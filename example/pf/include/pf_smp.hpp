@@ -185,7 +185,8 @@ class cv_init : public BASE_INIT<cv_state<Order>, cv_init<Order>>
     std::vector<double> log_weight_;
 };
 
-template <vsmc::MatrixOrder Order> class cv_move
+template <vsmc::MatrixOrder Order>
+class cv_move
 {
     public:
     typedef cv_state<Order> cv;

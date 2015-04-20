@@ -40,7 +40,8 @@
         ("**U01Sequence" #Method "::operator[]** INVALID INDEX"))
 
 #define VSMC_DEFINE_RNG_U01(FPType, Left, Right, left, right, UBits, FBits)  \
-    template <> struct U01<Left, Right, uint##UBits##_t, FPType> {           \
+    template <>                                                              \
+    struct U01<Left, Right, uint##UBits##_t, FPType> {                       \
         FPType operator()(uint##UBits##_t u) const                           \
         {                                                                    \
             return ::u01_##left##_##right##_##UBits##_##FBits(u);            \
@@ -65,7 +66,8 @@ struct Open {
 struct Closed {
 };
 
-template <typename, typename, typename, typename> struct U01;
+template <typename, typename, typename, typename>
+struct U01;
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1]\f$
 /// \ingroup U01
@@ -169,7 +171,8 @@ VSMC_DEFINE_RNG_U01(double, Open, Open, open, open, 64, 53)
 /// last time it is called.
 /// - `n` can only be either `0`, `nlast`, or `nlast + 1`
 /// - `n` can be at most `N - 1`.
-template <typename RngType> class U01SequenceSorted
+template <typename RngType>
+class U01SequenceSorted
 {
     public:
     U01SequenceSorted(std::size_t N, RngType &rng)
@@ -216,7 +219,8 @@ template <typename RngType> class U01SequenceSorted
 /// sequence as if by sorting. It is done by generating
 /// \f$u_i = U_i / N + (i - 1) / N\f$ where \f$U_i\f$ is uniform \f$[0,1)\f$
 /// random variates.
-template <typename RngType> class U01SequenceStratified
+template <typename RngType>
+class U01SequenceStratified
 {
     public:
     U01SequenceStratified(std::size_t N, RngType &rng)
@@ -257,7 +261,8 @@ template <typename RngType> class U01SequenceStratified
 /// sequence as if by sorting. It is done by generating
 /// \f$u_i = U / N + (i - 1) / N\f$ where \f$U\f$ is uniform \f$[0,1)\f$
 /// random variates and it is generated only once for all \f$i\f$.
-template <typename RngType> class U01SequenceSystematic
+template <typename RngType>
+class U01SequenceSystematic
 {
     public:
     U01SequenceSystematic(std::size_t N, RngType &rng)

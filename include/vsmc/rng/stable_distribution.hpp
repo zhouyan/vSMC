@@ -54,7 +54,8 @@ namespace vsmc
 
 /// \brief Stable distribution
 /// \ingroup Distribution
-template <typename FPType> class StableDistribution
+template <typename FPType>
+class StableDistribution
 {
     private:
     public:
@@ -220,7 +221,8 @@ template <typename FPType> class StableDistribution
         return std::numeric_limits<result_type>::infinity();
     }
 
-    template <typename Eng> result_type operator()(Eng &eng) const
+    template <typename Eng>
+    result_type operator()(Eng &eng) const
     {
         if (stability_1_)
             return trans_1(standard_1(eng));
@@ -307,7 +309,8 @@ template <typename FPType> class StableDistribution
     result_type xi_;
     bool stability_1_;
 
-    template <typename Eng> result_type standard_1(Eng &eng) const
+    template <typename Eng>
+    result_type standard_1(Eng &eng) const
     {
         using std::cos;
         using std::log;
@@ -325,7 +328,8 @@ template <typename FPType> class StableDistribution
         return x;
     }
 
-    template <typename Eng> result_type standard_a(Eng &eng) const
+    template <typename Eng>
+    result_type standard_a(Eng &eng) const
     {
         using std::cos;
         using std::exp;

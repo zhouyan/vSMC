@@ -300,7 +300,8 @@ class AlignedAllocator : public std::allocator<T>
     typedef typename std::allocator<T>::size_type size_type;
     typedef typename std::allocator<T>::pointer pointer;
 
-    template <typename U> struct rebind {
+    template <typename U>
+    struct rebind {
         typedef AlignedAllocator<U, Alignment> other;
     };
 

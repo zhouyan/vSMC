@@ -75,7 +75,8 @@
 #include <sstream>
 #include <string>
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief Ouput of std::array
 template <typename CharT, typename Traits, typename T, std::size_t N>

@@ -134,11 +134,13 @@ enum ResampleScheme {
 
 /// \brief Resample forward decleration
 /// \ingroup Resample
-template <typename> class Resample;
+template <typename>
+class Resample;
 
 /// \brief Resampling type of the built-in schemes
 /// \ingroup Resample
-template <ResampleScheme Scheme> struct ResampleType {
+template <ResampleScheme Scheme>
+struct ResampleType {
     typedef Resample<std::integral_constant<ResampleScheme, Scheme>> type;
 };
 

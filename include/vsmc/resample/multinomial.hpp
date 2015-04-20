@@ -47,7 +47,8 @@ typedef std::integral_constant<ResampleScheme, Multinomial>
 
 /// \brief Multinomial resampling
 /// \ingroup Resample
-template <> class Resample<internal::ResampleMultinomial>
+template <>
+class Resample<internal::ResampleMultinomial>
 {
     public:
     template <typename IntType, typename RngType>

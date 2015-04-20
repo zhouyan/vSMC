@@ -40,7 +40,8 @@ namespace vsmc
 
 /// \brief Configure the default behavior of CLManager
 /// \ingroup OpenCL
-template <typename ID = CLDefault> class CLSetup
+template <typename ID = CLDefault>
+class CLSetup
 {
     public:
     typedef ID id;

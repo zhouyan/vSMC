@@ -58,7 +58,8 @@ static std::size_t CM;
 #include "pet_monitor.hpp"
 #include "pet_proposal.hpp"
 
-template <typename InputStream> inline void pet_ignore(InputStream &is)
+template <typename InputStream>
+inline void pet_ignore(InputStream &is)
 {
     is.ignore(std::numeric_limits<std::streamsize>::max VSMC_MNE(), '\n');
 }

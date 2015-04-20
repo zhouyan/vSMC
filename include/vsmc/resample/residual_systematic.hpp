@@ -47,7 +47,8 @@ typedef std::integral_constant<ResampleScheme, ResidualSystematic>
 
 /// \brief Residual systematic resampling
 /// \ingroup Resample
-template <> class Resample<internal::ResampleResidualSystematic>
+template <>
+class Resample<internal::ResampleResidualSystematic>
 {
     public:
     template <typename IntType, typename RngType>

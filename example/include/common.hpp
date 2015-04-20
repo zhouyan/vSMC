@@ -49,7 +49,8 @@ static int ProposalScale;
 
 static vsmc::ProgramOptionMap Config;
 
-template <typename T> inline void grow(std::size_t num, T &orig)
+template <typename T>
+inline void grow(std::size_t num, T &orig)
 {
     if (orig.size() < num && num > 0) {
         T temp(num);

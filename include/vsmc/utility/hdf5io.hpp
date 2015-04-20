@@ -60,10 +60,12 @@ inline void hdf5io_matrix_dim<ColMajor>(
     dim[1] = nrow;
 }
 
-template <typename T> struct HDF5LoadDataPtr {
+template <typename T>
+struct HDF5LoadDataPtr {
     HDF5LoadDataPtr() : ptr_(nullptr) {}
 
-    template <typename OutputIter> void set(std::size_t n, OutputIter)
+    template <typename OutputIter>
+    void set(std::size_t n, OutputIter)
     {
         data_.resize(n);
     }
@@ -79,7 +81,8 @@ template <typename T> struct HDF5LoadDataPtr {
     std::vector<T> data_;
 }; // struct HDF5LoadDataPtr
 
-template <typename T> struct HDF5StoreDataPtr {
+template <typename T>
+struct HDF5StoreDataPtr {
     HDF5StoreDataPtr() : ptr_(nullptr) {}
 
     template <typename InputIter>
@@ -118,102 +121,120 @@ template <typename T> struct HDF5StoreDataPtr {
 
 /// \brief HDF5 data type
 /// \ingroup HDFIO
-template <typename> inline ::hid_t hdf5io_datatype() { return -1; }
+template <typename>
+inline ::hid_t hdf5io_datatype()
+{
+    return -1;
+}
 
 /// \brief HDF5 data type specialization for char
 /// \ingroup HDF5IO
-template <> inline ::hid_t hdf5io_datatype<char>()
+template <>
+inline ::hid_t hdf5io_datatype<char>()
 {
     return ::H5Tcopy(H5T_NATIVE_CHAR);
 }
 
 /// \brief HDF5 data type specialization for signed char
 /// \ingroup HDF5IO
-template <> inline ::hid_t hdf5io_datatype<signed char>()
+template <>
+inline ::hid_t hdf5io_datatype<signed char>()
 {
     return ::H5Tcopy(H5T_NATIVE_SCHAR);
 }
 
 /// \brief HDF5 data type specialization for unsigned char
 /// \ingroup HDF5IO
-template <> inline ::hid_t hdf5io_datatype<unsigned char>()
+template <>
+inline ::hid_t hdf5io_datatype<unsigned char>()
 {
     return ::H5Tcopy(H5T_NATIVE_UCHAR);
 }
 
 /// \brief HDF5 data type specialization for short
 /// \ingroup HDF5IO
-template <> inline ::hid_t hdf5io_datatype<short>()
+template <>
+inline ::hid_t hdf5io_datatype<short>()
 {
     return ::H5Tcopy(H5T_NATIVE_SHORT);
 }
 
 /// \brief HDF5 data type specialization for unsigned short
 /// \ingroup HDF5IO
-template <> inline ::hid_t hdf5io_datatype<unsigned short>()
+template <>
+inline ::hid_t hdf5io_datatype<unsigned short>()
 {
     return ::H5Tcopy(H5T_NATIVE_UCHAR);
 }
 
 /// \brief HDF5 data type specialization for int
 /// \ingroup HDF5IO
-template <> inline ::hid_t hdf5io_datatype<int>()
+template <>
+inline ::hid_t hdf5io_datatype<int>()
 {
     return ::H5Tcopy(H5T_NATIVE_INT);
 }
 
 /// \brief HDF5 data type specialization for unsigned int
 /// \ingroup HDF5IO
-template <> inline ::hid_t hdf5io_datatype<unsigned int>()
+template <>
+inline ::hid_t hdf5io_datatype<unsigned int>()
 {
     return ::H5Tcopy(H5T_NATIVE_UINT);
 }
 
 /// \brief HDF5 data type specialization for long
 /// \ingroup HDF5IO
-template <> inline ::hid_t hdf5io_datatype<long>()
+template <>
+inline ::hid_t hdf5io_datatype<long>()
 {
     return ::H5Tcopy(H5T_NATIVE_LONG);
 }
 
 /// \brief HDF5 data type specialization for unsigned long
 /// \ingroup HDF5IO
-template <> inline ::hid_t hdf5io_datatype<unsigned long>()
+template <>
+inline ::hid_t hdf5io_datatype<unsigned long>()
 {
     return ::H5Tcopy(H5T_NATIVE_ULONG);
 }
 
 /// \brief HDF5 data type specialization for long long
 /// \ingroup HDF5IO
-template <> inline ::hid_t hdf5io_datatype<long long>()
+template <>
+inline ::hid_t hdf5io_datatype<long long>()
 {
     return ::H5Tcopy(H5T_NATIVE_LLONG);
 }
 
 /// \brief HDF5 data type specialization for unsigned long
 /// \ingroup HDF5IO
-template <> inline ::hid_t hdf5io_datatype<unsigned long long>()
+template <>
+inline ::hid_t hdf5io_datatype<unsigned long long>()
 {
     return ::H5Tcopy(H5T_NATIVE_ULLONG);
 }
 
 /// \brief HDF5 data type specialization for float
 /// \ingroup HDF5IO
-template <> inline ::hid_t hdf5io_datatype<float>()
+template <>
+inline ::hid_t hdf5io_datatype<float>()
 {
     return ::H5Tcopy(H5T_NATIVE_FLOAT);
 }
 
 /// \brief HDF5 data type specialization for double
 /// \ingroup HDF5IO
-template <> inline ::hid_t hdf5io_datatype<double>()
+template <>
+inline ::hid_t hdf5io_datatype<double>()
 {
     return ::H5Tcopy(H5T_NATIVE_DOUBLE);
 }
 
 /// \brief HDF5 data type specialization for long double
 /// \ingroup HDF5IO
-template <> inline ::hid_t hdf5io_datatype<long double>()
+template <>
+inline ::hid_t hdf5io_datatype<long double>()
 {
     return ::H5Tcopy(H5T_NATIVE_LDOUBLE);
 }

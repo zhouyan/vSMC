@@ -39,7 +39,8 @@ namespace vsmc
 
 /// \brief A thin wrapper over a complete Particle
 /// \ingroup Core
-template <typename T> class SingleParticleBase
+template <typename T>
+class SingleParticleBase
 {
     public:
     SingleParticleBase(
@@ -71,7 +72,8 @@ template <typename T> class SingleParticleBase
 
 /// \brief A const variant to SingleParticle
 /// \ingroup Core
-template <typename T> class ConstSingleParticleBase
+template <typename T>
+class ConstSingleParticleBase
 {
     public:
     ConstSingleParticleBase(

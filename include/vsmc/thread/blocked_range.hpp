@@ -42,7 +42,8 @@ namespace vsmc
 
 /// \brief Blocked range
 /// \ingroup Thread
-template <typename T> class BlockedRange
+template <typename T>
+class BlockedRange
 {
     public:
     typedef T const_iterator;

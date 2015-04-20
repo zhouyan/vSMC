@@ -54,7 +54,8 @@ class StateTupleBase
     typedef std::tuple<T *, Types *...> state_tuple_ptr_type;
     typedef std::tuple<const T *, const Types *...> state_tuple_cptr_type;
 
-    template <std::size_t Pos> struct state_type {
+    template <std::size_t Pos>
+    struct state_type {
         typedef typename std::tuple_element<Pos, state_tuple_type>::type type;
     };
 
@@ -115,7 +116,8 @@ class StateTupleBase
             serialize(ar, Position<Pos + 1>());
         }
 
-        template <typename Archive> void serialize(Archive &, Position<dim_>)
+        template <typename Archive>
+        void serialize(Archive &, Position<dim_>)
         {
         }
 
@@ -459,7 +461,8 @@ class StateTuple<ColMajor, T, Types...>
     static constexpr const std::size_t dim_ = sizeof...(Types) + 1;
     std::tuple<std::vector<T>, std::vector<Types>...> state_;
 
-    template <std::size_t Pos> void init_state(size_type N, Position<Pos>)
+    template <std::size_t Pos>
+    void init_state(size_type N, Position<Pos>)
     {
         std::get<Pos>(state_).resize(N);
         init_state(N, Position<Pos + 1>());

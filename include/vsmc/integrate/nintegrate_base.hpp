@@ -57,7 +57,8 @@ namespace vsmc
 
 /// \brief Numerical integration base dispatch class
 /// \ingroup Integrate
-template <typename Derived> class NIntegrateBase
+template <typename Derived>
+class NIntegrateBase
 {
     protected:
     typedef std::size_t size_type;
@@ -132,7 +133,8 @@ template <typename Derived> class NIntegrateBase
 
 /// \brief Numerical integration base dispatch class
 /// \ingroup Integrate
-template <> class NIntegrateBase<Virtual>
+template <>
+class NIntegrateBase<Virtual>
 {
     public:
     typedef std::size_t size_type;

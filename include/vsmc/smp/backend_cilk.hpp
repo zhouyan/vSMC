@@ -44,7 +44,8 @@ VSMC_DEFINE_SMP_FORWARD(CILK)
 
 /// \brief Particle::value_type subtype using Intel Cilk Plus
 /// \ingroup CILK
-template <typename BaseState> class StateCILK : public BaseState
+template <typename BaseState>
+class StateCILK : public BaseState
 {
     public:
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;

@@ -285,7 +285,8 @@ inline void rng_cl_output(std::size_t N, std::vector<std::string> &dnames,
     output_file.clear();
 }
 
-template <typename FT> inline void rng_cl(std::size_t N, cl::Program &program)
+template <typename FT>
+inline void rng_cl(std::size_t N, cl::Program &program)
 {
     std::vector<std::string> dnames;
     std::vector<std::string> unames;

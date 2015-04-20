@@ -85,7 +85,8 @@ namespace traits
 
 /// \brief Traits of XorshiftEngine
 /// \ingroup Traits
-template <typename ResultType> struct XorshiftEngineTrait {
+template <typename ResultType>
+struct XorshiftEngineTrait {
     /// \brief Maximum number of states (e.g., 4 in Xorshift4x64) that an
     /// unrolled loop will be used
     ///
@@ -112,7 +113,8 @@ template <typename ResultType> struct XorshiftEngineTrait {
 namespace internal
 {
 
-template <bool, typename ResultType, unsigned> struct XorshiftLeft {
+template <bool, typename ResultType, unsigned>
+struct XorshiftLeft {
     static ResultType shift(ResultType x) { return x; }
 };
 
@@ -121,7 +123,8 @@ struct XorshiftLeft<true, ResultType, A> {
     static ResultType shift(ResultType x) { return x ^ (x << A); }
 };
 
-template <bool, typename ResultType, unsigned> struct XorshiftRight {
+template <bool, typename ResultType, unsigned>
+struct XorshiftRight {
     static ResultType shift(ResultType x) { return x; }
 };
 
@@ -175,8 +178,8 @@ inline ResultType xorshift(
 
 template <unsigned A, unsigned B, unsigned C, unsigned D, typename ResultType,
     std::size_t K, std::size_t R, std::size_t S>
-inline ResultType xorshift(
-    std::array<ResultType, K> &state, XorshiftIndex<ResultType, K, R, S> &index)
+inline ResultType xorshift(std::array<ResultType, K> &state,
+    XorshiftIndex<ResultType, K, R, S> &index)
 {
     ResultType xr = state[index.r()];
     xr = XorshiftLeft<A != 0, ResultType, A>::shift(xr);

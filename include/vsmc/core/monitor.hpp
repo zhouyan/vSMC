@@ -53,7 +53,8 @@ namespace vsmc
 
 /// \brief Monitor for Monte Carlo integration
 /// \ingroup Core
-template <typename T> class Monitor
+template <typename T>
+class Monitor
 {
     public:
     typedef T value_type;
@@ -209,7 +210,8 @@ template <typename T> class Monitor
     }
 
     /// \brief Read the index history through an output iterator
-    template <typename OutputIter> void read_index(OutputIter first) const
+    template <typename OutputIter>
+    void read_index(OutputIter first) const
     {
         std::copy(index_.begin(), index_.end(), first);
     }

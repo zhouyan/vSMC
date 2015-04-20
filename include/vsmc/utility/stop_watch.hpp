@@ -60,7 +60,8 @@ namespace vsmc
 /// \brief Start and stop a StopWatch in scope (similiar to a mutex lock
 /// guard)
 /// \ingroup StopWatch
-template <typename WatchType> class StopWatchGuard
+template <typename WatchType>
+class StopWatchGuard
 {
     public:
     typedef WatchType watch_type;
@@ -106,7 +107,8 @@ class StopWatchNull
 
 /// \brief StopWatch as an adapter of C++11 clock
 /// \ingroup StopWatch
-template <typename ClockType> class StopWatchClockAdapter
+template <typename ClockType>
+class StopWatchClockAdapter
 {
     public:
     typedef ClockType clock_type;

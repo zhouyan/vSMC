@@ -54,7 +54,8 @@ enum DispatchSourceType {
     DispatchWrite     ///< DISPATCH_SOURCE_TYPE_WRITE
 };                    // enum DispatchSourceType
 
-template <DispatchSourceType> class DispatchSource;
+template <DispatchSourceType>
+class DispatchSource;
 
 /// \brief Base class of DispatchSource
 /// \ingroup Dispatch
@@ -140,7 +141,8 @@ class DispatchSourceBase : public DispatchObject<::dispatch_source_t>
 #endif // __BLOCKS__
 
     private:
-    template <DispatchSourceType> struct source_type {
+    template <DispatchSourceType>
+    struct source_type {
     };
 
     protected:

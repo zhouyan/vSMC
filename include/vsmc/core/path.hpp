@@ -48,7 +48,8 @@ namespace vsmc
 
 /// \brief Monitor for Path sampling
 /// \ingroup Core
-template <typename T> class Path
+template <typename T>
+class Path
 {
     public:
     typedef T value_type;
@@ -155,19 +156,22 @@ template <typename T> class Path
     /// \brief Read the index history through an output iterator
     ///
     /// \sa Monitor::read_index()
-    template <typename OutputIter> void read_index(OutputIter first) const
+    template <typename OutputIter>
+    void read_index(OutputIter first) const
     {
         std::copy(index_.begin(), index_.end(), first);
     }
 
     /// \brief Read the integrand history through an output iterator
-    template <typename OutputIter> void read_integrand(OutputIter first) const
+    template <typename OutputIter>
+    void read_integrand(OutputIter first) const
     {
         std::copy(integrand_.begin(), integrand_.end(), first);
     }
 
     /// \brief Read the grid history through an output iterator
-    template <typename OutputIter> void read_grid(OutputIter first) const
+    template <typename OutputIter>
+    void read_grid(OutputIter first) const
     {
         std::copy(grid_.begin(), grid_.end(), first);
     }

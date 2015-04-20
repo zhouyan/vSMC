@@ -106,7 +106,8 @@ class CLQuery
     }
 
     /// \brief Check if a device type exists in any platform
-    template <::cl_device_type DevType> static bool has_device()
+    template <::cl_device_type DevType>
+    static bool has_device()
     {
         std::vector<::cl::Platform> platform;
         ::cl::Platform::get(&platform);

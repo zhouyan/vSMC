@@ -58,7 +58,8 @@ namespace vsmc
 namespace internal
 {
 
-template <uint64_t, uint64_t> struct UniformRealDistributionFRIntType;
+template <uint64_t, uint64_t>
+struct UniformRealDistributionFRIntType;
 
 template <>
 struct UniformRealDistributionFRIntType<0,
@@ -280,7 +281,8 @@ class UniformRealDistribution
     /// Eng::max() == std::numeric_limits<uint64_t>::max()
     /// )
     /// ~~~
-    template <typename Eng> result_type operator()(Eng &eng) const
+    template <typename Eng>
+    result_type operator()(Eng &eng) const
     {
         return internal::UniformRealDistributionOp<FPType, Left, Right, Eng,
                    MinMaxIsConstexpr>::uint2fp(eng) *

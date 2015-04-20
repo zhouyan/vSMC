@@ -42,7 +42,8 @@ namespace vsmc
 /// \ingroup Dispatch
 ///
 /// \details All Dispatch objects are reference counting shared objects
-template <typename DispatchType> class DispatchObject
+template <typename DispatchType>
+class DispatchObject
 {
     public:
     /// \brief Create a DispatchObject from its C-type object

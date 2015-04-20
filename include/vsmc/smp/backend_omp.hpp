@@ -42,7 +42,8 @@ VSMC_DEFINE_SMP_FORWARD(OMP)
 
 /// \brief Particle::value_type subtype using OpenMP
 /// \ingroup OMP
-template <typename BaseState> class StateOMP : public BaseState
+template <typename BaseState>
+class StateOMP : public BaseState
 {
     public:
     typedef typename traits::OMPSizeTypeTrait<

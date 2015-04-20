@@ -37,12 +37,14 @@
 #include <gsl/gsl_rng.h>
 
 #define VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(Generator, pointer)             \
-    template <> struct GSLRngTypePointer<GSL_RNG_TYPE_##Generator> {         \
+    template <>                                                              \
+    struct GSLRngTypePointer<GSL_RNG_TYPE_##Generator> {                     \
         static const ::gsl_rng_type *get() { return ::gsl_rng_##pointer; }   \
     };
 
 #define VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(Generator, Min, Max)                 \
-    template <> struct GSLRngMinMax<GSL_RNG_TYPE_##Generator> {              \
+    template <>                                                              \
+    struct GSLRngMinMax<GSL_RNG_TYPE_##Generator> {                          \
         static constexpr const uint32_t _Min =                               \
             static_cast<uint32_t>(Min##UL);                                  \
         static constexpr const uint32_t _Max =                               \
@@ -75,7 +77,8 @@ enum GSLRngType {
 namespace internal
 {
 
-template <GSLRngType> struct GSLRngTypePointer;
+template <GSLRngType>
+struct GSLRngTypePointer;
 
 VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(MT19937, mt19937)
 VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(RANLXS0, ranlxs0)
@@ -91,7 +94,8 @@ VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(TAUS, taus)
 VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(TAUS2, taus2)
 VSMC_DEFINE_RNG_GSL_RNG_TYPE_POINTER(GFSR4, gfsr4)
 
-template <GSLRngType RngType> struct GSLRngMinMax;
+template <GSLRngType RngType>
+struct GSLRngMinMax;
 
 VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(MT19937, 0, 0xFFFFFFFF)
 VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(RANLXS0, 0, 0x00FFFFFF)
@@ -110,7 +114,8 @@ VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(GFSR4, 0, 0xFFFFFFFF)
 
 /// \brief GSL RNG generator for use with GeneratorWrapper
 /// \ingroup GSLRNG
-template <GSLRngType RngType> class GSLGenerator
+template <GSLRngType RngType>
+class GSLGenerator
 {
     public:
     GSLGenerator()

@@ -55,7 +55,8 @@ struct NIntegrateNewtonCotesEval {
     }
 }; // struct NIntegrateNewtonCotesEval
 
-template <typename EvalType> struct NIntegrateNewtonCotesEval<1, EvalType> {
+template <typename EvalType>
+struct NIntegrateNewtonCotesEval<1, EvalType> {
     static double result(
         const double *coeff, double a, double, const EvalType &eval)
     {
@@ -63,7 +64,8 @@ template <typename EvalType> struct NIntegrateNewtonCotesEval<1, EvalType> {
     }
 }; // struct NIntegrateNewtonCotesEval
 
-template <unsigned Degree> class NIntegrateNewtonCotesCoeff
+template <unsigned Degree>
+class NIntegrateNewtonCotesCoeff
 {
     public:
     static NIntegrateNewtonCotesCoeff<Degree> &instance()

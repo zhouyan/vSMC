@@ -41,7 +41,8 @@ namespace vsmc
 namespace internal
 {
 
-template <typename ID> class CLCopy
+template <typename ID>
+class CLCopy
 {
     public:
     typedef CLManager<ID> manager_type;

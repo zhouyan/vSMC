@@ -228,7 +228,8 @@ class WeightSetMPI : public WeightSetBase
 
 /// \brief Particle::value_type subtype using MPI
 /// \ingroup MPI
-template <typename BaseState, typename ID> class StateMPI : public BaseState
+template <typename BaseState, typename ID>
+class StateMPI : public BaseState
 {
     public:
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;

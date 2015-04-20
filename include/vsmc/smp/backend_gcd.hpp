@@ -42,7 +42,8 @@ VSMC_DEFINE_SMP_FORWARD(GCD)
 
 /// \brief Particle::value_type subtype usingt Apple Grand Central Dispatch
 /// \ingroup GCD
-template <typename BaseState> class StateGCD : public BaseState
+template <typename BaseState>
+class StateGCD : public BaseState
 {
     public:
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;

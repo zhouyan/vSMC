@@ -33,10 +33,26 @@
 #define VSMC_MATH_CONSTANTS_HPP
 
 #define VSMC_DEFINE_MATH_CONSTANTS(name, val)                                \
-    template <typename T> inline T name() { return static_cast<T>(val##l); } \
-    template <> inline float name<float>() { return val##f; }                \
-    template <> inline double name<double>() { return val; }                 \
-    template <> inline long double name<long double>() { return val##l; }
+    template <typename T>                                                    \
+    inline T name()                                                          \
+    {                                                                        \
+        return static_cast<T>(val##l);                                       \
+    }                                                                        \
+    template <>                                                              \
+    inline float name<float>()                                               \
+    {                                                                        \
+        return val##f;                                                       \
+    }                                                                        \
+    template <>                                                              \
+    inline double name<double>()                                             \
+    {                                                                        \
+        return val;                                                          \
+    }                                                                        \
+    template <>                                                              \
+    inline long double name<long double>()                                   \
+    {                                                                        \
+        return val##l;                                                       \
+    }
 
 namespace vsmc
 {

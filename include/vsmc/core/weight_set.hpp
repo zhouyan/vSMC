@@ -151,7 +151,8 @@ class WeightSet
     }
 
     /// \brief Read normalized weights through an output iterator
-    template <typename OutputIter> void read_weight(OutputIter first) const
+    template <typename OutputIter>
+    void read_weight(OutputIter first) const
     {
         std::copy(weight_.begin(), weight_.end(), first);
     }
@@ -200,7 +201,8 @@ class WeightSet
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
     /// changing the (possible unnormalized) weights directly through an input
     /// iterator
-    template <typename InputIter> void set_weight(InputIter first)
+    template <typename InputIter>
+    void set_weight(InputIter first)
     {
         double *const wptr = &weight_[0];
         std::copy_n(first, size_, wptr);
@@ -223,7 +225,8 @@ class WeightSet
     /// multiply the normalized weight with (possible unnormalized)
     /// incremental
     /// weights through an input iterator
-    template <typename InputIter> void mul_weight(InputIter first)
+    template <typename InputIter>
+    void mul_weight(InputIter first)
     {
         double *const wptr = &weight_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
@@ -249,7 +252,8 @@ class WeightSet
     /// changing the (possible unnormalized) logarithm weights directly
     /// through
     /// an input iterator
-    template <typename InputIter> void set_log_weight(InputIter first)
+    template <typename InputIter>
+    void set_log_weight(InputIter first)
     {
         double *const lwptr = &log_weight_[0];
         std::copy_n(first, size_, lwptr);
@@ -272,7 +276,8 @@ class WeightSet
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
     /// adding to the unnormalized logarithm weights with (possible
     /// unormalized) logarithm incremental weights through an input iterator
-    template <typename InputIter> void add_log_weight(InputIter first)
+    template <typename InputIter>
+    void add_log_weight(InputIter first)
     {
         double *const lwptr = &log_weight_[0];
         for (size_type i = 0; i != size_; ++i, ++first)
@@ -294,7 +299,8 @@ class WeightSet
     }
 
     /// \brief Draw a sample according to the weights
-    template <typename URNG> size_type draw(URNG &eng) const
+    template <typename URNG>
+    size_type draw(URNG &eng) const
     {
         return draw_(eng, weight_.begin(), weight_.end(), true);
     }
@@ -430,22 +436,26 @@ class WeightSetNull
 
     double ess() const { return max_ess(); }
 
-    template <typename InputIter> double ess(InputIter, bool) const
+    template <typename InputIter>
+    double ess(InputIter, bool) const
     {
         return max_ess();
     }
 
-    template <typename RandomIter> double ess(RandomIter, int, bool) const
+    template <typename RandomIter>
+    double ess(RandomIter, int, bool) const
     {
         return max_ess();
     }
 
-    template <typename InputIter> double cess(InputIter, bool) const
+    template <typename InputIter>
+    double cess(InputIter, bool) const
     {
         return max_ess();
     }
 
-    template <typename RandomIter> double cess(RandomIter, int, bool) const
+    template <typename RandomIter>
+    double cess(RandomIter, int, bool) const
     {
         return max_ess();
     }
@@ -454,13 +464,23 @@ class WeightSetNull
 
     void read_resample_weight(double *) const {}
 
-    template <typename OutputIter> void read_weight(OutputIter) const {}
+    template <typename OutputIter>
+    void read_weight(OutputIter) const
+    {
+    }
 
-    template <typename RandomIter> void read_weight(RandomIter, int) const {}
+    template <typename RandomIter>
+    void read_weight(RandomIter, int) const
+    {
+    }
 
-    template <typename OutputIter> void read_log_weight(OutputIter) const {}
+    template <typename OutputIter>
+    void read_log_weight(OutputIter) const
+    {
+    }
 
-    template <typename RandomIter> void read_log_weight(RandomIter, int) const
+    template <typename RandomIter>
+    void read_log_weight(RandomIter, int) const
     {
     }
 
@@ -470,23 +490,51 @@ class WeightSetNull
 
     void set_equal_weight() {}
 
-    template <typename InputIter> void set_weight(InputIter) {}
+    template <typename InputIter>
+    void set_weight(InputIter)
+    {
+    }
 
-    template <typename RandomIter> void set_weight(RandomIter, int) {}
+    template <typename RandomIter>
+    void set_weight(RandomIter, int)
+    {
+    }
 
-    template <typename InputIter> void mul_weight(InputIter) {}
+    template <typename InputIter>
+    void mul_weight(InputIter)
+    {
+    }
 
-    template <typename RandomIter> void mul_weight(RandomIter, int) {}
+    template <typename RandomIter>
+    void mul_weight(RandomIter, int)
+    {
+    }
 
-    template <typename InputIter> void set_log_weight(InputIter) {}
+    template <typename InputIter>
+    void set_log_weight(InputIter)
+    {
+    }
 
-    template <typename RandomIter> void set_log_weight(RandomIter, int) {}
+    template <typename RandomIter>
+    void set_log_weight(RandomIter, int)
+    {
+    }
 
-    template <typename InputIter> void add_log_weight(InputIter) {}
+    template <typename InputIter>
+    void add_log_weight(InputIter)
+    {
+    }
 
-    template <typename RandomIter> void add_log_weight(RandomIter, int) {}
+    template <typename RandomIter>
+    void add_log_weight(RandomIter, int)
+    {
+    }
 
-    template <typename URNG> size_type draw(URNG &) const { return 0; }
+    template <typename URNG>
+    size_type draw(URNG &) const
+    {
+        return 0;
+    }
 
     const double *resample_weight_data() const { return nullptr; }
 

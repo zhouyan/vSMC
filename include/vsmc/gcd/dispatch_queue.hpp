@@ -47,7 +47,8 @@ enum DispatchQueueType {
     DispatchPrivate ///< The queue created by `dispatch_queue_create`
 };                  // enum DispatchQueueType
 
-template <DispatchQueueType> class DispatchQueue;
+template <DispatchQueueType>
+class DispatchQueue;
 
 /// \brief Base class of DispatchQueue
 /// \ingroup Dispatch
@@ -165,7 +166,8 @@ class DispatchQueueBase : public DispatchObject<::dispatch_queue_t>
 
 /// \brief The main dispatch queue (`dipatch_get_main_queue`)
 /// \ingroup Dispatch
-template <> class DispatchQueue<DispatchMain> : public DispatchQueueBase
+template <>
+class DispatchQueue<DispatchMain> : public DispatchQueueBase
 {
     public:
     DispatchQueue() : DispatchQueueBase(dispatch_get_main_queue(), false) {}
@@ -173,7 +175,8 @@ template <> class DispatchQueue<DispatchMain> : public DispatchQueueBase
 
 /// \brief The global dispatch queue (`dispatch_get_gloal_queue`)
 /// \ingroup Dispatch
-template <> class DispatchQueue<DispatchGlobal> : public DispatchQueueBase
+template <>
+class DispatchQueue<DispatchGlobal> : public DispatchQueueBase
 {
     public:
 #if VSMC_HAS_GCD_LION
@@ -195,7 +198,8 @@ template <> class DispatchQueue<DispatchGlobal> : public DispatchQueueBase
 
 /// \brief A private dispatch queue (`dispatch_queue_create`)
 /// \ingroup Dispatch
-template <> class DispatchQueue<DispatchPrivate> : public DispatchQueueBase
+template <>
+class DispatchQueue<DispatchPrivate> : public DispatchQueueBase
 {
     public:
     DispatchQueue(

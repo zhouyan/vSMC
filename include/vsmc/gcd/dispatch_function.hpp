@@ -49,7 +49,8 @@ namespace vsmc
 /// with a context variable, which shall not be destroyed before the execution
 /// of the function finishes. The original object does not need to exist after
 /// the creation of DispatchFunction.
-template <typename T> class DispatchFunction
+template <typename T>
+class DispatchFunction
 {
     public:
     DispatchFunction(const T &work) : work_(work) {}

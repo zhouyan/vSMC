@@ -180,7 +180,8 @@ class gmm_param
         }
     }
 
-    template <typename Archive> void serialize(Archive &ar, const unsigned)
+    template <typename Archive>
+    void serialize(Archive &ar, const unsigned)
     {
         int num = static_cast<int>(comp_num_);
         ar &num;

@@ -39,7 +39,8 @@ namespace vsmc
 
 /// \brief Strictly scope-based thread ownership wrapper
 /// \ingroup Thread
-template <typename ThreadType> class ThreadGuard
+template <typename ThreadType>
+class ThreadGuard
 {
     public:
     typedef ThreadType thread_type;

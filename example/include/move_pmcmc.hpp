@@ -95,11 +95,13 @@ class pmcmc_local_serial : public MoveType
     std::uniform_int_distribution<size_type> sample_;
 };
 
-template <typename MoveType> class pmcmc_local_parallel : public MoveType
+template <typename MoveType>
+class pmcmc_local_parallel : public MoveType
 {
 };
 
-template <typename T> class pmcmc_global
+template <typename T>
+class pmcmc_global
 {
     public:
     typedef typename vsmc::Particle<T>::size_type size_type;
@@ -144,7 +146,8 @@ template <typename T> class pmcmc_global
     std::uniform_real_distribution<> runif_;
 };
 
-template <typename T> class alpha_pair
+template <typename T>
+class alpha_pair
 {
     public:
     typedef double *value_type;

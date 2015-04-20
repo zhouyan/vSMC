@@ -113,9 +113,11 @@ namespace vsmc
 namespace internal
 {
 
-template <typename> void set_cl_fp_type(std::stringstream &);
+template <typename>
+void set_cl_fp_type(std::stringstream &);
 
-template <> inline void set_cl_fp_type<cl_float>(std::stringstream &ss)
+template <>
+inline void set_cl_fp_type<cl_float>(std::stringstream &ss)
 {
     ss << "#ifndef FP_TYPE\n";
     ss << "#define FP_TYPE float\n";
@@ -127,7 +129,8 @@ template <> inline void set_cl_fp_type<cl_float>(std::stringstream &ss)
     ss << "#endif\n";
 }
 
-template <> inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
+template <>
+inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
 {
     ss << "#if defined(cl_khr_fp64)\n";
     ss << "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n";
@@ -166,7 +169,8 @@ inline std::string cl_source_macros(
     return ss.str();
 }
 
-template <typename D> struct IsDerivedFromStateCLImpl {
+template <typename D>
+struct IsDerivedFromStateCLImpl {
     private:
     struct char2 {
         char c1;
@@ -190,7 +194,8 @@ struct IsDerivedFromStateCL : public std::integral_constant<bool,
 
 /// \brief Particle::value_type subtype using OpenCL
 /// \ingroup OpenCL
-template <std::size_t StateSize, typename FPType, typename ID> class StateCL
+template <std::size_t StateSize, typename FPType, typename ID>
+class StateCL
 {
     public:
     typedef ::cl_ulong size_type;
@@ -501,7 +506,8 @@ template <std::size_t StateSize, typename FPType, typename ID> class StateCL
 /// is also acceptable, but now `state` has to be treat as a length `N` array.
 /// In summary, on the host side, it is a `cl::Buffer` object being passed to
 /// the kernel, which is not much unlike `void *` pointer.
-template <typename T, typename PlaceHolder = NullType> class InitializeCL
+template <typename T, typename PlaceHolder = NullType>
+class InitializeCL
 {
     public:
     /// \brief The index offset of additional kernel arguments set by the user
@@ -593,7 +599,8 @@ template <typename T, typename PlaceHolder = NullType> class InitializeCL
 /// void kern (ulong iter, __global state_type *state, __global ulong
 /// *accept);
 /// ~~~
-template <typename T, typename PlaceHolder = NullType> class MoveCL
+template <typename T, typename PlaceHolder = NullType>
+class MoveCL
 {
     public:
     /// \brief The index offset of additional kernel arguments set by the user
@@ -684,7 +691,8 @@ template <typename T, typename PlaceHolder = NullType> class MoveCL
 /// void kern (ulong iter, ulong dim, __global state_type *state,
 ///            __global fp_type *res);
 /// ~~~
-template <typename T, typename PlaceHolder = NullType> class MonitorEvalCL
+template <typename T, typename PlaceHolder = NullType>
+class MonitorEvalCL
 {
     public:
     /// \brief The index offset of additional kernel arguments set by the user
@@ -763,7 +771,8 @@ template <typename T, typename PlaceHolder = NullType> class MonitorEvalCL
 /// void kern (ulong iter, __global state_type *state,
 ///            __global state_type *res);
 /// ~~~
-template <typename T, typename PlaceHolder = NullType> class PathEvalCL
+template <typename T, typename PlaceHolder = NullType>
+class PathEvalCL
 {
     public:
     /// \brief The index offset of additional kernel arguments set by the user

@@ -59,14 +59,17 @@ namespace vsmc
 {
 
 #if VSMC_USE_TBB
-template <typename = Threefry4x64, typename = ThreadLocal> class RngSet;
+template <typename = Threefry4x64, typename = ThreadLocal>
+class RngSet;
 #else
-template <typename = Threefry4x64, typename = Vector> class RngSet;
+template <typename = Threefry4x64, typename = Vector>
+class RngSet;
 #endif
 
 /// \brief Scalar RNG set
 /// \ingroup RNG
-template <typename RngType> class RngSet<RngType, Scalar>
+template <typename RngType>
+class RngSet<RngType, Scalar>
 {
     public:
     typedef RngType rng_type;
@@ -89,7 +92,8 @@ template <typename RngType> class RngSet<RngType, Scalar>
 
 /// \brief Vector RNG set
 /// \ingroup RNG
-template <typename RngType> class RngSet<RngType, Vector>
+template <typename RngType>
+class RngSet<RngType, Vector>
 {
     public:
     typedef RngType rng_type;
@@ -132,7 +136,8 @@ template <typename RngType> class RngSet<RngType, Vector>
 
 /// \brief Thread local RNG set
 /// \ingroup RNG
-template <typename RngType> class RngSet<RngType, ThreadLocal>
+template <typename RngType>
+class RngSet<RngType, ThreadLocal>
 {
     public:
     typedef RngType rng_type;

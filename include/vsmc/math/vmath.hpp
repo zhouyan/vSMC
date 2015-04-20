@@ -77,58 +77,71 @@ namespace math
 namespace internal
 {
 
-template <typename T> inline T vmath_sqr(T a) { return a * a; }
+template <typename T>
+inline T vmath_sqr(T a)
+{
+    return a * a;
+}
 
-template <typename T> inline T vmath_inv(T a)
+template <typename T>
+inline T vmath_inv(T a)
 {
     return static_cast<T>(1) / a;
 }
 
-template <typename T> inline T vmath_invsqrt(T a)
+template <typename T>
+inline T vmath_invsqrt(T a)
 {
     using std::sqrt;
     return static_cast<T>(1) / sqrt(a);
 }
 
-template <typename T> inline T vmath_invcbrt(T a)
+template <typename T>
+inline T vmath_invcbrt(T a)
 {
     using std::cbrt;
     return static_cast<T>(1) / cbrt(a);
 }
 
-template <typename T> inline T vmath_pow2o3(T a)
+template <typename T>
+inline T vmath_pow2o3(T a)
 {
     using std::cbrt;
     a = cbrt(a);
     return a * a;
 }
 
-template <typename T> inline T vmath_pow3o2(T a)
+template <typename T>
+inline T vmath_pow3o2(T a)
 {
     using std::sqrt;
     a = sqrt(a);
     return a * a * a;
 }
 
-template <typename T> inline T vmath_cdfnorm(T a)
+template <typename T>
+inline T vmath_cdfnorm(T a)
 {
     using std::erf;
     return static_cast<T>(0.5) +
         static_cast<T>(0.5) * erf(a * sqrt_1by2<T>());
 }
 
-template <typename T> inline T vmath_erfinv(T a)
+template <typename T>
+inline T vmath_erfinv(T a)
 {
     using std::erf;
     return static_cast<T>(1) / erf(a);
 }
 
-template <typename T> inline T vmath_erfcinv(T a)
+template <typename T>
+inline T vmath_erfcinv(T a)
 {
     return vmath_erfinv(static_cast<T>(1) - a);
 }
 
-template <typename T> inline T vmath_cdfnorminv(T a)
+template <typename T>
+inline T vmath_cdfnorminv(T a)
 {
     return static_cast<T>(1) / vmath_cdfnorm(a);
 }
@@ -200,7 +213,8 @@ VSMC_DEFINE_MATH_VMATH_1(internal, vmath_pow3o2, Pow3o2)
 VSMC_DEFINE_MATH_VMATH_2(std, pow, Pow)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^b\f$
-template <typename T> inline void vPowx(std::size_t n, const T *a, T b, T *y)
+template <typename T>
+inline void vPowx(std::size_t n, const T *a, T b, T *y)
 {
     using std::pow;
     for (std::size_t i = 0; i != n; ++i)

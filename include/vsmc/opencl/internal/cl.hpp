@@ -477,7 +477,7 @@ static inline cl_int errHandler(cl_int err, const char* errStr = NULL)
 #endif // #if defined(CL_VERSION_1_1)
 
 #endif // __CL_USER_OVERRIDE_ERROR_STRINGS
-//! \endcond
+       //! \endcond
 
 /**
  * CL 1.2 marker and barrier commands
@@ -848,7 +848,8 @@ class CL_EXT_PREFIX__VERSION_1_1_DEPRECATED vector
      *  \note
      *  Will throw an exception if exceptions are enabled and size exceeded.
      */
-    template <class I> void assign(I start, I end)
+    template <class I>
+    void assign(I start, I end)
     {
         clear();
         while (start != end) {
@@ -983,7 +984,8 @@ inline void fence() { _mm_mfence(); }
  *  OpenCL C calls that require arrays of size_t values, whose
  *  size is known statically.
  */
-template <int N> class size_t
+template <int N>
+class size_t
 {
     private:
     ::size_t data_[N];
@@ -1134,7 +1136,8 @@ inline cl_int getInfoHelper(Func f, cl_uint name, size_t<N>* param, long)
     return CL_SUCCESS;
 }
 
-template <typename T> struct ReferenceHandler;
+template <typename T>
+struct ReferenceHandler;
 
 /* Specialization for reference-counted types. This depends on the
  * existence of Wrapper<T>::cl_type, and none of the other types having the
@@ -1355,12 +1358,14 @@ inline cl_int getInfoHelper(
         VECTOR_CLASS<cl_device_partition_property_ext>)
 #endif // USE_CL_DEVICE_FISSION
 
-template <typename enum_type, cl_int Name> struct param_traits {
+template <typename enum_type, cl_int Name>
+struct param_traits {
 };
 
 #define __CL_DECLARE_PARAM_TRAITS(token, param_name, T)                      \
     struct token;                                                            \
-    template <> struct param_traits<detail::token, param_name> {             \
+    template <>                                                              \
+    struct param_traits<detail::token, param_name> {                         \
         enum { value = param_name };                                         \
         typedef T param_type;                                                \
     };
@@ -1462,7 +1467,8 @@ inline cl_int getInfo(Func f, cl_uint name, T* param)
     return getInfoHelper(f, name, param, 0);
 }
 
-template <typename Func, typename Arg0> struct GetInfoFunctor0 {
+template <typename Func, typename Arg0>
+struct GetInfoFunctor0 {
     Func f_;
     const Arg0& arg0_;
     cl_int operator()(
@@ -1499,14 +1505,16 @@ inline cl_int getInfo(
     return getInfoHelper(f0, name, param, 0);
 }
 
-template <typename T> struct ReferenceHandler {
+template <typename T>
+struct ReferenceHandler {
 };
 
 #if defined(CL_VERSION_1_2)
 /**
  * OpenCL 1.2 devices do have retain/release.
  */
-template <> struct ReferenceHandler<cl_device_id> {
+template <>
+struct ReferenceHandler<cl_device_id> {
     /**
      * Retain the device.
      * \param device A valid device created using createSubDevices
@@ -1538,7 +1546,8 @@ template <> struct ReferenceHandler<cl_device_id> {
 /**
  * OpenCL 1.1 devices do not have retain/release.
  */
-template <> struct ReferenceHandler<cl_device_id> {
+template <>
+struct ReferenceHandler<cl_device_id> {
     // cl_device_id does not have retain().
     static cl_int retain(cl_device_id) { return CL_SUCCESS; }
     // cl_device_id does not have release().
@@ -1546,14 +1555,16 @@ template <> struct ReferenceHandler<cl_device_id> {
 };
 #endif // #if defined(CL_VERSION_1_2)
 
-template <> struct ReferenceHandler<cl_platform_id> {
+template <>
+struct ReferenceHandler<cl_platform_id> {
     // cl_platform_id does not have retain().
     static cl_int retain(cl_platform_id) { return CL_SUCCESS; }
     // cl_platform_id does not have release().
     static cl_int release(cl_platform_id) { return CL_SUCCESS; }
 };
 
-template <> struct ReferenceHandler<cl_context> {
+template <>
+struct ReferenceHandler<cl_context> {
     static cl_int retain(cl_context context)
     {
         return ::clRetainContext(context);
@@ -1564,7 +1575,8 @@ template <> struct ReferenceHandler<cl_context> {
     }
 };
 
-template <> struct ReferenceHandler<cl_command_queue> {
+template <>
+struct ReferenceHandler<cl_command_queue> {
     static cl_int retain(cl_command_queue queue)
     {
         return ::clRetainCommandQueue(queue);
@@ -1575,7 +1587,8 @@ template <> struct ReferenceHandler<cl_command_queue> {
     }
 };
 
-template <> struct ReferenceHandler<cl_mem> {
+template <>
+struct ReferenceHandler<cl_mem> {
     static cl_int retain(cl_mem memory)
     {
         return ::clRetainMemObject(memory);
@@ -1586,7 +1599,8 @@ template <> struct ReferenceHandler<cl_mem> {
     }
 };
 
-template <> struct ReferenceHandler<cl_sampler> {
+template <>
+struct ReferenceHandler<cl_sampler> {
     static cl_int retain(cl_sampler sampler)
     {
         return ::clRetainSampler(sampler);
@@ -1597,7 +1611,8 @@ template <> struct ReferenceHandler<cl_sampler> {
     }
 };
 
-template <> struct ReferenceHandler<cl_program> {
+template <>
+struct ReferenceHandler<cl_program> {
     static cl_int retain(cl_program program)
     {
         return ::clRetainProgram(program);
@@ -1608,7 +1623,8 @@ template <> struct ReferenceHandler<cl_program> {
     }
 };
 
-template <> struct ReferenceHandler<cl_kernel> {
+template <>
+struct ReferenceHandler<cl_kernel> {
     static cl_int retain(cl_kernel kernel)
     {
         return ::clRetainKernel(kernel);
@@ -1619,7 +1635,8 @@ template <> struct ReferenceHandler<cl_kernel> {
     }
 };
 
-template <> struct ReferenceHandler<cl_event> {
+template <>
+struct ReferenceHandler<cl_event> {
     static cl_int retain(cl_event event) { return ::clRetainEvent(event); }
     static cl_int release(cl_event event) { return ::clReleaseEvent(event); }
 };
@@ -1679,7 +1696,8 @@ static cl_uint getContextPlatformVersion(cl_context context)
 #endif // #if defined(CL_VERSION_1_2) &&
        // defined(CL_USE_DEPRECATED_OPENCL_1_1_APIS)
 
-template <typename T> class Wrapper
+template <typename T>
+class Wrapper
 {
     public:
     typedef T cl_type;
@@ -1748,7 +1766,8 @@ template <typename T> class Wrapper
     }
 };
 
-template <> class Wrapper<cl_device_id>
+template <>
+class Wrapper<cl_device_id>
 {
     public:
     typedef cl_device_id cl_type;
@@ -1849,7 +1868,7 @@ template <> class Wrapper<cl_device_id>
 };
 
 } // namespace detail
-//! \endcond
+  //! \endcond
 
 /*! \stuct ImageFormat
  *  \brief Adds constructors and member functions for cl_image_format.
@@ -1936,7 +1955,8 @@ class Device : public detail::Wrapper<cl_device_id>
     }
 
     //! \brief Wrapper for clGetDeviceInfo().
-    template <typename T> cl_int getInfo(cl_device_info name, T* param) const
+    template <typename T>
+    cl_int getInfo(cl_device_info name, T* param) const
     {
         return detail::errHandler(
             detail::getInfo(&::clGetDeviceInfo, object_, name, param),
@@ -2547,7 +2567,8 @@ class Context : public detail::Wrapper<cl_context>
     }
 
     //! \brief Wrapper for clGetContextInfo().
-    template <typename T> cl_int getInfo(cl_context_info name, T* param) const
+    template <typename T>
+    cl_int getInfo(cl_context_info name, T* param) const
     {
         return detail::errHandler(
             detail::getInfo(&::clGetContextInfo, object_, name, param),
@@ -2689,7 +2710,8 @@ class Event : public detail::Wrapper<cl_event>
     }
 
     //! \brief Wrapper for clGetEventInfo().
-    template <typename T> cl_int getInfo(cl_event_info name, T* param) const
+    template <typename T>
+    cl_int getInfo(cl_event_info name, T* param) const
     {
         return detail::errHandler(
             detail::getInfo(&::clGetEventInfo, object_, name, param),
@@ -2897,7 +2919,8 @@ class Memory : public detail::Wrapper<cl_mem>
     }
 
     //! \brief Wrapper for clGetMemObjectInfo().
-    template <typename T> cl_int getInfo(cl_mem_info name, T* param) const
+    template <typename T>
+    cl_int getInfo(cl_mem_info name, T* param) const
     {
         return detail::errHandler(
             detail::getInfo(&::clGetMemObjectInfo, object_, name, param),
@@ -4134,7 +4157,8 @@ class Sampler : public detail::Wrapper<cl_sampler>
     }
 
     //! \brief Wrapper for clGetSamplerInfo().
-    template <typename T> cl_int getInfo(cl_sampler_info name, T* param) const
+    template <typename T>
+    cl_int getInfo(cl_sampler_info name, T* param) const
     {
         return detail::errHandler(
             detail::getInfo(&::clGetSamplerInfo, object_, name, param),
@@ -4210,12 +4234,14 @@ struct LocalSpaceArg {
 namespace detail
 {
 
-template <typename T> struct KernelArgumentHandler {
+template <typename T>
+struct KernelArgumentHandler {
     static ::size_t size(const T&) { return sizeof(T); }
     static T* ptr(T& value) { return &value; }
 };
 
-template <> struct KernelArgumentHandler<LocalSpaceArg> {
+template <>
+struct KernelArgumentHandler<LocalSpaceArg> {
     static ::size_t size(const LocalSpaceArg& value) { return value.size_; }
     static void* ptr(LocalSpaceArg&) { return NULL; }
 };
@@ -4310,7 +4336,8 @@ class Kernel : public detail::Wrapper<cl_kernel>
         return *this;
     }
 
-    template <typename T> cl_int getInfo(cl_kernel_info name, T* param) const
+    template <typename T>
+    cl_int getInfo(cl_kernel_info name, T* param) const
     {
         return detail::errHandler(
             detail::getInfo(&::clGetKernelInfo, object_, name, param),
@@ -4378,7 +4405,8 @@ class Kernel : public detail::Wrapper<cl_kernel>
         return param;
     }
 
-    template <typename T> cl_int setArg(cl_uint index, T value)
+    template <typename T>
+    cl_int setArg(cl_uint index, T value)
     {
         return detail::errHandler(
             ::clSetKernelArg(object_, index,
@@ -4650,7 +4678,8 @@ class Program : public detail::Wrapper<cl_program>
     }
 #endif
 
-    template <typename T> cl_int getInfo(cl_program_info name, T* param) const
+    template <typename T>
+    cl_int getInfo(cl_program_info name, T* param) const
     {
         return detail::errHandler(
             detail::getInfo(&::clGetProgramInfo, object_, name, param),
@@ -6374,11 +6403,13 @@ class NullType
 {
 };
 
-template <int index, typename T0> struct SetArg {
+template <int index, typename T0>
+struct SetArg {
     static void set(Kernel kernel, T0 arg) { kernel.setArg(index, arg); }
 };
 
-template <int index> struct SetArg<index, NullType> {
+template <int index>
+struct SetArg<index, NullType> {
     static void set(Kernel, NullType) {}
 };
 

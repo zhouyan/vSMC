@@ -42,7 +42,8 @@ VSMC_DEFINE_SMP_FORWARD(PPL)
 
 /// \brief Particle::value_type subtype using Parallel Pattern Library
 /// \ingroup PPL
-template <typename BaseState> class StatePPL : public BaseState
+template <typename BaseState>
+class StatePPL : public BaseState
 {
     public:
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
@@ -59,7 +60,8 @@ template <typename BaseState> class StatePPL : public BaseState
     }
 
     private:
-    template <typename IntType> struct copy_work_ {
+    template <typename IntType>
+    struct copy_work_ {
         copy_work_(StatePPL<BaseState> *state, const IntType *copy_from)
             : state_(state), copy_from_(copy_from)
         {

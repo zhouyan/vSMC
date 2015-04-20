@@ -60,7 +60,8 @@ inline std::string verify(
     return std::string("Pass");
 }
 
-template <typename IntType> inline std::string size_h(IntType B)
+template <typename IntType>
+inline std::string size_h(IntType B)
 {
     std::ptrdiff_t BS = static_cast<std::ptrdiff_t>(B);
     std::string ret;

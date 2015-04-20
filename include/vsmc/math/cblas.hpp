@@ -52,7 +52,8 @@ namespace math
 
 /// \brief Sum of vector magnitudes
 /// \ingroup CBLAS
-template <typename T> inline T asum(std::size_t n, const T *x)
+template <typename T>
+inline T asum(std::size_t n, const T *x)
 {
     using std::fabs;
 
@@ -65,13 +66,15 @@ template <typename T> inline T asum(std::size_t n, const T *x)
 
 /// \brief The dot product
 /// \ingroup CBLAS
-template <typename T> inline T dot(std::size_t n, const T *x, const T *y)
+template <typename T>
+inline T dot(std::size_t n, const T *x, const T *y)
 {
     return std::inner_product(x, x + n, y, static_cast<T>(0));
 }
 
 /// \brief Scale a vector
-template <typename T> inline void scal(std::size_t n, T a, T *x)
+template <typename T>
+inline void scal(std::size_t n, T a, T *x)
 {
     for (std::size_t i = 0; i != n; ++i)
         x[i] *= a;

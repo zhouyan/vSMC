@@ -129,7 +129,8 @@ namespace vsmc
 ///
 /// Before using a CLManager, it is important to check that CLManager::setup
 /// returns `true`.
-template <typename ID = CLDefault> class CLManager
+template <typename ID = CLDefault>
+class CLManager
 {
     public:
     typedef ID cl_id;

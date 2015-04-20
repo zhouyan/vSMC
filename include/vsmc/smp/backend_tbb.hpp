@@ -77,7 +77,8 @@ VSMC_DEFINE_SMP_FORWARD(TBB)
 
 /// \brief Particle::value_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
-template <typename BaseState> class StateTBB : public BaseState
+template <typename BaseState>
+class StateTBB : public BaseState
 {
     public:
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;

@@ -50,7 +50,8 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(
 namespace internal
 {
 
-template <typename T, typename IntType> class ParallelCopyParticle
+template <typename T, typename IntType>
+class ParallelCopyParticle
 {
     public:
     ParallelCopyParticle(T *state, const IntType *copy_from)
@@ -87,7 +88,8 @@ template <typename T, typename IntType> class ParallelCopyParticle
     const IntType *const copy_from_;
 }; // class ParallelCopyParticle
 
-template <typename T, typename InitType> class ParallelInitializeState
+template <typename T, typename InitType>
+class ParallelInitializeState
 {
     public:
     ParallelInitializeState(InitType *init, Particle<T> *particle)
@@ -139,7 +141,8 @@ template <typename T, typename InitType> class ParallelInitializeState
     std::size_t accept_;
 }; // class ParallelInitializeState
 
-template <typename T, typename MoveType> class ParallelMoveState
+template <typename T, typename MoveType>
+class ParallelMoveState
 {
     public:
     typedef typename traits::SizeTypeTrait<T>::type size_type;
@@ -196,7 +199,8 @@ template <typename T, typename MoveType> class ParallelMoveState
     std::size_t accept_;
 }; // class ParallelMoveState
 
-template <typename T, typename MonitorEvalType> class ParallelMonitorState
+template <typename T, typename MonitorEvalType>
+class ParallelMonitorState
 {
     public:
     ParallelMonitorState(MonitorEvalType *monitor, std::size_t iter,
@@ -242,7 +246,8 @@ template <typename T, typename MonitorEvalType> class ParallelMonitorState
     double *const res_;
 }; // class ParallelMonitorState
 
-template <typename T, typename PathEvalType> class ParallelPathState
+template <typename T, typename PathEvalType>
+class ParallelPathState
 {
     public:
     ParallelPathState(PathEvalType *path, std::size_t iter,

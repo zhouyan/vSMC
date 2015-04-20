@@ -110,7 +110,8 @@ struct ThreadLocal {
 
 /// \brief Function template argument used for position
 /// \ingroup Definitions
-template <std::size_t N> struct Position {
+template <std::size_t N>
+struct Position {
     typedef std::size_t size_type;
     typedef Position<N> type;
     static constexpr const size_type value = N;

@@ -355,7 +355,8 @@ class Progress
             cstr[offset++] = utmp[i - 1];
     }
 
-    template <typename UIntType> static std::size_t uint_digit(UIntType num)
+    template <typename UIntType>
+    static std::size_t uint_digit(UIntType num)
     {
         if (num == 0)
             return 1;

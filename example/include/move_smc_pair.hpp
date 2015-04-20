@@ -32,7 +32,8 @@
 #ifndef VSMC_EXAMPLE_MOVE_SMC_PAIR_HPP
 #define VSMC_EXAMPLE_MOVE_SMC_PAIR_HPP
 
-template <typename T, typename Alpha> class move_smc_pair
+template <typename T, typename Alpha>
+class move_smc_pair
 {
     public:
     typedef Alpha alpha_type;

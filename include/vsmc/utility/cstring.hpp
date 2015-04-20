@@ -507,7 +507,8 @@ namespace vsmc
 namespace internal
 {
 
-template <SIMD ISA> inline unsigned cstring_is_aligned(const void *ptr)
+template <SIMD ISA>
+inline unsigned cstring_is_aligned(const void *ptr)
 {
     return reinterpret_cast<uintptr_t>(ptr) %
                 traits::SIMDTrait<ISA>::alignment ==
@@ -516,7 +517,8 @@ template <SIMD ISA> inline unsigned cstring_is_aligned(const void *ptr)
         0;
 }
 
-template <SIMD> inline void memset_0(void *dst, int ch, std::size_t n)
+template <SIMD>
+inline void memset_0(void *dst, int ch, std::size_t n)
 {
     if (n != 0)
         std::memset(dst, ch, n);
@@ -743,7 +745,8 @@ class CStringNonTemporalThreshold
 namespace internal
 {
 
-template <SIMD ISA> inline void *memset_simd(void *dst, int ch, std::size_t n)
+template <SIMD ISA>
+inline void *memset_simd(void *dst, int ch, std::size_t n)
 {
     if (n < traits::SIMDTrait<ISA>::alignment) {
         memset_0<ISA>(dst, ch, n);

@@ -384,7 +384,8 @@ class ProgramOptionHelp : public ProgramOption
 
 /// \brief Option with a default value
 /// \ingroup Option
-template <typename T> class ProgramOptionDefault : public ProgramOption
+template <typename T>
+class ProgramOptionDefault : public ProgramOption
 {
     public:
     ProgramOptionDefault(const std::string &desc)
@@ -421,7 +422,8 @@ template <typename T> class ProgramOptionDefault : public ProgramOption
     T default_;
     bool has_default_;
 
-    template <typename U> std::string default_val2str(const U &val) const
+    template <typename U>
+    std::string default_val2str(const U &val) const
     {
         std::stringstream ss;
         ss << '(' << val << ')';

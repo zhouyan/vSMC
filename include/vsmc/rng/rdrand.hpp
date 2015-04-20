@@ -58,11 +58,13 @@ namespace vsmc
 
 /// \brief Invoke the RDRAND instruction and return the carry flag
 /// \ingroup RDRNG
-template <typename UIntType> inline bool rdrand(UIntType *);
+template <typename UIntType>
+inline bool rdrand(UIntType *);
 
 /// \brief Invoke the 16-bits RDRAND instruction and return the carry flag
 /// \ingroup RDRNG
-template <> inline bool rdrand<uint16_t>(uint16_t *rand)
+template <>
+inline bool rdrand<uint16_t>(uint16_t *rand)
 {
     unsigned short r;
     int cf = _rdrand16_step(&r);
@@ -73,7 +75,8 @@ template <> inline bool rdrand<uint16_t>(uint16_t *rand)
 
 /// \brief Invoke the 32-bits RDRAND instruction and return the carry flag
 /// \ingroup RDRNG
-template <> inline bool rdrand<uint32_t>(uint32_t *rand)
+template <>
+inline bool rdrand<uint32_t>(uint32_t *rand)
 {
     unsigned r;
     int cf = _rdrand32_step(&r);
@@ -84,7 +87,8 @@ template <> inline bool rdrand<uint32_t>(uint32_t *rand)
 
 /// \brief Invoke the 64-bits RDRAND instruction and return the carry flag
 /// \ingroup RDRNG
-template <> inline bool rdrand<uint64_t>(uint64_t *rand)
+template <>
+inline bool rdrand<uint64_t>(uint64_t *rand)
 {
     unsigned VSMC_INT64 r;
     int cf = _rdrand64_step(&r);

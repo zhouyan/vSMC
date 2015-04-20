@@ -36,7 +36,8 @@
 
 #include <vsmc/core/state_matrix.hpp>
 
-template <vsmc::MatrixOrder Order> struct BaseState {
+template <vsmc::MatrixOrder Order>
+struct BaseState {
     typedef vsmc::StateMatrix<Order, 5, double> type;
 };
 

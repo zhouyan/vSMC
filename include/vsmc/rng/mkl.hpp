@@ -62,9 +62,12 @@
 namespace vsmc
 {
 
-template <MKL_INT> class MKLStream;
-template <typename, typename> class MKLDistribution;
-template <MKL_INT, typename> class MKLEngine;
+template <MKL_INT>
+class MKLStream;
+template <typename, typename>
+class MKLDistribution;
+template <MKL_INT, typename>
+class MKLEngine;
 
 class MKLUniformBits32Distribution;
 class MKLUniformBits64Distribution;
@@ -80,7 +83,8 @@ template <MKL_INT = VSL_RNG_METHOD_BINOMIAL_BTPE>
 class MKLBinomialDistribution;
 template <MKL_INT = VSL_RNG_METHOD_HYPERGEOMETRIC_H2PE>
 class MKLHypergeometricDistribution;
-template <MKL_INT = VSL_RNG_METHOD_POISSON_PTPE> class MKLPoissonDistribution;
+template <MKL_INT = VSL_RNG_METHOD_POISSON_PTPE>
+class MKLPoissonDistribution;
 template <MKL_INT = VSL_RNG_METHOD_NEGBINOMIAL_NBAR>
 class MKLNegBinomialDistribution;
 template <typename = double, MKL_INT = VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2>
@@ -209,11 +213,13 @@ namespace traits
 ///
 /// This traits also need to have two static constant member data, `min` and
 /// `max`
-template <MKL_INT, typename> struct MKLUniformBitsTrait;
+template <MKL_INT, typename>
+struct MKLUniformBitsTrait;
 
 /// \brief Default uniform bits generator for MKLEngine with `unsigned` output
 /// \ingroup Traits
-template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned> {
+template <MKL_INT BRNG>
+struct MKLUniformBitsTrait<BRNG, unsigned> {
     typedef MKLUniformBits32Distribution type;
     static constexpr const unsigned min VSMC_MNE = 0;
     static constexpr const unsigned max VSMC_MNE = VSMC_MAX_UINT(unsigned);
@@ -222,7 +228,8 @@ template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned> {
 /// \brief Default uniform bits generator for MKLEngine with
 /// `unsigned MKL_INT64` output
 /// \ingroup Traits
-template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned MKL_INT64> {
+template <MKL_INT BRNG>
+struct MKLUniformBitsTrait<BRNG, unsigned MKL_INT64> {
     typedef MKLUniformBits64Distribution type;
     static constexpr const unsigned MKL_INT64 min VSMC_MNE = 0;
     static constexpr const unsigned MKL_INT64 max VSMC_MNE =
@@ -259,7 +266,8 @@ struct MKLOffsetZero {
     static constexpr MKL_INT offset() { return 0; }
 }; // struct OffsetZero
 
-template <MKL_INT MaxOffset> struct MKLOffsetDynamic {
+template <MKL_INT MaxOffset>
+struct MKLOffsetDynamic {
     MKLOffsetDynamic() : offset_(0) {}
 
     static constexpr MKL_INT min VSMC_MNE() { return 0; }
@@ -277,15 +285,18 @@ template <MKL_INT MaxOffset> struct MKLOffsetDynamic {
     MKL_INT offset_;
 }; // struct OffsetDynamic
 
-template <MKL_INT> struct MKLOffset {
+template <MKL_INT>
+struct MKLOffset {
     typedef MKLOffsetZero type;
 };
 
-template <> struct MKLOffset<VSL_BRNG_MT2203> {
+template <>
+struct MKLOffset<VSL_BRNG_MT2203> {
     typedef MKLOffsetDynamic<6024> type;
 };
 
-template <> struct MKLOffset<VSL_BRNG_WH> {
+template <>
+struct MKLOffset<VSL_BRNG_WH> {
     typedef MKLOffsetDynamic<273> type;
 };
 
@@ -307,7 +318,8 @@ struct MKLSkipAheadVSL {
     static MKL_INT buffer_size() { return 0; }
 }; // struct SkipAheadVSL
 
-template <MKL_INT BRNG, typename ResultType> struct MKLSkipAheadForce {
+template <MKL_INT BRNG, typename ResultType>
+struct MKLSkipAheadForce {
     typedef MKL_INT size_type;
 
     MKLSkipAheadForce() : buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE) {}
@@ -347,7 +359,8 @@ template <MKL_INT BRNG, typename ResultType> struct MKLSkipAheadForce {
     MKL_INT buffer_size_;
 }; // strut SkipAheadForce
 
-template <MKL_INT BRNG, typename ResultType> struct MKLSkipAhead {
+template <MKL_INT BRNG, typename ResultType>
+struct MKLSkipAhead {
     typedef MKLSkipAheadForce<BRNG, ResultType> type;
 };
 
@@ -518,7 +531,8 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 
 /// \brief MKL RNG C++11 engine
 /// \ingroup MKLRNG
-template <MKL_INT BRNG, typename ResultType> class MKLEngine
+template <MKL_INT BRNG, typename ResultType>
+class MKLEngine
 {
     public:
     typedef ResultType result_type;
@@ -648,7 +662,8 @@ typedef MKLEngine<VSL_BRNG_NONDETERM, unsigned MKL_INT64> MKL_NONDETERM_64;
 
 /// \brief Base class of MKL distribution
 /// \ingroup MKLRNG
-template <typename ResultType, typename Derived> class MKLDistribution
+template <typename ResultType, typename Derived>
+class MKLDistribution
 {
     public:
     typedef ResultType result_type;
@@ -658,7 +673,8 @@ template <typename ResultType, typename Derived> class MKLDistribution
     {
     }
 
-    template <MKL_INT BRNG> result_type operator()(MKLStream<BRNG> &stream)
+    template <MKL_INT BRNG>
+    result_type operator()(MKLStream<BRNG> &stream)
     {
         if (index_ == buffer_size_) {
             buffer_.resize(static_cast<std::size_t>(buffer_size_));

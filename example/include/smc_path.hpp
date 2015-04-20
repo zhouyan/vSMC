@@ -32,7 +32,8 @@
 #ifndef VSMC_EXAMPLE_SMC_PATH_HPP
 #define VSMC_EXAMPLE_SMC_PATH_HPP
 
-template <typename T> class smc_path : public BASE_PATH<T, smc_path<T>>
+template <typename T>
+class smc_path : public BASE_PATH<T, smc_path<T>>
 {
     public:
     double path_state(std::size_t, vsmc::ConstSingleParticle<T> csp)

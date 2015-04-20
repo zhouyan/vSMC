@@ -218,8 +218,8 @@ class Counter<std::array<T, K>>
         ++m;
         m <<= sizeof(T) * 8 - 8;
 
-	std::get<B>(ctr) = std::get<B - 1>(ctr);
-	std::get<B>(ctr).back() &= mask_hi_;
+        std::get<B>(ctr) = std::get<B - 1>(ctr);
+        std::get<B>(ctr).back() &= mask_hi_;
         std::get<B>(ctr).back() ^= m;
         set_block<B + 1>(ctr, std::integral_constant<bool, B + 1 < Blocks>());
     }

@@ -45,7 +45,8 @@ namespace vsmc
 
 /// \brief Particle class representing the whole particle set
 /// \ingroup Core
-template <typename T> class Particle
+template <typename T>
+class Particle
 {
     public:
     typedef typename traits::SizeTypeTrait<T>::type size_type;

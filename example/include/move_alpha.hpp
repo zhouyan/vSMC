@@ -32,7 +32,8 @@
 #ifndef VSMC_EXAMPLE_MOVE_ALPHA_HPP
 #define VSMC_EXAMPLE_MOVE_ALPHA_HPP
 
-template <typename T> class alpha_null
+template <typename T>
+class alpha_null
 {
     public:
     typedef double value_type;
@@ -42,7 +43,8 @@ template <typename T> class alpha_null
     void alpha_init(vsmc::Particle<T> &) {}
 };
 
-template <typename T> class alpha_fixed
+template <typename T>
+class alpha_fixed
 {
     public:
     typedef std::vector<double> *value_type;
@@ -68,7 +70,8 @@ template <typename T> class alpha_fixed
     std::vector<double> alpha_;
 };
 
-template <typename T> class alpha_mh
+template <typename T>
+class alpha_mh
 {
     public:
     typedef double value_type;
@@ -89,7 +92,8 @@ template <typename T> class alpha_mh
     double alpha_;
 };
 
-template <typename T> class alpha_linear
+template <typename T>
+class alpha_linear
 {
     public:
     typedef std::size_t value_type;
@@ -113,7 +117,8 @@ template <typename T> class alpha_linear
     std::size_t iter_num_;
 };
 
-template <typename T, std::size_t Power> class alpha_prior
+template <typename T, std::size_t Power>
+class alpha_prior
 {
     public:
     typedef std::size_t value_type;
@@ -145,7 +150,8 @@ template <typename T, std::size_t Power> class alpha_prior
     std::size_t iter_num_;
 };
 
-template <typename T, std::size_t Power> class alpha_posterior
+template <typename T, std::size_t Power>
+class alpha_posterior
 {
     public:
     typedef std::size_t value_type;
@@ -177,7 +183,8 @@ template <typename T, std::size_t Power> class alpha_posterior
     std::size_t iter_num_;
 };
 
-template <typename T> class ess01
+template <typename T>
+class ess01
 {
     public:
     double operator()(
@@ -187,7 +194,8 @@ template <typename T> class ess01
     }
 };
 
-template <typename T> class cess01
+template <typename T>
+class cess01
 {
     public:
     double operator()(
@@ -197,9 +205,11 @@ template <typename T> class cess01
     }
 };
 
-template <typename T, typename ESS> class ess_new;
+template <typename T, typename ESS>
+class ess_new;
 
-template <typename T> class ess_new<T, ess01<T>>
+template <typename T>
+class ess_new<T, ess01<T>>
 {
     public:
     double operator()(const vsmc::Particle<T> &particle, double drop) const
@@ -208,7 +218,8 @@ template <typename T> class ess_new<T, ess01<T>>
     }
 };
 
-template <typename T> class ess_new<T, cess01<T>>
+template <typename T>
+class ess_new<T, cess01<T>>
 {
     public:
     double operator()(const vsmc::Particle<T> &, double drop) const
@@ -217,7 +228,8 @@ template <typename T> class ess_new<T, cess01<T>>
     }
 };
 
-template <typename T, typename ESS> class alpha_ess
+template <typename T, typename ESS>
+class alpha_ess
 {
     public:
     typedef double value_type;

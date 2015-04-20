@@ -94,11 +94,13 @@ namespace vsmc
 namespace internal
 {
 
-template <bool> struct StaticAssert {
+template <bool>
+struct StaticAssert {
     static void test(int *) {}
 };
 
-template <> struct StaticAssert<true> {
+template <>
+struct StaticAssert<true> {
     static void test(...) {}
 };
 

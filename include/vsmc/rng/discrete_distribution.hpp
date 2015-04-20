@@ -44,7 +44,8 @@ namespace vsmc
 
 /// \brief Draw a single sample given weights
 /// \ingroup Distribution
-template <typename IntType = int> class DiscreteDistribution
+template <typename IntType = int>
+class DiscreteDistribution
 {
     public:
     typedef IntType result_type;
@@ -120,7 +121,8 @@ template <typename IntType = int> class DiscreteDistribution
 
     std::vector<double> probability() const { return param_; }
 
-    template <typename URNG> result_type operator()(URNG &eng) const
+    template <typename URNG>
+    result_type operator()(URNG &eng) const
     {
         return operator()(eng, param_.begin(), param_.end(), true);
     }

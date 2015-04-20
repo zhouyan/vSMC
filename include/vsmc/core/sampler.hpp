@@ -55,7 +55,8 @@ namespace vsmc
 
 /// \brief SMC Sampler
 /// \ingroup Core
-template <typename T> class Sampler
+template <typename T>
+class Sampler
 {
     public:
     typedef typename Particle<T>::size_type size_type;
@@ -658,7 +659,8 @@ template <typename T> class Sampler
     }
 
     /// \brief Sampler summary header (floating point data)
-    template <typename OutputIter> void summary_header(OutputIter first) const
+    template <typename OutputIter>
+    void summary_header(OutputIter first) const
     {
         if (summary_header_size() == 0)
             return;

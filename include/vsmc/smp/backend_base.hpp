@@ -81,7 +81,8 @@ namespace vsmc
 
 /// \brief Initialize base dispatch class
 /// \ingroup SMP
-template <typename T, typename Derived> class InitializeBase
+template <typename T, typename Derived>
+class InitializeBase
 {
     public:
     std::size_t initialize_state(SingleParticle<T> sp)
@@ -221,7 +222,8 @@ template <typename T, typename Derived> class InitializeBase
 
 /// \brief Initilaize base dispatch class
 /// \ingroup SMP
-template <typename T> class InitializeBase<T, Virtual>
+template <typename T>
+class InitializeBase<T, Virtual>
 {
     public:
     virtual std::size_t initialize_state(SingleParticle<T>) { return 0; }
@@ -235,7 +237,8 @@ template <typename T> class InitializeBase<T, Virtual>
 
 /// \brief Move base dispatch class
 /// \ingroup SMP
-template <typename T, typename Derived> class MoveBase
+template <typename T, typename Derived>
+class MoveBase
 {
     public:
     std::size_t move_state(std::size_t iter, SingleParticle<T> sp)
@@ -344,7 +347,8 @@ template <typename T, typename Derived> class MoveBase
 
 /// \brief Move base dispatch class
 /// \ingroup SMP
-template <typename T> class MoveBase<T, Virtual>
+template <typename T>
+class MoveBase<T, Virtual>
 {
     public:
     virtual std::size_t move_state(std::size_t, SingleParticle<T>)
@@ -360,7 +364,8 @@ template <typename T> class MoveBase<T, Virtual>
 
 /// \brief Monitor evalution base dispatch class
 /// \ingroup SMP
-template <typename T, typename Derived> class MonitorEvalBase
+template <typename T, typename Derived>
+class MonitorEvalBase
 {
     public:
     void monitor_state(std::size_t iter, std::size_t dim,
@@ -479,7 +484,8 @@ template <typename T, typename Derived> class MonitorEvalBase
 
 /// \brief Monitor evalution base dispatch class
 /// \ingroup SMP
-template <typename T> class MonitorEvalBase<T, Virtual>
+template <typename T>
+class MonitorEvalBase<T, Virtual>
 {
     public:
     virtual void monitor_state(
@@ -495,7 +501,8 @@ template <typename T> class MonitorEvalBase<T, Virtual>
 
 /// \brief Path evalution base dispatch class
 /// \ingroup SMP
-template <typename T, typename Derived> class PathEvalBase
+template <typename T, typename Derived>
+class PathEvalBase
 {
     public:
     double path_state(std::size_t iter, ConstSingleParticle<T> csp)
@@ -638,7 +645,8 @@ template <typename T, typename Derived> class PathEvalBase
 
 /// \brief Path evalution base dispatch class
 /// \ingroup SMP
-template <typename T> class PathEvalBase<T, Virtual>
+template <typename T>
+class PathEvalBase<T, Virtual>
 {
     public:
     virtual double path_state(std::size_t, ConstSingleParticle<T>)

@@ -43,7 +43,8 @@ VSMC_DEFINE_SMP_FORWARD(STD)
 
 /// \brief Particle::value_type subtype using C++11 concurrency
 /// \ingroup STD
-template <typename BaseState> class StateSTD : public BaseState
+template <typename BaseState>
+class StateSTD : public BaseState
 {
     public:
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;

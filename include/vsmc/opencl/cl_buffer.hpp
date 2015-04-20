@@ -47,7 +47,8 @@ namespace vsmc
 /// copy.
 /// Each CLBuffer object is tied to a specific CLManager, and thus its context
 /// and command queue, which are used to create and copy the buffers.
-template <typename T, typename ID = CLDefault> class CLBuffer
+template <typename T, typename ID = CLDefault>
+class CLBuffer
 {
     public:
     typedef T value_type;

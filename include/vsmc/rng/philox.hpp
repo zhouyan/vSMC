@@ -245,7 +245,7 @@ struct PhiloxRound<ResultType, 2, N, true> {
         ResultType lo = 0;
         philox_hilo<2, 0>(std::get<0>(state), hi, lo);
         std::get<0>(state) = hi ^ (std::get<0>(par) ^ std::get<1>(state));
-	std::get<1>(state) = lo;
+        std::get<1>(state) = lo;
     }
 }; // struct PhiloxRound
 
@@ -263,7 +263,7 @@ struct PhiloxRound<ResultType, 4, N, true> {
 
         hi0 ^= std::get<0>(par);
         hi2 ^= std::get<1>(par);
-	std::get<0>(state) = hi0 ^ std::get<1>(state);
+        std::get<0>(state) = hi0 ^ std::get<1>(state);
         std::get<1>(state) = lo1;
         std::get<2>(state) = hi2 ^ std::get<3>(state);
         std::get<3>(state) = lo3;

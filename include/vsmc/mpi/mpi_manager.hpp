@@ -98,7 +98,8 @@ class MPIEnvironment
 ///
 /// \details
 /// Use specialization of the singleton to configure different StateMPI
-template <typename ID> class MPICommunicator
+template <typename ID>
+class MPICommunicator
 {
     public:
     static MPICommunicator<ID> &instance()
