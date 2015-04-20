@@ -64,6 +64,12 @@ FUNCTION (ADD_U01_TEST name)
     ENDIF (TESTU01_FOUND)
 ENDFUNCTION (ADD_U01_TEST)
 
+FUNCTION (ADD_VALIDATION name)
+    ADD_VSMC_EXECUTABLE (rng_${name}_validation
+	${PROJECT_SOURCE_DIR}/src/rng_${name}_validation.cpp)
+    ADD_DEPENDENCIES (rng rng_${name}_validation)
+ENDFUNCTION (ADD_VALIDATION name)
+
 ADD_RNG_TEST(dist)
 
 ADD_RNG_TEST(std)
@@ -71,9 +77,11 @@ ADD_U01_TEST(std)
 
 ADD_RNG_TEST(philox)
 ADD_U01_TEST(philox)
+ADD_VALIDATION(philox)
 
 ADD_RNG_TEST(threefry)
 ADD_U01_TEST(threefry)
+ADD_VALIDATION(threefry)
 
 ADD_RNG_TEST(xorshift)
 ADD_U01_TEST(xorshift)
@@ -81,11 +89,11 @@ ADD_U01_TEST(xorshift)
 IF (AESNI_FOUND)
     ADD_RNG_TEST(aes)
     ADD_U01_TEST(aes)
+    ADD_VALIDATION(aes)
+
     ADD_RNG_TEST(ars)
     ADD_U01_TEST(ars)
-    ADD_VSMC_EXECUTABLE (rng_aes_validation
-        ${PROJECT_SOURCE_DIR}/src/rng_aes_validation.cpp)
-    ADD_DEPENDENCIES (rng rng_aes_validation)
+    ADD_VALIDATION(ars)
 ENDIF (AESNI_FOUND)
 
 IF (RDRAND_FOUND)
