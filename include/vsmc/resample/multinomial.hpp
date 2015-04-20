@@ -54,18 +54,9 @@ class Resample<internal::ResampleMultinomial>
     void operator() (std::size_t M, std::size_t N, RngType &rng,
             const double *weight, IntType *replication)
     {
-        u01_.resize(N);
-        double *const uptr = &u01_[0];
-        cxx11::uniform_real_distribution<double> runif(0, 1);
-        for (std::size_t i = 0; i != N; ++i)
-            uptr[i] = runif(rng);
-        inversion_(M, N, weight, uptr, replication);
+        U01SequenceSorted<RngType> u01seq(N, rng);
+        internal::inversion(M, N, weight, u01seq, replication);
     }
-
-    private :
-
-    internal::Inversion inversion_;
-    std::vector<double, AlignedAllocator<double> > u01_;
 }; // Mulitnomial resampling
 
 } // namespace vsmc

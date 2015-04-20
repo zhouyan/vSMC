@@ -38,199 +38,8 @@
 
 #if VSMC_USE_MKL_VML
 #include <mkl.h>
-#elif VSMC_USE_VECLIB_VFORCE
+#elif VSMC_USE_ACCELERATE_VFORCE
 #include <Accelerate/Accelerate.h>
-#endif
-
-/// \brief When MKL (VML) or vecLib (vForce) is available, the threshold of the
-/// number of elements above which these libraries will be used.
-/// \ingroup Config
-///
-/// \details
-/// This macro change the behavior of all functions in the vMath module. One
-/// can also define function specific macros to change the threshold of only
-/// one function. For example, `VSMC_VMATH_THRESHOLD_Add` will change how a
-/// call `vAdd(n, a, b, y)` will behave. Also call this function explicitly
-/// with a template parameter, `vAdd<double>(n, a, b, y)` will bypass the
-/// library calls entirely.
-#ifndef VSMC_VMATH_THRESHOLD
-#define VSMC_VMATH_THRESHOLD 1000
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Add
-#define VSMC_VMATH_THRESHOLD_Add VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Sub
-#define VSMC_VMATH_THRESHOLD_Sub VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Sqr
-#define VSMC_VMATH_THRESHOLD_Sqr VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Mul
-#define VSMC_VMATH_THRESHOLD_Mul VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Abs
-#define VSMC_VMATH_THRESHOLD_Abs VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_LinearFrac
-#define VSMC_VMATH_THRESHOLD_LinearFrac VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Inv
-#define VSMC_VMATH_THRESHOLD_Inv VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Div
-#define VSMC_VMATH_THRESHOLD_Div VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Sqrt
-#define VSMC_VMATH_THRESHOLD_Sqrt VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_InvSqrt
-#define VSMC_VMATH_THRESHOLD_InvSqrt VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Cbrt
-#define VSMC_VMATH_THRESHOLD_Cbrt VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_InvCbrt
-#define VSMC_VMATH_THRESHOLD_InvCbrt VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Pow2o3
-#define VSMC_VMATH_THRESHOLD_Pow2o3 VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Pow3o2
-#define VSMC_VMATH_THRESHOLD_Pow3o2 VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Pow
-#define VSMC_VMATH_THRESHOLD_Pow VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Powx
-#define VSMC_VMATH_THRESHOLD_Powx VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Hypot
-#define VSMC_VMATH_THRESHOLD_Hypot VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Exp
-#define VSMC_VMATH_THRESHOLD_Exp VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Expm1
-#define VSMC_VMATH_THRESHOLD_Expm1 VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Ln
-#define VSMC_VMATH_THRESHOLD_Ln VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Log10
-#define VSMC_VMATH_THRESHOLD_Log10 VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Log1p
-#define VSMC_VMATH_THRESHOLD_Log1p VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Cos
-#define VSMC_VMATH_THRESHOLD_Cos VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Sin
-#define VSMC_VMATH_THRESHOLD_Sin VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_SinCos
-#define VSMC_VMATH_THRESHOLD_SinCos VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Tan
-#define VSMC_VMATH_THRESHOLD_Tan VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Acos
-#define VSMC_VMATH_THRESHOLD_Acos VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Asin
-#define VSMC_VMATH_THRESHOLD_Asin VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Atan
-#define VSMC_VMATH_THRESHOLD_Atan VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Atan2
-#define VSMC_VMATH_THRESHOLD_Atan2 VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Cosh
-#define VSMC_VMATH_THRESHOLD_Cosh VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Sinh
-#define VSMC_VMATH_THRESHOLD_Sinh VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Tanh
-#define VSMC_VMATH_THRESHOLD_Tanh VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Acosh
-#define VSMC_VMATH_THRESHOLD_Acosh VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Asinh
-#define VSMC_VMATH_THRESHOLD_Asinh VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Atanh
-#define VSMC_VMATH_THRESHOLD_Atanh VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Erf
-#define VSMC_VMATH_THRESHOLD_Erf VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_Erfc
-#define VSMC_VMATH_THRESHOLD_Erfc VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_CdfNorm
-#define VSMC_VMATH_THRESHOLD_CdfNorm VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_ErfInv
-#define VSMC_VMATH_THRESHOLD_ErfInv VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_ErfcInv
-#define VSMC_VMATH_THRESHOLD_ErfcInv VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_CdfNormInv
-#define VSMC_VMATH_THRESHOLD_CdfNormInv VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_LGamma
-#define VSMC_VMATH_THRESHOLD_LGamma VSMC_VMATH_THRESHOLD
-#endif
-
-#ifndef VSMC_VMATH_THRESHOLD_TGamma
-#define VSMC_VMATH_THRESHOLD_TGamma VSMC_VMATH_THRESHOLD
 #endif
 
 #define VSMC_DEFINE_MATH_VMATH_1(ns, func, name) \
@@ -519,34 +328,18 @@ VSMC_DEFINE_MATH_VMATH_1(cxx11, tgamma, TGamma)
 #define VSMC_DEFINE_MATH_VMATH_VML_1(name) \
 inline void v##name                                                          \
 (std::size_t n, const float *a, float *y)                                    \
-{                                                                            \
-    n < VSMC_VMATH_THRESHOLD_##name ?                                        \
-        v##name<float>(n, a, y):                                             \
-        ::vs##name(static_cast<MKL_INT>(n), a, y);                           \
-}                                                                            \
+{::vs##name(static_cast<MKL_INT>(n), a, y);}                                 \
 inline void v##name                                                          \
 (std::size_t n, const double *a, double *y)                                  \
-{                                                                            \
-    n < VSMC_VMATH_THRESHOLD_##name ?                                        \
-        v##name<double>(n, a, y):                                            \
-        ::vd##name(static_cast<MKL_INT>(n), a, y);                           \
-}
+{::vd##name(static_cast<MKL_INT>(n), a, y);}
 
 #define VSMC_DEFINE_MATH_VMATH_VML_2(name) \
 inline void v##name                                                          \
 (std::size_t n, const float *a, const float *b, float *y)                    \
-{                                                                            \
-    n < VSMC_VMATH_THRESHOLD_##name ?                                        \
-        v##name<float>(n, a, b, y):                                          \
-        ::vs##name(static_cast<MKL_INT>(n), a, b, y);                        \
-}                                                                            \
+{::vs##name(static_cast<MKL_INT>(n), a, b, y);}                              \
 inline void v##name                                                          \
 (std::size_t n, const double *a, const double *b, double *y)                 \
-{                                                                            \
-    n < VSMC_VMATH_THRESHOLD_##name ?                                        \
-        v##name<double>(n, a, b, y):                                         \
-        ::vd##name(static_cast<MKL_INT>(n), a, b, y);                        \
-}
+{::vd##name(static_cast<MKL_INT>(n), a, b, y);}
 
 namespace vsmc {
 
@@ -559,20 +352,10 @@ VSMC_DEFINE_MATH_VMATH_VML_2(Mul)
 VSMC_DEFINE_MATH_VMATH_VML_1(Abs)
 inline void vLinearFrac (std::size_t n, const float *a, const float *b,
         float beta_a, float beta_b, float mu_a, float mu_b, float *y)
-{
-    n < VSMC_VMATH_THRESHOLD_LinearFrac ?
-        vLinearFrac<float>(n, a, b, beta_a, beta_b, mu_a, mu_b, y):
-        ::vsLinearFrac(static_cast<MKL_INT>(n), a, b,
-                beta_a, beta_b, mu_a, mu_b, y);
-}
+{::vsLinearFrac(static_cast<MKL_INT>(n), a, b, beta_a, beta_b, mu_a, mu_b, y);}
 inline void vLinearFrac (std::size_t n, const double *a, const double *b,
         double beta_a, double beta_b, double mu_a, double mu_b, double *y)
-{
-    n < VSMC_VMATH_THRESHOLD_LinearFrac ?
-        vLinearFrac<double>(n, a, b, beta_a, beta_b, mu_a, mu_b, y):
-        ::vdLinearFrac(static_cast<MKL_INT>(n), a, b,
-                beta_a, beta_b, mu_a, mu_b, y);
-}
+{::vdLinearFrac(static_cast<MKL_INT>(n), a, b, beta_a, beta_b, mu_a, mu_b, y);}
 
 VSMC_DEFINE_MATH_VMATH_VML_1(Inv)
 VSMC_DEFINE_MATH_VMATH_VML_2(Div)
@@ -584,17 +367,9 @@ VSMC_DEFINE_MATH_VMATH_VML_1(Pow2o3)
 VSMC_DEFINE_MATH_VMATH_VML_1(Pow3o2)
 VSMC_DEFINE_MATH_VMATH_VML_2(Pow)
 inline void vPowx (std::size_t n, const float *a, float b, float *y)
-{
-    n < VSMC_VMATH_THRESHOLD_Powx ?
-        vPowx<float>(n, a, b, y):
-        ::vsPowx(static_cast<MKL_INT>(n), a, b, y);
-}
+{::vsPowx(static_cast<MKL_INT>(n), a, b, y);}
 inline void vPowx (std::size_t n, const double *a, double b, double *y)
-{
-    n < VSMC_VMATH_THRESHOLD_Powx ?
-        vPowx<double>(n, a, b, y):
-        ::vdPowx(static_cast<MKL_INT>(n), a, b, y);
-}
+{::vdPowx(static_cast<MKL_INT>(n), a, b, y);}
 VSMC_DEFINE_MATH_VMATH_VML_2(Hypot)
 
 VSMC_DEFINE_MATH_VMATH_VML_1(Exp)
@@ -606,17 +381,9 @@ VSMC_DEFINE_MATH_VMATH_VML_1(Log1p)
 VSMC_DEFINE_MATH_VMATH_VML_1(Cos)
 VSMC_DEFINE_MATH_VMATH_VML_1(Sin)
 inline void vSinCos (std::size_t n, const float *a, float *y, float *z)
-{
-    n < VSMC_VMATH_THRESHOLD_SinCos ?
-        vSinCos<float>(n, a, y, z):
-        ::vsSinCos(static_cast<MKL_INT>(n), a, y, z);
-}
+{::vsSinCos(static_cast<MKL_INT>(n), a, y, z);}
 inline void vSinCos (std::size_t n, const double *a, double *y, double *z)
-{
-    n < VSMC_VMATH_THRESHOLD_SinCos ?
-        vSinCos<double>(n, a, y, z):
-        ::vdSinCos(static_cast<MKL_INT>(n), a, y, z);
-}
+{::vdSinCos(static_cast<MKL_INT>(n), a, y, z);}
 VSMC_DEFINE_MATH_VMATH_VML_1(Tan)
 VSMC_DEFINE_MATH_VMATH_VML_1(Acos)
 VSMC_DEFINE_MATH_VMATH_VML_1(Asin)
@@ -643,43 +410,23 @@ VSMC_DEFINE_MATH_VMATH_VML_1(TGamma)
 
 } // namespace vsmc
 
-#elif VSMC_USE_VECLIB_VFORCE
+#elif VSMC_USE_ACCELERATE_VFORCE
 
 #define VSMC_DEFINE_MATH_VMATH_VFORCE_1(func, name) \
 inline void v##name                                                          \
 (std::size_t n, const float *a, float *y)                                    \
-{                                                                            \
-    const int in = static_cast<int>(n);                                      \
-    n < VSMC_VMATH_THRESHOLD_##name ?                                        \
-        v##name<float>(n, a, y):                                             \
-        ::vv##func##f(y, a, &in);                                            \
-}                                                                            \
+{const int in = static_cast<int>(n); ::vv##func##f(y, a, &in);}              \
 inline void v##name                                                          \
 (std::size_t n, const double *a, double *y)                                  \
-{                                                                            \
-    const int in = static_cast<int>(n);                                      \
-    n < VSMC_VMATH_THRESHOLD_##name ?                                        \
-        v##name<double>(n, a, y):                                            \
-        ::vv##func(y, a, &in);                                               \
-}
+{const int in = static_cast<int>(n); ::vv##func(y, a, &in);}
 
 #define VSMC_DEFINE_MATH_VMATH_VFORCE_2(func, name) \
 inline void v##name                                                          \
 (std::size_t n, const float *a, const float *b, float *y)                    \
-{                                                                            \
-    const int in = static_cast<int>(n);                                      \
-    n < VSMC_VMATH_THRESHOLD_##name ?                                        \
-        v##name<float>(n, a, b, y):                                          \
-        ::vv##func##f(y, a, b, &in);                                         \
-}                                                                            \
+{const int in = static_cast<int>(n); ::vv##func##f(y, a, b, &in);}           \
 inline void v##name                                                          \
 (std::size_t n, const double *a, const double *b, double *y)                 \
-{                                                                            \
-    const int in = static_cast<int>(n);                                      \
-    n < VSMC_VMATH_THRESHOLD_##name ?                                        \
-        v##name<double>(n, a, b, y):                                         \
-        ::vv##func(y, a, b, &in);                                            \
-}
+{const int in = static_cast<int>(n); ::vv##func(y, a, b, &in);}
 
 namespace vsmc {
 
@@ -699,19 +446,9 @@ VSMC_DEFINE_MATH_VMATH_VFORCE_1(log1p, Log1p)
 VSMC_DEFINE_MATH_VMATH_VFORCE_1(cos, Cos)
 VSMC_DEFINE_MATH_VMATH_VFORCE_1(sin, Sin)
 inline void vSinCos (std::size_t n, const float *a, float *y, float *z)
-{
-    int in = static_cast<int>(n);
-    n < VSMC_VMATH_THRESHOLD_SinCos ?
-        vSinCos<float>(n, a, y, z):
-        ::vvsincosf(z, y, a, &in);
-}
+{int in = static_cast<int>(n); ::vvsincosf(z, y, a, &in);}
 inline void vSinCos (std::size_t n, const double *a, double *y, double *z)
-{
-    int in = static_cast<int>(n);
-    n < VSMC_VMATH_THRESHOLD_SinCos ?
-        vSinCos<double>(n, a, y, z):
-        ::vvsincos(z, y, a, &in);
-}
+{int in = static_cast<int>(n); ::vvsincos(z, y, a, &in);}
 VSMC_DEFINE_MATH_VMATH_VFORCE_1(tan,   Tan)
 VSMC_DEFINE_MATH_VMATH_VFORCE_1(acos,  Acos)
 VSMC_DEFINE_MATH_VMATH_VFORCE_1(asin,  Asin)

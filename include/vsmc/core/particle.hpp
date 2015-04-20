@@ -60,10 +60,6 @@ class Particle
 
     typedef cxx11::function<void (std::size_t, std::size_t,
             resample_rng_type &, const double *, size_type *)> resample_type;
-    typedef typename traits::ResampleCopyFromReplicationTypeTrait<T>::type
-        resample_copy_from_replication_type;
-    typedef typename traits::ResamplePostCopyTypeTrait<T>::type
-        resample_post_copy_type;
 
     explicit Particle (size_type N) :
         size_(N), value_(N),
@@ -237,17 +233,17 @@ class Particle
         bool resampled = weight_set_.ess() < threshold * N;
         if (resampled) {
             size_type *cptr = VSMC_NULLPTR;
-            const double *wptr = weight_set_.resample_weight_data();
+            const double *const wptr = weight_set_.resample_weight_data();
             if (wptr != VSMC_NULLPTR) {
-                resample_copy_from_.resize(N);
-                resample_replication_.resize(N);
-                cptr = &resample_copy_from_[0];
-                size_type *rptr = &resample_replication_[0];
+                copy_from_.resize(N);
+                replication_.resize(N);
+                cptr = &copy_from_[0];
+                size_type *const rptr = &replication_[0];
                 op(N, N, resample_rng_, wptr, rptr);
-                resample_copy_from_replication_(N, N, rptr, cptr);
+                internal::cfrp_trans(N, N, rptr, cptr);
             }
             value_.copy(N, cptr);
-            resample_post_copy_(weight_set_);
+            weight_set_.set_equal_weight();
         }
 
         return resampled;
@@ -261,10 +257,8 @@ class Particle
     rng_set_type rng_set_;
     resample_rng_type resample_rng_;
 
-    std::vector<size_type, AlignedAllocator<size_type> > resample_copy_from_;
-    std::vector<size_type, AlignedAllocator<size_type> > resample_replication_;
-    resample_copy_from_replication_type resample_copy_from_replication_;
-    resample_post_copy_type resample_post_copy_;
+    std::vector<size_type, AlignedAllocator<size_type> > copy_from_;
+    std::vector<size_type, AlignedAllocator<size_type> > replication_;
 }; // class Particle
 
 } // namespace vsmc

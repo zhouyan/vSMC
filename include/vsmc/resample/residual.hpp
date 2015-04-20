@@ -62,33 +62,24 @@ class Resample<internal::ResampleResidual>
         double *const iptr = &integral_[0];
         for (std::size_t i = 0; i != M; ++i)
             rptr[i] = modf(N * weight[i], iptr + i);
-        double rsum = 0;
-        for (std::size_t i = 0; i != M; ++i)
-            rsum += rptr[i];
-        for (std::size_t i = 0; i != M; ++i)
-            rptr[i] /= rsum;
+        double coeff = 1 / math::asum(M, rptr);
+        math::scal(M, coeff, rptr);
 
         IntType R = 0;
         for (std::size_t i = 0; i != M; ++i)
             R += static_cast<IntType>(iptr[i]);
         std::size_t NN = N - static_cast<std::size_t>(R);
-        u01_.resize(NN);
-        double *const uptr = &u01_[0];
-        cxx11::uniform_real_distribution<double> runif(0, 1);
-        for (std::size_t i = 0; i != NN; ++i)
-            uptr[i] = runif(rng);
-        inversion_(M, NN, rptr, uptr, replication);
+        U01SequenceSorted<RngType> u01seq(NN, rng);
+        internal::inversion(M, NN, rptr, u01seq, replication);
 
-        for (std::size_t i = 0; i != N; ++i)
+        for (std::size_t i = 0; i != M; ++i)
             replication[i] += static_cast<IntType>(iptr[i]);
     }
 
     private :
 
-    internal::Inversion inversion_;
     std::vector<double, AlignedAllocator<double> > residual_;
     std::vector<double, AlignedAllocator<double> > integral_;
-    std::vector<double, AlignedAllocator<double> > u01_;
 }; // Residual resampling
 
 } // namespace vsmc

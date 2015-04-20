@@ -39,16 +39,9 @@
 #if VSMC_USE_MKL_CBLAS
 #include <mkl.h>
 #define VSMC_CBLAS_INT MKL_INT
-#elif VSMC_USE_VECLIB_CBLAS
+#elif VSMC_USE_ACCELERATE_CBLAS
 #include <Accelerate/Accelerate.h>
 #define VSMC_CBLAS_INT int
-#endif
-
-/// \brief When MKL or vecLib CBLAS is available, the threshold of the number
-/// of elements above which these libraries will be used
-/// \ingroup Config
-#ifndef VSMC_CBLAS_THRESHOLD
-#define VSMC_CBLAS_THRESHOLD 1000
 #endif
 
 namespace vsmc {
@@ -91,45 +84,21 @@ inline void scal (std::size_t n, T a, T *x)
 
 #define VSMC_DEFINE_MATH_CBLAS_S1(name, sname, dname) \
 inline float name (std::size_t n, const float *x)                            \
-{                                                                            \
-    return n < VSMC_CBLAS_THRESHOLD ?                                        \
-        name<float>(n, x):                                                   \
-        ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), x, 1);               \
-}                                                                            \
+{return ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), x, 1);}              \
 inline double name (std::size_t n, const double *x)                          \
-{                                                                            \
-    return n < VSMC_CBLAS_THRESHOLD ?                                        \
-        name<double>(n, x):                                                  \
-        ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), x, 1);               \
-}
+{return ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), x, 1);}
 
 #define VSMC_DEFINE_MATH_CBLAS_S2(name, sname, dname) \
 inline float name (std::size_t n, const float *x, const float *y)            \
-{                                                                            \
-    return n < VSMC_CBLAS_THRESHOLD ?                                        \
-        name<float>(n, x, y):                                                \
-        ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), x, 1, y, 1);         \
-}                                                                            \
+{return ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), x, 1, y, 1);}        \
 inline double name (std::size_t n, const double *x, const double *y)         \
-{                                                                            \
-    return n < VSMC_CBLAS_THRESHOLD ?                                        \
-        name<double>(n, x, y):                                               \
-        ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), x, 1, y, 1);         \
-}
+{return ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), x, 1, y, 1);}
 
 #define VSMC_DEFINE_MATH_CBLAS_SV(name, sname, dname) \
 inline void name (std::size_t n, float a, float *x)                          \
-{                                                                            \
-    n < VSMC_CBLAS_THRESHOLD ?                                               \
-        name<float>(n, a, x):                                                \
-        ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), a, x, 1);            \
-}                                                                            \
+{::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), a, x, 1);}                  \
 inline void name (std::size_t n, double a, double *x)                        \
-{                                                                            \
-    n < VSMC_CBLAS_THRESHOLD ?                                               \
-        name<double>(n, a, x):                                               \
-        ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), a, x, 1);            \
-}
+{::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), a, x, 1);}
 
 namespace vsmc { namespace math {
 

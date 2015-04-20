@@ -105,7 +105,7 @@ for (rowcol in c(".row", ".col", "")) {
 }
 plt <- qplot(x = Position.X, y = Position.Y, data = dat.list,
     group = Group, color = Source, linetype= Source, geom = "path")
-pdf("pf.pdf", width = 12.8, height = 7.2)
+pdf("pf.pdf", width = 14.4, height = 9)
 print(plt)
 for (plt in plt.list) print(plt)
 garbage <- dev.off()

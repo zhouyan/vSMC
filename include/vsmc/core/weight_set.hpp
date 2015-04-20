@@ -93,9 +93,40 @@ class WeightSet
 
     virtual ~WeightSet () {}
 
+    static double set_equal_weight (std::size_t N, std::size_t RN,
+            double *wptr, double *lwptr)
+    {
+        double ess = static_cast<double>(RN);
+        if (wptr != VSMC_NULLPTR)
+            std::fill_n(wptr, N, 1 / ess);
+        if (lwptr != VSMC_NULLPTR)
+            std::memset(lwptr, 0, sizeof(double) * N);
+
+        return ess; 
+    }
+
+    static void normalize_log_weight (std::size_t N, double *lwptr)
+    {
+        double dmax = lwptr[0];
+        for (std::size_t i = 0; i != N; ++i)
+            if (dmax < lwptr[i])
+                dmax = lwptr[i];
+        dmax = -dmax;
+        for (std::size_t i = 0; i != N; ++i)
+            lwptr[i] += dmax;
+    }
+
+    static double normalize_weight (std::size_t N, double *wptr)
+    {
+        double coeff = 1 / math::asum(N, wptr);
+        math::scal(N, coeff, wptr);
+
+        return 1 / math::dot(N, wptr, wptr);
+    }
+
     size_type size () const {return size_;}
 
-    /// \brief ESS of the particle collection based on the current weights
+    /// \brief ESS of the current weights
     double ess () const {return ess_;}
 
     /// \brief Compute ESS given (log) incremental weights
@@ -202,9 +233,8 @@ class WeightSet
     /// such that each particle has a equal weight
     void set_equal_weight ()
     {
-        ess_ = static_cast<double>(resample_size());
-        std::fill_n(&weight_[0], size_, 1 / ess_);
-        std::memset(&log_weight_[0], 0, sizeof(double) * size_);
+        ess_ = set_equal_weight(size_, resample_size(),
+                &weight_[0], &log_weight_[0]);
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -345,25 +375,11 @@ class WeightSet
 
     /// \brief Normalize logarithm weights such that the maximum is zero
     virtual void normalize_log_weight ()
-    {
-        double *const lwptr = &log_weight_[0];
-        double dmax = lwptr[0];
-        for (size_type i = 0; i != size_; ++i)
-            if (dmax < lwptr[i])
-                dmax = lwptr[i];
-        dmax = -dmax;
-        for (size_type i = 0; i != size_; ++i)
-            lwptr[i] += dmax;
-    }
+    {normalize_log_weight(size_, &log_weight_[0]);}
 
     /// \brief Normalize weights such that the summation is one
     virtual void normalize_weight ()
-    {
-        double *const wptr = &weight_[0];
-        double coeff = 1 / math::asum(size_, wptr);
-        math::scal(size_, coeff, wptr);
-        ess_ = 1 / math::dot(size_, wptr, wptr);
-    }
+    {ess_ = normalize_weight(size_, &weight_[0]);}
 
     /// \brief Compute ESS given (logarithm) unormalzied incremental weights
     virtual double compute_ess (const double *first, bool use_log) const
@@ -518,6 +534,12 @@ class WeightSetNull
 
     template <typename URNG>
     size_type draw (URNG &) const {return 0;}
+
+    const double *resample_weight_data () const {return VSMC_NULLPTR;}
+
+    const double *weight_data () const {return VSMC_NULLPTR;}
+
+    const double *log_weight_data () const {return VSMC_NULLPTR;}
 
     private :
 

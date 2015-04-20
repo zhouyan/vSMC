@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/resample/residual_systematic.hpp
+// vSMC/cmake/FindCXX11LibAtomic.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,59 +29,13 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RESAMPLE_RESIDUAL_SYSTEMATIC_HPP
-#define VSMC_RESAMPLE_RESIDUAL_SYSTEMATIC_HPP
+#include <atomic>
 
-#include <vsmc/resample/common.hpp>
-
-namespace vsmc {
-
-namespace internal {
-
-typedef cxx11::integral_constant<ResampleScheme, ResidualSystematic>
-    ResampleResidualSystematic;
-
-} // namespace vsmc::internal
-
-/// \brief Residual systematic resampling
-/// \ingroup Resample
-template <>
-class Resample<internal::ResampleResidualSystematic>
+int main ()
 {
-    public :
+    std::atomic<long> c;
+    ++c;
 
-    template <typename IntType, typename RngType>
-    void operator() (std::size_t M, std::size_t N, RngType &rng,
-            const double *weight, IntType *replication)
-    {
-        using std::modf;
+    return 0;
+}
 
-        residual_.resize(M);
-        integral_.resize(M);
-        double *const rptr = &residual_[0];
-        double *const iptr = &integral_[0];
-        for (std::size_t i = 0; i != M; ++i)
-            rptr[i] = modf(N * weight[i], iptr + i);
-        double coeff = 1 / math::asum(M, rptr);
-        math::scal(M, coeff, rptr);
-
-        IntType R = 0;
-        for (std::size_t i = 0; i != M; ++i)
-            R += static_cast<IntType>(iptr[i]);
-        std::size_t NN = N - static_cast<std::size_t>(R);
-        U01SequenceSystematic<RngType> u01seq(NN, rng);
-        internal::inversion(M, NN, rptr, u01seq, replication);
-
-        for (std::size_t i = 0; i != M; ++i)
-            replication[i] += static_cast<IntType>(iptr[i]);
-    }
-
-    private :
-
-    std::vector<double, AlignedAllocator<double> > residual_;
-    std::vector<double, AlignedAllocator<double> > integral_;
-}; // Residual systematic resampling
-
-} // namespace vsmc
-
-#endif // VSMC_RESAMPLE_RESIDUAL_SYSTEMATIC_HPP

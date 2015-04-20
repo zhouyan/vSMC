@@ -221,8 +221,6 @@ class StateMatrixBase : public traits::DimTrait<Dim>
              std::vector<T, AlignedAllocator<T> >,
              std::vector<T> >::type data_;
 
-    private :
-
     std::vector<T> create_pack_dispatch (cxx11::true_type) const
     {return std::vector<T>(this->dim());}
 
@@ -271,6 +269,12 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     template <std::size_t Pos>
     const T &state (size_type id) const
     {return state(id, Pos);}
+
+    using state_matrix_base_type::data;
+
+    T *data (size_type id) {return row_data(id);}
+
+    const T *data (size_type id) const {return row_data(id);}
 
     T *row_data (size_type id)
     {return this->data() + id * this->dim();}
@@ -358,6 +362,12 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     template <std::size_t Pos>
     const T &state (size_type id) const
     {return state(id, Pos);}
+
+    using state_matrix_base_type::data;
+
+    T *data (size_type pos) {return col_data(pos);}
+
+    const T *data (size_type pos) const {return col_data(pos);}
 
     T *col_data (std::size_t pos)
     {return this->data() + pos * this->size();}

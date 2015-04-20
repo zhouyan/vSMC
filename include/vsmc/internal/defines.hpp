@@ -104,12 +104,21 @@ enum MatrixOrder {
     ColMajor = 102  ///< Data are stored column by column in memory
 }; // enum MatrixOrder
 
+/// \brief Monitor stage
+/// \ingroup Definitions
+enum MonitorStage {
+    MonitorMove,     ///< Monitor evaluated after moves
+    MonitorResample, ///< Monitor evaluated after resampling
+    MonitorMCMC      ///< Monitor evaluated after MCMC moves
+}; // enum MonitorStage
+
 /// \brief Class template argument used for scalar variant
 /// \ingroup Definitions
 struct Scalar
 {
     static VSMC_CONSTEXPR const bool is_scalar = true;
     static VSMC_CONSTEXPR const bool is_vector = false;
+    static VSMC_CONSTEXPR const bool is_thread_local = false;
 }; // struct Scalar
 
 /// \brief Class template argument used for vector variant
@@ -118,7 +127,17 @@ struct Vector
 {
     static VSMC_CONSTEXPR const bool is_scalar = false;
     static VSMC_CONSTEXPR const bool is_vector = true;
+    static VSMC_CONSTEXPR const bool is_thread_local = false;
 }; // struct Vector
+
+/// \brief Class template argument used for thread local storage variant
+/// \ingroup Definitions
+struct ThreadLocal
+{
+    static VSMC_CONSTEXPR const bool is_scalar = false;
+    static VSMC_CONSTEXPR const bool is_vector = false;
+    static VSMC_CONSTEXPR const bool is_thread_local = true;
+}; // struct ThreadLocal
 
 /// \brief Function template argument used for position
 /// \ingroup Definitions
