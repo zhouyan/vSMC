@@ -36,35 +36,37 @@
 #include <vsmc/opencl/cl_configure.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
 
-namespace vsmc { namespace internal {
+namespace vsmc
+{
+namespace internal
+{
 
 template <typename ID>
 class CLCopy
 {
-    public :
-
+    public:
     typedef CLManager<ID> manager_type;
 
-    CLCopy () : size_(0) {}
+    CLCopy() : size_(0) {}
 
-    std::size_t size () {return size_;}
+    std::size_t size() { return size_; }
 
-    static manager_type &manager() {return manager_type::instance();}
+    static manager_type &manager() { return manager_type::instance(); }
 
-    void operator() (const ::cl::Buffer &copy_from, const ::cl::Buffer &state)
+    void operator()(const ::cl::Buffer &copy_from, const ::cl::Buffer &state)
     {
         cl_set_kernel_args(kernel_, 0, copy_from, state);
         manager().run_kernel(kernel_, size_, configure_.local_size());
     }
 
-    void operator () (const ::cl::Buffer &idx, const ::cl::Buffer &tmp,
-            const ::cl::Buffer &state)
+    void operator()(const ::cl::Buffer &idx, const ::cl::Buffer &tmp,
+        const ::cl::Buffer &state)
     {
         cl_set_kernel_args(kernel_post_, 0, idx, tmp, state);
         manager().run_kernel(kernel_, size_, configure_post_.local_size());
     }
 
-    void build (std::size_t size, std::size_t state_size)
+    void build(std::size_t size, std::size_t state_size)
     {
         size_ = size;
 
@@ -100,17 +102,16 @@ class CLCopy
         configure_post_.local_size(size, kernel_post_, manager().device());
     }
 
-    ::cl::Program &program () {return program_;}
-    const ::cl::Program &program () const {return program_;}
+    ::cl::Program &program() { return program_; }
+    const ::cl::Program &program() const { return program_; }
 
-    ::cl::Kernel &kernel () {return kernel_;}
-    const ::cl::Kernel &kernel () const {return kernel_;}
+    ::cl::Kernel &kernel() { return kernel_; }
+    const ::cl::Kernel &kernel() const { return kernel_; }
 
-    CLConfigure &configure () {return configure_;}
-    const CLConfigure &configure () const {return configure_;}
+    CLConfigure &configure() { return configure_; }
+    const CLConfigure &configure() const { return configure_; }
 
-    private :
-
+    private:
     std::size_t size_;
 
     ::cl::Program program_;
@@ -119,7 +120,7 @@ class CLCopy
     CLConfigure configure_;
     CLConfigure configure_post_;
 }; // class CLCopy
-
-} } // namespace vsmc::internal
+}
+} // namespace vsmc::internal
 
 #endif // VSMC_OPENCL_INTERNAL_COPY_HPP

@@ -40,15 +40,15 @@
 #include <vsmc/rng/seed.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief Particle class representing the whole particle set
 /// \ingroup Core
 template <typename T>
 class Particle
 {
-    public :
-
+    public:
     typedef typename traits::SizeTypeTrait<T>::type size_type;
     typedef T value_type;
     typedef typename traits::WeightSetTypeTrait<T>::type weight_set_type;
@@ -58,22 +58,26 @@ class Particle
     typedef SingleParticle<T> sp_type;
     typedef ConstSingleParticle<T> csp_type;
 
-    typedef cxx11::function<void (std::size_t, std::size_t,
-            resample_rng_type &, const double *, size_type *)> resample_type;
+    typedef std::function<void(std::size_t, std::size_t, resample_rng_type &,
+        const double *, size_type *)> resample_type;
 
-    explicit Particle (size_type N) :
-        size_(N), value_(N),
-        weight_set_(static_cast<typename
-                traits::SizeTypeTrait<weight_set_type>::type>(N)),
-        rng_set_(static_cast<typename
-                traits::SizeTypeTrait<rng_set_type>::type>(N)),
-        resample_rng_(Seed::instance().get()) {}
+    explicit Particle(size_type N)
+        : size_(N),
+          value_(N),
+          weight_set_(static_cast<
+              typename traits::SizeTypeTrait<weight_set_type>::type>(N)),
+          rng_set_(
+              static_cast<typename traits::SizeTypeTrait<rng_set_type>::type>(
+                  N)),
+          resample_rng_(Seed::instance().get())
+    {
+    }
 
     /// \brief Clone the particle system except the RNG engines
     ///
     /// \param new_rng If true, the new particle system has new-seeded RNG.
     /// Otherwise false, it is exactly the same as the current.
-    Particle<T> clone (bool new_rng) const
+    Particle<T> clone(bool new_rng) const
     {
         Particle<T> particle(*this);
         if (new_rng) {
@@ -89,26 +93,15 @@ class Particle
     /// \param other The particle system to be cloned
     /// \param retain_rng If true, retain the current system's RNG. Otherwise,
     /// it is exactly the same as the new one.
-    Particle<T> &clone (const Particle<T> &other, bool retain_rng)
+    Particle<T> &clone(const Particle<T> &other, bool retain_rng)
     {
         if (this != &other) {
             if (retain_rng) {
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-                rng_set_type rset(cxx11::move(rng_set_));
-                resample_rng_type rrng(cxx11::move(resample_rng_));
+                rng_set_type rset(std::move(rng_set_));
+                resample_rng_type rrng(std::move(resample_rng_));
                 *this = other;
-                rng_set_ = cxx11::move(rset);
-                resample_rng_ = cxx11::move(rrng);
-#else
-                using std::swap;
-
-                rng_set_type rset(0);
-                swap(rset, rng_set_);
-                resample_rng_type rrng(resample_rng_);
-                *this = other;
-                swap(rset, rng_set_);
-                resample_rng_ = rrng;
-#endif
+                rng_set_ = std::move(rset);
+                resample_rng_ = std::move(rrng);
                 rng_set_.resize(other.size());
             } else {
                 *this = other;
@@ -118,64 +111,62 @@ class Particle
         return *this;
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    Particle<T> &clone (Particle<T> &&other, bool retain_rng)
+    Particle<T> &clone(Particle<T> &&other, bool retain_rng)
     {
         if (this != &other) {
             if (retain_rng) {
-                rng_set_type rset(cxx11::move(rng_set_));
-                resample_rng_type rrng(cxx11::move(resample_rng_));
-                *this = cxx11::move(other);
-                rng_set_ = cxx11::move(rset);
-                resample_rng_ = cxx11::move(rrng);
+                rng_set_type rset(std::move(rng_set_));
+                resample_rng_type rrng(std::move(resample_rng_));
+                *this = std::move(other);
+                rng_set_ = std::move(rset);
+                resample_rng_ = std::move(rrng);
                 rng_set_.resize(other.size());
             } else {
-                *this = cxx11::move(other);
+                *this = std::move(other);
             }
         }
 
         return *this;
     }
-#endif
 
     /// \brief Number of particles
-    size_type size () const {return size_;}
+    size_type size() const { return size_; }
 
     /// \brief Read and write access to the value collection object
-    value_type &value () {return value_;}
+    value_type &value() { return value_; }
 
     /// \brief Read only access to the value collection object
-    const value_type &value () const {return value_;}
+    const value_type &value() const { return value_; }
 
     /// \brief Read and write access to the weight collection object
-    weight_set_type &weight_set () {return weight_set_;}
+    weight_set_type &weight_set() { return weight_set_; }
 
     /// \brief Read only access to the weight collection object
-    const weight_set_type &weight_set () const {return weight_set_;}
+    const weight_set_type &weight_set() const { return weight_set_; }
 
     /// \brief Read and write access to the RNG collection object
-    rng_set_type &rng_set () {return rng_set_;}
+    rng_set_type &rng_set() { return rng_set_; }
 
     /// \brief Read only access to the RNG collection object
-    const rng_set_type &rng_set () const {return rng_set_;}
+    const rng_set_type &rng_set() const { return rng_set_; }
 
     /// \brief Get an (parallel) RNG stream for a given particle
-    rng_type &rng (size_type id) {return rng_set_[id];}
+    rng_type &rng(size_type id) { return rng_set_[id]; }
 
     /// \brief Get a SingleParticle
-    sp_type sp (size_type id) {return sp_type(id, this);}
+    sp_type sp(size_type id) { return sp_type(id, this); }
 
     /// \brief Get a ConstSingleParticle
-    csp_type sp (size_type id) const {return csp_type(id, this);}
+    csp_type sp(size_type id) const { return csp_type(id, this); }
 
     /// \brief Get a ConstSingleParticle
-    csp_type csp (size_type id) {return csp_type(id, this);}
+    csp_type csp(size_type id) { return csp_type(id, this); }
 
     /// \brief Get a ConstSingleParticle
-    csp_type csp (size_type id) const {return csp_type(id, this);}
+    csp_type csp(size_type id) const { return csp_type(id, this); }
 
     /// \brief Get the (sequential) RNG used stream for resampling
-    resample_rng_type &resample_rng () {return resample_rng_;}
+    resample_rng_type &resample_rng() { return resample_rng_; }
 
     /// \brief Performing resampling if ESS/N < threshold
     ///
@@ -199,8 +190,10 @@ class Particle
     /// useful for MPI implementations. the boolean value `resampled` ensures
     /// that collective actions like `copy` will be called by all nodes.
     /// However, the resampling replication numbers can be computed by one
-    /// node instead of by all. Therefore, the program can actually collect and
-    /// read the resampling weights on one node, and do nothing on other nodes.
+    /// node instead of by all. Therefore, the program can actually collect
+    /// and
+    /// read the resampling weights on one node, and do nothing on other
+    /// nodes.
     /// This difference shall be reflected by the returning iterator of
     /// `read_resample_weight`
     ///     * (Allocate `double *weight` for size `N`)
@@ -227,14 +220,14 @@ class Particle
     ///     traits::ResamplePostCopyTypeTrait)
     ///     * `post(weight_set)`
     /// 8. `return resampled`
-    bool resample (const resample_type &op, double threshold)
+    bool resample(const resample_type &op, double threshold)
     {
         std::size_t N = static_cast<std::size_t>(weight_set_.resample_size());
         bool resampled = weight_set_.ess() < threshold * N;
         if (resampled) {
-            size_type *cptr = VSMC_NULLPTR;
+            size_type *cptr = nullptr;
             const double *const wptr = weight_set_.resample_weight_data();
-            if (wptr != VSMC_NULLPTR) {
+            if (wptr != nullptr) {
                 copy_from_.resize(N);
                 replication_.resize(N);
                 cptr = &copy_from_[0];
@@ -249,16 +242,15 @@ class Particle
         return resampled;
     }
 
-    private :
-
+    private:
     size_type size_;
     value_type value_;
     weight_set_type weight_set_;
     rng_set_type rng_set_;
     resample_rng_type resample_rng_;
 
-    std::vector<size_type, AlignedAllocator<size_type> > copy_from_;
-    std::vector<size_type, AlignedAllocator<size_type> > replication_;
+    std::vector<size_type, AlignedAllocator<size_type>> copy_from_;
+    std::vector<size_type, AlignedAllocator<size_type>> replication_;
 }; // class Particle
 
 } // namespace vsmc

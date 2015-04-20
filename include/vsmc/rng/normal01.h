@@ -43,8 +43,10 @@
 ///
 /// ~~~{.c}
 /// normal01_<N>x<W>_<F>;
-/// void normal01_<N>x<W>_<F>_init (normal01_<N>x<W>_<F> *, cburng<N>x<W>_rng_t *, <FT> shape);
-/// <FT> normal01_<N>x<W>_<F>_init (normal01_<N>x<W>_<F> *, cburng<N>x<W>_rng_t *);
+/// void normal01_<N>x<W>_<F>_init (normal01_<N>x<W>_<F> *,
+/// cburng<N>x<W>_rng_t *, <FT> shape);
+/// <FT> normal01_<N>x<W>_<F>_init (normal01_<N>x<W>_<F> *,
+/// cburng<N>x<W>_rng_t *);
 /// ~~~
 ///
 /// ### Macros
@@ -80,53 +82,53 @@
 
 #if VSMC_HAS_OPENCL_DOUBLE
 
-#define NORMAL01_2x32      normal01_2x32_53
+#define NORMAL01_2x32 normal01_2x32_53
 #define NORMAL01_2x32_INIT normal01_2x32_53_init
 #define NORMAL01_2x32_RAND normal01_2x32_53_rand
 
-#define NORMAL01_2x64      normal01_2x64_53
+#define NORMAL01_2x64 normal01_2x64_53
 #define NORMAL01_2x64_INIT normal01_2x64_53_init
 #define NORMAL01_2x64_RAND normal01_2x64_53_rand
 
-#define NORMAL01_4x32      normal01_4x32_53
+#define NORMAL01_4x32 normal01_4x32_53
 #define NORMAL01_4x32_INIT normal01_4x32_53_init
 #define NORMAL01_4x32_RAND normal01_4x32_53_rand
 
-#define NORMAL01_4x64      normal01_4x64_53
+#define NORMAL01_4x64 normal01_4x64_53
 #define NORMAL01_4x64_INIT normal01_4x64_53_init
 #define NORMAL01_4x64_RAND normal01_4x64_53_rand
 
 #else // VSMC_HAS_OPENCL_DOUBLE
 
-#define NORMAL01_2x32      normal01_2x32_24
+#define NORMAL01_2x32 normal01_2x32_24
 #define NORMAL01_2x32_INIT normal01_2x32_24_init
 #define NORMAL01_2x32_RAND normal01_2x32_24_rand
 
-#define NORMAL01_4x32      normal01_4x32_24
+#define NORMAL01_4x32 normal01_4x32_24
 #define NORMAL01_4x32_INIT normal01_4x32_24_init
 #define NORMAL01_4x32_RAND normal01_4x32_24_rand
 
 #endif // VSMC_HAS_OPENCL_DOUBLE
 
-#define VSMC_DEFINE_RNG_NORMAL01(N, W, F, FT) \
+#define VSMC_DEFINE_RNG_NORMAL01(N, W, F, FT)                                \
     typedef struct {                                                         \
         FT u1;                                                               \
         FT u2;                                                               \
         unsigned char saved;                                                 \
     } normal01_##N##x##W##_##F;
 
-#define VSMC_DEFINE_RNG_NORMAL01_INIT(N, W, F, FT) \
-    VSMC_STATIC_INLINE void normal01_##N##x##W##_##F##_init (                \
-            normal01_##N##x##W##_##F *rnorm, cburng##N##x##W##_rng_t *rng)   \
+#define VSMC_DEFINE_RNG_NORMAL01_INIT(N, W, F, FT)                           \
+    VSMC_STATIC_INLINE void normal01_##N##x##W##_##F##_init(                 \
+        normal01_##N##x##W##_##F *rnorm, cburng##N##x##W##_rng_t *rng)       \
     {                                                                        \
         rnorm->u1 = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));  \
         rnorm->u2 = u01_open_closed_##W##_##F(cburng##N##x##W##_rand(rng));  \
         rnorm->saved = 1;                                                    \
     }
 
-#define VSMC_DEFINE_RNG_NORMAL01_RAND(N, W, F, FT) \
-    VSMC_STATIC_INLINE FT normal01_##N##x##W##_##F##_rand (                  \
-            normal01_##N##x##W##_##F *rnorm, cburng##N##x##W##_rng_t *rng)   \
+#define VSMC_DEFINE_RNG_NORMAL01_RAND(N, W, F, FT)                           \
+    VSMC_STATIC_INLINE FT normal01_##N##x##W##_##F##_rand(                   \
+        normal01_##N##x##W##_##F *rnorm, cburng##N##x##W##_rng_t *rng)       \
     {                                                                        \
         const FT c_2pi = 6.2831853071795865;                                 \
         if (rnorm->saved) {                                                  \

@@ -49,8 +49,8 @@ static const std::size_t BMin = (1U << BitsMin);
 static const std::size_t BPad = (1U << BitsPad);
 static const std::size_t BMax = (1U << BitsMax);
 
-inline std::string verify (const char *y, const char *z,
-        std::size_t B, int offset)
+inline std::string verify(
+    const char *y, const char *z, std::size_t B, int offset)
 {
     y += offset;
     for (std::size_t b = 0; b != B; ++b)
@@ -61,7 +61,7 @@ inline std::string verify (const char *y, const char *z,
 }
 
 template <typename IntType>
-inline std::string size_h (IntType B)
+inline std::string size_h(IntType B)
 {
     std::ptrdiff_t BS = static_cast<std::ptrdiff_t>(B);
     std::string ret;
@@ -109,7 +109,7 @@ inline std::string size_h (IntType B)
     return ret;
 }
 
-inline void generate (char *x, char *y, char *z)
+inline void generate(char *x, char *y, char *z)
 {
     std::size_t N = BAlloc / sizeof(uint64_t);
     vsmc::Threefry4x64 eng;

@@ -38,7 +38,8 @@
 #include <vsmc/thread/thread_num.hpp>
 #include <thread>
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief Parallel reduce using C++11 concurrency
 /// \ingroup Thread
@@ -51,7 +52,7 @@ namespace vsmc {
 /// Work.join(other_work);
 /// ~~~
 template <typename Range, typename WorkType>
-inline void parallel_reduce (const Range &range, WorkType &work)
+inline void parallel_reduce(const Range &range, WorkType &work)
 {
     std::vector<Range> range_vec(ThreadNum::instance().partition(range));
     std::vector<WorkType> work_vec(range_vec.size(), work);
@@ -59,11 +60,12 @@ inline void parallel_reduce (const Range &range, WorkType &work)
         std::vector<ThreadGuard<std::thread>> tg;
         tg.reserve(range_vec.size());
         for (std::size_t i = 0; i != range_vec.size(); ++i) {
-            tg.push_back(ThreadGuard<std::thread>(std::thread(
-                            std::ref(work_vec[i]), range_vec[i])));
+            tg.push_back(ThreadGuard<std::thread>(
+                std::thread(std::ref(work_vec[i]), range_vec[i])));
         }
     }
-    for (std::size_t i = 0; i != work_vec.size(); ++i) work.join(work_vec[i]);
+    for (std::size_t i = 0; i != work_vec.size(); ++i)
+        work.join(work_vec[i]);
 }
 
 } // namespace vsmc

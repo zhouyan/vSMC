@@ -29,13 +29,12 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-Config
-.add("parallel",   "Enable parallel PMCMC",        &Parallel,  false)
-.add("chain_num",  "Number of MCMC chains",        &ChainNum,  1000)
-.add("burnin_num", "Number of burin iterations",   &BurninNum, 10000)
-.add("iter_num",   "Number of recored iterations", &IterNum,   10000)
-.add("linear",     "Enbale linear schedule",       &LinearIterNum)
-.add("prior2",     "Enbale prior2 schedule",       &Prior2IterNum)
-.add("prior5",     "Enbale prior5 schedule",       &Prior5IterNum)
-.add("posterior2", "Enbale posterior2 schedule",   &Posterior2IterNum)
-.add("posterior5", "Enbale posterior5 schedule",   &Posterior5IterNum);
+Config.add("parallel", "Enable parallel PMCMC", &Parallel, false)
+    .add("chain_num", "Number of MCMC chains", &ChainNum, 1000)
+    .add("burnin_num", "Number of burin iterations", &BurninNum, 10000)
+    .add("iter_num", "Number of recored iterations", &IterNum, 10000)
+    .add("linear", "Enbale linear schedule", &LinearIterNum)
+    .add("prior2", "Enbale prior2 schedule", &Prior2IterNum)
+    .add("prior5", "Enbale prior5 schedule", &Prior5IterNum)
+    .add("posterior2", "Enbale posterior2 schedule", &Posterior2IterNum)
+    .add("posterior5", "Enbale posterior5 schedule", &Posterior5IterNum);

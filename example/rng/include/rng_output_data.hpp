@@ -39,9 +39,9 @@
 #include <vector>
 
 template <typename T>
-inline void rng_output_data (const std::string &prog,
-        const std::vector<std::string> &vnames,
-        const std::vector<std::vector<T> > &values)
+inline void rng_output_data(const std::string &prog,
+    const std::vector<std::string> &vnames,
+    const std::vector<std::vector<T>> &values)
 {
     if (vnames.size() != values.size())
         return;

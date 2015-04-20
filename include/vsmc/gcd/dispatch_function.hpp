@@ -35,7 +35,8 @@
 #include <vsmc/internal/common.hpp>
 #include <dispatch/dispatch.h>
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief Wrap a callable object into a `dispatch_function_t` type pointer
 /// \ingroup Dispatch
@@ -51,48 +52,38 @@ namespace vsmc {
 template <typename T>
 class DispatchFunction
 {
-    public :
+    public:
+    DispatchFunction(const T &work) : work_(work) {}
 
-    DispatchFunction (const T &work) : work_(work) {}
+    DispatchFunction(T &&work) noexcept : work_(std::move(work)) {}
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    DispatchFunction (T &&work) VSMC_NOEXCEPT : work_(cxx11::move(work)) {}
-#endif
+    void *context() { return static_cast<void *>(this); }
 
-    void *context () {return static_cast<void *>(this);}
+    ::dispatch_function_t function() const { return function_; }
 
-    ::dispatch_function_t function () const {return function_;}
-
-    private :
-
+    private:
     T work_;
 
-    static void function_ (void *ctx)
+    static void function_(void *ctx)
     {
         DispatchFunction<T> *df_ptr = static_cast<DispatchFunction<T> *>(ctx);
         df_ptr->work_();
     }
 }; // class DispatchFunction
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
 /// \brief Make a DispatchFunction object from an arbitrary callable object
 /// \ingroup Dispatch
 ///
 /// \param work A callable object with signature `void f(void)`
 template <typename T>
 inline DispatchFunction<
-typename cxx11::remove_cv<typename cxx11::remove_reference<T>::type>::type>
-*dispatch_function_new (T &&work) VSMC_NOEXCEPT
+    typename std::remove_cv<typename std::remove_reference<T>::type>::type> *
+    dispatch_function_new(T &&work) noexcept
 {
-    typedef typename cxx11::remove_reference<T>::type U;
-    typedef typename cxx11::remove_cv<U>::type V;
-    return new DispatchFunction<V>(cxx11::forward<T>(work));
+    typedef typename std::remove_reference<T>::type U;
+    typedef typename std::remove_cv<U>::type V;
+    return new DispatchFunction<V>(std::forward<T>(work));
 }
-#else
-template <typename T>
-inline DispatchFunction<T> *dispatch_function_new (const T &work)
-{return new DispatchFunction<T>(work);}
-#endif
 
 } // namespace vsmc
 

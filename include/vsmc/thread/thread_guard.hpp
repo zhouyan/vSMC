@@ -34,36 +34,44 @@
 
 #include <vsmc/internal/common.hpp>
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief Strictly scope-based thread ownership wrapper
 /// \ingroup Thread
 template <typename ThreadType>
 class ThreadGuard
 {
-    public :
-
+    public:
     typedef ThreadType thread_type;
 
-    ThreadGuard () VSMC_NOEXCEPT {}
+    ThreadGuard() noexcept {}
 
-    ThreadGuard (const ThreadGuard &) = delete;
+    ThreadGuard(const ThreadGuard &) = delete;
 
-    ThreadGuard &operator= (const ThreadGuard &) = delete;
+    ThreadGuard &operator=(const ThreadGuard &) = delete;
 
-    ThreadGuard (thread_type &&thr) VSMC_NOEXCEPT :
-        thread_(cxx11::move(thr)) {}
+    ThreadGuard(thread_type &&thr) noexcept : thread_(std::move(thr)) {}
 
-    ThreadGuard (ThreadGuard &&other) VSMC_NOEXCEPT :
-        thread_(cxx11::move(other.thread_)) {}
+    ThreadGuard(ThreadGuard &&other) noexcept
+        : thread_(std::move(other.thread_))
+    {
+    }
 
-    ThreadGuard &operator= (ThreadGuard &&other) VSMC_NOEXCEPT
-    {thread_ = cxx11::move(other.thread_); return *this;}
+    ThreadGuard &operator=(ThreadGuard &&other) noexcept
+    {
+        thread_ = std::move(other.thread_);
 
-    ~ThreadGuard () VSMC_NOEXCEPT {if (thread_.joinable()) thread_.join();}
+        return *this;
+    }
 
-    private :
+    ~ThreadGuard() noexcept
+    {
+        if (thread_.joinable())
+            thread_.join();
+    }
 
+    private:
     thread_type thread_;
 }; // class ThreadGuard
 

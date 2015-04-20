@@ -35,7 +35,8 @@
 #include <vsmc/smp/backend_base.hpp>
 #include <omp.h>
 
-namespace vsmc {
+namespace vsmc
+{
 
 VSMC_DEFINE_SMP_FORWARD(OMP)
 
@@ -44,19 +45,23 @@ VSMC_DEFINE_SMP_FORWARD(OMP)
 template <typename BaseState>
 class StateOMP : public BaseState
 {
-    public :
-
+    public:
     typedef typename traits::OMPSizeTypeTrait<
         typename traits::SizeTypeTrait<BaseState>::type>::type size_type;
 
-    explicit StateOMP (size_type N) :
-        BaseState(static_cast<
-                typename traits::SizeTypeTrait<BaseState>::type>(N)) {}
+    explicit StateOMP(size_type N)
+        : BaseState(
+              static_cast<typename traits::SizeTypeTrait<BaseState>::type>(N))
+    {
+    }
 
-    size_type size () const {return static_cast<size_type>(BaseState::size());}
+    size_type size() const
+    {
+        return static_cast<size_type>(BaseState::size());
+    }
 
     template <typename IntType>
-    void copy (size_type N, const IntType *copy_from)
+    void copy(size_type N, const IntType *copy_from)
     {
         VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(OMP);
 
@@ -71,9 +76,8 @@ class StateOMP : public BaseState
 template <typename T, typename Derived>
 class InitializeOMP : public InitializeBase<T, Derived>
 {
-    public :
-
-    std::size_t operator() (Particle<T> &particle, void *param)
+    public:
+    std::size_t operator()(Particle<T> &particle, void *param)
     {
         typedef typename traits::OMPSizeTypeTrait<
             typename Particle<T>::size_type>::type size_type;
@@ -89,8 +93,7 @@ class InitializeOMP : public InitializeBase<T, Derived>
         return accept;
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(OMP, Initialize)
 }; // class InitializeOMP
 
@@ -99,9 +102,8 @@ class InitializeOMP : public InitializeBase<T, Derived>
 template <typename T, typename Derived>
 class MoveOMP : public MoveBase<T, Derived>
 {
-    public :
-
-    std::size_t operator() (std::size_t iter, Particle<T> &particle)
+    public:
+    std::size_t operator()(std::size_t iter, Particle<T> &particle)
     {
         typedef typename traits::OMPSizeTypeTrait<
             typename Particle<T>::size_type>::type size_type;
@@ -116,8 +118,7 @@ class MoveOMP : public MoveBase<T, Derived>
         return accept;
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(OMP, Move)
 }; // class MoveOMP
 
@@ -126,10 +127,9 @@ class MoveOMP : public MoveBase<T, Derived>
 template <typename T, typename Derived>
 class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 {
-    public :
-
-    void operator() (std::size_t iter, std::size_t dim,
-            const Particle<T> &particle, double *res)
+    public:
+    void operator()(std::size_t iter, std::size_t dim,
+        const Particle<T> &particle, double *res)
     {
         typedef typename traits::OMPSizeTypeTrait<
             typename Particle<T>::size_type>::type size_type;
@@ -138,13 +138,12 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 #pragma omp parallel for default(shared)
         for (size_type i = 0; i < N; ++i) {
             this->monitor_state(iter, dim,
-                    ConstSingleParticle<T>(i, &particle), res + i * dim);
+                ConstSingleParticle<T>(i, &particle), res + i * dim);
         }
         this->post_processor(iter, particle);
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(OMP, MonitorEval)
 }; // class MonitorEvalOMP
 
@@ -153,10 +152,9 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 template <typename T, typename Derived>
 class PathEvalOMP : public PathEvalBase<T, Derived>
 {
-    public :
-
-    double operator() (std::size_t iter, const Particle<T> &particle,
-            double *res)
+    public:
+    double operator()(
+        std::size_t iter, const Particle<T> &particle, double *res)
     {
         typedef typename traits::OMPSizeTypeTrait<
             typename Particle<T>::size_type>::type size_type;
@@ -164,16 +162,15 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(shared)
         for (size_type i = 0; i < N; ++i) {
-            res[i] = this->path_state(iter,
-                    ConstSingleParticle<T>(i, &particle));
+            res[i] =
+                this->path_state(iter, ConstSingleParticle<T>(i, &particle));
         }
         this->post_processor(iter, particle);
 
         return this->path_grid(iter, particle);
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(OMP, PathEval)
 }; // class PathEvalOMP
 

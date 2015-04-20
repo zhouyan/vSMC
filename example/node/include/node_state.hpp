@@ -32,38 +32,41 @@
 #ifndef VSMC_EXAMPLE_NODE_STATE_HPP
 #define VSMC_EXAMPLE_NODE_STATE_HPP
 
-struct data_info
-{
+struct data_info {
     const std::size_t data_num;
     double resolution;
     const char *file_name;
     const double *data_value;
 
-    data_info (std::size_t num, double r, const char *file) :
-        data_num(num), resolution(r),
-        file_name(file), data_value(VSMC_NULLPTR) {}
+    data_info(std::size_t num, double r, const char *file)
+        : data_num(num), resolution(r), file_name(file), data_value(nullptr)
+    {
+    }
 
-    data_info (std::size_t num, double r, const double *data) :
-        data_num(num), resolution(r),
-        file_name(VSMC_NULLPTR), data_value(data) {}
+    data_info(std::size_t num, double r, const double *data)
+        : data_num(num), resolution(r), file_name(nullptr), data_value(data)
+    {
+    }
 };
 
-class node_state :
-    public BASE_STATE<vsmc::StateMatrix<vsmc::RowMajor, 1, node_param> >
+class node_state
+    : public BASE_STATE<vsmc::StateMatrix<vsmc::RowMajor, 1, node_param>>
 {
-    public :
+    public:
+    node_state(size_type N)
+        : BASE_STATE<vsmc::StateMatrix<vsmc::RowMajor, 1, node_param>>(N)
+    {
+    }
 
-    node_state (size_type N) :
-        BASE_STATE<vsmc::StateMatrix<vsmc::RowMajor, 1, node_param> >(N) {}
-
-    double log_likelihood_const () const
+    double log_likelihood_const() const
     {
         using std::log;
 
-        return -(data_num() * (vsmc::math::ln_pi_2<double>() + 2 * log(sd0_)));
+        return -(data_num() *
+                   (vsmc::math::ln_pi_2<double>() + 2 * log(sd0_)));
     }
 
-    double log_prior (node_param &state) const
+    double log_prior(node_param &state) const
     {
         using std::log;
 
@@ -80,7 +83,7 @@ class node_state :
         return state.log_prior() = lp;
     }
 
-    double log_likelihood (node_param &state) const
+    double log_likelihood(node_param &state) const
     {
         using std::log;
 
@@ -97,15 +100,14 @@ class node_state :
         return state.log_likelihood() = ll;
     }
 
-    double log_target (node_param &state) const
+    double log_target(node_param &state) const
     {
-        double lt =
-            log_prior(state) + state.alpha() * log_likelihood(state);
+        double lt = log_prior(state) + state.alpha() * log_likelihood(state);
 
         return state.log_target() = lt;
     }
 
-    void read_data (const data_info *info)
+    void read_data(const data_info *info)
     {
         obs1_.resize(info->data_num);
         obs2_.resize(info->data_num);
@@ -138,7 +140,7 @@ class node_state :
         sd0_ = 0.2;
     }
 
-    void alpha (double a)
+    void alpha(double a)
     {
         a = a < 1 ? a : 1;
         a = a > 0 ? a : 0;
@@ -149,27 +151,26 @@ class node_state :
         }
     }
 
-    void alpha_inc (double a_inc)
+    void alpha_inc(double a_inc)
     {
         for (size_type i = 0; i != this->size(); ++i)
             this->state(i, 0).alpha_inc() = a_inc;
     }
 
-    void comp_num (std::size_t num)
+    void comp_num(std::size_t num)
     {
         for (size_type i = 0; i != this->size(); ++i)
             this->state(i, 0).comp_num(num);
     }
 
-    std::size_t data_num () const {return obs1_.size();}
-    double shape0        () const {return shape0_;}
-    double scale0        () const {return scale0_;}
-    double sd0           () const {return sd0_;}
-    double zconst        () const {return zconst_;}
-    double &zconst       ()       {return zconst_;}
+    std::size_t data_num() const { return obs1_.size(); }
+    double shape0() const { return shape0_; }
+    double scale0() const { return scale0_; }
+    double sd0() const { return sd0_; }
+    double zconst() const { return zconst_; }
+    double &zconst() { return zconst_; }
 
-    private :
-
+    private:
     double shape0_; // prior shape
     double scale0_; // prior scale
     double sd0_;    // likelihood sd

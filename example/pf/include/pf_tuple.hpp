@@ -37,8 +37,10 @@
 #include <vsmc/core/state_tuple.hpp>
 
 template <vsmc::MatrixOrder Order>
-struct BaseState
-{typedef vsmc::StateTuple<Order, double, double, double, double, double> type;};
+struct BaseState {
+    typedef vsmc::StateTuple<Order, double, double, double, double, double>
+        type;
+};
 
 #include "pf_smp.hpp"
 #include "pf_smp_do.hpp"

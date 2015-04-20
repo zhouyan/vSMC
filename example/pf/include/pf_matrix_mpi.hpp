@@ -38,8 +38,9 @@
 #include <vsmc/mpi/backend_mpi.hpp>
 
 template <vsmc::MatrixOrder Order>
-struct BaseState
-{typedef BASE_SMP_STATE<vsmc::StateMatrix<Order, 5, double> > type;};
+struct BaseState {
+    typedef BASE_SMP_STATE<vsmc::StateMatrix<Order, 5, double>> type;
+};
 
 #include "pf_smp.hpp"
 #include "pf_mpi_do.hpp"

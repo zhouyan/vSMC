@@ -42,13 +42,8 @@ ADD_HEADER_EXECUTABLE(vsmc/core/path            TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/core/sampler         TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/core/single_particle TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/core/state_matrix    TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/core/state_tuple     ${CXX11LIB_TUPLE_FOUND})
+ADD_HEADER_EXECUTABLE(vsmc/core/state_tuple     TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/core/weight_set      TRUE)
-
-ADD_HEADER_EXECUTABLE(vsmc/cxx11/cmath       TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/cxx11/functional  TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/cxx11/random      TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/cxx11/type_traits TRUE)
 
 ADD_HEADER_EXECUTABLE(vsmc/gcd/gcd ${GCD_FOUND} "GCD")
 ADD_HEADER_EXECUTABLE(vsmc/gcd/dispatch_function ${GCD_FOUND} "GCD")
@@ -124,25 +119,19 @@ ADD_HEADER_EXECUTABLE(vsmc/smp/backend_gcd  ${GCD_FOUND} "GCD")
 ADD_HEADER_EXECUTABLE(vsmc/smp/backend_omp  ${VSMC_OPENMP_FOUND} "OMP")
 ADD_HEADER_EXECUTABLE(vsmc/smp/backend_ppl  ${PPL_FOUND})
 ADD_HEADER_EXECUTABLE(vsmc/smp/backend_seq  TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/smp/backend_std  ${CXX11LIB_THREAD_FOUND} "STD")
+ADD_HEADER_EXECUTABLE(vsmc/smp/backend_std  TRUE "STD")
 ADD_HEADER_EXECUTABLE(vsmc/smp/backend_tbb  ${TBB_FOUND} "TBB")
 
-ADD_HEADER_EXECUTABLE(vsmc/thread/thread ${CXX11LIB_THREAD_FOUND} "STD")
-ADD_HEADER_EXECUTABLE(vsmc/thread/blocked_range TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/thread/parallel_accumulate
-    ${CXX11LIB_THREAD_FOUND} "STD")
-ADD_HEADER_EXECUTABLE(vsmc/thread/parallel_for
-    ${CXX11LIB_THREAD_FOUND} "STD")
-ADD_HEADER_EXECUTABLE(vsmc/thread/parallel_reduce
-    ${CXX11LIB_THREAD_FOUND} "STD")
-ADD_HEADER_EXECUTABLE(vsmc/thread/thread_guard
-    ${CXX11LIB_THREAD_FOUND} "STD")
-ADD_HEADER_EXECUTABLE(vsmc/thread/thread_num
-    ${CXX11LIB_THREAD_FOUND} "STD")
+ADD_HEADER_EXECUTABLE(vsmc/thread/thread TRUE "STD")
+ADD_HEADER_EXECUTABLE(vsmc/thread/blocked_range       TRUE)
+ADD_HEADER_EXECUTABLE(vsmc/thread/parallel_accumulate TRUE "STD")
+ADD_HEADER_EXECUTABLE(vsmc/thread/parallel_for        TRUE "STD")
+ADD_HEADER_EXECUTABLE(vsmc/thread/parallel_reduce     TRUE "STD")
+ADD_HEADER_EXECUTABLE(vsmc/thread/thread_guard        TRUE "STD")
+ADD_HEADER_EXECUTABLE(vsmc/thread/thread_num          TRUE "STD")
 
 ADD_HEADER_EXECUTABLE(vsmc/utility/utility TRUE "HDF5")
 ADD_HEADER_EXECUTABLE(vsmc/utility/aligned_memory TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/utility/array          TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/utility/counter        TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/utility/cstring        TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/utility/cpuid          ${CPUID_FOUND})

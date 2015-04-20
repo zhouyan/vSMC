@@ -34,36 +34,38 @@
 
 #include <vsmc/internal/common.hpp>
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief A thin wrapper over a complete Particle
 /// \ingroup Core
 template <typename T>
 class SingleParticleBase
 {
-    public :
+    public:
+    SingleParticleBase(
+        typename Particle<T>::size_type id, Particle<T> *particle_ptr)
+        : id_(id), particle_ptr_(particle_ptr)
+    {
+    }
 
-    SingleParticleBase (typename Particle<T>::size_type id,
-            Particle<T> *particle_ptr) :
-        id_(id), particle_ptr_(particle_ptr) {}
+    typename Particle<T>::size_type id() const { return id_; }
 
-    typename Particle<T>::size_type id () const {return id_;}
+    const Particle<T> &particle() const { return *particle_ptr_; }
 
-    const Particle<T> &particle () const {return *particle_ptr_;}
+    const Particle<T> *particle_ptr() const { return particle_ptr_; }
 
-    const Particle<T> *particle_ptr () const {return particle_ptr_;}
+    typename Particle<T>::rng_type &rng() const
+    {
+        return particle_ptr_->rng(id_);
+    }
 
-    typename Particle<T>::rng_type &rng () const
-    {return particle_ptr_->rng(id_);}
+    protected:
+    Particle<T> &mutable_particle() const { return *particle_ptr_; }
 
-    protected :
+    Particle<T> *mutable_particle_ptr() const { return particle_ptr_; }
 
-    Particle<T> &mutable_particle () const {return *particle_ptr_;}
-
-    Particle<T> *mutable_particle_ptr () const {return particle_ptr_;}
-
-    private :
-
+    private:
     typename Particle<T>::size_type id_;
     Particle<T> *particle_ptr_;
 }; // class SingleParticleBase
@@ -73,20 +75,20 @@ class SingleParticleBase
 template <typename T>
 class ConstSingleParticleBase
 {
-    public :
+    public:
+    ConstSingleParticleBase(
+        typename Particle<T>::size_type id, const Particle<T> *particle_ptr)
+        : id_(id), particle_ptr_(particle_ptr)
+    {
+    }
 
-    ConstSingleParticleBase (typename Particle<T>::size_type id,
-            const Particle<T> *particle_ptr) :
-        id_(id), particle_ptr_(particle_ptr) {}
+    typename Particle<T>::size_type id() const { return id_; }
 
-    typename Particle<T>::size_type id () const {return id_;}
+    const Particle<T> &particle() const { return *particle_ptr_; }
 
-    const Particle<T> &particle () const {return *particle_ptr_;}
+    const Particle<T> *particle_ptr() const { return particle_ptr_; }
 
-    const Particle<T> *particle_ptr () const {return particle_ptr_;}
-
-    private :
-
+    private:
     typename Particle<T>::size_type id_;
     const Particle<T> *particle_ptr_;
 }; // class ConstSingleParticleBase
@@ -113,29 +115,32 @@ class ConstSingleParticleBase
 /// Usually you can safely derive `single_particle_type<S>` from
 /// SingleParticleBase<S> and add methods specific to `S`.
 template <typename T>
-class SingleParticle :
-    public traits::SingleParticleBaseTypeTrait<T>::type
+class SingleParticle : public traits::SingleParticleBaseTypeTrait<T>::type
 {
     typedef typename traits::SingleParticleBaseTypeTrait<T>::type base;
 
-    public :
-
-    SingleParticle (typename Particle<T>::size_type id,
-            Particle<T> *particle_ptr) : base(id, particle_ptr) {}
+    public:
+    SingleParticle(
+        typename Particle<T>::size_type id, Particle<T> *particle_ptr)
+        : base(id, particle_ptr)
+    {
+    }
 }; // class SingleParticle
 
 /// \brief A const variant to SingleParticle
 /// \ingroup Core
 template <typename T>
-class ConstSingleParticle :
-    public traits::ConstSingleParticleBaseTypeTrait<T>::type
+class ConstSingleParticle
+    : public traits::ConstSingleParticleBaseTypeTrait<T>::type
 {
     typedef typename traits::ConstSingleParticleBaseTypeTrait<T>::type base;
 
-    public :
-
-    ConstSingleParticle (typename Particle<T>::size_type id,
-            const Particle<T> *particle_ptr) : base(id, particle_ptr) {}
+    public:
+    ConstSingleParticle(
+        typename Particle<T>::size_type id, const Particle<T> *particle_ptr)
+        : base(id, particle_ptr)
+    {
+    }
 }; // class ConstSingleParticle
 
 } // namespace vsmc

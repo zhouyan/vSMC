@@ -37,62 +37,82 @@
 #include <vsmc/gcd/dispatch_queue.hpp>
 #include <dispatch/dispatch.h>
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief A Dispatch group
 /// \ingroup Dispatch
-class DispatchGroup : public DispatchObject< ::dispatch_group_t>
+class DispatchGroup : public DispatchObject<::dispatch_group_t>
 {
-    public :
+    public:
+    DispatchGroup()
+        : DispatchObject<::dispatch_group_t>(::dispatch_group_create(), true)
+    {
+    }
 
-    DispatchGroup () :
-        DispatchObject< ::dispatch_group_t>(::dispatch_group_create(), true) {}
+    void enter() const { ::dispatch_group_enter(this->object()); }
 
-    void enter () const {::dispatch_group_enter(this->object());}
+    void leave() const { ::dispatch_group_leave(this->object()); }
 
-    void leave () const {::dispatch_group_leave(this->object());}
-
-    long wait (::dispatch_time_t timeout) const
-    {return ::dispatch_group_wait(this->object(), timeout);}
-
-    template <DispatchQueueType Type>
-    void async_f (const DispatchQueue<Type> &queue, void *context,
-            ::dispatch_function_t work) const
-    {::dispatch_group_async_f(this->object(), queue.object(), context, work);}
-
-    void async_f (::dispatch_queue_t queue, void *context,
-            ::dispatch_function_t work) const
-    {::dispatch_group_async_f(this->object(), queue, context, work);}
+    long wait(::dispatch_time_t timeout) const
+    {
+        return ::dispatch_group_wait(this->object(), timeout);
+    }
 
     template <DispatchQueueType Type>
-    void notify_f (const DispatchQueue<Type> &queue, void *context,
-            ::dispatch_function_t work) const
-    {::dispatch_group_notify_f(this->object(), queue.object(), context, work);}
+    void async_f(const DispatchQueue<Type> &queue, void *context,
+        ::dispatch_function_t work) const
+    {
+        ::dispatch_group_async_f(
+            this->object(), queue.object(), context, work);
+    }
 
-    void notify_f (::dispatch_queue_t queue, void *context,
-            ::dispatch_function_t work) const
-    {::dispatch_group_notify_f(this->object(), queue, context, work);}
+    void async_f(::dispatch_queue_t queue, void *context,
+        ::dispatch_function_t work) const
+    {
+        ::dispatch_group_async_f(this->object(), queue, context, work);
+    }
+
+    template <DispatchQueueType Type>
+    void notify_f(const DispatchQueue<Type> &queue, void *context,
+        ::dispatch_function_t work) const
+    {
+        ::dispatch_group_notify_f(
+            this->object(), queue.object(), context, work);
+    }
+
+    void notify_f(::dispatch_queue_t queue, void *context,
+        ::dispatch_function_t work) const
+    {
+        ::dispatch_group_notify_f(this->object(), queue, context, work);
+    }
 
 #ifdef __BLOCKS__
     template <DispatchQueueType Type>
-    void async (const DispatchQueue<Type> &queue,
-            ::dispatch_block_t block) const
-    {::dispatch_group_async(this->object(), queue.object(), block);}
+    void async(
+        const DispatchQueue<Type> &queue, ::dispatch_block_t block) const
+    {
+        ::dispatch_group_async(this->object(), queue.object(), block);
+    }
 
-    void async (::dispatch_queue_t queue,
-            ::dispatch_block_t block) const
-    {::dispatch_group_async(this->object(), queue, block);}
+    void async(::dispatch_queue_t queue, ::dispatch_block_t block) const
+    {
+        ::dispatch_group_async(this->object(), queue, block);
+    }
 
     template <DispatchQueueType Type>
-    void notify (const DispatchQueue<Type> &queue,
-            ::dispatch_block_t block) const
-    {::dispatch_group_notify(this->object(), queue.object(), block);}
+    void notify(
+        const DispatchQueue<Type> &queue, ::dispatch_block_t block) const
+    {
+        ::dispatch_group_notify(this->object(), queue.object(), block);
+    }
 
-    void notify (::dispatch_queue_t queue,
-            ::dispatch_block_t block) const
-    {::dispatch_group_notify(this->object(), queue, block);}
+    void notify(::dispatch_queue_t queue, ::dispatch_block_t block) const
+    {
+        ::dispatch_group_notify(this->object(), queue, block);
+    }
 #endif // __BLOCKS__
-}; // class DispatchGroup
+};     // class DispatchGroup
 
 } // namespace vsmc
 

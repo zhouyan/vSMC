@@ -38,25 +38,22 @@
 #include <intrin.h>
 #endif
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief Return the TSC value using RDTSC instruction
 /// \ingroup RDTSC
 ///
 /// \note This function does not sync by itself. Call `cpuid` to sync if more
 /// accurate measurement is needed.
-inline uint64_t rdtsc ()
+inline uint64_t rdtsc()
 {
 #ifdef VSMC_MSVC
     return static_cast<uint64_t>(__rdtsc());
-#else // VSMC_MSVC
+#else  // VSMC_MSVC
     unsigned eax = 0;
     unsigned edx = 0;
-    __asm__ volatile
-        (
-         "rdtsc\n"
-         : "=a" (eax), "=d" (edx)
-        );
+    __asm__ volatile("rdtsc\n" : "=a"(eax), "=d"(edx));
 
     return (static_cast<uint64_t>(edx) << 32) + static_cast<uint64_t>(eax);
 #endif // VSMC_MSVC
@@ -64,19 +61,15 @@ inline uint64_t rdtsc ()
 
 /// \brief Return the TSC and TSC_AUX values using RDTSCP instruction
 /// \ingroup RDTSC
-inline uint64_t rdtscp (unsigned *aux)
+inline uint64_t rdtscp(unsigned *aux)
 {
 #ifdef VSMC_MSVC
     return static_cast<uint64_t>(__rdtscp(aux));
-#else // VSMC_MSVC
+#else  // VSMC_MSVC
     unsigned eax = 0;
     unsigned ecx = 0;
     unsigned edx = 0;
-    __asm__ volatile
-        (
-         "rdtscp\n"
-         : "=a" (eax), "=c" (ecx), "=d" (edx)
-        );
+    __asm__ volatile("rdtscp\n" : "=a"(eax), "=c"(ecx), "=d"(edx));
     *aux = ecx;
 
     return static_cast<uint64_t>(eax) + (static_cast<uint64_t>(edx) << 32);
@@ -87,16 +80,15 @@ inline uint64_t rdtscp (unsigned *aux)
 /// \ingroup RDTSC
 class RDTSCCounter
 {
-    public :
-
-    RDTSCCounter () : elapsed_(0), start_(0), running_(false) {}
+    public:
+    RDTSCCounter() : elapsed_(0), start_(0), running_(false) {}
 
     /// \brief If the counter is running
     ///
     /// \details
     /// If `start()` has been called and no `stop()` call since, then it is
     /// running, otherwise it is stoped.
-    bool running () const {return running_;}
+    bool running() const { return running_; }
 
     /// \brief Start the counter, no effect if already started
     ///
@@ -104,7 +96,7 @@ class RDTSCCounter
     /// count will be incremented next time `stop()` is called. The increment
     /// will be relative to the time point of this call. `false` if it is
     /// already started earlier.
-    bool start ()
+    bool start()
     {
         if (running_)
             return false;
@@ -118,13 +110,14 @@ class RDTSCCounter
     /// \brief Stop the counter, no effect if already stopped
     ///
     /// \return `true` if it is stoped by this call, and the elapsed cycle
-    /// count has been incremented. `false` in one of the following situations.
+    /// count has been incremented. `false` in one of the following
+    /// situations.
     /// In all these situations, the elapsed cycle count will not be
     /// incremented.
     /// - It already stopped or wasn't started before.
     /// - The cycle count appears to decrease. This is most likely in the case
     /// that the TSC MSR has been reset.
-    bool stop ()
+    bool stop()
     {
         if (!running_)
             return false;
@@ -140,17 +133,16 @@ class RDTSCCounter
     }
 
     /// \brief Stop and reset the elapsed cycle count to zero
-    void reset ()
+    void reset()
     {
         elapsed_ = 0;
         running_ = false;
     }
 
     /// \brief Return the accumulated elapsed cycle count
-    uint64_t cycles () const {return elapsed_;}
+    uint64_t cycles() const { return elapsed_; }
 
-    private :
-
+    private:
     uint64_t elapsed_;
     uint64_t start_;
     bool running_;
@@ -168,16 +160,15 @@ class RDTSCCounter
 /// ~~~
 class RDTSCPCounter
 {
-    public :
-
-    RDTSCPCounter () : elapsed_(0), start_(0), start_id_(0), running_(false) {}
+    public:
+    RDTSCPCounter() : elapsed_(0), start_(0), start_id_(0), running_(false) {}
 
     /// \brief If the counter is running
     ///
     /// \details
     /// If `start()` has been called and no `stop()` call since, then it is
     /// running, otherwise it is stoped.
-    bool running () const {return running_;}
+    bool running() const { return running_; }
 
     /// \brief Start the counter, no effect if already started
     ///
@@ -185,7 +176,7 @@ class RDTSCPCounter
     /// count will be incremented next time `stop()` is called. The increment
     /// will be relative to the time point of this call. `false` if it is
     /// already started earlier.
-    bool start ()
+    bool start()
     {
         if (running_)
             return false;
@@ -199,15 +190,17 @@ class RDTSCPCounter
     /// \brief Stop the counter, no effect if already stopped
     ///
     /// \return `true` if it is stoped by this call, and the elapsed cycle
-    /// count has been incremented. `false` in one of the following situations.
+    /// count has been incremented. `false` in one of the following
+    /// situations.
     /// In all these situations, the elapsed cycle count will not be
     /// incremented.
     /// - It already stopped or wasn't started before.
-    /// - The logical processor has changed since the last successful `start()`
+    /// - The logical processor has changed since the last successful
+    /// `start()`
     /// call. The user is repsonsible for assure threads affinity.
     /// - The cycle count appears to decrease. This is most likely in the case
     /// that the TSC MSR has been reset.
-    bool stop ()
+    bool stop()
     {
         if (!running_)
             return false;
@@ -224,17 +217,16 @@ class RDTSCPCounter
     }
 
     /// \brief Stop and reset the elapsed cycle count to zero
-    void reset ()
+    void reset()
     {
         elapsed_ = 0;
         running_ = false;
     }
 
     /// \brief Return the accumulated elapsed cycle count
-    uint64_t cycles () const {return elapsed_;}
+    uint64_t cycles() const { return elapsed_; }
 
-    private :
-
+    private:
     uint64_t elapsed_;
     uint64_t start_;
     unsigned start_id_;

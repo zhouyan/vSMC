@@ -69,31 +69,34 @@
 #endif
 #endif
 
-#define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(Alignment) \
-    VSMC_STATIC_ASSERT((Alignment != 0 && (Alignment & (Alignment - 1)) == 0),\
-            USE_AlignedAllocator_WITH_ALIGNEMNT_NOT_A_POWER_OF_TWO)
+#define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(Alignment)    \
+    VSMC_STATIC_ASSERT(                                                      \
+        (Alignment != 0 && (Alignment & (Alignment - 1)) == 0),              \
+        USE_AlignedAllocator_WITH_ALIGNEMNT_NOT_A_POWER_OF_TWO)
 
-#define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_SIZEOF_VOID(Alignemnt) \
+#define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_SIZEOF_VOID(Alignemnt)     \
     VSMC_STATIC_ASSERT((Alignment >= sizeof(void *)),                        \
-            USE_AlignedAllocator_WITH_ALIGNMENT_LESS_THAN_SIZEOF_VOID_POINTER)
+        USE_AlignedAllocator_WITH_ALIGNMENT_LESS_THAN_SIZEOF_VOID_POINTER)
 
-#define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY \
-    VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(Alignment);    \
+#define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY                            \
+    VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(Alignment);       \
     VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_SIZEOF_VOID(Alignment);
 
-#define VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(alignment) \
-    VSMC_RUNTIME_ASSERT((alignment != 0 && (alignment & (alignment - 1)) == 0),\
-            "**aligned_malloc** USED WITH ALIGNMENT NOT A POWER OF TWO")
+#define VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(alignment)   \
+    VSMC_RUNTIME_ASSERT(                                                     \
+        (alignment != 0 && (alignment & (alignment - 1)) == 0),              \
+        "**aligned_malloc** USED WITH ALIGNMENT NOT A POWER OF TWO")
 
-#define VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY_SIZEOF_VOID(alignemnt) \
-    VSMC_RUNTIME_ASSERT((alignment >= sizeof(void *)),                        \
-            "**aligned_malloc** USED WITH ALIGNMENT LESS THAN sizeof(void *)")
+#define VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY_SIZEOF_VOID(alignemnt)    \
+    VSMC_RUNTIME_ASSERT((alignment >= sizeof(void *)),                       \
+        "**aligned_malloc** USED WITH ALIGNMENT LESS THAN sizeof(void *)")
 
-#define VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY \
-    VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(alignment);    \
+#define VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY                           \
+    VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(alignment);      \
     VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY_SIZEOF_VOID(alignment);
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief Aligned memory using `std::malloc` and `std::free`
 /// \ingroup AlignedMemory
@@ -103,32 +106,32 @@ namespace vsmc {
 /// wasted in each allocation.
 class AlignedMemorySTD
 {
-    public :
-
-    static void *aligned_malloc (std::size_t n, std::size_t alignment)
+    public:
+    static void *aligned_malloc(std::size_t n, std::size_t alignment)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY;
 
         if (n == 0)
-            return VSMC_NULLPTR;
+            return nullptr;
 
         void *orig_ptr = std::malloc(n + alignment + sizeof(void *));
-        if (orig_ptr == VSMC_NULLPTR)
+        if (orig_ptr == nullptr)
             throw std::bad_alloc();
 
         uintptr_t address = reinterpret_cast<uintptr_t>(orig_ptr);
         uintptr_t offset = alignment - (address + sizeof(void *)) % alignment;
-        void *ptr = reinterpret_cast<void *>(address + offset + sizeof(void *));
+        void *ptr =
+            reinterpret_cast<void *>(address + offset + sizeof(void *));
         void **orig = reinterpret_cast<void **>(address + offset);
         *orig = orig_ptr;
 
         return ptr;
     }
 
-    static void aligned_free (void *ptr)
+    static void aligned_free(void *ptr)
     {
         std::free(*reinterpret_cast<void **>(
-                    reinterpret_cast<uintptr_t>(ptr) - sizeof(void *)));
+                      reinterpret_cast<uintptr_t>(ptr) - sizeof(void *)));
     }
 }; // class AlignedMemmorySTD
 
@@ -142,14 +145,13 @@ class AlignedMemorySTD
 /// Linux, etc.) and `_aligned_malloc` and `_aligned_free` on Windows.
 class AlignedMemorySYS
 {
-    public :
-
-    static void *aligned_malloc (std::size_t n, std::size_t alignment)
+    public:
+    static void *aligned_malloc(std::size_t n, std::size_t alignment)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY;
 
         if (n == 0)
-            return VSMC_NULLPTR;
+            return nullptr;
 
         void *ptr;
         if (posix_memalign(&ptr, alignment, n) != 0)
@@ -158,30 +160,29 @@ class AlignedMemorySYS
         return ptr;
     }
 
-    static void aligned_free (void *ptr) {free(ptr);}
+    static void aligned_free(void *ptr) { free(ptr); }
 }; // class AlignedMallocSYS
 
 #elif defined(VSMC_MSVC)
 
 class AlignedMemorySYS
 {
-    public :
-
-    static void *aligned_malloc (std::size_t n, std::size_t alignment)
+    public:
+    static void *aligned_malloc(std::size_t n, std::size_t alignment)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY;
 
         if (n == 0)
-            return VSMC_NULLPTR;
+            return nullptr;
 
         void *ptr = _aligned_malloc(n, alignment);
-        if (ptr == VSMC_NULLPTR)
+        if (ptr == nullptr)
             throw std::bad_alloc();
 
         return ptr;
     }
 
-    static void aligned_free (void *ptr) {_aligned_free(ptr);}
+    static void aligned_free(void *ptr) { _aligned_free(ptr); }
 }; // class AlignedMemorySYS
 
 #endif // VSMC_HAS_POSIX
@@ -192,27 +193,26 @@ class AlignedMemorySYS
 /// \ingroup AlignedMemory
 class AlignedMemoryJE
 {
-    public :
-
-    static void *aligned_malloc (std::size_t n, std::size_t alignment)
+    public:
+    static void *aligned_malloc(std::size_t n, std::size_t alignment)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY;
 
         if (n == 0)
-            return VSMC_NULLPTR;
+            return nullptr;
 
 #if VSMC_HAS_JEMALLOC_STDAPI
         void *ptr = aligned_alloc(alignment, n);
 #else
         void *ptr = je_aligned_alloc(alignment, n);
 #endif
-        if (ptr == VSMC_NULLPTR)
+        if (ptr == nullptr)
             throw std::bad_alloc();
 
         return ptr;
     }
 
-    static void aligned_free (void *ptr)
+    static void aligned_free(void *ptr)
     {
 #if VSMC_HAS_JEMALLOC_STDAPI
         free(ptr);
@@ -231,23 +231,22 @@ class AlignedMemoryJE
 /// \ingroup AlignedMemory
 class AlignedMemoryTBB
 {
-    public :
-
-    static void *aligned_malloc (std::size_t n, std::size_t alignment)
+    public:
+    static void *aligned_malloc(std::size_t n, std::size_t alignment)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY;
 
         if (n == 0)
-            return VSMC_NULLPTR;
+            return nullptr;
 
         void *ptr = scalable_aligned_malloc(n, alignment);
-        if (ptr == VSMC_NULLPTR)
+        if (ptr == nullptr)
             throw std::bad_alloc();
 
         return ptr;
     }
 
-    static void aligned_free (void *ptr) {scalable_aligned_free(ptr);}
+    static void aligned_free(void *ptr) { scalable_aligned_free(ptr); }
 }; // class AlignedMemoryTBB
 
 #endif // VSMC_HAS_TBB_MALLOC
@@ -258,23 +257,22 @@ class AlignedMemoryTBB
 /// \ingroup AlignedMemory
 class AlignedMemoryMKL
 {
-    public :
-
-    static void *aligned_malloc (std::size_t n, std::size_t alignment)
+    public:
+    static void *aligned_malloc(std::size_t n, std::size_t alignment)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY;
 
         if (n == 0)
-            return VSMC_NULLPTR;
+            return nullptr;
 
         void *ptr = mkl_malloc(n, static_cast<int>(alignment));
-        if (ptr == VSMC_NULLPTR)
+        if (ptr == nullptr)
             throw std::bad_alloc();
 
         return ptr;
     }
 
-    static void aligned_free (void *ptr) {mkl_free(ptr);}
+    static void aligned_free(void *ptr) { mkl_free(ptr); }
 }; // class AlignedMemoryMKL
 
 #endif // VSMC_HAS_MKL
@@ -295,47 +293,51 @@ typedef VSMC_ALIGNED_MEMORY_TYPE AlignedMemory;
 /// additional arguments for alignment. The member function `aligned_free`
 /// shall behave just like `std::free`.
 template <typename T, std::size_t Alignment = 32,
-         typename Memory = AlignedMemory>
+    typename Memory = AlignedMemory>
 class AlignedAllocator : public std::allocator<T>
 {
-    public :
-
+    public:
     typedef typename std::allocator<T>::size_type size_type;
     typedef typename std::allocator<T>::pointer pointer;
 
-    template <typename U> struct rebind
-    {typedef AlignedAllocator<U, Alignment> other;};
-
-    AlignedAllocator () {VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY;}
-
-    AlignedAllocator (const AlignedAllocator<T, Alignment> &other) :
-        std::allocator<T>(other)
-    {VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY;}
-
     template <typename U>
-    AlignedAllocator (const AlignedAllocator<U, Alignment> &other) :
-        std::allocator<T>(static_cast<std::allocator<U> >(other))
-    {VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY;}
+    struct rebind {
+        typedef AlignedAllocator<U, Alignment> other;
+    };
 
-    ~AlignedAllocator () {}
+    AlignedAllocator() { VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY; }
 
-    pointer allocate (size_type n, const void * = VSMC_NULLPTR)
+    AlignedAllocator(const AlignedAllocator<T, Alignment> &other)
+        : std::allocator<T>(other)
     {
-        if (n == 0)
-            return VSMC_NULLPTR;
-
-        return static_cast<pointer>(
-                memory_.aligned_malloc(sizeof(T) * n, Alignment));
+        VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY;
     }
 
-    void deallocate (pointer ptr, size_type)
+    template <typename U>
+    AlignedAllocator(const AlignedAllocator<U, Alignment> &other)
+        : std::allocator<T>(static_cast<std::allocator<U>>(other))
     {
-        if (ptr != VSMC_NULLPTR)
+        VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY;
+    }
+
+    ~AlignedAllocator() {}
+
+    pointer allocate(size_type n, const void * = nullptr)
+    {
+        if (n == 0)
+            return nullptr;
+
+        return static_cast<pointer>(
+            memory_.aligned_malloc(sizeof(T) * n, Alignment));
+    }
+
+    void deallocate(pointer ptr, size_type)
+    {
+        if (ptr != nullptr)
             memory_.aligned_free(ptr);
     }
 
-    private :
-
+    private:
     Memory memory_;
 }; // class AlignedAllocator
 

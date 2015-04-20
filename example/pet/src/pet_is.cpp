@@ -32,7 +32,7 @@
 #include "pet_@smp@.hpp"
 #include "smc.hpp"
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
 #include "options_main.hpp"
 #include "options_smc.hpp"
@@ -43,10 +43,10 @@ int main (int argc, char **argv)
     vsmc::Sampler<pet_state> sampler(ParticleNum);
     sampler.init(pet_init());
     sampler.initialize(&info);
-    info.read_time  = false;
-    info.read_conv  = false;
+    info.read_time = false;
+    info.read_conv = false;
     info.read_prior = false;
-    info.read_sd    = false;
+    info.read_sd = false;
     info.read_model = false;
 
     std::ofstream output("is.save");
@@ -59,7 +59,7 @@ int main (int argc, char **argv)
         py = 0;
         for (std::size_t i = 0; i != ParticleNum; ++i)
             py += std::exp(
-                    sampler.particle().value().state(i, 0).log_likelihood());
+                sampler.particle().value().state(i, 0).log_likelihood());
         py /= static_cast<double>(ParticleNum);
         py = std::log(py);
         py += sampler.particle().value().log_likelihood_const();
@@ -70,7 +70,7 @@ int main (int argc, char **argv)
         py = 0;
         for (std::size_t i = 0; i != ParticleNum; ++i)
             py += std::exp(
-                    sampler.particle().value().state(i, 0).log_likelihood());
+                sampler.particle().value().state(i, 0).log_likelihood());
         py /= static_cast<double>(ParticleNum);
         py = std::log(py);
         py += sampler.particle().value().log_likelihood_const();

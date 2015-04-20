@@ -48,16 +48,14 @@
 
 #include <fstream>
 
-#define PF_CV_DO(Res) \
-    cv_do<vsmc::RowMajor>(vsmc::Res, argv, "."#Res".row");                   \
-    cv_do<vsmc::ColMajor>(vsmc::Res, argv, "."#Res".col");
+#define PF_CV_DO(Res)                                                        \
+    cv_do<vsmc::RowMajor>(vsmc::Res, argv, "." #Res ".row");                 \
+    cv_do<vsmc::ColMajor>(vsmc::Res, argv, "." #Res ".col");
 
-#define PF_MAIN \
+#define PF_MAIN                                                              \
     if (argc < 3) {                                                          \
-        std::cout << "Usage: " << argv[0]                                    \
-            << " <input file>"                                               \
-            << " <output file>"                                              \
-            << std::endl;                                                    \
+        std::cout << "Usage: " << argv[0] << " <input file>"                 \
+                  << " <output file>" << std::endl;                          \
         return -1;                                                           \
     }                                                                        \
     PF_CV_DO(Multinomial);                                                   \
@@ -68,7 +66,9 @@
     PF_CV_DO(ResidualSystematic);                                            \
     return 0;
 
-#define PF_MAIN_MPI vsmc::MPIEnvironment env(argc, argv); PF_MAIN;
+#define PF_MAIN_MPI                                                          \
+    vsmc::MPIEnvironment env(argc, argv);                                    \
+    PF_MAIN;
 
 static const std::size_t DataNum = 100;
 static const std::size_t ParticleNum = 1000;
@@ -81,29 +81,28 @@ static const std::size_t LogL = 4;
 template <vsmc::MatrixOrder Order>
 class cv_state : public BASE_STATE<typename BaseState<Order>::type>
 {
-    public :
-
+    public:
     typedef vsmc::RngSet<vsmc::Threefry4x32, vsmc::Scalar> rng_set_type;
 
     typedef typename BASE_STATE<typename BaseState<Order>::type> base_state;
     typedef typename base_state::size_type size_type;
 
-    cv_state (size_type N) : BASE_STATE<typename BaseState<Order>::type>(N) {}
+    cv_state(size_type N) : BASE_STATE<typename BaseState<Order>::type>(N) {}
 
-    double &obs_x (std::size_t iter) {return obs_x_[iter];}
-    double &obs_y (std::size_t iter) {return obs_y_[iter];}
+    double &obs_x(std::size_t iter) { return obs_x_[iter]; }
+    double &obs_y(std::size_t iter) { return obs_y_[iter]; }
 
-    double log_likelihood (std::size_t iter, size_type id) const
+    double log_likelihood(std::size_t iter, size_type id) const
     {
         using std::log;
 
         const double scale = 10;
         const double nu = 10;
 
-        double llh_x = scale * (this->state(id, vsmc::Position<PosX>())
-                - obs_x_[iter]);
-        double llh_y = scale * (this->state(id, vsmc::Position<PosY>())
-                - obs_y_[iter]);
+        double llh_x =
+            scale * (this->state(id, vsmc::Position<PosX>()) - obs_x_[iter]);
+        double llh_y =
+            scale * (this->state(id, vsmc::Position<PosY>()) - obs_y_[iter]);
 
         llh_x = log(1 + llh_x * llh_x / nu);
         llh_y = log(1 + llh_y * llh_y / nu);
@@ -111,7 +110,7 @@ class cv_state : public BASE_STATE<typename BaseState<Order>::type>
         return -0.5 * (nu + 1) * (llh_x + llh_y);
     }
 
-    void read_data (const char *file)
+    void read_data(const char *file)
     {
         if (!file)
             return;
@@ -124,35 +123,33 @@ class cv_state : public BASE_STATE<typename BaseState<Order>::type>
         data.close();
     }
 
-    private :
-
+    private:
     std::vector<double> obs_x_;
     std::vector<double> obs_y_;
 };
 
 template <vsmc::MatrixOrder Order>
-class cv_init : public BASE_INIT<cv_state<Order>, cv_init<Order> >
+class cv_init : public BASE_INIT<cv_state<Order>, cv_init<Order>>
 {
-    public :
-
+    public:
     typedef cv_state<Order> cv;
 
 #if VSMC_EXAMPLE_PF_USE_TBB
-    std::size_t operator() (vsmc::Particle<cv> &particle, void *param)
+    std::size_t operator()(vsmc::Particle<cv> &particle, void *param)
     {
         return this->parallel_run(particle, param,
-                tbb::blocked_range<typename vsmc::Particle<cv>::size_type>(
-                    0, particle.size(), particle.size() / 20),
-                tbb::simple_partitioner());
+            tbb::blocked_range<typename vsmc::Particle<cv>::size_type>(0,
+                                      particle.size(), particle.size() / 20),
+            tbb::simple_partitioner());
     }
 #endif
 
-    std::size_t initialize_state (vsmc::SingleParticle<cv> sp) const
+    std::size_t initialize_state(vsmc::SingleParticle<cv> sp) const
     {
         const double sd_pos0 = 2;
         const double sd_vel0 = 1;
-        vsmc::cxx11::normal_distribution<> norm_pos(0, sd_pos0);
-        vsmc::cxx11::normal_distribution<> norm_vel(0, sd_vel0);
+        std::normal_distribution<> norm_pos(0, sd_pos0);
+        std::normal_distribution<> norm_vel(0, sd_vel0);
 
         typedef typename vsmc::Particle<cv>::rng_type rng_type;
         rng_type eng(sp.rng());
@@ -172,48 +169,48 @@ class cv_init : public BASE_INIT<cv_state<Order>, cv_init<Order> >
         return 1;
     }
 
-    void initialize_param (vsmc::Particle<cv> &particle, void *file) const
-    {particle.value().read_data(static_cast<const char *>(file));}
+    void initialize_param(vsmc::Particle<cv> &particle, void *file) const
+    {
+        particle.value().read_data(static_cast<const char *>(file));
+    }
 
-    void post_processor (vsmc::Particle<cv> &particle)
+    void post_processor(vsmc::Particle<cv> &particle)
     {
         log_weight_.resize(particle.size());
         particle.value().read_state(vsmc::Position<LogL>(), &log_weight_[0]);
         particle.weight_set().set_log_weight(&log_weight_[0]);
     }
 
-    private :
-
+    private:
     std::vector<double> log_weight_;
 };
 
 template <vsmc::MatrixOrder Order>
 class cv_move
 {
-    public :
-
+    public:
     typedef cv_state<Order> cv;
 
 #if VSMC_EXAMPLE_PF_USE_TBB
-    std::size_t operator() (std::size_t iter, vsmc::Particle<cv> &particle)
+    std::size_t operator()(std::size_t iter, vsmc::Particle<cv> &particle)
     {
         static tbb::affinity_partitioner partitioner;
         return this->parallel_run(iter, particle,
-                tbb::blocked_range<typename vsmc::Particle<cv>::size_type>(
-                    0, particle.size(), partitioner));
+            tbb::blocked_range<typename vsmc::Particle<cv>::size_type>(
+                                      0, particle.size(), partitioner));
     }
 #endif
 
-    std::size_t move_state (std::size_t iter,
-            vsmc::SingleParticle<cv> sp) const
+    std::size_t move_state(
+        std::size_t iter, vsmc::SingleParticle<cv> sp) const
     {
         using std::sqrt;
 
         const double sd_pos = sqrt(0.02);
         const double sd_vel = sqrt(0.001);
         const double delta = 0.1;
-        vsmc::cxx11::normal_distribution<> norm_pos(0, sd_pos);
-        vsmc::cxx11::normal_distribution<> norm_vel(0, sd_vel);
+        std::normal_distribution<> norm_pos(0, sd_pos);
+        std::normal_distribution<> norm_vel(0, sd_vel);
 
         typedef typename vsmc::Particle<cv>::rng_type rng_type;
         rng_type eng(sp.rng());
@@ -225,10 +222,10 @@ class cv_move
         ctr.back() +=
             static_cast<typename rng_type::ctr_type::value_type>(iter);
         eng.ctr(ctr);
-        sp.state(vsmc::Position<PosX>()) += norm_pos(eng) +
-            delta * sp.state(vsmc::Position<VelX>());
-        sp.state(vsmc::Position<PosY>()) += norm_pos(eng) +
-            delta * sp.state(vsmc::Position<VelY>());
+        sp.state(vsmc::Position<PosX>()) +=
+            norm_pos(eng) + delta * sp.state(vsmc::Position<VelX>());
+        sp.state(vsmc::Position<PosY>()) +=
+            norm_pos(eng) + delta * sp.state(vsmc::Position<VelY>());
         sp.state(vsmc::Position<VelX>()) += norm_vel(eng);
         sp.state(vsmc::Position<VelY>()) += norm_vel(eng);
         sp.state(vsmc::Position<LogL>()) =
@@ -237,21 +234,20 @@ class cv_move
         return 1;
     }
 
-    void post_processor (std::size_t, vsmc::Particle<cv> &particle)
+    void post_processor(std::size_t, vsmc::Particle<cv> &particle)
     {
         inc_weight_.resize(particle.size());
         particle.value().read_state(vsmc::Position<LogL>(), &inc_weight_[0]);
         particle.weight_set().add_log_weight(&inc_weight_[0]);
     }
 
-    private :
-
+    private:
     std::vector<double> inc_weight_;
 };
 
 template <vsmc::MatrixOrder Order>
-inline void cv_est (std::size_t, std::size_t,
-        vsmc::ConstSingleParticle<cv_state<Order> > csp, double *res)
+inline void cv_est(std::size_t, std::size_t,
+    vsmc::ConstSingleParticle<cv_state<Order>> csp, double *res)
 {
     res[0] = csp.state(vsmc::Position<0>());
     res[1] = csp.state(vsmc::Position<1>());

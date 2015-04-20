@@ -35,7 +35,6 @@
 #include <vsmc/internal/config.hpp>
 
 #include <vsmc/utility/aligned_memory.hpp>
-#include <vsmc/utility/array.hpp>
 #include <vsmc/utility/counter.hpp>
 #include <vsmc/utility/cstring.hpp>
 #include <vsmc/utility/program_option.hpp>

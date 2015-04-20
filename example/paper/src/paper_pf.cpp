@@ -43,13 +43,15 @@ const std::size_t Dim = 4;
 
 class cv : public vsmc::StateMatrix<vsmc::RowMajor, Dim, double>
 {
-    public :
+    public:
+    cv(size_type N)
+        : vsmc::StateMatrix<vsmc::RowMajor, Dim, double>(N),
+          x_obs_(DataNum),
+          y_obs_(DataNum)
+    {
+    }
 
-    cv (size_type N) :
-        vsmc::StateMatrix<vsmc::RowMajor, Dim, double>(N),
-        x_obs_(DataNum), y_obs_(DataNum) {}
-
-    double log_likelihood (std::size_t iter, size_type id) const
+    double log_likelihood(std::size_t iter, size_type id) const
     {
         const double scale = 10;
         const double nu = 10;
@@ -61,7 +63,7 @@ class cv : public vsmc::StateMatrix<vsmc::RowMajor, Dim, double>
         return -0.5 * (nu + 1) * (llh_x + llh_y);
     }
 
-    void read_data (const char *filename)
+    void read_data(const char *filename)
     {
         std::ifstream data(filename);
         for (std::size_t i = 0; i != DataNum; ++i)
@@ -70,21 +72,20 @@ class cv : public vsmc::StateMatrix<vsmc::RowMajor, Dim, double>
         data.clear();
     }
 
-    private :
-
+    private:
     std::vector<double> x_obs_;
     std::vector<double> y_obs_;
 };
 
-inline std::size_t cv_init (vsmc::Particle<cv> &particle, void *filename)
+inline std::size_t cv_init(vsmc::Particle<cv> &particle, void *filename)
 {
     if (filename)
         particle.value().read_data(static_cast<const char *>(filename));
 
     const double sd_pos0 = 2;
     const double sd_vel0 = 1;
-    vsmc::cxx11::normal_distribution<double> norm_pos(0, sd_pos0);
-    vsmc::cxx11::normal_distribution<double> norm_vel(0, sd_vel0);
+    std::normal_distribution<double> norm_pos(0, sd_pos0);
+    std::normal_distribution<double> norm_vel(0, sd_vel0);
     std::vector<double> log_weight(particle.size());
 
     for (vsmc::Particle<cv>::size_type i = 0; i != particle.size(); ++i) {
@@ -101,18 +102,19 @@ inline std::size_t cv_init (vsmc::Particle<cv> &particle, void *filename)
 
 class cv_move : public vsmc::MoveSEQ<cv>
 {
-    public :
+    public:
+    void pre_processor(std::size_t, vsmc::Particle<cv> &particle)
+    {
+        incw_.resize(particle.size());
+    }
 
-    void pre_processor (std::size_t, vsmc::Particle<cv> &particle)
-    {incw_.resize(particle.size());}
-
-    std::size_t move_state (std::size_t iter, vsmc::SingleParticle<cv> sp)
+    std::size_t move_state(std::size_t iter, vsmc::SingleParticle<cv> sp)
     {
         const double sd_pos = std::sqrt(0.02);
         const double sd_vel = std::sqrt(0.001);
         const double delta = 0.1;
-        vsmc::cxx11::normal_distribution<double> norm_pos(0, sd_pos);
-        vsmc::cxx11::normal_distribution<double> norm_vel(0, sd_vel);
+        std::normal_distribution<double> norm_pos(0, sd_pos);
+        std::normal_distribution<double> norm_vel(0, sd_vel);
 
         sp.state(0) += norm_pos(sp.rng()) + delta * sp.state(2);
         sp.state(1) += norm_pos(sp.rng()) + delta * sp.state(3);
@@ -123,29 +125,30 @@ class cv_move : public vsmc::MoveSEQ<cv>
         return 0;
     }
 
-    void post_processor (std::size_t, vsmc::Particle<cv> &particle)
-    {particle.weight_set().add_log_weight(incw_.begin());}
+    void post_processor(std::size_t, vsmc::Particle<cv> &particle)
+    {
+        particle.weight_set().add_log_weight(incw_.begin());
+    }
 
-    private :
-
+    private:
     std::vector<double> incw_;
 };
 
-inline void cv_monitor_state (std::size_t, std::size_t dim,
-        vsmc::ConstSingleParticle<cv> csp, double *res)
+inline void cv_monitor_state(std::size_t, std::size_t dim,
+    vsmc::ConstSingleParticle<cv> csp, double *res)
 {
     assert(dim <= Dim);
     for (std::size_t d = 0; d != dim; ++d)
         res[d] = csp.state(d);
 }
 
-int main ()
+int main()
 {
     vsmc::Sampler<cv> sampler(ParticleNum, vsmc::Stratified, 0.5);
     sampler.init(cv_init);
     sampler.move(cv_move(), false);
     vsmc::MonitorEvalAdapter<cv, vsmc::MonitorEvalSEQ> cv_est(
-            cv_monitor_state);
+        cv_monitor_state);
     sampler.monitor("pos", 2, cv_est);
 
     char data_file[] = "paper_pf.data";

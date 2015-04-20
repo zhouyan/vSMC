@@ -36,20 +36,24 @@
 #include <vsmc/rng/seed.hpp>
 #include <boost/mpi.hpp>
 
-namespace vsmc {
+namespace vsmc
+{
 
-namespace internal {
+namespace internal
+{
 
 template <typename ResultType, typename IntType1, typename IntType2>
-inline void mpi_init_seed (ResultType &, IntType1 D, IntType2 R)
+inline void mpi_init_seed(ResultType &, IntType1 D, IntType2 R)
 {
     Seed::instance().modulo(
-            static_cast<Seed::skip_type>(D), static_cast<Seed::skip_type>(R));
+        static_cast<Seed::skip_type>(D), static_cast<Seed::skip_type>(R));
 }
 
 template <typename T, std::size_t K, typename IntType1, typename IntType2>
-inline void mpi_init_seed (vsmc::Array<T, K> &s, IntType1, IntType2 R)
-{s.back() = static_cast<Seed::skip_type>(R);}
+inline void mpi_init_seed(std::array<T, K> &s, IntType1, IntType2 R)
+{
+    s.back() = static_cast<Seed::skip_type>(R);
+}
 
 } // namespace vsmc::internal
 
@@ -61,21 +65,25 @@ inline void mpi_init_seed (vsmc::Array<T, K> &s, IntType1, IntType2 R)
 /// initialize Seed
 class MPIEnvironment
 {
-    public :
-
+    public:
 #ifdef BOOST_MPI_HAS_NOARG_INITIALIZATION
-    explicit MPIEnvironment (bool abort_on_exception = true) :
-        env_(abort_on_exception) {init_seed();}
+    explicit MPIEnvironment(bool abort_on_exception = true)
+        : env_(abort_on_exception)
+    {
+        init_seed();
+    }
 #endif
 
-    MPIEnvironment(int &argc, char **&argv, bool abort_on_exception = true) :
-        env_(argc, argv, abort_on_exception) {init_seed();}
+    MPIEnvironment(int &argc, char **&argv, bool abort_on_exception = true)
+        : env_(argc, argv, abort_on_exception)
+    {
+        init_seed();
+    }
 
-    private :
-
+    private:
     ::boost::mpi::environment env_;
 
-    void init_seed () const
+    void init_seed() const
     {
         ::boost::mpi::communicator world;
         Seed::result_type s(Seed::instance().get());
@@ -93,26 +101,24 @@ class MPIEnvironment
 template <typename ID>
 class MPICommunicator
 {
-    public :
-
-    static MPICommunicator<ID> &instance ()
+    public:
+    static MPICommunicator<ID> &instance()
     {
         static MPICommunicator<ID> comm;
 
         return comm;
     }
 
-    const MPI_Comm &get () const {return comm_;}
+    const MPI_Comm &get() const { return comm_; }
 
-    void set (const MPI_Comm &comm) {comm_ = comm;}
+    void set(const MPI_Comm &comm) { comm_ = comm; }
 
-    private :
-
+    private:
     MPI_Comm comm_;
 
-    MPICommunicator () : comm_(MPI_COMM_WORLD) {}
-    MPICommunicator (const MPICommunicator<ID> &);
-    MPICommunicator<ID> &operator= (const MPICommunicator<ID> &);
+    MPICommunicator() : comm_(MPI_COMM_WORLD) {}
+    MPICommunicator(const MPICommunicator<ID> &);
+    MPICommunicator<ID> &operator=(const MPICommunicator<ID> &);
 }; // class MPICommunicator
 
 } // namespace vsmc

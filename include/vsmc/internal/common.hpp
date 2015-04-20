@@ -38,38 +38,79 @@
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
 
-#include <vsmc/cxx11/cmath.hpp>
-#include <vsmc/cxx11/functional.hpp>
-#include <vsmc/cxx11/random.hpp>
-#include <vsmc/cxx11/type_traits.hpp>
-
 #include <vsmc/math/cblas.hpp>
 #include <vsmc/math/constants.hpp>
 #include <vsmc/math/vmath.hpp>
 
-#include <stdint.h>
-
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
 #include <algorithm>
+#include <numeric>
+#include <random>
+
+#include <array>
+#include <iterator>
+#include <list>
+#include <map>
+#include <tuple>
+#include <vector>
+
+#include <chrono>
 #include <exception>
+#include <functional>
+#include <limits>
+#include <memory>
+#include <type_traits>
+#include <utility>
+
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <iterator>
-#include <limits>
-#include <list>
-#include <map>
-#include <memory>
-#include <numeric>
 #include <sstream>
 #include <string>
-#include <utility>
-#include <vector>
+
+namespace vsmc
+{
+
+/// \brief Ouput of std::array
+template <typename CharT, typename Traits, typename T, std::size_t N>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
+{
+    if (!os.good())
+        return os;
+
+    for (std::size_t i = 0; i < N - 1; ++i)
+        os << ary[i] << ' ';
+    os << ary[N - 1];
+
+    return os;
+}
+
+/// \brief Input of std::array
+template <typename CharT, typename Traits, typename T, std::size_t N>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, std::array<T, N> &ary)
+{
+    if (!is.good())
+        return is;
+
+    std::array<T, N> ary_tmp;
+    for (std::size_t i = 0; i != N; ++i)
+        is >> std::ws >> ary_tmp[i];
+
+    if (is.good())
+        ary = std::move(ary_tmp);
+
+    return is;
+}
+
+} // namespace vsmc
 
 #endif // VSMC_INTERNAL_COMMON_HPP

@@ -37,6 +37,7 @@
 #include <vsmc/smp/adapter.hpp>
 #include <vsmc/smp/backend_base.hpp>
 #include <vsmc/smp/backend_seq.hpp>
+#include <vsmc/smp/backend_std.hpp>
 
 #if VSMC_HAS_CILK
 #include <vsmc/smp/backend_cilk.hpp>
@@ -52,10 +53,6 @@
 
 #if VSMC_HAS_PPL
 #include <vsmc/smp/backend_ppl.hpp>
-#endif
-
-#if VSMC_HAS_CXX11LIB_THREAD
-#include <vsmc/smp/backend_std.hpp>
 #endif
 
 #if VSMC_HAS_TBB

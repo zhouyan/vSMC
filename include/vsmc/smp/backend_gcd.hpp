@@ -35,7 +35,8 @@
 #include <vsmc/smp/backend_base.hpp>
 #include <vsmc/gcd/gcd.hpp>
 
-namespace vsmc {
+namespace vsmc
+{
 
 VSMC_DEFINE_SMP_FORWARD(GCD)
 
@@ -44,11 +45,10 @@ VSMC_DEFINE_SMP_FORWARD(GCD)
 template <typename BaseState>
 class StateGCD : public BaseState
 {
-    public :
-
+    public:
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
 
-    explicit StateGCD (size_type N) : BaseState(N) {}
+    explicit StateGCD(size_type N) : BaseState(N) {}
 }; // class StateGCD
 
 /// \brief Sampler<T>::init_type subtype usingt Apple Grand Central Dispatch
@@ -56,9 +56,8 @@ class StateGCD : public BaseState
 template <typename T, typename Derived>
 class InitializeGCD : public InitializeBase<T, Derived>
 {
-    public :
-
-    std::size_t operator() (Particle<T> &particle, void *param)
+    public:
+    std::size_t operator()(Particle<T> &particle, void *param)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
@@ -76,32 +75,31 @@ class InitializeGCD : public InitializeBase<T, Derived>
         return acc;
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(GCD, Initialize)
 
-    private :
-
+    private:
     DispatchQueue<DispatchGlobal> queue_;
     std::vector<std::size_t> accept_;
 
-    struct work_param_
-    {
-        work_param_ (InitializeGCD<T, Derived> *dptr, Particle<T> *pptr,
-                std::size_t *aptr) :
-            dispatcher(dptr), particle(pptr), accept(aptr) {}
+    struct work_param_ {
+        work_param_(InitializeGCD<T, Derived> *dptr, Particle<T> *pptr,
+            std::size_t *aptr)
+            : dispatcher(dptr), particle(pptr), accept(aptr)
+        {
+        }
 
         InitializeGCD<T, Derived> *const dispatcher;
         Particle<T> *const particle;
         std::size_t *const accept;
     };
 
-    static void work_ (void *wp, std::size_t i)
+    static void work_(void *wp, std::size_t i)
     {
         typedef typename Particle<T>::size_type size_type;
         const work_param_ *const wptr = static_cast<const work_param_ *>(wp);
         wptr->accept[i] = wptr->dispatcher->initialize_state(
-                SingleParticle<T>(static_cast<size_type>(i), wptr->particle));
+            SingleParticle<T>(static_cast<size_type>(i), wptr->particle));
     }
 }; // class InitializeGCD
 
@@ -110,9 +108,8 @@ class InitializeGCD : public InitializeBase<T, Derived>
 template <typename T, typename Derived>
 class MoveGCD : public MoveBase<T, Derived>
 {
-    public :
-
-    std::size_t operator() (std::size_t iter, Particle<T> &particle)
+    public:
+    std::size_t operator()(std::size_t iter, Particle<T> &particle)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
@@ -129,20 +126,19 @@ class MoveGCD : public MoveBase<T, Derived>
         return acc;
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(GCD, Move)
 
-    private :
-
+    private:
     DispatchQueue<DispatchGlobal> queue_;
     std::vector<std::size_t> accept_;
 
-    struct work_param_
-    {
-        work_param_ (MoveGCD<T, Derived> *dptr, Particle<T> *pptr,
-                std::size_t *aptr, std::size_t i) :
-            dispatcher(dptr), particle(pptr), accept(aptr), iter(i) {}
+    struct work_param_ {
+        work_param_(MoveGCD<T, Derived> *dptr, Particle<T> *pptr,
+            std::size_t *aptr, std::size_t i)
+            : dispatcher(dptr), particle(pptr), accept(aptr), iter(i)
+        {
+        }
 
         MoveGCD<T, Derived> *const dispatcher;
         Particle<T> *const particle;
@@ -150,12 +146,12 @@ class MoveGCD : public MoveBase<T, Derived>
         std::size_t iter;
     };
 
-    static void work_ (void *wp, std::size_t i)
+    static void work_(void *wp, std::size_t i)
     {
         typedef typename Particle<T>::size_type size_type;
         const work_param_ *const wptr = static_cast<const work_param_ *>(wp);
         wptr->accept[i] = wptr->dispatcher->move_state(wptr->iter,
-                SingleParticle<T>(static_cast<size_type>(i), wptr->particle));
+            SingleParticle<T>(static_cast<size_type>(i), wptr->particle));
     }
 }; // class MoveGCD
 
@@ -164,10 +160,9 @@ class MoveGCD : public MoveBase<T, Derived>
 template <typename T, typename Derived>
 class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
 {
-    public :
-
-    void operator() (std::size_t iter, std::size_t dim,
-            const Particle<T> &particle, double *res)
+    public:
+    void operator()(std::size_t iter, std::size_t dim,
+        const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
@@ -177,19 +172,18 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
         this->post_processor(iter, particle);
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(GCD, MonitorEval)
 
-    private :
-
+    private:
     DispatchQueue<DispatchGlobal> queue_;
 
-    struct work_param_
-    {
-        work_param_ (MonitorEvalGCD<T, Derived> *dptr, const Particle<T> *pptr,
-                double *rptr, std::size_t i, std::size_t d) :
-            dispatcher(dptr), particle(pptr), res(rptr), iter(i), dim(d) {}
+    struct work_param_ {
+        work_param_(MonitorEvalGCD<T, Derived> *dptr, const Particle<T> *pptr,
+            double *rptr, std::size_t i, std::size_t d)
+            : dispatcher(dptr), particle(pptr), res(rptr), iter(i), dim(d)
+        {
+        }
 
         MonitorEvalGCD<T, Derived> *const dispatcher;
         const Particle<T> *const particle;
@@ -198,14 +192,13 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
         std::size_t dim;
     };
 
-    static void work_ (void *wp, std::size_t i)
+    static void work_(void *wp, std::size_t i)
     {
         typedef typename Particle<T>::size_type size_type;
         const work_param_ *const wptr = static_cast<const work_param_ *>(wp);
         wptr->dispatcher->monitor_state(wptr->iter, wptr->dim,
-                ConstSingleParticle<T>(
-                    static_cast<size_type>(i), wptr->particle),
-                wptr->res + i * wptr->dim);
+            ConstSingleParticle<T>(static_cast<size_type>(i), wptr->particle),
+            wptr->res + i * wptr->dim);
     }
 }; // class MonitorEvalGCD
 
@@ -214,10 +207,9 @@ class MonitorEvalGCD : public MonitorEvalBase<T, Derived>
 template <typename T, typename Derived>
 class PathEvalGCD : public PathEvalBase<T, Derived>
 {
-    public :
-
-    double operator() (std::size_t iter, const Particle<T> &particle,
-            double *res)
+    public:
+    double operator()(
+        std::size_t iter, const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
@@ -229,19 +221,18 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
         return this->path_grid(iter, particle);
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(GCD, PathEval)
 
-    private :
-
+    private:
     DispatchQueue<DispatchGlobal> queue_;
 
-    struct work_param_
-    {
-        work_param_ (PathEvalGCD<T, Derived> *dptr, const Particle<T> *pptr,
-                double *rptr, std::size_t i) :
-            dispatcher(dptr), particle(pptr), res(rptr), iter(i) {}
+    struct work_param_ {
+        work_param_(PathEvalGCD<T, Derived> *dptr, const Particle<T> *pptr,
+            double *rptr, std::size_t i)
+            : dispatcher(dptr), particle(pptr), res(rptr), iter(i)
+        {
+        }
 
         PathEvalGCD<T, Derived> *const dispatcher;
         const Particle<T> *const particle;
@@ -249,13 +240,13 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
         std::size_t iter;
     };
 
-    static void work_ (void *wp, std::size_t i)
+    static void work_(void *wp, std::size_t i)
     {
         typedef typename Particle<T>::size_type size_type;
         const work_param_ *const wptr = static_cast<const work_param_ *>(wp);
-        wptr->res[i] = wptr->dispatcher->path_state(wptr->iter,
-                ConstSingleParticle<T>(
-                    static_cast<size_type>(i), wptr->particle));
+        wptr->res[i] = wptr->dispatcher->path_state(
+            wptr->iter, ConstSingleParticle<T>(
+                            static_cast<size_type>(i), wptr->particle));
     }
 }; // class PathEvalGCD
 

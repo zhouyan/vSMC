@@ -44,7 +44,7 @@ VSMC_RNG_TESTU01_FUNCTION(MKL_NONDETERM)
 VSMC_RNG_TESTU01_FUNCTION(MKL_NONDETERM_64)
 #endif
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     VSMC_RNG_TESTU01_OPTION_PRE;
 

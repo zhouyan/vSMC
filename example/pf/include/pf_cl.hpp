@@ -48,29 +48,28 @@
 #include <fstream>
 #include <iostream>
 
-#define PF_CV_DO(Res) cv_do(sampler, vsmc::Res, argv, "."#Res);
+#define PF_CV_DO(Res) cv_do(sampler, vsmc::Res, argv, "." #Res);
 
 static const std::size_t DataNum = 100;
 static const std::size_t ParticleNum = 1000;
 static const std::size_t StateSize = 4 * sizeof(cl_float);
 
 #ifdef VSMC_PF_CL_MPI
-typedef vsmc::StateMPI<vsmc::StateCL<StateSize, cl_float> > cv_base;
+typedef vsmc::StateMPI<vsmc::StateCL<StateSize, cl_float>> cv_base;
 #else
 typedef vsmc::StateCL<StateSize, cl_float> cv_base;
 #endif
 
 class cv : public cv_base
 {
-    public :
+    public:
+    cv(size_type N) : cv_base(N), counter_(N) {}
 
-    cv (size_type N) : cv_base(N), counter_(N) {}
+    const cl::Buffer &obs_x() const { return obs_x_.data(); }
+    const cl::Buffer &obs_y() const { return obs_y_.data(); }
+    const cl::Buffer &counter() const { return counter_.data(); }
 
-    const cl::Buffer &obs_x () const {return obs_x_.data();}
-    const cl::Buffer &obs_y () const {return obs_y_.data();}
-    const cl::Buffer &counter () const {return counter_.data();}
-
-    void read_data (const char *file)
+    void read_data(const char *file)
     {
         if (!file)
             return;
@@ -88,8 +87,7 @@ class cv : public cv_base
         manager().write_buffer(obs_y_.data(), DataNum, &y[0]);
     }
 
-    private :
-
+    private:
     vsmc::CLBuffer<cl_float> obs_x_;
     vsmc::CLBuffer<cl_float> obs_y_;
     vsmc::CLBuffer<struct r123array4x32> counter_;
@@ -97,75 +95,71 @@ class cv : public cv_base
 
 class cv_init : public vsmc::InitializeCL<cv>
 {
-    public :
+    public:
+    void initialize_state(std::string &kernel_name)
+    {
+        kernel_name = std::string("cv_init");
+    }
 
-    void initialize_state (std::string &kernel_name)
-    {kernel_name = std::string("cv_init");}
+    void initialize_param(vsmc::Particle<cv> &particle, void *file)
+    {
+        particle.value().read_data(static_cast<const char *>(file));
+    }
 
-    void initialize_param (vsmc::Particle<cv> &particle, void *file)
-    {particle.value().read_data(static_cast<const char *>(file));}
-
-    void pre_processor (vsmc::Particle<cv> &particle)
+    void pre_processor(vsmc::Particle<cv> &particle)
     {
         log_weight_.resize(particle.size());
         log_weight_buffer_.resize(particle.size());
 
-        vsmc::cl_set_kernel_args(
-                kernel(), kernel_args_offset(),
-                log_weight_buffer_.data(),
-                particle.value().obs_x(),
-                particle.value().obs_y(),
-                particle.value().counter());
+        vsmc::cl_set_kernel_args(kernel(), kernel_args_offset(),
+            log_weight_buffer_.data(), particle.value().obs_x(),
+            particle.value().obs_y(), particle.value().counter());
     }
 
-    void post_processor (vsmc::Particle<cv> &particle)
+    void post_processor(vsmc::Particle<cv> &particle)
     {
         particle.value().manager().read_buffer(
-                log_weight_buffer_.data(), particle.size(), &log_weight_[0]);
+            log_weight_buffer_.data(), particle.size(), &log_weight_[0]);
         particle.weight_set().set_log_weight(&log_weight_[0]);
     }
 
-    private :
-
+    private:
     vsmc::CLBuffer<cl_float> log_weight_buffer_;
     std::vector<cl_float> log_weight_;
 };
 
 class cv_move : public vsmc::MoveCL<cv>
 {
-    public :
+    public:
+    void move_state(std::size_t, std::string &kernel_name)
+    {
+        kernel_name = std::string("cv_move");
+    }
 
-    void move_state (std::size_t, std::string &kernel_name)
-    {kernel_name = std::string("cv_move");}
-
-    void pre_processor (std::size_t, vsmc::Particle<cv> &particle)
+    void pre_processor(std::size_t, vsmc::Particle<cv> &particle)
     {
         inc_weight_.resize(particle.size());
         inc_weight_buffer_.resize(particle.size());
 
-        vsmc::cl_set_kernel_args(
-                kernel(), kernel_args_offset(),
-                inc_weight_buffer_.data(),
-                particle.value().obs_x(),
-                particle.value().obs_y(),
-                particle.value().counter());
+        vsmc::cl_set_kernel_args(kernel(), kernel_args_offset(),
+            inc_weight_buffer_.data(), particle.value().obs_x(),
+            particle.value().obs_y(), particle.value().counter());
     }
 
-    void post_processor (std::size_t, vsmc::Particle<cv> &particle)
+    void post_processor(std::size_t, vsmc::Particle<cv> &particle)
     {
         particle.value().manager().read_buffer(
-                inc_weight_buffer_.data(), particle.size(), &inc_weight_[0]);
+            inc_weight_buffer_.data(), particle.size(), &inc_weight_[0]);
         particle.weight_set().add_log_weight(&inc_weight_[0]);
     }
 
-    private :
-
+    private:
     vsmc::CLBuffer<cl_float> inc_weight_buffer_;
     std::vector<cl_float> inc_weight_;
 };
 
-inline void cv_do (vsmc::Sampler<cv> &sampler, vsmc::ResampleScheme res,
-        char **argv, const std::string &name)
+inline void cv_do(vsmc::Sampler<cv> &sampler, vsmc::ResampleScheme res,
+    char **argv, const std::string &name)
 {
     sampler.resample_scheme(res);
     sampler.resample_threshold(0.5);

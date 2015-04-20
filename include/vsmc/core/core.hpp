@@ -41,9 +41,6 @@
 #include <vsmc/core/weight_set.hpp>
 
 #include <vsmc/core/state_matrix.hpp>
-
-#if VSMC_HAS_CXX11LIB_TUPLE
 #include <vsmc/core/state_tuple.hpp>
-#endif
 
 #endif // VSMC_CORE_CORE_HPP

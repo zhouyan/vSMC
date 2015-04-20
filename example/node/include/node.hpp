@@ -32,11 +32,13 @@
 #ifndef VSMC_EXAMPLE_NODE_HPP
 #define VSMC_EXAMPLE_NODE_HPP
 
-#define BASE_STATE   vsmc::State@SMP@
-#define BASE_INIT    vsmc::Initialize@SMP@
-#define BASE_MOVE    vsmc::Move@SMP@
+// clang-format off
+#define BASE_STATE vsmc::State@SMP@
+#define BASE_INIT vsmc::Initialize@SMP@
+#define BASE_MOVE vsmc::Move@SMP@
 #define BASE_MONITOR vsmc::MonitorEval@SMP@
-#define BASE_PATH    vsmc::PathEval@SMP@
+#define BASE_PATH vsmc::PathEval@SMP@
+// clang-format on
 
 #include <vsmc/smp/backend_@smp@.hpp>
 

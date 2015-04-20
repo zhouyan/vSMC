@@ -42,20 +42,20 @@
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable:4521)
+#pragma warning(disable : 4521)
 #endif
 #include <Random123/conventional/Engine.hpp>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     VSMC_RNG_TEST_PRE(rng_r123);
 
 #if VSMC_HAS_AES_NI
     VSMC_RNG_TEST(r123::Engine<r123::AESNI4x32>);
-    VSMC_RNG_TEST(r123::Engine<r123::ARS4x32_R<7> >);
+    VSMC_RNG_TEST(r123::Engine<r123::ARS4x32_R<7>>);
 #endif
     VSMC_RNG_TEST(r123::Engine<r123::Philox2x32>);
     VSMC_RNG_TEST(r123::Engine<r123::Philox4x32>);

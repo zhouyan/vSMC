@@ -59,9 +59,6 @@ CONFIGURE_FILE (
     ${PROJECT_SOURCE_DIR}/config/main.md.in
     ${PROJECT_SOURCE_DIR}/doc/main.md)
 
-# Generate headers
-INCLUDE (vSMCCLSetKernelArgs)
-
 # Installation
 IF (NOT VSMC_INSTALL_INC_DIR)
     SET (VSMC_INSTALL_INC_DIR include)

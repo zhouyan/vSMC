@@ -41,29 +41,28 @@
 #include <string>
 #include <vector>
 
-#define VSMC_RNG_TEST_PRE(prog) \
+#define VSMC_RNG_TEST_PRE(prog)                                              \
     std::size_t N = 1000000;                                                 \
     std::string prog_name(#prog);                                            \
-    if (argc > 1) N = static_cast<std::size_t>(std::atoi(argv[1]));          \
+    if (argc > 1)                                                            \
+        N = static_cast<std::size_t>(std::atoi(argv[1]));                    \
     std::vector<std::string> names;                                          \
     std::vector<std::size_t> size;                                           \
     std::vector<vsmc::StopWatch> sw;                                         \
     std::vector<std::size_t> bytes;                                          \
     std::vector<uint64_t> cycles;
 
-#define VSMC_RNG_TEST(Engine) \
+#define VSMC_RNG_TEST(Engine)                                                \
     rng_test<Engine>(N, #Engine, names, size, sw, bytes, cycles);
 
-#define VSMC_RNG_TEST_POST \
+#define VSMC_RNG_TEST_POST                                                   \
     rng_output_sw(prog_name, names, size, sw, bytes, cycles);
 
 template <typename Eng>
-inline void rng_test (std::size_t N, const std::string &name,
-        std::vector<std::string> &names,
-        std::vector<std::size_t> &size,
-        std::vector<vsmc::StopWatch> &sw,
-        std::vector<std::size_t> &bytes,
-        std::vector<uint64_t> &cycles)
+inline void rng_test(std::size_t N, const std::string &name,
+    std::vector<std::string> &names, std::vector<std::size_t> &size,
+    std::vector<vsmc::StopWatch> &sw, std::vector<std::size_t> &bytes,
+    std::vector<uint64_t> &cycles)
 {
     Eng eng;
     vsmc::StopWatch watch;
@@ -75,7 +74,8 @@ inline void rng_test (std::size_t N, const std::string &name,
 
     watch.start();
     counter.start();
-    for (std::size_t i = 0; i != N; ++i) eng();
+    for (std::size_t i = 0; i != N; ++i)
+        eng();
     counter.stop();
     watch.stop();
     std::ofstream rnd("rnd");
@@ -89,20 +89,20 @@ inline void rng_test (std::size_t N, const std::string &name,
     cycles.push_back(counter.cycles());
 }
 
-inline void rng_output_sw (const std::string &prog_name,
-        const std::vector<std::string> &names,
-        std::vector<std::size_t> &size,
-        const std::vector<vsmc::StopWatch> &sw,
-        const std::vector<std::size_t> &bytes,
-        std::vector<uint64_t> &cycles)
+inline void rng_output_sw(const std::string &prog_name,
+    const std::vector<std::string> &names, std::vector<std::size_t> &size,
+    const std::vector<vsmc::StopWatch> &sw,
+    const std::vector<std::size_t> &bytes, std::vector<uint64_t> &cycles)
 {
     std::size_t M = names.size();
-    if (M == 0) return;
-    if (sw.size() != M) return;
+    if (M == 0)
+        return;
+    if (sw.size() != M)
+        return;
 
     std::cout << std::string(90, '=') << std::endl;
-    std::cout << std::left  << std::setw(40) << prog_name;
-    std::cout << std::right << std::setw( 5) << "Size";
+    std::cout << std::left << std::setw(40) << prog_name;
+    std::cout << std::right << std::setw(5) << "Size";
     std::cout << std::right << std::setw(15) << "Time (ms)";
     std::cout << std::right << std::setw(15) << "GB/s";
     std::cout << std::right << std::setw(15) << "cpB";
@@ -115,8 +115,8 @@ inline void rng_output_sw (const std::string &prog_name,
         double c = static_cast<double>(cycles[i]);
         double gbps = b / time * 1e-6;
         double cpB = c / b;
-        std::cout << std::left  << std::setw(40) << names[i];
-        std::cout << std::right << std::setw( 5) << size[i];
+        std::cout << std::left << std::setw(40) << names[i];
+        std::cout << std::right << std::setw(5) << size[i];
         std::cout << std::right << std::setw(15) << std::fixed << time;
         std::cout << std::right << std::setw(15) << std::fixed << gbps;
         std::cout << std::right << std::setw(15) << std::fixed << cpB;

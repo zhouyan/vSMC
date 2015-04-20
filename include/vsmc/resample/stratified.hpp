@@ -34,12 +34,13 @@
 
 #include <vsmc/resample/common.hpp>
 
-namespace vsmc {
+namespace vsmc
+{
 
-namespace internal {
+namespace internal
+{
 
-typedef cxx11::integral_constant<ResampleScheme, Stratified>
-    ResampleStratified;
+typedef std::integral_constant<ResampleScheme, Stratified> ResampleStratified;
 
 } // namespace vsmc::internal
 
@@ -48,11 +49,10 @@ typedef cxx11::integral_constant<ResampleScheme, Stratified>
 template <>
 class Resample<internal::ResampleStratified>
 {
-    public :
-
+    public:
     template <typename IntType, typename RngType>
-    void operator() (std::size_t M, std::size_t N, RngType &rng,
-            const double *weight, IntType *replication)
+    void operator()(std::size_t M, std::size_t N, RngType &rng,
+        const double *weight, IntType *replication)
     {
         U01SequenceStratified<RngType> u01seq(N, rng);
         internal::inversion(M, N, weight, u01seq, replication);

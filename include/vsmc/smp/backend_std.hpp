@@ -36,7 +36,8 @@
 #include <vsmc/smp/internal/parallel_work.hpp>
 #include <vsmc/thread/thread.hpp>
 
-namespace vsmc {
+namespace vsmc
+{
 
 VSMC_DEFINE_SMP_FORWARD(STD)
 
@@ -45,20 +46,19 @@ VSMC_DEFINE_SMP_FORWARD(STD)
 template <typename BaseState>
 class StateSTD : public BaseState
 {
-    public :
-
+    public:
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
 
-    explicit StateSTD (size_type N) : BaseState(N) {}
+    explicit StateSTD(size_type N) : BaseState(N) {}
 
     template <typename IntType>
-    void copy (size_type N, const IntType *copy_from)
+    void copy(size_type N, const IntType *copy_from)
     {
         VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(STD);
 
         parallel_for(BlockedRange<size_type>(0, N),
-                internal::ParallelCopyParticle<
-                StateSTD<BaseState>, IntType>(this, copy_from));
+            internal::ParallelCopyParticle<StateSTD<BaseState>, IntType>(
+                         this, copy_from));
     }
 }; // class StateSTD
 
@@ -67,24 +67,22 @@ class StateSTD : public BaseState
 template <typename T, typename Derived>
 class InitializeSTD : public InitializeBase<T, Derived>
 {
-    public :
-
-    std::size_t operator() (Particle<T> &particle, void *param)
+    public:
+    std::size_t operator()(Particle<T> &particle, void *param)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
-        internal::ParallelInitializeState<T, InitializeSTD<T, Derived> > work(
-                this, &particle);
+        internal::ParallelInitializeState<T, InitializeSTD<T, Derived>> work(
+            this, &particle);
         parallel_reduce(BlockedRange<size_type>(0, N), work);
         this->post_processor(particle);
 
         return work.accept();
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(STD, Initialize)
 }; // class InitializeSTD
 
@@ -93,23 +91,21 @@ class InitializeSTD : public InitializeBase<T, Derived>
 template <typename T, typename Derived>
 class MoveSTD : public MoveBase<T, Derived>
 {
-    public :
-
-    std::size_t operator() (std::size_t iter, Particle<T> &particle)
+    public:
+    std::size_t operator()(std::size_t iter, Particle<T> &particle)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
-        internal::ParallelMoveState<T, MoveSTD<T, Derived> > work(
-                this, iter, &particle);
+        internal::ParallelMoveState<T, MoveSTD<T, Derived>> work(
+            this, iter, &particle);
         parallel_reduce(BlockedRange<size_type>(0, N), work);
         this->post_processor(iter, particle);
 
         return work.accept();
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(STD, Move)
 }; // class MoveSTD
 
@@ -118,22 +114,20 @@ class MoveSTD : public MoveBase<T, Derived>
 template <typename T, typename Derived>
 class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 {
-    public :
-
-    void operator() (std::size_t iter, std::size_t dim,
-            const Particle<T> &particle, double *res)
+    public:
+    void operator()(std::size_t iter, std::size_t dim,
+        const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         parallel_for(BlockedRange<size_type>(0, N),
-                internal::ParallelMonitorState<T, MonitorEvalSTD<T, Derived> >(
-                    this, iter, dim, &particle, res));
+            internal::ParallelMonitorState<T, MonitorEvalSTD<T, Derived>>(
+                         this, iter, dim, &particle, res));
         this->post_processor(iter, particle);
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(STD, MonitorEval)
 }; // class MonitorEvalSTD
 
@@ -142,24 +136,22 @@ class MonitorEvalSTD : public MonitorEvalBase<T, Derived>
 template <typename T, typename Derived>
 class PathEvalSTD : public PathEvalBase<T, Derived>
 {
-    public :
-
-    double operator() (std::size_t iter, const Particle<T> &particle,
-            double *res)
+    public:
+    double operator()(
+        std::size_t iter, const Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         parallel_for(BlockedRange<size_type>(0, N),
-                internal::ParallelPathState<T, PathEvalSTD<T, Derived> >(
-                    this, iter, &particle, res));
+            internal::ParallelPathState<T, PathEvalSTD<T, Derived>>(
+                         this, iter, &particle, res));
         this->post_processor(iter, particle);
 
         return this->path_grid(iter, particle);
     }
 
-    protected :
-
+    protected:
     VSMC_DEFINE_SMP_IMPL_COPY(STD, PathEval)
 }; // PathEvalSTD
 

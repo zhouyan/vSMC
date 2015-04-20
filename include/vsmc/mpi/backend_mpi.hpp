@@ -38,59 +38,60 @@
 #include <vsmc/mpi/mpi_manager.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 
-#define VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH \
-    VSMC_RUNTIME_ASSERT((N == global_size_),                                 \
-            ("**StateMPI::copy** SIZE MISMATCH"))
+#define VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH               \
+    VSMC_RUNTIME_ASSERT(                                                     \
+        (N == global_size_), ("**StateMPI::copy** SIZE MISMATCH"))
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief Particle::weight_set_type subtype using MPI
 /// \ingroup MPI
 template <typename WeightSetBase, typename ID>
 class WeightSetMPI : public WeightSetBase
 {
-    public :
-
+    public:
     typedef typename WeightSetBase::size_type size_type;
     typedef ID mpi_id;
 
-    explicit WeightSetMPI (size_type N) :
-        WeightSetBase(N), world_(MPICommunicator<ID>::instance().get(),
-                ::boost::mpi::comm_duplicate), resample_size_(0)
+    explicit WeightSetMPI(size_type N)
+        : WeightSetBase(N),
+          world_(MPICommunicator<ID>::instance().get(),
+              ::boost::mpi::comm_duplicate),
+          resample_size_(0)
     {
-        ::boost::mpi::all_reduce(world_, N, resample_size_,
-                std::plus<size_type>());
+        ::boost::mpi::all_reduce(
+            world_, N, resample_size_, std::plus<size_type>());
         this->set_ess(static_cast<double>(resample_size_));
     }
 
-    size_type resample_size () const {return resample_size_;}
+    size_type resample_size() const { return resample_size_; }
 
-    void read_resample_weight (double *first) const
+    void read_resample_weight(double *first) const
     {
         gather_resample_weight();
         if (world_.rank() == 0) {
             const std::size_t S = static_cast<std::size_t>(world_.size());
             for (std::size_t r = 0; r != S; ++r) {
-                first = std::copy(weight_all_[r].begin(), weight_all_[r].end(),
-                        first);
+                first = std::copy(
+                    weight_all_[r].begin(), weight_all_[r].end(), first);
             }
         }
     }
 
-    const double *resample_weight_data () const
+    const double *resample_weight_data() const
     {
         resample_weight_.resize(resample_size_);
         read_resample_weight(&resample_weight_[0]);
 
-        return world_.rank() == 0 ? &resample_weight_[0] : VSMC_NULLPTR;
+        return world_.rank() == 0 ? &resample_weight_[0] : nullptr;
     }
 
     /// \brief A duplicated MPI communicator for this weight set object
-    const ::boost::mpi::communicator &world () const {return world_;}
+    const ::boost::mpi::communicator &world() const { return world_; }
 
-    protected :
-
-    void normalize_log_weight ()
+    protected:
+    void normalize_log_weight()
     {
         const size_type N = static_cast<size_type>(this->size());
         double *const lwptr = this->mutable_log_weight_data();
@@ -101,12 +102,12 @@ class WeightSetMPI : public WeightSetBase
                 lmax_weight = lwptr[i];
         double gmax_weight = 0;
         ::boost::mpi::all_reduce(world_, lmax_weight, gmax_weight,
-                ::boost::mpi::maximum<double>());
+            ::boost::mpi::maximum<double>());
         for (size_type i = 0; i != N; ++i)
             lwptr[i] -= gmax_weight;
     }
 
-    void normalize_weight ()
+    void normalize_weight()
     {
         const size_type N = static_cast<size_type>(this->size());
         double *const wptr = this->mutable_weight_data();
@@ -129,12 +130,12 @@ class WeightSetMPI : public WeightSetBase
         this->set_ess(gess);
     }
 
-    double compute_ess (const double *first, bool use_log) const
+    double compute_ess(const double *first, bool use_log) const
     {
         using std::exp;
 
         const size_type N = static_cast<size_type>(this->size());
-        std::vector<double, AlignedAllocator<double> > buffer(N);
+        std::vector<double, AlignedAllocator<double>> buffer(N);
         double *const bptr = &buffer[0];
 
         if (use_log) {
@@ -147,7 +148,7 @@ class WeightSetMPI : public WeightSetBase
                     lmax_weight = bptr[i];
             double gmax_weight = 0;
             ::boost::mpi::all_reduce(world_, lmax_weight, gmax_weight,
-                    ::boost::mpi::maximum<double>());
+                ::boost::mpi::maximum<double>());
             for (size_type i = 0; i != N; ++i)
                 bptr[i] -= gmax_weight;
             for (size_type i = 0; i != N; ++i)
@@ -176,14 +177,14 @@ class WeightSetMPI : public WeightSetBase
         return 1 / gess;
     }
 
-    double compute_cess (const double *first, bool use_log) const
+    double compute_cess(const double *first, bool use_log) const
     {
         using std::exp;
 
         const size_type N = static_cast<size_type>(this->size());
         const double *bptr = first;
         const double *const wptr = this->weight_data();
-        std::vector<double, AlignedAllocator<double> > buffer;
+        std::vector<double, AlignedAllocator<double>> buffer;
         if (use_log) {
             buffer.resize(N);
             double *const cptr = &buffer[0];
@@ -207,15 +208,14 @@ class WeightSetMPI : public WeightSetBase
         return gabove * gabove / gbelow;
     }
 
-    private :
-
+    private:
     ::boost::mpi::communicator world_;
     size_type resample_size_;
     mutable std::vector<double> resample_weight_;
     mutable std::vector<double> weight_;
-    mutable std::vector<std::vector<double> > weight_all_;
+    mutable std::vector<std::vector<double>> weight_all_;
 
-    void gather_resample_weight () const
+    void gather_resample_weight() const
     {
         weight_.resize(this->size());
         this->read_weight(&weight_[0]);
@@ -231,18 +231,20 @@ class WeightSetMPI : public WeightSetBase
 template <typename BaseState, typename ID>
 class StateMPI : public BaseState
 {
-    public :
-
+    public:
     typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
     typedef WeightSetMPI<typename traits::WeightSetTypeTrait<BaseState>::type,
-            ID> weight_set_type;
+        ID> weight_set_type;
     typedef ID mpi_id;
 
-    explicit StateMPI (size_type N) :
-        BaseState(N), world_(MPICommunicator<ID>::instance().get(),
-                ::boost::mpi::comm_duplicate),
-        offset_(0), global_size_(0), size_equal_(true),
-        copy_tag_(::boost::mpi::environment::max_tag())
+    explicit StateMPI(size_type N)
+        : BaseState(N),
+          world_(MPICommunicator<ID>::instance().get(),
+              ::boost::mpi::comm_duplicate),
+          offset_(0),
+          global_size_(0),
+          size_equal_(true),
+          copy_tag_(::boost::mpi::environment::max_tag())
     {
         ::boost::mpi::all_gather(world_, N, size_all_);
         const std::size_t R = static_cast<std::size_t>(world_.rank());
@@ -269,9 +271,11 @@ class StateMPI : public BaseState
     /// The `BaseState` type is required to have the following members -
     /// `state_pack_type`: A type that used to pack state values. It shall be
     /// serializable. That is, a `state_pack_type` object is acceptable by
-    /// `boost::mpi::communicator::send` etc. Both StateMatrix::state_pack_type
+    /// `boost::mpi::communicator::send` etc. Both
+    /// StateMatrix::state_pack_type
     /// and StateTuple::state_pack_type satisfy this requirement if their
-    /// template type parameter types are serializable. For user defined types,
+    /// template type parameter types are serializable. For user defined
+    /// types,
     /// see document of Boost.Serialize of how to serialize a class object.
     /// - `state_pack`
     /// ~~~{.cpp}
@@ -298,7 +302,8 @@ class StateMPI : public BaseState
     /// of each particle. Particles with replication zero need to copy other
     /// particles. The vector of the number of replications is transfered to
     /// `copy_from` by Particle::resample, and it is generated in such a way
-    /// that each particle will copy from somewhere close to itself. Therefore,
+    /// that each particle will copy from somewhere close to itself.
+    /// Therefore,
     /// transferring between nodes is minimized.
     ///
     /// This default implementation perform three stages of copy.
@@ -314,10 +319,11 @@ class StateMPI : public BaseState
     /// - Stage one is not needed or too expansive
     /// - Stage three is too expansive. The default implementation assumes
     /// `this->state_pack(id)` and `this->state_unpack(id, pack) is not too
-    /// expansive, and inter-node copy is rare anyway. If this is not the case,
+    /// expansive, and inter-node copy is rare anyway. If this is not the
+    /// case,
     /// then it can be a performance bottle neck.
     template <typename IntType>
-    void copy (size_type N, const IntType *copy_from)
+    void copy(size_type N, const IntType *copy_from)
     {
         VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH;
 
@@ -332,18 +338,18 @@ class StateMPI : public BaseState
     }
 
     /// \brief A duplicated MPI communicator for this state value object
-    const ::boost::mpi::communicator &world () const {return world_;}
+    const ::boost::mpi::communicator &world() const { return world_; }
 
     /// \brief The number of particles on all nodes
-    size_type global_size () const {return global_size_;}
+    size_type global_size() const { return global_size_; }
 
     /// \brief The number of particles on nodes with ranks less than the rank
     /// of this node.
-    size_type offset () const {return offset_;}
+    size_type offset() const { return offset_; }
 
     /// \brief Given a global particle id return the rank of the node it
     /// belongs
-    int rank (size_type global_id) const
+    int rank(size_type global_id) const
     {
         if (size_equal_)
             return static_cast<int>(global_id / this->size());
@@ -359,12 +365,14 @@ class StateMPI : public BaseState
     }
 
     /// \brief Given a global particle id check if it is on this `node`
-    bool is_local (size_type global_id) const
-    {return global_id >= offset_ && global_id < this->size() + offset_;}
+    bool is_local(size_type global_id) const
+    {
+        return global_id >= offset_ && global_id < this->size() + offset_;
+    }
 
     /// \brief Transfer a global particle id into a local particle id
     /// (possibly not on this node, use `rank` to get the rank of its node)
-    size_type local_id (size_type global_id) const
+    size_type local_id(size_type global_id) const
     {
         if (size_equal_) {
             return global_id -
@@ -384,12 +392,14 @@ class StateMPI : public BaseState
 
     /// \brief Transfer a local particle id *on this node* into a global
     /// particle id
-    size_type global_id (size_type local_id) const {return local_id + offset_;}
+    size_type global_id(size_type local_id) const
+    {
+        return local_id + offset_;
+    }
 
-    protected :
-
+    protected:
     /// \brief The MPI recv/send tag used by `copy_inter_node`
-    int copy_tag () const {return copy_tag_;}
+    int copy_tag() const { return copy_tag_; }
 
     /// \brief Perform local copy
     ///
@@ -399,7 +409,8 @@ class StateMPI : public BaseState
     /// \param copy_send All particles that shall be send from this node
     ///
     /// \details
-    /// `copy_from` is a pointer that can access a vector of size `N`. For each
+    /// `copy_from` is a pointer that can access a vector of size `N`. For
+    /// each
     /// `to` in the range `0` to `N - 1`
     /// - If both `to` and `from = copy_from[to]` are particles on this node,
     /// use `BaseState::copy` to copy the parties. Otherwise,
@@ -414,9 +425,9 @@ class StateMPI : public BaseState
     ///
     /// It is important the the vector accessed through `copy_from_first` is
     /// the same for all nodes. Otherwise the behavior is undefined.
-    void copy_this_node (size_type N, const size_type *copy_from,
-            std::vector<std::pair<int, size_type> > &copy_recv,
-            std::vector<std::pair<int, size_type> > &copy_send)
+    void copy_this_node(size_type N, const size_type *copy_from,
+        std::vector<std::pair<int, size_type>> &copy_recv,
+        std::vector<std::pair<int, size_type>> &copy_send)
     {
         using std::advance;
 
@@ -453,36 +464,31 @@ class StateMPI : public BaseState
     ///
     /// \param copy_recv The output vector `copy_recv` from `copy_this_node`
     /// \param copy_send The output vector `copy_send` from `copy_this_node`
-    void copy_inter_node (
-            const std::vector<std::pair<int, size_type> > &copy_recv,
-            const std::vector<std::pair<int, size_type> > &copy_send)
+    void copy_inter_node(
+        const std::vector<std::pair<int, size_type>> &copy_recv,
+        const std::vector<std::pair<int, size_type>> &copy_send)
     {
         const int rank_this = world_.rank();
         for (int r = 0; r != world_.size(); ++r) {
             if (rank_this == r) {
                 for (std::size_t i = 0; i != copy_recv.size(); ++i) {
                     world_.recv(copy_recv[i].first, copy_tag_, pack_recv_);
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-                    this->state_unpack(copy_recv[i].second,
-                            cxx11::move(pack_recv_));
-#else
-                    this->state_unpack(copy_recv[i].second,
-                            pack_recv_);
-#endif
+                    this->state_unpack(
+                        copy_recv[i].second, std::move(pack_recv_));
                 }
             } else {
                 for (std::size_t i = 0; i != copy_send.size(); ++i) {
                     if (copy_send[i].first == r) {
                         pack_send_ = this->state_pack(copy_send[i].second);
-                        world_.send(copy_send[i].first, copy_tag_, pack_send_);
+                        world_.send(
+                            copy_send[i].first, copy_tag_, pack_send_);
                     }
                 }
             }
         }
     }
 
-    private :
-
+    private:
     ::boost::mpi::communicator world_;
     size_type offset_;
     size_type global_size_;
@@ -491,23 +497,27 @@ class StateMPI : public BaseState
     int copy_tag_;
     std::vector<size_type> copy_from_;
     std::vector<size_type> copy_from_this_;
-    std::vector<std::pair<int, size_type> > copy_recv_;
-    std::vector<std::pair<int, size_type> > copy_send_;
+    std::vector<std::pair<int, size_type>> copy_recv_;
+    std::vector<std::pair<int, size_type>> copy_send_;
     typename BaseState::state_pack_type pack_recv_;
     typename BaseState::state_pack_type pack_send_;
 
     VSMC_DEFINE_METHOD_CHECKER(copy_pre_processor, void, ())
     VSMC_DEFINE_METHOD_CHECKER(copy_post_processor, void, ())
 
-    void copy_pre_processor_dispatch (cxx11::true_type)
-    {BaseState::copy_pre_processor();}
+    void copy_pre_processor_dispatch(std::true_type)
+    {
+        BaseState::copy_pre_processor();
+    }
 
-    void copy_pre_processor_dispatch (cxx11::false_type) {}
+    void copy_pre_processor_dispatch(std::false_type) {}
 
-    void copy_post_processor_dispatch (cxx11::true_type)
-    {BaseState::copy_post_processor();}
+    void copy_post_processor_dispatch(std::true_type)
+    {
+        BaseState::copy_post_processor();
+    }
 
-    void copy_post_processor_dispatch (cxx11::false_type) {}
+    void copy_post_processor_dispatch(std::false_type) {}
 }; // class StateMPI
 
 } // namespace vsmc

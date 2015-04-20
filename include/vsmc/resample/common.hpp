@@ -48,15 +48,17 @@
 #define VSMC_RESAMPLE_RNG_TYPE ::vsmc::Threefry4x64
 #endif
 
-namespace vsmc {
+namespace vsmc
+{
 
-namespace internal {
+namespace internal
+{
 
 // Given N sorted U01 random variates
 // Compute M replication numbers based on M weights
 template <typename IntType, typename U01SeqType>
-inline void inversion (std::size_t M, std::size_t N,
-        const double *weight, U01SeqType &u01seq, IntType *replication)
+inline void inversion(std::size_t M, std::size_t N, const double *weight,
+    U01SeqType &u01seq, IntType *replication)
 {
     if (M == 0)
         return;
@@ -85,8 +87,8 @@ inline void inversion (std::size_t M, std::size_t N,
 
 // Given replication numbers, transfer them to copy_from index
 template <typename IntType1, typename IntType2>
-inline void cfrp_trans (std::size_t M, std::size_t N,
-        const IntType1 *replication, IntType2 *copy_from)
+inline void cfrp_trans(std::size_t M, std::size_t N,
+    const IntType1 *replication, IntType2 *copy_from)
 {
     if (M == N) {
         IntType1 time = 0;
@@ -128,24 +130,27 @@ enum ResampleScheme {
     Systematic,         ///< Systematic resampling
     ResidualStratified, ///< Stratified resampling on residuals
     ResidualSystematic  ///< Systematic resampling on residuals
-}; // enum ResampleScheme
+};                      // enum ResampleScheme
 
 /// \brief Resample forward decleration
 /// \ingroup Resample
-template <typename> class Resample;
+template <typename>
+class Resample;
 
 /// \brief Resampling type of the built-in schemes
 /// \ingroup Resample
 template <ResampleScheme Scheme>
-struct ResampleType
-{typedef Resample<cxx11::integral_constant<ResampleScheme, Scheme> > type;};
+struct ResampleType {
+    typedef Resample<std::integral_constant<ResampleScheme, Scheme>> type;
+};
 
-namespace traits {
+namespace traits
+{
 
 /// \brief Particle::resample_rng_type trait
 /// \ingroup Traits
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(ResampleRngType, resample_rng_type,
-        VSMC_RESAMPLE_RNG_TYPE)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(
+    ResampleRngType, resample_rng_type, VSMC_RESAMPLE_RNG_TYPE)
 
 } // namespace vsmc::traits
 

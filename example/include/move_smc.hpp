@@ -35,20 +35,22 @@
 template <typename T, typename Alpha, typename Proposal>
 class move_smc
 {
-    public :
-
+    public:
     typedef Alpha alpha_type;
     typedef Proposal proposal_type;
 
-    move_smc (
-            typename Alpha::value_type alpha_config = 0,
-            typename Proposal::value_type proposal_config = 0) :
-        alpha_(alpha_config), proposal_(proposal_config) {}
+    move_smc(typename Alpha::value_type alpha_config = 0,
+        typename Proposal::value_type proposal_config = 0)
+        : alpha_(alpha_config), proposal_(proposal_config)
+    {
+    }
 
-    move_smc (const Alpha &alpha, const Proposal &proposal) :
-        alpha_(alpha), proposal_(proposal) {}
+    move_smc(const Alpha &alpha, const Proposal &proposal)
+        : alpha_(alpha), proposal_(proposal)
+    {
+    }
 
-    std::size_t operator() (std::size_t iter, vsmc::Particle<T> &particle)
+    std::size_t operator()(std::size_t iter, vsmc::Particle<T> &particle)
     {
         using std::exp;
         using std::log;
@@ -63,7 +65,7 @@ class move_smc
         particle.weight_set().read_weight(&weight_[0]);
         double sum = 0;
         for (typename vsmc::Particle<T>::size_type i = 0;
-                i != particle.size(); ++i) {
+             i != particle.size(); ++i) {
             inc_weight_[i] = particle.value().state(i, 0).log_likelihood() *
                 particle.value().state(0, 0).alpha_inc();
             sum += weight_[i] * exp(inc_weight_[i]);
@@ -74,8 +76,7 @@ class move_smc
         return 0;
     }
 
-    private :
-
+    private:
     Alpha alpha_;
     Proposal proposal_;
     std::vector<double> weight_;

@@ -35,31 +35,39 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01.h>
 
-#define VSMC_RUNTIME_ASSERT_RNG_U01_U01_SEQUENCE(Method) \
+#define VSMC_RUNTIME_ASSERT_RNG_U01_U01_SEQUENCE(Method)                     \
     VSMC_RUNTIME_ASSERT((n < N_ && (n == n_ || n == n_ + 1 || n_ == N_)),    \
-            ("**U01Sequence"#Method"::operator[]** INVALID INDEX"))
+        ("**U01Sequence" #Method "::operator[]** INVALID INDEX"))
 
-#define VSMC_DEFINE_RNG_U01(FPType, Left, Right, left, right, UBits, FBits) \
-template <> struct U01<Left, Right, uint##UBits##_t, FPType>                 \
-{                                                                            \
-    FPType operator() (uint##UBits##_t u) const                              \
-    {return ::u01_##left##_##right##_##UBits##_##FBits(u);}                  \
+#define VSMC_DEFINE_RNG_U01(FPType, Left, Right, left, right, UBits, FBits)  \
+    template <>                                                              \
+    struct U01<Left, Right, uint##UBits##_t, FPType> {                       \
+        FPType operator()(uint##UBits##_t u) const                           \
+        {                                                                    \
+            return ::u01_##left##_##right##_##UBits##_##FBits(u);            \
+        }                                                                    \
                                                                              \
-    static FPType uint2fp (uint##UBits##_t u)                                \
-    {return ::u01_##left##_##right##_##UBits##_##FBits(u);}                  \
-};
+        static FPType uint2fp(uint##UBits##_t u)                             \
+        {                                                                    \
+            return ::u01_##left##_##right##_##UBits##_##FBits(u);            \
+        }                                                                    \
+    };
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief Parameter type for open interval
 /// \ingroup U01
-struct Open {};
+struct Open {
+};
 
 /// \brief Parameter type for closed interval
 /// \ingroup U01
-struct Closed {};
+struct Closed {
+};
 
-template <typename, typename, typename, typename> struct U01;
+template <typename, typename, typename, typename>
+struct U01;
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1]\f$
 /// \ingroup U01
@@ -146,7 +154,8 @@ VSMC_DEFINE_RNG_U01(double, Open, Open, open, open, 64, 53)
 /// In the above example, one want N uniform random variates, and having them
 /// sorted. The sorted sequence is accessed sequentially. There are two
 /// undesired effects. First the program has a runtime cost \f$O(N\log N)\f$.
-/// Second, it has a memory cost \f$O(N)\f$. The presented class can be used in
+/// Second, it has a memory cost \f$O(N)\f$. The presented class can be used
+/// in
 /// place of the temporary vector in the following fashion.
 /// ~~~{.cpp}
 /// const std::size_t N = 1000;
@@ -165,14 +174,15 @@ VSMC_DEFINE_RNG_U01(double, Open, Open, open, open, 64, 53)
 template <typename RngType>
 class U01SequenceSorted
 {
-    public :
-
-    U01SequenceSorted (std::size_t N, RngType &rng) :
-        N_(N), n_(N), u_(0), lmax_(0), rng_(rng), runif_(0, 1) {}
+    public:
+    U01SequenceSorted(std::size_t N, RngType &rng)
+        : N_(N), n_(N), u_(0), lmax_(0), rng_(rng), runif_(0, 1)
+    {
+    }
 
     /// \brief Generate the n-th random variates
-    /// 
-    double operator[] (std::size_t n)
+    ///
+    double operator[](std::size_t n)
     {
         using std::exp;
         using std::log;
@@ -189,35 +199,36 @@ class U01SequenceSorted
         return u_;
     }
 
-    double operator() (std::size_t n) {return operator[](n);}
+    double operator()(std::size_t n) { return operator[](n); }
 
-    private :
-
+    private:
     std::size_t N_;
     std::size_t n_;
     double u_;
     double lmax_;
     RngType &rng_;
-    cxx11::uniform_real_distribution<double> runif_;
+    std::uniform_real_distribution<double> runif_;
 }; // U01SequenceSorted
 
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
 /// variates by stratified sampling.
 ///
 /// \details
-/// This is similar to U01SequenceSorted except that, instead of generating the
+/// This is similar to U01SequenceSorted except that, instead of generating
+/// the
 /// sequence as if by sorting. It is done by generating
 /// \f$u_i = U_i / N + (i - 1) / N\f$ where \f$U_i\f$ is uniform \f$[0,1)\f$
 /// random variates.
 template <typename RngType>
 class U01SequenceStratified
 {
-    public :
+    public:
+    U01SequenceStratified(std::size_t N, RngType &rng)
+        : N_(N), n_(N), u_(0), delta_(1.0 / N), rng_(rng), runif_(0, 1)
+    {
+    }
 
-    U01SequenceStratified (std::size_t N, RngType &rng) :
-        N_(N), n_(N), u_(0), delta_(1.0 / N), rng_(rng), runif_(0, 1) {}
-
-    double operator[] (std::size_t n)
+    double operator[](std::size_t n)
     {
         VSMC_RUNTIME_ASSERT_RNG_U01_U01_SEQUENCE(Stratified)
 
@@ -230,39 +241,38 @@ class U01SequenceStratified
         return u_;
     }
 
-    double operator() (std::size_t n) {return operator[](n);}
+    double operator()(std::size_t n) { return operator[](n); }
 
-    private :
-
+    private:
     std::size_t N_;
     std::size_t n_;
     double u_;
     double delta_;
     RngType &rng_;
-    cxx11::uniform_real_distribution<double> runif_;
+    std::uniform_real_distribution<double> runif_;
 }; // class U01SequenceStratified
 
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
 /// variates by systematic sampling.
 ///
 /// \details
-/// This is similar to U01SequenceSorted except that, instead of generating the
+/// This is similar to U01SequenceSorted except that, instead of generating
+/// the
 /// sequence as if by sorting. It is done by generating
 /// \f$u_i = U / N + (i - 1) / N\f$ where \f$U\f$ is uniform \f$[0,1)\f$
 /// random variates and it is generated only once for all \f$i\f$.
 template <typename RngType>
 class U01SequenceSystematic
 {
-    public :
-
-    U01SequenceSystematic (std::size_t N, RngType &rng) :
-        N_(N), n_(N), u_(0), u0_(0), delta_(1.0 / N)
+    public:
+    U01SequenceSystematic(std::size_t N, RngType &rng)
+        : N_(N), n_(N), u_(0), u0_(0), delta_(1.0 / N)
     {
-        cxx11::uniform_real_distribution<double> runif(0, 1);
+        std::uniform_real_distribution<double> runif(0, 1);
         u0_ = runif(rng) * delta_;
     }
 
-    double operator[] (std::size_t n)
+    double operator[](std::size_t n)
     {
         VSMC_RUNTIME_ASSERT_RNG_U01_U01_SEQUENCE(Systematic)
 
@@ -275,10 +285,9 @@ class U01SequenceSystematic
         return u_;
     }
 
-    double operator() (std::size_t n) {return operator[](n);}
+    double operator()(std::size_t n) { return operator[](n); }
 
-    private :
-
+    private:
     std::size_t N_;
     std::size_t n_;
     double u_;

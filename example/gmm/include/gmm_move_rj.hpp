@@ -33,7 +33,7 @@
 #define VSMC_EXAMPLE_GMM_MOVE_RJ_HPP
 
 #ifndef NDEBUG
-inline void gmm_check_odd_nums (std::size_t old_num, std::size_t new_num)
+inline void gmm_check_odd_nums(std::size_t old_num, std::size_t new_num)
 {
     bool valid = false;
     if (old_num - new_num == 1)
@@ -44,15 +44,14 @@ inline void gmm_check_odd_nums (std::size_t old_num, std::size_t new_num)
         throw std::invalid_argument("Difference is not ONE");
 }
 #else
-inline void gmm_check_odd_nums (std::size_t, std::size_t) {}
+inline void gmm_check_odd_nums(std::size_t, std::size_t) {}
 #endif
 
 class gmm_logodds_flat
 {
-    public :
-
-    double operator() (std::size_t old_num, std::size_t new_num,
-            const gmm_param &)
+    public:
+    double operator()(
+        std::size_t old_num, std::size_t new_num, const gmm_param &)
     {
         gmm_check_odd_nums(old_num, new_num);
 
@@ -62,10 +61,9 @@ class gmm_logodds_flat
 
 class gmm_logodds_pair
 {
-    public :
-
-    double operator() (std::size_t old_num, std::size_t new_num,
-            const gmm_param &state)
+    public:
+    double operator()(
+        std::size_t old_num, std::size_t new_num, const gmm_param &state)
     {
         using std::log;
 
@@ -91,14 +89,15 @@ class gmm_logodds_pair
 
 // Split or combine
 template <typename LogPriorOdd>
-class gmm_rj_sc : public BASE_MOVE<gmm_state, gmm_rj_sc<LogPriorOdd> >
+class gmm_rj_sc : public BASE_MOVE<gmm_state, gmm_rj_sc<LogPriorOdd>>
 {
-    public :
+    public:
+    gmm_rj_sc(std::size_t minc = MinCompNum, std::size_t maxc = MaxCompNum)
+        : min_comp_(minc), max_comp_(maxc)
+    {
+    }
 
-    gmm_rj_sc (std::size_t minc = MinCompNum, std::size_t maxc = MaxCompNum) :
-        min_comp_(minc), max_comp_(maxc) {}
-
-    std::size_t move_state (std::size_t, vsmc::SingleParticle<gmm_state> sp)
+    std::size_t move_state(std::size_t, vsmc::SingleParticle<gmm_state> sp)
     {
         using std::sqrt;
         using std::log;
@@ -111,14 +110,14 @@ class gmm_rj_sc : public BASE_MOVE<gmm_state, gmm_rj_sc<LogPriorOdd> >
         else if (cn == min_comp_)
             split = true;
         else {
-            vsmc::cxx11::bernoulli_distribution rsplit(0.5);
+            std::bernoulli_distribution rsplit(0.5);
             split = rsplit(sp.rng());
         }
 
         if (split) { // do split move
-            vsmc::cxx11::gamma_distribution<> rgamma2(2, 1);
-            vsmc::cxx11::uniform_int_distribution<std::size_t> rj(0, cn - 1);
-            vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+            std::gamma_distribution<> rgamma2(2, 1);
+            std::uniform_int_distribution<std::size_t> rj(0, cn - 1);
+            std::uniform_real_distribution<> runif(0, 1);
 
             // generate u1, u2, u3
             double a, b;
@@ -132,7 +131,7 @@ class gmm_rj_sc : public BASE_MOVE<gmm_state, gmm_rj_sc<LogPriorOdd> >
 
             // component to split
             std::size_t id = rj(sp.rng());
-            double mu     = sp.state(0).mu(id);
+            double mu = sp.state(0).mu(id);
             double lambda = sp.state(0).lambda(id);
             double weight = sp.state(0).weight(id);
 
@@ -143,17 +142,16 @@ class gmm_rj_sc : public BASE_MOVE<gmm_state, gmm_rj_sc<LogPriorOdd> >
             double mu1 = mu - u2 * sqrt(weight2 / weight1 / lambda);
             double mu2 = mu + u2 * sqrt(weight1 / weight2 / lambda);
 
-            double lambda1 = lambda / (
-                    u3 * (1 - u2 * u2) * weight / weight1);
-            double lambda2 = lambda / (
-                    (1 - u3) * (1 - u2 * u2) * weight / weight2);
+            double lambda1 = lambda / (u3 * (1 - u2 * u2) * weight / weight1);
+            double lambda2 =
+                lambda / ((1 - u3) * (1 - u2 * u2) * weight / weight2);
 
             // insert the two new components
             std::size_t id1 = id;
             std::size_t id2 = id + 1;
             sp.state(0).insert(id2);
-            sp.state(0).mu(id1)     = mu1;
-            sp.state(0).mu(id2)     = mu2;
+            sp.state(0).mu(id1) = mu1;
+            sp.state(0).mu(id2) = mu2;
             sp.state(0).lambda(id1) = lambda1;
             sp.state(0).lambda(id2) = lambda2;
             sp.state(0).weight(id1) = weight1;
@@ -187,16 +185,16 @@ class gmm_rj_sc : public BASE_MOVE<gmm_state, gmm_rj_sc<LogPriorOdd> >
 
             return sp.state(0).mh_reject_rj(p, u);
         } else { // do combine move
-            vsmc::cxx11::uniform_int_distribution<std::size_t> rj(0, cn - 2);
-            vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+            std::uniform_int_distribution<std::size_t> rj(0, cn - 2);
+            std::uniform_real_distribution<> runif(0, 1);
             std::size_t id1 = rj(sp.rng());
             std::size_t id2 = id1 + 1;
 
             // old components
             double weight1 = sp.state(0).weight(id1);
             double weight2 = sp.state(0).weight(id2);
-            double mu1     = sp.state(0).mu(id1);
-            double mu2     = sp.state(0).mu(id2);
+            double mu1 = sp.state(0).mu(id1);
+            double mu2 = sp.state(0).mu(id2);
             double lambda1 = sp.state(0).lambda(id1);
             double lambda2 = sp.state(0).lambda(id2);
 
@@ -213,7 +211,7 @@ class gmm_rj_sc : public BASE_MOVE<gmm_state, gmm_rj_sc<LogPriorOdd> >
             // insert new components
             std::size_t id = id1;
             sp.state(0).remove(id2);
-            sp.state(0).mu(id)     = mu;
+            sp.state(0).mu(id) = mu;
             sp.state(0).lambda(id) = lambda;
             sp.state(0).weight(id) = weight;
 
@@ -247,8 +245,7 @@ class gmm_rj_sc : public BASE_MOVE<gmm_state, gmm_rj_sc<LogPriorOdd> >
         }
     }
 
-    private :
-
+    private:
     std::size_t min_comp_;
     std::size_t max_comp_;
     LogPriorOdd log_prior_odd_;
@@ -256,14 +253,15 @@ class gmm_rj_sc : public BASE_MOVE<gmm_state, gmm_rj_sc<LogPriorOdd> >
 
 // Birth or death
 template <typename LogPriorOdd>
-class gmm_rj_bd : public BASE_MOVE<gmm_state, gmm_rj_bd<LogPriorOdd> >
+class gmm_rj_bd : public BASE_MOVE<gmm_state, gmm_rj_bd<LogPriorOdd>>
 {
-    public :
+    public:
+    gmm_rj_bd(std::size_t minc = MinCompNum, std::size_t maxc = MaxCompNum)
+        : min_comp_(minc), max_comp_(maxc)
+    {
+    }
 
-    gmm_rj_bd (std::size_t minc = MinCompNum, std::size_t maxc = MaxCompNum) :
-        min_comp_(minc), max_comp_(maxc) {}
-
-    std::size_t move_state (std::size_t, vsmc::SingleParticle<gmm_state> sp)
+    std::size_t move_state(std::size_t, vsmc::SingleParticle<gmm_state> sp)
     {
         sp.state(0).save_old();
         bool birth;
@@ -273,27 +271,24 @@ class gmm_rj_bd : public BASE_MOVE<gmm_state, gmm_rj_bd<LogPriorOdd> >
         else if (cn == min_comp_)
             birth = true;
         else {
-            vsmc::cxx11::bernoulli_distribution rbirth(0.5);
+            std::bernoulli_distribution rbirth(0.5);
             birth = rbirth(sp.rng());
         }
 
         if (birth) { // do birth move
-            vsmc::cxx11::gamma_distribution<> rgamma1(1, 1);
-            vsmc::cxx11::gamma_distribution<> rgammak(
-                    static_cast<double>(cn), 1);
-            vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
-            vsmc::cxx11::normal_distribution<> rmu(
-                    sp.particle().value().mu0(),
-                    sp.particle().value().sd0());
-            vsmc::cxx11::gamma_distribution<> rlambda(
-                    sp.particle().value().shape0(),
-                    sp.particle().value().scale0());
+            std::gamma_distribution<> rgamma1(1, 1);
+            std::gamma_distribution<> rgammak(static_cast<double>(cn), 1);
+            std::uniform_real_distribution<> runif(0, 1);
+            std::normal_distribution<> rmu(
+                sp.particle().value().mu0(), sp.particle().value().sd0());
+            std::gamma_distribution<> rlambda(sp.particle().value().shape0(),
+                sp.particle().value().scale0());
 
             // propose new component
             double a = rgamma1(sp.rng());
             double b = rgammak(sp.rng());
             double weight = a / (a + b);
-            double mu     = rmu(sp.rng());
+            double mu = rmu(sp.rng());
             double lambda = rlambda(sp.rng());
             double weight_1 = 1 - weight;
 
@@ -302,7 +297,7 @@ class gmm_rj_bd : public BASE_MOVE<gmm_state, gmm_rj_bd<LogPriorOdd> >
             while (sp.state(0).mu(id) < mu && id != cn)
                 ++id;
             sp.state(0).insert(id);
-            sp.state(0).mu(id)     = mu;
+            sp.state(0).mu(id) = mu;
             sp.state(0).lambda(id) = lambda;
             sp.state(0).weight(id) = weight;
 
@@ -327,8 +322,8 @@ class gmm_rj_bd : public BASE_MOVE<gmm_state, gmm_rj_bd<LogPriorOdd> >
 
             return sp.state(0).mh_reject_rj(p, u);
         } else { // do death move
-            vsmc::cxx11::uniform_int_distribution<std::size_t> rj(0, cn - 1);
-            vsmc::cxx11::uniform_real_distribution<> runif(0, 1);
+            std::uniform_int_distribution<std::size_t> rj(0, cn - 1);
+            std::uniform_real_distribution<> runif(0, 1);
 
             std::size_t id = rj(sp.rng());
             double weight_1 = 1 - sp.state(0).weight(id);
@@ -357,8 +352,7 @@ class gmm_rj_bd : public BASE_MOVE<gmm_state, gmm_rj_bd<LogPriorOdd> >
         }
     }
 
-    private :
-
+    private:
     std::size_t min_comp_;
     std::size_t max_comp_;
     LogPriorOdd log_prior_odd_;

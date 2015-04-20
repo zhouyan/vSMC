@@ -31,7 +31,7 @@
 
 #include "gmm_smc_cl.hpp"
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
 #include "options_main.hpp"
 #include "gmm_options_cl.hpp"
@@ -47,21 +47,20 @@ int main (int argc, char **argv)
 #ifdef VSMC_GMM_SMC_CL_MPI
     vsmc::MPIEnvironment env(argc, argv);
     boost::mpi::communicator world(vsmc::MPICommunicator<>::instance().get(),
-            boost::mpi::comm_duplicate);
+        boost::mpi::comm_duplicate);
     std::size_t R = static_cast<std::size_t>(world.rank());
     std::size_t S = static_cast<std::size_t>(world.size());
-    platform_name = PlatformName.size() >= S ?
-        PlatformName[R] : PlatformName.front();
-    device_type = DeviceType.size() >= S ?
-        DeviceType[R] : DeviceType.front();
+    platform_name =
+        PlatformName.size() >= S ? PlatformName[R] : PlatformName.front();
+    device_type = DeviceType.size() >= S ? DeviceType[R] : DeviceType.front();
     device_vendor_name = DeviceVendorName.size() >= S ?
-        DeviceVendorName[R] : DeviceVendorName.front();
-    build_option = BuildOption.size() >= S ?
-        BuildOption[R] : BuildOption.front();
-    local_size = LocalSize.size() >= S ?
-        LocalSize[R] : LocalSize.front();
-    particle_num = ParticleNum.size() >= S ?
-        ParticleNum[R] : ParticleNum.front();
+        DeviceVendorName[R] :
+        DeviceVendorName.front();
+    build_option =
+        BuildOption.size() >= S ? BuildOption[R] : BuildOption.front();
+    local_size = LocalSize.size() >= S ? LocalSize[R] : LocalSize.front();
+    particle_num =
+        ParticleNum.size() >= S ? ParticleNum[R] : ParticleNum.front();
 #else
     platform_name = PlatformName.front();
     device_type = DeviceType.front();
@@ -86,12 +85,12 @@ int main (int argc, char **argv)
 
         if (FPTypeBits == 32) {
             gmm_do_smc<cl_float>(particle_num, IterNum, DataNum, DataFile,
-                    Threshold, vSMCIncPath, R123IncPath, build_option,
-                    local_size, SM, CM, Repeat);
+                Threshold, vSMCIncPath, R123IncPath, build_option, local_size,
+                SM, CM, Repeat);
         } else if (FPTypeBits == 64) {
             gmm_do_smc<cl_double>(particle_num, IterNum, DataNum, DataFile,
-                    Threshold, vSMCIncPath, R123IncPath, build_option,
-                    local_size, SM, CM, Repeat);
+                Threshold, vSMCIncPath, R123IncPath, build_option, local_size,
+                SM, CM, Repeat);
         } else {
             std::cout << "cl_type_bits has to be 32 or 64" << std::endl;
         }

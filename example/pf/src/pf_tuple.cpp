@@ -32,4 +32,4 @@
 #include "pf_@smp@.hpp"
 #include "pf_tuple.hpp"
 
-int main (int argc, char **argv) {PF_MAIN;}
+int main(int argc, char **argv) { PF_MAIN; }

@@ -35,7 +35,8 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/internal/cl_wrapper.hpp>
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief Query the preferred factor of local size
 /// \ingroup OpenCL
@@ -45,15 +46,14 @@ namespace vsmc {
 /// \param factor Multiplier factor of local size for optimzied performance
 /// \param lmax Maximum of the local size
 /// \param mmax Maximum of the multiplier of the factor
-inline void cl_minmax_local_size (
-        const ::cl::Kernel &kern, const ::cl::Device &dev,
-        std::size_t &factor, std::size_t &lmax, std::size_t &mmax)
+inline void cl_minmax_local_size(const ::cl::Kernel &kern,
+    const ::cl::Device &dev, std::size_t &factor, std::size_t &lmax,
+    std::size_t &mmax)
 {
     try {
-        kern.getWorkGroupInfo(dev,
-                CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &factor);
-        kern.getWorkGroupInfo(dev,
-                CL_KERNEL_WORK_GROUP_SIZE, &lmax);
+        kern.getWorkGroupInfo(
+            dev, CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, &factor);
+        kern.getWorkGroupInfo(dev, CL_KERNEL_WORK_GROUP_SIZE, &lmax);
         if (factor == 0 || factor > lmax) {
             factor = lmax = mmax = 0;
             return;
@@ -66,27 +66,28 @@ inline void cl_minmax_local_size (
 
 /// \brief The minimum global size that is a multiple of the local size
 /// \ingroup OpenCL
-inline std::size_t cl_min_global_size (std::size_t N, std::size_t local_size)
+inline std::size_t cl_min_global_size(std::size_t N, std::size_t local_size)
 {
     if (local_size == 0)
         return N;
 
     return (local_size && N % local_size) ?
-        (N / local_size + 1) * local_size : N;
+        (N / local_size + 1) * local_size :
+        N;
 }
 
 /// \brief The preferred global and local size
 /// \ingroup OpenCL
 ///
 /// \return The difference between the preferred global size and the N
-inline std::size_t cl_preferred_work_size (std::size_t N,
-        const ::cl::Kernel &kern, const ::cl::Device &dev,
-        std::size_t &global_size, std::size_t &local_size)
+inline std::size_t cl_preferred_work_size(std::size_t N,
+    const ::cl::Kernel &kern, const ::cl::Device &dev,
+    std::size_t &global_size, std::size_t &local_size)
 {
     cl::size_t<3> reqd_size;
     try {
-        kern.getWorkGroupInfo(dev,
-                CL_KERNEL_COMPILE_WORK_GROUP_SIZE, &reqd_size);
+        kern.getWorkGroupInfo(
+            dev, CL_KERNEL_COMPILE_WORK_GROUP_SIZE, &reqd_size);
     } catch (const ::cl::Error &) {
         reqd_size[0] = 0;
     }
@@ -126,9 +127,8 @@ inline std::size_t cl_preferred_work_size (std::size_t N,
     return diff_size;
 }
 
-inline void cl_set_kernel_args (::cl::Kernel &, ::cl_uint) {}
+inline void cl_set_kernel_args(::cl::Kernel &, ::cl_uint) {}
 
-#if VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 /// \brief Set OpenCL kernel arguments
 /// \ingroup OpenCL
 ///
@@ -139,15 +139,12 @@ inline void cl_set_kernel_args (::cl::Kernel &, ::cl_uint) {}
 /// by the compiler's implementation). Otherwise this function supports up to
 /// 16 arguments.
 template <typename Arg1, typename... Args>
-inline void cl_set_kernel_args (::cl::Kernel &kern, ::cl_uint offset,
-        const Arg1 &arg1, const Args &... args)
+inline void cl_set_kernel_args(::cl::Kernel &kern, ::cl_uint offset,
+    const Arg1 &arg1, const Args &... args)
 {
     kern.setArg(offset, arg1);
     cl_set_kernel_args(kern, offset + 1, args...);
 }
-#else // VSMC_HAS_CXX11_VARIADIC_TEMPLATES
-#include <vsmc/opencl/internal/cl_set_kernel_args.hpp>
-#endif // VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 
 } // namespace vsmc
 

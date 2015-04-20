@@ -34,16 +34,15 @@
 
 class pet_proposal
 {
-    public :
+    public:
+    typedef const vsmc::Sampler<pet_state> *value_type;
 
-    typedef const vsmc::Sampler<pet_state> * value_type;
+    pet_proposal(value_type) {}
 
-    pet_proposal (value_type) {}
-
-    void proposal_iter (std::size_t, vsmc::Particle<pet_state> &particle) const
+    void proposal_iter(std::size_t, vsmc::Particle<pet_state> &particle) const
     {
-        for (vsmc::Particle<pet_state>::size_type i = 0;
-                i != particle.size(); ++i) {
+        for (vsmc::Particle<pet_state>::size_type i = 0; i != particle.size();
+             ++i) {
             double alpha = particle.value().state(i, 0).alpha();
             double coeff;
             const std::size_t cn = particle.value().state(i, 0).comp_num();
@@ -63,41 +62,44 @@ class pet_proposal
         }
     }
 
-    void proposal_init (vsmc::Particle<pet_state> &particle) const
-    {proposal_iter(0, particle);}
+    void proposal_init(vsmc::Particle<pet_state> &particle) const
+    {
+        proposal_iter(0, particle);
+    }
 };
 
 class pet_proposal_adaptive
 {
-    public :
+    public:
+    typedef const vsmc::Sampler<pet_state> *value_type;
 
-    typedef const vsmc::Sampler<pet_state> * value_type;
+    pet_proposal_adaptive(value_type sampler) : sampler_(sampler) {}
 
-    pet_proposal_adaptive (value_type sampler) : sampler_(sampler) {}
-
-    void proposal_iter (std::size_t, vsmc::Particle<pet_state> &particle) const
+    void proposal_iter(std::size_t, vsmc::Particle<pet_state> &particle) const
     {
         using std::sqrt;
 
-        std::size_t cn = particle.value().state(0,0).comp_num();
+        std::size_t cn = particle.value().state(0, 0).comp_num();
         const vsmc::Monitor<pet_state> &monitor =
             sampler_->monitor("pet_moments");
         double lambda_sd = 2.38 * sqrt(monitor.record(2 + 2 * cn) -
-                monitor.record(0) * monitor.record(0));
+                                      monitor.record(0) * monitor.record(0));
         double nu_sd = 2.38 * sqrt(monitor.record(3 + 2 * cn) -
-                monitor.record(1) * monitor.record(1));
+                                  monitor.record(1) * monitor.record(1));
         std::vector<double> phi_sd(cn);
         std::vector<double> theta_sd(cn);
         const double coeff = 2.38 / sqrt(static_cast<double>(cn));
         for (std::size_t d = 0; d != cn; ++d) {
-            phi_sd[d] = coeff * sqrt(monitor.record(d + 4 + 2 * cn) -
-                    monitor.record(d + 2) * monitor.record(d + 2));
+            phi_sd[d] =
+                coeff * sqrt(monitor.record(d + 4 + 2 * cn) -
+                            monitor.record(d + 2) * monitor.record(d + 2));
             theta_sd[d] = coeff / 2 * sqrt(monitor.record(d + 4 + 3 * cn) -
-                    monitor.record(d + 2 + cn) * monitor.record(d + 2 + cn));
+                                          monitor.record(d + 2 + cn) *
+                                              monitor.record(d + 2 + cn));
         }
 
-        for (vsmc::Particle<pet_state>::size_type i = 0;
-                i != particle.size(); ++i) {
+        for (vsmc::Particle<pet_state>::size_type i = 0; i != particle.size();
+             ++i) {
             particle.value().state(i, 0).lambda_sd() = lambda_sd;
             particle.value().state(i, 0).nu_sd() = nu_sd;
             for (std::size_t d = 0; d != cn; ++d) {
@@ -107,8 +109,7 @@ class pet_proposal_adaptive
         }
     }
 
-    private :
-
+    private:
     const vsmc::Sampler<pet_state> *const sampler_;
 };
 

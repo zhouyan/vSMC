@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/cmake/FindCXX11LibChrono.cpp
+// vSMC/example/rng/include/rng_validation.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,17 +29,34 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <cassert>
-#include <chrono>
+#ifndef VSMC_EXAMPLE_RNG_VALIDATION_HPP
+#define VSMC_EXAMPLE_RNG_VALIDATION_HPP
 
-int main ()
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include <vector>
+
+template <typename Eng>
+inline void rng_validation(
+    const std::vector<unsigned long long> &result, const std::string &name)
 {
-    std::chrono::time_point<std::chrono::system_clock> bt =
-        std::chrono::system_clock::now();
-    std::chrono::time_point<std::chrono::system_clock> et =
-        std::chrono::system_clock::now();
-    assert(std::chrono::duration_cast<std::chrono::nanoseconds>(
-                et - bt).count() < 1000000);
+    bool success = true;
+    Eng eng(static_cast<typename Eng::result_type>(result.back()));
+    for (std::size_t i = 0; i != result.size() - 1; ++i) {
+        if (static_cast<unsigned long long>(eng()) != result[i]) {
+            success = false;
+            break;
+        }
+    }
 
-    return 0;
+    if (success) {
+        std::cout << std::left << std::setw(20) << name << " passed"
+                  << std::endl;
+    } else {
+        std::cout << std::left << std::setw(20) << name << " failed"
+                  << std::endl;
+    }
 }
+
+#endif // VSMC_EXAMPLE_RNG_VALIDATION_HPP

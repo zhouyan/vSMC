@@ -32,4 +32,4 @@
 #include "pf_@smp@.hpp"
 #include "pf_matrix_mpi.hpp"
 
-int main (int argc, char **argv) {PF_MAIN_MPI;}
+int main(int argc, char **argv) { PF_MAIN_MPI; }

@@ -36,88 +36,111 @@
 
 class gmm_param
 {
-    public :
+    public:
+    gmm_param()
+        : comp_num_(0),
+          comp_num_old_(0),
+          log_prior_(0),
+          log_prior_old_(0),
+          log_likelihood_(0),
+          log_likelihood_old_(0),
+          log_target_(0),
+          log_target_old_(0),
+          alpha_(0),
+          alpha_inc_(0),
+          beta_(0),
+          beta_inc_(0),
+          mu_sd_(1),
+          lambda_sd_(1),
+          weight_sd_(1)
+    {
+    }
 
-    gmm_param () :
-        comp_num_(0), comp_num_old_(0), log_prior_(0), log_prior_old_(0),
-        log_likelihood_(0), log_likelihood_old_(0), log_target_(0),
-        log_target_old_(0), alpha_(0), alpha_inc_(0), beta_(0), beta_inc_(0),
-        mu_sd_(1), lambda_sd_(1), weight_sd_(1) {}
-
-    gmm_param (const gmm_param &other) :
-        comp_num_(0), comp_num_old_(0), log_prior_(0), log_prior_old_(0),
-        log_likelihood_(0), log_likelihood_old_(0), log_target_(0),
-        log_target_old_(0), alpha_(0), alpha_inc_(0), beta_(0), beta_inc_(0),
-        mu_sd_(1), lambda_sd_(1), weight_sd_(1)
+    gmm_param(const gmm_param &other)
+        : comp_num_(0),
+          comp_num_old_(0),
+          log_prior_(0),
+          log_prior_old_(0),
+          log_likelihood_(0),
+          log_likelihood_old_(0),
+          log_target_(0),
+          log_target_old_(0),
+          alpha_(0),
+          alpha_inc_(0),
+          beta_(0),
+          beta_inc_(0),
+          mu_sd_(1),
+          lambda_sd_(1),
+          weight_sd_(1)
     {
         comp_num(other.comp_num_);
         for (std::size_t i = 0; i != comp_num_; ++i) {
-            mu_[i]         = other.mu_[i];
-            lambda_[i]     = other.lambda_[i];
+            mu_[i] = other.mu_[i];
+            lambda_[i] = other.lambda_[i];
             log_lambda_[i] = other.log_lambda_[i];
-            weight_[i]     = other.weight_[i];
+            weight_[i] = other.weight_[i];
         }
-        log_prior_      = other.log_prior_;
+        log_prior_ = other.log_prior_;
         log_likelihood_ = other.log_likelihood_;
-        log_target_     = other.log_target_;
+        log_target_ = other.log_target_;
     }
 
     // assignment only manipulate parameters and log likelihood etc.
-    gmm_param &operator= (const gmm_param &other)
+    gmm_param &operator=(const gmm_param &other)
     {
         if (this != &other) {
             comp_num(other.comp_num_);
             for (std::size_t i = 0; i != comp_num_; ++i) {
-                mu_[i]         = other.mu_[i];
-                lambda_[i]     = other.lambda_[i];
+                mu_[i] = other.mu_[i];
+                lambda_[i] = other.lambda_[i];
                 log_lambda_[i] = other.log_lambda_[i];
-                weight_[i]     = other.weight_[i];
+                weight_[i] = other.weight_[i];
             }
-            log_prior_      = other.log_prior_;
+            log_prior_ = other.log_prior_;
             log_likelihood_ = other.log_likelihood_;
-            log_target_     = other.log_target_;
+            log_target_ = other.log_target_;
         }
 
         return *this;
     }
 
     // Read only access
-    double mu              (std::size_t d) const {return mu_[d];}
-    double lambda          (std::size_t d) const {return lambda_[d];}
-    double log_lambda      (std::size_t d) const {return log_lambda_[d];}
-    double weight          (std::size_t d) const {return weight_[d];}
-    double log_prior       ()           const {return log_prior_;}
-    double log_likelihood  ()           const {return log_likelihood_;}
-    double log_target      ()           const {return log_target_;}
-    double alpha           ()           const {return alpha_;}
-    double alpha_inc       ()           const {return alpha_inc_;}
-    double beta            ()           const {return beta_;}
-    double beta_inc        ()           const {return beta_inc_;}
-    double mu_sd           ()           const {return mu_sd_;}
-    double lambda_sd       ()           const {return lambda_sd_;}
-    double weight_sd       ()           const {return weight_sd_;}
+    double mu(std::size_t d) const { return mu_[d]; }
+    double lambda(std::size_t d) const { return lambda_[d]; }
+    double log_lambda(std::size_t d) const { return log_lambda_[d]; }
+    double weight(std::size_t d) const { return weight_[d]; }
+    double log_prior() const { return log_prior_; }
+    double log_likelihood() const { return log_likelihood_; }
+    double log_target() const { return log_target_; }
+    double alpha() const { return alpha_; }
+    double alpha_inc() const { return alpha_inc_; }
+    double beta() const { return beta_; }
+    double beta_inc() const { return beta_inc_; }
+    double mu_sd() const { return mu_sd_; }
+    double lambda_sd() const { return lambda_sd_; }
+    double weight_sd() const { return weight_sd_; }
 
     // Read and write access
-    double &mu              (std::size_t d) {return mu_[d];}
-    double &lambda          (std::size_t d) {return lambda_[d];}
-    double &log_lambda      (std::size_t d) {return log_lambda_[d];}
-    double &weight          (std::size_t d) {return weight_[d];}
-    double &log_prior       ()              {return log_prior_;}
-    double &log_likelihood  ()              {return log_likelihood_;}
-    double &log_target      ()              {return log_target_;}
-    double &alpha           ()              {return alpha_;}
-    double &alpha_inc       ()              {return alpha_inc_;}
-    double &beta            ()              {return beta_;}
-    double &beta_inc        ()              {return beta_inc_;}
-    double &mu_sd           ()              {return mu_sd_;}
-    double &lambda_sd       ()              {return lambda_sd_;}
-    double &weight_sd       ()              {return weight_sd_;}
+    double &mu(std::size_t d) { return mu_[d]; }
+    double &lambda(std::size_t d) { return lambda_[d]; }
+    double &log_lambda(std::size_t d) { return log_lambda_[d]; }
+    double &weight(std::size_t d) { return weight_[d]; }
+    double &log_prior() { return log_prior_; }
+    double &log_likelihood() { return log_likelihood_; }
+    double &log_target() { return log_target_; }
+    double &alpha() { return alpha_; }
+    double &alpha_inc() { return alpha_inc_; }
+    double &beta() { return beta_; }
+    double &beta_inc() { return beta_inc_; }
+    double &mu_sd() { return mu_sd_; }
+    double &lambda_sd() { return lambda_sd_; }
+    double &weight_sd() { return weight_sd_; }
 
-    std::size_t comp_num () const {return comp_num_;}
+    std::size_t comp_num() const { return comp_num_; }
 
     // Minimize dynamic memory allocation
     // Not suitable if many particles will occaciaonally grow very large
-    void comp_num (std::size_t num)
+    void comp_num(std::size_t num)
     {
         grow(num, mu_);
         grow(num, lambda_);
@@ -130,9 +153,9 @@ class gmm_param
         comp_num_ = num;
     }
 
-    void sort_mu () {std::sort(mu_.begin(), mu_.end());}
+    void sort_mu() { std::sort(mu_.begin(), mu_.end()); }
 
-    bool ordered () const
+    bool ordered() const
     {
         for (std::size_t d = 1; d != comp_num_; ++d)
             if (mu_[d] < mu_[d - 1])
@@ -142,66 +165,66 @@ class gmm_param
     }
 
     // swap is an expansive operation, only population MCMC shall use it
-    void swap (gmm_param &other)
+    void swap(gmm_param &other)
     {
         using std::swap;
 
         if (this != &other) {
-            swap(mu_,              other.mu_);
-            swap(lambda_,          other.lambda_);
-            swap(log_lambda_,      other.log_lambda_);
-            swap(weight_,          other.weight_);
-            swap(log_prior_,       other.log_prior_);
-            swap(log_likelihood_,  other.log_likelihood_);
-            swap(log_target_,      other.log_target_);
+            swap(mu_, other.mu_);
+            swap(lambda_, other.lambda_);
+            swap(log_lambda_, other.log_lambda_);
+            swap(weight_, other.weight_);
+            swap(log_prior_, other.log_prior_);
+            swap(log_likelihood_, other.log_likelihood_);
+            swap(log_target_, other.log_target_);
             std::size_t cn = comp_num_;
             comp_num(other.comp_num_);
             other.comp_num(cn);
         }
     }
 
-    void save_old ()
+    void save_old()
     {
         comp_num_old_ = comp_num_;
 
         for (std::size_t i = 0; i != comp_num_; ++i) {
-            mu_old_[i]         = mu_[i];
-            lambda_old_[i]     = lambda_[i];
+            mu_old_[i] = mu_[i];
+            lambda_old_[i] = lambda_[i];
             log_lambda_old_[i] = log_lambda_[i];
-            weight_old_[i]     = weight_[i];
+            weight_old_[i] = weight_[i];
         }
 
-        log_prior_old_       = log_prior_;
-        log_likelihood_old_  = log_likelihood_;
-        log_target_old_      = log_prior_ + alpha_ * log_likelihood_;
+        log_prior_old_ = log_prior_;
+        log_likelihood_old_ = log_likelihood_;
+        log_target_old_ = log_prior_ + alpha_ * log_likelihood_;
     }
 
-    void remove (std::size_t id)
+    void remove(std::size_t id)
     {
         for (std::size_t d = id; d != comp_num_ - 1; ++d) {
-            mu_[d]         = mu_[d + 1];
-            lambda_[d]     = lambda_[d + 1];
+            mu_[d] = mu_[d + 1];
+            lambda_[d] = lambda_[d + 1];
             log_lambda_[d] = log_lambda_[d + 1];
-            weight_[d]     = weight_[d + 1];
+            weight_[d] = weight_[d + 1];
         }
         comp_num(comp_num_ - 1);
     }
 
     // after insert, id position is empty for insertion
-    void insert (std::size_t id)
+    void insert(std::size_t id)
     {
         comp_num(comp_num_ + 1);
         for (std::size_t d = comp_num_ - 1; d != id; --d) {
-            mu_[d]         = mu_[d - 1];
-            lambda_[d]     = lambda_[d - 1];
+            mu_[d] = mu_[d - 1];
+            lambda_[d] = lambda_[d - 1];
             log_lambda_[d] = log_lambda_[d - 1];
-            weight_[d]     = weight_[d - 1];
+            weight_[d] = weight_[d - 1];
         }
     }
 
-    double log_target_diff () const {return log_target_ - log_target_old_;}
+    double log_target_diff() const { return log_target_ - log_target_old_; }
 
-    double log_lambda_diff () const
+    double log_lambda_diff() const
     {
         double sum = 0;
         for (std::size_t i = 0; i != comp_num_; ++i)
@@ -210,7 +233,7 @@ class gmm_param
         return sum;
     }
 
-    void log_lambda ()
+    void log_lambda()
     {
         using std::log;
 
@@ -218,7 +241,7 @@ class gmm_param
             log_lambda_[i] = log(lambda_[i]);
     }
 
-    double logit_weight_diff () const
+    double logit_weight_diff() const
     {
         using std::log;
 
@@ -247,7 +270,7 @@ class gmm_param
         return lp - lp_old;
     }
 
-    unsigned mh_reject_mu (double p, double u)
+    unsigned mh_reject_mu(double p, double u)
     {
         mh_reject_common(p, u);
         if (p < u) {
@@ -261,7 +284,7 @@ class gmm_param
         }
     }
 
-    unsigned mh_reject_lambda (double p, double u)
+    unsigned mh_reject_lambda(double p, double u)
     {
         mh_reject_common(p, u);
         if (p < u) {
@@ -279,7 +302,7 @@ class gmm_param
         }
     }
 
-    unsigned mh_reject_weight (double p, double u)
+    unsigned mh_reject_weight(double p, double u)
     {
         mh_reject_common(p, u);
         if (p < u) {
@@ -293,7 +316,7 @@ class gmm_param
         }
     }
 
-    unsigned mh_reject_rj (double p, double u)
+    unsigned mh_reject_rj(double p, double u)
     {
         mh_reject_common(p, u);
         if (p < u) {
@@ -310,21 +333,20 @@ class gmm_param
         }
     }
 
-    void mh_reject_common (double p, double u)
+    void mh_reject_common(double p, double u)
     {
         if (p < u) {
-            log_prior_       = log_prior_old_;
-            log_likelihood_  = log_likelihood_old_;
-            log_target_      = log_target_old_;
+            log_prior_ = log_prior_old_;
+            log_likelihood_ = log_likelihood_old_;
+            log_target_ = log_target_old_;
         } else {
-            log_prior_old_       = log_prior_;
-            log_likelihood_old_  = log_likelihood_;
-            log_target_old_      = log_target_;
+            log_prior_old_ = log_prior_;
+            log_likelihood_old_ = log_likelihood_;
+            log_target_old_ = log_target_;
         }
     }
 
-    private :
-
+    private:
     std::size_t comp_num_;
     std::size_t comp_num_old_;
 
@@ -361,7 +383,7 @@ class gmm_param
 };
 
 template <typename OutputStream>
-inline OutputStream &operator<< (OutputStream &os, const gmm_param &param)
+inline OutputStream &operator<<(OutputStream &os, const gmm_param &param)
 {
     for (std::size_t d = 0; d != param.comp_num(); ++d) {
         os << param.mu(d) << ' ';

@@ -31,7 +31,4 @@
 
 #include <vsmc/utility/cpuid.hpp>
 
-int main ()
-{
-    std::cout << vsmc::CPUID() << std::endl;
-}
+int main() { std::cout << vsmc::CPUID() << std::endl; }

@@ -34,11 +34,13 @@
 
 #include <vsmc/resample/common.hpp>
 
-namespace vsmc {
+namespace vsmc
+{
 
-namespace internal {
+namespace internal
+{
 
-typedef cxx11::integral_constant<ResampleScheme, ResidualStratified>
+typedef std::integral_constant<ResampleScheme, ResidualStratified>
     ResampleResidualStratified;
 
 } // namespace vsmc::internal
@@ -48,11 +50,10 @@ typedef cxx11::integral_constant<ResampleScheme, ResidualStratified>
 template <>
 class Resample<internal::ResampleResidualStratified>
 {
-    public :
-
+    public:
     template <typename IntType, typename RngType>
-    void operator() (std::size_t M, std::size_t N, RngType &rng,
-            const double *weight, IntType *replication)
+    void operator()(std::size_t M, std::size_t N, RngType &rng,
+        const double *weight, IntType *replication)
     {
         using std::modf;
 
@@ -76,10 +77,9 @@ class Resample<internal::ResampleResidualStratified>
             replication[i] += static_cast<IntType>(iptr[i]);
     }
 
-    private :
-
-    std::vector<double, AlignedAllocator<double> > residual_;
-    std::vector<double, AlignedAllocator<double> > integral_;
+    private:
+    std::vector<double, AlignedAllocator<double>> residual_;
+    std::vector<double, AlignedAllocator<double>> integral_;
 }; // Residual stratified resampling
 
 } // namespace vsmc

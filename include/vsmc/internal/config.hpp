@@ -38,10 +38,6 @@
 
 #include <vsmc/internal/compiler.hpp>
 
-#ifndef VSMC_NO_STATIC_ASSERT
-#define VSMC_NO_STATIC_ASSERT 0
-#endif
-
 #ifndef VSMC_NO_RUNTIME_ASSERT
 #ifndef NDEBUG
 #define VSMC_NO_RUNTIME_ASSERT 0

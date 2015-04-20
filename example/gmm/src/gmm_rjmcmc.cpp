@@ -32,23 +32,21 @@
 #include "gmm_@smp@.hpp"
 #include "gmm_move_rj.hpp"
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
 #include "options_main.hpp"
 #include "gmm_options.hpp"
     std::size_t BurninNum;
     std::size_t IterNum;
-    Config
-        .add("burnin_num", "Number of burin iterations",   &BurninNum, 10000)
-        .add("iter_num",   "Number of recored iterations", &IterNum,   10000);
+    Config.add("burnin_num", "Number of burin iterations", &BurninNum, 10000)
+        .add("iter_num", "Number of recored iterations", &IterNum, 10000);
 #include "options_process.hpp"
 
     //////////////////////////////////////////////////////////////////////
 
     vsmc::Sampler<gmm_state> sampler(Repeat);
     sampler.particle().value().ordered() = true;
-    sampler
-        .init(gmm_init_rjmcmc())
+    sampler.init(gmm_init_rjmcmc())
         .mcmc(gmm_move_mu(), true)
         .mcmc(gmm_move_lambda(), true)
         .mcmc(gmm_move_weight(), true)
@@ -59,18 +57,20 @@ int main (int argc, char **argv)
     sampler.initialize(&info);
 
     for (std::size_t d = 0; d != BurninNum; ++d) {
-        if (!(d % 1000)) std::cout << "Burnin: " << d << std::endl;
+        if (!(d % 1000))
+            std::cout << "Burnin: " << d << std::endl;
         sampler.iterate();
     }
 
-    std::vector<std::vector<std::size_t> > cn(Repeat);
+    std::vector<std::vector<std::size_t>> cn(Repeat);
     for (std::size_t i = 0; i != Repeat; ++i)
         cn[i].resize(MaxCompNum);
     for (std::size_t d = 0; d != IterNum; ++d) {
-        if (!(d % 1000)) std::cout << "Iter: " << d << std::endl;
+        if (!(d % 1000))
+            std::cout << "Iter: " << d << std::endl;
         sampler.iterate();
         for (std::size_t r = 0; r != Repeat; ++r)
-            ++cn[r][sampler.particle().value().state(r,0).comp_num() - 1];
+            ++cn[r][sampler.particle().value().state(r, 0).comp_num() - 1];
     }
 
     //////////////////////////////////////////////////////////////////////

@@ -34,8 +34,8 @@
 
 #include "utility_cstring.hpp"
 
-inline void test (char *y, char *z, int ch,
-        std::size_t B, int offset, std::size_t R)
+inline void test(
+    char *y, char *z, int ch, std::size_t B, int offset, std::size_t R)
 {
     std::cout << std::setw(10) << B;
     std::cout << std::setw(10) << size_h(B);

@@ -32,7 +32,7 @@
 #include "pet_@smp@.hpp"
 #include "smc.hpp"
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
 #include "options_main.hpp"
 #include "options_smc.hpp"
@@ -42,9 +42,9 @@ int main (int argc, char **argv)
 
     //////////////////////////////////////////////////////////////////////
 
-    vsmc::Sampler<pet_state> sampler(ParticleNum, vsmc::Stratified, Threshold);
-    sampler
-        .init(pet_init())
+    vsmc::Sampler<pet_state> sampler(
+        ParticleNum, vsmc::Stratified, Threshold);
+    sampler.init(pet_init())
         .mcmc(pet_move_phi(), true)
         .mcmc(pet_move_theta(), true)
         .mcmc(pet_move_lambda(), true)
@@ -54,15 +54,15 @@ int main (int argc, char **argv)
         .monitor("theta", (SM > CM ? SM : CM), pet_theta())
         .path_sampling(smc_path<pet_state>());
     if (ProposalScale == 2) {
-        sampler.monitor("pet_moments", 2 * (2 + 2 * (SM > CM ? SM : CM)),
-                pet_moments());
+        sampler.monitor(
+            "pet_moments", 2 * (2 + 2 * (SM > CM ? SM : CM)), pet_moments());
     }
 
     sampler.initialize(&info);
-    info.read_time  = false;
-    info.read_conv  = false;
+    info.read_time = false;
+    info.read_conv = false;
     info.read_prior = false;
-    info.read_sd    = false;
+    info.read_sd = false;
     info.read_model = false;
 
     //////////////////////////////////////////////////////////////////////

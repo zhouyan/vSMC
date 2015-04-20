@@ -41,15 +41,18 @@
 ///   - k >= 1: Ahrens, J.H. and Dieter, U. (1982). Generating gamma variates
 ///   by a modified rejection technique. Comm. ACM, 25, 47-54.
 ///   - k < 1: Ahrens, J.H. and Dieter, U. (1974). Computer methods for
-///   sampling from gamma, beta, poisson and binomial distributions. Computing,
+///   sampling from gamma, beta, poisson and binomial distributions.
+///   Computing,
 ///   12, 223-246.
 ///
 /// ### Types and functions
 ///
 /// ~~~{.c}
 /// gammak1_<N>x<W>_<F>;
-/// void gammak1_<N>x<W>_<F>_init (gammak1_<N>x<W>_<F> *, cburng<N>x<W>_rng_t *, <FT> shape);
-/// <FT> gammak1_<N>x<W>_<F>_init (gammak1_<N>x<W>_<F> *, cburng<N>x<W>_rng_t *);
+/// void gammak1_<N>x<W>_<F>_init (gammak1_<N>x<W>_<F> *, cburng<N>x<W>_rng_t
+/// *, <FT> shape);
+/// <FT> gammak1_<N>x<W>_<F>_init (gammak1_<N>x<W>_<F> *, cburng<N>x<W>_rng_t
+/// *);
 /// ~~~
 ///
 /// ### Macros
@@ -86,55 +89,55 @@
 
 #if VSMC_HAS_OPENCL_DOUBLE
 
-#define GAMMAK1_2x32      gammak1_2x32_53
+#define GAMMAK1_2x32 gammak1_2x32_53
 #define GAMMAK1_2x32_INIT gammak1_2x32_53_init
 #define GAMMAK1_2x32_RAND gammak1_2x32_53_rand
 
-#define GAMMAK1_2x64      gammak1_2x64_53
+#define GAMMAK1_2x64 gammak1_2x64_53
 #define GAMMAK1_2x64_INIT gammak1_2x64_53_init
 #define GAMMAK1_2x64_RAND gammak1_2x64_53_rand
 
-#define GAMMAK1_4x32      gammak1_4x32_53
+#define GAMMAK1_4x32 gammak1_4x32_53
 #define GAMMAK1_4x32_INIT gammak1_4x32_53_init
 #define GAMMAK1_4x32_RAND gammak1_4x32_53_rand
 
-#define GAMMAK1_4x64      gammak1_4x64_53
+#define GAMMAK1_4x64 gammak1_4x64_53
 #define GAMMAK1_4x64_INIT gammak1_4x64_53_init
 #define GAMMAK1_4x64_RAND gammak1_4x64_53_rand
 
 #else // VSMC_HAS_OPENCL_DOUBLE
 
-#define GAMMAK1_2x32      gammak1_2x32_24
+#define GAMMAK1_2x32 gammak1_2x32_24
 #define GAMMAK1_2x32_INIT gammak1_2x32_24_init
 #define GAMMAK1_2x32_RAND gammak1_2x32_24_rand
 
-#define GAMMAK1_4x32      gammak1_4x32_24
+#define GAMMAK1_4x32 gammak1_4x32_24
 #define GAMMAK1_4x32_INIT gammak1_4x32_24_init
 #define GAMMAK1_4x32_RAND gammak1_4x32_24_rand
 
 #endif // VSMC_HAS_OPENCL_DOUBLE
 
-#define VSMC_DEFINE_RNG_GAMMAK1(N, W, F, FT) \
+#define VSMC_DEFINE_RNG_GAMMAK1(N, W, F, FT)                                 \
     typedef struct {                                                         \
         FT c_shape, c_s2, c_s, c_d, c_b, c_si, c_c, c_q0;                    \
         normal01_##N##x##W##_##F rnorm;                                      \
     } gammak1_##N##x##W##_##F;
 
-#define VSMC_DEFINE_RNG_GAMMAK1_INIT(N, W, F, FT) \
-    VSMC_STATIC_INLINE void gammak1_##N##x##W##_##F##_init (                 \
-            gammak1_##N##x##W##_##F *rgamma,                                 \
-            cburng##N##x##W##_rng_t *rng, FT shape)                          \
+#define VSMC_DEFINE_RNG_GAMMAK1_INIT(N, W, F, FT)                            \
+    VSMC_STATIC_INLINE void gammak1_##N##x##W##_##F##_init(                  \
+        gammak1_##N##x##W##_##F *rgamma, cburng##N##x##W##_rng_t *rng,       \
+        FT shape)                                                            \
     {                                                                        \
         rgamma->c_shape = shape;                                             \
         normal01_##N##x##W##_##F##_init(&(rgamma->rnorm), rng);              \
                                                                              \
         if (shape <= 1) {                                                    \
             rgamma->c_s2 = 0;                                                \
-            rgamma->c_s  = 0;                                                \
-            rgamma->c_d  = 0;                                                \
-            rgamma->c_b  = 0;                                                \
+            rgamma->c_s = 0;                                                 \
+            rgamma->c_d = 0;                                                 \
+            rgamma->c_b = 0;                                                 \
             rgamma->c_si = 0;                                                \
-            rgamma->c_c  = 0;                                                \
+            rgamma->c_c = 0;                                                 \
             rgamma->c_q0 = 0;                                                \
             return;                                                          \
         }                                                                    \
@@ -153,8 +156,10 @@
         FT q5 = -7.388e-5;                                                   \
         FT q6 = 2.4511e-4;                                                   \
         FT q7 = 2.424e-4;                                                    \
-        FT c_q0 = ((((((q7 * r + q6) * r + q5) * r + q4) * r + q3) * r +     \
-                    q2) * r + q1) * r;                                       \
+        FT c_q0 =                                                            \
+            ((((((q7 * r + q6) * r + q5) * r + q4) * r + q3) * r + q2) * r + \
+                q1) *                                                        \
+            r;                                                               \
         if (shape <= 3.686f) {                                               \
             c_b = 0.463f + c_s + 0.178f * c_s2;                              \
             c_si = 1.235f;                                                   \
@@ -170,26 +175,26 @@
         }                                                                    \
                                                                              \
         rgamma->c_s2 = c_s2;                                                 \
-        rgamma->c_s  = c_s;                                                  \
-        rgamma->c_d  = c_d;                                                  \
-        rgamma->c_b  = c_b;                                                  \
+        rgamma->c_s = c_s;                                                   \
+        rgamma->c_d = c_d;                                                   \
+        rgamma->c_b = c_b;                                                   \
         rgamma->c_si = c_si;                                                 \
-        rgamma->c_c  = c_c;                                                  \
+        rgamma->c_c = c_c;                                                   \
         rgamma->c_q0 = c_q0;                                                 \
     }
 
-#define VSMC_DEFINE_RNG_GAMMAK1_RAND(N, W, F, FT) \
-    VSMC_STATIC_INLINE FT gammak1_##N##x##W##_##F##_rand (                   \
-            gammak1_##N##x##W##_##F *rgamma, cburng##N##x##W##_rng_t *rng)   \
+#define VSMC_DEFINE_RNG_GAMMAK1_RAND(N, W, F, FT)                            \
+    VSMC_STATIC_INLINE FT gammak1_##N##x##W##_##F##_rand(                    \
+        gammak1_##N##x##W##_##F *rgamma, cburng##N##x##W##_rng_t *rng)       \
     {                                                                        \
         const FT c_shape = rgamma->c_shape;                                  \
-        const FT c_s2    = rgamma->c_s2;                                     \
-        const FT c_s     = rgamma->c_s;                                      \
-        const FT c_d     = rgamma->c_d;                                      \
-        const FT c_b     = rgamma->c_b;                                      \
-        const FT c_si    = rgamma->c_si;                                     \
-        const FT c_c     = rgamma->c_c;                                      \
-        const FT c_q0    = rgamma->c_q0;                                     \
+        const FT c_s2 = rgamma->c_s2;                                        \
+        const FT c_s = rgamma->c_s;                                          \
+        const FT c_d = rgamma->c_d;                                          \
+        const FT c_b = rgamma->c_b;                                          \
+        const FT c_si = rgamma->c_si;                                        \
+        const FT c_c = rgamma->c_c;                                          \
+        const FT c_q0 = rgamma->c_q0;                                        \
                                                                              \
         if (c_shape < 0)                                                     \
             return -1;                                                       \
@@ -243,9 +248,14 @@
             FT v = t / (c_s + c_s);                                          \
             FT q;                                                            \
             if (fabs(v) <= 0.25f) {                                          \
-                q = c_q0 + 0.5f * t * t *                                    \
-                    ((((((a7 * v + a6) * v + a5) * v + a4) *                 \
-                       v + a3) * v + a2) * v + a1) * v;                      \
+                q = c_q0 +                                                   \
+                    0.5f * t * t *                                           \
+                        ((((((a7 * v + a6) * v + a5) * v + a4) * v + a3) *   \
+                                 v +                                         \
+                             a2) *                                           \
+                                v +                                          \
+                            a1) *                                            \
+                        v;                                                   \
             } else {                                                         \
                 q = c_q0 - c_s * t + 0.25f * t * t +                         \
                     (c_s2 + c_s2) * log(1 + v);                              \
@@ -269,9 +279,14 @@
             FT v = t / (c_s + c_s);                                          \
             FT q;                                                            \
             if (fabs(v) <= 0.25f) {                                          \
-                q = c_q0 + 0.5f * t * t *                                    \
-                    ((((((a7 * v + a6) * v + a5) * v + a4) *                 \
-                       v + a3) * v + a2) * v + a1) * v;                      \
+                q = c_q0 +                                                   \
+                    0.5f * t * t *                                           \
+                        ((((((a7 * v + a6) * v + a5) * v + a4) * v + a3) *   \
+                                 v +                                         \
+                             a2) *                                           \
+                                v +                                          \
+                            a1) *                                            \
+                        v;                                                   \
             } else {                                                         \
                 q = c_q0 - c_s * t + 0.25f * t * t +                         \
                     (c_s2 + c_s2) * log(1 + v);                              \

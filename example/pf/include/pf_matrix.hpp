@@ -37,7 +37,9 @@
 #include <vsmc/core/state_matrix.hpp>
 
 template <vsmc::MatrixOrder Order>
-struct BaseState {typedef vsmc::StateMatrix<Order, 5, double> type;};
+struct BaseState {
+    typedef vsmc::StateMatrix<Order, 5, double> type;
+};
 
 #include "pf_smp.hpp"
 #include "pf_smp_do.hpp"

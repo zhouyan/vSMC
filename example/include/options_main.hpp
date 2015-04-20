@@ -29,8 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-Config
-.add("suffix",      "Suffix to output file", &Suffix,      "save")
-.add("repeat",      "Number of repeatition", &Repeat,      1)
-.add("seed",        "Seed to the sampler",   &Seed,        1)
-.add("interactive", "Interactive mode",      &Interactive, false);
+Config.add("suffix", "Suffix to output file", &Suffix, "save")
+    .add("repeat", "Number of repeatition", &Repeat, 1)
+    .add("seed", "Seed to the sampler", &Seed, 1)
+    .add("interactive", "Interactive mode", &Interactive, false);

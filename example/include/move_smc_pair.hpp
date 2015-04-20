@@ -35,17 +35,20 @@
 template <typename T, typename Alpha>
 class move_smc_pair
 {
-    public :
-
+    public:
     typedef Alpha alpha_type;
 
-    move_smc_pair (
-            std::size_t min_comp, std::size_t max_comp,
-            typename Alpha::value_type alpha_config = 0) :
-        min_comp_(min_comp), max_comp_(max_comp), iter_(0),
-        alpha_(alpha_config), dummy_particle_(1) {}
+    move_smc_pair(std::size_t min_comp, std::size_t max_comp,
+        typename Alpha::value_type alpha_config = 0)
+        : min_comp_(min_comp),
+          max_comp_(max_comp),
+          iter_(0),
+          alpha_(alpha_config),
+          dummy_particle_(1)
+    {
+    }
 
-    std::size_t operator() (std::size_t iter, vsmc::Particle<T> &particle)
+    std::size_t operator()(std::size_t iter, vsmc::Particle<T> &particle)
     {
         using std::log;
 
@@ -64,7 +67,7 @@ class move_smc_pair
         double min_comp_inc = (1 - beta) / (1 - beta + beta_inc);
         double max_comp_inc = beta / (beta - beta_inc);
         for (typename vsmc::Particle<T>::size_type i = 0;
-                i != particle.size(); ++i) {
+             i != particle.size(); ++i) {
             if (particle.value().state(i, 0).comp_num() == min_comp_)
                 exp_weight_[i] = min_comp_inc;
             else if (particle.value().state(i, 0).comp_num() == max_comp_)
@@ -77,7 +80,7 @@ class move_smc_pair
         particle.weight_set().read_weight(&weight_[0]);
         double sum = 0;
         for (typename vsmc::Particle<T>::size_type i = 0;
-                i != particle.size(); ++i)
+             i != particle.size(); ++i)
             sum += weight_[i] * exp_weight_[i];
         particle.value().zconst() += log(sum);
         particle.weight_set().mul_weight(&exp_weight_[0]);
@@ -85,8 +88,7 @@ class move_smc_pair
         return 0;
     }
 
-    private :
-
+    private:
     std::size_t min_comp_;
     std::size_t max_comp_;
     std::size_t iter_;

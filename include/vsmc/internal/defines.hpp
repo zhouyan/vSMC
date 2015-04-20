@@ -37,6 +37,9 @@
 /// \brief Avoid MSVC stupid behavior: MNE = Macro No Expansion
 #define VSMC_MNE
 
+/// \brief A constant expression that give maximum of unsigned integer types
+#define VSMC_MAX_UINT(type) static_cast<type>(~(static_cast<type>(0)))
+
 /// \brief CRTP style base classes (virtual) destructor
 /// \ingroup Definitions
 ///
@@ -49,39 +52,8 @@
 #define VSMC_CRTP_DESTRUCTOR_PREFIX virtual
 #endif
 
-/// \brief constexpr
-/// \ingroup Definitions
-#if VSMC_HAS_CXX11_CONSTEXPR
-#define VSMC_CONSTEXPR constexpr
-#else
-#define VSMC_CONSTEXPR
-#endif
-
-/// \brief Explicit operator
-/// \ingroup Definitions
-#if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
-#define VSMC_EXPLICIT_OPERATOR explicit
-#else
-#define VSMC_EXPLICIT_OPERATOR
-#endif
-
-/// \brief noexcept
-/// \ingroup Definitions
-#if VSMC_HAS_CXX11_NOEXCEPT
-#define VSMC_NOEXCEPT noexcept
-#else
-#define VSMC_NOEXCEPT throw()
-#endif
-
-/// \brief nullptr
-/// \ingroup Definitions
-#if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTIONAL
-#define VSMC_NULLPTR nullptr
-#else
-#define VSMC_NULLPTR 0
-#endif
-
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief SIMD instructions
 /// \ingroup Definitions
@@ -89,20 +61,20 @@ namespace vsmc {
 /// \details
 /// These constants are used when template functions are specialized for SIMD
 /// intructions, such as those in the CString module.
-enum SIMD {SSE2, SSE3, SSSE3, SSE4_1, SSE4_2, AVX, AVX2};
+enum SIMD { SSE2, SSE3, SSSE3, SSE4_1, SSE4_2, AVX, AVX2 };
 
 /// \brief Dynamic dimension
 /// \ingroup Definitions
 enum {
     Dynamic = 0 ///< Used to specify a dimension template parameter is dynamic
-}; // enum Dynamic
+};              // enum Dynamic
 
 /// \brief Matrix order
 /// \ingroup Definitions
 enum MatrixOrder {
     RowMajor = 101, ///< Data are stored row by row in memory
     ColMajor = 102  ///< Data are stored column by column in memory
-}; // enum MatrixOrder
+};                  // enum MatrixOrder
 
 /// \brief Monitor stage
 /// \ingroup Definitions
@@ -110,45 +82,41 @@ enum MonitorStage {
     MonitorMove,     ///< Monitor evaluated after moves
     MonitorResample, ///< Monitor evaluated after resampling
     MonitorMCMC      ///< Monitor evaluated after MCMC moves
-}; // enum MonitorStage
+};                   // enum MonitorStage
 
 /// \brief Class template argument used for scalar variant
 /// \ingroup Definitions
-struct Scalar
-{
-    static VSMC_CONSTEXPR const bool is_scalar = true;
-    static VSMC_CONSTEXPR const bool is_vector = false;
-    static VSMC_CONSTEXPR const bool is_thread_local = false;
+struct Scalar {
+    static constexpr const bool is_scalar = true;
+    static constexpr const bool is_vector = false;
+    static constexpr const bool is_thread_local = false;
 }; // struct Scalar
 
 /// \brief Class template argument used for vector variant
 /// \ingroup Definitions
-struct Vector
-{
-    static VSMC_CONSTEXPR const bool is_scalar = false;
-    static VSMC_CONSTEXPR const bool is_vector = true;
-    static VSMC_CONSTEXPR const bool is_thread_local = false;
+struct Vector {
+    static constexpr const bool is_scalar = false;
+    static constexpr const bool is_vector = true;
+    static constexpr const bool is_thread_local = false;
 }; // struct Vector
 
 /// \brief Class template argument used for thread local storage variant
 /// \ingroup Definitions
-struct ThreadLocal
-{
-    static VSMC_CONSTEXPR const bool is_scalar = false;
-    static VSMC_CONSTEXPR const bool is_vector = false;
-    static VSMC_CONSTEXPR const bool is_thread_local = true;
+struct ThreadLocal {
+    static constexpr const bool is_scalar = false;
+    static constexpr const bool is_vector = false;
+    static constexpr const bool is_thread_local = true;
 }; // struct ThreadLocal
 
 /// \brief Function template argument used for position
 /// \ingroup Definitions
 template <std::size_t N>
-struct Position
-{
+struct Position {
     typedef std::size_t size_type;
     typedef Position<N> type;
-    static VSMC_CONSTEXPR const size_type value = N;
-    VSMC_CONSTEXPR operator size_type () const {return value;}
-    VSMC_CONSTEXPR size_type operator() () const {return value;}
+    static constexpr const size_type value = N;
+    constexpr operator size_type() const { return value; }
+    constexpr size_type operator()() const { return value; }
 }; // struct Position
 
 } // namespace vsmc
