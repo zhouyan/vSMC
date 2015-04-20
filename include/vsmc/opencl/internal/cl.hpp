@@ -477,7 +477,7 @@ static inline cl_int errHandler(cl_int err, const char* errStr = NULL)
 #endif // #if defined(CL_VERSION_1_1)
 
 #endif // __CL_USER_OVERRIDE_ERROR_STRINGS
-       //! \endcond
+//! \endcond
 
 /**
  * CL 1.2 marker and barrier commands
@@ -1868,7 +1868,7 @@ class Wrapper<cl_device_id>
 };
 
 } // namespace detail
-  //! \endcond
+//! \endcond
 
 /*! \stuct ImageFormat
  *  \brief Adds constructors and member functions for cl_image_format.
@@ -6245,90 +6245,90 @@ struct EnqueueArgs {
     VECTOR_CLASS<Event> events_;
 
     EnqueueArgs(NDRange global)
-        : queue_(CommandQueue::getDefault()),
-          offset_(NullRange),
-          global_(global),
-          local_(NullRange)
+        : queue_(CommandQueue::getDefault())
+        , offset_(NullRange)
+        , global_(global)
+        , local_(NullRange)
     {
     }
 
     EnqueueArgs(NDRange global, NDRange local)
-        : queue_(CommandQueue::getDefault()),
-          offset_(NullRange),
-          global_(global),
-          local_(local)
+        : queue_(CommandQueue::getDefault())
+        , offset_(NullRange)
+        , global_(global)
+        , local_(local)
     {
     }
 
     EnqueueArgs(NDRange offset, NDRange global, NDRange local)
-        : queue_(CommandQueue::getDefault()),
-          offset_(offset),
-          global_(global),
-          local_(local)
+        : queue_(CommandQueue::getDefault())
+        , offset_(offset)
+        , global_(global)
+        , local_(local)
     {
     }
 
     EnqueueArgs(Event e, NDRange global)
-        : queue_(CommandQueue::getDefault()),
-          offset_(NullRange),
-          global_(global),
-          local_(NullRange)
+        : queue_(CommandQueue::getDefault())
+        , offset_(NullRange)
+        , global_(global)
+        , local_(NullRange)
     {
         events_.push_back(e);
     }
 
     EnqueueArgs(Event e, NDRange global, NDRange local)
-        : queue_(CommandQueue::getDefault()),
-          offset_(NullRange),
-          global_(global),
-          local_(local)
+        : queue_(CommandQueue::getDefault())
+        , offset_(NullRange)
+        , global_(global)
+        , local_(local)
     {
         events_.push_back(e);
     }
 
     EnqueueArgs(Event e, NDRange offset, NDRange global, NDRange local)
-        : queue_(CommandQueue::getDefault()),
-          offset_(offset),
-          global_(global),
-          local_(local)
+        : queue_(CommandQueue::getDefault())
+        , offset_(offset)
+        , global_(global)
+        , local_(local)
     {
         events_.push_back(e);
     }
 
     EnqueueArgs(const VECTOR_CLASS<Event>& events, NDRange global)
-        : queue_(CommandQueue::getDefault()),
-          offset_(NullRange),
-          global_(global),
-          local_(NullRange),
-          events_(events)
+        : queue_(CommandQueue::getDefault())
+        , offset_(NullRange)
+        , global_(global)
+        , local_(NullRange)
+        , events_(events)
     {
     }
 
     EnqueueArgs(
         const VECTOR_CLASS<Event>& events, NDRange global, NDRange local)
-        : queue_(CommandQueue::getDefault()),
-          offset_(NullRange),
-          global_(global),
-          local_(local),
-          events_(events)
+        : queue_(CommandQueue::getDefault())
+        , offset_(NullRange)
+        , global_(global)
+        , local_(local)
+        , events_(events)
     {
     }
 
     EnqueueArgs(const VECTOR_CLASS<Event>& events, NDRange offset,
         NDRange global, NDRange local)
-        : queue_(CommandQueue::getDefault()),
-          offset_(offset),
-          global_(global),
-          local_(local),
-          events_(events)
+        : queue_(CommandQueue::getDefault())
+        , offset_(offset)
+        , global_(global)
+        , local_(local)
+        , events_(events)
     {
     }
 
     EnqueueArgs(CommandQueue& queue, NDRange global)
-        : queue_(queue),
-          offset_(NullRange),
-          global_(global),
-          local_(NullRange)
+        : queue_(queue)
+        , offset_(NullRange)
+        , global_(global)
+        , local_(NullRange)
     {
     }
 
@@ -6344,10 +6344,10 @@ struct EnqueueArgs {
     }
 
     EnqueueArgs(CommandQueue& queue, Event e, NDRange global)
-        : queue_(queue),
-          offset_(NullRange),
-          global_(global),
-          local_(NullRange)
+        : queue_(queue)
+        , offset_(NullRange)
+        , global_(global)
+        , local_(NullRange)
     {
         events_.push_back(e);
     }
@@ -6367,31 +6367,31 @@ struct EnqueueArgs {
 
     EnqueueArgs(CommandQueue& queue, const VECTOR_CLASS<Event>& events,
         NDRange global)
-        : queue_(queue),
-          offset_(NullRange),
-          global_(global),
-          local_(NullRange),
-          events_(events)
+        : queue_(queue)
+        , offset_(NullRange)
+        , global_(global)
+        , local_(NullRange)
+        , events_(events)
     {
     }
 
     EnqueueArgs(CommandQueue& queue, const VECTOR_CLASS<Event>& events,
         NDRange global, NDRange local)
-        : queue_(queue),
-          offset_(NullRange),
-          global_(global),
-          local_(local),
-          events_(events)
+        : queue_(queue)
+        , offset_(NullRange)
+        , global_(global)
+        , local_(local)
+        , events_(events)
     {
     }
 
     EnqueueArgs(CommandQueue& queue, const VECTOR_CLASS<Event>& events,
         NDRange offset, NDRange global, NDRange local)
-        : queue_(queue),
-          offset_(offset),
-          global_(global),
-          local_(local),
-          events_(events)
+        : queue_(queue)
+        , offset_(offset)
+        , global_(global)
+        , local_(local)
+        , events_(events)
     {
     }
 };

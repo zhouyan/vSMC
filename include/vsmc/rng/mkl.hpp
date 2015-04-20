@@ -432,9 +432,9 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     }
 
     MKLStream(const MKLStream<BRNG> &other)
-        : internal::MKLOffset<BRNG>::type(other),
-          seed_(other.seed_),
-          property_(other.property_)
+        : internal::MKLOffset<BRNG>::type(other)
+        , seed_(other.seed_)
+        , property_(other.property_)
     {
         int status = ::vslCopyStream(&stream_ptr_, other.stream_ptr_);
         internal::mkl_vsl_error_check(
@@ -455,10 +455,10 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     }
 
     MKLStream(MKLStream<BRNG> &&other)
-        : internal::MKLOffset<BRNG>::type(std::move(other)),
-          seed_(other.seed_),
-          stream_ptr_(other.stream_ptr_),
-          property_(other.property_)
+        : internal::MKLOffset<BRNG>::type(std::move(other))
+        , seed_(other.seed_)
+        , stream_ptr_(other.stream_ptr_)
+        , property_(other.property_)
     {
         other.stream_ptr_ = nullptr;
     }
@@ -540,9 +540,9 @@ class MKLEngine
 
     explicit MKLEngine(
         MKL_UINT s = traits::MKLSeedTrait<BRNG>::value, MKL_INT offset = 0)
-        : stream_(s, offset),
-          buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE),
-          index_(buffer_size_)
+        : stream_(s, offset)
+        , buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE)
+        , index_(buffer_size_)
     {
     }
 
@@ -550,9 +550,9 @@ class MKLEngine
     explicit MKLEngine(SeedSeq &seq,
         typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
             MKLEngine<BRNG, ResultType>>::value>::type * = nullptr)
-        : stream_(seq),
-          buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE),
-          index_(buffer_size_)
+        : stream_(seq)
+        , buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE)
+        , index_(buffer_size_)
     {
     }
 

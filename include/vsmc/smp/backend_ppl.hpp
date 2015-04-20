@@ -209,11 +209,11 @@ class MonitorEvalPPL : public MonitorEvalBase<T, Derived>
 
         work_(MonitorEvalPPL<T, Derived> *monitor, std::size_t iter,
             std::size_t dim, const Particle<T> *particle, double *res)
-            : monitor_(monitor),
-              particle_(particle),
-              res_(res),
-              iter_(iter),
-              dim_(dim)
+            : monitor_(monitor)
+            , particle_(particle)
+            , res_(res)
+            , iter_(iter)
+            , dim_(dim)
         {
         }
 

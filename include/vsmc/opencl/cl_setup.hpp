@@ -119,11 +119,11 @@ class CLSetup
     std::string platform_;
 
     CLSetup()
-        : device_type_(CL_DEVICE_TYPE_DEFAULT),
-          default_("vSMCOpenCLDefault"),
-          device_(default_),
-          device_vendor_(default_),
-          platform_(default_)
+        : device_type_(CL_DEVICE_TYPE_DEFAULT)
+        , default_("vSMCOpenCLDefault")
+        , device_(default_)
+        , device_vendor_(default_)
+        , platform_(default_)
     {
     }
 

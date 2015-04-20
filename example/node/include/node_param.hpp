@@ -55,24 +55,24 @@ class node_param
 {
     public:
     node_param()
-        : comp_num_(0),
-          a0_(0),
-          a0_old_(0),
-          a0_sd_(1),
-          a1_(0),
-          a1_old_(0),
-          a1_sd_(1),
-          a2_(0),
-          a2_old_(0),
-          a2_sd_(1),
-          log_prior_(0),
-          log_prior_old_(0),
-          log_likelihood_(0),
-          log_likelihood_old_(0),
-          log_target_(0),
-          log_target_old_(0),
-          alpha_(0),
-          alpha_inc_(0)
+        : comp_num_(0)
+        , a0_(0)
+        , a0_old_(0)
+        , a0_sd_(1)
+        , a1_(0)
+        , a1_old_(0)
+        , a1_sd_(1)
+        , a2_(0)
+        , a2_old_(0)
+        , a2_sd_(1)
+        , log_prior_(0)
+        , log_prior_old_(0)
+        , log_likelihood_(0)
+        , log_likelihood_old_(0)
+        , log_target_(0)
+        , log_target_old_(0)
+        , alpha_(0)
+        , alpha_inc_(0)
     {
     }
 

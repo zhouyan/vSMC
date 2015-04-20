@@ -55,10 +55,10 @@ class WeightSetMPI : public WeightSetBase
     typedef ID mpi_id;
 
     explicit WeightSetMPI(size_type N)
-        : WeightSetBase(N),
-          world_(MPICommunicator<ID>::instance().get(),
-              ::boost::mpi::comm_duplicate),
-          resample_size_(0)
+        : WeightSetBase(N)
+        , world_(MPICommunicator<ID>::instance().get(),
+              ::boost::mpi::comm_duplicate)
+        , resample_size_(0)
     {
         ::boost::mpi::all_reduce(
             world_, N, resample_size_, std::plus<size_type>());
@@ -238,13 +238,13 @@ class StateMPI : public BaseState
     typedef ID mpi_id;
 
     explicit StateMPI(size_type N)
-        : BaseState(N),
-          world_(MPICommunicator<ID>::instance().get(),
-              ::boost::mpi::comm_duplicate),
-          offset_(0),
-          global_size_(0),
-          size_equal_(true),
-          copy_tag_(::boost::mpi::environment::max_tag())
+        : BaseState(N)
+        , world_(MPICommunicator<ID>::instance().get(),
+              ::boost::mpi::comm_duplicate)
+        , offset_(0)
+        , global_size_(0)
+        , size_equal_(true)
+        , copy_tag_(::boost::mpi::environment::max_tag())
     {
         ::boost::mpi::all_gather(world_, N, size_all_);
         const std::size_t R = static_cast<std::size_t>(world_.rank());

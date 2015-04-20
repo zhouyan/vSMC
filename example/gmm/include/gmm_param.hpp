@@ -38,40 +38,40 @@ class gmm_param
 {
     public:
     gmm_param()
-        : comp_num_(0),
-          comp_num_old_(0),
-          log_prior_(0),
-          log_prior_old_(0),
-          log_likelihood_(0),
-          log_likelihood_old_(0),
-          log_target_(0),
-          log_target_old_(0),
-          alpha_(0),
-          alpha_inc_(0),
-          beta_(0),
-          beta_inc_(0),
-          mu_sd_(1),
-          lambda_sd_(1),
-          weight_sd_(1)
+        : comp_num_(0)
+        , comp_num_old_(0)
+        , log_prior_(0)
+        , log_prior_old_(0)
+        , log_likelihood_(0)
+        , log_likelihood_old_(0)
+        , log_target_(0)
+        , log_target_old_(0)
+        , alpha_(0)
+        , alpha_inc_(0)
+        , beta_(0)
+        , beta_inc_(0)
+        , mu_sd_(1)
+        , lambda_sd_(1)
+        , weight_sd_(1)
     {
     }
 
     gmm_param(const gmm_param &other)
-        : comp_num_(0),
-          comp_num_old_(0),
-          log_prior_(0),
-          log_prior_old_(0),
-          log_likelihood_(0),
-          log_likelihood_old_(0),
-          log_target_(0),
-          log_target_old_(0),
-          alpha_(0),
-          alpha_inc_(0),
-          beta_(0),
-          beta_inc_(0),
-          mu_sd_(1),
-          lambda_sd_(1),
-          weight_sd_(1)
+        : comp_num_(0)
+        , comp_num_old_(0)
+        , log_prior_(0)
+        , log_prior_old_(0)
+        , log_likelihood_(0)
+        , log_likelihood_old_(0)
+        , log_target_(0)
+        , log_target_old_(0)
+        , alpha_(0)
+        , alpha_inc_(0)
+        , beta_(0)
+        , beta_inc_(0)
+        , mu_sd_(1)
+        , lambda_sd_(1)
+        , weight_sd_(1)
     {
         comp_num(other.comp_num_);
         for (std::size_t i = 0; i != comp_num_; ++i) {

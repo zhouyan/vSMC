@@ -107,12 +107,12 @@ class Monitor
     /// `record()`.
     explicit Monitor(std::size_t dim, const eval_type &eval,
         bool record_only = false, MonitorStage stage = MonitorMCMC)
-        : dim_(dim),
-          eval_(eval),
-          recording_(true),
-          record_only_(record_only),
-          stage_(stage),
-          name_(dim)
+        : dim_(dim)
+        , eval_(eval)
+        , recording_(true)
+        , record_only_(record_only)
+        , stage_(stage)
+        , name_(dim)
     {
     }
 

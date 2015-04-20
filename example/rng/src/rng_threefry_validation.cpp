@@ -60,8 +60,7 @@ int main()
         489392195ULL, 569170260ULL, 3151774943ULL, 1323299256ULL,
         3482885113ULL, 402439219ULL, 3163273511ULL, 3505379617ULL,
         1170217625ULL, 1181892006ULL, 970586880ULL, 92ULL};
-    rng_validation<vsmc::Threefry2x32>(
-        Threefry2x32Result, "Threefry2x32");
+    rng_validation<vsmc::Threefry2x32>(Threefry2x32Result, "Threefry2x32");
 
     std::vector<unsigned long long> Threefry4x32Result = {72649349ULL,
         488426255ULL, 1182236606ULL, 503389643ULL, 2657065516ULL,
@@ -89,8 +88,7 @@ int main()
         2393580504ULL, 3187306808ULL, 3961684887ULL, 1658081136ULL,
         2169997687ULL, 3427929537ULL, 1230009001ULL, 787750860ULL,
         1510254211ULL, 781084165ULL, 2974020319ULL, 44ULL};
-    rng_validation<vsmc::Threefry4x32>(
-        Threefry4x32Result, "Threefry4x32");
+    rng_validation<vsmc::Threefry4x32>(Threefry4x32Result, "Threefry4x32");
 
     std::vector<unsigned long long> Threefry2x64Result = {
         6587418233440704010ULL, 922607945289313709ULL,
@@ -142,8 +140,7 @@ int main()
         13301976048850739582ULL, 15032256000915451172ULL,
         16648524814763982427ULL, 491535854765621175ULL,
         8179707882298974426ULL, 95ULL};
-    rng_validation<vsmc::Threefry2x64>(
-        Threefry2x64Result, "Threefry2x64");
+    rng_validation<vsmc::Threefry2x64>(Threefry2x64Result, "Threefry2x64");
 
     std::vector<unsigned long long> Threefry4x64Result = {
         3925897152597938002ULL, 1593725430291856998ULL,
@@ -193,8 +190,7 @@ int main()
         16774051211549599565ULL, 9093562834670167937ULL,
         4785193166798545310ULL, 2409366490122510774ULL,
         2564164278159198574ULL, 5ULL};
-    rng_validation<vsmc::Threefry4x64>(
-        Threefry4x64Result, "Threefry4x64");
+    rng_validation<vsmc::Threefry4x64>(Threefry4x64Result, "Threefry4x64");
 
     return 0;
 }

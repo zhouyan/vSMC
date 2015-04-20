@@ -206,11 +206,11 @@ class StateCL
         std::array<char, StateSize>>::type state_pack_type;
 
     explicit StateCL(size_type N)
-        : state_size_(StateSize == Dynamic ? 1 : StateSize),
-          size_(N),
-          build_(false),
-          build_id_(0),
-          state_buffer_(state_size_ * size_)
+        : state_size_(StateSize == Dynamic ? 1 : StateSize)
+        , size_(N)
+        , build_(false)
+        , build_id_(0)
+        , state_buffer_(state_size_ * size_)
     {
 #if VSMC_OPENCL_VERSION >= 120
         if (manager().opencl_version() >= 120) {

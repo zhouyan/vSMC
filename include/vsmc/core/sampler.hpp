@@ -76,11 +76,11 @@ class Sampler
     /// resampling is consdiered, then use the other two versions of the
     /// constructor to make the intention clear to the library.
     explicit Sampler(size_type N)
-        : init_by_iter_(false),
-          resample_threshold_(resample_threshold_never()),
-          particle_(N),
-          iter_num_(0),
-          path_(typename Path<T>::eval_type())
+        : init_by_iter_(false)
+        , resample_threshold_(resample_threshold_never())
+        , particle_(N)
+        , iter_num_(0)
+        , path_(typename Path<T>::eval_type())
     {
         resample_scheme(Multinomial);
     }
@@ -92,11 +92,11 @@ class Sampler
     /// always
     /// want to perform resampling.
     Sampler(size_type N, ResampleScheme scheme)
-        : init_by_iter_(false),
-          resample_threshold_(resample_threshold_always()),
-          particle_(N),
-          iter_num_(0),
-          path_(typename Path<T>::eval_type())
+        : init_by_iter_(false)
+        , resample_threshold_(resample_threshold_always())
+        , particle_(N)
+        , iter_num_(0)
+        , path_(typename Path<T>::eval_type())
     {
         resample_scheme(scheme);
     }
@@ -109,11 +109,11 @@ class Sampler
     /// user want to perform resampling at least sometime. So the threshold is
     /// set to 0.5 if not provided as the third parameter.
     Sampler(size_type N, ResampleScheme scheme, double resample_threshold)
-        : init_by_iter_(false),
-          resample_threshold_(resample_threshold),
-          particle_(N),
-          iter_num_(0),
-          path_(typename Path<T>::eval_type())
+        : init_by_iter_(false)
+        , resample_threshold_(resample_threshold)
+        , particle_(N)
+        , iter_num_(0)
+        , path_(typename Path<T>::eval_type())
     {
         resample_scheme(scheme);
     }
@@ -126,11 +126,11 @@ class Sampler
     /// threshold is set to 0.5 if not provided as the third parameter.
     Sampler(size_type N, const resample_type &res_op,
         double resample_threshold = 0.5)
-        : init_by_iter_(false),
-          resample_threshold_(resample_threshold),
-          particle_(N),
-          iter_num_(0),
-          path_(typename Path<T>::eval_type())
+        : init_by_iter_(false)
+        , resample_threshold_(resample_threshold)
+        , particle_(N)
+        , iter_num_(0)
+        , path_(typename Path<T>::eval_type())
     {
         resample_scheme(res_op);
     }

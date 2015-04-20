@@ -59,19 +59,19 @@ class CLBuffer
 
     CLBuffer(size_type N, ::cl_mem_flags flag = CL_MEM_READ_WRITE,
         void *host_ptr = nullptr)
-        : size_(N),
-          flag_(flag),
-          host_ptr_(host_ptr),
-          data_(manager().template create_buffer<value_type>(
+        : size_(N)
+        , flag_(flag)
+        , host_ptr_(host_ptr)
+        , data_(manager().template create_buffer<value_type>(
               size_, flag_, host_ptr_))
     {
     }
 
     CLBuffer(const CLBuffer<T, ID> &other)
-        : size_(other.size_),
-          flag_(other.flag_),
-          host_ptr_(other.host_ptr_),
-          data_(manager().template create_buffer<value_type>(
+        : size_(other.size_)
+        , flag_(other.flag_)
+        , host_ptr_(other.host_ptr_)
+        , data_(manager().template create_buffer<value_type>(
               size_, flag_, host_ptr_))
     {
         if (size_ != 0
@@ -104,10 +104,10 @@ class CLBuffer
     }
 
     CLBuffer(CLBuffer<T, ID> &&other)
-        : size_(other.size_),
-          flag_(other.flag_),
-          host_ptr_(other.host_ptr_),
-          data_(std::move(other.data_))
+        : size_(other.size_)
+        , flag_(other.flag_)
+        , host_ptr_(other.host_ptr_)
+        , data_(std::move(other.data_))
     {
         other.size_ = 0;
         other.flag_ = CL_MEM_READ_WRITE;

@@ -40,11 +40,11 @@ class move_smc_pair
 
     move_smc_pair(std::size_t min_comp, std::size_t max_comp,
         typename Alpha::value_type alpha_config = 0)
-        : min_comp_(min_comp),
-          max_comp_(max_comp),
-          iter_(0),
-          alpha_(alpha_config),
-          dummy_particle_(1)
+        : min_comp_(min_comp)
+        , max_comp_(max_comp)
+        , iter_(0)
+        , alpha_(alpha_config)
+        , dummy_particle_(1)
     {
     }
 

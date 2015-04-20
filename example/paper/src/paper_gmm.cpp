@@ -53,11 +53,11 @@ class gmm_param
 {
     public:
     gmm_param()
-        : comp_num_(0),
-          log_prior_(0),
-          log_likelihood_(0),
-          log_prior_old_(0),
-          log_likelihood_old_(0)
+        : comp_num_(0)
+        , log_prior_(0)
+        , log_likelihood_(0)
+        , log_prior_old_(0)
+        , log_likelihood_old_(0)
     {
     }
 
@@ -231,17 +231,17 @@ class gmm_state : public gmm_state_base
 {
     public:
     gmm_state(size_type N)
-        : gmm_state_base(N),
-          comp_num_(0),
-          alpha_(0),
-          alpha_inc_(0),
-          mu0_(1),
-          sd0_(1),
-          shape0_(1),
-          scale0_(1),
-          mu_sd_(1),
-          lambda_sd_(1),
-          weight_sd_(1)
+        : gmm_state_base(N)
+        , comp_num_(0)
+        , alpha_(0)
+        , alpha_inc_(0)
+        , mu0_(1)
+        , sd0_(1)
+        , shape0_(1)
+        , scale0_(1)
+        , mu_sd_(1)
+        , lambda_sd_(1)
+        , weight_sd_(1)
     {
     }
 

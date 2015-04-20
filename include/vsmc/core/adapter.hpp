@@ -292,9 +292,9 @@ class InitializeAdapterBase<T, NullType, BaseType> : public BaseType
         const initialize_param_type &init_param = initialize_param_type(),
         const pre_processor_type &pre = pre_processor_type(),
         const post_processor_type &post = post_processor_type())
-        : initialize_param_(init_param),
-          pre_processor_(pre),
-          post_processor_(post)
+        : initialize_param_(init_param)
+        , pre_processor_(pre)
+        , post_processor_(post)
     {
     }
 

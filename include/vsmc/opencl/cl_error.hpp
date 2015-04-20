@@ -141,8 +141,8 @@ class CLError : public std::runtime_error
 {
     public:
     CLError()
-        : std::runtime_error(internal::cl_error_str(CL_SUCCESS)),
-          status_(CL_SUCCESS)
+        : std::runtime_error(internal::cl_error_str(CL_SUCCESS))
+        , status_(CL_SUCCESS)
     {
     }
 
@@ -153,21 +153,21 @@ class CLError : public std::runtime_error
 
     explicit CLError(const ::cl::Error &err)
         : std::runtime_error(std::string(err.what()) + ":" +
-              internal::cl_error_str(err.err())),
-          status_(err.err())
+              internal::cl_error_str(err.err()))
+        , status_(err.err())
     {
     }
 
     CLError(cl_int status, const char *msg)
         : std::runtime_error(
-              std::string(msg) + ":" + internal::cl_error_str(status)),
-          status_(status)
+              std::string(msg) + ":" + internal::cl_error_str(status))
+        , status_(status)
     {
     }
 
     CLError(cl_int status, const std::string &msg)
-        : std::runtime_error(msg + ":" + internal::cl_error_str(status)),
-          status_(status)
+        : std::runtime_error(msg + ":" + internal::cl_error_str(status))
+        , status_(status)
     {
     }
 

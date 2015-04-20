@@ -154,10 +154,10 @@ class ParallelMoveState
 
     template <typename SplitType>
     ParallelMoveState(const ParallelMoveState<T, MoveType> &other, SplitType)
-        : move_(other.move_),
-          iter_(other.iter_),
-          particle_(other.particle_),
-          accept_(0)
+        : move_(other.move_)
+        , iter_(other.iter_)
+        , particle_(other.particle_)
+        , accept_(0)
     {
     }
 
@@ -205,11 +205,11 @@ class ParallelMonitorState
     public:
     ParallelMonitorState(MonitorEvalType *monitor, std::size_t iter,
         std::size_t dim, const Particle<T> *particle, double *res)
-        : monitor_(monitor),
-          iter_(iter),
-          dim_(dim),
-          particle_(particle),
-          res_(res)
+        : monitor_(monitor)
+        , iter_(iter)
+        , dim_(dim)
+        , particle_(particle)
+        , res_(res)
     {
     }
 

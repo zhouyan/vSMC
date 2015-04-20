@@ -69,10 +69,10 @@ class StableDistribution
         explicit param_type(result_type stability = 1,
             result_type skewness = 0, result_type location = 0,
             result_type scale = 1)
-            : stability_(stability),
-              skewness_(skewness),
-              location_(location),
-              scale_(scale)
+            : stability_(stability)
+            , skewness_(skewness)
+            , location_(location)
+            , scale_(scale)
         {
         }
 
@@ -159,13 +159,13 @@ class StableDistribution
     explicit StableDistribution(result_type stability = 1,
         result_type skewness = 0, result_type location = 0,
         result_type scale = 1)
-        : stability_(stability),
-          skewness_(skewness),
-          location_(location),
-          scale_(scale),
-          zeta_(0),
-          xi_(0),
-          stability_1_(false)
+        : stability_(stability)
+        , skewness_(skewness)
+        , location_(location)
+        , scale_(scale)
+        , zeta_(0)
+        , xi_(0)
+        , stability_1_(false)
     {
         VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_STABILITY(
             stability_);
@@ -176,13 +176,13 @@ class StableDistribution
     }
 
     explicit StableDistribution(const param_type &param)
-        : stability_(param.stability()),
-          skewness_(param.skewness()),
-          location_(param.location()),
-          scale_(param.scale()),
-          zeta_(0),
-          xi_(0),
-          stability_1_(false)
+        : stability_(param.stability())
+        , skewness_(param.skewness())
+        , location_(param.location())
+        , scale_(param.scale())
+        , zeta_(0)
+        , xi_(0)
+        , stability_1_(false)
     {
         VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_STABILITY(
             stability_);

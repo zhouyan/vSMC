@@ -528,19 +528,19 @@ class ProgramOptionMap
 
     public:
     explicit ProgramOptionMap(bool silent = false, bool auto_help = true)
-        : silent_(silent),
-          auto_help_(auto_help),
-          help_ptr_(new ProgramOptionHelp)
+        : silent_(silent)
+        , auto_help_(auto_help)
+        , help_ptr_(new ProgramOptionHelp)
     {
         option_map_["--help"] = std::make_pair(help_ptr_, 0);
         option_list_.push_back(std::make_pair("--help", help_ptr_));
     }
 
     ProgramOptionMap(const ProgramOptionMap &other)
-        : silent_(other.silent_),
-          auto_help_(other.auto_help_),
-          option_map_(other.option_map_),
-          option_list_(other.option_list_)
+        : silent_(other.silent_)
+        , auto_help_(other.auto_help_)
+        , option_map_(other.option_map_)
+        , option_list_(other.option_list_)
     {
         for (option_map_type::iterator iter = option_map_.begin();
              iter != option_map_.end(); ++iter) {
@@ -574,11 +574,11 @@ class ProgramOptionMap
     }
 
     ProgramOptionMap(ProgramOptionMap &&other)
-        : silent_(other.silent_),
-          auto_help_(other.auto_help_),
-          help_ptr_(other.help_ptr_),
-          option_map_(std::move(other.option_map_)),
-          option_list_(std::move(other.option_list_))
+        : silent_(other.silent_)
+        , auto_help_(other.auto_help_)
+        , help_ptr_(other.help_ptr_)
+        , option_map_(std::move(other.option_map_))
+        , option_list_(std::move(other.option_list_))
     {
         other.help_ptr_ = nullptr;
         other.option_map_.clear();

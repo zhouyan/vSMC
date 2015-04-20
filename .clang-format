@@ -22,7 +22,7 @@ BinPackParameters                              : true
 BreakBeforeBinaryOperators                     : None
 BreakBeforeBraces                              : Linux
 BreakBeforeTernaryOperators                    : false
-BreakConstructorInitializersBeforeComma        : false
+BreakConstructorInitializersBeforeComma        : true
 ColumnLimit                                    : 78
 # CommentPragmas                                 :
 ConstructorInitializerAllOnOneLineOrOnePerLine : true

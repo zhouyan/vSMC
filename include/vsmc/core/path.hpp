@@ -94,10 +94,10 @@ class Path
     /// \f$(g_{\alpha_t}(X_0),\dots)\f$ and the return value is
     /// \f$\alpha_t\f$.
     explicit Path(const eval_type &eval, bool record_only = false)
-        : eval_(eval),
-          recording_(true),
-          record_only_(record_only),
-          log_zconst_(0)
+        : eval_(eval)
+        , recording_(true)
+        , record_only_(record_only)
+        , log_zconst_(0)
     {
     }
 

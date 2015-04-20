@@ -422,18 +422,18 @@ class CPUID
     /// \brief Structure of deterministic cache parameter
     struct cache_param_type {
         cache_param_type(const reg_type &reg)
-            : level_(0),
-              max_proc_sharing_(0),
-              max_proc_physical_(0),
-              line_size_(0),
-              partitions_(0),
-              ways_(0),
-              sets_(0),
-              self_initializing_(false),
-              fully_associative_(false),
-              wbinvd_(false),
-              inclusiveness_(false),
-              complex_indexing_(false)
+            : level_(0)
+            , max_proc_sharing_(0)
+            , max_proc_physical_(0)
+            , line_size_(0)
+            , partitions_(0)
+            , ways_(0)
+            , sets_(0)
+            , self_initializing_(false)
+            , fully_associative_(false)
+            , wbinvd_(false)
+            , inclusiveness_(false)
+            , complex_indexing_(false)
         {
             unsigned t = extract_bits<4, 0>(std::get<0>(reg));
             switch (t) {

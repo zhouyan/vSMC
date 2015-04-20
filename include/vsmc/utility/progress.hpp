@@ -47,23 +47,23 @@ class Progress
     public:
     /// \brief Construct a Progress with an output stream
     Progress(std::ostream &os = std::cout)
-        : thread_ptr_(nullptr),
-          interval_ms_(0),
-          iter_(0),
-          total_(0),
-          length_(0),
-          show_iter_(true),
-          print_first_(true),
-          in_progress_(false),
-          num_equal_(0),
-          percent_(0),
-          seconds_(0),
-          last_iter_(0),
-          cstr_bar_(),
-          cstr_percent_(),
-          cstr_time_(),
-          cstr_iter_(),
-          os_(os)
+        : thread_ptr_(nullptr)
+        , interval_ms_(0)
+        , iter_(0)
+        , total_(0)
+        , length_(0)
+        , show_iter_(true)
+        , print_first_(true)
+        , in_progress_(false)
+        , num_equal_(0)
+        , percent_(0)
+        , seconds_(0)
+        , last_iter_(0)
+        , cstr_bar_()
+        , cstr_percent_()
+        , cstr_time_()
+        , cstr_iter_()
+        , os_(os)
     {
     }
 

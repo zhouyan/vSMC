@@ -45,9 +45,9 @@ class cv : public vsmc::StateMatrix<vsmc::RowMajor, Dim, double>
 {
     public:
     cv(size_type N)
-        : vsmc::StateMatrix<vsmc::RowMajor, Dim, double>(N),
-          x_obs_(DataNum),
-          y_obs_(DataNum)
+        : vsmc::StateMatrix<vsmc::RowMajor, Dim, double>(N)
+        , x_obs_(DataNum)
+        , y_obs_(DataNum)
     {
     }
 

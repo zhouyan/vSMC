@@ -53,8 +53,8 @@ class gmm_state
 {
     public:
     gmm_state(size_type N)
-        : BASE_STATE<vsmc::StateMatrix<vsmc::RowMajor, 1, gmm_param>>(N),
-          ordered_(false)
+        : BASE_STATE<vsmc::StateMatrix<vsmc::RowMajor, 1, gmm_param>>(N)
+        , ordered_(false)
     {
     }
 

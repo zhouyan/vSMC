@@ -36,21 +36,21 @@ class pet_param
 {
     public:
     pet_param()
-        : comp_num_(0),
-          lambda_(1),
-          lambda_old_(1),
-          lambda_sd_(1),
-          nu_(3),
-          nu_old_(3),
-          nu_sd_(1),
-          log_prior_(0),
-          log_prior_old_(0),
-          log_likelihood_(0),
-          log_likelihood_old_(0),
-          log_target_(0),
-          log_target_old_(0),
-          alpha_(0),
-          alpha_inc_(0)
+        : comp_num_(0)
+        , lambda_(1)
+        , lambda_old_(1)
+        , lambda_sd_(1)
+        , nu_(3)
+        , nu_old_(3)
+        , nu_sd_(1)
+        , log_prior_(0)
+        , log_prior_old_(0)
+        , log_likelihood_(0)
+        , log_likelihood_old_(0)
+        , log_target_(0)
+        , log_target_old_(0)
+        , alpha_(0)
+        , alpha_inc_(0)
     {
     }
 

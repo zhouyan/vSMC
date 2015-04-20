@@ -62,14 +62,14 @@ class Particle
         const double *, size_type *)> resample_type;
 
     explicit Particle(size_type N)
-        : size_(N),
-          value_(N),
-          weight_set_(static_cast<
-              typename traits::SizeTypeTrait<weight_set_type>::type>(N)),
-          rng_set_(
+        : size_(N)
+        , value_(N)
+        , weight_set_(static_cast<
+              typename traits::SizeTypeTrait<weight_set_type>::type>(N))
+        , rng_set_(
               static_cast<typename traits::SizeTypeTrait<rng_set_type>::type>(
-                  N)),
-          resample_rng_(Seed::instance().get())
+                  N))
+        , resample_rng_(Seed::instance().get())
     {
     }
 
