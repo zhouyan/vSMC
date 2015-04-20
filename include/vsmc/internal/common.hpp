@@ -42,6 +42,8 @@
 #include <vsmc/math/constants.hpp>
 #include <vsmc/math/vmath.hpp>
 
+#include <algorithm>
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -49,31 +51,24 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-
-#include <algorithm>
-#include <numeric>
-#include <random>
-
-#include <array>
-#include <iterator>
-#include <list>
-#include <map>
-#include <tuple>
-#include <vector>
-
-#include <chrono>
 #include <exception>
-#include <functional>
-#include <limits>
-#include <memory>
-#include <type_traits>
-#include <utility>
-
 #include <fstream>
+#include <functional>
 #include <iomanip>
 #include <iostream>
+#include <iterator>
+#include <limits>
+#include <list>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <random>
 #include <sstream>
 #include <string>
+#include <tuple>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 namespace vsmc
 {

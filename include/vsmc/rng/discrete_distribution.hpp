@@ -32,7 +32,7 @@
 #ifndef VSMC_RNG_DISCRETE_DISTRIBUTION_HPP
 #define VSMC_RNG_DISCRETE_DISTRIBUTION_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/rng/internal/common.hpp>
 #include <vsmc/math/cblas.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param)        \

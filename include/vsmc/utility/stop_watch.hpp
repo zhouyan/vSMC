@@ -33,6 +33,7 @@
 #define VSMC_UTILITY_STOP_WATCH_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <chrono>
 
 /// \brief Default C++11 clock used as StopWatch
 /// \ingroup Config
