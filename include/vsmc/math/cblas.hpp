@@ -55,11 +55,9 @@ namespace math
 template <typename T>
 inline T asum(std::size_t n, const T *x)
 {
-    using std::fabs;
-
     T sum = 0;
     for (std::size_t i = 0; i != n; ++i)
-        sum += fabs(x[i]);
+        sum += std::fabs(x[i]);
 
     return sum;
 }

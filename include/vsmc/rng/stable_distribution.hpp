@@ -312,17 +312,14 @@ class StableDistribution
     template <typename Eng>
     result_type standard_1(Eng &eng) const
     {
-        using std::cos;
-        using std::log;
-        using std::tan;
-
         std::uniform_real_distribution<result_type> runif(0, 1);
-        result_type w = -log(1 - runif(eng));
+        result_type w = -std::log(1 - runif(eng));
         result_type u = (runif(eng) - 0.5) * math::pi<result_type>();
         result_type a =
-            (math::pi_by2<result_type>() + skewness_ * u) * tan(u);
-        result_type b = log(math::pi_by2<result_type>() * w * cos(u));
-        result_type c = log(math::pi_by2<result_type>() + skewness_ * u);
+            (math::pi_by2<result_type>() + skewness_ * u) * std::tan(u);
+        result_type b =
+            std::log(math::pi_by2<result_type>() * w * std::cos(u));
+        result_type c = std::log(math::pi_by2<result_type>() + skewness_ * u);
         result_type x = (a - skewness_ * (b - c)) / xi_;
 
         return x;
@@ -331,19 +328,14 @@ class StableDistribution
     template <typename Eng>
     result_type standard_a(Eng &eng) const
     {
-        using std::cos;
-        using std::exp;
-        using std::log;
-        using std::sin;
-
         std::uniform_real_distribution<result_type> runif(0, 1);
-        result_type w = -log(1 - runif(eng));
+        result_type w = -std::std::log(1 - runif(eng));
         result_type u = (runif(eng) - 0.5) * math::pi<result_type>();
-        result_type a = 0.5 * log(1 + zeta_ * zeta_) / stability_;
-        result_type b = sin(stability_ * (u + xi_));
-        result_type c = log(cos(u)) / stability_;
+        result_type a = 0.5 * std::log(1 + zeta_ * zeta_) / stability_;
+        result_type b = std::sin(stability_ * (u + xi_));
+        result_type c = std::log(std::cos(u)) / stability_;
         result_type d = (1 - stability_) / stability_ *
-            log(cos(u - stability_ * (u + xi_)) / w);
+            std::log(std::cos(u - stability_ * (u + xi_)) / w);
         result_type x = b * std::exp(a - c + d);
 
         return x;
@@ -351,11 +343,9 @@ class StableDistribution
 
     result_type trans_1(result_type x) const
     {
-        using std::log;
-
         return scale_ * x + location_ +
             2 * math::pi_inv<result_type>() * skewness_ * scale_ *
-            log(scale_);
+            std::log(scale_);
     }
 
     result_type trans_a(result_type x) const
@@ -365,14 +355,11 @@ class StableDistribution
 
     void invariant()
     {
-        using std::atan;
-        using std::tan;
-
         if (stability_ < 1 || stability_ > 1) {
             stability_1_ = false;
-            zeta_ =
-                -skewness_ * tan(math::pi_by2<result_type>() * stability_);
-            xi_ = 1 / stability_ * atan(-zeta_);
+            zeta_ = -skewness_ *
+                std::tan(math::pi_by2<result_type>() * stability_);
+            xi_ = 1 / stability_ * std::atan(-zeta_);
         } else {
             stability_1_ = true;
             zeta_ = -std::numeric_limits<result_type>::infinity();

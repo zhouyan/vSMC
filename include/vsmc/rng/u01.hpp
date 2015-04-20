@@ -184,17 +184,14 @@ class U01SequenceSorted
     ///
     double operator[](std::size_t n)
     {
-        using std::exp;
-        using std::log;
-
         VSMC_RUNTIME_ASSERT_RNG_U01_U01_SEQUENCE(Sorted)
 
         if (n == n_)
             return u_;
 
-        lmax_ += log(1 - runif_(rng_)) / (N_ - n);
+        lmax_ += std::log(1 - runif_(rng_)) / (N_ - n);
         n_ = n;
-        u_ = 1 - exp(lmax_);
+        u_ = 1 - std::exp(lmax_);
 
         return u_;
     }

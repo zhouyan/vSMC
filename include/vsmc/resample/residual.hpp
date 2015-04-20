@@ -54,14 +54,12 @@ class Resample<internal::ResampleResidual>
     void operator()(std::size_t M, std::size_t N, RngType &rng,
         const double *weight, IntType *replication)
     {
-        using std::modf;
-
         residual_.resize(M);
         integral_.resize(M);
         double *const rptr = &residual_[0];
         double *const iptr = &integral_[0];
         for (std::size_t i = 0; i != M; ++i)
-            rptr[i] = modf(N * weight[i], iptr + i);
+            rptr[i] = std::modf(N * weight[i], iptr + i);
         double coeff = 1 / math::asum(M, rptr);
         math::scal(M, coeff, rptr);
 

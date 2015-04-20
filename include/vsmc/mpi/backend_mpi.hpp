@@ -132,8 +132,6 @@ class WeightSetMPI : public WeightSetBase
 
     double compute_ess(const double *first, bool use_log) const
     {
-        using std::exp;
-
         const size_type N = static_cast<size_type>(this->size());
         std::vector<double, AlignedAllocator<double>> buffer(N);
         double *const bptr = &buffer[0];
@@ -152,7 +150,7 @@ class WeightSetMPI : public WeightSetBase
             for (size_type i = 0; i != N; ++i)
                 bptr[i] -= gmax_weight;
             for (size_type i = 0; i != N; ++i)
-                bptr[i] = exp(bptr[i]);
+                bptr[i] = std::exp(bptr[i]);
         } else {
             const double *const wptr = this->weight_data();
             for (size_type i = 0; i != N; ++i)
@@ -179,8 +177,6 @@ class WeightSetMPI : public WeightSetBase
 
     double compute_cess(const double *first, bool use_log) const
     {
-        using std::exp;
-
         const size_type N = static_cast<size_type>(this->size());
         const double *bptr = first;
         const double *const wptr = this->weight_data();
@@ -189,7 +185,7 @@ class WeightSetMPI : public WeightSetBase
             buffer.resize(N);
             double *const cptr = &buffer[0];
             for (size_type i = 0; i != N; ++i)
-                cptr[i] = exp(first[i]);
+                cptr[i] = std::exp(first[i]);
             bptr = cptr;
         }
 
