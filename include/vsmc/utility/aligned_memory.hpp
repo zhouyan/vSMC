@@ -114,10 +114,10 @@ class AlignedMemorySTD
         VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY;
 
         if (n == 0)
-            return VSMC_NULLPTR;
+            return nullptr;
 
         void *orig_ptr = std::malloc(n + alignment + sizeof(void *));
-        if (orig_ptr == VSMC_NULLPTR)
+        if (orig_ptr == nullptr)
             throw std::bad_alloc();
 
         uintptr_t address = reinterpret_cast<uintptr_t>(orig_ptr);
@@ -153,7 +153,7 @@ class AlignedMemorySYS
         VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY;
 
         if (n == 0)
-            return VSMC_NULLPTR;
+            return nullptr;
 
         void *ptr;
         if (posix_memalign(&ptr, alignment, n) != 0)
@@ -175,10 +175,10 @@ class AlignedMemorySYS
         VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY;
 
         if (n == 0)
-            return VSMC_NULLPTR;
+            return nullptr;
 
         void *ptr = _aligned_malloc(n, alignment);
-        if (ptr == VSMC_NULLPTR)
+        if (ptr == nullptr)
             throw std::bad_alloc();
 
         return ptr;
@@ -201,14 +201,14 @@ class AlignedMemoryJE
         VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY;
 
         if (n == 0)
-            return VSMC_NULLPTR;
+            return nullptr;
 
 #if VSMC_HAS_JEMALLOC_STDAPI
         void *ptr = aligned_alloc(alignment, n);
 #else
         void *ptr = je_aligned_alloc(alignment, n);
 #endif
-        if (ptr == VSMC_NULLPTR)
+        if (ptr == nullptr)
             throw std::bad_alloc();
 
         return ptr;
@@ -239,10 +239,10 @@ class AlignedMemoryTBB
         VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY;
 
         if (n == 0)
-            return VSMC_NULLPTR;
+            return nullptr;
 
         void *ptr = scalable_aligned_malloc(n, alignment);
-        if (ptr == VSMC_NULLPTR)
+        if (ptr == nullptr)
             throw std::bad_alloc();
 
         return ptr;
@@ -265,10 +265,10 @@ class AlignedMemoryMKL
         VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY;
 
         if (n == 0)
-            return VSMC_NULLPTR;
+            return nullptr;
 
         void *ptr = mkl_malloc(n, static_cast<int>(alignment));
-        if (ptr == VSMC_NULLPTR)
+        if (ptr == nullptr)
             throw std::bad_alloc();
 
         return ptr;
@@ -324,10 +324,10 @@ class AlignedAllocator : public std::allocator<T>
 
     ~AlignedAllocator() {}
 
-    pointer allocate(size_type n, const void * = VSMC_NULLPTR)
+    pointer allocate(size_type n, const void * = nullptr)
     {
         if (n == 0)
-            return VSMC_NULLPTR;
+            return nullptr;
 
         return static_cast<pointer>(
             memory_.aligned_malloc(sizeof(T) * n, Alignment));
@@ -335,7 +335,7 @@ class AlignedAllocator : public std::allocator<T>
 
     void deallocate(pointer ptr, size_type)
     {
-        if (ptr != VSMC_NULLPTR)
+        if (ptr != nullptr)
             memory_.aligned_free(ptr);
     }
 

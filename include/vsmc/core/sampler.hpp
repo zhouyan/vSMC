@@ -162,7 +162,6 @@ template <typename T> class Sampler
     {
         if (this != &other) {
             if (retain_rng) {
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
                 typename Particle<T>::rng_set_type rset(
                     std::move(particle_.rng_set()));
                 typename Particle<T>::resample_rng_type rrng(
@@ -170,17 +169,6 @@ template <typename T> class Sampler
                 *this = other;
                 particle_.rng_set() = std::move(rset);
                 particle_.resample_rng() = std::move(rrng);
-#else
-                using std::swap;
-
-                typename Particle<T>::rng_set_type rset(0);
-                swap(rset, particle_.rng_set());
-                typename Particle<T>::resample_rng_type rrng(
-                    particle_.resample_rng());
-                *this = other;
-                swap(rset, particle_.rng_set());
-                particle_.resample_rng() = rrng;
-#endif
                 particle_.rng_set().resize(other.size());
             } else {
                 *this = other;
@@ -190,7 +178,6 @@ template <typename T> class Sampler
         return *this;
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
     Sampler<T> &clone(Sampler<T> &&other, bool retain_rng)
     {
         if (this != &other) {
@@ -210,7 +197,6 @@ template <typename T> class Sampler
 
         return *this;
     }
-#endif
 
     /// \brief Number of particles
     size_type size() const { return particle_.size(); }
@@ -503,7 +489,7 @@ template <typename T> class Sampler
     /// All histories (ESS, resampled, accept, Monitor and Path) are clared
     /// before callling the initialization object. Monitors and Path's
     /// evaluation objects are untouched.
-    Sampler<T> &initialize(void *param = VSMC_NULLPTR)
+    Sampler<T> &initialize(void *param = nullptr)
     {
         do_reset();
         do_acch();

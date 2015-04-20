@@ -172,19 +172,18 @@ template <typename T, std::size_t N> class Array
         return const_reverse_iterator(cbegin());
     }
 
-    static VSMC_CONSTEXPR bool empty() { return N == 0; }
+    static constexpr bool empty() { return N == 0; }
 
-    static VSMC_CONSTEXPR size_type size() { return N; }
+    static constexpr size_type size() { return N; }
 
-    static VSMC_CONSTEXPR size_type max_size()
+    static constexpr size_type max_size()
     {
         return static_cast<size_type>(~static_cast<size_type>(0)) / sizeof(T);
     }
 
     void fill(const T &value)
     {
-        fill(value,
-             std::integral_constant < bool,
+        fill(value, std::integral_constant < bool,
              std::is_integral<T>::value &&N >= 100 > ());
     }
 
@@ -276,13 +275,8 @@ template <typename T, std::size_t N> class Array
         for (size_type i = 0; i != N; ++i)
             is >> std::ws >> ary_tmp[i];
 
-        if (is.good()) {
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+        if (is.good())
             ary = std::move(ary_tmp);
-#else
-            ary = ary_tmp;
-#endif
-        }
 
         return is;
     }
@@ -363,7 +357,6 @@ inline const T &get(const Array<T, N> &ary)
     return ary.template at<I>();
 }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
 /// \brief Array ADL of get
 /// \ingroup Array
 template <std::size_t I, typename T, std::size_t N>
@@ -371,7 +364,6 @@ inline T &&get(Array<T, N> &&ary)
 {
     return std::move(ary.template at<I>());
 }
-#endif
 
 template <typename> struct TupleSize;
 

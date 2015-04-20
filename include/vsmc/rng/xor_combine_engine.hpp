@@ -77,7 +77,7 @@ class XorCombineEngine
             SeedSeq,
             result_type,
             XorCombineEngine<Eng1, Eng2, S1, S2>>::value>::type * =
-            VSMC_NULLPTR)
+            nullptr)
         : eng1_(seq), eng2_(seq)
     {
         VSMC_STATIC_ASSERT_RNG_XOR_COMBINE;
@@ -95,7 +95,7 @@ class XorCombineEngine
                   SeedSeq,
                   result_type,
                   XorCombineEngine<Eng1, Eng2, S1, S2>>::value>::type * =
-                  VSMC_NULLPTR)
+                  nullptr)
     {
         eng1_.seed(seq);
         eng2_.seed(seq);
@@ -105,7 +105,7 @@ class XorCombineEngine
 
     engine2_type &eng2() { return eng2_; }
 
-    static VSMC_CONSTEXPR result_type min VSMC_MNE()
+    static constexpr result_type min VSMC_MNE()
     {
         return Eng1::min VSMC_MNE() < Eng2::min VSMC_MNE() ?
                    Eng1::min VSMC_MNE :
@@ -113,7 +113,7 @@ class XorCombineEngine
                    VSMC_MNE();
     }
 
-    static VSMC_CONSTEXPR result_type max VSMC_MNE()
+    static constexpr result_type max VSMC_MNE()
     {
         return Eng1::max VSMC_MNE() > Eng2::max VSMC_MNE() ?
                    Eng1::max VSMC_MNE :
@@ -170,13 +170,8 @@ class XorCombineEngine
         is >> std::ws >> eng2_tmp;
 
         if (is.good()) {
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
             eng.eng1_ = std::move(eng1_tmp);
             eng.eng2_ = std::move(eng2_tmp);
-#else
-            eng.eng1_ = eng1_tmp;
-            eng.eng2_ = eng2_tmp;
-#endif
         }
 
         return is;

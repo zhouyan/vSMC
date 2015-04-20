@@ -77,70 +77,15 @@
         (psize >= dim),                                                      \
         ("**StateCL::state_unpack** INPUT PACK SIZE TOO SMALL"))
 
-#if VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
-
 #define VSMC_DEFINE_OPENCL_COPY(Name)                                        \
     Name() : build_id_(-1) {}                                                \
     Name(const Name<T, PlaceHolder> &) = default;                            \
     Name<T, PlaceHolder> &operator=(const Name<T, PlaceHolder> &) = default; \
     virtual ~Name() {}
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
 #define VSMC_DEFINE_OPENCL_MOVE(Name)                                        \
     Name(Name<T, PlaceHolder> &&) = default;                                 \
     Name<T, PlaceHolder> &operator=(Name<T, PlaceHolder> &&) = default;
-#else
-#define VSMC_DEFINE_OPENCL_MOVE(Name)
-#endif
-
-#else  // VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
-
-#define VSMC_DEFINE_OPENCL_COPY(Name)                                        \
-    Name() : build_id_(-1) {}                                                \
-    Name(const Name<T, PlaceHolder> &other)                                  \
-        : configure_(other.configure_),                                      \
-          build_id_(other.build_id_),                                        \
-          kernel_(other.kernel_),                                            \
-          kernel_name_(other.kernel_name_)                                   \
-    {                                                                        \
-    }                                                                        \
-    Name<T, PlaceHolder> &operator=(const Name<T, PlaceHolder> &other)       \
-    {                                                                        \
-        if (this != &other) {                                                \
-            configure_ = other.configure_;                                   \
-            build_id_ = other.build_id_;                                     \
-            kernel_ = other.kernel_;                                         \
-            kernel_name_ = other.kernel_name_;                               \
-        }                                                                    \
-    }                                                                        \
-    virtual ~Name() {}
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-#define VSMC_DEFINE_OPENCL_MOVE(Name)                                        \
-    Name(Name<T, PlaceHolder> &&other)                                       \
-        : configure_(std::move(other.configure_)),                           \
-          build_id_(other.build_id_),                                        \
-          kernel_(std::move(other.kernel_)),                                 \
-          kernel_name_(std::move(other.kernel_name_))                        \
-    {                                                                        \
-    }                                                                        \
-                                                                             \
-    Name<T, PlaceHolder> &operator=(Name<T, PlaceHolder> &&other)            \
-    {                                                                        \
-        if (this != &other) {                                                \
-            configure_ = std::move(other.configure_);                        \
-            build_id_ = other.build_id_;                                     \
-            kernel_ = std::move(other.kernel_);                              \
-            kernel_name_ = std::move(other.kernel_name_);                    \
-        }                                                                    \
-                                                                             \
-        return *this;                                                        \
-    }
-#else
-#define VSMC_DEFINE_OPENCL_MOVE(Name)
-#endif
-
-#endif  // VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
 
 #define VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL                                  \
     CLConfigure &configure() { return configure_; }                          \
@@ -584,7 +529,7 @@ template <typename T, typename PlaceHolder = NullType> class InitializeCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static VSMC_CONSTEXPR::cl_uint kernel_args_offset() { return 2; }
+    static constexpr::cl_uint kernel_args_offset() { return 2; }
 
     std::size_t operator()(Particle<T> &particle, void *param)
     {
@@ -683,7 +628,7 @@ template <typename T, typename PlaceHolder = NullType> class MoveCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static VSMC_CONSTEXPR::cl_uint kernel_args_offset() { return 3; }
+    static constexpr::cl_uint kernel_args_offset() { return 3; }
 
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
     {
@@ -782,7 +727,7 @@ template <typename T, typename PlaceHolder = NullType> class MonitorEvalCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static VSMC_CONSTEXPR::cl_uint kernel_args_offset() { return 4; }
+    static constexpr::cl_uint kernel_args_offset() { return 4; }
 
     void operator()(std::size_t iter,
                     std::size_t dim,
@@ -867,7 +812,7 @@ template <typename T, typename PlaceHolder = NullType> class PathEvalCL
     /// \details
     /// The first user supplied additional argument shall have index
     /// `kernel_args_offset`
-    static VSMC_CONSTEXPR::cl_uint kernel_args_offset() { return 3; }
+    static constexpr::cl_uint kernel_args_offset() { return 3; }
 
     double
         operator()(std::size_t iter, const Particle<T> &particle, double *res)

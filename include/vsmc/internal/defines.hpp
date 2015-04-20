@@ -49,30 +49,6 @@
 #define VSMC_CRTP_DESTRUCTOR_PREFIX virtual
 #endif
 
-/// \brief constexpr
-/// \ingroup Definitions
-#if VSMC_HAS_CXX11_CONSTEXPR
-#define VSMC_CONSTEXPR constexpr
-#else
-#define VSMC_CONSTEXPR
-#endif
-
-/// \brief Explicit operator
-/// \ingroup Definitions
-#if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
-#define VSMC_EXPLICIT_OPERATOR explicit
-#else
-#define VSMC_EXPLICIT_OPERATOR
-#endif
-
-/// \brief noexcept
-/// \ingroup Definitions
-#define VSMC_NOEXCEPT noexcept
-
-/// \brief nullptr
-/// \ingroup Definitions
-#define VSMC_NULLPTR nullptr
-
 namespace vsmc
 {
 
@@ -109,25 +85,25 @@ enum MonitorStage {
 /// \brief Class template argument used for scalar variant
 /// \ingroup Definitions
 struct Scalar {
-    static VSMC_CONSTEXPR const bool is_scalar = true;
-    static VSMC_CONSTEXPR const bool is_vector = false;
-    static VSMC_CONSTEXPR const bool is_thread_local = false;
+    static constexpr const bool is_scalar = true;
+    static constexpr const bool is_vector = false;
+    static constexpr const bool is_thread_local = false;
 };  // struct Scalar
 
 /// \brief Class template argument used for vector variant
 /// \ingroup Definitions
 struct Vector {
-    static VSMC_CONSTEXPR const bool is_scalar = false;
-    static VSMC_CONSTEXPR const bool is_vector = true;
-    static VSMC_CONSTEXPR const bool is_thread_local = false;
+    static constexpr const bool is_scalar = false;
+    static constexpr const bool is_vector = true;
+    static constexpr const bool is_thread_local = false;
 };  // struct Vector
 
 /// \brief Class template argument used for thread local storage variant
 /// \ingroup Definitions
 struct ThreadLocal {
-    static VSMC_CONSTEXPR const bool is_scalar = false;
-    static VSMC_CONSTEXPR const bool is_vector = false;
-    static VSMC_CONSTEXPR const bool is_thread_local = true;
+    static constexpr const bool is_scalar = false;
+    static constexpr const bool is_vector = false;
+    static constexpr const bool is_thread_local = true;
 };  // struct ThreadLocal
 
 /// \brief Function template argument used for position
@@ -135,9 +111,9 @@ struct ThreadLocal {
 template <std::size_t N> struct Position {
     typedef std::size_t size_type;
     typedef Position<N> type;
-    static VSMC_CONSTEXPR const size_type value = N;
-    VSMC_CONSTEXPR operator size_type() const { return value; }
-    VSMC_CONSTEXPR size_type operator()() const { return value; }
+    static constexpr const size_type value = N;
+    constexpr operator size_type() const { return value; }
+    constexpr size_type operator()() const { return value; }
 };  // struct Position
 
 }  // namespace vsmc

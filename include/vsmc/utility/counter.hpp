@@ -44,13 +44,13 @@ namespace internal
 template <typename T, bool> struct CounterMask;
 
 template <typename T> struct CounterMask<T, true> {
-    static VSMC_CONSTEXPR const T max_val =
+    static constexpr const T max_val =
         static_cast<T>(~(static_cast<T>(0)));
 
-    static VSMC_CONSTEXPR const T mask_hi =
+    static constexpr const T mask_hi =
         static_cast<T>(static_cast<T>(max_val << 8) >> 8);
 
-    static VSMC_CONSTEXPR const T mask_lo = static_cast<T>(mask_hi ^ max_val);
+    static constexpr const T mask_lo = static_cast<T>(mask_hi ^ max_val);
 };  // struct CounterMask
 
 }  // namespace vsmc::internal
@@ -173,13 +173,13 @@ template <typename T, std::size_t K> class Counter<Array<T, K>>
     }
 
     private:
-    static VSMC_CONSTEXPR const T max_ =
+    static constexpr const T max_ =
         internal::CounterMask<T, std::is_unsigned<T>::value>::max_val;
 
-    static VSMC_CONSTEXPR const T mask_hi_ =
+    static constexpr const T mask_hi_ =
         internal::CounterMask<T, std::is_unsigned<T>::value>::mask_hi;
 
-    static VSMC_CONSTEXPR const T mask_lo_ =
+    static constexpr const T mask_lo_ =
         internal::CounterMask<T, std::is_unsigned<T>::value>::mask_lo;
 
     template <std::size_t>

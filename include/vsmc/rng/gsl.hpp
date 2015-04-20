@@ -43,12 +43,12 @@
 
 #define VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(Generator, Min, Max)                 \
     template <> struct GSLRngMinMax<GSL_RNG_TYPE_##Generator> {              \
-        static VSMC_CONSTEXPR const uint32_t _Min =                          \
+        static constexpr const uint32_t _Min =                          \
             static_cast<uint32_t>(Min##UL);                                  \
-        static VSMC_CONSTEXPR const uint32_t _Max =                          \
+        static constexpr const uint32_t _Max =                          \
             static_cast<uint32_t>(Max##UL);                                  \
-        static VSMC_CONSTEXPR uint32_t min VSMC_MNE() { return _Min; }       \
-        static VSMC_CONSTEXPR uint32_t max VSMC_MNE() { return _Max; }       \
+        static constexpr uint32_t min VSMC_MNE() { return _Min; }       \
+        static constexpr uint32_t max VSMC_MNE() { return _Max; }       \
     };  // VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX
 
 namespace vsmc
@@ -131,10 +131,9 @@ template <GSLRngType RngType> class GSLGenerator
         return *this;
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
     GSLGenerator(GSLGenerator<RngType> &&other) : rng_(other.rng_)
     {
-        other.rng_ = VSMC_NULLPTR;
+        other.rng_ = nullptr;
     }
 
     GSLGenerator<RngType> &operator=(GSLGenerator<RngType> &&other)
@@ -146,23 +145,22 @@ template <GSLRngType RngType> class GSLGenerator
 
         return *this;
     }
-#endif
 
     ~GSLGenerator()
     {
-        if (rng_ != VSMC_NULLPTR)
+        if (rng_ != nullptr)
             ::gsl_rng_free(rng_);
     }
 
     void seed(unsigned long s)
     {
-        if (rng_ != VSMC_NULLPTR)
+        if (rng_ != nullptr)
             ::gsl_rng_set(rng_, s);
     }
 
     unsigned long generate()
     {
-        if (rng_ != VSMC_NULLPTR)
+        if (rng_ != nullptr)
             return ::gsl_rng_get(rng_);
 
         return 0;
@@ -196,7 +194,7 @@ class GSLEngine : public GeneratorWrapper<uint32_t,
         SeedSeq &seq,
         typename std::enable_if<
             internal::is_seed_seq<SeedSeq, result_type, GSLEngine<RngType>>::
-                value>::type * = VSMC_NULLPTR)
+                value>::type * = nullptr)
         : base(seq)
     {
         seed(seq);
@@ -212,7 +210,7 @@ class GSLEngine : public GeneratorWrapper<uint32_t,
         SeedSeq &seq,
         typename std::enable_if<
             internal::is_seed_seq<SeedSeq, result_type, GSLEngine<RngType>>::
-                value>::type * = VSMC_NULLPTR)
+                value>::type * = nullptr)
     {
         unsigned long s;
         seq.generate(&s, &s + 1);

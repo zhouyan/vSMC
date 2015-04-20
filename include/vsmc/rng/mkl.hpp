@@ -218,8 +218,8 @@ template <MKL_INT, typename> struct MKLUniformBitsTrait;
 /// \ingroup Traits
 template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned> {
     typedef MKLUniformBits32Distribution type;
-    static VSMC_CONSTEXPR const unsigned min VSMC_MNE = 0;
-    static VSMC_CONSTEXPR const unsigned max VSMC_MNE =
+    static constexpr const unsigned min VSMC_MNE = 0;
+    static constexpr const unsigned max VSMC_MNE =
         static_cast<unsigned>(~(static_cast<unsigned>(0)));
 };  // struct MKLUniformBitsTrait
 
@@ -228,8 +228,8 @@ template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned> {
 /// \ingroup Traits
 template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned MKL_INT64> {
     typedef MKLUniformBits64Distribution type;
-    static VSMC_CONSTEXPR const unsigned MKL_INT64 min VSMC_MNE = 0;
-    static VSMC_CONSTEXPR const unsigned MKL_INT64 max VSMC_MNE =
+    static constexpr const unsigned MKL_INT64 min VSMC_MNE = 0;
+    static constexpr const unsigned MKL_INT64 max VSMC_MNE =
         static_cast<unsigned MKL_INT64>(
             ~(static_cast<unsigned MKL_INT64>(0)));
 };  // struct MKLUniformBitsTrait
@@ -258,17 +258,17 @@ namespace internal
 {
 
 struct MKLOffsetZero {
-    static VSMC_CONSTEXPR MKL_INT min VSMC_MNE() { return 0; }
-    static VSMC_CONSTEXPR MKL_INT max VSMC_MNE() { return 0; }
+    static constexpr MKL_INT min VSMC_MNE() { return 0; }
+    static constexpr MKL_INT max VSMC_MNE() { return 0; }
     static void offset(MKL_INT) {}
-    static VSMC_CONSTEXPR MKL_INT offset() { return 0; }
+    static constexpr MKL_INT offset() { return 0; }
 };  // struct OffsetZero
 
 template <MKL_INT MaxOffset> struct MKLOffsetDynamic {
     MKLOffsetDynamic() : offset_(0) {}
 
-    static VSMC_CONSTEXPR MKL_INT min VSMC_MNE() { return 0; }
-    static VSMC_CONSTEXPR MKL_INT max VSMC_MNE() { return MaxOffset; }
+    static constexpr MKL_INT min VSMC_MNE() { return 0; }
+    static constexpr MKL_INT max VSMC_MNE() { return MaxOffset; }
 
     void offset(MKL_INT n)
     {
@@ -391,7 +391,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     public:
     explicit MKLStream(MKL_UINT s = traits::MKLSeedTrait<BRNG>::value,
                        MKL_INT offset = 0)
-        : seed_(s), stream_ptr_(VSMC_NULLPTR), property_()
+        : seed_(s), stream_ptr_(nullptr), property_()
     {
         this->offset(offset);
         int status = VSL_ERROR_OK;
@@ -410,8 +410,8 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
         SeedSeq &seq,
         typename std::enable_if<
             internal::is_seed_seq<SeedSeq, MKL_UINT, MKLStream<BRNG>>::
-                value>::type * = VSMC_NULLPTR)
-        : seed_(0), stream_ptr_(VSMC_NULLPTR), property_()
+                value>::type * = nullptr)
+        : seed_(0), stream_ptr_(nullptr), property_()
     {
         seq.generate(&seed_, &seed_ + 1);
         int status = VSL_ERROR_OK;
@@ -448,14 +448,13 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
         return *this;
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
     MKLStream(MKLStream<BRNG> &&other)
         : internal::MKLOffset<BRNG>::type(std::move(other)),
           seed_(other.seed_),
           stream_ptr_(other.stream_ptr_),
           property_(other.property_)
     {
-        other.stream_ptr_ = VSMC_NULLPTR;
+        other.stream_ptr_ = nullptr;
     }
 
     MKLStream<BRNG> &operator=(MKLStream<BRNG> &&other)
@@ -471,11 +470,10 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 
         return *this;
     }
-#endif
 
     ~MKLStream()
     {
-        if (stream_ptr_ != VSMC_NULLPTR)
+        if (stream_ptr_ != nullptr)
             ::vslDeleteStream(&stream_ptr_);
     }
 
@@ -484,7 +482,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
         seed_ = s;
         int status = VSL_ERROR_OK;
 
-        if (stream_ptr_ == VSMC_NULLPTR) {
+        if (stream_ptr_ == nullptr) {
             status = ::vslNewStream(&stream_ptr_, BRNG + this->offset(), s);
             internal::mkl_vsl_error_check(
                 BRNG, status, "MKLStream::seed", "::vslNewStream");
@@ -510,7 +508,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     void seed(SeedSeq &seq,
               typename std::enable_if<
                   internal::is_seed_seq<SeedSeq, MKL_UINT, MKLStream<BRNG>>::
-                      value>::type * = VSMC_NULLPTR)
+                      value>::type * = nullptr)
     {
         seq.generate(&seed_, &seed_ + 1);
         seed(seed_);
@@ -548,7 +546,7 @@ template <MKL_INT BRNG, typename ResultType> class MKLEngine
         typename std::enable_if<internal::is_seed_seq<
             SeedSeq,
             MKL_UINT,
-            MKLEngine<BRNG, ResultType>>::value>::type * = VSMC_NULLPTR)
+            MKLEngine<BRNG, ResultType>>::value>::type * = nullptr)
         : stream_(seq),
           buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE),
           index_(buffer_size_)
@@ -562,7 +560,7 @@ template <MKL_INT BRNG, typename ResultType> class MKLEngine
               typename std::enable_if<internal::is_seed_seq<
                   SeedSeq,
                   MKL_UINT,
-                  MKLEngine<BRNG, ResultType>>::value>::type * = VSMC_NULLPTR)
+                  MKLEngine<BRNG, ResultType>>::value>::type * = nullptr)
     {
         stream_.seed(seq);
     }
@@ -596,13 +594,13 @@ template <MKL_INT BRNG, typename ResultType> class MKLEngine
         index_ = buffer_size_;
     }
 
-    static VSMC_CONSTEXPR const result_type _Min =
+    static constexpr const result_type _Min =
         traits::MKLUniformBitsTrait<BRNG, ResultType>::min VSMC_MNE;
-    static VSMC_CONSTEXPR const result_type _Max =
+    static constexpr const result_type _Max =
         traits::MKLUniformBitsTrait<BRNG, ResultType>::max VSMC_MNE;
 
-    static VSMC_CONSTEXPR result_type min VSMC_MNE() { return _Min; }
-    static VSMC_CONSTEXPR result_type max VSMC_MNE() { return _Max; }
+    static constexpr result_type min VSMC_MNE() { return _Min; }
+    static constexpr result_type max VSMC_MNE() { return _Max; }
 
     stream_type &stream() { return stream_; }
     const stream_type &stream() const { return stream_; }

@@ -54,9 +54,7 @@ template <typename T> class DispatchFunction
     public:
     DispatchFunction(const T &work) : work_(work) {}
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    DispatchFunction(T &&work) VSMC_NOEXCEPT : work_(std::move(work)) {}
-#endif
+    DispatchFunction(T &&work) noexcept : work_(std::move(work)) {}
 
     void *context() { return static_cast<void *>(this); }
 
@@ -72,7 +70,6 @@ template <typename T> class DispatchFunction
     }
 };  // class DispatchFunction
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
 /// \brief Make a DispatchFunction object from an arbitrary callable object
 /// \ingroup Dispatch
 ///
@@ -80,19 +77,12 @@ template <typename T> class DispatchFunction
 template <typename T>
 inline DispatchFunction<
     typename std::remove_cv<typename std::remove_reference<T>::type>::type> *
-    dispatch_function_new(T &&work) VSMC_NOEXCEPT
+    dispatch_function_new(T &&work) noexcept
 {
     typedef typename std::remove_reference<T>::type U;
     typedef typename std::remove_cv<U>::type V;
     return new DispatchFunction<V>(std::forward<T>(work));
 }
-#else
-template <typename T>
-inline DispatchFunction<T> *dispatch_function_new(const T &work)
-{
-    return new DispatchFunction<T>(work);
-}
-#endif
 
 }  // namespace vsmc
 

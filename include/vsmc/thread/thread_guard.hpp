@@ -44,7 +44,7 @@ template <typename ThreadType> class ThreadGuard
     public:
     typedef ThreadType thread_type;
 
-    ThreadGuard() VSMC_NOEXCEPT {}
+    ThreadGuard() noexcept {}
 
     ThreadGuard(const ThreadGuard &) = delete;
 
@@ -64,7 +64,7 @@ template <typename ThreadType> class ThreadGuard
         return *this;
     }
 
-    ~ThreadGuard() VSMC_NOEXCEPT
+    ~ThreadGuard() noexcept
     {
         if (thread_.joinable())
             thread_.join();

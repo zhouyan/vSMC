@@ -459,7 +459,6 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
             state(id, d) = pack[d];
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
     void state_unpack(size_type id, state_pack_type &&pack)
     {
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(pack.size(),
@@ -468,7 +467,6 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         for (std::size_t d = 0; d != this->dim(); ++d)
             state(id, d) = std::move(pack[d]);
     }
-#endif
 };  // class StateMatrix
 
 }  // namespace vsmc

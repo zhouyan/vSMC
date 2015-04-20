@@ -99,22 +99,11 @@ template <typename T> class Particle
     {
         if (this != &other) {
             if (retain_rng) {
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
                 rng_set_type rset(std::move(rng_set_));
                 resample_rng_type rrng(std::move(resample_rng_));
                 *this = other;
                 rng_set_ = std::move(rset);
                 resample_rng_ = std::move(rrng);
-#else
-                using std::swap;
-
-                rng_set_type rset(0);
-                swap(rset, rng_set_);
-                resample_rng_type rrng(resample_rng_);
-                *this = other;
-                swap(rset, rng_set_);
-                resample_rng_ = rrng;
-#endif
                 rng_set_.resize(other.size());
             } else {
                 *this = other;
@@ -124,7 +113,6 @@ template <typename T> class Particle
         return *this;
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
     Particle<T> &clone(Particle<T> &&other, bool retain_rng)
     {
         if (this != &other) {
@@ -142,7 +130,6 @@ template <typename T> class Particle
 
         return *this;
     }
-#endif
 
     /// \brief Number of particles
     size_type size() const { return size_; }
@@ -240,9 +227,9 @@ template <typename T> class Particle
         std::size_t N = static_cast<std::size_t>(weight_set_.resample_size());
         bool resampled = weight_set_.ess() < threshold * N;
         if (resampled) {
-            size_type *cptr = VSMC_NULLPTR;
+            size_type *cptr = nullptr;
             const double *const wptr = weight_set_.resample_weight_data();
-            if (wptr != VSMC_NULLPTR) {
+            if (wptr != nullptr) {
                 copy_from_.resize(N);
                 replication_.resize(N);
                 cptr = &copy_from_[0];

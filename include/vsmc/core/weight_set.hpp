@@ -51,56 +51,10 @@ class WeightSet
     {
     }
 
-#if VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
     WeightSet(const WeightSet &) = default;
     WeightSet &operator=(const WeightSet &) = default;
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
     WeightSet(WeightSet &&) = default;
     WeightSet &operator=(WeightSet &&) = default;
-#endif
-#else  // VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
-    WeightSet(const WeightSet &other)
-        : size_(other.size_),
-          ess_(other.ess_),
-          weight_(other.weight_),
-          log_weight_(other.log_weight_)
-    {
-    }
-
-    WeightSet &operator=(const WeightSet &other)
-    {
-        if (this != &other) {
-            size_ = other.size_;
-            ess_ = other.ess_;
-            weight_ = other.weight_;
-            log_weight_ = other.log_weight_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    WeightSet(WeightSet &&other)
-        : size_(other.size_),
-          ess_(other.ess_),
-          weight_(std::move(other.weight_)),
-          log_weight_(std::move(other.log_weight_))
-    {
-    }
-
-    WeightSet &operator=(WeightSet &&other)
-    {
-        if (this != &other) {
-            size_ = other.size_;
-            ess_ = other.ess_;
-            weight_ = std::move(other.weight_);
-            log_weight_ = std::move(other.log_weight_);
-        }
-
-        return *this;
-    }
-#endif
-#endif  // VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS
 
     virtual ~WeightSet() {}
 
@@ -110,9 +64,9 @@ class WeightSet
                                    double *lwptr)
     {
         double ess = static_cast<double>(RN);
-        if (wptr != VSMC_NULLPTR)
+        if (wptr != nullptr)
             std::fill_n(wptr, N, 1 / ess);
-        if (lwptr != VSMC_NULLPTR)
+        if (lwptr != nullptr)
             std::memset(lwptr, 0, sizeof(double) * N);
 
         return ess;
@@ -536,11 +490,11 @@ class WeightSetNull
 
     template <typename URNG> size_type draw(URNG &) const { return 0; }
 
-    const double *resample_weight_data() const { return VSMC_NULLPTR; }
+    const double *resample_weight_data() const { return nullptr; }
 
-    const double *weight_data() const { return VSMC_NULLPTR; }
+    const double *weight_data() const { return nullptr; }
 
-    const double *log_weight_data() const { return VSMC_NULLPTR; }
+    const double *log_weight_data() const { return nullptr; }
 
     private:
     static double max_ess()

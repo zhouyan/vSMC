@@ -299,7 +299,7 @@ class StopWatchSYS
     uint64_t start_time_;
     ::mach_timebase_info_data_t timebase_;
     bool running_;
-    static VSMC_CONSTEXPR const uint64_t ratio_ =
+    static constexpr const uint64_t ratio_ =
         static_cast<uint64_t>(1000000000ULL);  // 9 zero
 };                                             // class StopWatchSYS
 
@@ -378,7 +378,7 @@ class StopWatchSYS
     ::timespec elapsed_;
     ::timespec start_time_;
     bool running_;
-    static VSMC_CONSTEXPR const long ratio_ = 1000000000L;  // 9 zero
+    static constexpr const long ratio_ = 1000000000L;  // 9 zero
 };                                                          // class StopWatchSYS
 
 #elif defined(VSMC_MSVC)

@@ -54,13 +54,10 @@ template <typename T, typename ID = CLDefault> class CLBuffer
     typedef std::size_t size_type;
     typedef CLManager<ID> manager_type;
 
-    CLBuffer() : size_(0), flag_(CL_MEM_READ_WRITE), host_ptr_(VSMC_NULLPTR)
-    {
-    }
+    CLBuffer() : size_(0), flag_(CL_MEM_READ_WRITE), host_ptr_(nullptr) {}
 
-    CLBuffer(size_type N,
-             ::cl_mem_flags flag = CL_MEM_READ_WRITE,
-             void *host_ptr = VSMC_NULLPTR)
+    CLBuffer(size_type N, ::cl_mem_flags flag = CL_MEM_READ_WRITE,
+        void *host_ptr = nullptr)
         : size_(N),
           flag_(flag),
           host_ptr_(host_ptr),
@@ -78,8 +75,7 @@ template <typename T, typename ID = CLDefault> class CLBuffer
     {
         if (size_ != 0
 #if VSMC_OPENCL_VERSION >= 120
-            &&
-            (flag_ & CL_MEM_HOST_WRITE_ONLY) != 0 &&
+            && (flag_ & CL_MEM_HOST_WRITE_ONLY) != 0 &&
             (flag_ & CL_MEM_HOST_READ_ONLY) != 0
 #endif
             ) {
@@ -94,8 +90,7 @@ template <typename T, typename ID = CLDefault> class CLBuffer
             resize(other.size_, other.flag_, other.host_ptr_);
             if (size_ != 0
 #if VSMC_OPENCL_VERSION >= 120
-                &&
-                (flag_ & CL_MEM_HOST_WRITE_ONLY) != 0 &&
+                && (flag_ & CL_MEM_HOST_WRITE_ONLY) != 0 &&
                 (flag_ & CL_MEM_HOST_READ_ONLY) != 0
 #endif
                 ) {
@@ -107,7 +102,6 @@ template <typename T, typename ID = CLDefault> class CLBuffer
         return *this;
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
     CLBuffer(CLBuffer<T, ID> &&other)
         : size_(other.size_),
           flag_(other.flag_),
@@ -116,7 +110,7 @@ template <typename T, typename ID = CLDefault> class CLBuffer
     {
         other.size_ = 0;
         other.flag_ = CL_MEM_READ_WRITE;
-        other.host_ptr_ = VSMC_NULLPTR;
+        other.host_ptr_ = nullptr;
         other.data_ = ::cl::Buffer();
     }
 
@@ -133,7 +127,6 @@ template <typename T, typename ID = CLDefault> class CLBuffer
 
         return *this;
     }
-#endif
 
     ~CLBuffer() {}
 
@@ -191,8 +184,8 @@ template <typename T, typename ID = CLDefault> class CLBuffer
     ::cl_mem_flags flag_;
     void *host_ptr_;
     ::cl::Buffer data_;
-};  // class CLBuffer
+}; // class CLBuffer
 
-}  // namespace vsmc
+} // namespace vsmc
 
-#endif  // VSMC_OPENCL_CL_BUFFER_HPP
+#endif // VSMC_OPENCL_CL_BUFFER_HPP

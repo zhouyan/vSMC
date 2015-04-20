@@ -63,7 +63,7 @@ inline void hdf5io_matrix_dim<ColMajor>(std::size_t nrow,
 }
 
 template <typename T> struct HDF5LoadDataPtr {
-    HDF5LoadDataPtr() : ptr_(VSMC_NULLPTR) {}
+    HDF5LoadDataPtr() : ptr_(nullptr) {}
 
     template <typename OutputIter> void set(std::size_t n, OutputIter)
     {
@@ -72,9 +72,9 @@ template <typename T> struct HDF5LoadDataPtr {
 
     void set(std::size_t, T *ptr) { ptr_ = ptr; }
 
-    bool set_ptr() const { return ptr_ == VSMC_NULLPTR; }
+    bool set_ptr() const { return ptr_ == nullptr; }
 
-    T *get() { return ptr_ == VSMC_NULLPTR ? &data_[0] : ptr_; }
+    T *get() { return ptr_ == nullptr ? &data_[0] : ptr_; }
 
     private:
     T *ptr_;
@@ -82,7 +82,7 @@ template <typename T> struct HDF5LoadDataPtr {
 };  // struct HDF5LoadDataPtr
 
 template <typename T> struct HDF5StoreDataPtr {
-    HDF5StoreDataPtr() : ptr_(VSMC_NULLPTR) {}
+    HDF5StoreDataPtr() : ptr_(nullptr) {}
 
     template <typename InputIter>
     InputIter set(std::size_t n, InputIter first)
@@ -107,9 +107,9 @@ template <typename T> struct HDF5StoreDataPtr {
         return ptr + n;
     }
 
-    bool set_ptr() const { return ptr_ == VSMC_NULLPTR; }
+    bool set_ptr() const { return ptr_ == nullptr; }
 
-    const T *get() const { return ptr_ == VSMC_NULLPTR ? &data_[0] : ptr_; }
+    const T *get() const { return ptr_ == nullptr ? &data_[0] : ptr_; }
 
     private:
     const T *ptr_;
@@ -185,8 +185,6 @@ template <> inline ::hid_t hdf5io_datatype<unsigned long>()
     return ::H5Tcopy(H5T_NATIVE_ULONG);
 }
 
-#if VSMC_HAS_CXX11_LONG_LONG
-
 /// \brief HDF5 data type specialization for long long
 /// \ingroup HDF5IO
 template <> inline ::hid_t hdf5io_datatype<long long>()
@@ -200,8 +198,6 @@ template <> inline ::hid_t hdf5io_datatype<unsigned long long>()
 {
     return ::H5Tcopy(H5T_NATIVE_ULLONG);
 }
-
-#endif  // VSMC_HAS_CXX11_LONG_LONG
 
 /// \brief HDF5 data type specialization for float
 /// \ingroup HDF5IO
@@ -363,7 +359,7 @@ inline InputIter hdf5store_matrix(std::size_t nrow,
         datafile = ::H5Fcreate(
             file_name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     }
-    ::hid_t dataspace = ::H5Screate_simple(2, dim, VSMC_NULLPTR);
+    ::hid_t dataspace = ::H5Screate_simple(2, dim, nullptr);
     ::hid_t datatype = hdf5io_datatype<T>();
     ::hid_t dataset = ::H5Dcreate(datafile,
                                   dataset_name.c_str(),
@@ -459,7 +455,7 @@ inline void hdf5store_list(std::size_t nrow,
         datafile, group_name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     if (nrow != 0 && ncol != 0) {
-        ::hid_t dataspace = ::H5Screate_simple(1, dim, VSMC_NULLPTR);
+        ::hid_t dataspace = ::H5Screate_simple(1, dim, nullptr);
         ::hid_t datatype = hdf5io_datatype<T>();
         internal::HDF5StoreDataPtr<T> data_ptr;
         for (std::size_t j = 0; j != ncol; ++j, ++first, ++sfirst) {
@@ -509,7 +505,7 @@ inline void hdf5store_list_insert(std::size_t N,
 
     ::hid_t datafile =
         ::H5Fopen(file_name.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
-    ::hid_t dataspace = ::H5Screate_simple(1, dim, VSMC_NULLPTR);
+    ::hid_t dataspace = ::H5Screate_simple(1, dim, nullptr);
     ::hid_t datatype = hdf5io_datatype<T>();
     internal::HDF5StoreDataPtr<T> data_ptr;
     data_ptr.set(N, first);
@@ -663,7 +659,7 @@ inline void hdf5store_list(std::size_t nrow,
                            SInputIter sfirst,
                            bool append = false)
 {
-    static VSMC_CONSTEXPR const std::size_t dim = sizeof...(InputIters) + 1;
+    static constexpr const std::size_t dim = sizeof...(InputIters) + 1;
     internal::HDF5StoreDataPtr<std::string> vnames;
     vnames.set(dim, sfirst);
     const std::string *sptr = vnames.get() + dim;
@@ -671,8 +667,8 @@ inline void hdf5store_list(std::size_t nrow,
                         0,
                         file_name,
                         data_name,
-                        static_cast<int **>(VSMC_NULLPTR),
-                        static_cast<std::string *>(VSMC_NULLPTR),
+                        static_cast<int **>(nullptr),
+                        static_cast<std::string *>(nullptr),
                         append);
     internal::hdf5store_list_insert_tuple(
         nrow, file_name, data_name, first, --sptr, Position<dim - 1>());
@@ -744,7 +740,7 @@ inline void hdf5store(const StateTuple<RowMajor, T, Types...> &state,
                       const std::string &data_name,
                       bool append = false)
 {
-    static VSMC_CONSTEXPR const std::size_t dim = sizeof...(Types) + 1;
+    static constexpr const std::size_t dim = sizeof...(Types) + 1;
     std::vector<std::string> vnames;
     vnames.reserve(dim);
     for (std::size_t i = 0; i != dim; ++i) {
@@ -774,7 +770,7 @@ inline void hdf5store(const StateTuple<ColMajor, T, Types...> &state,
                       const std::string &data_name,
                       bool append = false)
 {
-    static VSMC_CONSTEXPR const std::size_t dim = sizeof...(Types) + 1;
+    static constexpr const std::size_t dim = sizeof...(Types) + 1;
     std::vector<std::string> vnames;
     vnames.reserve(dim);
     for (std::size_t i = 0; i != dim; ++i) {

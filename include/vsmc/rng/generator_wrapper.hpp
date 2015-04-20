@@ -54,12 +54,12 @@ namespace traits
 /// \ingroup Traits
 template <typename ResultType, typename = void>
 struct GeneratorWrapperMinMaxTrait {
-    static VSMC_CONSTEXPR const ResultType _Min = 0;
-    static VSMC_CONSTEXPR const ResultType _Max =
+    static constexpr const ResultType _Min = 0;
+    static constexpr const ResultType _Max =
         static_cast<ResultType>(~(static_cast<ResultType>(0)));
 
-    static VSMC_CONSTEXPR ResultType min VSMC_MNE() { return _Min; }
-    static VSMC_CONSTEXPR ResultType max VSMC_MNE() { return _Max; }
+    static constexpr ResultType min VSMC_MNE() { return _Min; }
+    static constexpr ResultType max VSMC_MNE() { return _Max; }
 };  // struct GeneratorWrapperMinMaxTrait
 
 }  // namespace traits
@@ -105,7 +105,7 @@ class GeneratorWrapper : public Traits
             SeedSeq,
             result_type,
             GeneratorWrapper<ResultType, Generator, Traits>>::value>::type * =
-            VSMC_NULLPTR)
+            nullptr)
     {
         VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER;
     }
@@ -119,7 +119,7 @@ class GeneratorWrapper : public Traits
             SeedSeq,
             result_type,
             GeneratorWrapper<ResultType, Generator, Traits>>::value>::type * =
-            VSMC_NULLPTR)
+            nullptr)
     {
     }
 

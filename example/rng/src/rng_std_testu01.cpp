@@ -31,7 +31,7 @@
 
 #include "rng_testu01.hpp"
 
-#define VSMC_RNG_TESTU01_FUNCTION_CXX11(Eng)                                 \
+#define VSMC_RNG_TESTU01_FUNCTION_STD(Eng)                                 \
     extern "C" {                                                             \
     inline double rng_##Eng(void)                                            \
     {                                                                        \
@@ -42,33 +42,33 @@
     }                                                                        \
     }
 
-#define VSMC_RNG_TESTU01_OPTION_CXX11(Eng)                                   \
+#define VSMC_RNG_TESTU01_OPTION_STD(Eng)                                   \
     bool rng_testu01_##Eng = false;                                          \
     option.add(#Eng, "Test std::" #Eng, &rng_testu01_##Eng, false);
 
-VSMC_RNG_TESTU01_FUNCTION_CXX11(mt19937)
-VSMC_RNG_TESTU01_FUNCTION_CXX11(mt19937_64)
-VSMC_RNG_TESTU01_FUNCTION_CXX11(minstd_rand0)
-VSMC_RNG_TESTU01_FUNCTION_CXX11(minstd_rand)
-VSMC_RNG_TESTU01_FUNCTION_CXX11(ranlux24_base)
-VSMC_RNG_TESTU01_FUNCTION_CXX11(ranlux48_base)
-VSMC_RNG_TESTU01_FUNCTION_CXX11(ranlux24)
-VSMC_RNG_TESTU01_FUNCTION_CXX11(ranlux48)
-VSMC_RNG_TESTU01_FUNCTION_CXX11(knuth_b)
+VSMC_RNG_TESTU01_FUNCTION_STD(mt19937)
+VSMC_RNG_TESTU01_FUNCTION_STD(mt19937_64)
+VSMC_RNG_TESTU01_FUNCTION_STD(minstd_rand0)
+VSMC_RNG_TESTU01_FUNCTION_STD(minstd_rand)
+VSMC_RNG_TESTU01_FUNCTION_STD(ranlux24_base)
+VSMC_RNG_TESTU01_FUNCTION_STD(ranlux48_base)
+VSMC_RNG_TESTU01_FUNCTION_STD(ranlux24)
+VSMC_RNG_TESTU01_FUNCTION_STD(ranlux48)
+VSMC_RNG_TESTU01_FUNCTION_STD(knuth_b)
 
 int main(int argc, char **argv)
 {
     VSMC_RNG_TESTU01_OPTION_PRE;
 
-    VSMC_RNG_TESTU01_OPTION_CXX11(mt19937);
-    VSMC_RNG_TESTU01_OPTION_CXX11(mt19937_64);
-    VSMC_RNG_TESTU01_OPTION_CXX11(minstd_rand0);
-    VSMC_RNG_TESTU01_OPTION_CXX11(minstd_rand);
-    VSMC_RNG_TESTU01_OPTION_CXX11(ranlux24_base);
-    VSMC_RNG_TESTU01_OPTION_CXX11(ranlux48_base);
-    VSMC_RNG_TESTU01_OPTION_CXX11(ranlux24);
-    VSMC_RNG_TESTU01_OPTION_CXX11(ranlux48);
-    VSMC_RNG_TESTU01_OPTION_CXX11(knuth_b);
+    VSMC_RNG_TESTU01_OPTION_STD(mt19937);
+    VSMC_RNG_TESTU01_OPTION_STD(mt19937_64);
+    VSMC_RNG_TESTU01_OPTION_STD(minstd_rand0);
+    VSMC_RNG_TESTU01_OPTION_STD(minstd_rand);
+    VSMC_RNG_TESTU01_OPTION_STD(ranlux24_base);
+    VSMC_RNG_TESTU01_OPTION_STD(ranlux48_base);
+    VSMC_RNG_TESTU01_OPTION_STD(ranlux24);
+    VSMC_RNG_TESTU01_OPTION_STD(ranlux48);
+    VSMC_RNG_TESTU01_OPTION_STD(knuth_b);
 
     VSMC_RNG_TESTU01_OPTION_POST;
 

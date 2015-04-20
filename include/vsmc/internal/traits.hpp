@@ -53,8 +53,8 @@
         template <typename U> static char2 test(...);                        \
                                                                              \
         public:                                                              \
-        static VSMC_CONSTEXPR const bool value =                             \
-            sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char);                   \
+        static constexpr const bool value =                             \
+            sizeof(test<T>(nullptr)) == sizeof(char);                   \
     };                                                                       \
                                                                              \
     template <typename T>                                                    \
@@ -74,7 +74,7 @@
     }                                                                        \
                                                                              \
     template <typename T> struct Outer##Trait {                              \
-        static VSMC_CONSTEXPR const bool value =                             \
+        static constexpr const bool value =                             \
             internal::Has##Outer<T>::value;                                  \
         typedef typename internal::Outer##Dispatch<T, value>::type type;     \
     };
@@ -96,8 +96,8 @@
         template <typename U> static char2 test(...);                        \
                                                                              \
         public:                                                              \
-        static VSMC_CONSTEXPR const bool value =                             \
-            sizeof(test<T>(VSMC_NULLPTR)) == sizeof(char);                   \
+        static constexpr const bool value =                             \
+            sizeof(test<T>(nullptr)) == sizeof(char);                   \
     };                                                                       \
                                                                              \
     template <typename T>                                                    \
@@ -117,7 +117,7 @@
     }                                                                        \
                                                                              \
     template <typename T> struct Outer##Trait {                              \
-        static VSMC_CONSTEXPR const bool value =                             \
+        static constexpr const bool value =                             \
             internal::Has##Outer<T>::value;                                  \
         typedef typename internal::Outer##Dispatch<T, value>::type type;     \
     };
@@ -140,8 +140,8 @@
         template <typename V> static char2 test(...);                        \
                                                                              \
         public:                                                              \
-        static VSMC_CONSTEXPR const bool value =                             \
-            sizeof(test<U>(VSMC_NULLPTR)) == sizeof(char);                   \
+        static constexpr const bool value =                             \
+            sizeof(test<U>(nullptr)) == sizeof(char);                   \
     };                                                                       \
                                                                              \
     template <typename U>                                                    \
@@ -193,8 +193,8 @@ template <SIMD> struct SIMDTrait;
 /// \brief SSE2 traits
 /// \ingroup Traits
 template <> struct SIMDTrait<SSE2> {
-    static VSMC_CONSTEXPR const std::size_t alignment = 16;
-    static VSMC_CONSTEXPR const std::size_t grainsize = 8;
+    static constexpr const std::size_t alignment = 16;
+    static constexpr const std::size_t grainsize = 8;
 };
 
 /// \brief SSE3 traits
@@ -220,8 +220,8 @@ template <> struct SIMDTrait<SSE4_2> : public SIMDTrait<SSE4_1> {
 /// \brief AVX traits
 /// \ingroup Traits
 template <> struct SIMDTrait<AVX> {
-    static VSMC_CONSTEXPR const std::size_t alignment = 32;
-    static VSMC_CONSTEXPR const std::size_t grainsize = 8;
+    static constexpr const std::size_t alignment = 32;
+    static constexpr const std::size_t grainsize = 8;
 };
 
 /// \brief AVX2 traits
@@ -232,7 +232,7 @@ template <> struct SIMDTrait<AVX2> : public SIMDTrait<AVX> {
 /// \brief Dimension trait for StateMatrix and StateCL (fixed dimension)
 /// \ingroup Traits
 template <std::size_t Dim> struct DimTrait {
-    static VSMC_CONSTEXPR std::size_t dim() { return Dim; }
+    static constexpr std::size_t dim() { return Dim; }
 };
 
 /// \brief Dimension trait for StateMatrix and StateCL (dynamic dimension)

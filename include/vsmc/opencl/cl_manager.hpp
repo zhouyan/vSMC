@@ -65,7 +65,7 @@
 
 #define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(func, block, event)     \
     VSMC_RUNTIME_WARNING(                                                    \
-        (block || event != VSMC_NULLPTR),                                    \
+        (block || event != nullptr),                                    \
         ("**CLManager::" #func " NOT BLOCKING BUT WITH NULL EVENT"))
 
 namespace vsmc
@@ -217,7 +217,7 @@ template <typename ID = CLDefault> class CLManager
     template <typename CLType>
     ::cl::Buffer create_buffer(std::size_t num,
                                ::cl_mem_flags flag = CL_MEM_READ_WRITE,
-                               void *host_ptr = VSMC_NULLPTR) const
+                               void *host_ptr = nullptr) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(create_buffer);
 
@@ -234,8 +234,8 @@ template <typename ID = CLDefault> class CLManager
                      std::size_t num,
                      OutputIter first,
                      std::size_t offset = 0,
-                     const std::vector<::cl::Event> *events = VSMC_NULLPTR,
-                     ::cl::Event *event = VSMC_NULLPTR,
+                     const std::vector<::cl::Event> *events = nullptr,
+                     ::cl::Event *event = nullptr,
                      bool block = true) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(read_buffer);
@@ -260,8 +260,8 @@ template <typename ID = CLDefault> class CLManager
                      std::size_t num,
                      CLType *first,
                      std::size_t offset = 0,
-                     const std::vector<::cl::Event> *events = VSMC_NULLPTR,
-                     ::cl::Event *event = VSMC_NULLPTR,
+                     const std::vector<::cl::Event> *events = nullptr,
+                     ::cl::Event *event = nullptr,
                      bool block = true) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(read_buffer);
@@ -284,8 +284,8 @@ template <typename ID = CLDefault> class CLManager
                       std::size_t num,
                       InputIter first,
                       std::size_t offset = 0,
-                      const std::vector<::cl::Event> *events = VSMC_NULLPTR,
-                      ::cl::Event *event = VSMC_NULLPTR,
+                      const std::vector<::cl::Event> *events = nullptr,
+                      ::cl::Event *event = nullptr,
                       bool block = true) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(write_buffer);
@@ -310,8 +310,8 @@ template <typename ID = CLDefault> class CLManager
                       std::size_t num,
                       const CLType *first,
                       std::size_t offset = 0,
-                      const std::vector<::cl::Event> *events = VSMC_NULLPTR,
-                      ::cl::Event *event = VSMC_NULLPTR,
+                      const std::vector<::cl::Event> *events = nullptr,
+                      ::cl::Event *event = nullptr,
                       bool block = true) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(write_buffer);
@@ -334,8 +334,8 @@ template <typename ID = CLDefault> class CLManager
                       std::size_t num,
                       CLType *first,
                       std::size_t offset = 0,
-                      const std::vector<::cl::Event> *events = VSMC_NULLPTR,
-                      ::cl::Event *event = VSMC_NULLPTR,
+                      const std::vector<::cl::Event> *events = nullptr,
+                      ::cl::Event *event = nullptr,
                       bool block = true) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(write_buffer);
@@ -360,8 +360,8 @@ template <typename ID = CLDefault> class CLManager
                      std::size_t num,
                      std::size_t src_offset = 0,
                      std::size_t dst_offset = 0,
-                     const std::vector<::cl::Event> *events = VSMC_NULLPTR,
-                     ::cl::Event *event = VSMC_NULLPTR,
+                     const std::vector<::cl::Event> *events = nullptr,
+                     ::cl::Event *event = nullptr,
                      bool block = true) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(copy_buffer);
@@ -369,7 +369,7 @@ template <typename ID = CLDefault> class CLManager
             copy_buffer, block, event);
 
         ::cl::Event e;
-        ::cl::Event *eptr = event == VSMC_NULLPTR ? &e : event;
+        ::cl::Event *eptr = event == nullptr ? &e : event;
         command_queue_.enqueueCopyBuffer(src,
                                          dst,
                                          sizeof(CLType) * src_offset,
@@ -399,15 +399,15 @@ template <typename ID = CLDefault> class CLManager
     void run_kernel(const ::cl::Kernel &kern,
                     std::size_t N,
                     std::size_t local_size = 0,
-                    const std::vector<::cl::Event> *events = VSMC_NULLPTR,
-                    ::cl::Event *event = VSMC_NULLPTR,
+                    const std::vector<::cl::Event> *events = nullptr,
+                    ::cl::Event *event = nullptr,
                     bool block = true) const
     {
         VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(
             run_kernel, block, event);
 
         ::cl::Event e;
-        ::cl::Event *eptr = event == VSMC_NULLPTR ? &e : event;
+        ::cl::Event *eptr = event == nullptr ? &e : event;
         command_queue_.enqueueNDRangeKernel(
             kern,
             ::cl::NullRange,
@@ -541,7 +541,7 @@ template <typename ID = CLDefault> class CLManager
     ::cl::Program
         create_program(const std::vector<std::string> &binary,
                        const std::vector<::cl::Device> *devices,
-                       std::vector<::cl_int> *status = VSMC_NULLPTR) const
+                       std::vector<::cl_int> *status = nullptr) const
     {
         std::vector<std::pair<const void *, std::size_t>> bin(binary.size());
         for (std::size_t i = 0; i != binary.size(); ++i) {
@@ -550,7 +550,7 @@ template <typename ID = CLDefault> class CLManager
                                binary[i].size());
         }
 
-        return devices == VSMC_NULLPTR ?
+        return devices == nullptr ?
                    ::cl::Program(context_, device_vec_, bin, status) :
                    ::cl::Program(context_, *devices, bin, status);
     }

@@ -80,11 +80,11 @@ struct UniformRealDistributionFRIntType<0,
 template <typename FPType, typename Left, typename Right, typename Eng, bool>
 class UniformRealDistributionOp
 {
-    static VSMC_CONSTEXPR const uint64_t uint32_t_max_ =
+    static constexpr const uint64_t uint32_t_max_ =
         static_cast<uint64_t>(
             static_cast<uint32_t>(~(static_cast<uint32_t>(0))));
 
-    static VSMC_CONSTEXPR const uint64_t uint64_t_max_ =
+    static constexpr const uint64_t uint64_t_max_ =
         static_cast<uint64_t>(~(static_cast<uint64_t>(0)));
 
     public:
@@ -109,7 +109,6 @@ class UniformRealDistributionOp
     }
 };  // class UniformRealDistributionOp
 
-#if VSMC_HAS_CXX11_CONSTEXPR
 template <typename FPType, typename Left, typename Right, typename Eng>
 class UniformRealDistributionOp<FPType, Left, Right, Eng, true>
 {
@@ -124,7 +123,6 @@ class UniformRealDistributionOp<FPType, Left, Right, Eng, true>
             static_cast<eng_uint_t>(eng()));
     }
 };  // class UniformRealDistributionOp
-#endif
 
 }  // namespace vsmc::interal
 

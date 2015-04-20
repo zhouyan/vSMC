@@ -100,13 +100,8 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
         for (std::size_t i = 0; i != Rounds + 1; ++i)
             m128i_input(is, ks_tmp.key_seq_[i]);
 
-        if (is.good()) {
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+        if (is.good())
             ks = std::move(ks_tmp);
-#else
-            ks = ks_tmp;
-#endif
-        }
 
         return is;
     }
@@ -228,7 +223,7 @@ template <typename ResultType,
           std::size_t Blocks>
 class AESNIEngine
 {
-    static VSMC_CONSTEXPR const std::size_t K_ =
+    static constexpr const std::size_t K_ =
         sizeof(__m128i) / sizeof(ResultType) * Blocks;
 
     public:
@@ -257,7 +252,7 @@ class AESNIEngine
             result_type,
             key_type,
             AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>>::
-                                    value>::type * = VSMC_NULLPTR)
+                                    value>::type * = nullptr)
         : index_(K_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
@@ -284,7 +279,7 @@ class AESNIEngine
         SeedSeq &seq,
         typename std::enable_if<
             internal::is_seed_seq<SeedSeq, result_type, key_type>::value>::
-            type * = VSMC_NULLPTR)
+            type * = nullptr)
     {
         counter::reset(ctr_block_);
         seq.generate(key_.begin(), key_.end());
@@ -397,12 +392,12 @@ class AESNIEngine
         index_ = n % K_;
     }
 
-    static VSMC_CONSTEXPR const result_type _Min = 0;
-    static VSMC_CONSTEXPR const result_type _Max =
+    static constexpr const result_type _Min = 0;
+    static constexpr const result_type _Max =
         static_cast<result_type>(~(static_cast<result_type>(0)));
 
-    static VSMC_CONSTEXPR result_type min VSMC_MNE() { return _Min; }
-    static VSMC_CONSTEXPR result_type max VSMC_MNE() { return _Max; }
+    static constexpr result_type min VSMC_MNE() { return _Min; }
+    static constexpr result_type max VSMC_MNE() { return _Max; }
 
     friend inline bool operator==(
         const AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>
@@ -458,13 +453,8 @@ class AESNIEngine
         is >> std::ws >> eng_tmp.key_;
         is >> std::ws >> eng_tmp.index_;
 
-        if (is.good()) {
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+        if (is.good())
             eng = std::move(eng_tmp);
-#else
-            eng = eng_tmp;
-#endif
-        }
 
         return is;
     }

@@ -230,7 +230,7 @@
 #include <vsmc/internal/common.hpp>
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, func)        \
-    VSMC_RUNTIME_ASSERT((ptr != VSMC_NULLPTR),                               \
+    VSMC_RUNTIME_ASSERT((ptr != nullptr),                               \
                         ("**ProgramOptionMap::" #func                        \
                          "** ATTEMPT TO SET OPTION WITH A NULL POINTER"))
 
@@ -590,7 +590,6 @@ class ProgramOptionMap
         return *this;
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
     ProgramOptionMap(ProgramOptionMap &&other)
         : silent_(other.silent_),
           auto_help_(other.auto_help_),
@@ -598,7 +597,7 @@ class ProgramOptionMap
           option_map_(std::move(other.option_map_)),
           option_list_(std::move(other.option_list_))
     {
-        other.help_ptr_ = VSMC_NULLPTR;
+        other.help_ptr_ = nullptr;
         other.option_map_.clear();
         other.option_list_.clear();
     }
@@ -610,21 +609,20 @@ class ProgramOptionMap
             help_ptr_ = other.help_ptr_;
             option_map_ = std::move(other.option_map_);
             option_list_ = std::move(other.option_list_);
-            other.help_ptr_ = VSMC_NULLPTR;
+            other.help_ptr_ = nullptr;
             other.option_map_.clear();
             other.option_list_.clear();
         }
 
         return *this;
     }
-#endif
 
     ~ProgramOptionMap()
     {
         for (option_map_type::iterator iter = option_map_.begin();
              iter != option_map_.end();
              ++iter) {
-            if (iter->second.first != VSMC_NULLPTR)
+            if (iter->second.first != nullptr)
                 delete iter->second.first;
         }
     }
@@ -694,7 +692,7 @@ class ProgramOptionMap
         const std::string oname("--" + name);
         option_map_type::iterator iter = option_map_.find(oname);
         if (iter != option_map_.end()) {
-            if (iter->second.first != VSMC_NULLPTR)
+            if (iter->second.first != nullptr)
                 delete iter->second.first;
             option_map_.erase(iter);
             option_list_type::iterator liter = option_list_find(oname);
@@ -784,7 +782,7 @@ class ProgramOptionMap
         if (iter != option_map_.end())
             return iter->second.first;
         else
-            return VSMC_NULLPTR;
+            return nullptr;
     }
 
     /// \brief Get the underlying option object
@@ -794,7 +792,7 @@ class ProgramOptionMap
         if (iter != option_map_.end())
             return iter->second.first;
         else
-            return VSMC_NULLPTR;
+            return nullptr;
     }
 
     /// \brief Set the silent flag, if true, no warning messages will be
@@ -831,7 +829,7 @@ class ProgramOptionMap
         if (insert.second) {
             option_list_.push_back(std::make_pair(oname, optr));
         } else {
-            if (insert.first->second.first != VSMC_NULLPTR)
+            if (insert.first->second.first != nullptr)
                 delete insert.first->second.first;
             insert.first->second.first = optr;
             option_list_type::iterator liter = option_list_find(oname);

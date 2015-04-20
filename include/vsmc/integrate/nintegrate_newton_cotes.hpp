@@ -237,10 +237,10 @@ class NIntegrateNewtonCotes
                 coeff[Degree + 1] * eval(b));
     }
 
-    static VSMC_CONSTEXPR unsigned max_degree() { return max_degree_; }
+    static constexpr unsigned max_degree() { return max_degree_; }
 
     private:
-    static VSMC_CONSTEXPR const unsigned max_degree_ = 10;
+    static constexpr const unsigned max_degree_ = 10;
 };  // class NIntegrateNewtonCotes
 
 }  // namespace vsmc

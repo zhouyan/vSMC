@@ -201,8 +201,8 @@ template <> class DispatchQueue<DispatchGlobal> : public DispatchQueueBase
 template <> class DispatchQueue<DispatchPrivate> : public DispatchQueueBase
 {
     public:
-    DispatchQueue(const char *label = VSMC_NULLPTR,
-                  ::dispatch_queue_attr_t attr = VSMC_NULLPTR)
+    DispatchQueue(const char *label = nullptr,
+                  ::dispatch_queue_attr_t attr = nullptr)
         : DispatchQueueBase(::dispatch_queue_create(label, attr), true)
     {
     }

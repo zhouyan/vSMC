@@ -442,7 +442,7 @@ class AES128Engine : public AESNIEngine<ResultType,
             SeedSeq,
             typename base_eng_type::result_type,
             typename base_eng_type::key_type,
-            AES128Engine<ResultType, Blocks>>::value>::type * = VSMC_NULLPTR)
+            AES128Engine<ResultType, Blocks>>::value>::type * = nullptr)
         : base_eng_type(seq)
     {
     }
@@ -647,7 +647,7 @@ class AES192Engine : public AESNIEngine<ResultType,
             SeedSeq,
             typename base_eng_type::result_type,
             typename base_eng_type::key_type,
-            AES192Engine<ResultType, Blocks>>::value>::type * = VSMC_NULLPTR)
+            AES192Engine<ResultType, Blocks>>::value>::type * = nullptr)
         : base_eng_type(seq)
     {
     }
@@ -803,7 +803,7 @@ class AES256Engine : public AESNIEngine<ResultType,
             SeedSeq,
             typename base_eng_type::result_type,
             typename base_eng_type::key_type,
-            AES256Engine<ResultType, Blocks>>::value>::type * = VSMC_NULLPTR)
+            AES256Engine<ResultType, Blocks>>::value>::type * = nullptr)
         : base_eng_type(seq)
     {
     }

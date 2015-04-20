@@ -109,7 +109,7 @@ template <typename ResultType> struct XorshiftEngineTrait {
     /// compile time. Otherwise, no loop will be performed. Instead, a
     /// circular
     /// buffer is implemented through the use of modulo operation.
-    static VSMC_CONSTEXPR const std::size_t max_loop_unroll = 4;
+    static constexpr const std::size_t max_loop_unroll = 4;
 };  // struct XorshiftEngineTrait
 
 }  // namespace vsmc::traits
@@ -144,9 +144,9 @@ template <typename ResultType,
 struct XorshiftIndex {
     void reset() {}
 
-    static VSMC_CONSTEXPR std::size_t r() { return K - R; }
-    static VSMC_CONSTEXPR std::size_t s() { return K - S; }
-    static VSMC_CONSTEXPR std::size_t k() { return K - 1; }
+    static constexpr std::size_t r() { return K - R; }
+    static constexpr std::size_t s() { return K - S; }
+    static constexpr std::size_t k() { return K - 1; }
 
     static void shift(Array<ResultType, K> &state)
     {
@@ -257,7 +257,7 @@ class XorshiftEngine
             SeedSeq,
             result_type,
             XorshiftEngine<ResultType, K, A, B, C, D, R, S>>::value>::type * =
-            VSMC_NULLPTR)
+            nullptr)
     {
         VSMC_STATIC_ASSERT_RNG_XORSHIFT;
         seed(seq);
@@ -281,7 +281,7 @@ class XorshiftEngine
             SeedSeq,
             result_type,
             XorshiftEngine<ResultType, K, A, B, C, D, R, S>>::value>::type * =
-            VSMC_NULLPTR)
+            nullptr)
     {
         index_.reset();
         seq.generate(state_.begin(), state_.end());
@@ -299,12 +299,12 @@ class XorshiftEngine
             operator()();
     }
 
-    static VSMC_CONSTEXPR const result_type _Min = 0;
-    static VSMC_CONSTEXPR const result_type _Max =
+    static constexpr const result_type _Min = 0;
+    static constexpr const result_type _Max =
         static_cast<result_type>(~(static_cast<result_type>(0)));
 
-    static VSMC_CONSTEXPR result_type min VSMC_MNE() { return _Min; }
-    static VSMC_CONSTEXPR result_type max VSMC_MNE() { return _Max; }
+    static constexpr result_type min VSMC_MNE() { return _Min; }
+    static constexpr result_type max VSMC_MNE() { return _Max; }
 
     friend inline bool operator==(
         const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng1,
@@ -344,13 +344,8 @@ class XorshiftEngine
         Array<ResultType, K> tmp;
         is >> std::ws >> tmp;
 
-        if (is.good()) {
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+        if (is.good())
             eng.state_ = std::move(tmp);
-#else
-            eng.state_ = tmp;
-#endif
-        }
 
         return is;
     }
@@ -359,7 +354,7 @@ class XorshiftEngine
     internal::XorshiftIndex<ResultType, K, R, S> index_;
     Array<ResultType, K> state_;
 
-    static VSMC_CONSTEXPR const result_type uint32_t_max_ =
+    static constexpr const result_type uint32_t_max_ =
         static_cast<result_type>(
             static_cast<uint32_t>(~(static_cast<uint32_t>(0))));
 };  // class XorshiftEngine
@@ -386,7 +381,7 @@ class XorwowEngine
         typename std::enable_if<internal::is_seed_seq<
             SeedSeq,
             result_type,
-            XorwowEngine<Eng, D, DInit>>::value>::type * = VSMC_NULLPTR)
+            XorwowEngine<Eng, D, DInit>>::value>::type * = nullptr)
         : eng_(seq), weyl_(DInit)
     {
     }
@@ -402,7 +397,7 @@ class XorwowEngine
               typename std::enable_if<internal::is_seed_seq<
                   SeedSeq,
                   result_type,
-                  XorwowEngine<Eng, D, DInit>>::value>::type * = VSMC_NULLPTR)
+                  XorwowEngine<Eng, D, DInit>>::value>::type * = nullptr)
     {
         eng_.seed(seq);
         weyl_ = DInit;
@@ -416,12 +411,12 @@ class XorwowEngine
         weyl_ += D * nskip;
     }
 
-    static VSMC_CONSTEXPR const result_type _Min = 0;
-    static VSMC_CONSTEXPR const result_type _Max =
+    static constexpr const result_type _Min = 0;
+    static constexpr const result_type _Max =
         static_cast<result_type>(~(static_cast<result_type>(0)));
 
-    static VSMC_CONSTEXPR result_type min VSMC_MNE() { return _Min; }
-    static VSMC_CONSTEXPR result_type max VSMC_MNE() { return _Max; }
+    static constexpr result_type min VSMC_MNE() { return _Min; }
+    static constexpr result_type max VSMC_MNE() { return _Max; }
 
     friend inline bool operator==(const XorwowEngine<Eng, D, DInit> &eng1,
                                   const XorwowEngine<Eng, D, DInit> &eng2)
@@ -462,11 +457,7 @@ class XorwowEngine
         is >> std::ws >> weyl_tmp;
 
         if (is.good()) {
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
             eng.eng_ = std::move(eng_tmp);
-#else
-            eng.eng_ = eng_tmp;
-#endif
             eng.weyl_ = weyl_tmp;
         }
 

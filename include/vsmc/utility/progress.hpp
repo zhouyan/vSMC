@@ -94,7 +94,7 @@ class Progress
 
     /// \brief Construct a Progress with an output stream
     Progress(std::ostream &os = std::cout)
-        : thread_ptr_(VSMC_NULLPTR),
+        : thread_ptr_(nullptr),
           interval_(0),
           iter_(0),
           total_(0),
@@ -200,11 +200,11 @@ class Progress
 
     void join()
     {
-        if (thread_ptr_ != VSMC_NULLPTR) {
+        if (thread_ptr_ != nullptr) {
             if (thread_ptr_->joinable())
                 thread_ptr_->join();
             delete thread_ptr_;
-            thread_ptr_ = VSMC_NULLPTR;
+            thread_ptr_ = nullptr;
         }
     }
 

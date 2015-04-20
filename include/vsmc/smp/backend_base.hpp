@@ -68,7 +68,7 @@
     ~Name##Impl() {}
 
 #define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(basename)               \
-    VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this) != VSMC_NULLPTR),     \
+    VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this) != nullptr),     \
                         ("DERIVED FROM " #basename                           \
                          " WITH INCORRECT **Derived** TEMPLATE PARAMTER"));
 

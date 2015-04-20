@@ -90,14 +90,12 @@ template <typename IntType = int> class DiscreteDistribution
         normalize();
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
     explicit DiscreteDistribution(param_type &&param)
     {
         VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param);
         param_ = std::move(param);
         normalize();
     }
-#endif
 
     param_type param() const { return param_; }
 
@@ -108,14 +106,12 @@ template <typename IntType = int> class DiscreteDistribution
         normalize();
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
     void param(param_type &&param)
     {
         VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param);
         param_ = std::move(param);
         normalize();
     }
-#endif
 
     void reset() {}
 

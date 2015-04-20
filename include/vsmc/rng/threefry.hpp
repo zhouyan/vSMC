@@ -163,7 +163,7 @@ struct ThreefryRotate<ResultType, 2, N, true> {
     }
 
     private:
-    static VSMC_CONSTEXPR const unsigned r_ = (N - 1) % 8;
+    static constexpr const unsigned r_ = (N - 1) % 8;
 };  // struct ThreefryRotate
 
 template <typename ResultType, std::size_t N>
@@ -186,9 +186,9 @@ struct ThreefryRotate<ResultType, 4, N, true> {
     }
 
     private:
-    static VSMC_CONSTEXPR const std::size_t i0_ = N % 2 ? 1 : 3;
-    static VSMC_CONSTEXPR const std::size_t i2_ = N % 2 ? 3 : 1;
-    static VSMC_CONSTEXPR const unsigned r_ = (N - 1) % 8;
+    static constexpr const std::size_t i0_ = N % 2 ? 1 : 3;
+    static constexpr const std::size_t i2_ = N % 2 ? 3 : 1;
+    static constexpr const unsigned r_ = (N - 1) % 8;
 };  // struct ThreefryRotate
 
 template <typename ResultType,
@@ -212,9 +212,9 @@ struct ThreefryInsertKey<ResultType, 2, N, true> {
     }
 
     private:
-    static VSMC_CONSTEXPR const std::size_t inc_ = N / 4;
-    static VSMC_CONSTEXPR const std::size_t i0_ = (inc_ + 0) % 3;
-    static VSMC_CONSTEXPR const std::size_t i1_ = (inc_ + 1) % 3;
+    static constexpr const std::size_t inc_ = N / 4;
+    static constexpr const std::size_t i0_ = (inc_ + 0) % 3;
+    static constexpr const std::size_t i1_ = (inc_ + 1) % 3;
 };  // struct ThreefryInsertKey
 
 template <typename ResultType, std::size_t N>
@@ -230,11 +230,11 @@ struct ThreefryInsertKey<ResultType, 4, N, true> {
     }
 
     private:
-    static VSMC_CONSTEXPR const std::size_t inc_ = N / 4;
-    static VSMC_CONSTEXPR const std::size_t i0_ = (inc_ + 0) % 5;
-    static VSMC_CONSTEXPR const std::size_t i1_ = (inc_ + 1) % 5;
-    static VSMC_CONSTEXPR const std::size_t i2_ = (inc_ + 2) % 5;
-    static VSMC_CONSTEXPR const std::size_t i3_ = (inc_ + 3) % 5;
+    static constexpr const std::size_t inc_ = N / 4;
+    static constexpr const std::size_t i0_ = (inc_ + 0) % 5;
+    static constexpr const std::size_t i1_ = (inc_ + 1) % 5;
+    static constexpr const std::size_t i2_ = (inc_ + 2) % 5;
+    static constexpr const std::size_t i3_ = (inc_ + 3) % 5;
 };  // struct ThreefryInsertKey
 
 }  // namespace vsmc::internal
@@ -297,7 +297,7 @@ class ThreefryEngine
             result_type,
             key_type,
             ThreefryEngine<ResultType, K, Rounds>>::value>::type * =
-            VSMC_NULLPTR)
+            nullptr)
         : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY;
@@ -327,7 +327,7 @@ class ThreefryEngine
                   result_type,
                   key_type,
                   ThreefryEngine<ResultType, K, Rounds>>::value>::type * =
-                  VSMC_NULLPTR)
+                  nullptr)
     {
         counter::reset(ctr_);
         key_type k;
@@ -416,12 +416,12 @@ class ThreefryEngine
         index_ = n % K;
     }
 
-    static VSMC_CONSTEXPR const result_type _Min = 0;
-    static VSMC_CONSTEXPR const result_type _Max =
+    static constexpr const result_type _Min = 0;
+    static constexpr const result_type _Max =
         static_cast<result_type>(~(static_cast<result_type>(0)));
 
-    static VSMC_CONSTEXPR result_type min VSMC_MNE() { return _Min; }
-    static VSMC_CONSTEXPR result_type max VSMC_MNE() { return _Max; }
+    static constexpr result_type min VSMC_MNE() { return _Min; }
+    static constexpr result_type max VSMC_MNE() { return _Max; }
 
     friend inline bool
         operator==(const ThreefryEngine<ResultType, K, Rounds> &eng1,
@@ -468,13 +468,8 @@ class ThreefryEngine
         is >> std::ws >> eng_tmp.buffer_;
         is >> std::ws >> eng_tmp.index_;
 
-        if (is.good()) {
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+        if (is.good())
             eng = std::move(eng_tmp);
-#else
-            eng = eng_tmp;
-#endif
-        }
 
         return is;
     }

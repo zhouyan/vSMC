@@ -349,7 +349,7 @@ class PhiloxEngine
             result_type,
             key_type,
             PhiloxEngine<ResultType, K, Rounds>>::value>::type * =
-            VSMC_NULLPTR)
+            nullptr)
         : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_PHILOX;
@@ -377,7 +377,7 @@ class PhiloxEngine
                   result_type,
                   key_type,
                   PhiloxEngine<ResultType, K, Rounds>>::value>::type * =
-                  VSMC_NULLPTR)
+                  nullptr)
     {
         counter::reset(ctr_);
         seq.generate(key_.begin(), key_.end());
@@ -457,12 +457,12 @@ class PhiloxEngine
         index_ = n % K;
     }
 
-    static VSMC_CONSTEXPR const result_type _Min = 0;
-    static VSMC_CONSTEXPR const result_type _Max =
+    static constexpr const result_type _Min = 0;
+    static constexpr const result_type _Max =
         static_cast<result_type>(~(static_cast<result_type>(0)));
 
-    static VSMC_CONSTEXPR result_type min VSMC_MNE() { return _Min; }
-    static VSMC_CONSTEXPR result_type max VSMC_MNE() { return _Max; }
+    static constexpr result_type min VSMC_MNE() { return _Min; }
+    static constexpr result_type max VSMC_MNE() { return _Max; }
 
     friend inline bool
         operator==(const PhiloxEngine<ResultType, K, Rounds> &eng1,
@@ -509,13 +509,8 @@ class PhiloxEngine
         is >> std::ws >> eng_tmp.key_;
         is >> std::ws >> eng_tmp.index_;
 
-        if (is.good()) {
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
+        if (is.good())
             eng = std::move(eng_tmp);
-#else
-            eng = eng_tmp;
-#endif
-        }
 
         return is;
     }

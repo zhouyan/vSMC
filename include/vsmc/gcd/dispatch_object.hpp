@@ -77,11 +77,10 @@ template <typename DispatchType> class DispatchObject
         return *this;
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
     DispatchObject(DispatchObject<DispatchType> &&other)
         : object_(std::move(other.object_))
     {
-        other.object_ = VSMC_NULLPTR;
+        other.object_ = nullptr;
     }
 
     DispatchObject<DispatchType> &
@@ -94,7 +93,6 @@ template <typename DispatchType> class DispatchObject
 
         return *this;
     }
-#endif
 
     ~DispatchObject() { release(); }
 
@@ -128,13 +126,13 @@ template <typename DispatchType> class DispatchObject
 
     void retain()
     {
-        if (object_ != VSMC_NULLPTR)
+        if (object_ != nullptr)
             ::dispatch_retain(object_);
     }
 
     void release()
     {
-        if (object_ != VSMC_NULLPTR)
+        if (object_ != nullptr)
             ::dispatch_release(object_);
     }
 };  // class DispatchObject

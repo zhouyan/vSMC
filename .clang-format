@@ -4,9 +4,9 @@ BasedOnStyle                                   : LLVM
 ---
 Language                                       : Cpp
 AccessModifierOffset                           : 0
-AlignAfterOpenBracket                          : true
+AlignAfterOpenBracket                          : false
 AlignEscapedNewlinesLeft                       : false
-AlignOperands                                  : true
+AlignOperands                                  : false
 AlignTrailingComments                          : true
 AllowAllParametersOfDeclarationOnNextLine      : true
 AllowShortBlocksOnASingleLine                  : true
@@ -17,8 +17,8 @@ AllowShortLoopsOnASingleLine                   : false
 AlwaysBreakAfterDefinitionReturnType           : false
 AlwaysBreakBeforeMultilineStrings              : false
 AlwaysBreakTemplateDeclarations                : false
-BinPackArguments                               : false
-BinPackParameters                              : false
+BinPackArguments                               : true
+BinPackParameters                              : true
 BreakBeforeBinaryOperators                     : None
 BreakBeforeBraces                              : Linux
 BreakBeforeTernaryOperators                    : false
@@ -53,7 +53,7 @@ SpaceAfterCStyleCast                           : true
 SpaceBeforeAssignmentOperators                 : true
 SpaceBeforeParens                              : ControlStatements
 SpaceInEmptyParentheses                        : false
-SpacesBeforeTrailingComments                   : 2
+SpacesBeforeTrailingComments                   : 1
 SpacesInAngles                                 : false
 SpacesInCStyleCastParentheses                  : false
 SpacesInContainerLiterals                      : true

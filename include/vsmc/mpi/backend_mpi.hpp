@@ -84,7 +84,7 @@ class WeightSetMPI : public WeightSetBase
         resample_weight_.resize(resample_size_);
         read_resample_weight(&resample_weight_[0]);
 
-        return world_.rank() == 0 ? &resample_weight_[0] : VSMC_NULLPTR;
+        return world_.rank() == 0 ? &resample_weight_[0] : nullptr;
     }
 
     /// \brief A duplicated MPI communicator for this weight set object
@@ -477,12 +477,8 @@ template <typename BaseState, typename ID> class StateMPI : public BaseState
             if (rank_this == r) {
                 for (std::size_t i = 0; i != copy_recv.size(); ++i) {
                     world_.recv(copy_recv[i].first, copy_tag_, pack_recv_);
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
                     this->state_unpack(copy_recv[i].second,
                                        std::move(pack_recv_));
-#else
-                    this->state_unpack(copy_recv[i].second, pack_recv_);
-#endif
                 }
             } else {
                 for (std::size_t i = 0; i != copy_send.size(); ++i) {

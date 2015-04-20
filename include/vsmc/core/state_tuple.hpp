@@ -73,7 +73,6 @@ class StateTupleBase
             return *this;
         }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
         state_pack_type(state_pack_type &&other)
             : data_(std::move(other.data_))
         {
@@ -88,7 +87,6 @@ class StateTupleBase
 
             return *this;
         }
-#endif
 
         state_tuple_type &data() { return data_; }
 
@@ -108,7 +106,7 @@ class StateTupleBase
 
         private:
         state_tuple_type data_;
-        static VSMC_CONSTEXPR const std::size_t dim_ = sizeof...(Types) + 1;
+        static constexpr const std::size_t dim_ = sizeof...(Types) + 1;
 
         template <typename Archive, std::size_t Pos>
         void serialize(Archive &ar, Position<Pos>)
@@ -142,7 +140,7 @@ class StateTupleBase
         {
         }
 
-        static VSMC_CONSTEXPR std::size_t dim() { return S::dim(); }
+        static constexpr std::size_t dim() { return S::dim(); }
 
         template <std::size_t Pos>
         typename state_type<Pos>::type &state(Position<Pos>) const
@@ -166,7 +164,7 @@ class StateTupleBase
         {
         }
 
-        static VSMC_CONSTEXPR std::size_t dim() { return S::dim(); }
+        static constexpr std::size_t dim() { return S::dim(); }
 
         template <std::size_t Pos>
         const typename state_type<Pos>::type &state(Position<Pos>) const
@@ -184,7 +182,7 @@ class StateTupleBase
 
     size_type size() const { return size_; }
 
-    static VSMC_CONSTEXPR std::size_t dim() { return dim_; }
+    static constexpr std::size_t dim() { return dim_; }
 
     template <std::size_t Pos, typename OutputIter>
     void read_state(Position<Pos>, OutputIter first) const
@@ -220,7 +218,7 @@ class StateTupleBase
 
     private:
     size_type size_;
-    static VSMC_CONSTEXPR const std::size_t dim_ = sizeof...(Types) + 1;
+    static constexpr const std::size_t dim_ = sizeof...(Types) + 1;
 
     template <std::size_t Pos, typename CharT, typename Traits>
     void print_particle(std::basic_ostream<CharT, Traits> &os,
@@ -333,15 +331,13 @@ class StateTuple<RowMajor, T, Types...>
         state_[id] = pack.data();
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
     void state_unpack(size_type id, state_pack_type &&pack)
     {
         state_[id] = std::move(pack.data());
     }
-#endif
 
     private:
-    static VSMC_CONSTEXPR const std::size_t dim_ = sizeof...(Types) + 1;
+    static constexpr const std::size_t dim_ = sizeof...(Types) + 1;
     std::vector<std::tuple<T, Types...>> state_;
 };  // StateTuple
 
@@ -462,15 +458,13 @@ class StateTuple<ColMajor, T, Types...>
         unpack_particle(id, pack, Position<0>());
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
     void state_unpack(size_type id, state_pack_type &&pack)
     {
         unpack_particle(id, std::move(pack), Position<0>());
     }
-#endif
 
     private:
-    static VSMC_CONSTEXPR const std::size_t dim_ = sizeof...(Types) + 1;
+    static constexpr const std::size_t dim_ = sizeof...(Types) + 1;
     std::tuple<std::vector<T>, std::vector<Types>...> state_;
 
     template <std::size_t Pos> void init_state(size_type N, Position<Pos>)
@@ -530,7 +524,6 @@ class StateTuple<ColMajor, T, Types...>
     {
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
     template <std::size_t Pos>
     void unpack_particle(size_type id, state_pack_type &&pack, Position<Pos>)
     {
@@ -539,7 +532,6 @@ class StateTuple<ColMajor, T, Types...>
     }
 
     void unpack_particle(size_type, state_pack_type &&, Position<dim_>) {}
-#endif
 };  // class StateTuple
 
 }  // namespace vsmc

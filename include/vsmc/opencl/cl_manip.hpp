@@ -133,7 +133,6 @@ inline std::size_t cl_preferred_work_size(std::size_t N,
 
 inline void cl_set_kernel_args(::cl::Kernel &, ::cl_uint) {}
 
-#if VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 /// \brief Set OpenCL kernel arguments
 /// \ingroup OpenCL
 ///
@@ -152,9 +151,6 @@ inline void cl_set_kernel_args(::cl::Kernel &kern,
     kern.setArg(offset, arg1);
     cl_set_kernel_args(kern, offset + 1, args...);
 }
-#else  // VSMC_HAS_CXX11_VARIADIC_TEMPLATES
-#include <vsmc/opencl/internal/cl_set_kernel_args.hpp>
-#endif  // VSMC_HAS_CXX11_VARIADIC_TEMPLATES
 
 }  // namespace vsmc
 
