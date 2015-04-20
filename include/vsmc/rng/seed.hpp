@@ -226,7 +226,7 @@ class SeedGenerator
 /// ~~~{.cpp}
 /// #include <vsmc/rng/seed.hpp>
 ///
-/// typedef SeedGeneartor<NullType, Array<uint32_t, 4> > Seed4x32;
+/// typedef SeedGeneartor<NullType, std::array<uint32_t, 4> > Seed4x32;
 /// Seed4x32 &seed = SeedType::instance();
 /// boost::mpi::communicator world;
 /// Seed4x32::result_type s;
@@ -235,15 +235,15 @@ class SeedGenerator
 /// seed.set(s);
 /// ~~~
 template <typename ID, typename T, std::size_t K>
-class SeedGenerator<ID, Array<T, K>>
+class SeedGenerator<ID, std::array<T, K>>
 {
     public:
-    typedef Array<T, K> result_type;
+    typedef std::array<T, K> result_type;
     typedef T skip_type;
 
-    static SeedGenerator<ID, Array<T, K>> &instance()
+    static SeedGenerator<ID, std::array<T, K>> &instance()
     {
-        static SeedGenerator<ID, Array<T, K>> seed;
+        static SeedGenerator<ID, std::array<T, K>> seed;
 
         return seed;
     }
@@ -285,7 +285,7 @@ class SeedGenerator<ID, Array<T, K>>
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const SeedGenerator<ID, Array<T, K>> &sg)
+        const SeedGenerator<ID, std::array<T, K>> &sg)
     {
         if (!os.good())
             return os;
@@ -300,7 +300,7 @@ class SeedGenerator<ID, Array<T, K>>
     template <typename CharT, typename Traits>
     friend inline std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        SeedGenerator<ID, Array<T, K>> &sg)
+        SeedGenerator<ID, std::array<T, K>> &sg)
     {
         if (!is.good())
             return is;
@@ -335,10 +335,11 @@ class SeedGenerator<ID, Array<T, K>>
         modulo(divisor_, remainder_);
     }
 
-    SeedGenerator<ID, Array<T, K>>(const SeedGenerator<ID, Array<T, K>> &);
+    SeedGenerator<ID, std::array<T, K>>(
+        const SeedGenerator<ID, std::array<T, K>> &);
 
-    SeedGenerator<ID, Array<T, K>> &operator=(
-        const SeedGenerator<ID, Array<T, K>> &);
+    SeedGenerator<ID, std::array<T, K>> &operator=(
+        const SeedGenerator<ID, std::array<T, K>> &);
 }; // class SeedGenerator
 
 /// \brief The default Seed type

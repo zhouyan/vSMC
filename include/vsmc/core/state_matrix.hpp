@@ -35,7 +35,6 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
-#include <vsmc/utility/array.hpp>
 
 #define VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim)         \
     VSMC_STATIC_ASSERT((Dim == Dynamic),                                     \
@@ -65,7 +64,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     typedef std::size_t size_type;
     typedef T state_type;
     typedef typename std::conditional<Dim == Dynamic, std::vector<T>,
-        Array<T, Dim>>::type state_pack_type;
+        std::array<T, Dim>>::type state_pack_type;
 
     template <typename S>
     struct single_particle_type : public SingleParticleBase<S> {
@@ -244,9 +243,9 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         return std::vector<T>(this->dim());
     }
 
-    Array<T, Dim> create_pack_dispatch(std::false_type) const
+    std::array<T, Dim> create_pack_dispatch(std::false_type) const
     {
-        return Array<T, Dim>();
+        return std::array<T, Dim>();
     }
 }; // class StateMatrixBase
 

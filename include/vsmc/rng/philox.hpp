@@ -78,7 +78,8 @@ namespace traits
 namespace internal
 {
 
-template <typename, std::size_t> struct PhiloxWeylConstantValue;
+template <typename, std::size_t>
+struct PhiloxWeylConstantValue;
 
 VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint32_t, 0, UINT32_C(0x9E3779B9))
 VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint32_t, 1, UINT32_C(0xBB67AE85))
@@ -88,7 +89,8 @@ VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(
 VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(
     uint64_t, 1, UINT64_C(0xBB67AE8584CAA73B))
 
-template <typename, std::size_t, std::size_t> struct PhiloxRoundConstantValue;
+template <typename, std::size_t, std::size_t>
+struct PhiloxRoundConstantValue;
 
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint32_t, 2, 0, UINT32_C(0xd256d193))
 
@@ -141,25 +143,25 @@ namespace internal
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 1)>
 struct PhiloxBumpKey {
-    static void eval(Array<ResultType, K / 2> &) {}
+    static void eval(std::array<ResultType, K / 2> &) {}
 };
 
 template <typename ResultType, std::size_t N>
 struct PhiloxBumpKey<ResultType, 2, N, true> {
-    static void eval(Array<ResultType, 1> &par)
+    static void eval(std::array<ResultType, 1> &par)
     {
-        par[Position<0>()] +=
+        std::get<0>(par) +=
             traits::PhiloxWeylConstantTrait<ResultType, 0>::value;
     }
 }; // struct PhiloxBumpKey
 
 template <typename ResultType, std::size_t N>
 struct PhiloxBumpKey<ResultType, 4, N, true> {
-    static void eval(Array<ResultType, 2> &par)
+    static void eval(std::array<ResultType, 2> &par)
     {
-        par[Position<0>()] +=
+        std::get<0>(par) +=
             traits::PhiloxWeylConstantTrait<ResultType, 0>::value;
-        par[Position<1>()] +=
+        std::get<1>(par) +=
             traits::PhiloxWeylConstantTrait<ResultType, 1>::value;
     }
 }; // struct PhiloxBumpKey
@@ -228,43 +230,43 @@ inline void philox_hilo(uint64_t b, uint64_t &hi, uint64_t &lo)
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
 struct PhiloxRound {
-    static void eval(Array<ResultType, K> &, const Array<ResultType, K / 2> &)
+    static void eval(
+        std::array<ResultType, K> &, const std::array<ResultType, K / 2> &)
     {
     }
 }; // struct PhiloxRound
 
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 2, N, true> {
-    static void eval(
-        Array<ResultType, 2> &state, const Array<ResultType, 1> &par)
+    static void eval(std::array<ResultType, 2> &state,
+        const std::array<ResultType, 1> &par)
     {
         ResultType hi = 0;
         ResultType lo = 0;
-        philox_hilo<2, 0>(state[Position<0>()], hi, lo);
-        state[Position<0>()] =
-            hi ^ (par[Position<0>()] ^ state[Position<1>()]);
-        state[Position<1>()] = lo;
+        philox_hilo<2, 0>(std::get<0>(state), hi, lo);
+        std::get<0>(state) = hi ^ (std::get<0>(par) ^ std::get<1>(state));
+	std::get<1>(state) = lo;
     }
 }; // struct PhiloxRound
 
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 4, N, true> {
-    static void eval(
-        Array<ResultType, 4> &state, const Array<ResultType, 2> &par)
+    static void eval(std::array<ResultType, 4> &state,
+        const std::array<ResultType, 2> &par)
     {
         ResultType hi0 = 0;
         ResultType lo1 = 0;
         ResultType hi2 = 0;
         ResultType lo3 = 0;
-        philox_hilo<4, 1>(state[Position<2>()], hi0, lo1);
-        philox_hilo<4, 0>(state[Position<0>()], hi2, lo3);
+        philox_hilo<4, 1>(std::get<2>(state), hi0, lo1);
+        philox_hilo<4, 0>(std::get<0>(state), hi2, lo3);
 
-        hi0 ^= par[Position<0>()];
-        hi2 ^= par[Position<1>()];
-        state[Position<0>()] = hi0 ^ state[Position<1>()];
-        state[Position<1>()] = lo1;
-        state[Position<2>()] = hi2 ^ state[Position<3>()];
-        state[Position<3>()] = lo3;
+        hi0 ^= std::get<0>(par);
+        hi2 ^= std::get<1>(par);
+	std::get<0>(state) = hi0 ^ std::get<1>(state);
+        std::get<1>(state) = lo1;
+        std::get<2>(state) = hi2 ^ std::get<3>(state);
+        std::get<3>(state) = lo3;
     }
 }; // struct PhiloxRound
 
@@ -317,9 +319,9 @@ class PhiloxEngine
 {
     public:
     typedef ResultType result_type;
-    typedef Array<ResultType, K> buffer_type;
-    typedef Array<ResultType, K> ctr_type;
-    typedef Array<ResultType, K / 2> key_type;
+    typedef std::array<ResultType, K> buffer_type;
+    typedef std::array<ResultType, K> ctr_type;
+    typedef std::array<ResultType, K / 2> key_type;
 
     private:
     typedef Counter<ctr_type> counter;

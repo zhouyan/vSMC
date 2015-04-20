@@ -54,6 +54,7 @@
 #include <numeric>
 #include <random>
 
+#include <array>
 #include <iterator>
 #include <list>
 #include <map>

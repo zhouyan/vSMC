@@ -161,17 +161,13 @@
 /// \ingroup Utility
 /// \brief Memory allocation with alignment requirement
 
-/// \defgroup Array Array
-/// \ingroup Utility
-/// \brief Container with static size
-
 /// \defgroup CPUID CPUID
 /// \ingroup Utility
 /// \brief Query CPUID information
 
 /// \defgroup Counter Counter
 /// \ingroup Utility
-/// \brief Use Array of unsinged integers as counters
+/// \brief Use std::array of unsinged integers as counters
 
 /// \defgroup CString CString
 /// \ingroup Utility

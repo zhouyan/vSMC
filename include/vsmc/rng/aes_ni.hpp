@@ -61,7 +61,7 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
 {
     public:
     typedef typename KeySeq::key_type key_type;
-    typedef Array<__m128i, Rounds + 1> key_seq_type;
+    typedef std::array<__m128i, Rounds + 1> key_seq_type;
 
     key_seq_type get(const key_type &) const { return key_seq_; }
 
@@ -114,7 +114,7 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 {
     public:
     typedef typename KeySeq::key_type key_type;
-    typedef Array<__m128i, Rounds + 1> key_seq_type;
+    typedef std::array<__m128i, Rounds + 1> key_seq_type;
 
     key_seq_type get(const key_type &k) const
     {
@@ -224,11 +224,12 @@ class AESNIEngine
 
     public:
     typedef ResultType result_type;
-    typedef Array<__m128i, Blocks> buffer_type;
-    typedef Array<ResultType, sizeof(__m128i) / sizeof(ResultType)> ctr_type;
-    typedef Array<ctr_type, Blocks> ctr_block_type;
+    typedef std::array<__m128i, Blocks> buffer_type;
+    typedef std::array<ResultType, sizeof(__m128i) / sizeof(ResultType)>
+        ctr_type;
+    typedef std::array<ctr_type, Blocks> ctr_block_type;
     typedef typename KeySeq::key_type key_type;
-    typedef Array<__m128i, Rounds + 1> key_seq_type;
+    typedef std::array<__m128i, Rounds + 1> key_seq_type;
 
     private:
     typedef Counter<ctr_type> counter;
@@ -286,9 +287,10 @@ class AESNIEngine
         index_ = K_;
     }
 
-    template <std::size_t B> ctr_type ctr() const
+    template <std::size_t B>
+    ctr_type ctr() const
     {
-        return ctr_block_[Position<B>()];
+        return std::get<B>(ctr_block_);
     }
 
     ctr_block_type ctr_block() const { return ctr_block_; }
@@ -477,7 +479,7 @@ class AESNIEngine
     void enc_first(
         const key_seq_type &ks, buffer_type &buf, std::true_type) const
     {
-        buf[Position<B>()] = _mm_xor_si128(buf[Position<B>()], ks.front());
+        std::get<B>(buf) = _mm_xor_si128(std::get<B>(buf), ks.front());
         enc_first<B + 1>(
             ks, buf, std::integral_constant<bool, B + 1 < Blocks>());
     }
@@ -506,8 +508,8 @@ class AESNIEngine
     void enc_round_block(
         const key_seq_type &ks, buffer_type &buf, std::true_type) const
     {
-        buf[Position<B>()] =
-            _mm_aesenc_si128(buf[Position<B>()], ks[Position<N>()]);
+        std::get<B>(buf) =
+            _mm_aesenc_si128(std::get<B>(buf), std::get<N>(ks));
         enc_round_block<B + 1, N>(
             ks, buf, std::integral_constant<bool, B + 1 < Blocks>());
     }
@@ -521,8 +523,7 @@ class AESNIEngine
     void enc_last(
         const key_seq_type &ks, buffer_type &buf, std::true_type) const
     {
-        buf[Position<B>()] =
-            _mm_aesenclast_si128(buf[Position<B>()], ks.back());
+        std::get<B>(buf) = _mm_aesenclast_si128(std::get<B>(buf), ks.back());
         enc_last<B + 1>(
             ks, buf, std::integral_constant<bool, B + 1 < Blocks>());
     }
@@ -542,7 +543,7 @@ class AESNIEngine
     void pack_ctr(
         const ctr_block_type &cb, buffer_type &buf, std::true_type) const
     {
-        m128i_pack<0>(cb[Position<B>()], buf[Position<B>()]);
+        m128i_pack<0>(std::get<B>(cb), std::get<B>(buf));
         pack_ctr<B + 1>(
             cb, buf, std::integral_constant<bool, B + 1 < Blocks>());
     }

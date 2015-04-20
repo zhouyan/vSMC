@@ -56,7 +56,8 @@ namespace traits
 namespace internal
 {
 
-template <std::size_t> struct ARSWeylConstantValue;
+template <std::size_t>
+struct ARSWeylConstantValue;
 
 template <>
 struct ARSWeylConstantValue<0>
@@ -85,10 +86,11 @@ struct ARSWeylConstantTrait : public internal::ARSWeylConstantValue<I> {
 
 /// \brief Default ARSEngine key sequence generator
 /// \ingroup AESNIRNG
-template <typename ResultType> class ARSKeySeq
+template <typename ResultType>
+class ARSKeySeq
 {
     public:
-    typedef Array<ResultType, 16 / sizeof(ResultType)> key_type;
+    typedef std::array<ResultType, 16 / sizeof(ResultType)> key_type;
 
     ARSKeySeq()
         : weyl_(_mm_set_epi64x(
@@ -98,7 +100,7 @@ template <typename ResultType> class ARSKeySeq
     }
 
     template <std::size_t Rp1>
-    void generate(const key_type &key, Array<__m128i, Rp1> &key_seq)
+    void generate(const key_type &key, std::array<__m128i, Rp1> &key_seq)
     {
         m128i_pack<0>(key, key_seq.front());
         generate_seq<1>(key_seq, std::integral_constant<bool, 1 < Rp1>());
@@ -108,15 +110,14 @@ template <typename ResultType> class ARSKeySeq
     const __m128i weyl_;
 
     template <std::size_t, std::size_t Rp1>
-    void generate_seq(Array<__m128i, Rp1> &, std::false_type)
+    void generate_seq(std::array<__m128i, Rp1> &, std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq(Array<__m128i, Rp1> &key_seq, std::true_type)
+    void generate_seq(std::array<__m128i, Rp1> &key_seq, std::true_type)
     {
-        key_seq[Position<N>()] =
-            _mm_add_epi64(key_seq[Position<N - 1>()], weyl_);
+        std::get<N>(key_seq) = _mm_add_epi64(std::get<N - 1>(key_seq), weyl_);
         generate_seq<N + 1>(
             key_seq, std::integral_constant<bool, N + 1 < Rp1>());
     }

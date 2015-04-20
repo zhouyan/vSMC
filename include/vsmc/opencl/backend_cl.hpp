@@ -41,7 +41,6 @@
 #include <vsmc/opencl/internal/cl_copy.hpp>
 #include <vsmc/opencl/internal/cl_wrapper.hpp>
 #include <vsmc/rng/seed.hpp>
-#include <vsmc/utility/array.hpp>
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_DYNAMIC_STATE_SIZE_RESIZE(Dim)  \
     VSMC_STATIC_ASSERT((Dim == Dynamic),                                     \
@@ -199,7 +198,7 @@ template <std::size_t StateSize, typename FPType, typename ID> class StateCL
     typedef ID cl_id;
     typedef CLManager<ID> manager_type;
     typedef typename std::conditional<StateSize == Dynamic, std::vector<char>,
-        Array<char, StateSize>>::type state_pack_type;
+        std::array<char, StateSize>>::type state_pack_type;
 
     explicit StateCL(size_type N)
         : state_size_(StateSize == Dynamic ? 1 : StateSize),
@@ -469,9 +468,9 @@ template <std::size_t StateSize, typename FPType, typename ID> class StateCL
         return std::vector<char>(this->state_size());
     }
 
-    Array<char, StateSize> create_pack_dispatch(std::false_type) const
+    std::array<char, StateSize> create_pack_dispatch(std::false_type) const
     {
-        return Array<char, StateSize>();
+        return std::array<char, StateSize>();
     }
 }; // class StateCL
 

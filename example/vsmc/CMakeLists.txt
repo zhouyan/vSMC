@@ -132,7 +132,6 @@ ADD_HEADER_EXECUTABLE(vsmc/thread/thread_num          TRUE "STD")
 
 ADD_HEADER_EXECUTABLE(vsmc/utility/utility TRUE "HDF5")
 ADD_HEADER_EXECUTABLE(vsmc/utility/aligned_memory TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/utility/array          TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/utility/counter        TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/utility/cstring        TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/utility/cpuid          ${CPUID_FOUND})

@@ -148,8 +148,8 @@ inline void rng_aes_validation_cbc(
     typedef Eng<uint32_t, 1> eng_type;
 
     typename eng_type::key_type key;
-    vsmc::Array<typename eng_type::ctr_block_type, 4> text;
-    vsmc::Array<typename eng_type::buffer_type, 5> cipher;
+    std::array<typename eng_type::ctr_block_type, 4> text;
+    std::array<typename eng_type::buffer_type, 5> cipher;
 
     std::memcpy(key.data(), plain_key, sizeof(key));
     std::memcpy(text.data(), plain_text, 64);

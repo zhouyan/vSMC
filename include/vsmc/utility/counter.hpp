@@ -33,7 +33,6 @@
 #define VSMC_UTILITY_COUNTER_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/array.hpp>
 
 namespace vsmc
 {
@@ -41,9 +40,11 @@ namespace vsmc
 namespace internal
 {
 
-template <typename T, bool> struct CounterMask;
+template <typename T, bool>
+struct CounterMask;
 
-template <typename T> struct CounterMask<T, true> {
+template <typename T>
+struct CounterMask<T, true> {
     static constexpr const T max_val = static_cast<T>(~(static_cast<T>(0)));
 
     static constexpr const T mask_hi =
@@ -54,27 +55,30 @@ template <typename T> struct CounterMask<T, true> {
 
 } // namespace vsmc::internal
 
-template <typename> class Counter;
+template <typename>
+class Counter;
 
-/// \brief Using Array of unsigned integers as counters
+/// \brief Using `std::array` of unsigned integers as counters
 /// \ingroup Counter
 ///
 /// \details
-/// This class provides methods for using Array of unsigned integers as
+/// This class provides methods for using `std::array` of unsigned integers as
 /// large integer counters.
 ///
 /// It deals with two types of counters. The first type is in the form
-/// `Array<T, K>` where `T` is an unsigned integer type, treated as a
-/// `sizeof(T) * K * 8` bits integer. For example, `Array<uint32_t, 4>` is
+/// `std::array<T, K>` where `T` is an unsigned integer type, treated as a
+/// `sizeof(T) * K * 8` bits integer. For example, `std::array<uint32_t, 4>`
+/// is
 /// treated as an 128-bits integer. The counter start with all elements being
 /// zero. The value of the integer can be calculated as, \f$c_0 + c_1 M + c_2
 /// M^2 +\cdots + c_{K-1} M^{K - 1}\f$, where \f$c_i\f$ is the \f$i\f$th
-/// element in the Array and has a range from zero to \f$M - 1\f$, \f$M\f$ is
+/// element in the `std::array` and has a range from zero to \f$M - 1\f$,
+/// \f$M\f$ is
 /// the largest number of type `T` plus one, that is \f$2^n\f$ with \f$n\f$
 /// being the number of bits in type `T`.
 ///
 /// The second type is blocks of counters of the first type. For example,
-/// `Array<ctr_type, Blocks>`, where `ctr_type` is a counter of the first
+/// `std::array<ctr_type, Blocks>`, where `ctr_type` is a counter of the first
 /// type.
 /// When set and incremented using methods in this class, all `Blocks`
 /// counters
@@ -85,18 +89,20 @@ template <typename> class Counter;
 /// the first type, except that the last element, \f$c_{K-1}\f$ has a range
 /// from zero to \f$2^{n - 8} - 1\f$ where \f$n\f$ is the number of bits in
 /// type `T`. Therefore, in the extreme case where `ctr_type` is
-/// `Array<uint8_t, 1>`, increment won't change the counter at all.
-template <typename T, std::size_t K> class Counter<Array<T, K>>
+/// `std::array<uint8_t, 1>`, increment won't change the counter at all.
+template <typename T, std::size_t K>
+class Counter<std::array<T, K>>
 {
     public:
-    typedef Array<T, K> ctr_type;
+    typedef std::array<T, K> ctr_type;
 
     /// \brief Set the counter to a given value
     static inline void set(ctr_type &ctr, const ctr_type &c) { ctr = c; }
 
     /// \brief Set a block of counters given the value of the first counter
     template <std::size_t Blocks>
-    static inline void set(Array<ctr_type, Blocks> &ctr, const ctr_type &c)
+    static inline void set(
+        std::array<ctr_type, Blocks> &ctr, const ctr_type &c)
     {
         ctr.front() = c;
         set_block<1>(ctr, std::integral_constant<bool, 1 < Blocks>());
@@ -110,7 +116,7 @@ template <typename T, std::size_t K> class Counter<Array<T, K>>
 
     /// \brief Reset a block of counters with the first set to zero
     template <std::size_t Blocks>
-    static inline void reset(Array<ctr_type, Blocks> &ctr)
+    static inline void reset(std::array<ctr_type, Blocks> &ctr)
     {
         reset(ctr.front());
         set_block<1>(ctr, std::integral_constant<bool, 1 < Blocks>());
@@ -124,7 +130,7 @@ template <typename T, std::size_t K> class Counter<Array<T, K>>
 
     /// \brief Increment each counter in a block by one
     template <std::size_t Blocks>
-    static inline void increment(Array<ctr_type, Blocks> &ctr)
+    static inline void increment(std::array<ctr_type, Blocks> &ctr)
     {
         increment_block<0>(ctr, std::true_type());
     }
@@ -158,7 +164,7 @@ template <typename T, std::size_t K> class Counter<Array<T, K>>
 
     /// \brief Increment each counter in a block by a given value
     template <std::size_t Blocks>
-    static inline void increment(Array<ctr_type, Blocks> &ctr, T nskip)
+    static inline void increment(std::array<ctr_type, Blocks> &ctr, T nskip)
     {
         if (nskip == 0)
             return;
@@ -190,7 +196,7 @@ template <typename T, std::size_t K> class Counter<Array<T, K>>
     template <std::size_t N>
     static inline void increment_single(ctr_type &ctr, std::true_type)
     {
-        if (++ctr[Position<N>()] != 0)
+        if (++std::get<N>(ctr) != 0)
             return;
 
         increment_single<N + 1>(
@@ -198,50 +204,52 @@ template <typename T, std::size_t K> class Counter<Array<T, K>>
     }
 
     template <std::size_t, std::size_t Blocks>
-    static inline void set_block(Array<ctr_type, Blocks> &, std::false_type)
+    static inline void set_block(
+        std::array<ctr_type, Blocks> &, std::false_type)
     {
     }
 
     template <std::size_t B, std::size_t Blocks>
-    static inline void set_block(Array<ctr_type, Blocks> &ctr, std::true_type)
+    static inline void set_block(
+        std::array<ctr_type, Blocks> &ctr, std::true_type)
     {
-        T m = ctr[Position<B - 1>()].back() & mask_lo_;
+        T m = std::get<B - 1>(ctr).back() & mask_lo_;
         m >>= sizeof(T) * 8 - 8;
         ++m;
         m <<= sizeof(T) * 8 - 8;
 
-        ctr[Position<B>()] = ctr[Position<B - 1>()];
-        ctr[Position<B>()].back() &= mask_hi_;
-        ctr[Position<B>()].back() ^= m;
+	std::get<B>(ctr) = std::get<B - 1>(ctr);
+	std::get<B>(ctr).back() &= mask_hi_;
+        std::get<B>(ctr).back() ^= m;
         set_block<B + 1>(ctr, std::integral_constant<bool, B + 1 < Blocks>());
     }
 
     template <std::size_t, std::size_t Blocks>
     static inline void increment_block(
-        Array<ctr_type, Blocks> &, std::false_type)
+        std::array<ctr_type, Blocks> &, std::false_type)
     {
     }
 
     template <std::size_t B, std::size_t Blocks>
     static inline void increment_block(
-        Array<ctr_type, Blocks> &ctr, std::true_type)
+        std::array<ctr_type, Blocks> &ctr, std::true_type)
     {
-        increment_block_ctr(ctr[Position<B>()]);
+        increment_block_ctr(std::get<B>(ctr));
         increment_block<B + 1>(
             ctr, std::integral_constant<bool, B + 1 < Blocks>());
     }
 
     template <std::size_t, std::size_t Blocks>
     static inline void increment_block(
-        Array<ctr_type, Blocks> &, T, std::false_type)
+        std::array<ctr_type, Blocks> &, T, std::false_type)
     {
     }
 
     template <std::size_t B, std::size_t Blocks>
     static inline void increment_block(
-        Array<ctr_type, Blocks> &ctr, T nskip, std::true_type)
+        std::array<ctr_type, Blocks> &ctr, T nskip, std::true_type)
     {
-        increment_block_ctr(ctr[Position<B>()], nskip);
+        increment_block_ctr(std::get<B>(ctr), nskip);
         increment_block<B + 1>(
             ctr, nskip, std::integral_constant<bool, B + 1 < Blocks>());
     }
@@ -271,7 +279,7 @@ template <typename T, std::size_t K> class Counter<Array<T, K>>
     template <std::size_t N>
     static inline void increment_block_single(ctr_type &ctr, std::true_type)
     {
-        if (++ctr[Position<N>()] != 0)
+        if (++std::get<N>(ctr) != 0)
             return;
 
         increment_block_single<N + 1>(

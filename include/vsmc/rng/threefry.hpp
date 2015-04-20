@@ -65,7 +65,8 @@ namespace vsmc
 namespace internal
 {
 
-template <typename> struct ThreefryKSConstantValue;
+template <typename>
+struct ThreefryKSConstantValue;
 
 template <>
 struct ThreefryKSConstantValue<uint32_t>
@@ -134,31 +135,34 @@ VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(uint64_t, 4, 5, 1, 12)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(uint64_t, 4, 6, 1, 22)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(uint64_t, 4, 7, 1, 32)
 
-template <typename ResultType, unsigned N> struct ThreefryRotateImpl;
+template <typename ResultType, unsigned N>
+struct ThreefryRotateImpl;
 
-template <unsigned N> struct ThreefryRotateImpl<uint32_t, N> {
+template <unsigned N>
+struct ThreefryRotateImpl<uint32_t, N> {
     static uint32_t eval(uint32_t x) { return x << N | x >> (32 - N); }
 };
 
-template <unsigned N> struct ThreefryRotateImpl<uint64_t, N> {
+template <unsigned N>
+struct ThreefryRotateImpl<uint64_t, N> {
     static uint64_t eval(uint64_t x) { return x << N | x >> (64 - N); }
 };
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
 struct ThreefryRotate {
-    static void eval(Array<ResultType, K> &) {}
+    static void eval(std::array<ResultType, K> &) {}
 };
 
 template <typename ResultType, std::size_t N>
 struct ThreefryRotate<ResultType, 2, N, true> {
-    static void eval(Array<ResultType, 2> &state)
+    static void eval(std::array<ResultType, 2> &state)
     {
-        state[Position<0>()] += state[Position<1>()];
-        state[Position<1>()] =
+        std::get<0>(state) += std::get<1>(state);
+        std::get<1>(state) =
             ThreefryRotateImpl<ResultType,
                 ThreefryRotateConstantValue<ResultType, 2, r_,
-                                   0>::value>::eval(state[Position<1>()]);
-        state[Position<1>()] ^= state[Position<0>()];
+                                   0>::value>::eval(std::get<1>(state));
+        std::get<1>(state) ^= std::get<0>(state);
     }
 
     private:
@@ -167,21 +171,21 @@ struct ThreefryRotate<ResultType, 2, N, true> {
 
 template <typename ResultType, std::size_t N>
 struct ThreefryRotate<ResultType, 4, N, true> {
-    static void eval(Array<ResultType, 4> &state)
+    static void eval(std::array<ResultType, 4> &state)
     {
-        state[Position<0>()] += state[Position<i0_>()];
-        state[Position<i0_>()] =
+        std::get<0>(state) += std::get<i0_>(state);
+        std::get<i0_>(state) =
             ThreefryRotateImpl<ResultType,
                 ThreefryRotateConstantValue<ResultType, 4, r_,
-                                   0>::value>::eval(state[Position<i0_>()]);
-        state[Position<i0_>()] ^= state[Position<0>()];
+                                   0>::value>::eval(std::get<i0_>(state));
+        std::get<i0_>(state) ^= std::get<0>(state);
 
-        state[Position<2>()] += state[Position<i2_>()];
-        state[Position<i2_>()] =
+        std::get<2>(state) += std::get<i2_>(state);
+        std::get<i2_>(state) =
             ThreefryRotateImpl<ResultType,
                 ThreefryRotateConstantValue<ResultType, 4, r_,
-                                   1>::value>::eval(state[Position<i2_>()]);
-        state[Position<i2_>()] ^= state[Position<2>()];
+                                   1>::value>::eval(std::get<i2_>(state));
+        std::get<i2_>(state) ^= std::get<2>(state);
     }
 
     private:
@@ -193,19 +197,20 @@ struct ThreefryRotate<ResultType, 4, N, true> {
 template <typename ResultType, std::size_t K, std::size_t N,
     bool = (N % 4 == 0)>
 struct ThreefryInsertKey {
-    static void eval(Array<ResultType, K> &, const Array<ResultType, K + 1> &)
+    static void eval(
+        std::array<ResultType, K> &, const std::array<ResultType, K + 1> &)
     {
     }
 }; // struct ThreefryInsertKey
 
 template <typename ResultType, std::size_t N>
 struct ThreefryInsertKey<ResultType, 2, N, true> {
-    static void eval(
-        Array<ResultType, 2> &state, const Array<ResultType, 3> &par)
+    static void eval(std::array<ResultType, 2> &state,
+        const std::array<ResultType, 3> &par)
     {
-        state[Position<0>()] += par[Position<i0_>()];
-        state[Position<1>()] += par[Position<i1_>()];
-        state[Position<1>()] += inc_;
+        std::get<0>(state) += std::get<i0_>(par);
+        std::get<1>(state) += std::get<i1_>(par);
+        std::get<1>(state) += inc_;
     }
 
     private:
@@ -216,14 +221,14 @@ struct ThreefryInsertKey<ResultType, 2, N, true> {
 
 template <typename ResultType, std::size_t N>
 struct ThreefryInsertKey<ResultType, 4, N, true> {
-    static void eval(
-        Array<ResultType, 4> &state, const Array<ResultType, 5> &par)
+    static void eval(std::array<ResultType, 4> &state,
+        const std::array<ResultType, 5> &par)
     {
-        state[Position<0>()] += par[Position<i0_>()];
-        state[Position<1>()] += par[Position<i1_>()];
-        state[Position<2>()] += par[Position<i2_>()];
-        state[Position<3>()] += par[Position<i3_>()];
-        state[Position<3>()] += inc_;
+        std::get<0>(state) += std::get<i0_>(par);
+        std::get<1>(state) += std::get<i1_>(par);
+        std::get<2>(state) += std::get<i2_>(par);
+        std::get<3>(state) += std::get<i3_>(par);
+        std::get<3>(state) += inc_;
     }
 
     private:
@@ -271,9 +276,9 @@ class ThreefryEngine
 {
     public:
     typedef ResultType result_type;
-    typedef Array<ResultType, K> buffer_type;
-    typedef Array<ResultType, K> ctr_type;
-    typedef Array<ResultType, K> key_type;
+    typedef std::array<ResultType, K> buffer_type;
+    typedef std::array<ResultType, K> ctr_type;
+    typedef std::array<ResultType, K> key_type;
 
     private:
     typedef Counter<ctr_type> counter;
@@ -464,7 +469,7 @@ class ThreefryEngine
 
     private:
     ctr_type ctr_;
-    Array<ResultType, K + 1> par_;
+    std::array<ResultType, K + 1> par_;
     buffer_type buffer_;
     std::size_t index_;
 
@@ -494,12 +499,16 @@ class ThreefryEngine
         par_xor<0>(key, std::integral_constant<bool, 0 < K>());
     }
 
-    template <std::size_t> void par_xor(const key_type &, std::false_type) {}
-
-    template <std::size_t N> void par_xor(const key_type &key, std::true_type)
+    template <std::size_t>
+    void par_xor(const key_type &, std::false_type)
     {
-        par_[Position<N>()] = key[Position<N>()];
-        par_.back() ^= key[Position<N>()];
+    }
+
+    template <std::size_t N>
+    void par_xor(const key_type &key, std::true_type)
+    {
+        std::get<N>(par_) = std::get<N>(key);
+        par_.back() ^= std::get<N>(key);
         par_xor<N + 1>(key, std::integral_constant<bool, N + 1 < K>());
     }
 }; // class ThreefryEngine

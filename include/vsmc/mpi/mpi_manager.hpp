@@ -50,7 +50,7 @@ inline void mpi_init_seed(ResultType &, IntType1 D, IntType2 R)
 }
 
 template <typename T, std::size_t K, typename IntType1, typename IntType2>
-inline void mpi_init_seed(vsmc::Array<T, K> &s, IntType1, IntType2 R)
+inline void mpi_init_seed(std::array<T, K> &s, IntType1, IntType2 R)
 {
     s.back() = static_cast<Seed::skip_type>(R);
 }
