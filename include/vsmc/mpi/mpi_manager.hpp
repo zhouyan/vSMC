@@ -102,6 +102,9 @@ template <typename ID>
 class MPICommunicator
 {
     public:
+    MPICommunicator(const MPICommunicator<ID> &) = delete;
+    MPICommunicator<ID> &operator=(const MPICommunicator<ID> &) = delete;
+
     static MPICommunicator<ID> &instance()
     {
         static MPICommunicator<ID> comm;
@@ -117,8 +120,6 @@ class MPICommunicator
     MPI_Comm comm_;
 
     MPICommunicator() : comm_(MPI_COMM_WORLD) {}
-    MPICommunicator(const MPICommunicator<ID> &);
-    MPICommunicator<ID> &operator=(const MPICommunicator<ID> &);
 }; // class MPICommunicator
 
 } // namespace vsmc

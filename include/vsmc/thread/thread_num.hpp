@@ -43,6 +43,9 @@ namespace vsmc
 class ThreadNum
 {
     public:
+    ThreadNum(const ThreadNum &) = delete;
+    ThreadNum &operator=(const ThreadNum &) = delete;
+
     static ThreadNum &instance()
     {
         static ThreadNum num;
@@ -113,9 +116,6 @@ class ThreadNum
             thread_num_ = num > 0 ? static_cast<std::size_t>(num) : 1;
         }
     }
-
-    ThreadNum(const ThreadNum &) = delete;
-    ThreadNum &operator=(const ThreadNum &) = delete;
 }; // class ThreadInfo
 
 } // namespace vsmc

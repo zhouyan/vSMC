@@ -135,6 +135,10 @@ class CLManager
     public:
     typedef ID cl_id;
 
+    CLManager(const CLManager<ID> &) = delete;
+
+    CLManager<ID> &operator=(const CLManager<ID> &) = delete;
+
     /// \brief Get an instance of the manager singleton
     static CLManager<ID> &instance()
     {
@@ -515,10 +519,6 @@ class CLManager
     {
         setup_cl_manager(setup_default_.device_type());
     }
-
-    CLManager(const CLManager<ID> &);
-
-    CLManager<ID> &operator=(const CLManager<ID> &);
 
     void check_opencl_version()
     {

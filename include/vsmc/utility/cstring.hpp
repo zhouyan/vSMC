@@ -669,11 +669,11 @@ inline void memcpy_l_switch(
 class CStringNonTemporalThreshold
 {
     public:
+    CStringNonTemporalThreshold(const CStringNonTemporalThreshold &) = delete;
+    CStringNonTemporalThreshold &operator=(
+        const CStringNonTemporalThreshold &) = delete;
+
     /// \brief Singleton instance
-    ///
-    /// \note If any `memcpy` functions in this module is to be called from
-    /// multiple thread, then this member function need to be called at least
-    /// once before entering threads.
     static CStringNonTemporalThreshold &instance()
     {
         static CStringNonTemporalThreshold ntt;
@@ -735,11 +735,6 @@ class CStringNonTemporalThreshold
         if (threshold_ == 0)
             set();
     }
-
-    CStringNonTemporalThreshold(const CStringNonTemporalThreshold &);
-
-    CStringNonTemporalThreshold &operator=(
-        const CStringNonTemporalThreshold &);
 }; // class CStringNonTemporalThreshold
 
 namespace internal
@@ -960,6 +955,10 @@ namespace internal
 class CStringRuntimeDispatch
 {
     public:
+    CStringRuntimeDispatch(const CStringRuntimeDispatch &) = delete;
+    CStringRuntimeDispatch &operator=(
+        const CStringRuntimeDispatch &) = delete;
+
     static CStringRuntimeDispatch &instance()
     {
         static CStringRuntimeDispatch dispatch;
@@ -1018,10 +1017,6 @@ class CStringRuntimeDispatch
         }
 #endif // VSMC_HAS_AVX
     }
-
-    CStringRuntimeDispatch(const CStringRuntimeDispatch &);
-
-    CStringRuntimeDispatch &operator=(const CStringRuntimeDispatch &);
 }; // class CStringRuntimeDispatc
 
 } // namespace vsmc::internal

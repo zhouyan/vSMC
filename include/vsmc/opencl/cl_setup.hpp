@@ -46,6 +46,9 @@ class CLSetup
     public:
     typedef ID id;
 
+    CLSetup(const CLSetup<ID> &) = delete;
+    CLSetup<ID> &operator=(const CLSetup<ID> &) = delete;
+
     static CLSetup<ID> &instance()
     {
         static CLSetup<ID> config;
@@ -126,9 +129,6 @@ class CLSetup
         , platform_(default_)
     {
     }
-
-    CLSetup(const CLSetup<ID> &);
-    CLSetup<ID> &operator=(const CLSetup<ID> &);
 
     bool check_name(const std::string &name, const std::string &stored) const
     {

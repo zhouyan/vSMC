@@ -94,6 +94,11 @@ class SeedGenerator
     typedef ResultType result_type;
     typedef ResultType skip_type;
 
+    SeedGenerator(const SeedGenerator<ID, ResultType> &) = delete;
+
+    SeedGenerator<ID, ResultType> &operator=(
+        const SeedGenerator<ID, ResultType> &) = delete;
+
     static SeedGenerator<ID, ResultType> &instance()
     {
         static SeedGenerator<ID, ResultType> seed;
@@ -207,11 +212,6 @@ class SeedGenerator
 
         modulo(divisor_, remainder_);
     }
-
-    SeedGenerator(const SeedGenerator<ID, ResultType> &);
-
-    SeedGenerator<ID, ResultType> &operator=(
-        const SeedGenerator<ID, ResultType> &);
 }; // class SeedGenerator
 
 /// \brief Seed generator counters
@@ -240,6 +240,11 @@ class SeedGenerator<ID, std::array<T, K>>
     public:
     typedef std::array<T, K> result_type;
     typedef T skip_type;
+
+    SeedGenerator(const SeedGenerator<ID, std::array<T, K>> &) = delete;
+
+    SeedGenerator<ID, std::array<T, K>> &operator=(
+        const SeedGenerator<ID, std::array<T, K>> &) = delete;
 
     static SeedGenerator<ID, std::array<T, K>> &instance()
     {
@@ -334,12 +339,6 @@ class SeedGenerator<ID, std::array<T, K>>
         seed_max_.fill(0);
         modulo(divisor_, remainder_);
     }
-
-    SeedGenerator<ID, std::array<T, K>>(
-        const SeedGenerator<ID, std::array<T, K>> &);
-
-    SeedGenerator<ID, std::array<T, K>> &operator=(
-        const SeedGenerator<ID, std::array<T, K>> &);
 }; // class SeedGenerator
 
 /// \brief The default Seed type
