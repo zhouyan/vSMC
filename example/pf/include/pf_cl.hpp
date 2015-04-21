@@ -173,7 +173,7 @@ inline void cv_do(vsmc::Sampler<cv> &sampler, vsmc::ResampleScheme res,
     ss << name;
 #endif
     std::string rname(ss.str());
-    std::string est_file_name(argv[2] + rname + ".tsv");
+    std::string est_file_name(argv[2] + rname + ".txt");
     std::ofstream est_file;
     est_file.open(est_file_name.c_str());
     est_file << sampler << std::endl;

@@ -49,7 +49,7 @@ inline void cv_do(
     sampler.initialize(argv[1]);
     sampler.iterate(DataNum - 1);
 
-    std::string est_file_name(argv[2] + name + ".tsv");
+    std::string est_file_name(argv[2] + name + ".txt");
     std::ofstream est_file;
     est_file.open(est_file_name.c_str());
     est_file << sampler << std::endl;
