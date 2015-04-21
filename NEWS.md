@@ -45,6 +45,10 @@ changes.
 * `Progress` is no longer a class template.
 * The Integrate module is removed.
 
+## Minor changes
+
+* `Monitor::record_data` gets an overload version that return the row pointer.
+
 #Changes since v1 .1.1
 
 ## New features

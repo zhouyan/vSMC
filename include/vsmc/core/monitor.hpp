@@ -222,6 +222,13 @@ class Monitor
     /// matrix)
     const double *record_data() const { return record_.data(); }
 
+    /// \brief Read only access to the raw data of records for a given
+    /// Monitor iteration
+    const double *record_data(std::size_t iter) const
+    {
+        return record_.data() + iter * dim_;
+    }
+
     /// \brief Read the record history for a given variable through an output
     /// iterator
     template <typename OutputIter>
