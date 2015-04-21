@@ -53,9 +53,6 @@
 /// \defgroup Adapter Adapter
 /// \brief Adapter class templates for constructing concrete objects
 
-/// \defgroup Integrate Integration
-/// \brief Numerical integration
-
 /// \defgroup MPI Message Passing Interface
 /// \brief Parallel samplers using MPI
 
@@ -196,7 +193,6 @@
 #include <vsmc/internal/config.hpp>
 
 #include <vsmc/core/core.hpp>
-#include <vsmc/integrate/integrate.hpp>
 #include <vsmc/math/math.hpp>
 #include <vsmc/resample/resample.hpp>
 #include <vsmc/rng/rng.hpp>

@@ -33,7 +33,6 @@
 #define VSMC_CORE_MONITOR_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/integrate/is_integrate.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(func)                            \
@@ -305,9 +304,19 @@ class Monitor
         const std::size_t N = static_cast<std::size_t>(particle.size());
         buffer_.resize(N * dim_);
         eval_(iter, dim_, particle, buffer_.data());
-        is_integrate_(static_cast<ISIntegrate::size_type>(N),
-            static_cast<ISIntegrate::size_type>(dim_), buffer_.data(),
-            particle.weight_set().weight_data(), result_.data());
+#ifdef VSMC_CBLAS_INT
+        ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,
+            static_cast<VSMC_CBLAS_INT>(dim_), static_cast<VSMC_CBLAS_INT>(N),
+            1, buffer_.data(), static_cast<VSMC_CBLAS_INT>(dim_),
+            particle.weight_set().weight_data(), 1, 0, result_.data(), 1);
+#else
+        const double *wptr = particle.weight_set().weight_data();
+        const double *bptr = buffer_.data();
+        std::fill(result_.begin(), result_.end(), 0.0);
+        for (std::size_t i = 0; i != N; ++i)
+            for (std::size_t d = 0; d != dim_; ++d, ++bptr)
+                result_[d] += particle.weight_set().weight(i) * (*bptr);
+#endif
         push_back(iter);
     }
 
@@ -338,7 +347,6 @@ class Monitor
     std::vector<double, AlignedAllocator<double>> record_;
     std::vector<double, AlignedAllocator<double>> result_;
     std::vector<double, AlignedAllocator<double>> buffer_;
-    ISIntegrate is_integrate_;
 
     void push_back(std::size_t iter)
     {

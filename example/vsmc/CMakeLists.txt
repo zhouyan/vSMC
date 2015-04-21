@@ -52,11 +52,6 @@ ADD_HEADER_EXECUTABLE(vsmc/gcd/dispatch_object   ${GCD_FOUND} "GCD")
 ADD_HEADER_EXECUTABLE(vsmc/gcd/dispatch_queue    ${GCD_FOUND} "GCD")
 ADD_HEADER_EXECUTABLE(vsmc/gcd/dispatch_source   ${GCD_FOUND} "GCD")
 
-ADD_HEADER_EXECUTABLE(vsmc/integrate/integrate TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/integrate/is_integrate            TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/integrate/nintegrate_base         TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/integrate/nintegrate_newton_cotes TRUE)
-
 ADD_HEADER_EXECUTABLE(vsmc/internal/assert   TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/internal/common   TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/internal/compiler TRUE)
