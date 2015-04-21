@@ -2,7 +2,9 @@
 
 ## Important changes
 
-The library is now C++11 only.
+The library is now C++11 only. GCC 4.8.1, Clang 3.4, Intel C++ 2015 all
+provides full C++11 support. MSVC is the only one lagging behind. At the
+moment, MSVC 2015 support is considered to be the minimum.
 
 * Enabled C++11 core language features (based on [LLVM coding standard][LLVM
   CS]:
@@ -28,6 +30,9 @@ The library is now C++11 only.
   - Defaulted and deleted functions: [N2346][N2346]
   - Initializer lists: [N2627][N2627]
   - Delegating constructors: [N1986][N1986]
+  - Template alias: [N2258][N2258]
+  - `constexpr`: [N2235][N2235]
+  - `noexcept`: [N3050][N3050]
 
 * The C++11 standard library is used more freely. Mostly only restricted by the
   enabled C++11 core language features
@@ -123,23 +128,26 @@ changes.
 [jemalloc]: http://www.canonware.com/jemalloc/
 [LLVM CS]: http://llvm.org/docs/CodingStandards.html
 
-[N2118]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2118.html
 [N1720]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2004/n1720.html
-[N1984]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n1984.pdf
 [N1737]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2004/n1737.pdf
-[N2541]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2541.htm
-[N2927]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2009/n2927.pdf
-[N2343]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2343.pdf
 [N1757]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2005/n1757.html
+[N1984]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n1984.pdf
+[N1986]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n1986.pdf
+[N2118]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2118.html
+[N2235]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2235.pdf
+[N2242]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2242.pdf
+[N2258]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2258.pdf
+[N2343]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2343.pdf
+[N2346]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2346.htm
+[N2429]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2429.htm
 [N2431]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2431.pdf
+[N2437]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2437.pdf
+[N2541]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2541.htm
+[N2627]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2672.htm
 [N2657]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2657.htm
-[N2930]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2009/n2930.html
+[N2927]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2009/n2927.pdf
 [N2928]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2009/n2928.htm
+[N2930]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2009/n2930.html
+[N3050]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2010/n3050.html
 [N3206]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2010/n3206.htm
 [N3272]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2011/n3272.htm
-[N2429]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2429.htm
-[N2242]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2242.pdf
-[N2437]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2437.pdf
-[N2346]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2346.htm
-[N2627]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2672.htm
-[N1986]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n1986.pdf
