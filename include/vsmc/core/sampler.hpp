@@ -666,11 +666,11 @@ class Sampler
         for (const auto &m : monitor_) {
             if (m.second.iter_size() > 0) {
                 unsigned md = static_cast<unsigned>(m.second.dim());
-                for (unsigned i = 0; i != md; ++i) {
-                    if (m.second.name(i).empty())
-                        *first++ = m.second.name(i);
+                for (unsigned d = 0; d != md; ++d) {
+                    if (m.second.name(d).empty())
+                        *first++ = m.first + "." + internal::itos(d);
                     else
-                        *first++ = m.first + "." + internal::itos(i);
+                        *first++ = m.second.name(d);
                 }
             }
         }
@@ -727,32 +727,32 @@ class Sampler
         if (iter_size() == 0 || !os.good())
             return os;
 
-        std::size_t var_num_int = summary_header_size_int();
-        std::size_t dat_num_int = summary_data_size_int();
-        std::vector<std::string> header_int(var_num_int);
-        std::vector<std::size_t> data_int(dat_num_int);
+        std::size_t nrow = iter_size();
+
+        std::size_t ncol_int = summary_header_size_int();
+        std::vector<std::string> header_int(ncol_int);
+        std::vector<size_type> data_int(nrow * ncol_int);
         summary_header_int(header_int.begin());
         summary_data_int<RowMajor>(data_int.begin());
 
-        std::size_t var_num = summary_header_size();
-        std::size_t dat_num = summary_data_size();
-        std::vector<std::string> header(var_num);
-        std::vector<double> data(dat_num);
+        std::size_t ncol = summary_header_size();
+        std::vector<std::string> header(ncol);
+        std::vector<double> data(nrow * ncol);
         summary_header(header.begin());
         summary_data<RowMajor>(data.begin());
 
-        for (std::size_t i = 0; i != header_int.size(); ++i)
-            os << header_int[i] << sepchar;
-        for (std::size_t i = 0; i != header.size(); ++i)
-            os << header[i] << sepchar;
+        for (const auto &h : header_int)
+            os << h << sepchar;
+        for (const auto &h : header)
+            os << h << sepchar;
         os << '\n';
 
         std::size_t offset_int = 0;
         std::size_t offset = 0;
-        for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-            for (std::size_t i = 0; i != var_num_int; ++i)
+        for (std::size_t r = 0; r != nrow; ++r) {
+            for (std::size_t c = 0; c != ncol_int; ++c)
                 os << data_int[offset_int++] << sepchar;
-            for (std::size_t i = 0; i != var_num; ++i)
+            for (std::size_t c = 0; c != ncol; ++c)
                 os << data[offset++] << sepchar;
             os << '\n';
         }
@@ -831,20 +831,16 @@ class Sampler
 
     std::size_t do_move(std::size_t ia)
     {
-        for (auto &m : move_queue_) {
-            accept_history_[ia].push_back(m(iter_num_, particle_));
-            ++ia;
-        }
+        for (auto &m : move_queue_)
+            accept_history_[ia++].push_back(m(iter_num_, particle_));
 
         return ia;
     }
 
     std::size_t do_mcmc(std::size_t ia)
     {
-        for (auto &m : mcmc_queue_) {
-            accept_history_[ia].push_back(m(iter_num_, particle_));
-            ++ia;
-        }
+        for (auto &m : mcmc_queue_)
+            accept_history_[ia++].push_back(m(iter_num_, particle_));
 
         return ia;
     }
@@ -898,38 +894,36 @@ class Sampler
         double missing_data = std::numeric_limits<double>::quiet_NaN();
 
         std::size_t piter = 0;
-        std::vector<std::size_t> miter(monitor_.size(), 0);
+
+        std::vector<std::pair<std::size_t, const Monitor<T> *>> miter;
+        for (const auto &m : monitor_)
+            if (m.second.iter_size() > 0)
+                miter.push_back(std::make_pair(0, &m.second));
+
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
             *first++ = ess_history_[iter];
+
             if (path_.iter_size() > 0) {
-                if (piter == path_.iter_size() ||
-                    iter != path_.index(piter)) {
-                    *first++ = missing_data;
-                    *first++ = missing_data;
-                } else {
+                if (piter != path_.iter_size() &&
+                    iter == path_.index(piter)) {
                     *first++ = path_.integrand(piter);
                     *first++ = path_.grid(piter);
                     ++piter;
+                } else {
+                    *first++ = missing_data;
+                    *first++ = missing_data;
                 }
             }
 
-            std::size_t mm = 0;
-            for (const auto &m : monitor_) {
-                if (m.second.iter_size() > 0) {
-                    if (miter[mm] == m.second.iter_size() ||
-                        iter != m.second.index(miter[mm])) {
-                        for (std::size_t i = 0; i != m.second.dim();
-                             ++i, ++first) {
-                            *first = missing_data;
-                        }
-                    } else {
-                        for (std::size_t i = 0; i != m.second.dim();
-                             ++i, ++first) {
-                            *first = m.second.record(i, miter[mm]);
-                        }
-                    }
+            for (auto &m : miter) {
+                std::size_t md = m.second->dim();
+                if (m.first != m.second->iter_size() &&
+                    iter == m.second->index(m.first)) {
+                    first = std::copy_n(
+                        m.second->record_data(m.first++), md, first);
+                } else {
+                    first = std::fill_n(first, md, missing_data);
                 }
-                ++mm;
             }
         }
     }
@@ -940,42 +934,37 @@ class Sampler
         double missing_data = std::numeric_limits<double>::quiet_NaN();
 
         first = std::copy(ess_history_.begin(), ess_history_.end(), first);
+
         if (path_.iter_size() > 0) {
             std::size_t piter;
+
             piter = 0;
-            for (std::size_t iter = 0; iter != iter_size(); ++iter, ++first) {
-                if (piter == path_.iter_size() ||
-                    iter != path_.index(piter)) {
+            for (std::size_t iter = 0; iter != iter_size(); ++iter) {
+                if (piter != path_.iter_size() || iter == path_.index(piter))
+                    *first++ = path_.integrand(piter++);
+                else
                     *first = missing_data;
-                } else {
-                    *first = path_.integrand(piter);
-                    ++piter;
-                }
             }
+
             piter = 0;
-            for (std::size_t iter = 0; iter != iter_size(); ++iter, ++first) {
-                if (piter == path_.iter_size() ||
-                    iter != path_.index(piter)) {
+            for (std::size_t iter = 0; iter != iter_size(); ++iter) {
+                if (piter != path_.iter_size() || iter == path_.index(piter))
+                    *first++ = path_.grid(piter++);
+                else
                     *first = missing_data;
-                } else {
-                    *first = path_.grid(piter);
-                    ++piter;
-                }
             }
         }
 
         for (const auto &m : monitor_) {
             if (m.second.iter_size() > 0) {
-                for (std::size_t i = 0; i != m.second.dim(); ++i) {
+                for (std::size_t d = 0; d != m.second.dim(); ++d) {
                     std::size_t miter = 0;
-                    for (std::size_t iter = 0; iter != iter_size();
-                         ++iter, ++first) {
-                        if (miter == m.second.iter_size() ||
-                            iter != m.second.index(miter)) {
-                            *first = missing_data;
+                    for (std::size_t iter = 0; iter != iter_size(); ++iter) {
+                        if (miter != m.second.iter_size() ||
+                            iter == m.second.index(miter)) {
+                            *first++ = m.second.record(d, miter++);
                         } else {
-                            *first = m.second.record(i, miter);
-                            ++miter;
+                            *first++ = missing_data;
                         }
                     }
                 }
