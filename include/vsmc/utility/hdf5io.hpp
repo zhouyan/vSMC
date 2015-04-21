@@ -706,11 +706,8 @@ inline void hdf5store(const StateTuple<RowMajor, T, Types...> &state,
     static constexpr const std::size_t dim = sizeof...(Types) + 1;
     std::vector<std::string> vnames;
     vnames.reserve(dim);
-    for (std::size_t i = 0; i != dim; ++i) {
-        std::stringstream ss;
-        ss << 'V' << i;
-        vnames.push_back(ss.str());
-    }
+    for (std::size_t i = 0; i != dim; ++i)
+        vnames.push_back("V" + internal::itos(i));
 
     std::tuple<std::vector<T>, std::vector<Types>...> data_vec;
     internal::hdf5_tuple_vector_resize(
@@ -735,11 +732,8 @@ inline void hdf5store(const StateTuple<ColMajor, T, Types...> &state,
     static constexpr const std::size_t dim = sizeof...(Types) + 1;
     std::vector<std::string> vnames;
     vnames.reserve(dim);
-    for (std::size_t i = 0; i != dim; ++i) {
-        std::stringstream ss;
-        ss << 'V' << i;
-        vnames.push_back(ss.str());
-    }
+    for (std::size_t i = 0; i != dim; ++i)
+        vnames.push_back("V" + internal::itos(i));
 
     hdf5store_list(state.size(), file_name, data_name, state.data(),
         vnames.data(), append);

@@ -73,6 +73,45 @@
 namespace vsmc
 {
 
+namespace internal
+{
+
+template <typename UIntType>
+inline std::string itos(UIntType i, std::true_type)
+{
+    if (i == 0)
+        return std::string("0");
+
+    char str[24] = {0};
+    std::size_t n = 0;
+    while (i > 0) {
+        str[n++] = '0' + i % 10;
+        i /= 10;
+    }
+    std::reverse(str, str + n);
+
+    return std::string(str);
+}
+
+template <typename IntType>
+inline std::string itos(IntType i, std::false_type)
+{
+    typedef typename std::make_unsigned<IntType>::type uint_type;
+
+    if (i < 0)
+        return "-" + itos(static_cast<uint_type>(-i));
+
+    return itos(static_cast<uint_type>(i));
+}
+
+template <typename IntType>
+inline std::string itos(IntType i)
+{
+    return itos(i, std::is_unsigned<IntType>());
+}
+
+} // namespace vsmc::internal
+
 template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)

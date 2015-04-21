@@ -205,15 +205,13 @@ class Sampler
         size_history_.reserve(num);
         ess_history_.reserve(num);
         resampled_history_.reserve(num);
-        for (std::size_t i = 0; i != accept_history_.size(); ++i)
-            accept_history_[i].reserve(num);
+        for (auto &a : accept_history_)
+            a.reserve(num);
         if (!path_.empty())
             path_.reserve(num);
-        for (typename monitor_map_type::iterator m = monitor_.begin();
-             m != monitor_.end(); ++m) {
-            if (!m->second.empty())
-                m->second.reserve(num);
-        }
+        for (auto &m : monitor_)
+            if (!m.second.empty())
+                m.second.reserve(num);
     }
 
     /// \brief Number of iterations (including initialization)
@@ -631,11 +629,9 @@ class Sampler
         std::size_t header_size = 1;
         if (path_.iter_size() > 0)
             header_size += 2;
-        for (typename monitor_map_type::const_iterator m = monitor_.begin();
-             m != monitor_.end(); ++m) {
-            if (m->second.iter_size() > 0)
-                header_size += m->second.dim();
-        }
+        for (const auto &m : monitor_)
+            if (m.second.iter_size() > 0)
+                header_size += m.second.dim();
 
         return header_size;
     }
@@ -649,13 +645,8 @@ class Sampler
 
         *first++ = std::string("Size");
         *first++ = std::string("Resampled");
-
-        std::stringstream ss;
-        for (std::size_t i = 0; i != accept_history_.size(); ++i) {
-            ss.str(std::string());
-            ss << "Accept." << i;
-            *first++ = ss.str();
-        }
+        for (std::size_t i = 0; i != accept_history_.size(); ++i)
+            *first++ = "Accept." + internal::itos(i);
     }
 
     /// \brief Sampler summary header (floating point data)
@@ -672,19 +663,14 @@ class Sampler
             *first++ = std::string("Path.Grid");
         }
 
-        std::stringstream ss;
-        for (typename monitor_map_type::const_iterator m = monitor_.begin();
-             m != monitor_.end(); ++m) {
-            if (m->second.iter_size() > 0) {
-                unsigned mond = static_cast<unsigned>(m->second.dim());
-                for (unsigned i = 0; i != mond; ++i, ++first) {
-                    if (!m->second.name(i).empty()) {
-                        *first = m->second.name(i);
-                    } else {
-                        ss.str(std::string());
-                        ss << m->first << '.' << i;
-                        *first = ss.str();
-                    }
+        for (const auto &m : monitor_) {
+            if (m.second.iter_size() > 0) {
+                unsigned md = static_cast<unsigned>(m.second.dim());
+                for (unsigned i = 0; i != md; ++i) {
+                    if (m.second.name(i).empty())
+                        *first++ = m.second.name(i);
+                    else
+                        *first++ = m.first + "." + internal::itos(i);
                 }
             }
         }
@@ -815,9 +801,8 @@ class Sampler
         resampled_history_.clear();
         accept_history_.clear();
         path_.clear();
-        for (typename monitor_map_type::iterator m = monitor_.begin();
-             m != monitor_.end(); ++m)
-            m->second.clear();
+        for (auto &m : monitor_)
+            m.second.clear();
 
         iter_num_ = 0;
         particle_.weight_set().set_equal_weight();
@@ -846,11 +831,9 @@ class Sampler
 
     std::size_t do_move(std::size_t ia)
     {
-        for (
-            typename std::vector<move_type>::iterator m = move_queue_.begin();
-            m != move_queue_.end(); ++m, ++ia) {
-            std::size_t acc = (*m)(iter_num_, particle_);
-            accept_history_[ia].push_back(acc);
+        for (auto &m : move_queue_) {
+            accept_history_[ia].push_back(m(iter_num_, particle_));
+            ++ia;
         }
 
         return ia;
@@ -858,11 +841,9 @@ class Sampler
 
     std::size_t do_mcmc(std::size_t ia)
     {
-        for (
-            typename std::vector<mcmc_type>::iterator m = mcmc_queue_.begin();
-            m != mcmc_queue_.end(); ++m, ++ia) {
-            std::size_t acc = (*m)(iter_num_, particle_);
-            accept_history_[ia].push_back(acc);
+        for (auto &m : mcmc_queue_) {
+            accept_history_[ia].push_back(m(iter_num_, particle_));
+            ++ia;
         }
 
         return ia;
@@ -881,11 +862,9 @@ class Sampler
         if (!path_.empty() && stage == MonitorMCMC)
             path_.eval(iter_num_, particle_);
 
-        for (typename monitor_map_type::iterator m = monitor_.begin();
-             m != monitor_.end(); ++m) {
-            if (!m->second.empty())
-                m->second.eval(iter_num_, particle_, stage);
-        }
+        for (auto &m : monitor_)
+            if (!m.second.empty())
+                m.second.eval(iter_num_, particle_, stage);
     }
 
     template <typename OutputIter>
@@ -933,23 +912,24 @@ class Sampler
                     ++piter;
                 }
             }
+
             std::size_t mm = 0;
-            for (typename monitor_map_type::const_iterator m =
-                     monitor_.begin();
-                 m != monitor_.end(); ++m, ++mm) {
-                if (m->second.iter_size() > 0) {
-                    if (miter[mm] == m->second.iter_size() ||
-                        iter != m->second.index(miter[mm])) {
-                        for (std::size_t i = 0; i != m->second.dim();
-                             ++i, ++first)
+            for (const auto &m : monitor_) {
+                if (m.second.iter_size() > 0) {
+                    if (miter[mm] == m.second.iter_size() ||
+                        iter != m.second.index(miter[mm])) {
+                        for (std::size_t i = 0; i != m.second.dim();
+                             ++i, ++first) {
                             *first = missing_data;
+                        }
                     } else {
-                        for (std::size_t i = 0; i != m->second.dim();
-                             ++i, ++first)
-                            *first = m->second.record(i, miter[mm]);
-                        ++miter[mm];
+                        for (std::size_t i = 0; i != m.second.dim();
+                             ++i, ++first) {
+                            *first = m.second.record(i, miter[mm]);
+                        }
                     }
                 }
+                ++mm;
             }
         }
     }
@@ -959,8 +939,7 @@ class Sampler
     {
         double missing_data = std::numeric_limits<double>::quiet_NaN();
 
-        for (std::size_t iter = 0; iter != iter_size(); ++iter, ++first)
-            *first = ess_history_[iter];
+        first = std::copy(ess_history_.begin(), ess_history_.end(), first);
         if (path_.iter_size() > 0) {
             std::size_t piter;
             piter = 0;
@@ -984,18 +963,18 @@ class Sampler
                 }
             }
         }
-        for (typename monitor_map_type::const_iterator m = monitor_.begin();
-             m != monitor_.end(); ++m) {
-            if (m->second.iter_size() > 0) {
-                for (std::size_t i = 0; i != m->second.dim(); ++i) {
+
+        for (const auto &m : monitor_) {
+            if (m.second.iter_size() > 0) {
+                for (std::size_t i = 0; i != m.second.dim(); ++i) {
                     std::size_t miter = 0;
                     for (std::size_t iter = 0; iter != iter_size();
                          ++iter, ++first) {
-                        if (miter == m->second.iter_size() ||
-                            iter != m->second.index(miter)) {
+                        if (miter == m.second.iter_size() ||
+                            iter != m.second.index(miter)) {
                             *first = missing_data;
                         } else {
-                            *first = m->second.record(i, miter);
+                            *first = m.second.record(i, miter);
                             ++miter;
                         }
                     }
