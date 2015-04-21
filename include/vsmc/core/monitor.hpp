@@ -228,7 +228,7 @@ class Monitor
     void read_record(std::size_t id, OutputIter first) const
     {
         const std::size_t N = iter_size();
-        const double *riter = &record_[id];
+        const double *riter = record_.data() + id;
         for (std::size_t i = 0; i != N; ++i, ++first, riter += dim_)
             *first = *riter;
     }
@@ -260,7 +260,7 @@ class Monitor
         const std::size_t N = iter_size();
         if (Order == ColMajor) {
             for (std::size_t d = 0; d != dim_; ++d) {
-                const double *riter = &record_[d];
+                const double *riter = record_.data() + d;
                 for (std::size_t i = 0; i != N; ++i, ++first, riter += dim_)
                     *first = *riter;
             }

@@ -403,8 +403,8 @@ class StateCL
     state_pack_type state_pack(size_type id) const
     {
         state_pack_type pack(create_pack());
-        std::memcpy(
-            pack.data(), &state_tmp_host_[id * state_size_], state_size_);
+        std::memcpy(pack.data(), state_tmp_host_.data() + id * state_size_,
+            state_size_);
 
         return pack;
     }
