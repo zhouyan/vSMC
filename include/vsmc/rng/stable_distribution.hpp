@@ -329,7 +329,7 @@ class StableDistribution
     result_type standard_a(Eng &eng) const
     {
         std::uniform_real_distribution<result_type> runif(0, 1);
-        result_type w = -std::std::log(1 - runif(eng));
+        result_type w = -std::log(1 - runif(eng));
         result_type u = (runif(eng) - 0.5) * math::pi<result_type>();
         result_type a = 0.5 * std::log(1 + zeta_ * zeta_) / stability_;
         result_type b = std::sin(stability_ * (u + xi_));
