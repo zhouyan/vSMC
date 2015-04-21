@@ -4,7 +4,8 @@
 
 The library is now C++11 only.
 
-* Enabled C++11 features (based on [LLVM coding standard][LLVM CS]:
+* Enabled C++11 core language features (based on [LLVM coding standard][LLVM
+  CS]:
   - Rvalue references: [N2118][N2118]
       * But not rvalue references for `*this` or member qualifier
   - Static assert: [N1720][N1720]
@@ -27,6 +28,9 @@ The library is now C++11 only.
   - Defaulted and deleted functions: [N2346][N2346]
   - Initializer lists: [N2627][N2627]
   - Delegating constructors: [N1986][N1986]
+
+* The C++11 standard library is used more freely. Mostly only restricted by the
+  enabled C++11 core language features
 
 Most changes are internal. The API remain unchanged (in C++11 mode with
 supported compilers). The following are backward compatibility breaking
