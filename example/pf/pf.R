@@ -96,11 +96,12 @@ for (rowcol in c(".row", ".col", "")) {
         pf.r0.h5  <- paste(run, rowcol, ".r0", ".h5",  sep = "")
         pf.r1.h5  <- paste(run, rowcol, ".r1", ".h5",  sep = "")
         if (file.exists(pf.h5)) {
-            pf("h5", as.data.frame(h5read(pf.h5, "/Sampler")))
+            pf("h5",
+                as.data.frame(suppressWarnings(h5read(pf.h5, "/Sampler"))))
         } else if (file.exists(pf.r0.h5) && file.exists(pf.r1.h5)) {
             pf("h5",
-                as.data.frame(h5read(pf.r0.h5, "/Sampler")) +
-                as.data.frame(h5read(pf.r1.h5, "/Sampler")))
+                as.data.frame(suppressWarnings(h5read(pf.r0.h5, "/Sampler"))) +
+                as.data.frame(suppressWarnings(h5read(pf.r1.h5, "/Sampler"))))
         }
     }
 }
