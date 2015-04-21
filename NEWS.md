@@ -1,13 +1,41 @@
-# Changes since v1.2.0
+#Changes since v1 .2.0
 
-## Major change
+## Important changes
 
-The library will be C++11 only from this point.
+The library is now C++11 only.
+
+* Enabled C++11 features (based on [LLVM coding standard][LLVM CS]:
+  - Rvalue references: [N2118][N2118]
+      * But not rvalue references for `*this` or member qualifier
+  - Static assert: [N1720][N1720]
+  - `auto` type deduction: [N1984][N1984], [N1737][N1737]
+  - Trailing return types: [N2541][N2541]
+  - Lambdas: [N2927][N2927]
+      * But not lambdas with default arguments
+  - decltype: [N2343][N2343]
+  - Nested closing right angle brackets: [N1757][N1757]
+  - `nullptr`: [N2431][N2431]
+  - Local and unnamed types as template arguments: [N2657][N2657]
+  - Range-based for-loop: [N2930][N2930]
+      * But `{}` are required around inner `do {} while ()` loops.As a result,
+        `{}` are required around function-like macros inside range-based for
+        loops.
+  - `override` and `final`: [N2928][N2928], [N3206][N3206], [N3272][N3272]
+  - Atomic operations and the C++11 memory model: [N2429][N2429]
+  - Variadic templates: [N2242][N2242]
+  - Explicit conversion operators: [N2437][N2437]
+  - Defaulted and deleted functions: [N2346][N2346]
+  - Initializer lists: [N2627][N2627]
+  - Delegating constructors: [N1986][N1986]
+
+Most changes are internal. The API remain unchanged (in C++11 mode with
+supported compilers). The following are backward compatibility breaking
+changes.
 
 * `Array` is no more and its use has been replaced by `std::array`.
 * `Progress` is no longer a class template.
 
-# Changes since v1.1.1
+#Changes since v1 .1.1
 
 ## New features
 
@@ -47,7 +75,7 @@ The library will be C++11 only from this point.
 * Fix Residual and related resampling algorithms in situations where the new
   system has number of particles unequal to the old system.
 
-# Changes since v1.1.0
+#Changes since v1 .1.0
 
 ## Changed behaviors
 
@@ -62,7 +90,7 @@ The library will be C++11 only from this point.
 
 * `Sampler` now correctly clear size history during initialization
 
-# Changes since v1.0.0
+#Changes since v1 .0.0
 
 ## New features
 
@@ -89,3 +117,25 @@ The library will be C++11 only from this point.
 [HDF5]: http://www.hdfgroup.org/HDF5/
 [TBB]: https://www.threadingbuildingblocks.org
 [jemalloc]: http://www.canonware.com/jemalloc/
+[LLVM CS]: http://llvm.org/docs/CodingStandards.html
+
+[N2118]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2118.html
+[N1720]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2004/n1720.html
+[N1984]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n1984.pdf
+[N1737]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2004/n1737.pdf
+[N2541]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2541.htm
+[N2927]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2009/n2927.pdf
+[N2343]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2343.pdf
+[N1757]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2005/n1757.html
+[N2431]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2431.pdf
+[N2657]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2657.htm
+[N2930]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2009/n2930.html
+[N2928]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2009/n2928.htm
+[N3206]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2010/n3206.htm
+[N3272]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2011/n3272.htm
+[N2429]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2429.htm
+[N2242]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2242.pdf
+[N2437]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2437.pdf
+[N2346]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2346.htm
+[N2627]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2672.htm
+[N1986]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n1986.pdf
