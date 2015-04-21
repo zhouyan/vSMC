@@ -82,9 +82,9 @@ class WeightSetMPI : public WeightSetBase
     const double *resample_weight_data() const
     {
         resample_weight_.resize(resample_size_);
-        read_resample_weight(&resample_weight_[0]);
+        read_resample_weight(resample_weight_.data());
 
-        return world_.rank() == 0 ? &resample_weight_[0] : nullptr;
+        return world_.rank() == 0 ? resample_weight_.data() : nullptr;
     }
 
     /// \brief A duplicated MPI communicator for this weight set object
@@ -134,7 +134,7 @@ class WeightSetMPI : public WeightSetBase
     {
         const size_type N = static_cast<size_type>(this->size());
         std::vector<double, AlignedAllocator<double>> buffer(N);
-        double *const bptr = &buffer[0];
+        double *const bptr = buffer.data();
 
         if (use_log) {
             const double *const lwptr = this->log_weight_data();
@@ -183,7 +183,7 @@ class WeightSetMPI : public WeightSetBase
         std::vector<double, AlignedAllocator<double>> buffer;
         if (use_log) {
             buffer.resize(N);
-            double *const cptr = &buffer[0];
+            double *const cptr = buffer.data();
             for (size_type i = 0; i != N; ++i)
                 cptr[i] = std::exp(first[i]);
             bptr = cptr;
@@ -214,7 +214,7 @@ class WeightSetMPI : public WeightSetBase
     void gather_resample_weight() const
     {
         weight_.resize(this->size());
-        this->read_weight(&weight_[0]);
+        this->read_weight(weight_.data());
         if (world_.rank() == 0)
             ::boost::mpi::gather(world_, weight_, weight_all_, 0);
         else
@@ -328,7 +328,7 @@ class StateMPI : public BaseState
         if (world_.rank() == 0)
             std::copy(copy_from, copy_from + N, copy_from_.begin());
         ::boost::mpi::broadcast(world_, copy_from_, 0);
-        copy_this_node(N, &copy_from_[0], copy_recv_, copy_send_);
+        copy_this_node(N, copy_from_.data(), copy_recv_, copy_send_);
         copy_inter_node(copy_recv_, copy_send_);
         copy_post_processor_dispatch(has_copy_post_processor_<BaseState>());
     }
@@ -436,7 +436,7 @@ class StateMPI : public BaseState
             copy_from_this_[to] =
                 rank_this == rank(from) ? local_id(from) : to;
         }
-        BaseState::copy(this->size(), &copy_from_this_[0]);
+        BaseState::copy(this->size(), copy_from_this_.data());
 
         copy_recv.clear();
         copy_send.clear();

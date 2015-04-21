@@ -217,11 +217,11 @@ class Monitor
     }
 
     /// \brief Read only access to the raw data of the index vector
-    const std::size_t *index_data() const { return &index_[0]; }
+    const std::size_t *index_data() const { return index_.data(); }
 
     /// \brief Read only access to the raw data of records (a row major
     /// matrix)
-    const double *record_data() const { return &record_[0]; }
+    const double *record_data() const { return record_.data(); }
 
     /// \brief Read the record history for a given variable through an output
     /// iterator
@@ -295,9 +295,8 @@ class Monitor
         VSMC_RUNTIME_ASSERT_CORE_MONITOR_FUNCTOR(eval_, eval, EVALUATION);
 
         result_.resize(dim_);
-        double *const rptr = &result_[0];
         if (record_only_) {
-            eval_(iter, dim_, particle, rptr);
+            eval_(iter, dim_, particle, result_.data());
             push_back(iter);
 
             return;
@@ -305,11 +304,10 @@ class Monitor
 
         const std::size_t N = static_cast<std::size_t>(particle.size());
         buffer_.resize(N * dim_);
-        double *const bptr = &buffer_[0];
-        const double *const wptr = particle.weight_set().weight_data();
-        eval_(iter, dim_, particle, bptr);
+        eval_(iter, dim_, particle, buffer_.data());
         is_integrate_(static_cast<ISIntegrate::size_type>(N),
-            static_cast<ISIntegrate::size_type>(dim_), bptr, wptr, rptr);
+            static_cast<ISIntegrate::size_type>(dim_), buffer_.data(),
+            particle.weight_set().weight_data(), result_.data());
         push_back(iter);
     }
 

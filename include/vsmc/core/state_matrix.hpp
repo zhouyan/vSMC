@@ -151,9 +151,9 @@ class StateMatrixBase : public traits::DimTrait<Dim>
             i, pos);
     }
 
-    T *data() { return &data_[0]; }
+    T *data() { return data_.data(); }
 
-    const T *data() const { return &data_[0]; }
+    const T *data() const { return data_.data(); }
 
     template <typename OutputIter>
     void read_state(std::size_t pos, OutputIter first) const
@@ -340,7 +340,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     state_pack_type state_pack(size_type id) const
     {
         state_pack_type pack(this->create_pack());
-        std::copy(row_data(id), row_data(id + 1), &pack[0]);
+        std::copy(row_data(id), row_data(id + 1), pack.data());
 
         return pack;
     }
@@ -350,7 +350,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
             pack.size(), this->dim());
 
-        const T *ptr = &pack[0];
+        const T *ptr = pack.data();
         std::copy(ptr, ptr + this->dim(), row_data(id));
     }
 
@@ -359,7 +359,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
             pack.size(), this->dim());
 
-        const T *ptr = &pack[0];
+        const T *ptr = pack.data();
         std::move(ptr, ptr + this->dim(), row_data(id));
     }
 }; // class StateMatrix

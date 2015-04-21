@@ -177,8 +177,9 @@ class cv_init : public BASE_INIT<cv_state<Order>, cv_init<Order>>
     void post_processor(vsmc::Particle<cv> &particle)
     {
         log_weight_.resize(particle.size());
-        particle.value().read_state(vsmc::Position<LogL>(), &log_weight_[0]);
-        particle.weight_set().set_log_weight(&log_weight_[0]);
+        particle.value().read_state(
+            vsmc::Position<LogL>(), log_weight_.data());
+        particle.weight_set().set_log_weight(log_weight_.data());
     }
 
     private:
@@ -237,8 +238,9 @@ class cv_move
     void post_processor(std::size_t, vsmc::Particle<cv> &particle)
     {
         inc_weight_.resize(particle.size());
-        particle.value().read_state(vsmc::Position<LogL>(), &inc_weight_[0]);
-        particle.weight_set().add_log_weight(&inc_weight_[0]);
+        particle.value().read_state(
+            vsmc::Position<LogL>(), inc_weight_.data());
+        particle.weight_set().add_log_weight(inc_weight_.data());
     }
 
     private:

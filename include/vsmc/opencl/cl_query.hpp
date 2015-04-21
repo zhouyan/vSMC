@@ -132,7 +132,7 @@ class CLQuery
         std::vector<char *> bin_ptr(num);
         for (std::size_t i = 0; i != bin_vec.size(); ++i) {
             bin_vec[i].resize(bin_size[i]);
-            bin_ptr[i] = &bin_vec[i][0];
+            bin_ptr[i] = bin_vec[i].data();
         }
         program.getInfo(CL_PROGRAM_BINARIES, &bin_ptr);
 

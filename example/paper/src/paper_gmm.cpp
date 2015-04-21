@@ -438,7 +438,7 @@ class gmm_move_smc
              ++i) {
             incw_[i] = coeff * particle.value().state(i, 0).log_likelihood();
         }
-        particle.weight_set().add_log_weight(&incw_[0]);
+        particle.weight_set().add_log_weight(incw_.data());
 
         return 0;
     }

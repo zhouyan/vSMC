@@ -83,8 +83,8 @@ class cv : public cv_base
 
         obs_x_.resize(DataNum);
         obs_y_.resize(DataNum);
-        manager().write_buffer(obs_x_.data(), DataNum, &x[0]);
-        manager().write_buffer(obs_y_.data(), DataNum, &y[0]);
+        manager().write_buffer(obs_x_.data(), DataNum, x.data());
+        manager().write_buffer(obs_y_.data(), DataNum, y.data());
     }
 
     private:
@@ -119,8 +119,8 @@ class cv_init : public vsmc::InitializeCL<cv>
     void post_processor(vsmc::Particle<cv> &particle)
     {
         particle.value().manager().read_buffer(
-            log_weight_buffer_.data(), particle.size(), &log_weight_[0]);
-        particle.weight_set().set_log_weight(&log_weight_[0]);
+            log_weight_buffer_.data(), particle.size(), log_weight_.data());
+        particle.weight_set().set_log_weight(log_weight_.data());
     }
 
     private:
@@ -149,8 +149,8 @@ class cv_move : public vsmc::MoveCL<cv>
     void post_processor(std::size_t, vsmc::Particle<cv> &particle)
     {
         particle.value().manager().read_buffer(
-            inc_weight_buffer_.data(), particle.size(), &inc_weight_[0]);
-        particle.weight_set().add_log_weight(&inc_weight_[0]);
+            inc_weight_buffer_.data(), particle.size(), inc_weight_.data());
+        particle.weight_set().add_log_weight(inc_weight_.data());
     }
 
     private:

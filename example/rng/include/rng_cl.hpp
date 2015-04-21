@@ -192,10 +192,10 @@ inline void rng_cl_test(std::size_t N, cl::Program &program,
         std::cout << std::right << std::fixed << std::setw(20);
         std::cout << watch.milliseconds() << std::endl;
 
-        manager.read_buffer<cl_uint>(buffer_ui_0, N, &host_ui_0[0]);
-        manager.read_buffer<cl_uint>(buffer_ui_1, N, &host_ui_1[0]);
-        manager.read_buffer<cl_uint>(buffer_ui_2, N, &host_ui_2[0]);
-        manager.read_buffer<cl_uint>(buffer_ui_3, N, &host_ui_3[0]);
+        manager.read_buffer<cl_uint>(buffer_ui_0, N, host_ui_0.data());
+        manager.read_buffer<cl_uint>(buffer_ui_1, N, host_ui_1.data());
+        manager.read_buffer<cl_uint>(buffer_ui_2, N, host_ui_2.data());
+        manager.read_buffer<cl_uint>(buffer_ui_3, N, host_ui_3.data());
         values_ui.push_back(host_ui_0);
         values_ui.push_back(host_ui_1);
         values_ui.push_back(host_ui_2);

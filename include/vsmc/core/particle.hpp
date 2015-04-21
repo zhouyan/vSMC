@@ -205,37 +205,29 @@ class Particle
     ///     traits::ResampleRngTypeTrait)
     ///     * Call `op(N, resample_rng, weight, replication)`
     /// 4. Transform replication numbers into parent particle indices
-    ///     * (Allocat `size_type *copy_from` for size `N`)
-    ///     * (Create functor `r2c` according to
-    ///     traits::ResampleCopyFromReplicationTypeTrait)
-    ///     * Call `r2c(N, replication, copy_from)`
     /// 5. Set `const size_type *cptr` according to results of Step 2.
     ///     * If Step 3 and 4 are skipped according to Step 2, then set
     ///     `cptr = 0`. Otherwise,
     ///     * Set `cptr = copy_from`
     /// 6. Performing copying of particles
     ///     * Call `value.copy(N, cptr)`
-    /// 7. Performing post resampling weight manipulation
-    ///     * (Create functor `post` according to
-    ///     traits::ResamplePostCopyTypeTrait)
-    ///     * `post(weight_set)`
-    /// 8. `return resampled`
+    /// 7. `return resampled`
     bool resample(const resample_type &op, double threshold)
     {
         std::size_t N = static_cast<std::size_t>(weight_set_.resample_size());
         bool resampled = weight_set_.ess() < threshold * N;
         if (resampled) {
-            size_type *cptr = nullptr;
-            const double *const wptr = weight_set_.resample_weight_data();
-            if (wptr != nullptr) {
+            const double *const rwptr = weight_set_.resample_weight_data();
+            if (rwptr != nullptr) {
                 copy_from_.resize(N);
                 replication_.resize(N);
-                cptr = &copy_from_[0];
-                size_type *const rptr = &replication_[0];
-                op(N, N, resample_rng_, wptr, rptr);
-                internal::cfrp_trans(N, N, rptr, cptr);
+                op(N, N, resample_rng_, rwptr, replication_.data());
+                internal::cfrp_trans(
+                    N, N, replication_.data(), copy_from_.data());
+                value_.copy(N, copy_from_.data());
+            } else {
+                value_.copy(N, static_cast<const std::size_t *>(nullptr));
             }
-            value_.copy(N, cptr);
             weight_set_.set_equal_weight();
         }
 

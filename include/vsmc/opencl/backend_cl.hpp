@@ -370,31 +370,32 @@ class StateCL
         if (manager().opencl_version() >= 120) {
             state_idx_buffer_.resize(size_, CL_MEM_READ_ONLY |
                     CL_MEM_HOST_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
-                &state_idx_host_[0]);
+                state_idx_host_.data());
         } else {
             state_idx_buffer_.resize(size_,
-                CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, &state_idx_host_[0]);
+                CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+                state_idx_host_.data());
         }
 #else
         state_idx_buffer_.resize(size_,
-            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, &state_idx_host_[0]);
+            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, state_idx_host_.data());
 #endif
 
         state_tmp_host_.resize(size_ * state_size_);
         state_tmp_buffer_.resize(size_ * state_size_,
-            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, &state_tmp_host_[0]);
+            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, state_tmp_host_.data());
 
-        std::memset(&state_idx_host_[0], 0, size_);
+        std::memset(state_idx_host_.data(), 0, size_);
         manager().read_buffer(state_tmp_buffer_.data(), size_ * state_size_,
-            &state_tmp_host_[0]);
+            state_tmp_host_.data());
     }
 
     void copy_post_processor()
     {
         manager().write_buffer(
-            state_idx_buffer_.data(), size_, &state_idx_host_[0]);
+            state_idx_buffer_.data(), size_, state_idx_host_.data());
         manager().write_buffer(state_tmp_buffer_.data(), size_ * state_size_,
-            &state_tmp_host_[0]);
+            state_tmp_host_.data());
         copy_(state_idx_buffer_.data(), state_tmp_buffer_.data(),
             state_buffer_.data());
     }
@@ -403,7 +404,7 @@ class StateCL
     {
         state_pack_type pack(create_pack());
         std::memcpy(
-            &pack[0], &state_tmp_host_[id * state_size_], state_size_);
+            pack.data(), &state_tmp_host_[id * state_size_], state_size_);
 
         return pack;
     }
@@ -415,7 +416,7 @@ class StateCL
 
         state_idx_host_[id] = 1;
         std::memcpy(
-            &state_tmp_host_[id * state_size_], &pack[0], state_size_);
+            state_tmp_host_[id * state_size_], &pack.data(), state_size_);
     }
 
     CLConfigure &copy_configure() { return copy_.configure(); }
@@ -544,7 +545,7 @@ class InitializeCL
         Particle<T> &particle, const ::cl::Buffer &accept_buffer)
     {
         particle.value().manager().read_buffer(
-            accept_buffer, particle.size(), &accept_host_[0]);
+            accept_buffer, particle.size(), accept_host_.data());
 
         return static_cast<std::size_t>(std::accumulate(accept_host_.begin(),
             accept_host_.end(), static_cast<::cl_ulong>(0)));
@@ -564,14 +565,14 @@ class InitializeCL
         if (particle.value().manager().opencl_version() >= 120) {
             accept_buffer_.resize(particle.size(), CL_MEM_READ_WRITE |
                     CL_MEM_HOST_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                &accept_host_[0]);
+                accept_host_.data());
         } else {
             accept_buffer_.resize(particle.size(),
-                CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+                CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, accept_host_.data());
         }
 #else
         accept_buffer_.resize(particle.size(),
-            CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+            CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, accept_host_.data());
 #endif
         cl_set_kernel_args(kernel_, 0, particle.value().state_buffer().data(),
             accept_buffer_.data());
@@ -635,7 +636,7 @@ class MoveCL
         Particle<T> &particle, const ::cl::Buffer &accept_buffer)
     {
         particle.value().manager().read_buffer(
-            accept_buffer, particle.size(), &accept_host_[0]);
+            accept_buffer, particle.size(), accept_host_.data());
 
         return static_cast<std::size_t>(std::accumulate(accept_host_.begin(),
             accept_host_.end(), static_cast<::cl_ulong>(0)));
@@ -656,14 +657,14 @@ class MoveCL
         if (particle.value().manager().opencl_version() >= 120) {
             accept_buffer_.resize(particle.size(), CL_MEM_READ_WRITE |
                     CL_MEM_HOST_READ_ONLY | CL_MEM_USE_HOST_PTR,
-                &accept_host_[0]);
+                accept_host_.data());
         } else {
             accept_buffer_.resize(particle.size(),
-                CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+                CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, accept_host_.data());
         }
 #else
         accept_buffer_.resize(particle.size(),
-            CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, &accept_host_[0]);
+            CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, accept_host_.data());
 #endif
         cl_set_kernel_args(kernel_, 0, static_cast<::cl_ulong>(iter),
             particle.value().state_buffer().data(), accept_buffer_.data());

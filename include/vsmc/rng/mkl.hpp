@@ -332,16 +332,16 @@ struct MKLSkipAheadForce {
         if (nskip < buffer_size_) {
             if (buffer_.size() < nskip)
                 buffer_.resize(nskip);
-            uniform_bits_(stream, nskip, &buffer_[0]);
+            uniform_bits_(stream, nskip, buffer_.data());
         } else {
             buffer_.resize(buffer_size_);
             size_type repeat = nskip / buffer_size_;
             size_type remain = nskip - repeat * buffer_size_;
             for (size_type r = 1; r != repeat + 1; ++r) {
                 size_type n = r * buffer_size_;
-                uniform_bits_(stream, n, &buffer_[0]);
+                uniform_bits_(stream, n, buffer_.data());
             }
-            uniform_bits_(stream, remain, &buffer_[0]);
+            uniform_bits_(stream, remain, buffer_.data());
         }
     }
 
@@ -570,7 +570,7 @@ class MKLEngine
     {
         if (index_ == buffer_size_) {
             buffer_.resize(static_cast<std::size_t>(buffer_size_));
-            uniform_bits_(stream_, buffer_size_, &buffer_[0]);
+            uniform_bits_(stream_, buffer_size_, buffer_.data());
             index_ = 0;
         }
 
@@ -679,7 +679,7 @@ class MKLDistribution
         if (index_ == buffer_size_) {
             buffer_.resize(static_cast<std::size_t>(buffer_size_));
             static_cast<Derived *>(this)->generate(
-                stream, buffer_size_, &buffer_[0]);
+                stream, buffer_size_, buffer_.data());
             index_ = 0;
         }
 

@@ -57,22 +57,20 @@ class Resample<internal::ResampleResidualSystematic>
     {
         residual_.resize(M);
         integral_.resize(M);
-        double *const rptr = &residual_[0];
-        double *const iptr = &integral_[0];
         for (std::size_t i = 0; i != M; ++i)
-            rptr[i] = std::modf(N * weight[i], iptr + i);
-        double coeff = 1 / math::asum(M, rptr);
-        math::scal(M, coeff, rptr);
+            residual_[i] = std::modf(N * weight[i], integral_.data() + i);
+        double coeff = 1 / math::asum(M, residual_.data());
+        math::scal(M, coeff, residual_.data());
 
         IntType R = 0;
         for (std::size_t i = 0; i != M; ++i)
-            R += static_cast<IntType>(iptr[i]);
+            R += static_cast<IntType>(integral_[i]);
         std::size_t NN = N - static_cast<std::size_t>(R);
         U01SequenceSystematic<RngType> u01seq(NN, rng);
-        internal::inversion(M, NN, rptr, u01seq, replication);
+        internal::inversion(M, NN, residual_.data(), u01seq, replication);
 
         for (std::size_t i = 0; i != M; ++i)
-            replication[i] += static_cast<IntType>(iptr[i]);
+            replication[i] += static_cast<IntType>(integral_[i]);
     }
 
     private:

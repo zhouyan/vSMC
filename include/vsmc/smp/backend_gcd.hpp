@@ -64,7 +64,7 @@ class InitializeGCD : public InitializeBase<T, Derived>
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         accept_.resize(N);
-        work_param_ wp(this, &particle, &accept_[0]);
+        work_param_ wp(this, &particle, accept_.data());
         queue_.apply_f(N, &wp, work_);
         this->post_processor(particle);
 
@@ -115,7 +115,7 @@ class MoveGCD : public MoveBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         accept_.resize(N);
-        work_param_ wp(this, &particle, &accept_[0], iter);
+        work_param_ wp(this, &particle, accept_.data(), iter);
         queue_.apply_f(N, &wp, work_);
         this->post_processor(iter, particle);
 

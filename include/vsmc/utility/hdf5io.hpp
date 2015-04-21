@@ -74,7 +74,7 @@ struct HDF5LoadDataPtr {
 
     bool set_ptr() const { return ptr_ == nullptr; }
 
-    T *get() { return ptr_ == nullptr ? &data_[0] : ptr_; }
+    T *get() { return ptr_ == nullptr ? data_.data() : ptr_; }
 
     private:
     T *ptr_;
@@ -89,7 +89,7 @@ struct HDF5StoreDataPtr {
     InputIter set(std::size_t n, InputIter first)
     {
         data_.resize(n);
-        T *dst = &data_[0];
+        T *dst = data_.data();
         for (std::size_t i = 0; i != n; ++i, ++first)
             dst[i] = *first;
 
@@ -110,7 +110,7 @@ struct HDF5StoreDataPtr {
 
     bool set_ptr() const { return ptr_ == nullptr; }
 
-    const T *get() const { return ptr_ == nullptr ? &data_[0] : ptr_; }
+    const T *get() const { return ptr_ == nullptr ? data_.data() : ptr_; }
 
     private:
     const T *ptr_;
@@ -541,7 +541,7 @@ inline void hdf5_tuple_vector_copy(
 {
     typedef typename std::iterator_traits<InputIter>::value_type tuple_type;
     typedef typename std::tuple_element<0, tuple_type>::type value_type;
-    value_type *dst = &std::get<0>(vec)[0];
+    value_type *dst = std::get<0>(vec).data();
     InputIter ffirst = first;
     for (std::size_t i = 0; i != n; ++i, ++ffirst)
         dst[i] = std::get<0>(*ffirst);
@@ -553,7 +553,7 @@ inline void hdf5_tuple_vector_copy(
 {
     typedef typename std::iterator_traits<InputIter>::value_type tuple_type;
     typedef typename std::tuple_element<Pos, tuple_type>::type value_type;
-    value_type *dst = &std::get<Pos>(vec)[0];
+    value_type *dst = std::get<Pos>(vec).data();
     InputIter ffirst = first;
     for (std::size_t i = 0; i != n; ++i, ++ffirst)
         dst[i] = std::get<Pos>(*ffirst);
@@ -564,14 +564,14 @@ template <typename TupleVectorType, typename TuplePtrType>
 inline void hdf5_tuple_vector_ptr(
     const TupleVectorType &vec, TuplePtrType &ptr, Position<0>)
 {
-    std::get<0>(ptr) = &std::get<0>(vec)[0];
+    std::get<0>(ptr) = std::get<0>(vec).data();
 }
 
 template <typename TupleVectorType, typename TuplePtrType, std::size_t Pos>
 inline void hdf5_tuple_vector_ptr(
     const TupleVectorType &vec, TuplePtrType &ptr, Position<Pos>)
 {
-    std::get<Pos>(ptr) = &std::get<Pos>(vec)[0];
+    std::get<Pos>(ptr) = std::get<Pos>(vec).data();
     hdf5_tuple_vector_ptr(vec, ptr, Position<Pos - 1>());
 }
 
@@ -663,7 +663,7 @@ inline void hdf5store(const Sampler<T> &sampler, const std::string &file_name,
     sampler.template summary_data_int<ColMajor>(data_int.begin());
     std::vector<const int *> data_ptr_int(ncol_int);
     for (std::size_t j = 0; j != ncol_int; ++j)
-        data_ptr_int[j] = &data_int[0] + j * nrow;
+        data_ptr_int[j] = data_int.data() + j * nrow;
 
     std::size_t ncol = sampler.summary_header_size();
     std::vector<std::string> header(ncol);
@@ -672,7 +672,7 @@ inline void hdf5store(const Sampler<T> &sampler, const std::string &file_name,
     sampler.template summary_data<ColMajor>(data.begin());
     std::vector<const double *> data_ptr(ncol);
     for (std::size_t j = 0; j != ncol; ++j)
-        data_ptr[j] = &data[0] + j * nrow;
+        data_ptr[j] = data.data() + j * nrow;
 
     hdf5store_list_empty(file_name, data_name, append);
 
@@ -722,7 +722,7 @@ inline void hdf5store(const StateTuple<RowMajor, T, Types...> &state,
     internal::hdf5_tuple_vector_ptr(data_vec, data_ptr, Position<dim - 1>());
 
     hdf5store_list(
-        state.size(), file_name, data_name, data_ptr, &vnames[0], append);
+        state.size(), file_name, data_name, data_ptr, vnames.data(), append);
 }
 
 /// \brief Store a StateTuple in the HDF5 format
@@ -741,8 +741,8 @@ inline void hdf5store(const StateTuple<ColMajor, T, Types...> &state,
         vnames.push_back(ss.str());
     }
 
-    hdf5store_list(
-        state.size(), file_name, data_name, state.data(), &vnames[0], append);
+    hdf5store_list(state.size(), file_name, data_name, state.data(),
+        vnames.data(), append);
 }
 
 /// \brief Store a StateCL in the HDF5 format
@@ -758,9 +758,9 @@ inline void hdf5store(const StateCL<StateSize, FPType, ID> &state,
     std::size_t N = nrow * ncol;
     std::vector<T> data(N);
     state.manager().template read_buffer<T>(
-        state.state_buffer().data(), N, &data[0]);
+        state.state_buffer().data(), N, data.data());
     hdf5store_matrix<Order, T>(
-        nrow, ncol, file_name, data_name, &data[0], append);
+        nrow, ncol, file_name, data_name, data.data(), append);
 }
 
 /// \brief Store a Particle in the HDF5 format

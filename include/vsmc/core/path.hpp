@@ -145,13 +145,13 @@ class Path
     }
 
     /// \brief Read only access to the raw data of the index vector
-    const std::size_t *index_data() const { return &index_[0]; }
+    const std::size_t *index_data() const { return index_.data(); }
 
     /// \brief Read only access to the raw data of the integrand vector
-    const std::size_t *integrand_data() const { return &integrand_[0]; }
+    const std::size_t *integrand_data() const { return integrand_.data(); }
 
     /// \brief Read only access to the raw data of the grid vector
-    const std::size_t *grid_data() const { return &grid_[0]; }
+    const std::size_t *grid_data() const { return grid_.data(); }
 
     /// \brief Read the index history through an output iterator
     ///
@@ -203,10 +203,9 @@ class Path
 
         const std::size_t N = static_cast<std::size_t>(particle.size());
         buffer_.resize(N);
-        double *const bptr = &buffer_[0];
-        const double *const wptr = particle.weight_set().weight_data();
-        double grid = eval_(iter, particle, bptr);
-        double integrand = math::dot(N, wptr, bptr);
+        double grid = eval_(iter, particle, buffer_.data());
+        double integrand =
+            math::dot(N, particle.weight_set().weight_data(), buffer_.data());
         push_back(iter, grid, integrand);
     }
 

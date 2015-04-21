@@ -236,8 +236,8 @@ class CLManager
 
         std::vector<CLType> buffer(num);
         command_queue_.enqueueReadBuffer(buf, static_cast<::cl_bool>(block),
-            sizeof(CLType) * offset, sizeof(CLType) * num, &buffer[0], events,
-            event);
+            sizeof(CLType) * offset, sizeof(CLType) * num, buffer.data(),
+            events, event);
         std::copy(buffer.begin(), buffer.end(), first);
     }
 
@@ -271,10 +271,10 @@ class CLManager
             write_buffer, block, event);
 
         std::vector<CLType> buffer(num);
-        std::copy_n(first, num, &buffer[0]);
+        std::copy_n(first, num, buffer.data());
         command_queue_.enqueueWriteBuffer(buf, static_cast<::cl_bool>(block),
-            sizeof(CLType) * offset, sizeof(CLType) * num, &buffer[0], events,
-            event);
+            sizeof(CLType) * offset, sizeof(CLType) * num, buffer.data(),
+            events, event);
     }
 
     /// \brief Write an OpenCL buffer of a given type and number of elements
