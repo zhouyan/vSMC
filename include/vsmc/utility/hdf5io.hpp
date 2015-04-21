@@ -638,9 +638,7 @@ inline void hdf5store_list(std::size_t nrow, const std::string &file_name,
     internal::HDF5StoreDataPtr<std::string> vnames;
     vnames.set(dim, sfirst);
     const std::string *sptr = vnames.get() + dim;
-    hdf5store_list<int>(0, 0, file_name, data_name,
-        static_cast<int **>(nullptr), static_cast<std::string *>(nullptr),
-        append);
+    hdf5store_list_empty(file_name, data_name, append);
     internal::hdf5store_list_insert_tuple(
         nrow, file_name, data_name, first, --sptr, Position<dim - 1>());
 }
@@ -651,6 +649,8 @@ template <typename T>
 inline void hdf5store(const Sampler<T> &sampler, const std::string &file_name,
     const std::string &data_name, bool append = false)
 {
+    typedef typename Sampler<T>::size_type size_type;
+
     std::size_t nrow = sampler.iter_size();
 
     if (nrow == 0)
@@ -658,10 +658,10 @@ inline void hdf5store(const Sampler<T> &sampler, const std::string &file_name,
 
     std::size_t ncol_int = sampler.summary_header_size_int();
     std::vector<std::string> header_int(ncol_int);
-    std::vector<int> data_int(nrow * ncol_int);
+    std::vector<size_type> data_int(nrow * ncol_int);
     sampler.summary_header_int(header_int.begin());
     sampler.template summary_data_int<ColMajor>(data_int.begin());
-    std::vector<const int *> data_ptr_int(ncol_int);
+    std::vector<const size_type *> data_ptr_int(ncol_int);
     for (std::size_t j = 0; j != ncol_int; ++j)
         data_ptr_int[j] = data_int.data() + j * nrow;
 
@@ -677,7 +677,7 @@ inline void hdf5store(const Sampler<T> &sampler, const std::string &file_name,
     hdf5store_list_empty(file_name, data_name, append);
 
     for (std::size_t j = 0; j != ncol_int; ++j)
-        hdf5store_list_insert<int>(
+        hdf5store_list_insert<size_type>(
             nrow, file_name, data_name, data_ptr_int[j], header_int[j]);
 
     for (std::size_t j = 0; j != ncol; ++j)
