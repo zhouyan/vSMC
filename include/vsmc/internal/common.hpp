@@ -73,7 +73,6 @@
 namespace vsmc
 {
 
-/// \brief Ouput of std::array
 template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
@@ -88,7 +87,6 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
     return os;
 }
 
-/// \brief Input of std::array
 template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_istream<CharT, Traits> &operator>>(
     std::basic_istream<CharT, Traits> &is, std::array<T, N> &ary)
