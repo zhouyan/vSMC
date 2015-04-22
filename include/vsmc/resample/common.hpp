@@ -57,7 +57,7 @@ namespace internal
 // Given N sorted U01 random variates
 // Compute M replication numbers based on M weights
 template <typename IntType, typename U01SeqType>
-inline void inversion(std::size_t M, std::size_t N, const double *weight,
+inline void trans_usrp(std::size_t M, std::size_t N, const double *weight,
     U01SeqType &u01seq, IntType *replication)
 {
     if (M == 0)
@@ -87,7 +87,7 @@ inline void inversion(std::size_t M, std::size_t N, const double *weight,
 
 // Given replication numbers, transfer them to copy_from index
 template <typename IntType1, typename IntType2>
-inline void cfrp_trans(std::size_t M, std::size_t N,
+inline void trans_rpcf(std::size_t M, std::size_t N,
     const IntType1 *replication, IntType2 *copy_from)
 {
     if (M == N) {
@@ -116,6 +116,28 @@ inline void cfrp_trans(std::size_t M, std::size_t N,
             for (IntType1 r = 0; r != rep; ++r)
                 copy_from[to++] = static_cast<IntType2>(from);
         }
+    }
+}
+
+template <typename IntType, typename U01SeqType>
+inline void trans_uscf(std::size_t M, std::size_t N, const double *weight,
+    U01SeqType &u01seq, IntType *copy_from)
+{
+    if (M == 0 && N == 0)
+        return;
+
+    std::memset(copy_from, 0, sizeof(IntType) * N);
+
+    if (M == 1)
+        return;
+
+    std::size_t n = 0;
+    std::size_t m = 0;
+    double accw = 0;
+    for (std::size_t i = 0; i != M - 1; ++i) {
+        accw += weight[i];
+        while (n != N && u01seq[n] <= accw)
+            copy_from[m++] = i;
     }
 }
 

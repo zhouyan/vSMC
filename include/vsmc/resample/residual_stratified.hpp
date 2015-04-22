@@ -53,10 +53,11 @@ class Resample<internal::ResampleResidualStratified>
     public:
     template <typename IntType, typename RngType>
     void operator()(std::size_t M, std::size_t N, RngType &rng,
-        const double *weight, IntType *replication)
+        const double *weight, IntType *copy_from)
     {
         residual_.resize(M);
         integral_.resize(M);
+        replication_.resize(M);
         for (std::size_t i = 0; i != M; ++i)
             residual_[i] = std::modf(N * weight[i], integral_.data() + i);
         double coeff = 1 / math::asum(M, residual_.data());
@@ -67,15 +68,18 @@ class Resample<internal::ResampleResidualStratified>
             R += static_cast<IntType>(integral_[i]);
         std::size_t NN = N - static_cast<std::size_t>(R);
         U01SequenceStratified<RngType> u01seq(NN, rng);
-        internal::inversion(M, NN, residual_.data(), u01seq, replication);
+        internal::trans_usrp(
+            M, NN, residual_.data(), u01seq, replication_.data());
 
         for (std::size_t i = 0; i != M; ++i)
-            replication[i] += static_cast<IntType>(integral_[i]);
+            replication_[i] += static_cast<IntType>(integral_[i]);
+        internal::trans_rpcf(M, N, replication_.data(), copy_from);
     }
 
     private:
     std::vector<double, AlignedAllocator<double>> residual_;
     std::vector<double, AlignedAllocator<double>> integral_;
+    std::vector<std::size_t, AlignedAllocator<std::size_t>> replication_;
 }; // Residual stratified resampling
 
 } // namespace vsmc
