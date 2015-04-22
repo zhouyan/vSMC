@@ -52,10 +52,10 @@ class Resample<internal::ResampleStratified>
     public:
     template <typename IntType, typename RngType>
     void operator()(std::size_t M, std::size_t N, RngType &rng,
-        const double *weight, IntType *copy_from)
+        const double *weight, IntType *replication)
     {
         U01SequenceStratified<RngType> u01seq(N, rng);
-        internal::trans_uscf(M, N, weight, u01seq, copy_from);
+        internal::trans_usrp(M, N, weight, u01seq, replication);
     }
 }; // Stratified resampling
 

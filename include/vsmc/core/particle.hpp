@@ -219,8 +219,11 @@ class Particle
         if (resampled) {
             const double *const rwptr = weight_set_.resample_weight_data();
             if (rwptr != nullptr) {
+                replication_.resize(N);
                 copy_from_.resize(N);
-                op(N, N, resample_rng_, rwptr, copy_from_.data());
+                op(N, N, resample_rng_, rwptr, replication_.data());
+                internal::trans_rpcf(
+                    N, N, replication_.data(), copy_from_.data());
                 value_.copy(N, copy_from_.data());
             } else {
                 value_.copy(N, static_cast<const std::size_t *>(nullptr));
@@ -238,6 +241,7 @@ class Particle
     rng_set_type rng_set_;
     resample_rng_type resample_rng_;
 
+    std::vector<size_type, AlignedAllocator<size_type>> replication_;
     std::vector<size_type, AlignedAllocator<size_type>> copy_from_;
 }; // class Particle
 

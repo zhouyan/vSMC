@@ -53,12 +53,6 @@ changes.
 
 * `Monitor::record_data` gets an overload version that return the row pointer.
 
-## Changed behaviors
-* The `Sampler::resample_type` operations shall now output `copy_from` index
-  directly. The user defined resampling method feature was not exactly
-  documented, and it is still considered an undocumented feature. It may change
-  in the future again.
-
 ## Bug fixes
 
 * The default resampling threshold when a user defined resampling algorithm is

@@ -53,11 +53,10 @@ class Resample<internal::ResampleResidualSystematic>
     public:
     template <typename IntType, typename RngType>
     void operator()(std::size_t M, std::size_t N, RngType &rng,
-        const double *weight, IntType *copy_from)
+        const double *weight, IntType *replication)
     {
         residual_.resize(M);
         integral_.resize(M);
-        replication_.resize(M);
         for (std::size_t i = 0; i != M; ++i)
             residual_[i] = std::modf(N * weight[i], integral_.data() + i);
         double coeff = 1 / math::asum(M, residual_.data());
@@ -68,18 +67,14 @@ class Resample<internal::ResampleResidualSystematic>
             R += static_cast<IntType>(integral_[i]);
         std::size_t NN = N - static_cast<std::size_t>(R);
         U01SequenceSystematic<RngType> u01seq(NN, rng);
-        internal::trans_usrp(
-            M, NN, residual_.data(), u01seq, replication_.data());
-
+        internal::trans_usrp(M, NN, residual_.data(), u01seq, replication);
         for (std::size_t i = 0; i != M; ++i)
-            replication_[i] += static_cast<IntType>(integral_[i]);
-        internal::trans_rpcf(M, N, replication_.data(), copy_from);
+            replication[i] += static_cast<IntType>(integral_[i]);
     }
 
     private:
     std::vector<double, AlignedAllocator<double>> residual_;
     std::vector<double, AlignedAllocator<double>> integral_;
-    std::vector<std::size_t, AlignedAllocator<std::size_t>> replication_;
 }; // Residual systematic resampling
 
 } // namespace vsmc
