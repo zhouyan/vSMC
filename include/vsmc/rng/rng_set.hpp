@@ -48,7 +48,7 @@
 /// \ingroup Config
 #ifndef VSMC_RNG_SET_TYPE
 #if VSMC_USE_TBB
-#define VSMC_RNG_SET_TYPE                                                    \
+#define VSMC_RNG_SET_TYPE                                                     \
     ::vsmc::RngSet<::vsmc::Threefry4x64, ::vsmc::ThreadLocal>
 #else
 #define VSMC_RNG_SET_TYPE ::vsmc::RngSet<::vsmc::Threefry4x64, ::vsmc::Vector>
@@ -143,10 +143,7 @@ class RngSet<RngType, ThreadLocal>
     typedef RngType rng_type;
     typedef std::size_t size_type;
 
-    explicit RngSet(size_type N = 0) : size_(N), rng_(rng_init)
-    {
-        rng_init();
-    }
+    explicit RngSet(size_type N = 0) : size_(N), rng_(rng_init) { rng_init(); }
 
     size_type size() const { return size_; }
 

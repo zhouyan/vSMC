@@ -36,15 +36,15 @@
 #include <vsmc/rng/m128i.hpp>
 #include <wmmintrin.h>
 
-#define VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks)                         \
+#define VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks)                          \
     VSMC_STATIC_ASSERT((Blocks > 0), USE_AESNIEngine_WITH_ZERO_BLOCKS)
 
-#define VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType)                \
-    VSMC_STATIC_ASSERT((std::is_unsigned<ResultType>::value),                \
+#define VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType)                 \
+    VSMC_STATIC_ASSERT((std::is_unsigned<ResultType>::value),                 \
         USE_AESNIEngine_WITH_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER)
 
-#define VSMC_STATIC_ASSERT_RNG_AES_NI                                        \
-    VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks);                            \
+#define VSMC_STATIC_ASSERT_RNG_AES_NI                                         \
+    VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks);                             \
     VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType);
 
 namespace vsmc
@@ -320,8 +320,7 @@ class AESNIEngine
             index_ = 0;
         }
 
-        return reinterpret_cast<const result_type *>(
-            buffer_.data())[index_++];
+        return reinterpret_cast<const result_type *>(buffer_.data())[index_++];
     }
 
     /// \brief Generate a buffer of random bits given a counter using the
@@ -411,8 +410,7 @@ class AESNIEngine
     template <typename CharT, typename Traits>
     friend inline std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>
-            &eng)
+        const AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng)
     {
         if (!os.good())
             return os;
@@ -508,8 +506,7 @@ class AESNIEngine
     void enc_round_block(
         const key_seq_type &ks, buffer_type &buf, std::true_type) const
     {
-        std::get<B>(buf) =
-            _mm_aesenc_si128(std::get<B>(buf), std::get<N>(ks));
+        std::get<B>(buf) = _mm_aesenc_si128(std::get<B>(buf), std::get<N>(ks));
         enc_round_block<B + 1, N>(
             ks, buf, std::integral_constant<bool, B + 1 < Blocks>());
     }
@@ -534,8 +531,7 @@ class AESNIEngine
     }
 
     template <std::size_t>
-    void pack_ctr(
-        const ctr_block_type &, buffer_type &, std::false_type) const
+    void pack_ctr(const ctr_block_type &, buffer_type &, std::false_type) const
     {
     }
 

@@ -41,21 +41,21 @@
 #include <string>
 #include <vector>
 
-#define VSMC_RNG_TEST_PRE(prog)                                              \
-    std::size_t N = 1000000;                                                 \
-    std::string prog_name(#prog);                                            \
-    if (argc > 1)                                                            \
-        N = static_cast<std::size_t>(std::atoi(argv[1]));                    \
-    std::vector<std::string> names;                                          \
-    std::vector<std::size_t> size;                                           \
-    std::vector<vsmc::StopWatch> sw;                                         \
-    std::vector<std::size_t> bytes;                                          \
+#define VSMC_RNG_TEST_PRE(prog)                                               \
+    std::size_t N = 1000000;                                                  \
+    std::string prog_name(#prog);                                             \
+    if (argc > 1)                                                             \
+        N = static_cast<std::size_t>(std::atoi(argv[1]));                     \
+    std::vector<std::string> names;                                           \
+    std::vector<std::size_t> size;                                            \
+    std::vector<vsmc::StopWatch> sw;                                          \
+    std::vector<std::size_t> bytes;                                           \
     std::vector<uint64_t> cycles;
 
-#define VSMC_RNG_TEST(Engine)                                                \
+#define VSMC_RNG_TEST(Engine)                                                 \
     rng_test<Engine>(N, #Engine, names, size, sw, bytes, cycles);
 
-#define VSMC_RNG_TEST_POST                                                   \
+#define VSMC_RNG_TEST_POST                                                    \
     rng_output_sw(prog_name, names, size, sw, bytes, cycles);
 
 template <typename Eng>

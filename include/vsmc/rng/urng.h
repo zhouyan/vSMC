@@ -180,53 +180,53 @@
 #include <Random123/threefry.h>
 #include <Random123/philox.h>
 
-#define VSMC_DEFINE_RNG_URNG_RNG_T(RNG, N, W)                                \
-    typedef struct {                                                         \
-        RNG##N##x##W##_key_t key;                                            \
-        RNG##N##x##W##_ctr_t ctr;                                            \
-        RNG##N##x##W##_ctr_t rnd;                                            \
-        unsigned char remain;                                                \
+#define VSMC_DEFINE_RNG_URNG_RNG_T(RNG, N, W)                                 \
+    typedef struct {                                                          \
+        RNG##N##x##W##_key_t key;                                             \
+        RNG##N##x##W##_ctr_t ctr;                                             \
+        RNG##N##x##W##_ctr_t rnd;                                             \
+        unsigned char remain;                                                 \
     } RNG##N##x##W##_rng_t;
 
-#define VSMC_DEFINE_RNG_URNG_INIT(RNG, N, W)                                 \
-    VSMC_STATIC_INLINE void RNG##N##x##W##_init(                             \
-        RNG##N##x##W##_rng_t *rng, uint##W##_t seed)                         \
-    {                                                                        \
-        RNG##N##x##W##_ctr_t init_ctr = {{}};                                \
-        RNG##N##x##W##_ukey_t ukey = {{}};                                   \
-        rng->ctr = init_ctr;                                                 \
-        rng->rnd = init_ctr;                                                 \
-        ukey.v[0] = seed;                                                    \
-        rng->key = RNG##N##x##W##keyinit(ukey);                              \
-        rng->remain = 0;                                                     \
+#define VSMC_DEFINE_RNG_URNG_INIT(RNG, N, W)                                  \
+    VSMC_STATIC_INLINE void RNG##N##x##W##_init(                              \
+        RNG##N##x##W##_rng_t *rng, uint##W##_t seed)                          \
+    {                                                                         \
+        RNG##N##x##W##_ctr_t init_ctr = {{}};                                 \
+        RNG##N##x##W##_ukey_t ukey = {{}};                                    \
+        rng->ctr = init_ctr;                                                  \
+        rng->rnd = init_ctr;                                                  \
+        ukey.v[0] = seed;                                                     \
+        rng->key = RNG##N##x##W##keyinit(ukey);                               \
+        rng->remain = 0;                                                      \
     }
 
-#define VSMC_DEFINE_RNG_URNG_RAND(RNG, N, W)                                 \
-    VSMC_STATIC_INLINE uint##W##_t RNG##N##x##W##_rand(                      \
-        RNG##N##x##W##_rng_t *rng)                                           \
-    {                                                                        \
-        unsigned char remain = rng->remain;                                  \
-        RNG##N##x##W##_ctr_t rnd = rng->rnd;                                 \
-                                                                             \
-        if (remain > 0) {                                                    \
-            --remain;                                                        \
-            rng->remain = remain;                                            \
-            return rnd.v[remain];                                            \
-        }                                                                    \
-                                                                             \
-        RNG##N##x##W##_ctr_t ctr = rng->ctr;                                 \
-        RNG##N##x##W##_key_t key = rng->key;                                 \
-                                                                             \
-        remain = N - 1;                                                      \
-        ctr.v[0]++;                                                          \
-        rnd = RNG##N##x##W(ctr, key);                                        \
-                                                                             \
-        rng->remain = remain;                                                \
-        rng->rnd = rnd;                                                      \
-        rng->ctr = ctr;                                                      \
-        rng->key = key;                                                      \
-                                                                             \
-        return rnd.v[remain];                                                \
+#define VSMC_DEFINE_RNG_URNG_RAND(RNG, N, W)                                  \
+    VSMC_STATIC_INLINE uint##W##_t RNG##N##x##W##_rand(                       \
+        RNG##N##x##W##_rng_t *rng)                                            \
+    {                                                                         \
+        unsigned char remain = rng->remain;                                   \
+        RNG##N##x##W##_ctr_t rnd = rng->rnd;                                  \
+                                                                              \
+        if (remain > 0) {                                                     \
+            --remain;                                                         \
+            rng->remain = remain;                                             \
+            return rnd.v[remain];                                             \
+        }                                                                     \
+                                                                              \
+        RNG##N##x##W##_ctr_t ctr = rng->ctr;                                  \
+        RNG##N##x##W##_key_t key = rng->key;                                  \
+                                                                              \
+        remain = N - 1;                                                       \
+        ctr.v[0]++;                                                           \
+        rnd = RNG##N##x##W(ctr, key);                                         \
+                                                                              \
+        rng->remain = remain;                                                 \
+        rng->rnd = rnd;                                                       \
+        rng->ctr = ctr;                                                       \
+        rng->key = key;                                                       \
+                                                                              \
+        return rnd.v[remain];                                                 \
     }
 
 /// \ingroup CLRNG

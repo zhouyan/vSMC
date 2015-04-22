@@ -42,28 +42,28 @@
 #include <Accelerate/Accelerate.h>
 #endif
 
-#define VSMC_DEFINE_MATH_VMATH_1(func, name)                                 \
-    template <typename T>                                                    \
-    inline void v##name(std::size_t n, const T *a, T *y)                     \
-    {                                                                        \
-        for (std::size_t i = 0; i != n; ++i)                                 \
-            y[i] = func(a[i]);                                               \
+#define VSMC_DEFINE_MATH_VMATH_1(func, name)                                  \
+    template <typename T>                                                     \
+    inline void v##name(std::size_t n, const T *a, T *y)                      \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = func(a[i]);                                                \
     }
 
-#define VSMC_DEFINE_MATH_VMATH_2(func, name)                                 \
-    template <typename T>                                                    \
-    inline void v##name(std::size_t n, const T *a, const T *b, T *y)         \
-    {                                                                        \
-        for (std::size_t i = 0; i != n; ++i)                                 \
-            y[i] = func(a[i], b[i]);                                         \
+#define VSMC_DEFINE_MATH_VMATH_2(func, name)                                  \
+    template <typename T>                                                     \
+    inline void v##name(std::size_t n, const T *a, const T *b, T *y)          \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = func(a[i], b[i]);                                          \
     }
 
-#define VSMC_DEFINE_MATH_VMATH_B(op, vname)                                  \
-    template <typename T>                                                    \
-    inline void v##vname(std::size_t n, const T *a, const T *b, T *y)        \
-    {                                                                        \
-        for (std::size_t i = 0; i != n; ++i)                                 \
-            y[i] = a[i] op b[i];                                             \
+#define VSMC_DEFINE_MATH_VMATH_B(op, vname)                                   \
+    template <typename T>                                                     \
+    inline void v##vname(std::size_t n, const T *a, const T *b, T *y)         \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = a[i] op b[i];                                              \
     }
 
 namespace vsmc
@@ -344,26 +344,26 @@ VSMC_DEFINE_MATH_VMATH_1(tgamma, TGamma)
 
 #if VSMC_USE_MKL_VML
 
-#define VSMC_DEFINE_MATH_VMATH_VML_1(name)                                   \
-    inline void v##name(std::size_t n, const float *a, float *y)             \
-    {                                                                        \
-        ::vs##name(static_cast<MKL_INT>(n), a, y);                           \
-    }                                                                        \
-    inline void v##name(std::size_t n, const double *a, double *y)           \
-    {                                                                        \
-        ::vd##name(static_cast<MKL_INT>(n), a, y);                           \
+#define VSMC_DEFINE_MATH_VMATH_VML_1(name)                                    \
+    inline void v##name(std::size_t n, const float *a, float *y)              \
+    {                                                                         \
+        ::vs##name(static_cast<MKL_INT>(n), a, y);                            \
+    }                                                                         \
+    inline void v##name(std::size_t n, const double *a, double *y)            \
+    {                                                                         \
+        ::vd##name(static_cast<MKL_INT>(n), a, y);                            \
     }
 
-#define VSMC_DEFINE_MATH_VMATH_VML_2(name)                                   \
-    inline void v##name(                                                     \
-        std::size_t n, const float *a, const float *b, float *y)             \
-    {                                                                        \
-        ::vs##name(static_cast<MKL_INT>(n), a, b, y);                        \
-    }                                                                        \
-    inline void v##name(                                                     \
-        std::size_t n, const double *a, const double *b, double *y)          \
-    {                                                                        \
-        ::vd##name(static_cast<MKL_INT>(n), a, b, y);                        \
+#define VSMC_DEFINE_MATH_VMATH_VML_2(name)                                    \
+    inline void v##name(                                                      \
+        std::size_t n, const float *a, const float *b, float *y)              \
+    {                                                                         \
+        ::vs##name(static_cast<MKL_INT>(n), a, b, y);                         \
+    }                                                                         \
+    inline void v##name(                                                      \
+        std::size_t n, const double *a, const double *b, double *y)           \
+    {                                                                         \
+        ::vd##name(static_cast<MKL_INT>(n), a, b, y);                         \
     }
 
 namespace vsmc
@@ -453,30 +453,30 @@ VSMC_DEFINE_MATH_VMATH_VML_1(TGamma)
 
 #elif VSMC_USE_ACCELERATE_VFORCE
 
-#define VSMC_DEFINE_MATH_VMATH_VFORCE_1(func, name)                          \
-    inline void v##name(std::size_t n, const float *a, float *y)             \
-    {                                                                        \
-        const int in = static_cast<int>(n);                                  \
-        ::vv##func##f(y, a, &in);                                            \
-    }                                                                        \
-    inline void v##name(std::size_t n, const double *a, double *y)           \
-    {                                                                        \
-        const int in = static_cast<int>(n);                                  \
-        ::vv##func(y, a, &in);                                               \
+#define VSMC_DEFINE_MATH_VMATH_VFORCE_1(func, name)                           \
+    inline void v##name(std::size_t n, const float *a, float *y)              \
+    {                                                                         \
+        const int in = static_cast<int>(n);                                   \
+        ::vv##func##f(y, a, &in);                                             \
+    }                                                                         \
+    inline void v##name(std::size_t n, const double *a, double *y)            \
+    {                                                                         \
+        const int in = static_cast<int>(n);                                   \
+        ::vv##func(y, a, &in);                                                \
     }
 
-#define VSMC_DEFINE_MATH_VMATH_VFORCE_2(func, name)                          \
-    inline void v##name(                                                     \
-        std::size_t n, const float *a, const float *b, float *y)             \
-    {                                                                        \
-        const int in = static_cast<int>(n);                                  \
-        ::vv##func##f(y, a, b, &in);                                         \
-    }                                                                        \
-    inline void v##name(                                                     \
-        std::size_t n, const double *a, const double *b, double *y)          \
-    {                                                                        \
-        const int in = static_cast<int>(n);                                  \
-        ::vv##func(y, a, b, &in);                                            \
+#define VSMC_DEFINE_MATH_VMATH_VFORCE_2(func, name)                           \
+    inline void v##name(                                                      \
+        std::size_t n, const float *a, const float *b, float *y)              \
+    {                                                                         \
+        const int in = static_cast<int>(n);                                   \
+        ::vv##func##f(y, a, b, &in);                                          \
+    }                                                                         \
+    inline void v##name(                                                      \
+        std::size_t n, const double *a, const double *b, double *y)           \
+    {                                                                         \
+        const int in = static_cast<int>(n);                                   \
+        ::vv##func(y, a, b, &in);                                             \
     }
 
 namespace vsmc

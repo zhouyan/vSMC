@@ -32,26 +32,26 @@
 #ifndef VSMC_MATH_CONSTANTS_HPP
 #define VSMC_MATH_CONSTANTS_HPP
 
-#define VSMC_DEFINE_MATH_CONSTANTS(name, val)                                \
-    template <typename T>                                                    \
-    inline T name() noexcept                                                 \
-    {                                                                        \
-        return static_cast<T>(val##l);                                       \
-    }                                                                        \
-    template <>                                                              \
-    inline float name<float>() noexcept                                      \
-    {                                                                        \
-        return val##f;                                                       \
-    }                                                                        \
-    template <>                                                              \
-    inline double name<double>() noexcept                                    \
-    {                                                                        \
-        return val;                                                          \
-    }                                                                        \
-    template <>                                                              \
-    inline long double name<long double>() noexcept                          \
-    {                                                                        \
-        return val##l;                                                       \
+#define VSMC_DEFINE_MATH_CONSTANTS(name, val)                                 \
+    template <typename T>                                                     \
+    inline T name() noexcept                                                  \
+    {                                                                         \
+        return static_cast<T>(val##l);                                        \
+    }                                                                         \
+    template <>                                                               \
+    inline float name<float>() noexcept                                       \
+    {                                                                         \
+        return val##f;                                                        \
+    }                                                                         \
+    template <>                                                               \
+    inline double name<double>() noexcept                                     \
+    {                                                                         \
+        return val;                                                           \
+    }                                                                         \
+    template <>                                                               \
+    inline long double name<long double>() noexcept                           \
+    {                                                                         \
+        return val##l;                                                        \
     }
 
 namespace vsmc
@@ -267,8 +267,7 @@ VSMC_DEFINE_MATH_CONSTANTS(ln_10, 2.302585092994045684017991454684364207601)
 
 /// \brief \f$1/\ln(2)\f$
 /// \ingroup Constants
-VSMC_DEFINE_MATH_CONSTANTS(
-    ln_inv_2, 1.442695040888963407359924681001892137427)
+VSMC_DEFINE_MATH_CONSTANTS(ln_inv_2, 1.442695040888963407359924681001892137427)
 
 /// \brief \f$1/\ln(3)\f$
 /// \ingroup Constants

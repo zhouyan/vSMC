@@ -34,46 +34,46 @@
 
 #include <vsmc/internal/common.hpp>
 
-#define VSMC_DEFINE_SMP_BASE_COPY(Name)                                      \
-    Name##Base() {}                                                          \
-    Name##Base(const Name##Base<T, Derived> &) {}                            \
-    Name##Base<T, Derived> &operator=(const Name##Base<T, Derived> &)        \
-    {                                                                        \
-        return *this;                                                        \
-    }                                                                        \
+#define VSMC_DEFINE_SMP_BASE_COPY(Name)                                       \
+    Name##Base() {}                                                           \
+    Name##Base(const Name##Base<T, Derived> &) {}                             \
+    Name##Base<T, Derived> &operator=(const Name##Base<T, Derived> &)         \
+    {                                                                         \
+        return *this;                                                         \
+    }                                                                         \
     VSMC_CRTP_DESTRUCTOR_PREFIX ~Name##Base() {}
 
-#define VSMC_DEFINE_SMP_BASE_COPY_VIRTUAL(Name)                              \
-    Name##Base() {}                                                          \
-    Name##Base(const Name##Base<T, Virtual> &) {}                            \
-    Name##Base<T, Virtual> &operator=(const Name##Base<T, Virtual> &)        \
-    {                                                                        \
-        return *this;                                                        \
-    }                                                                        \
+#define VSMC_DEFINE_SMP_BASE_COPY_VIRTUAL(Name)                               \
+    Name##Base() {}                                                           \
+    Name##Base(const Name##Base<T, Virtual> &) {}                             \
+    Name##Base<T, Virtual> &operator=(const Name##Base<T, Virtual> &)         \
+    {                                                                         \
+        return *this;                                                         \
+    }                                                                         \
     virtual ~Name##Base() {}
 
-#define VSMC_DEFINE_SMP_IMPL_COPY(Impl, Name)                                \
-    Name##Impl() {}                                                          \
-    Name##Impl(const Name##Impl<T, Derived> &other)                          \
-        : Name##Base<T, Derived>(other)                                      \
-    {                                                                        \
-    }                                                                        \
-    Name##Impl<T, Derived> &operator=(const Name##Impl<T, Derived> &other)   \
-    {                                                                        \
-        if (this != &other)                                                  \
-            Name##Base<T, Derived>::operator=(other);                        \
-                                                                             \
-        return *this;                                                        \
-    }                                                                        \
+#define VSMC_DEFINE_SMP_IMPL_COPY(Impl, Name)                                 \
+    Name##Impl() {}                                                           \
+    Name##Impl(const Name##Impl<T, Derived> &other)                           \
+        : Name##Base<T, Derived>(other)                                       \
+    {                                                                         \
+    }                                                                         \
+    Name##Impl<T, Derived> &operator=(const Name##Impl<T, Derived> &other)    \
+    {                                                                         \
+        if (this != &other)                                                   \
+            Name##Base<T, Derived>::operator=(other);                         \
+                                                                              \
+        return *this;                                                         \
+    }                                                                         \
     ~Name##Impl() {}
 
-#define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(basename)               \
-    VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this) != nullptr),          \
-        ("DERIVED FROM " #basename                                           \
+#define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(basename)                \
+    VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this) != nullptr),           \
+        ("DERIVED FROM " #basename                                            \
          " WITH INCORRECT **Derived** TEMPLATE PARAMTER"));
 
-#define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(name)        \
-    VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),         \
+#define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(name)         \
+    VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),          \
         ("**State" #name "::copy** SIZE MISMATCH"))
 
 namespace vsmc
@@ -92,8 +92,7 @@ class InitializeBase
 
     void initialize_param(Particle<T> &particle, void *param)
     {
-        initialize_param_dispatch(
-            particle, param, &Derived::initialize_param);
+        initialize_param_dispatch(particle, param, &Derived::initialize_param);
     }
 
     void pre_processor(Particle<T> &particle)
@@ -120,8 +119,8 @@ class InitializeBase
     }
 
     template <typename D>
-    void initialize_param_dispatch(Particle<T> &particle, void *param,
-        void (D::*)(Particle<T> &, void *))
+    void initialize_param_dispatch(
+        Particle<T> &particle, void *param, void (D::*)(Particle<T> &, void *))
     {
         static_cast<Derived *>(this)->initialize_param(particle, param);
     }
@@ -184,8 +183,7 @@ class InitializeBase
         Derived::initialize_param(particle, param);
     }
 
-    void pre_processor_dispatch(
-        Particle<T> &particle, void (*)(Particle<T> &))
+    void pre_processor_dispatch(Particle<T> &particle, void (*)(Particle<T> &))
     {
         Derived::pre_processor(particle);
     }
@@ -204,8 +202,8 @@ class InitializeBase
         return 0;
     }
 
-    void initialize_param_dispatch(Particle<T> &, void *,
-        void (InitializeBase::*)(Particle<T> &, void *))
+    void initialize_param_dispatch(
+        Particle<T> &, void *, void (InitializeBase::*)(Particle<T> &, void *))
     {
     }
 
@@ -407,8 +405,7 @@ class MonitorEvalBase
     }
 
     template <typename D>
-    void post_processor_dispatch(std::size_t iter,
-        const Particle<T> &particle,
+    void post_processor_dispatch(std::size_t iter, const Particle<T> &particle,
         void (D::*)(std::size_t, const Particle<T> &))
     {
         static_cast<Derived *>(this)->post_processor(iter, particle);
@@ -419,8 +416,8 @@ class MonitorEvalBase
     template <typename D>
     void monitor_state_dispatch(std::size_t iter, std::size_t dim,
         ConstSingleParticle<T> csp, double *res,
-        void (D::*)(std::size_t, std::size_t, ConstSingleParticle<T>,
-                                    double *) const)
+        void (D::*)(std::size_t, std::size_t, ConstSingleParticle<T>, double *)
+            const)
     {
         static_cast<Derived *>(this)->monitor_state(iter, dim, csp, res);
     }
@@ -433,8 +430,7 @@ class MonitorEvalBase
     }
 
     template <typename D>
-    void post_processor_dispatch(std::size_t iter,
-        const Particle<T> &particle,
+    void post_processor_dispatch(std::size_t iter, const Particle<T> &particle,
         void (D::*)(std::size_t, const Particle<T> &) const)
     {
         static_cast<Derived *>(this)->post_processor(iter, particle);
@@ -455,8 +451,7 @@ class MonitorEvalBase
         Derived::pre_processor(iter, particle);
     }
 
-    void post_processor_dispatch(std::size_t iter,
-        const Particle<T> &particle,
+    void post_processor_dispatch(std::size_t iter, const Particle<T> &particle,
         void (*)(std::size_t, const Particle<T> &))
     {
         Derived::post_processor(iter, particle);
@@ -553,8 +548,7 @@ class PathEvalBase
     }
 
     template <typename D>
-    void post_processor_dispatch(std::size_t iter,
-        const Particle<T> &particle,
+    void post_processor_dispatch(std::size_t iter, const Particle<T> &particle,
         void (D::*)(std::size_t, const Particle<T> &))
     {
         static_cast<Derived *>(this)->post_processor(iter, particle);
@@ -584,8 +578,7 @@ class PathEvalBase
     }
 
     template <typename D>
-    void post_processor_dispatch(std::size_t iter,
-        const Particle<T> &particle,
+    void post_processor_dispatch(std::size_t iter, const Particle<T> &particle,
         void (D::*)(std::size_t, const Particle<T> &) const)
     {
         static_cast<Derived *>(this)->post_processor(iter, particle);
@@ -611,8 +604,7 @@ class PathEvalBase
         Derived::pre_processor(iter, particle);
     }
 
-    void post_processor_dispatch(std::size_t iter,
-        const Particle<T> &particle,
+    void post_processor_dispatch(std::size_t iter, const Particle<T> &particle,
         void (*)(std::size_t, const Particle<T> &))
     {
         Derived::post_processor(iter, particle);

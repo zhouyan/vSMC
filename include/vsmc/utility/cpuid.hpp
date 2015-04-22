@@ -38,24 +38,24 @@
 #include <intrin.h>
 #endif
 
-#define VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(feat, a, c, i, b)             \
-    template <>                                                              \
-    struct CPUIDFeatureInfo<CPUIDFeature##feat> {                            \
-        static std::string str() { return std::string(#feat); }              \
-        static constexpr unsigned eax = a##U;                                \
-        static constexpr unsigned ecx = c##U;                                \
-        static constexpr unsigned bit = b##U;                                \
-        static constexpr std::size_t index = i;                              \
+#define VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(feat, a, c, i, b)              \
+    template <>                                                               \
+    struct CPUIDFeatureInfo<CPUIDFeature##feat> {                             \
+        static std::string str() { return std::string(#feat); }               \
+        static constexpr unsigned eax = a##U;                                 \
+        static constexpr unsigned ecx = c##U;                                 \
+        static constexpr unsigned bit = b##U;                                 \
+        static constexpr std::size_t index = i;                               \
     };
 
-#define VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(feat, a, c, i, b)         \
-    template <>                                                              \
-    struct CPUIDFeatureInfo<CPUIDFeatureExt##feat> {                         \
-        static std::string str() { return std::string(#feat); }              \
-        static constexpr unsigned eax = 0x80000000U + a##U;                  \
-        static constexpr unsigned ecx = c##U;                                \
-        static constexpr unsigned bit = b##U;                                \
-        static constexpr std::size_t index = i;                              \
+#define VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(feat, a, c, i, b)          \
+    template <>                                                               \
+    struct CPUIDFeatureInfo<CPUIDFeatureExt##feat> {                          \
+        static std::string str() { return std::string(#feat); }               \
+        static constexpr unsigned eax = 0x80000000U + a##U;                   \
+        static constexpr unsigned ecx = c##U;                                 \
+        static constexpr unsigned bit = b##U;                                 \
+        static constexpr std::size_t index = i;                               \
     };
 
 namespace vsmc
@@ -746,9 +746,7 @@ class CPUID
         for (std::size_t i = 0; i != caches.size(); ++i) {
             switch (caches[i].type()) {
                 case CPUIDCacheTypeNull: break;
-                case CPUIDCacheTypeData:
-                    os << std::setw(fix) << "Data";
-                    break;
+                case CPUIDCacheTypeData: os << std::setw(fix) << "Data"; break;
                 case CPUIDCacheTypeInstruction:
                     os << std::setw(fix) << "Instruction";
                     break;
@@ -828,8 +826,7 @@ class CPUID
 
         os << "Cache inclusiveness        ";
         for (std::size_t i = 0; i != caches.size(); ++i) {
-            os << std::setw(fix)
-               << (caches[i].inclusiveness() ? "Yes" : "No");
+            os << std::setw(fix) << (caches[i].inclusiveness() ? "Yes" : "No");
         }
         os << '\n';
 
@@ -876,8 +873,8 @@ class CPUID
     }
 
     template <typename CharT, typename Traits>
-    static void print_feature(std::basic_ostream<CharT, Traits> &os,
-        std::vector<std::string> &feats)
+    static void print_feature(
+        std::basic_ostream<CharT, Traits> &os, std::vector<std::string> &feats)
     {
         std::sort(feats.begin(), feats.end());
         for (std::size_t i = 0; i != feats.size(); ++i) {

@@ -41,32 +41,30 @@
 #include <iostream>
 #include <vector>
 
-#define VSMC_RNG_DIST_B1(Dist, p1)                                           \
-    {                                                                        \
-        std::Dist##_distribution dist(p1);                                   \
-        rng_dist(                                                            \
-            N, dist, #Dist "(" #p1 ")", names, size, sw, bytes, cycles);     \
+#define VSMC_RNG_DIST_B1(Dist, p1)                                            \
+    {                                                                         \
+        std::Dist##_distribution dist(p1);                                    \
+        rng_dist(N, dist, #Dist "(" #p1 ")", names, size, sw, bytes, cycles); \
     }
 
-#define VSMC_RNG_DIST_B2(Dist, p1, p2)                                       \
-    {                                                                        \
-        std::Dist##_distribution dist(p1, p2);                               \
-        rng_dist(N, dist, #Dist "(" #p1 ", " #p2 ")", names, size, sw,       \
-            bytes, cycles);                                                  \
+#define VSMC_RNG_DIST_B2(Dist, p1, p2)                                        \
+    {                                                                         \
+        std::Dist##_distribution dist(p1, p2);                                \
+        rng_dist(N, dist, #Dist "(" #p1 ", " #p2 ")", names, size, sw, bytes, \
+            cycles);                                                          \
     }
 
-#define VSMC_RNG_DIST_T1(Dist, p1)                                           \
-    {                                                                        \
-        std::Dist##_distribution<> dist(p1);                                 \
-        rng_dist(                                                            \
-            N, dist, #Dist "(" #p1 ")", names, size, sw, bytes, cycles);     \
+#define VSMC_RNG_DIST_T1(Dist, p1)                                            \
+    {                                                                         \
+        std::Dist##_distribution<> dist(p1);                                  \
+        rng_dist(N, dist, #Dist "(" #p1 ")", names, size, sw, bytes, cycles); \
     }
 
-#define VSMC_RNG_DIST_T2(Dist, p1, p2)                                       \
-    {                                                                        \
-        std::Dist##_distribution<> dist(p1, p2);                             \
-        rng_dist(N, dist, #Dist "(" #p1 ", " #p2 ")", names, size, sw,       \
-            bytes, cycles);                                                  \
+#define VSMC_RNG_DIST_T2(Dist, p1, p2)                                        \
+    {                                                                         \
+        std::Dist##_distribution<> dist(p1, p2);                              \
+        rng_dist(N, dist, #Dist "(" #p1 ", " #p2 ")", names, size, sw, bytes, \
+            cycles);                                                          \
     }
 
 template <typename Dist>

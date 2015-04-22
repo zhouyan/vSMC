@@ -81,8 +81,7 @@ class InitializeAdapterBase : public BaseType
     private:
     F f_;
 
-    VSMC_DEFINE_METHOD_CHECKER(
-        initialize_param, void, (Particle<T> &, void *))
+    VSMC_DEFINE_METHOD_CHECKER(initialize_param, void, (Particle<T> &, void *))
     VSMC_DEFINE_METHOD_CHECKER(pre_processor, void, (Particle<T> &))
     VSMC_DEFINE_METHOD_CHECKER(post_processor, void, (Particle<T> &))
 
@@ -153,9 +152,7 @@ class MoveAdapterBase : public BaseType
         f_.post_processor(iter, particle);
     }
 
-    void pre_processor_dispatch(std::size_t, Particle<T> &, std::false_type)
-    {
-    }
+    void pre_processor_dispatch(std::size_t, Particle<T> &, std::false_type) {}
     void post_processor_dispatch(std::size_t, Particle<T> &, std::false_type)
     {
     }
@@ -328,8 +325,7 @@ template <typename T, typename BaseType>
 class MoveAdapterBase<T, NullType, BaseType> : public BaseType
 {
     public:
-    typedef std::function<void(std::size_t, Particle<T> &)>
-        pre_processor_type;
+    typedef std::function<void(std::size_t, Particle<T> &)> pre_processor_type;
     typedef std::function<void(std::size_t, Particle<T> &)>
         post_processor_type;
 

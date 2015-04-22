@@ -44,8 +44,8 @@ template <typename T, template <typename, typename> class Impl, typename F>
 class InitializeAdapter : public InitializeAdapterBase<T, F,
                               Impl<T, InitializeAdapter<T, Impl, F>>>
 {
-    typedef InitializeAdapterBase<T, F,
-        Impl<T, InitializeAdapter<T, Impl, F>>> base;
+    typedef InitializeAdapterBase<T, F, Impl<T, InitializeAdapter<T, Impl, F>>>
+        base;
 
     public:
     InitializeAdapter() {}

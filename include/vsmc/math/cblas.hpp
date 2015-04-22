@@ -84,34 +84,34 @@ inline void scal(std::size_t n, T a, T *x)
 
 #ifdef VSMC_CBLAS_INT
 
-#define VSMC_DEFINE_MATH_CBLAS_S1(name, sname, dname)                        \
-    inline float name(std::size_t n, const float *x)                         \
-    {                                                                        \
-        return ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), x, 1);        \
-    }                                                                        \
-    inline double name(std::size_t n, const double *x)                       \
-    {                                                                        \
-        return ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), x, 1);        \
+#define VSMC_DEFINE_MATH_CBLAS_S1(name, sname, dname)                         \
+    inline float name(std::size_t n, const float *x)                          \
+    {                                                                         \
+        return ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), x, 1);         \
+    }                                                                         \
+    inline double name(std::size_t n, const double *x)                        \
+    {                                                                         \
+        return ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), x, 1);         \
     }
 
-#define VSMC_DEFINE_MATH_CBLAS_S2(name, sname, dname)                        \
-    inline float name(std::size_t n, const float *x, const float *y)         \
-    {                                                                        \
-        return ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), x, 1, y, 1);  \
-    }                                                                        \
-    inline double name(std::size_t n, const double *x, const double *y)      \
-    {                                                                        \
-        return ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), x, 1, y, 1);  \
+#define VSMC_DEFINE_MATH_CBLAS_S2(name, sname, dname)                         \
+    inline float name(std::size_t n, const float *x, const float *y)          \
+    {                                                                         \
+        return ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), x, 1, y, 1);   \
+    }                                                                         \
+    inline double name(std::size_t n, const double *x, const double *y)       \
+    {                                                                         \
+        return ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), x, 1, y, 1);   \
     }
 
-#define VSMC_DEFINE_MATH_CBLAS_SV(name, sname, dname)                        \
-    inline void name(std::size_t n, float a, float *x)                       \
-    {                                                                        \
-        ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), a, x, 1);            \
-    }                                                                        \
-    inline void name(std::size_t n, double a, double *x)                     \
-    {                                                                        \
-        ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), a, x, 1);            \
+#define VSMC_DEFINE_MATH_CBLAS_SV(name, sname, dname)                         \
+    inline void name(std::size_t n, float a, float *x)                        \
+    {                                                                         \
+        ::cblas_##sname(static_cast<VSMC_CBLAS_INT>(n), a, x, 1);             \
+    }                                                                         \
+    inline void name(std::size_t n, double a, double *x)                      \
+    {                                                                         \
+        ::cblas_##dname(static_cast<VSMC_CBLAS_INT>(n), a, x, 1);             \
     }
 
 namespace vsmc

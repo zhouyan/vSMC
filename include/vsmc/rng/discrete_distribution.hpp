@@ -35,8 +35,8 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/math/cblas.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param)        \
-    VSMC_RUNTIME_ASSERT(is_positive(param),                                  \
+#define VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param)         \
+    VSMC_RUNTIME_ASSERT(is_positive(param),                                   \
         ("**DiscreteDistribution** WEIGHTS ARE NOT NON-NEGATIVE"));
 
 namespace vsmc

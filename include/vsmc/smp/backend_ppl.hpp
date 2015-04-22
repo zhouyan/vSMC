@@ -266,8 +266,8 @@ class PathEvalPPL : public PathEvalBase<T, Derived>
 
         void operator()(size_type i) const
         {
-            res_[i] = path_->path_state(
-                iter_, ConstSingleParticle<T>(i, particle_));
+            res_[i] =
+                path_->path_state(iter_, ConstSingleParticle<T>(i, particle_));
         }
 
         private:

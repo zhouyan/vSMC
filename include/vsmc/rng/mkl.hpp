@@ -35,14 +35,14 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <mkl.h>
 
-#define VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Dist)    \
-    VSMC_STATIC_ASSERT((std::is_same<FPType, float>::value ||                \
-                           std::is_same<FPType, double>::value),             \
+#define VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Dist)     \
+    VSMC_STATIC_ASSERT((std::is_same<FPType, float>::value ||                 \
+                           std::is_same<FPType, double>::value),              \
         USE_MKL##Dist##Distribution_##WITH_A_RESULT_TYPE_OTHER_THAN_float_OR_double)
 
-#define VSMC_RUNTIME_ASSERT_RNG_MKL_VSL_OFFSET(offset)                       \
-    VSMC_RUNTIME_ASSERT((offset < max VSMC_MNE()),                           \
-        ("**MKLOffsetDynamic** "                                             \
+#define VSMC_RUNTIME_ASSERT_RNG_MKL_VSL_OFFSET(offset)                        \
+    VSMC_RUNTIME_ASSERT((offset < max VSMC_MNE()),                            \
+        ("**MKLOffsetDynamic** "                                              \
          "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS"))
 
 #ifndef VSMC_RNG_MKL_VSL_BUFFER_SIZE
@@ -165,8 +165,7 @@ inline std::string mkl_vsl_error_str(int status)
         VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_SKIPAHEAD_UNSUPPORTED);
         VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_UNSUPPORTED_FILE_VER);
         VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_NONDETERM_NOT_SUPPORTED);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(
-            VSL_RNG_ERROR_NONDETERM_NRETRIES_EXCEEDED);
+        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_NONDETERM_NRETRIES_EXCEEDED);
         default: return "UNKNOWN";
     }
 }
@@ -354,8 +353,7 @@ struct MKLSkipAheadForce {
 
     private:
     std::vector<ResultType, AlignedAllocator<ResultType>> buffer_;
-    typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type
-        uniform_bits_;
+    typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
     MKL_INT buffer_size_;
 }; // strut SkipAheadForce
 
@@ -414,9 +412,9 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     }
 
     template <typename SeedSeq>
-    explicit MKLStream(SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
-            MKLStream<BRNG>>::value>::type * = nullptr)
+    explicit MKLStream(
+        SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
+                          MKL_UINT, MKLStream<BRNG>>::value>::type * = nullptr)
         : seed_(0), stream_ptr_(nullptr), property_()
     {
         seq.generate(&seed_, &seed_ + 1);
@@ -495,8 +493,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
         } else {
             VSLStreamStatePtr new_stream_ptr;
 
-            status =
-                ::vslNewStream(&new_stream_ptr, BRNG + this->offset(), s);
+            status = ::vslNewStream(&new_stream_ptr, BRNG + this->offset(), s);
             internal::mkl_vsl_error_check(
                 BRNG, status, "MKLStream::seed", "::vslNewStream");
 
@@ -511,9 +508,9 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     }
 
     template <typename SeedSeq>
-    void seed(SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
-            MKLStream<BRNG>>::value>::type * = nullptr)
+    void seed(
+        SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
+                          MKL_UINT, MKLStream<BRNG>>::value>::type * = nullptr)
     {
         seq.generate(&seed_, &seed_ + 1);
         seed(seed_);
@@ -615,8 +612,7 @@ class MKLEngine
     private:
     stream_type stream_;
     typename internal::MKLSkipAhead<BRNG, ResultType>::type skip_ahead_;
-    typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type
-        uniform_bits_;
+    typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
     std::vector<result_type, AlignedAllocator<result_type>> buffer_;
     MKL_INT buffer_size_;
     MKL_INT index_;
@@ -1193,13 +1189,11 @@ class MKLLognormalDistribution
     public:
     typedef FPType result_type;
 
-    explicit MKLLognormalDistribution(result_type mean = 0,
-        result_type sd = 1, result_type displacement = 0,
-        result_type scale = 1)
+    explicit MKLLognormalDistribution(result_type mean = 0, result_type sd = 1,
+        result_type displacement = 0, result_type scale = 1)
         : mean_(mean), sd_(sd), disp_(displacement), scale_(scale)
     {
-        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(
-            FPType, Lognormal);
+        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Lognormal);
     }
 
     template <MKL_INT BRNG>
@@ -1335,14 +1329,12 @@ class MKLBetaDistribution
 
     int generate(VSLStreamStatePtr ptr, MKL_INT n, float *r)
     {
-        return ::vsRngBeta(
-            Method, ptr, n, r, shape1_, shape2_, disp_, scale_);
+        return ::vsRngBeta(Method, ptr, n, r, shape1_, shape2_, disp_, scale_);
     }
 
     int generate(VSLStreamStatePtr ptr, MKL_INT n, double *r)
     {
-        return ::vdRngBeta(
-            Method, ptr, n, r, shape1_, shape2_, disp_, scale_);
+        return ::vdRngBeta(Method, ptr, n, r, shape1_, shape2_, disp_, scale_);
     }
 }; // class MKLBetaDistribution
 

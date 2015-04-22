@@ -229,9 +229,9 @@
 
 #include <vsmc/internal/common.hpp>
 
-#define VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, func)        \
-    VSMC_RUNTIME_ASSERT(                                                     \
-        (ptr != nullptr), ("**ProgramOptionMap::" #func                      \
+#define VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, func)         \
+    VSMC_RUNTIME_ASSERT(                                                      \
+        (ptr != nullptr), ("**ProgramOptionMap::" #func                       \
                            "** ATTEMPT TO SET OPTION WITH A NULL POINTER"))
 
 namespace vsmc
@@ -802,8 +802,7 @@ class ProgramOptionMap
     void add_option(const std::string &oname, ProgramOption *optr)
     {
         std::pair<option_map_type::iterator, bool> insert =
-            option_map_.insert(
-                std::make_pair(oname, std::make_pair(optr, 0)));
+            option_map_.insert(std::make_pair(oname, std::make_pair(optr, 0)));
         if (insert.second) {
             option_list_.push_back(std::make_pair(oname, optr));
         } else {
@@ -893,8 +892,7 @@ class ProgramOptionMap
         const std::string &sval, std::ostream &os)
     {
         if (sval.empty()) {
-            program_option_warning(
-                iter->first, "No value found", silent_, os);
+            program_option_warning(iter->first, "No value found", silent_, os);
             return false;
         }
 

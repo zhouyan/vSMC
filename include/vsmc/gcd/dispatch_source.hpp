@@ -101,8 +101,7 @@ class DispatchSourceBase : public DispatchObject<::dispatch_source_t>
 
     void set_cancel_handler_f(::dispatch_function_t cancel_handler) const
     {
-        ::dispatch_source_set_cancel_handler_f(
-            this->object(), cancel_handler);
+        ::dispatch_source_set_cancel_handler_f(this->object(), cancel_handler);
     }
 
     void set_event_handler_f(::dispatch_function_t event_handler) const
@@ -156,8 +155,7 @@ class DispatchSourceBase : public DispatchObject<::dispatch_source_t>
     }
 
     private:
-    static ::dispatch_source_type_t source_type_t(
-        source_type<DispatchDataAdd>)
+    static ::dispatch_source_type_t source_type_t(source_type<DispatchDataAdd>)
     {
         return DISPATCH_SOURCE_TYPE_DATA_ADD;
     }

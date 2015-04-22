@@ -36,20 +36,20 @@
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 
-#define VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim)         \
-    VSMC_STATIC_ASSERT((Dim == Dynamic),                                     \
+#define VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim)          \
+    VSMC_STATIC_ASSERT((Dim == Dynamic),                                      \
         USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateMatrix_OBJECT)
 
-#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH             \
-    VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),         \
+#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH              \
+    VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),          \
         ("**StateMatrix::copy** SIZE MISMATCH"))
 
-#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_DIM_SIZE(dim)                  \
-    VSMC_RUNTIME_ASSERT(                                                     \
+#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_DIM_SIZE(dim)                   \
+    VSMC_RUNTIME_ASSERT(                                                      \
         (dim >= 1), ("**StateMatrix** DIMENSION IS LESS THAN 1"))
 
-#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(psize, dim)        \
-    VSMC_RUNTIME_ASSERT((psize >= dim),                                      \
+#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(psize, dim)         \
+    VSMC_RUNTIME_ASSERT((psize >= dim),                                       \
         ("**StateMatrix::state_unpack** INPUT PACK SIZE TOO SMALL"))
 
 namespace vsmc
@@ -74,10 +74,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         {
         }
 
-        std::size_t dim() const
-        {
-            return this->particle_ptr()->value().dim();
-        }
+        std::size_t dim() const { return this->particle_ptr()->value().dim(); }
 
         state_type &state(std::size_t pos) const
         {
@@ -106,10 +103,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         {
         }
 
-        std::size_t dim() const
-        {
-            return this->particle_ptr()->value().dim();
-        }
+        std::size_t dim() const { return this->particle_ptr()->value().dim(); }
 
         const state_type &state(std::size_t pos) const
         {

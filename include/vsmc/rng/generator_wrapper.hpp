@@ -34,13 +34,13 @@
 
 #include <vsmc/rng/internal/common.hpp>
 
-#define VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER_RESULT_TYPE(ResultType)     \
-    VSMC_STATIC_ASSERT((std::is_same<ResultType, uint16_t>::value ||         \
-                           std::is_same<ResultType, uint32_t>::value ||      \
-                           std::is_same<ResultType, uint64_t>::value),       \
+#define VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER_RESULT_TYPE(ResultType)      \
+    VSMC_STATIC_ASSERT((std::is_same<ResultType, uint16_t>::value ||          \
+                           std::is_same<ResultType, uint32_t>::value ||       \
+                           std::is_same<ResultType, uint64_t>::value),        \
         USE_GeneratorWrapper_WITH_RESULT_TYPE_OTHER_THAN_uint16_t_OR_uint32_t_OR_uint64_t)
 
-#define VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER                             \
+#define VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER                              \
     VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER_RESULT_TYPE(ResultType);
 
 namespace vsmc

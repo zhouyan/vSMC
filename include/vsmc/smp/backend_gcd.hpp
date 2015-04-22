@@ -244,9 +244,8 @@ class PathEvalGCD : public PathEvalBase<T, Derived>
     {
         typedef typename Particle<T>::size_type size_type;
         const work_param_ *const wptr = static_cast<const work_param_ *>(wp);
-        wptr->res[i] = wptr->dispatcher->path_state(
-            wptr->iter, ConstSingleParticle<T>(
-                            static_cast<size_type>(i), wptr->particle));
+        wptr->res[i] = wptr->dispatcher->path_state(wptr->iter,
+            ConstSingleParticle<T>(static_cast<size_type>(i), wptr->particle));
     }
 }; // class PathEvalGCD
 

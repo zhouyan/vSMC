@@ -42,69 +42,69 @@
 #include <vsmc/opencl/internal/cl_wrapper.hpp>
 #include <vsmc/rng/seed.hpp>
 
-#define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_DYNAMIC_STATE_SIZE_RESIZE(Dim)  \
-    VSMC_STATIC_ASSERT((Dim == Dynamic),                                     \
+#define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_DYNAMIC_STATE_SIZE_RESIZE(Dim)   \
+    VSMC_STATIC_ASSERT((Dim == Dynamic),                                      \
         USE_METHOD_resize_state_WITH_A_FIXED_SIZE_StateCL_OBJECT)
 
-#define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(derived, user)    \
-    VSMC_STATIC_ASSERT((internal::IsDerivedFromStateCL<derived>::value),     \
+#define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(derived, user)     \
+    VSMC_STATIC_ASSERT((internal::IsDerivedFromStateCL<derived>::value),      \
         USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
 
-#define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(type)          \
-    VSMC_STATIC_ASSERT((std::is_same<type, ::cl_float>::value ||             \
-                           std::is_same<type, ::cl_double>::value),          \
+#define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(type)           \
+    VSMC_STATIC_ASSERT((std::is_same<type, ::cl_float>::value ||              \
+                           std::is_same<type, ::cl_double>::value),           \
         USE_StateCL_WITH_A_FP_TYPE_OTHER_THAN_cl_float_AND_cl_double)
 
-#define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(func)                    \
-    VSMC_RUNTIME_ASSERT(                                                     \
-        (build()), ("**StateCL::" #func "** CAN ONLY BE CALLED AFTER true "  \
+#define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(func)                     \
+    VSMC_RUNTIME_ASSERT(                                                      \
+        (build()), ("**StateCL::" #func "** CAN ONLY BE CALLED AFTER true "   \
                     "**StateCL::build**"));
 
-#define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_STATE_SIZE(state_size)         \
+#define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_STATE_SIZE(state_size)          \
     VSMC_RUNTIME_ASSERT((state_size >= 1), ("STATE SIZE IS LESS THAN 1"))
 
-#define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_COPY_SIZE_MISMATCH             \
-    VSMC_RUNTIME_ASSERT(                                                     \
+#define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_COPY_SIZE_MISMATCH              \
+    VSMC_RUNTIME_ASSERT(                                                      \
         (N == copy_.size()), ("**StateCL::copy** SIZE MISMATCH"))
 
-#define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_UNPACK_SIZE(psize, dim)        \
-    VSMC_RUNTIME_ASSERT((psize >= dim),                                      \
+#define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_UNPACK_SIZE(psize, dim)         \
+    VSMC_RUNTIME_ASSERT((psize >= dim),                                       \
         ("**StateCL::state_unpack** INPUT PACK SIZE TOO SMALL"))
 
-#define VSMC_DEFINE_OPENCL_COPY(Name)                                        \
-    Name() : build_id_(-1) {}                                                \
-    Name(const Name<T, PlaceHolder> &) = default;                            \
-    Name<T, PlaceHolder> &operator=(const Name<T, PlaceHolder> &) = default; \
+#define VSMC_DEFINE_OPENCL_COPY(Name)                                         \
+    Name() : build_id_(-1) {}                                                 \
+    Name(const Name<T, PlaceHolder> &) = default;                             \
+    Name<T, PlaceHolder> &operator=(const Name<T, PlaceHolder> &) = default;  \
     virtual ~Name() {}
 
-#define VSMC_DEFINE_OPENCL_MOVE(Name)                                        \
-    Name(Name<T, PlaceHolder> &&) = default;                                 \
+#define VSMC_DEFINE_OPENCL_MOVE(Name)                                         \
+    Name(Name<T, PlaceHolder> &&) = default;                                  \
     Name<T, PlaceHolder> &operator=(Name<T, PlaceHolder> &&) = default;
 
-#define VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL                                  \
-    CLConfigure &configure() { return configure_; }                          \
-    const CLConfigure &configure() const { return configure_; }              \
-    ::cl::Kernel &kernel() { return kernel_; }                               \
-    const ::cl::Kernel &kernel() const { return kernel_; }                   \
+#define VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL                                   \
+    CLConfigure &configure() { return configure_; }                           \
+    const CLConfigure &configure() const { return configure_; }               \
+    ::cl::Kernel &kernel() { return kernel_; }                                \
+    const ::cl::Kernel &kernel() const { return kernel_; }                    \
     const std::string &kernel_name() const { return kernel_name_; }
 
-#define VSMC_DEFINE_OPENCL_SET_KERNEL                                        \
-    if (kname.empty()) {                                                     \
-        kernel_name_.clear();                                                \
-        return;                                                              \
-    }                                                                        \
-    if (build_id_ != particle.value().build_id() || kernel_name_ != kname) { \
-        build_id_ = particle.value().build_id();                             \
-        kernel_name_ = kname;                                                \
-        kernel_ = particle.value().create_kernel(kernel_name_);              \
-        configure_.local_size(                                               \
-            particle.size(), kernel_, particle.value().manager().device());  \
+#define VSMC_DEFINE_OPENCL_SET_KERNEL                                         \
+    if (kname.empty()) {                                                      \
+        kernel_name_.clear();                                                 \
+        return;                                                               \
+    }                                                                         \
+    if (build_id_ != particle.value().build_id() || kernel_name_ != kname) {  \
+        build_id_ = particle.value().build_id();                              \
+        kernel_name_ = kname;                                                 \
+        kernel_ = particle.value().create_kernel(kernel_name_);               \
+        configure_.local_size(                                                \
+            particle.size(), kernel_, particle.value().manager().device());   \
     }
 
-#define VSMC_DEFINE_OPENCL_MEMBER_DATA                                       \
-    CLConfigure configure_;                                                  \
-    int build_id_;                                                           \
-    ::cl::Kernel kernel_;                                                    \
+#define VSMC_DEFINE_OPENCL_MEMBER_DATA                                        \
+    CLConfigure configure_;                                                   \
+    int build_id_;                                                            \
+    ::cl::Kernel kernel_;                                                     \
     std::string kernel_name_
 
 namespace vsmc
@@ -186,8 +186,8 @@ struct IsDerivedFromStateCLImpl {
 }; // struct IsDerivedFromStateImpl
 
 template <typename D>
-struct IsDerivedFromStateCL : public std::integral_constant<bool,
-                                  IsDerivedFromStateCLImpl<D>::value> {
+struct IsDerivedFromStateCL
+    : public std::integral_constant<bool, IsDerivedFromStateCLImpl<D>::value> {
 };
 
 } // namespace vsmc::internal
@@ -327,8 +327,8 @@ class StateCL
         build_program(flags, os);
     }
 
-    void build(const ::cl::Program &program,
-        const std::string &flags = std::string())
+    void build(
+        const ::cl::Program &program, const std::string &flags = std::string())
     {
         build(program, flags, std::cout);
     }
@@ -377,8 +377,8 @@ class StateCL
                 state_idx_host_.data());
         }
 #else
-        state_idx_buffer_.resize(size_,
-            CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, state_idx_host_.data());
+        state_idx_buffer_.resize(size_, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
+            state_idx_host_.data());
 #endif
 
         state_tmp_host_.resize(size_ * state_size_);
@@ -649,8 +649,7 @@ class MoveCL
         VSMC_DEFINE_OPENCL_SET_KERNEL;
     }
 
-    virtual void set_kernel_args(
-        std::size_t iter, const Particle<T> &particle)
+    virtual void set_kernel_args(std::size_t iter, const Particle<T> &particle)
     {
         accept_host_.resize(particle.size());
 #if VSMC_OPENCL_VERSION >= 120
@@ -815,8 +814,7 @@ class PathEvalCL
         VSMC_DEFINE_OPENCL_SET_KERNEL;
     }
 
-    virtual void set_kernel_args(
-        std::size_t iter, const Particle<T> &particle)
+    virtual void set_kernel_args(std::size_t iter, const Particle<T> &particle)
     {
 #if VSMC_OPENCL_VERSION >= 120
         if (particle.value().manager().opencl_version() >= 120) {

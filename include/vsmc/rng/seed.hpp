@@ -34,23 +34,23 @@
 
 #include <vsmc/rng/internal/common.hpp>
 
-#define VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(T)                 \
-    VSMC_STATIC_ASSERT((std::is_unsigned<T>::value),                         \
+#define VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(T)                  \
+    VSMC_STATIC_ASSERT((std::is_unsigned<T>::value),                          \
         USE_SeedGenerator_WITH_A_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER)
 
-#define VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(div, rem)              \
-    VSMC_RUNTIME_ASSERT(                                                     \
-        (div > rem), ("**SeedGenerator::modulo** "                           \
+#define VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(div, rem)               \
+    VSMC_RUNTIME_ASSERT(                                                      \
+        (div > rem), ("**SeedGenerator::modulo** "                            \
                       "REMAINDER IS NOT SMALLER THAN THE DIVISOR"))
 
-#define VSMC_RUNTIME_WARNING_RNG_SEED_GENERATOR_MODULO(div, rem)             \
-    VSMC_RUNTIME_WARNING((div == 1 && rem == 0),                             \
-        ("**SeedGenerator::modulo** "                                        \
+#define VSMC_RUNTIME_WARNING_RNG_SEED_GENERATOR_MODULO(div, rem)              \
+    VSMC_RUNTIME_WARNING((div == 1 && rem == 0),                              \
+        ("**SeedGenerator::modulo** "                                         \
          "COUNTER TYPE SEED DOES NOT SUPPORT MODULO"))
 
-#define VSMC_RUNTIME_ASSERT_RNG_SEED_MAX(seed_max)                           \
-    VSMC_RUNTIME_ASSERT((seed_max > 1),                                      \
-        ("**SeedGenerator::modulo** "                                        \
+#define VSMC_RUNTIME_ASSERT_RNG_SEED_MAX(seed_max)                            \
+    VSMC_RUNTIME_ASSERT((seed_max > 1),                                       \
+        ("**SeedGenerator::modulo** "                                         \
          "THE MAXIMUM OF THE INTERNAL SEED IS NO LARGER THAN 1"))
 
 /// \brief Default result type of Seed

@@ -469,8 +469,7 @@ inline void hdf5store_list(std::size_t nrow, std::size_t ncol,
             std::string dataset_name(group_name + "/" + (*sfirst));
             ::hid_t dataset = ::H5Dcreate(datafile, dataset_name.c_str(),
                 datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-            ::H5Dwrite(
-                dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+            ::H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
             ::H5Dclose(dataset);
         }
         ::H5Tclose(datatype);
@@ -500,8 +499,7 @@ inline void hdf5store_list_insert(std::size_t N, const std::string &file_name,
     std::string dataset_name("/" + data_name + "/" + vname);
     ::hsize_t dim[1] = {N};
 
-    ::hid_t datafile =
-        ::H5Fopen(file_name.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+    ::hid_t datafile = ::H5Fopen(file_name.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
     ::hid_t dataspace = ::H5Screate_simple(1, dim, nullptr);
     ::hid_t datatype = hdf5io_datatype<T>();
     internal::HDF5StoreDataPtr<T> data_ptr;
@@ -578,8 +576,8 @@ inline void hdf5_tuple_vector_ptr(
 template <typename InputIter, typename... InputIters>
 inline void hdf5store_list_insert_tuple(std::size_t nrow,
     const std::string &file_name, const std::string &data_name,
-    const std::tuple<InputIter, InputIters...> &first,
-    const std::string *sptr, Position<0>)
+    const std::tuple<InputIter, InputIters...> &first, const std::string *sptr,
+    Position<0>)
 {
     typedef typename std::tuple_element<0,
         std::tuple<InputIter, InputIters...>>::type iter_type;
@@ -593,8 +591,8 @@ inline void hdf5store_list_insert_tuple(std::size_t nrow,
 template <typename InputIter, typename... InputIters, std::size_t Pos>
 inline void hdf5store_list_insert_tuple(std::size_t nrow,
     const std::string &file_name, const std::string &data_name,
-    const std::tuple<InputIter, InputIters...> &first,
-    const std::string *sptr, Position<Pos>)
+    const std::tuple<InputIter, InputIters...> &first, const std::string *sptr,
+    Position<Pos>)
 {
     typedef typename std::tuple_element<Pos,
         std::tuple<InputIter, InputIters...>>::type iter_type;
@@ -692,8 +690,8 @@ inline void hdf5store(const StateMatrix<Order, Dim, T> &state,
     const std::string &file_name, const std::string &data_name,
     bool append = false)
 {
-    hdf5store_matrix<Order, T>(state.size(), state.dim(), file_name,
-        data_name, state.data(), append);
+    hdf5store_matrix<Order, T>(
+        state.size(), state.dim(), file_name, data_name, state.data(), append);
 }
 
 /// \brief Store a StateTuple in the HDF5 format

@@ -23,7 +23,7 @@ BreakBeforeBinaryOperators                     : None
 BreakBeforeBraces                              : Linux
 BreakBeforeTernaryOperators                    : false
 BreakConstructorInitializersBeforeComma        : true
-ColumnLimit                                    : 78
+ColumnLimit                                    : 79
 # CommentPragmas                                 :
 ConstructorInitializerAllOnOneLineOrOnePerLine : true
 ConstructorInitializerIndentWidth              : 4

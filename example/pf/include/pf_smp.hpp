@@ -48,26 +48,26 @@
 
 #include <fstream>
 
-#define PF_CV_DO(Res)                                                        \
-    cv_do<vsmc::RowMajor>(vsmc::Res, argv, "." #Res ".row");                 \
+#define PF_CV_DO(Res)                                                         \
+    cv_do<vsmc::RowMajor>(vsmc::Res, argv, "." #Res ".row");                  \
     cv_do<vsmc::ColMajor>(vsmc::Res, argv, "." #Res ".col");
 
-#define PF_MAIN                                                              \
-    if (argc < 3) {                                                          \
-        std::cout << "Usage: " << argv[0] << " <input file>"                 \
-                  << " <output file>" << std::endl;                          \
-        return -1;                                                           \
-    }                                                                        \
-    PF_CV_DO(Multinomial);                                                   \
-    PF_CV_DO(Residual);                                                      \
-    PF_CV_DO(Stratified);                                                    \
-    PF_CV_DO(Systematic);                                                    \
-    PF_CV_DO(ResidualStratified);                                            \
-    PF_CV_DO(ResidualSystematic);                                            \
+#define PF_MAIN                                                               \
+    if (argc < 3) {                                                           \
+        std::cout << "Usage: " << argv[0] << " <input file>"                  \
+                  << " <output file>" << std::endl;                           \
+        return -1;                                                            \
+    }                                                                         \
+    PF_CV_DO(Multinomial);                                                    \
+    PF_CV_DO(Residual);                                                       \
+    PF_CV_DO(Stratified);                                                     \
+    PF_CV_DO(Systematic);                                                     \
+    PF_CV_DO(ResidualStratified);                                             \
+    PF_CV_DO(ResidualSystematic);                                             \
     return 0;
 
-#define PF_MAIN_MPI                                                          \
-    vsmc::MPIEnvironment env(argc, argv);                                    \
+#define PF_MAIN_MPI                                                           \
+    vsmc::MPIEnvironment env(argc, argv);                                     \
     PF_MAIN;
 
 static const std::size_t DataNum = 100;
@@ -202,8 +202,7 @@ class cv_move
     }
 #endif
 
-    std::size_t move_state(
-        std::size_t iter, vsmc::SingleParticle<cv> sp) const
+    std::size_t move_state(std::size_t iter, vsmc::SingleParticle<cv> sp) const
     {
         using std::sqrt;
 

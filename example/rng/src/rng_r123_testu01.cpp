@@ -49,21 +49,21 @@
 #pragma warning(pop)
 #endif
 
-#define VSMC_RNG_TESTU01_FUNCTION_R123(Eng)                                  \
-    extern "C" {                                                             \
-    inline double rng_##Eng(void)                                            \
-    {                                                                        \
-        static r123::Engine<r123::Eng> eng;                                  \
-        static std::uniform_real_distribution<double> runif(0, 1);           \
-                                                                             \
-        return runif(eng);                                                   \
-    }                                                                        \
+#define VSMC_RNG_TESTU01_FUNCTION_R123(Eng)                                   \
+    extern "C" {                                                              \
+    inline double rng_##Eng(void)                                             \
+    {                                                                         \
+        static r123::Engine<r123::Eng> eng;                                   \
+        static std::uniform_real_distribution<double> runif(0, 1);            \
+                                                                              \
+        return runif(eng);                                                    \
+    }                                                                         \
     }
 
-#define VSMC_RNG_TESTU01_OPTION_R123(Eng)                                    \
-    bool rng_testu01_##Eng = false;                                          \
-    option.add(#Eng, "Test r123::Engine<r123::" #Eng ">",                    \
-        &rng_testu01_##Eng, false);
+#define VSMC_RNG_TESTU01_OPTION_R123(Eng)                                     \
+    bool rng_testu01_##Eng = false;                                           \
+    option.add(#Eng, "Test r123::Engine<r123::" #Eng ">", &rng_testu01_##Eng, \
+        false);
 
 #if VSMC_HAS_AES_NI
 namespace r123

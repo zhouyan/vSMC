@@ -255,23 +255,23 @@ class Memory;
 /**
  * Deprecated APIs for 1.2
  */
-#if defined(CL_USE_DEPRECATED_OPENCL_1_1_APIS) ||                            \
+#if defined(CL_USE_DEPRECATED_OPENCL_1_1_APIS) ||                             \
     (defined(CL_VERSION_1_1) && !defined(CL_VERSION_1_2))
-#define __INIT_CL_EXT_FCN_PTR(name)                                          \
-    if (!pfn_##name) {                                                       \
-        pfn_##name = (PFN_##name) clGetExtensionFunctionAddress(#name);      \
-        if (!pfn_##name) {                                                   \
-        }                                                                    \
+#define __INIT_CL_EXT_FCN_PTR(name)                                           \
+    if (!pfn_##name) {                                                        \
+        pfn_##name = (PFN_##name) clGetExtensionFunctionAddress(#name);       \
+        if (!pfn_##name) {                                                    \
+        }                                                                     \
     }
 #endif // #if defined(CL_VERSION_1_1)
 
 #if defined(CL_VERSION_1_2)
-#define __INIT_CL_EXT_FCN_PTR_PLATFORM(platform, name)                       \
-    if (!pfn_##name) {                                                       \
-        pfn_##name = (PFN_##name) clGetExtensionFunctionAddressForPlatform(  \
-            platform, #name);                                                \
-        if (!pfn_##name) {                                                   \
-        }                                                                    \
+#define __INIT_CL_EXT_FCN_PTR_PLATFORM(platform, name)                        \
+    if (!pfn_##name) {                                                        \
+        pfn_##name = (PFN_##name) clGetExtensionFunctionAddressForPlatform(   \
+            platform, #name);                                                 \
+        if (!pfn_##name) {                                                    \
+        }                                                                     \
     }
 #endif // #if defined(CL_VERSION_1_1)
 
@@ -377,8 +377,7 @@ static inline cl_int errHandler(cl_int err, const char* errStr = NULL)
 
 #define __CREATE_CONTEXT_ERR __ERR_STR(clCreateContext)
 #define __CREATE_CONTEXT_FROM_TYPE_ERR __ERR_STR(clCreateContextFromType)
-#define __GET_SUPPORTED_IMAGE_FORMATS_ERR                                    \
-    __ERR_STR(clGetSupportedImageFormats)
+#define __GET_SUPPORTED_IMAGE_FORMATS_ERR __ERR_STR(clGetSupportedImageFormats)
 
 #define __CREATE_BUFFER_ERR __ERR_STR(clCreateBuffer)
 #define __COPY_ERR __ERR_STR(cl::copy)
@@ -392,7 +391,7 @@ static inline cl_int errHandler(cl_int err, const char* errStr = NULL)
 #define __IMAGE_DIMENSION_ERR __ERR_STR(Incorrect image dimensions)
 #endif // #if defined(CL_VERSION_1_2)
 #define __CREATE_SAMPLER_ERR __ERR_STR(clCreateSampler)
-#define __SET_MEM_OBJECT_DESTRUCTOR_CALLBACK_ERR                             \
+#define __SET_MEM_OBJECT_DESTRUCTOR_CALLBACK_ERR                              \
     __ERR_STR(clSetMemObjectDestructorCallback)
 
 #define __CREATE_USER_EVENT_ERR __ERR_STR(clCreateUserEvent)
@@ -405,7 +404,7 @@ static inline cl_int errHandler(cl_int err, const char* errStr = NULL)
 #define __CREATE_PROGRAM_WITH_SOURCE_ERR __ERR_STR(clCreateProgramWithSource)
 #define __CREATE_PROGRAM_WITH_BINARY_ERR __ERR_STR(clCreateProgramWithBinary)
 #if defined(CL_VERSION_1_2)
-#define __CREATE_PROGRAM_WITH_BUILT_IN_KERNELS_ERR                           \
+#define __CREATE_PROGRAM_WITH_BUILT_IN_KERNELS_ERR                            \
     __ERR_STR(clCreateProgramWithBuiltInKernels)
 #endif // #if defined(CL_VERSION_1_2)
 #define __BUILD_PROGRAM_ERR __ERR_STR(clBuildProgram)
@@ -428,9 +427,9 @@ static inline cl_int errHandler(cl_int err, const char* errStr = NULL)
 #define __ENQUEUE_WRITE_IMAGE_ERR __ERR_STR(clEnqueueWriteImage)
 #define __ENQUEUE_COPY_IMAGE_ERR __ERR_STR(clEnqueueCopyImage)
 #define __ENQUEUE_FILL_IMAGE_ERR __ERR_STR(clEnqueueFillImage)
-#define __ENQUEUE_COPY_IMAGE_TO_BUFFER_ERR                                   \
+#define __ENQUEUE_COPY_IMAGE_TO_BUFFER_ERR                                    \
     __ERR_STR(clEnqueueCopyImageToBuffer)
-#define __ENQUEUE_COPY_BUFFER_TO_IMAGE_ERR                                   \
+#define __ENQUEUE_COPY_BUFFER_TO_IMAGE_ERR                                    \
     __ERR_STR(clEnqueueCopyBufferToImage)
 #define __ENQUEUE_MAP_BUFFER_ERR __ERR_STR(clEnqueueMapBuffer)
 #define __ENQUEUE_MAP_IMAGE_ERR __ERR_STR(clEnqueueMapImage)
@@ -439,8 +438,7 @@ static inline cl_int errHandler(cl_int err, const char* errStr = NULL)
 #define __ENQUEUE_TASK_ERR __ERR_STR(clEnqueueTask)
 #define __ENQUEUE_NATIVE_KERNEL __ERR_STR(clEnqueueNativeKernel)
 #if defined(CL_VERSION_1_2)
-#define __ENQUEUE_MIGRATE_MEM_OBJECTS_ERR                                    \
-    __ERR_STR(clEnqueueMigrateMemObjects)
+#define __ENQUEUE_MIGRATE_MEM_OBJECTS_ERR __ERR_STR(clEnqueueMigrateMemObjects)
 #endif // #if defined(CL_VERSION_1_2)
 
 #define __ENQUEUE_ACQUIRE_GL_ERR __ERR_STR(clEnqueueAcquireGLObjects)
@@ -464,7 +462,7 @@ static inline cl_int errHandler(cl_int err, const char* errStr = NULL)
 /**
  * Deprecated APIs for 1.2
  */
-#if defined(CL_USE_DEPRECATED_OPENCL_1_1_APIS) ||                            \
+#if defined(CL_USE_DEPRECATED_OPENCL_1_1_APIS) ||                             \
     (defined(CL_VERSION_1_1) && !defined(CL_VERSION_1_2))
 #define __ENQUEUE_MARKER_ERR __ERR_STR(clEnqueueMarker)
 #define __ENQUEUE_WAIT_FOR_EVENTS_ERR __ERR_STR(clEnqueueWaitForEvents)
@@ -477,15 +475,14 @@ static inline cl_int errHandler(cl_int err, const char* errStr = NULL)
 #endif // #if defined(CL_VERSION_1_1)
 
 #endif // __CL_USER_OVERRIDE_ERROR_STRINGS
-//! \endcond
+       //! \endcond
 
 /**
  * CL 1.2 marker and barrier commands
  */
 #if defined(CL_VERSION_1_2)
 #define __ENQUEUE_MARKER_WAIT_LIST_ERR __ERR_STR(clEnqueueMarkerWithWaitList)
-#define __ENQUEUE_BARRIER_WAIT_LIST_ERR                                      \
-    __ERR_STR(clEnqueueBarrierWithWaitList)
+#define __ENQUEUE_BARRIER_WAIT_LIST_ERR __ERR_STR(clEnqueueBarrierWithWaitList)
 #endif // #if defined(CL_VERSION_1_2)
 
 #if !defined(__USE_DEV_STRING) && !defined(__NO_STD_STRING)
@@ -1025,8 +1022,7 @@ inline cl_int getInfoHelper(Functor f, cl_uint name, T* param, long)
 
 // Specialized getInfoHelper for VECTOR_CLASS params
 template <typename Func, typename T>
-inline cl_int getInfoHelper(
-    Func f, cl_uint name, VECTOR_CLASS<T>* param, long)
+inline cl_int getInfoHelper(Func f, cl_uint name, VECTOR_CLASS<T>* param, long)
 {
     ::size_t required;
     cl_int err = f(name, 0, NULL, &required);
@@ -1051,8 +1047,8 @@ inline cl_int getInfoHelper(
  * template will provide a better match.
  */
 template <typename Func, typename T>
-inline cl_int getInfoHelper(Func f, cl_uint name, VECTOR_CLASS<T>* param, int,
-    typename T::cl_type = 0)
+inline cl_int getInfoHelper(
+    Func f, cl_uint name, VECTOR_CLASS<T>* param, int, typename T::cl_type = 0)
 {
     ::size_t required;
     cl_int err = f(name, 0, NULL, &required);
@@ -1164,197 +1160,197 @@ inline cl_int getInfoHelper(
     return CL_SUCCESS;
 }
 
-#define __PARAM_NAME_INFO_1_0(F)                                             \
-    F(cl_platform_info, CL_PLATFORM_PROFILE, STRING_CLASS)                   \
-    F(cl_platform_info, CL_PLATFORM_VERSION, STRING_CLASS)                   \
-    F(cl_platform_info, CL_PLATFORM_NAME, STRING_CLASS)                      \
-    F(cl_platform_info, CL_PLATFORM_VENDOR, STRING_CLASS)                    \
-    F(cl_platform_info, CL_PLATFORM_EXTENSIONS, STRING_CLASS)                \
-                                                                             \
-    F(cl_device_info, CL_DEVICE_TYPE, cl_device_type)                        \
-    F(cl_device_info, CL_DEVICE_VENDOR_ID, cl_uint)                          \
-    F(cl_device_info, CL_DEVICE_MAX_COMPUTE_UNITS, cl_uint)                  \
-    F(cl_device_info, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, cl_uint)           \
-    F(cl_device_info, CL_DEVICE_MAX_WORK_GROUP_SIZE, ::size_t)               \
-    F(cl_device_info, CL_DEVICE_MAX_WORK_ITEM_SIZES, VECTOR_CLASS<::size_t>) \
-    F(cl_device_info, CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, cl_uint)        \
-    F(cl_device_info, CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT, cl_uint)       \
-    F(cl_device_info, CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT, cl_uint)         \
-    F(cl_device_info, CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG, cl_uint)        \
-    F(cl_device_info, CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT, cl_uint)       \
-    F(cl_device_info, CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE, cl_uint)      \
-    F(cl_device_info, CL_DEVICE_MAX_CLOCK_FREQUENCY, cl_uint)                \
-    F(cl_device_info, CL_DEVICE_ADDRESS_BITS, cl_uint)                       \
-    F(cl_device_info, CL_DEVICE_MAX_READ_IMAGE_ARGS, cl_uint)                \
-    F(cl_device_info, CL_DEVICE_MAX_WRITE_IMAGE_ARGS, cl_uint)               \
-    F(cl_device_info, CL_DEVICE_MAX_MEM_ALLOC_SIZE, cl_ulong)                \
-    F(cl_device_info, CL_DEVICE_IMAGE2D_MAX_WIDTH, ::size_t)                 \
-    F(cl_device_info, CL_DEVICE_IMAGE2D_MAX_HEIGHT, ::size_t)                \
-    F(cl_device_info, CL_DEVICE_IMAGE3D_MAX_WIDTH, ::size_t)                 \
-    F(cl_device_info, CL_DEVICE_IMAGE3D_MAX_HEIGHT, ::size_t)                \
-    F(cl_device_info, CL_DEVICE_IMAGE3D_MAX_DEPTH, ::size_t)                 \
-    F(cl_device_info, CL_DEVICE_IMAGE_SUPPORT, cl_bool)                      \
-    F(cl_device_info, CL_DEVICE_MAX_PARAMETER_SIZE, ::size_t)                \
-    F(cl_device_info, CL_DEVICE_MAX_SAMPLERS, cl_uint)                       \
-    F(cl_device_info, CL_DEVICE_MEM_BASE_ADDR_ALIGN, cl_uint)                \
-    F(cl_device_info, CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE, cl_uint)           \
-    F(cl_device_info, CL_DEVICE_SINGLE_FP_CONFIG, cl_device_fp_config)       \
-    F(cl_device_info, CL_DEVICE_GLOBAL_MEM_CACHE_TYPE,                       \
-        cl_device_mem_cache_type)                                            \
-    F(cl_device_info, CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE, cl_uint)          \
-    F(cl_device_info, CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, cl_ulong)             \
-    F(cl_device_info, CL_DEVICE_GLOBAL_MEM_SIZE, cl_ulong)                   \
-    F(cl_device_info, CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, cl_ulong)          \
-    F(cl_device_info, CL_DEVICE_MAX_CONSTANT_ARGS, cl_uint)                  \
-    F(cl_device_info, CL_DEVICE_LOCAL_MEM_TYPE, cl_device_local_mem_type)    \
-    F(cl_device_info, CL_DEVICE_LOCAL_MEM_SIZE, cl_ulong)                    \
-    F(cl_device_info, CL_DEVICE_ERROR_CORRECTION_SUPPORT, cl_bool)           \
-    F(cl_device_info, CL_DEVICE_PROFILING_TIMER_RESOLUTION, ::size_t)        \
-    F(cl_device_info, CL_DEVICE_ENDIAN_LITTLE, cl_bool)                      \
-    F(cl_device_info, CL_DEVICE_AVAILABLE, cl_bool)                          \
-    F(cl_device_info, CL_DEVICE_COMPILER_AVAILABLE, cl_bool)                 \
-    F(cl_device_info, CL_DEVICE_EXECUTION_CAPABILITIES,                      \
-        cl_device_exec_capabilities)                                         \
-    F(cl_device_info, CL_DEVICE_QUEUE_PROPERTIES,                            \
-        cl_command_queue_properties)                                         \
-    F(cl_device_info, CL_DEVICE_PLATFORM, cl_platform_id)                    \
-    F(cl_device_info, CL_DEVICE_NAME, STRING_CLASS)                          \
-    F(cl_device_info, CL_DEVICE_VENDOR, STRING_CLASS)                        \
-    F(cl_device_info, CL_DRIVER_VERSION, STRING_CLASS)                       \
-    F(cl_device_info, CL_DEVICE_PROFILE, STRING_CLASS)                       \
-    F(cl_device_info, CL_DEVICE_VERSION, STRING_CLASS)                       \
-    F(cl_device_info, CL_DEVICE_EXTENSIONS, STRING_CLASS)                    \
-                                                                             \
-    F(cl_context_info, CL_CONTEXT_REFERENCE_COUNT, cl_uint)                  \
-    F(cl_context_info, CL_CONTEXT_DEVICES, VECTOR_CLASS<Device>)             \
-    F(cl_context_info, CL_CONTEXT_PROPERTIES,                                \
-        VECTOR_CLASS<cl_context_properties>)                                 \
-                                                                             \
-    F(cl_event_info, CL_EVENT_COMMAND_QUEUE, cl::CommandQueue)               \
-    F(cl_event_info, CL_EVENT_COMMAND_TYPE, cl_command_type)                 \
-    F(cl_event_info, CL_EVENT_REFERENCE_COUNT, cl_uint)                      \
-    F(cl_event_info, CL_EVENT_COMMAND_EXECUTION_STATUS, cl_uint)             \
-                                                                             \
-    F(cl_profiling_info, CL_PROFILING_COMMAND_QUEUED, cl_ulong)              \
-    F(cl_profiling_info, CL_PROFILING_COMMAND_SUBMIT, cl_ulong)              \
-    F(cl_profiling_info, CL_PROFILING_COMMAND_START, cl_ulong)               \
-    F(cl_profiling_info, CL_PROFILING_COMMAND_END, cl_ulong)                 \
-                                                                             \
-    F(cl_mem_info, CL_MEM_TYPE, cl_mem_object_type)                          \
-    F(cl_mem_info, CL_MEM_FLAGS, cl_mem_flags)                               \
-    F(cl_mem_info, CL_MEM_SIZE, ::size_t)                                    \
-    F(cl_mem_info, CL_MEM_HOST_PTR, void*)                                   \
-    F(cl_mem_info, CL_MEM_MAP_COUNT, cl_uint)                                \
-    F(cl_mem_info, CL_MEM_REFERENCE_COUNT, cl_uint)                          \
-    F(cl_mem_info, CL_MEM_CONTEXT, cl::Context)                              \
-                                                                             \
-    F(cl_image_info, CL_IMAGE_FORMAT, cl_image_format)                       \
-    F(cl_image_info, CL_IMAGE_ELEMENT_SIZE, ::size_t)                        \
-    F(cl_image_info, CL_IMAGE_ROW_PITCH, ::size_t)                           \
-    F(cl_image_info, CL_IMAGE_SLICE_PITCH, ::size_t)                         \
-    F(cl_image_info, CL_IMAGE_WIDTH, ::size_t)                               \
-    F(cl_image_info, CL_IMAGE_HEIGHT, ::size_t)                              \
-    F(cl_image_info, CL_IMAGE_DEPTH, ::size_t)                               \
-                                                                             \
-    F(cl_sampler_info, CL_SAMPLER_REFERENCE_COUNT, cl_uint)                  \
-    F(cl_sampler_info, CL_SAMPLER_CONTEXT, cl::Context)                      \
-    F(cl_sampler_info, CL_SAMPLER_NORMALIZED_COORDS, cl_addressing_mode)     \
-    F(cl_sampler_info, CL_SAMPLER_ADDRESSING_MODE, cl_filter_mode)           \
-    F(cl_sampler_info, CL_SAMPLER_FILTER_MODE, cl_bool)                      \
-                                                                             \
-    F(cl_program_info, CL_PROGRAM_REFERENCE_COUNT, cl_uint)                  \
-    F(cl_program_info, CL_PROGRAM_CONTEXT, cl::Context)                      \
-    F(cl_program_info, CL_PROGRAM_NUM_DEVICES, cl_uint)                      \
-    F(cl_program_info, CL_PROGRAM_DEVICES, VECTOR_CLASS<Device>)             \
-    F(cl_program_info, CL_PROGRAM_SOURCE, STRING_CLASS)                      \
-    F(cl_program_info, CL_PROGRAM_BINARY_SIZES, VECTOR_CLASS<::size_t>)      \
-    F(cl_program_info, CL_PROGRAM_BINARIES, VECTOR_CLASS<char*>)             \
-                                                                             \
-    F(cl_program_build_info, CL_PROGRAM_BUILD_STATUS, cl_build_status)       \
-    F(cl_program_build_info, CL_PROGRAM_BUILD_OPTIONS, STRING_CLASS)         \
-    F(cl_program_build_info, CL_PROGRAM_BUILD_LOG, STRING_CLASS)             \
-                                                                             \
-    F(cl_kernel_info, CL_KERNEL_FUNCTION_NAME, STRING_CLASS)                 \
-    F(cl_kernel_info, CL_KERNEL_NUM_ARGS, cl_uint)                           \
-    F(cl_kernel_info, CL_KERNEL_REFERENCE_COUNT, cl_uint)                    \
-    F(cl_kernel_info, CL_KERNEL_CONTEXT, cl::Context)                        \
-    F(cl_kernel_info, CL_KERNEL_PROGRAM, cl::Program)                        \
-                                                                             \
-    F(cl_kernel_work_group_info, CL_KERNEL_WORK_GROUP_SIZE, ::size_t)        \
-    F(cl_kernel_work_group_info, CL_KERNEL_COMPILE_WORK_GROUP_SIZE,          \
-        cl::size_t<3>)                                                       \
-    F(cl_kernel_work_group_info, CL_KERNEL_LOCAL_MEM_SIZE, cl_ulong)         \
-                                                                             \
-    F(cl_command_queue_info, CL_QUEUE_CONTEXT, cl::Context)                  \
-    F(cl_command_queue_info, CL_QUEUE_DEVICE, cl::Device)                    \
-    F(cl_command_queue_info, CL_QUEUE_REFERENCE_COUNT, cl_uint)              \
+#define __PARAM_NAME_INFO_1_0(F)                                              \
+    F(cl_platform_info, CL_PLATFORM_PROFILE, STRING_CLASS)                    \
+    F(cl_platform_info, CL_PLATFORM_VERSION, STRING_CLASS)                    \
+    F(cl_platform_info, CL_PLATFORM_NAME, STRING_CLASS)                       \
+    F(cl_platform_info, CL_PLATFORM_VENDOR, STRING_CLASS)                     \
+    F(cl_platform_info, CL_PLATFORM_EXTENSIONS, STRING_CLASS)                 \
+                                                                              \
+    F(cl_device_info, CL_DEVICE_TYPE, cl_device_type)                         \
+    F(cl_device_info, CL_DEVICE_VENDOR_ID, cl_uint)                           \
+    F(cl_device_info, CL_DEVICE_MAX_COMPUTE_UNITS, cl_uint)                   \
+    F(cl_device_info, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, cl_uint)            \
+    F(cl_device_info, CL_DEVICE_MAX_WORK_GROUP_SIZE, ::size_t)                \
+    F(cl_device_info, CL_DEVICE_MAX_WORK_ITEM_SIZES, VECTOR_CLASS<::size_t>)  \
+    F(cl_device_info, CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR, cl_uint)         \
+    F(cl_device_info, CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT, cl_uint)        \
+    F(cl_device_info, CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT, cl_uint)          \
+    F(cl_device_info, CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG, cl_uint)         \
+    F(cl_device_info, CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT, cl_uint)        \
+    F(cl_device_info, CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE, cl_uint)       \
+    F(cl_device_info, CL_DEVICE_MAX_CLOCK_FREQUENCY, cl_uint)                 \
+    F(cl_device_info, CL_DEVICE_ADDRESS_BITS, cl_uint)                        \
+    F(cl_device_info, CL_DEVICE_MAX_READ_IMAGE_ARGS, cl_uint)                 \
+    F(cl_device_info, CL_DEVICE_MAX_WRITE_IMAGE_ARGS, cl_uint)                \
+    F(cl_device_info, CL_DEVICE_MAX_MEM_ALLOC_SIZE, cl_ulong)                 \
+    F(cl_device_info, CL_DEVICE_IMAGE2D_MAX_WIDTH, ::size_t)                  \
+    F(cl_device_info, CL_DEVICE_IMAGE2D_MAX_HEIGHT, ::size_t)                 \
+    F(cl_device_info, CL_DEVICE_IMAGE3D_MAX_WIDTH, ::size_t)                  \
+    F(cl_device_info, CL_DEVICE_IMAGE3D_MAX_HEIGHT, ::size_t)                 \
+    F(cl_device_info, CL_DEVICE_IMAGE3D_MAX_DEPTH, ::size_t)                  \
+    F(cl_device_info, CL_DEVICE_IMAGE_SUPPORT, cl_bool)                       \
+    F(cl_device_info, CL_DEVICE_MAX_PARAMETER_SIZE, ::size_t)                 \
+    F(cl_device_info, CL_DEVICE_MAX_SAMPLERS, cl_uint)                        \
+    F(cl_device_info, CL_DEVICE_MEM_BASE_ADDR_ALIGN, cl_uint)                 \
+    F(cl_device_info, CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE, cl_uint)            \
+    F(cl_device_info, CL_DEVICE_SINGLE_FP_CONFIG, cl_device_fp_config)        \
+    F(cl_device_info, CL_DEVICE_GLOBAL_MEM_CACHE_TYPE,                        \
+        cl_device_mem_cache_type)                                             \
+    F(cl_device_info, CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE, cl_uint)           \
+    F(cl_device_info, CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, cl_ulong)              \
+    F(cl_device_info, CL_DEVICE_GLOBAL_MEM_SIZE, cl_ulong)                    \
+    F(cl_device_info, CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, cl_ulong)           \
+    F(cl_device_info, CL_DEVICE_MAX_CONSTANT_ARGS, cl_uint)                   \
+    F(cl_device_info, CL_DEVICE_LOCAL_MEM_TYPE, cl_device_local_mem_type)     \
+    F(cl_device_info, CL_DEVICE_LOCAL_MEM_SIZE, cl_ulong)                     \
+    F(cl_device_info, CL_DEVICE_ERROR_CORRECTION_SUPPORT, cl_bool)            \
+    F(cl_device_info, CL_DEVICE_PROFILING_TIMER_RESOLUTION, ::size_t)         \
+    F(cl_device_info, CL_DEVICE_ENDIAN_LITTLE, cl_bool)                       \
+    F(cl_device_info, CL_DEVICE_AVAILABLE, cl_bool)                           \
+    F(cl_device_info, CL_DEVICE_COMPILER_AVAILABLE, cl_bool)                  \
+    F(cl_device_info, CL_DEVICE_EXECUTION_CAPABILITIES,                       \
+        cl_device_exec_capabilities)                                          \
+    F(cl_device_info, CL_DEVICE_QUEUE_PROPERTIES,                             \
+        cl_command_queue_properties)                                          \
+    F(cl_device_info, CL_DEVICE_PLATFORM, cl_platform_id)                     \
+    F(cl_device_info, CL_DEVICE_NAME, STRING_CLASS)                           \
+    F(cl_device_info, CL_DEVICE_VENDOR, STRING_CLASS)                         \
+    F(cl_device_info, CL_DRIVER_VERSION, STRING_CLASS)                        \
+    F(cl_device_info, CL_DEVICE_PROFILE, STRING_CLASS)                        \
+    F(cl_device_info, CL_DEVICE_VERSION, STRING_CLASS)                        \
+    F(cl_device_info, CL_DEVICE_EXTENSIONS, STRING_CLASS)                     \
+                                                                              \
+    F(cl_context_info, CL_CONTEXT_REFERENCE_COUNT, cl_uint)                   \
+    F(cl_context_info, CL_CONTEXT_DEVICES, VECTOR_CLASS<Device>)              \
+    F(cl_context_info, CL_CONTEXT_PROPERTIES,                                 \
+        VECTOR_CLASS<cl_context_properties>)                                  \
+                                                                              \
+    F(cl_event_info, CL_EVENT_COMMAND_QUEUE, cl::CommandQueue)                \
+    F(cl_event_info, CL_EVENT_COMMAND_TYPE, cl_command_type)                  \
+    F(cl_event_info, CL_EVENT_REFERENCE_COUNT, cl_uint)                       \
+    F(cl_event_info, CL_EVENT_COMMAND_EXECUTION_STATUS, cl_uint)              \
+                                                                              \
+    F(cl_profiling_info, CL_PROFILING_COMMAND_QUEUED, cl_ulong)               \
+    F(cl_profiling_info, CL_PROFILING_COMMAND_SUBMIT, cl_ulong)               \
+    F(cl_profiling_info, CL_PROFILING_COMMAND_START, cl_ulong)                \
+    F(cl_profiling_info, CL_PROFILING_COMMAND_END, cl_ulong)                  \
+                                                                              \
+    F(cl_mem_info, CL_MEM_TYPE, cl_mem_object_type)                           \
+    F(cl_mem_info, CL_MEM_FLAGS, cl_mem_flags)                                \
+    F(cl_mem_info, CL_MEM_SIZE, ::size_t)                                     \
+    F(cl_mem_info, CL_MEM_HOST_PTR, void*)                                    \
+    F(cl_mem_info, CL_MEM_MAP_COUNT, cl_uint)                                 \
+    F(cl_mem_info, CL_MEM_REFERENCE_COUNT, cl_uint)                           \
+    F(cl_mem_info, CL_MEM_CONTEXT, cl::Context)                               \
+                                                                              \
+    F(cl_image_info, CL_IMAGE_FORMAT, cl_image_format)                        \
+    F(cl_image_info, CL_IMAGE_ELEMENT_SIZE, ::size_t)                         \
+    F(cl_image_info, CL_IMAGE_ROW_PITCH, ::size_t)                            \
+    F(cl_image_info, CL_IMAGE_SLICE_PITCH, ::size_t)                          \
+    F(cl_image_info, CL_IMAGE_WIDTH, ::size_t)                                \
+    F(cl_image_info, CL_IMAGE_HEIGHT, ::size_t)                               \
+    F(cl_image_info, CL_IMAGE_DEPTH, ::size_t)                                \
+                                                                              \
+    F(cl_sampler_info, CL_SAMPLER_REFERENCE_COUNT, cl_uint)                   \
+    F(cl_sampler_info, CL_SAMPLER_CONTEXT, cl::Context)                       \
+    F(cl_sampler_info, CL_SAMPLER_NORMALIZED_COORDS, cl_addressing_mode)      \
+    F(cl_sampler_info, CL_SAMPLER_ADDRESSING_MODE, cl_filter_mode)            \
+    F(cl_sampler_info, CL_SAMPLER_FILTER_MODE, cl_bool)                       \
+                                                                              \
+    F(cl_program_info, CL_PROGRAM_REFERENCE_COUNT, cl_uint)                   \
+    F(cl_program_info, CL_PROGRAM_CONTEXT, cl::Context)                       \
+    F(cl_program_info, CL_PROGRAM_NUM_DEVICES, cl_uint)                       \
+    F(cl_program_info, CL_PROGRAM_DEVICES, VECTOR_CLASS<Device>)              \
+    F(cl_program_info, CL_PROGRAM_SOURCE, STRING_CLASS)                       \
+    F(cl_program_info, CL_PROGRAM_BINARY_SIZES, VECTOR_CLASS<::size_t>)       \
+    F(cl_program_info, CL_PROGRAM_BINARIES, VECTOR_CLASS<char*>)              \
+                                                                              \
+    F(cl_program_build_info, CL_PROGRAM_BUILD_STATUS, cl_build_status)        \
+    F(cl_program_build_info, CL_PROGRAM_BUILD_OPTIONS, STRING_CLASS)          \
+    F(cl_program_build_info, CL_PROGRAM_BUILD_LOG, STRING_CLASS)              \
+                                                                              \
+    F(cl_kernel_info, CL_KERNEL_FUNCTION_NAME, STRING_CLASS)                  \
+    F(cl_kernel_info, CL_KERNEL_NUM_ARGS, cl_uint)                            \
+    F(cl_kernel_info, CL_KERNEL_REFERENCE_COUNT, cl_uint)                     \
+    F(cl_kernel_info, CL_KERNEL_CONTEXT, cl::Context)                         \
+    F(cl_kernel_info, CL_KERNEL_PROGRAM, cl::Program)                         \
+                                                                              \
+    F(cl_kernel_work_group_info, CL_KERNEL_WORK_GROUP_SIZE, ::size_t)         \
+    F(cl_kernel_work_group_info, CL_KERNEL_COMPILE_WORK_GROUP_SIZE,           \
+        cl::size_t<3>)                                                        \
+    F(cl_kernel_work_group_info, CL_KERNEL_LOCAL_MEM_SIZE, cl_ulong)          \
+                                                                              \
+    F(cl_command_queue_info, CL_QUEUE_CONTEXT, cl::Context)                   \
+    F(cl_command_queue_info, CL_QUEUE_DEVICE, cl::Device)                     \
+    F(cl_command_queue_info, CL_QUEUE_REFERENCE_COUNT, cl_uint)               \
     F(cl_command_queue_info, CL_QUEUE_PROPERTIES, cl_command_queue_properties)
 
 #if defined(CL_VERSION_1_1)
-#define __PARAM_NAME_INFO_1_1(F)                                             \
-    F(cl_context_info, CL_CONTEXT_NUM_DEVICES, cl_uint)                      \
-    F(cl_device_info, CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF, cl_uint)        \
-    F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR, cl_uint)           \
-    F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT, cl_uint)          \
-    F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_INT, cl_uint)            \
-    F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG, cl_uint)           \
-    F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT, cl_uint)          \
-    F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE, cl_uint)         \
-    F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF, cl_uint)           \
-    F(cl_device_info, CL_DEVICE_DOUBLE_FP_CONFIG, cl_device_fp_config)       \
-    F(cl_device_info, CL_DEVICE_HALF_FP_CONFIG, cl_device_fp_config)         \
-    F(cl_device_info, CL_DEVICE_HOST_UNIFIED_MEMORY, cl_bool)                \
-    F(cl_device_info, CL_DEVICE_OPENCL_C_VERSION, STRING_CLASS)              \
-                                                                             \
-    F(cl_mem_info, CL_MEM_ASSOCIATED_MEMOBJECT, cl::Memory)                  \
-    F(cl_mem_info, CL_MEM_OFFSET, ::size_t)                                  \
-                                                                             \
-    F(cl_kernel_work_group_info,                                             \
-        CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, ::size_t)              \
-    F(cl_kernel_work_group_info, CL_KERNEL_PRIVATE_MEM_SIZE, cl_ulong)       \
-                                                                             \
+#define __PARAM_NAME_INFO_1_1(F)                                              \
+    F(cl_context_info, CL_CONTEXT_NUM_DEVICES, cl_uint)                       \
+    F(cl_device_info, CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF, cl_uint)         \
+    F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR, cl_uint)            \
+    F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_SHORT, cl_uint)           \
+    F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_INT, cl_uint)             \
+    F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_LONG, cl_uint)            \
+    F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_FLOAT, cl_uint)           \
+    F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_DOUBLE, cl_uint)          \
+    F(cl_device_info, CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF, cl_uint)            \
+    F(cl_device_info, CL_DEVICE_DOUBLE_FP_CONFIG, cl_device_fp_config)        \
+    F(cl_device_info, CL_DEVICE_HALF_FP_CONFIG, cl_device_fp_config)          \
+    F(cl_device_info, CL_DEVICE_HOST_UNIFIED_MEMORY, cl_bool)                 \
+    F(cl_device_info, CL_DEVICE_OPENCL_C_VERSION, STRING_CLASS)               \
+                                                                              \
+    F(cl_mem_info, CL_MEM_ASSOCIATED_MEMOBJECT, cl::Memory)                   \
+    F(cl_mem_info, CL_MEM_OFFSET, ::size_t)                                   \
+                                                                              \
+    F(cl_kernel_work_group_info,                                              \
+        CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, ::size_t)               \
+    F(cl_kernel_work_group_info, CL_KERNEL_PRIVATE_MEM_SIZE, cl_ulong)        \
+                                                                              \
     F(cl_event_info, CL_EVENT_CONTEXT, cl::Context)
 #endif // CL_VERSION_1_1
 
 #if defined(CL_VERSION_1_2)
-#define __PARAM_NAME_INFO_1_2(F)                                             \
-    F(cl_image_info, CL_IMAGE_BUFFER, cl::Buffer)                            \
-                                                                             \
-    F(cl_program_info, CL_PROGRAM_NUM_KERNELS, ::size_t)                     \
-    F(cl_program_info, CL_PROGRAM_KERNEL_NAMES, STRING_CLASS)                \
-                                                                             \
-    F(cl_program_build_info, CL_PROGRAM_BINARY_TYPE, cl_program_binary_type) \
-                                                                             \
-    F(cl_kernel_info, CL_KERNEL_ATTRIBUTES, STRING_CLASS)                    \
-                                                                             \
-    F(cl_kernel_arg_info, CL_KERNEL_ARG_ADDRESS_QUALIFIER,                   \
-        cl_kernel_arg_address_qualifier)                                     \
-    F(cl_kernel_arg_info, CL_KERNEL_ARG_ACCESS_QUALIFIER,                    \
-        cl_kernel_arg_access_qualifier)                                      \
-    F(cl_kernel_arg_info, CL_KERNEL_ARG_TYPE_NAME, STRING_CLASS)             \
-    F(cl_kernel_arg_info, CL_KERNEL_ARG_NAME, STRING_CLASS)                  \
-                                                                             \
-    F(cl_device_info, CL_DEVICE_PARENT_DEVICE, cl_device_id)                 \
-    F(cl_device_info, CL_DEVICE_PARTITION_PROPERTIES,                        \
-        VECTOR_CLASS<cl_device_partition_property>)                          \
-    F(cl_device_info, CL_DEVICE_PARTITION_TYPE,                              \
-        VECTOR_CLASS<cl_device_partition_property>)                          \
-    F(cl_device_info, CL_DEVICE_REFERENCE_COUNT, cl_uint)                    \
-    F(cl_device_info, CL_DEVICE_PREFERRED_INTEROP_USER_SYNC, ::size_t)       \
-    F(cl_device_info, CL_DEVICE_PARTITION_AFFINITY_DOMAIN,                   \
-        cl_device_affinity_domain)                                           \
+#define __PARAM_NAME_INFO_1_2(F)                                              \
+    F(cl_image_info, CL_IMAGE_BUFFER, cl::Buffer)                             \
+                                                                              \
+    F(cl_program_info, CL_PROGRAM_NUM_KERNELS, ::size_t)                      \
+    F(cl_program_info, CL_PROGRAM_KERNEL_NAMES, STRING_CLASS)                 \
+                                                                              \
+    F(cl_program_build_info, CL_PROGRAM_BINARY_TYPE, cl_program_binary_type)  \
+                                                                              \
+    F(cl_kernel_info, CL_KERNEL_ATTRIBUTES, STRING_CLASS)                     \
+                                                                              \
+    F(cl_kernel_arg_info, CL_KERNEL_ARG_ADDRESS_QUALIFIER,                    \
+        cl_kernel_arg_address_qualifier)                                      \
+    F(cl_kernel_arg_info, CL_KERNEL_ARG_ACCESS_QUALIFIER,                     \
+        cl_kernel_arg_access_qualifier)                                       \
+    F(cl_kernel_arg_info, CL_KERNEL_ARG_TYPE_NAME, STRING_CLASS)              \
+    F(cl_kernel_arg_info, CL_KERNEL_ARG_NAME, STRING_CLASS)                   \
+                                                                              \
+    F(cl_device_info, CL_DEVICE_PARENT_DEVICE, cl_device_id)                  \
+    F(cl_device_info, CL_DEVICE_PARTITION_PROPERTIES,                         \
+        VECTOR_CLASS<cl_device_partition_property>)                           \
+    F(cl_device_info, CL_DEVICE_PARTITION_TYPE,                               \
+        VECTOR_CLASS<cl_device_partition_property>)                           \
+    F(cl_device_info, CL_DEVICE_REFERENCE_COUNT, cl_uint)                     \
+    F(cl_device_info, CL_DEVICE_PREFERRED_INTEROP_USER_SYNC, ::size_t)        \
+    F(cl_device_info, CL_DEVICE_PARTITION_AFFINITY_DOMAIN,                    \
+        cl_device_affinity_domain)                                            \
     F(cl_device_info, CL_DEVICE_BUILT_IN_KERNELS, STRING_CLASS)
 #endif // #if defined(CL_VERSION_1_2)
 
 #if defined(USE_CL_DEVICE_FISSION)
-#define __PARAM_NAME_DEVICE_FISSION(F)                                       \
-    F(cl_device_info, CL_DEVICE_PARENT_DEVICE_EXT, cl_device_id)             \
-    F(cl_device_info, CL_DEVICE_PARTITION_TYPES_EXT,                         \
-        VECTOR_CLASS<cl_device_partition_property_ext>)                      \
-    F(cl_device_info, CL_DEVICE_AFFINITY_DOMAINS_EXT,                        \
-        VECTOR_CLASS<cl_device_partition_property_ext>)                      \
-    F(cl_device_info, CL_DEVICE_REFERENCE_COUNT_EXT, cl_uint)                \
-    F(cl_device_info, CL_DEVICE_PARTITION_STYLE_EXT,                         \
+#define __PARAM_NAME_DEVICE_FISSION(F)                                        \
+    F(cl_device_info, CL_DEVICE_PARENT_DEVICE_EXT, cl_device_id)              \
+    F(cl_device_info, CL_DEVICE_PARTITION_TYPES_EXT,                          \
+        VECTOR_CLASS<cl_device_partition_property_ext>)                       \
+    F(cl_device_info, CL_DEVICE_AFFINITY_DOMAINS_EXT,                         \
+        VECTOR_CLASS<cl_device_partition_property_ext>)                       \
+    F(cl_device_info, CL_DEVICE_REFERENCE_COUNT_EXT, cl_uint)                 \
+    F(cl_device_info, CL_DEVICE_PARTITION_STYLE_EXT,                          \
         VECTOR_CLASS<cl_device_partition_property_ext>)
 #endif // USE_CL_DEVICE_FISSION
 
@@ -1362,12 +1358,12 @@ template <typename enum_type, cl_int Name>
 struct param_traits {
 };
 
-#define __CL_DECLARE_PARAM_TRAITS(token, param_name, T)                      \
-    struct token;                                                            \
-    template <>                                                              \
-    struct param_traits<detail::token, param_name> {                         \
-        enum { value = param_name };                                         \
-        typedef T param_type;                                                \
+#define __CL_DECLARE_PARAM_TRAITS(token, param_name, T)                       \
+    struct token;                                                             \
+    template <>                                                               \
+    struct param_traits<detail::token, param_name> {                          \
+        enum { value = param_name };                                          \
+        typedef T param_type;                                                 \
     };
 
 __PARAM_NAME_INFO_1_0(__CL_DECLARE_PARAM_TRAITS)
@@ -1589,10 +1585,7 @@ struct ReferenceHandler<cl_command_queue> {
 
 template <>
 struct ReferenceHandler<cl_mem> {
-    static cl_int retain(cl_mem memory)
-    {
-        return ::clRetainMemObject(memory);
-    }
+    static cl_int retain(cl_mem memory) { return ::clRetainMemObject(memory); }
     static cl_int release(cl_mem memory)
     {
         return ::clReleaseMemObject(memory);
@@ -1625,10 +1618,7 @@ struct ReferenceHandler<cl_program> {
 
 template <>
 struct ReferenceHandler<cl_kernel> {
-    static cl_int retain(cl_kernel kernel)
-    {
-        return ::clRetainKernel(kernel);
-    }
+    static cl_int retain(cl_kernel kernel) { return ::clRetainKernel(kernel); }
     static cl_int release(cl_kernel kernel)
     {
         return ::clReleaseKernel(kernel);
@@ -1868,7 +1858,7 @@ class Wrapper<cl_device_id>
 };
 
 } // namespace detail
-//! \endcond
+  //! \endcond
 
 /*! \stuct ImageFormat
  *  \brief Adds constructors and member functions for cl_image_format.
@@ -1968,8 +1958,8 @@ class Device : public detail::Wrapper<cl_device_id>
     typename detail::param_traits<detail::cl_device_info, name>::param_type
         getInfo(cl_int* err = NULL) const
     {
-        typename detail::param_traits<detail::cl_device_info,
-            name>::param_type param;
+        typename detail::param_traits<detail::cl_device_info, name>::param_type
+            param;
         cl_int result = getInfo(name, &param);
         if (err != NULL) {
             *err = result;
@@ -2007,8 +1997,7 @@ class Device : public detail::Wrapper<cl_device_id>
  */
 #if defined(CL_VERSION_1_1)
 #if defined(USE_CL_DEVICE_FISSION)
-    cl_int createSubDevices(
-        const cl_device_partition_property_ext* properties,
+    cl_int createSubDevices(const cl_device_partition_property_ext* properties,
         VECTOR_CLASS<Device>* devices)
     {
         typedef CL_API_ENTRY cl_int(CL_API_CALL * PFN_clCreateSubDevicesEXT)(
@@ -2120,8 +2109,7 @@ class Platform : public detail::Wrapper<cl_platform_id>
      *
      *  Wraps clGetDeviceIDs().
      */
-    cl_int getDevices(
-        cl_device_type type, VECTOR_CLASS<Device>* devices) const
+    cl_int getDevices(cl_device_type type, VECTOR_CLASS<Device>* devices) const
     {
         cl_uint n = 0;
         if (devices == NULL) {
@@ -2189,8 +2177,8 @@ class Platform : public detail::Wrapper<cl_platform_id>
         __INIT_CL_EXT_FCN_PTR_PLATFORM(object_, clGetDeviceIDsFromD3D10KHR);
 
         cl_uint n = 0;
-        cl_int err = pfn_clGetDeviceIDsFromD3D10KHR(object_,
-            d3d_device_source, d3d_object, d3d_device_set, 0, NULL, &n);
+        cl_int err = pfn_clGetDeviceIDsFromD3D10KHR(object_, d3d_device_source,
+            d3d_object, d3d_device_set, 0, NULL, &n);
         if (err != CL_SUCCESS) {
             return detail::errHandler(err, __GET_DEVICE_IDS_ERR);
         }
@@ -2310,7 +2298,7 @@ class Platform : public detail::Wrapper<cl_platform_id>
 /**
  * Deprecated APIs for 1.2
  */
-#if defined(CL_USE_DEPRECATED_OPENCL_1_1_APIS) ||                            \
+#if defined(CL_USE_DEPRECATED_OPENCL_1_1_APIS) ||                             \
     (defined(CL_VERSION_1_1) && !defined(CL_VERSION_1_2))
 /**
  * Unload the OpenCL compiler.
@@ -2960,8 +2948,8 @@ class Memory : public detail::Wrapper<cl_mem>
     cl_int setDestructorCallback(
         void(CL_CALLBACK* pfn_notify)(cl_mem, void*), void* user_data = NULL)
     {
-        return detail::errHandler(::clSetMemObjectDestructorCallback(
-                                      object_, pfn_notify, user_data),
+        return detail::errHandler(
+            ::clSetMemObjectDestructorCallback(object_, pfn_notify, user_data),
             __SET_MEM_OBJECT_DESTRUCTOR_CALLBACK_ERR);
     }
 #endif
@@ -3040,8 +3028,8 @@ class Buffer : public Memory
      * If useHostPtr is specified iterators must represent contiguous data.
      */
     template <typename IteratorType>
-    Buffer(IteratorType startIterator, IteratorType endIterator,
-        bool readOnly, bool useHostPtr = false, cl_int* err = NULL)
+    Buffer(IteratorType startIterator, IteratorType endIterator, bool readOnly,
+        bool useHostPtr = false, cl_int* err = NULL)
     {
         typedef
             typename std::iterator_traits<IteratorType>::value_type DataType;
@@ -3106,9 +3094,7 @@ class Buffer : public Memory
      *
      *  See Memory for further details.
      */
-    __CL_EXPLICIT_CONSTRUCTORS Buffer(const cl_mem& buffer) : Memory(buffer)
-    {
-    }
+    __CL_EXPLICIT_CONSTRUCTORS Buffer(const cl_mem& buffer) : Memory(buffer) {}
 
     /*! \brief Assignment from Buffer - performs shallow copy.
      *
@@ -4348,8 +4334,8 @@ class Kernel : public detail::Wrapper<cl_kernel>
     typename detail::param_traits<detail::cl_kernel_info, name>::param_type
         getInfo(cl_int* err = NULL) const
     {
-        typename detail::param_traits<detail::cl_kernel_info,
-            name>::param_type param;
+        typename detail::param_traits<detail::cl_kernel_info, name>::param_type
+            param;
         cl_int result = getInfo(name, &param);
         if (err != NULL) {
             *err = result;
@@ -4368,8 +4354,7 @@ class Kernel : public detail::Wrapper<cl_kernel>
     }
 
     template <cl_int name>
-    typename detail::param_traits<detail::cl_kernel_arg_info,
-        name>::param_type
+    typename detail::param_traits<detail::cl_kernel_arg_info, name>::param_type
         getArgInfo(cl_uint argIndex, cl_int* err = NULL) const
     {
         typename detail::param_traits<detail::cl_kernel_arg_info,
@@ -4432,8 +4417,7 @@ class Program : public detail::Wrapper<cl_program>
     typedef VECTOR_CLASS<std::pair<const void*, ::size_t>> Binaries;
     typedef VECTOR_CLASS<std::pair<const char*, ::size_t>> Sources;
 
-    Program(
-        const STRING_CLASS& source, bool build = false, cl_int* err = NULL)
+    Program(const STRING_CLASS& source, bool build = false, cl_int* err = NULL)
     {
         cl_int error;
 
@@ -4484,8 +4468,7 @@ class Program : public detail::Wrapper<cl_program>
         }
     }
 
-    Program(
-        const Context& context, const Sources& sources, cl_int* err = NULL)
+    Program(const Context& context, const Sources& sources, cl_int* err = NULL)
     {
         cl_int error;
 
@@ -4671,9 +4654,8 @@ class Program : public detail::Wrapper<cl_program>
         void(CL_CALLBACK* notifyFptr)(cl_program, void*) = NULL,
         void* data = NULL) const
     {
-        return detail::errHandler(
-            ::clCompileProgram(
-                object_, 0, NULL, options, 0, NULL, NULL, notifyFptr, data),
+        return detail::errHandler(::clCompileProgram(object_, 0, NULL, options,
+                                      0, NULL, NULL, notifyFptr, data),
             __COMPILE_PROGRAM_ERR);
     }
 #endif
@@ -4725,8 +4707,7 @@ class Program : public detail::Wrapper<cl_program>
     cl_int createKernels(VECTOR_CLASS<Kernel>* kernels)
     {
         cl_uint numKernels;
-        cl_int err =
-            ::clCreateKernelsInProgram(object_, 0, NULL, &numKernels);
+        cl_int err = ::clCreateKernelsInProgram(object_, 0, NULL, &numKernels);
         if (err != CL_SUCCESS) {
             return detail::errHandler(err, __CREATE_KERNELS_IN_PROGRAM_ERR);
         }
@@ -4746,8 +4727,8 @@ class Program : public detail::Wrapper<cl_program>
 #if defined(CL_VERSION_1_2)
 inline Program linkProgram(Program input1, Program input2,
     const char* options = NULL,
-    void(CL_CALLBACK* notifyFptr)(cl_program, void*) = NULL,
-    void* data = NULL, cl_int* err = NULL)
+    void(CL_CALLBACK* notifyFptr)(cl_program, void*) = NULL, void* data = NULL,
+    cl_int* err = NULL)
 {
     cl_int err_local = CL_SUCCESS;
 
@@ -4768,8 +4749,8 @@ inline Program linkProgram(Program input1, Program input2,
 
 inline Program linkProgram(VECTOR_CLASS<Program> inputPrograms,
     const char* options = NULL,
-    void(CL_CALLBACK* notifyFptr)(cl_program, void*) = NULL,
-    void* data = NULL, cl_int* err = NULL)
+    void(CL_CALLBACK* notifyFptr)(cl_program, void*) = NULL, void* data = NULL,
+    cl_int* err = NULL)
 {
     cl_int err_local = CL_SUCCESS;
 
@@ -5082,10 +5063,9 @@ class CommandQueue : public detail::Wrapper<cl_command_queue>
         cl_event tmp;
         cl_int err = detail::errHandler(
             ::clEnqueueReadBufferRect(object_, buffer(), blocking,
-                (const ::size_t*) buffer_offset,
-                (const ::size_t*) host_offset, (const ::size_t*) region,
-                buffer_row_pitch, buffer_slice_pitch, host_row_pitch,
-                host_slice_pitch, ptr,
+                (const ::size_t*) buffer_offset, (const ::size_t*) host_offset,
+                (const ::size_t*) region, buffer_row_pitch, buffer_slice_pitch,
+                host_row_pitch, host_slice_pitch, ptr,
                 (events != NULL) ? (cl_uint) events->size() : 0,
                 (events != NULL && events->size() > 0) ?
                     (cl_event*) &events->front() :
@@ -5109,10 +5089,9 @@ class CommandQueue : public detail::Wrapper<cl_command_queue>
         cl_event tmp;
         cl_int err = detail::errHandler(
             ::clEnqueueWriteBufferRect(object_, buffer(), blocking,
-                (const ::size_t*) buffer_offset,
-                (const ::size_t*) host_offset, (const ::size_t*) region,
-                buffer_row_pitch, buffer_slice_pitch, host_row_pitch,
-                host_slice_pitch, ptr,
+                (const ::size_t*) buffer_offset, (const ::size_t*) host_offset,
+                (const ::size_t*) region, buffer_row_pitch, buffer_slice_pitch,
+                host_row_pitch, host_slice_pitch, ptr,
                 (events != NULL) ? (cl_uint) events->size() : 0,
                 (events != NULL && events->size() > 0) ?
                     (cl_event*) &events->front() :
@@ -5390,13 +5369,12 @@ class CommandQueue : public detail::Wrapper<cl_command_queue>
         cl_int* err = NULL) const
     {
         cl_int error;
-        void* result =
-            ::clEnqueueMapBuffer(object_, buffer(), blocking, flags, offset,
-                size, (events != NULL) ? (cl_uint) events->size() : 0,
-                (events != NULL && events->size() > 0) ?
-                    (cl_event*) &events->front() :
-                    NULL,
-                (cl_event*) event, &error);
+        void* result = ::clEnqueueMapBuffer(object_, buffer(), blocking, flags,
+            offset, size, (events != NULL) ? (cl_uint) events->size() : 0,
+            (events != NULL && events->size() > 0) ?
+                (cl_event*) &events->front() :
+                NULL,
+            (cl_event*) event, &error);
 
         detail::errHandler(error, __ENQUEUE_MAP_BUFFER_ERR);
         if (err != NULL) {
@@ -5525,8 +5503,8 @@ class CommandQueue : public detail::Wrapper<cl_command_queue>
      * should be associated.
      */
     cl_int enqueueMigrateMemObjects(const VECTOR_CLASS<Memory>& memObjects,
-        cl_mem_migration_flags flags,
-        const VECTOR_CLASS<Event>* events = NULL, Event* event = NULL)
+        cl_mem_migration_flags flags, const VECTOR_CLASS<Event>* events = NULL,
+        Event* event = NULL)
     {
         cl_event tmp;
 
@@ -5614,8 +5592,7 @@ class CommandQueue : public detail::Wrapper<cl_command_queue>
 
         cl_event tmp;
         cl_int err = detail::errHandler(
-            ::clEnqueueNativeKernel(object_, userFptr, args.first,
-                args.second,
+            ::clEnqueueNativeKernel(object_, userFptr, args.first, args.second,
                 (mem_objects != NULL) ? (cl_uint) mem_objects->size() : 0,
                 mems,
                 (mem_locs != NULL) ? (const void**) &mem_locs->front() : NULL,
@@ -5635,7 +5612,7 @@ class CommandQueue : public detail::Wrapper<cl_command_queue>
 /**
  * Deprecated APIs for 1.2
  */
-#if defined(CL_USE_DEPRECATED_OPENCL_1_1_APIS) ||                            \
+#if defined(CL_USE_DEPRECATED_OPENCL_1_1_APIS) ||                             \
     (defined(CL_VERSION_1_1) && !defined(CL_VERSION_1_2))
     CL_EXT_PREFIX__VERSION_1_1_DEPRECATED
     cl_int enqueueMarker(
@@ -5665,9 +5642,8 @@ class CommandQueue : public detail::Wrapper<cl_command_queue>
         cl_int err = detail::errHandler(
             ::clEnqueueAcquireGLObjects(object_,
                 (mem_objects != NULL) ? (cl_uint) mem_objects->size() : 0,
-                (mem_objects != NULL) ?
-                    (const cl_mem*) &mem_objects->front() :
-                    NULL,
+                (mem_objects != NULL) ? (const cl_mem*) &mem_objects->front() :
+                                        NULL,
                 (events != NULL) ? (cl_uint) events->size() : 0,
                 (events != NULL && events->size() > 0) ?
                     (cl_event*) &events->front() :
@@ -5689,9 +5665,8 @@ class CommandQueue : public detail::Wrapper<cl_command_queue>
         cl_int err = detail::errHandler(
             ::clEnqueueReleaseGLObjects(object_,
                 (mem_objects != NULL) ? (cl_uint) mem_objects->size() : 0,
-                (mem_objects != NULL) ?
-                    (const cl_mem*) &mem_objects->front() :
-                    NULL,
+                (mem_objects != NULL) ? (const cl_mem*) &mem_objects->front() :
+                                        NULL,
                 (events != NULL) ? (cl_uint) events->size() : 0,
                 (events != NULL && events->size() > 0) ?
                     (cl_event*) &events->front() :
@@ -5738,9 +5713,8 @@ class CommandQueue : public detail::Wrapper<cl_command_queue>
         cl_int err = detail::errHandler(
             pfn_clEnqueueAcquireD3D10ObjectsKHR(object_,
                 (mem_objects != NULL) ? (cl_uint) mem_objects->size() : 0,
-                (mem_objects != NULL) ?
-                    (const cl_mem*) &mem_objects->front() :
-                    NULL,
+                (mem_objects != NULL) ? (const cl_mem*) &mem_objects->front() :
+                                        NULL,
                 (events != NULL) ? (cl_uint) events->size() : 0,
                 (events != NULL) ? (cl_event*) &events->front() : NULL,
                 (event != NULL) ? &tmp : NULL),
@@ -5773,9 +5747,8 @@ class CommandQueue : public detail::Wrapper<cl_command_queue>
         cl_int err = detail::errHandler(
             pfn_clEnqueueReleaseD3D10ObjectsKHR(object_,
                 (mem_objects != NULL) ? (cl_uint) mem_objects->size() : 0,
-                (mem_objects != NULL) ?
-                    (const cl_mem*) &mem_objects->front() :
-                    NULL,
+                (mem_objects != NULL) ? (const cl_mem*) &mem_objects->front() :
+                                        NULL,
                 (events != NULL) ? (cl_uint) events->size() : 0,
                 (events != NULL) ? (cl_event*) &events->front() : NULL,
                 (event != NULL) ? &tmp : NULL),
@@ -5791,7 +5764,7 @@ class CommandQueue : public detail::Wrapper<cl_command_queue>
 /**
  * Deprecated APIs for 1.2
  */
-#if defined(CL_USE_DEPRECATED_OPENCL_1_1_APIS) ||                            \
+#if defined(CL_USE_DEPRECATED_OPENCL_1_1_APIS) ||                             \
     (defined(CL_VERSION_1_1) && !defined(CL_VERSION_1_2))
     CL_EXT_PREFIX__VERSION_1_1_DEPRECATED
     cl_int enqueueBarrier() const CL_EXT_SUFFIX__VERSION_1_1_DEPRECATED
@@ -5916,9 +5889,8 @@ inline void* enqueueMapBuffer(const Buffer& buffer, cl_bool blocking,
 
     void* result = ::clEnqueueMapBuffer(queue(), buffer(), blocking, flags,
         offset, size, (events != NULL) ? (cl_uint) events->size() : 0,
-        (events != NULL && events->size() > 0) ?
-            (cl_event*) &events->front() :
-            NULL,
+        (events != NULL && events->size() > 0) ? (cl_event*) &events->front() :
+                                                 NULL,
         (cl_event*) event, &error);
 
     detail::errHandler(error, __ENQUEUE_MAP_BUFFER_ERR);
@@ -6125,8 +6097,8 @@ inline cl_int enqueueCopyBufferRect(const Buffer& src, const Buffer& dst,
     }
 
     return queue.enqueueCopyBufferRect(src, dst, src_origin, dst_origin,
-        region, src_row_pitch, src_slice_pitch, dst_row_pitch,
-        dst_slice_pitch, events, event);
+        region, src_row_pitch, src_slice_pitch, dst_row_pitch, dst_slice_pitch,
+        events, event);
 }
 #endif
 
@@ -6325,10 +6297,7 @@ struct EnqueueArgs {
     }
 
     EnqueueArgs(CommandQueue& queue, NDRange global)
-        : queue_(queue)
-        , offset_(NullRange)
-        , global_(global)
-        , local_(NullRange)
+        : queue_(queue), offset_(NullRange), global_(global), local_(NullRange)
     {
     }
 
@@ -6344,10 +6313,7 @@ struct EnqueueArgs {
     }
 
     EnqueueArgs(CommandQueue& queue, Event e, NDRange global)
-        : queue_(queue)
-        , offset_(NullRange)
-        , global_(global)
-        , local_(NullRange)
+        : queue_(queue), offset_(NullRange), global_(global), local_(NullRange)
     {
         events_.push_back(e);
     }
@@ -6365,8 +6331,8 @@ struct EnqueueArgs {
         events_.push_back(e);
     }
 
-    EnqueueArgs(CommandQueue& queue, const VECTOR_CLASS<Event>& events,
-        NDRange global)
+    EnqueueArgs(
+        CommandQueue& queue, const VECTOR_CLASS<Event>& events, NDRange global)
         : queue_(queue)
         , offset_(NullRange)
         , global_(global)
@@ -6497,9 +6463,9 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4,
     typename T25, typename T26, typename T27, typename T28, typename T29,
     typename T30, typename T31>
 struct functionImplementation_ {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
-        T23, T24, T25, T26, T27, T28, T29, T30, T31> FunctorType;
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23,
+        T24, T25, T26, T27, T28, T29, T30, T31> FunctorType;
 
     FunctorType functor_;
 
@@ -6519,16 +6485,16 @@ struct functionImplementation_ {
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21,
-        T22, T23, T24, T25, T26, T27, T28, T29, T30, T31);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
+        T23, T24, T25, T26, T27, T28, T29, T30, T31);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20,
-        T21 arg21, T22 arg22, T23 arg23, T24 arg24, T25 arg25, T26 arg26,
-        T27 arg27, T28 arg28, T29 arg29, T30 arg30, T31 arg31)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20, T21 arg21,
+        T22 arg22, T23 arg23, T24 arg24, T25 arg25, T26 arg26, T27 arg27,
+        T28 arg28, T29 arg29, T30 arg30, T31 arg31)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
@@ -6547,9 +6513,9 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4,
 struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23, T24, T25,
     T26, T27, T28, T29, T30, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
-        T23, T24, T25, T26, T27, T28, T29, T30, NullType> FunctorType;
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23,
+        T24, T25, T26, T27, T28, T29, T30, NullType> FunctorType;
 
     FunctorType functor_;
 
@@ -6569,16 +6535,16 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21,
-        T22, T23, T24, T25, T26, T27, T28, T29, T30);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
+        T23, T24, T25, T26, T27, T28, T29, T30);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20,
-        T21 arg21, T22 arg22, T23 arg23, T24 arg24, T25 arg25, T26 arg26,
-        T27 arg27, T28 arg28, T29 arg29, T30 arg30)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20, T21 arg21,
+        T22 arg22, T23 arg23, T24 arg24, T25 arg25, T26 arg26, T27 arg27,
+        T28 arg28, T29 arg29, T30 arg30)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
@@ -6596,9 +6562,9 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4,
 struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23, T24, T25,
     T26, T27, T28, T29, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
-        T23, T24, T25, T26, T27, T28, T29, NullType, NullType> FunctorType;
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23,
+        T24, T25, T26, T27, T28, T29, NullType, NullType> FunctorType;
 
     FunctorType functor_;
 
@@ -6618,16 +6584,16 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21,
-        T22, T23, T24, T25, T26, T27, T28, T29);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
+        T23, T24, T25, T26, T27, T28, T29);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20,
-        T21 arg21, T22 arg22, T23 arg23, T24 arg24, T25 arg25, T26 arg26,
-        T27 arg27, T28 arg28, T29 arg29)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20, T21 arg21,
+        T22 arg22, T23 arg23, T24 arg24, T25 arg25, T26 arg26, T27 arg27,
+        T28 arg28, T29 arg29)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
@@ -6645,10 +6611,9 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4,
 struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23, T24, T25,
     T26, T27, T28, NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
-        T23, T24, T25, T26, T27, T28, NullType, NullType,
-        NullType> FunctorType;
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23,
+        T24, T25, T26, T27, T28, NullType, NullType, NullType> FunctorType;
 
     FunctorType functor_;
 
@@ -6668,16 +6633,16 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21,
-        T22, T23, T24, T25, T26, T27, T28);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
+        T23, T24, T25, T26, T27, T28);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20,
-        T21 arg21, T22 arg22, T23 arg23, T24 arg24, T25 arg25, T26 arg26,
-        T27 arg27, T28 arg28)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20, T21 arg21,
+        T22 arg22, T23 arg23, T24 arg24, T25 arg25, T26 arg26, T27 arg27,
+        T28 arg28)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
@@ -6695,9 +6660,9 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4,
 struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23, T24, T25,
     T26, T27, NullType, NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
-        T23, T24, T25, T26, T27, NullType, NullType, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23,
+        T24, T25, T26, T27, NullType, NullType, NullType,
         NullType> FunctorType;
 
     FunctorType functor_;
@@ -6718,16 +6683,15 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21,
-        T22, T23, T24, T25, T26, T27);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
+        T23, T24, T25, T26, T27);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20,
-        T21 arg21, T22 arg22, T23 arg23, T24 arg24, T25 arg25, T26 arg26,
-        T27 arg27)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20, T21 arg21,
+        T22 arg22, T23 arg23, T24 arg24, T25 arg25, T26 arg26, T27 arg27)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
@@ -6745,9 +6709,9 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4,
 struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23, T24, T25,
     T26, NullType, NullType, NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
-        T23, T24, T25, T26, NullType, NullType, NullType, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23,
+        T24, T25, T26, NullType, NullType, NullType, NullType,
         NullType> FunctorType;
 
     FunctorType functor_;
@@ -6768,15 +6732,15 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21,
-        T22, T23, T24, T25, T26);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
+        T23, T24, T25, T26);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20,
-        T21 arg21, T22 arg22, T23 arg23, T24 arg24, T25 arg25, T26 arg26)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20, T21 arg21,
+        T22 arg22, T23 arg23, T24 arg24, T25 arg25, T26 arg26)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
@@ -6794,9 +6758,9 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4,
 struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23, T24, T25,
     NullType, NullType, NullType, NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
-        T23, T24, T25, NullType, NullType, NullType, NullType, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23,
+        T24, T25, NullType, NullType, NullType, NullType, NullType,
         NullType> FunctorType;
 
     FunctorType functor_;
@@ -6817,15 +6781,15 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21,
-        T22, T23, T24, T25);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
+        T23, T24, T25);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20,
-        T21 arg21, T22 arg22, T23 arg23, T24 arg24, T25 arg25)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20, T21 arg21,
+        T22 arg22, T23 arg23, T24 arg24, T25 arg25)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
@@ -6841,9 +6805,9 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4,
 struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23, T24,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
-        T23, T24, NullType, NullType, NullType, NullType, NullType, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23,
+        T24, NullType, NullType, NullType, NullType, NullType, NullType,
         NullType> FunctorType;
 
     FunctorType functor_;
@@ -6864,15 +6828,15 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21,
-        T22, T23, T24);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
+        T23, T24);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20,
-        T21 arg21, T22 arg22, T23 arg23, T24 arg24)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20, T21 arg21,
+        T22 arg22, T23 arg23, T24 arg24)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
@@ -6888,10 +6852,10 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4,
 struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
-        T23, NullType, NullType, NullType, NullType, NullType, NullType,
-        NullType, NullType> FunctorType;
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23,
+        NullType, NullType, NullType, NullType, NullType, NullType, NullType,
+        NullType> FunctorType;
 
     FunctorType functor_;
 
@@ -6911,15 +6875,15 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21,
-        T22, T23);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
+        T23);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20,
-        T21 arg21, T22 arg22, T23 arg23)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20, T21 arg21,
+        T22 arg22, T23 arg23)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
@@ -6936,8 +6900,8 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
         NullType, NullType> FunctorType;
 
@@ -6959,15 +6923,14 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21,
-        T22);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20,
-        T21 arg21, T22 arg22)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20, T21 arg21,
+        T22 arg22)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
@@ -6984,10 +6947,10 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
-        NullType, NullType, NullType> FunctorType;
+        NullType, NullType> FunctorType;
 
     FunctorType functor_;
 
@@ -7007,14 +6970,13 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20,
-        T21 arg21)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20, T21 arg21)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
@@ -7031,8 +6993,8 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
         NullType, NullType, NullType> FunctorType;
 
@@ -7054,13 +7016,13 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
@@ -7076,10 +7038,10 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, T16, T17, T18, T19, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
-        NullType, NullType, NullType, NullType> FunctorType;
+        NullType, NullType, NullType> FunctorType;
 
     FunctorType functor_;
 
@@ -7099,13 +7061,13 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16, T17 arg17, T18 arg18, T19 arg19)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
@@ -7121,8 +7083,8 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, T16, T17, T18, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, NullType, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, T18, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType> FunctorType;
 
@@ -7144,13 +7106,13 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16, T17 arg17, T18 arg18)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16, T17 arg17, T18 arg18)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
@@ -7166,10 +7128,10 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, T16, T17, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, NullType, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
-        NullType, NullType, NullType, NullType, NullType> FunctorType;
+        NullType, NullType, NullType, NullType> FunctorType;
 
     FunctorType functor_;
 
@@ -7189,13 +7151,13 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16, T17);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16, T17);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16, T17 arg17)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16, T17 arg17)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16,
@@ -7211,8 +7173,8 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, T16, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, NullType, NullType, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType> FunctorType;
 
@@ -7234,17 +7196,16 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15, T16);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15, T16);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15, T16 arg16)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15,
+        T16 arg16)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
-            arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
-            arg16);
+            arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16);
     }
 };
 
@@ -7256,11 +7217,10 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, T15, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, NullType, NullType, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, NullType, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
-        NullType, NullType, NullType, NullType, NullType,
-        NullType> FunctorType;
+        NullType, NullType, NullType, NullType, NullType> FunctorType;
 
     FunctorType functor_;
 
@@ -7280,13 +7240,12 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14, T15);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14, T15);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14,
-        T15 arg15)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
@@ -7300,8 +7259,8 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, T14, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, NullType, NullType, NullType, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, NullType, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType,
         NullType> FunctorType;
@@ -7324,12 +7283,12 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13, T14);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13, T14);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
@@ -7343,10 +7302,10 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, T13, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, NullType, NullType, NullType, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, NullType, NullType, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
-        NullType, NullType, NullType, NullType, NullType, NullType,
+        NullType, NullType, NullType, NullType, NullType,
         NullType> FunctorType;
 
     FunctorType functor_;
@@ -7367,12 +7326,12 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12, T13);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12, T13);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12, T13 arg13)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12, arg13);
@@ -7386,8 +7345,8 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, T12, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, NullType, NullType, NullType, NullType, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, NullType, NullType, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType,
         NullType> FunctorType;
@@ -7410,12 +7369,12 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event result_type;
 
     //! \brief Function signature of kernel functor with no event dependency.
-    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7,
-        T8, T9, T10, T11, T12);
+    typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8,
+        T9, T10, T11, T12);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11, T12 arg12)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11, T12 arg12)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11, arg12);
@@ -7429,10 +7388,10 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     T11, NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, NullType, NullType, NullType, NullType, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, NullType, NullType, NullType, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
-        NullType, NullType, NullType, NullType, NullType, NullType, NullType,
+        NullType, NullType, NullType, NullType, NullType, NullType,
         NullType> FunctorType;
 
     FunctorType functor_;
@@ -7456,9 +7415,9 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event type_(
         const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10, T11 arg11)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10, T11 arg11)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10, arg11);
@@ -7472,8 +7431,8 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, NullType, NullType, NullType, NullType, NullType, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, NullType, NullType, NullType, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
         NullType> FunctorType;
@@ -7499,9 +7458,9 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
     typedef Event type_(
         const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9, T10 arg10)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9,
+        T10 arg10)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9, arg10);
@@ -7515,11 +7474,11 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, NullType, NullType, NullType, NullType, NullType, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
-        NullType, NullType> FunctorType;
+        NullType, NullType, NullType, NullType, NullType, NullType, NullType,
+        NullType> FunctorType;
 
     FunctorType functor_;
 
@@ -7542,9 +7501,8 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
     typedef Event type_(
         const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8,
-        T9 arg9)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
             arg7, arg8, arg9);
@@ -7585,11 +7543,11 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, T8, NullType,
     typedef Event type_(
         const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7, T8);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8)
     {
-        return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6,
-            arg7, arg8);
+        return functor_(
+            enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
     }
 };
 
@@ -7626,8 +7584,8 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, T7, NullType,
     //! \brief Function signature of kernel functor with no event dependency.
     typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6, T7);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7)
     {
         return functor_(
             enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
@@ -7667,11 +7625,10 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, T6, NullType, NullType,
     //! \brief Function signature of kernel functor with no event dependency.
     typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5, T6);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5, T6 arg6)
     {
-        return functor_(
-            enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6);
+        return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5, arg6);
     }
 };
 
@@ -7708,8 +7665,8 @@ struct functionImplementation_<T0, T1, T2, T3, T4, T5, NullType, NullType,
     //! \brief Function signature of kernel functor with no event dependency.
     typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4, T5);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4, T5 arg5)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4, T5 arg5)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4, arg5);
     }
@@ -7721,11 +7678,11 @@ struct functionImplementation_<T0, T1, T2, T3, T4, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType, NullType, NullType, NullType,
     NullType, NullType, NullType, NullType> {
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, NullType,
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
         NullType, NullType, NullType, NullType, NullType, NullType, NullType,
-        NullType, NullType, NullType, NullType, NullType> FunctorType;
+        NullType, NullType, NullType, NullType> FunctorType;
 
     FunctorType functor_;
 
@@ -7747,8 +7704,8 @@ struct functionImplementation_<T0, T1, T2, T3, T4, NullType, NullType,
     //! \brief Function signature of kernel functor with no event dependency.
     typedef Event type_(const EnqueueArgs&, T0, T1, T2, T3, T4);
 
-    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1,
-        T2 arg2, T3 arg3, T4 arg4)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2,
+        T3 arg3, T4 arg4)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2, arg3, arg4);
     }
@@ -7826,8 +7783,7 @@ struct functionImplementation_<T0, T1, T2, NullType, NullType, NullType,
     //! \brief Function signature of kernel functor with no event dependency.
     typedef Event type_(const EnqueueArgs&, T0, T1, T2);
 
-    Event operator()(
-        const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2)
+    Event operator()(const EnqueueArgs& enqueueArgs, T0 arg0, T1 arg1, T2 arg2)
     {
         return functor_(enqueueArgs, arg0, arg1, arg2);
     }
@@ -7936,9 +7892,9 @@ struct make_kernel
           T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21,
           T22, T23, T24, T25, T26, T27, T28, T29, T30, T31> {
     public:
-    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8,
-        T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22,
-        T23, T24, T25, T26, T27, T28, T29, T30, T31> FunctorType;
+    typedef detail::KernelFunctorGlobal<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23,
+        T24, T25, T26, T27, T28, T29, T30, T31> FunctorType;
 
     make_kernel(
         const Program& program, const STRING_CLASS name, cl_int* err = NULL)

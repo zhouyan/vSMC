@@ -36,8 +36,8 @@
 #include <vsmc/core/single_particle.hpp>
 #include <tuple>
 
-#define VSMC_RUNTIME_ASSERT_CORE_STATE_TUPLE_COPY_SIZE_MISMATCH              \
-    VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),         \
+#define VSMC_RUNTIME_ASSERT_CORE_STATE_TUPLE_COPY_SIZE_MISMATCH               \
+    VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),          \
         ("**StateTuple::copy** SIZE MISMATCH"))
 
 namespace vsmc
@@ -387,8 +387,8 @@ class StateTuple<ColMajor, T, Types...>
     }
 
     template <std::size_t Pos>
-    const typename state_tuple_base_type::template state_type<Pos>::type *
-        data(Position<Pos>) const
+    const typename state_tuple_base_type::template state_type<Pos>::type *data(
+        Position<Pos>) const
     {
         return std::get<Pos>(state_).data();
     }
@@ -513,9 +513,7 @@ class StateTuple<ColMajor, T, Types...>
         unpack_particle(id, pack, Position<Pos + 1>());
     }
 
-    void unpack_particle(size_type, const state_pack_type &, Position<dim_>)
-    {
-    }
+    void unpack_particle(size_type, const state_pack_type &, Position<dim_>) {}
 
     template <std::size_t Pos>
     void unpack_particle(size_type id, state_pack_type &&pack, Position<Pos>)

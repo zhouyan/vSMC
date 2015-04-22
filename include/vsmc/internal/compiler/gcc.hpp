@@ -34,7 +34,7 @@
 
 #define VSMC_GCC_NONEXIST 0xFFFFFFFFUL
 
-#define VSMC_GCC_VERSION                                                     \
+#define VSMC_GCC_VERSION                                                      \
     (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 
 #ifndef VSMC_INT64

@@ -35,9 +35,9 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <emmintrin.h>
 
-#define VSMC_STATIC_ASSERT_RNG_M128I_PACK(Offset, T, N)                      \
-    VSMC_STATIC_ASSERT(                                                      \
-        ((Offset < N) && (sizeof(T) * (N - Offset) >= sizeof(__m128i))),     \
+#define VSMC_STATIC_ASSERT_RNG_M128I_PACK(Offset, T, N)                       \
+    VSMC_STATIC_ASSERT(                                                       \
+        ((Offset < N) && (sizeof(T) * (N - Offset) >= sizeof(__m128i))),      \
         TRY_TO_PACK_OR_UNPACK_A_TOO_SMALL_VECTOR_INTO_OR_FROM_m128i)
 
 namespace vsmc

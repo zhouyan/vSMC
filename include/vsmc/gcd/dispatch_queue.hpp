@@ -70,8 +70,8 @@ class DispatchQueueBase : public DispatchObject<::dispatch_queue_t>
         return ::dispatch_queue_get_specific(this->object(), key);
     }
 
-    void set_specific(const void *key, void *context,
-        ::dispatch_function_t destructor) const
+    void set_specific(
+        const void *key, void *context, ::dispatch_function_t destructor) const
     {
         ::dispatch_queue_set_specific(
             this->object(), key, context, destructor);
@@ -180,8 +180,8 @@ class DispatchQueue<DispatchGlobal> : public DispatchQueueBase
 {
     public:
 #if VSMC_HAS_GCD_LION
-    DispatchQueue(::dispatch_queue_priority_t priority =
-                      DISPATCH_QUEUE_PRIORITY_DEFAULT,
+    DispatchQueue(
+        ::dispatch_queue_priority_t priority = DISPATCH_QUEUE_PRIORITY_DEFAULT,
         unsigned long flags = 0)
         : DispatchQueueBase(
               ::dispatch_get_global_queue(priority, flags), false)

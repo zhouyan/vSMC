@@ -35,14 +35,14 @@
 #include <vsmc/internal/config.hpp>
 #include <vsmc/internal/defines.hpp>
 
-#define VSMC_DEFINE_SMP_FORWARD(Name)                                        \
-    template <typename T, typename = Virtual>                                \
-    class Initialize##Name;                                                  \
-    template <typename T, typename = Virtual>                                \
-    class Move##Name;                                                        \
-    template <typename T, typename = Virtual>                                \
-    class MonitorEval##Name;                                                 \
-    template <typename T, typename = Virtual>                                \
+#define VSMC_DEFINE_SMP_FORWARD(Name)                                         \
+    template <typename T, typename = Virtual>                                 \
+    class Initialize##Name;                                                   \
+    template <typename T, typename = Virtual>                                 \
+    class Move##Name;                                                         \
+    template <typename T, typename = Virtual>                                 \
+    class MonitorEval##Name;                                                  \
+    template <typename T, typename = Virtual>                                 \
     class PathEval##Name;
 
 namespace vsmc

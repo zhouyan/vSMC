@@ -38,29 +38,29 @@
 #include <intrin.h>
 #endif
 
-#define VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType)                \
-    VSMC_STATIC_ASSERT((std::is_same<ResultType, uint32_t>::value ||         \
-                           std::is_same<ResultType, uint64_t>::value),       \
+#define VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType)                 \
+    VSMC_STATIC_ASSERT((std::is_same<ResultType, uint32_t>::value ||          \
+                           std::is_same<ResultType, uint64_t>::value),        \
         USE_PhiloxEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t)
 
-#define VSMC_STATIC_ASSERT_RNG_PHILOX_SIZE(K)                                \
-    VSMC_STATIC_ASSERT(                                                      \
+#define VSMC_STATIC_ASSERT_RNG_PHILOX_SIZE(K)                                 \
+    VSMC_STATIC_ASSERT(                                                       \
         (K == 2 || K == 4), USE_PhiloxEngine_WITH_SIZE_OTHER_THAN_2_OR_4)
 
-#define VSMC_STATIC_ASSERT_RNG_PHILOX                                        \
-    VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType);                   \
+#define VSMC_STATIC_ASSERT_RNG_PHILOX                                         \
+    VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType);                    \
     VSMC_STATIC_ASSERT_RNG_PHILOX_SIZE(K);
 
-#define VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(T, I, val)                      \
-    template <>                                                              \
-    struct PhiloxWeylConstantValue<T, I>                                     \
-        : public std::integral_constant<T, val> {                            \
+#define VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(T, I, val)                       \
+    template <>                                                               \
+    struct PhiloxWeylConstantValue<T, I>                                      \
+        : public std::integral_constant<T, val> {                             \
     };
 
-#define VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(T, K, I, val)                  \
-    template <>                                                              \
-    struct PhiloxRoundConstantValue<T, K, I>                                 \
-        : public std::integral_constant<T, val> {                            \
+#define VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(T, K, I, val)                   \
+    template <>                                                               \
+    struct PhiloxRoundConstantValue<T, K, I>                                  \
+        : public std::integral_constant<T, val> {                             \
     };
 
 /// \brief PhiloxEngine default rounds
@@ -84,10 +84,8 @@ struct PhiloxWeylConstantValue;
 VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint32_t, 0, UINT32_C(0x9E3779B9))
 VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint32_t, 1, UINT32_C(0xBB67AE85))
 
-VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(
-    uint64_t, 0, UINT64_C(0x9E3779B97F4A7C15))
-VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(
-    uint64_t, 1, UINT64_C(0xBB67AE8584CAA73B))
+VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint64_t, 0, UINT64_C(0x9E3779B97F4A7C15))
+VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint64_t, 1, UINT64_C(0xBB67AE8584CAA73B))
 
 template <typename, std::size_t, std::size_t>
 struct PhiloxRoundConstantValue;
@@ -204,8 +202,7 @@ inline void philox_hilo(uint64_t b, uint64_t &hi, uint64_t &lo)
 template <std::size_t K, std::size_t I>
 inline void philox_hilo(uint64_t b, uint64_t &hi, uint64_t &lo)
 {
-    const uint64_t a =
-        traits::PhiloxRoundConstantTrait<uint64_t, K, I>::value;
+    const uint64_t a = traits::PhiloxRoundConstantTrait<uint64_t, K, I>::value;
     const unsigned whalf = 32;
     const uint64_t lomask = (static_cast<uint64_t>(1) << whalf) - 1;
 
@@ -238,8 +235,8 @@ struct PhiloxRound {
 
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 2, N, true> {
-    static void eval(std::array<ResultType, 2> &state,
-        const std::array<ResultType, 1> &par)
+    static void eval(
+        std::array<ResultType, 2> &state, const std::array<ResultType, 1> &par)
     {
         ResultType hi = 0;
         ResultType lo = 0;
@@ -251,8 +248,8 @@ struct PhiloxRound<ResultType, 2, N, true> {
 
 template <typename ResultType, std::size_t N>
 struct PhiloxRound<ResultType, 4, N, true> {
-    static void eval(std::array<ResultType, 4> &state,
-        const std::array<ResultType, 2> &par)
+    static void eval(
+        std::array<ResultType, 4> &state, const std::array<ResultType, 2> &par)
     {
         ResultType hi0 = 0;
         ResultType lo1 = 0;
@@ -518,8 +515,7 @@ class PhiloxEngine
     }
 
     template <std::size_t N>
-    void generate_buffer(
-        buffer_type &buf, key_type &par, std::true_type) const
+    void generate_buffer(buffer_type &buf, key_type &par, std::true_type) const
     {
         internal::PhiloxBumpKey<ResultType, K, N>::eval(par);
         internal::PhiloxRound<ResultType, K, N>::eval(buf, par);

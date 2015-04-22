@@ -77,9 +77,8 @@ inline vsmc::StopWatch rng_cl_test_cpp(
 }
 
 template <typename FP>
-inline void rng_cl_test_ocl(std::size_t N,
-    std::vector<cl::Kernel> &kernel_vec, cl::Buffer &buffer,
-    std::vector<FP> &host, double tcpp)
+inline void rng_cl_test_ocl(std::size_t N, std::vector<cl::Kernel> &kernel_vec,
+    cl::Buffer &buffer, std::vector<FP> &host, double tcpp)
 {
     vsmc::CLManager<rng_device> &manager =
         vsmc::CLManager<rng_device>::instance();

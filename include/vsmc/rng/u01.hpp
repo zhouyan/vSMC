@@ -35,22 +35,22 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01.h>
 
-#define VSMC_RUNTIME_ASSERT_RNG_U01_U01_SEQUENCE(Method)                     \
-    VSMC_RUNTIME_ASSERT((n < N_ && (n == n_ || n == n_ + 1 || n_ == N_)),    \
+#define VSMC_RUNTIME_ASSERT_RNG_U01_U01_SEQUENCE(Method)                      \
+    VSMC_RUNTIME_ASSERT((n < N_ && (n == n_ || n == n_ + 1 || n_ == N_)),     \
         ("**U01Sequence" #Method "::operator[]** INVALID INDEX"))
 
-#define VSMC_DEFINE_RNG_U01(FPType, Left, Right, left, right, UBits, FBits)  \
-    template <>                                                              \
-    struct U01<Left, Right, uint##UBits##_t, FPType> {                       \
-        FPType operator()(uint##UBits##_t u) const                           \
-        {                                                                    \
-            return ::u01_##left##_##right##_##UBits##_##FBits(u);            \
-        }                                                                    \
-                                                                             \
-        static FPType uint2fp(uint##UBits##_t u)                             \
-        {                                                                    \
-            return ::u01_##left##_##right##_##UBits##_##FBits(u);            \
-        }                                                                    \
+#define VSMC_DEFINE_RNG_U01(FPType, Left, Right, left, right, UBits, FBits)   \
+    template <>                                                               \
+    struct U01<Left, Right, uint##UBits##_t, FPType> {                        \
+        FPType operator()(uint##UBits##_t u) const                            \
+        {                                                                     \
+            return ::u01_##left##_##right##_##UBits##_##FBits(u);             \
+        }                                                                     \
+                                                                              \
+        static FPType uint2fp(uint##UBits##_t u)                              \
+        {                                                                     \
+            return ::u01_##left##_##right##_##UBits##_##FBits(u);             \
+        }                                                                     \
     };
 
 namespace vsmc

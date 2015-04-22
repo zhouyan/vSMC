@@ -38,36 +38,36 @@
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_reduce.h>
 
-#define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_INITIALIZE(args)            \
-    this->initialize_param(particle, param);                                 \
-    this->pre_processor(particle);                                           \
-    internal::ParallelInitializeState<T, InitializeTBB<T, Derived>> work(    \
-        this, &particle);                                                    \
-    ::tbb::parallel_reduce args;                                             \
-    this->post_processor(particle);                                          \
+#define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_INITIALIZE(args)             \
+    this->initialize_param(particle, param);                                  \
+    this->pre_processor(particle);                                            \
+    internal::ParallelInitializeState<T, InitializeTBB<T, Derived>> work(     \
+        this, &particle);                                                     \
+    ::tbb::parallel_reduce args;                                              \
+    this->post_processor(particle);                                           \
     return work.accept();
 
-#define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MOVE(args)                  \
-    this->pre_processor(iter, particle);                                     \
-    internal::ParallelMoveState<T, MoveTBB<T, Derived>> work(                \
-        this, iter, &particle);                                              \
-    ::tbb::parallel_reduce args;                                             \
-    this->post_processor(iter, particle);                                    \
+#define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MOVE(args)                   \
+    this->pre_processor(iter, particle);                                      \
+    internal::ParallelMoveState<T, MoveTBB<T, Derived>> work(                 \
+        this, iter, &particle);                                               \
+    ::tbb::parallel_reduce args;                                              \
+    this->post_processor(iter, particle);                                     \
     return work.accept();
 
-#define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MONITOR_EVAL(args)          \
-    this->pre_processor(iter, particle);                                     \
-    internal::ParallelMonitorState<T, MonitorEvalTBB<T, Derived>> work(      \
-        this, iter, dim, &particle, res);                                    \
-    ::tbb::parallel_for args;                                                \
+#define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MONITOR_EVAL(args)           \
+    this->pre_processor(iter, particle);                                      \
+    internal::ParallelMonitorState<T, MonitorEvalTBB<T, Derived>> work(       \
+        this, iter, dim, &particle, res);                                     \
+    ::tbb::parallel_for args;                                                 \
     this->post_processor(iter, particle);
 
-#define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_PATH_EVAL(args)             \
-    this->pre_processor(iter, particle);                                     \
-    internal::ParallelPathState<T, PathEvalTBB<T, Derived>> work(            \
-        this, iter, &particle, res);                                         \
-    ::tbb::parallel_for args;                                                \
-    this->post_processor(iter, particle);                                    \
+#define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_PATH_EVAL(args)              \
+    this->pre_processor(iter, particle);                                      \
+    internal::ParallelPathState<T, PathEvalTBB<T, Derived>> work(             \
+        this, iter, &particle, res);                                          \
+    ::tbb::parallel_for args;                                                 \
+    this->post_processor(iter, particle);                                     \
     return this->path_grid(iter, particle);
 
 namespace vsmc
@@ -94,8 +94,8 @@ class StateTBB : public BaseState
 
     protected:
     template <typename IntType>
-    void parallel_copy_run(const IntType *copy_from,
-        const ::tbb::blocked_range<size_type> &range)
+    void parallel_copy_run(
+        const IntType *copy_from, const ::tbb::blocked_range<size_type> &range)
     {
         ::tbb::parallel_for(range,
             internal::ParallelCopyParticle<StateTBB<BaseState>, IntType>(

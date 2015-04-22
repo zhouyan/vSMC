@@ -79,8 +79,7 @@ class Progress
     /// \param show_iter Shall the iteration count be displayed.
     /// \param interval_s The sleep interval in seconds
     void start(std::size_t total, const std::string &msg = std::string(),
-        std::size_t length = 0, bool show_iter = true,
-        double interval_s = 0.1)
+        std::size_t length = 0, bool show_iter = true, double interval_s = 0.1)
     {
         total_ = total;
         msg_ = msg;

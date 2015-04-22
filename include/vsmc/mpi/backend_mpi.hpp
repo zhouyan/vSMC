@@ -38,8 +38,8 @@
 #include <vsmc/mpi/mpi_manager.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 
-#define VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH               \
-    VSMC_RUNTIME_ASSERT(                                                     \
+#define VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH                \
+    VSMC_RUNTIME_ASSERT(                                                      \
         (N == global_size_), ("**StateMPI::copy** SIZE MISMATCH"))
 
 namespace vsmc
@@ -101,8 +101,8 @@ class WeightSetMPI : public WeightSetBase
             if (lmax_weight < lwptr[i])
                 lmax_weight = lwptr[i];
         double gmax_weight = 0;
-        ::boost::mpi::all_reduce(world_, lmax_weight, gmax_weight,
-            ::boost::mpi::maximum<double>());
+        ::boost::mpi::all_reduce(
+            world_, lmax_weight, gmax_weight, ::boost::mpi::maximum<double>());
         for (size_type i = 0; i != N; ++i)
             lwptr[i] -= gmax_weight;
     }
@@ -476,8 +476,7 @@ class StateMPI : public BaseState
                 for (std::size_t i = 0; i != copy_send.size(); ++i) {
                     if (copy_send[i].first == r) {
                         pack_send_ = this->state_pack(copy_send[i].second);
-                        world_.send(
-                            copy_send[i].first, copy_tag_, pack_send_);
+                        world_.send(copy_send[i].first, copy_tag_, pack_send_);
                     }
                 }
             }

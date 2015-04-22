@@ -39,29 +39,29 @@
 #include <vsmc/opencl/internal/cl_wrapper.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
-#define VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(func)                    \
-    VSMC_RUNTIME_ASSERT((setup()),                                           \
-        ("**CLManager::" #func "** CAN ONLY BE CALLED AFTER TRUE "           \
-         "**CLManager::setup**"));
+#define VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(func)                     \
+    VSMC_RUNTIME_ASSERT(                                                      \
+        (setup()), ("**CLManager::" #func "** CAN ONLY BE CALLED AFTER TRUE " \
+                    "**CLManager::setup**"));
 
-#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_PLATFORM                \
-    VSMC_RUNTIME_WARNING(setup_platform,                                     \
-        ("**CLManager::setup** FAILED TO SETUP A PLATFORM"));
+#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_PLATFORM                 \
+    VSMC_RUNTIME_WARNING(                                                     \
+        setup_platform, ("**CLManager::setup** FAILED TO SETUP A PLATFORM"));
 
-#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_CONTEXT                 \
-    VSMC_RUNTIME_WARNING(                                                    \
+#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_CONTEXT                  \
+    VSMC_RUNTIME_WARNING(                                                     \
         setup_context, ("**CLManager::setup** FAILED TO SETUP A CONTEXT"));
 
-#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_DEVICE                  \
-    VSMC_RUNTIME_WARNING(                                                    \
+#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_DEVICE                   \
+    VSMC_RUNTIME_WARNING(                                                     \
         setup_device, ("**CLManager::setup** FAILED TO SETUP A DEVICE"));
 
-#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_COMMAND_QUEUE           \
-    VSMC_RUNTIME_WARNING(setup_command_queue,                                \
+#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_COMMAND_QUEUE            \
+    VSMC_RUNTIME_WARNING(setup_command_queue,                                 \
         ("**CLManager::setup** FAILED TO SETUP A COMMAND_QUEUE"));
 
-#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(func, block, event)     \
-    VSMC_RUNTIME_WARNING((block || event != nullptr),                        \
+#define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(func, block, event)      \
+    VSMC_RUNTIME_WARNING((block || event != nullptr),                         \
         ("**CLManager::" #func " NOT BLOCKING BUT WITH NULL EVENT"))
 
 namespace vsmc
@@ -169,10 +169,7 @@ class CLManager
     const ::cl::Device &device() const { return device_; }
 
     /// \brief The vector of all device that is in the context of this manager
-    const std::vector<::cl::Device> &device_vec() const
-    {
-        return device_vec_;
-    }
+    const std::vector<::cl::Device> &device_vec() const { return device_vec_; }
 
     /// \brief The command queue currently being used
     const ::cl::CommandQueue &command_queue() const { return command_queue_; }
@@ -331,9 +328,8 @@ class CLManager
 
         ::cl::Event e;
         ::cl::Event *eptr = event == nullptr ? &e : event;
-        command_queue_.enqueueCopyBuffer(src, dst,
-            sizeof(CLType) * src_offset, sizeof(CLType) * dst_offset,
-            sizeof(CLType) * num, events, eptr);
+        command_queue_.enqueueCopyBuffer(src, dst, sizeof(CLType) * src_offset,
+            sizeof(CLType) * dst_offset, sizeof(CLType) * num, events, eptr);
         if (block)
             eptr->wait();
     }
@@ -358,14 +354,13 @@ class CLManager
         const std::vector<::cl::Event> *events = nullptr,
         ::cl::Event *event = nullptr, bool block = true) const
     {
-        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(
-            run_kernel, block, event);
+        VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(run_kernel, block, event);
 
         ::cl::Event e;
         ::cl::Event *eptr = event == nullptr ? &e : event;
         command_queue_.enqueueNDRangeKernel(kern, ::cl::NullRange,
-            get_global_nd_range(N, local_size),
-            get_local_nd_range(local_size), events, eptr);
+            get_global_nd_range(N, local_size), get_local_nd_range(local_size),
+            events, eptr);
         if (block)
             eptr->wait();
     }
@@ -489,9 +484,8 @@ class CLManager
     {
         std::vector<std::pair<const void *, std::size_t>> bin(binary.size());
         for (std::size_t i = 0; i != binary.size(); ++i) {
-            bin[i] =
-                std::make_pair(static_cast<const void *>(binary[i].data()),
-                    binary[i].size());
+            bin[i] = std::make_pair(
+                static_cast<const void *>(binary[i].data()), binary[i].size());
         }
 
         return devices == nullptr ?
@@ -553,8 +547,7 @@ class CLManager
             if (dev_select.size() != 0) {
                 ::cl_context_properties context_properties[] = {
                     CL_CONTEXT_PLATFORM,
-                    reinterpret_cast<::cl_context_properties>(platform_()),
-                    0};
+                    reinterpret_cast<::cl_context_properties>(platform_()), 0};
                 context_ = ::cl::Context(dev_select, context_properties);
                 setup_context = true;
                 device_vec_ = context_.getInfo<CL_CONTEXT_DEVICES>();

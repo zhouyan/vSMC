@@ -53,8 +53,7 @@ class DispatchObject
     /// are retained at least once when it is created. These objects shall not
     /// be retained again by this constructor. Passing `true` as this argument
     /// prevent the constructor to retain the object.
-    DispatchObject(const DispatchType &object, bool retained)
-        : object_(object)
+    DispatchObject(const DispatchType &object, bool retained) : object_(object)
     {
         if (!retained)
             retain();

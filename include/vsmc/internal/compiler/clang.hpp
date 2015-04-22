@@ -34,7 +34,7 @@
 
 #define VSMC_CLANG_NONEXIST 0xFFFFFFFFUL
 
-#define VSMC_CLANG_VERSION                                                   \
+#define VSMC_CLANG_VERSION                                                    \
     (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 
 #ifndef VSMC_INT64

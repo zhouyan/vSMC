@@ -515,8 +515,8 @@ class gmm_move_weight : public BASE_MOVE<gmm_state, gmm_move_weight>
         param.save_old();
         double sum = 1;
         for (std::size_t i = 0; i != param.comp_num() - 1; ++i) {
-            param.weight(i) = std::log(
-                param.weight(i) / param.weight(param.comp_num() - 1));
+            param.weight(i) =
+                std::log(param.weight(i) / param.weight(param.comp_num() - 1));
             param.weight(i) += rweight(sp.rng());
             param.weight(i) = std::exp(param.weight(i));
             sum += param.weight(i);

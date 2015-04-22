@@ -34,23 +34,23 @@
 
 #include <vsmc/rng/internal/common.hpp>
 
-#define VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType)              \
-    VSMC_STATIC_ASSERT((std::is_same<ResultType, uint32_t>::value ||         \
-                           std::is_same<ResultType, uint64_t>::value),       \
+#define VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType)               \
+    VSMC_STATIC_ASSERT((std::is_same<ResultType, uint32_t>::value ||          \
+                           std::is_same<ResultType, uint64_t>::value),        \
         USE_ThreefryEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t)
 
-#define VSMC_STATIC_ASSERT_RNG_THREEFRY_SIZE(K)                              \
-    VSMC_STATIC_ASSERT(                                                      \
+#define VSMC_STATIC_ASSERT_RNG_THREEFRY_SIZE(K)                               \
+    VSMC_STATIC_ASSERT(                                                       \
         (K == 2 || K == 4), USE_ThreefryEngine_WITH_SIZE_OTHER_THAN_2_OR_4)
 
-#define VSMC_STATIC_ASSERT_RNG_THREEFRY                                      \
-    VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType);                 \
+#define VSMC_STATIC_ASSERT_RNG_THREEFRY                                       \
+    VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType);                  \
     VSMC_STATIC_ASSERT_RNG_THREEFRY_SIZE(K);
 
-#define VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(T, K, N, I, val)            \
-    template <>                                                              \
-    struct ThreefryRotateConstantValue<T, K, N, I>                           \
-        : public std::integral_constant<unsigned, val> {                     \
+#define VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(T, K, N, I, val)             \
+    template <>                                                               \
+    struct ThreefryRotateConstantValue<T, K, N, I>                            \
+        : public std::integral_constant<unsigned, val> {                      \
     };
 
 /// \brief ThreefryEngine default rounds
@@ -205,8 +205,8 @@ struct ThreefryInsertKey {
 
 template <typename ResultType, std::size_t N>
 struct ThreefryInsertKey<ResultType, 2, N, true> {
-    static void eval(std::array<ResultType, 2> &state,
-        const std::array<ResultType, 3> &par)
+    static void eval(
+        std::array<ResultType, 2> &state, const std::array<ResultType, 3> &par)
     {
         std::get<0>(state) += std::get<i0_>(par);
         std::get<1>(state) += std::get<i1_>(par);
@@ -221,8 +221,8 @@ struct ThreefryInsertKey<ResultType, 2, N, true> {
 
 template <typename ResultType, std::size_t N>
 struct ThreefryInsertKey<ResultType, 4, N, true> {
-    static void eval(std::array<ResultType, 4> &state,
-        const std::array<ResultType, 5> &par)
+    static void eval(
+        std::array<ResultType, 4> &state, const std::array<ResultType, 5> &par)
     {
         std::get<0>(state) += std::get<i0_>(par);
         std::get<1>(state) += std::get<i1_>(par);

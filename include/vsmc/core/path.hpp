@@ -35,12 +35,12 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 
-#define VSMC_RUNTIME_ASSERT_CORE_PATH_ITER(func)                             \
-    VSMC_RUNTIME_ASSERT((iter < iter_size()),                                \
+#define VSMC_RUNTIME_ASSERT_CORE_PATH_ITER(func)                              \
+    VSMC_RUNTIME_ASSERT((iter < iter_size()),                                 \
         ("**Path::" #func "** INVALID ITERATION NUMBER ARGUMENT"))
 
-#define VSMC_RUNTIME_ASSERT_CORE_PATH_FUNCTOR(func, caller, name)            \
-    VSMC_RUNTIME_ASSERT(static_cast<bool>(func),                             \
+#define VSMC_RUNTIME_ASSERT_CORE_PATH_FUNCTOR(func, caller, name)             \
+    VSMC_RUNTIME_ASSERT(static_cast<bool>(func),                              \
         ("**Path::" #caller "** INVALID " #name " OBJECT"))
 
 namespace vsmc

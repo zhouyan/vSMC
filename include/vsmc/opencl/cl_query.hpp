@@ -174,8 +174,7 @@ class CLQuery
         std::vector<::cl::Device> devices(program_device(program));
         std::vector<std::pair<::cl_build_status, std::string>> build_log;
         for (std::size_t i = 0; i != devices.size(); ++i) {
-            program.getBuildInfo(
-                devices[i], CL_PROGRAM_BUILD_STATUS, &status);
+            program.getBuildInfo(devices[i], CL_PROGRAM_BUILD_STATUS, &status);
             program.getBuildInfo(devices[i], CL_PROGRAM_BUILD_LOG, &log);
             build_log.push_back(std::make_pair(status, log));
         }
@@ -456,8 +455,8 @@ class CLQuery
             os, dev, CL_DEVICE_PROFILE, "CL_DEVICE_PROFILE");
         print_info_val<std::string, ::cl_device_info>(
             os, dev, CL_DEVICE_VERSION, "CL_DEVICE_VERSION");
-        print_info_val<std::string, ::cl_device_info>(os, dev,
-            CL_DEVICE_OPENCL_C_VERSION, "CL_DEVICE_OPENCL_C_VERSION");
+        print_info_val<std::string, ::cl_device_info>(
+            os, dev, CL_DEVICE_OPENCL_C_VERSION, "CL_DEVICE_OPENCL_C_VERSION");
     }
 
     template <typename CharT, typename Traits>
@@ -535,8 +534,8 @@ class CLQuery
             CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE,
             "CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE", "byte");
         print_info_val<::cl_ulong, ::cl_device_info>(os, dev,
-            CL_DEVICE_GLOBAL_MEM_CACHE_SIZE,
-            "CL_DEVICE_GLOBAL_MEM_CACHE_SIZE", "byte");
+            CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, "CL_DEVICE_GLOBAL_MEM_CACHE_SIZE",
+            "byte");
         print_info_val<::cl_ulong, ::cl_device_info>(os, dev,
             CL_DEVICE_GLOBAL_MEM_SIZE, "CL_DEVICE_GLOBAL_MEM_SIZE", "byte");
         print_info_val<::cl_ulong, ::cl_device_info>(os, dev,
@@ -694,8 +693,8 @@ class CLQuery
             CL_DEVICE_IMAGE3D_MAX_DEPTH, "CL_DEVICE_IMAGE3D_MAX_DEPTH",
             "pixel");
         print_info_val<std::size_t, ::cl_device_info>(os, dev,
-            CL_DEVICE_IMAGE_MAX_BUFFER_SIZE,
-            "CL_DEVICE_IMAGE_MAX_BUFFER_SIZE", "pixel");
+            CL_DEVICE_IMAGE_MAX_BUFFER_SIZE, "CL_DEVICE_IMAGE_MAX_BUFFER_SIZE",
+            "pixel");
         print_info_val<std::size_t, ::cl_device_info>(os, dev,
             CL_DEVICE_IMAGE_MAX_ARRAY_SIZE, "CL_DEVICE_IMAGE_MAX_ARRAY_SIZE");
         print_info_val<::cl_uint, ::cl_device_info>(
@@ -740,8 +739,7 @@ class CLQuery
     static std::vector<std::string> split_string(const std::string &str)
     {
         std::istringstream ss(str);
-        return std::vector<std::string>(
-            std::istream_iterator<std::string>(ss),
+        return std::vector<std::string>(std::istream_iterator<std::string>(ss),
             std::istream_iterator<std::string>());
     }
 

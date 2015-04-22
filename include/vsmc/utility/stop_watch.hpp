@@ -382,7 +382,7 @@ class StopWatchSYS
     ::timespec start_time_;
     bool running_;
     static constexpr long ratio_ = 1000000000L; // 9 zero
-};                                                    // class StopWatchSYS
+};                                              // class StopWatchSYS
 
 #elif defined(VSMC_MSVC)
 

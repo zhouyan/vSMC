@@ -34,19 +34,19 @@
 
 #include <vsmc/rng/internal/common.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_STABILITY(a) \
-    VSMC_RUNTIME_ASSERT((a > 0 && a <= 2),                                   \
-        ("**StableDistribution** CONSTRUCTED WITH INVALID "                  \
+#define VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_STABILITY(a)  \
+    VSMC_RUNTIME_ASSERT((a > 0 && a <= 2),                                    \
+        ("**StableDistribution** CONSTRUCTED WITH INVALID "                   \
          "STABILITY PARAMETER VALUE"))
 
-#define VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_SKEWNESS(a)  \
-    VSMC_RUNTIME_ASSERT((a >= -1 && a <= 1),                                 \
-        ("**StableDistribution** CONSTRUCTED WITH INVALID "                  \
+#define VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_SKEWNESS(a)   \
+    VSMC_RUNTIME_ASSERT((a >= -1 && a <= 1),                                  \
+        ("**StableDistribution** CONSTRUCTED WITH INVALID "                   \
          "SKEWNESS PARAMETER VALUE"))
 
-#define VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_SCALE(a)     \
-    VSMC_RUNTIME_ASSERT(                                                     \
-        (a > 0), ("**StableDistribution** CONSTRUCTED WITH INVALID "         \
+#define VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_SCALE(a)      \
+    VSMC_RUNTIME_ASSERT(                                                      \
+        (a > 0), ("**StableDistribution** CONSTRUCTED WITH INVALID "          \
                   "SCALE PARAMETER VALUE"))
 
 namespace vsmc
@@ -93,8 +93,7 @@ class StableDistribution
             if (param1.location_ < param2.location_ ||
                 param1.location_ > param2.location_)
                 return false;
-            if (param1.scale_ < param2.scale_ ||
-                param1.scale_ > param2.scale_)
+            if (param1.scale_ < param2.scale_ || param1.scale_ > param2.scale_)
                 return false;
             return true;
         }
@@ -348,10 +347,7 @@ class StableDistribution
             std::log(scale_);
     }
 
-    result_type trans_a(result_type x) const
-    {
-        return scale_ * x + location_;
-    }
+    result_type trans_a(result_type x) const { return scale_ * x + location_; }
 
     void invariant()
     {

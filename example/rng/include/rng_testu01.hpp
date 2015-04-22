@@ -39,51 +39,51 @@ extern "C" {
 #include <bbattery.h>
 }
 
-#define VSMC_RNG_TESTU01_FUNCTION(Eng)                                       \
-    extern "C" {                                                             \
-    inline double rng_##Eng(void)                                            \
-    {                                                                        \
-        static vsmc::Eng eng;                                                \
-        static std::uniform_real_distribution<double> runif(0, 1);           \
-                                                                             \
-        return runif(eng);                                                   \
-    }                                                                        \
+#define VSMC_RNG_TESTU01_FUNCTION(Eng)                                        \
+    extern "C" {                                                              \
+    inline double rng_##Eng(void)                                             \
+    {                                                                         \
+        static vsmc::Eng eng;                                                 \
+        static std::uniform_real_distribution<double> runif(0, 1);            \
+                                                                              \
+        return runif(eng);                                                    \
+    }                                                                         \
     }
 
-#define VSMC_RNG_TESTU01_OPTION_PRE                                          \
-    vsmc::ProgramOptionMap option;                                           \
-    bool SmallCrush = false;                                                 \
-    bool Crush = false;                                                      \
-    bool BigCrush = false;                                                   \
-    bool DieHard = false;                                                    \
-    bool FIPS_140_2 = false;                                                 \
-    option.add("SmallCrush", "Test SmallCrush", &SmallCrush, false);         \
-    option.add("Crush", "Test Crush", &Crush, false);                        \
-    option.add("BigCrush", "Test BigCrush", &BigCrush, false);               \
-    option.add("DieHard", "Test DieHard", &DieHard, false);                  \
+#define VSMC_RNG_TESTU01_OPTION_PRE                                           \
+    vsmc::ProgramOptionMap option;                                            \
+    bool SmallCrush = false;                                                  \
+    bool Crush = false;                                                       \
+    bool BigCrush = false;                                                    \
+    bool DieHard = false;                                                     \
+    bool FIPS_140_2 = false;                                                  \
+    option.add("SmallCrush", "Test SmallCrush", &SmallCrush, false);          \
+    option.add("Crush", "Test Crush", &Crush, false);                         \
+    option.add("BigCrush", "Test BigCrush", &BigCrush, false);                \
+    option.add("DieHard", "Test DieHard", &DieHard, false);                   \
     option.add("FIPS_140_2", "Test FIPS_140_2", &FIPS_140_2, false);
 
-#define VSMC_RNG_TESTU01_OPTION(Eng)                                         \
-    bool rng_testu01_##Eng = false;                                          \
+#define VSMC_RNG_TESTU01_OPTION(Eng)                                          \
+    bool rng_testu01_##Eng = false;                                           \
     option.add(#Eng, "Test vsmc::" #Eng, &rng_testu01_##Eng, false);
 
 #define VSMC_RNG_TESTU01_OPTION_POST option.process(argc, argv);
 
-#define VSMC_RNG_TESTU01(Eng)                                                \
-    if (rng_testu01_##Eng) {                                                 \
-        char ename[] = #Eng;                                                 \
-        unif01_Gen *gen = unif01_CreateExternGen01(ename, rng_##Eng);        \
-        if (SmallCrush)                                                      \
-            bbattery_SmallCrush(gen);                                        \
-        if (Crush)                                                           \
-            bbattery_Crush(gen);                                             \
-        if (BigCrush)                                                        \
-            bbattery_BigCrush(gen);                                          \
-        if (DieHard)                                                         \
-            bbattery_pseudoDIEHARD(gen);                                     \
-        if (FIPS_140_2)                                                      \
-            bbattery_FIPS_140_2(gen);                                        \
-        unif01_DeleteExternGen01(gen);                                       \
+#define VSMC_RNG_TESTU01(Eng)                                                 \
+    if (rng_testu01_##Eng) {                                                  \
+        char ename[] = #Eng;                                                  \
+        unif01_Gen *gen = unif01_CreateExternGen01(ename, rng_##Eng);         \
+        if (SmallCrush)                                                       \
+            bbattery_SmallCrush(gen);                                         \
+        if (Crush)                                                            \
+            bbattery_Crush(gen);                                              \
+        if (BigCrush)                                                         \
+            bbattery_BigCrush(gen);                                           \
+        if (DieHard)                                                          \
+            bbattery_pseudoDIEHARD(gen);                                      \
+        if (FIPS_140_2)                                                       \
+            bbattery_FIPS_140_2(gen);                                         \
+        unif01_DeleteExternGen01(gen);                                        \
     }
 
 #endif // VSMC_EXAMPLE_RNG_TESTU01_HPP

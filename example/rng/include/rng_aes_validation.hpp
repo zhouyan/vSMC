@@ -92,8 +92,8 @@ static unsigned char plain_cipher_ctr256[64] = {
 
 *****************************************************************************/
 
-inline void rng_aes_validation(unsigned bits,
-    const unsigned char *test_cipher, const unsigned char *plain_cipher)
+inline void rng_aes_validation(unsigned bits, const unsigned char *test_cipher,
+    const unsigned char *plain_cipher)
 {
     bool success = true;
     for (std::size_t i = 0; i != 64; ++i) {
@@ -104,8 +104,7 @@ inline void rng_aes_validation(unsigned bits,
     }
 
     if (success) {
-        std::cout << "AES" << std::dec << bits << "Engine passed"
-                  << std::endl;
+        std::cout << "AES" << std::dec << bits << "Engine passed" << std::endl;
         return;
     }
 

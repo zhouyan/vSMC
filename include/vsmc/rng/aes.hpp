@@ -35,10 +35,10 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/aes_ni.hpp>
 
-#define VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(N, val)                           \
-    template <>                                                              \
-    struct AESRoundConstantValue<N>                                          \
-        : public std::integral_constant<int, val> {                          \
+#define VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(N, val)                            \
+    template <>                                                               \
+    struct AESRoundConstantValue<N>                                           \
+        : public std::integral_constant<int, val> {                           \
     };
 
 /// \brief AESEngine default blocks
@@ -412,17 +412,17 @@ class AES128Engine : public AESNIEngine<ResultType, AES128KeySeq<ResultType>,
 {
 
     public:
-    typedef AESNIEngine<ResultType, AES128KeySeq<ResultType>, true, 10,
-        Blocks> base_eng_type;
+    typedef AESNIEngine<ResultType, AES128KeySeq<ResultType>, true, 10, Blocks>
+        base_eng_type;
 
     explicit AES128Engine(ResultType s = 0) : base_eng_type(s) {}
 
     template <typename SeedSeq>
     explicit AES128Engine(SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq,
-            typename base_eng_type::result_type,
-            typename base_eng_type::key_type,
-            AES128Engine<ResultType, Blocks>>::value>::type * = nullptr)
+        typename std::enable_if<
+            internal::is_seed_seq<SeedSeq, typename base_eng_type::result_type,
+                typename base_eng_type::key_type,
+                AES128Engine<ResultType, Blocks>>::value>::type * = nullptr)
         : base_eng_type(seq)
     {
     }
@@ -586,8 +586,7 @@ class AES192KeySeq
     void copy_key(std::array<__m128i, Rp1> &key_seq,
         const unsigned char *ks_ptr, std::true_type)
     {
-        unsigned char *dst =
-            reinterpret_cast<unsigned char *>(key_seq.data());
+        unsigned char *dst = reinterpret_cast<unsigned char *>(key_seq.data());
         std::memcpy(dst + 24, ks_ptr + 24, Rp1 * 16 - 24);
     }
 }; // class AES192KeySeq
@@ -603,17 +602,17 @@ class AES192Engine : public AESNIEngine<ResultType, AES192KeySeq<ResultType>,
 {
 
     public:
-    typedef AESNIEngine<ResultType, AES192KeySeq<ResultType>, true, 12,
-        Blocks> base_eng_type;
+    typedef AESNIEngine<ResultType, AES192KeySeq<ResultType>, true, 12, Blocks>
+        base_eng_type;
 
     explicit AES192Engine(ResultType s = 0) : base_eng_type(s) {}
 
     template <typename SeedSeq>
     explicit AES192Engine(SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq,
-            typename base_eng_type::result_type,
-            typename base_eng_type::key_type,
-            AES192Engine<ResultType, Blocks>>::value>::type * = nullptr)
+        typename std::enable_if<
+            internal::is_seed_seq<SeedSeq, typename base_eng_type::result_type,
+                typename base_eng_type::key_type,
+                AES192Engine<ResultType, Blocks>>::value>::type * = nullptr)
         : base_eng_type(seq)
     {
     }
@@ -752,17 +751,17 @@ class AES256Engine : public AESNIEngine<ResultType, AES256KeySeq<ResultType>,
 {
 
     public:
-    typedef AESNIEngine<ResultType, AES256KeySeq<ResultType>, true, 14,
-        Blocks> base_eng_type;
+    typedef AESNIEngine<ResultType, AES256KeySeq<ResultType>, true, 14, Blocks>
+        base_eng_type;
 
     explicit AES256Engine(ResultType s = 0) : base_eng_type(s) {}
 
     template <typename SeedSeq>
     explicit AES256Engine(SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq,
-            typename base_eng_type::result_type,
-            typename base_eng_type::key_type,
-            AES256Engine<ResultType, Blocks>>::value>::type * = nullptr)
+        typename std::enable_if<
+            internal::is_seed_seq<SeedSeq, typename base_eng_type::result_type,
+                typename base_eng_type::key_type,
+                AES256Engine<ResultType, Blocks>>::value>::type * = nullptr)
         : base_eng_type(seq)
     {
     }

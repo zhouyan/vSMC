@@ -35,7 +35,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/opencl/internal/cl_wrapper.hpp>
 
-#define VSMC_DEFINE_OPENCL_CL_ERROR_ERR(STATUS)                              \
+#define VSMC_DEFINE_OPENCL_CL_ERROR_ERR(STATUS)                               \
     case STATUS: return #STATUS
 
 namespace vsmc
