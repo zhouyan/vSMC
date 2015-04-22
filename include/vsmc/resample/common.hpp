@@ -136,10 +136,10 @@ inline void trans_uscf(std::size_t M, std::size_t N, const double *weight,
     for (std::size_t i = 0; i != M - 1; ++i) {
         accw += weight[i];
         while (n != N && u01seq[n] <= accw)
-            copy_from[n++] = i;
+            copy_from[n++] = static_cast<IntType>(i);
     }
     while (n != N)
-        copy_from[n++] = M - 1;
+        copy_from[n++] = static_cast<IntType>(M - 1);
 }
 
 } // namespace vsmc::internal
