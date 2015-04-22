@@ -53,8 +53,8 @@ namespace traits
 /// \ingroup Traits
 template <typename ResultType, typename = void>
 struct GeneratorWrapperMinMaxTrait {
-    static constexpr const ResultType _Min = 0;
-    static constexpr const ResultType _Max = VSMC_MAX_UINT(ResultType);
+    static constexpr ResultType _Min = 0;
+    static constexpr ResultType _Max = VSMC_MAX_UINT(ResultType);
 
     static constexpr ResultType min VSMC_MNE() { return _Min; }
     static constexpr ResultType max VSMC_MNE() { return _Max; }

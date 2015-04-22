@@ -107,7 +107,7 @@ class StateTupleBase
 
         private:
         state_tuple_type data_;
-        static constexpr const std::size_t dim_ = sizeof...(Types) + 1;
+        static constexpr std::size_t dim_ = sizeof...(Types) + 1;
 
         template <typename Archive, std::size_t Pos>
         void serialize(Archive &ar, Position<Pos>)
@@ -219,7 +219,7 @@ class StateTupleBase
 
     private:
     size_type size_;
-    static constexpr const std::size_t dim_ = sizeof...(Types) + 1;
+    static constexpr std::size_t dim_ = sizeof...(Types) + 1;
 
     template <std::size_t Pos, typename CharT, typename Traits>
     void print_particle(std::basic_ostream<CharT, Traits> &os, size_type id,
@@ -331,7 +331,7 @@ class StateTuple<RowMajor, T, Types...>
     }
 
     private:
-    static constexpr const std::size_t dim_ = sizeof...(Types) + 1;
+    static constexpr std::size_t dim_ = sizeof...(Types) + 1;
     std::vector<std::tuple<T, Types...>> state_;
 }; // StateTuple
 
@@ -458,7 +458,7 @@ class StateTuple<ColMajor, T, Types...>
     }
 
     private:
-    static constexpr const std::size_t dim_ = sizeof...(Types) + 1;
+    static constexpr std::size_t dim_ = sizeof...(Types) + 1;
     std::tuple<std::vector<T>, std::vector<Types>...> state_;
 
     template <std::size_t Pos>

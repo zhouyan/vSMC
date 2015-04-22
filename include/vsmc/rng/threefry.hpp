@@ -166,7 +166,7 @@ struct ThreefryRotate<ResultType, 2, N, true> {
     }
 
     private:
-    static constexpr const unsigned r_ = (N - 1) % 8;
+    static constexpr unsigned r_ = (N - 1) % 8;
 }; // struct ThreefryRotate
 
 template <typename ResultType, std::size_t N>
@@ -189,9 +189,9 @@ struct ThreefryRotate<ResultType, 4, N, true> {
     }
 
     private:
-    static constexpr const std::size_t i0_ = N % 2 ? 1 : 3;
-    static constexpr const std::size_t i2_ = N % 2 ? 3 : 1;
-    static constexpr const unsigned r_ = (N - 1) % 8;
+    static constexpr std::size_t i0_ = N % 2 ? 1 : 3;
+    static constexpr std::size_t i2_ = N % 2 ? 3 : 1;
+    static constexpr unsigned r_ = (N - 1) % 8;
 }; // struct ThreefryRotate
 
 template <typename ResultType, std::size_t K, std::size_t N,
@@ -214,9 +214,9 @@ struct ThreefryInsertKey<ResultType, 2, N, true> {
     }
 
     private:
-    static constexpr const std::size_t inc_ = N / 4;
-    static constexpr const std::size_t i0_ = (inc_ + 0) % 3;
-    static constexpr const std::size_t i1_ = (inc_ + 1) % 3;
+    static constexpr std::size_t inc_ = N / 4;
+    static constexpr std::size_t i0_ = (inc_ + 0) % 3;
+    static constexpr std::size_t i1_ = (inc_ + 1) % 3;
 }; // struct ThreefryInsertKey
 
 template <typename ResultType, std::size_t N>
@@ -232,11 +232,11 @@ struct ThreefryInsertKey<ResultType, 4, N, true> {
     }
 
     private:
-    static constexpr const std::size_t inc_ = N / 4;
-    static constexpr const std::size_t i0_ = (inc_ + 0) % 5;
-    static constexpr const std::size_t i1_ = (inc_ + 1) % 5;
-    static constexpr const std::size_t i2_ = (inc_ + 2) % 5;
-    static constexpr const std::size_t i3_ = (inc_ + 3) % 5;
+    static constexpr std::size_t inc_ = N / 4;
+    static constexpr std::size_t i0_ = (inc_ + 0) % 5;
+    static constexpr std::size_t i1_ = (inc_ + 1) % 5;
+    static constexpr std::size_t i2_ = (inc_ + 2) % 5;
+    static constexpr std::size_t i3_ = (inc_ + 3) % 5;
 }; // struct ThreefryInsertKey
 
 } // namespace vsmc::internal
@@ -410,8 +410,8 @@ class ThreefryEngine
         index_ = n % K;
     }
 
-    static constexpr const result_type _Min = 0;
-    static constexpr const result_type _Max = VSMC_MAX_UINT(result_type);
+    static constexpr result_type _Min = 0;
+    static constexpr result_type _Max = VSMC_MAX_UINT(result_type);
 
     static constexpr result_type min VSMC_MNE() { return _Min; }
     static constexpr result_type max VSMC_MNE() { return _Max; }

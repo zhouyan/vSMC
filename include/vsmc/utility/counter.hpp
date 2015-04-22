@@ -45,12 +45,12 @@ struct CounterMask;
 
 template <typename T>
 struct CounterMask<T, true> {
-    static constexpr const T max_val = static_cast<T>(~(static_cast<T>(0)));
+    static constexpr T max_val = VSMC_MAX_UINT(T);
 
-    static constexpr const T mask_hi =
+    static constexpr T mask_hi =
         static_cast<T>(static_cast<T>(max_val << 8) >> 8);
 
-    static constexpr const T mask_lo = static_cast<T>(mask_hi ^ max_val);
+    static constexpr T mask_lo = static_cast<T>(mask_hi ^ max_val);
 }; // struct CounterMask
 
 } // namespace vsmc::internal
@@ -178,13 +178,13 @@ class Counter<std::array<T, K>>
     }
 
     private:
-    static constexpr const T max_ =
+    static constexpr T max_ =
         internal::CounterMask<T, std::is_unsigned<T>::value>::max_val;
 
-    static constexpr const T mask_hi_ =
+    static constexpr T mask_hi_ =
         internal::CounterMask<T, std::is_unsigned<T>::value>::mask_hi;
 
-    static constexpr const T mask_lo_ =
+    static constexpr T mask_lo_ =
         internal::CounterMask<T, std::is_unsigned<T>::value>::mask_lo;
 
     template <std::size_t>

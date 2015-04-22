@@ -219,7 +219,7 @@ template <typename ResultType, typename KeySeq, bool KeySeqInit,
     std::size_t Rounds, std::size_t Blocks>
 class AESNIEngine
 {
-    static constexpr const std::size_t K_ =
+    static constexpr std::size_t K_ =
         sizeof(__m128i) / sizeof(ResultType) * Blocks;
 
     public:
@@ -385,8 +385,8 @@ class AESNIEngine
         index_ = n % K_;
     }
 
-    static constexpr const result_type _Min = 0;
-    static constexpr const result_type _Max = VSMC_MAX_UINT(result_type);
+    static constexpr result_type _Min = 0;
+    static constexpr result_type _Max = VSMC_MAX_UINT(result_type);
 
     static constexpr result_type min VSMC_MNE() { return _Min; }
     static constexpr result_type max VSMC_MNE() { return _Max; }

@@ -75,10 +75,10 @@ struct UniformRealDistributionFRIntType<0, VSMC_MAX_UINT(uint64_t)> {
 template <typename FPType, typename Left, typename Right, typename Eng, bool>
 class UniformRealDistributionOp
 {
-    static constexpr const uint64_t uint32_t_max_ =
+    static constexpr uint64_t uint32_t_max_ =
         static_cast<uint64_t>(VSMC_MAX_UINT(uint32_t));
 
-    static constexpr const uint64_t uint64_t_max_ = VSMC_MAX_UINT(uint64_t);
+    static constexpr uint64_t uint64_t_max_ = VSMC_MAX_UINT(uint64_t);
 
     public:
     static FPType uint2fp(Eng &eng)

@@ -87,25 +87,25 @@ enum MonitorStage {
 /// \brief Class template argument used for scalar variant
 /// \ingroup Definitions
 struct Scalar {
-    static constexpr const bool is_scalar = true;
-    static constexpr const bool is_vector = false;
-    static constexpr const bool is_thread_local = false;
+    static constexpr bool is_scalar = true;
+    static constexpr bool is_vector = false;
+    static constexpr bool is_thread_local = false;
 }; // struct Scalar
 
 /// \brief Class template argument used for vector variant
 /// \ingroup Definitions
 struct Vector {
-    static constexpr const bool is_scalar = false;
-    static constexpr const bool is_vector = true;
-    static constexpr const bool is_thread_local = false;
+    static constexpr bool is_scalar = false;
+    static constexpr bool is_vector = true;
+    static constexpr bool is_thread_local = false;
 }; // struct Vector
 
 /// \brief Class template argument used for thread local storage variant
 /// \ingroup Definitions
 struct ThreadLocal {
-    static constexpr const bool is_scalar = false;
-    static constexpr const bool is_vector = false;
-    static constexpr const bool is_thread_local = true;
+    static constexpr bool is_scalar = false;
+    static constexpr bool is_vector = false;
+    static constexpr bool is_thread_local = true;
 }; // struct ThreadLocal
 
 /// \brief Function template argument used for position
@@ -114,7 +114,7 @@ template <std::size_t N>
 struct Position {
     typedef std::size_t size_type;
     typedef Position<N> type;
-    static constexpr const size_type value = N;
+    static constexpr size_type value = N;
     constexpr operator size_type() const { return value; }
     constexpr size_type operator()() const { return value; }
 }; // struct Position

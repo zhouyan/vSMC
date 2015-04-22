@@ -57,7 +57,7 @@
         static char2 test(...);                                              \
                                                                              \
         public:                                                              \
-        static constexpr const bool value =                                  \
+        static constexpr bool value =                                        \
             sizeof(test<T>(nullptr)) == sizeof(char);                        \
     };                                                                       \
                                                                              \
@@ -82,7 +82,7 @@
                                                                              \
     template <typename T>                                                    \
     struct Outer##Trait {                                                    \
-        static constexpr const bool value = internal::Has##Outer<T>::value;  \
+        static constexpr bool value = internal::Has##Outer<T>::value;        \
         typedef typename internal::Outer##Dispatch<T, value>::type type;     \
     };
 
@@ -106,7 +106,7 @@
         static char2 test(...);                                              \
                                                                              \
         public:                                                              \
-        static constexpr const bool value =                                  \
+        static constexpr bool value =                                        \
             sizeof(test<T>(nullptr)) == sizeof(char);                        \
     };                                                                       \
                                                                              \
@@ -131,7 +131,7 @@
                                                                              \
     template <typename T>                                                    \
     struct Outer##Trait {                                                    \
-        static constexpr const bool value = internal::Has##Outer<T>::value;  \
+        static constexpr bool value = internal::Has##Outer<T>::value;        \
         typedef typename internal::Outer##Dispatch<T, value>::type type;     \
     };
 
@@ -159,7 +159,7 @@
         static char2 test(...);                                              \
                                                                              \
         public:                                                              \
-        static constexpr const bool value =                                  \
+        static constexpr bool value =                                        \
             sizeof(test<U>(nullptr)) == sizeof(char);                        \
     };                                                                       \
                                                                              \
@@ -213,8 +213,8 @@ struct SIMDTrait;
 /// \ingroup Traits
 template <>
 struct SIMDTrait<SSE2> {
-    static constexpr const std::size_t alignment = 16;
-    static constexpr const std::size_t grainsize = 8;
+    static constexpr std::size_t alignment = 16;
+    static constexpr std::size_t grainsize = 8;
 };
 
 /// \brief SSE3 traits
@@ -245,8 +245,8 @@ struct SIMDTrait<SSE4_2> : public SIMDTrait<SSE4_1> {
 /// \ingroup Traits
 template <>
 struct SIMDTrait<AVX> {
-    static constexpr const std::size_t alignment = 32;
-    static constexpr const std::size_t grainsize = 8;
+    static constexpr std::size_t alignment = 32;
+    static constexpr std::size_t grainsize = 8;
 };
 
 /// \brief AVX2 traits

@@ -45,10 +45,8 @@
 #define VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(Generator, Min, Max)                 \
     template <>                                                              \
     struct GSLRngMinMax<GSL_RNG_TYPE_##Generator> {                          \
-        static constexpr const uint32_t _Min =                               \
-            static_cast<uint32_t>(Min##UL);                                  \
-        static constexpr const uint32_t _Max =                               \
-            static_cast<uint32_t>(Max##UL);                                  \
+        static constexpr uint32_t _Min = static_cast<uint32_t>(Min##UL);     \
+        static constexpr uint32_t _Max = static_cast<uint32_t>(Max##UL);     \
         static constexpr uint32_t min VSMC_MNE() { return _Min; }            \
         static constexpr uint32_t max VSMC_MNE() { return _Max; }            \
     }; // VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX

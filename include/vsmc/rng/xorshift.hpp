@@ -105,7 +105,7 @@ struct XorshiftEngineTrait {
     /// compile time. Otherwise, no loop will be performed. Instead, a
     /// circular
     /// buffer is implemented through the use of modulo operation.
-    static constexpr const std::size_t max_loop_unroll = 4;
+    static constexpr std::size_t max_loop_unroll = 4;
 }; // struct XorshiftEngineTrait
 
 } // namespace vsmc::traits
@@ -270,8 +270,8 @@ class XorshiftEngine
             operator()();
     }
 
-    static constexpr const result_type _Min = 0;
-    static constexpr const result_type _Max = VSMC_MAX_UINT(result_type);
+    static constexpr result_type _Min = 0;
+    static constexpr result_type _Max = VSMC_MAX_UINT(result_type);
 
     static constexpr result_type min VSMC_MNE() { return _Min; }
     static constexpr result_type max VSMC_MNE() { return _Max; }
@@ -324,7 +324,7 @@ class XorshiftEngine
     internal::XorshiftIndex<ResultType, K, R, S> index_;
     std::array<ResultType, K> state_;
 
-    static constexpr const result_type uint32_t_max_ =
+    static constexpr result_type uint32_t_max_ =
         static_cast<result_type>(VSMC_MAX_UINT(uint32_t));
 }; // class XorshiftEngine
 
@@ -374,8 +374,8 @@ class XorwowEngine
         weyl_ += D * nskip;
     }
 
-    static constexpr const result_type _Min = 0;
-    static constexpr const result_type _Max = VSMC_MAX_UINT(result_type);
+    static constexpr result_type _Min = 0;
+    static constexpr result_type _Max = VSMC_MAX_UINT(result_type);
 
     static constexpr result_type min VSMC_MNE() { return _Min; }
     static constexpr result_type max VSMC_MNE() { return _Max; }

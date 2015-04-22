@@ -42,20 +42,20 @@
     template <>                                                              \
     struct CPUIDFeatureInfo<CPUIDFeature##feat> {                            \
         static std::string str() { return std::string(#feat); }              \
-        static constexpr const unsigned eax = a##U;                          \
-        static constexpr const unsigned ecx = c##U;                          \
-        static constexpr const unsigned bit = b##U;                          \
-        static constexpr const std::size_t index = i;                        \
+        static constexpr unsigned eax = a##U;                                \
+        static constexpr unsigned ecx = c##U;                                \
+        static constexpr unsigned bit = b##U;                                \
+        static constexpr std::size_t index = i;                              \
     };
 
 #define VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(feat, a, c, i, b)         \
     template <>                                                              \
     struct CPUIDFeatureInfo<CPUIDFeatureExt##feat> {                         \
         static std::string str() { return std::string(#feat); }              \
-        static constexpr const unsigned eax = 0x80000000U + a##U;            \
-        static constexpr const unsigned ecx = c##U;                          \
-        static constexpr const unsigned bit = b##U;                          \
-        static constexpr const std::size_t index = i;                        \
+        static constexpr unsigned eax = 0x80000000U + a##U;                  \
+        static constexpr unsigned ecx = c##U;                                \
+        static constexpr unsigned bit = b##U;                                \
+        static constexpr std::size_t index = i;                              \
     };
 
 namespace vsmc
@@ -250,16 +250,16 @@ struct CPUIDFeatureInfo {
     static std::string str();
 
     /// \brief The value of the calling parameter EAX
-    static constexpr const unsigned eax = 0x00U;
+    static constexpr unsigned eax = 0x00U;
 
     /// \brief The value of the calling parameter ECX
-    static constexpr const unsigned ecx = 0x00U;
+    static constexpr unsigned ecx = 0x00U;
 
     /// \brief The index of in CPUID::reg_type of the output register
-    static constexpr const unsigned index = 0x00U;
+    static constexpr unsigned index = 0x00U;
 
     /// \brief The bit number of the feature in the register
-    static constexpr const unsigned bit = 0x00U;
+    static constexpr unsigned bit = 0x00U;
 }; // struct CPUIDFeatureInfo
 
 VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(SSE3, 0x01, 0x00, 2, 0)
@@ -667,7 +667,7 @@ class CPUID
     }
 
     private:
-    static constexpr const unsigned ext0_ = 0x80000000U;
+    static constexpr unsigned ext0_ = 0x80000000U;
 
     template <unsigned, unsigned>
     static reg_type info_dispatch(std::true_type, std::true_type)
