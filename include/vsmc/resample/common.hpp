@@ -123,7 +123,7 @@ template <typename IntType, typename U01SeqType>
 inline void trans_uscf(std::size_t M, std::size_t N, const double *weight,
     U01SeqType &u01seq, IntType *copy_from)
 {
-    if (M == 0 && N == 0)
+    if (M == 0 || N == 0)
         return;
 
     std::memset(copy_from, 0, sizeof(IntType) * N);
@@ -132,13 +132,14 @@ inline void trans_uscf(std::size_t M, std::size_t N, const double *weight,
         return;
 
     std::size_t n = 0;
-    std::size_t m = 0;
     double accw = 0;
     for (std::size_t i = 0; i != M - 1; ++i) {
         accw += weight[i];
         while (n != N && u01seq[n] <= accw)
-            copy_from[m++] = i;
+            copy_from[n++] = i;
     }
+    while (n != N)
+        copy_from[n++] = M - 1;
 }
 
 } // namespace vsmc::internal

@@ -55,14 +55,9 @@ class Resample<internal::ResampleMultinomial>
     void operator()(std::size_t M, std::size_t N, RngType &rng,
         const double *weight, IntType *copy_from)
     {
-        replication_.resize(M);
         U01SequenceSorted<RngType> u01seq(N, rng);
-        internal::trans_usrp(M, N, weight, u01seq, replication_.data());
-        internal::trans_rpcf(M, N, replication_.data(), copy_from);
+        internal::trans_uscf(M, N, weight, u01seq, copy_from);
     }
-
-    private :
-    std::vector<std::size_t, AlignedAllocator<std::size_t>> replication_;
 }; // Mulitnomial resampling
 
 } // namespace vsmc
