@@ -116,14 +116,17 @@ inline void scal(std::size_t n, T a, T *x)
 
 namespace vsmc
 {
+
 namespace math
 {
 
 VSMC_DEFINE_MATH_CBLAS_S1(asum, sasum, dasum)
 VSMC_DEFINE_MATH_CBLAS_S2(dot, sdot, ddot)
 VSMC_DEFINE_MATH_CBLAS_SV(scal, sscal, dscal)
-}
+
 } // namespace vsmc::math
+
+} // namespace vsmc
 
 #endif // VSMC_CBLAS_INT
 
