@@ -44,6 +44,7 @@ changes.
 * `Array` is no more and its use has been replaced by `std::array`.
 * `Progress` is no longer a class template.
 * The Integrate module is removed.
+* The CString module is removed.
 
 ## Minor changes
 

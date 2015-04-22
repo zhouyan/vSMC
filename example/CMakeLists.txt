@@ -355,14 +355,6 @@ ADD_SUBDIRECTORY (pf)
 SET (EXAMPLES ${EXAMPLES} "rng")
 ADD_SUBDIRECTORY (rng)
 
-IF (OPENCL_FOUND)
-    SET (EXAMPLES ${EXAMPLES} "opencl")
-    ADD_SUBDIRECTORY (opencl)
-ENDIF (OPENCL_FOUND)
-
-SET (EXAMPLES ${EXAMPLES} "utility")
-ADD_SUBDIRECTORY (utility)
-
 ##############################################################################
 # Enable backends
 ##############################################################################
