@@ -37,17 +37,17 @@
 #include <vsmc/core/particle.hpp>
 #include <vsmc/core/path.hpp>
 
-#define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, map, func)       \
-    VSMC_RUNTIME_ASSERT((iter != map.end()),                                 \
-        ("**Sampler::" #func "** INVALID MONITOR NAME"))
+#define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, map, func)        \
+    VSMC_RUNTIME_ASSERT(                                                      \
+        (iter != map.end()), ("**Sampler::" #func "** INVALID MONITOR NAME"))
 
-#define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(func, caller, name)         \
-    VSMC_RUNTIME_ASSERT(static_cast<bool>(func),                             \
+#define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(func, caller, name)          \
+    VSMC_RUNTIME_ASSERT(static_cast<bool>(func),                              \
         ("**Sampler::" #caller "** INVALID " #name " OBJECT"))
 
-#define VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER                       \
-    VSMC_RUNTIME_WARNING((!static_cast<bool>(init_)),                        \
-        ("**Sampler::initialize** A VALID INIT OBJECT IS SET "               \
+#define VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER                        \
+    VSMC_RUNTIME_WARNING((!static_cast<bool>(init_)),                         \
+        ("**Sampler::initialize** A VALID INIT OBJECT IS SET "                \
          "BUT INITILIALIZED BY ITERATING"))
 
 namespace vsmc
@@ -68,13 +68,6 @@ class Sampler
     typedef std::map<std::string, Monitor<T>> monitor_map_type;
 
     /// \brief Construct a Sampler without selection of resampling method
-    ///
-    /// \details
-    /// If no resampling method, either built-in ones or user defined are
-    /// provided, then it is assumed that no resamling shall be performed at
-    /// all. And the threshold is set to `resample_threshold_never()`. If
-    /// resampling is consdiered, then use the other two versions of the
-    /// constructor to make the intention clear to the library.
     explicit Sampler(size_type N)
         : init_by_iter_(false)
         , resample_threshold_(resample_threshold_never())
@@ -88,9 +81,7 @@ class Sampler
     /// \brief Construct a Sampler with a built-in resampling scheme
     ///
     /// \details
-    /// If a built-in scheme is chosen, then it is assumed that the user
-    /// always
-    /// want to perform resampling.
+    /// By default, resampling will be performed at every iteration.
     Sampler(size_type N, ResampleScheme scheme)
         : init_by_iter_(false)
         , resample_threshold_(resample_threshold_always())
@@ -101,13 +92,22 @@ class Sampler
         resample_scheme(scheme);
     }
 
-    /// \brief Construct a Sampler with a built-in resampling scheme and a
-    /// threshold for resampling
+    /// \brief Construct a Sampler with a user defined resampling operation
     ///
     /// \details
-    /// If a built-in scheme is chosen, then it is assumed that at least the
-    /// user want to perform resampling at least sometime. So the threshold is
-    /// set to 0.5 if not provided as the third parameter.
+    /// By default, resampling will be performed at every iteration.
+    Sampler(size_type N, const resample_type &res_op)
+        : init_by_iter_(false)
+        , resample_threshold_(resample_threshold_always())
+        , particle_(N)
+        , iter_num_(0)
+        , path_(typename Path<T>::eval_type())
+    {
+        resample_scheme(res_op);
+    }
+
+    /// \brief Construct a Sampler with a built-in resampling scheme and a
+    /// threshold for resampling
     Sampler(size_type N, ResampleScheme scheme, double resample_threshold)
         : init_by_iter_(false)
         , resample_threshold_(resample_threshold)
@@ -118,14 +118,10 @@ class Sampler
         resample_scheme(scheme);
     }
 
-    /// \brief Construct a Sampler with a user defined resampling operation
-    ///
-    /// \details
-    /// If a user defined resampling operation is set, then it is assumed that
-    /// at least the user want to perform resampling at least sometime. So the
-    /// threshold is set to 0.5 if not provided as the third parameter.
-    Sampler(size_type N, const resample_type &res_op,
-        double resample_threshold = 0.5)
+    /// \brief Construct a Sampler with a user defined resampling scheme and a
+    /// threshold for resampling
+    Sampler(
+        size_type N, const resample_type &res_op, double resample_threshold)
         : init_by_iter_(false)
         , resample_threshold_(resample_threshold)
         , particle_(N)
@@ -296,10 +292,7 @@ class Sampler
 
     /// \brief Get sampler size of a given iteration, initialization count as
     /// iter 0
-    double size_history(std::size_t iter) const
-    {
-        return size_history_[iter];
-    }
+    double size_history(std::size_t iter) const { return size_history_[iter]; }
 
     /// \brief Read sampler size history through an output iterator
     template <typename OutputIter>
@@ -328,8 +321,7 @@ class Sampler
     template <typename OutputIter>
     void read_resampled_history(OutputIter first) const
     {
-        std::copy(
-            resampled_history_.begin(), resampled_history_.end(), first);
+        std::copy(resampled_history_.begin(), resampled_history_.end(), first);
     }
 
     /// \brief Get the accept count of a given move id and the iteration
@@ -374,8 +366,7 @@ class Sampler
     /// and the `void *` parameter will be ignored.
     Sampler<T> &init_by_move(const move_type &new_init)
     {
-        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(
-            new_init, init_by_move, MOVE);
+        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_init, init_by_move, MOVE);
 
         class init_op
         {
@@ -572,8 +563,7 @@ class Sampler
     {
         typename monitor_map_type::iterator iter = monitor_.find(name);
 
-        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(
-            iter, monitor_, monitor);
+        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, monitor_, monitor);
 
         return iter->second;
     }
@@ -866,8 +856,7 @@ class Sampler
     template <typename OutputIter>
     void summary_data_row_int(OutputIter first) const
     {
-        typedef
-            typename std::iterator_traits<OutputIter>::value_type int_type;
+        typedef typename std::iterator_traits<OutputIter>::value_type int_type;
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
             *first++ = static_cast<int_type>(size_history_[iter]);
             *first++ = static_cast<int_type>(resampled_history_[iter]);
@@ -904,8 +893,7 @@ class Sampler
             *first++ = ess_history_[iter];
 
             if (path_.iter_size() > 0) {
-                if (piter != path_.iter_size() &&
-                    iter == path_.index(piter)) {
+                if (piter != path_.iter_size() && iter == path_.index(piter)) {
                     *first++ = path_.integrand(piter);
                     *first++ = path_.grid(piter);
                     ++piter;

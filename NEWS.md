@@ -49,9 +49,21 @@ changes.
 * The Integrate module is removed.
 * The CString module is removed.
 
-## Minor changes
+## New features
 
 * `Monitor::record_data` gets an overload version that return the row pointer.
+
+## Changed behaviors
+* The `Sampler::resample_type` operations shall now output `copy_from` index
+  directly. The user defined resampling method feature was not exactly
+  documented, and it is still considered an undocumented feature. It may change
+  in the future again.
+
+## Bug fixes
+
+* The default resampling threshold when a user defined resampling algorithm is
+  provided in `Sampler`'s constructor is fixed to be always resampling, the
+  same as for the built-in schemes.
 
 #Changes since v1 .1.1
 
