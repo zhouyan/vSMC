@@ -6,6 +6,9 @@ The library is now C++11 only. GCC 4.8.1, Clang 3.4, Intel C++ 2015 all
 provides full C++11 support. MSVC is the only one lagging behind. At the
 moment, MSVC 2015 support is considered to be the minimum.
 
+* Everything in the namespace `vsmc::cxx11` is gone. Replace `vsmc::cxx11` with
+  `std` shall solve any issues.
+
 * Enabled C++11 core language features (based on [LLVM coding standard][LLVM
   CS]:
   - Rvalue references: [N2118][N2118]
