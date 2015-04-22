@@ -437,30 +437,30 @@ class WeightSetNull
 
     size_type size() const { return 0; }
 
-    double ess() const { return max_ess(); }
+    double ess() const { return ess_inf(); }
 
     template <typename InputIter>
     double ess(InputIter, bool) const
     {
-        return max_ess();
+        return ess_inf();
     }
 
     template <typename RandomIter>
     double ess(RandomIter, int, bool) const
     {
-        return max_ess();
+        return ess_inf();
     }
 
     template <typename InputIter>
     double cess(InputIter, bool) const
     {
-        return max_ess();
+        return ess_inf();
     }
 
     template <typename RandomIter>
     double cess(RandomIter, int, bool) const
     {
-        return max_ess();
+        return ess_inf();
     }
 
     size_type resample_size() const { return 0; }
@@ -546,10 +546,7 @@ class WeightSetNull
     const double *log_weight_data() const { return nullptr; }
 
     private:
-    static double max_ess()
-    {
-        return std::numeric_limits<double>::max VSMC_MNE();
-    }
+    static double ess_inf() { return std::numeric_limits<double>::infinity(); }
 }; // class WeightSetEmtpy
 
 } // namespace vsmc
