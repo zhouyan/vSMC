@@ -90,31 +90,32 @@ template <typename IntType1, typename IntType2>
 inline void trans_rpcf(std::size_t M, std::size_t N,
     const IntType1 *replication, IntType2 *copy_from)
 {
-    if (M == N) {
-        IntType1 time = 0;
-        IntType2 from = 0;
-        for (std::size_t to = 0; to != N; ++to) {
-            if (replication[to] != 0) {
-                copy_from[to] = static_cast<IntType2>(to);
-            } else {
-                // replication[to] has zero child, copy from elsewhere
-                if (replication[from] < time + 2) {
-                    // only 1 child left on replication[from]
-                    time = 0;
-                    do // move from to a position with at least 2 children
-                        ++from;
-                    while (replication[from] < 2);
-                }
-                copy_from[to] = from;
-                ++time;
-            }
-        }
-    } else {
+    if (M != N) {
         std::size_t to = 0;
         for (std::size_t from = 0; from != M; ++from) {
             const IntType1 rep = replication[from];
             for (IntType1 r = 0; r != rep; ++r)
                 copy_from[to++] = static_cast<IntType2>(from);
+        }
+        return;
+    }
+
+    IntType1 time = 0;
+    IntType2 from = 0;
+    for (std::size_t to = 0; to != N; ++to) {
+        if (replication[to] != 0) {
+            copy_from[to] = static_cast<IntType2>(to);
+        } else {
+            // replication[to] has zero child, copy from elsewhere
+            if (replication[from] < time + 2) {
+                // only 1 child left on replication[from]
+                time = 0;
+                do // move from to a position with at least 2 children
+                    ++from;
+                while (replication[from] < 2);
+            }
+            copy_from[to] = from;
+            ++time;
         }
     }
 }
