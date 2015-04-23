@@ -90,6 +90,9 @@ template <typename IntType1, typename IntType2>
 inline void trans_rpcf(std::size_t M, std::size_t N,
     const IntType1 *replication, IntType2 *copy_from)
 {
+    if (M == 0 || N == 0)
+        return;
+
     if (M != N) {
         std::size_t to = 0;
         for (std::size_t from = 0; from != M; ++from) {
@@ -118,6 +121,20 @@ inline void trans_rpcf(std::size_t M, std::size_t N,
             ++time;
         }
     }
+}
+
+// Give copy_from index, retrace the replication numbers
+template <typename IntType1, typename IntType2>
+inline void trans_cfrp(std::size_t M, std::size_t N,
+        const IntType1 *copy_from, IntType2 *replication)
+{
+    if (M == 0 || N == 0)
+        return;
+
+    std::memset(replication, 0, sizeof(IntType2) * M);
+
+    for (std::size_t i = 0; i != N; ++i)
+        ++replication[copy_from[i]];
 }
 
 template <typename IntType, typename U01SeqType>
