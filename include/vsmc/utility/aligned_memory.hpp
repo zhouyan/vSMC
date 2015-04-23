@@ -341,6 +341,9 @@ class AlignedAllocator : public std::allocator<T>
     Memory memory_;
 }; // class AlignedAllocator
 
+template <typename T>
+using AlignedVector = std::vector<T, AlignedAllocator<T>>;
+
 } // namespace vsmc
 
 #endif // VSMC_UTILITY_ALIGNED_MEMORY

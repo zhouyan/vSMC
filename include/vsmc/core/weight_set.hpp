@@ -58,37 +58,39 @@ class WeightSet
 
     virtual ~WeightSet() {}
 
-    static double set_equal_weight(
-        std::size_t N, std::size_t RN, double *wptr, double *lwptr)
+    /// \brief Set all weights to be equal, normalized and return the ESS
+    static double set_equal_weight(std::size_t N, double *weight)
     {
-        double ess = static_cast<double>(RN);
-        if (wptr != nullptr)
-            std::fill_n(wptr, N, 1 / ess);
-        if (lwptr != nullptr)
-            std::memset(lwptr, 0, sizeof(double) * N);
+        double ess = static_cast<double>(N);
+        if (weight != nullptr)
+            std::fill_n(weight, N, 1 / ess);
 
         return ess;
     }
 
-    static void normalize_log_weight(std::size_t N, double *lwptr)
+    /// \brief Normalize logarithm weights such that the maximum is zero
+    static void normalize_log_weight(std::size_t N, double *log_weight)
     {
-        double dmax = lwptr[0];
+        double dmax = log_weight[0];
         for (std::size_t i = 0; i != N; ++i)
-            if (dmax < lwptr[i])
-                dmax = lwptr[i];
+            if (dmax < log_weight[i])
+                dmax = log_weight[i];
         dmax = -dmax;
         for (std::size_t i = 0; i != N; ++i)
-            lwptr[i] += dmax;
+            log_weight[i] += dmax;
     }
 
-    static double normalize_weight(std::size_t N, double *wptr)
+    /// \brief Normalize weights such that the summation is one and return the
+    /// ESS
+    static double normalize_weight(std::size_t N, double *weight)
     {
-        double coeff = 1 / math::asum(N, wptr);
-        math::scal(N, coeff, wptr);
+        double coeff = 1 / math::asum(N, weight);
+        math::scal(N, coeff, weight);
 
-        return 1 / math::dot(N, wptr, wptr);
+        return 1 / math::dot(N, weight, weight);
     }
 
+    /// \brief The number of particles
     size_type size() const { return size_; }
 
     /// \brief ESS of the current weights
@@ -98,53 +100,55 @@ class WeightSet
     template <typename InputIter>
     double ess(InputIter first, bool use_log) const
     {
-        std::vector<double, AlignedAllocator<double>> buffer(size_);
-        double *const bptr = buffer.data();
-        std::copy_n(first, size_, bptr);
+        AlignedVector<double> buffer(size_);
+        std::copy_n(first, size_, buffer.begin());
 
-        return compute_ess(bptr, use_log);
+        return compute_ess(buffer.data(), use_log);
     }
 
     /// \brief Compute ESS given (log) incremental weights
     template <typename RandomIter>
     double ess(RandomIter first, int stride, bool use_log) const
     {
-        std::vector<double, AlignedAllocator<double>> buffer(size_);
-        double *const bptr = buffer.data();
+        AlignedVector<double> buffer(size_);
         for (size_type i = 0; i != size_; ++i, first += stride)
-            bptr[i] = *first;
+            buffer[i] = *first;
 
-        return compute_ess(bptr, use_log);
+        return compute_ess(buffer.data(), use_log);
     }
 
     /// \brief Compute CESS given (log) incremental weights
     template <typename InputIter>
     double cess(InputIter first, bool use_log) const
     {
-        std::vector<double, AlignedAllocator<double>> buffer(size_);
-        double *const bptr = buffer.data();
-        std::copy_n(first, size_, bptr);
+        AlignedVector<double> buffer(size_);
+        std::copy_n(first, size_, buffer.begin());
 
-        return compute_cess(bptr, use_log);
+        return compute_cess(buffer.data(), use_log);
     }
 
     /// \brief Compute CESS given (log) incremental weights
     template <typename RandomIter>
     double cess(RandomIter first, int stride, bool use_log) const
     {
-        std::vector<double, AlignedAllocator<double>> buffer(size_);
-        double *const bptr = buffer.data();
+        AlignedVector<double> buffer(size_);
         for (size_type i = 0; i != size_; ++i, first += stride)
-            bptr[i] = *first;
+            buffer[i] = *first;
 
-        return compute_cess(bptr, use_log);
+        return compute_cess(buffer.data(), use_log);
     }
 
     /// \brief Size of the weight set for the purpose of resampling
-    virtual size_type resample_size() const { return size_; }
+    virtual size_type resample_size() const { return size(); }
 
-    /// \brief Read normalized weights through an output iterator for the
-    /// purpose of resampling
+    /// \brief Read normalized weights through a pointer for the purpose of
+    /// resampling
+    ///
+    /// \details
+    /// In this class, `resample_weight` and `weight` are identical. However,
+    /// in derived classes they might not be. For example, in `WeightSetMPI`,
+    /// the `resample_weight` give a vector of normalized weights on all nodes
+    /// while `weight` give the weights on the calling node.
     virtual void read_resample_weight(double *first) const
     {
         read_weight(first);
@@ -162,9 +166,8 @@ class WeightSet
     template <typename RandomIter>
     void read_weight(RandomIter first, int stride) const
     {
-        const double *const wptr = weight_.data();
         for (size_type i = 0; i != size_; ++i, first += stride)
-            *first = wptr[i];
+            *first = weight_[i];
     }
 
     /// \brief Read unnormalized logarithm weights through an output iterator
@@ -179,9 +182,8 @@ class WeightSet
     template <typename RandomIter>
     void read_log_weight(RandomIter first, int stride) const
     {
-        const double *const lwptr = log_weight_.data();
         for (size_type i = 0; i != size_; ++i, first += stride)
-            *first = lwptr[i];
+            *first = log_weight_[i];
     }
 
     /// \brief Get the normalized weight of the id'th particle
@@ -194,8 +196,8 @@ class WeightSet
     /// such that each particle has a equal weight
     void set_equal_weight()
     {
-        ess_ = set_equal_weight(
-            size_, resample_size(), weight_.data(), log_weight_.data());
+        set_ess(set_equal_weight(size_, weight_.data()));
+        std::memset(log_weight_.data(), 0, sizeof(double) * size_);
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -204,8 +206,7 @@ class WeightSet
     template <typename InputIter>
     void set_weight(InputIter first)
     {
-        double *const wptr = weight_.data();
-        std::copy_n(first, size_, wptr);
+        std::copy_n(first, size_, weight_.begin());
         post_set_weight();
     }
 
@@ -215,9 +216,8 @@ class WeightSet
     template <typename RandomIter>
     void set_weight(RandomIter first, int stride)
     {
-        double *const wptr = weight_.data();
         for (size_type i = 0; i != size_; ++i, first += stride)
-            wptr[i] = *first;
+            weight_[i] = *first;
         post_set_weight();
     }
 
@@ -228,9 +228,8 @@ class WeightSet
     template <typename InputIter>
     void mul_weight(InputIter first)
     {
-        double *const wptr = weight_.data();
         for (size_type i = 0; i != size_; ++i, ++first)
-            wptr[i] *= *first;
+            weight_[i] *= *first;
         post_set_weight();
     }
 
@@ -242,9 +241,8 @@ class WeightSet
     template <typename RandomIter>
     void mul_weight(RandomIter first, int stride)
     {
-        double *const wptr = weight_.data();
         for (size_type i = 0; i != size_; ++i, first += stride)
-            wptr[i] *= *first;
+            weight_[i] *= *first;
         post_set_weight();
     }
 
@@ -255,8 +253,7 @@ class WeightSet
     template <typename InputIter>
     void set_log_weight(InputIter first)
     {
-        double *const lwptr = log_weight_.data();
-        std::copy_n(first, size_, lwptr);
+        std::copy_n(first, size_, log_weight_.begin());
         post_set_log_weight();
     }
 
@@ -267,9 +264,8 @@ class WeightSet
     template <typename RandomIter>
     void set_log_weight(RandomIter first, int stride)
     {
-        double *const lwptr = log_weight_.data();
         for (size_type i = 0; i != size_; ++i, first += stride)
-            lwptr[i] = *first;
+            log_weight_[i] = *first;
         post_set_log_weight();
     }
 
@@ -279,9 +275,8 @@ class WeightSet
     template <typename InputIter>
     void add_log_weight(InputIter first)
     {
-        double *const lwptr = log_weight_.data();
         for (size_type i = 0; i != size_; ++i, ++first)
-            lwptr[i] += *first;
+            log_weight_[i] += *first;
         post_set_log_weight();
     }
 
@@ -292,9 +287,8 @@ class WeightSet
     template <typename RandomIter>
     void add_log_weight(RandomIter first, int stride)
     {
-        double *const lwptr = log_weight_.data();
         for (size_type i = 0; i != size_; ++i, first += stride)
-            lwptr[i] += *first;
+            log_weight_[i] += *first;
         post_set_log_weight();
     }
 
@@ -318,10 +312,13 @@ class WeightSet
     const double *log_weight_data() const { return log_weight_.data(); }
 
     protected:
+    /// \brief Set the value of ESS;
     void set_ess(double e) { ess_ = e; }
 
+    /// \brief Write access to the raw data of weight
     double *mutable_weight_data() { return weight_.data(); }
 
+    /// \brief Write access to the raw data of logarithm weight
     double *mutable_log_weight_data() { return log_weight_.data(); }
 
     /// \brief Compute unormalized logarithm weights from normalized weights
@@ -345,51 +342,47 @@ class WeightSet
     /// \brief Normalize weights such that the summation is one
     virtual void normalize_weight()
     {
-        ess_ = normalize_weight(size_, weight_.data());
+        set_ess(normalize_weight(size_, weight_.data()));
     }
 
     /// \brief Compute ESS given (logarithm) unormalzied incremental weights
     virtual double compute_ess(const double *first, bool use_log) const
     {
-        std::vector<double, AlignedAllocator<double>> buffer(size_);
-        double *const bptr = buffer.data();
-
+        AlignedVector<double> buffer(size_);
         if (use_log) {
-            math::vAdd(size_, log_weight_.data(), first, bptr);
-            double dmax = bptr[0];
+            math::vAdd(size_, log_weight_.data(), first, buffer.data());
+            double dmax = buffer[0];
             for (size_type i = 0; i != size_; ++i)
-                if (dmax < bptr[i])
-                    dmax = bptr[i];
+                if (dmax < buffer[i])
+                    dmax = buffer[i];
             dmax = -dmax;
             for (size_type i = 0; i != size_; ++i)
-                bptr[i] += dmax;
-            math::vExp(size_, bptr, bptr);
+                buffer[i] += dmax;
+            math::vExp(size_, buffer.data(), buffer.data());
         } else {
-            math::vMul(size_, weight_.data(), first, bptr);
+            math::vMul(size_, weight_.data(), first, buffer.data());
         }
 
-        double coeff = 1 / math::asum(size_, bptr);
-        math::scal(size_, coeff, bptr);
+        double coeff = 1 / math::asum(size_, buffer.data());
+        math::scal(size_, coeff, buffer.data());
 
-        return 1 / math::dot(size_, bptr, bptr);
+        return 1 / math::dot(size_, buffer.data(), buffer.data());
     }
 
     /// \brief Compute CESS given (logarithm) unormalized incremental weights
     virtual double compute_cess(const double *first, bool use_log) const
     {
-        const double *bptr = first;
-        const double *const wptr = weight_.data();
-        std::vector<double, AlignedAllocator<double>> buffer;
+        AlignedVector<double> buffer;
         if (use_log) {
             buffer.resize(size_);
             math::vExp(size_, first, buffer.data());
-            bptr = buffer.data();
         }
+        const double *const bptr = use_log ? buffer.data() : first;
 
         double above = 0;
         double below = 0;
         for (size_type i = 0; i != size_; ++i) {
-            double wb = wptr[i] * bptr[i];
+            double wb = weight_[i] * bptr[i];
             above += wb;
             below += wb * bptr[i];
         }
@@ -400,8 +393,8 @@ class WeightSet
     private:
     size_type size_;
     double ess_;
-    std::vector<double, AlignedAllocator<double>> weight_;
-    std::vector<double, AlignedAllocator<double>> log_weight_;
+    AlignedVector<double> weight_;
+    AlignedVector<double> log_weight_;
     DiscreteDistribution<size_type> draw_;
 
     void post_set_log_weight()
