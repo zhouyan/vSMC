@@ -352,7 +352,7 @@ struct MKLSkipAheadForce {
     MKL_INT buffer_size() { return buffer_size_; }
 
     private:
-    std::vector<ResultType, AlignedAllocator<ResultType>> buffer_;
+    AlignedVector<ResultType> buffer_;
     typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
     MKL_INT buffer_size_;
 }; // strut SkipAheadForce
@@ -613,7 +613,7 @@ class MKLEngine
     stream_type stream_;
     typename internal::MKLSkipAhead<BRNG, ResultType>::type skip_ahead_;
     typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
-    std::vector<result_type, AlignedAllocator<result_type>> buffer_;
+    AlignedVector<result_type> buffer_;
     MKL_INT buffer_size_;
     MKL_INT index_;
 }; // class MKLEngine
@@ -716,7 +716,7 @@ class MKLDistribution
     }
 
     private:
-    std::vector<result_type, AlignedAllocator<result_type>> buffer_;
+    AlignedVector<result_type> buffer_;
     MKL_INT buffer_size_;
     MKL_INT index_;
 

@@ -442,8 +442,8 @@ class StateCL
 
     CLBuffer<char, ID> state_idx_buffer_;
     CLBuffer<char, ID> state_tmp_buffer_;
-    std::vector<char, AlignedAllocator<char>> state_idx_host_;
-    std::vector<char, AlignedAllocator<char>> state_tmp_host_;
+    AlignedVector<char> state_idx_host_;
+    AlignedVector<char> state_tmp_host_;
 
     template <typename CharT, typename Traits>
     void build_program(

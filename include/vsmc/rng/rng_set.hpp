@@ -97,8 +97,7 @@ class RngSet<RngType, Vector>
 {
     public:
     typedef RngType rng_type;
-    typedef typename std::vector<rng_type,
-        AlignedAllocator<rng_type>>::size_type size_type;
+    typedef typename AlignedVector<rng_type>::size_type size_type;
 
     explicit RngSet(size_type N = 0) : rng_(N, rng_type()) { seed(); }
 
@@ -129,7 +128,7 @@ class RngSet<RngType, Vector>
     rng_type &operator[](size_type id) { return rng_[id]; }
 
     private:
-    std::vector<rng_type, AlignedAllocator<rng_type>> rng_;
+    AlignedVector<rng_type> rng_;
 }; // class RngSet
 
 #if VSMC_HAS_TBB

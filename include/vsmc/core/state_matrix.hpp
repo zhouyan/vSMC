@@ -232,8 +232,9 @@ class StateMatrixBase : public traits::DimTrait<Dim>
 
     private:
     size_type size_;
-    typename std::conditional<std::is_arithmetic<T>::value,
-        std::vector<T, AlignedAllocator<T>>, std::vector<T>>::type data_;
+    typename std::conditional<std::is_scalar<T>::value ||
+            std::is_pod<T>::value,
+        AlignedVector<T>, std::vector<T>>::type data_;
 
     std::vector<T> create_pack_dispatch(std::true_type) const
     {

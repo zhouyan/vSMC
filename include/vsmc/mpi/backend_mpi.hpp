@@ -133,7 +133,7 @@ class WeightSetMPI : public WeightSetBase
     double compute_ess(const double *first, bool use_log) const
     {
         const size_type N = static_cast<size_type>(this->size());
-        std::vector<double, AlignedAllocator<double>> buffer(N);
+        AlignedVector<double> buffer(N);
         double *const bptr = buffer.data();
 
         if (use_log) {
@@ -180,7 +180,7 @@ class WeightSetMPI : public WeightSetBase
         const size_type N = static_cast<size_type>(this->size());
         const double *bptr = first;
         const double *const wptr = this->weight_data();
-        std::vector<double, AlignedAllocator<double>> buffer;
+        AlignedVector<double> buffer;
         if (use_log) {
             buffer.resize(N);
             double *const cptr = buffer.data();

@@ -351,9 +351,9 @@ class Monitor
     MonitorStage stage_;
     std::vector<std::string> name_;
     std::vector<std::size_t> index_;
-    std::vector<double, AlignedAllocator<double>> record_;
-    std::vector<double, AlignedAllocator<double>> result_;
-    std::vector<double, AlignedAllocator<double>> buffer_;
+    AlignedVector<double> record_;
+    AlignedVector<double> result_;
+    AlignedVector<double> buffer_;
 
     void push_back(std::size_t iter)
     {

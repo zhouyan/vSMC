@@ -239,9 +239,9 @@ class Path
     bool record_only_;
     double log_zconst_;
     std::vector<std::size_t> index_;
-    std::vector<double, AlignedAllocator<double>> integrand_;
-    std::vector<double, AlignedAllocator<double>> grid_;
-    std::vector<double, AlignedAllocator<double>> buffer_;
+    AlignedVector<double> integrand_;
+    AlignedVector<double> grid_;
+    AlignedVector<double> buffer_;
 
     void push_back(std::size_t iter, double grid, double integrand)
     {

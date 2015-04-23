@@ -241,8 +241,8 @@ class Particle
     rng_set_type rng_set_;
     resample_rng_type resample_rng_;
 
-    std::vector<size_type, AlignedAllocator<size_type>> replication_;
-    std::vector<size_type, AlignedAllocator<size_type>> copy_from_;
+    AlignedVector<size_type> replication_;
+    AlignedVector<size_type> copy_from_;
 }; // class Particle
 
 } // namespace vsmc
