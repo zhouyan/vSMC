@@ -34,8 +34,6 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#include <chrono>
-#include <thread>
 
 namespace vsmc
 {

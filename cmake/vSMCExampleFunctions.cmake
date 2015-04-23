@@ -82,10 +82,6 @@ FUNCTION (ADD_VSMC_EXECUTABLE exe src)
             TARGET_LINK_LIBRARIES (${exe} ${TBB_LINK_LIBRARIES})
         ENDIF (${arg} STREQUAL "TBB" AND TBB_FOUND)
 
-        IF (${arg} STREQUAL "STD" AND THREAD_FOUND)
-            TARGET_LINK_LIBRARIES (${exe} ${Thread_LINK_LIBRARIES})
-        ENDIF (${arg} STREQUAL "STD" AND THREAD_FOUND)
-
         IF (${arg} STREQUAL "CILK" AND CILK_FOUND)
             SET (compile_flags "${compile_flags} ${Cilk_CXX_FLAGS}")
             TARGET_LINK_LIBRARIES (${exe} ${Cilk_LINK_LIBRARIES})

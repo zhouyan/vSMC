@@ -36,7 +36,6 @@
 #include <vsmc/thread/blocked_range.hpp>
 #include <vsmc/thread/thread_guard.hpp>
 #include <vsmc/thread/thread_num.hpp>
-#include <thread>
 
 namespace vsmc
 {

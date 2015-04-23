@@ -201,7 +201,7 @@ class SeedGenerator
     }
 
     private:
-    result_type seed_;
+    std::atomic<result_type> seed_;
     result_type seed_max_;
     skip_type divisor_;
     skip_type remainder_;
