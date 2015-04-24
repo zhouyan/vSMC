@@ -111,17 +111,24 @@ class Progress
     }
 
     /// \brief Increment the iteration count
+    ///
+    /// \details
+    /// This member function is thread-safe, and can be called from multiple
+    /// threads.
     void increment(std::size_t step = 1) { iter_ += step; }
 
     /// \brief Set a new message for display
     void message(const std::string &msg) { msg_ = msg; }
 
     private:
+    static constexpr std::size_t max_val_ =
+        std::numeric_limits<std::size_t>::max VSMC_MNE();
+
     StopWatch watch_;
     std::thread *thread_ptr_;
 
     double interval_ms_;
-    std::size_t iter_;
+    std::atomic<std::size_t> iter_;
     std::size_t total_;
     std::size_t length_;
     bool show_iter_;
@@ -185,22 +192,23 @@ class Progress
         const std::size_t seconds =
             static_cast<std::size_t>(ptr->watch_.seconds());
 
-        const std::size_t display_iter =
-            ptr->iter_ <= ptr->total_ ? ptr->iter_ : ptr->total_;
-        std::size_t num_equal = (ptr->total_ | ptr->length_) == 0 ?
-            ptr->length_ :
+        std::size_t iter = ptr->iter_;
+
+        std::size_t display_iter = std::min VSMC_MNE(iter, ptr->total_);
+
+        std::size_t num_equal = (ptr->length_ == 0 || ptr->total_ == 0) ?
+            0 :
             ptr->length_ * display_iter / ptr->total_;
-        num_equal = num_equal <= ptr->length_ ? num_equal : ptr->length_;
+
         std::size_t percent =
             ptr->total_ == 0 ? 100 : 100 * display_iter / ptr->total_;
-        percent = percent <= 100 ? percent : 100;
 
         if (ptr->print_first_) {
             ptr->print_first_ = false;
-            ptr->num_equal_ = num_equal + 1;
-            ptr->percent_ = percent + 1;
-            ptr->seconds_ = seconds + 1;
-            ptr->last_iter_ = ptr->iter_ + 1;
+            ptr->num_equal_ = max_val_;
+            ptr->percent_ = max_val_;
+            ptr->seconds_ = max_val_;
+            ptr->last_iter_ = max_val_;
         }
 
         if (ptr->length_ != 0 && ptr->num_equal_ != num_equal) {
@@ -262,10 +270,10 @@ class Progress
             cstr[offset++] = '\0';
         }
 
-        if (ptr->show_iter_ && ptr->last_iter_ != ptr->iter_) {
-            ptr->last_iter_ = ptr->iter_;
+        if (ptr->show_iter_ && ptr->last_iter_ != iter) {
+            ptr->last_iter_ = iter;
             const std::size_t dtotal = uint_digit(ptr->total_);
-            const std::size_t diter = uint_digit(ptr->iter_);
+            const std::size_t diter = uint_digit(iter);
             const std::size_t num_space = dtotal > diter ? dtotal - diter : 0;
 
             char *cstr = ptr->cstr_iter_;
@@ -273,7 +281,7 @@ class Progress
             cstr[offset++] = '[';
             for (std::size_t i = 0; i < num_space; ++i)
                 cstr[offset++] = ' ';
-            uint_to_char(ptr->iter_, cstr, offset);
+            uint_to_char(iter, cstr, offset);
             cstr[offset++] = '/';
             uint_to_char(ptr->total_, cstr, offset);
             cstr[offset++] = ']';
