@@ -58,7 +58,7 @@ namespace internal
 // Compute M replication numbers based on M weights
 template <typename IntType, typename U01SeqType>
 inline void trans_usrp(std::size_t M, std::size_t N, const double *weight,
-    U01SeqType &u01seq, IntType *replication)
+    U01SeqType &&u01seq, IntType *replication)
 {
     if (M == 0)
         return;
@@ -139,7 +139,7 @@ inline void trans_cfrp(std::size_t M, std::size_t N,
 
 template <typename IntType, typename U01SeqType>
 inline void trans_uscf(std::size_t M, std::size_t N, const double *weight,
-    U01SeqType &u01seq, IntType *copy_from)
+    U01SeqType &&u01seq, IntType *copy_from)
 {
     if (M == 0 || N == 0)
         return;
