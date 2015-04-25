@@ -36,21 +36,21 @@
 #include <vsmc/rng/u01.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_PARAM_CHECK(a, b)   \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (a <= b), ("**UniformRealDistribution** CONSTRUCTED WITH INVALID "    \
-                   "MINIMUM AND MAXIMUM PARAMTER VALUES"))
+    VSMC_RUNTIME_ASSERT((a <= b),                                             \
+        "**UniformRealDistribution** CONSTRUCTED WITH INVALID "               \
+        "MINIMUM AND MAXIMUM PARAMTER VALUES")
 
 #define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(eng_min)    \
     VSMC_RUNTIME_ASSERT((eng_min == 0),                                       \
-        ("**UniformRealDistribution::operator()** "                           \
-         "ENGINE MEMBER FUNCTION min() RETURN A VALUE OTHER THAN ZERO"))
+        "**UniformRealDistribution::operator()** "                            \
+        "ENGINE MEMBER FUNCTION min() RETURN A VALUE OTHER THAN ZERO")
 
 #define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX(eng_max)    \
     VSMC_RUNTIME_ASSERT(                                                      \
         (eng_max == uint32_t_max_ || eng_max == uint64_t_max_),               \
-        ("**UniformRealDistribution::operator()** "                           \
-         "ENGINE MEMBER FUNCTION max() RETURN A VALUE OTHER THAN "            \
-         "THE MAXIMUM OF std::uint32_t OR std::uint64_t"))
+        "**UniformRealDistribution::operator()** "                            \
+        "ENGINE MEMBER FUNCTION max() RETURN A VALUE OTHER THAN "             \
+        "THE MAXIMUM OF std::uint32_t OR std::uint64_t")
 
 namespace vsmc
 {

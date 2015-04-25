@@ -37,7 +37,7 @@
 
 #define VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param)         \
     VSMC_RUNTIME_ASSERT(is_positive(param),                                   \
-        ("**DiscreteDistribution** WEIGHTS ARE NOT NON-NEGATIVE"));
+        "**DiscreteDistribution** WEIGHTS ARE NOT NON-NEGATIVE")
 
 namespace vsmc
 {

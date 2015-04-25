@@ -36,22 +36,22 @@
 
 #define VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(T)                  \
     VSMC_STATIC_ASSERT((std::is_unsigned<T>::value),                          \
-        USE_SeedGenerator_WITH_A_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER)
+        "**SeedGenerator** USED WITH ResultType NOT AN UNSIGNED INTEGER")
 
 #define VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(div, rem)               \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (div > rem), ("**SeedGenerator::modulo** "                            \
-                      "REMAINDER IS NOT SMALLER THAN THE DIVISOR"))
+    VSMC_RUNTIME_ASSERT((div > rem),                                          \
+        "**SeedGenerator::modulo** "                                          \
+        "REMAINDER IS NOT SMALLER THAN THE DIVISOR")
 
 #define VSMC_RUNTIME_WARNING_RNG_SEED_GENERATOR_MODULO(div, rem)              \
     VSMC_RUNTIME_WARNING((div == 1 && rem == 0),                              \
-        ("**SeedGenerator::modulo** "                                         \
-         "COUNTER TYPE SEED DOES NOT SUPPORT MODULO"))
+        "**SeedGenerator::modulo** "                                          \
+        "COUNTER TYPE SEED DOES NOT SUPPORT MODULO")
 
 #define VSMC_RUNTIME_ASSERT_RNG_SEED_MAX(seed_max)                            \
     VSMC_RUNTIME_ASSERT((seed_max > 1),                                       \
-        ("**SeedGenerator::modulo** "                                         \
-         "THE MAXIMUM OF THE INTERNAL SEED IS NO LARGER THAN 1"))
+        "**SeedGenerator::modulo** "                                          \
+        "THE MAXIMUM OF THE INTERNAL SEED IS NO LARGER THAN 1")
 
 /// \brief Default result type of Seed
 /// \ingroup Config

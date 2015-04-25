@@ -37,11 +37,11 @@
 #include <wmmintrin.h>
 
 #define VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks)                          \
-    VSMC_STATIC_ASSERT((Blocks > 0), USE_AESNIEngine_WITH_ZERO_BLOCKS)
+    VSMC_STATIC_ASSERT((Blocks > 0), "**AESNIEngine** USED WITH ZERO BLOCKS")
 
 #define VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType)                 \
     VSMC_STATIC_ASSERT((std::is_unsigned<ResultType>::value),                 \
-        USE_AESNIEngine_WITH_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER)
+        "**AESNIEngine USED WITH ResultType NOT AN UNSIGNED INTEGER")
 
 #define VSMC_STATIC_ASSERT_RNG_AES_NI                                         \
     VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks);                             \

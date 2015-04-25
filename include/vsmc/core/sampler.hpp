@@ -39,16 +39,16 @@
 
 #define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, map, func)        \
     VSMC_RUNTIME_ASSERT(                                                      \
-        (iter != map.end()), ("**Sampler::" #func "** INVALID MONITOR NAME"))
+        (iter != map.end()), "**Sampler::" #func "** INVALID MONITOR NAME")
 
 #define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(func, caller, name)          \
     VSMC_RUNTIME_ASSERT(static_cast<bool>(func),                              \
-        ("**Sampler::" #caller "** INVALID " #name " OBJECT"))
+        "**Sampler::" #caller "** INVALID " #name " OBJECT")
 
 #define VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER                        \
     VSMC_RUNTIME_WARNING((!static_cast<bool>(init_)),                         \
-        ("**Sampler::initialize** A VALID INIT OBJECT IS SET "                \
-         "BUT INITILIALIZED BY ITERATING"))
+        "**Sampler::initialize** A VALID INIT OBJECT IS SET "                 \
+        "BUT INITILIALIZED BY ITERATING")
 
 namespace vsmc
 {

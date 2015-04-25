@@ -38,19 +38,19 @@
 
 #define VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim)          \
     VSMC_STATIC_ASSERT((Dim == Dynamic),                                      \
-        USE_METHOD_resize_dim_WITH_A_FIXED_SIZE_StateMatrix_OBJECT)
+        "**StateMatrix::resize_dim** USED WITH A FIXED DIMENSION OBJECT")
 
 #define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH              \
     VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),          \
-        ("**StateMatrix::copy** SIZE MISMATCH"))
+        "**StateMatrix::copy** SIZE MISMATCH")
 
 #define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_DIM_SIZE(dim)                   \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (dim >= 1), ("**StateMatrix** DIMENSION IS LESS THAN 1"))
+    VSMC_RUNTIME_ASSERT((dim >= 1), "**StateMatrix** DIMENSION IS LESS THAN " \
+                                    "1")
 
 #define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(psize, dim)         \
     VSMC_RUNTIME_ASSERT((psize >= dim),                                       \
-        ("**StateMatrix::state_unpack** INPUT PACK SIZE TOO SMALL"))
+        "**StateMatrix::state_unpack** INPUT PACK SIZE TOO SMALL")
 
 namespace vsmc
 {

@@ -40,7 +40,7 @@
 
 #define VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH                \
     VSMC_RUNTIME_ASSERT(                                                      \
-        (N == global_size_), ("**StateMPI::copy** SIZE MISMATCH"))
+        (N == global_size_), "**StateMPI::copy** SIZE MISMATCH")
 
 namespace vsmc
 {

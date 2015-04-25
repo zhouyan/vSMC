@@ -37,15 +37,15 @@
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(func)                             \
     VSMC_RUNTIME_ASSERT(                                                      \
-        (id < dim()), ("**Monitor::" #func "** INVALID ID NUMBER ARGUMENT"))
+        (id < dim()), "**Monitor::" #func "** INVALID ID NUMBER ARGUMENT")
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ITER(func)                           \
     VSMC_RUNTIME_ASSERT((iter < iter_size()),                                 \
-        ("**Monitor::" #func "** INVALID ITERATION NUMBER ARGUMENT"))
+        "**Monitor::" #func "** INVALID ITERATION NUMBER ARGUMENT")
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_FUNCTOR(func, caller, name)          \
     VSMC_RUNTIME_ASSERT(static_cast<bool>(func),                              \
-        ("**Monitor::" #caller "** INVALID " #name " OBJECT"))
+        "**Monitor::" #caller "** INVALID " #name " OBJECT")
 
 namespace vsmc
 {

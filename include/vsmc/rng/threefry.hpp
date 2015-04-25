@@ -37,11 +37,12 @@
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType)               \
     VSMC_STATIC_ASSERT((std::is_same<ResultType, std::uint32_t>::value ||     \
                            std::is_same<ResultType, std::uint64_t>::value),   \
-        USE_ThreefryEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t)
+        "**ThreefryEngine** USED WITH ResultType OTHER THAN std::uint32_t "   \
+        "OR std::uint64_t")
 
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY_SIZE(K)                               \
-    VSMC_STATIC_ASSERT(                                                       \
-        (K == 2 || K == 4), USE_ThreefryEngine_WITH_SIZE_OTHER_THAN_2_OR_4)
+    VSMC_STATIC_ASSERT((K == 2 || K == 4),                                    \
+        "**ThreefryEngine** USED WITH SIZE OTHER THAN 2 OR 4")
 
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY                                       \
     VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType);                  \

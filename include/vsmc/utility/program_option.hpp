@@ -230,9 +230,9 @@
 #include <vsmc/internal/common.hpp>
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, func)         \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (ptr != nullptr), ("**ProgramOptionMap::" #func                       \
-                           "** ATTEMPT TO SET OPTION WITH A NULL POINTER"))
+    VSMC_RUNTIME_ASSERT((ptr != nullptr),                                     \
+        "**ProgramOptionMap::" #func                                          \
+        "** ATTEMPT TO SET OPTION WITH A NULL POINTER")
 
 namespace vsmc
 {

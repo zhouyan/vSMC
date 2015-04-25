@@ -72,11 +72,11 @@
 #define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(Alignment)     \
     VSMC_STATIC_ASSERT(                                                       \
         (Alignment != 0 && (Alignment & (Alignment - 1)) == 0),               \
-        USE_AlignedAllocator_WITH_ALIGNEMNT_NOT_A_POWER_OF_TWO)
+        "**AlignedAllocator** USED WITH Alignment NOT A POWER OF TWO")
 
 #define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_SIZEOF_VOID(Alignemnt)      \
     VSMC_STATIC_ASSERT((Alignment >= sizeof(void *)),                         \
-        USE_AlignedAllocator_WITH_ALIGNMENT_LESS_THAN_SIZEOF_VOID_POINTER)
+        "**AlginedAllocator** USED WITH Alignment LESS THAN sizeof(void *)")
 
 #define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY                             \
     VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(Alignment);        \

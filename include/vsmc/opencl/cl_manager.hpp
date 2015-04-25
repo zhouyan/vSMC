@@ -40,29 +40,29 @@
 #include <vsmc/utility/stop_watch.hpp>
 
 #define VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(func)                     \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (setup()), ("**CLManager::" #func "** CAN ONLY BE CALLED AFTER TRUE " \
-                    "**CLManager::setup**"));
+    VSMC_RUNTIME_ASSERT((setup()),                                            \
+        "**CLManager::" #func "** CAN ONLY BE CALLED AFTER TRUE "             \
+        "**CLManager::setup**")
 
 #define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_PLATFORM                 \
     VSMC_RUNTIME_WARNING(                                                     \
-        setup_platform, ("**CLManager::setup** FAILED TO SETUP A PLATFORM"));
+        setup_platform, "**CLManager::setup** FAILED TO SETUP A PLATFORM")
 
 #define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_CONTEXT                  \
     VSMC_RUNTIME_WARNING(                                                     \
-        setup_context, ("**CLManager::setup** FAILED TO SETUP A CONTEXT"));
+        setup_context, "**CLManager::setup** FAILED TO SETUP A CONTEXT")
 
 #define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_DEVICE                   \
     VSMC_RUNTIME_WARNING(                                                     \
-        setup_device, ("**CLManager::setup** FAILED TO SETUP A DEVICE"));
+        setup_device, "**CLManager::setup** FAILED TO SETUP A DEVICE")
 
 #define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_COMMAND_QUEUE            \
     VSMC_RUNTIME_WARNING(setup_command_queue,                                 \
-        ("**CLManager::setup** FAILED TO SETUP A COMMAND_QUEUE"));
+        "**CLManager::setup** FAILED TO SETUP A COMMAND_QUEUE")
 
 #define VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_BLOCK(func, block, event)      \
     VSMC_RUNTIME_WARNING((block || event != nullptr),                         \
-        ("**CLManager::" #func " NOT BLOCKING BUT WITH NULL EVENT"))
+        "**CLManager::" #func " NOT BLOCKING BUT WITH NULL EVENT")
 
 namespace vsmc
 {

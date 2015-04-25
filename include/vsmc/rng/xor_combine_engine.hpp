@@ -36,12 +36,14 @@
 
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type)              \
     VSMC_STATIC_ASSERT((std::is_unsigned<result_type>::value),                \
-        USE_XorCombineEngine_WITH_ENGINES_HAVE_RESULT_TYPE_NOT_AN_UNSIGNED_INTEGER_TYPE)
+        "**XorCombineEngine** USED WITH RNG ENGINES HAVNG result_type NOT "   \
+        "AN UNSIGNED INTEGER TYPE")
 
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_SAME_TYPE(Eng1, Eng2)              \
     VSMC_STATIC_ASSERT((std::is_same<typename Eng1::resultType,               \
                            typename Eng2::resultType>::value),                \
-        USE_XorCombineEngine_WITH_TWO_RNG_ENGINES_WITH_DIFFERENT_RESULT_TYPE)
+        "**XorCombneEngine** USED WITH TWO RNG ENGINES WITH DIFFERENT "       \
+        "result_type")
 
 #define VSMC_STATIC_ASSERT_RNG_XOR_COMBINE                                    \
     VSMC_STATIC_ASSERT_RNG_XOR_COMBINE_UNSIGNED(result_type);                 \

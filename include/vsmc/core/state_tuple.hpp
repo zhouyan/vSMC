@@ -38,7 +38,7 @@
 
 #define VSMC_RUNTIME_ASSERT_CORE_STATE_TUPLE_COPY_SIZE_MISMATCH               \
     VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),          \
-        ("**StateTuple::copy** SIZE MISMATCH"))
+        "**StateTuple::copy** SIZE MISMATCH")
 
 namespace vsmc
 {

@@ -35,7 +35,7 @@
 #include <vsmc/internal/common.hpp>
 
 #define VSMC_RUNTIME_ASSERT_THREAD_BLOCKED_RANGE(begin, end, func)            \
-    VSMC_RUNTIME_ASSERT((begin < end), ("**" #func "** INVALID RANGE"))
+    VSMC_RUNTIME_ASSERT((begin < end), "**" #func "** INVALID RANGE")
 
 namespace vsmc
 {

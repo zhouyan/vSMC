@@ -35,35 +35,38 @@
 #include <vsmc/rng/internal/common.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(K)                              \
-    VSMC_STATIC_ASSERT((K != 0), USE_XorshiftEngine_WITH_ORDER_EUQAL_TO_ZERO)
+    VSMC_STATIC_ASSERT(                                                       \
+        (K != 0), "**XorshiftEngine USEd WITH ORDER EUQAL TO ZERO")
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_UNSIGNED(ResultType)                  \
     VSMC_STATIC_ASSERT((std::is_unsigned<ResultType>::value),                 \
-        USE_XorshiftEngine_WITH_A_ResultType_NOT_AN_UNSIGNED_INTEGER_TYPE)
+        "**XorshiftEngine** USED WITH ResultType NOT AN UNSIGNED INTEGER "    \
+        "TYPE")
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_UINT_SIZE(ResultType)                 \
     VSMC_STATIC_ASSERT((sizeof(ResultType) >= sizeof(std::uint32_t)),         \
-        USE_XorshiftEngine_WITH_A_ResultType_SMALLER_THAN_32_BITS)
+        "**XorshiftEngine** USED WITH ResultType SMALLER THAN "               \
+        "std::uint32_t")
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_INDEX(I, K)                           \
     VSMC_STATIC_ASSERT((I != 0 || K == 1),                                    \
-        USE_XorshiftEngine_WITH_INDEX_##I##_EQUAL_TO_ZERO)
+        "**XorshiftEngine** USED WITH INDEX " #I " EQUAL TO ZERO")
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_INDEX_ORDER(R, S, K)                  \
     VSMC_STATIC_ASSERT((R > S || K == 1),                                     \
-        USE_XorshiftEngine_WITH_INDEX_##R##_NOT_LARGER_THAN_##S)
+        "**XorshiftEngine** USED WITH INDEX " #R " NOT LARGER THAN " #S)
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_SHIFT_BITS(A)                         \
-    VSMC_STATIC_ASSERT(                                                       \
-        (A != 0), USE_XorshiftEngine_WITH_SHIFT_BITS_##A##_EQUAL_TO_ZERO);
+    VSMC_STATIC_ASSERT((A != 0),                                              \
+        "**XorshiftEngine** USED WITH SHIFT BITS " #A " EQUAL TO ZERO")
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_SHIFT_BITS_C(C, K)                    \
     VSMC_STATIC_ASSERT((C != 0 || K != 1),                                    \
-        USE_XorshiftEngine_WITH_SHIFT_BITS_##C##_EQUAL_TO_ZERO);
+        "**XorshiftEngine** USED WTIH SHIFT BITS " #C " EQUAL TO ZERO")
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT_SHIFT_BITS_D(D, K)                    \
     VSMC_STATIC_ASSERT((D != 0 || K == 1),                                    \
-        USE_XorshiftEngine_WITH_SHIFT_BITS_##A##_EQUAL_TO_ZERO);
+        "**XorshiftEngine** USED WTIH SHIFT BITS " #D " EQUAL TO ZERO")
 
 #define VSMC_STATIC_ASSERT_RNG_XORSHIFT                                       \
     VSMC_STATIC_ASSERT_RNG_XORSHIFT_ORDER(K);                                 \

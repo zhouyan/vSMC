@@ -44,14 +44,15 @@
     VSMC_STATIC_ASSERT((std::is_same<ResultType, uint16_t>::value ||          \
                            std::is_same<ResultType, std::uint32_t>::value ||  \
                            std::is_same<ResultType, std::uint64_t>::value),   \
-        USE_RDRANDGenerator_WITH_RESULT_TYPE_OTHER_THAN_uint16_t_OR_uint32_t_OR_uint64_t)
+        "**RDRANDGenerator** USED WITH ResultType OTHER THAN "                \
+        "std::uint16_t, std::uint32_t OR std::uint64_t")
 
 #define VSMC_STATIC_ASSERT_RNG_RDRAND_GENERATOR                               \
     VSMC_STATIC_ASSERT_RNG_RDRAND_GENERATOR_RESULT_TYPE(ResultType);
 
 #define VSMC_RUNTIME_WARNING_RNG_RDRAND_GENERATOR_NTRIAL(ntrial, NTrialMax)   \
     VSMC_RUNTIME_WARNING((ntrial < NTrialMax),                                \
-        ("**RDRAND::generate** MAXIMUM NUMBER OF TRIALS EXCEEDED"))
+        "**RDRAND::generate** MAXIMUM NUMBER OF TRIALS EXCEEDED")
 
 namespace vsmc
 {

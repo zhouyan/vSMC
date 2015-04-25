@@ -69,12 +69,12 @@
 
 #define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(basename)                \
     VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this) != nullptr),           \
-        ("DERIVED FROM " #basename                                            \
-         " WITH INCORRECT **Derived** TEMPLATE PARAMTER"));
+        "DERIVED FROM " #basename                                             \
+        " WITH INCORRECT **Derived** TEMPLATE PARAMTER");
 
 #define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(name)         \
     VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),          \
-        ("**State" #name "::copy** SIZE MISMATCH"))
+        "**State" #name "::copy** SIZE MISMATCH")
 
 namespace vsmc
 {

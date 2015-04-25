@@ -36,18 +36,18 @@
 
 #define VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_STABILITY(a)  \
     VSMC_RUNTIME_ASSERT((a > 0 && a <= 2),                                    \
-        ("**StableDistribution** CONSTRUCTED WITH INVALID "                   \
-         "STABILITY PARAMETER VALUE"))
+        "**StableDistribution** CONSTRUCTED WITH INVALID "                    \
+        "STABILITY PARAMETER VALUE")
 
 #define VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_SKEWNESS(a)   \
     VSMC_RUNTIME_ASSERT((a >= -1 && a <= 1),                                  \
-        ("**StableDistribution** CONSTRUCTED WITH INVALID "                   \
-         "SKEWNESS PARAMETER VALUE"))
+        "**StableDistribution** CONSTRUCTED WITH INVALID "                    \
+        "SKEWNESS PARAMETER VALUE")
 
 #define VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_SCALE(a)      \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (a > 0), ("**StableDistribution** CONSTRUCTED WITH INVALID "          \
-                  "SCALE PARAMETER VALUE"))
+    VSMC_RUNTIME_ASSERT((a > 0),                                              \
+        "**StableDistribution** CONSTRUCTED WITH INVALID "                    \
+        "SCALE PARAMETER VALUE")
 
 namespace vsmc
 {

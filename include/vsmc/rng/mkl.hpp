@@ -38,12 +38,13 @@
 #define VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Dist)     \
     VSMC_STATIC_ASSERT((std::is_same<FPType, float>::value ||                 \
                            std::is_same<FPType, double>::value),              \
-        USE_MKL##Dist##Distribution_##WITH_A_RESULT_TYPE_OTHER_THAN_float_OR_double)
+        "**MKL" #Dist                                                         \
+        "Distribution** USED WITH ResultType OTHER THAN float OR double")
 
 #define VSMC_RUNTIME_ASSERT_RNG_MKL_VSL_OFFSET(offset)                        \
     VSMC_RUNTIME_ASSERT((offset < max VSMC_MNE()),                            \
-        ("**MKLOffsetDynamic** "                                              \
-         "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS"))
+        "**MKLOffsetDynamic** "                                               \
+        "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS")
 
 #ifndef VSMC_RNG_MKL_VSL_BUFFER_SIZE
 #define VSMC_RNG_MKL_VSL_BUFFER_SIZE 1024

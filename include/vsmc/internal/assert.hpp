@@ -39,7 +39,7 @@
 #include <stdexcept>
 #include <string>
 
-#define VSMC_STATIC_ASSERT(cond, msg) static_assert(cond, #msg)
+#define VSMC_STATIC_ASSERT(cond, msg) static_assert(cond, msg)
 
 #if VSMC_NO_RUNTIME_ASSERT
 #define VSMC_RUNTIME_ASSERT(cond, msg)

@@ -44,32 +44,32 @@
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_DYNAMIC_STATE_SIZE_RESIZE(Dim)   \
     VSMC_STATIC_ASSERT((Dim == Dynamic),                                      \
-        USE_METHOD_resize_state_WITH_A_FIXED_SIZE_StateCL_OBJECT)
+        "**StateCL::resize_dim** USED WITH A FIXED DIMENSION OBJECT")
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(derived, user)     \
     VSMC_STATIC_ASSERT((internal::IsDerivedFromStateCL<derived>::value),      \
-        USE_##user##_WITH_A_STATE_TYPE_NOT_DERIVED_FROM_StateCL)
+        "**" #user "** USED WITH A STATE TYPE NOT DERIVED FROM StateCL")
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(type)           \
     VSMC_STATIC_ASSERT((std::is_same<type, ::cl_float>::value ||              \
                            std::is_same<type, ::cl_double>::value),           \
-        USE_StateCL_WITH_A_FP_TYPE_OTHER_THAN_cl_float_AND_cl_double)
+        "**StateCL** USED WITH FPType OTHER THAN cl_float OR cl_double")
 
 #define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(func)                     \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (build()), ("**StateCL::" #func "** CAN ONLY BE CALLED AFTER true "   \
-                    "**StateCL::build**"));
+    VSMC_RUNTIME_ASSERT((build()),                                            \
+        "**StateCL::" #func                                                   \
+        "** CAN ONLY BE CALLED AFTER true **StateCL::build**")
 
 #define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_STATE_SIZE(state_size)          \
-    VSMC_RUNTIME_ASSERT((state_size >= 1), ("STATE SIZE IS LESS THAN 1"))
+    VSMC_RUNTIME_ASSERT((state_size >= 1), "STATE SIZE IS LESS THAN 1")
 
 #define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_COPY_SIZE_MISMATCH              \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (N == copy_.size()), ("**StateCL::copy** SIZE MISMATCH"))
+    VSMC_RUNTIME_ASSERT((N == copy_.size()), "**StateCL::copy** SIZE "        \
+                                             "MISMATCH")
 
 #define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_UNPACK_SIZE(psize, dim)         \
     VSMC_RUNTIME_ASSERT((psize >= dim),                                       \
-        ("**StateCL::state_unpack** INPUT PACK SIZE TOO SMALL"))
+        "**StateCL::state_unpack** INPUT PACK SIZE TOO SMALL")
 
 #define VSMC_DEFINE_OPENCL_COPY(Name)                                         \
     Name() : build_id_(-1) {}                                                 \
@@ -245,33 +245,41 @@ class StateCL
         state_buffer_.resize(state_size_ * size_, flag);
     }
 
-    /// \brief Change state buffer flag and host pointer (cause reallocation)
+    /// \brief Change state buffer flag and host pointer (cause
+    /// reallocation)
     void update_state(::cl_mem_flags flag, void *host_ptr)
     {
         state_buffer_.resize(state_size_ * size_, flag, host_ptr);
     }
 
-    /// \brief The instance of the CLManager signleton associated with this
+    /// \brief The instance of the CLManager signleton associated
+    /// with this
     /// value collcection
     static manager_type &manager() { return manager_type::instance(); }
 
     /// \brief The OpenCL buffer that stores the state values
     const CLBuffer<char, ID> &state_buffer() const { return state_buffer_; }
 
-    /// \brief The OpenCL program associated with this value collection
+    /// \brief The OpenCL program associated with this value
+    /// collection
     const ::cl::Program &program() const { return program_; }
 
     /// \brief Build the OpenCL program from source
     ///
     /// \param source The source of the program
     /// \param flags The OpenCL compiler flags, e.g., `-I`
-    /// \param os The output stream to write the output when error occurs
+    /// \param os The output stream to write the output when error
+    /// occurs
     ///
     /// \details
-    /// Note that a few macros are defined before the user supplied `source`.
-    /// Say the template parameter `StateSize == 4`, `FPType` of this class is
-    /// set to `cl_float`, and there are `1000` particles, then the complete
-    /// source, which acutally get compiled looks like the following
+    /// Note that a few macros are defined before the user supplied
+    /// `source`.
+    /// Say the template parameter `StateSize == 4`, `FPType` of
+    /// this class is
+    /// set to `cl_float`, and there are `1000` particles, then the
+    /// complete
+    /// source, which acutally get compiled looks like the
+    /// following
     /// ~~~{.cpp}
     /// #ifndef FP_TYPE
     /// #define FP_TYPE float
@@ -296,7 +304,8 @@ class StateCL
     /// // The actual seed is vsmc::Seed::instance().get()
     /// // ... User source, passed by the source argument
     /// ~~~
-    /// After build, `vsmc::Seed::instance().skip(N)` is called with `N`
+    /// After build, `vsmc::Seed::instance().skip(N)` is called
+    /// with `N`
     /// being the nubmer of particles.
     template <typename CharT, typename Traits>
     void build(const std::string &source, const std::string &flags,
@@ -345,7 +354,8 @@ class StateCL
     /// \brief Create kernel with the current program
     ///
     /// \details
-    /// If build() does not return `true`, then calling this is an error
+    /// If build() does not return `true`, then calling this is an
+    /// error
     ::cl::Kernel create_kernel(const std::string &name) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(create_kernel);
@@ -492,7 +502,8 @@ class StateCL
 /// - Kernels can have additonal arguments and set by the user in
 /// `pre_processor`.
 /// - `state` has size `N * StateSize` where `accept` has size `N`.
-/// - The declaration does not have to much this, but the first arguments will
+/// - The declaration does not have to much this, but the first
+/// arguments will
 /// be set by InitializeCL::opeartor(). For example
 /// ~~~{.cpp}
 /// type struct {
@@ -504,17 +515,21 @@ class StateCL
 /// __kernel
 /// void kern (__global param *state, __global ulong *accept);
 /// ~~~
-/// is also acceptable, but now `state` has to be treat as a length `N` array.
-/// In summary, on the host side, it is a `cl::Buffer` object being passed to
+/// is also acceptable, but now `state` has to be treat as a length
+/// `N` array.
+/// In summary, on the host side, it is a `cl::Buffer` object being
+/// passed to
 /// the kernel, which is not much unlike `void *` pointer.
 template <typename T, typename PlaceHolder = NullType>
 class InitializeCL
 {
     public:
-    /// \brief The index offset of additional kernel arguments set by the user
+    /// \brief The index offset of additional kernel arguments set
+    /// by the user
     ///
     /// \details
-    /// The first user supplied additional argument shall have index
+    /// The first user supplied additional argument shall have
+    /// index
     /// `kernel_args_offset`
     static constexpr ::cl_uint kernel_args_offset() { return 2; }
 
@@ -597,17 +612,20 @@ class InitializeCL
 /// Kernel requirement (`move_state`)
 /// ~~~{.cpp}
 /// __kernel
-/// void kern (ulong iter, __global state_type *state, __global ulong
+/// void kern (ulong iter, __global state_type *state, __global
+/// ulong
 /// *accept);
 /// ~~~
 template <typename T, typename PlaceHolder = NullType>
 class MoveCL
 {
     public:
-    /// \brief The index offset of additional kernel arguments set by the user
+    /// \brief The index offset of additional kernel arguments set
+    /// by the user
     ///
     /// \details
-    /// The first user supplied additional argument shall have index
+    /// The first user supplied additional argument shall have
+    /// index
     /// `kernel_args_offset`
     static constexpr ::cl_uint kernel_args_offset() { return 3; }
 
@@ -695,10 +713,12 @@ template <typename T, typename PlaceHolder = NullType>
 class MonitorEvalCL
 {
     public:
-    /// \brief The index offset of additional kernel arguments set by the user
+    /// \brief The index offset of additional kernel arguments set
+    /// by the user
     ///
     /// \details
-    /// The first user supplied additional argument shall have index
+    /// The first user supplied additional argument shall have
+    /// index
     /// `kernel_args_offset`
     static constexpr ::cl_uint kernel_args_offset() { return 4; }
 
@@ -775,10 +795,12 @@ template <typename T, typename PlaceHolder = NullType>
 class PathEvalCL
 {
     public:
-    /// \brief The index offset of additional kernel arguments set by the user
+    /// \brief The index offset of additional kernel arguments set
+    /// by the user
     ///
     /// \details
-    /// The first user supplied additional argument shall have index
+    /// The first user supplied additional argument shall have
+    /// index
     /// `kernel_args_offset`
     static constexpr ::cl_uint kernel_args_offset() { return 3; }
 
