@@ -206,10 +206,8 @@ namespace traits
 /// \details
 /// To use MKLEngine with those MKL BRNG that has not been typedefed by vSMC,
 /// one need to specialize this trait, which has member type `type`, and this
-/// type has member
-/// `operator() (MKLStream<BRNG> &, MKL_INT, ResultType *)` such that given
-/// the
-/// stream object, it is able to generate uniform integers.
+/// type has member `operator() (MKLStream<BRNG> &, MKL_INT, ResultType *)`
+/// such that given the stream object, it is able to generate uniform integers.
 ///
 /// This traits also need to have two static constant member data, `min` and
 /// `max`
@@ -239,7 +237,7 @@ struct MKLUniformBitsTrait<BRNG, unsigned MKL_INT64> {
 /// \brief Default seed for MKL RNG
 /// \ingroup Traits
 template <MKL_INT>
-struct MKLSeedTrait : public std::integral_constant<MKL_UINT, 101> {
+struct MKLSeedTrait : public std::integral_constant<MKL_UINT, 1> {
 };
 
 /// \brief Default seed for MKL Sobol quasi-RNG
