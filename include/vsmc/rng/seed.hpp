@@ -107,6 +107,9 @@ class SeedGenerator
     }
 
     /// \brief Get a new seed
+    ///
+    /// \details
+    /// This member function is thread safe
     result_type get()
     {
         skip();
@@ -255,7 +258,9 @@ class SeedGenerator<ID, std::array<T, K>>
 
     result_type get()
     {
+        std::lock_guard<std::mutex> lock_(mtx_);
         skip();
+
         return seed_;
     }
 
@@ -330,6 +335,7 @@ class SeedGenerator<ID, std::array<T, K>>
     result_type seed_max_;
     skip_type divisor_;
     skip_type remainder_;
+    std::mutex mtx_;
 
     SeedGenerator() : divisor_(1), remainder_(0)
     {
