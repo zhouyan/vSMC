@@ -82,7 +82,7 @@ template <vsmc::MatrixOrder Order>
 class cv_state : public BASE_STATE<typename BaseState<Order>::type>
 {
     public:
-    typedef vsmc::RngSet<vsmc::Threefry4x32, vsmc::Scalar> rng_set_type;
+    typedef vsmc::RngSetScalar<vsmc::Threefry4x32> rng_set_type;
 
     typedef typename BASE_STATE<typename BaseState<Order>::type> base_state;
     typedef typename base_state::size_type size_type;

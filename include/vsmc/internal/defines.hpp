@@ -84,30 +84,6 @@ enum MonitorStage {
     MonitorMCMC      ///< Monitor evaluated after MCMC moves
 };                   // enum MonitorStage
 
-/// \brief Class template argument used for scalar variant
-/// \ingroup Definitions
-struct Scalar {
-    static constexpr bool is_scalar = true;
-    static constexpr bool is_vector = false;
-    static constexpr bool is_thread_local = false;
-}; // struct Scalar
-
-/// \brief Class template argument used for vector variant
-/// \ingroup Definitions
-struct Vector {
-    static constexpr bool is_scalar = false;
-    static constexpr bool is_vector = true;
-    static constexpr bool is_thread_local = false;
-}; // struct Vector
-
-/// \brief Class template argument used for thread local storage variant
-/// \ingroup Definitions
-struct ThreadLocal {
-    static constexpr bool is_scalar = false;
-    static constexpr bool is_vector = false;
-    static constexpr bool is_thread_local = true;
-}; // struct ThreadLocal
-
 /// \brief Function template argument used for position
 /// \ingroup Definitions
 template <std::size_t N>

@@ -48,34 +48,25 @@
 /// \ingroup Config
 #ifndef VSMC_RNG_SET_TYPE
 #if VSMC_USE_TBB
-#define VSMC_RNG_SET_TYPE                                                     \
-    ::vsmc::RngSet<::vsmc::Threefry4x64, ::vsmc::ThreadLocal>
+#define VSMC_RNG_SET_TYPE ::vsmc::RngSetTBB<::vsmc::Threefry4x64>
 #else
-#define VSMC_RNG_SET_TYPE ::vsmc::RngSet<::vsmc::Threefry4x64, ::vsmc::Vector>
+#define VSMC_RNG_SET_TYPE ::vsmc::RngSetVector<::vsmc::Threefry4x64>
 #endif
 #endif
 
 namespace vsmc
 {
 
-#if VSMC_USE_TBB
-template <typename = Threefry4x64, typename = ThreadLocal>
-class RngSet;
-#else
-template <typename = Threefry4x64, typename = Vector>
-class RngSet;
-#endif
-
 /// \brief Scalar RNG set
 /// \ingroup RNG
 template <typename RngType>
-class RngSet<RngType, Scalar>
+class RngSetScalar
 {
     public:
     typedef RngType rng_type;
     typedef std::size_t size_type;
 
-    explicit RngSet(size_type N = 0) : size_(N) { seed(); }
+    explicit RngSetScalar(size_type N = 0) : size_(N) { seed(); }
 
     size_type size() const { return size_; }
 
@@ -88,18 +79,18 @@ class RngSet<RngType, Scalar>
     private:
     std::size_t size_;
     rng_type rng_;
-}; // class RngSet
+}; // class RngSetScalar
 
 /// \brief Vector RNG set
 /// \ingroup RNG
 template <typename RngType>
-class RngSet<RngType, Vector>
+class RngSetVector
 {
     public:
     typedef RngType rng_type;
-    typedef typename AlignedVector<rng_type>::size_type size_type;
+    typedef typename std::vector<rng_type>::size_type size_type;
 
-    explicit RngSet(size_type N = 0) : rng_(N, rng_type()) { seed(); }
+    explicit RngSetVector(size_type N = 0) : rng_(N, rng_type()) { seed(); }
 
     size_type size() const { return rng_.size(); }
 
@@ -128,21 +119,24 @@ class RngSet<RngType, Vector>
     rng_type &operator[](size_type id) { return rng_[id]; }
 
     private:
-    AlignedVector<rng_type> rng_;
-}; // class RngSet
+    std::vector<rng_type> rng_;
+}; // class RngSetVector
 
 #if VSMC_HAS_TBB
 
 /// \brief Thread local RNG set
 /// \ingroup RNG
 template <typename RngType>
-class RngSet<RngType, ThreadLocal>
+class RngSetTBB
 {
     public:
     typedef RngType rng_type;
     typedef std::size_t size_type;
 
-    explicit RngSet(size_type N = 0) : size_(N), rng_(rng_init) { rng_init(); }
+    explicit RngSetTBB(size_type N = 0) : size_(N), rng_(rng_init)
+    {
+        rng_init();
+    }
 
     size_type size() const { return size_; }
 
@@ -165,7 +159,7 @@ class RngSet<RngType, ThreadLocal>
 
         return rng;
     }
-}; // class RngSet
+}; // class RngSetTBB
 
 #endif // VSMC_HAS_TBB
 
