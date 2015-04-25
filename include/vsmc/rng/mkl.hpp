@@ -1304,7 +1304,7 @@ class MKLBetaDistribution
 template <typename>
 class RngSetMKL;
 
-/// \brief Thread local RNG set using MKL RNG
+/// \brief Thread local RNG set using MKL RNG and TBB
 /// \ingroup MKLRNG
 template <MKL_INT BRNG, typename ResultType>
 class RngSetMKL<MKLEngine<BRNG, ResultType>>
