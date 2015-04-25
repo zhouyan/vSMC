@@ -33,7 +33,11 @@
 #define VSMC_RNG_MKL_HPP
 
 #include <vsmc/rng/internal/common.hpp>
+#include <vsmc/rng/seed.hpp>
 #include <mkl.h>
+#if VSMC_HAS_TBB
+#include <tbb/tbb.h>
+#endif
 
 #define VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Dist)     \
     VSMC_STATIC_ASSERT((std::is_same<FPType, float>::value ||                 \
@@ -1294,6 +1298,57 @@ class MKLBetaDistribution
         return ::vdRngBeta(Method, ptr, n, r, shape1_, shape2_, disp_, scale_);
     }
 }; // class MKLBetaDistribution
+
+#if VSMC_HAS_TBB
+
+template <typename>
+class RngSetMKL;
+
+/// \brief Thread local RNG set using MKL RNG
+/// \ingroup MKLRNG
+template <MKL_INT BRNG, typename ResultType>
+class RngSetMKL<MKLEngine<BRNG, ResultType>>
+{
+    public:
+    typedef MKLEngine<BRNG, ResultType> rng_type;
+    typedef std::size_t size_type;
+
+    explicit RngSetMKL(size_type N = 0) : size_(N), rng_(rng_init)
+    {
+        rng_init();
+    }
+
+    size_type size() const { return size_; }
+
+    void resize(std::size_t) {}
+
+    void seed() { rng_.clear(); }
+
+    rng_type &operator[](size_type) { return rng_.local(); }
+
+    private:
+    std::size_t size_;
+    ::tbb::combinable<rng_type> rng_;
+
+    static rng_type rng_init()
+    {
+        static ::tbb::mutex mtx;
+
+        ::tbb::mutex::scoped_lock lock(mtx);
+        MKL_UINT seed = static_cast<MKL_UINT>(Seed::instance().get());
+        MKL_INT offset_max = internal::MKLOffset<BRNG>::type::max VSMC_MNE();
+        MKL_INT offset = 0;
+        if (offset_max != 0) {
+            offset = SeedGenerator<rng_type, MKL_INT>::instance().get() %
+                offset_max;
+        }
+        rng_type rng(seed, offset);
+
+        return rng;
+    }
+}; // class RngSetMKL
+
+#endif // VSMC_HAS_TBB
 
 } // namespace vsmc
 
