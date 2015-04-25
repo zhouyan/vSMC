@@ -396,114 +396,62 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     public:
     explicit MKLStream(
         MKL_UINT s = traits::MKLSeedTrait<BRNG>::value, MKL_INT offset = 0)
-        : seed_(s), stream_ptr_(nullptr), property_()
     {
         this->offset(offset);
-        int status = VSL_ERROR_OK;
-
-        status = ::vslNewStream(&stream_ptr_, BRNG + this->offset(), seed_);
+        VSLStreamStatePtr ptr = nullptr;
+        int status = ::vslNewStream(&ptr, BRNG + this->offset(), s);
         internal::mkl_vsl_error_check(
             BRNG, status, "MKLStream::Stream", "::vslNewStream");
-
-        status = ::vslGetBrngProperties(BRNG, &property_);
-        internal::mkl_vsl_error_check(
-            BRNG, status, "MKLStream::Stream", "::vslGetBrngProperties");
+        stream_ptr_.reset(ptr);
     }
 
     template <typename SeedSeq>
     explicit MKLStream(
         SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
                           MKL_UINT, MKLStream<BRNG>>::value>::type * = nullptr)
-        : seed_(0), stream_ptr_(nullptr), property_()
     {
-        seq.generate(&seed_, &seed_ + 1);
-        int status = VSL_ERROR_OK;
-
-        status = ::vslNewStream(&stream_ptr_, BRNG + this->offset(), seed_);
+        MKL_UINT s = 0;
+        seq.generate(&s, &s + 1);
+        VSLStreamStatePtr ptr = nullptr;
+        int status = ::vslNewStream(&ptr, BRNG + this->offset(), s);
         internal::mkl_vsl_error_check(
             BRNG, status, "MKLStream::Stream", "::vslNewStream");
-
-        status = ::vslGetBrngProperties(BRNG, &property_);
-        internal::mkl_vsl_error_check(
-            BRNG, status, "MKLStream::Stream", "::vslGetBrngProperties");
+        stream_ptr_.reset(ptr);
     }
 
     MKLStream(const MKLStream<BRNG> &other)
         : internal::MKLOffset<BRNG>::type(other)
-        , seed_(other.seed_)
-        , property_(other.property_)
     {
-        int status = ::vslCopyStream(&stream_ptr_, other.stream_ptr_);
+        VSLStreamStatePtr ptr = nullptr;
+        int status = ::vslCopyStream(&ptr, other.stream_ptr_.get());
         internal::mkl_vsl_error_check(
             BRNG, status, "MKLStream::Stream", "::vslCopyStream");
+        stream_ptr_.reset(ptr);
     }
 
     MKLStream<BRNG> &operator=(const MKLStream<BRNG> &other)
     {
         if (this != &other) {
             internal::MKLOffset<BRNG>::type::operator=(other);
-            int status = ::vslCopyStreamState(stream_ptr_, other.stream_ptr_);
+            int status = ::vslCopyStreamState(
+                stream_ptr_.get(), other.stream_ptr_.get());
             internal::mkl_vsl_error_check(
                 BRNG, status, "MKLStream::operator=", "::vslCopyStreamState");
-            property_ = other.property_;
         }
 
         return *this;
     }
 
-    MKLStream(MKLStream<BRNG> &&other)
-        : internal::MKLOffset<BRNG>::type(std::move(other))
-        , seed_(other.seed_)
-        , stream_ptr_(other.stream_ptr_)
-        , property_(other.property_)
-    {
-        other.stream_ptr_ = nullptr;
-    }
-
-    MKLStream<BRNG> &operator=(MKLStream<BRNG> &&other)
-    {
-        using std::swap;
-
-        if (this != other) {
-            internal::MKLOffset<BRNG>::type::operator=(std::move(other));
-            swap(seed_, other.seed_);
-            swap(stream_ptr_, other.stream_ptr_);
-            swap(property_, other.property_);
-        }
-
-        return *this;
-    }
-
-    ~MKLStream()
-    {
-        if (stream_ptr_ != nullptr)
-            ::vslDeleteStream(&stream_ptr_);
-    }
+    MKLStream(MKLStream<BRNG> &&other) = default;
+    MKLStream<BRNG> &operator=(MKLStream<BRNG> &&other) = default;
 
     void seed(MKL_UINT s)
     {
-        seed_ = s;
-        int status = VSL_ERROR_OK;
-
-        if (stream_ptr_ == nullptr) {
-            status = ::vslNewStream(&stream_ptr_, BRNG + this->offset(), s);
-            internal::mkl_vsl_error_check(
-                BRNG, status, "MKLStream::seed", "::vslNewStream");
-        } else {
-            VSLStreamStatePtr new_stream_ptr;
-
-            status = ::vslNewStream(&new_stream_ptr, BRNG + this->offset(), s);
-            internal::mkl_vsl_error_check(
-                BRNG, status, "MKLStream::seed", "::vslNewStream");
-
-            status = ::vslCopyStreamState(stream_ptr_, new_stream_ptr);
-            internal::mkl_vsl_error_check(
-                BRNG, status, "MKLStream::seed", "::vslCopyStreamState");
-
-            status = ::vslDeleteStream(&new_stream_ptr);
-            internal::mkl_vsl_error_check(
-                BRNG, status, "MKLStream::seed", "::vslDeleteStream");
-        }
+        VSLStreamStatePtr ptr = nullptr;
+        int status = ::vslNewStream(&ptr, BRNG + this->offset(), s);
+        internal::mkl_vsl_error_check(
+            BRNG, status, "MKLStream::seed", "::vslNewStream");
+        stream_ptr_.reset(ptr);
     }
 
     template <typename SeedSeq>
@@ -511,18 +459,28 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
         SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
                           MKL_UINT, MKLStream<BRNG>>::value>::type * = nullptr)
     {
-        seq.generate(&seed_, &seed_ + 1);
-        seed(seed_);
+        MKL_UINT s = 0;
+        seq.generate(&s, &s + 1);
+        seed(s);
     }
 
-    VSLStreamStatePtr ptr() const { return stream_ptr_; }
-
-    const VSLBRngProperties &property() const { return property_; }
+    VSLStreamStatePtr ptr() const { return stream_ptr_.get(); }
 
     private:
+    struct stream_deleter {
+        void operator()(VSLStreamStatePtr ptr)
+        {
+            int status = ::vslDeleteStream(&ptr);
+            internal::mkl_vsl_error_check(
+                BRNG, status, "MKLStream::delete_stream", "::vslDeleteStream");
+        }
+    };
+
+    typedef std::unique_ptr<std::remove_pointer<VSLStreamStatePtr>::type,
+        stream_deleter> stream_ptr_type;
+
     MKL_UINT seed_;
-    VSLStreamStatePtr stream_ptr_;
-    VSLBRngProperties property_;
+    stream_ptr_type stream_ptr_;
 }; // class MKLStream
 
 /// \brief MKL RNG C++11 engine
