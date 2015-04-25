@@ -55,6 +55,8 @@
 #include <exception>
 #include <fstream>
 #include <functional>
+#include <future>
+#include <initializer_list>
 #include <iomanip>
 #include <iostream>
 #include <iterator>
@@ -66,6 +68,7 @@
 #include <numeric>
 #include <random>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <tuple>
