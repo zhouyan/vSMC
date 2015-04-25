@@ -42,8 +42,8 @@
 
 #define VSMC_STATIC_ASSERT_RNG_RDRAND_GENERATOR_RESULT_TYPE(ResultType)       \
     VSMC_STATIC_ASSERT((std::is_same<ResultType, uint16_t>::value ||          \
-                           std::is_same<ResultType, uint32_t>::value ||       \
-                           std::is_same<ResultType, uint64_t>::value),        \
+                           std::is_same<ResultType, std::uint32_t>::value ||  \
+                           std::is_same<ResultType, std::uint64_t>::value),   \
         USE_RDRANDGenerator_WITH_RESULT_TYPE_OTHER_THAN_uint16_t_OR_uint32_t_OR_uint64_t)
 
 #define VSMC_STATIC_ASSERT_RNG_RDRAND_GENERATOR                               \
@@ -64,11 +64,11 @@ inline bool rdrand(UIntType *);
 /// \brief Invoke the 16-bits RDRAND instruction and return the carry flag
 /// \ingroup RDRNG
 template <>
-inline bool rdrand<uint16_t>(uint16_t *rand)
+inline bool rdrand<std::uint16_t>(std::uint16_t *rand)
 {
     unsigned short r;
     int cf = _rdrand16_step(&r);
-    *rand = static_cast<uint16_t>(r);
+    *rand = static_cast<std::uint16_t>(r);
 
     return cf != 0;
 }
@@ -76,11 +76,11 @@ inline bool rdrand<uint16_t>(uint16_t *rand)
 /// \brief Invoke the 32-bits RDRAND instruction and return the carry flag
 /// \ingroup RDRNG
 template <>
-inline bool rdrand<uint32_t>(uint32_t *rand)
+inline bool rdrand<std::uint32_t>(std::uint32_t *rand)
 {
     unsigned r;
     int cf = _rdrand32_step(&r);
-    *rand = static_cast<uint32_t>(r);
+    *rand = static_cast<std::uint32_t>(r);
 
     return cf != 0;
 }
@@ -88,11 +88,11 @@ inline bool rdrand<uint32_t>(uint32_t *rand)
 /// \brief Invoke the 64-bits RDRAND instruction and return the carry flag
 /// \ingroup RDRNG
 template <>
-inline bool rdrand<uint64_t>(uint64_t *rand)
+inline bool rdrand<std::uint64_t>(std::uint64_t *rand)
 {
     unsigned VSMC_INT64 r;
     int cf = _rdrand64_step(&r);
-    *rand = static_cast<uint64_t>(r);
+    *rand = static_cast<std::uint64_t>(r);
 
     return cf != 0;
 }
@@ -121,15 +121,18 @@ class RDRANDGenerator
 
 /// \brief C++11 Engine using 16-bits RDRAND instruction
 /// \ingroup RDRNG
-typedef GeneratorWrapper<uint16_t, RDRANDGenerator<uint16_t>> RDRAND16;
+typedef GeneratorWrapper<std::uint16_t, RDRANDGenerator<std::uint16_t>>
+    RDRAND16;
 
 /// \brief C++11 Engine using 32-bits RDRAND instruction
 /// \ingroup RDRNG
-typedef GeneratorWrapper<uint32_t, RDRANDGenerator<uint32_t>> RDRAND32;
+typedef GeneratorWrapper<std::uint32_t, RDRANDGenerator<std::uint32_t>>
+    RDRAND32;
 
 /// \brief C++11 Engine using 64-bits RDRAND instruction
 /// \ingroup RDRNG
-typedef GeneratorWrapper<uint64_t, RDRANDGenerator<uint64_t>> RDRAND64;
+typedef GeneratorWrapper<std::uint64_t, RDRANDGenerator<std::uint64_t>>
+    RDRAND64;
 
 } // namespace vsmc
 

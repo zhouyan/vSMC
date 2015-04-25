@@ -134,8 +134,8 @@ inline void rng_aes_validation(unsigned bits, const unsigned char *test_cipher,
 
 inline void rng_aes_validation_xor(void *a, void *b)
 {
-    uint64_t *ua = static_cast<uint64_t *>(a);
-    uint64_t *ub = static_cast<uint64_t *>(b);
+    std::uint64_t *ua = static_cast<std::uint64_t *>(a);
+    std::uint64_t *ub = static_cast<std::uint64_t *>(b);
     ua[0] ^= ub[0];
     ua[1] ^= ub[1];
 }
@@ -144,7 +144,7 @@ template <template <typename, std::size_t> class Eng>
 inline void rng_aes_validation_cbc(
     unsigned bits, unsigned char *plain_key, unsigned char plain_cipher[64])
 {
-    typedef Eng<uint32_t, 1> eng_type;
+    typedef Eng<std::uint32_t, 1> eng_type;
 
     typename eng_type::key_type key;
     std::array<typename eng_type::ctr_block_type, 4> text;

@@ -50,7 +50,7 @@
         (eng_max == uint32_t_max_ || eng_max == uint64_t_max_),               \
         ("**UniformRealDistribution::operator()** "                           \
          "ENGINE MEMBER FUNCTION max() RETURN A VALUE OTHER THAN "            \
-         "THE MAXIMUM OF uint32_t OR uint64_t"))
+         "THE MAXIMUM OF std::uint32_t OR std::uint64_t"))
 
 namespace vsmc
 {
@@ -58,45 +58,46 @@ namespace vsmc
 namespace internal
 {
 
-template <uint64_t, uint64_t>
+template <std::uint64_t, std::uint64_t>
 struct UniformRealDistributionFRIntType;
 
 template <>
 struct UniformRealDistributionFRIntType<0,
-    static_cast<uint64_t>(VSMC_MAX_UINT(uint32_t))> {
-    typedef uint32_t type;
+    static_cast<std::uint64_t>(VSMC_MAX_UINT(std::uint32_t))> {
+    typedef std::uint32_t type;
 };
 
 template <>
-struct UniformRealDistributionFRIntType<0, VSMC_MAX_UINT(uint64_t)> {
-    typedef uint64_t type;
+struct UniformRealDistributionFRIntType<0, VSMC_MAX_UINT(std::uint64_t)> {
+    typedef std::uint64_t type;
 };
 
 template <typename FPType, typename Left, typename Right, typename Eng, bool>
 class UniformRealDistributionOp
 {
-    static constexpr uint64_t uint32_t_max_ =
-        static_cast<uint64_t>(VSMC_MAX_UINT(uint32_t));
+    static constexpr std::uint64_t uint32_t_max_ =
+        static_cast<std::uint64_t>(VSMC_MAX_UINT(std::uint32_t));
 
-    static constexpr uint64_t uint64_t_max_ = VSMC_MAX_UINT(uint64_t);
+    static constexpr std::uint64_t uint64_t_max_ =
+        VSMC_MAX_UINT(std::uint64_t);
 
     public:
     static FPType uint2fp(Eng &eng)
     {
-        static const uint64_t eng_max =
-            static_cast<uint64_t>(eng.max VSMC_MNE());
+        static const std::uint64_t eng_max =
+            static_cast<std::uint64_t>(eng.max VSMC_MNE());
 
         VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(
             (eng.min VSMC_MNE()));
         VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX(eng_max);
 
         if (eng_max == uint32_t_max_)
-            return U01<Left, Right, uint32_t, FPType>::uint2fp(
-                static_cast<uint32_t>(eng()));
+            return U01<Left, Right, std::uint32_t, FPType>::uint2fp(
+                static_cast<std::uint32_t>(eng()));
 
         if (eng_max == uint64_t_max_)
-            return U01<Left, Right, uint64_t, FPType>::uint2fp(
-                static_cast<uint64_t>(eng()));
+            return U01<Left, Right, std::uint64_t, FPType>::uint2fp(
+                static_cast<std::uint64_t>(eng()));
 
         return 0;
     }
@@ -126,7 +127,7 @@ class UniformRealDistributionOp<FPType, Left, Right, Eng, true>
 /// `std::uniform_real_distribution`. But it differs in two important aspects
 /// - It allows the interval to be either open or closed on both sides.
 /// - It requires that the uniform random number generator to produce integers
-///   on the full range of either `uint32_t` or `uint64_t`.
+///   on the full range of either `std::uint32_t` or `std::uint64_t`.
 /// \tparam FPType The floating points type of results
 /// \tparam Left Shall the left side of the interval be Open or Closed
 /// \tparam Right Shall the right side of the interval be Open or Closed
@@ -136,16 +137,16 @@ class UniformRealDistributionOp<FPType, Left, Right, Eng, true>
 /// ~~~{.cpp}
 /// struct Engine1
 /// {
-///     static constexpr uint32_t min ();
-///     static constexpr uint32_t max ();
-///     uint32_t operator() ();
+///     static constexpr std::uint32_t min ();
+///     static constexpr std::uint32_t max ();
+///     std::uint32_t operator() ();
 /// };
 ///
 /// struct Engine2
 /// {
-///     uint32_t min ();
-///     uint32_t max ();
-///     uint32_t operator() ();
+///     std::uint32_t min ();
+///     std::uint32_t max ();
+///     std::uint32_t operator() ();
 /// };
 ///
 /// Engine1 eng1;
@@ -277,8 +278,8 @@ class UniformRealDistribution
     /// \tparam Eng Requirement:
     /// ~~~{.cpp}
     /// Eng::min() == 0 && (
-    /// Eng::max() == std::numeric_limits<uint32_t>::max() ||
-    /// Eng::max() == std::numeric_limits<uint64_t>::max()
+    /// Eng::max() == std::numeric_limits<std::uint32_t>::max() ||
+    /// Eng::max() == std::numeric_limits<std::uint64_t>::max()
     /// )
     /// ~~~
     template <typename Eng>

@@ -45,10 +45,12 @@
 #define VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX(Generator, Min, Max)                  \
     template <>                                                               \
     struct GSLRngMinMax<GSL_RNG_TYPE_##Generator> {                           \
-        static constexpr uint32_t _Min = static_cast<uint32_t>(Min##UL);      \
-        static constexpr uint32_t _Max = static_cast<uint32_t>(Max##UL);      \
-        static constexpr uint32_t min VSMC_MNE() { return _Min; }             \
-        static constexpr uint32_t max VSMC_MNE() { return _Max; }             \
+        static constexpr std::uint32_t _Min =                                 \
+            static_cast<std::uint32_t>(Min##UL);                              \
+        static constexpr std::uint32_t _Max =                                 \
+            static_cast<std::uint32_t>(Max##UL);                              \
+        static constexpr std::uint32_t min VSMC_MNE() { return _Min; }        \
+        static constexpr std::uint32_t max VSMC_MNE() { return _Max; }        \
     }; // VSMC_DEFINE_RNG_GSL_RNG_MIN_MAX
 
 namespace vsmc
@@ -179,14 +181,14 @@ class GSLGenerator
 /// \brief GSL RNG Engine
 /// \ingroup GSLRNG
 template <GSLRngType RngType>
-class GSLEngine : public GeneratorWrapper<uint32_t, GSLGenerator<RngType>,
+class GSLEngine : public GeneratorWrapper<std::uint32_t, GSLGenerator<RngType>,
                       internal::GSLRngMinMax<RngType>>
 {
-    typedef GeneratorWrapper<uint32_t, GSLGenerator<RngType>,
+    typedef GeneratorWrapper<std::uint32_t, GSLGenerator<RngType>,
         internal::GSLRngMinMax<RngType>> base;
 
     public:
-    typedef uint32_t result_type;
+    typedef std::uint32_t result_type;
 
     GSLEngine(result_type s = 0) : base(s) { seed(s); }
 

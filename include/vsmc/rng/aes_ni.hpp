@@ -150,24 +150,22 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 /// \ingroup AESNIRNG
 ///
 /// \details
-/// Two dervied class AES128Engine and ARSEngine behave exactly the same as
-/// AES and ARS RNG engines as described in
-/// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented
-/// in
-/// [Random123][r123lib], when used with `uint32_t` as ResultType. The first
-/// \f$2^{32}\f$ iterations will be exactly the same as
-/// `r123::Engine<r123:AESNI4x32>` and `r123::Engine<r123:ARS4x32_R<10> >`.
-/// (Note, they could be simple template alias in C++11, but to support C++98
-/// we had to derive from it. Since the derived classes contains nothing and
-/// does nothing, there is no performance cost).
+/// Two dervied class AES128Engine and ARSEngine behave exactly the same as AES
+/// and ARS RNG engines as described in [Parallel Random Numbers: As Easy as 1,
+/// 2, 3][r123paper] and implemented in [Random123][r123lib], when used with
+/// `std::uint32_t` as ResultType. The first \f$2^{32}\f$ iterations will be
+/// exactly the same as `r123::Engine<r123:AESNI4x32>` and
+/// `r123::Engine<r123:ARS4x32_R<10> >`.  (Note, they could be simple template
+/// alias in C++11, but to support C++98 we had to derive from it. Since the
+/// derived classes contains nothing and does nothing, there is no performance
+/// cost).
 ///
 /// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
 /// [r123lib]: https://www.deshawresearch.com/resources_random123.html
 ///
 /// This implementation is more flexible than the original. First, it allows
 /// using any unsigned integers as output. Second, it allows user defined key
-/// schedule (the second template argument). The two derived classed merely
-/// use
+/// schedule (the second template argument). The two derived classed merely use
 /// two special key schedule to reproduce the original behavior.
 ///
 /// The terminology used in this engine is slightly different than that in
@@ -178,11 +176,9 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 /// vSMC does not define `ukey_type`. In this engine, the term `key` (`ukey`,
 /// short for unique key, in [Rnadom123][r123lib]) usually refer to the 128-,
 /// 192-, or 256-bits input key in the context of the AES algorithm. And
-/// `key_seq` (`key` in [Random123][r123lib]) refers to the key schedule in
-/// the
+/// `key_seq` (`key` in [Random123][r123lib]) refers to the key schedule in the
 /// same context. In the context of C++11, `key_seq` is also sort of like the
-/// `seed_seq` for other RNG (basically both expand a single input value into
-/// a
+/// `seed_seq` for other RNG (basically both expand a single input value into a
 /// sequence such that the sequence provides extra entropy even the inputs are
 /// not random at all). Therefore vSMC's terminology shall be both familiar to
 /// people familiar with block ciphers (of which AES is one), and people
@@ -208,10 +204,8 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 /// \tparam Rounds The third template argument is the rounds of the algorithm.
 /// AES requires 10 rounds when using a 128-bits key. With reduced strength,
 /// any number of round below 10 can be used.
-/// \tparam Blocks The fourth template argument specifies how many blocks
-/// shall
-/// be used. The AES-NI instructions have noticeable latency but can be
-/// started
+/// \tparam Blocks The fourth template argument specifies how many blocks shall
+/// be used. The AES-NI instructions have noticeable latency but can be started
 /// every two cycles. By allowing generating multiple blocks at once, and
 /// interleaving the instructions, the throughput can be increased at the cost
 /// of space.

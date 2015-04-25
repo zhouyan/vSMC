@@ -97,8 +97,8 @@ inline void m128i_unpack(const __m128i &m, std::array<T, N> &c)
 /// \ingroup RNG
 inline bool m128i_is_equal(const __m128i &a, const __m128i &b)
 {
-    std::array<uint64_t, 2> sa;
-    std::array<uint64_t, 2> sb;
+    std::array<std::uint64_t, 2> sa;
+    std::array<std::uint64_t, 2> sb;
     m128i_unpack<0>(a, sa);
     m128i_unpack<0>(b, sb);
 

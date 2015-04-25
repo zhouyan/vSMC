@@ -226,7 +226,7 @@ class SeedGenerator
 /// ~~~{.cpp}
 /// #include <vsmc/rng/seed.hpp>
 ///
-/// typedef SeedGeneartor<NullType, std::array<uint32_t, 4> > Seed4x32;
+/// typedef SeedGeneartor<NullType, std::array<std::uint32_t, 4> > Seed4x32;
 /// Seed4x32 &seed = SeedType::instance();
 /// boost::mpi::communicator world;
 /// Seed4x32::result_type s;

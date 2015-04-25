@@ -46,25 +46,26 @@ namespace vsmc
 ///
 /// \note This function does not sync by itself. Call `cpuid` to sync if more
 /// accurate measurement is needed.
-inline uint64_t rdtsc()
+inline std::uint64_t rdtsc()
 {
 #ifdef VSMC_MSVC
-    return static_cast<uint64_t>(__rdtsc());
+    return static_cast<std::uint64_t>(__rdtsc());
 #else  // VSMC_MSVC
     unsigned eax = 0;
     unsigned edx = 0;
     __asm__ volatile("rdtsc\n" : "=a"(eax), "=d"(edx));
 
-    return (static_cast<uint64_t>(edx) << 32) + static_cast<uint64_t>(eax);
+    return (static_cast<std::uint64_t>(edx) << 32) +
+        static_cast<std::uint64_t>(eax);
 #endif // VSMC_MSVC
 }
 
 /// \brief Return the TSC and TSC_AUX values using RDTSCP instruction
 /// \ingroup RDTSC
-inline uint64_t rdtscp(unsigned *aux)
+inline std::uint64_t rdtscp(unsigned *aux)
 {
 #ifdef VSMC_MSVC
-    return static_cast<uint64_t>(__rdtscp(aux));
+    return static_cast<std::uint64_t>(__rdtscp(aux));
 #else  // VSMC_MSVC
     unsigned eax = 0;
     unsigned ecx = 0;
@@ -72,7 +73,8 @@ inline uint64_t rdtscp(unsigned *aux)
     __asm__ volatile("rdtscp\n" : "=a"(eax), "=c"(ecx), "=d"(edx));
     *aux = ecx;
 
-    return static_cast<uint64_t>(eax) + (static_cast<uint64_t>(edx) << 32);
+    return static_cast<std::uint64_t>(eax) +
+        (static_cast<std::uint64_t>(edx) << 32);
 #endif // VSMC_MSVC
 }
 
@@ -122,7 +124,7 @@ class RDTSCCounter
         if (!running_)
             return false;
 
-        uint64_t stop = rdtsc();
+        std::uint64_t stop = rdtsc();
         if (stop < start_)
             return false;
 
@@ -140,11 +142,11 @@ class RDTSCCounter
     }
 
     /// \brief Return the accumulated elapsed cycle count
-    uint64_t cycles() const { return elapsed_; }
+    std::uint64_t cycles() const { return elapsed_; }
 
     private:
-    uint64_t elapsed_;
-    uint64_t start_;
+    std::uint64_t elapsed_;
+    std::uint64_t start_;
     bool running_;
 }; // class RDTSCCounter
 
@@ -206,7 +208,7 @@ class RDTSCPCounter
             return false;
 
         unsigned stop_id = 0;
-        uint64_t stop = rdtscp(&stop_id);
+        std::uint64_t stop = rdtscp(&stop_id);
         if (stop_id != start_id_ || stop < start_)
             return false;
 
@@ -224,11 +226,11 @@ class RDTSCPCounter
     }
 
     /// \brief Return the accumulated elapsed cycle count
-    uint64_t cycles() const { return elapsed_; }
+    std::uint64_t cycles() const { return elapsed_; }
 
     private:
-    uint64_t elapsed_;
-    uint64_t start_;
+    std::uint64_t elapsed_;
+    std::uint64_t start_;
     unsigned start_id_;
     bool running_;
 }; // class RDTSCPCounter

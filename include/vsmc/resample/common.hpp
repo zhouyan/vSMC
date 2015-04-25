@@ -125,8 +125,8 @@ inline void trans_rpcf(std::size_t M, std::size_t N,
 
 // Give copy_from index, retrace the replication numbers
 template <typename IntType1, typename IntType2>
-inline void trans_cfrp(std::size_t M, std::size_t N,
-        const IntType1 *copy_from, IntType2 *replication)
+inline void trans_cfrp(std::size_t M, std::size_t N, const IntType1 *copy_from,
+    IntType2 *replication)
 {
     if (M == 0 || N == 0)
         return;

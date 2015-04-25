@@ -89,7 +89,7 @@ class DispatchSourceBase : public DispatchObject<::dispatch_source_t>
         return ::dispatch_source_get_data(this->object());
     }
 
-    uintptr_t get_handle() const
+    std::uintptr_t get_handle() const
     {
         return ::dispatch_source_get_handle(this->object());
     }
@@ -146,7 +146,7 @@ class DispatchSourceBase : public DispatchObject<::dispatch_source_t>
 
     protected:
     DispatchSourceBase(
-        uintptr_t handle, unsigned long mask, ::dispatch_queue_t queue)
+        std::uintptr_t handle, unsigned long mask, ::dispatch_queue_t queue)
         : DispatchObject<::dispatch_source_t>(
               ::dispatch_source_create(
                   source_type_t(source_type<Type>()), handle, mask, queue),
@@ -215,14 +215,14 @@ class DispatchSource : public DispatchSourceBase<Type>
 {
     public:
     template <DispatchQueueType QType>
-    DispatchSource(uintptr_t handle, unsigned long mask,
+    DispatchSource(std::uintptr_t handle, unsigned long mask,
         const DispatchQueue<QType> &queue)
         : DispatchSourceBase<Type>(handle, mask, queue.object())
     {
     }
 
     DispatchSource(
-        uintptr_t handle, unsigned long mask, ::dispatch_queue_t queue)
+        std::uintptr_t handle, unsigned long mask, ::dispatch_queue_t queue)
         : DispatchSourceBase<Type>(handle, mask, queue)
     {
     }
@@ -236,14 +236,14 @@ class DispatchSource<DispatchDataAdd>
 {
     public:
     template <DispatchQueueType QType>
-    DispatchSource(uintptr_t handle, unsigned long mask,
+    DispatchSource(std::uintptr_t handle, unsigned long mask,
         const DispatchQueue<QType> &queue)
         : DispatchSourceBase<DispatchDataAdd>(handle, mask, queue.object())
     {
     }
 
     DispatchSource(
-        uintptr_t handle, unsigned long mask, ::dispatch_queue_t queue)
+        std::uintptr_t handle, unsigned long mask, ::dispatch_queue_t queue)
         : DispatchSourceBase<DispatchDataAdd>(handle, mask, queue)
     {
     }
@@ -262,14 +262,14 @@ class DispatchSource<DispatchDataOr>
 {
     public:
     template <DispatchQueueType QType>
-    DispatchSource(uintptr_t handle, unsigned long mask,
+    DispatchSource(std::uintptr_t handle, unsigned long mask,
         const DispatchQueue<QType> &queue)
         : DispatchSourceBase<DispatchDataOr>(handle, mask, queue.object())
     {
     }
 
     DispatchSource(
-        uintptr_t handle, unsigned long mask, ::dispatch_queue_t queue)
+        std::uintptr_t handle, unsigned long mask, ::dispatch_queue_t queue)
         : DispatchSourceBase<DispatchDataOr>(handle, mask, queue)
     {
     }
@@ -287,20 +287,20 @@ class DispatchSource<DispatchTimer> : public DispatchSourceBase<DispatchTimer>
 {
     public:
     template <DispatchQueueType QType>
-    DispatchSource(uintptr_t handle, unsigned long mask,
+    DispatchSource(std::uintptr_t handle, unsigned long mask,
         const DispatchQueue<QType> &queue)
         : DispatchSourceBase<DispatchTimer>(handle, mask, queue.object())
     {
     }
 
     DispatchSource(
-        uintptr_t handle, unsigned long mask, ::dispatch_queue_t queue)
+        std::uintptr_t handle, unsigned long mask, ::dispatch_queue_t queue)
         : DispatchSourceBase<DispatchTimer>(handle, mask, queue)
     {
     }
 
-    void set_timer(
-        ::dispatch_time_t start, uint64_t interval, uint64_t leeway) const
+    void set_timer(::dispatch_time_t start, std::uint64_t interval,
+        std::uint64_t leeway) const
     {
         ::dispatch_source_set_timer(this->object(), start, interval, leeway);
     }

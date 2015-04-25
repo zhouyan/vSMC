@@ -50,7 +50,7 @@
     std::vector<std::size_t> size;                                            \
     std::vector<vsmc::StopWatch> sw;                                          \
     std::vector<std::size_t> bytes;                                           \
-    std::vector<uint64_t> cycles;
+    std::vector<std::uint64_t> cycles;
 
 #define VSMC_RNG_TEST(Engine)                                                 \
     rng_test<Engine>(N, #Engine, names, size, sw, bytes, cycles);
@@ -62,7 +62,7 @@ template <typename Eng>
 inline void rng_test(std::size_t N, const std::string &name,
     std::vector<std::string> &names, std::vector<std::size_t> &size,
     std::vector<vsmc::StopWatch> &sw, std::vector<std::size_t> &bytes,
-    std::vector<uint64_t> &cycles)
+    std::vector<std::uint64_t> &cycles)
 {
     Eng eng;
     vsmc::StopWatch watch;
@@ -92,7 +92,7 @@ inline void rng_test(std::size_t N, const std::string &name,
 inline void rng_output_sw(const std::string &prog_name,
     const std::vector<std::string> &names, std::vector<std::size_t> &size,
     const std::vector<vsmc::StopWatch> &sw,
-    const std::vector<std::size_t> &bytes, std::vector<uint64_t> &cycles)
+    const std::vector<std::size_t> &bytes, std::vector<std::uint64_t> &cycles)
 {
     std::size_t M = names.size();
     if (M == 0)

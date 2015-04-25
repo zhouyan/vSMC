@@ -39,8 +39,8 @@
 #endif
 
 #define VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType)                 \
-    VSMC_STATIC_ASSERT((std::is_same<ResultType, uint32_t>::value ||          \
-                           std::is_same<ResultType, uint64_t>::value),        \
+    VSMC_STATIC_ASSERT((std::is_same<ResultType, std::uint32_t>::value ||     \
+                           std::is_same<ResultType, std::uint64_t>::value),   \
         USE_PhiloxEngine_WITH_INTEGER_TYPE_OTHER_THAN_uint32_t_OR_uint64_t)
 
 #define VSMC_STATIC_ASSERT_RNG_PHILOX_SIZE(K)                                 \
@@ -81,27 +81,32 @@ namespace internal
 template <typename, std::size_t>
 struct PhiloxWeylConstantValue;
 
-VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint32_t, 0, UINT32_C(0x9E3779B9))
-VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint32_t, 1, UINT32_C(0xBB67AE85))
+VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(std::uint32_t, 0, UINT32_C(0x9E3779B9))
+VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(std::uint32_t, 1, UINT32_C(0xBB67AE85))
 
-VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint64_t, 0, UINT64_C(0x9E3779B97F4A7C15))
-VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(uint64_t, 1, UINT64_C(0xBB67AE8584CAA73B))
+VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(
+    std::uint64_t, 0, UINT64_C(0x9E3779B97F4A7C15))
+VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(
+    std::uint64_t, 1, UINT64_C(0xBB67AE8584CAA73B))
 
 template <typename, std::size_t, std::size_t>
 struct PhiloxRoundConstantValue;
 
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint32_t, 2, 0, UINT32_C(0xd256d193))
-
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint32_t, 4, 0, UINT32_C(0xD2511F53))
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(uint32_t, 4, 1, UINT32_C(0xCD9E8D57))
+VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
+    std::uint32_t, 2, 0, UINT32_C(0xd256d193))
 
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
-    uint64_t, 2, 0, UINT64_C(0xD2B74407B1CE6E93))
+    std::uint32_t, 4, 0, UINT32_C(0xD2511F53))
+VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
+    std::uint32_t, 4, 1, UINT32_C(0xCD9E8D57))
 
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
-    uint64_t, 4, 0, UINT64_C(0xD2E7470EE14C6C93))
+    std::uint64_t, 2, 0, UINT64_C(0xD2B74407B1CE6E93))
+
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
-    uint64_t, 4, 1, UINT64_C(0xCA5A826395121157))
+    std::uint64_t, 4, 0, UINT64_C(0xD2E7470EE14C6C93))
+VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
+    std::uint64_t, 4, 1, UINT64_C(0xCA5A826395121157))
 
 } // namespace vsmc::traits::internal
 
@@ -110,9 +115,10 @@ VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
 /// \ingroup Traits
 ///
 /// \details
-/// The first template argument is either `uint32_t` or `uint64_t`. The second
+/// The first template argument is either `std::uint32_t` or `std::uint64_t`.
+/// The second
 /// is either 0 or 1. Specializing the class templates
-/// `PhiloxWeylConstantTrait<uint64_t, 0>` etc., are equivalent to define
+/// `PhiloxWeylConstantTrait<std::uint64_t, 0>` etc., are equivalent to define
 /// macros `PHILOX_W64_0` etc., in the original implementation.
 template <typename ResultType, std::size_t I>
 struct PhiloxWeylConstantTrait
@@ -123,9 +129,11 @@ struct PhiloxWeylConstantTrait
 /// \ingroup Traits
 ///
 /// \details
-/// The first template argument is either `uint32_t` or `uint64_t`. The second
+/// The first template argument is either `std::uint32_t` or `std::uint64_t`.
+/// The second
 /// is the size of the RNG, either 2 or 4. The third is either 0 or 1.
-/// Specializing the class templates `PhiloxRoundConstantTrait<uint64_t, 4,
+/// Specializing the class templates `PhiloxRoundConstantTrait<std::uint64_t,
+/// 4,
 /// 0>`
 /// etc., are equivalent to define macros `PHILOX_M4x64_0` etc., in the
 /// original implementation.
@@ -165,58 +173,59 @@ struct PhiloxBumpKey<ResultType, 4, N, true> {
 }; // struct PhiloxBumpKey
 
 template <std::size_t K, std::size_t I>
-inline void philox_hilo(uint32_t b, uint32_t &hi, uint32_t &lo)
+inline void philox_hilo(std::uint32_t b, std::uint32_t &hi, std::uint32_t &lo)
 {
-    uint64_t prod =
-        static_cast<uint64_t>(b) *
-        static_cast<uint64_t>(
-            traits::PhiloxRoundConstantTrait<uint32_t, K, I>::value);
-    hi = static_cast<uint32_t>(prod >> 32);
-    lo = static_cast<uint32_t>(prod);
+    std::uint64_t prod =
+        static_cast<std::uint64_t>(b) *
+        static_cast<std::uint64_t>(
+            traits::PhiloxRoundConstantTrait<std::uint32_t, K, I>::value);
+    hi = static_cast<std::uint32_t>(prod >> 32);
+    lo = static_cast<std::uint32_t>(prod);
 }
 
 #if VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
-inline void philox_hilo(uint64_t b, uint64_t &hi, uint64_t &lo)
+inline void philox_hilo(std::uint64_t b, std::uint64_t &hi, std::uint64_t &lo)
 {
     unsigned VSMC_INT128 prod =
         static_cast<unsigned VSMC_INT128>(b) *
         static_cast<unsigned VSMC_INT128>(
-            traits::PhiloxRoundConstantTrait<uint64_t, K, I>::value);
-    hi = static_cast<uint64_t>(prod >> 64);
-    lo = static_cast<uint64_t>(prod);
+            traits::PhiloxRoundConstantTrait<std::uint64_t, K, I>::value);
+    hi = static_cast<std::uint64_t>(prod >> 64);
+    lo = static_cast<std::uint64_t>(prod);
 }
 
 #elif defined(VSMC_MSVC) // VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
-inline void philox_hilo(uint64_t b, uint64_t &hi, uint64_t &lo)
+inline void philox_hilo(std::uint64_t b, std::uint64_t &hi, std::uint64_t &lo)
 {
     lo = _umul128(
-        traits::PhiloxRoundConstantTrait<uint64_t, K, I>::value, b, &hi);
+        traits::PhiloxRoundConstantTrait<std::uint64_t, K, I>::value, b, &hi);
 }
 
 #else // VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
-inline void philox_hilo(uint64_t b, uint64_t &hi, uint64_t &lo)
+inline void philox_hilo(std::uint64_t b, std::uint64_t &hi, std::uint64_t &lo)
 {
-    const uint64_t a = traits::PhiloxRoundConstantTrait<uint64_t, K, I>::value;
+    const std::uint64_t a =
+        traits::PhiloxRoundConstantTrait<std::uint64_t, K, I>::value;
     const unsigned whalf = 32;
-    const uint64_t lomask = (static_cast<uint64_t>(1) << whalf) - 1;
+    const std::uint64_t lomask = (static_cast<std::uint64_t>(1) << whalf) - 1;
 
-    lo = static_cast<uint64_t>(a * b);
+    lo = static_cast<std::uint64_t>(a * b);
 
-    const uint64_t ahi = a >> whalf;
-    const uint64_t alo = a & lomask;
-    const uint64_t bhi = b >> whalf;
-    const uint64_t blo = b & lomask;
+    const std::uint64_t ahi = a >> whalf;
+    const std::uint64_t alo = a & lomask;
+    const std::uint64_t bhi = b >> whalf;
+    const std::uint64_t blo = b & lomask;
 
-    const uint64_t ahbl = ahi * blo;
-    const uint64_t albh = alo * bhi;
+    const std::uint64_t ahbl = ahi * blo;
+    const std::uint64_t albh = alo * bhi;
 
-    const uint64_t ahbl_albh = ((ahbl & lomask) + (albh & lomask));
+    const std::uint64_t ahbl_albh = ((ahbl & lomask) + (albh & lomask));
 
     hi = ahi * bhi + (ahbl >> whalf) + (albh >> whalf);
     hi += ahbl_albh >> whalf;
@@ -526,19 +535,19 @@ class PhiloxEngine
 
 /// \brief Philox2x32 RNG engine reimplemented
 /// \ingroup R123RNG
-typedef PhiloxEngine<uint32_t, 2> Philox2x32;
+typedef PhiloxEngine<std::uint32_t, 2> Philox2x32;
 
 /// \brief Philox4x32 RNG engine reimplemented
 /// \ingroup R123RNG
-typedef PhiloxEngine<uint32_t, 4> Philox4x32;
+typedef PhiloxEngine<std::uint32_t, 4> Philox4x32;
 
 /// \brief Philox2x64 RNG engine reimplemented
 /// \ingroup R123RNG
-typedef PhiloxEngine<uint64_t, 2> Philox2x64;
+typedef PhiloxEngine<std::uint64_t, 2> Philox2x64;
 
 /// \brief Philox4x64 RNG engine reimplemented
 /// \ingroup R123RNG
-typedef PhiloxEngine<uint64_t, 4> Philox4x64;
+typedef PhiloxEngine<std::uint64_t, 4> Philox4x64;
 
 /// \brief The default 32-bits Philox engine
 /// \ingroup R123RNG

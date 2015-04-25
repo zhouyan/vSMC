@@ -67,7 +67,8 @@ class Counter;
 ///
 /// It deals with two types of counters. The first type is in the form
 /// `std::array<T, K>` where `T` is an unsigned integer type, treated as a
-/// `sizeof(T) * K * 8` bits integer. For example, `std::array<uint32_t, 4>`
+/// `sizeof(T) * K * 8` bits integer. For example, `std::array<std::uint32_t,
+/// 4>`
 /// is
 /// treated as an 128-bits integer. The counter start with all elements being
 /// zero. The value of the integer can be calculated as, \f$c_0 + c_1 M + c_2

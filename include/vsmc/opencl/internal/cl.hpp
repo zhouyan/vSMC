@@ -475,7 +475,7 @@ static inline cl_int errHandler(cl_int err, const char* errStr = NULL)
 #endif // #if defined(CL_VERSION_1_1)
 
 #endif // __CL_USER_OVERRIDE_ERROR_STRINGS
-       //! \endcond
+//! \endcond
 
 /**
  * CL 1.2 marker and barrier commands
@@ -1858,7 +1858,7 @@ class Wrapper<cl_device_id>
 };
 
 } // namespace detail
-  //! \endcond
+//! \endcond
 
 /*! \stuct ImageFormat
  *  \brief Adds constructors and member functions for cl_image_format.

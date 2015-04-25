@@ -36,8 +36,8 @@
 
 #define VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER_RESULT_TYPE(ResultType)      \
     VSMC_STATIC_ASSERT((std::is_same<ResultType, uint16_t>::value ||          \
-                           std::is_same<ResultType, uint32_t>::value ||       \
-                           std::is_same<ResultType, uint64_t>::value),        \
+                           std::is_same<ResultType, std::uint32_t>::value ||  \
+                           std::is_same<ResultType, std::uint64_t>::value),   \
         USE_GeneratorWrapper_WITH_RESULT_TYPE_OTHER_THAN_uint16_t_OR_uint32_t_OR_uint64_t)
 
 #define VSMC_STATIC_ASSERT_RNG_GENERATOR_WRAPPER                              \
@@ -68,11 +68,14 @@ struct GeneratorWrapperMinMaxTrait {
 /// \details
 /// Generator need to have a member function named `generate` which returns
 /// uniform integers on the range of `ResultType`, which has to be one of
-/// `uint16_t`, `uint32_t` and `uint64_t`. Note that, the generator does not
+/// `uint16_t`, `std::uint32_t` and `std::uint64_t`. Note that, the generator
+/// does not
 /// necessarily returns one of these types. For example, on some platforms,
-/// some RNG returns `unsigned long long`, which is 64-bits, while `uint64_t`
+/// some RNG returns `unsigned long long`, which is 64-bits, while
+/// `std::uint64_t`
 /// is also 64-bits but a typedef of `unsigned long`. It is ok as long as the
-/// `static_cast` from the returned value to `uint64_t` does not change, add,
+/// `static_cast` from the returned value to `std::uint64_t` does not change,
+/// add,
 /// or lose any bits.
 ///
 /// For most RNG generators, use only need to write a thin wrapper to use this
