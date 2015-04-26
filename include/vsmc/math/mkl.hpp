@@ -382,8 +382,71 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 
     VSLStreamStatePtr ptr() const { return stream_ptr_.get(); }
 
+    /// \brief Get stream state size
+    int size() const { return ::vslGetStreamSize(ptr()); }
+
+    /// \brief Save a stream to a file
+    int save(const std::string &fname) const
+    {
+        int status = ::vslSaveStreamF(ptr(), fname.c_str());
+        internal::mkl_vsl_error_check(
+            status, "MKLStream::save", "::vslSaveStreamF");
+
+        return status
+    }
+
+    /// \brief Save a stream to a memory buffer (query size using `size()`)
+    int save(void *mem) const
+    {
+        int status = ::vslSaveStreamM(ptr(), static_cast<char *>(mem));
+        internal::mkl_vsl_error_check(
+            status, "MKLStream::save", "::vslSaveStreamM");
+
+        return status;
+    }
+
+    /// \brief Load a stream from a file
+    int load(const std::string &fname)
+    {
+        int status = ::vslLoadStreamF(ptr(), fname.c_str());
+        internal::mkl_vsl_error_check(
+            status, "MKLStream::load", "::vslLoadStreamF");
+
+        return status;
+    }
+
+    /// \brief Load a stream from a memory buffer
+    int load(const void *mem)
+    {
+        int status = ::vslLoadStreamM(ptr(), static_cast<const char *>(mem));
+        intrnal::mkl_vsl_error_check(
+            status, "MKLStream::load", "::vslLoadStreamM");
+
+        return status;
+    }
+
+    /// \brief Leap frog the stream
+    int leap_frog(MKL_INT k, MKL_INT nstream)
+    {
+        int status = ::vslLeapfrogStream(ptr(), k, nstream);
+        internal::mkl_vsl_error_check(
+            status, "MKLStream::leap_frog", "::vslLeapfrogStream");
+
+        return status;
+    }
+
+    /// \brief Skip ahead the stream
+    int skip_ahead(MKL_INT nskip)
+    {
+        int status = ::vslSkipAheadStream(ptr(), nskip);
+        internal::mkl_vsl_error_check(
+            status, "MKLStream::skip_ahead", "::vslSkipAheadStream");
+
+        return status;
+    }
+
     private:
-    struct stream_deleter {
+    struct deleter {
         void operator()(VSLStreamStatePtr ptr)
         {
             int status = ::vslDeleteStream(&ptr);
@@ -393,7 +456,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     };
 
     typedef std::unique_ptr<std::remove_pointer<VSLStreamStatePtr>::type,
-        stream_deleter> stream_ptr_type;
+        deleter> stream_ptr_type;
 
     MKL_UINT seed_;
     stream_ptr_type stream_ptr_;
