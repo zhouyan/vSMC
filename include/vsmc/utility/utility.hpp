@@ -49,4 +49,8 @@
 #include <vsmc/utility/hdf5io.hpp>
 #endif
 
+#if VSMC_HAS_MKL
+#include <vsmc/utility/mkl.hpp>
+#endif
+
 #endif // VSMC_UTILITY_UTILITY_HPP
