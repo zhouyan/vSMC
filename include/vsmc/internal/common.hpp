@@ -105,9 +105,9 @@ inline std::string itos(IntType i, std::false_type)
     typedef typename std::make_unsigned<IntType>::type uint_type;
 
     if (i < 0)
-        return "-" + itos(static_cast<uint_type>(-i));
+        return "-" + itos(static_cast<uint_type>(-i), std::true_type());
 
-    return itos(static_cast<uint_type>(i));
+    return itos(static_cast<uint_type>(i), std::true_type());
 }
 
 template <typename IntType>
