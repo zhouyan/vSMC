@@ -101,10 +101,6 @@
 /// \ingroup Math
 /// \brief Mathematical constants
 
-/// \defgroup MKL Intel Math Kernel Library
-/// \ingroup Math
-/// \brief Resource management for Intel Math Kernel Library
-
 /// \defgroup vMath Vector math functions
 /// \ingroup Math
 /// \brief Math functions on vectors
@@ -173,6 +169,10 @@
 /// \defgroup HDF5IO HDF5 objects IO
 /// \ingroup Utility
 /// \brief Load and store objects in the HDF5 format
+
+/// \defgroup MKL Intel Math Kernel Library
+/// \ingroup Utility
+/// \brief Resource management for Intel Math Kernel Library
 
 /// \defgroup Option Program option
 /// \ingroup Utility

@@ -33,7 +33,7 @@
 #define VSMC_RNG_MKL_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/math/mkl.hpp>
+#include <vsmc/utility/mkl.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Dist)     \
     VSMC_STATIC_ASSERT((std::is_same<FPType, float>::value ||                 \
