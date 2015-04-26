@@ -35,6 +35,32 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <mkl.h>
 
+#define VSMC_STATIC_ASSERT_MATH_MKL_SS_TASK_RESULT_TYPE(ResultType)           \
+    VSMC_STATIC_ASSERT((std::is_same<ResultType, double>::value ||            \
+                           std::is_same<ResultType, float>::value),           \
+        "**MKLSSTask** USED WITH A ResultType OTHER THAN double OR float")
+
+#define VSMC_STATIC_ASSERT_MATH_MKL_CONV_TASK_RESULT_TYPE(ResultType)         \
+    VSMC_STATIC_ASSERT((std::is_same<ResultType, double>::value ||            \
+                           std::is_same<ResultType, float>::value ||          \
+                           std::is_same<ResultType, MKL_Complex8>::value ||   \
+                           std::is_same<ResultType, MKL_Complex16>::value),   \
+        "**MKLConvTask** USED WITH A ResultType OTHER THAN double, float, "   \
+        "MKL_Complex8, OR MKL_Complex16")
+
+#define VSMC_STATIC_ASSERT_MATH_MKL_CORR_TASK_RESULT_TYPE(ResultType)         \
+    VSMC_STATIC_ASSERT((std::is_same<ResultType, double>::value ||            \
+                           std::is_same<ResultType, float>::value ||          \
+                           std::is_same<ResultType, MKL_Complex8>::value ||   \
+                           std::is_same<ResultType, MKL_Complex16>::value),   \
+        "**MKLCorrTask** USED WITH A ResultType OTHER THAN double, float, "   \
+        "MKL_Complex8, OR MKL_Complex16")
+
+#define VSMC_STATIC_ASSERT_MATH_MKL_DF_TASK_RESULT_TYPE(ResultType)           \
+    VSMC_STATIC_ASSERT((std::is_same<ResultType, double>::value ||            \
+                           std::is_same<ResultType, float>::value),           \
+        "**MKLDFTask** USED WITH A ResultType OTHER THAN double OR float")
+
 #define VSMC_RUNTIME_ASSERT_MATH_MKL_VSL_OFFSET(offset)                       \
     VSMC_RUNTIME_ASSERT((offset < max VSMC_MNE()),                            \
         "**MKLOffsetDynamic** "                                               \
@@ -304,7 +330,7 @@ struct MKLSeedTrait<VSL_BRNG_NIEDERR>
 
 } // namespace traits
 
-/// \brief MKL VSLStreamStatePtr
+/// \brief MKL `VSLStreamStatePtr`
 /// \ingroup MKL
 template <MKL_INT BRNG>
 class MKLStream : public internal::MKLOffset<BRNG>::type
@@ -317,7 +343,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
         VSLStreamStatePtr ptr = nullptr;
         int status = ::vslNewStream(&ptr, BRNG + this->offset(), s);
         internal::mkl_vsl_error_check(
-            status, "MKLStream::Stream", "::vslNewStream");
+            status, "MKLStream::MKLStream", "::vslNewStream");
         stream_ptr_.reset(ptr);
     }
 
@@ -331,7 +357,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
         VSLStreamStatePtr ptr = nullptr;
         int status = ::vslNewStream(&ptr, BRNG + this->offset(), s);
         internal::mkl_vsl_error_check(
-            status, "MKLStream::Stream", "::vslNewStream");
+            status, "MKLStream::MKLStream", "::vslNewStream");
         stream_ptr_.reset(ptr);
     }
 
@@ -341,7 +367,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
         VSLStreamStatePtr ptr = nullptr;
         int status = ::vslCopyStream(&ptr, other.stream_ptr_.get());
         internal::mkl_vsl_error_check(
-            status, "MKLStream::Stream", "::vslCopyStream");
+            status, "MKLStream::MKLStream", "::vslCopyStream");
         stream_ptr_.reset(ptr);
     }
 
@@ -358,8 +384,8 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
         return *this;
     }
 
-    MKLStream(MKLStream<BRNG> &&other) = default;
-    MKLStream<BRNG> &operator=(MKLStream<BRNG> &&other) = default;
+    MKLStream(MKLStream<BRNG> &&) = default;
+    MKLStream<BRNG> &operator=(MKLStream<BRNG> &&) = default;
 
     void seed(MKL_UINT s)
     {
@@ -382,76 +408,13 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
 
     VSLStreamStatePtr ptr() const { return stream_ptr_.get(); }
 
-    /// \brief Get stream state size
-    int size() const { return ::vslGetStreamSize(ptr()); }
-
-    /// \brief Save a stream to a file
-    int save(const std::string &fname) const
-    {
-        int status = ::vslSaveStreamF(ptr(), fname.c_str());
-        internal::mkl_vsl_error_check(
-            status, "MKLStream::save", "::vslSaveStreamF");
-
-        return status
-    }
-
-    /// \brief Save a stream to a memory buffer (query size using `size()`)
-    int save(void *mem) const
-    {
-        int status = ::vslSaveStreamM(ptr(), static_cast<char *>(mem));
-        internal::mkl_vsl_error_check(
-            status, "MKLStream::save", "::vslSaveStreamM");
-
-        return status;
-    }
-
-    /// \brief Load a stream from a file
-    int load(const std::string &fname)
-    {
-        int status = ::vslLoadStreamF(ptr(), fname.c_str());
-        internal::mkl_vsl_error_check(
-            status, "MKLStream::load", "::vslLoadStreamF");
-
-        return status;
-    }
-
-    /// \brief Load a stream from a memory buffer
-    int load(const void *mem)
-    {
-        int status = ::vslLoadStreamM(ptr(), static_cast<const char *>(mem));
-        intrnal::mkl_vsl_error_check(
-            status, "MKLStream::load", "::vslLoadStreamM");
-
-        return status;
-    }
-
-    /// \brief Leap frog the stream
-    int leap_frog(MKL_INT k, MKL_INT nstream)
-    {
-        int status = ::vslLeapfrogStream(ptr(), k, nstream);
-        internal::mkl_vsl_error_check(
-            status, "MKLStream::leap_frog", "::vslLeapfrogStream");
-
-        return status;
-    }
-
-    /// \brief Skip ahead the stream
-    int skip_ahead(MKL_INT nskip)
-    {
-        int status = ::vslSkipAheadStream(ptr(), nskip);
-        internal::mkl_vsl_error_check(
-            status, "MKLStream::skip_ahead", "::vslSkipAheadStream");
-
-        return status;
-    }
-
     private:
     struct deleter {
         void operator()(VSLStreamStatePtr ptr)
         {
             int status = ::vslDeleteStream(&ptr);
             internal::mkl_vsl_error_check(
-                status, "MKLStream::delete_stream", "::vslDeleteStream");
+                status, "MKLStream::deleter", "::vslDeleteStream");
         }
     };
 
@@ -461,6 +424,65 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     MKL_UINT seed_;
     stream_ptr_type stream_ptr_;
 }; // class MKLStream
+
+/// \brief MKL `VSLSSTaskPtr`
+/// \ingroup MKL
+template <typename ResultType = double>
+class MKLSSTask
+{
+    public:
+    typedef ResultType result_type;
+
+    MKLSSTask(const MKL_INT *p, const MKL_INT *n, const MKL_INT *xstorage,
+        const result_type *x, const result_type *w = nullptr,
+        const MKL_INT *indices = nullptr)
+    {
+        VSMC_STATIC_ASSERT_MATH_MKL_SS_TASK_RESULT_TYPE(ResultType);
+        VSLSSTaskPtr ptr = nullptr;
+        new_task(&ptr, p, n, xstorage, x, w, indices);
+        task_ptr_.reset(ptr);
+    }
+
+    MKLSSTask(const MKLSSTask<ResultType> &) = delete;
+    MKLSSTask *operator=(const MKLSSTask<ResultType> &) = delete;
+    MKLSSTask(MKLSSTask<ResultType> &&) = default;
+    MKLSSTask *operator=(MKLSSTask<ResultType> &&) = default;
+
+    VSLSSTaskPtr ptr() const { return task_ptr_.get(); }
+
+    private:
+    struct deleter {
+        void operator()(VSLSSTaskPtr ptr)
+        {
+            int status = ::vslSSDeleteTask(&ptr);
+            internal::mkl_vsl_error_check(
+                status, "MKLSSTask::deleter", "::vslSSDeleteTask");
+        }
+    };
+
+    typedef std::unique_ptr<std::remove_pointer<VSLSSTaskPtr>::type, deleter>
+        task_ptr_type;
+
+    task_ptr_type task_ptr_;
+
+    void new_task(VSLSSTaskPtr *task, const MKL_INT *p, const MKL_INT *n,
+        const MKL_INT *xstorage, const double *x, const double *w,
+        const MKL_INT *indices)
+    {
+        internal::mkl_vsl_error_check(
+            ::vsldSSNewTask(task, p, n, xstorage, x, w, indices),
+            "MKLSSTask::MKLSSTask", "::vsldSSNewTask");
+    }
+
+    void new_task(VSLSSTaskPtr *task, const MKL_INT *p, const MKL_INT *n,
+        const MKL_INT *xstorage, const float *x, const float *w,
+        const MKL_INT *indices)
+    {
+        internal::mkl_vsl_error_check(
+            ::vslsSSNewTask(task, p, n, xstorage, x, w, indices),
+            "MKLSSTask::MKLSSTask", "::vslsSSNewTask");
+    }
+}; // class MKLSSTask
 
 } // namespace vsmc
 
