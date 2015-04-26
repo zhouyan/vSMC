@@ -34,14 +34,20 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/seed.hpp>
+
 #if VSMC_HAS_AES_NI
 #include <vsmc/rng/aes.hpp>
 #include <vsmc/rng/ars.hpp>
 #endif
+
 #include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
+
 #if VSMC_HAS_TBB
 #include <tbb/tbb.h>
+#if VSMC_HAS_MKL
+#include <vsmc/rng/mkl.hpp>
+#endif
 #endif
 
 /// \brief Default RNG set type
@@ -160,6 +166,57 @@ class RngSetTBB
         return rng;
     }
 }; // class RngSetTBB
+
+#if VSMC_HAS_MKL
+
+template <typename>
+class RngSetMKL;
+
+/// \brief Thread local RNG set using MKL RNG and TBB
+/// \ingroup RNG
+template <MKL_INT BRNG, typename ResultType>
+class RngSetMKL<MKLEngine<BRNG, ResultType>>
+{
+    public:
+    typedef MKLEngine<BRNG, ResultType> rng_type;
+    typedef std::size_t size_type;
+
+    explicit RngSetMKL(size_type N = 0) : size_(N), rng_(rng_init)
+    {
+        rng_init();
+    }
+
+    size_type size() const { return size_; }
+
+    void resize(std::size_t) {}
+
+    void seed() { rng_.clear(); }
+
+    rng_type &operator[](size_type) { return rng_.local(); }
+
+    private:
+    std::size_t size_;
+    ::tbb::combinable<rng_type> rng_;
+
+    static rng_type rng_init()
+    {
+        static ::tbb::mutex mtx;
+
+        ::tbb::mutex::scoped_lock lock(mtx);
+        MKL_UINT seed = static_cast<MKL_UINT>(Seed::instance().get());
+        MKL_INT offset_max = internal::MKLOffset<BRNG>::type::max VSMC_MNE();
+        MKL_INT offset = 0;
+        if (offset_max != 0) {
+            offset = SeedGenerator<rng_type, MKL_INT>::instance().get() %
+                offset_max;
+        }
+        rng_type rng(seed, offset);
+
+        return rng;
+    }
+}; // class RngSetMKL
+
+#endif // VSMC_HAS_MKL
 
 #endif // VSMC_HAS_TBB
 
