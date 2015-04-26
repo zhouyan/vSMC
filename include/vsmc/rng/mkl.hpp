@@ -33,7 +33,7 @@
 #define VSMC_RNG_MKL_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <mkl.h>
+#include <vsmc/math/mkl.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Dist)     \
     VSMC_STATIC_ASSERT((std::is_same<FPType, float>::value ||                 \
@@ -41,30 +41,13 @@
         "**MKL" #Dist                                                         \
         "Distribution** USED WITH ResultType OTHER THAN float OR double")
 
-#define VSMC_RUNTIME_ASSERT_RNG_MKL_VSL_OFFSET(offset)                        \
-    VSMC_RUNTIME_ASSERT((offset < max VSMC_MNE()),                            \
-        "**MKLOffsetDynamic** "                                               \
-        "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS")
-
 #ifndef VSMC_RNG_MKL_VSL_BUFFER_SIZE
 #define VSMC_RNG_MKL_VSL_BUFFER_SIZE 1024
 #endif
 
-// clang-format off
-
-#define VSMC_DEFINE_RNG_MKL_VSL_BRNG(BRNG)                                   \
-    case BRNG: return #BRNG
-
-#define VSMC_DEFINE_RNG_MKL_VSL_ERR(STATUS)                                  \
-    case STATUS: return #STATUS
-
-// clang-format on
-
 namespace vsmc
 {
 
-template <MKL_INT>
-class MKLStream;
 template <typename, typename>
 class MKLDistribution;
 template <MKL_INT, typename>
@@ -109,94 +92,6 @@ class MKLGammaDistribution;
 template <typename = double, MKL_INT = VSL_RNG_METHOD_BETA_CJA>
 class MKLBetaDistribution;
 
-namespace internal
-{
-
-inline std::string mkl_vsl_brng_str(MKL_INT BRNG)
-{
-    switch (BRNG) {
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_MCG31);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_R250);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_MRG32K3A);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_WH);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_MCG59);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_MT19937);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_MT2203);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_SFMT19937);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_SOBOL);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_NIEDERR);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_IABSTRACT);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_DABSTRACT);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_SABSTRACT);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_NONDETERM);
-        default: return "Unknown";
-    }
-}
-
-inline std::string mkl_vsl_error_str(int status)
-{
-    switch (status) {
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_OK);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_BADARGS);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_CPU_NOT_SUPPORTED);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_FEATURE_NOT_IMPLEMENTED);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_MEM_FAILURE);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_NULL_PTR);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_UNKNOWN);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_FILE_FORMAT);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_MEM_FORMAT);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_NBITS);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_NSEEDS);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_STREAM);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_STREAM_STATE_SIZE);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_UPDATE);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_WORD_SIZE);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BRNG_NOT_SUPPORTED);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BRNG_TABLE_FULL);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BRNGS_INCOMPATIBLE);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_FILE_CLOSE);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_FILE_OPEN);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_FILE_READ);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_FILE_WRITE);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_INVALID_ABSTRACT_STREAM);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_INVALID_BRNG_INDEX);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_NO_NUMBERS);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_QRNG_PERIOD_ELAPSED);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_SKIPAHEAD_UNSUPPORTED);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_UNSUPPORTED_FILE_VER);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_NONDETERM_NOT_SUPPORTED);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_NONDETERM_NRETRIES_EXCEEDED);
-        default: return "UNKNOWN";
-    }
-}
-
-#if VSMC_NO_RUNTIME_ASSERT
-inline void mkl_vsl_error_check(MKL_INT, int, const char *, const char *) {}
-#else
-inline void mkl_vsl_error_check(
-    MKL_INT BRNG, int status, const char *func, const char *mklf)
-{
-    if (status == VSL_ERROR_OK)
-        return;
-
-    std::string msg("**vsmc::");
-    msg += func;
-    msg += " failure";
-    msg += "; MKL function: ";
-    msg += mklf;
-
-    msg += "; BRNG: ";
-    msg += mkl_vsl_brng_str(BRNG);
-    msg += "; Error code: ";
-    msg += mkl_vsl_error_str(status);
-
-    VSMC_RUNTIME_ASSERT((status == VSL_ERROR_OK), msg.c_str());
-} // error_check
-#endif
-
-} // namespace vsmc::internal
-
 namespace traits
 {
 
@@ -234,69 +129,10 @@ struct MKLUniformBitsTrait<BRNG, unsigned MKL_INT64> {
         VSMC_MAX_UINT(unsigned MKL_INT64);
 }; // struct MKLUniformBitsTrait
 
-/// \brief Default seed for MKL RNG
-/// \ingroup Traits
-template <MKL_INT>
-struct MKLSeedTrait : public std::integral_constant<MKL_UINT, 1> {
-};
-
-/// \brief Default seed for MKL Sobol quasi-RNG
-template <>
-struct MKLSeedTrait<VSL_BRNG_SOBOL>
-    : public std::integral_constant<MKL_UINT, 10> {
-};
-
-/// \brief Default seed for MKL Niederr quasi-RNG
-template <>
-struct MKLSeedTrait<VSL_BRNG_NIEDERR>
-    : public std::integral_constant<MKL_UINT, 10> {
-};
-
 } // namespace traits
 
 namespace internal
 {
-
-struct MKLOffsetZero {
-    static constexpr MKL_INT min VSMC_MNE() { return 0; }
-    static constexpr MKL_INT max VSMC_MNE() { return 0; }
-    static void offset(MKL_INT) {}
-    static constexpr MKL_INT offset() { return 0; }
-}; // struct OffsetZero
-
-template <MKL_INT MaxOffset>
-struct MKLOffsetDynamic {
-    MKLOffsetDynamic() : offset_(0) {}
-
-    static constexpr MKL_INT min VSMC_MNE() { return 0; }
-    static constexpr MKL_INT max VSMC_MNE() { return MaxOffset; }
-
-    void offset(MKL_INT n)
-    {
-        VSMC_RUNTIME_ASSERT_RNG_MKL_VSL_OFFSET(n);
-        offset_ = n;
-    }
-
-    MKL_INT offset() const { return offset_; }
-
-    private:
-    MKL_INT offset_;
-}; // struct OffsetDynamic
-
-template <MKL_INT>
-struct MKLOffset {
-    typedef MKLOffsetZero type;
-};
-
-template <>
-struct MKLOffset<VSL_BRNG_MT2203> {
-    typedef MKLOffsetDynamic<6024> type;
-};
-
-template <>
-struct MKLOffset<VSL_BRNG_WH> {
-    typedef MKLOffsetDynamic<273> type;
-};
 
 struct MKLSkipAheadVSL {
     typedef long long size_type;
@@ -309,7 +145,7 @@ struct MKLSkipAheadVSL {
 
         int status = ::vslSkipAheadStream(stream.ptr(), nskip);
         internal::mkl_vsl_error_check(
-            BRNG, status, "MKLSkipAheadVSL::skip", "::vslSkipAheadStream");
+            status, "MKLSkipAheadVSL::skip", "::vslSkipAheadStream");
     }
 
     static void buffer_size(MKL_INT) {}
@@ -387,101 +223,6 @@ struct MKLSkipAhead<VSL_BRNG_NIEDERR, ResultType> {
 };
 
 } // namespace vsmc::internal
-
-/// \brief MKL RNG C++11 engine stream
-/// \ingroup MKLRNG
-template <MKL_INT BRNG>
-class MKLStream : public internal::MKLOffset<BRNG>::type
-{
-    public:
-    explicit MKLStream(
-        MKL_UINT s = traits::MKLSeedTrait<BRNG>::value, MKL_INT offset = 0)
-    {
-        this->offset(offset);
-        VSLStreamStatePtr ptr = nullptr;
-        int status = ::vslNewStream(&ptr, BRNG + this->offset(), s);
-        internal::mkl_vsl_error_check(
-            BRNG, status, "MKLStream::Stream", "::vslNewStream");
-        stream_ptr_.reset(ptr);
-    }
-
-    template <typename SeedSeq>
-    explicit MKLStream(
-        SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
-                          MKL_UINT, MKLStream<BRNG>>::value>::type * = nullptr)
-    {
-        MKL_UINT s = 0;
-        seq.generate(&s, &s + 1);
-        VSLStreamStatePtr ptr = nullptr;
-        int status = ::vslNewStream(&ptr, BRNG + this->offset(), s);
-        internal::mkl_vsl_error_check(
-            BRNG, status, "MKLStream::Stream", "::vslNewStream");
-        stream_ptr_.reset(ptr);
-    }
-
-    MKLStream(const MKLStream<BRNG> &other)
-        : internal::MKLOffset<BRNG>::type(other)
-    {
-        VSLStreamStatePtr ptr = nullptr;
-        int status = ::vslCopyStream(&ptr, other.stream_ptr_.get());
-        internal::mkl_vsl_error_check(
-            BRNG, status, "MKLStream::Stream", "::vslCopyStream");
-        stream_ptr_.reset(ptr);
-    }
-
-    MKLStream<BRNG> &operator=(const MKLStream<BRNG> &other)
-    {
-        if (this != &other) {
-            internal::MKLOffset<BRNG>::type::operator=(other);
-            int status = ::vslCopyStreamState(
-                stream_ptr_.get(), other.stream_ptr_.get());
-            internal::mkl_vsl_error_check(
-                BRNG, status, "MKLStream::operator=", "::vslCopyStreamState");
-        }
-
-        return *this;
-    }
-
-    MKLStream(MKLStream<BRNG> &&other) = default;
-    MKLStream<BRNG> &operator=(MKLStream<BRNG> &&other) = default;
-
-    void seed(MKL_UINT s)
-    {
-        VSLStreamStatePtr ptr = nullptr;
-        int status = ::vslNewStream(&ptr, BRNG + this->offset(), s);
-        internal::mkl_vsl_error_check(
-            BRNG, status, "MKLStream::seed", "::vslNewStream");
-        stream_ptr_.reset(ptr);
-    }
-
-    template <typename SeedSeq>
-    void seed(
-        SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
-                          MKL_UINT, MKLStream<BRNG>>::value>::type * = nullptr)
-    {
-        MKL_UINT s = 0;
-        seq.generate(&s, &s + 1);
-        seed(s);
-    }
-
-    VSLStreamStatePtr ptr() const { return stream_ptr_.get(); }
-
-    private:
-    struct stream_deleter {
-        void operator()(VSLStreamStatePtr ptr)
-        {
-            int status = ::vslDeleteStream(&ptr);
-            internal::mkl_vsl_error_check(
-                BRNG, status, "MKLStream::delete_stream", "::vslDeleteStream");
-        }
-    };
-
-    typedef std::unique_ptr<std::remove_pointer<VSLStreamStatePtr>::type,
-        stream_deleter> stream_ptr_type;
-
-    MKL_UINT seed_;
-    stream_ptr_type stream_ptr_;
-}; // class MKLStream
 
 /// \brief MKL RNG C++11 engine
 /// \ingroup MKLRNG
@@ -669,7 +410,7 @@ class MKLDistribution
         mkl_vsl_name += "Rng";
         mkl_vsl_name += name;
         internal::mkl_vsl_error_check(
-            BRNG, status, dist_name.c_str(), mkl_vsl_name.c_str());
+            status, dist_name.c_str(), mkl_vsl_name.c_str());
     }
 
     private:

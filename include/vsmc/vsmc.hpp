@@ -101,9 +101,13 @@
 /// \ingroup Math
 /// \brief Mathematical constants
 
+/// \defgroup MKL Intel Math Kernel Library
+/// \ingroup Math
+/// \brief Resource management for Intel Math Kernel Library
+
 /// \defgroup vMath Vector math functions
 /// \ingroup Math
-/// \brief Math functions on vectors (optional optimization through Intel MKL)
+/// \brief Math functions on vectors
 
 /// \defgroup RNG Random number generating
 /// \brief Random number generating engines and utilities
@@ -124,7 +128,7 @@
 /// \ingroup RNG
 /// \brief Random number generating using GSL RNG
 
-/// \defgroup MKLRNG MKL
+/// \defgroup MKLRNG Intel Math Kernel Library
 /// \ingroup RNG
 /// \brief Random number generating using MKL RNG
 

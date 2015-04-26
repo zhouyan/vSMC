@@ -52,6 +52,9 @@
 #define VSMC_CRTP_DESTRUCTOR_PREFIX virtual
 #endif
 
+#define VSMC_DEFINE_CASE_RETURN_STR(Case)                                     \
+    case Case: return #Case
+
 namespace vsmc
 {
 
