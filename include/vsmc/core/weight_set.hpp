@@ -59,9 +59,14 @@ class WeightSet
     virtual ~WeightSet() {}
 
     /// \brief Set all weights to be equal, normalized and return the ESS
-    static double set_equal_weight(std::size_t N, double *weight)
+    ///
+    /// \param N Number of particles in weight
+    /// \param RN Number  of particles used for resampling
+    /// \param weight Weights to be equalized
+    static double set_equal_weight(
+        std::size_t N, std::size_t RN, double *weight)
     {
-        double ess = static_cast<double>(N);
+        double ess = static_cast<double>(RN);
         if (weight != nullptr)
             std::fill_n(weight, N, 1 / ess);
 
@@ -75,9 +80,8 @@ class WeightSet
         for (std::size_t i = 0; i != N; ++i)
             if (dmax < log_weight[i])
                 dmax = log_weight[i];
-        dmax = -dmax;
         for (std::size_t i = 0; i != N; ++i)
-            log_weight[i] += dmax;
+            log_weight[i] -= dmax;
     }
 
     /// \brief Normalize weights such that the summation is one and return the
@@ -196,7 +200,7 @@ class WeightSet
     /// such that each particle has a equal weight
     void set_equal_weight()
     {
-        set_ess(set_equal_weight(size_, weight_.data()));
+        set_ess(set_equal_weight(size_, resample_size(), weight_.data()));
         std::memset(log_weight_.data(), 0, sizeof(double) * size_);
     }
 

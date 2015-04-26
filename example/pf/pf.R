@@ -58,7 +58,7 @@ dat.list <- data.frame(
     Source = rep("Observation", dim(obs)[1]))
 plt.list <- list()
 
-pf <- function (suffix, est)
+pf <- function (suffix, run, rowcol, est)
 {
     name <- paste(run, rowcol, ".", suffix, sep = "")
     dat <- data.frame(
@@ -85,9 +85,10 @@ for (rowcol in c(".row", ".col", "")) {
         pf.r0.txt <- paste(run, rowcol, ".r0", ".txt", sep = "")
         pf.r1.txt <- paste(run, rowcol, ".r1", ".txt", sep = "")
         if (file.exists(pf.txt)) {
-            pf("txt", read.table(pf.txt, header = TRUE))
+            pf("txt", run, rowcol,
+                read.table(pf.txt, header = TRUE))
         } else if (file.exists(pf.r0.txt) && file.exists(pf.r1.txt)) {
-            pf("txt",
+            pf("txt", run, rowcol,
                 read.table(pf.r0.txt, header = TRUE) +
                 read.table(pf.r1.txt, header = TRUE))
         }
@@ -96,10 +97,10 @@ for (rowcol in c(".row", ".col", "")) {
         pf.r0.h5  <- paste(run, rowcol, ".r0", ".h5",  sep = "")
         pf.r1.h5  <- paste(run, rowcol, ".r1", ".h5",  sep = "")
         if (file.exists(pf.h5)) {
-            pf("h5",
+            pf("h5", run, rowcol,
                 as.data.frame(suppressWarnings(h5read(pf.h5, "/Sampler"))))
         } else if (file.exists(pf.r0.h5) && file.exists(pf.r1.h5)) {
-            pf("h5",
+            pf("h5", run, rowcol,
                 as.data.frame(suppressWarnings(h5read(pf.r0.h5, "/Sampler"))) +
                 as.data.frame(suppressWarnings(h5read(pf.r1.h5, "/Sampler"))))
         }

@@ -65,6 +65,9 @@ class WeightSetMPI : public WeightSetBase
         this->set_ess(static_cast<double>(resample_size_));
     }
 
+    /// \brief A duplicated MPI communicator for this weight set object
+    const ::boost::mpi::communicator &world() const { return world_; }
+
     size_type resample_size() const { return resample_size_; }
 
     void read_resample_weight(double *first) const
@@ -87,10 +90,6 @@ class WeightSetMPI : public WeightSetBase
         return world_.rank() == 0 ? resample_weight_.data() : nullptr;
     }
 
-    /// \brief A duplicated MPI communicator for this weight set object
-    const ::boost::mpi::communicator &world() const { return world_; }
-
-    protected:
     void normalize_log_weight()
     {
         const size_type N = static_cast<size_type>(this->size());
@@ -112,18 +111,13 @@ class WeightSetMPI : public WeightSetBase
         const size_type N = static_cast<size_type>(this->size());
         double *const wptr = this->mutable_weight_data();
 
-        double lcoeff = 0;
-        for (size_type i = 0; i != N; ++i)
-            lcoeff += wptr[i];
+        double lcoeff = math::asum(N, wptr);
         double gcoeff = 0;
         ::boost::mpi::all_reduce(world_, lcoeff, gcoeff, std::plus<double>());
         gcoeff = 1 / gcoeff;
-        for (size_type i = 0; i != N; ++i)
-            wptr[i] *= gcoeff;
+        math::scal(N, gcoeff, wptr);
 
-        double less = 0;
-        for (size_type i = 0; i != N; ++i)
-            less += wptr[i] * wptr[i];
+        double less = math::dot(N, wptr, wptr);
         double gess = 0;
         ::boost::mpi::all_reduce(world_, less, gess, std::plus<double>());
         gess = 1 / gess;
