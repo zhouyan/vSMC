@@ -95,8 +95,8 @@ inline void mkl_error_check(int status, const char *func, const char *mklf)
 struct MKLOffsetZero {
     static constexpr MKL_INT min VSMC_MNE() { return 0; }
     static constexpr MKL_INT max VSMC_MNE() { return 0; }
-    static void offset(MKL_INT) {}
-    static constexpr MKL_INT offset() { return 0; }
+    static void set(MKL_INT) {}
+    static constexpr MKL_INT get() { return 0; }
 }; // struct OffsetZero
 
 template <MKL_INT MaxOffset>
@@ -106,13 +106,13 @@ struct MKLOffsetDynamic {
     static constexpr MKL_INT min VSMC_MNE() { return 0; }
     static constexpr MKL_INT max VSMC_MNE() { return MaxOffset; }
 
-    void offset(MKL_INT n)
+    void set(MKL_INT n)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_MKL_VSL_OFFSET(n);
         offset_ = n;
     }
 
-    MKL_INT offset() const { return offset_; }
+    MKL_INT get() const { return offset_; }
 
     private:
     MKL_INT offset_;
@@ -178,6 +178,7 @@ class MKLBase
         int status_;
     };
 
+    MKLBase() = default;
     MKLBase(const MKLBase<MKLPtr, Derived> &) = delete;
     MKLBase<MKLPtr, Derived> &operator=(
         const MKLBase<MKLPtr, Derived> &) = delete;
@@ -198,6 +199,9 @@ class MKLBase
     const deleter_type &get_deleter() const { return ptr_.get_deleter(); }
 
     explicit operator bool() const { return bool(ptr_); }
+
+    protected:
+    void reset_ptr(pointer ptr = nullptr) { ptr_.reset(ptr); }
 
     private:
     std::unique_ptr<element_type, deleter_type> ptr_;
@@ -233,18 +237,13 @@ inline void swap(
 /// \brief MKL `VSLStreamStatePtr`
 /// \ingroup MKL
 template <MKL_INT BRNG>
-class MKLStream : public internal::MKLOffset<BRNG>::type
+class MKLStream : public MKLBase<VSLStreamStatePtr, MKLStream<BRNG>>
 {
     public:
     explicit MKLStream(
         MKL_UINT s = traits::MKLSeedTrait<BRNG>::value, MKL_INT offset = 0)
     {
-        this->offset(offset);
-        VSLStreamStatePtr ptr = nullptr;
-        internal::mkl_error_check(
-            ::vslNewStream(&ptr, BRNG + this->offset(), s),
-            "MKLStream::MKLStream", "::vslNewStream");
-        stream_ptr_.reset(ptr);
+        reset(s, offset);
     }
 
     template <typename SeedSeq>
@@ -254,30 +253,31 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     {
         MKL_UINT s = 0;
         seq.generate(&s, &s + 1);
-        VSLStreamStatePtr ptr = nullptr;
-        internal::mkl_error_check(
-            ::vslNewStream(&ptr, BRNG + this->offset(), s),
-            "MKLStream::MKLStream", "::vslNewStream");
-        stream_ptr_.reset(ptr);
+        reset(s);
     }
 
-    MKLStream(const MKLStream<BRNG> &other)
-        : internal::MKLOffset<BRNG>::type(other)
+    MKLStream(const MKLStream<BRNG> &other) : offset_(other.offset_)
     {
         VSLStreamStatePtr ptr = nullptr;
-        internal::mkl_error_check(
-            ::vslCopyStream(&ptr, other.stream_ptr_.get()),
+        internal::mkl_error_check(::vslCopyStream(&ptr, other.get()),
             "MKLStream::MKLStream", "::vslCopyStream");
-        stream_ptr_.reset(ptr);
+        this->reset_ptr(ptr);
     }
 
     MKLStream<BRNG> &operator=(const MKLStream<BRNG> &other)
     {
         if (this != &other) {
-            internal::MKLOffset<BRNG>::type::operator=(other);
-            internal::mkl_error_check(::vslCopyStreamState(stream_ptr_.get(),
-                                          other.stream_ptr_.get()),
-                "MKLStream::operator=", "::vslCopyStreamState");
+            offset_ = other.offset_;
+            if (this->get() == nullptr) {
+                VSLStreamStatePtr ptr = nullptr;
+                internal::mkl_error_check(::vslCopyStream(&ptr, other.get()),
+                    "MKLStream::operator=", "::vslCopyStream");
+                this->reset_ptr(ptr);
+            } else {
+                internal::mkl_error_check(
+                    ::vslCopyStreamState(this->get(), other.get()),
+                    "MKLStream::operator=", "::vslCopyStreamState");
+            }
         }
 
         return *this;
@@ -286,14 +286,7 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     MKLStream(MKLStream<BRNG> &&) = default;
     MKLStream<BRNG> &operator=(MKLStream<BRNG> &&) = default;
 
-    void seed(MKL_UINT s)
-    {
-        VSLStreamStatePtr ptr = nullptr;
-        internal::mkl_error_check(
-            ::vslNewStream(&ptr, BRNG + this->offset(), s), "MKLStream::seed",
-            "::vslNewStream");
-        stream_ptr_.reset(ptr);
-    }
+    void seed(MKL_UINT s) { reset(s); }
 
     template <typename SeedSeq>
     void seed(
@@ -302,23 +295,49 @@ class MKLStream : public internal::MKLOffset<BRNG>::type
     {
         MKL_UINT s = 0;
         seq.generate(&s, &s + 1);
-        seed(s);
+        reset(s);
     }
 
-    VSLStreamStatePtr ptr() const { return stream_ptr_.get(); }
+    static int release(VSLStreamStatePtr ptr)
+    {
+        int status = ::vslDeleteStream(&ptr);
+        internal::mkl_error_check(
+            status, "MKLStream::release", "::vslDeleteStream");
+
+        return status;
+    }
+
+    int reset(MKL_UINT s) { return reset(s, offset_.get()); }
+
+    int reset(MKL_UINT s, MKL_INT offset)
+    {
+        VSLStreamStatePtr ptr = nullptr;
+        int status = ::vslNewStream(&ptr, BRNG + offset, s);
+        internal::mkl_error_check(
+            status, "MKLStream::reset", "::vslNewStream");
+        offset_.set(offset);
+        this->reset_ptr(ptr);
+
+        return status;
+    }
+
+    static constexpr MKL_INT brng() { return BRNG; }
+
+    static constexpr MKL_INT min_offset()
+    {
+        return internal::MKLOffset<BRNG>::type::min VSMC_MNE();
+    }
+    static constexpr MKL_INT max_offset()
+    {
+        return internal::MKLOffset<BRNG>::type::max VSMC_MNE();
+    }
+
+    void offset(MKL_INT n) { offset_.offset(n); }
+
+    MKL_INT offset() const { return offset_.offset(); }
 
     private:
-    struct deleter {
-        void operator()(VSLStreamStatePtr ptr)
-        {
-            internal::mkl_error_check(::vslDeleteStream(&ptr),
-                "MKLStream::~MKLStream", "::vslDeleteStream");
-        }
-    };
-
-    MKL_UINT seed_;
-    std::unique_ptr<std::remove_pointer<VSLStreamStatePtr>::type, deleter>
-        stream_ptr_;
+    typename internal::MKLOffset<BRNG>::type offset_;
 }; // class MKLStream
 
 /// \brief MKL `VSLSSTaskPtr`
@@ -357,7 +376,7 @@ class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
     {
         VSLSSTaskPtr ptr = nullptr;
         int status = reset_dispatch(&ptr, p, n, xstorage, x, w, indices);
-        this->reset(ptr);
+        this->reset_ptr(ptr);
 
         return status;
     }
@@ -439,7 +458,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         VSLConvTaskPtr ptr = nullptr;
         internal::mkl_error_check(::vslConvCopyTask(&ptr, other.get()),
             "MKLConvTask::MKLConvTask", "::vslConvCopyTask");
-        this->reset(ptr);
+        this->reset_ptr(ptr);
     }
 
     MKLConvTask<ResultType> &operator=(const MKLConvTask<ResultType> &other)
@@ -448,7 +467,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
             VSLConvTaskPtr ptr = nullptr;
             internal::mkl_error_check(::vslConvCopyTask(&ptr, other.get()),
                 "MKLConvTask::operator=", "::vslConvCopyTask");
-            this->reset(ptr);
+            this->reset_ptr(ptr);
         }
 
         return *this;
@@ -472,7 +491,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
     {
         VSLConvTaskPtr ptr = nullptr;
         int status = reset_dispatch(&ptr, mode, dims, xshape, yshape, zshape);
-        this->reset(ptr);
+        this->reset_ptr(ptr);
 
         return status;
     }
@@ -483,7 +502,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
     {
         VSLConvTaskPtr ptr = nullptr;
         int status = reset_dispatch(&ptr, mode, xshape, yshape, zshape);
-        this->reset(ptr);
+        this->reset_ptr(ptr);
 
         return status;
     }
@@ -496,7 +515,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         VSLConvTaskPtr ptr = nullptr;
         int status = reset_dispatch(
             &ptr, mode, dims, xshape, yshape, zshape, x, xstride);
-        this->reset(ptr);
+        this->reset_ptr(ptr);
 
         return status;
     }
@@ -508,7 +527,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         VSLConvTaskPtr ptr = nullptr;
         int status =
             reset_dispatch(&ptr, mode, xshape, yshape, zshape, x, xstride);
-        this->reset(ptr);
+        this->reset_ptr(ptr);
 
         return status;
     }
@@ -712,7 +731,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         VSLCorrTaskPtr ptr = nullptr;
         internal::mkl_error_check(::vslCorrCopyTask(&ptr, other.get()),
             "MKLCorrTask::MKLCorrTask", "::vslCorrCopyTask");
-        this->reset(ptr);
+        this->reset_ptr(ptr);
     }
 
     MKLCorrTask<ResultType> &operator=(const MKLCorrTask<ResultType> &other)
@@ -721,7 +740,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
             VSLCorrTaskPtr ptr = nullptr;
             internal::mkl_error_check(::vslCorrCopyTask(&ptr, other.get()),
                 "MKLCorrTask::operator=", "::vslCorrCopyTask");
-            this->reset(ptr);
+            this->reset_ptr(ptr);
         }
 
         return *this;
@@ -745,7 +764,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     {
         VSLCorrTaskPtr ptr = nullptr;
         int status = reset_dispatch(&ptr, mode, dims, xshape, yshape, zshape);
-        this->reset(ptr);
+        this->reset_ptr(ptr);
 
         return status;
     }
@@ -756,7 +775,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     {
         VSLCorrTaskPtr ptr = nullptr;
         int status = reset_dispatch(&ptr, mode, xshape, yshape, zshape);
-        this->reset(ptr);
+        this->reset_ptr(ptr);
 
         return status;
     }
@@ -769,7 +788,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         VSLCorrTaskPtr ptr = nullptr;
         int status = reset_dispatch(
             &ptr, mode, dims, xshape, yshape, zshape, x, xstride);
-        this->reset(ptr);
+        this->reset_ptr(ptr);
 
         return status;
     }
@@ -781,7 +800,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         VSLCorrTaskPtr ptr = nullptr;
         int status =
             reset_dispatch(&ptr, mode, xshape, yshape, zshape, x, xstride);
-        this->reset(ptr);
+        this->reset_ptr(ptr);
 
         return status;
     }
@@ -966,7 +985,7 @@ class MKLDFTask
     {
         DFTaskPtr ptr = nullptr;
         int status = reset_dispatch(&ptr, nx, x, xhint, ny, y, yhint);
-        this->reset(ptr);
+        this->reset_ptr(ptr);
 
         return status;
     }
