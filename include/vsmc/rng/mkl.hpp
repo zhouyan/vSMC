@@ -144,7 +144,7 @@ struct MKLSkipAheadVSL {
             return;
 
         int status = ::vslSkipAheadStream(stream.ptr(), nskip);
-        internal::mkl_vsl_error_check(
+        internal::mkl_error_check(
             status, "MKLSkipAheadVSL::skip", "::vslSkipAheadStream");
     }
 
@@ -354,6 +354,27 @@ typedef MKLEngine<VSL_BRNG_NONDETERM, unsigned> MKL_NONDETERM;
 /// \ingroup MKLRNG
 typedef MKLEngine<VSL_BRNG_NONDETERM, unsigned MKL_INT64> MKL_NONDETERM_64;
 
+#if INTEL_MKL_VERSION >= 110300
+
+/// \brief A counter-based random number generator
+/// \ingroup MKLRNG
+typedef MKLEngine<VSL_BRNG_ARS5, unsigned> MKL_ARS5;
+
+/// \brief A counter-based random number generator (64-bits)
+/// \ingroup MKLRNG
+typedef MKLEngine<VSL_BRNG_ARS5, unsigned MKL_INT64> MKL_ARS5_64;
+
+/// \brief A counter-based random number generator
+/// \ingroup MKLRNG
+typedef MKLEngine<VSL_BRNG_PHILOX4X32X10, unsigned> MKL_PHILOX4X32X10;
+
+/// \brief A counter-based random number generator (64-bits)
+/// \ingroup MKLRNG
+typedef MKLEngine<VSL_BRNG_PHILOX4X32X10, unsigned MKL_INT64>
+    MKL_PHILOX4X32X10_64;
+
+#endif // INTEL_MKL_VERSION >= 110300
+
 /// \brief Base class of MKL distribution
 /// \ingroup MKLRNG
 template <typename ResultType, typename Derived>
@@ -409,7 +430,7 @@ class MKLDistribution
             mkl_vsl_name_prefix(static_cast<result_type>(0)));
         mkl_vsl_name += "Rng";
         mkl_vsl_name += name;
-        internal::mkl_vsl_error_check(
+        internal::mkl_error_check(
             status, dist_name.c_str(), mkl_vsl_name.c_str());
     }
 
