@@ -48,8 +48,10 @@ int main(int argc, char **argv)
     VSMC_RNG_TEST(vsmc::MKL_NONDETERM_64);
 #endif
 #if INTEL_MKL_VERSION >= 110300
+#if VSMC_HAS_AES_NI
     VSMC_RNG_TEST(vsmc::MKL_ARS5);
     VSMC_RNG_TEST(vsmc::MKL_ARS5_64);
+#endif
     VSMC_RNG_TEST(vsmc::MKL_PHILOX4X32X10);
     VSMC_RNG_TEST(vsmc::MKL_PHILOX4X32X10_64);
 #endif
