@@ -170,7 +170,7 @@ class MKLBase
     class deleter_type
     {
         public:
-        void operator()(MKLPtr ptr) { status_ = Derived::release(&ptr); }
+        void operator()(MKLPtr ptr) { status_ = Derived::release(ptr); }
 
         int status() const { return status_; }
 
