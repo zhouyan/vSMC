@@ -98,46 +98,45 @@ class Counter<std::array<T, K>>
     typedef std::array<T, K> ctr_type;
 
     /// \brief Set the counter to a given value
-    static inline void set(ctr_type &ctr, const ctr_type &c) { ctr = c; }
+    static void set(ctr_type &ctr, const ctr_type &c) { ctr = c; }
 
     /// \brief Set a block of counters given the value of the first counter
     template <std::size_t Blocks>
-    static inline void set(
-        std::array<ctr_type, Blocks> &ctr, const ctr_type &c)
+    static void set(std::array<ctr_type, Blocks> &ctr, const ctr_type &c)
     {
         ctr.front() = c;
         set_block<1>(ctr, std::integral_constant<bool, 1 < Blocks>());
     }
 
     /// \brief Reset a counter to zero
-    static inline void reset(ctr_type &ctr)
+    static void reset(ctr_type &ctr)
     {
         std::memset(ctr.data(), 0, sizeof(T) * K);
     }
 
     /// \brief Reset a block of counters with the first set to zero
     template <std::size_t Blocks>
-    static inline void reset(std::array<ctr_type, Blocks> &ctr)
+    static void reset(std::array<ctr_type, Blocks> &ctr)
     {
         reset(ctr.front());
         set_block<1>(ctr, std::integral_constant<bool, 1 < Blocks>());
     }
 
     /// \brief Increment the counter by one
-    static inline void increment(ctr_type &ctr)
+    static void increment(ctr_type &ctr)
     {
         increment_single<0>(ctr, std::integral_constant<bool, 1 < K>());
     }
 
     /// \brief Increment each counter in a block by one
     template <std::size_t Blocks>
-    static inline void increment(std::array<ctr_type, Blocks> &ctr)
+    static void increment(std::array<ctr_type, Blocks> &ctr)
     {
         increment_block<0>(ctr, std::true_type());
     }
 
     /// \brief Increment a counter by a given value
-    static inline void increment(ctr_type &ctr, T nskip)
+    static void increment(ctr_type &ctr, T nskip)
     {
         if (nskip == 0)
             return;
@@ -165,7 +164,7 @@ class Counter<std::array<T, K>>
 
     /// \brief Increment each counter in a block by a given value
     template <std::size_t Blocks>
-    static inline void increment(std::array<ctr_type, Blocks> &ctr, T nskip)
+    static void increment(std::array<ctr_type, Blocks> &ctr, T nskip)
     {
         if (nskip == 0)
             return;
@@ -189,13 +188,13 @@ class Counter<std::array<T, K>>
         internal::CounterMask<T, std::is_unsigned<T>::value>::mask_lo;
 
     template <std::size_t>
-    static inline void increment_single(ctr_type &ctr, std::false_type)
+    static void increment_single(ctr_type &ctr, std::false_type)
     {
         ++ctr.back();
     }
 
     template <std::size_t N>
-    static inline void increment_single(ctr_type &ctr, std::true_type)
+    static void increment_single(ctr_type &ctr, std::true_type)
     {
         if (++std::get<N>(ctr) != 0)
             return;
@@ -205,14 +204,12 @@ class Counter<std::array<T, K>>
     }
 
     template <std::size_t, std::size_t Blocks>
-    static inline void set_block(
-        std::array<ctr_type, Blocks> &, std::false_type)
+    static void set_block(std::array<ctr_type, Blocks> &, std::false_type)
     {
     }
 
     template <std::size_t B, std::size_t Blocks>
-    static inline void set_block(
-        std::array<ctr_type, Blocks> &ctr, std::true_type)
+    static void set_block(std::array<ctr_type, Blocks> &ctr, std::true_type)
     {
         T m = std::get<B - 1>(ctr).back() & mask_lo_;
         m >>= sizeof(T) * 8 - 8;
@@ -226,13 +223,13 @@ class Counter<std::array<T, K>>
     }
 
     template <std::size_t, std::size_t Blocks>
-    static inline void increment_block(
+    static void increment_block(
         std::array<ctr_type, Blocks> &, std::false_type)
     {
     }
 
     template <std::size_t B, std::size_t Blocks>
-    static inline void increment_block(
+    static void increment_block(
         std::array<ctr_type, Blocks> &ctr, std::true_type)
     {
         increment_block_ctr(std::get<B>(ctr));
@@ -241,13 +238,13 @@ class Counter<std::array<T, K>>
     }
 
     template <std::size_t, std::size_t Blocks>
-    static inline void increment_block(
+    static void increment_block(
         std::array<ctr_type, Blocks> &, T, std::false_type)
     {
     }
 
     template <std::size_t B, std::size_t Blocks>
-    static inline void increment_block(
+    static void increment_block(
         std::array<ctr_type, Blocks> &ctr, T nskip, std::true_type)
     {
         increment_block_ctr(std::get<B>(ctr), nskip);
@@ -255,19 +252,19 @@ class Counter<std::array<T, K>>
             ctr, nskip, std::integral_constant<bool, B + 1 < Blocks>());
     }
 
-    static inline void increment_block_ctr(ctr_type &ctr)
+    static void increment_block_ctr(ctr_type &ctr)
     {
         increment_block_single<0>(ctr, std::integral_constant<bool, 1 < K>());
     }
 
-    static inline void increment_block_ctr(ctr_type &ctr, T nskip)
+    static void increment_block_ctr(ctr_type &ctr, T nskip)
     {
         increment_block_nskip(
             ctr, nskip, std::integral_constant<bool, 1 < K>());
     }
 
     template <std::size_t>
-    static inline void increment_block_single(ctr_type &ctr, std::false_type)
+    static void increment_block_single(ctr_type &ctr, std::false_type)
     {
         T m = ctr.back() & mask_lo_;
         ctr.back() <<= 8;
@@ -278,7 +275,7 @@ class Counter<std::array<T, K>>
     }
 
     template <std::size_t N>
-    static inline void increment_block_single(ctr_type &ctr, std::true_type)
+    static void increment_block_single(ctr_type &ctr, std::true_type)
     {
         if (++std::get<N>(ctr) != 0)
             return;
@@ -287,8 +284,7 @@ class Counter<std::array<T, K>>
             ctr, std::integral_constant<bool, N + 2 < K>());
     }
 
-    static inline void increment_block_nskip(
-        ctr_type &ctr, T nskip, std::false_type)
+    static void increment_block_nskip(ctr_type &ctr, T nskip, std::false_type)
     {
         T m = ctr.back() & mask_lo_;
         T b = ctr.back();
@@ -312,8 +308,7 @@ class Counter<std::array<T, K>>
         ctr.back() = b;
     }
 
-    static inline void increment_block_nskip(
-        ctr_type &ctr, T nskip, std::true_type)
+    static void increment_block_nskip(ctr_type &ctr, T nskip, std::true_type)
     {
         if (nskip == 0)
             return;

@@ -279,14 +279,14 @@ class XorshiftEngine
     static constexpr result_type min VSMC_MNE() { return _Min; }
     static constexpr result_type max VSMC_MNE() { return _Max; }
 
-    friend inline bool operator==(
+    friend bool operator==(
         const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng1,
         const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng2)
     {
         return eng1.state_ == eng2.state_;
     }
 
-    friend inline bool operator!=(
+    friend bool operator!=(
         const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng1,
         const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng2)
     {
@@ -294,7 +294,7 @@ class XorshiftEngine
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+    friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
         const XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng)
     {
@@ -307,7 +307,7 @@ class XorshiftEngine
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>>(
+    friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
         XorshiftEngine<ResultType, K, A, B, C, D, R, S> &eng)
     {
@@ -383,20 +383,20 @@ class XorwowEngine
     static constexpr result_type min VSMC_MNE() { return _Min; }
     static constexpr result_type max VSMC_MNE() { return _Max; }
 
-    friend inline bool operator==(const XorwowEngine<Eng, D, DInit> &eng1,
+    friend bool operator==(const XorwowEngine<Eng, D, DInit> &eng1,
         const XorwowEngine<Eng, D, DInit> &eng2)
     {
         return eng1.eng_ == eng2.eng_ && eng1.weyl_ == eng2.weyl_;
     }
 
-    friend inline bool operator!=(const XorwowEngine<Eng, D, DInit> &eng1,
+    friend bool operator!=(const XorwowEngine<Eng, D, DInit> &eng1,
         const XorwowEngine<Eng, D, DInit> &eng2)
     {
         return !(eng1 == eng2);
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+    friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
         const XorwowEngine<Eng, D, DInit> &eng)
     {
@@ -409,7 +409,7 @@ class XorwowEngine
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>>(
+    friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
         XorwowEngine<Eng, D, DInit> &eng)
     {

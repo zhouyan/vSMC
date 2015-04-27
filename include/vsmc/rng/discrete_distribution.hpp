@@ -184,20 +184,20 @@ class DiscreteDistribution
         return index - 1;
     }
 
-    friend inline bool operator==(const DiscreteDistribution<IntType> &rdisc1,
+    friend bool operator==(const DiscreteDistribution<IntType> &rdisc1,
         const DiscreteDistribution<IntType> &rdisc2)
     {
         return rdisc1.param_ == rdisc2.param_;
     }
 
-    friend inline bool operator!=(const DiscreteDistribution<IntType> &rdisc1,
+    friend bool operator!=(const DiscreteDistribution<IntType> &rdisc1,
         const DiscreteDistribution<IntType> &rdisc2)
     {
         return rdisc1.param_ != rdisc2.param_;
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+    friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
         const DiscreteDistribution<IntType> &rdisc)
     {
@@ -222,7 +222,7 @@ class DiscreteDistribution
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>>(
+    friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
         DiscreteDistribution<IntType> &rdisc)
     {

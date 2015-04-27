@@ -166,7 +166,7 @@ class SeedGenerator
     void skip() { seed_ = seed_ == seed_max_ ? 1 : (seed_ + 1); }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+    friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
         const SeedGenerator<ID, ResultType> &sg)
     {
@@ -181,7 +181,7 @@ class SeedGenerator
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>>(
+    friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
         SeedGenerator<ID, ResultType> &sg)
     {
@@ -293,7 +293,7 @@ class SeedGenerator<ID, std::array<T, K>>
     void skip() { Counter<result_type>::increment(seed_); }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+    friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
         const SeedGenerator<ID, std::array<T, K>> &sg)
     {
@@ -308,7 +308,7 @@ class SeedGenerator<ID, std::array<T, K>>
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>>(
+    friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
         SeedGenerator<ID, std::array<T, K>> &sg)
     {

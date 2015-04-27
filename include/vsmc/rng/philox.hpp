@@ -455,23 +455,21 @@ class PhiloxEngine
     static constexpr result_type min VSMC_MNE() { return _Min; }
     static constexpr result_type max VSMC_MNE() { return _Max; }
 
-    friend inline bool operator==(
-        const PhiloxEngine<ResultType, K, Rounds> &eng1,
+    friend bool operator==(const PhiloxEngine<ResultType, K, Rounds> &eng1,
         const PhiloxEngine<ResultType, K, Rounds> &eng2)
     {
         return eng1.index_ == eng2.index_ && eng1.ctr_ == eng2.ctr_ &&
             eng1.key_ == eng2.key_;
     }
 
-    friend inline bool operator!=(
-        const PhiloxEngine<ResultType, K, Rounds> &eng1,
+    friend bool operator!=(const PhiloxEngine<ResultType, K, Rounds> &eng1,
         const PhiloxEngine<ResultType, K, Rounds> &eng2)
     {
         return !(eng1 == eng2);
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+    friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
         const PhiloxEngine<ResultType, K, Rounds> &eng)
     {
@@ -487,7 +485,7 @@ class PhiloxEngine
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>>(
+    friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
         PhiloxEngine<ResultType, K, Rounds> &eng)
     {

@@ -189,7 +189,7 @@ class UniformRealDistribution
         result_type a() const { return a_; }
         result_type b() const { return b_; }
 
-        friend inline bool operator==(
+        friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
             if (param1.a_ < param2.a_ || param1.a_ > param2.a_)
@@ -199,14 +199,14 @@ class UniformRealDistribution
             return true;
         }
 
-        friend inline bool operator!=(
+        friend bool operator!=(
             const param_type param1, const param_type param2)
         {
             return !(param1 == param2);
         }
 
         template <typename CharT, typename Traits>
-        friend inline std::basic_ostream<CharT, Traits> &operator<<(
+        friend std::basic_ostream<CharT, Traits> &operator<<(
             std::basic_ostream<CharT, Traits> &os, const param_type &param)
         {
             if (!os.good())
@@ -218,7 +218,7 @@ class UniformRealDistribution
         }
 
         template <typename CharT, typename Traits>
-        friend inline std::basic_istream<CharT, Traits> &operator>>(
+        friend std::basic_istream<CharT, Traits> &operator>>(
             std::basic_istream<CharT, Traits> &is, param_type &param)
         {
             if (!is.good())
@@ -291,8 +291,8 @@ class UniformRealDistribution
             a_;
     }
 
-    friend inline bool operator==(const UniformRealDistribution<FPType, Left,
-                                      Right, MinMaxIsConstexpr> &runif1,
+    friend bool operator==(const UniformRealDistribution<FPType, Left, Right,
+                               MinMaxIsConstexpr> &runif1,
         const UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr>
             &runif2)
     {
@@ -303,8 +303,8 @@ class UniformRealDistribution
         return true;
     }
 
-    friend inline bool operator!=(const UniformRealDistribution<FPType, Left,
-                                      Right, MinMaxIsConstexpr> &runif1,
+    friend bool operator!=(const UniformRealDistribution<FPType, Left, Right,
+                               MinMaxIsConstexpr> &runif1,
         const UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr>
             &runif2)
     {
@@ -312,7 +312,7 @@ class UniformRealDistribution
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+    friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
         const UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr>
             &runif)
@@ -326,7 +326,7 @@ class UniformRealDistribution
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>>(
+    friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
         UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr> &runif)
     {

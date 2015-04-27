@@ -81,7 +81,7 @@ class StableDistribution
         result_type location() const { return location_; }
         result_type scale() const { return scale_; }
 
-        friend inline bool operator==(
+        friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
             if (param1.stability_ < param2.stability_ ||
@@ -98,14 +98,14 @@ class StableDistribution
             return true;
         }
 
-        friend inline bool operator!=(
+        friend bool operator!=(
             const param_type param1, const param_type param2)
         {
             return !(param1 == param2);
         }
 
         template <typename CharT, typename Traits>
-        friend inline std::basic_ostream<CharT, Traits> &operator<<(
+        friend std::basic_ostream<CharT, Traits> &operator<<(
             std::basic_ostream<CharT, Traits> &os, const param_type &param)
         {
             if (!os.good())
@@ -118,7 +118,7 @@ class StableDistribution
         }
 
         template <typename CharT, typename Traits>
-        friend inline std::basic_istream<CharT, Traits> &operator>>(
+        friend std::basic_istream<CharT, Traits> &operator>>(
             std::basic_istream<CharT, Traits> &is, param_type &param)
         {
             if (!is.good())
@@ -229,7 +229,7 @@ class StableDistribution
             return trans_a(standard_a(eng));
     }
 
-    friend inline bool operator==(const StableDistribution<FPType> &rstable1,
+    friend bool operator==(const StableDistribution<FPType> &rstable1,
         const StableDistribution<FPType> &rstable2)
     {
         if (rstable1.stability_ < rstable2.stability_ ||
@@ -247,14 +247,14 @@ class StableDistribution
         return true;
     }
 
-    friend inline bool operator!=(const StableDistribution<FPType> &rstable1,
+    friend bool operator!=(const StableDistribution<FPType> &rstable1,
         const StableDistribution<FPType> &rstable2)
     {
         return !(rstable1 == rstable2);
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+    friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
         const StableDistribution<FPType> &rstable)
     {
@@ -268,7 +268,7 @@ class StableDistribution
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>>(
+    friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
         StableDistribution<FPType> &rstable)
     {

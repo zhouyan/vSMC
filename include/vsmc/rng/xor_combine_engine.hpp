@@ -120,22 +120,20 @@ class XorCombineEngine
             operator()();
     }
 
-    friend inline bool operator==(
-        const XorCombineEngine<Eng1, Eng2, S1, S2> &eng1,
+    friend bool operator==(const XorCombineEngine<Eng1, Eng2, S1, S2> &eng1,
         const XorCombineEngine<Eng1, Eng2, S1, S2> &eng2)
     {
         return (eng1.eng1_ == eng2.eng1_ && eng1.eng2_ == eng2.eng2_);
     }
 
-    friend inline bool operator!=(
-        const XorCombineEngine<Eng1, Eng2, S1, S2> &eng1,
+    friend bool operator!=(const XorCombineEngine<Eng1, Eng2, S1, S2> &eng1,
         const XorCombineEngine<Eng1, Eng2, S1, S2> &eng2)
     {
         return !(eng1 == eng2);
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+    friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
         const XorCombineEngine<Eng1, Eng2, S1, S2> &eng)
     {
@@ -148,7 +146,7 @@ class XorCombineEngine
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>>(
+    friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
         XorCombineEngine<Eng1, Eng2, S1, S2> &eng)
     {

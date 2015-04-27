@@ -72,7 +72,7 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+    friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
         const AESNIKeySeqStorage<KeySeq, true, Rounds> &ks)
     {
@@ -88,7 +88,7 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>>(
+    friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
         AESNIKeySeqStorage<KeySeq, true, Rounds> &ks)
     {
@@ -128,7 +128,7 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
     void set(const key_type &) {}
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+    friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
         const AESNIKeySeqStorage<KeySeq, false, Rounds> &)
     {
@@ -136,7 +136,7 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>>(
+    friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
         AESNIKeySeqStorage<KeySeq, false, Rounds> &)
     {
@@ -384,8 +384,8 @@ class AESNIEngine
     static constexpr result_type min VSMC_MNE() { return _Min; }
     static constexpr result_type max VSMC_MNE() { return _Max; }
 
-    friend inline bool operator==(const AESNIEngine<ResultType, KeySeq,
-                                      KeySeqInit, Rounds, Blocks> &eng1,
+    friend bool operator==(const AESNIEngine<ResultType, KeySeq, KeySeqInit,
+                               Rounds, Blocks> &eng1,
         const AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>
             &eng2)
     {
@@ -393,8 +393,8 @@ class AESNIEngine
             eng1.ctr_block_ == eng2.ctr_block_;
     }
 
-    friend inline bool operator!=(const AESNIEngine<ResultType, KeySeq,
-                                      KeySeqInit, Rounds, Blocks> &eng1,
+    friend bool operator!=(const AESNIEngine<ResultType, KeySeq, KeySeqInit,
+                               Rounds, Blocks> &eng1,
         const AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks>
             &eng2)
     {
@@ -402,7 +402,7 @@ class AESNIEngine
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<<(
+    friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
         const AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng)
     {
@@ -421,7 +421,7 @@ class AESNIEngine
     }
 
     template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>>(
+    friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
         AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> &eng)
     {

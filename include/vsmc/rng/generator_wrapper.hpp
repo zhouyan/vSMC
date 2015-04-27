@@ -133,14 +133,14 @@ class GeneratorWrapper : public Traits
 
     const Generator &generator() const { return generator_; }
 
-    friend inline bool operator==(
+    friend bool operator==(
         const GeneratorWrapper<ResultType, Generator, Traits> &,
         const GeneratorWrapper<ResultType, Generator, Traits> &)
     {
         return false;
     }
 
-    friend inline bool operator!=(
+    friend bool operator!=(
         const GeneratorWrapper<ResultType, Generator, Traits> &,
         const GeneratorWrapper<ResultType, Generator, Traits> &)
     {
@@ -148,7 +148,7 @@ class GeneratorWrapper : public Traits
     }
 
     template <typename CharT, typename CharTraits>
-    friend inline std::basic_ostream<CharT, CharTraits> &operator<<(
+    friend std::basic_ostream<CharT, CharTraits> &operator<<(
         std::basic_ostream<CharT, CharTraits> &os,
         const GeneratorWrapper<ResultType, Generator, Traits> &)
     {
@@ -156,7 +156,7 @@ class GeneratorWrapper : public Traits
     }
 
     template <typename CharT, typename CharTraits>
-    friend inline std::basic_istream<CharT, CharTraits> &operator>>(
+    friend std::basic_istream<CharT, CharTraits> &operator>>(
         std::basic_istream<CharT, CharTraits> &is,
         GeneratorWrapper<ResultType, Generator, Traits> &)
     {
