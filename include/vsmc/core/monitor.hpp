@@ -34,6 +34,9 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
+#if VSMC_HAS_MKL
+#include <vsmc/utility/mkl.hpp>
+#endif
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(func)                             \
     VSMC_RUNTIME_ASSERT(                                                      \
@@ -311,19 +314,29 @@ class Monitor
         const std::size_t N = static_cast<std::size_t>(particle.size());
         buffer_.resize(N * dim_);
         eval_(iter, dim_, particle, buffer_.data());
+#if VSMC_HAS_MKL
+        if (ss_task_.ptr() == nullptr) {
+            MKL_INT p = static_cast<MKL_INT>(dim_);
+            MKL_INT n = static_cast<MKL_INT>(N);
+            MKL_INT xstorage = VSL_SS_MATRIX_STORAGE_COLS;
+            ss_task_.reset(
+                &p, &n, &xstorage, buffer_.data(), result_.data(), nullptr);
+        }
+        ::vsldSSCompute(ss_task_.ptr(), VSL_SS_MEAN, VSL_SS_METHOD_FAST);
 #ifdef VSMC_CBLAS_INT
         ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,
             static_cast<VSMC_CBLAS_INT>(dim_), static_cast<VSMC_CBLAS_INT>(N),
             1, buffer_.data(), static_cast<VSMC_CBLAS_INT>(dim_),
             particle.weight_set().weight_data(), 1, 0, result_.data(), 1);
-#else
+#else  // VSMC_CBLAS_INT
         const double *wptr = particle.weight_set().weight_data();
         const double *bptr = buffer_.data();
         std::fill(result_.begin(), result_.end(), 0.0);
         for (std::size_t i = 0; i != N; ++i)
             for (std::size_t d = 0; d != dim_; ++d, ++bptr)
                 result_[d] += particle.weight_set().weight(i) * (*bptr);
-#endif
+#endif // VSMC_CBLAS_INT
+#endif // VSMC_HAS_MKL
         push_back(iter);
     }
 
@@ -354,6 +367,9 @@ class Monitor
     AlignedVector<double> record_;
     AlignedVector<double> result_;
     AlignedVector<double> buffer_;
+#if VSMC_HAS_MKL
+    MKLSSTask<double> ss_task_;
+#endif
 
     void push_back(std::size_t iter)
     {

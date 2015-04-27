@@ -537,144 +537,188 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, float *)
     {
+        int status =
+            ::vslsConvNewTask(task, mode, dims, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vslsConvNewTask(task, mode, dims, xshape, yshape, zshape),
-            "MKLConvTask::reset", "::vslsConvNewTask");
+            status, "MKLConvTask::reset", "::vslsConvNewTask");
+
+        return status;
     }
 
     static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, double *)
     {
+        int status =
+            ::vsldConvNewTask(task, mode, dims, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vsldConvNewTask(task, mode, dims, xshape, yshape, zshape),
-            "MKLConvTask::reset", "::vsldConvNewTask");
+            status, "MKLConvTask::reset", "::vsldConvNewTask");
+
+        return status;
     }
 
     static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, MKL_Complex8 *)
     {
+        int status =
+            ::vslcConvNewTask(task, mode, dims, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vslcConvNewTask(task, mode, dims, xshape, yshape, zshape),
-            "MKLConvTask::reset", "::vslcConvNewTask");
+            status, "MKLConvTask::reset", "::vslcConvNewTask");
+
+        return status;
     }
 
     static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, MKL_Complex16 *)
     {
+        int status =
+            ::vslzConvNewTask(task, mode, dims, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vslzConvNewTask(task, mode, dims, xshape, yshape, zshape),
-            "MKLConvTask::reset", "::vslzConvNewTask");
+            status, "MKLConvTask::reset", "::vslzConvNewTask");
+
+        return status;
     }
 
     static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         float *)
     {
+        int status = ::vslsConvNewTask1D(task, mode, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vslsConvNewTask1D(task, mode, xshape, yshape, zshape),
-            "MKLConvTask::reset", "::vslsConvNewTask1D");
+            status, "MKLConvTask::reset", "::vslsConvNewTask1D");
+
+        return status;
     }
 
     static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         double *)
     {
+        int status = ::vsldConvNewTask1D(task, mode, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vsldConvNewTask1D(task, mode, xshape, yshape, zshape),
-            "MKLConvTask::reset", "::vsldConvNewTask1D");
+            status, "MKLConvTask::reset", "::vsldConvNewTask1D");
+
+        return status;
     }
 
     static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         MKL_Complex8 *)
     {
+        int status = ::vslcConvNewTask1D(task, mode, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vslcConvNewTask1D(task, mode, xshape, yshape, zshape),
-            "MKLConvTask::reset", "::vslcConvNewTask1D");
+            status, "MKLConvTask::reset", "::vslcConvNewTask1D");
+
+        return status;
     }
 
     static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         MKL_Complex16 *)
     {
+        int status = ::vslzConvNewTask1D(task, mode, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vslzConvNewTask1D(task, mode, xshape, yshape, zshape),
-            "MKLConvTask::reset", "::vslzConvNewTask1D");
+            status, "MKLConvTask::reset", "::vslzConvNewTask1D");
+
+        return status;
     }
 
     static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const float *x, const MKL_INT *xstride)
     {
-        internal::mkl_error_check(::vslsConvNewTaskX(task, mode, dims, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLConvTask::reset", "::vslsConvNewTaskX");
+        int status = ::vslsConvNewTaskX(
+            task, mode, dims, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLConvTask::reset", "::vslsConvNewTaskX");
+
+        return status;
     }
 
     static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const double *x, const MKL_INT *xstride)
     {
-        internal::mkl_error_check(::vsldConvNewTaskX(task, mode, dims, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLConvTask::reset", "::vsldConvNewTaskX");
+        int status = ::vsldConvNewTaskX(
+            task, mode, dims, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLConvTask::reset", "::vsldConvNewTaskX");
+
+        return status;
     }
 
     static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const MKL_Complex8 *x, const MKL_INT *xstride)
     {
-        internal::mkl_error_check(::vslcConvNewTaskX(task, mode, dims, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLConvTask::reset", "::vslcConvNewTaskX");
+        int status = ::vslcConvNewTaskX(
+            task, mode, dims, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLConvTask::reset", "::vslcConvNewTaskX");
+
+        return status;
     }
 
     static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const MKL_Complex16 *x, const MKL_INT *xstride)
     {
-        internal::mkl_error_check(::vslzConvNewTaskX(task, mode, dims, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLConvTask::reset", "::vslzConvNewTaskX");
+        int status = ::vslzConvNewTaskX(
+            task, mode, dims, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLConvTask::reset", "::vslzConvNewTaskX");
+
+        return status;
     }
 
     static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const float *x, const MKL_INT xstride)
     {
-        internal::mkl_error_check(::vslsConvNewTaskX1D(task, mode, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLConvTask::reset", "::vslsConvNewTaskX1D");
+        int status = ::vslsConvNewTaskX1D(
+            task, mode, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLConvTask::reset", "::vslsConvNewTaskX1D");
+
+        return status;
     }
 
     static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const double *x, const MKL_INT xstride)
     {
-        internal::mkl_error_check(::vsldConvNewTaskX1D(task, mode, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLConvTask::reset", "::vsldConvNewTaskX1D");
+        int status = ::vsldConvNewTaskX1D(
+            task, mode, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLConvTask::reset", "::vsldConvNewTaskX1D");
+
+        return status;
     }
 
     static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const MKL_Complex8 *x, const MKL_INT xstride)
     {
-        internal::mkl_error_check(::vslcConvNewTaskX1D(task, mode, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLConvTask::reset", "::vslcConvNewTaskX1D");
+        int status = ::vslcConvNewTaskX1D(
+            task, mode, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLConvTask::reset", "::vslcConvNewTaskX1D");
+
+        return status;
     }
 
     static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const MKL_Complex16 *x, const MKL_INT xstride)
     {
-        internal::mkl_error_check(::vslzConvNewTaskX1D(task, mode, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLConvTask::reset", "::vslzConvNewTaskX1D");
+        int status = ::vslzConvNewTaskX1D(
+            task, mode, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLConvTask::reset", "::vslzConvNewTaskX1D");
+
+        return status;
     }
 }; // class MKLConvTask
 
@@ -810,144 +854,188 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, float *)
     {
+        int status =
+            ::vslsCorrNewTask(task, mode, dims, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vslsCorrNewTask(task, mode, dims, xshape, yshape, zshape),
-            "MKLCorrTask::reset", "::vslsCorrNewTask");
+            status, "MKLCorrTask::reset", "::vslsCorrNewTask");
+
+        return status;
     }
 
     static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, double *)
     {
+        int status =
+            ::vsldCorrNewTask(task, mode, dims, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vsldCorrNewTask(task, mode, dims, xshape, yshape, zshape),
-            "MKLCorrTask::reset", "::vsldCorrNewTask");
+            status, "MKLCorrTask::reset", "::vsldCorrNewTask");
+
+        return status;
     }
 
     static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, MKL_Complex8 *)
     {
+        int status =
+            ::vslcCorrNewTask(task, mode, dims, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vslcCorrNewTask(task, mode, dims, xshape, yshape, zshape),
-            "MKLCorrTask::reset", "::vslcCorrNewTask");
+            status, "MKLCorrTask::reset", "::vslcCorrNewTask");
+
+        return status;
     }
 
     static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, MKL_Complex16 *)
     {
+        int status =
+            ::vslzCorrNewTask(task, mode, dims, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vslzCorrNewTask(task, mode, dims, xshape, yshape, zshape),
-            "MKLCorrTask::reset", "::vslzCorrNewTask");
+            status, "MKLCorrTask::reset", "::vslzCorrNewTask");
+
+        return status;
     }
 
     static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         float *)
     {
+        int status = ::vslsCorrNewTask1D(task, mode, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vslsCorrNewTask1D(task, mode, xshape, yshape, zshape),
-            "MKLCorrTask::reset", "::vslsCorrNewTask1D");
+            status, "MKLCorrTask::reset", "::vslsCorrNewTask1D");
+
+        return status;
     }
 
     static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         double *)
     {
+        int status = ::vsldCorrNewTask1D(task, mode, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vsldCorrNewTask1D(task, mode, xshape, yshape, zshape),
-            "MKLCorrTask::reset", "::vsldCorrNewTask1D");
+            status, "MKLCorrTask::reset", "::vsldCorrNewTask1D");
+
+        return status;
     }
 
     static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         MKL_Complex8 *)
     {
+        int status = ::vslcCorrNewTask1D(task, mode, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vslcCorrNewTask1D(task, mode, xshape, yshape, zshape),
-            "MKLCorrTask::reset", "::vslcCorrNewTask1D");
+            status, "MKLCorrTask::reset", "::vslcCorrNewTask1D");
+
+        return status;
     }
 
     static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         MKL_Complex16 *)
     {
+        int status = ::vslzCorrNewTask1D(task, mode, xshape, yshape, zshape);
         internal::mkl_error_check(
-            ::vslzCorrNewTask1D(task, mode, xshape, yshape, zshape),
-            "MKLCorrTask::reset", "::vslzCorrNewTask1D");
+            status, "MKLCorrTask::reset", "::vslzCorrNewTask1D");
+
+        return status;
     }
 
     static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const float *x, const MKL_INT *xstride)
     {
-        internal::mkl_error_check(::vslsCorrNewTaskX(task, mode, dims, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLCorrTask::reset", "::vslsCorrNewTaskX");
+        int status = ::vslsCorrNewTaskX(
+            task, mode, dims, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLCorrTask::reset", "::vslsCorrNewTaskX");
+
+        return status;
     }
 
     static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const double *x, const MKL_INT *xstride)
     {
-        internal::mkl_error_check(::vsldCorrNewTaskX(task, mode, dims, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLCorrTask::reset", "::vsldCorrNewTaskX");
+        int status = ::vsldCorrNewTaskX(
+            task, mode, dims, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLCorrTask::reset", "::vsldCorrNewTaskX");
+
+        return status;
     }
 
     static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const MKL_Complex8 *x, const MKL_INT *xstride)
     {
-        internal::mkl_error_check(::vslcCorrNewTaskX(task, mode, dims, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLCorrTask::reset", "::vslcCorrNewTaskX");
+        int status = ::vslcCorrNewTaskX(
+            task, mode, dims, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLCorrTask::reset", "::vslcCorrNewTaskX");
+
+        return status;
     }
 
     static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const MKL_Complex16 *x, const MKL_INT *xstride)
     {
-        internal::mkl_error_check(::vslzCorrNewTaskX(task, mode, dims, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLCorrTask::reset", "::vslzCorrNewTaskX");
+        int status = ::vslzCorrNewTaskX(
+            task, mode, dims, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLCorrTask::reset", "::vslzCorrNewTaskX");
+
+        return status;
     }
 
     static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const float *x, const MKL_INT xstride)
     {
-        internal::mkl_error_check(::vslsCorrNewTaskX1D(task, mode, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLCorrTask::reset", "::vslsCorrNewTaskX1D");
+        int status = ::vslsCorrNewTaskX1D(
+            task, mode, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLCorrTask::reset", "::vslsCorrNewTaskX1D");
+
+        return status;
     }
 
     static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const double *x, const MKL_INT xstride)
     {
-        internal::mkl_error_check(::vsldCorrNewTaskX1D(task, mode, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLCorrTask::reset", "::vsldCorrNewTaskX1D");
+        int status = ::vsldCorrNewTaskX1D(
+            task, mode, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLCorrTask::reset", "::vsldCorrNewTaskX1D");
+
+        return status;
     }
 
     static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const MKL_Complex8 *x, const MKL_INT xstride)
     {
-        internal::mkl_error_check(::vslcCorrNewTaskX1D(task, mode, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLCorrTask::reset", "::vslcCorrNewTaskX1D");
+        int status = ::vslcCorrNewTaskX1D(
+            task, mode, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLCorrTask::reset", "::vslcCorrNewTaskX1D");
+
+        return status;
     }
 
     static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const MKL_Complex16 *x, const MKL_INT xstride)
     {
-        internal::mkl_error_check(::vslzCorrNewTaskX1D(task, mode, xshape,
-                                      yshape, zshape, x, xstride),
-            "MKLCorrTask::reset", "::vslzCorrNewTaskX1D");
+        int status = ::vslzCorrNewTaskX1D(
+            task, mode, xshape, yshape, zshape, x, xstride);
+        internal::mkl_error_check(
+            status, "MKLCorrTask::reset", "::vslzCorrNewTaskX1D");
+
+        return status;
     }
 }; // class MKLCorrTask
 
@@ -1007,6 +1095,8 @@ class MKLDFTask
         int status = ::dfdNewTask1D(task, nx, x, xhint, ny, y, yhint);
         internal::mkl_error_check(
             status, "MKLDFTask::reset", "::dfdNewTask1D");
+
+        return status;
     }
 }; // class MKLDFTask
 
