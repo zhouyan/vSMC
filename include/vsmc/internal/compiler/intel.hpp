@@ -49,12 +49,6 @@
 #endif
 #endif
 
-#ifndef _WIN32
-#ifndef VSMC_STRONG_INLINE
-#define VSMC_STRONG_INLINE __attribute__((always_inline)) inline
-#endif
-#endif
-
 #ifdef __AVX__
 #define VSMC_HAS_AES_NI 1
 #endif
@@ -66,12 +60,6 @@
 #if VSMC_INTEL_VERSION >= 1210
 #ifndef VSMC_HAS_CILK
 #define VSMC_HAS_CILK 1
-#endif
-#endif
-
-#ifdef _OPENMP
-#ifndef VSMC_HAS_OMP
-#define VSMC_HAS_OMP 1
 #endif
 #endif
 

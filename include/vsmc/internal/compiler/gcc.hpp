@@ -50,10 +50,6 @@
 #endif
 #endif
 
-#ifndef VSMC_STRONG_INLINE
-#define VSMC_STRONG_INLINE __attribute__((always_inline)) inline
-#endif
-
 #ifdef __AES__
 #ifndef VSMC_HAS_AES_NI
 #define VSMC_HAS_AES_NI 1
@@ -69,12 +65,6 @@
 #if VSMC_GCC_VERSION >= 50100
 #ifndef VSMC_HAS_CILK
 #define VSMC_HAS_CILK 1
-#endif
-#endif
-
-#ifdef _OPENMP
-#ifndef VSMC_HAS_OMP
-#define VSMC_HAS_OMP 1
 #endif
 #endif
 

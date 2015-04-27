@@ -50,12 +50,6 @@
 #endif
 #endif
 
-#ifndef VSMC_STRONG_INLINE
-#if __has_attribute(always_inline)
-#define VSMC_STRONG_INLINE __attribute__((always_inline)) inline
-#endif
-#endif
-
 #ifdef __AES__
 #ifndef VSMC_HAS_AES_NI
 #define VSMC_HAS_AES_NI 1

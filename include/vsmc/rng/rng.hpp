@@ -67,7 +67,7 @@
 #include <vsmc/rng/u01.hpp>
 #include <vsmc/rng/uniform_real_distribution.hpp>
 
-#if VSMC_HAS_SSE2
+#if VSMC_HAS_X86
 #include <vsmc/rng/m128i.hpp>
 #endif
 
