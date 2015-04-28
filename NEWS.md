@@ -22,6 +22,8 @@ changes.
 ## New features
 
 * `Monitor::record_data` gets an overload version that return the row pointer.
+* `std::unique_ptr` alike wrappers for [Intel MKL][MKL] `VSLStreamStatePtr`,
+  `VSLSSTaskPtr`, `VSLConvTaskPtr`, `VSLCorrTaskPtr`, `DFTaskPtr`.
 
 ## Bug fixes
 
@@ -109,5 +111,6 @@ changes.
   (`Sampler::init_by_iter(true)`).
 
 [HDF5]: http://www.hdfgroup.org/HDF5/
+[MKL]: https://software.intel.com/en-us/intel-mkl/
 [TBB]: https://www.threadingbuildingblocks.org
 [jemalloc]: http://www.canonware.com/jemalloc/
