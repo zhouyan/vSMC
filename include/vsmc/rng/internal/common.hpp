@@ -130,6 +130,44 @@ struct is_seed_seq
                   W>::value> {
 };
 
+template <typename T, std::size_t K>
+using ctr_type_8 =
+    typename std::conditional<sizeof(T) * K % sizeof(std::uint8_t) == 0,
+        std::array<std::uint8_t, sizeof(T) * K / sizeof(std::uint8_t)>,
+        std::array<T, K>>::type;
+
+template <typename T, std::size_t K>
+using ctr_type_16 =
+    typename std::conditional<sizeof(T) * K % sizeof(std::uint16_t) == 0,
+        std::array<std::uint16_t, sizeof(T) * K / sizeof(std::uint16_t)>,
+        ctr_type_8<T, K>>::type;
+
+template <typename T, std::size_t K>
+using ctr_type_32 =
+    typename std::conditional<sizeof(T) * K % sizeof(std::uint32_t) == 0,
+        std::array<std::uint32_t, sizeof(T) * K / sizeof(std::uint32_t)>,
+        ctr_type_16<T, K>>::type;
+
+template <typename T, std::size_t K>
+using ctr_type_64 =
+    typename std::conditional<sizeof(T) * K % sizeof(std::uint64_t) == 0,
+        std::array<std::uint64_t, sizeof(T) * K / sizeof(std::uint64_t)>,
+        ctr_type_32<T, K>>::type;
+
+#if VSMC_HAS_INT128
+template <typename T, std::size_t K>
+using ctr_type_128 =
+    typename std::conditional<sizeof(T) * K % sizeof(VSMC_INT128) == 0,
+        std::array<unsigned VSMC_INT128, sizeof(T) * K / sizeof(VSMC_INT128)>,
+        ctr_type_64<T, K>>::type;
+
+template <typename T, std::size_t K>
+using ctr_type_max = ctr_type_128<T, K>;
+#else
+template <typename T, std::size_t K>
+using ctr_type_max = ctr_type_64<T, K>;
+#endif
+
 } // namespace vsmc::internal
 
 } // namespace vsmc

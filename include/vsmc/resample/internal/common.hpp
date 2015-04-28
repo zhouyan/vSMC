@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/resample/common.hpp
+// vSMC/include/vsmc/resample/internal/common.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RESAMPLE_COMMON_HPP
-#define VSMC_RESAMPLE_COMMON_HPP
+#ifndef VSMC_RESAMPLE_INTERNAL_COMMON_HPP
+#define VSMC_RESAMPLE_INTERNAL_COMMON_HPP
 
 #include <vsmc/internal/common.hpp>
 #if VSMC_HAS_AES_NI
@@ -197,4 +197,4 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(
 
 } // namespace vsmc
 
-#endif // VSMC_RESAMPLE_COMMON_HPP
+#endif // VSMC_RESAMPLE_INTERNAL_COMMON_HPP

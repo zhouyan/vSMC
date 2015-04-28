@@ -32,7 +32,7 @@
 #ifndef VSMC_RESAMPLE_STRATIFIED_HPP
 #define VSMC_RESAMPLE_STRATIFIED_HPP
 
-#include <vsmc/resample/common.hpp>
+#include <vsmc/resample/internal/common.hpp>
 
 namespace vsmc
 {
