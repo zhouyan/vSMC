@@ -324,13 +324,13 @@ class Monitor
         const double *const s = result_.data();
         if (ss_task_.get() == nullptr)
             ss_task_.reset(&p, &n, &xstorage, x, w);
-        ::vsliSSEditTask(ss_task_.ptr(), VSL_SS_ED_DIMEN, &p);
-        ::vsliSSEditTask(ss_task_.ptr(), VSL_SS_ED_OBSERV_N, &n);
-        ::vsliSSEditTask(ss_task_.ptr(), VSL_SS_ED_OBSERV_STORAGE, &xstorage);
-        ::vsldSSEditTask(ss_task_.ptr(), VSL_SS_ED_OBSERV, x);
-        ::vsldSSEditTask(ss_task_.ptr(), VSL_SS_ED_WEIGHTS, w);
-        ::vsldSSEditTask(ss_task_.ptr(), VSL_SS_ED_SUM, s);
-        ::vsldSSCompute(ss_task_.ptr(), VSL_SS_SUM, VSL_SS_METHOD_FAST);
+        ss_task_.edit_task(VSL_SS_ED_DIMEN, &p);
+        ss_task_.edit_task(VSL_SS_ED_OBSERV_N, &n);
+        ss_task_.edit_task(VSL_SS_ED_OBSERV_STORAGE, &xstorage);
+        ss_task_.edit_task(VSL_SS_ED_OBSERV, x);
+        ss_task_.edit_task(VSL_SS_ED_WEIGHTS, w);
+        ss_task_.edit_task(VSL_SS_ED_SUM, s);
+        ss_task_.compute(VSL_SS_SUM, VSL_SS_METHOD_FAST);
 #else // VSMC_HAS_MKL
 #ifdef VSMC_CBLAS_INT
         ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,

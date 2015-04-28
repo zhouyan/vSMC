@@ -381,6 +381,22 @@ class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
         return status;
     }
 
+    int edit_task(MKL_INT parameter, const result_type *par_addr)
+    {
+        return edit_task_dispatch(this->get(), parameter, par_addr);
+    }
+
+    int edit_task(MKL_INT parameter, const MKL_INT *par_addr)
+    {
+        return edit_task_dispatch(this->get(), parameter, par_addr);
+    }
+
+    int compute(unsigned MKL_INT64 estimates, MKL_INT method)
+    {
+        return compute_dispatch(this->get(), estimates, method,
+            static_cast<result_type *>(nullptr));
+    }
+
     private:
     static int reset_dispatch(VSLSSTaskPtr *task, const MKL_INT *p,
         const MKL_INT *n, const MKL_INT *xstorage, const float *x,
@@ -400,6 +416,56 @@ class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
         int status = ::vsldSSNewTask(task, p, n, xstorage, x, w, indices);
         internal::mkl_error_check(
             status, "MKLSSTask::reset", "::vsldSSNewTask");
+
+        return status;
+    }
+
+    static int edit_task_dispatch(
+        VSLSSTaskPtr task, MKL_INT parameter, const float *par_addr)
+    {
+        int status = ::vslsSSEditTask(task, parameter, par_addr);
+        internal::mkl_error_check(
+            status, "MKLSSTask::edit_task", "::vslsSSEditTask");
+
+        return status;
+    }
+
+    static int edit_task_dispatch(
+        VSLSSTaskPtr task, MKL_INT parameter, const double *par_addr)
+    {
+        int status = ::vsldSSEditTask(task, parameter, par_addr);
+        internal::mkl_error_check(
+            status, "MKLSSTask::edit_task", "::vsldSSEditTask");
+
+        return status;
+    }
+
+    static int edit_task_dispatch(
+        VSLSSTaskPtr task, MKL_INT parameter, const MKL_INT *par_addr)
+    {
+        int status = ::vsliSSEditTask(task, parameter, par_addr);
+        internal::mkl_error_check(
+            status, "MKLSSTask::edit_task", "::vsliSSEditTask");
+
+        return status;
+    }
+
+    static int compute_dispatch(VSLSSTaskPtr task,
+        unsigned MKL_INT64 estimates, MKL_INT method, const float *)
+    {
+        int status = ::vslsSSCompute(task, estimates, method);
+        internal::mkl_error_check(
+            status, "MKLSSTask::compute", "::vslsSSCompute");
+
+        return status;
+    }
+
+    static int compute_dispatch(VSLSSTaskPtr task,
+        unsigned MKL_INT64 estimates, MKL_INT method, const double *)
+    {
+        int status = ::vsldSSCompute(task, estimates, method);
+        internal::mkl_error_check(
+            status, "MKLSSTask::compute", "::vsldSSCompute");
 
         return status;
     }
