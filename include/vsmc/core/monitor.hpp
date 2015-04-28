@@ -314,15 +314,24 @@ class Monitor
         const std::size_t N = static_cast<std::size_t>(particle.size());
         buffer_.resize(N * dim_);
         eval_(iter, dim_, particle, buffer_.data());
+
 #if VSMC_HAS_MKL
-        if (ss_task_.ptr() == nullptr) {
-            MKL_INT p = static_cast<MKL_INT>(dim_);
-            MKL_INT n = static_cast<MKL_INT>(N);
-            MKL_INT xstorage = VSL_SS_MATRIX_STORAGE_COLS;
-            ss_task_.reset(
-                &p, &n, &xstorage, buffer_.data(), result_.data(), nullptr);
-        }
-        ::vsldSSCompute(ss_task_.ptr(), VSL_SS_MEAN, VSL_SS_METHOD_FAST);
+        MKL_INT p = static_cast<MKL_INT>(dim_);
+        MKL_INT n = static_cast<MKL_INT>(N);
+        MKL_INT xstorage = VSL_SS_MATRIX_STORAGE_COLS;
+        const double *const x = buffer_.data();
+        const double *const w = particle.weight_set().weight_data();
+        const double *const s = result_.data();
+        if (ss_task_.get() == nullptr)
+            ss_task_.reset(&p, &n, &xstorage, x, w);
+        ::vsliSSEditTask(ss_task_.ptr(), VSL_SS_ED_DIMEN, &p);
+        ::vsliSSEditTask(ss_task_.ptr(), VSL_SS_ED_OBSERV_N, &n);
+        ::vsliSSEditTask(ss_task_.ptr(), VSL_SS_ED_OBSERV_STORAGE, &xstorage);
+        ::vsldSSEditTask(ss_task_.ptr(), VSL_SS_ED_OBSERV, x);
+        ::vsldSSEditTask(ss_task_.ptr(), VSL_SS_ED_WEIGHTS, w);
+        ::vsldSSEditTask(ss_task_.ptr(), VSL_SS_ED_SUM, s);
+        ::vsldSSCompute(ss_task_.ptr(), VSL_SS_SUM, VSL_SS_METHOD_FAST);
+#else // VSMC_HAS_MKL
 #ifdef VSMC_CBLAS_INT
         ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,
             static_cast<VSMC_CBLAS_INT>(dim_), static_cast<VSMC_CBLAS_INT>(N),
@@ -337,6 +346,7 @@ class Monitor
                 result_[d] += particle.weight_set().weight(i) * (*bptr);
 #endif // VSMC_CBLAS_INT
 #endif // VSMC_HAS_MKL
+
         push_back(iter);
     }
 
