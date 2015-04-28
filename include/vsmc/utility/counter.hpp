@@ -34,6 +34,10 @@
 
 #include <vsmc/internal/common.hpp>
 
+#define VSMC_STATIC_ASSERT_UTILITY_COUNTER_SET_CTR(dst, src)                  \
+    VSMC_STATIC_ASSERT((sizeof(dst) <= sizeof(src)),                          \
+        "**Counter::set** SIZE OF SOURCE TOO SMALL")
+
 namespace vsmc
 {
 
@@ -100,11 +104,26 @@ class Counter<std::array<T, K>>
     /// \brief Set the counter to a given value
     static void set(ctr_type &ctr, const ctr_type &c) { ctr = c; }
 
+    template <typename U>
+    static void set(ctr_type &ctr, const U &c)
+    {
+        VSMC_STATIC_ASSERT_UTILITY_COUNTER_SET_CTR(ctr_type, U);
+        std::memcpy(ctr.data(), &c, sizeof(ctr_type));
+    }
+
     /// \brief Set a block of counters given the value of the first counter
     template <std::size_t Blocks>
     static void set(std::array<ctr_type, Blocks> &ctr, const ctr_type &c)
     {
         ctr.front() = c;
+        set_block<1>(ctr, std::integral_constant<bool, 1 < Blocks>());
+    }
+
+    template <std::size_t Blocks, typename U>
+    static void set(std::array<ctr_type, Blocks> &ctr, const U &c)
+    {
+        VSMC_STATIC_ASSERT_UTILITY_COUNTER_SET_CTR(ctr_type, U);
+        std::memcpy(ctr.front().data(), &c, sizeof(ctr_type));
         set_block<1>(ctr, std::integral_constant<bool, 1 < Blocks>());
     }
 
