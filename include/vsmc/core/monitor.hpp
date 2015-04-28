@@ -34,9 +34,6 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
-#if VSMC_HAS_MKL
-#include <vsmc/utility/mkl.hpp>
-#endif
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(func)                             \
     VSMC_RUNTIME_ASSERT(                                                      \
@@ -311,42 +308,13 @@ class Monitor
             return;
         }
 
-        const std::size_t N = static_cast<std::size_t>(particle.size());
-        buffer_.resize(N * dim_);
+        buffer_.resize(static_cast<std::size_t>(particle.size()) * dim_);
         eval_(iter, dim_, particle, buffer_.data());
-
-#if VSMC_HAS_MKL
-        MKL_INT p = static_cast<MKL_INT>(dim_);
-        MKL_INT n = static_cast<MKL_INT>(N);
-        MKL_INT xstorage = VSL_SS_MATRIX_STORAGE_COLS;
-        const double *const x = buffer_.data();
-        const double *const w = particle.weight_set().weight_data();
-        const double *const s = result_.data();
-        if (ss_task_.get() == nullptr)
-            ss_task_.reset(&p, &n, &xstorage, x, w);
-        ss_task_.edit_task(VSL_SS_ED_DIMEN, &p);
-        ss_task_.edit_task(VSL_SS_ED_OBSERV_N, &n);
-        ss_task_.edit_task(VSL_SS_ED_OBSERV_STORAGE, &xstorage);
-        ss_task_.edit_task(VSL_SS_ED_OBSERV, x);
-        ss_task_.edit_task(VSL_SS_ED_WEIGHTS, w);
-        ss_task_.edit_task(VSL_SS_ED_SUM, s);
-        ss_task_.compute(VSL_SS_SUM, VSL_SS_METHOD_FAST);
-#else // VSMC_HAS_MKL
 #ifdef VSMC_CBLAS_INT
-        ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,
-            static_cast<VSMC_CBLAS_INT>(dim_), static_cast<VSMC_CBLAS_INT>(N),
-            1, buffer_.data(), static_cast<VSMC_CBLAS_INT>(dim_),
-            particle.weight_set().weight_data(), 1, 0, result_.data(), 1);
+        eval_cblas(particle);
 #else  // VSMC_CBLAS_INT
-        const double *wptr = particle.weight_set().weight_data();
-        const double *bptr = buffer_.data();
-        std::fill(result_.begin(), result_.end(), 0.0);
-        for (std::size_t i = 0; i != N; ++i)
-            for (std::size_t d = 0; d != dim_; ++d, ++bptr)
-                result_[d] += particle.weight_set().weight(i) * (*bptr);
+        eval_loop(particle);
 #endif // VSMC_CBLAS_INT
-#endif // VSMC_HAS_MKL
-
         push_back(iter);
     }
 
@@ -377,14 +345,31 @@ class Monitor
     AlignedVector<double> record_;
     AlignedVector<double> result_;
     AlignedVector<double> buffer_;
-#if VSMC_HAS_MKL
-    MKLSSTask<double> ss_task_;
-#endif
 
     void push_back(std::size_t iter)
     {
         index_.push_back(iter);
         record_.insert(record_.end(), result_.begin(), result_.end());
+    }
+
+#ifdef VSMC_CBLAS_INT
+    void eval_cblas (const Particle<T> &particle)
+    {
+        ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,
+            static_cast<VSMC_CBLAS_INT>(dim_),
+            static_cast<VSMC_CBLAS_INT>(particle.size()),
+            1, buffer_.data(), static_cast<VSMC_CBLAS_INT>(dim_),
+            particle.weight_set().weight_data(), 1, 0, result_.data(), 1);
+    }
+#endif
+
+    void eval_loop (const Particle<T> &particle)
+    {
+        std::fill(result_.begin(), result_.end(), 0.0);
+        std::size_t j = 0;
+        for (std::size_t i = 0; i != particle.size(); ++i)
+            for (std::size_t d = 0; d != dim_; ++d, ++j)
+                result_[d] += particle.weight_set().weight(i) * buffer_[j];
     }
 }; // class Monitor
 
