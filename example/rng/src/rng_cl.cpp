@@ -77,39 +77,21 @@ int main(int argc, char **argv)
         opt += argv[i];
     }
 
-    cl::Program program = manager.create_program(src);
-    std::string name;
-    manager.platform().getInfo(
-        static_cast<cl_device_info>(CL_PLATFORM_NAME), &name);
+    std::shared_ptr<vsmc::CLProgram> program = manager.create_program(src);
 
-    std::ofstream output_log;
-    output_log.open("rng_cl.log");
-    try {
-        program.build(manager.device_vec(), opt.c_str());
-        vsmc::CLQuery::program_build_log(program, output_log);
-    } catch (...) {
-        vsmc::CLQuery::program_build_log(program, output_log);
-        output_log.close();
-        output_log.clear();
-        throw;
-    }
-    output_log.close();
-    output_log.clear();
+    std::vector<::cl_device_id> dev_vec_ptr;
+    for (const auto &dev : manager.device_vec())
+        dev_vec_ptr.push_back(dev.get());
+    ::clBuildProgram(program.get(), static_cast<::cl_uint>(dev_vec_ptr.size()),
+        dev_vec_ptr.data(), opt.c_str(), nullptr, nullptr);
 
-    std::cout << std::string(120, '=') << std::endl;
-    std::cout << "Using platform: " << name << std::endl;
-    manager.device().getInfo(
-        static_cast<cl_device_info>(CL_DEVICE_NAME), &name);
-    std::cout << "Using device:   " << name << std::endl;
-    std::cout << "Using fp type:  " << (use_double ? "double" : "float")
-              << std::endl;
     std::cout << std::string(120, '-') << std::endl;
     std::cout << "Number of samples: " << N << std::endl;
 
     if (use_double)
-        rng_cl<cl_double>(N, program);
+        rng_cl<cl_double>(N, program.get());
     else
-        rng_cl<cl_float>(N, program);
+        rng_cl<cl_float>(N, program.get());
 
     return 0;
 }

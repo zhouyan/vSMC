@@ -32,8 +32,7 @@
 #ifndef VSMC_OPENCL_CL_SETUP_HPP
 #define VSMC_OPENCL_CL_SETUP_HPP
 
-#include <vsmc/internal/common.hpp>
-#include <vsmc/opencl/internal/cl_wrapper.hpp>
+#include <vsmc/opencl/internal/common.hpp>
 
 namespace vsmc
 {

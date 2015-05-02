@@ -32,7 +32,7 @@
 #ifndef VSMC_OPENCL_CL_QUERY_HPP
 #define VSMC_OPENCL_CL_QUERY_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/opencl/internal/common.hpp>
 #include <vsmc/opencl/internal/cl_wrapper.hpp>
 
 namespace vsmc
@@ -62,23 +62,51 @@ class CLQuery
     /// \note If the version information returned by `CL_DEVICE_VERSION` does
     /// not follow the specification, then this function will return `100`
     /// (OpenCL 1.0) to play safe..
-    static int opencl_version(const ::cl::Device &dev)
+    static int opencl_version(::cl_device_id dev)
     {
-        std::string version;
-        dev.getInfo(CL_DEVICE_VERSION, &version);
+        ::cl_int status = CL_SUCCESS;
 
-        return check_opencl_version(version.substr(7, 3));
+        std::size_t name_size;
+        status =
+            ::clGetDeviceInfo(dev, CL_DEVICE_VERSION, 0, nullptr, &name_size);
+        internal::cl_error_check(
+            status, "CLQuery::opencl_version", "::clGetDeviceInfo");
+
+        std::vector<char> name_vec(name_size);
+        status = ::clGetDeviceInfo(
+            dev, CL_DEVICE_VERSION, name_size, name_vec.data(), nullptr);
+        internal::cl_error_check(
+            status, "CLQuery::opencl_version", "::clGetDeviceInfo");
+
+        name_vec.push_back(0);
+        std::string name(static_cast<const char *>(name_vec.data()));
+
+        return check_opencl_version(name.substr(7, 3));
     }
 
     /// \brief Return the OpenCL C version of a device
     ///
     /// \sa opencl_version
-    static int opencl_c_version(const ::cl::Device &dev)
+    static int opencl_c_version(::cl_device_id dev)
     {
-        std::string version;
-        dev.getInfo(CL_DEVICE_OPENCL_C_VERSION, &version);
+        ::cl_int status = CL_SUCCESS;
 
-        return check_opencl_version(version.substr(9, 3));
+        std::size_t name_size;
+        status = ::clGetDeviceInfo(
+            dev, CL_DEVICE_OPENCL_C_VERSION, 0, nullptr, &name_size);
+        internal::cl_error_check(
+            status, "CLQuery::opencl_version", "::clGetDeviceInfo");
+
+        std::vector<char> name_vec(name_size);
+        status = ::clGetDeviceInfo(dev, CL_DEVICE_OPENCL_C_VERSION, name_size,
+            name_vec.data(), nullptr);
+        internal::cl_error_check(
+            status, "CLQuery::opencl_version", "::clGetDeviceInfo");
+
+        name_vec.push_back(0);
+        std::string name(static_cast<const char *>(name_vec.data()));
+
+        return check_opencl_version(name.substr(9, 3));
     }
 
     /// \brief Check if a device feature exists
@@ -275,7 +303,7 @@ class CLQuery
         print_dev_single_fp_config(os, dev);
         os << '\n';
         print_dev_double_fp_config(os, dev);
-        if (opencl_version(dev) >= 120) {
+        if (opencl_version(dev()) >= 120) {
             os << '\n';
             print_info_val<std::string, ::cl_device_info>(os, dev,
                 CL_DEVICE_BUILT_IN_KERNELS, "CL_DEVICE_BUILT_IN_KERNELS");
@@ -576,7 +604,7 @@ class CLQuery
             CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF,
             "CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF");
 #if VSMC_OPENCL_VERSION >= 110
-        if (opencl_version(dev) >= 110) {
+        if (opencl_version(dev()) >= 110) {
             os << '\n';
             print_info_val<::cl_uint, ::cl_device_info>(os, dev,
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_CHAR,

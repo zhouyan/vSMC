@@ -32,9 +32,8 @@
 #ifndef VSMC_OPENCL_CL_BUFFER_HPP
 #define VSMC_OPENCL_CL_BUFFER_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/opencl/internal/common.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
-#include <vsmc/opencl/internal/cl_wrapper.hpp>
 
 namespace vsmc
 {
@@ -55,9 +54,7 @@ class CLBuffer
     typedef std::size_t size_type;
     typedef CLManager<ID> manager_type;
 
-    CLBuffer() : size_(0), flag_(CL_MEM_READ_WRITE), host_ptr_(nullptr) {}
-
-    CLBuffer(size_type N, ::cl_mem_flags flag = CL_MEM_READ_WRITE,
+    CLBuffer(size_type N = 0, ::cl_mem_flags flag = CL_MEM_READ_WRITE,
         void *host_ptr = nullptr)
         : size_(N)
         , flag_(flag)
@@ -81,7 +78,7 @@ class CLBuffer
 #endif
             ) {
             manager().template copy_buffer<value_type>(
-                other.data_, data_, size_);
+                other.data_.get(), data_.get(), size_);
         }
     }
 
@@ -112,7 +109,6 @@ class CLBuffer
         other.size_ = 0;
         other.flag_ = CL_MEM_READ_WRITE;
         other.host_ptr_ = nullptr;
-        other.data_ = ::cl::Buffer();
     }
 
     CLBuffer<T, ID> &operator=(CLBuffer<T, ID> &&other)
@@ -145,7 +141,7 @@ class CLBuffer
     /// This is alike the `data` method of C++11 `std::vector` etc. It
     /// provides
     /// direct access to the raw buffer.
-    const ::cl::Buffer &data() const { return data_; }
+    const std::shared_ptr<CLMemory> &data() const { return data_; }
 
     void resize(size_type N)
     {
@@ -184,7 +180,7 @@ class CLBuffer
     size_type size_;
     ::cl_mem_flags flag_;
     void *host_ptr_;
-    ::cl::Buffer data_;
+    std::shared_ptr<CLMemory> data_;
 }; // class CLBuffer
 
 } // namespace vsmc

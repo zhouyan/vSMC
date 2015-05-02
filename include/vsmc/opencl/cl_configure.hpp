@@ -32,9 +32,8 @@
 #ifndef VSMC_OPENCL_CL_CONFIGURE_HPP
 #define VSMC_OPENCL_CL_CONFIGURE_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/opencl/internal/common.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
-#include <vsmc/opencl/internal/cl_wrapper.hpp>
 
 namespace vsmc
 {
@@ -51,7 +50,7 @@ class CLConfigure
     void local_size(std::size_t new_size) { local_size_ = new_size; }
 
     void local_size(
-        std::size_t N, const ::cl::Kernel &kern, const ::cl::Device &dev)
+        std::size_t N, ::cl_kernel kern, ::cl_device_id dev)
     {
         std::size_t global_size;
         cl_preferred_work_size(N, kern, dev, global_size, local_size_);

@@ -32,7 +32,7 @@
 #ifndef VSMC_OPENCL_INTERNAL_COPY_HPP
 #define VSMC_OPENCL_INTERNAL_COPY_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/opencl/internal/common.hpp>
 #include <vsmc/opencl/cl_configure.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
 
@@ -53,17 +53,17 @@ class CLCopy
 
     static manager_type &manager() { return manager_type::instance(); }
 
-    void operator()(const ::cl::Buffer &copy_from, const ::cl::Buffer &state)
+    void operator()(::cl_mem copy_from, ::cl_mem state)
     {
-        cl_set_kernel_args(kernel_, 0, copy_from, state);
-        manager().run_kernel(kernel_, size_, configure_.local_size());
+        cl_set_kernel_args(kernel_.get(), 0, copy_from, state);
+        manager().run_kernel(kernel_.get(), size_, configure_.local_size());
     }
 
-    void operator()(const ::cl::Buffer &idx, const ::cl::Buffer &tmp,
-        const ::cl::Buffer &state)
+    void operator()(::cl_mem idx, ::cl_mem tmp, ::cl_mem state)
     {
-        cl_set_kernel_args(kernel_post_, 0, idx, tmp, state);
-        manager().run_kernel(kernel_, size_, configure_post_.local_size());
+        cl_set_kernel_args(kernel_post_.get(), 0, idx, tmp, state);
+        manager().run_kernel(
+            kernel_.get(), size_, configure_post_.local_size());
     }
 
     void build(std::size_t size, std::size_t state_size)
@@ -94,19 +94,36 @@ class CLCopy
         ss << "    if (idx[id] != 0) state[id] = tmp[id];\n";
         ss << "}\n";
 
+        ::cl_int status = CL_SUCCESS;
+
         program_ = manager().create_program(ss.str());
-        program_.build(manager().device_vec());
-        kernel_ = ::cl::Kernel(program_, "copy");
-        kernel_post_ = ::cl::Kernel(program_, "copy_post");
-        configure_.local_size(size, kernel_, manager().device());
-        configure_post_.local_size(size, kernel_post_, manager().device());
+
+        std::vector<::cl_device_id> dev_vec_ptr;
+        for (const auto &dev : manager().device_vec())
+            dev_vec_ptr.push_back(dev.get());
+        status = ::clBuildProgram(program_.get(),
+            static_cast<::cl_uint>(dev_vec_ptr.size()), dev_vec_ptr.data(),
+            nullptr, nullptr, nullptr);
+        internal::cl_error_check(status, "CLCopy::build", "::clBuildProgram");
+
+        ::cl_kernel kern = nullptr;
+
+        kern = ::clCreateKernel(program_.get(), "copy", &status);
+        internal::cl_error_check(status, "CLCopy::build", "::clCreateKernel");
+        kernel_ = make_cl_kernel_ptr(kern);
+
+        kern = ::clCreateKernel(program_.get(), "copy_post", &status);
+        internal::cl_error_check(status, "CLCopy::build", "::clCreateKernel");
+        kernel_post_ = make_cl_kernel_ptr(kern);
+
+        configure_.local_size(size, kernel_.get(), manager().device().get());
+        configure_post_.local_size(
+            size, kernel_post_.get(), manager().device().get());
     }
 
-    ::cl::Program &program() { return program_; }
-    const ::cl::Program &program() const { return program_; }
+    const std::shared_ptr<CLProgram> &program() { return program_; }
 
-    ::cl::Kernel &kernel() { return kernel_; }
-    const ::cl::Kernel &kernel() const { return kernel_; }
+    const std::shared_ptr<CLKernel> &kernel() { return kernel_; }
 
     CLConfigure &configure() { return configure_; }
     const CLConfigure &configure() const { return configure_; }
@@ -114,9 +131,9 @@ class CLCopy
     private:
     std::size_t size_;
 
-    ::cl::Program program_;
-    ::cl::Kernel kernel_;
-    ::cl::Kernel kernel_post_;
+    std::shared_ptr<CLProgram> program_;
+    std::shared_ptr<CLKernel> kernel_;
+    std::shared_ptr<CLKernel> kernel_post_;
     CLConfigure configure_;
     CLConfigure configure_post_;
 }; // class CLCopy

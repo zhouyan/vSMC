@@ -80,7 +80,7 @@ inline void mkl_error_check(int status, const char *func, const char *mklf)
     if (status == 0)
         return;
 
-    std::string msg("**vsmc::");
+    std::string msg("**");
     msg += func;
     msg += "** failure";
     msg += "; MKL function: ";

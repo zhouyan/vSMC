@@ -18,6 +18,9 @@ changes.
 * The Integrate module is removed.
 * The `RngSet` class template is replaced by `RngSetScalar`, `RngSetVector`,
   `RngSetTBB` etc., and the structures `Scalar`, `Vector`, `TBB` are removed.
+* The OpenCL module has gone through a complete rework. The interface is now
+  `std::shared_ptr` based instead of the official (outdated) C++ wrapper.  Only
+  the `CLQuery` class still depends on the C++ wrapper.
 
 ## New features
 
