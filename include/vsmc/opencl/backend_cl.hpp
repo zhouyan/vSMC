@@ -458,7 +458,7 @@ class StateCL
 
     template <typename CharT, typename Traits>
     void build_program(
-        const std::string flags, std::basic_ostream<CharT, Traits> &)
+        const std::string flags, std::basic_ostream<CharT, Traits> &os)
     {
         ++build_id_;
 
@@ -469,6 +469,8 @@ class StateCL
         ::cl_int status = ::clBuildProgram(program_.get(),
             static_cast<::cl_uint>(dev_vec_ptr.size()), dev_vec_ptr.data(),
             flags.c_str(), nullptr, nullptr);
+        if (status != CL_SUCCESS)
+            CLQuery::program_build_log(program_.get(), os);
         internal::cl_error_check(
             status, "StateCL::build_program", "::clBuildProgram");
         copy_.build(size_, state_size_);
