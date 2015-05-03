@@ -83,7 +83,7 @@
 #define VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL                                   \
     CLConfigure &configure() { return configure_; }                           \
     const CLConfigure &configure() const { return configure_; }               \
-    const std::shared_ptr<CLKernel> &kernel() { return kernel_; }             \
+    const CLKernel &kernel() { return kernel_; }                              \
     const std::string &kernel_name() const { return kernel_name_; }
 
 #define VSMC_DEFINE_OPENCL_SET_KERNEL                                         \
@@ -95,14 +95,14 @@
         build_id_ = particle.value().build_id();                              \
         kernel_name_ = kname;                                                 \
         kernel_ = particle.value().create_kernel(kernel_name_);               \
-        configure_.local_size(particle.size(), kernel_.get(),                 \
-            particle.value().manager().device().get());                       \
+        configure_.local_size(                                                \
+            particle.size(), kernel_, particle.value().manager().device());   \
     }
 
 #define VSMC_DEFINE_OPENCL_MEMBER_DATA                                        \
     CLConfigure configure_;                                                   \
     int build_id_;                                                            \
-    std::shared_ptr<CLKernel> kernel_;                                        \
+    CLKernel kernel_;                                                         \
     std::string kernel_name_
 
 namespace vsmc
@@ -260,7 +260,7 @@ class StateCL
 
     /// \brief The OpenCL program associated with this value
     /// collection
-    const std::shared_ptr<CLProgram> &program() const { return program_; }
+    const CLProgram &program() const { return program_; }
 
     /// \brief Build the OpenCL program from source
     ///
@@ -327,14 +327,15 @@ class StateCL
 
     /// \brief Build from an existing program
     template <typename CharT, typename Traits>
-    void build(::cl_program program, const std::string &flags,
+    void build(const CLProgram &program, const std::string &flags,
         std::basic_ostream<CharT, Traits> &os)
     {
-        program_ = cl_program_make_shared(program);
+        program_ = program;
         build_program(flags, os);
     }
 
-    void build(::cl_program program, const std::string &flags = std::string())
+    void build(
+        const CLProgram &program, const std::string &flags = std::string())
     {
         build(program, flags, std::cout);
     }
@@ -353,17 +354,11 @@ class StateCL
     /// \details
     /// If build() does not return `true`, then calling this is an
     /// error
-    std::shared_ptr<CLKernel> create_kernel(const std::string &name) const
+    CLKernel create_kernel(const std::string &name) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(create_kernel);
 
-        ::cl_int status = CL_SUCCESS;
-        ::cl_kernel kern =
-            ::clCreateKernel(program_.get(), name.c_str(), &status);
-        internal::cl_error_check(
-            status, "StateCL::create_kernel", "::clCreateKernel");
-
-        return cl_kernel_make_shared(kern);
+        return CLKernel(program_, name);
     }
 
     template <typename IntType>
@@ -372,8 +367,8 @@ class StateCL
         VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_COPY_SIZE_MISMATCH;
 
         manager().template write_buffer<size_type>(
-            copy_from_buffer_.data().get(), N, copy_from);
-        copy_(copy_from_buffer_.data().get(), state_buffer_.data().get());
+            copy_from_buffer_.data(), N, copy_from);
+        copy_(copy_from_buffer_.data(), state_buffer_.data());
     }
 
     void copy_pre_processor()
@@ -399,18 +394,18 @@ class StateCL
             CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, state_tmp_host_.data());
 
         std::memset(state_idx_host_.data(), 0, size_);
-        manager().read_buffer(state_tmp_buffer_.data().get(),
-            size_ * state_size_, state_tmp_host_.data());
+        manager().read_buffer(state_tmp_buffer_.data(), size_ * state_size_,
+            state_tmp_host_.data());
     }
 
     void copy_post_processor()
     {
         manager().write_buffer(
-            state_idx_buffer_.data().get(), size_, state_idx_host_.data());
-        manager().write_buffer(state_tmp_buffer_.data().get(),
-            size_ * state_size_, state_tmp_host_.data());
-        copy_(state_idx_buffer_.data().get(), state_tmp_buffer_.data().get(),
-            state_buffer_.data().get());
+            state_idx_buffer_.data(), size_, state_idx_host_.data());
+        manager().write_buffer(state_tmp_buffer_.data(), size_ * state_size_,
+            state_tmp_host_.data());
+        copy_(state_idx_buffer_.data(), state_tmp_buffer_.data(),
+            state_buffer_.data());
     }
 
     state_pack_type state_pack(size_type id) const
@@ -436,13 +431,13 @@ class StateCL
 
     const CLConfigure &copy_configure() const { return copy_.configure(); }
 
-    const std::shared_ptr<CLKernel> &copy_kernel() { return copy_.kernel(); }
+    const CLKernel &copy_kernel() { return copy_.kernel(); }
 
     private:
     std::size_t state_size_;
     size_type size_;
 
-    std::shared_ptr<CLProgram> program_;
+    CLProgram program_;
 
     bool build_;
     int build_id_;
@@ -463,16 +458,24 @@ class StateCL
         ++build_id_;
 
         build_ = false;
-        std::vector<::cl_device_id> dev_vec_ptr;
-        for (const auto &dev : manager().device_vec())
-            dev_vec_ptr.push_back(dev.get());
-        ::cl_int status = ::clBuildProgram(program_.get(),
-            static_cast<::cl_uint>(dev_vec_ptr.size()), dev_vec_ptr.data(),
-            flags.c_str(), nullptr, nullptr);
-        if (status != CL_SUCCESS)
-            CLQuery::program_build_log(program_.get(), os);
-        internal::cl_error_check(
-            status, "StateCL::build_program", "::clBuildProgram");
+        ::cl_int status = program_.build(manager().device_vec(), flags);
+        if (status != CL_SUCCESS) {
+            std::vector<CLDevice> dev_vec(program_.get_device());
+            std::string equal(75, '=');
+            std::string dash(75, '-');
+            std::string name;
+            for (const auto &dev : dev_vec) {
+                dev.get_info(CL_DEVICE_NAME, name);
+                os << equal << std::endl;
+                if (program_.build_status(dev) == CL_BUILD_SUCCESS)
+                    os << "Build success for " << name << std::endl;
+                else
+                    os << "Build failure for " << name << std::endl;
+                os << dash << std::endl;
+                os << program_.build_log(dev) << std::endl;
+            }
+            os << equal << std::endl;
+        }
         copy_.build(size_, state_size_);
         build_ = true;
     }
@@ -549,10 +552,10 @@ class InitializeCL
         initialize_param(particle, param);
         pre_processor(particle);
         particle.value().manager().run_kernel(
-            kernel_.get(), particle.size(), configure_.local_size());
+            kernel_, particle.size(), configure_.local_size());
         post_processor(particle);
 
-        return accept_count(particle, accept_buffer_.data().get());
+        return accept_count(particle, accept_buffer_.data());
     }
 
     virtual void initialize_param(Particle<T> &, void *) {}
@@ -561,7 +564,7 @@ class InitializeCL
     virtual void post_processor(Particle<T> &) {}
 
     virtual std::size_t accept_count(
-        Particle<T> &particle, ::cl_mem accept_buffer)
+        Particle<T> &particle, const CLMemory &accept_buffer)
     {
         particle.value().manager().read_buffer(
             accept_buffer, particle.size(), accept_host_.data());
@@ -593,9 +596,8 @@ class InitializeCL
         accept_buffer_.resize(particle.size(),
             CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, accept_host_.data());
 #endif
-        cl_set_kernel_args(kernel_.get(), 0,
-            particle.value().state_buffer().data().get(),
-            accept_buffer_.data().get());
+        cl_set_kernel_args(kernel_, 0, particle.value().state_buffer().data(),
+            accept_buffer_.data());
     }
 
     VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
@@ -645,10 +647,10 @@ class MoveCL
         set_kernel_args(iter, particle);
         pre_processor(iter, particle);
         particle.value().manager().run_kernel(
-            kernel_.get(), particle.size(), configure_.local_size());
+            kernel_, particle.size(), configure_.local_size());
         post_processor(iter, particle);
 
-        return accept_count(particle, accept_buffer_.data().get());
+        return accept_count(particle, accept_buffer_.data());
     }
 
     virtual void move_state(std::size_t, std::string &) {}
@@ -656,7 +658,7 @@ class MoveCL
     virtual void post_processor(std::size_t, Particle<T> &) {}
 
     virtual std::size_t accept_count(
-        Particle<T> &particle, ::cl_mem accept_buffer)
+        Particle<T> &particle, const CLMemory &accept_buffer)
     {
         particle.value().manager().read_buffer(
             accept_buffer, particle.size(), accept_host_.data());
@@ -688,9 +690,8 @@ class MoveCL
         accept_buffer_.resize(particle.size(),
             CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, accept_host_.data());
 #endif
-        cl_set_kernel_args(kernel_.get(), 0, static_cast<::cl_ulong>(iter),
-            particle.value().state_buffer().data().get(),
-            accept_buffer_.data().get());
+        cl_set_kernel_args(kernel_, 0, static_cast<::cl_ulong>(iter),
+            particle.value().state_buffer().data(), accept_buffer_.data());
     }
 
     VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
@@ -740,9 +741,9 @@ class MonitorEvalCL
         set_kernel_args(iter, dim, particle);
         pre_processor(iter, particle);
         particle.value().manager().run_kernel(
-            kernel_.get(), particle.size(), configure_.local_size());
+            kernel_, particle.size(), configure_.local_size());
         particle.value().manager().template read_buffer<typename T::fp_type>(
-            buffer_.data().get(), particle.value().size() * dim, res);
+            buffer_.data(), particle.value().size() * dim, res);
         post_processor(iter, particle);
     }
 
@@ -771,10 +772,9 @@ class MonitorEvalCL
 #else
         buffer_.resize(particle.size() * dim);
 #endif
-        cl_set_kernel_args(kernel_.get(), 0, static_cast<::cl_ulong>(iter),
+        cl_set_kernel_args(kernel_, 0, static_cast<::cl_ulong>(iter),
             static_cast<::cl_ulong>(dim),
-            particle.value().state_buffer().data().get(),
-            buffer_.data().get());
+            particle.value().state_buffer().data(), buffer_.data());
     }
 
     VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
@@ -823,7 +823,7 @@ class PathEvalCL
         set_kernel_args(iter, particle);
         pre_processor(iter, particle);
         particle.value().manager().run_kernel(
-            kernel_.get(), particle.size(), configure_.local_size());
+            kernel_, particle.size(), configure_.local_size());
         particle.value().manager().template read_buffer<typename T::fp_type>(
             buffer_.data(), particle.value().size(), res);
         post_processor(iter, particle);
@@ -855,9 +855,8 @@ class PathEvalCL
 #else
         buffer_.resize(particle.size());
 #endif
-        cl_set_kernel_args(kernel_.get(), 0, static_cast<::cl_ulong>(iter),
-            particle.value().state_buffer().data().get(),
-            buffer_.data().get());
+        cl_set_kernel_args(kernel_, 0, static_cast<::cl_ulong>(iter),
+            particle.value().state_buffer().data(), buffer_.data());
     }
 
     VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL

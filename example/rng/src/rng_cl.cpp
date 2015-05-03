@@ -77,21 +77,16 @@ int main(int argc, char **argv)
         opt += argv[i];
     }
 
-    std::shared_ptr<vsmc::CLProgram> program = manager.create_program(src);
-
-    std::vector<::cl_device_id> dev_vec_ptr;
-    for (const auto &dev : manager.device_vec())
-        dev_vec_ptr.push_back(dev.get());
-    ::clBuildProgram(program.get(), static_cast<::cl_uint>(dev_vec_ptr.size()),
-        dev_vec_ptr.data(), opt.c_str(), nullptr, nullptr);
+    vsmc::CLProgram program(manager.create_program(src));
+    program.build(manager.device_vec(), opt);
 
     std::cout << std::string(120, '-') << std::endl;
     std::cout << "Number of samples: " << N << std::endl;
 
     if (use_double)
-        rng_cl<cl_double>(N, program.get());
+        rng_cl<cl_double>(N, program);
     else
-        rng_cl<cl_float>(N, program.get());
+        rng_cl<cl_float>(N, program);
 
     return 0;
 }

@@ -70,17 +70,11 @@ int main(int argc, char **argv)
     }
     sampler.particle().value().build(src, opt);
 
-    std::cout << "Using platform: "
-              << vsmc::cl_get_platform_info<std::string>(
-                     vsmc::CLManager<>::instance().platform().get(),
-                     CL_PLATFORM_NAME) << std::endl;
-    std::cout << "Using device: "
-              << vsmc::cl_get_device_info<std::string>(
-                     vsmc::CLManager<>::instance().device().get(),
-                     CL_DEVICE_NAME) << std::endl;
-    if (!sampler.particle().value().build())
-        vsmc::CLQuery::program_build_log(
-            sampler.particle().value().program().get(), std::cout);
+    std::string name;
+    vsmc::CLManager<>::instance().platform().get_info(CL_PLATFORM_NAME, name);
+    std::cout << "Using platform: " << name << std::endl;
+    vsmc::CLManager<>::instance().device().get_info(CL_DEVICE_NAME, name);
+    std::cout << "Using device: " << name << std::endl;
 
     cv_init init;
     cv_move move;

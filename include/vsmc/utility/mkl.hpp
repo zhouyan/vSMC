@@ -170,11 +170,7 @@ class MKLBase
     class deleter_type
     {
         public:
-        void operator()(MKLPtr ptr)
-        {
-            if (ptr != nullptr)
-                status_ = Derived::release(ptr);
-        }
+        void operator()(MKLPtr ptr) { status_ = Derived::release(ptr); }
 
         int status() const { return status_; }
 
@@ -191,13 +187,17 @@ class MKLBase
 
     int release() { return Derived::release(ptr_.get()); }
 
-    void reset(pointer ptr = nullptr) { ptr_.reset(ptr); }
+    void reset(pointer ptr = nullptr)
+    {
+        if (ptr != ptr_.get())
+            ptr_.reset(ptr);
+    }
 
     void swap(MKLBase<MKLPtr, Derived> &other) { ptr_.swap(other.ptr_); }
 
-    pointer get() { return ptr_.get(); }
+    pointer get() const { return ptr_.get(); }
 
-    pointer ptr() { return ptr_.get(); }
+    pointer ptr() const { return ptr_.get(); }
 
     deleter_type &get_deleter() { return ptr_.get_deleter(); }
     const deleter_type &get_deleter() const { return ptr_.get_deleter(); }
@@ -205,7 +205,7 @@ class MKLBase
     explicit operator bool() const { return bool(ptr_); }
 
     protected:
-    void reset_ptr(pointer ptr = nullptr) { ptr_.reset(ptr); }
+    void reset_ptr(pointer ptr = nullptr) { reset(ptr); }
 
     private:
     std::unique_ptr<element_type, deleter_type> ptr_;
@@ -304,6 +304,9 @@ class MKLStream : public MKLBase<VSLStreamStatePtr, MKLStream<BRNG>>
 
     static int release(VSLStreamStatePtr ptr)
     {
+        if (ptr == nullptr)
+            return 0;
+
         int status = ::vslDeleteStream(&ptr);
         internal::mkl_error_check(
             status, "MKLStream::release", "::vslDeleteStream");
@@ -367,6 +370,9 @@ class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
 
     static int release(VSLSSTaskPtr ptr)
     {
+        if (ptr == nullptr)
+            return 0;
+
         int status = ::vslSSDeleteTask(&ptr);
         internal::mkl_error_check(
             status, "MKLSSTask::release", "::vslDeleteTask");
@@ -548,6 +554,9 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
 
     static int release(VSLConvTaskPtr ptr)
     {
+        if (ptr == nullptr)
+            return 0;
+
         int status = ::vslConvDeleteTask(&ptr);
         internal::mkl_error_check(
             status, "MKLConvTask::release", "::vslConvDeleteTask");
@@ -865,6 +874,9 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
 
     static int release(VSLCorrTaskPtr ptr)
     {
+        if (ptr == nullptr)
+            return 0;
+
         int status = ::vslCorrDeleteTask(&ptr);
         internal::mkl_error_check(
             status, "MKLCorrTask::release", "::vslCorrDeleteTask");
@@ -1131,6 +1143,9 @@ class MKLDFTask
 
     static int release(DFTaskPtr ptr)
     {
+        if (ptr == nullptr)
+            return 0;
+
         int status = ::dfDeleteTask(&ptr);
         internal::mkl_error_check(
             status, "MKLDFTask::release", "::dfDeleteTask");

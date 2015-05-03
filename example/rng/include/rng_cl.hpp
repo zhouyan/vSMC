@@ -50,18 +50,16 @@
 
 struct rng_device;
 
-inline void set_kernel_vec(const std::string &kbase, ::cl_program program,
-    std::vector<std::shared_ptr<vsmc::CLKernel>> &kernel_vec,
+inline void set_kernel_vec(const std::string &kbase,
+    const vsmc::CLProgram &program, std::vector<vsmc::CLKernel> &kernel_vec,
     bool clear_first = true)
 {
     if (clear_first)
         kernel_vec.clear();
     std::string kernel_name_2x32(kbase + "_2x32_ker");
     std::string kernel_name_4x32(kbase + "_4x32_ker");
-    kernel_vec.push_back(vsmc::cl_kernel_make_shared(
-        clCreateKernel(program, kernel_name_2x32.c_str(), nullptr)));
-    kernel_vec.push_back(vsmc::cl_kernel_make_shared(
-        clCreateKernel(program, kernel_name_4x32.c_str(), nullptr)));
+    kernel_vec.push_back(vsmc::CLKernel(program, kernel_name_2x32.c_str()));
+    kernel_vec.push_back(vsmc::CLKernel(program, kernel_name_4x32.c_str()));
 }
 
 template <typename FP, typename DistType, typename Eng>
@@ -81,7 +79,7 @@ inline vsmc::StopWatch rng_cl_test_cpp(
 
 template <typename FP>
 inline void rng_cl_test_ocl(std::size_t N,
-    std::vector<std::shared_ptr<vsmc::CLKernel>> &kernel_vec, ::cl_mem buffer,
+    std::vector<vsmc::CLKernel> &kernel_vec, const vsmc::CLMemory &buffer,
     std::vector<FP> &host, double tcpp)
 {
     vsmc::CLManager<rng_device> &manager =
@@ -90,16 +88,16 @@ inline void rng_cl_test_ocl(std::size_t N,
     std::size_t offset = N;
     for (std::size_t i = 0; i != kernel_vec.size(); ++i, offset += N) {
         std::size_t global_size, local_size;
-        vsmc::cl_preferred_work_size(N, kernel_vec[i].get(),
-            manager.device().get(), global_size, local_size);
+        vsmc::cl_preferred_work_size(
+            N, kernel_vec[i], manager.device(), global_size, local_size);
         vsmc::cl_set_kernel_args(
-            kernel_vec[i].get(), 0, static_cast<cl_ulong>(N), buffer);
+            kernel_vec[i], 0, static_cast<cl_ulong>(N), buffer);
 
         // Run kernel once to cache
-        manager.run_kernel(kernel_vec[i].get(), N, local_size);
+        manager.run_kernel(kernel_vec[i], N, local_size);
         vsmc::StopWatch watch;
         watch.start();
-        manager.run_kernel(kernel_vec[i].get(), N, local_size);
+        manager.run_kernel(kernel_vec[i], N, local_size);
         watch.stop();
         manager.read_buffer<FP>(buffer, N, &host[offset]);
 
@@ -111,8 +109,8 @@ inline void rng_cl_test_ocl(std::size_t N,
 
 template <typename FP, typename DistType, typename Eng>
 inline void rng_test_dist(std::size_t N,
-    std::vector<std::shared_ptr<vsmc::CLKernel>> &kernel_vec,
-    const std::string &dname, DistType &dist, Eng &eng, ::cl_mem buffer,
+    std::vector<vsmc::CLKernel> &kernel_vec, const std::string &dname,
+    DistType &dist, Eng &eng, const vsmc::CLMemory &buffer,
     std::vector<FP> &host)
 {
     std::cout << std::left << std::setw(20) << dname;
@@ -122,7 +120,7 @@ inline void rng_test_dist(std::size_t N,
 }
 
 template <typename FP>
-inline void rng_cl_test(std::size_t N, ::cl_program program,
+inline void rng_cl_test(std::size_t N, const vsmc::CLProgram &program,
     std::vector<std::string> &dnames, std::vector<std::string> &unames,
     std::vector<std::string> &rcodes, std::vector<std::vector<FP>> &values,
     std::vector<std::vector<cl_uint>> &values_ui)
@@ -131,17 +129,13 @@ inline void rng_cl_test(std::size_t N, ::cl_program program,
         vsmc::CLManager<rng_device>::instance();
 
     std::mt19937_64 eng;
-    std::vector<std::shared_ptr<vsmc::CLKernel>> kernel_vec;
+    std::vector<vsmc::CLKernel> kernel_vec;
 
-    std::shared_ptr<vsmc::CLMemory> buffer(manager.create_buffer<FP>(N));
-    std::shared_ptr<vsmc::CLMemory> buffer_ui_0(
-        manager.create_buffer<cl_uint>(N));
-    std::shared_ptr<vsmc::CLMemory> buffer_ui_1(
-        manager.create_buffer<cl_uint>(N));
-    std::shared_ptr<vsmc::CLMemory> buffer_ui_2(
-        manager.create_buffer<cl_uint>(N));
-    std::shared_ptr<vsmc::CLMemory> buffer_ui_3(
-        manager.create_buffer<cl_uint>(N));
+    vsmc::CLMemory buffer(manager.create_buffer<FP>(N));
+    vsmc::CLMemory buffer_ui_0(manager.create_buffer<cl_uint>(N));
+    vsmc::CLMemory buffer_ui_1(manager.create_buffer<cl_uint>(N));
+    vsmc::CLMemory buffer_ui_2(manager.create_buffer<cl_uint>(N));
+    vsmc::CLMemory buffer_ui_3(manager.create_buffer<cl_uint>(N));
     std::vector<FP> host(3 * N);
     std::vector<cl_uint> host_ui_0(N);
     std::vector<cl_uint> host_ui_1(N);
@@ -184,27 +178,26 @@ inline void rng_cl_test(std::size_t N, ::cl_program program,
     for (std::size_t i = 0; i != kernel_vec.size(); ++i) {
         std::size_t global_size = 0;
         std::size_t local_size = 0;
-        vsmc::cl_preferred_work_size(N, kernel_vec[i].get(),
-            manager.device().get(), global_size, local_size);
-        vsmc::cl_set_kernel_args(kernel_vec[i].get(), 0,
-            static_cast<cl_ulong>(N), buffer_ui_0.get(), buffer_ui_1.get(),
-            buffer_ui_2.get(), buffer_ui_3.get());
+        vsmc::cl_preferred_work_size(
+            N, kernel_vec[i], manager.device(), global_size, local_size);
+        vsmc::cl_set_kernel_args(kernel_vec[i], 0, static_cast<cl_ulong>(N),
+            buffer_ui_0, buffer_ui_1, buffer_ui_2, buffer_ui_3);
 
         // Run kernel once first to cache
-        manager.run_kernel(kernel_vec[i].get(), N, local_size);
+        manager.run_kernel(kernel_vec[i], N, local_size);
         vsmc::StopWatch watch;
         watch.start();
-        manager.run_kernel(kernel_vec[i].get(), N, local_size);
+        manager.run_kernel(kernel_vec[i], N, local_size);
         watch.stop();
 
         std::cout << std::left << std::setw(20) << engnames[i];
         std::cout << std::right << std::fixed << std::setw(20);
         std::cout << watch.milliseconds() << std::endl;
 
-        manager.read_buffer<cl_uint>(buffer_ui_0.get(), N, host_ui_0.data());
-        manager.read_buffer<cl_uint>(buffer_ui_1.get(), N, host_ui_1.data());
-        manager.read_buffer<cl_uint>(buffer_ui_2.get(), N, host_ui_2.data());
-        manager.read_buffer<cl_uint>(buffer_ui_3.get(), N, host_ui_3.data());
+        manager.read_buffer<cl_uint>(buffer_ui_0, N, host_ui_0.data());
+        manager.read_buffer<cl_uint>(buffer_ui_1, N, host_ui_1.data());
+        manager.read_buffer<cl_uint>(buffer_ui_2, N, host_ui_2.data());
+        manager.read_buffer<cl_uint>(buffer_ui_3, N, host_ui_3.data());
         values_ui.push_back(host_ui_0);
         values_ui.push_back(host_ui_1);
         values_ui.push_back(host_ui_2);
@@ -227,7 +220,7 @@ inline void rng_cl_test(std::size_t N, ::cl_program program,
     dnames.push_back("u01");
     rcodes.push_back("runif(N)");
     set_kernel_vec("u01", program, kernel_vec);
-    rng_test_dist(N, kernel_vec, "u01", runif, eng, buffer.get(), host);
+    rng_test_dist(N, kernel_vec, "u01", runif, eng, buffer, host);
     values.push_back(host);
 
     // Test normal01
@@ -235,7 +228,7 @@ inline void rng_cl_test(std::size_t N, ::cl_program program,
     dnames.push_back("normal01");
     rcodes.push_back("rnorm(N)");
     set_kernel_vec("normal01", program, kernel_vec);
-    rng_test_dist(N, kernel_vec, "normal01", rnorm, eng, buffer.get(), host);
+    rng_test_dist(N, kernel_vec, "normal01", rnorm, eng, buffer, host);
     values.push_back(host);
 
     // Test gammak1
@@ -262,9 +255,8 @@ inline void rng_cl_test(std::size_t N, ::cl_program program,
         rcodes.push_back(rcode.str());
         set_kernel_vec("gammak1", program, kernel_vec);
         for (std::size_t k = 0; k != kernel_vec.size(); ++k)
-            vsmc::cl_set_kernel_args(kernel_vec[k].get(), 2, gammak1_shape[i]);
-        rng_test_dist(
-            N, kernel_vec, dname.str(), rgamma, eng, buffer.get(), host);
+            vsmc::cl_set_kernel_args(kernel_vec[k], 2, gammak1_shape[i]);
+        rng_test_dist(N, kernel_vec, dname.str(), rgamma, eng, buffer, host);
         values.push_back(host);
     }
     std::cout << std::string(120, '=') << std::endl;
@@ -296,7 +288,7 @@ inline void rng_cl_output(std::size_t N, std::vector<std::string> &dnames,
 }
 
 template <typename FT>
-inline void rng_cl(std::size_t N, ::cl_program program)
+inline void rng_cl(std::size_t N, const vsmc::CLProgram &program)
 {
     std::vector<std::string> dnames;
     std::vector<std::string> unames;

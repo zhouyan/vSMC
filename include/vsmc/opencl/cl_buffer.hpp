@@ -79,7 +79,7 @@ class CLBuffer
 #endif
             ) {
             manager().template copy_buffer<value_type>(
-                other.data_.get(), data_.get(), size_);
+                other.data_, data_, size_);
         }
     }
 
@@ -142,7 +142,7 @@ class CLBuffer
     /// This is alike the `data` method of C++11 `std::vector` etc. It
     /// provides
     /// direct access to the raw buffer.
-    const std::shared_ptr<CLMemory> &data() const { return data_; }
+    const CLMemory &data() const { return data_; }
 
     void resize(size_type N)
     {
@@ -181,7 +181,7 @@ class CLBuffer
     size_type size_;
     ::cl_mem_flags flag_;
     void *host_ptr_;
-    std::shared_ptr<CLMemory> data_;
+    CLMemory data_;
 }; // class CLBuffer
 
 } // namespace vsmc

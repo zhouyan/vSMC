@@ -54,17 +54,17 @@ class CLCopy
 
     static manager_type &manager() { return manager_type::instance(); }
 
-    void operator()(::cl_mem copy_from, ::cl_mem state)
+    void operator()(const CLMemory &copy_from, const CLMemory &state)
     {
-        cl_set_kernel_args(kernel_.get(), 0, copy_from, state);
-        manager().run_kernel(kernel_.get(), size_, configure_.local_size());
+        cl_set_kernel_args(kernel_, 0, copy_from, state);
+        manager().run_kernel(kernel_, size_, configure_.local_size());
     }
 
-    void operator()(::cl_mem idx, ::cl_mem tmp, ::cl_mem state)
+    void operator()(
+        const CLMemory &idx, const CLMemory &tmp, const CLMemory &state)
     {
-        cl_set_kernel_args(kernel_post_.get(), 0, idx, tmp, state);
-        manager().run_kernel(
-            kernel_.get(), size_, configure_post_.local_size());
+        cl_set_kernel_args(kernel_post_, 0, idx, tmp, state);
+        manager().run_kernel(kernel_, size_, configure_post_.local_size());
     }
 
     void build(std::size_t size, std::size_t state_size)
@@ -95,36 +95,19 @@ class CLCopy
         ss << "    if (idx[id] != 0) state[id] = tmp[id];\n";
         ss << "}\n";
 
-        ::cl_int status = CL_SUCCESS;
-
         program_ = manager().create_program(ss.str());
+        program_.build(manager().device_vec(), std::string());
 
-        std::vector<::cl_device_id> dev_vec_ptr;
-        for (const auto &dev : manager().device_vec())
-            dev_vec_ptr.push_back(dev.get());
-        status = ::clBuildProgram(program_.get(),
-            static_cast<::cl_uint>(dev_vec_ptr.size()), dev_vec_ptr.data(),
-            nullptr, nullptr, nullptr);
-        internal::cl_error_check(status, "CLCopy::build", "::clBuildProgram");
+        kernel_ = CLKernel(program_, "copy");
+        kernel_post_ = CLKernel(program_, "copy_post");
 
-        ::cl_kernel kern = nullptr;
-
-        kern = ::clCreateKernel(program_.get(), "copy", &status);
-        internal::cl_error_check(status, "CLCopy::build", "::clCreateKernel");
-        kernel_ = cl_kernel_make_shared(kern);
-
-        kern = ::clCreateKernel(program_.get(), "copy_post", &status);
-        internal::cl_error_check(status, "CLCopy::build", "::clCreateKernel");
-        kernel_post_ = cl_kernel_make_shared(kern);
-
-        configure_.local_size(size, kernel_.get(), manager().device().get());
-        configure_post_.local_size(
-            size, kernel_post_.get(), manager().device().get());
+        configure_.local_size(size, kernel_, manager().device());
+        configure_post_.local_size(size, kernel_post_, manager().device());
     }
 
-    const std::shared_ptr<CLProgram> &program() { return program_; }
+    const CLProgram &program() { return program_; }
 
-    const std::shared_ptr<CLKernel> &kernel() { return kernel_; }
+    const CLKernel &kernel() { return kernel_; }
 
     CLConfigure &configure() { return configure_; }
     const CLConfigure &configure() const { return configure_; }
@@ -132,9 +115,9 @@ class CLCopy
     private:
     std::size_t size_;
 
-    std::shared_ptr<CLProgram> program_;
-    std::shared_ptr<CLKernel> kernel_;
-    std::shared_ptr<CLKernel> kernel_post_;
+    CLProgram program_;
+    CLKernel kernel_;
+    CLKernel kernel_post_;
     CLConfigure configure_;
     CLConfigure configure_post_;
 }; // class CLCopy

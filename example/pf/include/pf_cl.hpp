@@ -65,9 +65,9 @@ class cv : public cv_base
     public:
     cv(size_type N) : cv_base(N), counter_(N) {}
 
-    ::cl_mem obs_x() const { return obs_x_.data().get(); }
-    ::cl_mem obs_y() const { return obs_y_.data().get(); }
-    ::cl_mem counter() const { return counter_.data().get(); }
+    const vsmc::CLMemory &obs_x() const { return obs_x_.data(); }
+    const vsmc::CLMemory &obs_y() const { return obs_y_.data(); }
+    const vsmc::CLMemory &counter() const { return counter_.data(); }
 
     void read_data(const char *file)
     {
@@ -111,15 +111,15 @@ class cv_init : public vsmc::InitializeCL<cv>
         log_weight_.resize(particle.size());
         log_weight_buffer_.resize(particle.size());
 
-        vsmc::cl_set_kernel_args(kernel().get(), kernel_args_offset(),
-            log_weight_buffer_.data().get(), particle.value().obs_x(),
+        vsmc::cl_set_kernel_args(kernel(), kernel_args_offset(),
+            log_weight_buffer_.data(), particle.value().obs_x(),
             particle.value().obs_y(), particle.value().counter());
     }
 
     void post_processor(vsmc::Particle<cv> &particle)
     {
-        particle.value().manager().read_buffer(log_weight_buffer_.data().get(),
-            particle.size(), log_weight_.data());
+        particle.value().manager().read_buffer(
+            log_weight_buffer_.data(), particle.size(), log_weight_.data());
         particle.weight_set().set_log_weight(log_weight_.data());
     }
 
@@ -141,15 +141,15 @@ class cv_move : public vsmc::MoveCL<cv>
         inc_weight_.resize(particle.size());
         inc_weight_buffer_.resize(particle.size());
 
-        vsmc::cl_set_kernel_args(kernel().get(), kernel_args_offset(),
-            inc_weight_buffer_.data().get(), particle.value().obs_x(),
+        vsmc::cl_set_kernel_args(kernel(), kernel_args_offset(),
+            inc_weight_buffer_.data(), particle.value().obs_x(),
             particle.value().obs_y(), particle.value().counter());
     }
 
     void post_processor(std::size_t, vsmc::Particle<cv> &particle)
     {
-        particle.value().manager().read_buffer(inc_weight_buffer_.data().get(),
-            particle.size(), inc_weight_.data());
+        particle.value().manager().read_buffer(
+            inc_weight_buffer_.data(), particle.size(), inc_weight_.data());
         particle.weight_set().add_log_weight(inc_weight_.data());
     }
 

@@ -49,8 +49,7 @@ class CLConfigure
 
     void local_size(std::size_t new_size) { local_size_ = new_size; }
 
-    void local_size(
-        std::size_t N, ::cl_kernel kern, ::cl_device_id dev)
+    void local_size(std::size_t N, const CLKernel &kern, const CLDevice &dev)
     {
         std::size_t global_size;
         cl_preferred_work_size(N, kern, dev, global_size, local_size_);

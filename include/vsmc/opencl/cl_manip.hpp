@@ -33,6 +33,7 @@
 #define VSMC_OPENCL_CL_MANIP_HPP
 
 #include <vsmc/opencl/internal/common.hpp>
+#include <vsmc/opencl/cl_type.hpp>
 
 namespace vsmc
 {
@@ -45,27 +46,22 @@ namespace vsmc
 /// \param factor Multiplier factor of local size for optimzied performance
 /// \param lmax Maximum of the local size
 /// \param mmax Maximum of the multiplier of the factor
-inline void cl_minmax_local_size(::cl_kernel kern, ::cl_device_id dev,
+inline void cl_minmax_local_size(const CLKernel &kern, const CLDevice &dev,
     std::size_t &factor, std::size_t &lmax, std::size_t &mmax)
 {
-    ::cl_int status = CL_SUCCESS;
-
-    status = ::clGetKernelWorkGroupInfo(kern, dev,
-        CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, sizeof(std::size_t),
-        &factor, nullptr);
-    if (status != CL_SUCCESS) {
+    factor = kern.preferred_work_group_size_multiple(dev);
+    if (factor == 0) {
         factor = lmax = mmax = 0;
         return;
     }
 
-    status = ::clGetKernelWorkGroupInfo(kern, dev, CL_KERNEL_WORK_GROUP_SIZE,
-        sizeof(std::size_t), &lmax, nullptr);
-    if (status != CL_SUCCESS) {
+    lmax = kern.work_group_size(dev);
+    if (lmax == 0) {
         factor = lmax = mmax = 0;
         return;
     }
 
-    if (factor == 0 || factor > lmax) {
+    if (factor > lmax) {
         factor = lmax = mmax = 0;
         return;
     }
@@ -88,17 +84,12 @@ inline std::size_t cl_min_global_size(std::size_t N, std::size_t local_size)
 /// \ingroup OpenCL
 ///
 /// \return The difference between the preferred global size and the N
-inline std::size_t cl_preferred_work_size(std::size_t N, ::cl_kernel kern,
-    ::cl_device_id dev, std::size_t &global_size, std::size_t &local_size)
+inline std::size_t cl_preferred_work_size(std::size_t N, const CLKernel &kern,
+    const CLDevice &dev, std::size_t &global_size, std::size_t &local_size)
 {
-    ::cl_int status = CL_SUCCESS;
-
-    std::size_t reqd_size[3] = {0};
-    status = ::clGetKernelWorkGroupInfo(kern, dev,
-        CL_KERNEL_COMPILE_WORK_GROUP_SIZE, sizeof(reqd_size), reqd_size,
-        nullptr);
-    if (status == CL_SUCCESS && reqd_size[0] != 0) {
-        local_size = reqd_size[0];
+    std::array<std::size_t, 3> reqd_size = kern.compile_work_group_size(dev);
+    if (std::get<0>(reqd_size) != 0) {
+        local_size = std::get<0>(reqd_size);
         global_size = cl_min_global_size(N, local_size);
 
         return global_size - N;
@@ -132,7 +123,7 @@ inline std::size_t cl_preferred_work_size(std::size_t N, ::cl_kernel kern,
     return diff_size;
 }
 
-inline void cl_set_kernel_args(::cl_kernel, ::cl_uint) {}
+inline void cl_set_kernel_args(const CLKernel &, ::cl_uint) {}
 
 /// \brief Set OpenCL kernel arguments
 /// \ingroup OpenCL
@@ -144,11 +135,10 @@ inline void cl_set_kernel_args(::cl_kernel, ::cl_uint) {}
 /// by the compiler's implementation). Otherwise this function supports up to
 /// 16 arguments.
 template <typename Arg1, typename... Args>
-inline void cl_set_kernel_args(
-    ::cl_kernel kern, ::cl_uint offset, const Arg1 &arg1, const Args &... args)
+inline void cl_set_kernel_args(const CLKernel &kern, ::cl_uint offset,
+    const Arg1 &arg1, const Args &... args)
 {
-    ::cl_int status = ::clSetKernelArg(kern, offset, sizeof(Arg1), &arg1);
-    internal::cl_error_check(status, "cl_set_kernel_args", "::clSetKernelArg");
+    kern.set_arg(offset, arg1);
     cl_set_kernel_args(kern, offset + 1, args...);
 }
 
