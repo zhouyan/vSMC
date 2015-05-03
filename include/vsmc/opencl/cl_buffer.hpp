@@ -34,6 +34,7 @@
 
 #include <vsmc/opencl/internal/common.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
+#include <vsmc/opencl/cl_type.hpp>
 
 namespace vsmc
 {

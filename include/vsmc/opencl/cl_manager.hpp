@@ -33,9 +33,10 @@
 #define VSMC_OPENCL_CL_MANAGER_HPP
 
 #include <vsmc/opencl/internal/common.hpp>
-#include <vsmc/opencl/cl_setup.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/opencl/cl_query.hpp>
+#include <vsmc/opencl/cl_setup.hpp>
+#include <vsmc/opencl/cl_type.hpp>
 
 #define VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(func)                     \
     VSMC_RUNTIME_ASSERT((setup()),                                            \
@@ -202,10 +203,10 @@ class CLManager
         ::cl_command_queue cmd)
     {
         setup_ = false;
-        platform_ = make_cl_platform_ptr(plat);
-        context_ = make_cl_context_ptr(ctx);
-        device_ = make_cl_device_ptr(dev);
-        command_queue_ = make_cl_command_queue_ptr(cmd);
+        platform_ = cl_platform_make_shared(plat);
+        context_ = cl_context_make_shared(ctx);
+        device_ = cl_device_make_shared(dev);
+        command_queue_ = cl_command_queue_make_shared(cmd);
         set_device_vec();
         check_opencl_version();
 
@@ -223,7 +224,7 @@ class CLManager
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(create_buffer);
 
         if (num == 0)
-            return make_cl_memory_ptr(nullptr);
+            return cl_memory_make_shared(nullptr);
 
         ::cl_int status;
         ::cl_mem buffer = ::clCreateBuffer(
@@ -231,7 +232,7 @@ class CLManager
         internal::cl_error_check(
             status, "CLManager::create_buffer", "::clCreateBuffer");
 
-        return make_cl_memory_ptr(buffer);
+        return cl_memory_make_shared(buffer);
     }
 
     /// \brief Read an OpenCL buffer of a given type and number of elements
@@ -441,7 +442,7 @@ class CLManager
         internal::cl_error_check(status, "CLManager::create_program",
             "::clCreateProgramWithSource");
 
-        return make_cl_program_ptr(ptr);
+        return cl_program_make_shared(ptr);
     }
 
     /// \brief Create a program given the source within the current context
@@ -512,7 +513,7 @@ class CLManager
 
         std::vector<std::shared_ptr<CLDevice>> dev_pool;
         for (auto ptr : dev_pool_ptr)
-            dev_pool.push_back(make_cl_device_ptr(ptr));
+            dev_pool.push_back(cl_device_make_shared(ptr));
         std::vector<std::shared_ptr<CLDevice>> dev_select;
         device_filter(dev_pool, dev_select);
         if (dev_select.size() == 0) {
@@ -534,7 +535,7 @@ class CLManager
             VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_DEVICE;
             return;
         }
-        context_ = make_cl_context_ptr(ctx);
+        context_ = cl_context_make_shared(ctx);
 
         bool setup_device = set_device_vec();
         if (!setup_device) {
@@ -549,7 +550,7 @@ class CLManager
             VSMC_RUNTIME_WARNING_OPENCL_CL_MANAGER_SETUP_COMMAND_QUEUE;
             return;
         }
-        command_queue_ = make_cl_command_queue_ptr(cmd);
+        command_queue_ = cl_command_queue_make_shared(cmd);
 
         check_opencl_version();
 
@@ -572,7 +573,7 @@ class CLManager
 
         std::vector<std::shared_ptr<CLPlatform>> plat_vec;
         for (auto ptr : plat_vec_ptr)
-            plat_vec.push_back(make_cl_platform_ptr(ptr));
+            plat_vec.push_back(cl_platform_make_shared(ptr));
 
         // If not using default platform
         if (!setup_default_.default_platform()) {
@@ -612,7 +613,7 @@ class CLManager
                 continue;
             std::vector<std::shared_ptr<CLDevice>> dev_pool;
             for (auto ptr : dev_pool_ptr)
-                dev_pool.push_back(make_cl_device_ptr(ptr));
+                dev_pool.push_back(cl_device_make_shared(ptr));
             std::vector<std::shared_ptr<CLDevice>> dev_select;
             device_filter(dev_pool, dev_select);
             if (dev_select.size() != 0) {
@@ -700,7 +701,7 @@ class CLManager
 
         device_vec_.clear();
         for (auto ptr : dev_vec)
-            device_vec_.push_back(make_cl_device_ptr(ptr));
+            device_vec_.push_back(cl_device_make_shared(ptr));
 
         return true;
     }

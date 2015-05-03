@@ -42,5 +42,6 @@
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/opencl/cl_query.hpp>
 #include <vsmc/opencl/cl_setup.hpp>
+#include <vsmc/opencl/cl_type.hpp>
 
 #endif // VSMC_OPENCL_OPENCL_HPP

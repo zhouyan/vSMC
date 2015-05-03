@@ -58,9 +58,9 @@ inline void set_kernel_vec(const std::string &kbase, ::cl_program program,
         kernel_vec.clear();
     std::string kernel_name_2x32(kbase + "_2x32_ker");
     std::string kernel_name_4x32(kbase + "_4x32_ker");
-    kernel_vec.push_back(vsmc::make_cl_kernel_ptr(
+    kernel_vec.push_back(vsmc::cl_kernel_make_shared(
         clCreateKernel(program, kernel_name_2x32.c_str(), nullptr)));
-    kernel_vec.push_back(vsmc::make_cl_kernel_ptr(
+    kernel_vec.push_back(vsmc::cl_kernel_make_shared(
         clCreateKernel(program, kernel_name_4x32.c_str(), nullptr)));
 }
 

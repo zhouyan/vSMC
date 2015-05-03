@@ -32,12 +32,13 @@
 #ifndef VSMC_OPENCL_BACKEND_CL_HPP
 #define VSMC_OPENCL_BACKEND_CL_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/opencl/internal/common.hpp>
+#include <vsmc/opencl/internal/cl_copy.hpp>
 #include <vsmc/opencl/cl_buffer.hpp>
 #include <vsmc/opencl/cl_configure.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
-#include <vsmc/opencl/internal/cl_copy.hpp>
+#include <vsmc/opencl/cl_type.hpp>
 #include <vsmc/rng/seed.hpp>
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_DYNAMIC_STATE_SIZE_RESIZE(Dim)   \
@@ -329,7 +330,7 @@ class StateCL
     void build(::cl_program program, const std::string &flags,
         std::basic_ostream<CharT, Traits> &os)
     {
-        program_ = make_cl_program_ptr(program);
+        program_ = cl_program_make_shared(program);
         build_program(flags, os);
     }
 
@@ -362,7 +363,7 @@ class StateCL
         internal::cl_error_check(
             status, "StateCL::create_kernel", "::clCreateKernel");
 
-        return make_cl_kernel_ptr(kern);
+        return cl_kernel_make_shared(kern);
     }
 
     template <typename IntType>

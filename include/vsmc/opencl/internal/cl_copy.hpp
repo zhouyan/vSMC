@@ -35,6 +35,7 @@
 #include <vsmc/opencl/internal/common.hpp>
 #include <vsmc/opencl/cl_configure.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
+#include <vsmc/opencl/cl_type.hpp>
 
 namespace vsmc
 {
@@ -110,11 +111,11 @@ class CLCopy
 
         kern = ::clCreateKernel(program_.get(), "copy", &status);
         internal::cl_error_check(status, "CLCopy::build", "::clCreateKernel");
-        kernel_ = make_cl_kernel_ptr(kern);
+        kernel_ = cl_kernel_make_shared(kern);
 
         kern = ::clCreateKernel(program_.get(), "copy_post", &status);
         internal::cl_error_check(status, "CLCopy::build", "::clCreateKernel");
-        kernel_post_ = make_cl_kernel_ptr(kern);
+        kernel_post_ = cl_kernel_make_shared(kern);
 
         configure_.local_size(size, kernel_.get(), manager().device().get());
         configure_post_.local_size(
