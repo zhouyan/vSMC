@@ -38,6 +38,238 @@
 namespace vsmc
 {
 
+namespace internal
+{
+
+template <typename ParamType, typename CLPtrType, typename GetInfoType,
+    typename ParamNameType>
+inline ParamType cl_get_info(CLPtrType ptr, GetInfoType get_info,
+    ParamNameType param_name, const char *get_info_name, ParamType *)
+{
+    ParamType param;
+    ::cl_int status =
+        get_info(ptr, param_name, sizeof(ParamType), &param, nullptr);
+    internal::cl_error_check(status, "cl_get_info", get_info_name);
+
+    return param;
+}
+
+template <typename CLPtrType, typename GetInfoType, typename ParamNameType>
+inline std::string cl_get_info(CLPtrType ptr, GetInfoType get_info,
+    ParamNameType param_name, const char *get_info_name, std::string *)
+{
+    ::cl_int status = CL_SUCCESS;
+
+    std::size_t nvec = 0;
+    status = get_info(ptr, param_name, 0, nullptr, &nvec);
+    internal::cl_error_check(status, "cl_get_info", get_info_name);
+
+    std::vector<char> vec(nvec);
+    status = get_info(ptr, param_name, nvec, vec.data(), nullptr);
+    internal::cl_error_check(status, "cl_get_info", get_info_name);
+
+    vec.push_back(0);
+    return std::string(static_cast<const char *>(vec.data()));
+}
+
+template <typename T, typename CLPtrType, typename GetInfoType,
+    typename ParamNameType>
+inline std::vector<T> cl_get_info(CLPtrType ptr, GetInfoType get_info,
+    ParamNameType param_name, const char *get_info_name, std::vector<T> *)
+{
+    ::cl_int status = CL_SUCCESS;
+
+    std::size_t nvec = 0;
+    status = get_info(ptr, param_name, 0, nullptr, &nvec);
+    internal::cl_error_check(status, "cl_get_info", get_info_name);
+
+    std::vector<T> vec(nvec / sizeof(T));
+    status = get_info(ptr, param_name, nvec, vec.data(), nullptr);
+    internal::cl_error_check(status, "cl_get_info", get_info_name);
+
+    return vec;
+}
+
+template <typename ParamType, typename CLPtrType, typename GetInfoType,
+    typename ParamNameType>
+inline ParamType cl_get_info(CLPtrType ptr, GetInfoType get_info,
+    ParamNameType param_name, const char *get_info_name)
+{
+    return cl_get_info(ptr, get_info, param_name, get_info_name,
+        static_cast<ParamType *>(nullptr));
+}
+
+template <typename ParamType, typename CLPtrType, typename GetInfoType,
+    typename ParamNameType>
+inline ParamType cl_get_dev_info(CLPtrType ptr, ::cl_device_id dev,
+    GetInfoType get_info, ParamNameType param_name, const char *get_info_name,
+    ParamType *)
+{
+    ParamType param;
+    ::cl_int status =
+        get_info(ptr, dev, param_name, sizeof(ParamType), &param, nullptr);
+    internal::cl_error_check(status, "cl_get_dev_info", get_info_name);
+
+    return param;
+}
+
+template <typename CLPtrType, typename GetInfoType, typename ParamNameType>
+inline std::string cl_get_dev_info(CLPtrType ptr, ::cl_device_id dev,
+    GetInfoType get_info, ParamNameType param_name, const char *get_info_name,
+    std::string *)
+{
+    ::cl_int status = CL_SUCCESS;
+
+    std::size_t nvec = 0;
+    status = get_info(ptr, dev, param_name, 0, nullptr, &nvec);
+    internal::cl_error_check(status, "cl_get_dev_info", get_info_name);
+
+    std::vector<char> vec(nvec);
+    status = get_info(ptr, dev, param_name, nvec, vec.data(), nullptr);
+    internal::cl_error_check(status, "cl_get_dev_info", get_info_name);
+
+    vec.push_back(0);
+    return std::string(static_cast<const char *>(vec.data()));
+}
+
+template <typename T, typename CLPtrType, typename GetInfoType,
+    typename ParamNameType>
+inline std::vector<T> cl_get_dev_info(CLPtrType ptr, ::cl_device_id dev,
+    GetInfoType get_info, ParamNameType param_name, const char *get_info_name,
+    std::vector<T> *)
+{
+    ::cl_int status = CL_SUCCESS;
+
+    std::size_t nvec = 0;
+    status = get_info(ptr, dev, param_name, 0, nullptr, &nvec);
+    internal::cl_error_check(status, "cl_get_dev_info", get_info_name);
+
+    std::vector<T> vec(nvec / sizeof(T));
+    status = get_info(ptr, dev, param_name, nvec, vec.data(), nullptr);
+    internal::cl_error_check(status, "cl_get_dev_info", get_info_name);
+
+    return vec;
+}
+
+template <typename ParamType, typename CLPtrType, typename GetInfoType,
+    typename ParamNameType>
+inline ParamType cl_get_dev_info(CLPtrType ptr, ::cl_device_id dev,
+    GetInfoType get_info, ParamNameType param_name, const char *get_info_name)
+{
+    return cl_get_dev_info(ptr, dev, get_info, param_name, get_info_name,
+        static_cast<ParamType *>(nullptr));
+}
+
+} // namespace vsmc::internal
+
+/// \brief `clGetPlatformInfo`
+/// \ingroup OpenCL
+template <typename ParamType>
+inline ParamType cl_get_platform_info(
+    ::cl_platform_id plat, ::cl_platform_info param_name)
+{
+    return internal::cl_get_info<ParamType>(
+        plat, ::clGetPlatformInfo, param_name, "::clGetPlatformInfo");
+}
+
+/// \brief `clGetDeviceInfo`
+/// \ingroup OpenCL
+template <typename ParamType>
+inline ParamType cl_get_device_info(
+    ::cl_device_id dev, ::cl_device_info param_name)
+{
+    return internal::cl_get_info<ParamType>(
+        dev, ::clGetDeviceInfo, param_name, "::clGetDeviceInfo");
+}
+
+/// \brief `clGetContextInfo`
+/// \ingroup OpenCL
+template <typename ParamType>
+inline ParamType cl_get_context_info(
+    ::cl_context ctx, ::cl_context_info param_name)
+{
+    return internal::cl_get_info<ParamType>(
+        ctx, ::clGetContextInfo, param_name, "::clGetContextInfo");
+}
+
+/// \brief `clGetCommandQueueInfo`
+/// \ingroup OpenCL
+template <typename ParamType>
+inline ParamType cl_get_command_queue_info(
+    ::cl_command_queue cmd, ::cl_command_queue_info param_name)
+{
+    return internal::cl_get_info<ParamType>(
+        cmd, ::clGetCommandQueueInfo, param_name, "::clGetCommandQueueInfo");
+}
+
+/// \brief `clGetMemObjectInfo`
+/// \ingroup OpenCL
+template <typename ParamType>
+inline ParamType cl_get_memory_info(::cl_mem mem, ::cl_mem_info param_name)
+{
+    return internal::cl_get_info<ParamType>(
+        mem, ::clGetMemObjectInfo, param_name, "::clGetMemObjectInfo");
+}
+
+/// \brief `clGetProgramInfo`
+/// \ingroup OpenCL
+template <typename ParamType>
+inline ParamType cl_get_program_info(
+    ::cl_program prg, ::cl_program_info param_name)
+{
+    return internal::cl_get_info<ParamType>(
+        prg, ::clGetProgramInfo, param_name, "::clGetProgramInfo");
+}
+
+/// \brief `clGetProgramBuildInfo`
+template <typename ParamType>
+inline ParamType cl_get_program_build_info(
+    ::cl_program prog, ::cl_device_id dev, ::cl_program_build_info param_name)
+{
+    return internal::cl_get_dev_info<ParamType>(prog, dev,
+        ::clGetProgramBuildInfo, param_name, "::clGetProgramBuildInfo");
+}
+
+/// \brief `clGetKernelInfo`
+/// \ingroup OpenCL
+template <typename ParamType>
+inline ParamType cl_get_kernel_info(
+    ::cl_kernel kern, ::cl_kernel_info param_name)
+{
+    return internal::cl_get_info<ParamType>(
+        kern, ::clGetKernelInfo, param_name, "::clGetKernelInfo");
+}
+
+/// \brief `clGetKernelWorkGroupInfo`
+/// \ingroup OpenCL
+template <typename ParamType>
+inline ParamType cl_get_kernel_work_group_info(::cl_kernel kern,
+    ::cl_device_id dev, ::cl_kernel_work_group_info param_name)
+{
+    return internal::cl_get_dev_info<ParamType>(kern, dev,
+        ::clGetKernelWorkGroupInfo, param_name, "::clGetKernelWorkGroupInfo");
+}
+
+/// \brief `clGetEventInfo`
+/// \ingroup OpenCL
+template <typename ParamType>
+inline ParamType cl_get_event_info(
+    ::cl_event event, ::cl_event_info param_name)
+{
+    return internal::cl_get_info<ParamType>(
+        event, ::clGetEventInfo, param_name, "::clGetEventInfo");
+}
+
+/// \brief `clGetSamplerInfo`
+/// \ingroup OpenCL
+template <typename ParamType>
+inline ParamType cl_get_sampler_info(
+    ::cl_sampler sampler, ::cl_sampler_info param_name)
+{
+    return internal::cl_get_info<ParamType>(
+        sampler, ::clGetSamplerInfo, param_name, "::clGetSamplerInfo");
+}
+
 /// \brief OpenCL device features
 /// \ingroup OpenCL
 enum OpenCLDeviceFeature {
@@ -64,24 +296,10 @@ class CLQuery
     /// (OpenCL 1.0) to play safe..
     static int opencl_version(::cl_device_id dev)
     {
-        ::cl_int status = CL_SUCCESS;
+        std::string version(
+            cl_get_device_info<std::string>(dev, CL_DEVICE_VERSION));
 
-        std::size_t name_size;
-        status =
-            ::clGetDeviceInfo(dev, CL_DEVICE_VERSION, 0, nullptr, &name_size);
-        internal::cl_error_check(
-            status, "CLQuery::opencl_version", "::clGetDeviceInfo");
-
-        std::vector<char> name_vec(name_size);
-        status = ::clGetDeviceInfo(
-            dev, CL_DEVICE_VERSION, name_size, name_vec.data(), nullptr);
-        internal::cl_error_check(
-            status, "CLQuery::opencl_version", "::clGetDeviceInfo");
-
-        name_vec.push_back(0);
-        std::string name(static_cast<const char *>(name_vec.data()));
-
-        return check_opencl_version(name.substr(7, 3));
+        return check_opencl_version(version.substr(7, 3));
     }
 
     /// \brief Return the OpenCL C version of a device
@@ -89,29 +307,15 @@ class CLQuery
     /// \sa opencl_version
     static int opencl_c_version(::cl_device_id dev)
     {
-        ::cl_int status = CL_SUCCESS;
+        std::string version(
+            cl_get_device_info<std::string>(dev, CL_DEVICE_OPENCL_C_VERSION));
 
-        std::size_t name_size;
-        status = ::clGetDeviceInfo(
-            dev, CL_DEVICE_OPENCL_C_VERSION, 0, nullptr, &name_size);
-        internal::cl_error_check(
-            status, "CLQuery::opencl_version", "::clGetDeviceInfo");
-
-        std::vector<char> name_vec(name_size);
-        status = ::clGetDeviceInfo(dev, CL_DEVICE_OPENCL_C_VERSION, name_size,
-            name_vec.data(), nullptr);
-        internal::cl_error_check(
-            status, "CLQuery::opencl_version", "::clGetDeviceInfo");
-
-        name_vec.push_back(0);
-        std::string name(static_cast<const char *>(name_vec.data()));
-
-        return check_opencl_version(name.substr(9, 3));
+        return check_opencl_version(version.substr(9, 3));
     }
 
     /// \brief Check if a device feature exists
     template <OpenCLDeviceFeature feat>
-    static bool has_feature(const ::cl::Device &dev)
+    static bool has_feature(::cl_device_id dev)
     {
         return check_feature(
             dev, std::integral_constant<OpenCLDeviceFeature, feat>());
@@ -119,42 +323,48 @@ class CLQuery
 
     /// \brief Check if a device type exists in a platform
     template <::cl_device_type DevType>
-    static bool has_device(const ::cl::Platform &plat)
+    static bool has_device(::cl_platform_id plat)
     {
-        std::vector<::cl::Device> device;
-        plat.getDevices(CL_DEVICE_TYPE_ALL, &device);
-        for (std::size_t i = 0; i != device.size(); ++i) {
-            ::cl_device_type type;
-            device[i].getInfo(CL_DEVICE_TYPE, &type);
-            if ((type & DevType) != 0)
-                return true;
-        }
+        ::cl_int status = CL_SUCCESS;
 
-        return false;
+        ::cl_uint nvec = 0;
+        status = ::clGetDeviceIDs(plat, DevType, 0, nullptr, &nvec);
+
+        return nvec != 0 && status == CL_SUCCESS;
     }
 
     /// \brief Check if a device type exists in any platform
     template <::cl_device_type DevType>
     static bool has_device()
     {
-        std::vector<::cl::Platform> platform;
-        ::cl::Platform::get(&platform);
-        for (std::size_t i = 0; i != platform.size(); ++i)
-            if (has_device<DevType>(platform[i]))
+        ::cl_int status = CL_SUCCESS;
+
+        ::cl_uint nvec = 0;
+        status = ::clGetPlatformIDs(0, nullptr, &nvec);
+        if (status != CL_SUCCESS)
+            return false;
+
+        std::vector<::cl_platform_id> vec(nvec);
+        status = ::clGetPlatformIDs(nvec, vec.data(), nullptr);
+        if (status != CL_SUCCESS)
+            return false;
+
+        for (auto plat : vec)
+            if (has_device<DevType>(plat))
                 return true;
 
         return false;
     }
 
     /// \brief Program binary vector
-    static std::vector<std::string> program_binary(
-        const ::cl::Program &program)
+    static std::vector<std::string> program_binary(::cl_program program)
     {
-        ::cl_uint num;
-        program.getInfo(CL_PROGRAM_NUM_DEVICES, &num);
+        ::cl_uint num =
+            cl_get_program_info<::cl_uint>(program, CL_PROGRAM_NUM_DEVICES);
 
-        std::vector<std::size_t> bin_size(num);
-        program.getInfo(CL_PROGRAM_BINARY_SIZES, &bin_size);
+        std::vector<std::size_t> bin_size(
+            cl_get_program_info<std::vector<std::size_t>>(
+                program, CL_PROGRAM_BINARY_SIZES));
 
         std::vector<std::vector<char>> bin_vec(num);
         std::vector<char *> bin_ptr(num);
@@ -162,7 +372,10 @@ class CLQuery
             bin_vec[i].resize(bin_size[i]);
             bin_ptr[i] = bin_vec[i].data();
         }
-        program.getInfo(CL_PROGRAM_BINARIES, &bin_ptr);
+        ::cl_int status = ::clGetProgramInfo(program, CL_PROGRAM_BINARIES,
+            sizeof(char *) * num, bin_ptr.data(), nullptr);
+        internal::cl_error_check(
+            status, "program_binary", "::clGetProgramInfo");
 
         std::vector<std::string> bin(num);
         for (std::size_t i = 0; i != bin_vec.size(); ++i)
@@ -172,38 +385,31 @@ class CLQuery
     }
 
     /// \brief Program device vector
-    static std::vector<::cl::Device> program_device(
-        const ::cl::Program program)
+    static std::vector<::cl_device_id> program_device(::cl_program program)
     {
-        ::cl_uint num;
-        program.getInfo(CL_PROGRAM_NUM_DEVICES, &num);
-
-        std::vector<::cl::Device> devices(num);
-        program.getInfo(CL_PROGRAM_DEVICES, &devices);
-
-        return devices;
+        return cl_get_program_info<std::vector<::cl_device_id>>(
+            program, CL_PROGRAM_DEVICES);
     }
 
     /// \brief Program source
-    static std::string program_source(const ::cl::Program &program)
+    static std::string program_source(::cl_program program)
     {
-        std::string src;
-        program.getInfo(CL_PROGRAM_SOURCE, &src);
-
-        return src;
+        return cl_get_program_info<std::string>(program, CL_PROGRAM_SOURCE);
     }
 
     /// \brief Program build log and status
     static std::vector<std::pair<::cl_build_status, std::string>>
-        program_build_log(const ::cl::Program &program)
+        program_build_log(::cl_program program)
     {
         std::string log;
         ::cl_build_status status = CL_BUILD_SUCCESS;
-        std::vector<::cl::Device> devices(program_device(program));
+        std::vector<::cl_device_id> devices(program_device(program));
         std::vector<std::pair<::cl_build_status, std::string>> build_log;
-        for (std::size_t i = 0; i != devices.size(); ++i) {
-            program.getBuildInfo(devices[i], CL_PROGRAM_BUILD_STATUS, &status);
-            program.getBuildInfo(devices[i], CL_PROGRAM_BUILD_LOG, &log);
+        for (auto dev : devices) {
+            status = cl_get_program_build_info<::cl_build_status>(
+                program, dev, CL_PROGRAM_BUILD_STATUS);
+            log = cl_get_program_build_info<std::string>(
+                program, dev, CL_PROGRAM_BUILD_LOG);
             build_log.push_back(std::make_pair(status, log));
         }
 
@@ -213,18 +419,19 @@ class CLQuery
     /// \brief Print program build log and status
     template <typename CharT, typename Traits>
     static std::vector<std::pair<::cl_build_status, std::string>>
-        program_build_log(const ::cl::Program &program,
-            std::basic_ostream<CharT, Traits> &os)
+        program_build_log(
+            ::cl_program program, std::basic_ostream<CharT, Traits> &os)
     {
         std::string line(78, '=');
         line += "\n";
 
         std::string dname;
-        std::vector<::cl::Device> devices(program_device(program));
+        std::vector<::cl_device_id> devices(program_device(program));
         std::vector<std::pair<::cl_build_status, std::string>> build_log(
             program_build_log(program));
         for (std::size_t i = 0; i != build_log.size(); ++i) {
-            devices[i].getInfo(CL_DEVICE_NAME, &dname);
+            dname =
+                cl_get_device_info<std::string>(devices[i], CL_DEVICE_NAME);
             if (build_log[i].first == CL_BUILD_SUCCESS)
                 os << line << "Build successed for : " << dname << std::endl;
             else
@@ -667,7 +874,7 @@ class CLQuery
     static void print_dev_double_fp_config(
         std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
     {
-        if (!has_feature<OpenCLDeviceDoubleFP>(dev))
+        if (!has_feature<OpenCLDeviceDoubleFP>(dev()))
             return;
 
         ::cl_device_fp_config config;
@@ -698,7 +905,7 @@ class CLQuery
     static void print_dev_image_support(
         std::basic_ostream<CharT, Traits> &os, const ::cl::Device &dev)
     {
-        if (!has_feature<OpenCLDeviceImageSupport>(dev))
+        if (!has_feature<OpenCLDeviceImageSupport>(dev()))
             return;
 
         print_info_val<::cl_uint, ::cl_device_info>(os, dev,
