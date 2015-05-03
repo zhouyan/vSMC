@@ -40,6 +40,16 @@
 #include <CL/opencl.h>
 #endif
 
+#if defined(CL_VERSION_2_0)
+#define VSMC_OPENCL_VERSION 200
+#elif defined(CL_VERSION_1_2)
+#define VSMC_OPENCL_VERSION 120
+#elif defined(CL_VERSION_1_1)
+#define VSMC_OPENCL_VERSION 110
+#else
+#define VSMC_OPENCL_VERSION 100
+#endif
+
 namespace vsmc
 {
 

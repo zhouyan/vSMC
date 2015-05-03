@@ -79,7 +79,6 @@ ADD_HEADER_EXECUTABLE(vsmc/opencl/cl_query            ${OPENCL_FOUND} "OCL")
 ADD_HEADER_EXECUTABLE(vsmc/opencl/cl_setup            ${OPENCL_FOUND} "OCL")
 ADD_HEADER_EXECUTABLE(vsmc/opencl/cl_type             ${OPENCL_FOUND} "OCL")
 ADD_HEADER_EXECUTABLE(vsmc/opencl/internal/cl_copy    ${OPENCL_FOUND} "OCL")
-ADD_HEADER_EXECUTABLE(vsmc/opencl/internal/cl_wrapper ${OPENCL_FOUND} "OCL")
 ADD_HEADER_EXECUTABLE(vsmc/opencl/internal/common     ${OPENCL_FOUND} "OCL")
 
 ADD_HEADER_EXECUTABLE(vsmc/resample/resample            TRUE)
