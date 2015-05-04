@@ -581,10 +581,7 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
         return CLMemory(ptr);
     }
 
-    // clSetMemObjectDestructorCallback
     // clGetImageInfo
-    // clEnqueueUnmapMemObject
-    // clEnqueueMigrateMemObjects
 
     static ::cl_int get_info_param(::cl_mem mem, ::cl_mem_info param_name,
         std::size_t param_value_size, void *param_value,
@@ -746,12 +743,12 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
     CLProgram(const CLContext &context, const std::vector<CLDevice> &devices,
         const std::string &kernel_name)
     {
-        std::vector<::cl_device_id> device_ptr;
+        std::vector<::cl_device_id> dptr;
         for (const auto &dev : devices)
-            device_ptr.push_back(dev.get());
+            dptr.push_back(dev.get());
         ::cl_int status = CL_SUCCESS;
         ::cl_program ptr = ::clCreateProgramWithBuiltInKernels(context.get(),
-            static_cast<::cl_uint>(devices.size()), device_ptr.data(),
+            static_cast<::cl_uint>(dptr.size()), dptr.data(),
             kernel_name.c_str(), &status);
         internal::cl_error_check(status, "CLProgram::CLProgram",
             "::clCreateProgramWithBuiltInKernels");
@@ -762,10 +759,10 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
     CLProgram(const CLContext &context, const CLDevice &device,
         const std::string &kernel_name)
     {
-        ::cl_device_id device_ptr = device.get();
+        ::cl_device_id dptr = device.get();
         ::cl_int status = CL_SUCCESS;
         ::cl_program ptr = ::clCreateProgramWithBuiltInKernels(
-            context.get(), 1, &device_ptr, kernel_name.c_str(), &status);
+            context.get(), 1, &dptr, kernel_name.c_str(), &status);
         internal::cl_error_check(status, "CLProgram::CLProgram",
             "::clCreateProgramWithBuiltInKernels");
 
@@ -776,19 +773,19 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         const std::string &options,
         const std::vector<CLProgram> &input_programs)
     {
-        std::vector<::cl_device_id> device_ptr;
+        std::vector<::cl_device_id> dptr;
         for (const auto &dev : devices)
-            device_ptr.push_back(dev.get());
+            dptr.push_back(dev.get());
 
-        std::vector<::cl_program> program_ptr;
+        std::vector<::cl_program> pptr;
         for (const auto &prg : input_programs)
-            program_ptr.push_back(prg.get());
+            pptr.push_back(prg.get());
 
         ::cl_int status = CL_SUCCESS;
         ::cl_program ptr = ::clLinkProgram(context.get(),
-            static_cast<::cl_uint>(devices.size()), device_ptr.data(),
-            options.c_str(), static_cast<::cl_uint>(input_programs.size()),
-            program_ptr.data(), nullptr, nullptr, &status);
+            static_cast<::cl_uint>(dptr.size()), dptr.data(), options.c_str(),
+            static_cast<::cl_uint>(pptr.size()), pptr.data(), nullptr, nullptr,
+            &status);
         internal::cl_error_check(
             status, "CLProgram::CLProgram", "::clLinkProgram");
 
@@ -798,12 +795,12 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
     ::cl_int build(
         const std::vector<CLDevice> &devices, const std::string &options) const
     {
-        std::vector<::cl_device_id> device_ptr;
+        std::vector<::cl_device_id> dptr;
         for (const auto &dev : devices)
-            device_ptr.push_back(dev.get());
+            dptr.push_back(dev.get());
         ::cl_int status =
-            ::clBuildProgram(get(), static_cast<::cl_uint>(devices.size()),
-                device_ptr.data(), options.c_str(), nullptr, nullptr);
+            ::clBuildProgram(get(), static_cast<::cl_uint>(dptr.size()),
+                dptr.data(), options.c_str(), nullptr, nullptr);
         internal::cl_error_check(
             status, "CLProgram::build", "::clBuildProgram");
 
@@ -815,9 +812,9 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         const std::vector<std::pair<CLProgram, std::string>>
             &input_headers_and_include_names) const
     {
-        std::vector<::cl_device_id> device_ptr;
+        std::vector<::cl_device_id> dptr;
         for (const auto &dev : devices)
-            device_ptr.push_back(dev.get());
+            dptr.push_back(dev.get());
 
         std::vector<::cl_program> input_headers;
         std::vector<const char *> include_names;
@@ -826,11 +823,10 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
             include_names.push_back(hn.second.c_str());
         }
 
-        ::cl_int status =
-            ::clCompileProgram(get(), static_cast<::cl_uint>(devices.size()),
-                device_ptr.data(), options.c_str(),
-                static_cast<::cl_uint>(input_headers_and_include_names.size()),
-                input_headers.data(), include_names.data(), nullptr, nullptr);
+        ::cl_int status = ::clCompileProgram(get(),
+            static_cast<::cl_uint>(dptr.size()), dptr.data(), options.c_str(),
+            static_cast<::cl_uint>(input_headers_and_include_names.size()),
+            input_headers.data(), include_names.data(), nullptr, nullptr);
         internal::cl_error_check(
             status, "CLProgram::compile", "::clCompileProgram");
 
@@ -839,13 +835,13 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
 
     ::cl_build_status build_status(const CLDevice &device) const
     {
-        ::cl_build_status bs = CL_BUILD_SUCCESS;
+        ::cl_build_status val = CL_BUILD_SUCCESS;
         ::cl_int status = ::clGetProgramBuildInfo(get(), device.get(),
-            CL_PROGRAM_BUILD_STATUS, sizeof(::cl_build_status), &bs, nullptr);
+            CL_PROGRAM_BUILD_STATUS, sizeof(::cl_build_status), &val, nullptr);
         internal::cl_error_check(
             status, "CLProgram::build_status", "::clGetProgramBuildInfo");
 
-        return bs;
+        return val;
     }
 
     std::string build_options(const CLDevice &device) const
@@ -896,14 +892,14 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
 
     ::cl_program_binary_type binary_type(const CLDevice &device) const
     {
-        ::cl_program_binary_type bt = CL_PROGRAM_BINARY_TYPE_NONE;
+        ::cl_program_binary_type val = CL_PROGRAM_BINARY_TYPE_NONE;
         ::cl_int status = ::clGetProgramBuildInfo(get(), device.get(),
-            CL_PROGRAM_BINARY_TYPE, sizeof(::cl_program_binary_type), &bt,
+            CL_PROGRAM_BINARY_TYPE, sizeof(::cl_program_binary_type), &val,
             nullptr);
         internal::cl_error_check(
             status, "CLProgram::binary_type", "::clGetProgramBuildInfo");
 
-        return bt;
+        return val;
     }
 
     inline std::vector<CLKernel> get_kernels() const;
@@ -1020,104 +1016,102 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
 
     std::array<std::size_t, 3> global_work_size(const CLDevice &device) const
     {
-        std::array<std::size_t, 3> gws;
+        std::array<std::size_t, 3> val;
+        val.fill(0);
         ::cl_int status = ::clGetKernelWorkGroupInfo(get(), device.get(),
-            CL_KERNEL_GLOBAL_WORK_SIZE, sizeof(std::size_t) * 3, gws.data(),
+            CL_KERNEL_GLOBAL_WORK_SIZE, sizeof(std::size_t) * 3, val.data(),
             nullptr);
         internal::cl_error_check(status, "CLKernel::global_work_size",
             "::clGetKernelWorkGroupInfo");
-        if (status != CL_SUCCESS)
-            gws.fill(0);
 
-        return gws;
+        return val;
     }
 
     std::size_t work_group_size(const CLDevice &device) const
     {
-        std::size_t wgs = 0;
+        std::size_t val = 0;
         ::cl_int status = ::clGetKernelWorkGroupInfo(get(), device.get(),
-            CL_KERNEL_WORK_GROUP_SIZE, sizeof(std::size_t), &wgs, nullptr);
+            CL_KERNEL_WORK_GROUP_SIZE, sizeof(std::size_t), &val, nullptr);
         internal::cl_error_check(
             status, "CLKernel::work_group_size", "::clGetKernelWorkGroupInfo");
 
-        return status == CL_SUCCESS ? wgs : 0;
+        return val;
     }
 
     std::array<std::size_t, 3> compile_work_group_size(
         const CLDevice &device) const
     {
-        std::array<std::size_t, 3> cwgs;
+        std::array<std::size_t, 3> val;
+        val.fill(0);
         ::cl_int status = ::clGetKernelWorkGroupInfo(get(), device.get(),
             CL_KERNEL_COMPILE_WORK_GROUP_SIZE, sizeof(std::size_t) * 3,
-            cwgs.data(), nullptr);
+            val.data(), nullptr);
         internal::cl_error_check(status, "CLKernel::compile_work_group_size",
             "::clGetKernelWorkGroupInfo");
-        if (status != CL_SUCCESS)
-            cwgs.fill(0);
 
-        return cwgs;
+        return val;
     }
 
     ::cl_ulong local_mem_size(const CLDevice &device) const
     {
-        std::size_t lms = 0;
+        std::size_t val = 0;
         ::cl_int status = ::clGetKernelWorkGroupInfo(get(), device.get(),
-            CL_KERNEL_LOCAL_MEM_SIZE, sizeof(std::size_t), &lms, nullptr);
+            CL_KERNEL_LOCAL_MEM_SIZE, sizeof(std::size_t), &val, nullptr);
         internal::cl_error_check(
             status, "CLKernel::local_mem_size", "::clGetKernelWorkGroupInfo");
 
-        return status == CL_SUCCESS ? lms : 0;
+        return val;
     }
 
     std::size_t preferred_work_group_size_multiple(
         const CLDevice &device) const
     {
-        std::size_t pwgsm = 0;
+        std::size_t val = 0;
         ::cl_int status = ::clGetKernelWorkGroupInfo(get(), device.get(),
             CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, sizeof(std::size_t),
-            &pwgsm, nullptr);
+            &val, nullptr);
         internal::cl_error_check(status,
             "CLKernel::preferred_work_group_size_multiple",
             "::clGetKernelWorkGroupInfo");
 
-        return status == CL_SUCCESS ? pwgsm : 0;
+        return val;
     }
 
     ::cl_ulong private_mem_size(const CLDevice &device) const
     {
-        std::size_t pms = 0;
+        std::size_t val = 0;
         ::cl_int status = ::clGetKernelWorkGroupInfo(get(), device.get(),
-            CL_KERNEL_PRIVATE_MEM_SIZE, sizeof(std::size_t), &pms, nullptr);
+            CL_KERNEL_PRIVATE_MEM_SIZE, sizeof(std::size_t), &val, nullptr);
         internal::cl_error_check(status, "CLKernel::private_mem_szie",
             "::clGetKernelWorkGroupInfo");
 
-        return status == CL_SUCCESS ? pms : 0;
+        return val;
     }
 
     ::cl_kernel_arg_address_qualifier arg_address_qualifier(
         ::cl_uint arg_index) const
     {
-        ::cl_kernel_arg_address_qualifier aq = 0;
+        ::cl_kernel_arg_address_qualifier val = 0;
         ::cl_int status = ::clGetKernelArgInfo(get(), arg_index,
             CL_KERNEL_ARG_ADDRESS_QUALIFIER,
-            sizeof(::cl_kernel_arg_address_qualifier), &aq, nullptr);
+            sizeof(::cl_kernel_arg_address_qualifier), &val, nullptr);
         internal::cl_error_check(
             status, "CLKernel::arg_address_qualifier", "::clGetKernelArgInfo");
 
-        return status == CL_SUCCESS ? aq : 0;
+        return val;
     }
 
     ::cl_kernel_arg_access_qualifier arg_access_qualifier(
         ::cl_uint arg_index) const
     {
-        ::cl_kernel_arg_access_qualifier aq = 0;
+        ::cl_kernel_arg_access_qualifier val = 0;
         ::cl_int status = ::clGetKernelArgInfo(get(), arg_index,
             CL_KERNEL_ARG_ACCESS_QUALIFIER,
-            sizeof(::cl_kernel_arg_access_qualifier), &aq, nullptr);
+            sizeof(::cl_kernel_arg_access_qualifier), &val, nullptr);
         internal::cl_error_check(
             status, "CLKernel::arg_access_qualifier", "::clGetKernelArgInfo");
 
-        return status == CL_SUCCESS ? aq : 0;
+        return val;
     }
 
     std::string arg_type_name(::cl_uint arg_index) const
@@ -1146,14 +1140,14 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
     ::cl_kernel_arg_type_qualifier arg_type_qualifier(
         ::cl_uint arg_index) const
     {
-        ::cl_kernel_arg_type_qualifier tq = 0;
+        ::cl_kernel_arg_type_qualifier val = 0;
         ::cl_int status = ::clGetKernelArgInfo(get(), arg_index,
             CL_KERNEL_ARG_TYPE_QUALIFIER,
-            sizeof(::cl_kernel_arg_type_qualifier), &tq, nullptr);
+            sizeof(::cl_kernel_arg_type_qualifier), &val, nullptr);
         internal::cl_error_check(
             status, "CLKernel::arg_type_qualifier", "::clGetKernelArgInfo");
 
-        return status == CL_SUCCESS ? tq : 0;
+        return val;
     }
 
     std::string arg_name(::cl_uint arg_index) const
@@ -1282,6 +1276,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    // clEnqueueNativeKernel
+
     ::cl_int enqueue_read_buffer(const CLMemory &buffer,
         ::cl_bool blocking_read, std::size_t offset, std::size_t size,
         void *ptr, const std::vector<CLEvent> &event_wait_list,
@@ -1322,6 +1318,58 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    ::cl_int enqueue_read_buffer_rect(const CLMemory &buffer,
+        ::cl_bool blocking_read,
+        const std::array<std::size_t, 3> &buffer_origin,
+        const std::array<std::size_t, 3> &host_origin,
+        const std::array<std::size_t, 3> &region, std::size_t buffer_row_pitch,
+        std::size_t buffer_slice_pitch, std::size_t host_row_pitch,
+        std::size_t host_slice_pitch, void *ptr,
+        const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
+    {
+        std::vector<::cl_event> eptrs;
+        for (const auto &e : event_wait_list)
+            eptrs.push_back(e.get());
+        ::cl_event eptr = event.get();
+
+        ::cl_int status = ::clEnqueueReadBufferRect(get(), buffer.get(),
+            blocking_read, buffer_origin.data(), host_origin.data(),
+            region.data(), buffer_row_pitch, buffer_slice_pitch,
+            host_row_pitch, host_slice_pitch, ptr,
+            static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
+        internal::cl_error_check(status,
+            "CLCommandQueue::enqueue_read_buffer_rect",
+            "::clEnqueueReadBufferRect");
+
+        return status;
+    }
+
+    ::cl_int enqueue_write_buffer_rect(const CLMemory &buffer,
+        ::cl_bool blocking_write,
+        const std::array<std::size_t, 3> &buffer_origin,
+        const std::array<std::size_t, 3> &host_origin,
+        const std::array<std::size_t, 3> &region, std::size_t buffer_row_pitch,
+        std::size_t buffer_slice_pitch, std::size_t host_row_pitch,
+        std::size_t host_slice_pitch, const void *ptr,
+        const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
+    {
+        std::vector<::cl_event> eptrs;
+        for (const auto &e : event_wait_list)
+            eptrs.push_back(e.get());
+        ::cl_event eptr = event.get();
+
+        ::cl_int status = ::clEnqueueWriteBufferRect(get(), buffer.get(),
+            blocking_write, buffer_origin.data(), host_origin.data(),
+            region.data(), buffer_row_pitch, buffer_slice_pitch,
+            host_row_pitch, host_slice_pitch, ptr,
+            static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
+        internal::cl_error_check(status,
+            "CLCommandQueue::enqueue_write_buffer_rect",
+            "::clEnqueueWriteBufferRect");
+
+        return status;
+    }
+
     ::cl_int enqueue_copy_buffer(const CLMemory &src_buffer,
         const CLMemory &dst_buffer, std::size_t src_offset,
         std::size_t dst_offset, std::size_t size,
@@ -1337,6 +1385,33 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
             static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
         internal::cl_error_check(status,
             "CLCommandQeueue::enqueue_copy_buffer", "::clEnqueueCopyBuffer");
+        event.reset(eptr);
+
+        return status;
+    }
+
+    ::cl_int enqueue_copy_buffer_rect(const CLMemory &src_buffer,
+        const CLMemory &dst_buffer,
+        const std::array<std::size_t, 3> &src_origin,
+        const std::array<std::size_t, 3> &dst_origin,
+        const std::array<std::size_t, 3> &region, std::size_t src_row_pitch,
+        std::size_t src_slice_pitch, std::size_t dst_row_pitch,
+        std::size_t dst_slice_pitch,
+        const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
+    {
+        std::vector<::cl_event> eptrs;
+        for (const auto &e : event_wait_list)
+            eptrs.push_back(e.get());
+        ::cl_event eptr = event.get();
+
+        ::cl_int status = ::clEnqueueCopyBufferRect(get(), src_buffer.get(),
+            dst_buffer.get(), src_origin.data(), dst_origin.data(),
+            region.data(), src_row_pitch, src_slice_pitch, dst_row_pitch,
+            dst_slice_pitch, static_cast<::cl_uint>(eptrs.size()),
+            eptrs.data(), &eptr);
+        internal::cl_error_check(status,
+            "CLCommandQueue::enqueue_copy_buffer_rect",
+            "::clEnqueueCopyBufferRect");
         event.reset(eptr);
 
         return status;
@@ -1378,7 +1453,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
             "::clEnqueueMapBuffer");
         event.reset(eptr);
 
-        return status == CL_SUCCESS ? ptr : nullptr;
+        return ptr;
     }
 
     ::cl_int enqueue_read_image(const CLMemory &image, ::cl_bool blocking_read,
@@ -1468,13 +1543,115 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
-    // clEnqueueReadBufferRect
-    // clEnqueueWriteBufferRect
-    // clEnqueueCopyBufferRect
-    // clEnqueueCopyImageToBuffer
-    // clEnqueueCopyBufferToImage
-    // clEnqueueMapImage
-    // clEnqueueNativeKernel
+    void *enqueue_map_image(const CLMemory &image, ::cl_bool blocking_map,
+        ::cl_map_flags map_flags, const std::array<std::size_t, 3> &origin,
+        const std::array<std::size_t, 3> &region, std::size_t &image_row_pitch,
+        std::size_t &image_slice_pitch,
+        const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
+    {
+        std::vector<::cl_event> eptrs;
+        for (const auto &e : event_wait_list)
+            eptrs.push_back(e.get());
+        ::cl_event eptr = event.get();
+
+        ::cl_int status = CL_SUCCESS;
+        void *ptr = ::clEnqueueMapImage(get(), image.get(), blocking_map,
+            map_flags, origin.data(), region.data(), &image_row_pitch,
+            &image_slice_pitch, static_cast<::cl_uint>(eptrs.size()),
+            eptrs.data(), &eptr, &status);
+        internal::cl_error_check(status, "CLCommandQueue::enqueue_map_image",
+            "::clEnqueueMapImage");
+        event.reset(eptr);
+
+        return ptr;
+    }
+
+    ::cl_int enqueue_copy_image_to_buffer(const CLMemory &src_image,
+        const CLMemory &dst_buffer,
+        const std::array<std::size_t, 3> &src_origin,
+        const std::array<std::size_t, 3> &region, std::size_t dst_offset,
+        const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
+    {
+        std::vector<::cl_event> eptrs;
+        for (const auto &e : event_wait_list)
+            eptrs.push_back(e.get());
+        ::cl_event eptr = event.get();
+
+        ::cl_int status = ::clEnqueueCopyImageToBuffer(get(), src_image.get(),
+            dst_buffer.get(), src_origin.data(), region.data(), dst_offset,
+            static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
+        internal::cl_error_check(status,
+            "CLCommandQueue::enqueue_copy_image_to_buffer",
+            "::clEnqueueCopyImageToBuffer");
+        event.reset(eptr);
+
+        return status;
+    }
+    ::cl_int enqueue_copy_buffer_to_image(const CLMemory &src_buffer,
+        const CLMemory &dst_image, std::size_t src_offset,
+        const std::array<std::size_t, 3> &dst_origin,
+        const std::array<std::size_t, 3> &region,
+        const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
+    {
+        std::vector<::cl_event> eptrs;
+        for (const auto &e : event_wait_list)
+            eptrs.push_back(e.get());
+        ::cl_event eptr = event.get();
+
+        ::cl_int status = ::clEnqueueCopyBufferToImage(get(), src_buffer.get(),
+            dst_image.get(), src_offset, dst_origin.data(), region.data(),
+            static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
+        internal::cl_error_check(status,
+            "CLCommandQueue::enqueue_copy_buffer_to_image",
+            "::clEnqueueCopyBufferToImage");
+        event.reset(eptr);
+
+        return status;
+    }
+
+    ::cl_int enqueue_unmap_mem_object(const CLMemory &memobj, void *mapped_ptr,
+        const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
+    {
+        std::vector<::cl_event> eptrs;
+        for (const auto &e : event_wait_list)
+            eptrs.push_back(e.get());
+        ::cl_event eptr = event.get();
+
+        ::cl_int status =
+            ::clEnqueueUnmapMemObject(get(), memobj.get(), mapped_ptr,
+                static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
+        internal::cl_error_check(status,
+            "CLCommandQueue::enqueue_unmap_mem_object",
+            "::clEnqueueUnmapMemObject");
+        event.reset(eptr);
+
+        return status;
+    }
+
+    ::cl_int enqueue_migrate_mem_objects(
+        const std::vector<CLMemory> &mem_objects,
+        ::cl_mem_migration_flags flags,
+        const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
+    {
+        std::vector<::cl_mem> mptrs;
+        for (const auto &m : mem_objects)
+            mptrs.push_back(m.get());
+
+        std::vector<::cl_event> eptrs;
+        for (const auto &e : event_wait_list)
+            eptrs.push_back(e.get());
+        ::cl_event eptr = event.get();
+
+        ::cl_int status = ::clEnqueueMigrateMemObjects(get(),
+            static_cast<::cl_uint>(mptrs.size()), mptrs.data(), flags,
+            static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
+        internal::cl_error_check(status,
+            "CLCommandQueue::enqueue_migrate_mem_objects",
+            "::clEnqueueMigrateMemObjects");
+        event.reset(eptr);
+
+        return status;
+    }
 
     ::cl_int enqueue_marker_with_wait_list(
         const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
