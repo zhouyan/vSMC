@@ -69,8 +69,8 @@ class Particle
         , rng_set_(
               static_cast<typename traits::SizeTypeTrait<rng_set_type>::type>(
                   N))
-        , resample_rng_(Seed::instance().get())
     {
+        Seed::instance().seed_rng(resample_rng_);
     }
 
     /// \brief Clone the particle system except the RNG engines
@@ -82,7 +82,7 @@ class Particle
         Particle<T> particle(*this);
         if (new_rng) {
             particle.rng_set().seed();
-            particle.resample_rng().seed(Seed::instance().get());
+            Seed::instance().seed_rng(particle.resample_rng());
         }
 
         return particle;

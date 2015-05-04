@@ -43,6 +43,13 @@
 namespace vsmc
 {
 
+namespace traits
+{
+
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, void)
+
+}
+
 namespace internal
 {
 

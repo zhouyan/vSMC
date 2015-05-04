@@ -78,7 +78,7 @@ class RngSetScalar
 
     void resize(std::size_t) {}
 
-    void seed() { rng_.seed(Seed::instance().get()); }
+    void seed() { Seed::instance().seed_rng(rng_); }
 
     rng_type &operator[](size_type) { return rng_; }
 
@@ -111,15 +111,15 @@ class RngSetVector
         rng_.reserve(n);
         rng_type rng;
         for (std::size_t i = rng_.size(); i != n; ++i) {
-            rng.seed(Seed::instance().get());
+            Seed::instance().seed_rng(rng);
             rng_.push_back(rng);
         }
     }
 
     void seed()
     {
-        for (size_type i = 0; i != rng_.size(); ++i)
-            rng_[i].seed(Seed::instance().get());
+        for (auto &rng : rng_)
+            Seed::instance().seed_rng(rng);
     }
 
     rng_type &operator[](size_type id) { return rng_[id]; }
@@ -161,7 +161,8 @@ class RngSetTBB
         static ::tbb::mutex mtx;
 
         ::tbb::mutex::scoped_lock lock(mtx);
-        rng_type rng(Seed::instance().get());
+        rng_type rng;
+        Seed::instance().seed_rng(rng);
 
         return rng;
     }

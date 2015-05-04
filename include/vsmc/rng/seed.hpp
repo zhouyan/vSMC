@@ -106,6 +106,13 @@ class SeedGenerator
         return seed;
     }
 
+    /// \brief Equivalent to `rng.seed(get())`
+    template <typename RngType>
+    void seed_rng(RngType &rng)
+    {
+        rng.seed(get());
+    }
+
     /// \brief Get a new seed
     ///
     /// \details
@@ -258,6 +265,21 @@ class SeedGenerator<ID, std::array<T, K>>
         return seed;
     }
 
+    /// \brief Equivalent to `rng.seed(get())` or
+    /// `rng.seed(std::get<0>(get()))`.
+    ///
+    /// \details
+    /// If `RngType::key_type` exists and it is the same as `result_type`, call
+    /// the former, otherwise the later.
+    template <typename RngType>
+    void seed_rng(RngType &rng)
+    {
+        seed_rng_dispatch(
+            rng, std::integral_constant<bool,
+                     std::is_same<result_type, typename traits::KeyTypeTrait<
+                                                   RngType>::type>::value>());
+    }
+
     result_type get()
     {
         std::lock_guard<std::mutex> lock_(mtx_);
@@ -266,7 +288,16 @@ class SeedGenerator<ID, std::array<T, K>>
         return seed_;
     }
 
-    T get_scalar() { return std::get<0>(get()); }
+    T get_scalar()
+    {
+        result_type s1(get());
+        result_type s2(get());
+        for (std::size_t k = 0; k != K; ++k)
+            if (s1[k] != s2[k])
+                return s2[k];
+
+        return std::get<0>(s2);
+    }
 
     void set(result_type seed) { seed_ = seed; }
 
@@ -348,6 +379,18 @@ class SeedGenerator<ID, std::array<T, K>>
         seed_.fill(0);
         seed_max_.fill(0);
         modulo(divisor_, remainder_);
+    }
+
+    template <typename RngType>
+    void seed_rng_dispatch(RngType &rng, std::true_type)
+    {
+        rng.seed(get());
+    }
+
+    template <typename RngType>
+    void seed_rng_dispatch(RngType &rng, std::false_type)
+    {
+        rng.seed(get_scalar());
     }
 }; // class SeedGenerator
 
