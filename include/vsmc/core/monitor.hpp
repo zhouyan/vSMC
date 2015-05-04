@@ -353,17 +353,17 @@ class Monitor
     }
 
 #ifdef VSMC_CBLAS_INT
-    void eval_cblas (const Particle<T> &particle)
+    void eval_cblas(const Particle<T> &particle)
     {
         ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,
             static_cast<VSMC_CBLAS_INT>(dim_),
-            static_cast<VSMC_CBLAS_INT>(particle.size()),
-            1, buffer_.data(), static_cast<VSMC_CBLAS_INT>(dim_),
+            static_cast<VSMC_CBLAS_INT>(particle.size()), 1, buffer_.data(),
+            static_cast<VSMC_CBLAS_INT>(dim_),
             particle.weight_set().weight_data(), 1, 0, result_.data(), 1);
     }
 #endif
 
-    void eval_loop (const Particle<T> &particle)
+    void eval_loop(const Particle<T> &particle)
     {
         std::fill(result_.begin(), result_.end(), 0.0);
         std::size_t j = 0;
