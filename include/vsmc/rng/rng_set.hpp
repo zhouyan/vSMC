@@ -203,7 +203,7 @@ class RngSetMKL<MKLEngine<BRNG, ResultType>>
         static ::tbb::mutex mtx;
 
         ::tbb::mutex::scoped_lock lock(mtx);
-        MKL_UINT seed = static_cast<MKL_UINT>(Seed::instance().get());
+        MKL_UINT seed = static_cast<MKL_UINT>(Seed::instance().get_scalar());
         MKL_INT offset_max = internal::MKLOffset<BRNG>::type::max VSMC_MNE();
         MKL_INT offset = 0;
         if (offset_max != 0) {

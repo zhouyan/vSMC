@@ -116,6 +116,8 @@ class SeedGenerator
         return seed_ * divisor_ + remainder_;
     }
 
+    result_type get_scalar() { return get(); }
+
     /// \brief Set the internal seed
     ///
     /// \details
@@ -263,6 +265,8 @@ class SeedGenerator<ID, std::array<T, K>>
 
         return seed_;
     }
+
+    T get_scalar() { return std::get<0>(get()); }
 
     void set(result_type seed) { seed_ = seed; }
 
