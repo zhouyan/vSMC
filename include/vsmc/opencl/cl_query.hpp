@@ -100,7 +100,7 @@ class CLQuery
     template <::cl_device_type DevType>
     static bool has_device()
     {
-        std::vector<CLPlatform> plat_vec(cl_get_platform());
+        std::vector<CLPlatform> plat_vec(CLPlatform::platforms());
         for (const auto &plat : plat_vec)
             if (has_device<DevType>(plat))
                 return true;
@@ -116,7 +116,7 @@ class CLQuery
         if (!os.good())
             return os;
 
-        std::vector<CLPlatform> plat_vec(cl_get_platform());
+        std::vector<CLPlatform> plat_vec(CLPlatform::platforms());
         for (const auto &plat : plat_vec)
             info(os, plat);
         print_equal(os);
@@ -169,7 +169,6 @@ class CLQuery
         print_dev_memory(os, dev);
         os << '\n';
         print_dev_vector(os, dev);
-#if VSMC_OPENCL_VERSION >= 120
         os << '\n';
         print_dev_single_fp_config(os, dev);
         os << '\n';
@@ -181,7 +180,6 @@ class CLQuery
             os << '\n';
             print_dev_image_support(os, dev);
         }
-#endif // VSMC_OPENCL_VERSION >= 120
 
         return os;
     }
@@ -208,14 +206,10 @@ class CLQuery
         if (version == std::string("2.0"))
             return 200;
 #endif
-#if VSMC_OPENCL_VERSION >= 120
         if (version == std::string("1.2"))
             return 120;
-#endif
-#if VSMC_OPENCL_VERSION >= 110
         if (version == std::string("1.1"))
             return 110;
-#endif
         return 100;
     }
 
@@ -226,24 +220,20 @@ class CLQuery
         dev.get_info(CL_DEVICE_EXTENSIONS, info);
         if (info.find("cl_khr_fp64") != std::string::npos)
             return true;
-#if VSMC_OPENCL_VERSION >= 120
         ::cl_device_fp_config config;
         dev.get_info(CL_DEVICE_DOUBLE_FP_CONFIG, config);
         if (config != 0)
             return true;
-#endif
         return false;
     }
 
     static bool check_feature(const CLDevice &dev,
         std::integral_constant<OpenCLDeviceFeature, OpenCLDeviceImageSupport>)
     {
-#if VSMC_OPENCL_VERSION >= 120
         ::cl_bool support;
         dev.get_info(CL_DEVICE_IMAGE_SUPPORT, support);
         if (support != 0)
             return true;
-#endif
         return false;
     }
 
@@ -407,7 +397,6 @@ class CLQuery
         print_info_val<::cl_uint, ::cl_device_info>(os, dev,
             CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF,
             "CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF");
-#if VSMC_OPENCL_VERSION >= 110
         if (opencl_version(dev) >= 110) {
             os << '\n';
             print_info_val<::cl_uint, ::cl_device_info>(os, dev,
@@ -432,10 +421,8 @@ class CLQuery
                 CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF,
                 "CL_DEVICE_NATIVE_VECTOR_WIDTH_HALF");
         }
-#endif // VSMC_OPENCL_VERSION >= 110
     }
 
-#if VSMC_OPENCL_VERSION >= 120
     template <typename CharT, typename Traits>
     static void print_dev_single_fp_config(
         std::basic_ostream<CharT, Traits> &os, const CLDevice &dev)
@@ -532,7 +519,6 @@ class CLQuery
         print_info_val<::cl_uint, ::cl_device_info>(
             os, dev, CL_DEVICE_MAX_SAMPLERS, "CL_DEVICE_MAX_SAMPLERS");
     }
-#endif // VSMC_OPENCL_VERSION >= 120
 
     template <typename T>
     static void append_bit_field(T info, T val, const std::string &name,

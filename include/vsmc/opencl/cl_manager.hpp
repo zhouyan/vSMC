@@ -436,7 +436,7 @@ class CLManager
 
     bool platform_filter(::cl_device_type dev_type)
     {
-        std::vector<CLPlatform> plat_vec(cl_get_platform());
+        std::vector<CLPlatform> plat_vec(CLPlatform::platforms());
         if (plat_vec.empty())
             return false;
 

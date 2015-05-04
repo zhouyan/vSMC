@@ -50,6 +50,10 @@
 #define VSMC_OPENCL_VERSION 100
 #endif
 
+#if VSMC_OPENCL_VERSION < 120
+#error vSMC OpenCL module requires at least version 1.2 runtime
+#endif
+
 namespace vsmc
 {
 

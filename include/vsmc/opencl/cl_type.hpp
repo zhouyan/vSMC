@@ -37,6 +37,17 @@
 namespace vsmc
 {
 
+class CLNDRange;
+class CLDevice;
+class CLPlatform;
+class CLContext;
+class CLEvent;
+class CLMemory;
+class CLSampler;
+class CLProgram;
+class CLKernel;
+class CLCommandQueue;
+
 /// \brief OpenCL resource management base class
 /// \ingroup OpenCL
 template <typename CLPtr, typename Derived>
@@ -64,6 +75,13 @@ class CLBase
 
     explicit operator bool() const { return bool(ptr_); }
 
+    /// \brief Call `clGet*Info` functions
+    ///
+    /// \details
+    /// For `char[]` type parameters, call this function with `std::string`
+    /// output parameter `pram`.
+    /// For other pointer type parameters, call this function with
+    /// `std::vector<T>` output parameter `param`
     template <typename ParamType>
     ::cl_int get_info(::cl_uint param_name, ParamType &param) const
     {
@@ -136,12 +154,57 @@ inline void swap(
     ptr1.swap(ptr2);
 }
 
+/// \brief OpenCL NDRange object
+/// \ingroup OpenCL
+class CLNDRange
+{
+    public:
+    CLNDRange() : null_(true) {}
+
+    CLNDRange(std::size_t x, std::size_t y = 0, std::size_t z = 0)
+        : null_(false)
+    {
+        std::get<0>(range_) = x;
+        std::get<1>(range_) = y;
+        std::get<2>(range_) = z;
+    }
+
+    const std::size_t *data() const { return null_ ? nullptr : range_.data(); }
+
+    private:
+    bool null_;
+    std::array<std::size_t, 3> range_;
+}; // class CLNDRange
+
 /// \brief OpenCL `cl_device_id` wrapper
 /// \ingroup OpenCL
 class CLDevice : public CLBase<::cl_device_id, CLDevice>
 {
     public:
     CLDevice(::cl_device_id ptr = nullptr) { reset(ptr); }
+
+    std::vector<CLDevice> sub_devices(
+        const ::cl_device_partition_property *properties) const
+    {
+        ::cl_int status = CL_SUCCESS;
+
+        ::cl_uint num = 0;
+        status = ::clCreateSubDevices(get(), properties, 0, nullptr, &num);
+        internal::cl_error_check(
+            status, "CLDevice::sub_devices", "::clCreateSubDevices");
+
+        std::vector<::cl_device_id> vec(num);
+        status =
+            ::clCreateSubDevices(get(), properties, num, vec.data(), nullptr);
+        internal::cl_error_check(
+            status, "CLDevice::sub_devices", "::clCreateSubDevices");
+
+        std::vector<CLDevice> dev;
+        for (auto ptr : vec)
+            dev.push_back(CLDevice(ptr));
+
+        return dev;
+    }
 
     static ::cl_int get_info_param(::cl_device_id device,
         ::cl_device_info param_name, std::size_t param_value_size,
@@ -174,6 +237,36 @@ class CLPlatform : public CLBase<::cl_platform_id, CLPlatform>
 {
     public:
     CLPlatform(::cl_platform_id ptr = nullptr) { reset(ptr); }
+
+    static std::vector<CLPlatform> platforms()
+    {
+        ::cl_int status = CL_SUCCESS;
+
+        ::cl_uint num = 0;
+        status = ::clGetPlatformIDs(0, nullptr, &num);
+        internal::cl_error_check(
+            status, "CLPlatform::get_platform", "::clGetPlatformIDs");
+
+        std::vector<::cl_platform_id> vec(num);
+        status = ::clGetPlatformIDs(num, vec.data(), nullptr);
+        internal::cl_error_check(
+            status, "CLPlatform::get_platform", "::clGetPlatformIDs");
+
+        std::vector<CLPlatform> plat;
+        for (auto ptr : vec)
+            plat.push_back(CLPlatform(ptr));
+
+        return plat;
+    }
+
+    ::cl_int unload_compiler() const
+    {
+        ::cl_int status = ::clUnloadPlatformCompiler(get());
+        internal::cl_error_check(status, "CLPlatform::unload_compiler",
+            "::clUnloadPlatformCompiler");
+
+        return status;
+    }
 
     std::vector<CLDevice> get_device(::cl_device_type dev_type) const
     {
@@ -213,29 +306,6 @@ class CLPlatform : public CLBase<::cl_platform_id, CLPlatform>
     static ::cl_int release(::cl_platform_id) { return CL_SUCCESS; }
 }; // class CLPlatform
 
-/// \brief Get all OpenCL platforms
-/// \ingroup OpenCL
-inline std::vector<CLPlatform> cl_get_platform()
-{
-    ::cl_int status = CL_SUCCESS;
-
-    ::cl_uint num = 0;
-    status = ::clGetPlatformIDs(0, nullptr, &num);
-    internal::cl_error_check(
-        status, "CLPlatform::get_platform", "::clGetPlatformIDs");
-
-    std::vector<::cl_platform_id> vec(num);
-    status = ::clGetPlatformIDs(num, vec.data(), nullptr);
-    internal::cl_error_check(
-        status, "CLPlatform::get_platform", "::clGetPlatformIDs");
-
-    std::vector<CLPlatform> plat;
-    for (auto ptr : vec)
-        plat.push_back(CLPlatform(ptr));
-
-    return plat;
-}
-
 /// \brief OpenCL `cl_context` wrapper
 /// \ingroup OpenCL
 class CLContext : public CLBase<::cl_context, CLContext>
@@ -272,6 +342,28 @@ class CLContext : public CLBase<::cl_context, CLContext>
             status, "CLContext::CLContext", "::clCreateContextFromType");
 
         reset(ptr);
+    }
+
+    std::vector<::cl_image_format> get_supported_image_formats(
+        ::cl_mem_flags flags, ::cl_mem_object_type image_type) const
+    {
+        ::cl_int status = CL_SUCCESS;
+
+        ::cl_uint num = 0;
+        status = ::clGetSupportedImageFormats(
+            get(), flags, image_type, 0, nullptr, &num);
+        internal::cl_error_check(status,
+            "CLContext::get_supported_image_format",
+            "::clGetSupportedImageFormats");
+
+        std::vector<::cl_image_format> vec(num);
+        status = ::clGetSupportedImageFormats(
+            get(), flags, image_type, num, vec.data(), nullptr);
+        internal::cl_error_check(status,
+            "CLContext::get_supported_image_format",
+            "::clGetSupportedImageFormats");
+
+        return vec;
     }
 
     std::vector<CLDevice> get_device() const
@@ -313,6 +405,137 @@ class CLContext : public CLBase<::cl_context, CLContext>
     }
 }; // class CLContext
 
+/// \brief OpenCL `cl_event` wrapper
+/// \ingroup OpenCL
+class CLEvent : public CLBase<::cl_event, CLEvent>
+{
+    public:
+    CLEvent(::cl_event ptr = nullptr) { reset(ptr); }
+
+    CLEvent(const CLContext &context)
+    {
+        ::cl_int status = CL_SUCCESS;
+        ::cl_event ptr = ::clCreateUserEvent(context.get(), &status);
+        internal::cl_error_check(
+            status, "CLEvent::CLEvent", "::clCreateUserEvent");
+
+        reset(ptr);
+    }
+
+    ::cl_int set_status(::cl_int execution_status) const
+    {
+        ::cl_int status = ::clSetUserEventStatus(get(), execution_status);
+        internal::cl_error_check(
+            status, "CLEvent::set_status", "::clSetUserEventStatus");
+
+        return status;
+    }
+
+    CLContext get_context() const
+    {
+        ::cl_context ptr = nullptr;
+        ::cl_int status = get_info(CL_EVENT_CONTEXT, ptr);
+        if (status != CL_SUCCESS)
+            return CLContext();
+
+        return CLContext(ptr);
+    }
+
+    inline CLCommandQueue get_command_queue() const;
+
+    ::cl_ulong profiling_command_queued() const
+    {
+        ::cl_ulong queued = 0;
+        ::cl_int status = ::clGetEventProfilingInfo(get(),
+            CL_PROFILING_COMMAND_QUEUED, sizeof(::cl_ulong), &queued, nullptr);
+        internal::cl_error_check(status, "CLEvent::profiling_command_queued",
+            "::clGetEventProfilingInfo");
+
+        return queued;
+    }
+
+    ::cl_ulong profiling_command_submit() const
+    {
+        ::cl_ulong submit = 0;
+        ::cl_int status = ::clGetEventProfilingInfo(get(),
+            CL_PROFILING_COMMAND_SUBMIT, sizeof(::cl_ulong), &submit, nullptr);
+        internal::cl_error_check(status, "CLEvent::profiling_command_submit",
+            "::clGetEventProfilingInfo");
+
+        return submit;
+    }
+
+    ::cl_ulong profiling_command_start() const
+    {
+        ::cl_ulong start = 0;
+        ::cl_int status = ::clGetEventProfilingInfo(get(),
+            CL_PROFILING_COMMAND_START, sizeof(::cl_ulong), &start, nullptr);
+        internal::cl_error_check(status, "CLEvent::profiling_command_start",
+            "::clGetEventProfilingInfo");
+
+        return start;
+    }
+
+    ::cl_ulong profiling_command_end() const
+    {
+        ::cl_ulong end = 0;
+        ::cl_int status = ::clGetEventProfilingInfo(get(),
+            CL_PROFILING_COMMAND_END, sizeof(::cl_ulong), &end, nullptr);
+        internal::cl_error_check(status, "CLEvent::profiling_command_end",
+            "::clGetEventProfilingInfo");
+
+        return end;
+    }
+
+    ::cl_int wait() const
+    {
+        ::cl_event ptr = get();
+        ::cl_int status = ::clWaitForEvents(1, &ptr);
+        internal::cl_error_check(status, "CLEvent::wait", "::clWaitForEvents");
+
+        return status;
+    }
+
+    static ::cl_int wait(const std::vector<CLEvent> &events)
+    {
+        if (events.size() == 0)
+            return CL_SUCCESS;
+
+        std::vector<::cl_event> vec;
+        for (const auto &event : events)
+            vec.push_back(event.get());
+        ::cl_int status =
+            ::clWaitForEvents(static_cast<::cl_uint>(vec.size()), vec.data());
+        internal::cl_error_check(status, "CLEvent::wait", "::clWaitForEvents");
+
+        return status;
+    }
+
+    static ::cl_int get_info_param(::cl_event event,
+        ::cl_event_info param_name, std::size_t param_value_size,
+        void *param_value, std::size_t *param_value_size_ret)
+    {
+        ::cl_int status = ::clGetEventInfo(event, param_name, param_value_size,
+            param_value, param_value_size_ret);
+        internal::cl_error_check(
+            status, "CLEvent::get_info", "::clGetEventInfo");
+
+        return status;
+    }
+
+    static ::cl_int release(::cl_event ptr)
+    {
+        if (ptr == nullptr)
+            return CL_SUCCESS;
+
+        ::cl_int status = ::clReleaseEvent(ptr);
+        internal::cl_error_check(
+            status, "CLEvent::release", "::clReleaseEvent");
+
+        return status;
+    }
+}; // class CLEvent
+
 /// \brief OpenCL `cl_mem` wrapper
 /// \ingroup OpenCL
 class CLMemory : public CLBase<::cl_mem, CLMemory>
@@ -320,7 +543,7 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
     public:
     CLMemory(::cl_mem ptr = nullptr) { reset(ptr); }
 
-    CLMemory(const CLContext context, ::cl_mem_flags flags, std::size_t size,
+    CLMemory(const CLContext &context, ::cl_mem_flags flags, std::size_t size,
         void *host_ptr)
     {
         ::cl_int status = CL_SUCCESS;
@@ -331,6 +554,37 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
 
         reset(ptr);
     }
+
+    CLMemory(const CLContext &context, ::cl_mem_flags flags,
+        const ::cl_image_format &image_format,
+        const ::cl_image_desc &image_desc, void *host_ptr)
+    {
+        ::cl_int status = CL_SUCCESS;
+        ::cl_mem ptr = ::clCreateImage(context.get(), flags, &image_format,
+            &image_desc, host_ptr, &status);
+        internal::cl_error_check(
+            status, "CLMemory::CLMemory", "::clCreateImage");
+
+        reset(ptr);
+    }
+
+    CLMemory sub_buffer(::cl_mem_flags flags,
+        ::cl_buffer_create_type buffer_create_type,
+        const void *buffer_create_info)
+    {
+        ::cl_int status = CL_SUCCESS;
+        ::cl_mem ptr = ::clCreateSubBuffer(
+            get(), flags, buffer_create_type, buffer_create_info, &status);
+        internal::cl_error_check(
+            status, "CLMemory::sub_buffer", "::clCreateSubBuffer");
+
+        return CLMemory(ptr);
+    }
+
+    // clSetMemObjectDestructorCallback
+    // clGetImageInfo
+    // clEnqueueUnmapMemObject
+    // clEnqueueMigrateMemObjects
 
     static ::cl_int get_info_param(::cl_mem mem, ::cl_mem_info param_name,
         std::size_t param_value_size, void *param_value,
@@ -356,6 +610,60 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
         return status;
     }
 }; // class CLMemory
+
+/// \brief OpenCL `cl_sampler` wrapper
+/// \ingroup OpenCL
+class CLSampler : public CLBase<::cl_sampler, CLSampler>
+{
+    public:
+    CLSampler(::cl_sampler ptr = nullptr) { reset(ptr); }
+
+    CLSampler(const CLContext &context, ::cl_bool normalized_coords,
+        ::cl_addressing_mode addressing_mode, ::cl_filter_mode filter_mode)
+    {
+        ::cl_int status = CL_SUCCESS;
+        ::cl_sampler ptr = ::clCreateSampler(context.get(), normalized_coords,
+            addressing_mode, filter_mode, &status);
+        internal::cl_error_check(
+            status, "CLSampler::CLSampler", "::clCreateSampler");
+
+        reset(ptr);
+    }
+
+    CLContext get_context() const
+    {
+        ::cl_context ptr = nullptr;
+        ::cl_int status = get_info(CL_SAMPLER_CONTEXT, ptr);
+        if (status != CL_SUCCESS)
+            return CLContext();
+
+        return CLContext(ptr);
+    }
+
+    static ::cl_int get_info_param(::cl_sampler sampler,
+        ::cl_sampler_info param_name, std::size_t param_value_size,
+        void *param_value, std::size_t *param_value_size_ret)
+    {
+        ::cl_int status = ::clGetSamplerInfo(sampler, param_name,
+            param_value_size, param_value, param_value_size_ret);
+        internal::cl_error_check(
+            status, "CLSampler::get_info", "::clGetSamplerInfo");
+
+        return status;
+    }
+
+    static ::cl_int release(::cl_sampler ptr)
+    {
+        if (ptr == nullptr)
+            return CL_SUCCESS;
+
+        ::cl_int status = ::clReleaseSampler(ptr);
+        internal::cl_error_check(
+            status, "CLSampler::release", "::clReleaseSampler");
+
+        return status;
+    }
+}; // class CLSampler
 
 /// \brief OpenCL `cl_program` wrapper
 /// \ingroup OpenCL
@@ -464,8 +772,31 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         reset(ptr);
     }
 
+    CLProgram(const CLContext &context, const std::vector<CLDevice> &devices,
+        const std::string &options,
+        const std::vector<CLProgram> &input_programs)
+    {
+        std::vector<::cl_device_id> device_ptr;
+        for (const auto &dev : devices)
+            device_ptr.push_back(dev.get());
+
+        std::vector<::cl_program> program_ptr;
+        for (const auto &prg : input_programs)
+            program_ptr.push_back(prg.get());
+
+        ::cl_int status = CL_SUCCESS;
+        ::cl_program ptr = ::clLinkProgram(context.get(),
+            static_cast<::cl_uint>(devices.size()), device_ptr.data(),
+            options.c_str(), static_cast<::cl_uint>(input_programs.size()),
+            program_ptr.data(), nullptr, nullptr, &status);
+        internal::cl_error_check(
+            status, "CLProgram::CLProgram", "::clLinkProgram");
+
+        reset(ptr);
+    }
+
     ::cl_int build(
-        const std::vector<CLDevice> &devices, const std::string &options)
+        const std::vector<CLDevice> &devices, const std::string &options) const
     {
         std::vector<::cl_device_id> device_ptr;
         for (const auto &dev : devices)
@@ -475,6 +806,33 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
                 device_ptr.data(), options.c_str(), nullptr, nullptr);
         internal::cl_error_check(
             status, "CLProgram::build", "::clBuildProgram");
+
+        return status;
+    }
+
+    ::cl_int compile(const std::vector<CLDevice> &devices,
+        const std::string &options,
+        const std::vector<std::pair<CLProgram, std::string>>
+            &input_headers_and_include_names) const
+    {
+        std::vector<::cl_device_id> device_ptr;
+        for (const auto &dev : devices)
+            device_ptr.push_back(dev.get());
+
+        std::vector<::cl_program> input_headers;
+        std::vector<const char *> include_names;
+        for (const auto &hn : input_headers_and_include_names) {
+            input_headers.push_back(hn.first.get());
+            include_names.push_back(hn.second.c_str());
+        }
+
+        ::cl_int status =
+            ::clCompileProgram(get(), static_cast<::cl_uint>(devices.size()),
+                device_ptr.data(), options.c_str(),
+                static_cast<::cl_uint>(input_headers_and_include_names.size()),
+                input_headers.data(), include_names.data(), nullptr, nullptr);
+        internal::cl_error_check(
+            status, "CLProgram::compile", "::clCompileProgram");
 
         return status;
     }
@@ -547,6 +905,8 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
 
         return bt;
     }
+
+    inline std::vector<CLKernel> get_kernels() const;
 
     CLContext get_context() const
     {
@@ -629,7 +989,29 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
     {
         ::cl_mem mem = arg.get();
         ::cl_int status =
-            ::clSetKernelArg(get(), arg_index, sizeof(::cl_mem *), &mem);
+            ::clSetKernelArg(get(), arg_index, sizeof(::cl_mem), &mem);
+        internal::cl_error_check(
+            status, "CLKernel::set_arg", "::clSetKernelArgs");
+
+        return status;
+    }
+
+    ::cl_int set_arg(::cl_uint arg_index, const CLEvent &arg) const
+    {
+        ::cl_event event = arg.get();
+        ::cl_int status =
+            ::clSetKernelArg(get(), arg_index, sizeof(::cl_event), &event);
+        internal::cl_error_check(
+            status, "CLKernel::set_arg", "::clSetKernelArgs");
+
+        return status;
+    }
+
+    ::cl_int set_arg(::cl_uint arg_index, const CLSampler &arg) const
+    {
+        ::cl_sampler sampler = arg.get();
+        ::cl_int status =
+            ::clSetKernelArg(get(), arg_index, sizeof(::cl_sampler), &sampler);
         internal::cl_error_check(
             status, "CLKernel::set_arg", "::clSetKernelArgs");
 
@@ -822,221 +1204,6 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
     }
 }; // class CLKernel
 
-/// \brief OpenCL `cl_event` wrapper
-/// \ingroup OpenCL
-class CLEvent : public CLBase<::cl_event, CLEvent>
-{
-    public:
-    CLEvent(::cl_event ptr = nullptr) { reset(ptr); }
-
-    CLEvent(const CLContext &context)
-    {
-        ::cl_int status = CL_SUCCESS;
-        ::cl_event ptr = ::clCreateUserEvent(context.get(), &status);
-        internal::cl_error_check(
-            status, "CLEvent::CLEvent", "::clCreateUserEvent");
-
-        reset(ptr);
-    }
-
-    ::cl_int set_status(::cl_int execution_status) const
-    {
-        ::cl_int status = ::clSetUserEventStatus(get(), execution_status);
-        internal::cl_error_check(
-            status, "CLEvent::set_status", "::clSetUserEventStatus");
-
-        return status;
-    }
-
-    CLContext get_context() const
-    {
-        ::cl_context ptr = nullptr;
-        ::cl_int status = get_info(CL_EVENT_CONTEXT, ptr);
-        if (status != CL_SUCCESS)
-            return CLContext();
-
-        return CLContext(ptr);
-    }
-
-    // CLCommandQueue get_command_queue() const
-    // {
-    //     ::cl_command_queue ptr = nullptr;
-    //     ::cl_int status = get_info(CL_EVENT_COMMAND_QUEUE, ptr);
-    //     if (status != CL_SUCCESS)
-    //         return CLCommandQueue();
-
-    //     return CLCommandQueue(ptr);
-    // }
-
-    ::cl_ulong profiling_command_queued() const
-    {
-        ::cl_ulong queued = 0;
-        ::cl_int status = ::clGetEventProfilingInfo(get(),
-            CL_PROFILING_COMMAND_QUEUED, sizeof(::cl_ulong), &queued, nullptr);
-        internal::cl_error_check(status, "CLEvent::profiling_command_queued",
-            "::clGetEventProfilingInfo");
-
-        return queued;
-    }
-
-    ::cl_ulong profiling_command_submit() const
-    {
-        ::cl_ulong submit = 0;
-        ::cl_int status = ::clGetEventProfilingInfo(get(),
-            CL_PROFILING_COMMAND_SUBMIT, sizeof(::cl_ulong), &submit, nullptr);
-        internal::cl_error_check(status, "CLEvent::profiling_command_submit",
-            "::clGetEventProfilingInfo");
-
-        return submit;
-    }
-
-    ::cl_ulong profiling_command_start() const
-    {
-        ::cl_ulong start = 0;
-        ::cl_int status = ::clGetEventProfilingInfo(get(),
-            CL_PROFILING_COMMAND_START, sizeof(::cl_ulong), &start, nullptr);
-        internal::cl_error_check(status, "CLEvent::profiling_command_start",
-            "::clGetEventProfilingInfo");
-
-        return start;
-    }
-
-    ::cl_ulong profiling_command_end() const
-    {
-        ::cl_ulong end = 0;
-        ::cl_int status = ::clGetEventProfilingInfo(get(),
-            CL_PROFILING_COMMAND_END, sizeof(::cl_ulong), &end, nullptr);
-        internal::cl_error_check(status, "CLEvent::profiling_command_end",
-            "::clGetEventProfilingInfo");
-
-        return end;
-    }
-
-    ::cl_int wait() const
-    {
-        ::cl_event ptr = get();
-        ::cl_int status = ::clWaitForEvents(1, &ptr);
-        internal::cl_error_check(status, "CLEvent::wait", "::clWaitForEvents");
-
-        return status;
-    }
-
-    static ::cl_int wait(const std::vector<CLEvent> &events)
-    {
-        if (events.size() == 0)
-            return CL_SUCCESS;
-
-        std::vector<::cl_event> vec;
-        for (const auto &event : events)
-            vec.push_back(event.get());
-        ::cl_int status =
-            ::clWaitForEvents(static_cast<::cl_uint>(vec.size()), vec.data());
-        internal::cl_error_check(status, "CLEvent::wait", "::clWaitForEvents");
-
-        return status;
-    }
-
-    static ::cl_int get_info_param(::cl_event event,
-        ::cl_event_info param_name, std::size_t param_value_size,
-        void *param_value, std::size_t *param_value_size_ret)
-    {
-        ::cl_int status = ::clGetEventInfo(event, param_name, param_value_size,
-            param_value, param_value_size_ret);
-        internal::cl_error_check(
-            status, "CLEvent::get_info", "::clGetEventInfo");
-
-        return status;
-    }
-
-    static ::cl_int release(::cl_event ptr)
-    {
-        if (ptr == nullptr)
-            return CL_SUCCESS;
-
-        ::cl_int status = ::clReleaseEvent(ptr);
-        internal::cl_error_check(
-            status, "CLEvent::release", "::clReleaseEvent");
-
-        return status;
-    }
-}; // class CLEvent
-
-/// \brief OpenCL `cl_sampler` wrapper
-/// \ingroup OpenCL
-class CLSampler : public CLBase<::cl_sampler, CLSampler>
-{
-    public:
-    CLSampler(::cl_sampler ptr = nullptr) { reset(ptr); }
-
-    CLSampler(const CLContext &context, ::cl_bool normalized_coords,
-        ::cl_addressing_mode addressing_mode, ::cl_filter_mode filter_mode)
-    {
-        ::cl_int status = CL_SUCCESS;
-        ::cl_sampler ptr = ::clCreateSampler(context.get(), normalized_coords,
-            addressing_mode, filter_mode, &status);
-        internal::cl_error_check(
-            status, "CLSampler::CLSampler", "::clCreateSampler");
-
-        reset(ptr);
-    }
-
-    CLContext get_context() const
-    {
-        ::cl_context ptr = nullptr;
-        ::cl_int status = get_info(CL_SAMPLER_CONTEXT, ptr);
-        if (status != CL_SUCCESS)
-            return CLContext();
-
-        return CLContext(ptr);
-    }
-
-    static ::cl_int get_info_param(::cl_sampler sampler,
-        ::cl_sampler_info param_name, std::size_t param_value_size,
-        void *param_value, std::size_t *param_value_size_ret)
-    {
-        ::cl_int status = ::clGetSamplerInfo(sampler, param_name,
-            param_value_size, param_value, param_value_size_ret);
-        internal::cl_error_check(
-            status, "CLSampler::get_info", "::clGetSamplerInfo");
-
-        return status;
-    }
-
-    static ::cl_int release(::cl_sampler ptr)
-    {
-        if (ptr == nullptr)
-            return CL_SUCCESS;
-
-        ::cl_int status = ::clReleaseSampler(ptr);
-        internal::cl_error_check(
-            status, "CLSampler::release", "::clReleaseSampler");
-
-        return status;
-    }
-}; // class CLSampler
-
-/// \brief OpenCL NDRange object
-/// \ingroup OpenCL
-class CLNDRange
-{
-    public:
-    CLNDRange() : null_(true) {}
-
-    CLNDRange(std::size_t x, std::size_t y = 0, std::size_t z = 0)
-        : null_(false)
-    {
-        std::get<0>(range_) = x;
-        std::get<1>(range_) = y;
-        std::get<2>(range_) = z;
-    }
-
-    const std::size_t *data() const { return null_ ? nullptr : range_.data(); }
-
-    private:
-    bool null_;
-    std::array<std::size_t, 3> range_;
-}; // class CLNDRange
-
 /// \brief OpenCL `cl_command_queue` wrapper
 /// \ingroup OpenCL
 class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
@@ -1115,7 +1282,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
-    ::cl_int enqueue_read_buffer(const CLMemory &memory,
+    ::cl_int enqueue_read_buffer(const CLMemory &buffer,
         ::cl_bool blocking_read, std::size_t offset, std::size_t size,
         void *ptr, const std::vector<CLEvent> &event_wait_list,
         CLEvent &event) const
@@ -1125,7 +1292,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
             eptrs.push_back(e.get());
         ::cl_event eptr = event.get();
 
-        ::cl_int status = ::clEnqueueReadBuffer(get(), memory.get(),
+        ::cl_int status = ::clEnqueueReadBuffer(get(), buffer.get(),
             blocking_read, offset, size, ptr,
             static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
         internal::cl_error_check(status, "CLCommandQueue::enqueue_read_buffer",
@@ -1135,7 +1302,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
-    ::cl_int enqueue_write_buffer(const CLMemory &memory,
+    ::cl_int enqueue_write_buffer(const CLMemory &buffer,
         ::cl_bool blocking_write, std::size_t offset, std::size_t size,
         void *ptr, const std::vector<CLEvent> &event_wait_list,
         CLEvent &event) const
@@ -1145,7 +1312,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
             eptrs.push_back(e.get());
         ::cl_event eptr = event.get();
 
-        ::cl_int status = ::clEnqueueWriteBuffer(get(), memory.get(),
+        ::cl_int status = ::clEnqueueWriteBuffer(get(), buffer.get(),
             blocking_write, offset, size, ptr,
             static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
         internal::cl_error_check(status,
@@ -1155,8 +1322,9 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
-    ::cl_int enqueue_copy_buffer(const CLMemory &src, const CLMemory &dst,
-        std::size_t src_offset, std::size_t dst_offset, std::size_t size,
+    ::cl_int enqueue_copy_buffer(const CLMemory &src_buffer,
+        const CLMemory &dst_buffer, std::size_t src_offset,
+        std::size_t dst_offset, std::size_t size,
         const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
     {
         std::vector<::cl_event> eptrs;
@@ -1164,15 +1332,149 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
             eptrs.push_back(e.get());
         ::cl_event eptr = event.get();
 
-        ::cl_int status = ::clEnqueueCopyBuffer(get(), src.get(), dst.get(),
-            src_offset, dst_offset, size, static_cast<::cl_uint>(eptrs.size()),
-            eptrs.data(), &eptr);
+        ::cl_int status = ::clEnqueueCopyBuffer(get(), src_buffer.get(),
+            dst_buffer.get(), src_offset, dst_offset, size,
+            static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
         internal::cl_error_check(status,
             "CLCommandQeueue::enqueue_copy_buffer", "::clEnqueueCopyBuffer");
         event.reset(eptr);
 
         return status;
     }
+
+    ::cl_int enqueue_fill_buffer(const CLMemory &buffer, const void *pattern,
+        std::size_t pattern_size, std::size_t offset, std::size_t size,
+        const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
+    {
+        std::vector<::cl_event> eptrs;
+        for (const auto &e : event_wait_list)
+            eptrs.push_back(e.get());
+        ::cl_event eptr = event.get();
+
+        ::cl_int status = ::clEnqueueFillBuffer(get(), buffer.get(), pattern,
+            pattern_size, offset, size, static_cast<::cl_uint>(eptrs.size()),
+            eptrs.data(), &eptr);
+        internal::cl_error_check(status, "CLCommandQueue::enqueue_fill_buffer",
+            "::clEnqueueFillBuffer");
+        event.reset(eptr);
+
+        return status;
+    }
+
+    void *enqueue_map_buffer(const CLMemory &buffer, ::cl_bool blocking_map,
+        ::cl_map_flags map_flags, std::size_t offset, std::size_t size,
+        const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
+    {
+        std::vector<::cl_event> eptrs;
+        for (const auto &e : event_wait_list)
+            eptrs.push_back(e.get());
+        ::cl_event eptr = event.get();
+
+        ::cl_int status = CL_SUCCESS;
+        void *ptr = ::clEnqueueMapBuffer(get(), buffer.get(), blocking_map,
+            map_flags, offset, size, static_cast<::cl_uint>(eptrs.size()),
+            eptrs.data(), &eptr, &status);
+        internal::cl_error_check(status, "CLCommandQueue::enqueue_map_buffer",
+            "::clEnqueueMapBuffer");
+        event.reset(eptr);
+
+        return status == CL_SUCCESS ? ptr : nullptr;
+    }
+
+    ::cl_int enqueue_read_image(const CLMemory &image, ::cl_bool blocking_read,
+        const std::array<std::size_t, 3> &origin,
+        const std::array<std::size_t, 3> &region, std::size_t row_pitch,
+        std::size_t slice_pitch, void *ptr,
+        const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
+    {
+        std::vector<::cl_event> eptrs;
+        for (const auto &e : event_wait_list)
+            eptrs.push_back(e.get());
+        ::cl_event eptr = event.get();
+
+        ::cl_int status =
+            ::clEnqueueReadImage(get(), image.get(), blocking_read,
+                origin.data(), region.data(), row_pitch, slice_pitch, ptr,
+                static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
+        internal::cl_error_check(status, "CLCommandQueue::enqueue_read_image",
+            "::clEnqueueReadImage");
+        event.reset(eptr);
+
+        return status;
+    }
+
+    ::cl_int enqueue_write_image(const CLMemory &image,
+        ::cl_bool blocking_write, const std::array<std::size_t, 3> &origin,
+        const std::array<std::size_t, 3> &region, std::size_t row_pitch,
+        std::size_t slice_pitch, void *ptr,
+        const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
+    {
+        std::vector<::cl_event> eptrs;
+        for (const auto &e : event_wait_list)
+            eptrs.push_back(e.get());
+        ::cl_event eptr = event.get();
+
+        ::cl_int status =
+            ::clEnqueueWriteImage(get(), image.get(), blocking_write,
+                origin.data(), region.data(), row_pitch, slice_pitch, ptr,
+                static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
+        internal::cl_error_check(status, "CLCommandQueue::enqueue_write_image",
+            "::clEnqueueWriteImage");
+        event.reset(eptr);
+
+        return status;
+    }
+
+    ::cl_int enqueue_copy_image(const CLMemory &src_image,
+        const CLMemory &dst_image,
+        const std::array<std::size_t, 3> &src_origin,
+        const std::array<std::size_t, 3> &dst_origin,
+        const std::array<std::size_t, 3> &region,
+        const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
+    {
+        std::vector<::cl_event> eptrs;
+        for (const auto &e : event_wait_list)
+            eptrs.push_back(e.get());
+        ::cl_event eptr = event.get();
+
+        ::cl_int status =
+            ::clEnqueueCopyImage(get(), src_image.get(), dst_image.get(),
+                src_origin.data(), dst_origin.data(), region.data(),
+                static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
+        internal::cl_error_check(status, "CLCommandQueue::enqueue_copy_image",
+            "::clEnqueueCopyImage");
+        event.reset(eptr);
+
+        return status;
+    }
+
+    ::cl_int enqueue_fill_image(const CLMemory &image, const void *fill_color,
+        const std::array<std::size_t, 3> &origin,
+        const std::array<std::size_t, 3> &region,
+        const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
+    {
+        std::vector<::cl_event> eptrs;
+        for (const auto &e : event_wait_list)
+            eptrs.push_back(e.get());
+        ::cl_event eptr = event.get();
+
+        ::cl_int status = ::clEnqueueFillImage(get(), image.get(), fill_color,
+            origin.data(), region.data(), static_cast<::cl_uint>(eptrs.size()),
+            eptrs.data(), &eptr);
+        internal::cl_error_check(status, "CLCommandQueue::enqueue_fill_image",
+            "::clEnqueueFillImage");
+        event.reset(eptr);
+
+        return status;
+    }
+
+    // clEnqueueReadBufferRect
+    // clEnqueueWriteBufferRect
+    // clEnqueueCopyBufferRect
+    // clEnqueueCopyImageToBuffer
+    // clEnqueueCopyBufferToImage
+    // clEnqueueMapImage
+    // clEnqueueNativeKernel
 
     ::cl_int enqueue_marker_with_wait_list(
         const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
@@ -1251,6 +1553,36 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 }; // class CLCommandQueue
+
+inline CLCommandQueue CLEvent::get_command_queue() const
+{
+    ::cl_command_queue ptr = nullptr;
+    ::cl_int status = get_info(CL_EVENT_COMMAND_QUEUE, ptr);
+    if (status != CL_SUCCESS)
+        return CLCommandQueue();
+
+    return CLCommandQueue(ptr);
+}
+inline std::vector<CLKernel> CLProgram::get_kernels() const
+{
+    ::cl_int status = CL_SUCCESS;
+
+    ::cl_uint num = 0;
+    status = ::clCreateKernelsInProgram(get(), 0, nullptr, &num);
+    internal::cl_error_check(
+        status, "CLProgram::get_kernels", "::clCreateKernelsInProgram");
+
+    std::vector<::cl_kernel> vec(num);
+    status = ::clCreateKernelsInProgram(get(), num, vec.data(), nullptr);
+    internal::cl_error_check(
+        status, "CLProgram::get_kernels", "::clCreateKernelsInProgram");
+
+    std::vector<CLKernel> kern;
+    for (auto ptr : vec)
+        kern.push_back(CLKernel(ptr));
+
+    return kern;
+}
 
 } // namespace vsmc
 
