@@ -183,6 +183,7 @@ class CLDevice : public CLBase<::cl_device_id, CLDevice>
     public:
     CLDevice(::cl_device_id ptr = nullptr) { reset(ptr); }
 
+    /// \brief `clCreateSubDevices`
     std::vector<CLDevice> sub_devices(
         const ::cl_device_partition_property *properties) const
     {
@@ -238,6 +239,7 @@ class CLPlatform : public CLBase<::cl_platform_id, CLPlatform>
     public:
     CLPlatform(::cl_platform_id ptr = nullptr) { reset(ptr); }
 
+    /// \brief `clGetPlatformIDs`
     static std::vector<CLPlatform> platforms()
     {
         ::cl_int status = CL_SUCCESS;
@@ -259,6 +261,7 @@ class CLPlatform : public CLBase<::cl_platform_id, CLPlatform>
         return plat;
     }
 
+    /// \brief `clUnloadPlatformCompiler`
     ::cl_int unload_compiler() const
     {
         ::cl_int status = ::clUnloadPlatformCompiler(get());
@@ -268,6 +271,7 @@ class CLPlatform : public CLBase<::cl_platform_id, CLPlatform>
         return status;
     }
 
+    /// \brief `clGetDeviceIDs`
     std::vector<CLDevice> get_device(::cl_device_type dev_type) const
     {
         ::cl_int status = CL_SUCCESS;
@@ -313,6 +317,7 @@ class CLContext : public CLBase<::cl_context, CLContext>
     public:
     CLContext(::cl_context ptr = nullptr) { reset(ptr); }
 
+    /// \brief `clCreateContext`
     CLContext(const cl_context_properties *properties,
         const std::vector<CLDevice> &devices)
     {
@@ -331,6 +336,7 @@ class CLContext : public CLBase<::cl_context, CLContext>
         reset(ptr);
     }
 
+    /// \brief `clCreateContextFromType`
     CLContext(
         const cl_context_properties &properties, ::cl_device_type dev_type)
     {
@@ -344,6 +350,7 @@ class CLContext : public CLBase<::cl_context, CLContext>
         reset(ptr);
     }
 
+    /// \brief `clGetSupportedImageFormats`
     std::vector<::cl_image_format> get_supported_image_formats(
         ::cl_mem_flags flags, ::cl_mem_object_type image_type) const
     {
@@ -412,6 +419,7 @@ class CLEvent : public CLBase<::cl_event, CLEvent>
     public:
     CLEvent(::cl_event ptr = nullptr) { reset(ptr); }
 
+    /// \brief `clCreateUserEvent`
     CLEvent(const CLContext &context)
     {
         ::cl_int status = CL_SUCCESS;
@@ -422,6 +430,7 @@ class CLEvent : public CLBase<::cl_event, CLEvent>
         reset(ptr);
     }
 
+    /// \brief `clSetUserEventStatus`
     ::cl_int set_status(::cl_int execution_status) const
     {
         ::cl_int status = ::clSetUserEventStatus(get(), execution_status);
@@ -443,6 +452,7 @@ class CLEvent : public CLBase<::cl_event, CLEvent>
 
     inline CLCommandQueue get_command_queue() const;
 
+    /// \brief `clGetEventProfilingInfo`
     ::cl_ulong profiling_command_queued() const
     {
         ::cl_ulong queued = 0;
@@ -454,6 +464,7 @@ class CLEvent : public CLBase<::cl_event, CLEvent>
         return queued;
     }
 
+    /// \brief `clGetEventProfilingInfo`
     ::cl_ulong profiling_command_submit() const
     {
         ::cl_ulong submit = 0;
@@ -465,6 +476,7 @@ class CLEvent : public CLBase<::cl_event, CLEvent>
         return submit;
     }
 
+    /// \brief `clGetEventProfilingInfo`
     ::cl_ulong profiling_command_start() const
     {
         ::cl_ulong start = 0;
@@ -476,6 +488,7 @@ class CLEvent : public CLBase<::cl_event, CLEvent>
         return start;
     }
 
+    /// \brief `clGetEventProfilingInfo`
     ::cl_ulong profiling_command_end() const
     {
         ::cl_ulong end = 0;
@@ -487,6 +500,7 @@ class CLEvent : public CLBase<::cl_event, CLEvent>
         return end;
     }
 
+    /// \brief `clWaitForEvents`
     ::cl_int wait() const
     {
         ::cl_event ptr = get();
@@ -496,6 +510,7 @@ class CLEvent : public CLBase<::cl_event, CLEvent>
         return status;
     }
 
+    /// \brief `clWaitForEvents`
     static ::cl_int wait(const std::vector<CLEvent> &events)
     {
         if (events.size() == 0)
@@ -543,6 +558,7 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
     public:
     CLMemory(::cl_mem ptr = nullptr) { reset(ptr); }
 
+    /// \brief `clCreateBuffer`
     CLMemory(const CLContext &context, ::cl_mem_flags flags, std::size_t size,
         void *host_ptr)
     {
@@ -555,6 +571,7 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
         reset(ptr);
     }
 
+    /// \brief `clCreateImage`
     CLMemory(const CLContext &context, ::cl_mem_flags flags,
         const ::cl_image_format &image_format,
         const ::cl_image_desc &image_desc, void *host_ptr)
@@ -568,6 +585,7 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
         reset(ptr);
     }
 
+    /// \brief `clCreateSubBuffer`
     CLMemory sub_buffer(::cl_mem_flags flags,
         ::cl_buffer_create_type buffer_create_type,
         const void *buffer_create_info)
@@ -615,6 +633,7 @@ class CLSampler : public CLBase<::cl_sampler, CLSampler>
     public:
     CLSampler(::cl_sampler ptr = nullptr) { reset(ptr); }
 
+    /// \brief `clCreateSampler`
     CLSampler(const CLContext &context, ::cl_bool normalized_coords,
         ::cl_addressing_mode addressing_mode, ::cl_filter_mode filter_mode)
     {
@@ -669,6 +688,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
     public:
     CLProgram(::cl_program ptr = nullptr) { reset(ptr); }
 
+    /// \brief `clCreateProgramWithSource`
     CLProgram(
         const CLContext &context, const std::vector<std::string> &sources)
     {
@@ -688,6 +708,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         reset(ptr);
     }
 
+    /// \brief `clCreateProgramWithSource`
     CLProgram(const CLContext &context, const std::string &source)
     {
         const char *string = source.c_str();
@@ -701,6 +722,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         reset(ptr);
     }
 
+    /// \brief `clCreateProgramWithBinary`
     CLProgram(const CLContext &context,
         const std::vector<std::pair<CLDevice, std::vector<unsigned char>>>
             &device_binaries,
@@ -725,6 +747,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         reset(ptr);
     }
 
+    /// \brief `clCreateProgramWithBinary`
     CLProgram(const CLContext &context, const CLDevice &device,
         const std::vector<unsigned char> &binary, ::cl_int &binary_status)
     {
@@ -740,6 +763,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         reset(ptr);
     }
 
+    /// \brief `clCreateProgramWithBuiltInKernels`
     CLProgram(const CLContext &context, const std::vector<CLDevice> &devices,
         const std::string &kernel_name)
     {
@@ -756,6 +780,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         reset(ptr);
     }
 
+    /// \brief `clCreateProgramWithBuiltInKernels`
     CLProgram(const CLContext &context, const CLDevice &device,
         const std::string &kernel_name)
     {
@@ -769,6 +794,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         reset(ptr);
     }
 
+    /// \brief `clLinkProgram`
     CLProgram(const CLContext &context, const std::vector<CLDevice> &devices,
         const std::string &options,
         const std::vector<CLProgram> &input_programs)
@@ -792,6 +818,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         reset(ptr);
     }
 
+    /// \brief `clBuildProgram`
     ::cl_int build(
         const std::vector<CLDevice> &devices, const std::string &options) const
     {
@@ -807,6 +834,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         return status;
     }
 
+    /// \brief `clCompileProgram`
     ::cl_int compile(const std::vector<CLDevice> &devices,
         const std::string &options,
         const std::vector<std::pair<CLProgram, std::string>>
@@ -833,6 +861,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         return status;
     }
 
+    /// \brief `clGetProgramBuildInfo`
     ::cl_build_status build_status(const CLDevice &device) const
     {
         ::cl_build_status val = CL_BUILD_SUCCESS;
@@ -844,6 +873,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         return val;
     }
 
+    /// \brief `clGetProgramBuildInfo`
     std::string build_options(const CLDevice &device) const
     {
         ::cl_int status = CL_SUCCESS;
@@ -867,6 +897,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         return std::string(static_cast<const char *>(vec.data()));
     }
 
+    /// \brief `clGetProgramBuildInfo`
     std::string build_log(const CLDevice &device) const
     {
         ::cl_int status = CL_SUCCESS;
@@ -890,6 +921,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         return std::string(static_cast<const char *>(vec.data()));
     }
 
+    /// \brief `clGetProgramBuildInfo`
     ::cl_program_binary_type binary_type(const CLDevice &device) const
     {
         ::cl_program_binary_type val = CL_PROGRAM_BINARY_TYPE_NONE;
@@ -902,6 +934,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         return val;
     }
 
+    /// \brief `clCreateKernelsInProgram`
     inline std::vector<CLKernel> get_kernels() const;
 
     CLContext get_context() const
@@ -960,6 +993,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
     public:
     CLKernel(::cl_kernel ptr = nullptr) { reset(ptr); }
 
+    /// \brief `clCreateKernel`
     CLKernel(const CLProgram &program, const std::string &kernel_name)
     {
         ::cl_int status = CL_SUCCESS;
@@ -971,6 +1005,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         reset(ptr);
     }
 
+    /// \brief `clSetKernelArg`
     template <typename T>
     ::cl_int set_arg(::cl_uint arg_index, const T &arg) const
     {
@@ -981,6 +1016,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         return status;
     }
 
+    /// \brief `clSetKernelArg`
     ::cl_int set_arg(::cl_uint arg_index, const CLMemory &arg) const
     {
         ::cl_mem mem = arg.get();
@@ -992,6 +1028,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         return status;
     }
 
+    /// \brief `clSetKernelArg`
     ::cl_int set_arg(::cl_uint arg_index, const CLEvent &arg) const
     {
         ::cl_event event = arg.get();
@@ -1003,6 +1040,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         return status;
     }
 
+    /// \brief `clSetKernelArg`
     ::cl_int set_arg(::cl_uint arg_index, const CLSampler &arg) const
     {
         ::cl_sampler sampler = arg.get();
@@ -1014,6 +1052,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         return status;
     }
 
+    /// \brief `clGetKernelWorkGroupInfo`
     std::array<std::size_t, 3> global_work_size(const CLDevice &device) const
     {
         std::array<std::size_t, 3> val;
@@ -1027,6 +1066,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         return val;
     }
 
+    /// \brief `clGetKernelWorkGroupInfo`
     std::size_t work_group_size(const CLDevice &device) const
     {
         std::size_t val = 0;
@@ -1038,6 +1078,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         return val;
     }
 
+    /// \brief `clGetKernelWorkGroupInfo`
     std::array<std::size_t, 3> compile_work_group_size(
         const CLDevice &device) const
     {
@@ -1052,6 +1093,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         return val;
     }
 
+    /// \brief `clGetKernelWorkGroupInfo`
     ::cl_ulong local_mem_size(const CLDevice &device) const
     {
         std::size_t val = 0;
@@ -1063,6 +1105,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         return val;
     }
 
+    /// \brief `clGetKernelWorkGroupInfo`
     std::size_t preferred_work_group_size_multiple(
         const CLDevice &device) const
     {
@@ -1077,6 +1120,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         return val;
     }
 
+    /// \brief `clGetKernelWorkGroupInfo`
     ::cl_ulong private_mem_size(const CLDevice &device) const
     {
         std::size_t val = 0;
@@ -1088,6 +1132,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         return val;
     }
 
+    /// \brief `clGetKernelArgInfo`
     ::cl_kernel_arg_address_qualifier arg_address_qualifier(
         ::cl_uint arg_index) const
     {
@@ -1101,6 +1146,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         return val;
     }
 
+    /// \brief `clGetKernelArgInfo`
     ::cl_kernel_arg_access_qualifier arg_access_qualifier(
         ::cl_uint arg_index) const
     {
@@ -1114,6 +1160,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         return val;
     }
 
+    /// \brief `clGetKernelArgInfo`
     std::string arg_type_name(::cl_uint arg_index) const
     {
         ::cl_int status = CL_SUCCESS;
@@ -1137,6 +1184,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         return std::string(static_cast<const char *>(vec.data()));
     }
 
+    /// \brief `clGetKernelArgInfo`
     ::cl_kernel_arg_type_qualifier arg_type_qualifier(
         ::cl_uint arg_index) const
     {
@@ -1150,6 +1198,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         return val;
     }
 
+    /// \brief `clGetKernelArgInfo`
     std::string arg_name(::cl_uint arg_index) const
     {
         ::cl_int status = CL_SUCCESS;
@@ -1205,6 +1254,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
     public:
     CLCommandQueue(::cl_command_queue ptr = nullptr) { reset(ptr); }
 
+    /// \brief `clCreateCommandQueue`
     CLCommandQueue(const CLContext &context, const CLDevice &device,
         ::cl_command_queue_properties properties)
     {
@@ -1237,6 +1287,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return CLDevice(ptr);
     }
 
+    /// \brief `clEnqueueNDRangeKernel`
     ::cl_int enqueue_nd_range_kernel(const CLKernel &kernel,
         ::cl_uint work_dim, const CLNDRange &global_work_offset,
         const CLNDRange &global_work_size, const CLNDRange &local_work_size,
@@ -1259,6 +1310,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueTask`
     ::cl_int enqueue_task(const CLKernel &kernel,
         const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
     {
@@ -1278,6 +1330,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
 
     // clEnqueueNativeKernel
 
+    /// \brief `clEnqueueReadBuffer`
     ::cl_int enqueue_read_buffer(const CLMemory &buffer,
         ::cl_bool blocking_read, std::size_t offset, std::size_t size,
         void *ptr, const std::vector<CLEvent> &event_wait_list,
@@ -1298,6 +1351,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueWriteBuffer`
     ::cl_int enqueue_write_buffer(const CLMemory &buffer,
         ::cl_bool blocking_write, std::size_t offset, std::size_t size,
         void *ptr, const std::vector<CLEvent> &event_wait_list,
@@ -1318,6 +1372,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueReadBufferRect`
     ::cl_int enqueue_read_buffer_rect(const CLMemory &buffer,
         ::cl_bool blocking_read,
         const std::array<std::size_t, 3> &buffer_origin,
@@ -1344,6 +1399,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueWriteBufferRect`
     ::cl_int enqueue_write_buffer_rect(const CLMemory &buffer,
         ::cl_bool blocking_write,
         const std::array<std::size_t, 3> &buffer_origin,
@@ -1370,6 +1426,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueCopyBuffer`
     ::cl_int enqueue_copy_buffer(const CLMemory &src_buffer,
         const CLMemory &dst_buffer, std::size_t src_offset,
         std::size_t dst_offset, std::size_t size,
@@ -1390,6 +1447,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueCopyBufferRect`
     ::cl_int enqueue_copy_buffer_rect(const CLMemory &src_buffer,
         const CLMemory &dst_buffer,
         const std::array<std::size_t, 3> &src_origin,
@@ -1417,6 +1475,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueFillBuffer`
     ::cl_int enqueue_fill_buffer(const CLMemory &buffer, const void *pattern,
         std::size_t pattern_size, std::size_t offset, std::size_t size,
         const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
@@ -1436,6 +1495,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueMapBuffer`
     void *enqueue_map_buffer(const CLMemory &buffer, ::cl_bool blocking_map,
         ::cl_map_flags map_flags, std::size_t offset, std::size_t size,
         const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
@@ -1456,6 +1516,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return ptr;
     }
 
+    /// \brief `clEnqueueReadImage`
     ::cl_int enqueue_read_image(const CLMemory &image, ::cl_bool blocking_read,
         const std::array<std::size_t, 3> &origin,
         const std::array<std::size_t, 3> &region, std::size_t row_pitch,
@@ -1478,6 +1539,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueWriteImage`
     ::cl_int enqueue_write_image(const CLMemory &image,
         ::cl_bool blocking_write, const std::array<std::size_t, 3> &origin,
         const std::array<std::size_t, 3> &region, std::size_t row_pitch,
@@ -1500,6 +1562,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueCopyImage`
     ::cl_int enqueue_copy_image(const CLMemory &src_image,
         const CLMemory &dst_image,
         const std::array<std::size_t, 3> &src_origin,
@@ -1523,6 +1586,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueFillImage`
     ::cl_int enqueue_fill_image(const CLMemory &image, const void *fill_color,
         const std::array<std::size_t, 3> &origin,
         const std::array<std::size_t, 3> &region,
@@ -1543,6 +1607,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueMapImage`
     void *enqueue_map_image(const CLMemory &image, ::cl_bool blocking_map,
         ::cl_map_flags map_flags, const std::array<std::size_t, 3> &origin,
         const std::array<std::size_t, 3> &region, std::size_t &image_row_pitch,
@@ -1566,6 +1631,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return ptr;
     }
 
+    /// \brief `clEnqueueCopyImageToBuffer`
     ::cl_int enqueue_copy_image_to_buffer(const CLMemory &src_image,
         const CLMemory &dst_buffer,
         const std::array<std::size_t, 3> &src_origin,
@@ -1587,6 +1653,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
 
         return status;
     }
+
+    /// \brief `clEnqueueCopyBufferToImage`
     ::cl_int enqueue_copy_buffer_to_image(const CLMemory &src_buffer,
         const CLMemory &dst_image, std::size_t src_offset,
         const std::array<std::size_t, 3> &dst_origin,
@@ -1609,6 +1677,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueUnmapMemObject`
     ::cl_int enqueue_unmap_mem_object(const CLMemory &memobj, void *mapped_ptr,
         const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
     {
@@ -1628,6 +1697,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueMigrateMemObjects`
     ::cl_int enqueue_migrate_mem_objects(
         const std::vector<CLMemory> &mem_objects,
         ::cl_mem_migration_flags flags,
@@ -1653,6 +1723,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueMarkerWithWaitList`
     ::cl_int enqueue_marker_with_wait_list(
         const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
     {
@@ -1671,6 +1742,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clEnqueueBarrierWithWaitList`
     ::cl_int enqueue_barrier_with_wait_list(
         const std::vector<CLEvent> &event_wait_list, CLEvent &event) const
     {
@@ -1689,6 +1761,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clFlush`
     ::cl_int flush() const
     {
         ::cl_int status = ::clFlush(get());
@@ -1697,6 +1770,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
+    /// \brief `clFinish`
     ::cl_int finish() const
     {
         ::cl_int status = ::clFinish(get());
@@ -1740,6 +1814,7 @@ inline CLCommandQueue CLEvent::get_command_queue() const
 
     return CLCommandQueue(ptr);
 }
+
 inline std::vector<CLKernel> CLProgram::get_kernels() const
 {
     ::cl_int status = CL_SUCCESS;
