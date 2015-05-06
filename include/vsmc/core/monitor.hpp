@@ -308,13 +308,11 @@ class Monitor
             return;
         }
 
-        buffer_.resize(static_cast<std::size_t>(particle.size()) * dim_);
+        const std::size_t N = static_cast<std::size_t>(particle.size());
+        buffer_.resize(N * dim_);
         eval_(iter, dim_, particle, buffer_.data());
-#ifdef VSMC_CBLAS_INT
-        eval_cblas(particle);
-#else  // VSMC_CBLAS_INT
-        eval_loop(particle);
-#endif // VSMC_CBLAS_INT
+        math::gemv(ColMajor, NoTrans, dim_, N, 1, buffer_.data(), dim_,
+            particle.weight_set().weight_data(), 1, 0, result_.data(), 1);
         push_back(iter);
     }
 
@@ -350,26 +348,6 @@ class Monitor
     {
         index_.push_back(iter);
         record_.insert(record_.end(), result_.begin(), result_.end());
-    }
-
-#ifdef VSMC_CBLAS_INT
-    void eval_cblas(const Particle<T> &particle)
-    {
-        ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,
-            static_cast<VSMC_CBLAS_INT>(dim_),
-            static_cast<VSMC_CBLAS_INT>(particle.size()), 1, buffer_.data(),
-            static_cast<VSMC_CBLAS_INT>(dim_),
-            particle.weight_set().weight_data(), 1, 0, result_.data(), 1);
-    }
-#endif
-
-    void eval_loop(const Particle<T> &particle)
-    {
-        std::fill(result_.begin(), result_.end(), 0.0);
-        std::size_t j = 0;
-        for (std::size_t i = 0; i != particle.size(); ++i)
-            for (std::size_t d = 0; d != dim_; ++d, ++j)
-                result_[d] += particle.weight_set().weight(i) * buffer_[j];
     }
 }; // class Monitor
 

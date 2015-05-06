@@ -76,10 +76,7 @@ class WeightSet
     /// \brief Normalize logarithm weights such that the maximum is zero
     static void normalize_log_weight(std::size_t N, double *log_weight)
     {
-        double dmax = log_weight[0];
-        for (std::size_t i = 0; i != N; ++i)
-            if (dmax < log_weight[i])
-                dmax = log_weight[i];
+        double dmax = *(std::max_element(log_weight, log_weight + N));
         for (std::size_t i = 0; i != N; ++i)
             log_weight[i] -= dmax;
     }
@@ -88,10 +85,11 @@ class WeightSet
     /// ESS
     static double normalize_weight(std::size_t N, double *weight)
     {
-        double coeff = 1 / math::asum(N, weight);
-        math::scal(N, coeff, weight);
+        double coeff = 1 / math::asum(N, weight, 1);
+        math::scal(N, coeff, weight, 1);
+        double res = math::nrm2(N, weight, 1);
 
-        return 1 / math::dot(N, weight, weight);
+        return 1 / (res * res);
     }
 
     /// \brief The number of particles
@@ -367,10 +365,11 @@ class WeightSet
             math::vMul(size_, weight_.data(), first, buffer.data());
         }
 
-        double coeff = 1 / math::asum(size_, buffer.data());
-        math::scal(size_, coeff, buffer.data());
+        double coeff = 1 / math::asum(size_, buffer.data(), 1);
+        math::scal(size_, coeff, buffer.data(), 1);
+        double res = math::nrm2(size_, buffer.data(), 1);
 
-        return 1 / math::dot(size_, buffer.data(), buffer.data());
+        return 1 / (res * res);
     }
 
     /// \brief Compute CESS given (logarithm) unormalized incremental weights

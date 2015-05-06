@@ -59,8 +59,8 @@ class Resample<internal::ResampleResidualStratified>
         integral_.resize(M);
         for (std::size_t i = 0; i != M; ++i)
             residual_[i] = std::modf(N * weight[i], integral_.data() + i);
-        double coeff = 1 / math::asum(M, residual_.data());
-        math::scal(M, coeff, residual_.data());
+        double coeff = 1 / math::asum(M, residual_.data(), 1);
+        math::scal(M, coeff, residual_.data(), 1);
 
         IntType R = 0;
         for (std::size_t i = 0; i != M; ++i)

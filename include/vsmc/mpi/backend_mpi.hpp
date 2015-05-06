@@ -95,10 +95,7 @@ class WeightSetMPI : public WeightSetBase
         const size_type N = static_cast<size_type>(this->size());
         double *const lwptr = this->mutable_log_weight_data();
 
-        double lmax_weight = lwptr[0];
-        for (size_type i = 0; i != N; ++i)
-            if (lmax_weight < lwptr[i])
-                lmax_weight = lwptr[i];
+        double lmax_weight = *(std::max_element(lwptr, lwptr + N));
         double gmax_weight = 0;
         ::boost::mpi::all_reduce(
             world_, lmax_weight, gmax_weight, ::boost::mpi::maximum<double>());
@@ -111,13 +108,14 @@ class WeightSetMPI : public WeightSetBase
         const size_type N = static_cast<size_type>(this->size());
         double *const wptr = this->mutable_weight_data();
 
-        double lcoeff = math::asum(N, wptr);
+        double lcoeff = math::asum(N, wptr, 1);
         double gcoeff = 0;
         ::boost::mpi::all_reduce(world_, lcoeff, gcoeff, std::plus<double>());
         gcoeff = 1 / gcoeff;
-        math::scal(N, gcoeff, wptr);
+        math::scal(N, gcoeff, wptr, 1);
 
-        double less = math::dot(N, wptr, wptr);
+        double less = math::nrm2(N, wptr, 1);
+        less = less * less;
         double gess = 0;
         ::boost::mpi::all_reduce(world_, less, gess, std::plus<double>());
         gess = 1 / gess;

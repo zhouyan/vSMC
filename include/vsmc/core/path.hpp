@@ -204,8 +204,8 @@ class Path
         const std::size_t N = static_cast<std::size_t>(particle.size());
         buffer_.resize(N);
         double grid = eval_(iter, particle, buffer_.data());
-        double integrand =
-            math::dot(N, particle.weight_set().weight_data(), buffer_.data());
+        double integrand = math::dot(
+            N, particle.weight_set().weight_data(), 1, buffer_.data(), 1);
         push_back(iter, grid, integrand);
     }
 

@@ -59,14 +59,21 @@ namespace vsmc
 /// \ingroup Definitions
 enum {
     Dynamic = 0 ///< Used to specify a dimension template parameter is dynamic
-};              // enum Dynamic
+};
 
 /// \brief Matrix order
 /// \ingroup Definitions
 enum MatrixOrder {
     RowMajor = 101, ///< Data are stored row by row in memory
     ColMajor = 102  ///< Data are stored column by column in memory
-};                  // enum MatrixOrder
+};
+
+/// \brief Matrix Transpose
+/// \ingroup Definitions
+enum MatrixTrans {
+    NoTrans = 111, ///< The matrix shall not be transposed
+    Trans = 112    ///< The matrix shall be transposed
+};
 
 /// \brief Monitor stage
 /// \ingroup Definitions
@@ -74,7 +81,7 @@ enum MonitorStage {
     MonitorMove,     ///< Monitor evaluated after moves
     MonitorResample, ///< Monitor evaluated after resampling
     MonitorMCMC      ///< Monitor evaluated after MCMC moves
-};                   // enum MonitorStage
+};
 
 /// \brief Function template argument used for position
 /// \ingroup Definitions
