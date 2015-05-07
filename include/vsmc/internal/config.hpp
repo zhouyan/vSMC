@@ -68,124 +68,84 @@
 
 // Parallelization features
 
-/// \brief Intel Cilk Plus
-/// \ingroup Config
 #ifndef VSMC_HAS_CILK
 #define VSMC_HAS_CILK 0
 #endif
 
-/// \brief Apple Grand Central Dispatch
-/// \ingroup Config
 #ifndef VSMC_HAS_GCD
 #define VSMC_HAS_GCD 0
 #endif
 
-/// \brief OpenMP
-/// \ingroup Config
 #ifndef VSMC_HAS_OMP
 #define VSMC_HAS_OMP 0
 #endif
 
-/// \brief Microsoft Parallel Pattern Library
-/// \ingroup Config
 #ifndef VSMC_HAS_PPL
 #define VSMC_HAS_PPL 0
 #endif
 
-/// \brief Intel Threading Building Blocks
-/// \brief Config
 #ifndef VSMC_HAS_TBB
 #define VSMC_HAS_TBB 0
 #endif
 
-/// \brief Allows vSMC to use Intel TBB
-/// \ingroup Config
 #ifndef VSMC_USE_TBB
 #define VSMC_USE_TBB VSMC_HAS_TBB
 #endif
 
-/// \brief Intel TBB scalable memory allocator library
-/// \ingroup Config
 #ifndef VSMC_HAS_TBB_MALLOC
 #define VSMC_HAS_TBB_MALLOC VSMC_HAS_TBB
 #endif
 
-/// \brief MPI, Boost.MPI and Boost.Serialization
-/// \ingroup Config
 #ifndef VSMC_HAS_MPI
 #define VSMC_HAS_MPI 0
 #endif
 
-/// \brief OpenCL
-/// \ingroup Config
 #ifndef VSMC_HAS_OPENCL
 #define VSMC_HAS_OPENCL 0
 #endif
 
 // Optional libraries
 
-/// \brief Apple Accelerate framework
-/// \ingroup Config
 #ifndef VSMC_HAS_ACCELERATE
 #define VSMC_HAS_ACCELERATE 0
 #endif
 
-/// \brief Allows vSMC to use the CBLAS part of the Accelerate framework
-/// \ingroup Config
 #ifndef VSMC_USE_ACCELERATE_CBLAS
 #define VSMC_USE_ACCELERATE_CBLAS VSMC_HAS_ACCELERATE
 #endif
 
-/// \brief Allows vSMC to use the vForce part of the Accelerate framework
-/// \ingroup Config
 #ifndef VSMC_USE_ACCELERATE_VFORCE
 #define VSMC_USE_ACCELERATE_VFORCE VSMC_HAS_ACCELERATE
 #endif
 
-/// \brief Generic CBLAS library (requires `cblas.h`)
-/// \ingroup Config
 #ifndef VSMC_HAS_CBLAS
 #define VSMC_HAS_CBLAS 0
 #endif
 
-/// \brief HDF5 library
-/// \ingroup Config
 #ifndef VSMC_HAS_HDF5
 #define VSMC_HAS_HDF5 0
 #endif
 
-/// \brief jemalloc
-/// \ingroup Config
 #ifndef VSMC_HAS_JEMALLOC
 #define VSMC_HAS_JEMALLOC 0
 #endif
 
-/// \brief jemalloc has standard API
-/// \ingroup Config
 #ifndef VSMC_HAS_JEMALLOC_STDAPI
 #define VSMC_HAS_JEMALLOC_STDAPI 0
 #endif
 
-/// \brief Intel Math Kernel Library
-/// \ingroup Config
 #ifndef VSMC_HAS_MKL
 #define VSMC_HAS_MKL 0
 #endif
 
-/// \brief Allows vSMC to use Intel MKL CBLAS
-/// \ingroup Config
 #ifndef VSMC_USE_MKL_CBLAS
 #define VSMC_USE_MKL_CBLAS VSMC_HAS_MKL
 #endif
 
-/// \brief Allows vSMC to use Intel MKL VML
-/// \ingroup Config
 #ifndef VSMC_USE_MKL_VML
 #define VSMC_USE_MKL_VML VSMC_HAS_MKL
 #endif
 
-/// \brief Allows vSMC to use Intel MKL VSL
-/// \ingroup Config
 #ifndef VSMC_USE_MKL_VSL
 #define VSMC_USE_MKL_VSL VSMC_HAS_MKL
 #endif
