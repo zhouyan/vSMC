@@ -43,6 +43,11 @@
 #elif VSMC_USE_ACCELERATE_CBLAS
 #include <Accelerate/Accelerate.h>
 #define VSMC_CBLAS_INT int
+#elif VSMC_HAS_CBLAS
+#include <cblas.h>
+#ifndef VSMC_CBLAS_INT
+#define VSMC_CBLAS_INT int
+#endif
 #endif
 
 namespace vsmc

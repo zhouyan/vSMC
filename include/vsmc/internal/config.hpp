@@ -138,6 +138,10 @@
 #define VSMC_USE_ACCELERATE_VFORCE VSMC_HAS_ACCELERATE
 #endif
 
+#ifndef VSMC_HAS_CBLAS
+#define VSMC_HAS_CBLAS 0
+#endif
+
 #ifndef VSMC_USE_TBB
 #define VSMC_USE_TBB VSMC_HAS_TBB
 #endif
