@@ -51,7 +51,7 @@ namespace vsmc
 namespace math
 {
 
-/// \defgroup CLBAS1 BLAS level 1 routines and functions
+/// \defgroup CBLAS1 BLAS level 1 routines and functions
 /// \ingroup CBLAS
 /// \@{
 
@@ -121,7 +121,7 @@ inline void scal(std::size_t n, T a, T *x, std::size_t incx)
 
 /// \@}
 
-/// \defgroup CLBAS1 BLAS level 2 routines
+/// \defgroup CBLAS2 BLAS level 2 routines
 /// \ingroup CBLAS
 /// \@{
 
