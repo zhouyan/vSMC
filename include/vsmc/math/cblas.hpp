@@ -58,7 +58,7 @@ namespace math
 
 /// \defgroup CBLAS1 BLAS level 1 routines and functions
 /// \ingroup CBLAS
-/// \@{
+/// @{
 
 /// \brief Computes the sum of magnitudes of the vector elements
 template <typename T>
@@ -124,11 +124,11 @@ inline void scal(std::size_t n, T a, T *x, std::size_t incx)
         x[j] *= a;
 }
 
-/// \@}
+/// @}
 
 /// \defgroup CBLAS2 BLAS level 2 routines
 /// \ingroup CBLAS
-/// \@{
+/// @{
 
 /// \brief Computes a matrix-vector product using a general matrix
 template <typename T>
@@ -158,7 +158,7 @@ inline void gemv(MatrixOrder order, MatrixTrans trans, std::size_t m,
     }
 }
 
-/// \@}
+/// @}
 
 } // namespace vsmc::math
 
