@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/m128i.hpp
+// vSMC/include/vsmc/rng/internal/m128i.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -41,6 +41,9 @@
         "TRY TO PACK OR UNPACK A TOO SMALL VECTOR INTO OR FROM m128i")
 
 namespace vsmc
+{
+
+namespace internal
 {
 
 /// \brief Aligned pack
@@ -137,6 +140,8 @@ inline std::basic_istream<CharT, Traits> &m128i_input(
 
     return is;
 }
+
+} // namespace vsmc::internal
 
 } // namespace vsmc
 

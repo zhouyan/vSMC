@@ -37,8 +37,6 @@
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
 
-#include <vsmc/rng/generator_wrapper.hpp>
-
 #include <vsmc/rng/xor_combine_engine.hpp>
 #include <vsmc/rng/xorshift.hpp>
 
@@ -49,10 +47,6 @@
 #include <vsmc/rng/aes.hpp>
 #include <vsmc/rng/aes_ni.hpp>
 #include <vsmc/rng/ars.hpp>
-#endif
-
-#if VSMC_HAS_GSL
-#include <vsmc/rng/gsl.hpp>
 #endif
 
 #if VSMC_HAS_MKL
@@ -66,9 +60,5 @@
 #include <vsmc/rng/stable_distribution.hpp>
 #include <vsmc/rng/u01.hpp>
 #include <vsmc/rng/uniform_real_distribution.hpp>
-
-#if VSMC_HAS_X86
-#include <vsmc/rng/m128i.hpp>
-#endif
 
 #endif // VSMC_RNG_RNG_HPP

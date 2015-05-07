@@ -33,7 +33,7 @@
 #define VSMC_RNG_AES_NI_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/m128i.hpp>
+#include <vsmc/rng/internal/m128i.hpp>
 #include <wmmintrin.h>
 
 #define VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks)                          \
@@ -80,7 +80,7 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
             return os;
 
         for (std::size_t i = 0; i != Rounds + 1; ++i) {
-            m128i_output(os, ks.key_seq_[i]);
+            internal::m128i_output(os, ks.key_seq_[i]);
             os << ' ';
         }
 
@@ -97,7 +97,7 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
 
         AESNIKeySeqStorage<KeySeq, true, Rounds> ks_tmp;
         for (std::size_t i = 0; i != Rounds + 1; ++i)
-            m128i_input(is, ks_tmp.key_seq_[i]);
+            internal::m128i_input(is, ks_tmp.key_seq_[i]);
 
         if (is.good())
             ks = std::move(ks_tmp);
@@ -410,7 +410,7 @@ class AESNIEngine
             return os;
 
         for (std::size_t i = 0; i != Blocks; ++i) {
-            m128i_output(os, eng.buffer_[i]);
+            internal::m128i_output(os, eng.buffer_[i]);
             os << ' ';
         }
         os << eng.ctr_block_ << ' ';
@@ -430,7 +430,7 @@ class AESNIEngine
 
         AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> eng_tmp;
         for (std::size_t i = 0; i != Blocks; ++i)
-            m128i_input(is, eng_tmp.buffer_[i]);
+            internal::m128i_input(is, eng_tmp.buffer_[i]);
         is >> std::ws >> eng_tmp.ctr_block_;
         is >> std::ws >> eng_tmp.key_;
         is >> std::ws >> eng_tmp.index_;
@@ -533,7 +533,7 @@ class AESNIEngine
     void pack_ctr(
         const ctr_block_type &cb, buffer_type &buf, std::true_type) const
     {
-        m128i_pack<0>(std::get<B>(cb), std::get<B>(buf));
+        internal::m128i_pack<0>(std::get<B>(cb), std::get<B>(buf));
         pack_ctr<B + 1>(
             cb, buf, std::integral_constant<bool, B + 1 < Blocks>());
     }

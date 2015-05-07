@@ -98,10 +98,6 @@
 
 // Optional libraries
 
-#ifndef VSMC_HAS_GSL
-#define VSMC_HAS_GSL 0
-#endif
-
 #ifndef VSMC_HAS_HDF5
 #define VSMC_HAS_HDF5 0
 #endif

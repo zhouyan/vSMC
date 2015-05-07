@@ -103,7 +103,7 @@ class ARSKeySeq
     template <std::size_t Rp1>
     void generate(const key_type &key, std::array<__m128i, Rp1> &key_seq)
     {
-        m128i_pack<0>(key, key_seq.front());
+        internal::m128i_pack<0>(key, key_seq.front());
         generate_seq<1>(key_seq, std::integral_constant<bool, 1 < Rp1>());
     }
 

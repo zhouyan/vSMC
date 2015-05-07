@@ -33,24 +33,23 @@
 #define VSMC_RNG_RDRAND_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/generator_wrapper.hpp>
 #include <immintrin.h>
 
 #ifndef VSMC_RDRAND_NTRIAL_MAX
 #define VSMC_RDRAND_NTRIAL_MAX 10
 #endif
 
-#define VSMC_STATIC_ASSERT_RNG_RDRAND_GENERATOR_RESULT_TYPE(ResultType)       \
+#define VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE_RESULT_TYPE(ResultType)          \
     VSMC_STATIC_ASSERT((std::is_same<ResultType, uint16_t>::value ||          \
                            std::is_same<ResultType, std::uint32_t>::value ||  \
                            std::is_same<ResultType, std::uint64_t>::value),   \
-        "**RDRANDGenerator** USED WITH ResultType OTHER THAN "                \
+        "**RDRANDEngine** USED WITH ResultType OTHER THAN "                   \
         "std::uint16_t, std::uint32_t OR std::uint64_t")
 
-#define VSMC_STATIC_ASSERT_RNG_RDRAND_GENERATOR                               \
-    VSMC_STATIC_ASSERT_RNG_RDRAND_GENERATOR_RESULT_TYPE(ResultType);
+#define VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE                                  \
+    VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE_RESULT_TYPE(ResultType);
 
-#define VSMC_RUNTIME_WARNING_RNG_RDRAND_GENERATOR_NTRIAL(ntrial, NTrialMax)   \
+#define VSMC_RUNTIME_WARNING_RNG_RDRAND_ENGINE_NTRIAL(ntrial, NTrialMax)      \
     VSMC_RUNTIME_WARNING((ntrial < NTrialMax),                                \
         "**RDRAND::generate** MAXIMUM NUMBER OF TRIALS EXCEEDED")
 
@@ -58,12 +57,12 @@ namespace vsmc
 {
 
 /// \brief Invoke the RDRAND instruction and return the carry flag
-/// \ingroup RDRNG
+/// \ingroup RDRAND
 template <typename UIntType>
 inline bool rdrand(UIntType *);
 
 /// \brief Invoke the 16-bits RDRAND instruction and return the carry flag
-/// \ingroup RDRNG
+/// \ingroup RDRAND
 template <>
 inline bool rdrand<std::uint16_t>(std::uint16_t *rand)
 {
@@ -75,7 +74,7 @@ inline bool rdrand<std::uint16_t>(std::uint16_t *rand)
 }
 
 /// \brief Invoke the 32-bits RDRAND instruction and return the carry flag
-/// \ingroup RDRNG
+/// \ingroup RDRAND
 template <>
 inline bool rdrand<std::uint32_t>(std::uint32_t *rand)
 {
@@ -87,7 +86,7 @@ inline bool rdrand<std::uint32_t>(std::uint32_t *rand)
 }
 
 /// \brief Invoke the 64-bits RDRAND instruction and return the carry flag
-/// \ingroup RDRNG
+/// \ingroup RDRAND
 template <>
 inline bool rdrand<std::uint64_t>(std::uint64_t *rand)
 {
@@ -99,41 +98,98 @@ inline bool rdrand<std::uint64_t>(std::uint64_t *rand)
 }
 
 /// \brief RDRAND generator
-/// \ingroup RDRNG
+/// \ingroup RDRAND
 template <typename ResultType, std::size_t NTrialMax = VSMC_RDRAND_NTRIAL_MAX>
-class RDRANDGenerator
+class RDRANDEngine
 {
     public:
     typedef ResultType result_type;
 
-    static result_type generate()
+    explicit RDRANDEngine(result_type = 0)
     {
-        VSMC_STATIC_ASSERT_RNG_RDRAND_GENERATOR;
+        VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE;
+    }
 
+    template <typename SeedSeq>
+    explicit RDRANDEngine(SeedSeq &,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
+            RDRANDEngine<ResultType, NTrialMax>>::value>::type * = nullptr)
+    {
+        VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE;
+    }
+
+    void seed(result_type) {}
+
+    template <typename SeedSeq>
+    void seed(SeedSeq &,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
+            RDRANDEngine<ResultType, NTrialMax>>::value>::type * = nullptr)
+    {
+    }
+
+    result_type operator()()
+    {
         result_type r;
         std::size_t ntrial = 0;
         while (!rdrand<result_type>(&r) && ntrial != NTrialMax)
             ++ntrial;
-        VSMC_RUNTIME_WARNING_RNG_RDRAND_GENERATOR_NTRIAL(ntrial, NTrialMax);
+        VSMC_RUNTIME_WARNING_RNG_RDRAND_ENGINE_NTRIAL(ntrial, NTrialMax);
 
         return r;
     }
-}; // class RDRANDGenertor
+
+    void discard(std::size_t nskip)
+    {
+        for (std::size_t i = 0; i != nskip; ++i)
+            operator()();
+    }
+
+    static constexpr result_type _Min = 0;
+    static constexpr result_type _Max = VSMC_MAX_UINT(result_type);
+
+    static constexpr result_type min VSMC_MNE() { return _Min; }
+    static constexpr result_type max VSMC_MNE() { return _Max; }
+
+    friend bool operator==(const RDRANDEngine<ResultType, NTrialMax> &,
+        const RDRANDEngine<ResultType, NTrialMax> &)
+    {
+        return false;
+    }
+
+    friend bool operator!=(const RDRANDEngine<ResultType, NTrialMax> &,
+        const RDRANDEngine<ResultType, NTrialMax> &)
+    {
+        return true;
+    }
+
+    template <typename CharT, typename CharTraits>
+    friend std::basic_ostream<CharT, CharTraits> &operator<<(
+        std::basic_ostream<CharT, CharTraits> &os,
+        const RDRANDEngine<ResultType, NTrialMax> &)
+    {
+        return os;
+    }
+
+    template <typename CharT, typename CharTraits>
+    friend std::basic_istream<CharT, CharTraits> &operator>>(
+        std::basic_istream<CharT, CharTraits> &is,
+        RDRANDEngine<ResultType, NTrialMax> &)
+    {
+        return is;
+    }
+}; // class RDRANDEngine
 
 /// \brief C++11 Engine using 16-bits RDRAND instruction
-/// \ingroup RDRNG
-typedef GeneratorWrapper<std::uint16_t, RDRANDGenerator<std::uint16_t>>
-    RDRAND16;
+/// \ingroup RDRAND
+typedef RDRANDEngine<std::uint16_t> RDRAND16;
 
 /// \brief C++11 Engine using 32-bits RDRAND instruction
-/// \ingroup RDRNG
-typedef GeneratorWrapper<std::uint32_t, RDRANDGenerator<std::uint32_t>>
-    RDRAND32;
+/// \ingroup RDRAND
+typedef RDRANDEngine<std::uint32_t> RDRAND32;
 
 /// \brief C++11 Engine using 64-bits RDRAND instruction
-/// \ingroup RDRNG
-typedef GeneratorWrapper<std::uint64_t, RDRANDGenerator<std::uint64_t>>
-    RDRAND64;
+/// \ingroup RDRAND
+typedef RDRANDEngine<std::uint64_t> RDRAND64;
 
 } // namespace vsmc
 

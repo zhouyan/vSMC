@@ -120,10 +120,6 @@
 /// \ingroup RNG
 /// \brief Distribution random varaites
 
-/// \defgroup GSLRNG GSL
-/// \ingroup RNG
-/// \brief Random number generating using GSL RNG
-
 /// \defgroup MKLRNG Intel Math Kernel Library
 /// \ingroup RNG
 /// \brief Random number generating using MKL RNG
@@ -132,13 +128,9 @@
 /// \ingroup RNG
 /// \brief Random number generating using Random123 RNG
 
-/// \defgroup RDRNG Intel DRNG
+/// \defgroup RDRAND Intel DRNG
 /// \ingroup RNG
 /// \brief Random number generating using Intel RDRAND instructions
-
-/// \defgroup RNGAdapter Adapter
-/// \ingroup RNG
-/// \brief C++11 RNG engines that adapt other RNG generators
 
 /// \defgroup U01 U01
 /// \ingroup RNG
