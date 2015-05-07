@@ -257,7 +257,7 @@ class DiscreteDistribution
             return;
 
         double sumw = std::accumulate(param_.begin(), param_.end(), 0.0);
-        math::scal(param_.size(), 1 / sumw, param_.data());
+        math::scal(param_.size(), 1 / sumw, param_.data(), 1);
     }
 
     bool is_positive(const param_type &param)
