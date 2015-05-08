@@ -34,6 +34,11 @@
 
 #include <vsmc/opencl/internal/common.hpp>
 
+#if defined(VSMC_CLANG) || defined(VSMC_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 namespace vsmc
 {
 
@@ -1910,5 +1915,9 @@ inline std::vector<CLKernel> CLProgram::get_kernels() const
 }
 
 } // namespace vsmc
+
+#if defined(VSMC_CLANG) || defined(VSMC_GCC)
+#pragma GCC diagnostic pop
+#endif
 
 #endif // VSMC_OPENCL_CL_TYPE_HPP
