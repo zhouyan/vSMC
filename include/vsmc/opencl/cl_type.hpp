@@ -57,6 +57,8 @@ class CLBase
     typedef CLPtr pointer;
     typedef typename std::remove_pointer<CLPtr>::type element_type;
 
+    CLBase() : ptr_(nullptr, [](pointer p) { Derived::release(p); }) {}
+
     void reset(pointer ptr = nullptr)
     {
         if (ptr != ptr_.get())
