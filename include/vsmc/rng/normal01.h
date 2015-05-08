@@ -66,23 +66,25 @@
     VSMC_STATIC_INLINE FT vsmc_normal01_##F##_rand(                           \
         vsmc_normal01_##F *rnorm, vsmc_rng *rng)                              \
     {                                                                         \
-        const FT c_2pi = 6.2831853071795865;                                  \
+        const FT c_2pi = VSMC_FP##F##_C(6.2831853071795865);                  \
         if (rnorm->saved) {                                                   \
             rnorm->saved = 0;                                                 \
-            return sqrt(-2 * log(rnorm->u1)) * cos(c_2pi * rnorm->u2);        \
+            return VSMC_SQRT##F(-2 * VSMC_LOG##F(rnorm->u1)) *                \
+                VSMC_COS##F(c_2pi * rnorm->u2);                               \
         } else {                                                              \
-            vsmc_normal01_init(rnorm, rng);                                   \
-            return sqrt(-2 * log(rnorm->u1)) * sin(c_2pi * rnorm->u2);        \
+            vsmc_normal01_##F##_init(rnorm, rng);                             \
+            return VSMC_SQRT##F(-2 * VSMC_LOG##F(rnorm->u1)) *                \
+                VSMC_SIN##F(c_2pi * rnorm->u2);                               \
         }                                                                     \
     }
 
 /// \ingroup CRNG
 VSMC_DEFINE_RNG_NORMAL01(24, float)
 
-/// \ingroup CLRNG
+/// \ingroup CRNG
 VSMC_DEFINE_RNG_NORMAL01_INIT(24, float)
 
-/// \ingroup CLRNG
+/// \ingroup CRNG
 VSMC_DEFINE_RNG_NORMAL01_RAND(24, float)
 
 #if VSMC_HAS_OPENCL_DOUBLE
@@ -90,10 +92,10 @@ VSMC_DEFINE_RNG_NORMAL01_RAND(24, float)
 /// \ingroup CRNG
 VSMC_DEFINE_RNG_NORMAL01(53, double)
 
-/// \ingroup CLRNG
+/// \ingroup CRNG
 VSMC_DEFINE_RNG_NORMAL01_INIT(53, double)
 
-/// \ingroup CLRNG
+/// \ingroup CRNG
 VSMC_DEFINE_RNG_NORMAL01_RAND(53, double)
 
 #endif // VSMC_HAS_OPENCL_DOUBLE
