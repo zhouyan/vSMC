@@ -183,31 +183,7 @@ class CLNDRange
 class CLDevice : public CLBase<::cl_device_id, CLDevice>
 {
     public:
-    CLDevice(::cl_device_id ptr = nullptr)
-    {
-        reset(ptr);
-
-        if (ptr != nullptr) {
-            std::string version;
-            get_info(CL_DEVICE_VERSION, version);
-            version = version.substr(7, 3);
-#if VSMC_OPENCL_VERSION >= 200
-            if (version == std::string("2.0")) {
-                version_ = 200;
-                return;
-            }
-#endif
-            if (version == std::string("1.2")) {
-                version_ = 120;
-                return;
-            }
-            if (version == std::string("1.1")) {
-                version_ = 110;
-                return;
-            }
-        }
-        version_ = 100;
-    }
+    CLDevice(::cl_device_id ptr = nullptr) { reset(ptr); }
 
     /// \brief `clCreateSubDevices`
     std::vector<CLDevice> sub_devices(
@@ -250,18 +226,26 @@ class CLDevice : public CLBase<::cl_device_id, CLDevice>
         if (ptr == nullptr)
             return CL_SUCCESS;
 
-        if (version_ < 120)
+        ::cl_int status = CL_SUCCESS;
+
+        char version[32];
+        status =
+            ::clGetDeviceInfo(ptr, CL_DEVICE_VERSION, 32, version, nullptr);
+        if (status != CL_SUCCESS)
+            return status;
+
+        version[10] = '\0';
+        if (std::strcmp(version, "OpenCL 1.1") == 0)
+            return CL_SUCCESS;
+        if (std::strcmp(version, "OpenCL 1.0") == 0)
             return CL_SUCCESS;
 
-        ::cl_int status = ::clReleaseDevice(ptr);
+        status = ::clReleaseDevice(ptr);
         internal::cl_error_check(
             status, "CLDevice::release", "::clReleaseDevice");
 
         return status;
     }
-
-    private:
-    int version_;
 }; // class CLDevice
 
 /// \brief OpenCL `cl_platform_id` wrapper
