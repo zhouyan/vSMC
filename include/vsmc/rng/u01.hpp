@@ -44,12 +44,12 @@
     struct U01<Left, Right, uint##UBits##_t, FPType> {                        \
         FPType operator()(uint##UBits##_t u) const                            \
         {                                                                     \
-            return ::u01_##left##_##right##_##UBits##_##FBits(u);             \
+            return ::vsmc_u01_##left##_##right##_##UBits##_##FBits(u);        \
         }                                                                     \
                                                                               \
         static FPType uint2fp(uint##UBits##_t u)                              \
         {                                                                     \
-            return ::u01_##left##_##right##_##UBits##_##FBits(u);             \
+            return ::vsmc_u01_##left##_##right##_##UBits##_##FBits(u);        \
         }                                                                     \
     };
 

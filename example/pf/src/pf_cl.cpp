@@ -69,6 +69,8 @@ int main(int argc, char **argv)
         opt += argv[i];
     }
     sampler.particle().value().build(src, opt);
+    if (!sampler.particle().value().build())
+        return -1;
 
     std::string name;
     vsmc::CLManager<>::instance().platform().get_info(CL_PLATFORM_NAME, name);

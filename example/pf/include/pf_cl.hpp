@@ -35,7 +35,7 @@
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/opencl/adapter.hpp>
 #include <vsmc/opencl/backend_cl.hpp>
-#include <Random123/array.h>
+#include <vsmc/rng/philox.h>
 
 #ifdef VSMC_PF_CL_MPI
 #include <vsmc/mpi/backend_mpi.hpp>
@@ -87,7 +87,7 @@ class cv : public cv_base
     private:
     vsmc::CLBuffer<cl_float> obs_x_;
     vsmc::CLBuffer<cl_float> obs_y_;
-    vsmc::CLBuffer<struct r123array4x32> counter_;
+    vsmc::CLBuffer<vsmc_philox4x32_ctr_t> counter_;
 };
 
 class cv_init : public vsmc::InitializeCL<cv>

@@ -36,9 +36,9 @@
 #ifndef VSMC_HAS_OPENCL_DOUBLE
 #define VSMC_HAS_OPENCL_DOUBLE 0
 #endif
-#ifndef UINT64_C
+typedef uint uint32_t;
+typedef ulong uint64_t;
 #define UINT64_C(x) ((ulong)(x##UL))
-#endif
 #ifndef VSMC_STATIC_INLINE
 #if defined(__OPENCL_C_VERSION__) && __OPENCL_C_VERSION__ >= 120
 #define VSMC_STATIC_INLINE static inline
@@ -73,5 +73,17 @@
 #include <math.h>
 #endif // __cplusplus
 #endif // __OPENCL_VERSION__
+
+#ifndef vsmc_rng
+#define vsmc_rng vsmc_philox4x32
+#endif
+
+#ifndef vsmc_rng_init
+#define vsmc_rng_init vsmc_philox4x32_init
+#endif
+
+#ifndef vsmc_rng_rand
+#define vsmc_rng_rand vsmc_philox4x32_rand
+#endif
 
 #endif // VSMC_RNG_INTERNAL_COMMON_H

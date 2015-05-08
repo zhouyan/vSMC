@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/rng/src/rng_r123.cpp
+// vSMC/include/vsmc/rng/rng.h
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,44 +29,12 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "rng_test.hpp"
+#ifndef VSMC_RNG_RNG_H
+#define VSMC_RNG_RNG_H
 
-#if VSMC_HAS_AES_NI
-#define R123_USE_AES_NI 1
-#include <Random123/aes.h>
-#include <Random123/ars.h>
-#endif
+#include <vsmc/rng/philox.h>
+#include <vsmc/rng/gammak1.h>
+#include <vsmc/rng/normal01.h>
+#include <vsmc/rng/u01.h>
 
-#include <Random123/philox.h>
-#include <Random123/threefry.h>
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4521)
-#endif
-#include <Random123/conventional/Engine.hpp>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
-int main(int argc, char **argv)
-{
-    VSMC_RNG_TEST_PRE(rng_r123);
-
-#if VSMC_HAS_AES_NI
-    VSMC_RNG_TEST(r123::Engine<r123::AESNI4x32>);
-    VSMC_RNG_TEST(r123::Engine<r123::ARS4x32_R<7>>);
-#endif
-    VSMC_RNG_TEST(r123::Engine<r123::Philox2x32>);
-    VSMC_RNG_TEST(r123::Engine<r123::Philox4x32>);
-    VSMC_RNG_TEST(r123::Engine<r123::Philox2x64>);
-    VSMC_RNG_TEST(r123::Engine<r123::Philox4x64>);
-    VSMC_RNG_TEST(r123::Engine<r123::Threefry2x32>);
-    VSMC_RNG_TEST(r123::Engine<r123::Threefry4x32>);
-    VSMC_RNG_TEST(r123::Engine<r123::Threefry2x64>);
-    VSMC_RNG_TEST(r123::Engine<r123::Threefry4x64>);
-
-    VSMC_RNG_TEST_POST;
-
-    return 0;
-}
+#endif // VSMC_RNG_RNG_H

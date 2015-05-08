@@ -466,6 +466,7 @@ class StateCL
                 os << program_.build_log(dev) << std::endl;
             }
             os << equal << std::endl;
+            return;
         }
         copy_.build(size_, state_size_);
         build_ = true;

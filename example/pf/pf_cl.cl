@@ -29,7 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/normal01.h>
+#include <vsmc/rng/rng.h>
 
 typedef struct {
     fp_type x_pos;
@@ -43,7 +43,8 @@ typedef struct {
     fp_type y_pos;
 } cv_pos;
 
-fp_type log_likelihood (const cv *sp, fp_type x_obs, fp_type y_obs)
+VSMC_STATIC_INLINE fp_type log_likelihood(
+    const cv *sp, fp_type x_obs, fp_type y_obs)
 {
     const fp_type scale = 10;
     const fp_type nu = 10;
@@ -57,11 +58,9 @@ fp_type log_likelihood (const cv *sp, fp_type x_obs, fp_type y_obs)
     return -0.5F * (nu + 1) * (llh_x + llh_y);
 }
 
-__kernel
-void cv_init (__global cv *state,
-        __global ulong *accept, __global fp_type *log_weight,
-        __global fp_type *x_obs, __global fp_type *y_obs,
-        __global struct r123array4x32 *counter)
+__kernel void cv_init(__global cv *state, __global ulong *accept,
+    __global fp_type *log_weight, __global fp_type *x_obs,
+    __global fp_type *y_obs, __global vsmc_philox4x32_ctr_t *counter)
 {
     ulong i = get_global_id(0);
     if (i >= SIZE)
@@ -71,15 +70,15 @@ void cv_init (__global cv *state,
     const fp_type sd_vel0 = 1;
     cv sp = state[i];
 
-    cburng4x32_rng_t rng;
-    cburng4x32_init(&rng, SEED + i);
-    NORMAL01_4x32 rnorm;
-    NORMAL01_4x32_INIT(&rnorm, &rng);
+    vsmc_rng rng;
+    vsmc_rng_init(&rng, SEED + i);
+    vsmc_normal01 rnorm;
+    vsmc_normal01_init(&rnorm, &rng);
 
-    sp.x_pos = NORMAL01_4x32_RAND(&rnorm, &rng) * sd_pos0;
-    sp.y_pos = NORMAL01_4x32_RAND(&rnorm, &rng) * sd_pos0;
-    sp.x_vel = NORMAL01_4x32_RAND(&rnorm, &rng) * sd_vel0;
-    sp.y_vel = NORMAL01_4x32_RAND(&rnorm, &rng) * sd_vel0;
+    sp.x_pos = vsmc_normal01_rand(&rnorm, &rng) * sd_pos0;
+    sp.y_pos = vsmc_normal01_rand(&rnorm, &rng) * sd_pos0;
+    sp.x_vel = vsmc_normal01_rand(&rnorm, &rng) * sd_vel0;
+    sp.y_vel = vsmc_normal01_rand(&rnorm, &rng) * sd_vel0;
 
     state[i] = sp;
     accept[i] = 1;
@@ -87,11 +86,9 @@ void cv_init (__global cv *state,
     counter[i] = rng.ctr;
 }
 
-__kernel
-void cv_move (ulong iter, __global cv *state,
-        __global ulong *accept, __global fp_type *inc_weight,
-        __global fp_type *x_obs, __global fp_type *y_obs,
-        __global struct r123array4x32 *counter)
+__kernel void cv_move(ulong iter, __global cv *state, __global ulong *accept,
+    __global fp_type *inc_weight, __global fp_type *x_obs,
+    __global fp_type *y_obs, __global vsmc_philox4x32_ctr_t *counter)
 {
     ulong i = get_global_id(0);
     if (i >= SIZE)
@@ -104,16 +101,16 @@ void cv_move (ulong iter, __global cv *state,
     const fp_type delta = 0.1F;
     cv sp = state[i];
 
-    cburng4x32_rng_t rng;
-    cburng4x32_init(&rng, SEED + i);
+    vsmc_rng rng;
+    vsmc_rng_init(&rng, SEED + i);
     rng.ctr = counter[i];
-    NORMAL01_4x32 rnorm;
-    NORMAL01_4x32_INIT(&rnorm, &rng);
+    vsmc_normal01 rnorm;
+    vsmc_normal01_init(&rnorm, &rng);
 
-    sp.x_pos += NORMAL01_4x32_RAND(&rnorm, &rng) * sd_pos + delta * sp.x_vel;
-    sp.y_pos += NORMAL01_4x32_RAND(&rnorm, &rng) * sd_pos + delta * sp.y_vel;
-    sp.x_vel += NORMAL01_4x32_RAND(&rnorm, &rng) * sd_vel;
-    sp.y_vel += NORMAL01_4x32_RAND(&rnorm, &rng) * sd_vel;
+    sp.x_pos += vsmc_normal01_rand(&rnorm, &rng) * sd_pos + delta * sp.x_vel;
+    sp.y_pos += vsmc_normal01_rand(&rnorm, &rng) * sd_pos + delta * sp.y_vel;
+    sp.x_vel += vsmc_normal01_rand(&rnorm, &rng) * sd_vel;
+    sp.y_vel += vsmc_normal01_rand(&rnorm, &rng) * sd_vel;
 
     state[i] = sp;
     accept[i] = 1;
@@ -121,8 +118,8 @@ void cv_move (ulong iter, __global cv *state,
     counter[i] = rng.ctr;
 }
 
-__kernel
-void cv_est (ulong iter, ulong dim, __global cv *state, __global cv_pos *est)
+__kernel void cv_est(
+    ulong iter, ulong dim, __global cv *state, __global cv_pos *est)
 {
     ulong i = get_global_id(0);
     if (i >= SIZE)

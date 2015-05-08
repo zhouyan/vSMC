@@ -101,17 +101,12 @@ IF (RDRAND_FOUND)
     ADD_U01_TEST(rdrand)
 ENDIF (RDRAND_FOUND)
 
-IF (VSMC_RANDOM123_FOUND)
-    ADD_RNG_TEST(r123)
-    ADD_U01_TEST(r123)
-ENDIF (VSMC_RANDOM123_FOUND)
-
 IF (MKL_FOUND)
     ADD_RNG_TEST(mkl "MKL")
     ADD_U01_TEST(mkl "MKL")
 ENDIF (MKL_FOUND)
 
-IF (OPENCL_FOUND AND RANDOM123_FOUND)
+IF (OPENCL_FOUND)
     COPY_FILE (rng rng_cl.cl)
     COPY_FILE (rng rng_cl.R)
     ADD_VSMC_EXECUTABLE (rng_cl
@@ -122,8 +117,7 @@ IF (OPENCL_FOUND AND RANDOM123_FOUND)
         DEPENDS rng_cl rng-files
         COMMAND rng_cl
         "vSMCOpenCLDefault" "vSMCOpenCLDefault" "vSMCOpenCLDefault"
-        "float" "10000"
-        "-I ${VSMC_INCLUDE_DIR} -I ${Random123_INCLUDE_DIR}" ">>rng_cl.out"
+        "float" "10000" "-I ${VSMC_INCLUDE_DIR}" ">>rng_cl.out"
         COMMENT "Running rng_cl"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
     ADD_CUSTOM_TARGET (rng_cl-pdf
@@ -132,4 +126,4 @@ IF (OPENCL_FOUND AND RANDOM123_FOUND)
         COMMENT "Plotting rng_cl-check results"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
     ADD_DEPENDENCIES (rng-pdf rng_cl-pdf)
-ENDIF (OPENCL_FOUND AND RANDOM123_FOUND)
+ENDIF (OPENCL_FOUND)

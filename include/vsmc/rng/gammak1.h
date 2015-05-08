@@ -32,104 +32,33 @@
 #ifndef VSMC_RNG_GAMMAK1_H
 #define VSMC_RNG_GAMMAK1_H
 
-/// \page gammak1 Gamma distribution
-///
-/// - Header: `<vsmc/rng/gammak1.h>`
-/// - Distribution: Gamma with scale 1, shape k,
-///  \f$ f(x) = \frac{1}{\Gamma(k)}x^{k-1}e^{-x} \f$
-/// - Method:
-///   - k >= 1: Ahrens, J.H. and Dieter, U. (1982). Generating gamma variates
-///   by a modified rejection technique. Comm. ACM, 25, 47-54.
-///   - k < 1: Ahrens, J.H. and Dieter, U. (1974). Computer methods for
-///   sampling from gamma, beta, poisson and binomial distributions.
-///   Computing,
-///   12, 223-246.
-///
-/// ### Types and functions
-///
-/// ~~~{.c}
-/// gammak1_<N>x<W>_<F>;
-/// void gammak1_<N>x<W>_<F>_init (gammak1_<N>x<W>_<F> *, cburng<N>x<W>_rng_t
-/// *, <FT> shape);
-/// <FT> gammak1_<N>x<W>_<F>_init (gammak1_<N>x<W>_<F> *, cburng<N>x<W>_rng_t
-/// *);
-/// ~~~
-///
-/// ### Macros
-///
-/// ~~~{.c}
-/// GAMMAK1_<N>x<W>
-/// GAMMAK1_<N>x<W>_INIT
-/// GAMMAK1_<N>x<W>_RAND
-/// ~~~
-///
-/// ### Examples
-///
-/// ~~~{.c}
-/// #define VSMC_HAS_OPENCL_DOUBLE 1
-/// #include <vsmc/rng/gammak1.h>
-///
-/// cburng4x32_rng_t rng;
-/// cburng4x32_init(&rng);
-///
-/// double shape = 2;
-/// gammak1_4x32_53 rgamma_53;
-/// gammak1_4x32_53_init(&rgamma_53, &rng, shape);
-/// double r_53 = gammak1_4x32_53_rand(&rgamma_53, &rng);
-///
-/// GAMMAK1_4x32 rgamma;
-/// GAMMAK1_4x32_INIT(&rgamma, &rng, shape);
-/// double r = GAMMAK1_4x32_RAND(&rgamma, &rng);
-/// ~~~
-
 #include <vsmc/rng/internal/common.h>
-#include <vsmc/rng/urng.h>
+#include <vsmc/rng/philox.h>
 #include <vsmc/rng/normal01.h>
 #include <vsmc/rng/u01.h>
 
 #if VSMC_HAS_OPENCL_DOUBLE
-
-#define GAMMAK1_2x32 gammak1_2x32_53
-#define GAMMAK1_2x32_INIT gammak1_2x32_53_init
-#define GAMMAK1_2x32_RAND gammak1_2x32_53_rand
-
-#define GAMMAK1_2x64 gammak1_2x64_53
-#define GAMMAK1_2x64_INIT gammak1_2x64_53_init
-#define GAMMAK1_2x64_RAND gammak1_2x64_53_rand
-
-#define GAMMAK1_4x32 gammak1_4x32_53
-#define GAMMAK1_4x32_INIT gammak1_4x32_53_init
-#define GAMMAK1_4x32_RAND gammak1_4x32_53_rand
-
-#define GAMMAK1_4x64 gammak1_4x64_53
-#define GAMMAK1_4x64_INIT gammak1_4x64_53_init
-#define GAMMAK1_4x64_RAND gammak1_4x64_53_rand
-
+#define vsmc_gammak1 vsmc_gammak1_53
+#define vsmc_gammak1_init vsmc_gammak1_53_init
+#define vsmc_gammak1_rand vsmc_gammak1_53_rand
 #else // VSMC_HAS_OPENCL_DOUBLE
-
-#define GAMMAK1_2x32 gammak1_2x32_24
-#define GAMMAK1_2x32_INIT gammak1_2x32_24_init
-#define GAMMAK1_2x32_RAND gammak1_2x32_24_rand
-
-#define GAMMAK1_4x32 gammak1_4x32_24
-#define GAMMAK1_4x32_INIT gammak1_4x32_24_init
-#define GAMMAK1_4x32_RAND gammak1_4x32_24_rand
-
+#define vsmc_gammak1 vsmc_gammak1_24
+#define vsmc_gammak1_init vsmc_gammak1_24_init
+#define vsmc_gammak1_rand vsmc_gammak1_24_rand
 #endif // VSMC_HAS_OPENCL_DOUBLE
 
-#define VSMC_DEFINE_RNG_GAMMAK1(N, W, F, FT)                                  \
+#define VSMC_DEFINE_RNG_GAMMAK1(F, FT)                                        \
     typedef struct {                                                          \
         FT c_shape, c_s2, c_s, c_d, c_b, c_si, c_c, c_q0;                     \
-        normal01_##N##x##W##_##F rnorm;                                       \
-    } gammak1_##N##x##W##_##F;
+        vsmc_normal01_##F rnorm;                                              \
+    } vsmc_gammak1_##F;
 
-#define VSMC_DEFINE_RNG_GAMMAK1_INIT(N, W, F, FT)                             \
-    VSMC_STATIC_INLINE void gammak1_##N##x##W##_##F##_init(                   \
-        gammak1_##N##x##W##_##F *rgamma, cburng##N##x##W##_rng_t *rng,        \
-        FT shape)                                                             \
+#define VSMC_DEFINE_RNG_GAMMAK1_INIT(F, FT)                                   \
+    VSMC_STATIC_INLINE void vsmc_gammak1_##F##_init(                          \
+        vsmc_gammak1_##F *rgamma, vsmc_rng *rng, FT shape)                    \
     {                                                                         \
         rgamma->c_shape = shape;                                              \
-        normal01_##N##x##W##_##F##_init(&(rgamma->rnorm), rng);               \
+        vsmc_normal01_##F##_init(&(rgamma->rnorm), rng);                      \
                                                                               \
         if (shape <= 1) {                                                     \
             rgamma->c_s2 = 0;                                                 \
@@ -183,9 +112,9 @@
         rgamma->c_q0 = c_q0;                                                  \
     }
 
-#define VSMC_DEFINE_RNG_GAMMAK1_RAND(N, W, F, FT)                             \
-    VSMC_STATIC_INLINE FT gammak1_##N##x##W##_##F##_rand(                     \
-        gammak1_##N##x##W##_##F *rgamma, cburng##N##x##W##_rng_t *rng)        \
+#define VSMC_DEFINE_RNG_GAMMAK1_RAND(F, FT)                                   \
+    VSMC_STATIC_INLINE FT vsmc_gammak1_##F##_rand(                            \
+        vsmc_gammak1_##F *rgamma, vsmc_rng *rng)                              \
     {                                                                         \
         const FT c_shape = rgamma->c_shape;                                   \
         const FT c_s2 = rgamma->c_s2;                                         \
@@ -203,7 +132,7 @@
             return 0;                                                         \
                                                                               \
         if (c_shape == 1) {                                                   \
-            FT u = u01_open_open_##W##_##F(cburng##N##x##W##_rand(rng));      \
+            FT u = vsmc_u01_open_open_32_##F(vsmc_rng_rand(rng));             \
             return -log(u);                                                   \
         }                                                                     \
                                                                               \
@@ -211,8 +140,8 @@
             const FT c_exp_m1 = 0.3678794411714423;                           \
             FT b = 1 + c_exp_m1 * c_shape;                                    \
             while (true) {                                                    \
-                FT u = u01_open_open_##W##_##F(cburng##N##x##W##_rand(rng));  \
-                FT v = u01_open_open_##W##_##F(cburng##N##x##W##_rand(rng));  \
+                FT u = vsmc_u01_open_open_32_##F(vsmc_rng_rand(rng));         \
+                FT v = vsmc_u01_open_open_32_##F(vsmc_rng_rand(rng));         \
                 FT p = b * u;                                                 \
                 FT e = -log(v);                                               \
                 if (p >= 1) {                                                 \
@@ -227,12 +156,12 @@
             }                                                                 \
         }                                                                     \
                                                                               \
-        FT t = normal01_##N##x##W##_##F##_rand(&(rgamma->rnorm), rng);        \
+        FT t = vsmc_normal01_##F##_rand(&(rgamma->rnorm), rng);               \
         FT x = c_s + t * 0.5f;                                                \
         if (t >= 0)                                                           \
             return x * x;                                                     \
                                                                               \
-        FT u = u01_open_open_##W##_##F(cburng##N##x##W##_rand(rng));          \
+        FT u = vsmc_u01_open_open_32_##F(vsmc_rng_rand(rng));                 \
         if (c_d * u <= t * t * t)                                             \
             return x * x;                                                     \
                                                                               \
@@ -266,8 +195,8 @@
         }                                                                     \
                                                                               \
         while (true) {                                                        \
-            FT e = u01_open_open_##W##_##F(cburng##N##x##W##_rand(rng));      \
-            FT u = u01_open_open_##W##_##F(cburng##N##x##W##_rand(rng));      \
+            FT e = vsmc_u01_open_open_32_##F(vsmc_rng_rand(rng));             \
+            FT u = vsmc_u01_open_open_32_##F(vsmc_rng_rand(rng));             \
             e = -log(e);                                                      \
             u = u + u - 1;                                                    \
             FT t = u < 0 ? c_b - c_si * e : c_b + c_si * e;                   \
@@ -302,51 +231,24 @@
     }
 
 /// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1(2, 32, 24, float)
-/// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1(4, 32, 24, float)
+VSMC_DEFINE_RNG_GAMMAK1(24, float)
 
 /// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1_INIT(2, 32, 24, float)
-/// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1_INIT(4, 32, 24, float)
+VSMC_DEFINE_RNG_GAMMAK1_INIT(24, float)
 
 /// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1_RAND(2, 32, 24, float)
-/// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1_RAND(4, 32, 24, float)
+VSMC_DEFINE_RNG_GAMMAK1_RAND(24, float)
 
 #if VSMC_HAS_OPENCL_DOUBLE
 
 /// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1(2, 32, 53, double)
-/// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1(4, 32, 53, double)
+VSMC_DEFINE_RNG_GAMMAK1(53, double)
 
 /// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1_INIT(2, 32, 53, double)
-/// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1_INIT(4, 32, 53, double)
+VSMC_DEFINE_RNG_GAMMAK1_INIT(53, double)
 
 /// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1_RAND(2, 32, 53, double)
-/// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1_RAND(4, 32, 53, double)
-
-/// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1(2, 64, 53, double)
-/// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1(4, 64, 53, double)
-
-/// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1_INIT(2, 64, 53, double)
-/// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1_INIT(4, 64, 53, double)
-
-/// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1_RAND(2, 64, 53, double)
-/// \ingroup CLRNG
-VSMC_DEFINE_RNG_GAMMAK1_RAND(4, 64, 53, double)
+VSMC_DEFINE_RNG_GAMMAK1_RAND(53, double)
 
 #endif // VSMC_HAS_OPENCL_DOUBLE
 
