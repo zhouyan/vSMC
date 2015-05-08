@@ -36,22 +36,22 @@
 
 #if VSMC_HAS_OPENCL_DOUBLE
 
-#define vsmc_u01_open_open_32 u01_open_open_32_53
-#define vsmc_u01_open_closed_32 u01_open_closed_32_53
-#define vsmc_u01_closed_open_32 u01_closed_closed_32_53
-#define vsmc_u01_closed_closed_32 u01_closed_closed_32_53
+#define vsmc_u01_open_open_32 vsmc_u01_open_open_32_53
+#define vsmc_u01_open_closed_32 vsmc_u01_open_closed_32_53
+#define vsmc_u01_closed_open_32 vsmc_u01_closed_closed_32_53
+#define vsmc_u01_closed_closed_32 vsmc_u01_closed_closed_32_53
 
-#define vsmc_u01_open_open_64 u01_open_open_64_53
-#define vsmc_u01_open_closed_64 u01_open_closed_64_53
-#define vsmc_u01_closed_open_64 u01_closed_closed_64_53
-#define vsmc_u01_closed_closed_64 u01_closed_closed_64_53
+#define vsmc_u01_open_open_64 vsmc_u01_open_open_64_53
+#define vsmc_u01_open_closed_64 vsmc_u01_open_closed_64_53
+#define vsmc_u01_closed_open_64 vsmc_u01_closed_closed_64_53
+#define vsmc_u01_closed_closed_64 vsmc_u01_closed_closed_64_53
 
 #else // VSMC_HAS_openCL_DOUBLE
 
-#define vsmc_u01_open_open_32 u01_open_open_32_24
-#define vsmc_u01_open_closed_32 u01_open_closed_32_24
-#define vsmc_u01_closed_open_32 u01_closed_closed_32_24
-#define vsmc_u01_closed_closed_32 u01_closed_closed_32_24
+#define vsmc_u01_open_open_32 vsmc_u01_open_open_32_24
+#define vsmc_u01_open_closed_32 vsmc_u01_open_closed_32_24
+#define vsmc_u01_closed_open_32 vsmc_u01_closed_closed_32_24
+#define vsmc_u01_closed_closed_32 vsmc_u01_closed_closed_32_24
 
 #endif // VSMC_HAS_OPENCL_DOUBLE
 
