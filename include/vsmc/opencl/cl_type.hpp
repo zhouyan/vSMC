@@ -191,19 +191,22 @@ class CLDevice : public CLBase<::cl_device_id, CLDevice>
             std::string version;
             get_info(CL_DEVICE_VERSION, version);
             version = version.substr(7, 3);
-            static int check_opencl_version(const std::string &version)
-            {
 #if VSMC_OPENCL_VERSION >= 200
-                if (version == std::string("2.0"))
-                    version_ = 200;
+            if (version == std::string("2.0")) {
+                version_ = 200;
+                return;
+            }
 #endif
-                if (version == std::string("1.2"))
-                    version_ = 120;
-                if (version == std::string("1.1"))
-                    version_ = 110;
-                version_ = 100;
+            if (version == std::string("1.2")) {
+                version_ = 120;
+                return;
+            }
+            if (version == std::string("1.1")) {
+                version_ = 110;
+                return;
             }
         }
+        version_ = 100;
     }
 
     /// \brief `clCreateSubDevices`
