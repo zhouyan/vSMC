@@ -42,21 +42,19 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    vsmc::CLSetup<rng_device> &rng_setup =
-        vsmc::CLSetup<rng_device>::instance();
+    vsmc::CLSetup<> &rng_setup = vsmc::CLSetup<>::instance();
     rng_setup.platform(argv[1]);
     rng_setup.device_vendor(argv[2]);
     rng_setup.device_type(argv[3]);
 
-    if (!vsmc::CLManager<rng_device>::instance().setup()) {
+    if (!vsmc::CLManager<>::instance().setup()) {
         std::cout << "Failed to setup OpenCL environment" << std::endl;
         std::cout << "Platform name: " << argv[1] << std::endl;
         std::cout << "Device type:   " << argv[2] << std::endl;
         std::cout << "Device vendor: " << argv[3] << std::endl;
         return -1;
     }
-    vsmc::CLManager<rng_device> &manager =
-        vsmc::CLManager<rng_device>::instance();
+    vsmc::CLManager<> &manager = vsmc::CLManager<>::instance();
 
     bool use_double = false;
     if (std::string(argv[4]) == std::string("double"))
@@ -78,7 +76,25 @@ int main(int argc, char **argv)
     }
 
     vsmc::CLProgram program(manager.create_program(src));
-    program.build(manager.device_vec(), opt);
+    cl_int status = program.build(manager.device_vec(), opt);
+    if (status != CL_SUCCESS) {
+        std::vector<vsmc::CLDevice> dev_vec(program.get_device());
+        std::string equal(75, '=');
+        std::string dash(75, '-');
+        std::string name;
+        for (const auto &dev : dev_vec) {
+            dev.get_info(CL_DEVICE_NAME, name);
+            std::cout << equal << std::endl;
+            if (program.build_status(dev) == CL_BUILD_SUCCESS)
+                std::cout << "Build success for " << name << std::endl;
+            else
+                std::cout << "Build failure for " << name << std::endl;
+            std::cout << dash << std::endl;
+            std::cout << program.build_log(dev) << std::endl;
+        }
+        std::cout << equal << std::endl;
+        return -1;
+    }
 
     std::cout << std::string(120, '-') << std::endl;
     std::cout << "Number of samples: " << N << std::endl;

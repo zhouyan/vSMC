@@ -40,97 +40,76 @@ typedef double fp_type;
 typedef float fp_type;
 #endif
 
-#include <vsmc/rng/normal01.h>
-#include <vsmc/rng/gammak1.h>
-#include <vsmc/rng/u01.h>
+#include <vsmc/rng/rng.h>
 
-#define VSMC_DEFINE_R123_KERNEL(CBRNG, N, W) \
-    __kernel void CBRNG##_##N##x##W##_ker (ulong n,                          \
-            __global uint *output_ui_0,                                      \
-            __global uint *output_ui_1,                                      \
-            __global uint *output_ui_2,                                      \
-            __global uint *output_ui_3)                                      \
-    {                                                                        \
-        ulong i = get_global_id(0);                                          \
-        if (i >= n) return;                                                  \
-        CBRNG##N##x##W##_ctr_t ctr = {{}};                                   \
-        CBRNG##N##x##W##_key_t key = {{}};                                   \
-        CBRNG##N##x##W##_ukey_t ukey = {{}};                                 \
-        ukey.v[0] = i;                                                       \
-        key = CBRNG##N##x##W##keyinit(ukey);                                 \
-        CBRNG##N##x##W##_ctr_t r = CBRNG##N##x##W(ctr, key);                 \
-        output_ui_0[i] = r.v[0];                                             \
-        output_ui_1[i] = r.v[1];                                             \
-        output_ui_2[i] = (N == 4 ? r.v[2] : 0);                              \
-        output_ui_3[i] = (N == 4 ? r.v[3] : 0);                              \
-    }
+__kernel void kernel_philox2x32(ulong n, __global uint *buffer)
+{
+    ulong i = get_global_id(0);
+    if (i >= n)
+        return;
 
-#define VSMC_DEFINE_CBURNG_KERNEL(RNG, N, W) \
-    __kernel void cburng_##RNG##_##N##x##W##_ker (ulong n,                   \
-            __global uint *output_ui_0, __global uint *output_ui_1,          \
-            __global uint *output_ui_2, __global uint *output_ui_3)          \
-    {                                                                        \
-        ulong i = get_global_id(0);                                          \
-        if (i >= n) return;                                                  \
-        RNG##N##x##W##_rng_t rng;                                            \
-        RNG##N##x##W##_init(&rng, i);                                        \
-        output_ui_0[i] = RNG##N##x##W##_rand(&rng);                          \
-        output_ui_1[i] = RNG##N##x##W##_rand(&rng);                          \
-        output_ui_2[i] = (N == 4 ? RNG##N##x##W##_rand(&rng) : 0);           \
-        output_ui_3[i] = (N == 4 ? RNG##N##x##W##_rand(&rng) : 0);           \
-    }
+    vsmc_philox2x32 rng;
+    vsmc_philox2x32_init(&rng, 1);
+    rng.ctr.v[0] = i;
 
-#define VSMC_DEFINE_U01_KERNEL(N, W) \
-    __kernel void u01_##N##x##W##_ker (ulong n, __global fp_type *output)    \
-    {                                                                        \
-        ulong i = get_global_id(0);                                          \
-        if (i >= n) return ;                                                 \
-        cburng##N##x##W##_rng_t rng;                                         \
-        cburng##N##x##W##_init(&rng, i);                                     \
-        output[i] = U01_OPEN_CLOSED_##W(cburng##N##x##W##_rand(&rng));       \
-    }
+    buffer[i * 2 + 0] = vsmc_philox2x32_rand(&rng);
+    buffer[i * 2 + 1] = vsmc_philox2x32_rand(&rng);
+}
 
-#define VSMC_DEFINE_NORMAL01_KERNEL(N, W) \
-    __kernel void normal01_##N##x##W##_ker (ulong n, __global fp_type *output)\
-    {                                                                        \
-        ulong i = get_global_id(0);                                          \
-        if (i >= n) return ;                                                 \
-        cburng##N##x##W##_rng_t rng;                                         \
-        cburng##N##x##W##_init(&rng, i);                                     \
-        NORMAL01_##N##x##W dist;                                             \
-        NORMAL01_##N##x##W##_INIT(&dist, &rng);                              \
-        output[i] = NORMAL01_##N##x##W##_RAND(&dist, &rng);                  \
-    }
+__kernel void kernel_philox4x32(ulong n, __global uint *buffer)
+{
+    ulong i = get_global_id(0);
+    if (i >= n)
+        return;
 
-#define VSMC_DEFINE_GAMMAK1_KERNEL(N, W) \
-    __kernel void gammak1_##N##x##W##_ker (ulong n, __global fp_type *output,\
-            fp_type shape)                                                   \
-    {                                                                        \
-        ulong i = get_global_id(0);                                          \
-        if (i >= n) return ;                                                 \
-        cburng##N##x##W##_rng_t rng;                                         \
-        cburng##N##x##W##_init(&rng, i);                                     \
-        GAMMAK1_##N##x##W dist;                                              \
-        GAMMAK1_##N##x##W##_INIT(&dist, &rng, shape);                        \
-        output[i] = GAMMAK1_##N##x##W##_RAND(&dist, &rng);                   \
-    }
+    vsmc_philox4x32 rng;
+    vsmc_philox4x32_init(&rng, 1);
+    rng.ctr.v[0] = i;
 
-VSMC_DEFINE_R123_KERNEL(threefry, 2, 32)
-VSMC_DEFINE_R123_KERNEL(threefry, 4, 32)
+    buffer[i * 4 + 0] = vsmc_philox4x32_rand(&rng);
+    buffer[i * 4 + 1] = vsmc_philox4x32_rand(&rng);
+    buffer[i * 4 + 2] = vsmc_philox4x32_rand(&rng);
+    buffer[i * 4 + 3] = vsmc_philox4x32_rand(&rng);
+}
 
-VSMC_DEFINE_R123_KERNEL(philox, 2, 32)
-VSMC_DEFINE_R123_KERNEL(philox, 4, 32)
+__kernel void kernel_u01(ulong n, __global fp_type *buffer)
+{
+    ulong i = get_global_id(0);
+    if (i >= n)
+        return;
 
-VSMC_DEFINE_CBURNG_KERNEL(threefry, 2, 32)
-VSMC_DEFINE_CBURNG_KERNEL(threefry, 4, 32)
-VSMC_DEFINE_CBURNG_KERNEL(philox, 2, 32)
-VSMC_DEFINE_CBURNG_KERNEL(philox, 4, 32)
+    vsmc_rng rng;
+    vsmc_rng_init(&rng, i);
 
-VSMC_DEFINE_U01_KERNEL(2, 32)
-VSMC_DEFINE_U01_KERNEL(4, 32)
+    buffer[i] = vsmc_u01_open_closed_32(vsmc_rng_rand(&rng));
+}
 
-VSMC_DEFINE_NORMAL01_KERNEL(2, 32)
-VSMC_DEFINE_NORMAL01_KERNEL(4, 32)
+__kernel void kernel_normal01(ulong n, __global fp_type *buffer)
+{
+    ulong i = get_global_id(0);
+    if (i >= n)
+        return;
 
-VSMC_DEFINE_GAMMAK1_KERNEL(2, 32)
-VSMC_DEFINE_GAMMAK1_KERNEL(4, 32)
+    vsmc_rng rng;
+    vsmc_rng_init(&rng, i);
+
+    vsmc_normal01 dist;
+    vsmc_normal01_init(&dist, &rng);
+
+    buffer[i] = vsmc_normal01_rand(&dist, &rng);
+}
+
+__kernel void kernel_gammak1(ulong n, __global fp_type *buffer, fp_type shape)
+{
+    ulong i = get_global_id(0);
+    if (i >= n)
+        return;
+
+    vsmc_rng rng;
+    vsmc_rng_init(&rng, i);
+
+    vsmc_gammak1 dist;
+    vsmc_gammak1_init(&dist, &rng, shape);
+
+    buffer[i] = vsmc_gammak1_rand(&dist, &rng);
+}
