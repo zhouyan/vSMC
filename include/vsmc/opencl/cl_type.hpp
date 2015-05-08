@@ -237,6 +237,7 @@ class CLDevice : public CLBase<::cl_device_id, CLDevice>
         version[10] = '\0';
         if (std::strcmp(version, "OpenCL 1.1") == 0)
             return CL_SUCCESS;
+
         if (std::strcmp(version, "OpenCL 1.0") == 0)
             return CL_SUCCESS;
 
@@ -336,18 +337,34 @@ class CLContext : public CLBase<::cl_context, CLContext>
     CLContext(::cl_context ptr = nullptr) { reset(ptr); }
 
     /// \brief `clCreateContext`
-    CLContext(const cl_context_properties *properties,
+    CLContext(const ::cl_context_properties *properties,
         const std::vector<CLDevice> &devices)
     {
         ::cl_int status = CL_SUCCESS;
 
-        std::vector<::cl_device_id> devices_ptr;
+        std::vector<::cl_device_id> dptr;
         for (const auto &dev : devices)
-            devices_ptr.push_back(dev.get());
+            dptr.push_back(dev.get());
 
         ::cl_context ptr = ::clCreateContext(properties,
-            static_cast<::cl_uint>(devices.size()), devices_ptr.data(),
-            nullptr, nullptr, &status);
+            static_cast<::cl_uint>(devices.size()), dptr.data(), nullptr,
+            nullptr, &status);
+        internal::cl_error_check(
+            status, "CLContext::CLContext", "::clCreateContext");
+
+        if (status == CL_SUCCESS)
+            reset(ptr);
+    }
+
+    /// \brief `clCreateContext`
+    CLContext(
+        const ::cl_context_properties *properties, const CLDevice &device)
+    {
+        ::cl_int status = CL_SUCCESS;
+
+        ::cl_device_id dptr = device.get();
+        ::cl_context ptr =
+            ::clCreateContext(properties, 1, &dptr, nullptr, nullptr, &status);
         internal::cl_error_check(
             status, "CLContext::CLContext", "::clCreateContext");
 
@@ -357,7 +374,7 @@ class CLContext : public CLBase<::cl_context, CLContext>
 
     /// \brief `clCreateContextFromType`
     CLContext(
-        const cl_context_properties &properties, ::cl_device_type dev_type)
+        const ::cl_context_properties &properties, ::cl_device_type dev_type)
     {
         ::cl_int status = CL_SUCCESS;
 
@@ -1329,7 +1346,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = ::clEnqueueNDRangeKernel(get(), kernel.get(),
             work_dim, global_work_offset.data(), global_work_size.data(),
@@ -1350,7 +1367,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = ::clEnqueueTask(get(), kernel.get(),
             static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
@@ -1372,7 +1389,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = ::clEnqueueReadBuffer(get(), buffer.get(),
             blocking_read, offset, size, ptr,
@@ -1393,7 +1410,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = ::clEnqueueWriteBuffer(get(), buffer.get(),
             blocking_write, offset, size, ptr,
@@ -1418,7 +1435,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = ::clEnqueueReadBufferRect(get(), buffer.get(),
             blocking_read, buffer_origin.data(), host_origin.data(),
@@ -1445,7 +1462,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = ::clEnqueueWriteBufferRect(get(), buffer.get(),
             blocking_write, buffer_origin.data(), host_origin.data(),
@@ -1468,7 +1485,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = ::clEnqueueCopyBuffer(get(), src_buffer.get(),
             dst_buffer.get(), src_offset, dst_offset, size,
@@ -1493,7 +1510,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = ::clEnqueueCopyBufferRect(get(), src_buffer.get(),
             dst_buffer.get(), src_origin.data(), dst_origin.data(),
@@ -1516,7 +1533,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = ::clEnqueueFillBuffer(get(), buffer.get(), pattern,
             pattern_size, offset, size, static_cast<::cl_uint>(eptrs.size()),
@@ -1536,7 +1553,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = CL_SUCCESS;
         void *ptr = ::clEnqueueMapBuffer(get(), buffer.get(), blocking_map,
@@ -1559,7 +1576,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status =
             ::clEnqueueReadImage(get(), image.get(), blocking_read,
@@ -1582,7 +1599,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status =
             ::clEnqueueWriteImage(get(), image.get(), blocking_write,
@@ -1606,7 +1623,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status =
             ::clEnqueueCopyImage(get(), src_image.get(), dst_image.get(),
@@ -1628,7 +1645,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = ::clEnqueueFillImage(get(), image.get(), fill_color,
             origin.data(), region.data(), static_cast<::cl_uint>(eptrs.size()),
@@ -1650,7 +1667,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = CL_SUCCESS;
         void *ptr = ::clEnqueueMapImage(get(), image.get(), blocking_map,
@@ -1674,7 +1691,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = ::clEnqueueCopyImageToBuffer(get(), src_image.get(),
             dst_buffer.get(), src_origin.data(), region.data(), dst_offset,
@@ -1697,7 +1714,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = ::clEnqueueCopyBufferToImage(get(), src_buffer.get(),
             dst_image.get(), src_offset, dst_origin.data(), region.data(),
@@ -1717,7 +1734,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status =
             ::clEnqueueUnmapMemObject(get(), memobj.get(), mapped_ptr,
@@ -1743,7 +1760,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = ::clEnqueueMigrateMemObjects(get(),
             static_cast<::cl_uint>(mptrs.size()), mptrs.data(), flags,
@@ -1763,7 +1780,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = ::clEnqueueMarkerWithWaitList(
             get(), static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
@@ -1782,7 +1799,7 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         std::vector<::cl_event> eptrs;
         for (const auto &e : event_wait_list)
             eptrs.push_back(e.get());
-        ::cl_event eptr = event.get();
+        ::cl_event eptr = nullptr;
 
         ::cl_int status = ::clEnqueueBarrierWithWaitList(
             get(), static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);

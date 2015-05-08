@@ -320,12 +320,10 @@ class CLManager
     {
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(copy_buffer);
 
-        CLEvent event(context_);
-
+        CLEvent event;
         ::cl_int status = command_queue_.enqueue_copy_buffer(src, dst,
             sizeof(CLType) * src_offset, sizeof(CLType) * dst_offset,
             sizeof(CLType) * num, event_wait_list, event);
-
         if (status == CL_SUCCESS)
             return event.wait();
 
@@ -354,12 +352,11 @@ class CLManager
     {
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(run_kernel);
 
-        CLEvent event(context_);
+        CLEvent event;
         ::cl_int status = command_queue_.enqueue_nd_range_kernel(kern, 1,
             CLNDRange(), CLNDRange(get_global_work_size(N, local_size)),
             (local_size == 0 ? CLNDRange() : CLNDRange(local_size)),
             event_wait_list, event);
-
         if (status == CL_SUCCESS)
             return event.wait();
 

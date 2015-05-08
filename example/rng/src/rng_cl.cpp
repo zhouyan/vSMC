@@ -99,10 +99,10 @@ int main(int argc, char **argv)
     std::cout << std::string(120, '-') << std::endl;
     std::cout << "Number of samples: " << N << std::endl;
 
-    if (use_double)
-        rng_cl<cl_double>(N, program);
-    else
-        rng_cl<cl_float>(N, program);
+     if (use_double)
+         rng_cl<cl_double>(N, program);
+     else
+         rng_cl<cl_float>(N, program);
 
     return 0;
 }

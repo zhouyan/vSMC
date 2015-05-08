@@ -169,9 +169,7 @@ inline void rng_cl(std::size_t N, const vsmc::CLProgram &program)
     std::cout << std::string(120, '-') << std::endl;
     rng_cl_philox2x32(N, program);
     rng_cl_philox4x32(N, program);
-    // rng_cl_u01<FPType>(N, program);
-    // rng_cl_normal01<FPType>(N, program);
-    // rng_cl_gammak1<FPType>(N, program);
+    std::cout << std::string(120, '-') << std::endl;
 }
 
 #endif // VSMC_EXAMPLE_RNG_OPENCL_HPP
