@@ -39,6 +39,11 @@
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
+#if defined(VSMC_INTEL)
+#pragma warning(push)
+#pragma warning(disable:1478)
+#endif
+
 namespace vsmc
 {
 
@@ -1918,6 +1923,10 @@ inline std::vector<CLKernel> CLProgram::get_kernels() const
 
 #if defined(VSMC_CLANG) || defined(VSMC_GCC)
 #pragma GCC diagnostic pop
+#endif
+
+#if defined(VSMC_INTEL)
+#pragma warning(pop)
 #endif
 
 #endif // VSMC_OPENCL_CL_TYPE_HPP
