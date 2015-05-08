@@ -108,7 +108,6 @@ ENDIF (MKL_FOUND)
 
 IF (OPENCL_FOUND)
     COPY_FILE (rng rng_cl.cl)
-    COPY_FILE (rng rng_cl.R)
     ADD_VSMC_EXECUTABLE (rng_cl
         ${PROJECT_SOURCE_DIR}/src/rng_cl.cpp "OCL" "HDF5")
     ADD_DEPENDENCIES (rng rng_cl)
@@ -120,10 +119,4 @@ IF (OPENCL_FOUND)
         "float" "10000" "-I ${VSMC_INCLUDE_DIR}" ">>rng_cl.out"
         COMMENT "Running rng_cl"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-    ADD_CUSTOM_TARGET (rng_cl-pdf
-        DEPENDS rng_cl-check
-        COMMAND Rscript "${PROJECT_BINARY_DIR}/rng_cl.R" ">>rng_cl.out"
-        COMMENT "Plotting rng_cl-check results"
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-    ADD_DEPENDENCIES (rng-pdf rng_cl-pdf)
 ENDIF (OPENCL_FOUND)
