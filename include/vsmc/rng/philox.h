@@ -34,13 +34,37 @@
 
 #include <vsmc/rng/internal/common.h>
 
+/// \brief Philox2x32 counter type
+/// \ingroup CRNG
+typedef struct {
+    uint32_t v[2];
+} vsmc_philox2x32_ctr_t;
+
+/// \brief Philox4x32 counter type
+/// \ingroup CRNG
 typedef struct {
     uint32_t v[4];
 } vsmc_philox4x32_ctr_t;
 
+/// \brief Philox2x32 key type
+/// \ingroup CRNG
+typedef struct {
+    uint32_t v[1];
+} vsmc_philox2x32_key_t;
+
+/// \brief Philox4x32 key type
+/// \ingroup CRNG
 typedef struct {
     uint32_t v[2];
 } vsmc_philox4x32_key_t;
+
+VSMC_STATIC_INLINE void vsmc_philox2x32_inc(vsmc_philox2x32_ctr_t *ctr)
+{
+    if (++ctr->v[0] != 0)
+        return;
+    if (++ctr->v[1] != 0)
+        return;
+}
 
 VSMC_STATIC_INLINE void vsmc_philox4x32_inc(vsmc_philox4x32_ctr_t *ctr)
 {
@@ -54,10 +78,31 @@ VSMC_STATIC_INLINE void vsmc_philox4x32_inc(vsmc_philox4x32_ctr_t *ctr)
         return;
 }
 
+VSMC_STATIC_INLINE void vsmc_philox2x32_bumpkey(vsmc_philox2x32_key_t *par)
+{
+    par->v[0] += UINT32_C(0x9E3779B9);
+}
+
 VSMC_STATIC_INLINE void vsmc_philox4x32_bumpkey(vsmc_philox4x32_key_t *par)
 {
-    par->v[0] += 0x9E3779B9U;
-    par->v[1] += 0xBB67AE85U;
+    par->v[0] += UINT32_C(0x9E3779B9);
+    par->v[1] += UINT32_C(0xBB67AE85);
+}
+
+VSMC_STATIC_INLINE void vsmc_philox2x32_round(
+    vsmc_philox2x32_ctr_t *state, vsmc_philox2x32_key_t *par)
+{
+#ifdef __cplusplus
+    uint64_t p = static_cast<uint64_t>(state->v[0]) * UINT64_C(0xD256D193);
+    uint32_t hi = static_cast<uint32_t>(p >> 32) ^ (par->v[0]);
+    uint32_t lo = static_cast<uint32_t>(p);
+#else
+    uint64_t p = ((uint64_t)(state->v[0])) * UINT64_C(0xD256D193);
+    uint32_t hi = ((uint32_t)(p >> 32)) ^ (par->v[0]);
+    uint32_t lo = ((uint32_t)(p));
+#endif
+    state->v[0] = hi ^ (state->v[1]);
+    state->v[1] = lo;
 }
 
 VSMC_STATIC_INLINE void vsmc_philox4x32_round(
@@ -66,25 +111,34 @@ VSMC_STATIC_INLINE void vsmc_philox4x32_round(
 #ifdef __cplusplus
     uint64_t p0 = static_cast<uint64_t>(state->v[0]) * UINT64_C(0xD2511F53);
     uint64_t p2 = static_cast<uint64_t>(state->v[2]) * UINT64_C(0xCD9E8D57);
-    uint32_t hi0 = static_cast<uint32_t>(p2 >> 32) ^ par->v[0];
+    uint32_t hi0 = static_cast<uint32_t>(p2 >> 32) ^ (par->v[0]);
     uint32_t lo1 = static_cast<uint32_t>(p2);
-    uint32_t hi2 = static_cast<uint32_t>(p0 >> 32) ^ par->v[1];
+    uint32_t hi2 = static_cast<uint32_t>(p0 >> 32) ^ (par->v[1]);
     uint32_t lo3 = static_cast<uint32_t>(p0);
 #else
-    uint64_t p0 = ((uint64_t) state->v[0]) * UINT64_C(0xD2511F53);
-    uint64_t p2 = ((uint64_t) state->v[2]) * UINT64_C(0xCD9E8D57);
-    uint32_t hi0 = ((uint32_t) p2 >> 32) ^ par->v[0];
-    uint32_t lo1 = ((uint32_t) p2);
-    uint32_t hi2 = ((uint32_t) p0 >> 32) ^ par->v[1];
-    uint32_t lo3 = ((uint32_t) p0);
+    uint64_t p0 = ((uint64_t)(state->v[0])) * UINT64_C(0xD2511F53);
+    uint64_t p2 = ((uint64_t)(state->v[2])) * UINT64_C(0xCD9E8D57);
+    uint32_t hi0 = ((uint32_t)(p2 >> 32)) ^ (par->v[0]);
+    uint32_t lo1 = ((uint32_t)(p2));
+    uint32_t hi2 = ((uint32_t)(p0 >> 32)) ^ (par->v[1]);
+    uint32_t lo3 = ((uint32_t)(p0));
 #endif
-    state->v[0] = hi0 ^ state->v[1];
+    state->v[0] = hi0 ^ (state->v[1]);
     state->v[1] = lo1;
-    state->v[2] = hi2 ^ state->v[3];
+    state->v[2] = hi2 ^ (state->v[3]);
     state->v[3] = lo3;
 }
 
-/// \brief RNG state structure
+/// \brief Philox2x32 RNG state structure
+/// \ingroup CRNG
+typedef struct {
+    vsmc_philox2x32_ctr_t state;
+    vsmc_philox2x32_ctr_t ctr;
+    vsmc_philox2x32_key_t key;
+    unsigned char index;
+} vsmc_philox2x32;
+
+/// \brief Philox4x32 RNG state structure
 /// \ingroup CRNG
 typedef struct {
     vsmc_philox4x32_ctr_t state;
@@ -93,7 +147,18 @@ typedef struct {
     unsigned char index;
 } vsmc_philox4x32;
 
-/// \brief Initialize RNG state
+/// \brief Initialize Philox2x32 RNG state
+/// \ingroup CRNG
+VSMC_STATIC_INLINE void vsmc_philox2x32_init(
+    vsmc_philox2x32 *rng, uint32_t seed)
+{
+    rng->ctr.v[0] = 0;
+    rng->ctr.v[1] = 0;
+    rng->key.v[0] = seed;
+    rng->index = 2;
+}
+
+/// \brief Initialize Philox4x32 RNG state
 /// \ingroup CRNG
 VSMC_STATIC_INLINE void vsmc_philox4x32_init(
     vsmc_philox4x32 *rng, uint32_t seed)
@@ -103,20 +168,56 @@ VSMC_STATIC_INLINE void vsmc_philox4x32_init(
     rng->ctr.v[2] = 0;
     rng->ctr.v[3] = 0;
     rng->key.v[0] = seed;
+    rng->key.v[1] = 0;
     rng->index = 4;
 }
 
-/// \brief Generate random 32-bits integers
+/// \brief Generate random 32-bits integers from Philox2x32 RNG
+/// \ingroup CRNG
+VSMC_STATIC_INLINE uint32_t vsmc_philox2x32_rand(vsmc_philox2x32 *rng)
+{
+    if (rng->index == 2) {
+        vsmc_philox2x32_inc(&rng->ctr);
+
+        rng->state = rng->ctr;
+        vsmc_philox2x32_key_t par = rng->key;
+
+        vsmc_philox2x32_round(&rng->state, &par); // round 0
+        vsmc_philox2x32_bumpkey(&par);
+        vsmc_philox2x32_round(&rng->state, &par); // round 1
+        vsmc_philox2x32_bumpkey(&par);
+        vsmc_philox2x32_round(&rng->state, &par); // round 2
+        vsmc_philox2x32_bumpkey(&par);
+        vsmc_philox2x32_round(&rng->state, &par); // round 3
+        vsmc_philox2x32_bumpkey(&par);
+        vsmc_philox2x32_round(&rng->state, &par); // round 4
+        vsmc_philox2x32_bumpkey(&par);
+        vsmc_philox2x32_round(&rng->state, &par); // round 5
+        vsmc_philox2x32_bumpkey(&par);
+        vsmc_philox2x32_round(&rng->state, &par); // round 6
+        vsmc_philox2x32_bumpkey(&par);
+        vsmc_philox2x32_round(&rng->state, &par); // round 7
+        vsmc_philox2x32_bumpkey(&par);
+        vsmc_philox2x32_round(&rng->state, &par); // round 8
+        vsmc_philox2x32_bumpkey(&par);
+        vsmc_philox2x32_round(&rng->state, &par); // round 9
+
+        rng->index = 0;
+    }
+
+    return rng->state.v[rng->index++];
+}
+
+/// \brief Generate random 32-bits integers from Philox4x32 RNG
 /// \ingroup CRNG
 VSMC_STATIC_INLINE uint32_t vsmc_philox4x32_rand(vsmc_philox4x32 *rng)
 {
     if (rng->index == 4) {
-        rng->index = 0;
         vsmc_philox4x32_inc(&rng->ctr);
+
         rng->state = rng->ctr;
         vsmc_philox4x32_key_t par = rng->key;
 
-        vsmc_philox4x32_bumpkey(&par);
         vsmc_philox4x32_round(&rng->state, &par); // round 0
         vsmc_philox4x32_bumpkey(&par);
         vsmc_philox4x32_round(&rng->state, &par); // round 1
@@ -136,6 +237,8 @@ VSMC_STATIC_INLINE uint32_t vsmc_philox4x32_rand(vsmc_philox4x32 *rng)
         vsmc_philox4x32_round(&rng->state, &par); // round 8
         vsmc_philox4x32_bumpkey(&par);
         vsmc_philox4x32_round(&rng->state, &par); // round 9
+
+        rng->index = 0;
     }
 
     return rng->state.v[rng->index++];
