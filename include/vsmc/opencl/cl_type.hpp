@@ -1355,7 +1355,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         internal::cl_error_check(status,
             "CLCommandQueue::enqueue_nd_range_kernel",
             "::clEnqueueNDRangeKernel");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1373,7 +1374,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
             static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
         internal::cl_error_check(
             status, "CLCommandQueue::enqueue_task", "::clEnqueueTask");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1396,7 +1398,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
             static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
         internal::cl_error_check(status, "CLCommandQueue::enqueue_read_buffer",
             "::clEnqueueReadBuffer");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1417,7 +1420,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
             static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
         internal::cl_error_check(status,
             "CLCommandQueue::enqueue_write_buffer", "::clEnqueueWriteBuffer");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1445,6 +1449,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         internal::cl_error_check(status,
             "CLCommandQueue::enqueue_read_buffer_rect",
             "::clEnqueueReadBufferRect");
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1472,6 +1478,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         internal::cl_error_check(status,
             "CLCommandQueue::enqueue_write_buffer_rect",
             "::clEnqueueWriteBufferRect");
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1492,7 +1500,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
             static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
         internal::cl_error_check(status,
             "CLCommandQeueue::enqueue_copy_buffer", "::clEnqueueCopyBuffer");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1520,7 +1529,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         internal::cl_error_check(status,
             "CLCommandQueue::enqueue_copy_buffer_rect",
             "::clEnqueueCopyBufferRect");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1540,7 +1550,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
             eptrs.data(), &eptr);
         internal::cl_error_check(status, "CLCommandQueue::enqueue_fill_buffer",
             "::clEnqueueFillBuffer");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1561,7 +1572,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
             eptrs.data(), &eptr, &status);
         internal::cl_error_check(status, "CLCommandQueue::enqueue_map_buffer",
             "::clEnqueueMapBuffer");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return ptr;
     }
@@ -1584,7 +1596,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
                 static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
         internal::cl_error_check(status, "CLCommandQueue::enqueue_read_image",
             "::clEnqueueReadImage");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1607,7 +1620,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
                 static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
         internal::cl_error_check(status, "CLCommandQueue::enqueue_write_image",
             "::clEnqueueWriteImage");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1631,7 +1645,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
                 static_cast<::cl_uint>(eptrs.size()), eptrs.data(), &eptr);
         internal::cl_error_check(status, "CLCommandQueue::enqueue_copy_image",
             "::clEnqueueCopyImage");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1652,7 +1667,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
             eptrs.data(), &eptr);
         internal::cl_error_check(status, "CLCommandQueue::enqueue_fill_image",
             "::clEnqueueFillImage");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1676,7 +1692,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
             eptrs.data(), &eptr, &status);
         internal::cl_error_check(status, "CLCommandQueue::enqueue_map_image",
             "::clEnqueueMapImage");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return ptr;
     }
@@ -1699,7 +1716,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         internal::cl_error_check(status,
             "CLCommandQueue::enqueue_copy_image_to_buffer",
             "::clEnqueueCopyImageToBuffer");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1722,7 +1740,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         internal::cl_error_check(status,
             "CLCommandQueue::enqueue_copy_buffer_to_image",
             "::clEnqueueCopyBufferToImage");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1742,7 +1761,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         internal::cl_error_check(status,
             "CLCommandQueue::enqueue_unmap_mem_object",
             "::clEnqueueUnmapMemObject");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1768,7 +1788,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         internal::cl_error_check(status,
             "CLCommandQueue::enqueue_migrate_mem_objects",
             "::clEnqueueMigrateMemObjects");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1787,7 +1808,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         internal::cl_error_check(status,
             "CLCommandQueue::enqueue_marker_with_wait_list",
             "::clEnqueueMarkerWithWaitList");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
@@ -1806,7 +1828,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         internal::cl_error_check(status,
             "CLCommandQueue::enqueue_barrier_with_wait_list",
             "::clEnqueueBarrierWithWaitList");
-        event.reset(eptr);
+        if (status == CL_SUCCESS)
+            event.reset(eptr);
 
         return status;
     }
