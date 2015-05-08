@@ -132,10 +132,6 @@
 /// \ingroup RNG
 /// \brief Random number generating using Intel RDRAND instructions
 
-/// \defgroup U01 U01
-/// \ingroup RNG
-/// \brief Convert random integers to random floating points
-
 /// \defgroup Xorshift Xorshift
 /// \ingroup RNG
 /// \brief Random number generating using the Xorshift algorithm

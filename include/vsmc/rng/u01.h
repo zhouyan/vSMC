@@ -64,28 +64,28 @@
 #define VSMC_RNG_U01_52 (2048.0 * VSMC_RNG_U01_63)
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1]\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE float vsmc_u01_closed_closed_32_24(uint32_t u)
 {
     return ((u & 0x7fffffc0) + (u & 0x40)) * VSMC_RNG_U01_31f;
 }
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1)\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE float vsmc_u01_closed_open_32_24(uint32_t u)
 {
     return (u >> 8) * VSMC_RNG_U01_24f;
 }
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$(0,1]\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE float vsmc_u01_open_closed_32_24(uint32_t u)
 {
     return (1.0f + (u >> 8)) * VSMC_RNG_U01_24f;
 }
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$(0,1)\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE float vsmc_u01_open_open_32_24(uint32_t u)
 {
     return (0.5f + (u >> 9)) * VSMC_RNG_U01_23f;
@@ -94,7 +94,7 @@ VSMC_STATIC_INLINE float vsmc_u01_open_open_32_24(uint32_t u)
 #if VSMC_HAS_OPENCL_DOUBLE
 
 /// \brief Converting 32-bits unsigned to double precision uniform \f$[0,1]\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE double vsmc_u01_closed_closed_32_53(uint32_t u)
 {
 #ifdef __cplusplus
@@ -105,28 +105,28 @@ VSMC_STATIC_INLINE double vsmc_u01_closed_closed_32_53(uint32_t u)
 }
 
 /// \brief Converting 32-bits unsigned to double precision uniform \f$[0,1)\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE double vsmc_u01_closed_open_32_53(uint32_t u)
 {
     return u * VSMC_RNG_U01_32;
 }
 
 /// \brief Converting 32-bits unsigned to double precision uniform \f$(0,1]\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE double vsmc_u01_open_closed_32_53(uint32_t u)
 {
     return (1.0 + u) * VSMC_RNG_U01_32;
 }
 
 /// \brief Converting 32-bits unsigned to double precision uniform \f$(0,1)\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE double vsmc_u01_open_open_32_53(uint32_t u)
 {
     return (0.5 + u) * VSMC_RNG_U01_32;
 }
 
 /// \brief Converting 64-bits unsigned to double precision uniform \f$[0,1]\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE double vsmc_u01_closed_closed_64_53(uint64_t u)
 {
     return ((u & UINT64_C(0x7ffffffffffffe00)) + (u & 0x200)) *
@@ -134,28 +134,28 @@ VSMC_STATIC_INLINE double vsmc_u01_closed_closed_64_53(uint64_t u)
 }
 
 /// \brief Converting 64-bits unsigned to double precision uniform \f$[0,1)\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE double vsmc_u01_closed_open_64_53(uint64_t u)
 {
     return (u >> 11) * VSMC_RNG_U01_53;
 }
 
 /// \brief Converting 64-bits unsigned to double precision uniform \f$(0,1]\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE double vsmc_u01_open_closed_64_53(uint64_t u)
 {
     return (1.0 + (u >> 11)) * VSMC_RNG_U01_53;
 }
 
 /// \brief Converting 64-bits unsigned to double precision uniform \f$(0,1)\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE double vsmc_u01_open_open_64_53(uint64_t u)
 {
     return (0.5 + (u >> 12)) * VSMC_RNG_U01_52;
 }
 
 /// \brief Converting 64-bits unsigned to single precision uniform \f$[0,1]\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE float vsmc_u01_closed_closed_64_24(uint64_t u)
 {
 #ifdef __cplusplus
@@ -166,7 +166,7 @@ VSMC_STATIC_INLINE float vsmc_u01_closed_closed_64_24(uint64_t u)
 }
 
 /// \brief Converting 64-bits unsigned to single precision uniform \f$[0,1)\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE float vsmc_u01_closed_open_64_24(uint64_t u)
 {
 #ifdef __cplusplus
@@ -177,7 +177,7 @@ VSMC_STATIC_INLINE float vsmc_u01_closed_open_64_24(uint64_t u)
 }
 
 /// \brief Converting 64-bits unsigned to single precision uniform \f$(0,1]\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE float vsmc_u01_open_closed_64_24(uint64_t u)
 {
 #ifdef __cplusplus
@@ -188,7 +188,7 @@ VSMC_STATIC_INLINE float vsmc_u01_open_closed_64_24(uint64_t u)
 }
 
 /// \brief Converting 64-bits unsigned to single precision uniform \f$(0,1)\f$
-/// \ingroup U01
+/// \ingroup CRNG
 VSMC_STATIC_INLINE float vsmc_u01_open_open_64_24(uint64_t u)
 {
 #ifdef __cplusplus
