@@ -112,9 +112,9 @@
 /// \ingroup RNG
 /// \brief Random number generating using AES-NI
 
-/// \defgroup CLRNG OpenCL
+/// \defgroup CRNG C API
 /// \ingroup RNG
-/// \brief Random number generating in OpenCL kernels
+/// \brief Random number generating in C interface
 
 /// \defgroup Distribution Distribution
 /// \ingroup RNG
