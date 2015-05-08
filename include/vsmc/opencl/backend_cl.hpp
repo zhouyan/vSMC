@@ -210,16 +210,12 @@ class StateCL
         , build_id_(0)
         , state_buffer_(state_size_ * size_)
     {
-#if VSMC_OPENCL_VERSION >= 120
         if (manager().opencl_version() >= 120) {
             copy_from_buffer_.resize(
                 size_, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY);
         } else {
             copy_from_buffer_.resize(size_, CL_MEM_READ_ONLY);
         }
-#else
-        copy_from_buffer_.resize(size_, CL_MEM_READ_ONLY);
-#endif
     }
 
     size_type size() const { return size_; }
@@ -374,7 +370,6 @@ class StateCL
     void copy_pre_processor()
     {
         state_idx_host_.resize(size_);
-#if VSMC_OPENCL_VERSION >= 120
         if (manager().opencl_version() >= 120) {
             state_idx_buffer_.resize(size_, CL_MEM_READ_ONLY |
                     CL_MEM_HOST_WRITE_ONLY | CL_MEM_USE_HOST_PTR,
@@ -384,10 +379,6 @@ class StateCL
                 CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
                 state_idx_host_.data());
         }
-#else
-        state_idx_buffer_.resize(size_, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR,
-            state_idx_host_.data());
-#endif
 
         state_tmp_host_.resize(size_ * state_size_);
         state_tmp_buffer_.resize(size_ * state_size_,
@@ -583,7 +574,6 @@ class InitializeCL
     virtual void set_kernel_args(const Particle<T> &particle)
     {
         accept_host_.resize(particle.size());
-#if VSMC_OPENCL_VERSION >= 120
         if (particle.value().manager().opencl_version() >= 120) {
             accept_buffer_.resize(particle.size(), CL_MEM_READ_WRITE |
                     CL_MEM_HOST_READ_ONLY | CL_MEM_USE_HOST_PTR,
@@ -592,10 +582,6 @@ class InitializeCL
             accept_buffer_.resize(particle.size(),
                 CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, accept_host_.data());
         }
-#else
-        accept_buffer_.resize(particle.size(),
-            CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, accept_host_.data());
-#endif
         cl_set_kernel_args(kernel_, 0, particle.value().state_buffer().data(),
             accept_buffer_.data());
     }
@@ -677,7 +663,6 @@ class MoveCL
     virtual void set_kernel_args(std::size_t iter, const Particle<T> &particle)
     {
         accept_host_.resize(particle.size());
-#if VSMC_OPENCL_VERSION >= 120
         if (particle.value().manager().opencl_version() >= 120) {
             accept_buffer_.resize(particle.size(), CL_MEM_READ_WRITE |
                     CL_MEM_HOST_READ_ONLY | CL_MEM_USE_HOST_PTR,
@@ -686,10 +671,6 @@ class MoveCL
             accept_buffer_.resize(particle.size(),
                 CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, accept_host_.data());
         }
-#else
-        accept_buffer_.resize(particle.size(),
-            CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, accept_host_.data());
-#endif
         cl_set_kernel_args(kernel_, 0, static_cast<::cl_ulong>(iter),
             particle.value().state_buffer().data(), accept_buffer_.data());
     }
@@ -762,16 +743,12 @@ class MonitorEvalCL
     virtual void set_kernel_args(
         std::size_t iter, std::size_t dim, const Particle<T> &particle)
     {
-#if VSMC_OPENCL_VERSION >= 120
         if (particle.value().manager().opencl_version() >= 120) {
             buffer_.resize(particle.size() * dim,
                 CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY);
         } else {
             buffer_.resize(particle.size() * dim);
         }
-#else
-        buffer_.resize(particle.size() * dim);
-#endif
         cl_set_kernel_args(kernel_, 0, static_cast<::cl_ulong>(iter),
             static_cast<::cl_ulong>(dim),
             particle.value().state_buffer().data(), buffer_.data());
@@ -845,16 +822,12 @@ class PathEvalCL
 
     virtual void set_kernel_args(std::size_t iter, const Particle<T> &particle)
     {
-#if VSMC_OPENCL_VERSION >= 120
         if (particle.value().manager().opencl_version() >= 120) {
             buffer_.resize(
                 particle.size(), CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY);
         } else {
             buffer_.resize(particle.size());
         }
-#else
-        buffer_.resize(particle.size());
-#endif
         cl_set_kernel_args(kernel_, 0, static_cast<::cl_ulong>(iter),
             particle.value().state_buffer().data(), buffer_.data());
     }
