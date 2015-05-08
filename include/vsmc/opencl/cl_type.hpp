@@ -255,8 +255,9 @@ class CLPlatform : public CLBase<::cl_platform_id, CLPlatform>
             status, "CLPlatform::get_platform", "::clGetPlatformIDs");
 
         std::vector<CLPlatform> plat;
-        for (auto ptr : vec)
-            plat.push_back(CLPlatform(ptr));
+        if (status == CL_SUCCESS)
+            for (auto ptr : vec)
+                plat.push_back(CLPlatform(ptr));
 
         return plat;
     }
@@ -289,8 +290,9 @@ class CLPlatform : public CLBase<::cl_platform_id, CLPlatform>
             status, "CLPlatform::get_device", "::clGetDeviceIDs");
 
         std::vector<CLDevice> dev;
-        for (auto ptr : vec)
-            dev.push_back(CLDevice(ptr));
+        if (status == CL_SUCCESS)
+            for (auto ptr : vec)
+                dev.push_back(CLDevice(ptr));
 
         return dev;
     }
@@ -333,7 +335,8 @@ class CLContext : public CLBase<::cl_context, CLContext>
         internal::cl_error_check(
             status, "CLContext::CLContext", "::clCreateContext");
 
-        reset(ptr);
+        if (status == CL_SUCCESS)
+            reset(ptr);
     }
 
     /// \brief `clCreateContextFromType`
@@ -347,7 +350,8 @@ class CLContext : public CLBase<::cl_context, CLContext>
         internal::cl_error_check(
             status, "CLContext::CLContext", "::clCreateContextFromType");
 
-        reset(ptr);
+        if (status == CL_SUCCESS)
+            reset(ptr);
     }
 
     /// \brief `clGetSupportedImageFormats`
@@ -427,7 +431,8 @@ class CLEvent : public CLBase<::cl_event, CLEvent>
         internal::cl_error_check(
             status, "CLEvent::CLEvent", "::clCreateUserEvent");
 
-        reset(ptr);
+        if (status == CL_SUCCESS)
+            reset(ptr);
     }
 
     /// \brief `clSetUserEventStatus`
@@ -568,7 +573,8 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
         internal::cl_error_check(
             status, "CLMemory::CLMemory", "::clCreateBuffer");
 
-        reset(ptr);
+        if (status == CL_SUCCESS)
+            reset(ptr);
     }
 
     /// \brief `clCreateImage`
@@ -582,7 +588,8 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
         internal::cl_error_check(
             status, "CLMemory::CLMemory", "::clCreateImage");
 
-        reset(ptr);
+        if (status == CL_SUCCESS)
+            reset(ptr);
     }
 
     /// \brief `clCreateSubBuffer`
@@ -643,7 +650,8 @@ class CLSampler : public CLBase<::cl_sampler, CLSampler>
         internal::cl_error_check(
             status, "CLSampler::CLSampler", "::clCreateSampler");
 
-        reset(ptr);
+        if (status == CL_SUCCESS)
+            reset(ptr);
     }
 
     CLContext get_context() const
@@ -705,7 +713,8 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         internal::cl_error_check(
             status, "CLProgram::CLProgram", "::clCreateProgramWithSource");
 
-        reset(ptr);
+        if (status == CL_SUCCESS)
+            reset(ptr);
     }
 
     /// \brief `clCreateProgramWithSource`
@@ -719,7 +728,8 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         internal::cl_error_check(
             status, "CLProgram::CLProgram", "::clCreateProgramWithSource");
 
-        reset(ptr);
+        if (status == CL_SUCCESS)
+            reset(ptr);
     }
 
     /// \brief `clCreateProgramWithBinary`
@@ -744,7 +754,8 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         internal::cl_error_check(
             status, "CLProgram::CLProgram", "::clCreateProgramWithBinary");
 
-        reset(ptr);
+        if (status == CL_SUCCESS)
+            reset(ptr);
     }
 
     /// \brief `clCreateProgramWithBinary`
@@ -760,7 +771,8 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         internal::cl_error_check(
             status, "CLProgram::CLProgram", "::clCreateProgramWithBinary");
 
-        reset(ptr);
+        if (status == CL_SUCCESS)
+            reset(ptr);
     }
 
     /// \brief `clCreateProgramWithBuiltInKernels`
@@ -777,7 +789,8 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         internal::cl_error_check(status, "CLProgram::CLProgram",
             "::clCreateProgramWithBuiltInKernels");
 
-        reset(ptr);
+        if (status == CL_SUCCESS)
+            reset(ptr);
     }
 
     /// \brief `clCreateProgramWithBuiltInKernels`
@@ -791,7 +804,8 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         internal::cl_error_check(status, "CLProgram::CLProgram",
             "::clCreateProgramWithBuiltInKernels");
 
-        reset(ptr);
+        if (status == CL_SUCCESS)
+            reset(ptr);
     }
 
     /// \brief `clLinkProgram`
@@ -815,7 +829,8 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         internal::cl_error_check(
             status, "CLProgram::CLProgram", "::clLinkProgram");
 
-        reset(ptr);
+        if (status == CL_SUCCESS)
+            reset(ptr);
     }
 
     /// \brief `clBuildProgram`
@@ -1002,7 +1017,8 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         internal::cl_error_check(
             status, "CLKernel::CLKernel", "::clCreateKernel");
 
-        reset(ptr);
+        if (status == CL_SUCCESS)
+            reset(ptr);
     }
 
     /// \brief `clSetKernelArg`
@@ -1264,7 +1280,8 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         internal::cl_error_check(status, "CLCommandQueue::CLCommandQueue",
             "::clCreateCommandQueue");
 
-        reset(ptr);
+        if (status == CL_SUCCESS)
+            reset(ptr);
     }
 
     CLContext get_context() const
