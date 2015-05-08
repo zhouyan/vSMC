@@ -32,11 +32,7 @@
 #ifndef VSMC_EXAMPLE_RNG_OUTPUT_DATA_HPP
 #define VSMC_EXAMPLE_RNG_OUTPUT_DATA_HPP
 
-#include <cstddef>
-#include <fstream>
-#include <iomanip>
-#include <string>
-#include <vector>
+#include <vsmc/internal/common.hpp>
 
 template <typename T>
 inline void rng_output_data(const std::string &prog,

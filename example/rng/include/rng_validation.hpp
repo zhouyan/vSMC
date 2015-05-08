@@ -32,10 +32,7 @@
 #ifndef VSMC_EXAMPLE_RNG_VALIDATION_HPP
 #define VSMC_EXAMPLE_RNG_VALIDATION_HPP
 
-#include <iomanip>
-#include <iostream>
-#include <string>
-#include <vector>
+#include <vsmc/internal/common.hpp>
 
 template <typename Eng>
 inline void rng_validation(

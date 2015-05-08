@@ -45,9 +45,6 @@
 #include <vsmc/utility/hdf5io.hpp>
 #endif
 
-#include <fstream>
-#include <iostream>
-
 #define PF_CV_DO(Res) cv_do(sampler, vsmc::Res, argv, "." #Res);
 
 static const std::size_t DataNum = 100;

@@ -35,12 +35,6 @@
 #include <vsmc/opencl/cl_manager.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <vector>
 
 #if VSMC_HAS_HDF5
 #include "rng_output_data_hdf5.hpp"

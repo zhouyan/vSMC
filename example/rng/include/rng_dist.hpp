@@ -36,10 +36,6 @@
 
 #include <vsmc/rng/threefry.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <vector>
 
 #define VSMC_RNG_DIST_B1(Dist, p1)                                            \
     {                                                                         \

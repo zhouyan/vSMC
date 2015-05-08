@@ -33,7 +33,6 @@
 #define VSMC_EXAMPLE_RNG_OUTPUT_DATA_HDF5_HPP
 
 #include <vsmc/utility/hdf5io.hpp>
-#include <fstream>
 
 template <typename T>
 inline void rng_output_data(const std::string &base_name,

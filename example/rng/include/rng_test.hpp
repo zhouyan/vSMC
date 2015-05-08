@@ -34,12 +34,6 @@
 
 #include <vsmc/utility/rdtsc.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#include <cstdlib>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <string>
-#include <vector>
 
 #define VSMC_RNG_TEST_PRE(prog)                                               \
     std::size_t N = 1000000;                                                  \
