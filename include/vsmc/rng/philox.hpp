@@ -94,7 +94,7 @@ template <typename, std::size_t, std::size_t>
 struct PhiloxRoundConstantValue;
 
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
-    std::uint32_t, 2, 0, UINT32_C(0xd256d193))
+    std::uint32_t, 2, 0, UINT32_C(0xD256D193))
 
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
     std::uint32_t, 4, 0, UINT32_C(0xD2511F53))
