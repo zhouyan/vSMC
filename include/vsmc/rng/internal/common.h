@@ -101,14 +101,19 @@ typedef ulong uint64_t;
 #define VSMC_COS24 cosf
 #endif // __OPENCL_VERSION__
 
+/// \brief Default RNG state
+/// \ingroup CRNG
 #ifndef vsmc_rng
 #define vsmc_rng vsmc_philox4x32
 #endif
 
+/// \brief Initialize default RNG state
+/// \ingroup CRNG
 #ifndef vsmc_rng_init
 #define vsmc_rng_init vsmc_philox4x32_init
 #endif
 
+/// \brief Generate random 32-bits integers from default RNG
 #ifndef vsmc_rng_rand
 #define vsmc_rng_rand vsmc_philox4x32_rand
 #endif
