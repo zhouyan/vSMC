@@ -86,10 +86,8 @@ class DispatchObject
     DispatchObject<DispatchType> &operator=(
         DispatchObject<DispatchType> &&other)
     {
-        using std::swap;
-
         if (this != &other && object_ != other.object_)
-            swap(object_, other.object_);
+            std::swap(object_, other.object_);
 
         return *this;
     }

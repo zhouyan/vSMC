@@ -106,13 +106,11 @@ class CLBuffer
 
     CLBuffer<T, ID> &operator=(CLBuffer<T, ID> &&other)
     {
-        using std::swap;
-
         if (this != &other) {
-            swap(size_, other.size_);
-            swap(flag_, other.flag_);
-            swap(host_ptr_, other.host_ptr_);
-            swap(data_, other.data_);
+            std::swap(size_, other.size_);
+            std::swap(flag_, other.flag_);
+            std::swap(host_ptr_, other.host_ptr_);
+            std::swap(data_, other.data_);
         }
 
         return *this;
