@@ -222,31 +222,36 @@ class CLManager
     /// \brief Read an OpenCL buffer of a given type and number of elements
     /// into an iterator
     template <typename CLType, typename OutputIter>
-    void read_buffer(const CLMemory &buf, std::size_t num, OutputIter first,
-        std::size_t offset = 0, const std::vector<CLEvent> &event_wait_list =
-                                    std::vector<CLEvent>()) const
+    ::cl_int read_buffer(const CLMemory &buf, std::size_t num,
+        OutputIter first, std::size_t offset = 0,
+        const std::vector<CLEvent> &event_wait_list =
+            std::vector<CLEvent>()) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(read_buffer);
 
         CLEvent event;
         std::vector<CLType> buffer(num);
-        command_queue_.enqueue_read_buffer(buf, CL_TRUE,
+        ::cl_int status = command_queue_.enqueue_read_buffer(buf, CL_TRUE,
             sizeof(CLType) * offset, sizeof(CLType) * num, buffer.data(),
             event_wait_list, event);
-        std::copy(buffer.begin(), buffer.end(), first);
+        if (status == CL_SUCCESS)
+            std::copy(buffer.begin(), buffer.end(), first);
+
+        return status;
     }
 
     /// \brief Read an OpenCL buffer of a given type and number of elements
     /// into a pointer
     template <typename CLType>
-    void read_buffer(const CLMemory &buf, std::size_t num, CLType *first,
+    ::cl_int read_buffer(const CLMemory &buf, std::size_t num, CLType *first,
         std::size_t offset = 0, const std::vector<CLEvent> &event_wait_list =
                                     std::vector<CLEvent>()) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(read_buffer);
 
         CLEvent event;
-        command_queue_.enqueue_read_buffer(buf, CL_TRUE,
+
+        return command_queue_.enqueue_read_buffer(buf, CL_TRUE,
             sizeof(CLType) * offset, sizeof(CLType) * num, first,
             event_wait_list, event);
     }
@@ -254,16 +259,18 @@ class CLManager
     /// \brief Write an OpenCL buffer of a given type and number of elements
     /// from an iterator
     template <typename CLType, typename InputIter>
-    void write_buffer(const CLMemory &buf, std::size_t num, InputIter first,
-        std::size_t offset = 0, const std::vector<CLEvent> &event_wait_list =
-                                    std::vector<CLEvent>()) const
+    ::cl_int write_buffer(const CLMemory &buf, std::size_t num,
+        InputIter first, std::size_t offset = 0,
+        const std::vector<CLEvent> &event_wait_list =
+            std::vector<CLEvent>()) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(write_buffer);
 
         CLEvent event;
         std::vector<CLType> buffer(num);
         std::copy_n(first, num, buffer.data());
-        command_queue_.enqueue_write_buffer(buf, CL_TRUE,
+
+        return command_queue_.enqueue_write_buffer(buf, CL_TRUE,
             sizeof(CLType) * offset, sizeof(CLType) * num, buffer.data(),
             event_wait_list, event);
     }
@@ -271,7 +278,7 @@ class CLManager
     /// \brief Write an OpenCL buffer of a given type and number of elements
     /// from a pointer
     template <typename CLType>
-    void write_buffer(const CLMemory &buf, std::size_t num,
+    ::cl_int write_buffer(const CLMemory &buf, std::size_t num,
         const CLType *first, std::size_t offset = 0,
         const std::vector<CLEvent> &event_wait_list =
             std::vector<CLEvent>()) const
@@ -279,7 +286,8 @@ class CLManager
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(write_buffer);
 
         CLEvent event;
-        command_queue_.enqueue_write_buffer(buf, CL_TRUE,
+
+        return command_queue_.enqueue_write_buffer(buf, CL_TRUE,
             sizeof(CLType) * offset, sizeof(CLType) * num,
             const_cast<CLType *>(first), event_wait_list, event);
     }
@@ -287,14 +295,15 @@ class CLManager
     /// \brief Write an OpenCL buffer of a given type and number of elements
     /// from a pointer
     template <typename CLType>
-    void write_buffer(const CLMemory &buf, std::size_t num, CLType *first,
+    ::cl_int write_buffer(const CLMemory &buf, std::size_t num, CLType *first,
         std::size_t offset = 0, const std::vector<CLEvent> &event_wait_list =
                                     std::vector<CLEvent>()) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(write_buffer);
 
         CLEvent event;
-        command_queue_.enqueue_write_buffer(buf, CL_TRUE,
+
+        return command_queue_.enqueue_write_buffer(buf, CL_TRUE,
             sizeof(CLType) * offset, sizeof(CLType) * num, first,
             event_wait_list, event);
     }
@@ -303,18 +312,24 @@ class CLManager
     /// of
     /// elements
     template <typename CLType>
-    void copy_buffer(const CLMemory &src, const CLMemory &dst, std::size_t num,
-        std::size_t src_offset = 0, std::size_t dst_offset = 0,
+    ::cl_int copy_buffer(const CLMemory &src, const CLMemory &dst,
+        std::size_t num, std::size_t src_offset = 0,
+        std::size_t dst_offset = 0,
         const std::vector<CLEvent> &event_wait_list =
             std::vector<CLEvent>()) const
     {
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(copy_buffer);
 
         CLEvent event(context_);
-        command_queue_.enqueue_copy_buffer(src, dst,
+
+        ::cl_int status = command_queue_.enqueue_copy_buffer(src, dst,
             sizeof(CLType) * src_offset, sizeof(CLType) * dst_offset,
             sizeof(CLType) * num, event_wait_list, event);
-        event.wait();
+
+        if (status == CL_SUCCESS)
+            return event.wait();
+
+        return status;
     }
 
     /// \brief Run a given kernel with one dimensional global size and local
@@ -332,7 +347,7 @@ class CLManager
     /// calculate the correct global size yourself, you can simple call
     /// `run_kernel(kern, N, K)`. But within the kernel, you need to check
     /// `get_global_id(0) < N`
-    void run_kernel(const CLKernel &kern, std::size_t N,
+    ::cl_int run_kernel(const CLKernel &kern, std::size_t N,
         std::size_t local_size = 0,
         const std::vector<CLEvent> event_wait_list =
             std::vector<CLEvent>()) const
@@ -340,11 +355,15 @@ class CLManager
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(run_kernel);
 
         CLEvent event(context_);
-        command_queue_.enqueue_nd_range_kernel(kern, 1, CLNDRange(),
-            CLNDRange(get_global_work_size(N, local_size)),
+        ::cl_int status = command_queue_.enqueue_nd_range_kernel(kern, 1,
+            CLNDRange(), CLNDRange(get_global_work_size(N, local_size)),
             (local_size == 0 ? CLNDRange() : CLNDRange(local_size)),
             event_wait_list, event);
-        event.wait();
+
+        if (status == CL_SUCCESS)
+            return event.wait();
+
+        return status;
     }
 
     /// \brief Create a program given a vector of sources within the current
