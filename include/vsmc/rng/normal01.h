@@ -78,23 +78,29 @@
         }                                                                     \
     }
 
+/// \brief Normal(0, 1) structure (single precision)
 /// \ingroup CRNG
 VSMC_DEFINE_RNG_NORMAL01(24, float)
 
+/// \brief Initialize Normal(0, 1) structure (single precision)
 /// \ingroup CRNG
 VSMC_DEFINE_RNG_NORMAL01_INIT(24, float)
 
+/// \brief Generate Normal(0, 1) random numbers (single precision)
 /// \ingroup CRNG
 VSMC_DEFINE_RNG_NORMAL01_RAND(24, float)
 
 #if VSMC_HAS_OPENCL_DOUBLE
 
+/// \brief Normal(0, 1) structure (double precision)
 /// \ingroup CRNG
 VSMC_DEFINE_RNG_NORMAL01(53, double)
 
+/// \brief Initialize Normal(0, 1) structure (double precision)
 /// \ingroup CRNG
 VSMC_DEFINE_RNG_NORMAL01_INIT(53, double)
 
+/// \brief Generate Normal(0, 1) random numbers (double precision)
 /// \ingroup CRNG
 VSMC_DEFINE_RNG_NORMAL01_RAND(53, double)
 

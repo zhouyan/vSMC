@@ -232,23 +232,29 @@
         }                                                                     \
     }
 
+/// \brief Gamma(k, 1) structure (single precision)
 /// \ingroup CRNG
 VSMC_DEFINE_RNG_GAMMAK1(24, float)
 
+/// \brief Initialize Gamma(k, 1) structure (single precision)
 /// \ingroup CRNG
 VSMC_DEFINE_RNG_GAMMAK1_INIT(24, float)
 
+/// \brief Generate Gamma(k, 1) random numbers (single precision)
 /// \ingroup CRNG
 VSMC_DEFINE_RNG_GAMMAK1_RAND(24, float)
 
 #if VSMC_HAS_OPENCL_DOUBLE
 
+/// \brief Gamma(k, 1) structure (double precision)
 /// \ingroup CRNG
 VSMC_DEFINE_RNG_GAMMAK1(53, double)
 
+/// \brief Initialize Gamma(k, 1) structure (double precision)
 /// \ingroup CRNG
 VSMC_DEFINE_RNG_GAMMAK1_INIT(53, double)
 
+/// \brief Generate Gamma(k, 1) random numbers (double precision)
 /// \ingroup CRNG
 VSMC_DEFINE_RNG_GAMMAK1_RAND(53, double)
 
