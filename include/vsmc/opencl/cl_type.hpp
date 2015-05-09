@@ -41,7 +41,7 @@
 
 #if defined(VSMC_INTEL)
 #pragma warning(push)
-#pragma warning(disable:1478)
+#pragma warning(disable : 1478)
 #endif
 
 namespace vsmc
@@ -127,6 +127,7 @@ class CLBase
     {
         std::vector<char> vec;
         ::cl_int status = get_info(param_name, vec);
+        vec.push_back(0);
         if (status != CL_SUCCESS)
             return status;
 
@@ -947,6 +948,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         std::vector<char> vec(num);
         status = ::clGetProgramBuildInfo(get(), device.get(),
             CL_PROGRAM_BUILD_OPTIONS, num, vec.data(), nullptr);
+        vec.push_back(0);
         internal::cl_error_check(
             status, "CLProgram::build_options", "::clGetProgramBuildInfo");
         if (status != CL_SUCCESS)
@@ -971,6 +973,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
         std::vector<char> vec(num);
         status = ::clGetProgramBuildInfo(get(), device.get(),
             CL_PROGRAM_BUILD_LOG, num, vec.data(), nullptr);
+        vec.push_back(0);
         internal::cl_error_check(
             status, "CLProgram::build_log", "::clGetProgramBuildInfo");
         if (status != CL_SUCCESS)
@@ -1235,6 +1238,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         std::vector<char> vec(num);
         status = ::clGetKernelArgInfo(get(), arg_index,
             CL_KERNEL_ARG_TYPE_NAME, num, vec.data(), nullptr);
+        vec.push_back(0);
         internal::cl_error_check(
             status, "CLKernel::arg_type_name", "::clGetKernelArgInfo");
         if (status != CL_SUCCESS)
@@ -1273,6 +1277,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         std::vector<char> vec(num);
         status = ::clGetKernelArgInfo(
             get(), arg_index, CL_KERNEL_ARG_NAME, num, vec.data(), nullptr);
+        vec.push_back(0);
         internal::cl_error_check(
             status, "CLKernel::arg_name", "::clGetKernelArgInfo");
         if (status != CL_SUCCESS)
