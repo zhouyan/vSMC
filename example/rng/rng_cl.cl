@@ -143,7 +143,7 @@ __kernel void kernel_u01(ulong n, __global fp_type *buffer)
     buffer[i] = vsmc_u01_open_closed_32(vsmc_rng_rand(&rng));
 }
 
-__kernel void kernel_normal01(ulong n, __global fp_type *buffer)
+__kernel void kernel_Normal01(ulong n, __global fp_type *buffer)
 {
     ulong i = get_global_id(0);
     if (i >= n)
@@ -158,7 +158,7 @@ __kernel void kernel_normal01(ulong n, __global fp_type *buffer)
     buffer[i] = vsmc_normal01_rand(&dist, &rng);
 }
 
-__kernel void kernel_gammak1(ulong n, __global fp_type *buffer, fp_type shape)
+__kernel void kernel_GammaK1(ulong n, __global fp_type *buffer, fp_type shape)
 {
     ulong i = get_global_id(0);
     if (i >= n)
