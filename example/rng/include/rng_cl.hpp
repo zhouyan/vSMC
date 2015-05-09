@@ -51,39 +51,61 @@ inline void rng_cl_engine(std::size_t N, std::size_t M,
 {
     vsmc::StopWatch watch;
 
-    typedef typename Engine::result_type rt;
+    typedef typename Engine::result_type result_type;
 
-    std::vector<rt> cpp(N * M);
+    std::vector<result_type> cpp(N);
     Engine eng(1);
-    watch.reset();
-    watch.start();
-    for (std::size_t i = 0; i != N * M; ++i)
+    for (std::size_t i = 0; i != N; ++i)
         cpp[i] = eng();
-    watch.stop();
-    double tcpp = watch.seconds();
 
-    std::vector<rt> c(N * M);
+    std::vector<result_type> c(N);
     CEngine rng;
     cinit(&rng, 1);
-    watch.reset();
-    watch.start();
-    for (std::size_t i = 0; i != N * M; ++i)
+    for (std::size_t i = 0; i != N; ++i)
         c[i] = crand(&rng);
-    watch.stop();
-    double tc = watch.seconds();
+    for (std::size_t i = 0; i != N; ++i) {
+        if (cpp[i] != c[i]) {
+            std::cout << "Failure: C      " << name << std::endl;
+            break;
+        }
+    }
 
-    std::vector<rt> cl(N * M);
-    vsmc::CLBuffer<rt> buffer(N * M);
+    std::size_t n = N / M + 1;
+    std::vector<result_type> cl(n * M);
+    vsmc::CLBuffer<result_type> buffer(n * M);
     vsmc::CLKernel kernel(program, "kernel_" + name);
-    vsmc::cl_set_kernel_args(
-        kernel, 0, static_cast<cl_ulong>(N), buffer.data());
-    vsmc::CLManager<>::instance().run_kernel(kernel, N);
+    vsmc::cl_set_kernel_args(kernel, 0, static_cast<cl_uint>(1),
+        static_cast<cl_ulong>(n), buffer.data());
+    vsmc::CLManager<>::instance().run_kernel(kernel, n);
+    vsmc::CLManager<>::instance().read_buffer(buffer.data(), n * M, cl.data());
+    for (std::size_t i = 0; i != N; ++i) {
+        if (cpp[i] != cl[i]) {
+            std::cout << "Failure: OpenCL " << name << std::endl;
+            break;
+        }
+    }
+
     watch.reset();
     watch.start();
-    vsmc::CLManager<>::instance().run_kernel(kernel, N);
+    for (std::size_t i = 0; i != N; ++i)
+        eng();
     watch.stop();
-    vsmc::CLManager<>::instance().read_buffer(buffer.data(), N * M, cl.data());
-    double tcl = watch.seconds();
+    double tcpp = watch.milliseconds();
+
+    watch.reset();
+    watch.start();
+    for (std::size_t i = 0; i != N; ++i)
+        crand(&rng);
+    watch.stop();
+    double tc = watch.milliseconds();
+
+    vsmc::cl_set_kernel_args(kernel, 0, static_cast<cl_uint>(0),
+        static_cast<cl_ulong>(n), buffer.data());
+    watch.reset();
+    watch.start();
+    vsmc::CLManager<>::instance().run_kernel(kernel, n);
+    watch.stop();
+    double tcl = watch.milliseconds();
 
     std::cout << std::setw(20) << std::left << name;
     std::cout << std::setw(20) << std::fixed << std::right << tcpp;
@@ -93,18 +115,10 @@ inline void rng_cl_engine(std::size_t N, std::size_t M,
     std::cout << std::setw(20) << std::fixed << std::right << tcpp / tcl;
     std::cout << std::endl;
 
-    for (std::size_t i = 0; i != N * M; ++i) {
-        if (cpp[i] != c[i]) {
-            std::cout << "Failure: C      " << name << std::endl;
-            break;
-        }
-    }
-    for (std::size_t i = 0; i != N * M; ++i) {
-        if (cpp[i] != cl[i]) {
-            std::cout << "Failure: OpenCL " << name << std::endl;
-            break;
-        }
-    }
+    std::ofstream rnd("rnd");
+    rnd << eng() << std::endl;
+    rnd << crand(&rng) << std::endl;
+    rnd.close();
 }
 
 inline double rng_cl_normal01(std::size_t N, float *c)
@@ -121,7 +135,7 @@ inline double rng_cl_normal01(std::size_t N, float *c)
         c[i] = vsmc_normal01_f32_rand(&norm01, &rng);
     watch.stop();
 
-    return watch.seconds();
+    return watch.milliseconds();
 }
 
 inline double rng_cl_normal01(std::size_t N, double *c)
@@ -138,7 +152,7 @@ inline double rng_cl_normal01(std::size_t N, double *c)
         c[i] = vsmc_normal01_f64_rand(&norm01, &rng);
     watch.stop();
 
-    return watch.seconds();
+    return watch.milliseconds();
 }
 
 template <typename FPType>
@@ -155,7 +169,7 @@ inline void rng_cl_normal01(std::size_t N, const vsmc::CLProgram &program,
     for (std::size_t i = 0; i != N; ++i)
         cpp[i] = rnorm(eng);
     watch.stop();
-    double tcpp = watch.seconds();
+    double tcpp = watch.milliseconds();
 
     std::vector<FPType> c(N);
     double tc = rng_cl_normal01(N, c.data());
@@ -171,7 +185,7 @@ inline void rng_cl_normal01(std::size_t N, const vsmc::CLProgram &program,
     vsmc::CLManager<>::instance().run_kernel(kernel, N);
     watch.stop();
     vsmc::CLManager<>::instance().read_buffer(buffer.data(), N, cl.data());
-    double tcl = watch.seconds();
+    double tcl = watch.milliseconds();
 
     std::cout << std::setw(20) << std::left << "Normal(0, 1)";
     std::cout << std::setw(20) << std::fixed << std::right << tcpp;
@@ -200,7 +214,7 @@ inline double rng_cl_gammak1(std::size_t N, float *c, float shape)
         c[i] = vsmc_gammak1_f32_rand(&gammak1, &rng);
     watch.stop();
 
-    return watch.seconds();
+    return watch.milliseconds();
 }
 
 inline double rng_cl_gammak1(std::size_t N, double *c, double shape)
@@ -217,7 +231,7 @@ inline double rng_cl_gammak1(std::size_t N, double *c, double shape)
         c[i] = vsmc_gammak1_f64_rand(&gammak1, &rng);
     watch.stop();
 
-    return watch.seconds();
+    return watch.milliseconds();
 }
 
 template <typename FPType>
@@ -234,7 +248,7 @@ inline void rng_cl_gammak1(std::size_t N, const vsmc::CLProgram &program,
     for (std::size_t i = 0; i != N; ++i)
         cpp[i] = rgamma(eng);
     watch.stop();
-    double tcpp = watch.seconds();
+    double tcpp = watch.milliseconds();
 
     std::vector<FPType> c(N);
     double tc = rng_cl_gammak1(N, c.data(), shape);
@@ -250,7 +264,7 @@ inline void rng_cl_gammak1(std::size_t N, const vsmc::CLProgram &program,
     vsmc::CLManager<>::instance().run_kernel(kernel, N);
     watch.stop();
     vsmc::CLManager<>::instance().read_buffer(buffer.data(), N, cl.data());
-    double tcl = watch.seconds();
+    double tcl = watch.milliseconds();
 
     std::stringstream ss;
     ss << "Gamma(" << shape << ", 1)";
@@ -271,12 +285,10 @@ template <typename FPType>
 inline void rng_cl(std::size_t N, const vsmc::CLProgram &program)
 {
     std::cout << std::string(120, '=') << std::endl;
-    std::cout << "Number of samples: " << N << std::endl;
-    std::cout << std::string(120, '=') << std::endl;
     std::cout << std::setw(20) << std::left << "Test name";
-    std::cout << std::setw(20) << std::right << "Time (C++)";
-    std::cout << std::setw(20) << std::right << "Time (C)";
-    std::cout << std::setw(20) << std::right << "Time (OpenCL)";
+    std::cout << std::setw(20) << std::right << "Time (ms, C++)";
+    std::cout << std::setw(20) << std::right << "Time (ms, C)";
+    std::cout << std::setw(20) << std::right << "Time (ms, OpenCL)";
     std::cout << std::setw(20) << std::right << "Speedup (C)";
     std::cout << std::setw(20) << std::right << "Speedup (OpenCL)";
     std::cout << std::endl;
@@ -304,7 +316,7 @@ inline void rng_cl(std::size_t N, const vsmc::CLProgram &program)
     rng_cl_gammak1<FPType>(N, program, static_cast<FPType>(1), result);
     rng_cl_gammak1<FPType>(N, program, static_cast<FPType>(10), result);
     rng_cl_gammak1<FPType>(N, program, static_cast<FPType>(100), result);
-    std::cout << std::string(120, '-') << std::endl;
+    std::cout << std::string(120, '=') << std::endl;
 
 #if VSMC_HAS_HDF5
     std::size_t nrow = N;

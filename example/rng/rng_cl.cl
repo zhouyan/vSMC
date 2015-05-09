@@ -42,7 +42,8 @@ typedef float fp_type;
 
 #include <vsmc/rngc/rngc.h>
 
-__kernel void kernel_Philox2x32(ulong n, __global uint32_t *buffer)
+__kernel void kernel_Philox2x32(
+    uint store, ulong n, __global vsmc_philox2x32_ctr_t *buffer)
 {
     ulong i = get_global_id(0);
     if (i >= n)
@@ -52,11 +53,16 @@ __kernel void kernel_Philox2x32(ulong n, __global uint32_t *buffer)
     vsmc_philox2x32_init(&rng, 1);
     rng.ctr.v[0] = i;
 
-    buffer[i * 2 + 0] = vsmc_philox2x32_rand(&rng);
-    buffer[i * 2 + 1] = vsmc_philox2x32_rand(&rng);
+    vsmc_philox2x32_ctr_t res;
+    res.v[0] = vsmc_philox2x32_rand(&rng);
+    res.v[1] = vsmc_philox2x32_rand(&rng);
+
+    if (store)
+        buffer[i] = res;
 }
 
-__kernel void kernel_Philox4x32(ulong n, __global uint32_t *buffer)
+__kernel void kernel_Philox4x32(
+    uint store, ulong n, __global vsmc_philox4x32_ctr_t *buffer)
 {
     ulong i = get_global_id(0);
     if (i >= n)
@@ -66,13 +72,18 @@ __kernel void kernel_Philox4x32(ulong n, __global uint32_t *buffer)
     vsmc_philox4x32_init(&rng, 1);
     rng.ctr.v[0] = i;
 
-    buffer[i * 4 + 0] = vsmc_philox4x32_rand(&rng);
-    buffer[i * 4 + 1] = vsmc_philox4x32_rand(&rng);
-    buffer[i * 4 + 2] = vsmc_philox4x32_rand(&rng);
-    buffer[i * 4 + 3] = vsmc_philox4x32_rand(&rng);
+    vsmc_philox4x32_ctr_t res;
+    res.v[0] = vsmc_philox4x32_rand(&rng);
+    res.v[1] = vsmc_philox4x32_rand(&rng);
+    res.v[2] = vsmc_philox4x32_rand(&rng);
+    res.v[3] = vsmc_philox4x32_rand(&rng);
+
+    if (store)
+        buffer[i] = res;
 }
 
-__kernel void kernel_Threefry2x32(ulong n, __global uint32_t *buffer)
+__kernel void kernel_Threefry2x32(
+    uint store, ulong n, __global vsmc_threefry2x32_ctr_t *buffer)
 {
     ulong i = get_global_id(0);
     if (i >= n)
@@ -82,11 +93,16 @@ __kernel void kernel_Threefry2x32(ulong n, __global uint32_t *buffer)
     vsmc_threefry2x32_init(&rng, 1);
     rng.ctr.v[0] = i;
 
-    buffer[i * 2 + 0] = vsmc_threefry2x32_rand(&rng);
-    buffer[i * 2 + 1] = vsmc_threefry2x32_rand(&rng);
+    vsmc_threefry2x32_ctr_t res;
+    res.v[0] = vsmc_threefry2x32_rand(&rng);
+    res.v[1] = vsmc_threefry2x32_rand(&rng);
+
+    if (store)
+        buffer[i] = res;
 }
 
-__kernel void kernel_Threefry4x32(ulong n, __global uint32_t *buffer)
+__kernel void kernel_Threefry4x32(
+    uint store, ulong n, __global vsmc_threefry4x32_ctr_t *buffer)
 {
     ulong i = get_global_id(0);
     if (i >= n)
@@ -96,13 +112,18 @@ __kernel void kernel_Threefry4x32(ulong n, __global uint32_t *buffer)
     vsmc_threefry4x32_init(&rng, 1);
     rng.ctr.v[0] = i;
 
-    buffer[i * 4 + 0] = vsmc_threefry4x32_rand(&rng);
-    buffer[i * 4 + 1] = vsmc_threefry4x32_rand(&rng);
-    buffer[i * 4 + 2] = vsmc_threefry4x32_rand(&rng);
-    buffer[i * 4 + 3] = vsmc_threefry4x32_rand(&rng);
+    vsmc_threefry4x32_ctr_t res;
+    res.v[0] = vsmc_threefry4x32_rand(&rng);
+    res.v[1] = vsmc_threefry4x32_rand(&rng);
+    res.v[2] = vsmc_threefry4x32_rand(&rng);
+    res.v[3] = vsmc_threefry4x32_rand(&rng);
+
+    if (store)
+        buffer[i] = res;
 }
 
-__kernel void kernel_Threefry2x64(ulong n, __global uint64_t *buffer)
+__kernel void kernel_Threefry2x64(
+    uint store, ulong n, __global vsmc_threefry2x64_ctr_t *buffer)
 {
     ulong i = get_global_id(0);
     if (i >= n)
@@ -112,10 +133,15 @@ __kernel void kernel_Threefry2x64(ulong n, __global uint64_t *buffer)
     vsmc_threefry2x64_init(&rng, 1);
     rng.ctr.v[0] = i;
 
-    buffer[i * 2 + 0] = vsmc_threefry2x64_rand(&rng);
-    buffer[i * 2 + 1] = vsmc_threefry2x64_rand(&rng);
+    vsmc_threefry2x64_ctr_t res;
+    res.v[0] = vsmc_threefry2x64_rand(&rng);
+    res.v[1] = vsmc_threefry2x64_rand(&rng);
+
+    if (store)
+        buffer[i] = res;
 }
-__kernel void kernel_Threefry4x64(ulong n, __global uint64_t *buffer)
+__kernel void kernel_Threefry4x64(
+    uint store, ulong n, __global vsmc_threefry4x64_ctr_t *buffer)
 {
     ulong i = get_global_id(0);
     if (i >= n)
@@ -125,10 +151,14 @@ __kernel void kernel_Threefry4x64(ulong n, __global uint64_t *buffer)
     vsmc_threefry4x64_init(&rng, 1);
     rng.ctr.v[0] = i;
 
-    buffer[i * 4 + 0] = vsmc_threefry4x64_rand(&rng);
-    buffer[i * 4 + 1] = vsmc_threefry4x64_rand(&rng);
-    buffer[i * 4 + 2] = vsmc_threefry4x64_rand(&rng);
-    buffer[i * 4 + 3] = vsmc_threefry4x64_rand(&rng);
+    vsmc_threefry4x64_ctr_t res;
+    res.v[0] = vsmc_threefry4x64_rand(&rng);
+    res.v[1] = vsmc_threefry4x64_rand(&rng);
+    res.v[2] = vsmc_threefry4x64_rand(&rng);
+    res.v[3] = vsmc_threefry4x64_rand(&rng);
+
+    if (store)
+        buffer[i] = res;
 }
 
 __kernel void kernel_Normal01(ulong n, __global fp_type *buffer)
