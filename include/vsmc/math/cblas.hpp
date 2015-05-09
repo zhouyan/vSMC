@@ -142,7 +142,7 @@ inline void gemv(MatrixOrder order, MatrixTrans trans, std::size_t m,
     scal(nrow, beta, y, incy);
 
     if ((order == RowMajor && trans == NoTrans) ||
-            (order == ColMajor && trans == Trans)) {
+        (order == ColMajor && trans == Trans)) {
         std::size_t k = 0;
         for (std::size_t r = 0; r != nrow; ++r, k += incy)
             y[k] += alpha * dot<T>(ncol, x, incx, A + r * lda, 1);
