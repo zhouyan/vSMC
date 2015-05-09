@@ -1090,30 +1090,6 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
         return status;
     }
 
-    /// \brief `clSetKernelArg`
-    ::cl_int set_arg(::cl_uint arg_index, const CLEvent &arg) const
-    {
-        ::cl_event event = arg.get();
-        ::cl_int status =
-            ::clSetKernelArg(get(), arg_index, sizeof(::cl_event), &event);
-        internal::cl_error_check(
-            status, "CLKernel::set_arg", "::clSetKernelArgs");
-
-        return status;
-    }
-
-    /// \brief `clSetKernelArg`
-    ::cl_int set_arg(::cl_uint arg_index, const CLSampler &arg) const
-    {
-        ::cl_sampler sampler = arg.get();
-        ::cl_int status =
-            ::clSetKernelArg(get(), arg_index, sizeof(::cl_sampler), &sampler);
-        internal::cl_error_check(
-            status, "CLKernel::set_arg", "::clSetKernelArgs");
-
-        return status;
-    }
-
     /// \brief `clGetKernelWorkGroupInfo`
     std::array<std::size_t, 3> global_work_size(const CLDevice &device) const
     {
