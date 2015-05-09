@@ -29,28 +29,28 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/rng.h>
+#include <vsmc/rngc/rngc.h>
 
 typedef struct {
-    fp_type x_pos;
-    fp_type y_pos;
-    fp_type x_vel;
-    fp_type y_vel;
+    fp_type pos_x;
+    fp_type pos_y;
+    fp_type vel_x;
+    fp_type vel_y;
 } cv;
 
 typedef struct {
-    fp_type x_pos;
-    fp_type y_pos;
+    fp_type pos_x;
+    fp_type pos_y;
 } cv_pos;
 
 VSMC_STATIC_INLINE fp_type log_likelihood(
-    const cv *sp, fp_type x_obs, fp_type y_obs)
+    const cv *sp, fp_type obs_x, fp_type obs_y)
 {
     const fp_type scale = 10;
     const fp_type nu = 10;
 
-    fp_type llh_x = scale * (sp->x_pos - x_obs);
-    fp_type llh_y = scale * (sp->y_pos - y_obs);
+    fp_type llh_x = scale * (sp->pos_x - obs_x);
+    fp_type llh_y = scale * (sp->pos_y - obs_y);
 
     llh_x = log1p(llh_x * llh_x / nu);
     llh_y = log1p(llh_y * llh_y / nu);
@@ -59,8 +59,8 @@ VSMC_STATIC_INLINE fp_type log_likelihood(
 }
 
 __kernel void cv_init(__global cv *state, __global ulong *accept,
-    __global fp_type *log_weight, __global fp_type *x_obs,
-    __global fp_type *y_obs, __global vsmc_philox4x32_ctr_t *counter)
+    __global fp_type *log_weight, __global fp_type *obs_x,
+    __global fp_type *obs_y)
 {
     ulong i = get_global_id(0);
     if (i >= SIZE)
@@ -72,23 +72,23 @@ __kernel void cv_init(__global cv *state, __global ulong *accept,
 
     vsmc_rng rng;
     vsmc_rng_init(&rng, SEED + i);
+    rng.ctr.v[1] = i;
     vsmc_normal01 rnorm;
     vsmc_normal01_init(&rnorm, &rng);
 
-    sp.x_pos = vsmc_normal01_rand(&rnorm, &rng) * sd_pos0;
-    sp.y_pos = vsmc_normal01_rand(&rnorm, &rng) * sd_pos0;
-    sp.x_vel = vsmc_normal01_rand(&rnorm, &rng) * sd_vel0;
-    sp.y_vel = vsmc_normal01_rand(&rnorm, &rng) * sd_vel0;
+    sp.pos_x = vsmc_normal01_rand(&rnorm, &rng) * sd_pos0;
+    sp.pos_y = vsmc_normal01_rand(&rnorm, &rng) * sd_pos0;
+    sp.vel_x = vsmc_normal01_rand(&rnorm, &rng) * sd_vel0;
+    sp.vel_y = vsmc_normal01_rand(&rnorm, &rng) * sd_vel0;
 
     state[i] = sp;
     accept[i] = 1;
-    log_weight[i] = log_likelihood(&sp, x_obs[0], y_obs[0]);
-    counter[i] = rng.ctr;
+    log_weight[i] = log_likelihood(&sp, obs_x[0], obs_y[0]);
 }
 
 __kernel void cv_move(ulong iter, __global cv *state, __global ulong *accept,
-    __global fp_type *inc_weight, __global fp_type *x_obs,
-    __global fp_type *y_obs, __global vsmc_philox4x32_ctr_t *counter)
+    __global fp_type *inc_weight, __global fp_type *obs_x,
+    __global fp_type *obs_y)
 {
     ulong i = get_global_id(0);
     if (i >= SIZE)
@@ -103,19 +103,18 @@ __kernel void cv_move(ulong iter, __global cv *state, __global ulong *accept,
 
     vsmc_rng rng;
     vsmc_rng_init(&rng, SEED + i);
-    rng.ctr = counter[i];
+    rng.ctr.v[1] = i;
     vsmc_normal01 rnorm;
     vsmc_normal01_init(&rnorm, &rng);
 
-    sp.x_pos += vsmc_normal01_rand(&rnorm, &rng) * sd_pos + delta * sp.x_vel;
-    sp.y_pos += vsmc_normal01_rand(&rnorm, &rng) * sd_pos + delta * sp.y_vel;
-    sp.x_vel += vsmc_normal01_rand(&rnorm, &rng) * sd_vel;
-    sp.y_vel += vsmc_normal01_rand(&rnorm, &rng) * sd_vel;
+    sp.pos_x += vsmc_normal01_rand(&rnorm, &rng) * sd_pos + delta * sp.vel_x;
+    sp.pos_y += vsmc_normal01_rand(&rnorm, &rng) * sd_pos + delta * sp.vel_y;
+    sp.vel_x += vsmc_normal01_rand(&rnorm, &rng) * sd_vel;
+    sp.vel_y += vsmc_normal01_rand(&rnorm, &rng) * sd_vel;
 
     state[i] = sp;
     accept[i] = 1;
-    inc_weight[i] = log_likelihood(&sp, x_obs[iter], y_obs[iter]);
-    counter[i] = rng.ctr;
+    inc_weight[i] = log_likelihood(&sp, obs_x[iter], obs_y[iter]);
 }
 
 __kernel void cv_est(
@@ -125,6 +124,6 @@ __kernel void cv_est(
     if (i >= SIZE)
         return;
 
-    est[i].x_pos = state[i].x_pos;
-    est[i].y_pos = state[i].y_pos;
+    est[i].pos_x = state[i].pos_x;
+    est[i].pos_y = state[i].pos_y;
 }

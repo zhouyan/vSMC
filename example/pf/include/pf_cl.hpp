@@ -60,11 +60,10 @@ typedef vsmc::StateCL<StateSize, cl_float> cv_base;
 class cv : public cv_base
 {
     public:
-    cv(size_type N) : cv_base(N), counter_(N) {}
+    cv(size_type N) : cv_base(N) {}
 
     const vsmc::CLMemory &obs_x() const { return obs_x_.data(); }
     const vsmc::CLMemory &obs_y() const { return obs_y_.data(); }
-    const vsmc::CLMemory &counter() const { return counter_.data(); }
 
     void read_data(const char *file)
     {
@@ -87,7 +86,6 @@ class cv : public cv_base
     private:
     vsmc::CLBuffer<cl_float> obs_x_;
     vsmc::CLBuffer<cl_float> obs_y_;
-    vsmc::CLBuffer<vsmc_philox4x32_ctr_t> counter_;
 };
 
 class cv_init : public vsmc::InitializeCL<cv>
@@ -110,7 +108,7 @@ class cv_init : public vsmc::InitializeCL<cv>
 
         vsmc::cl_set_kernel_args(kernel(), kernel_args_offset(),
             log_weight_buffer_.data(), particle.value().obs_x(),
-            particle.value().obs_y(), particle.value().counter());
+            particle.value().obs_y());
     }
 
     void post_processor(vsmc::Particle<cv> &particle)
@@ -140,7 +138,7 @@ class cv_move : public vsmc::MoveCL<cv>
 
         vsmc::cl_set_kernel_args(kernel(), kernel_args_offset(),
             inc_weight_buffer_.data(), particle.value().obs_x(),
-            particle.value().obs_y(), particle.value().counter());
+            particle.value().obs_y());
     }
 
     void post_processor(std::size_t, vsmc::Particle<cv> &particle)
