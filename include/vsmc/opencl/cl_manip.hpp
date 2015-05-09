@@ -76,8 +76,10 @@ inline std::size_t cl_min_global_size(std::size_t N, std::size_t local_size)
     if (local_size == 0)
         return N;
 
-    return (local_size && N % local_size) ? (N / local_size + 1) * local_size :
-                                            N;
+    if (N % local_size == 0)
+        return N;
+
+    return (N / local_size + 1) * local_size;
 }
 
 /// \brief The preferred global and local size

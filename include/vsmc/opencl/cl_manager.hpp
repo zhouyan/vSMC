@@ -345,6 +345,9 @@ class CLManager
     /// calculate the correct global size yourself, you can simple call
     /// `run_kernel(kern, N, K)`. But within the kernel, you need to check
     /// `get_global_id(0) < N`
+    ///
+    /// One can specify `local_size` to zero such that vSMC will try to select
+    /// the optimal local and global size automatically.
     ::cl_int run_kernel(const CLKernel &kern, std::size_t N,
         std::size_t local_size = 0,
         const std::vector<CLEvent> event_wait_list =
@@ -352,11 +355,17 @@ class CLManager
     {
         VSMC_RUNTIME_ASSERT_OPENCL_CL_MANAGER_SETUP(run_kernel);
 
+        std::size_t gsize = 0;
+        std::size_t lsize = local_size;
+        if (local_size == 0)
+            cl_preferred_work_size(N, kern, device_, gsize, lsize);
+        else
+            gsize = cl_min_global_size(N, local_size);
+
         CLEvent event;
-        ::cl_int status = command_queue_.enqueue_nd_range_kernel(kern, 1,
-            CLNDRange(), CLNDRange(get_global_work_size(N, local_size)),
-            (local_size == 0 ? CLNDRange() : CLNDRange(local_size)),
-            event_wait_list, event);
+        ::cl_int status =
+            command_queue_.enqueue_nd_range_kernel(kern, 1, CLNDRange(),
+                CLNDRange(gsize), CLNDRange(lsize), event_wait_list, event);
         if (status == CL_SUCCESS)
             return event.wait();
 
@@ -535,18 +544,6 @@ class CLManager
                 dev_select.push_back(dev_pool[d]);
 
         return dev_select;
-    }
-
-    std::size_t get_global_work_size(
-        std::size_t N, std::size_t local_size) const
-    {
-        if (local_size == 0)
-            return N;
-
-        if (N % local_size == 0)
-            return N;
-
-        return (N / local_size + 1) * local_size;
     }
 }; // clss CLManager
 
