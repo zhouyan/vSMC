@@ -75,30 +75,30 @@ typedef ulong uint64_t;
 #endif // __cplusplus
 #endif // __OPENCL_VERSION__
 
-#define VSMC_FP24_C(x) (x##f)
-#define VSMC_FP53_C(x) (x)
+#define VSMC_F32_C(x) (x##f)
+#define VSMC_F64_C(x) (x)
 
-#define VSMC_LOG53 log
-#define VSMC_EXP53 exp
-#define VSMC_EXPM153 expm1
-#define VSMC_SQRT53 sqrt
-#define VSMC_SIN53 sin
-#define VSMC_COS53 cos
+#define VSMC_LOG_F64 log
+#define VSMC_EXP_F64 exp
+#define VSMC_EXPM1_F64 expm1
+#define VSMC_SQRT_F64 sqrt
+#define VSMC_SIN_F64 sin
+#define VSMC_COS_F64 cos
 
 #ifdef __OPENCL_VERSION__
-#define VSMC_LOG24 log
-#define VSMC_EXP24 exp
-#define VSMC_EXPM124 expm1
-#define VSMC_SQRT24 sqrt
-#define VSMC_SIN24 sin
-#define VSMC_COS24 cos
+#define VSMC_LOG_F32 log
+#define VSMC_EXP_F32 exp
+#define VSMC_EXPM1_F32 expm1
+#define VSMC_SQRT_F32 sqrt
+#define VSMC_SIN_F32 sin
+#define VSMC_COS_F32 cos
 #else // __OPENCL_VERSION__
-#define VSMC_LOG24 logf
-#define VSMC_EXP24 expf
-#define VSMC_EXPM124 expm1f
-#define VSMC_SQRT24 sqrtf
-#define VSMC_SIN24 sinf
-#define VSMC_COS24 cosf
+#define VSMC_LOG_F32 logf
+#define VSMC_EXP_F32 expf
+#define VSMC_EXPM1_F32 expm1f
+#define VSMC_SQRT_F32 sqrtf
+#define VSMC_SIN_F32 sinf
+#define VSMC_COS_F32 cosf
 #endif // __OPENCL_VERSION__
 
 /// \brief Default RNG state

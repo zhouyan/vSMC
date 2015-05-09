@@ -37,13 +37,13 @@
 #include <vsmc/rngc/u01.h>
 
 #if VSMC_HAS_RNGC_DOUBLE
-#define vsmc_normal01 vsmc_normal01_53
-#define vsmc_normal01_init vsmc_normal01_53_init
-#define vsmc_normal01_rand vsmc_normal01_53_rand
+#define vsmc_normal01 vsmc_normal01_f64
+#define vsmc_normal01_init vsmc_normal01_f64_init
+#define vsmc_normal01_rand vsmc_normal01_f64_rand
 #else // VSMC_HAS_RNGC_DOUBLE
-#define vsmc_normal01 vsmc_normal01_24
-#define vsmc_normal01_init vsmc_normal01_24_init
-#define vsmc_normal01_rand vsmc_normal01_24_rand
+#define vsmc_normal01 vsmc_normal01_f32
+#define vsmc_normal01_init vsmc_normal01_f32_init
+#define vsmc_normal01_rand vsmc_normal01_f32_rand
 #endif // VSMC_HAS_RNGC_DOUBLE
 
 #define VSMC_DEFINE_RNGC_NORMAL01(F, FT)                                      \
@@ -51,58 +51,58 @@
         FT u1;                                                                \
         FT u2;                                                                \
         unsigned char saved;                                                  \
-    } vsmc_normal01_##F;
+    } vsmc_normal01_f##F;
 
 #define VSMC_DEFINE_RNGC_NORMAL01_INIT(F, FT)                                 \
-    VSMC_STATIC_INLINE void vsmc_normal01_##F##_init(                         \
-        vsmc_normal01_##F *rnorm, vsmc_rng *rng)                              \
+    VSMC_STATIC_INLINE void vsmc_normal01_f##F##_init(                        \
+        vsmc_normal01_f##F *rnorm, vsmc_rng *rng)                             \
     {                                                                         \
-        rnorm->u1 = vsmc_u01_open_closed_32_##F(vsmc_rng_rand(rng));          \
-        rnorm->u2 = vsmc_u01_open_closed_32_##F(vsmc_rng_rand(rng));          \
+        rnorm->u1 = vsmc_u01_open_closed_u32_f##F(vsmc_rng_rand(rng));        \
+        rnorm->u2 = vsmc_u01_open_closed_u32_f##F(vsmc_rng_rand(rng));        \
         rnorm->saved = 1;                                                     \
     }
 
 #define VSMC_DEFINE_RNGC_NORMAL01_RAND(F, FT)                                 \
-    VSMC_STATIC_INLINE FT vsmc_normal01_##F##_rand(                           \
-        vsmc_normal01_##F *rnorm, vsmc_rng *rng)                              \
+    VSMC_STATIC_INLINE FT vsmc_normal01_f##F##_rand(                          \
+        vsmc_normal01_f##F *rnorm, vsmc_rng *rng)                             \
     {                                                                         \
-        const FT c_2pi = VSMC_FP##F##_C(6.2831853071795865);                  \
+        const FT c_2pi = VSMC_F##F##_C(6.2831853071795865);                   \
         if (rnorm->saved) {                                                   \
             rnorm->saved = 0;                                                 \
-            return VSMC_SQRT##F(-2 * VSMC_LOG##F(rnorm->u1)) *                \
-                VSMC_COS##F(c_2pi * rnorm->u2);                               \
+            return VSMC_SQRT_F##F(-2 * VSMC_LOG_F##F(rnorm->u1)) *            \
+                VSMC_COS_F##F(c_2pi * rnorm->u2);                             \
         } else {                                                              \
-            vsmc_normal01_##F##_init(rnorm, rng);                             \
-            return VSMC_SQRT##F(-2 * VSMC_LOG##F(rnorm->u1)) *                \
-                VSMC_SIN##F(c_2pi * rnorm->u2);                               \
+            vsmc_normal01_f##F##_init(rnorm, rng);                            \
+            return VSMC_SQRT_F##F(-2 * VSMC_LOG_F##F(rnorm->u1)) *            \
+                VSMC_SIN_F##F(c_2pi * rnorm->u2);                             \
         }                                                                     \
     }
 
 /// \brief Normal(0, 1) structure (single precision)
 /// \ingroup Normal01C
-VSMC_DEFINE_RNGC_NORMAL01(24, float)
+VSMC_DEFINE_RNGC_NORMAL01(32, float)
 
 /// \brief Initialize Normal(0, 1) structure (single precision)
 /// \ingroup Normal01C
-VSMC_DEFINE_RNGC_NORMAL01_INIT(24, float)
+VSMC_DEFINE_RNGC_NORMAL01_INIT(32, float)
 
 /// \brief Generate Normal(0, 1) random numbers (single precision)
 /// \ingroup Normal01C
-VSMC_DEFINE_RNGC_NORMAL01_RAND(24, float)
+VSMC_DEFINE_RNGC_NORMAL01_RAND(32, float)
 
 #if VSMC_HAS_RNGC_DOUBLE
 
 /// \brief Normal(0, 1) structure (double precision)
 /// \ingroup Normal01C
-VSMC_DEFINE_RNGC_NORMAL01(53, double)
+VSMC_DEFINE_RNGC_NORMAL01(64, double)
 
 /// \brief Initialize Normal(0, 1) structure (double precision)
 /// \ingroup Normal01C
-VSMC_DEFINE_RNGC_NORMAL01_INIT(53, double)
+VSMC_DEFINE_RNGC_NORMAL01_INIT(64, double)
 
 /// \brief Generate Normal(0, 1) random numbers (double precision)
 /// \ingroup Normal01C
-VSMC_DEFINE_RNGC_NORMAL01_RAND(53, double)
+VSMC_DEFINE_RNGC_NORMAL01_RAND(64, double)
 
 #endif // VSMC_HAS_RNGC_DOUBLE
 

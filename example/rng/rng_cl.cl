@@ -131,18 +131,6 @@ __kernel void kernel_Threefry4x64(ulong n, __global uint64_t *buffer)
     buffer[i * 4 + 3] = vsmc_threefry4x64_rand(&rng);
 }
 
-__kernel void kernel_u01(ulong n, __global fp_type *buffer)
-{
-    ulong i = get_global_id(0);
-    if (i >= n)
-        return;
-
-    vsmc_rng rng;
-    vsmc_rng_init(&rng, i);
-
-    buffer[i] = vsmc_u01_open_closed_32(vsmc_rng_rand(&rng));
-}
-
 __kernel void kernel_Normal01(ulong n, __global fp_type *buffer)
 {
     ulong i = get_global_id(0);

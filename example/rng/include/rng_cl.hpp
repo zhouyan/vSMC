@@ -114,12 +114,12 @@ inline double rng_cl_normal01(std::size_t N, float *c)
 
     vsmc_rng rng;
     vsmc_rng_init(&rng, 1);
-    vsmc_normal01_24 norm01;
-    vsmc_normal01_24_init(&norm01, &rng);
+    vsmc_normal01_f32 norm01;
+    vsmc_normal01_f32_init(&norm01, &rng);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        c[i] = vsmc_normal01_24_rand(&norm01, &rng);
+        c[i] = vsmc_normal01_f32_rand(&norm01, &rng);
     watch.stop();
 
     return watch.seconds();
@@ -131,12 +131,12 @@ inline double rng_cl_normal01(std::size_t N, double *c)
 
     vsmc_rng rng;
     vsmc_rng_init(&rng, 1);
-    vsmc_normal01_53 norm01;
-    vsmc_normal01_53_init(&norm01, &rng);
+    vsmc_normal01_f64 norm01;
+    vsmc_normal01_f64_init(&norm01, &rng);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        c[i] = vsmc_normal01_53_rand(&norm01, &rng);
+        c[i] = vsmc_normal01_f64_rand(&norm01, &rng);
     watch.stop();
 
     return watch.seconds();
@@ -194,12 +194,12 @@ inline double rng_cl_gammak1(std::size_t N, float *c, float shape)
 
     vsmc_rng rng;
     vsmc_rng_init(&rng, 1);
-    vsmc_gammak1_24 gammak1;
-    vsmc_gammak1_24_init(&gammak1, &rng, shape);
+    vsmc_gammak1_f32 gammak1;
+    vsmc_gammak1_f32_init(&gammak1, &rng, shape);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        c[i] = vsmc_gammak1_24_rand(&gammak1, &rng);
+        c[i] = vsmc_gammak1_f32_rand(&gammak1, &rng);
     watch.stop();
 
     return watch.seconds();
@@ -211,12 +211,12 @@ inline double rng_cl_gammak1(std::size_t N, double *c, double shape)
 
     vsmc_rng rng;
     vsmc_rng_init(&rng, 1);
-    vsmc_gammak1_53 gammak1;
-    vsmc_gammak1_53_init(&gammak1, &rng, shape);
+    vsmc_gammak1_f64 gammak1;
+    vsmc_gammak1_f64_init(&gammak1, &rng, shape);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        c[i] = vsmc_gammak1_53_rand(&gammak1, &rng);
+        c[i] = vsmc_gammak1_f64_rand(&gammak1, &rng);
     watch.stop();
 
     return watch.seconds();
