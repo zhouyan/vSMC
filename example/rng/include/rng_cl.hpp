@@ -46,32 +46,38 @@
 #include "rng_output_data.hpp"
 #endif
 
-inline void rng_cl_philox2x32(std::size_t N, const vsmc::CLProgram &program)
+template <typename Engine, typename CEngine, typename CEngineInit,
+    typename CEngineRand>
+inline void rng_cl_engine(std::size_t N, std::size_t M,
+    const vsmc::CLProgram &program, CEngineInit &cinit, CEngineRand &crand,
+    const std::string &name)
 {
     vsmc::StopWatch watch;
 
-    std::vector<std::uint32_t> cpp(N * 2);
-    vsmc::Philox2x32 eng(1);
+    typedef typename Engine::result_type rt;
+
+    std::vector<rt> cpp(N * M);
+    Engine eng(1);
     watch.reset();
     watch.start();
-    for (std::size_t i = 0; i != N * 2; ++i)
+    for (std::size_t i = 0; i != N * M; ++i)
         cpp[i] = eng();
     watch.stop();
     double tcpp = watch.seconds();
 
-    std::vector<std::uint32_t> c(N * 2);
-    vsmc_philox2x32 rng;
-    vsmc_philox2x32_init(&rng, 1);
+    std::vector<rt> c(N * M);
+    CEngine rng;
+    cinit(&rng, 1);
     watch.reset();
     watch.start();
-    for (std::size_t i = 0; i != N * 2; ++i)
-        c[i] = vsmc_philox2x32_rand(&rng);
+    for (std::size_t i = 0; i != N * M; ++i)
+        c[i] = crand(&rng);
     watch.stop();
     double tc = watch.seconds();
 
-    std::vector<cl_uint> cl(N * 2);
-    vsmc::CLBuffer<cl_uint> buffer(N * 2);
-    vsmc::CLKernel kernel(program, "kernel_philox2x32");
+    std::vector<rt> cl(N * M);
+    vsmc::CLBuffer<rt> buffer(N * M);
+    vsmc::CLKernel kernel(program, "kernel_" + name);
     vsmc::cl_set_kernel_args(
         kernel, 0, static_cast<cl_ulong>(N), buffer.data());
     vsmc::CLManager<>::instance().run_kernel(kernel, N, 0);
@@ -79,86 +85,27 @@ inline void rng_cl_philox2x32(std::size_t N, const vsmc::CLProgram &program)
     watch.start();
     vsmc::CLManager<>::instance().run_kernel(kernel, N, 0);
     watch.stop();
-    vsmc::CLManager<>::instance().read_buffer<cl_uint>(
-        buffer.data(), N * 2, cl.data());
+    vsmc::CLManager<>::instance().read_buffer<rt>(
+        buffer.data(), N * M, cl.data());
     double tcl = watch.seconds();
 
-    std::cout << std::setw(20) << std::left << "Philox2x32";
-    std::cout << std::setw(20) << std::right << tcpp;
-    std::cout << std::setw(20) << std::right << tc;
-    std::cout << std::setw(20) << std::right << tcl;
-    std::cout << std::setw(20) << std::right << tcpp / tc;
-    std::cout << std::setw(20) << std::right << tcpp / tcl;
+    std::cout << std::setw(20) << std::left << name;
+    std::cout << std::setw(20) << std::fixed << std::right << tcpp;
+    std::cout << std::setw(20) << std::fixed << std::right << tc;
+    std::cout << std::setw(20) << std::fixed << std::right << tcl;
+    std::cout << std::setw(20) << std::fixed << std::right << tcpp / tc;
+    std::cout << std::setw(20) << std::fixed << std::right << tcpp / tcl;
     std::cout << std::endl;
 
     for (std::size_t i = 0; i != N * 2; ++i) {
         if (cpp[i] != c[i]) {
-            std::cout << "Failure: C Philox2x32" << std::endl;
+            std::cout << "Failure: C      " << name << std::endl;
             break;
         }
     }
     for (std::size_t i = 0; i != N * 2; ++i) {
         if (cpp[i] != cl[i]) {
-            std::cout << "Failure: OpenCL Philox2x32" << std::endl;
-            break;
-        }
-    }
-}
-
-inline void rng_cl_philox4x32(std::size_t N, const vsmc::CLProgram &program)
-{
-    vsmc::StopWatch watch;
-
-    std::vector<std::uint32_t> cpp(N * 4);
-    vsmc::Philox4x32 eng(1);
-    watch.reset();
-    watch.start();
-    for (std::size_t i = 0; i != N * 4; ++i)
-        cpp[i] = eng();
-    watch.stop();
-    double tcpp = watch.seconds();
-
-    std::vector<std::uint32_t> c(N * 4);
-    vsmc_philox4x32 rng;
-    vsmc_philox4x32_init(&rng, 1);
-    watch.reset();
-    watch.start();
-    for (std::size_t i = 0; i != N * 4; ++i)
-        c[i] = vsmc_philox4x32_rand(&rng);
-    watch.stop();
-    double tc = watch.seconds();
-
-    std::vector<cl_uint> cl(N * 4);
-    vsmc::CLBuffer<cl_uint> buffer(N * 4);
-    vsmc::CLKernel kernel(program, "kernel_philox4x32");
-    vsmc::cl_set_kernel_args(
-        kernel, 0, static_cast<cl_ulong>(N), buffer.data());
-    vsmc::CLManager<>::instance().run_kernel(kernel, N, 0);
-    watch.reset();
-    watch.start();
-    vsmc::CLManager<>::instance().run_kernel(kernel, N, 0);
-    watch.stop();
-    vsmc::CLManager<>::instance().read_buffer<cl_uint>(
-        buffer.data(), N * 4, cl.data());
-    double tcl = watch.seconds();
-
-    std::cout << std::setw(20) << std::left << "Philox4x32";
-    std::cout << std::setw(20) << std::right << tcpp;
-    std::cout << std::setw(20) << std::right << tc;
-    std::cout << std::setw(20) << std::right << tcl;
-    std::cout << std::setw(20) << std::right << tcpp / tc;
-    std::cout << std::setw(20) << std::right << tcpp / tcl;
-    std::cout << std::endl;
-
-    for (std::size_t i = 0; i != N * 4; ++i) {
-        if (cpp[i] != c[i]) {
-            std::cout << "Failure: C Philox4x32" << std::endl;
-            break;
-        }
-    }
-    for (std::size_t i = 0; i != N * 4; ++i) {
-        if (cpp[i] != cl[i]) {
-            std::cout << "Failure: OpenCL Philox4x32" << std::endl;
+            std::cout << "Failure: OpenCL " << name << std::endl;
             break;
         }
     }
@@ -167,9 +114,29 @@ inline void rng_cl_philox4x32(std::size_t N, const vsmc::CLProgram &program)
 template <typename FPType>
 inline void rng_cl(std::size_t N, const vsmc::CLProgram &program)
 {
+    std::cout << std::string(120, '=') << std::endl;
+    std::cout << "Number of samples: " << N << std::endl;
+    std::cout << std::string(120, '=') << std::endl;
+    std::cout << std::setw(20) << std::left << "Test name";
+    std::cout << std::setw(20) << std::right << "Time (C++)";
+    std::cout << std::setw(20) << std::right << "Time (C)";
+    std::cout << std::setw(20) << std::right << "Time (OpenCL)";
+    std::cout << std::setw(20) << std::right << "Speedup (C)";
+    std::cout << std::setw(20) << std::right << "Speedup (OpenCL)";
+    std::cout << std::endl;
     std::cout << std::string(120, '-') << std::endl;
-    rng_cl_philox2x32(N, program);
-    rng_cl_philox4x32(N, program);
+    rng_cl_engine<vsmc::Philox2x32, vsmc_philox2x32>(N, 2, program,
+        vsmc_philox2x32_init, vsmc_philox2x32_rand, "Philox2x32");
+    rng_cl_engine<vsmc::Philox4x32, vsmc_philox4x32>(N, 4, program,
+        vsmc_philox4x32_init, vsmc_philox4x32_rand, "Philox4x32");
+    rng_cl_engine<vsmc::Threefry2x32, vsmc_threefry2x32>(N, 2, program,
+        vsmc_threefry2x32_init, vsmc_threefry2x32_rand, "Threefry2x32");
+    rng_cl_engine<vsmc::Threefry4x32, vsmc_threefry4x32>(N, 4, program,
+        vsmc_threefry4x32_init, vsmc_threefry4x32_rand, "Threefry4x32");
+    rng_cl_engine<vsmc::Threefry2x64, vsmc_threefry2x64>(N, 2, program,
+        vsmc_threefry2x64_init, vsmc_threefry2x64_rand, "Threefry2x64");
+    rng_cl_engine<vsmc::Threefry4x64, vsmc_threefry4x64>(N, 4, program,
+        vsmc_threefry4x64_init, vsmc_threefry4x64_rand, "Threefry4x64");
     std::cout << std::string(120, '-') << std::endl;
 }
 
