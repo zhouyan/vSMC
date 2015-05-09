@@ -73,9 +73,11 @@ int main(int argc, char **argv)
 
     vsmc::CLProgram program(manager.create_program(src));
     cl_int status = program.build(manager.device_vec(), opt);
-    std::vector<vsmc::CLDevice> dev_vec(program.get_device());
-    if (status != CL_SUCCESS)
+    if (status != CL_SUCCESS) {
+        std::string log(program.build_log(manager.device()));
+        std::cout << log << std::endl;
         return -1;
+    }
 
     std::string name;
     vsmc::CLManager<>::instance().platform().get_info(CL_PLATFORM_NAME, name);
