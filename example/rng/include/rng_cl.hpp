@@ -77,10 +77,10 @@ inline void rng_cl_engine(std::size_t N, std::size_t M,
     vsmc::CLKernel kernel(program, "kernel_" + name);
     vsmc::cl_set_kernel_args(
         kernel, 0, static_cast<cl_ulong>(N), buffer.data());
-    vsmc::CLManager<>::instance().run_kernel(kernel, N, 0);
+    vsmc::CLManager<>::instance().run_kernel(kernel, N);
     watch.reset();
     watch.start();
-    vsmc::CLManager<>::instance().run_kernel(kernel, N, 0);
+    vsmc::CLManager<>::instance().run_kernel(kernel, N);
     watch.stop();
     vsmc::CLManager<>::instance().read_buffer<rt>(
         buffer.data(), N * M, cl.data());
@@ -166,10 +166,10 @@ inline void rng_cl_normal01(std::size_t N, const vsmc::CLProgram &program,
     vsmc::CLKernel kernel(program, "kernel_Normal01");
     vsmc::cl_set_kernel_args(
         kernel, 0, static_cast<cl_ulong>(N), buffer.data());
-    vsmc::CLManager<>::instance().run_kernel(kernel, N, 0);
+    vsmc::CLManager<>::instance().run_kernel(kernel, N);
     watch.reset();
     watch.start();
-    vsmc::CLManager<>::instance().run_kernel(kernel, N, 0);
+    vsmc::CLManager<>::instance().run_kernel(kernel, N);
     watch.stop();
     vsmc::CLManager<>::instance().read_buffer<FPType>(
         buffer.data(), N, cl.data());
@@ -246,10 +246,10 @@ inline void rng_cl_gammak1(std::size_t N, const vsmc::CLProgram &program,
     vsmc::CLKernel kernel(program, "kernel_GammaK1");
     vsmc::cl_set_kernel_args(
         kernel, 0, static_cast<cl_ulong>(N), buffer.data(), shape);
-    vsmc::CLManager<>::instance().run_kernel(kernel, N, 0);
+    vsmc::CLManager<>::instance().run_kernel(kernel, N);
     watch.reset();
     watch.start();
-    vsmc::CLManager<>::instance().run_kernel(kernel, N, 0);
+    vsmc::CLManager<>::instance().run_kernel(kernel, N);
     watch.stop();
     vsmc::CLManager<>::instance().read_buffer<FPType>(
         buffer.data(), N, cl.data());
