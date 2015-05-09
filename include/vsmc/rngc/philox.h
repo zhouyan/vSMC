@@ -72,7 +72,7 @@ typedef struct {
     vsmc_philox2x32_ctr_t state;
     vsmc_philox2x32_ctr_t ctr;
     vsmc_philox2x32_key_t key;
-    unsigned char index;
+    uint32_t index;
 } vsmc_philox2x32;
 
 /// \brief Philox4x32 RNG state structure
@@ -81,7 +81,7 @@ typedef struct {
     vsmc_philox4x32_ctr_t state;
     vsmc_philox4x32_ctr_t ctr;
     vsmc_philox4x32_key_t key;
-    unsigned char index;
+    uint32_t index;
 } vsmc_philox4x32;
 
 VSMC_STATIC_INLINE void vsmc_philox2x32_inc(vsmc_philox2x32_ctr_t *ctr)

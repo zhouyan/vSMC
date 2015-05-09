@@ -104,7 +104,7 @@ typedef struct {
     vsmc_threefry2x32_ctr_t state;
     vsmc_threefry2x32_ctr_t ctr;
     vsmc_threefry2x32_key_t key;
-    unsigned char index;
+    uint32_t index;
 } vsmc_threefry2x32;
 
 /// \brief Threefry4x32 RNG state structure
@@ -113,7 +113,7 @@ typedef struct {
     vsmc_threefry4x32_ctr_t state;
     vsmc_threefry4x32_ctr_t ctr;
     vsmc_threefry4x32_key_t key;
-    unsigned char index;
+    uint32_t index;
 } vsmc_threefry4x32;
 
 /// \brief Threefry2x64 RNG state structure
@@ -122,7 +122,7 @@ typedef struct {
     vsmc_threefry2x64_ctr_t state;
     vsmc_threefry2x64_ctr_t ctr;
     vsmc_threefry2x64_key_t key;
-    unsigned char index;
+    uint64_t index;
 } vsmc_threefry2x64;
 
 /// \brief Threefry4x64 RNG state structure
@@ -131,7 +131,7 @@ typedef struct {
     vsmc_threefry4x64_ctr_t state;
     vsmc_threefry4x64_ctr_t ctr;
     vsmc_threefry4x64_key_t key;
-    unsigned char index;
+    uint64_t index;
 } vsmc_threefry4x64;
 
 VSMC_STATIC_INLINE void vsmc_threefry2x32_inc(vsmc_threefry2x32_ctr_t *ctr)
