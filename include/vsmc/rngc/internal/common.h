@@ -38,8 +38,8 @@
 #endif
 typedef uint uint32_t;
 typedef ulong uint64_t;
-#define UINT32_C(x) ((uint)(x##U))
-#define UINT64_C(x) ((ulong)(x##UL))
+#define UINT32_C(x) ((uint32_t)(x##U))
+#define UINT64_C(x) ((uint64_t)(x##UL))
 #ifndef VSMC_STATIC_INLINE
 #if defined(__OPENCL_C_VERSION__) && __OPENCL_C_VERSION__ >= 120
 #define VSMC_STATIC_INLINE static inline
