@@ -122,8 +122,8 @@ inline void set_cl_fp_type<cl_float>(std::stringstream &ss)
     ss << "typedef float fp_type;\n";
     ss << "#endif\n";
 
-    ss << "#ifndef VSMC_HAS_OPENCL_DOUBLE\n";
-    ss << "#define VSMC_HAS_OPENCL_DOUBLE 0\n";
+    ss << "#ifndef VSMC_HAS_RNGC_DOUBLE\n";
+    ss << "#define VSMC_HAS_RNGC_DOUBLE 0\n";
     ss << "#endif\n";
 }
 
@@ -140,8 +140,8 @@ inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
     ss << "typedef double fp_type;\n";
     ss << "#endif\n";
 
-    ss << "#ifndef VSMC_HAS_OPENCL_DOUBLE\n";
-    ss << "#define VSMC_HAS_OPENCL_DOUBLE 1\n";
+    ss << "#ifndef VSMC_HAS_RNGC_DOUBLE\n";
+    ss << "#define VSMC_HAS_RNGC_DOUBLE 1\n";
     ss << "#endif\n";
 }
 
@@ -280,8 +280,8 @@ class StateCL
     /// typedef float fp_type;
     /// #endif
     ///
-    /// #ifndef VSMC_HAS_OPENCL_DOUBLE
-    /// #define VSMC_HAS_OPENCL_DOUBLE 0
+    /// #ifndef VSMC_HAS_RNGC_DOUBLE
+    /// #define VSMC_HAS_RNGC_DOUBLE 0
     /// #endif
     ///
     /// #ifndef SIZE

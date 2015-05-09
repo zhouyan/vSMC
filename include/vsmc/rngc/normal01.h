@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/normal01.h
+// vSMC/include/vsmc/rngc/normal01.h
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,31 +29,31 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_NORMAL01_H
-#define VSMC_RNG_NORMAL01_H
+#ifndef VSMC_RNGC_NORMAL01_H
+#define VSMC_RNGC_NORMAL01_H
 
-#include <vsmc/rng/internal/common.h>
-#include <vsmc/rng/philox.h>
-#include <vsmc/rng/u01.h>
+#include <vsmc/rngc/internal/common.h>
+#include <vsmc/rngc/philox.h>
+#include <vsmc/rngc/u01.h>
 
-#if VSMC_HAS_OPENCL_DOUBLE
+#if VSMC_HAS_RNGC_DOUBLE
 #define vsmc_normal01 vsmc_normal01_53
 #define vsmc_normal01_init vsmc_normal01_53_init
 #define vsmc_normal01_rand vsmc_normal01_53_rand
-#else // VSMC_HAS_OPENCL_DOUBLE
+#else // VSMC_HAS_RNGC_DOUBLE
 #define vsmc_normal01 vsmc_normal01_24
 #define vsmc_normal01_init vsmc_normal01_24_init
 #define vsmc_normal01_rand vsmc_normal01_24_rand
-#endif // VSMC_HAS_OPENCL_DOUBLE
+#endif // VSMC_HAS_RNGC_DOUBLE
 
-#define VSMC_DEFINE_RNG_NORMAL01(F, FT)                                       \
+#define VSMC_DEFINE_RNGC_NORMAL01(F, FT)                                      \
     typedef struct {                                                          \
         FT u1;                                                                \
         FT u2;                                                                \
         unsigned char saved;                                                  \
     } vsmc_normal01_##F;
 
-#define VSMC_DEFINE_RNG_NORMAL01_INIT(F, FT)                                  \
+#define VSMC_DEFINE_RNGC_NORMAL01_INIT(F, FT)                                 \
     VSMC_STATIC_INLINE void vsmc_normal01_##F##_init(                         \
         vsmc_normal01_##F *rnorm, vsmc_rng *rng)                              \
     {                                                                         \
@@ -62,7 +62,7 @@
         rnorm->saved = 1;                                                     \
     }
 
-#define VSMC_DEFINE_RNG_NORMAL01_RAND(F, FT)                                  \
+#define VSMC_DEFINE_RNGC_NORMAL01_RAND(F, FT)                                 \
     VSMC_STATIC_INLINE FT vsmc_normal01_##F##_rand(                           \
         vsmc_normal01_##F *rnorm, vsmc_rng *rng)                              \
     {                                                                         \
@@ -79,31 +79,31 @@
     }
 
 /// \brief Normal(0, 1) structure (single precision)
-/// \ingroup CRNG
-VSMC_DEFINE_RNG_NORMAL01(24, float)
+/// \ingroup Normal01C
+VSMC_DEFINE_RNGC_NORMAL01(24, float)
 
 /// \brief Initialize Normal(0, 1) structure (single precision)
-/// \ingroup CRNG
-VSMC_DEFINE_RNG_NORMAL01_INIT(24, float)
+/// \ingroup Normal01C
+VSMC_DEFINE_RNGC_NORMAL01_INIT(24, float)
 
 /// \brief Generate Normal(0, 1) random numbers (single precision)
-/// \ingroup CRNG
-VSMC_DEFINE_RNG_NORMAL01_RAND(24, float)
+/// \ingroup Normal01C
+VSMC_DEFINE_RNGC_NORMAL01_RAND(24, float)
 
-#if VSMC_HAS_OPENCL_DOUBLE
+#if VSMC_HAS_RNGC_DOUBLE
 
 /// \brief Normal(0, 1) structure (double precision)
-/// \ingroup CRNG
-VSMC_DEFINE_RNG_NORMAL01(53, double)
+/// \ingroup Normal01C
+VSMC_DEFINE_RNGC_NORMAL01(53, double)
 
 /// \brief Initialize Normal(0, 1) structure (double precision)
-/// \ingroup CRNG
-VSMC_DEFINE_RNG_NORMAL01_INIT(53, double)
+/// \ingroup Normal01C
+VSMC_DEFINE_RNGC_NORMAL01_INIT(53, double)
 
 /// \brief Generate Normal(0, 1) random numbers (double precision)
-/// \ingroup CRNG
-VSMC_DEFINE_RNG_NORMAL01_RAND(53, double)
+/// \ingroup Normal01C
+VSMC_DEFINE_RNGC_NORMAL01_RAND(53, double)
 
-#endif // VSMC_HAS_OPENCL_DOUBLE
+#endif // VSMC_HAS_RNGC_DOUBLE
 
-#endif // VSMC_RNG_NORMAL01_H
+#endif // VSMC_RNGC_NORMAL01_H

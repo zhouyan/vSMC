@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/rng.h
+// vSMC/include/vsmc/rngc/rngc.h
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,12 +29,12 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_RNG_H
-#define VSMC_RNG_RNG_H
+#ifndef VSMC_RNGC_RNGC_H
+#define VSMC_RNGC_RNGC_H
 
-#include <vsmc/rng/philox.h>
-#include <vsmc/rng/gammak1.h>
-#include <vsmc/rng/normal01.h>
-#include <vsmc/rng/u01.h>
+#include <vsmc/rngc/philox.h>
+#include <vsmc/rngc/gammak1.h>
+#include <vsmc/rngc/normal01.h>
+#include <vsmc/rngc/u01.h>
 
-#endif // VSMC_RNG_RNG_H
+#endif // VSMC_RNGC_RNGC_H

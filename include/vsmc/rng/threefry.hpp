@@ -250,7 +250,7 @@ struct ThreefryInsertKey<ResultType, 4, N, true> {
 } // namespace vsmc::internal
 
 /// \brief Threefry RNG engine reimplemented
-/// \ingroup R123RNG
+/// \ingroup Threefry
 ///
 /// \details
 /// This is a reimplementation of the algorithm Threefry as described in
@@ -520,27 +520,27 @@ class ThreefryEngine
 }; // class ThreefryEngine
 
 /// \brief Threefry2x32 RNG engine reimplemented
-/// \ingroup R123RNG
+/// \ingroup Threefry
 typedef ThreefryEngine<std::uint32_t, 2> Threefry2x32;
 
 /// \brief Threefry4x32 RNG engine reimplemented
-/// \ingroup R123RNG
+/// \ingroup Threefry
 typedef ThreefryEngine<std::uint32_t, 4> Threefry4x32;
 
 /// \brief Threefry2x64 RNG engine reimplemented
-/// \ingroup R123RNG
+/// \ingroup Threefry
 typedef ThreefryEngine<std::uint64_t, 2> Threefry2x64;
 
 /// \brief Threefry4x64 RNG engine reimplemented
-/// \ingroup R123RNG
+/// \ingroup Threefry
 typedef ThreefryEngine<std::uint64_t, 4> Threefry4x64;
 
 /// \brief The default 32-bits Threefry engine
-/// \ingroup R123RNG
+/// \ingroup Threefry
 typedef Threefry4x32 Threefry;
 
 /// \brief The default 64-bits Threefry engine
-/// \ingroup R123RNG
+/// \ingroup Threefry
 typedef Threefry4x64 Threefry_64;
 
 } // namespace vsmc

@@ -35,7 +35,7 @@
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/opencl/adapter.hpp>
 #include <vsmc/opencl/backend_cl.hpp>
-#include <vsmc/rng/philox.h>
+#include <vsmc/rngc/philox.h>
 
 #ifdef VSMC_PF_CL_MPI
 #include <vsmc/mpi/backend_mpi.hpp>

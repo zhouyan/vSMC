@@ -33,7 +33,7 @@
 #define VSMC_RNG_U01_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/u01.h>
+#include <vsmc/rngc/u01.h>
 
 #define VSMC_RUNTIME_ASSERT_RNG_U01_U01_SEQUENCE(Method)                      \
     VSMC_RUNTIME_ASSERT((n < N_ && (n == n_ || n == n_ + 1 || n_ == N_)),     \
@@ -57,12 +57,12 @@ namespace vsmc
 {
 
 /// \brief Parameter type for open interval
-/// \ingroup RNG
+/// \ingroup U01
 struct Open {
 };
 
 /// \brief Parameter type for closed interval
-/// \ingroup RNG
+/// \ingroup U01
 struct Closed {
 };
 
@@ -70,72 +70,72 @@ template <typename, typename, typename, typename>
 struct U01;
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1]\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(float, Closed, Closed, closed, closed, 32, 24)
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1)\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(float, Closed, Open, closed, open, 32, 24)
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$(0,1]\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(float, Open, Closed, open, closed, 32, 24)
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$(0,1)\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(float, Open, Open, open, open, 32, 24)
 
 /// \brief Converting 32-bits unsigned to double precision uniform \f$[0,1]\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(double, Closed, Closed, closed, closed, 32, 53)
 
 /// \brief Converting 32-bits unsigned to double precision uniform \f$[0,1)\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(double, Closed, Open, closed, open, 32, 53)
 
 /// \brief Converting 32-bits unsigned to double precision uniform \f$(0,1]\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(double, Open, Closed, open, closed, 32, 53)
 
 /// \brief Converting 32-bits unsigned to double precision uniform \f$(0,1)\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(double, Open, Open, open, open, 32, 53)
 
 /// \brief Converting 64-bits unsigned to single precision uniform \f$[0,1]\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(float, Closed, Closed, closed, closed, 64, 24)
 
 /// \brief Converting 64-bits unsigned to single precision uniform \f$[0,1)\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(float, Closed, Open, closed, open, 64, 24)
 
 /// \brief Converting 64-bits unsigned to single precision uniform \f$(0,1]\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(float, Open, Closed, open, closed, 64, 24)
 
 /// \brief Converting 64-bits unsigned to single precision uniform \f$(0,1)\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(float, Open, Open, open, open, 64, 24)
 
 /// \brief Converting 64-bits unsigned to double precision uniform \f$[0,1]\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(double, Closed, Closed, closed, closed, 64, 53)
 
 /// \brief Converting 64-bits unsigned to double precision uniform \f$[0,1)\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(double, Closed, Open, closed, open, 64, 53)
 
 /// \brief Converting 64-bits unsigned to double precision uniform \f$(0,1]\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(double, Open, Closed, open, closed, 64, 53)
 
 /// \brief Converting 64-bits unsigned to double precision uniform \f$(0,1)\f$
-/// \ingroup RNG
+/// \ingroup U01
 VSMC_DEFINE_RNG_U01(double, Open, Open, open, open, 64, 53)
 
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
 /// variates by sorting.
-/// \ingroup RNG
+/// \ingroup U01
 ///
 /// \details
 /// This is primarily used in resampling algorithms within the library but can
@@ -210,7 +210,7 @@ class U01SequenceSorted
 
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
 /// variates by stratified sampling.
-/// \ingroup RNG
+/// \ingroup U01
 ///
 /// \details
 /// This is similar to U01SequenceSorted except that, instead of generating
@@ -253,7 +253,7 @@ class U01SequenceStratified
 
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
 /// variates by systematic sampling.
-/// \ingroup RNG
+/// \ingroup U01
 ///
 /// \details
 /// This is similar to U01SequenceSorted except that, instead of generating

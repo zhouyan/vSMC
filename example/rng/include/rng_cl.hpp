@@ -35,8 +35,9 @@
 #include <vsmc/opencl/cl_buffer.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
-#include <vsmc/rng/rng.h>
-#include <vsmc/rng/rng.hpp>
+#include <vsmc/rng/philox.hpp>
+#include <vsmc/rng/threefry.hpp>
+#include <vsmc/rngc/rngc.h>
 #include <vsmc/utility/stop_watch.hpp>
 
 #if VSMC_HAS_HDF5

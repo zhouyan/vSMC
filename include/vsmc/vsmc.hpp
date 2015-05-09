@@ -112,10 +112,6 @@
 /// \ingroup RNG
 /// \brief Random number generating using AES-NI
 
-/// \defgroup CRNG C API
-/// \ingroup RNG
-/// \brief Random number generating in C interface
-
 /// \defgroup Distribution Distribution
 /// \ingroup RNG
 /// \brief Distribution random varaites
@@ -124,17 +120,48 @@
 /// \ingroup RNG
 /// \brief Random number generating using MKL RNG
 
-/// \defgroup R123RNG Random123
+/// \defgroup Philox Philox
 /// \ingroup RNG
-/// \brief Random number generating using Random123 RNG
+/// \brief Random number generating using Random123 Philox RNG
+
+/// \defgroup Threefry Threefry
+/// \ingroup RNG
+/// \brief Random number generating using Random123 Threefry RNG
 
 /// \defgroup RDRAND Intel DRNG
 /// \ingroup RNG
 /// \brief Random number generating using Intel RDRAND instructions
 
+/// \defgroup U01 U01
+/// \ingroup RNG
+/// \brief Converting random integers to uniform floating points
+
 /// \defgroup Xorshift Xorshift
 /// \ingroup RNG
 /// \brief Random number generating using the Xorshift algorithm
+
+/// \defgroup RNGC Random number generating in C and OpenCL
+/// \brief Random number generating in C and OpenCL
+
+/// \defgroup GammaK1C GammaK1
+/// \ingroup RNGC
+/// \brief Generating Gamma(k, 1) random numbers
+
+/// \defgroup Normal01C Normal01
+/// \ingroup RNGC
+/// \brief Generating Normal(0, 1) random numbers
+
+/// \defgroup PhiloxC Philox
+/// \ingroup RNGC
+/// \brief Random number generating using Random123 Philox RNG
+
+/// \defgroup ThreefryC Threefry
+/// \ingroup RNGC
+/// \brief Random number generating using Random123 Threefry RNG
+
+/// \defgroup U01C U01
+/// \ingroup RNGC
+/// \brief Converting random integers to uniform floating points
 
 /// \defgroup Thread Thread
 /// \brief C++11 threading support

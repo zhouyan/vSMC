@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/internal/common.h
+// vSMC/include/vsmc/rngc/internal/common.h
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,12 +29,12 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_INTERNAL_COMMON_H
-#define VSMC_RNG_INTERNAL_COMMON_H
+#ifndef VSMC_RNGC_INTERNAL_COMMON_H
+#define VSMC_RNGC_INTERNAL_COMMON_H
 
 #ifdef __OPENCL_VERSION__
-#ifndef VSMC_HAS_OPENCL_DOUBLE
-#define VSMC_HAS_OPENCL_DOUBLE 0
+#ifndef VSMC_HAS_RNGC_DOUBLE
+#define VSMC_HAS_RNGC_DOUBLE 0
 #endif
 typedef uint uint32_t;
 typedef ulong uint64_t;
@@ -48,8 +48,8 @@ typedef ulong uint64_t;
 #endif
 #endif // VSMC_STATIC_INLINE
 #else  // __OPENCL_VERSION__
-#ifndef VSMC_HAS_OPENCL_DOUBLE
-#define VSMC_HAS_OPENCL_DOUBLE 1
+#ifndef VSMC_HAS_RNGC_DOUBLE
+#define VSMC_HAS_RNGC_DOUBLE 1
 #endif
 #ifndef __STDC_CONSTANT_MACROS
 #define __STDC_CONSTANT_MACROS
@@ -102,20 +102,21 @@ typedef ulong uint64_t;
 #endif // __OPENCL_VERSION__
 
 /// \brief Default RNG state
-/// \ingroup CRNG
+/// \ingroup RNGC
 #ifndef vsmc_rng
 #define vsmc_rng vsmc_philox4x32
 #endif
 
 /// \brief Initialize default RNG state
-/// \ingroup CRNG
+/// \ingroup RNGC
 #ifndef vsmc_rng_init
 #define vsmc_rng_init vsmc_philox4x32_init
 #endif
 
 /// \brief Generate random 32-bits integers from default RNG
+/// \ingroup RNGC
 #ifndef vsmc_rng_rand
 #define vsmc_rng_rand vsmc_philox4x32_rand
 #endif
 
-#endif // VSMC_RNG_INTERNAL_COMMON_H
+#endif // VSMC_RNGC_INTERNAL_COMMON_H

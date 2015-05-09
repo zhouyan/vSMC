@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/philox.h
+// vSMC/include/vsmc/rngc/philox.h
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,31 +29,31 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_PHILOX_H
-#define VSMC_RNG_PHILOX_H
+#ifndef VSMC_RNGC_PHILOX_H
+#define VSMC_RNGC_PHILOX_H
 
-#include <vsmc/rng/internal/common.h>
+#include <vsmc/rngc/internal/common.h>
 
 /// \brief Philox2x32 counter type
-/// \ingroup CRNG
+/// \ingroup PhiloxC
 typedef struct {
     uint32_t v[2];
 } vsmc_philox2x32_ctr_t;
 
 /// \brief Philox4x32 counter type
-/// \ingroup CRNG
+/// \ingroup PhiloxC
 typedef struct {
     uint32_t v[4];
 } vsmc_philox4x32_ctr_t;
 
 /// \brief Philox2x32 key type
-/// \ingroup CRNG
+/// \ingroup PhiloxC
 typedef struct {
     uint32_t v[1];
 } vsmc_philox2x32_key_t;
 
 /// \brief Philox4x32 key type
-/// \ingroup CRNG
+/// \ingroup PhiloxC
 typedef struct {
     uint32_t v[2];
 } vsmc_philox4x32_key_t;
@@ -130,7 +130,7 @@ VSMC_STATIC_INLINE void vsmc_philox4x32_round(
 }
 
 /// \brief Philox2x32 RNG state structure
-/// \ingroup CRNG
+/// \ingroup PhiloxC
 typedef struct {
     vsmc_philox2x32_ctr_t state;
     vsmc_philox2x32_ctr_t ctr;
@@ -139,7 +139,7 @@ typedef struct {
 } vsmc_philox2x32;
 
 /// \brief Philox4x32 RNG state structure
-/// \ingroup CRNG
+/// \ingroup PhiloxC
 typedef struct {
     vsmc_philox4x32_ctr_t state;
     vsmc_philox4x32_ctr_t ctr;
@@ -148,7 +148,7 @@ typedef struct {
 } vsmc_philox4x32;
 
 /// \brief Initialize Philox2x32 RNG state
-/// \ingroup CRNG
+/// \ingroup PhiloxC
 VSMC_STATIC_INLINE void vsmc_philox2x32_init(
     vsmc_philox2x32 *rng, uint32_t seed)
 {
@@ -159,7 +159,7 @@ VSMC_STATIC_INLINE void vsmc_philox2x32_init(
 }
 
 /// \brief Initialize Philox4x32 RNG state
-/// \ingroup CRNG
+/// \ingroup PhiloxC
 VSMC_STATIC_INLINE void vsmc_philox4x32_init(
     vsmc_philox4x32 *rng, uint32_t seed)
 {
@@ -173,7 +173,7 @@ VSMC_STATIC_INLINE void vsmc_philox4x32_init(
 }
 
 /// \brief Generate random 32-bits integers from Philox2x32 RNG
-/// \ingroup CRNG
+/// \ingroup PhiloxC
 VSMC_STATIC_INLINE uint32_t vsmc_philox2x32_rand(vsmc_philox2x32 *rng)
 {
     if (rng->index == 2) {
@@ -209,7 +209,7 @@ VSMC_STATIC_INLINE uint32_t vsmc_philox2x32_rand(vsmc_philox2x32 *rng)
 }
 
 /// \brief Generate random 32-bits integers from Philox4x32 RNG
-/// \ingroup CRNG
+/// \ingroup PhiloxC
 VSMC_STATIC_INLINE uint32_t vsmc_philox4x32_rand(vsmc_philox4x32 *rng)
 {
     if (rng->index == 4) {
@@ -244,4 +244,4 @@ VSMC_STATIC_INLINE uint32_t vsmc_philox4x32_rand(vsmc_philox4x32 *rng)
     return rng->state.v[rng->index++];
 }
 
-#endif // VSMC_RNG_PHILOX_H
+#endif // VSMC_RNGC_PHILOX_H

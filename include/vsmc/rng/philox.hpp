@@ -280,7 +280,7 @@ struct PhiloxRound<ResultType, 4, N, true> {
 } // namespace vsmc::internal
 
 /// \brief Philox RNG engine reimplemented
-/// \ingroup R123RNG
+/// \ingroup Philox
 ///
 /// \details
 /// This is a reimplementation of the algorithm Philox as described in
@@ -533,27 +533,27 @@ class PhiloxEngine
 }; // class PhiloxEngine
 
 /// \brief Philox2x32 RNG engine reimplemented
-/// \ingroup R123RNG
+/// \ingroup Philox
 typedef PhiloxEngine<std::uint32_t, 2> Philox2x32;
 
 /// \brief Philox4x32 RNG engine reimplemented
-/// \ingroup R123RNG
+/// \ingroup Philox
 typedef PhiloxEngine<std::uint32_t, 4> Philox4x32;
 
 /// \brief Philox2x64 RNG engine reimplemented
-/// \ingroup R123RNG
+/// \ingroup Philox
 typedef PhiloxEngine<std::uint64_t, 2> Philox2x64;
 
 /// \brief Philox4x64 RNG engine reimplemented
-/// \ingroup R123RNG
+/// \ingroup Philox
 typedef PhiloxEngine<std::uint64_t, 4> Philox4x64;
 
 /// \brief The default 32-bits Philox engine
-/// \ingroup R123RNG
+/// \ingroup Philox
 typedef Philox4x32 Philox;
 
 /// \brief The default 64-bits Philox engine
-/// \ingroup R123RNG
+/// \ingroup Philox
 typedef Philox4x64 Philox_64;
 
 } // namespace vsmc

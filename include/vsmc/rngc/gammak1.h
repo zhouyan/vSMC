@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/gammak1.h
+// vSMC/include/vsmc/rngc/gammak1.h
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,31 +29,31 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_GAMMAK1_H
-#define VSMC_RNG_GAMMAK1_H
+#ifndef VSMC_RNGC_GAMMAK1_H
+#define VSMC_RNGC_GAMMAK1_H
 
-#include <vsmc/rng/internal/common.h>
-#include <vsmc/rng/philox.h>
-#include <vsmc/rng/normal01.h>
-#include <vsmc/rng/u01.h>
+#include <vsmc/rngc/internal/common.h>
+#include <vsmc/rngc/philox.h>
+#include <vsmc/rngc/normal01.h>
+#include <vsmc/rngc/u01.h>
 
-#if VSMC_HAS_OPENCL_DOUBLE
+#if VSMC_HAS_RNGC_DOUBLE
 #define vsmc_gammak1 vsmc_gammak1_53
 #define vsmc_gammak1_init vsmc_gammak1_53_init
 #define vsmc_gammak1_rand vsmc_gammak1_53_rand
-#else // VSMC_HAS_OPENCL_DOUBLE
+#else // VSMC_HAS_RNGC_DOUBLE
 #define vsmc_gammak1 vsmc_gammak1_24
 #define vsmc_gammak1_init vsmc_gammak1_24_init
 #define vsmc_gammak1_rand vsmc_gammak1_24_rand
-#endif // VSMC_HAS_OPENCL_DOUBLE
+#endif // VSMC_HAS_RNGC_DOUBLE
 
-#define VSMC_DEFINE_RNG_GAMMAK1(F, FT)                                        \
+#define VSMC_DEFINE_RNGC_GAMMAK1(F, FT)                                       \
     typedef struct {                                                          \
         FT c_shape, c_s2, c_s, c_d, c_b, c_si, c_c, c_q0;                     \
         vsmc_normal01_##F rnorm;                                              \
     } vsmc_gammak1_##F;
 
-#define VSMC_DEFINE_RNG_GAMMAK1_INIT(F, FT)                                   \
+#define VSMC_DEFINE_RNGC_GAMMAK1_INIT(F, FT)                                  \
     VSMC_STATIC_INLINE void vsmc_gammak1_##F##_init(                          \
         vsmc_gammak1_##F *rgamma, vsmc_rng *rng, FT shape)                    \
     {                                                                         \
@@ -113,7 +113,7 @@
         rgamma->c_q0 = c_q0;                                                  \
     }
 
-#define VSMC_DEFINE_RNG_GAMMAK1_RAND(F, FT)                                   \
+#define VSMC_DEFINE_RNGC_GAMMAK1_RAND(F, FT)                                  \
     VSMC_STATIC_INLINE FT vsmc_gammak1_##F##_rand(                            \
         vsmc_gammak1_##F *rgamma, vsmc_rng *rng)                              \
     {                                                                         \
@@ -233,31 +233,31 @@
     }
 
 /// \brief Gamma(k, 1) structure (single precision)
-/// \ingroup CRNG
-VSMC_DEFINE_RNG_GAMMAK1(24, float)
+/// \ingroup GammaK1C
+VSMC_DEFINE_RNGC_GAMMAK1(24, float)
 
 /// \brief Initialize Gamma(k, 1) structure (single precision)
-/// \ingroup CRNG
-VSMC_DEFINE_RNG_GAMMAK1_INIT(24, float)
+/// \ingroup GammaK1C
+VSMC_DEFINE_RNGC_GAMMAK1_INIT(24, float)
 
 /// \brief Generate Gamma(k, 1) random numbers (single precision)
-/// \ingroup CRNG
-VSMC_DEFINE_RNG_GAMMAK1_RAND(24, float)
+/// \ingroup GammaK1C
+VSMC_DEFINE_RNGC_GAMMAK1_RAND(24, float)
 
-#if VSMC_HAS_OPENCL_DOUBLE
+#if VSMC_HAS_RNGC_DOUBLE
 
 /// \brief Gamma(k, 1) structure (double precision)
-/// \ingroup CRNG
-VSMC_DEFINE_RNG_GAMMAK1(53, double)
+/// \ingroup GammaK1C
+VSMC_DEFINE_RNGC_GAMMAK1(53, double)
 
 /// \brief Initialize Gamma(k, 1) structure (double precision)
-/// \ingroup CRNG
-VSMC_DEFINE_RNG_GAMMAK1_INIT(53, double)
+/// \ingroup GammaK1C
+VSMC_DEFINE_RNGC_GAMMAK1_INIT(53, double)
 
 /// \brief Generate Gamma(k, 1) random numbers (double precision)
-/// \ingroup CRNG
-VSMC_DEFINE_RNG_GAMMAK1_RAND(53, double)
+/// \ingroup GammaK1C
+VSMC_DEFINE_RNGC_GAMMAK1_RAND(53, double)
 
-#endif // VSMC_HAS_OPENCL_DOUBLE
+#endif // VSMC_HAS_RNGC_DOUBLE
 
-#endif // VSMC_RNG_GAMMAK1_H
+#endif // VSMC_RNGC_GAMMAK1_H
