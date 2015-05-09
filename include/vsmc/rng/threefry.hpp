@@ -137,22 +137,22 @@ VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 5, 1, 12)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 6, 1, 22)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 7, 1, 32)
 
-template <typename ResultType, unsigned N>
+template <typename ResultType, unsigned R>
 struct ThreefryRotateImpl;
 
-template <unsigned N>
-struct ThreefryRotateImpl<std::uint32_t, N> {
+template <unsigned R>
+struct ThreefryRotateImpl<std::uint32_t, R> {
     static std::uint32_t eval(std::uint32_t x)
     {
-        return x << N | x >> (32 - N);
+        return x << R | x >> (32 - R);
     }
 };
 
-template <unsigned N>
-struct ThreefryRotateImpl<std::uint64_t, N> {
+template <unsigned R>
+struct ThreefryRotateImpl<std::uint64_t, R> {
     static std::uint64_t eval(std::uint64_t x)
     {
-        return x << N | x >> (64 - N);
+        return x << R | x >> (64 - R);
     }
 };
 
