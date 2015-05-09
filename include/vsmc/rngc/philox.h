@@ -58,6 +58,14 @@ typedef struct {
     uint32_t v[2];
 } vsmc_philox4x32_key_t;
 
+typedef struct {
+    uint32_t v[1];
+} vsmc_philox2x32_par_t;
+
+typedef struct {
+    uint32_t v[2];
+} vsmc_philox4x32_par_t;
+
 /// \brief Philox2x32 RNG state structure
 /// \ingroup PhiloxC
 typedef struct {
@@ -96,19 +104,32 @@ VSMC_STATIC_INLINE void vsmc_philox4x32_inc(vsmc_philox4x32_ctr_t *ctr)
         return;
 }
 
-VSMC_STATIC_INLINE void vsmc_philox2x32_bumpkey(vsmc_philox2x32_key_t *par)
+VSMC_STATIC_INLINE void vsmc_philox2x32_initpar(
+    const vsmc_philox2x32_key_t *key, vsmc_philox2x32_par_t *par)
+{
+    par->v[0] = key->v[0];
+}
+
+VSMC_STATIC_INLINE void vsmc_philox4x32_initpar(
+    const vsmc_philox4x32_key_t *key, vsmc_philox4x32_par_t *par)
+{
+    par->v[0] = key->v[0];
+    par->v[1] = key->v[1];
+}
+
+VSMC_STATIC_INLINE void vsmc_philox2x32_bumpkey(vsmc_philox2x32_par_t *par)
 {
     par->v[0] += UINT32_C(0x9E3779B9);
 }
 
-VSMC_STATIC_INLINE void vsmc_philox4x32_bumpkey(vsmc_philox4x32_key_t *par)
+VSMC_STATIC_INLINE void vsmc_philox4x32_bumpkey(vsmc_philox4x32_par_t *par)
 {
     par->v[0] += UINT32_C(0x9E3779B9);
     par->v[1] += UINT32_C(0xBB67AE85);
 }
 
 VSMC_STATIC_INLINE void vsmc_philox2x32_round(
-    vsmc_philox2x32_ctr_t *state, const vsmc_philox2x32_key_t *par)
+    vsmc_philox2x32_ctr_t *state, const vsmc_philox2x32_par_t *par)
 {
 #ifdef __cplusplus
     uint64_t p = static_cast<uint64_t>(state->v[0]) * UINT64_C(0xD256D193);
@@ -125,7 +146,7 @@ VSMC_STATIC_INLINE void vsmc_philox2x32_round(
 }
 
 VSMC_STATIC_INLINE void vsmc_philox4x32_round(
-    vsmc_philox4x32_ctr_t *state, const vsmc_philox4x32_key_t *par)
+    vsmc_philox4x32_ctr_t *state, const vsmc_philox4x32_par_t *par)
 {
 #ifdef __cplusplus
     uint64_t p0 = static_cast<uint64_t>(state->v[0]) * UINT64_C(0xD2511F53);
@@ -183,27 +204,28 @@ VSMC_STATIC_INLINE uint32_t vsmc_philox2x32_rand(vsmc_philox2x32 *rng)
         vsmc_philox2x32_inc(&rng->ctr);
 
         rng->state = rng->ctr;
-        vsmc_philox2x32_key_t par = rng->key;
+        vsmc_philox2x32_par_t p;
+        vsmc_philox2x32_initpar(&rng->key, &p);
 
-        vsmc_philox2x32_round(&rng->state, &par); // N = 1
-        vsmc_philox2x32_bumpkey(&par);            // N = 2
-        vsmc_philox2x32_round(&rng->state, &par); // N = 2
-        vsmc_philox2x32_bumpkey(&par);            // N = 3
-        vsmc_philox2x32_round(&rng->state, &par); // N = 3
-        vsmc_philox2x32_bumpkey(&par);            // N = 4
-        vsmc_philox2x32_round(&rng->state, &par); // N = 4
-        vsmc_philox2x32_bumpkey(&par);            // N = 5
-        vsmc_philox2x32_round(&rng->state, &par); // N = 5
-        vsmc_philox2x32_bumpkey(&par);            // N = 6
-        vsmc_philox2x32_round(&rng->state, &par); // N = 6
-        vsmc_philox2x32_bumpkey(&par);            // N = 7
-        vsmc_philox2x32_round(&rng->state, &par); // N = 7
-        vsmc_philox2x32_bumpkey(&par);            // N = 8
-        vsmc_philox2x32_round(&rng->state, &par); // N = 8
-        vsmc_philox2x32_bumpkey(&par);            // N = 9
-        vsmc_philox2x32_round(&rng->state, &par); // N = 9
-        vsmc_philox2x32_bumpkey(&par);            // N = 10
-        vsmc_philox2x32_round(&rng->state, &par); // N = 10
+        vsmc_philox2x32_round(&rng->state, &p); // N = 1
+        vsmc_philox2x32_bumpkey(&p);            // N = 2
+        vsmc_philox2x32_round(&rng->state, &p); // N = 2
+        vsmc_philox2x32_bumpkey(&p);            // N = 3
+        vsmc_philox2x32_round(&rng->state, &p); // N = 3
+        vsmc_philox2x32_bumpkey(&p);            // N = 4
+        vsmc_philox2x32_round(&rng->state, &p); // N = 4
+        vsmc_philox2x32_bumpkey(&p);            // N = 5
+        vsmc_philox2x32_round(&rng->state, &p); // N = 5
+        vsmc_philox2x32_bumpkey(&p);            // N = 6
+        vsmc_philox2x32_round(&rng->state, &p); // N = 6
+        vsmc_philox2x32_bumpkey(&p);            // N = 7
+        vsmc_philox2x32_round(&rng->state, &p); // N = 7
+        vsmc_philox2x32_bumpkey(&p);            // N = 8
+        vsmc_philox2x32_round(&rng->state, &p); // N = 8
+        vsmc_philox2x32_bumpkey(&p);            // N = 9
+        vsmc_philox2x32_round(&rng->state, &p); // N = 9
+        vsmc_philox2x32_bumpkey(&p);            // N = 10
+        vsmc_philox2x32_round(&rng->state, &p); // N = 10
 
         rng->index = 0;
     }
@@ -219,27 +241,28 @@ VSMC_STATIC_INLINE uint32_t vsmc_philox4x32_rand(vsmc_philox4x32 *rng)
         vsmc_philox4x32_inc(&rng->ctr);
 
         rng->state = rng->ctr;
-        vsmc_philox4x32_key_t par = rng->key;
+        vsmc_philox4x32_par_t p;
+        vsmc_philox4x32_initpar(&rng->key, &p);
 
-        vsmc_philox4x32_round(&rng->state, &par); // N = 1
-        vsmc_philox4x32_bumpkey(&par);            // N = 2
-        vsmc_philox4x32_round(&rng->state, &par); // N = 2
-        vsmc_philox4x32_bumpkey(&par);            // N = 3
-        vsmc_philox4x32_round(&rng->state, &par); // N = 3
-        vsmc_philox4x32_bumpkey(&par);            // N = 4
-        vsmc_philox4x32_round(&rng->state, &par); // N = 4
-        vsmc_philox4x32_bumpkey(&par);            // N = 5
-        vsmc_philox4x32_round(&rng->state, &par); // N = 5
-        vsmc_philox4x32_bumpkey(&par);            // N = 6
-        vsmc_philox4x32_round(&rng->state, &par); // N = 6
-        vsmc_philox4x32_bumpkey(&par);            // N = 7
-        vsmc_philox4x32_round(&rng->state, &par); // N = 7
-        vsmc_philox4x32_bumpkey(&par);            // N = 8
-        vsmc_philox4x32_round(&rng->state, &par); // N = 8
-        vsmc_philox4x32_bumpkey(&par);            // N = 9
-        vsmc_philox4x32_round(&rng->state, &par); // N = 9
-        vsmc_philox4x32_bumpkey(&par);            // N = 10
-        vsmc_philox4x32_round(&rng->state, &par); // N = 10
+        vsmc_philox4x32_round(&rng->state, &p); // N = 1
+        vsmc_philox4x32_bumpkey(&p);            // N = 2
+        vsmc_philox4x32_round(&rng->state, &p); // N = 2
+        vsmc_philox4x32_bumpkey(&p);            // N = 3
+        vsmc_philox4x32_round(&rng->state, &p); // N = 3
+        vsmc_philox4x32_bumpkey(&p);            // N = 4
+        vsmc_philox4x32_round(&rng->state, &p); // N = 4
+        vsmc_philox4x32_bumpkey(&p);            // N = 5
+        vsmc_philox4x32_round(&rng->state, &p); // N = 5
+        vsmc_philox4x32_bumpkey(&p);            // N = 6
+        vsmc_philox4x32_round(&rng->state, &p); // N = 6
+        vsmc_philox4x32_bumpkey(&p);            // N = 7
+        vsmc_philox4x32_round(&rng->state, &p); // N = 7
+        vsmc_philox4x32_bumpkey(&p);            // N = 8
+        vsmc_philox4x32_round(&rng->state, &p); // N = 8
+        vsmc_philox4x32_bumpkey(&p);            // N = 9
+        vsmc_philox4x32_round(&rng->state, &p); // N = 9
+        vsmc_philox4x32_bumpkey(&p);            // N = 10
+        vsmc_philox4x32_round(&rng->state, &p); // N = 10
 
         rng->index = 0;
     }
