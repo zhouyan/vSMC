@@ -486,7 +486,19 @@ class CLManager
     std::vector<CLDevice> device_filter(const std::vector<CLDevice> &dev_pool)
     {
         std::vector<bool> dev_select_idx(dev_pool.size(), true);
+        std::vector<bool> dev_select_idx_igpu(dev_pool.size(), true);
         std::string name;
+        ::cl_device_type type;
+
+        // Filter out Intel GPU
+        for (std::size_t d = 0; d != dev_pool.size(); ++d) {
+            dev_pool[d].get_info(CL_DEVICE_TYPE, type);
+            dev_pool[d].get_info(CL_DEVICE_VENDOR, name);
+            if ((type & CL_DEVICE_TYPE_GPU) != 0 &&
+                name.find("Intel") != std::string::npos) {
+                dev_select_idx_igpu[d] = false;
+            }
+        }
 
         // Not using the default device vendor
         if (!setup_default_.default_device_vendor()) {
@@ -504,6 +516,17 @@ class CLManager
                 if (!setup_default_.check_device(name))
                     dev_select_idx[d] = false;
             }
+        }
+
+        // determine if we should remove intel GPU
+        std::size_t num = 0;
+        for (std::size_t d = 0; d != dev_pool.size(); ++d)
+            if (dev_select_idx[d] && dev_select_idx_igpu[d])
+                ++num;
+        if (num > 0) {
+            for (std::size_t d = 0; d != dev_pool.size(); ++d)
+                if (!dev_select_idx_igpu[d])
+                    dev_select_idx[d] = false;
         }
 
         std::vector<CLDevice> dev_select;
