@@ -115,9 +115,9 @@ IF (OPENCL_FOUND)
     ADD_DEPENDENCIES (example_cl rng_cl)
     ADD_CUSTOM_TARGET (rng_cl-check
         DEPENDS rng_cl rng-files
-        COMMAND rng_cl
+        COMMAND rng_cl "1000" "float"
         "vSMCOpenCLDefault" "vSMCOpenCLDefault" "vSMCOpenCLDefault"
-        "float" "10000" "-I ${VSMC_INCLUDE_DIR}" ">>rng_cl.out"
+        "-I ${VSMC_INCLUDE_DIR}" ">>rng_cl.out"
         COMMENT "Running rng_cl"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
     ADD_CUSTOM_TARGET (rng_cl-pdf

@@ -33,34 +33,30 @@
 
 int main(int argc, char **argv)
 {
-    if (argc < 6) {
-        std::cout << "Usage: " << argv[0] << " <platform name>"
-                  << " <device vendor>"
-                  << " <device type>"
-                  << " <fp type>"
-                  << " <number of samples>" << std::endl;
-        return -1;
-    }
+    std::size_t N =
+        argc > 1 ? static_cast<std::size_t>(std::atoi(argv[1])) : 1000;
+    const std::string fptype = argc > 2 ? argv[2] : "float";
+    const std::string platform = argc > 3 ? argv[3] : "vSMCOpenCLDefault";
+    const std::string device_vendor = argc > 4 ? argv[4] : "vSMCOpenCLDefault";
+    const std::string device_type = argc > 5 ? argv[5] : "vSMCOpenCLDefault";
 
     vsmc::CLSetup<> &rng_setup = vsmc::CLSetup<>::instance();
-    rng_setup.platform(argv[1]);
-    rng_setup.device_vendor(argv[2]);
-    rng_setup.device_type(argv[3]);
+    rng_setup.platform(platform);
+    rng_setup.device_vendor(device_vendor);
+    rng_setup.device_type(device_type);
 
     if (!vsmc::CLManager<>::instance().setup()) {
         std::cout << "Failed to setup OpenCL environment" << std::endl;
-        std::cout << "Platform name: " << argv[1] << std::endl;
-        std::cout << "Device type:   " << argv[2] << std::endl;
-        std::cout << "Device vendor: " << argv[3] << std::endl;
+        std::cout << "Platform name: " << platform << std::endl;
+        std::cout << "Device type:   " << device_vendor << std::endl;
+        std::cout << "Device vendor: " << device_type << std::endl;
         return -1;
     }
     vsmc::CLManager<> &manager = vsmc::CLManager<>::instance();
 
     bool use_double = false;
-    if (std::string(argv[4]) == std::string("double"))
+    if (fptype == std::string("double"))
         use_double = true;
-
-    std::size_t N = static_cast<std::size_t>(std::atoi(argv[5]));
 
     std::ifstream src_file("rng_cl.cl");
     std::string src((std::istreambuf_iterator<char>(src_file)),
@@ -70,36 +66,27 @@ int main(int argc, char **argv)
                        "#define VSMC_HAS_OPENCL_DOUBLE 0\n" + src;
 
     std::string opt;
-    for (int i = 6; i != argc; ++i) {
+    for (int i = 6; i < argc; ++i) {
         opt += " ";
         opt += argv[i];
     }
 
     vsmc::CLProgram program(manager.create_program(src));
     cl_int status = program.build(manager.device_vec(), opt);
-    if (status != CL_SUCCESS) {
-        std::vector<vsmc::CLDevice> dev_vec(program.get_device());
-        std::string equal(75, '=');
-        std::string dash(75, '-');
-        std::string name;
-        for (const auto &dev : dev_vec) {
-            dev.get_info(CL_DEVICE_NAME, name);
-            std::cout << equal << std::endl;
-            if (program.build_status(dev) == CL_BUILD_SUCCESS)
-                std::cout << "Build success for " << name << std::endl;
-            else
-                std::cout << "Build failure for " << name << std::endl;
-            std::cout << dash << std::endl;
-            std::cout << program.build_log(dev) << std::endl;
-        }
-        std::cout << equal << std::endl;
+    std::vector<vsmc::CLDevice> dev_vec(program.get_device());
+    if (status != CL_SUCCESS)
         return -1;
-    }
 
-     if (use_double)
-         rng_cl<cl_double>(N, program);
-     else
-         rng_cl<cl_float>(N, program);
+    std::string name;
+    vsmc::CLManager<>::instance().platform().get_info(CL_PLATFORM_NAME, name);
+    std::cout << "Using platform: " << name << std::endl;
+    vsmc::CLManager<>::instance().device().get_info(CL_DEVICE_NAME, name);
+    std::cout << "Using device: " << name << std::endl;
+
+    if (use_double)
+        rng_cl<cl_double>(N, program);
+    else
+        rng_cl<cl_float>(N, program);
 
     return 0;
 }
