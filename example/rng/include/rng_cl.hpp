@@ -82,8 +82,7 @@ inline void rng_cl_engine(std::size_t N, std::size_t M,
     watch.start();
     vsmc::CLManager<>::instance().run_kernel(kernel, N);
     watch.stop();
-    vsmc::CLManager<>::instance().read_buffer<rt>(
-        buffer.data(), N * M, cl.data());
+    vsmc::CLManager<>::instance().read_buffer(buffer.data(), N * M, cl.data());
     double tcl = watch.seconds();
 
     std::cout << std::setw(20) << std::left << name;
@@ -94,13 +93,13 @@ inline void rng_cl_engine(std::size_t N, std::size_t M,
     std::cout << std::setw(20) << std::fixed << std::right << tcpp / tcl;
     std::cout << std::endl;
 
-    for (std::size_t i = 0; i != N * 2; ++i) {
+    for (std::size_t i = 0; i != N * M; ++i) {
         if (cpp[i] != c[i]) {
             std::cout << "Failure: C      " << name << std::endl;
             break;
         }
     }
-    for (std::size_t i = 0; i != N * 2; ++i) {
+    for (std::size_t i = 0; i != N * M; ++i) {
         if (cpp[i] != cl[i]) {
             std::cout << "Failure: OpenCL " << name << std::endl;
             break;
@@ -171,8 +170,7 @@ inline void rng_cl_normal01(std::size_t N, const vsmc::CLProgram &program,
     watch.start();
     vsmc::CLManager<>::instance().run_kernel(kernel, N);
     watch.stop();
-    vsmc::CLManager<>::instance().read_buffer<FPType>(
-        buffer.data(), N, cl.data());
+    vsmc::CLManager<>::instance().read_buffer(buffer.data(), N, cl.data());
     double tcl = watch.seconds();
 
     std::cout << std::setw(20) << std::left << "Normal(0, 1)";
@@ -251,8 +249,7 @@ inline void rng_cl_gammak1(std::size_t N, const vsmc::CLProgram &program,
     watch.start();
     vsmc::CLManager<>::instance().run_kernel(kernel, N);
     watch.stop();
-    vsmc::CLManager<>::instance().read_buffer<FPType>(
-        buffer.data(), N, cl.data());
+    vsmc::CLManager<>::instance().read_buffer(buffer.data(), N, cl.data());
     double tcl = watch.seconds();
 
     std::stringstream ss;
