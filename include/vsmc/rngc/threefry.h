@@ -306,6 +306,158 @@ VSMC_STATIC_INLINE void vsmc_threefry4x64_insertkey(
     state->v[3] += inc;
 }
 
+/// \brief Generate Threefry2x32 RNG state
+/// \ingroup ThreefryC
+VSMC_STATIC_INLINE void vsmc_threefry2x32_gen(
+    const vsmc_threefry2x32_ctr_t *ctr, const vsmc_threefry2x32_key_t *key,
+    vsmc_threefry2x32_ctr_t *state)
+{
+    *state = *ctr;
+    vsmc_threefry2x32_par_t par;
+    vsmc_threefry2x32_initpar(key, &par);
+
+    vsmc_threefry2x32_insertkey(state, &par, 0, 0, 1); // N = 0
+    vsmc_threefry2x32_rotate(state, 13);               // N = 1
+    vsmc_threefry2x32_rotate(state, 15);               // N = 2
+    vsmc_threefry2x32_rotate(state, 26);               // N = 3
+    vsmc_threefry2x32_rotate(state, 6);                // N = 4
+    vsmc_threefry2x32_insertkey(state, &par, 1, 1, 2); // N = 4
+    vsmc_threefry2x32_rotate(state, 17);               // N = 5
+    vsmc_threefry2x32_rotate(state, 29);               // N = 6
+    vsmc_threefry2x32_rotate(state, 16);               // N = 7
+    vsmc_threefry2x32_rotate(state, 24);               // N = 8
+    vsmc_threefry2x32_insertkey(state, &par, 2, 2, 0); // N = 8
+    vsmc_threefry2x32_rotate(state, 13);               // N = 9
+    vsmc_threefry2x32_rotate(state, 15);               // N = 10
+    vsmc_threefry2x32_rotate(state, 26);               // N = 11
+    vsmc_threefry2x32_rotate(state, 6);                // N = 12
+    vsmc_threefry2x32_insertkey(state, &par, 3, 0, 1); // N = 12
+    vsmc_threefry2x32_rotate(state, 17);               // N = 13
+    vsmc_threefry2x32_rotate(state, 29);               // N = 14
+    vsmc_threefry2x32_rotate(state, 16);               // N = 15
+    vsmc_threefry2x32_rotate(state, 24);               // N = 16
+    vsmc_threefry2x32_insertkey(state, &par, 4, 1, 2); // N = 16
+    vsmc_threefry2x32_rotate(state, 13);               // N = 17
+    vsmc_threefry2x32_rotate(state, 15);               // N = 18
+    vsmc_threefry2x32_rotate(state, 26);               // N = 19
+    vsmc_threefry2x32_rotate(state, 6);                // N = 20
+    vsmc_threefry2x32_insertkey(state, &par, 5, 2, 0); // N = 20
+}
+
+/// \brief Generate Threefry4x32 RNG state
+/// \ingroup ThreefryC
+VSMC_STATIC_INLINE void vsmc_threefry4x32_gen(
+    const vsmc_threefry4x32_ctr_t *ctr, const vsmc_threefry4x32_key_t *key,
+    vsmc_threefry4x32_ctr_t *state)
+{
+    *state = *ctr;
+    vsmc_threefry4x32_par_t par;
+    vsmc_threefry4x32_initpar(key, &par);
+
+    vsmc_threefry4x32_insertkey(state, &par, 0, 0, 1, 2, 3); // N = 0
+    vsmc_threefry4x32_rotate(state, 10, 26, 1, 3);           // N = 1
+    vsmc_threefry4x32_rotate(state, 11, 21, 3, 1);           // N = 2
+    vsmc_threefry4x32_rotate(state, 13, 27, 1, 3);           // N = 3
+    vsmc_threefry4x32_rotate(state, 23, 5, 3, 1);            // N = 4
+    vsmc_threefry4x32_insertkey(state, &par, 1, 1, 2, 3, 4); // N = 4
+    vsmc_threefry4x32_rotate(state, 6, 20, 1, 3);            // N = 5
+    vsmc_threefry4x32_rotate(state, 17, 11, 3, 1);           // N = 6
+    vsmc_threefry4x32_rotate(state, 25, 10, 1, 3);           // N = 7
+    vsmc_threefry4x32_rotate(state, 18, 20, 3, 1);           // N = 8
+    vsmc_threefry4x32_insertkey(state, &par, 2, 2, 3, 4, 0); // N = 8
+    vsmc_threefry4x32_rotate(state, 10, 26, 1, 3);           // N = 9
+    vsmc_threefry4x32_rotate(state, 11, 21, 3, 1);           // N = 10
+    vsmc_threefry4x32_rotate(state, 13, 27, 1, 3);           // N = 11
+    vsmc_threefry4x32_rotate(state, 23, 5, 3, 1);            // N = 12
+    vsmc_threefry4x32_insertkey(state, &par, 3, 3, 4, 0, 1); // N = 12
+    vsmc_threefry4x32_rotate(state, 6, 20, 1, 3);            // N = 13
+    vsmc_threefry4x32_rotate(state, 17, 11, 3, 1);           // N = 14
+    vsmc_threefry4x32_rotate(state, 25, 10, 1, 3);           // N = 15
+    vsmc_threefry4x32_rotate(state, 18, 20, 3, 1);           // N = 16
+    vsmc_threefry4x32_insertkey(state, &par, 4, 4, 0, 1, 2); // N = 16
+    vsmc_threefry4x32_rotate(state, 10, 26, 1, 3);           // N = 17
+    vsmc_threefry4x32_rotate(state, 11, 21, 3, 1);           // N = 18
+    vsmc_threefry4x32_rotate(state, 13, 27, 1, 3);           // N = 19
+    vsmc_threefry4x32_rotate(state, 23, 5, 3, 1);            // N = 20
+    vsmc_threefry4x32_insertkey(state, &par, 5, 0, 1, 2, 3); // N = 20
+}
+
+/// \brief Generate Threefry2x64 RNG state
+/// \ingroup ThreefryC
+VSMC_STATIC_INLINE void vsmc_threefry2x64_gen(
+    const vsmc_threefry2x64_ctr_t *ctr, const vsmc_threefry2x64_key_t *key,
+    vsmc_threefry2x64_ctr_t *state)
+{
+    *state = *ctr;
+    vsmc_threefry2x64_par_t par;
+    vsmc_threefry2x64_initpar(key, &par);
+
+    vsmc_threefry2x64_insertkey(state, &par, 0, 0, 1); // N = 0
+    vsmc_threefry2x64_rotate(state, 16);               // N = 1
+    vsmc_threefry2x64_rotate(state, 42);               // N = 2
+    vsmc_threefry2x64_rotate(state, 12);               // N = 3
+    vsmc_threefry2x64_rotate(state, 31);               // N = 4
+    vsmc_threefry2x64_insertkey(state, &par, 1, 1, 2); // N = 4
+    vsmc_threefry2x64_rotate(state, 16);               // N = 5
+    vsmc_threefry2x64_rotate(state, 32);               // N = 6
+    vsmc_threefry2x64_rotate(state, 24);               // N = 7
+    vsmc_threefry2x64_rotate(state, 21);               // N = 8
+    vsmc_threefry2x64_insertkey(state, &par, 2, 2, 0); // N = 8
+    vsmc_threefry2x64_rotate(state, 16);               // N = 9
+    vsmc_threefry2x64_rotate(state, 42);               // N = 10
+    vsmc_threefry2x64_rotate(state, 12);               // N = 11
+    vsmc_threefry2x64_rotate(state, 31);               // N = 12
+    vsmc_threefry2x64_insertkey(state, &par, 3, 0, 1); // N = 12
+    vsmc_threefry2x64_rotate(state, 16);               // N = 13
+    vsmc_threefry2x64_rotate(state, 32);               // N = 14
+    vsmc_threefry2x64_rotate(state, 24);               // N = 15
+    vsmc_threefry2x64_rotate(state, 21);               // N = 16
+    vsmc_threefry2x64_insertkey(state, &par, 4, 1, 2); // N = 16
+    vsmc_threefry2x64_rotate(state, 16);               // N = 17
+    vsmc_threefry2x64_rotate(state, 42);               // N = 18
+    vsmc_threefry2x64_rotate(state, 12);               // N = 19
+    vsmc_threefry2x64_rotate(state, 31);               // N = 20
+    vsmc_threefry2x64_insertkey(state, &par, 5, 2, 0); // N = 20
+}
+
+/// \brief Generate Threefry4x64 RNG state
+/// \ingroup ThreefryC
+VSMC_STATIC_INLINE void vsmc_threefry4x64_gen(
+    const vsmc_threefry4x64_ctr_t *ctr, const vsmc_threefry4x64_key_t *key,
+    vsmc_threefry4x64_ctr_t *state)
+{
+    *state = *ctr;
+    vsmc_threefry4x64_par_t par;
+    vsmc_threefry4x64_initpar(key, &par);
+
+    vsmc_threefry4x64_insertkey(state, &par, 0, 0, 1, 2, 3); // N = 0
+    vsmc_threefry4x64_rotate(state, 14, 16, 1, 3);           // N = 1
+    vsmc_threefry4x64_rotate(state, 52, 57, 3, 1);           // N = 2
+    vsmc_threefry4x64_rotate(state, 23, 40, 1, 3);           // N = 3
+    vsmc_threefry4x64_rotate(state, 5, 37, 3, 1);            // N = 4
+    vsmc_threefry4x64_insertkey(state, &par, 1, 1, 2, 3, 4); // N = 4
+    vsmc_threefry4x64_rotate(state, 25, 33, 1, 3);           // N = 5
+    vsmc_threefry4x64_rotate(state, 46, 12, 3, 1);           // N = 6
+    vsmc_threefry4x64_rotate(state, 58, 22, 1, 3);           // N = 7
+    vsmc_threefry4x64_rotate(state, 32, 32, 3, 1);           // N = 8
+    vsmc_threefry4x64_insertkey(state, &par, 2, 2, 3, 4, 0); // N = 8
+    vsmc_threefry4x64_rotate(state, 14, 16, 1, 3);           // N = 9
+    vsmc_threefry4x64_rotate(state, 52, 57, 3, 1);           // N = 10
+    vsmc_threefry4x64_rotate(state, 23, 40, 1, 3);           // N = 11
+    vsmc_threefry4x64_rotate(state, 5, 37, 3, 1);            // N = 12
+    vsmc_threefry4x64_insertkey(state, &par, 3, 3, 4, 0, 1); // N = 12
+    vsmc_threefry4x64_rotate(state, 25, 33, 1, 3);           // N = 13
+    vsmc_threefry4x64_rotate(state, 46, 12, 3, 1);           // N = 14
+    vsmc_threefry4x64_rotate(state, 58, 22, 1, 3);           // N = 15
+    vsmc_threefry4x64_rotate(state, 32, 32, 3, 1);           // N = 16
+    vsmc_threefry4x64_insertkey(state, &par, 4, 4, 0, 1, 2); // N = 16
+    vsmc_threefry4x64_rotate(state, 14, 16, 1, 3);           // N = 17
+    vsmc_threefry4x64_rotate(state, 52, 57, 3, 1);           // N = 18
+    vsmc_threefry4x64_rotate(state, 23, 40, 1, 3);           // N = 19
+    vsmc_threefry4x64_rotate(state, 5, 37, 3, 1);            // N = 20
+    vsmc_threefry4x64_insertkey(state, &par, 5, 0, 1, 2, 3); // N = 20
+}
+
 /// \brief Initialize Threefry2x32 RNG state
 /// \ingroup ThreefryC
 VSMC_STATIC_INLINE void vsmc_threefry2x32_init(
@@ -368,38 +520,7 @@ VSMC_STATIC_INLINE uint32_t vsmc_threefry2x32_rand(vsmc_threefry2x32 *rng)
 {
     if (rng->index == 2) {
         vsmc_threefry2x32_inc(&rng->ctr);
-
-        rng->state = rng->ctr;
-        vsmc_threefry2x32_par_t p;
-        vsmc_threefry2x32_initpar(&rng->key, &p);
-
-        vsmc_threefry2x32_insertkey(&rng->state, &p, 0, 0, 1); // N = 0
-        vsmc_threefry2x32_rotate(&rng->state, 13);             // N = 1
-        vsmc_threefry2x32_rotate(&rng->state, 15);             // N = 2
-        vsmc_threefry2x32_rotate(&rng->state, 26);             // N = 3
-        vsmc_threefry2x32_rotate(&rng->state, 6);              // N = 4
-        vsmc_threefry2x32_insertkey(&rng->state, &p, 1, 1, 2); // N = 4
-        vsmc_threefry2x32_rotate(&rng->state, 17);             // N = 5
-        vsmc_threefry2x32_rotate(&rng->state, 29);             // N = 6
-        vsmc_threefry2x32_rotate(&rng->state, 16);             // N = 7
-        vsmc_threefry2x32_rotate(&rng->state, 24);             // N = 8
-        vsmc_threefry2x32_insertkey(&rng->state, &p, 2, 2, 0); // N = 8
-        vsmc_threefry2x32_rotate(&rng->state, 13);             // N = 9
-        vsmc_threefry2x32_rotate(&rng->state, 15);             // N = 10
-        vsmc_threefry2x32_rotate(&rng->state, 26);             // N = 11
-        vsmc_threefry2x32_rotate(&rng->state, 6);              // N = 12
-        vsmc_threefry2x32_insertkey(&rng->state, &p, 3, 0, 1); // N = 12
-        vsmc_threefry2x32_rotate(&rng->state, 17);             // N = 13
-        vsmc_threefry2x32_rotate(&rng->state, 29);             // N = 14
-        vsmc_threefry2x32_rotate(&rng->state, 16);             // N = 15
-        vsmc_threefry2x32_rotate(&rng->state, 24);             // N = 16
-        vsmc_threefry2x32_insertkey(&rng->state, &p, 4, 1, 2); // N = 16
-        vsmc_threefry2x32_rotate(&rng->state, 13);             // N = 17
-        vsmc_threefry2x32_rotate(&rng->state, 15);             // N = 18
-        vsmc_threefry2x32_rotate(&rng->state, 26);             // N = 19
-        vsmc_threefry2x32_rotate(&rng->state, 6);              // N = 20
-        vsmc_threefry2x32_insertkey(&rng->state, &p, 5, 2, 0); // N = 20
-
+        vsmc_threefry2x32_gen(&rng->ctr, &rng->key, &rng->state);
         rng->index = 0;
     }
 
@@ -412,38 +533,7 @@ VSMC_STATIC_INLINE uint32_t vsmc_threefry4x32_rand(vsmc_threefry4x32 *rng)
 {
     if (rng->index == 4) {
         vsmc_threefry4x32_inc(&rng->ctr);
-
-        rng->state = rng->ctr;
-        vsmc_threefry4x32_par_t p;
-        vsmc_threefry4x32_initpar(&rng->key, &p);
-
-        vsmc_threefry4x32_insertkey(&rng->state, &p, 0, 0, 1, 2, 3); // N = 0
-        vsmc_threefry4x32_rotate(&rng->state, 10, 26, 1, 3);         // N = 1
-        vsmc_threefry4x32_rotate(&rng->state, 11, 21, 3, 1);         // N = 2
-        vsmc_threefry4x32_rotate(&rng->state, 13, 27, 1, 3);         // N = 3
-        vsmc_threefry4x32_rotate(&rng->state, 23, 5, 3, 1);          // N = 4
-        vsmc_threefry4x32_insertkey(&rng->state, &p, 1, 1, 2, 3, 4); // N = 4
-        vsmc_threefry4x32_rotate(&rng->state, 6, 20, 1, 3);          // N = 5
-        vsmc_threefry4x32_rotate(&rng->state, 17, 11, 3, 1);         // N = 6
-        vsmc_threefry4x32_rotate(&rng->state, 25, 10, 1, 3);         // N = 7
-        vsmc_threefry4x32_rotate(&rng->state, 18, 20, 3, 1);         // N = 8
-        vsmc_threefry4x32_insertkey(&rng->state, &p, 2, 2, 3, 4, 0); // N = 8
-        vsmc_threefry4x32_rotate(&rng->state, 10, 26, 1, 3);         // N = 9
-        vsmc_threefry4x32_rotate(&rng->state, 11, 21, 3, 1);         // N = 10
-        vsmc_threefry4x32_rotate(&rng->state, 13, 27, 1, 3);         // N = 11
-        vsmc_threefry4x32_rotate(&rng->state, 23, 5, 3, 1);          // N = 12
-        vsmc_threefry4x32_insertkey(&rng->state, &p, 3, 3, 4, 0, 1); // N = 12
-        vsmc_threefry4x32_rotate(&rng->state, 6, 20, 1, 3);          // N = 13
-        vsmc_threefry4x32_rotate(&rng->state, 17, 11, 3, 1);         // N = 14
-        vsmc_threefry4x32_rotate(&rng->state, 25, 10, 1, 3);         // N = 15
-        vsmc_threefry4x32_rotate(&rng->state, 18, 20, 3, 1);         // N = 16
-        vsmc_threefry4x32_insertkey(&rng->state, &p, 4, 4, 0, 1, 2); // N = 16
-        vsmc_threefry4x32_rotate(&rng->state, 10, 26, 1, 3);         // N = 17
-        vsmc_threefry4x32_rotate(&rng->state, 11, 21, 3, 1);         // N = 18
-        vsmc_threefry4x32_rotate(&rng->state, 13, 27, 1, 3);         // N = 19
-        vsmc_threefry4x32_rotate(&rng->state, 23, 5, 3, 1);          // N = 20
-        vsmc_threefry4x32_insertkey(&rng->state, &p, 5, 0, 1, 2, 3); // N = 20
-
+        vsmc_threefry4x32_gen(&rng->ctr, &rng->key, &rng->state);
         rng->index = 0;
     }
 
@@ -456,38 +546,7 @@ VSMC_STATIC_INLINE uint64_t vsmc_threefry2x64_rand(vsmc_threefry2x64 *rng)
 {
     if (rng->index == 2) {
         vsmc_threefry2x64_inc(&rng->ctr);
-
-        rng->state = rng->ctr;
-        vsmc_threefry2x64_par_t p;
-        vsmc_threefry2x64_initpar(&rng->key, &p);
-
-        vsmc_threefry2x64_insertkey(&rng->state, &p, 0, 0, 1); // N = 0
-        vsmc_threefry2x64_rotate(&rng->state, 16);             // N = 1
-        vsmc_threefry2x64_rotate(&rng->state, 42);             // N = 2
-        vsmc_threefry2x64_rotate(&rng->state, 12);             // N = 3
-        vsmc_threefry2x64_rotate(&rng->state, 31);             // N = 4
-        vsmc_threefry2x64_insertkey(&rng->state, &p, 1, 1, 2); // N = 4
-        vsmc_threefry2x64_rotate(&rng->state, 16);             // N = 5
-        vsmc_threefry2x64_rotate(&rng->state, 32);             // N = 6
-        vsmc_threefry2x64_rotate(&rng->state, 24);             // N = 7
-        vsmc_threefry2x64_rotate(&rng->state, 21);             // N = 8
-        vsmc_threefry2x64_insertkey(&rng->state, &p, 2, 2, 0); // N = 8
-        vsmc_threefry2x64_rotate(&rng->state, 16);             // N = 9
-        vsmc_threefry2x64_rotate(&rng->state, 42);             // N = 10
-        vsmc_threefry2x64_rotate(&rng->state, 12);             // N = 11
-        vsmc_threefry2x64_rotate(&rng->state, 31);             // N = 12
-        vsmc_threefry2x64_insertkey(&rng->state, &p, 3, 0, 1); // N = 12
-        vsmc_threefry2x64_rotate(&rng->state, 16);             // N = 13
-        vsmc_threefry2x64_rotate(&rng->state, 32);             // N = 14
-        vsmc_threefry2x64_rotate(&rng->state, 24);             // N = 15
-        vsmc_threefry2x64_rotate(&rng->state, 21);             // N = 16
-        vsmc_threefry2x64_insertkey(&rng->state, &p, 4, 1, 2); // N = 16
-        vsmc_threefry2x64_rotate(&rng->state, 16);             // N = 17
-        vsmc_threefry2x64_rotate(&rng->state, 42);             // N = 18
-        vsmc_threefry2x64_rotate(&rng->state, 12);             // N = 19
-        vsmc_threefry2x64_rotate(&rng->state, 31);             // N = 20
-        vsmc_threefry2x64_insertkey(&rng->state, &p, 5, 2, 0); // N = 20
-
+        vsmc_threefry2x64_gen(&rng->ctr, &rng->key, &rng->state);
         rng->index = 0;
     }
 
@@ -500,38 +559,7 @@ VSMC_STATIC_INLINE uint64_t vsmc_threefry4x64_rand(vsmc_threefry4x64 *rng)
 {
     if (rng->index == 4) {
         vsmc_threefry4x64_inc(&rng->ctr);
-
-        rng->state = rng->ctr;
-        vsmc_threefry4x64_par_t p;
-        vsmc_threefry4x64_initpar(&rng->key, &p);
-
-        vsmc_threefry4x64_insertkey(&rng->state, &p, 0, 0, 1, 2, 3); // N = 0
-        vsmc_threefry4x64_rotate(&rng->state, 14, 16, 1, 3);         // N = 1
-        vsmc_threefry4x64_rotate(&rng->state, 52, 57, 3, 1);         // N = 2
-        vsmc_threefry4x64_rotate(&rng->state, 23, 40, 1, 3);         // N = 3
-        vsmc_threefry4x64_rotate(&rng->state, 5, 37, 3, 1);          // N = 4
-        vsmc_threefry4x64_insertkey(&rng->state, &p, 1, 1, 2, 3, 4); // N = 4
-        vsmc_threefry4x64_rotate(&rng->state, 25, 33, 1, 3);         // N = 5
-        vsmc_threefry4x64_rotate(&rng->state, 46, 12, 3, 1);         // N = 6
-        vsmc_threefry4x64_rotate(&rng->state, 58, 22, 1, 3);         // N = 7
-        vsmc_threefry4x64_rotate(&rng->state, 32, 32, 3, 1);         // N = 8
-        vsmc_threefry4x64_insertkey(&rng->state, &p, 2, 2, 3, 4, 0); // N = 8
-        vsmc_threefry4x64_rotate(&rng->state, 14, 16, 1, 3);         // N = 9
-        vsmc_threefry4x64_rotate(&rng->state, 52, 57, 3, 1);         // N = 10
-        vsmc_threefry4x64_rotate(&rng->state, 23, 40, 1, 3);         // N = 11
-        vsmc_threefry4x64_rotate(&rng->state, 5, 37, 3, 1);          // N = 12
-        vsmc_threefry4x64_insertkey(&rng->state, &p, 3, 3, 4, 0, 1); // N = 12
-        vsmc_threefry4x64_rotate(&rng->state, 25, 33, 1, 3);         // N = 13
-        vsmc_threefry4x64_rotate(&rng->state, 46, 12, 3, 1);         // N = 14
-        vsmc_threefry4x64_rotate(&rng->state, 58, 22, 1, 3);         // N = 15
-        vsmc_threefry4x64_rotate(&rng->state, 32, 32, 3, 1);         // N = 16
-        vsmc_threefry4x64_insertkey(&rng->state, &p, 4, 4, 0, 1, 2); // N = 16
-        vsmc_threefry4x64_rotate(&rng->state, 14, 16, 1, 3);         // N = 17
-        vsmc_threefry4x64_rotate(&rng->state, 52, 57, 3, 1);         // N = 18
-        vsmc_threefry4x64_rotate(&rng->state, 23, 40, 1, 3);         // N = 19
-        vsmc_threefry4x64_rotate(&rng->state, 5, 37, 3, 1);          // N = 20
-        vsmc_threefry4x64_insertkey(&rng->state, &p, 5, 0, 1, 2, 3); // N = 20
-
+        vsmc_threefry4x64_gen(&rng->ctr, &rng->key, &rng->state);
         rng->index = 0;
     }
 
