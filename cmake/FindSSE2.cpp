@@ -30,12 +30,16 @@
 //============================================================================
 
 #include <emmintrin.h>
+#include <iostream>
 
 int main()
 {
     __m128i m1 = _mm_set1_epi32(1);
     __m128i m2 = _mm_set1_epi32(2);
     __m128i m = _mm_add_epi32(m1, m2);
+    char a[32];
+    _mm_storeu_si128(reinterpret_cast<__m128i *>(a), m);
+    std::cout << a[0] << std::endl;
 
     return 0;
 }

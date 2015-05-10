@@ -30,12 +30,16 @@
 //============================================================================
 
 #include <immintrin.h>
+#include <iostream>
 
 int main()
 {
     __m256i m1 = _mm256_set1_epi32(1);
     __m256i m2 = _mm256_set1_epi32(2);
     __m256i m = _mm256_add_epi32(m1, m2);
+    char a[32];
+    _mm256_storeu_si256(reinterpret_cast<__m256i *>(a), m);
+    std::cout << a[0] << std::endl;
 
     return 0;
 }
