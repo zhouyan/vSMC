@@ -51,7 +51,7 @@
 #define VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(T, K, N, I, val)             \
     template <>                                                               \
     struct ThreefryRotateConstantValue<T, K, N, I>                            \
-        : public std::integral_constant<unsigned, val> {                      \
+        : public std::integral_constant<T, val> {                             \
     };
 
 /// \brief ThreefryEngine default rounds
@@ -137,10 +137,10 @@ VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 5, 1, 12)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 6, 1, 22)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 7, 1, 32)
 
-template <typename ResultType, unsigned R>
+template <typename ResultType, ResultType R>
 struct ThreefryRotateImpl;
 
-template <unsigned R>
+template <uint32_t R>
 struct ThreefryRotateImpl<std::uint32_t, R> {
     static std::uint32_t eval(std::uint32_t x)
     {
@@ -148,7 +148,7 @@ struct ThreefryRotateImpl<std::uint32_t, R> {
     }
 };
 
-template <unsigned R>
+template <uint64_t R>
 struct ThreefryRotateImpl<std::uint64_t, R> {
     static std::uint64_t eval(std::uint64_t x)
     {
@@ -174,7 +174,7 @@ struct ThreefryRotate<ResultType, 2, N, true> {
     }
 
     private:
-    static constexpr unsigned r_ = (N - 1) % 8;
+    static constexpr std::size_t r_ = (N - 1) % 8;
 }; // struct ThreefryRotate
 
 template <typename ResultType, std::size_t N>
@@ -199,7 +199,7 @@ struct ThreefryRotate<ResultType, 4, N, true> {
     private:
     static constexpr std::size_t i0_ = N % 2 ? 1 : 3;
     static constexpr std::size_t i2_ = N % 2 ? 3 : 1;
-    static constexpr unsigned r_ = (N - 1) % 8;
+    static constexpr std::size_t r_ = (N - 1) % 8;
 }; // struct ThreefryRotate
 
 template <typename ResultType, std::size_t K, std::size_t N,
