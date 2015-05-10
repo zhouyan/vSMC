@@ -31,6 +31,9 @@
 
 #include "rng_test.hpp"
 #include <vsmc/rng/threefry.hpp>
+#if VSMC_HAS_SSE2
+#include <vsmc/rng/threefry_sse2.hpp>
+#endif
 
 int main(int argc, char **argv)
 {
@@ -40,6 +43,12 @@ int main(int argc, char **argv)
     VSMC_RNG_TEST(vsmc::Threefry4x32);
     VSMC_RNG_TEST(vsmc::Threefry2x64);
     VSMC_RNG_TEST(vsmc::Threefry4x64);
+#if VSMC_HAS_SSE2
+    VSMC_RNG_TEST(vsmc::Threefry2x32SSE2);
+    VSMC_RNG_TEST(vsmc::Threefry4x32SSE2);
+    VSMC_RNG_TEST(vsmc::Threefry2x64SSE2);
+    VSMC_RNG_TEST(vsmc::Threefry4x64SSE2);
+#endif
 
     VSMC_RNG_TEST_POST;
 

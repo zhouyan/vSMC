@@ -50,6 +50,12 @@
 #endif
 #endif
 
+#ifdef __SSE2__
+#ifndef VSMC_HAS_SSE2
+#define VSMC_HAS_SSE2 1
+#endif
+#endif
+
 #ifdef __AES__
 #ifndef VSMC_HAS_AES_NI
 #define VSMC_HAS_AES_NI 1
@@ -63,7 +69,9 @@
 #endif
 
 #ifdef _OPENMP
+#ifndef VSMC_HAS_OMP
 #define VSMC_HAS_OMP 1
+#endif
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_GCC_HPP

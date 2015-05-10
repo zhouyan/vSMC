@@ -43,6 +43,10 @@
 #include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
 
+#if VSMC_HAS_SSE2
+#include <vsmc/rng/threefry_sse2.hpp>
+#endif
+
 #if VSMC_HAS_AES_NI
 #include <vsmc/rng/aes.hpp>
 #include <vsmc/rng/aes_ni.hpp>

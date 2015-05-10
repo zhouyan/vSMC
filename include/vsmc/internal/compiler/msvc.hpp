@@ -40,8 +40,16 @@
 #define VSMC_INT64 __int64
 #endif
 
+#ifdef __SSE2__
+#ifndef VSMC_HAS_SSE2
+#define VSMC_HAS_SSE2 1
+#endif
+#endif
+
 #ifdef _OPENMP
+#ifndef VSMC_HAS_OMP
 #define VSMC_HAS_OMP 1
+#endif
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_MSVC_HPP
