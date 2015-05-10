@@ -115,6 +115,10 @@
 #define VSMC_HAS_SSE2 0
 #endif
 
+#ifndef VSMC_HAS_AVX2
+#define VSMC_HAS_AVX2 0
+#endif
+
 #ifndef VSMC_HAS_AES_NI
 #define VSMC_HAS_AES_NI 0
 #endif

@@ -47,6 +47,10 @@
 #include <vsmc/rng/threefry_sse2.hpp>
 #endif
 
+#if VSMC_HAS_AVX2
+#include <vsmc/rng/threefry_avx2.hpp>
+#endif
+
 #if VSMC_HAS_AES_NI
 #include <vsmc/rng/aes.hpp>
 #include <vsmc/rng/aes_ni.hpp>

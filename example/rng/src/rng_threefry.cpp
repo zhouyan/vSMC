@@ -34,6 +34,9 @@
 #if VSMC_HAS_SSE2
 #include <vsmc/rng/threefry_sse2.hpp>
 #endif
+#if VSMC_HAS_AVX2
+#include <vsmc/rng/threefry_avx2.hpp>
+#endif
 
 int main(int argc, char **argv)
 {
@@ -48,6 +51,12 @@ int main(int argc, char **argv)
     VSMC_RNG_TEST(vsmc::Threefry4x32SSE2);
     VSMC_RNG_TEST(vsmc::Threefry2x64SSE2);
     VSMC_RNG_TEST(vsmc::Threefry4x64SSE2);
+#endif
+#if VSMC_HAS_AVX2
+    VSMC_RNG_TEST(vsmc::Threefry2x32AVX2);
+    VSMC_RNG_TEST(vsmc::Threefry4x32AVX2);
+    VSMC_RNG_TEST(vsmc::Threefry2x64AVX2);
+    VSMC_RNG_TEST(vsmc::Threefry4x64AVX2);
 #endif
 
     VSMC_RNG_TEST_POST;

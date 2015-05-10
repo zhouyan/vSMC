@@ -46,6 +46,12 @@
 #endif
 #endif
 
+#ifdef __AVX2__
+#ifndef VSMC_HAS_AVX2
+#define VSMC_HAS_AVX2 1
+#endif
+#endif
+
 #ifdef _OPENMP
 #ifndef VSMC_HAS_OMP
 #define VSMC_HAS_OMP 1

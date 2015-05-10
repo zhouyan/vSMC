@@ -55,6 +55,12 @@
 #endif
 #endif
 
+#ifdef __AVX2__
+#ifndef VSMC_HAS_AVX2
+#define VSMC_HAS_AVX2 1
+#endif
+#endif
+
 #ifdef __AVX__
 #ifndef VSMC_HAS_AES_NI
 #define VSMC_HAS_AES_NI 1

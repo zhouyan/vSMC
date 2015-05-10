@@ -34,109 +34,13 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/internal/m128i.hpp>
-
-#define VSMC_STATIC_ASSERT_RNG_THREFRY_SSE2_RESULT_TYPE(ResultType)           \
-    VSMC_STATIC_ASSERT((std::is_same<ResultType, std::uint32_t>::value ||     \
-                           std::is_same<ResultType, std::uint64_t>::value),   \
-        "**ThreefrySSE2Engine** USED WITH ResultType OTHER THAN "             \
-        "std::uint32_t OR std::uint64_t")
-
-#define VSMC_STATIC_ASSERT_RNG_THREEFRY_SSE2_SIZE(K)                          \
-    VSMC_STATIC_ASSERT((K == 2 || K == 4),                                    \
-        "**ThreefrySSE2Engine** USED WITH SIZE OTHER THAN 2 OR 4")
-
-#define VSMC_STATIC_ASSERT_RNG_THREEFRY_SSE2                                  \
-    VSMC_STATIC_ASSERT_RNG_THREEFRY_SSE2_RESULT_TYPE(ResultType);             \
-    VSMC_STATIC_ASSERT_RNG_THREEFRY_SSE2_SIZE(K);
-
-#define VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(T, K, N, I, val)        \
-    template <>                                                               \
-    struct ThreefrySSE2RotateConstantValue<T, K, N, I>                        \
-        : public std::integral_constant<int, val> {                           \
-    };
-
-/// \brief ThreefrySSE2SSE2Engine default rounds
-/// \ingroup Config
-#ifndef VSMC_RNG_THREEFRY_SSE2_ROUNDS
-#define VSMC_RNG_THREEFRY_SSE2_ROUNDS 20
-#endif
+#include <vsmc/rng/internal/threefry_defines.hpp>
 
 namespace vsmc
 {
 
 namespace internal
 {
-
-template <typename>
-struct ThreefrySSE2KSConstantValue;
-
-template <>
-struct ThreefrySSE2KSConstantValue<std::uint32_t>
-    : public std::integral_constant<std::uint32_t, UINT32_C(0x1BD11BDA)> {
-};
-
-template <>
-struct ThreefrySSE2KSConstantValue<std::uint64_t>
-    : public std::integral_constant<std::uint64_t,
-          UINT64_C(0x1BD11BDAA9FC1A22)> {
-};
-
-template <typename, std::size_t, std::size_t, std::size_t>
-struct ThreefrySSE2RotateConstantValue;
-
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 2, 0, 0, 13)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 2, 1, 0, 15)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 2, 2, 0, 26)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 2, 3, 0, 6)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 2, 4, 0, 17)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 2, 5, 0, 29)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 2, 6, 0, 16)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 2, 7, 0, 24)
-
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 0, 0, 10)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 1, 0, 11)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 2, 0, 13)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 3, 0, 23)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 4, 0, 6)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 5, 0, 17)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 6, 0, 25)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 7, 0, 18)
-
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 0, 1, 26)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 1, 1, 21)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 2, 1, 27)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 3, 1, 5)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 4, 1, 20)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 5, 1, 11)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 6, 1, 10)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint32_t, 4, 7, 1, 20)
-
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 2, 0, 0, 16)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 2, 1, 0, 42)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 2, 2, 0, 12)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 2, 3, 0, 31)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 2, 4, 0, 16)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 2, 5, 0, 32)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 2, 6, 0, 24)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 2, 7, 0, 21)
-
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 0, 0, 14)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 1, 0, 52)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 2, 0, 23)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 3, 0, 5)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 4, 0, 25)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 5, 0, 46)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 6, 0, 58)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 7, 0, 32)
-
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 0, 1, 16)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 1, 1, 57)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 2, 1, 40)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 3, 1, 37)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 4, 1, 33)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 5, 1, 12)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 6, 1, 22)
-VSMC_DEFINE_RNG_THREEFRY_SSE2_ROTATE_CONSTANT(std::uint64_t, 4, 7, 1, 32)
 
 template <typename ResultType, int R>
 struct ThreefrySSE2RotateImpl;
@@ -176,7 +80,7 @@ struct ThreefrySSE2Rotate<std::uint32_t, 2, N, true> {
             _mm_add_epi32(std::get<0>(state), std::get<1>(state));
         std::get<1>(state) =
             ThreefrySSE2RotateImpl<std::uint32_t,
-                ThreefrySSE2RotateConstantValue<std::uint32_t, 2, r_,
+                ThreefryRotateConstantValue<std::uint32_t, 2, r_,
                                        0>::value>::eval(std::get<1>(state));
         std::get<1>(state) =
             _mm_xor_si128(std::get<0>(state), std::get<1>(state));
@@ -194,7 +98,7 @@ struct ThreefrySSE2Rotate<std::uint32_t, 4, N, true> {
             _mm_add_epi32(std::get<0>(state), std::get<i0_>(state));
         std::get<i0_>(state) =
             ThreefrySSE2RotateImpl<std::uint32_t,
-                ThreefrySSE2RotateConstantValue<std::uint32_t, 4, r_,
+                ThreefryRotateConstantValue<std::uint32_t, 4, r_,
                                        0>::value>::eval(std::get<i0_>(state));
         std::get<i0_>(state) =
             _mm_xor_si128(std::get<0>(state), std::get<i0_>(state));
@@ -203,7 +107,7 @@ struct ThreefrySSE2Rotate<std::uint32_t, 4, N, true> {
             _mm_add_epi32(std::get<2>(state), std::get<i2_>(state));
         std::get<i2_>(state) =
             ThreefrySSE2RotateImpl<std::uint32_t,
-                ThreefrySSE2RotateConstantValue<std::uint32_t, 4, r_,
+                ThreefryRotateConstantValue<std::uint32_t, 4, r_,
                                        1>::value>::eval(std::get<i2_>(state));
         std::get<i2_>(state) =
             _mm_xor_si128(std::get<2>(state), std::get<i2_>(state));
@@ -223,7 +127,7 @@ struct ThreefrySSE2Rotate<std::uint64_t, 2, N, true> {
             _mm_add_epi64(std::get<0>(state), std::get<1>(state));
         std::get<1>(state) =
             ThreefrySSE2RotateImpl<std::uint64_t,
-                ThreefrySSE2RotateConstantValue<std::uint64_t, 2, r_,
+                ThreefryRotateConstantValue<std::uint64_t, 2, r_,
                                        0>::value>::eval(std::get<1>(state));
         std::get<1>(state) =
             _mm_xor_si128(std::get<0>(state), std::get<1>(state));
@@ -241,7 +145,7 @@ struct ThreefrySSE2Rotate<std::uint64_t, 4, N, true> {
             _mm_add_epi64(std::get<0>(state), std::get<i0_>(state));
         std::get<i0_>(state) =
             ThreefrySSE2RotateImpl<std::uint64_t,
-                ThreefrySSE2RotateConstantValue<std::uint64_t, 4, r_,
+                ThreefryRotateConstantValue<std::uint64_t, 4, r_,
                                        0>::value>::eval(std::get<i0_>(state));
         std::get<i0_>(state) =
             _mm_xor_si128(std::get<0>(state), std::get<i0_>(state));
@@ -250,7 +154,7 @@ struct ThreefrySSE2Rotate<std::uint64_t, 4, N, true> {
             _mm_add_epi64(std::get<2>(state), std::get<i2_>(state));
         std::get<i2_>(state) =
             ThreefrySSE2RotateImpl<std::uint64_t,
-                ThreefrySSE2RotateConstantValue<std::uint64_t, 4, r_,
+                ThreefryRotateConstantValue<std::uint64_t, 4, r_,
                                        1>::value>::eval(std::get<i2_>(state));
         std::get<i2_>(state) =
             _mm_xor_si128(std::get<2>(state), std::get<i2_>(state));
@@ -360,129 +264,6 @@ struct ThreefrySSE2InsertKey<std::uint64_t, 4, N, true> {
 }; // struct ThreefrySSE2InsertKey
 
 template <typename, std::size_t>
-struct ThreefrySSE2IncrementAndPack;
-
-template <>
-struct ThreefrySSE2IncrementAndPack<std::uint32_t, 2> {
-    typedef std::array<__m128i, 2> buffer_type;
-    typedef std::array<std::uint32_t, 2> ctr_type;
-    typedef Counter<ctr_type> counter;
-
-    static void eval(ctr_type &ctr, buffer_type &buffer)
-    {
-        counter::increment(ctr);
-        ctr_type ctr0 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr1 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr2 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr3 = ctr;
-
-        std::get<0>(buffer) =
-            _mm_set_epi32(static_cast<int>(std::get<0>(ctr0)),
-                static_cast<int>(std::get<0>(ctr1)),
-                static_cast<int>(std::get<0>(ctr2)),
-                static_cast<int>(std::get<0>(ctr3)));
-        std::get<1>(buffer) =
-            _mm_set_epi32(static_cast<int>(std::get<1>(ctr0)),
-                static_cast<int>(std::get<1>(ctr1)),
-                static_cast<int>(std::get<1>(ctr2)),
-                static_cast<int>(std::get<1>(ctr3)));
-    }
-}; // struct ThreefrySSE2IncrementAndPack
-
-template <>
-struct ThreefrySSE2IncrementAndPack<std::uint32_t, 4> {
-    typedef std::array<__m128i, 4> buffer_type;
-    typedef std::array<std::uint32_t, 4> ctr_type;
-    typedef Counter<ctr_type> counter;
-
-    static void eval(ctr_type &ctr, buffer_type &buffer)
-    {
-        counter::increment(ctr);
-        ctr_type ctr0 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr1 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr2 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr3 = ctr;
-
-        std::get<0>(buffer) =
-            _mm_set_epi32(static_cast<int>(std::get<0>(ctr0)),
-                static_cast<int>(std::get<0>(ctr1)),
-                static_cast<int>(std::get<0>(ctr2)),
-                static_cast<int>(std::get<0>(ctr3)));
-        std::get<1>(buffer) =
-            _mm_set_epi32(static_cast<int>(std::get<1>(ctr0)),
-                static_cast<int>(std::get<1>(ctr1)),
-                static_cast<int>(std::get<1>(ctr2)),
-                static_cast<int>(std::get<1>(ctr3)));
-        std::get<2>(buffer) =
-            _mm_set_epi32(static_cast<int>(std::get<2>(ctr0)),
-                static_cast<int>(std::get<2>(ctr1)),
-                static_cast<int>(std::get<2>(ctr2)),
-                static_cast<int>(std::get<2>(ctr3)));
-        std::get<3>(buffer) =
-            _mm_set_epi32(static_cast<int>(std::get<3>(ctr0)),
-                static_cast<int>(std::get<3>(ctr1)),
-                static_cast<int>(std::get<3>(ctr2)),
-                static_cast<int>(std::get<3>(ctr3)));
-    }
-}; // struct ThreefrySSE2IncrementAndPack
-
-template <>
-struct ThreefrySSE2IncrementAndPack<std::uint64_t, 2> {
-    typedef std::array<__m128i, 2> buffer_type;
-    typedef std::array<std::uint64_t, 2> ctr_type;
-    typedef Counter<ctr_type> counter;
-
-    static void eval(ctr_type &ctr, buffer_type &buffer)
-    {
-        counter::increment(ctr);
-        ctr_type ctr0 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr1 = ctr;
-
-        std::get<0>(buffer) =
-            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<0>(ctr0)),
-                static_cast<VSMC_INT64>(std::get<0>(ctr1)));
-        std::get<1>(buffer) =
-            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<1>(ctr0)),
-                static_cast<VSMC_INT64>(std::get<1>(ctr1)));
-    }
-}; // struct ThreefrySSE2IncrementAndPack
-
-template <>
-struct ThreefrySSE2IncrementAndPack<std::uint64_t, 4> {
-    typedef std::array<__m128i, 4> buffer_type;
-    typedef std::array<std::uint64_t, 4> ctr_type;
-    typedef Counter<ctr_type> counter;
-
-    static void eval(ctr_type &ctr, buffer_type &buffer)
-    {
-        counter::increment(ctr);
-        ctr_type ctr0 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr1 = ctr;
-
-        std::get<0>(buffer) =
-            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<0>(ctr0)),
-                static_cast<VSMC_INT64>(std::get<0>(ctr1)));
-        std::get<1>(buffer) =
-            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<1>(ctr0)),
-                static_cast<VSMC_INT64>(std::get<1>(ctr1)));
-        std::get<2>(buffer) =
-            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<2>(ctr0)),
-                static_cast<VSMC_INT64>(std::get<2>(ctr1)));
-        std::get<3>(buffer) =
-            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<3>(ctr0)),
-                static_cast<VSMC_INT64>(std::get<3>(ctr1)));
-    }
-}; // struct ThreefrySSE2IncrementAndPack
-
-template <typename, std::size_t>
 struct ThreefrySSE2ParPack;
 
 template <>
@@ -541,6 +322,153 @@ struct ThreefrySSE2ParPack<std::uint64_t, 4> {
     }
 }; // struct ThreefrySSE2ParPack
 
+template <typename, std::size_t>
+struct ThreefrySSE2CtrPack;
+
+template <>
+struct ThreefrySSE2CtrPack<std::uint32_t, 2> {
+    typedef std::array<__m128i, 2> state_type;
+    typedef std::array<std::uint32_t, 2> ctr_type;
+    typedef Counter<ctr_type> counter;
+
+    static void eval(ctr_type &ctr, state_type &state)
+    {
+        counter::increment(ctr);
+        ctr_type ctr0 = ctr;
+        counter::increment(ctr);
+        ctr_type ctr1 = ctr;
+        counter::increment(ctr);
+        ctr_type ctr2 = ctr;
+        counter::increment(ctr);
+        ctr_type ctr3 = ctr;
+
+        std::get<0>(state) = _mm_set_epi32(static_cast<int>(std::get<0>(ctr3)),
+            static_cast<int>(std::get<0>(ctr2)),
+            static_cast<int>(std::get<0>(ctr1)),
+            static_cast<int>(std::get<0>(ctr0)));
+        std::get<1>(state) = _mm_set_epi32(static_cast<int>(std::get<1>(ctr3)),
+            static_cast<int>(std::get<1>(ctr2)),
+            static_cast<int>(std::get<1>(ctr1)),
+            static_cast<int>(std::get<1>(ctr0)));
+    }
+}; // struct ThreefrySSE2CtrPack
+
+template <>
+struct ThreefrySSE2CtrPack<std::uint32_t, 4> {
+    typedef std::array<__m128i, 4> state_type;
+    typedef std::array<std::uint32_t, 4> ctr_type;
+    typedef Counter<ctr_type> counter;
+
+    static void eval(ctr_type &ctr, state_type &state)
+    {
+        counter::increment(ctr);
+        ctr_type ctr0 = ctr;
+        counter::increment(ctr);
+        ctr_type ctr1 = ctr;
+        counter::increment(ctr);
+        ctr_type ctr2 = ctr;
+        counter::increment(ctr);
+        ctr_type ctr3 = ctr;
+
+        std::get<0>(state) = _mm_set_epi32(static_cast<int>(std::get<0>(ctr3)),
+            static_cast<int>(std::get<0>(ctr2)),
+            static_cast<int>(std::get<0>(ctr1)),
+            static_cast<int>(std::get<0>(ctr0)));
+        std::get<1>(state) = _mm_set_epi32(static_cast<int>(std::get<1>(ctr3)),
+            static_cast<int>(std::get<1>(ctr2)),
+            static_cast<int>(std::get<1>(ctr1)),
+            static_cast<int>(std::get<1>(ctr0)));
+        std::get<2>(state) = _mm_set_epi32(static_cast<int>(std::get<2>(ctr3)),
+            static_cast<int>(std::get<2>(ctr2)),
+            static_cast<int>(std::get<2>(ctr1)),
+            static_cast<int>(std::get<2>(ctr0)));
+        std::get<3>(state) = _mm_set_epi32(static_cast<int>(std::get<3>(ctr3)),
+            static_cast<int>(std::get<3>(ctr2)),
+            static_cast<int>(std::get<3>(ctr1)),
+            static_cast<int>(std::get<3>(ctr0)));
+    }
+}; // struct ThreefrySSE2CtrPack
+
+template <>
+struct ThreefrySSE2CtrPack<std::uint64_t, 2> {
+    typedef std::array<__m128i, 2> state_type;
+    typedef std::array<std::uint64_t, 2> ctr_type;
+    typedef Counter<ctr_type> counter;
+
+    static void eval(ctr_type &ctr, state_type &state)
+    {
+        counter::increment(ctr);
+        ctr_type ctr0 = ctr;
+        counter::increment(ctr);
+        ctr_type ctr1 = ctr;
+
+        std::get<0>(state) =
+            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<0>(ctr1)),
+                static_cast<VSMC_INT64>(std::get<0>(ctr0)));
+        std::get<1>(state) =
+            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<1>(ctr1)),
+                static_cast<VSMC_INT64>(std::get<1>(ctr0)));
+    }
+}; // struct ThreefrySSE2CtrPack
+
+template <>
+struct ThreefrySSE2CtrPack<std::uint64_t, 4> {
+    typedef std::array<__m128i, 4> state_type;
+    typedef std::array<std::uint64_t, 4> ctr_type;
+    typedef Counter<ctr_type> counter;
+
+    static void eval(ctr_type &ctr, state_type &state)
+    {
+        counter::increment(ctr);
+        ctr_type ctr0 = ctr;
+        counter::increment(ctr);
+        ctr_type ctr1 = ctr;
+
+        std::get<0>(state) =
+            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<0>(ctr1)),
+                static_cast<VSMC_INT64>(std::get<0>(ctr0)));
+        std::get<1>(state) =
+            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<1>(ctr1)),
+                static_cast<VSMC_INT64>(std::get<1>(ctr0)));
+        std::get<2>(state) =
+            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<2>(ctr1)),
+                static_cast<VSMC_INT64>(std::get<2>(ctr0)));
+        std::get<3>(state) =
+            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<3>(ctr1)),
+                static_cast<VSMC_INT64>(std::get<3>(ctr0)));
+    }
+}; // struct ThreefrySSE2CtrPack
+
+template <typename, std::size_t>
+struct ThreefrySSE2Unpack;
+
+template <typename ResultType, std::size_t K>
+struct ThreefrySSE2Unpack {
+    static constexpr std::size_t M = sizeof(__m128i) / sizeof(ResultType);
+
+    static void eval(const std::array<__m128i, K> &state,
+        std::array<ResultType, K * M> &buffer)
+    {
+        unpack<0>(state, buffer, std::integral_constant<bool, 0 < K>());
+    }
+
+    private:
+    template <std::size_t>
+    static void unpack(const std::array<__m128i, K> &,
+        std::array<ResultType, K * M> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void unpack(const std::array<__m128i, K> &state,
+        std::array<ResultType, K * M> &buffer, std::true_type)
+    {
+        internal::m128i_unpack<N * M>(std::get<N>(state), buffer);
+        unpack<N + 1>(
+            state, buffer, std::integral_constant<bool, N + 1 < K>());
+    }
+}; // struct ThreefrySSE2Unpack
+
 } // namespace vsmc::internal
 
 /// \brief ThreefrySSE2 RNG engine reimplemented
@@ -576,18 +504,18 @@ class ThreefrySSE2Engine
 {
     public:
     typedef ResultType result_type;
-    typedef std::array<__m128i, K> buffer_type;
     typedef std::array<ResultType, K> ctr_type;
     typedef std::array<ResultType, K> key_type;
 
     private:
-    typedef Counter<ctr_type> counter;
     static constexpr std::size_t M = sizeof(__m128i) / sizeof(result_type);
+    typedef Counter<ctr_type> counter;
+    typedef std::array<ResultType, K * M> buffer_type;
 
     public:
     explicit ThreefrySSE2Engine(result_type s = 0) : index_(K * M)
     {
-        VSMC_STATIC_ASSERT_RNG_THREEFRY;
+        VSMC_STATIC_ASSERT_RNG_THREEFRY(SSE2);
         seed(s);
     }
 
@@ -598,13 +526,13 @@ class ThreefrySSE2Engine
             * = nullptr)
         : index_(K * M)
     {
-        VSMC_STATIC_ASSERT_RNG_THREEFRY;
+        VSMC_STATIC_ASSERT_RNG_THREEFRY(SSE2);
         seed(seq);
     }
 
     ThreefrySSE2Engine(const key_type &k) : index_(K * M)
     {
-        VSMC_STATIC_ASSERT_RNG_THREEFRY;
+        VSMC_STATIC_ASSERT_RNG_THREEFRY(SSE2);
         seed(k);
     }
 
@@ -664,13 +592,11 @@ class ThreefrySSE2Engine
     result_type operator()()
     {
         if (index_ == K * M) {
-            internal::ThreefrySSE2IncrementAndPack<ResultType, K>::eval(
-                ctr_, buffer_);
             generate_buffer();
             index_ = 0;
         }
 
-        return reinterpret_cast<const result_type *>(buffer_.data())[index_++];
+        return buffer_[index_++];
     }
 
     void discard(result_type nskip)
@@ -763,32 +689,37 @@ class ThreefrySSE2Engine
     buffer_type buffer_;
     std::size_t index_;
 
+    typedef std::array<__m128i, K> state_type;
     typedef std::array<__m128i, K + 1> par_type;
 
     void generate_buffer()
     {
         par_type par;
+        state_type state;
         internal::ThreefrySSE2ParPack<ResultType, K>::eval(par_, par);
-        generate_buffer<0>(par, std::true_type());
+        internal::ThreefrySSE2CtrPack<ResultType, K>::eval(ctr_, state);
+        generate_buffer<0>(par, state, std::true_type());
+        internal::ThreefrySSE2Unpack<ResultType, K>::eval(state, buffer_);
     }
 
     template <std::size_t>
-    void generate_buffer(const par_type &, std::false_type)
+    void generate_buffer(const par_type &, state_type &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    void generate_buffer(const par_type &par, std::true_type)
+    void generate_buffer(
+        const par_type &par, state_type &state, std::true_type)
     {
-        internal::ThreefrySSE2Rotate<ResultType, K, N>::eval(buffer_);
-        internal::ThreefrySSE2InsertKey<ResultType, K, N>::eval(buffer_, par);
+        internal::ThreefrySSE2Rotate<ResultType, K, N>::eval(state);
+        internal::ThreefrySSE2InsertKey<ResultType, K, N>::eval(state, par);
         generate_buffer<N + 1>(
-            par, std::integral_constant < bool, N<Rounds>());
+            par, state, std::integral_constant < bool, N<Rounds>());
     }
 
     void init_par(const key_type &key)
     {
-        par_.back() = internal::ThreefrySSE2KSConstantValue<ResultType>::value;
+        par_.back() = internal::ThreefryKSConstantValue<ResultType>::value;
         par_xor<0>(key, std::integral_constant<bool, 0 < K>());
     }
 
