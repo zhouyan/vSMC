@@ -185,7 +185,6 @@ class ThreefryEngine
 {
     public:
     typedef ResultType result_type;
-    typedef std::array<ResultType, K> buffer_type;
     typedef std::array<ResultType, K> ctr_type;
     typedef std::array<ResultType, K> key_type;
 
@@ -272,29 +271,11 @@ class ThreefryEngine
     result_type operator()()
     {
         if (index_ == K) {
-            counter::increment(ctr_);
-            generate_buffer(ctr_, buffer_);
+            generate_buffer();
             index_ = 0;
         }
 
         return buffer_[index_++];
-    }
-
-    /// \brief Generate a buffer of random bits given a counter using the
-    /// current key
-    buffer_type operator()(const ctr_type &c) const
-    {
-        buffer_type buf;
-        generate_buffer(c, buf);
-
-        return buf;
-    }
-
-    /// \brief Generate random bits in a pre-allocated buffer given a counter
-    /// using the current key
-    void operator()(const ctr_type &c, buffer_type &buf) const
-    {
-        generate_buffer(c, buf);
     }
 
     void discard(result_type nskip)
@@ -377,27 +358,27 @@ class ThreefryEngine
     private:
     ctr_type ctr_;
     std::array<ResultType, K + 1> par_;
-    buffer_type buffer_;
+    std::array<ResultType, K> buffer_;
     std::size_t index_;
 
-    void generate_buffer(const ctr_type &c, buffer_type &buf) const
+    void generate_buffer()
     {
-        buf = c;
-        generate_buffer<0>(buf, std::true_type());
+        counter::increment(ctr_);
+        buffer_ = ctr_;
+        generate_buffer<0>(std::true_type());
     }
 
     template <std::size_t>
-    void generate_buffer(buffer_type &, std::false_type) const
+    void generate_buffer(std::false_type)
     {
     }
 
     template <std::size_t N>
-    void generate_buffer(buffer_type &buf, std::true_type) const
+    void generate_buffer(std::true_type)
     {
-        internal::ThreefryRotate<ResultType, K, N>::eval(buf);
-        internal::ThreefryInsertKey<ResultType, K, N>::eval(buf, par_);
-        generate_buffer<N + 1>(
-            buf, std::integral_constant < bool, N<Rounds>());
+        internal::ThreefryRotate<ResultType, K, N>::eval(buffer_);
+        internal::ThreefryInsertKey<ResultType, K, N>::eval(buffer_, par_);
+        generate_buffer<N + 1>(std::integral_constant < bool, N<Rounds>());
     }
 
     void init_par(const key_type &key)

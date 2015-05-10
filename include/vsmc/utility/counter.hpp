@@ -41,24 +41,6 @@
 namespace vsmc
 {
 
-namespace internal
-{
-
-template <typename T, bool>
-struct CounterMask;
-
-template <typename T>
-struct CounterMask<T, true> {
-    static constexpr T max_val = VSMC_MAX_UINT(T);
-
-    static constexpr T mask_hi =
-        static_cast<T>(static_cast<T>(max_val << 8) >> 8);
-
-    static constexpr T mask_lo = static_cast<T>(mask_hi ^ max_val);
-}; // struct CounterMask
-
-} // namespace vsmc::internal
-
 template <typename>
 class Counter;
 
@@ -111,47 +93,16 @@ class Counter<std::array<T, K>>
         std::memcpy(ctr.data(), &c, sizeof(ctr_type));
     }
 
-    /// \brief Set a block of counters given the value of the first counter
-    template <std::size_t Blocks>
-    static void set(std::array<ctr_type, Blocks> &ctr, const ctr_type &c)
-    {
-        ctr.front() = c;
-        set_block<1>(ctr, std::integral_constant<bool, 1 < Blocks>());
-    }
-
-    template <std::size_t Blocks, typename U>
-    static void set(std::array<ctr_type, Blocks> &ctr, const U &c)
-    {
-        VSMC_STATIC_ASSERT_UTILITY_COUNTER_SET_CTR(ctr_type, U);
-        std::memcpy(ctr.front().data(), &c, sizeof(ctr_type));
-        set_block<1>(ctr, std::integral_constant<bool, 1 < Blocks>());
-    }
-
     /// \brief Reset a counter to zero
     static void reset(ctr_type &ctr)
     {
         std::memset(ctr.data(), 0, sizeof(T) * K);
     }
 
-    /// \brief Reset a block of counters with the first set to zero
-    template <std::size_t Blocks>
-    static void reset(std::array<ctr_type, Blocks> &ctr)
-    {
-        reset(ctr.front());
-        set_block<1>(ctr, std::integral_constant<bool, 1 < Blocks>());
-    }
-
     /// \brief Increment the counter by one
     static void increment(ctr_type &ctr)
     {
         increment_single<0>(ctr, std::integral_constant<bool, 1 < K>());
-    }
-
-    /// \brief Increment each counter in a block by one
-    template <std::size_t Blocks>
-    static void increment(std::array<ctr_type, Blocks> &ctr)
-    {
-        increment_block<0>(ctr, std::true_type());
     }
 
     /// \brief Increment a counter by a given value
@@ -181,30 +132,8 @@ class Counter<std::array<T, K>>
         ctr.front() = nskip - 1;
     }
 
-    /// \brief Increment each counter in a block by a given value
-    template <std::size_t Blocks>
-    static void increment(std::array<ctr_type, Blocks> &ctr, T nskip)
-    {
-        if (nskip == 0)
-            return;
-
-        if (nskip == 1) {
-            increment(ctr);
-            return;
-        }
-
-        increment_block<0>(ctr, nskip, std::true_type());
-    }
-
     private:
-    static constexpr T max_ =
-        internal::CounterMask<T, std::is_unsigned<T>::value>::max_val;
-
-    static constexpr T mask_hi_ =
-        internal::CounterMask<T, std::is_unsigned<T>::value>::mask_hi;
-
-    static constexpr T mask_lo_ =
-        internal::CounterMask<T, std::is_unsigned<T>::value>::mask_lo;
+    static constexpr T max_ = VSMC_MAX_UINT(T);
 
     template <std::size_t>
     static void increment_single(ctr_type &ctr, std::false_type)
@@ -220,132 +149,6 @@ class Counter<std::array<T, K>>
 
         increment_single<N + 1>(
             ctr, std::integral_constant<bool, N + 2 < K>());
-    }
-
-    template <std::size_t, std::size_t Blocks>
-    static void set_block(std::array<ctr_type, Blocks> &, std::false_type)
-    {
-    }
-
-    template <std::size_t B, std::size_t Blocks>
-    static void set_block(std::array<ctr_type, Blocks> &ctr, std::true_type)
-    {
-        T m = std::get<B - 1>(ctr).back() & mask_lo_;
-        m >>= sizeof(T) * 8 - 8;
-        ++m;
-        m <<= sizeof(T) * 8 - 8;
-
-        std::get<B>(ctr) = std::get<B - 1>(ctr);
-        std::get<B>(ctr).back() &= mask_hi_;
-        std::get<B>(ctr).back() ^= m;
-        set_block<B + 1>(ctr, std::integral_constant<bool, B + 1 < Blocks>());
-    }
-
-    template <std::size_t, std::size_t Blocks>
-    static void increment_block(
-        std::array<ctr_type, Blocks> &, std::false_type)
-    {
-    }
-
-    template <std::size_t B, std::size_t Blocks>
-    static void increment_block(
-        std::array<ctr_type, Blocks> &ctr, std::true_type)
-    {
-        increment_block_ctr(std::get<B>(ctr));
-        increment_block<B + 1>(
-            ctr, std::integral_constant<bool, B + 1 < Blocks>());
-    }
-
-    template <std::size_t, std::size_t Blocks>
-    static void increment_block(
-        std::array<ctr_type, Blocks> &, T, std::false_type)
-    {
-    }
-
-    template <std::size_t B, std::size_t Blocks>
-    static void increment_block(
-        std::array<ctr_type, Blocks> &ctr, T nskip, std::true_type)
-    {
-        increment_block_ctr(std::get<B>(ctr), nskip);
-        increment_block<B + 1>(
-            ctr, nskip, std::integral_constant<bool, B + 1 < Blocks>());
-    }
-
-    static void increment_block_ctr(ctr_type &ctr)
-    {
-        increment_block_single<0>(ctr, std::integral_constant<bool, 1 < K>());
-    }
-
-    static void increment_block_ctr(ctr_type &ctr, T nskip)
-    {
-        increment_block_nskip(
-            ctr, nskip, std::integral_constant<bool, 1 < K>());
-    }
-
-    template <std::size_t>
-    static void increment_block_single(ctr_type &ctr, std::false_type)
-    {
-        T m = ctr.back() & mask_lo_;
-        ctr.back() <<= 8;
-        ctr.back() >>= 8;
-        ++ctr.back();
-        ctr.back() &= mask_hi_;
-        ctr.back() ^= m;
-    }
-
-    template <std::size_t N>
-    static void increment_block_single(ctr_type &ctr, std::true_type)
-    {
-        if (++std::get<N>(ctr) != 0)
-            return;
-
-        increment_block_single<N + 1>(
-            ctr, std::integral_constant<bool, N + 2 < K>());
-    }
-
-    static void increment_block_nskip(ctr_type &ctr, T nskip, std::false_type)
-    {
-        T m = ctr.back() & mask_lo_;
-        T b = ctr.back();
-        b <<= 8;
-        b >>= 8;
-
-        if (nskip <= mask_hi_ - b) {
-            b += nskip;
-            b &= mask_hi_;
-            b ^= m;
-            ctr.back() = b;
-            return;
-        }
-
-        nskip -= mask_hi_ - b - 1;
-        while (nskip > mask_hi_)
-            nskip -= mask_hi_;
-        b = nskip;
-        b &= mask_hi_;
-        b ^= m;
-        ctr.back() = b;
-    }
-
-    static void increment_block_nskip(ctr_type &ctr, T nskip, std::true_type)
-    {
-        if (nskip == 0)
-            return;
-
-        if (nskip == 1) {
-            increment_block_ctr(ctr);
-            return;
-        }
-
-        if (ctr.front() <= max_ - nskip) {
-            ctr.front() += nskip;
-            return;
-        }
-
-        nskip -= max_ - ctr.front();
-        ctr.front() = max_;
-        increment_block_ctr(ctr);
-        ctr.front() = nskip - 1;
     }
 }; // struct Counter
 

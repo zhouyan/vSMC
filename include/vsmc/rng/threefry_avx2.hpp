@@ -557,12 +557,10 @@ class ThreefryEngineAVX2
     typedef std::array<ResultType, K> key_type;
 
     private:
-    static constexpr std::size_t M = sizeof(__m256i) / sizeof(result_type);
     typedef Counter<ctr_type> counter;
-    typedef std::array<ResultType, K * M> buffer_type;
 
     public:
-    explicit ThreefryEngineAVX2(result_type s = 0) : index_(K * M)
+    explicit ThreefryEngineAVX2(result_type s = 0) : index_(K * M_)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY(AVX2);
         seed(s);
@@ -573,13 +571,13 @@ class ThreefryEngineAVX2
         typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
             key_type, ThreefryEngineAVX2<ResultType, K, Rounds>>::value>::type
             * = nullptr)
-        : index_(K * M)
+        : index_(K * M_)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY(AVX2);
         seed(seq);
     }
 
-    ThreefryEngineAVX2(const key_type &k) : index_(K * M)
+    ThreefryEngineAVX2(const key_type &k) : index_(K * M_)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY(AVX2);
         seed(k);
@@ -592,7 +590,7 @@ class ThreefryEngineAVX2
         k.fill(0);
         k.front() = s;
         init_par(k);
-        index_ = K * M;
+        index_ = K * M_;
     }
 
     template <typename SeedSeq>
@@ -605,14 +603,14 @@ class ThreefryEngineAVX2
         key_type k;
         seq.generate(k.begin(), k.end());
         init_par(k);
-        index_ = K * M;
+        index_ = K * M_;
     }
 
     void seed(const key_type &k)
     {
         counter::reset(ctr_);
         init_par(k);
-        index_ = K * M;
+        index_ = K * M_;
     }
 
     ctr_type ctr() const { return ctr_; }
@@ -629,18 +627,18 @@ class ThreefryEngineAVX2
     void ctr(const ctr_type &c)
     {
         counter::set(ctr_, c);
-        index_ = K * M;
+        index_ = K * M_;
     }
 
     void key(const key_type &k)
     {
         init_par(k);
-        index_ = K * M;
+        index_ = K * M_;
     }
 
     result_type operator()()
     {
-        if (index_ == K * M) {
+        if (index_ == K * M_) {
             generate_buffer();
             index_ = 0;
         }
@@ -651,23 +649,23 @@ class ThreefryEngineAVX2
     void discard(result_type nskip)
     {
         std::size_t n = static_cast<std::size_t>(nskip);
-        if (index_ + n <= K * M) {
+        if (index_ + n <= K * M_) {
             index_ += n;
             return;
         }
 
-        n -= K * M - index_;
-        if (n <= K * M) {
-            index_ = K * M;
+        n -= K * M_ - index_;
+        if (n <= K * M_) {
+            index_ = K * M_;
             operator()();
             index_ = n;
             return;
         }
 
-        counter::increment(ctr_, static_cast<result_type>(n / (K * M)));
-        index_ = K * M;
+        counter::increment(ctr_, static_cast<result_type>(n / (K * M_)));
+        index_ = K * M_;
         operator()();
-        index_ = n % (K * M);
+        index_ = n % (K * M_);
     }
 
     static constexpr result_type _Min = 0;
@@ -733,13 +731,15 @@ class ThreefryEngineAVX2
     }
 
     private:
-    ctr_type ctr_;
-    std::array<ResultType, K + 1> par_;
-    buffer_type buffer_;
-    std::size_t index_;
-
     typedef std::array<__m256i, K> state_type;
     typedef std::array<__m256i, K + 1> par_type;
+
+    static constexpr std::size_t M_ = sizeof(__m256i) / sizeof(result_type);
+
+    ctr_type ctr_;
+    std::array<ResultType, K + 1> par_;
+    std::array<ResultType, K * M_> buffer_;
+    std::size_t index_;
 
     void generate_buffer()
     {

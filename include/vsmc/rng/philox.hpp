@@ -321,7 +321,6 @@ class PhiloxEngine
 {
     public:
     typedef ResultType result_type;
-    typedef std::array<ResultType, K> buffer_type;
     typedef std::array<ResultType, K> ctr_type;
     typedef std::array<ResultType, K / 2> key_type;
 
@@ -397,29 +396,11 @@ class PhiloxEngine
     result_type operator()()
     {
         if (index_ == K) {
-            counter::increment(ctr_);
-            generate_buffer(ctr_, buffer_);
+            generate_buffer();
             index_ = 0;
         }
 
         return buffer_[index_++];
-    }
-
-    /// \brief Generate a buffer of random bits given a counter using the
-    /// current key
-    buffer_type operator()(const ctr_type &c) const
-    {
-        buffer_type buf;
-        generate_buffer(c, buf);
-
-        return buf;
-    }
-
-    /// \brief Generate random bits in a pre-allocated buffer given a counter
-    /// using the current key
-    void operator()(const ctr_type &c, buffer_type &buf) const
-    {
-        generate_buffer(c, buf);
     }
 
     void discard(result_type nskip)
@@ -502,28 +483,29 @@ class PhiloxEngine
     private:
     ctr_type ctr_;
     key_type key_;
-    buffer_type buffer_;
+    std::array<ResultType, K> buffer_;
     std::size_t index_;
 
-    void generate_buffer(const ctr_type c, buffer_type &buf) const
+    void generate_buffer()
     {
-        buf = c;
+        counter::increment(ctr_);
+        buffer_ = ctr_;
         key_type par = key_;
-        generate_buffer<0>(buf, par, std::true_type());
+        generate_buffer<0>(par, std::true_type());
     }
 
     template <std::size_t>
-    void generate_buffer(buffer_type &, key_type &, std::false_type) const
+    void generate_buffer(key_type &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    void generate_buffer(buffer_type &buf, key_type &par, std::true_type) const
+    void generate_buffer(key_type &par, std::true_type)
     {
         internal::PhiloxBumpKey<ResultType, K, N>::eval(par);
-        internal::PhiloxRound<ResultType, K, N>::eval(buf, par);
+        internal::PhiloxRound<ResultType, K, N>::eval(buffer_, par);
         generate_buffer<N + 1>(
-            buf, par, std::integral_constant < bool, N<Rounds>());
+            par, std::integral_constant < bool, N<Rounds>());
     }
 }; // class PhiloxEngine
 
