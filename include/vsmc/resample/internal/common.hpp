@@ -45,7 +45,7 @@
 /// \brief Default RNG type for resampling
 /// \ingroup Config
 #ifndef VSMC_RESAMPLE_RNG_TYPE
-#define VSMC_RESAMPLE_RNG_TYPE ::vsmc::Threefry4x64
+#define VSMC_RESAMPLE_RNG_TYPE ::vsmc::Threefry4x32
 #endif
 
 namespace vsmc

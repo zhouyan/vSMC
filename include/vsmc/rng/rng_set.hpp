@@ -54,9 +54,9 @@
 /// \ingroup Config
 #ifndef VSMC_RNG_SET_TYPE
 #if VSMC_USE_TBB
-#define VSMC_RNG_SET_TYPE ::vsmc::RngSetTBB<::vsmc::Threefry4x64>
+#define VSMC_RNG_SET_TYPE ::vsmc::RngSetTBB<::vsmc::Threefry4x32>
 #else
-#define VSMC_RNG_SET_TYPE ::vsmc::RngSetVector<::vsmc::Threefry4x64>
+#define VSMC_RNG_SET_TYPE ::vsmc::RngSetVector<::vsmc::Threefry4x32>
 #endif
 #endif
 
