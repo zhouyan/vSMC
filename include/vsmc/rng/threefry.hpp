@@ -218,7 +218,7 @@ struct ThreefryInsertKey<ResultType, 2, N, true> {
     {
         std::get<0>(state) += std::get<i0_>(par);
         std::get<1>(state) += std::get<i1_>(par);
-        std::get<1>(state) += inc_;
+        std::get<1>(state) += static_cast<ResultType>(inc_);
     }
 
     private:
@@ -236,7 +236,7 @@ struct ThreefryInsertKey<ResultType, 4, N, true> {
         std::get<1>(state) += std::get<i1_>(par);
         std::get<2>(state) += std::get<i2_>(par);
         std::get<3>(state) += std::get<i3_>(par);
-        std::get<3>(state) += inc_;
+        std::get<3>(state) += static_cast<ResultType>(inc_);
     }
 
     private:
