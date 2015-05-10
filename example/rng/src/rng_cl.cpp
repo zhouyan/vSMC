@@ -54,6 +54,12 @@ int main(int argc, char **argv)
     }
     vsmc::CLManager<> &manager = vsmc::CLManager<>::instance();
 
+    std::string name;
+    vsmc::CLManager<>::instance().platform().get_info(CL_PLATFORM_NAME, name);
+    std::cout << "Using platform: " << name << std::endl;
+    vsmc::CLManager<>::instance().device().get_info(CL_DEVICE_NAME, name);
+    std::cout << "Using device: " << name << std::endl;
+
     bool use_double = false;
     if (fptype == std::string("double"))
         use_double = true;
@@ -78,12 +84,6 @@ int main(int argc, char **argv)
         std::cout << log << std::endl;
         return -1;
     }
-
-    std::string name;
-    vsmc::CLManager<>::instance().platform().get_info(CL_PLATFORM_NAME, name);
-    std::cout << "Using platform: " << name << std::endl;
-    vsmc::CLManager<>::instance().device().get_info(CL_DEVICE_NAME, name);
-    std::cout << "Using device: " << name << std::endl;
 
     if (use_double)
         rng_cl<cl_double>(N, program);

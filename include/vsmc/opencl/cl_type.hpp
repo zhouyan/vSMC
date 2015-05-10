@@ -237,22 +237,10 @@ class CLDevice : public CLBase<::cl_device_id, CLDevice>
         if (ptr == nullptr)
             return CL_SUCCESS;
 
-        ::cl_int status = CL_SUCCESS;
-
-        char version[32];
-        status =
-            ::clGetDeviceInfo(ptr, CL_DEVICE_VERSION, 32, version, nullptr);
-        if (status != CL_SUCCESS)
-            return status;
-
-        version[10] = '\0';
-        if (std::strcmp(version, "OpenCL 1.1") == 0)
+        if (internal::cl_opencl_version(ptr) < 120)
             return CL_SUCCESS;
 
-        if (std::strcmp(version, "OpenCL 1.0") == 0)
-            return CL_SUCCESS;
-
-        status = ::clReleaseDevice(ptr);
+        ::cl_int status = ::clReleaseDevice(ptr);
         internal::cl_error_check(
             status, "CLDevice::release", "::clReleaseDevice");
 

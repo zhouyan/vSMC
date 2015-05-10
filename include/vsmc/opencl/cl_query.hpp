@@ -64,10 +64,7 @@ class CLQuery
     /// (OpenCL 1.0) to play safe..
     static int opencl_version(const CLDevice &dev)
     {
-        std::string version;
-        dev.get_info(CL_DEVICE_VERSION, version);
-
-        return check_opencl_version(version.substr(7, 3));
+        return internal::cl_opencl_version(dev.get());
     }
 
     /// \brief Return the OpenCL C version of a device
@@ -75,10 +72,7 @@ class CLQuery
     /// \sa opencl_version
     static int opencl_c_version(const CLDevice &dev)
     {
-        std::string version;
-        dev.get_info(CL_DEVICE_OPENCL_C_VERSION, version);
-
-        return check_opencl_version(version.substr(9, 3));
+        return internal::cl_opencl_c_version(dev.get());
     }
 
     /// \brief Check if a device feature exists
@@ -200,19 +194,6 @@ class CLQuery
     }
 
     private:
-    static int check_opencl_version(const std::string &version)
-    {
-#if VSMC_OPENCL_VERSION >= 200
-        if (version == std::string("2.0"))
-            return 200;
-#endif
-        if (version == std::string("1.2"))
-            return 120;
-        if (version == std::string("1.1"))
-            return 110;
-        return 100;
-    }
-
     static bool check_feature(const CLDevice &dev,
         std::integral_constant<OpenCLDeviceFeature, OpenCLDeviceDoubleFP>)
     {

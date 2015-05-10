@@ -80,6 +80,39 @@ inline void cl_error_check(cl_int status, const char *func, const char *clf)
 }
 #endif
 
+inline int cl_version(const char *version)
+{
+    if (std::strcmp(version, "2.1") == 0)
+        return 210;
+    if (std::strcmp(version, "2.0") == 0)
+        return 200;
+    if (std::strcmp(version, "1.2") == 0)
+        return 120;
+    if (std::strcmp(version, "1.1") == 0)
+        return 110;
+    return 100;
+}
+
+inline int cl_opencl_version(::cl_device_id device)
+{
+    char version[64];
+    ::cl_int status =
+        ::clGetDeviceInfo(device, CL_DEVICE_VERSION, 64, version, nullptr);
+    version[10] = '\0';
+
+    return status == CL_SUCCESS ? cl_version(version + 7) : 100;
+}
+
+inline int cl_opencl_c_version(::cl_device_id device)
+{
+    char version[64];
+    ::cl_int status = ::clGetDeviceInfo(
+        device, CL_DEVICE_OPENCL_C_VERSION, 64, version, nullptr);
+    version[12] = '\0';
+
+    return status == CL_SUCCESS ? cl_version(version + 9) : 100;
+}
+
 } // namespace vsmc::internal
 
 } // namespace vsmc
