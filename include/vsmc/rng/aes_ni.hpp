@@ -149,74 +149,15 @@ struct AESNICtrPack {
     typedef std::array<__m128i, Blocks> state_type;
     typedef std::array<ResultType, sizeof(__m128i) / sizeof(ResultType)>
         ctr_type;
-    typedef Counter<ctr_type> counter;
 
     static void eval(ctr_type &ctr, state_type &state)
     {
         std::array<ctr_type, Blocks> ctr_blocks;
-        increment<0>(
-            ctr, ctr_blocks, std::integral_constant<bool, 0 < Blocks>());
-        pack<0>(ctr_blocks, state, std::integral_constant<bool, 0 < Blocks>());
+        Counter<ctr_type>::increment(ctr, ctr_blocks);
+        std::memcpy(state.data(), ctr_blocks.data(), sizeof(__m128i) * Blocks);
     }
 
     private:
-    template <std::size_t>
-    static void increment(
-        ctr_type &, std::array<ctr_type, Blocks> &, std::false_type)
-    {
-    }
-
-    template <std::size_t B>
-    static void increment(ctr_type &ctr,
-        std::array<ctr_type, Blocks> &ctr_blocks, std::true_type)
-    {
-        counter::increment(ctr);
-        std::get<B>(ctr_blocks) = ctr;
-        increment<B + 1>(
-            ctr, ctr_blocks, std::integral_constant<bool, B + 1 < Blocks>());
-    }
-
-    template <std::size_t>
-    static void pack(
-        std::array<ctr_type, Blocks> &, state_type &, std::false_type)
-    {
-    }
-
-    template <std::size_t B>
-    static void pack(std::array<ctr_type, Blocks> &ctr_blocks,
-        state_type &state, std::true_type)
-    {
-        internal::m128i_pack<0>(std::get<B>(ctr_blocks), std::get<B>(state));
-        pack<B + 1>(
-            ctr_blocks, state, std::integral_constant<bool, B + 1 < Blocks>());
-    }
-}; // struct AESNICtrPack
-
-template <typename ResultType, std::size_t Blocks>
-struct AESNIUnpack {
-    static constexpr std::size_t M = sizeof(__m128i) / sizeof(ResultType);
-
-    static void eval(const std::array<__m128i, Blocks> &state,
-        std::array<ResultType, Blocks * M> &buffer)
-    {
-        unpack<0>(state, buffer, std::integral_constant<bool, 0 < Blocks>());
-    }
-
-    private:
-    template <std::size_t>
-    static void unpack(const std::array<__m128i, Blocks> &,
-        std::array<ResultType, Blocks * M> &, std::false_type)
-    {
-    }
-
-    template <std::size_t B>
-    static void unpack(const std::array<__m128i, Blocks> &state,
-        std::array<ResultType, Blocks * M> &buffer, std::true_type)
-    {
-        internal::m128i_unpack<B * M>(std::get<B>(state), buffer);
-        unpack<B + 1>(
-            state, buffer, std::integral_constant<bool, B + 1 < Blocks>());
-    }
 }; // struct AESNICtrPack
 
 } // namespace vsmc::internal
@@ -492,7 +433,7 @@ class AESNIEngine
         enc_first<0>(ks, state, std::true_type());
         enc_round<1>(ks, state, std::integral_constant<bool, 1 < Rounds>());
         enc_last<0>(ks, state, std::true_type());
-        internal::AESNIUnpack<ResultType, Blocks>::eval(state, buffer_);
+        std::memcpy(buffer_.data(), state.data(), sizeof(__m128i) * Blocks);
     }
 
     template <std::size_t>

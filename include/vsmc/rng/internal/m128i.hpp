@@ -94,7 +94,6 @@ inline bool m128i_is_equal(const __m128i &a, const __m128i &b)
     return sa == sb;
 }
 
-/// \ingroup RNG
 template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &m128i_output(
     std::basic_ostream<CharT, Traits> &os, const __m128i &a)
@@ -108,7 +107,6 @@ inline std::basic_ostream<CharT, Traits> &m128i_output(
     return os;
 }
 
-/// \ingroup RNG
 template <typename CharT, typename Traits>
 inline std::basic_istream<CharT, Traits> &m128i_input(
     std::basic_istream<CharT, Traits> &is, __m128i &a)

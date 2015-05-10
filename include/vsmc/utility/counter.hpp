@@ -54,29 +54,12 @@ class Counter;
 /// It deals with two types of counters. The first type is in the form
 /// `std::array<T, K>` where `T` is an unsigned integer type, treated as a
 /// `sizeof(T) * K * 8` bits integer. For example, `std::array<std::uint32_t,
-/// 4>`
-/// is
-/// treated as an 128-bits integer. The counter start with all elements being
-/// zero. The value of the integer can be calculated as, \f$c_0 + c_1 M + c_2
-/// M^2 +\cdots + c_{K-1} M^{K - 1}\f$, where \f$c_i\f$ is the \f$i\f$th
+/// 4>` is treated as an 128-bits integer. The counter start with all elements
+/// being zero. The value of the integer can be calculated as, \f$c_0 + c_1 M +
+/// c_2 M^2 +\cdots + c_{K-1} M^{K - 1}\f$, where \f$c_i\f$ is the \f$i\f$th
 /// element in the `std::array` and has a range from zero to \f$M - 1\f$,
-/// \f$M\f$ is
-/// the largest number of type `T` plus one, that is \f$2^n\f$ with \f$n\f$
-/// being the number of bits in type `T`.
-///
-/// The second type is blocks of counters of the first type. For example,
-/// `std::array<ctr_type, Blocks>`, where `ctr_type` is a counter of the first
-/// type.
-/// When set and incremented using methods in this class, all `Blocks`
-/// counters
-/// are maintained such that, they are always distinctive. This is done by
-/// reserving eight bits as counter IDs. Therefore, there can be at most 256
-/// blocks. The increment works by incrementing each counter the same way as
-/// in
-/// the first type, except that the last element, \f$c_{K-1}\f$ has a range
-/// from zero to \f$2^{n - 8} - 1\f$ where \f$n\f$ is the number of bits in
-/// type `T`. Therefore, in the extreme case where `ctr_type` is
-/// `std::array<uint8_t, 1>`, increment won't change the counter at all.
+/// \f$M\f$ is the largest number of type `T` plus one, that is \f$2^n\f$ with
+/// \f$n\f$ being the number of bits in type `T`.
 template <typename T, std::size_t K>
 class Counter<std::array<T, K>>
 {
@@ -103,6 +86,15 @@ class Counter<std::array<T, K>>
     static void increment(ctr_type &ctr)
     {
         increment_single<0>(ctr, std::integral_constant<bool, 1 < K>());
+    }
+
+    /// \brief Increment the counter multiple times and store the results
+    template <std::size_t Blocks>
+    static void increment(
+        ctr_type &ctr, std::array<ctr_type, Blocks> &ctr_blocks)
+    {
+        increment_block<Blocks, 0>(
+            ctr, ctr_blocks, std::integral_constant<bool, 0 < Blocks>());
     }
 
     /// \brief Increment a counter by a given value
@@ -149,6 +141,22 @@ class Counter<std::array<T, K>>
 
         increment_single<N + 1>(
             ctr, std::integral_constant<bool, N + 2 < K>());
+    }
+
+    template <std::size_t Blocks, std::size_t>
+    static void increment_block(
+        ctr_type &, std::array<ctr_type, Blocks> &, std::false_type)
+    {
+    }
+
+    template <std::size_t Blocks, std::size_t B>
+    static void increment_block(ctr_type &ctr,
+        std::array<ctr_type, Blocks> &ctr_blocks, std::true_type)
+    {
+        increment(ctr);
+        std::get<B>(ctr_blocks) = ctr;
+        increment_block<Blocks, B + 1>(
+            ctr, ctr_blocks, std::integral_constant<bool, B + 1 < Blocks>());
     }
 }; // struct Counter
 

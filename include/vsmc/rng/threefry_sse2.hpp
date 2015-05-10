@@ -61,7 +61,7 @@ struct ThreefryRotateImplSSE2<std::uint64_t, R> {
     static __m128i eval(__m128i x)
     {
         __m128i a = _mm_slli_epi64(x, R);
-        __m128i b = _mm_srli_epi64(x, 32 - R);
+        __m128i b = _mm_srli_epi64(x, 64 - R);
 
         return _mm_or_si128(a, b);
     }
@@ -266,208 +266,124 @@ struct ThreefryInsertKeySSE2<std::uint64_t, 4, N, true> {
 template <typename, std::size_t>
 struct ThreefryParPackSSE2;
 
-template <>
-struct ThreefryParPackSSE2<std::uint32_t, 2> {
-    static void eval(
-        const std::array<std::uint32_t, 3> &par, std::array<__m128i, 3> &pack)
+template <std::size_t K>
+struct ThreefryParPackSSE2<std::uint32_t, K> {
+    static void eval(const std::array<std::uint32_t, K + 1> &par,
+        std::array<__m128i, K + 1> &par128)
     {
-        std::get<0>(pack) = _mm_set1_epi32(static_cast<int>(std::get<0>(par)));
-        std::get<1>(pack) = _mm_set1_epi32(static_cast<int>(std::get<1>(par)));
-        std::get<2>(pack) = _mm_set1_epi32(static_cast<int>(std::get<2>(par)));
-    }
-}; // struct ThreefryParPackSSE2
-
-template <>
-struct ThreefryParPackSSE2<std::uint32_t, 4> {
-    static void eval(
-        const std::array<std::uint32_t, 5> &par, std::array<__m128i, 5> &pack)
-    {
-        std::get<0>(pack) = _mm_set1_epi32(static_cast<int>(std::get<0>(par)));
-        std::get<1>(pack) = _mm_set1_epi32(static_cast<int>(std::get<1>(par)));
-        std::get<2>(pack) = _mm_set1_epi32(static_cast<int>(std::get<2>(par)));
-        std::get<3>(pack) = _mm_set1_epi32(static_cast<int>(std::get<3>(par)));
-        std::get<4>(pack) = _mm_set1_epi32(static_cast<int>(std::get<4>(par)));
-    }
-}; // struct ThreefryParPackSSE2
-
-template <>
-struct ThreefryParPackSSE2<std::uint64_t, 2> {
-    static void eval(
-        const std::array<std::uint64_t, 3> &par, std::array<__m128i, 3> &pack)
-    {
-        std::get<0>(pack) =
-            _mm_set1_epi64x(static_cast<VSMC_INT64>(std::get<0>(par)));
-        std::get<1>(pack) =
-            _mm_set1_epi64x(static_cast<VSMC_INT64>(std::get<1>(par)));
-        std::get<2>(pack) =
-            _mm_set1_epi64x(static_cast<VSMC_INT64>(std::get<2>(par)));
-    }
-}; // struct ThreefryParPackSSE2
-
-template <>
-struct ThreefryParPackSSE2<std::uint64_t, 4> {
-    static void eval(
-        const std::array<std::uint64_t, 5> &par, std::array<__m128i, 5> &pack)
-    {
-        std::get<0>(pack) =
-            _mm_set1_epi64x(static_cast<VSMC_INT64>(std::get<0>(par)));
-        std::get<1>(pack) =
-            _mm_set1_epi64x(static_cast<VSMC_INT64>(std::get<1>(par)));
-        std::get<2>(pack) =
-            _mm_set1_epi64x(static_cast<VSMC_INT64>(std::get<2>(par)));
-        std::get<3>(pack) =
-            _mm_set1_epi64x(static_cast<VSMC_INT64>(std::get<3>(par)));
-        std::get<4>(pack) =
-            _mm_set1_epi64x(static_cast<VSMC_INT64>(std::get<4>(par)));
-    }
-}; // struct ThreefryParPackSSE2
-
-template <typename, std::size_t>
-struct ThreefryCtrPackSSE2;
-
-template <>
-struct ThreefryCtrPackSSE2<std::uint32_t, 2> {
-    typedef std::array<__m128i, 2> state_type;
-    typedef std::array<std::uint32_t, 2> ctr_type;
-    typedef Counter<ctr_type> counter;
-
-    static void eval(ctr_type &ctr, state_type &state)
-    {
-        counter::increment(ctr);
-        ctr_type ctr0 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr1 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr2 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr3 = ctr;
-
-        std::get<0>(state) = _mm_set_epi32(static_cast<int>(std::get<0>(ctr3)),
-            static_cast<int>(std::get<0>(ctr2)),
-            static_cast<int>(std::get<0>(ctr1)),
-            static_cast<int>(std::get<0>(ctr0)));
-        std::get<1>(state) = _mm_set_epi32(static_cast<int>(std::get<1>(ctr3)),
-            static_cast<int>(std::get<1>(ctr2)),
-            static_cast<int>(std::get<1>(ctr1)),
-            static_cast<int>(std::get<1>(ctr0)));
-    }
-}; // struct ThreefryCtrPackSSE2
-
-template <>
-struct ThreefryCtrPackSSE2<std::uint32_t, 4> {
-    typedef std::array<__m128i, 4> state_type;
-    typedef std::array<std::uint32_t, 4> ctr_type;
-    typedef Counter<ctr_type> counter;
-
-    static void eval(ctr_type &ctr, state_type &state)
-    {
-        counter::increment(ctr);
-        ctr_type ctr0 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr1 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr2 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr3 = ctr;
-
-        std::get<0>(state) = _mm_set_epi32(static_cast<int>(std::get<0>(ctr3)),
-            static_cast<int>(std::get<0>(ctr2)),
-            static_cast<int>(std::get<0>(ctr1)),
-            static_cast<int>(std::get<0>(ctr0)));
-        std::get<1>(state) = _mm_set_epi32(static_cast<int>(std::get<1>(ctr3)),
-            static_cast<int>(std::get<1>(ctr2)),
-            static_cast<int>(std::get<1>(ctr1)),
-            static_cast<int>(std::get<1>(ctr0)));
-        std::get<2>(state) = _mm_set_epi32(static_cast<int>(std::get<2>(ctr3)),
-            static_cast<int>(std::get<2>(ctr2)),
-            static_cast<int>(std::get<2>(ctr1)),
-            static_cast<int>(std::get<2>(ctr0)));
-        std::get<3>(state) = _mm_set_epi32(static_cast<int>(std::get<3>(ctr3)),
-            static_cast<int>(std::get<3>(ctr2)),
-            static_cast<int>(std::get<3>(ctr1)),
-            static_cast<int>(std::get<3>(ctr0)));
-    }
-}; // struct ThreefryCtrPackSSE2
-
-template <>
-struct ThreefryCtrPackSSE2<std::uint64_t, 2> {
-    typedef std::array<__m128i, 2> state_type;
-    typedef std::array<std::uint64_t, 2> ctr_type;
-    typedef Counter<ctr_type> counter;
-
-    static void eval(ctr_type &ctr, state_type &state)
-    {
-        counter::increment(ctr);
-        ctr_type ctr0 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr1 = ctr;
-
-        std::get<0>(state) =
-            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<0>(ctr1)),
-                static_cast<VSMC_INT64>(std::get<0>(ctr0)));
-        std::get<1>(state) =
-            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<1>(ctr1)),
-                static_cast<VSMC_INT64>(std::get<1>(ctr0)));
-    }
-}; // struct ThreefryCtrPackSSE2
-
-template <>
-struct ThreefryCtrPackSSE2<std::uint64_t, 4> {
-    typedef std::array<__m128i, 4> state_type;
-    typedef std::array<std::uint64_t, 4> ctr_type;
-    typedef Counter<ctr_type> counter;
-
-    static void eval(ctr_type &ctr, state_type &state)
-    {
-        counter::increment(ctr);
-        ctr_type ctr0 = ctr;
-        counter::increment(ctr);
-        ctr_type ctr1 = ctr;
-
-        std::get<0>(state) =
-            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<0>(ctr1)),
-                static_cast<VSMC_INT64>(std::get<0>(ctr0)));
-        std::get<1>(state) =
-            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<1>(ctr1)),
-                static_cast<VSMC_INT64>(std::get<1>(ctr0)));
-        std::get<2>(state) =
-            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<2>(ctr1)),
-                static_cast<VSMC_INT64>(std::get<2>(ctr0)));
-        std::get<3>(state) =
-            _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<3>(ctr1)),
-                static_cast<VSMC_INT64>(std::get<3>(ctr0)));
-    }
-}; // struct ThreefryCtrPackSSE2
-
-template <typename, std::size_t>
-struct ThreefryUnpackSSE2;
-
-template <typename ResultType, std::size_t K>
-struct ThreefryUnpackSSE2 {
-    static constexpr std::size_t M = sizeof(__m128i) / sizeof(ResultType);
-
-    static void eval(const std::array<__m128i, K> &state,
-        std::array<ResultType, K * M> &buffer)
-    {
-        unpack<0>(state, buffer, std::integral_constant<bool, 0 < K>());
+        pack<0>(par, par128, std::integral_constant<bool, 0 < K + 1>());
     }
 
     private:
     template <std::size_t>
-    static void unpack(const std::array<__m128i, K> &,
-        std::array<ResultType, K * M> &, std::false_type)
+    static void pack(const std::array<std::uint32_t, K + 1> &,
+        std::array<__m128i, K + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void unpack(const std::array<__m128i, K> &state,
-        std::array<ResultType, K * M> &buffer, std::true_type)
+    static void pack(const std::array<std::uint32_t, K + 1> &par,
+        std::array<__m128i, K + 1> &par128, std::true_type)
     {
-        internal::m128i_unpack<N * M>(std::get<N>(state), buffer);
-        unpack<N + 1>(
-            state, buffer, std::integral_constant<bool, N + 1 < K>());
+        std::get<N>(par128) =
+            _mm_set1_epi32(static_cast<int>(std::get<N>(par)));
+        pack<N + 1>(
+            par, par128, std::integral_constant<bool, N + 1 < K + 1>());
     }
-}; // struct ThreefryUnpackSSE2
+}; // ThreefryParPackSSE2
+
+template <std::size_t K>
+struct ThreefryParPackSSE2<std::uint64_t, K> {
+    static void eval(const std::array<std::uint64_t, K + 1> &par,
+        std::array<__m128i, K + 1> &par128)
+    {
+        pack<0>(par, par128, std::integral_constant<bool, 0 < K + 1>());
+    }
+
+    private:
+    template <std::size_t>
+    static void pack(const std::array<std::uint64_t, K + 1> &,
+        std::array<__m128i, K + 1> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void pack(const std::array<std::uint64_t, K + 1> &par,
+        std::array<__m128i, K + 1> &par128, std::true_type)
+    {
+        std::get<N>(par128) =
+            _mm_set1_epi64x(static_cast<VSMC_INT64>(std::get<N>(par)));
+        pack<N + 1>(
+            par, par128, std::integral_constant<bool, N + 1 < K + 1>());
+    }
+}; // ThreefryParPackSSE2
+
+template <typename, std::size_t>
+struct ThreefryCtrPackSSE2;
+
+template <std::size_t K>
+struct ThreefryCtrPackSSE2<std::uint32_t, K> {
+    typedef std::array<__m128i, K> state_type;
+    typedef std::array<std::uint32_t, K> ctr_type;
+
+    static void eval(ctr_type &ctr, state_type &state)
+    {
+        std::array<ctr_type, 4> ctr_blocks;
+        Counter<ctr_type>::increment(ctr, ctr_blocks);
+        pack<0>(ctr_blocks, state, std::integral_constant<bool, 0 < K>());
+    }
+
+    private:
+    template <std::size_t N>
+    static void pack(
+        const std::array<ctr_type, 4> &, state_type &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void pack(
+        std::array<ctr_type, 4> &ctr_blocks, state_type &state, std::true_type)
+    {
+        std::get<N>(state) = _mm_set_epi32(
+            static_cast<int>(std::get<N>(std::get<0>(ctr_blocks))),
+            static_cast<int>(std::get<N>(std::get<1>(ctr_blocks))),
+            static_cast<int>(std::get<N>(std::get<2>(ctr_blocks))),
+            static_cast<int>(std::get<N>(std::get<3>(ctr_blocks))));
+        pack<N + 1>(
+            ctr_blocks, state, std::integral_constant<bool, N + 1 < K>());
+    }
+}; // struct ThreefryCtrPackSSE2
+
+template <std::size_t K>
+struct ThreefryCtrPackSSE2<std::uint64_t, K> {
+    typedef std::array<__m128i, K> state_type;
+    typedef std::array<std::uint64_t, K> ctr_type;
+
+    static void eval(ctr_type &ctr, state_type &state)
+    {
+        std::array<ctr_type, 2> ctr_blocks;
+        Counter<ctr_type>::increment(ctr, ctr_blocks);
+        pack<0>(ctr_blocks, state, std::integral_constant<bool, 0 < K>());
+    }
+
+    private:
+    template <std::size_t N>
+    static void pack(
+        const std::array<ctr_type, 2> &, state_type &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void pack(const std::array<ctr_type, 2> &ctr_blocks,
+        state_type &state, std::true_type)
+    {
+        std::get<N>(state) = _mm_set_epi64x(
+            static_cast<VSMC_INT64>(std::get<N>(std::get<0>(ctr_blocks))),
+            static_cast<VSMC_INT64>(std::get<N>(std::get<1>(ctr_blocks))));
+        pack<N + 1>(
+            ctr_blocks, state, std::integral_constant<bool, N + 1 < K>());
+    }
+}; // struct ThreefryCtrPackSSE2
 
 } // namespace vsmc::internal
 
@@ -674,7 +590,7 @@ class ThreefryEngineSSE2
         internal::ThreefryParPackSSE2<ResultType, K>::eval(par_, par);
         internal::ThreefryCtrPackSSE2<ResultType, K>::eval(ctr_, state);
         generate_buffer<0>(par, state, std::true_type());
-        internal::ThreefryUnpackSSE2<ResultType, K>::eval(state, buffer_);
+        std::memcpy(buffer_.data(), state.data(), sizeof(__m128i) * K);
     }
 
     template <std::size_t>
