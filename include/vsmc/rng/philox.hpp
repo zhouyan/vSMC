@@ -285,8 +285,7 @@ struct PhiloxRound<ResultType, 4, N, true> {
 /// \details
 /// This is a reimplementation of the algorithm Philox as described in
 /// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented
-/// in
-/// [Random123][r123lib].
+/// in [Random123][r123lib].
 ///
 /// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
 /// [r123lib]: https://www.deshawresearch.com/resources_random123.html
@@ -296,16 +295,13 @@ struct PhiloxRound<ResultType, 4, N, true> {
 /// two-folds performace difference (both faster and slower) were observed.
 ///
 /// Currently the 64-bits version is much slower than the original, except
-/// when
-/// using recent Clang, GCC, Intel C++ or MSVC on x86-64 computers. The
+/// when using recent Clang, GCC, Intel C++ or MSVC on x86-64 computers. The
 /// original implementation use some platform dependent assembly or intrinsics
 /// to optimize the performance. This implementation use standard C99 when
-/// used
-/// on other platforms.
+/// used on other platforms.
 ///
 /// This implementation is slightly more flexible in the sense that it does
-/// not
-/// limit the number of rounds. However, larger number of rounds can have
+/// not limit the number of rounds. However, larger number of rounds can have
 /// undesired effects. To say the least, currently all loops are unrolled,
 /// which can slow down significantly when the number of rounds is large.
 ///
@@ -313,9 +309,8 @@ struct PhiloxRound<ResultType, 4, N, true> {
 /// constructor or the one with a single seed, the output shall be exactly the
 /// same for the first \f$2^n\f$ iterations, where \f$n\f$ is the number of
 /// bits (32 or 64).  Further iterations may produce different results, as
-/// vSMC
-/// increment the counter slightly differently, but it still cover the same
-/// range and has the same period as the original.
+/// vSMC increment the counter slightly differently, but it still cover the
+/// same range and has the same period as the original.
 ///
 /// The constants of bumping the key (Weyl constants) and those used in each
 /// rounds can be set through traits, `vsmc::traits::PhiloxWeylConstantTrait`
