@@ -33,6 +33,7 @@
 #define VSMC_EXAMPLE_RNG_TEST_HPP
 
 #include <vsmc/utility/rdtsc.hpp>
+#include <vsmc/utility/aligned_memory.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
 #define VSMC_RNG_TEST_PRE(prog)                                               \
@@ -46,19 +47,19 @@
     std::vector<std::size_t> bytes;                                           \
     std::vector<std::uint64_t> cycles;
 
-#define VSMC_RNG_TEST(Engine)                                                 \
-    rng_test<Engine>(N, #Engine, names, size, sw, bytes, cycles);
+#define VSMC_RNG_TEST(RNG)                                                    \
+    rng_test<RNG>(N, #RNG, names, size, sw, bytes, cycles);
 
 #define VSMC_RNG_TEST_POST                                                    \
     rng_output_sw(prog_name, names, size, sw, bytes, cycles);
 
-template <typename Eng>
+template <typename RNG>
 inline void rng_test(std::size_t N, const std::string &name,
     std::vector<std::string> &names, std::vector<std::size_t> &size,
     std::vector<vsmc::StopWatch> &sw, std::vector<std::size_t> &bytes,
     std::vector<std::uint64_t> &cycles)
 {
-    Eng eng;
+    RNG rng;
     vsmc::StopWatch watch;
 #if VSMC_HAS_RDTSCP
     vsmc::RDTSCPCounter counter;
@@ -66,20 +67,21 @@ inline void rng_test(std::size_t N, const std::string &name,
     vsmc::RDTSCCounter counter;
 #endif
 
+    vsmc::AlignedVector<typename RNG::result_type> result(N);
     watch.start();
     counter.start();
     for (std::size_t i = 0; i != N; ++i)
-        eng();
+        result[i] = rng();
     counter.stop();
     watch.stop();
     std::ofstream rnd("rnd");
-    rnd << eng() << std::endl;
+    rnd << result.back() << std::endl;
     rnd.close();
 
     names.push_back(name);
-    size.push_back(sizeof(Eng));
+    size.push_back(sizeof(RNG));
     sw.push_back(watch);
-    bytes.push_back(N * sizeof(typename Eng::result_type));
+    bytes.push_back(N * sizeof(typename RNG::result_type));
     cycles.push_back(counter.cycles());
 }
 

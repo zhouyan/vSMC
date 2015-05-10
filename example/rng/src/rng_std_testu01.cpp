@@ -31,20 +31,20 @@
 
 #include "rng_testu01.hpp"
 
-#define VSMC_RNG_TESTU01_FUNCTION_STD(Eng)                                    \
+#define VSMC_RNG_TESTU01_FUNCTION_STD(RNG)                                    \
     extern "C" {                                                              \
-    inline double rng_##Eng(void)                                             \
+    inline double rng_##RNG(void)                                             \
     {                                                                         \
-        static std::Eng eng;                                                  \
+        static std::RNG rng;                                                  \
         static std::uniform_real_distribution<double> runif(0, 1);            \
                                                                               \
-        return runif(eng);                                                    \
+        return runif(rng);                                                    \
     }                                                                         \
     }
 
-#define VSMC_RNG_TESTU01_OPTION_STD(Eng)                                      \
-    bool rng_testu01_##Eng = false;                                           \
-    option.add(#Eng, "Test std::" #Eng, &rng_testu01_##Eng, false);
+#define VSMC_RNG_TESTU01_OPTION_STD(RNG)                                      \
+    bool rng_testu01_##RNG = false;                                           \
+    option.add(#RNG, "Test std::" #RNG, &rng_testu01_##RNG, false);
 
 VSMC_RNG_TESTU01_FUNCTION_STD(mt19937)
 VSMC_RNG_TESTU01_FUNCTION_STD(mt19937_64)

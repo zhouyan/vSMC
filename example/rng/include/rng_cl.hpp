@@ -38,31 +38,39 @@
 #include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
 #include <vsmc/rngc/rngc.h>
+#include <vsmc/utility/aligned_memory.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 #if VSMC_HAS_HDF5
 #include <vsmc/utility/hdf5io.hpp>
 #endif
 
-template <typename Engine, typename CEngine, typename CEngineInit,
-    typename CEngineRand>
-inline void rng_cl_engine(std::size_t N, std::size_t M,
-    const vsmc::CLProgram &program, CEngineInit &cinit, CEngineRand &crand,
+template <typename RNG, typename CRNG, typename CRNGInit, typename CRNGRand>
+inline void rng_cl_rng(std::size_t N, std::size_t M,
+    const vsmc::CLProgram &program, CRNGInit &cinit, CRNGRand &crand,
     const std::string &name)
 {
     vsmc::StopWatch watch;
 
-    typedef typename Engine::result_type result_type;
+    typedef typename RNG::result_type result_type;
 
-    std::vector<result_type> cpp(N);
-    Engine eng(1);
+    vsmc::AlignedVector<result_type> cpp(N);
+    RNG rng(1);
+    watch.reset();
+    watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        cpp[i] = eng();
+        cpp[i] = rng();
+    watch.stop();
+    double tcpp = watch.milliseconds();
 
-    std::vector<result_type> c(N);
-    CEngine rng;
-    cinit(&rng, 1);
+    vsmc::AlignedVector<result_type> c(N);
+    CRNG crng;
+    cinit(&crng, 1);
+    watch.reset();
+    watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        c[i] = crand(&rng);
+        c[i] = crand(&crng);
+    watch.stop();
+    double tc = watch.milliseconds();
     for (std::size_t i = 0; i != N; ++i) {
         if (cpp[i] != c[i]) {
             std::cout << "Failure: C      " << name << std::endl;
@@ -71,41 +79,24 @@ inline void rng_cl_engine(std::size_t N, std::size_t M,
     }
 
     std::size_t n = N / M + 1;
-    std::vector<result_type> cl(n * M);
+    vsmc::AlignedVector<result_type> cl(n * M);
     vsmc::CLBuffer<result_type> buffer(n * M);
     vsmc::CLKernel kernel(program, "kernel_" + name);
-    vsmc::cl_set_kernel_args(kernel, 0, static_cast<cl_uint>(1),
-        static_cast<cl_ulong>(n), buffer.data());
+    vsmc::cl_set_kernel_args(
+        kernel, 0, static_cast<cl_ulong>(n), buffer.data());
     vsmc::CLManager<>::instance().run_kernel(kernel, n);
     vsmc::CLManager<>::instance().read_buffer(buffer.data(), n * M, cl.data());
+    watch.reset();
+    watch.start();
+    vsmc::CLManager<>::instance().run_kernel(kernel, n);
+    watch.stop();
+    double tcl = watch.milliseconds();
     for (std::size_t i = 0; i != N; ++i) {
         if (cpp[i] != cl[i]) {
             std::cout << "Failure: OpenCL " << name << std::endl;
             break;
         }
     }
-
-    watch.reset();
-    watch.start();
-    for (std::size_t i = 0; i != N; ++i)
-        eng();
-    watch.stop();
-    double tcpp = watch.milliseconds();
-
-    watch.reset();
-    watch.start();
-    for (std::size_t i = 0; i != N; ++i)
-        crand(&rng);
-    watch.stop();
-    double tc = watch.milliseconds();
-
-    vsmc::cl_set_kernel_args(kernel, 0, static_cast<cl_uint>(0),
-        static_cast<cl_ulong>(n), buffer.data());
-    watch.reset();
-    watch.start();
-    vsmc::CLManager<>::instance().run_kernel(kernel, n);
-    watch.stop();
-    double tcl = watch.milliseconds();
 
     std::cout << std::setw(20) << std::left << name;
     std::cout << std::setw(20) << std::fixed << std::right << tcpp;
@@ -114,11 +105,6 @@ inline void rng_cl_engine(std::size_t N, std::size_t M,
     std::cout << std::setw(20) << std::fixed << std::right << tcpp / tc;
     std::cout << std::setw(20) << std::fixed << std::right << tcpp / tcl;
     std::cout << std::endl;
-
-    std::ofstream rnd("rnd");
-    rnd << eng() << std::endl;
-    rnd << crand(&rng) << std::endl;
-    rnd.close();
 }
 
 inline double rng_cl_normal01(std::size_t N, float *c)
@@ -157,24 +143,24 @@ inline double rng_cl_normal01(std::size_t N, double *c)
 
 template <typename FPType>
 inline void rng_cl_normal01(std::size_t N, const vsmc::CLProgram &program,
-    std::vector<std::vector<FPType>> &result)
+    std::vector<vsmc::AlignedVector<FPType>> &result)
 {
     vsmc::StopWatch watch;
 
-    std::vector<FPType> cpp(N);
-    vsmc::Philox2x32 eng(1);
+    vsmc::AlignedVector<FPType> cpp(N);
+    vsmc::Philox2x32 rng(1);
     std::normal_distribution<FPType> rnorm(0, 1);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        cpp[i] = rnorm(eng);
+        cpp[i] = rnorm(rng);
     watch.stop();
     double tcpp = watch.milliseconds();
 
-    std::vector<FPType> c(N);
+    vsmc::AlignedVector<FPType> c(N);
     double tc = rng_cl_normal01(N, c.data());
 
-    std::vector<FPType> cl(N);
+    vsmc::AlignedVector<FPType> cl(N);
     vsmc::CLBuffer<FPType> buffer(N);
     vsmc::CLKernel kernel(program, "kernel_Normal01");
     vsmc::cl_set_kernel_args(
@@ -236,24 +222,24 @@ inline double rng_cl_gammak1(std::size_t N, double *c, double shape)
 
 template <typename FPType>
 inline void rng_cl_gammak1(std::size_t N, const vsmc::CLProgram &program,
-    FPType shape, std::vector<std::vector<FPType>> &result)
+    FPType shape, std::vector<vsmc::AlignedVector<FPType>> &result)
 {
     vsmc::StopWatch watch;
 
-    std::vector<FPType> cpp(N);
-    vsmc::Philox2x32 eng(1);
+    vsmc::AlignedVector<FPType> cpp(N);
+    vsmc::Philox2x32 rng(1);
     std::gamma_distribution<FPType> rgamma(shape, 1);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        cpp[i] = rgamma(eng);
+        cpp[i] = rgamma(rng);
     watch.stop();
     double tcpp = watch.milliseconds();
 
-    std::vector<FPType> c(N);
+    vsmc::AlignedVector<FPType> c(N);
     double tc = rng_cl_gammak1(N, c.data(), shape);
 
-    std::vector<FPType> cl(N);
+    vsmc::AlignedVector<FPType> cl(N);
     vsmc::CLBuffer<FPType> buffer(N);
     vsmc::CLKernel kernel(program, "kernel_GammaK1");
     vsmc::cl_set_kernel_args(
@@ -294,20 +280,20 @@ inline void rng_cl(std::size_t N, const vsmc::CLProgram &program)
     std::cout << std::endl;
 
     std::cout << std::string(120, '-') << std::endl;
-    rng_cl_engine<vsmc::Philox2x32, vsmc_philox2x32>(N, 2, program,
+    rng_cl_rng<vsmc::Philox2x32, vsmc_philox2x32>(N, 2, program,
         vsmc_philox2x32_init, vsmc_philox2x32_rand, "Philox2x32");
-    rng_cl_engine<vsmc::Philox4x32, vsmc_philox4x32>(N, 4, program,
+    rng_cl_rng<vsmc::Philox4x32, vsmc_philox4x32>(N, 4, program,
         vsmc_philox4x32_init, vsmc_philox4x32_rand, "Philox4x32");
-    rng_cl_engine<vsmc::Threefry2x32, vsmc_threefry2x32>(N, 2, program,
+    rng_cl_rng<vsmc::Threefry2x32, vsmc_threefry2x32>(N, 2, program,
         vsmc_threefry2x32_init, vsmc_threefry2x32_rand, "Threefry2x32");
-    rng_cl_engine<vsmc::Threefry4x32, vsmc_threefry4x32>(N, 4, program,
+    rng_cl_rng<vsmc::Threefry4x32, vsmc_threefry4x32>(N, 4, program,
         vsmc_threefry4x32_init, vsmc_threefry4x32_rand, "Threefry4x32");
-    rng_cl_engine<vsmc::Threefry2x64, vsmc_threefry2x64>(N, 2, program,
+    rng_cl_rng<vsmc::Threefry2x64, vsmc_threefry2x64>(N, 2, program,
         vsmc_threefry2x64_init, vsmc_threefry2x64_rand, "Threefry2x64");
-    rng_cl_engine<vsmc::Threefry4x64, vsmc_threefry4x64>(N, 4, program,
+    rng_cl_rng<vsmc::Threefry4x64, vsmc_threefry4x64>(N, 4, program,
         vsmc_threefry4x64_init, vsmc_threefry4x64_rand, "Threefry4x64");
 
-    std::vector<std::vector<FPType>> result;
+    std::vector<vsmc::AlignedVector<FPType>> result;
     std::cout << std::string(120, '-') << std::endl;
     rng_cl_normal01<FPType>(N, program, result);
     std::cout << std::string(120, '-') << std::endl;

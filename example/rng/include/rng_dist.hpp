@@ -69,7 +69,7 @@ inline void rng_dist(std::size_t N, Dist &dist, const std::string &name,
     std::vector<vsmc::StopWatch> &sw, std::vector<std::size_t> &bytes,
     std::vector<uint64_t> &cycles)
 {
-    vsmc::Threefry4x64 eng;
+    vsmc::Threefry4x64 rng;
     vsmc::StopWatch watch;
 #if VSMC_HAS_RDTSCP
     vsmc::RDTSCPCounter counter;
@@ -80,11 +80,11 @@ inline void rng_dist(std::size_t N, Dist &dist, const std::string &name,
     watch.start();
     counter.start();
     for (std::size_t i = 0; i != N; ++i)
-        dist(eng);
+        dist(rng);
     counter.stop();
     watch.stop();
     std::ofstream rnd("rnd");
-    rnd << dist(eng) << std::endl;
+    rnd << dist(rng) << std::endl;
     rnd.close();
 
     names.push_back(name);

@@ -136,24 +136,24 @@ inline void rng_aes_validation_xor(void *a, void *b)
     ua[1] ^= ub[1];
 }
 
-template <template <typename, std::size_t> class Eng>
+template <template <typename, std::size_t> class RNG>
 inline void rng_aes_validation_cbc(
     unsigned bits, unsigned char *plain_key, unsigned char plain_cipher[64])
 {
-    typedef Eng<std::uint32_t, 1> eng_type;
+    typedef RNG<std::uint32_t, 1> rng_type;
 
-    typename eng_type::key_type key;
-    std::array<typename eng_type::ctr_block_type, 4> text;
-    std::array<typename eng_type::buffer_type, 5> cipher;
+    typename rng_type::key_type key;
+    std::array<typename rng_type::ctr_block_type, 4> text;
+    std::array<typename rng_type::buffer_type, 5> cipher;
 
     std::memcpy(key.data(), plain_key, sizeof(key));
     std::memcpy(text.data(), plain_text, 64);
     std::memcpy(cipher[0].data(), plain_vector, 16);
 
-    eng_type eng(key);
+    rng_type rng(key);
     for (std::size_t i = 0; i != 4; ++i) {
         rng_aes_validation_xor(text[i].data(), cipher[i].data());
-        eng(text[i], cipher[i + 1]);
+        rng(text[i], cipher[i + 1]);
     }
     unsigned char test_cipher[64];
     std::memcpy(test_cipher, cipher[1].data(), 64);

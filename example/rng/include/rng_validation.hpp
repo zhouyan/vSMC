@@ -34,14 +34,14 @@
 
 #include <vsmc/internal/common.hpp>
 
-template <typename Eng>
+template <typename RNG>
 inline void rng_validation(
     const std::vector<unsigned long long> &result, const std::string &name)
 {
     bool success = true;
-    Eng eng(static_cast<typename Eng::result_type>(result.back()));
+    RNG rng(static_cast<typename RNG::result_type>(result.back()));
     for (std::size_t i = 0; i != result.size() - 1; ++i) {
-        if (static_cast<unsigned long long>(eng()) != result[i]) {
+        if (static_cast<unsigned long long>(rng()) != result[i]) {
             success = false;
             break;
         }

@@ -39,14 +39,14 @@ extern "C" {
 #include <bbattery.h>
 }
 
-#define VSMC_RNG_TESTU01_FUNCTION(Eng)                                        \
+#define VSMC_RNG_TESTU01_FUNCTION(RNG)                                        \
     extern "C" {                                                              \
-    inline double rng_##Eng(void)                                             \
+    inline double rng_##RNG(void)                                             \
     {                                                                         \
-        static vsmc::Eng eng;                                                 \
+        static vsmc::RNG rng;                                                 \
         static std::uniform_real_distribution<double> runif(0, 1);            \
                                                                               \
-        return runif(eng);                                                    \
+        return runif(rng);                                                    \
     }                                                                         \
     }
 
@@ -63,16 +63,16 @@ extern "C" {
     option.add("DieHard", "Test DieHard", &DieHard, false);                   \
     option.add("FIPS_140_2", "Test FIPS_140_2", &FIPS_140_2, false);
 
-#define VSMC_RNG_TESTU01_OPTION(Eng)                                          \
-    bool rng_testu01_##Eng = false;                                           \
-    option.add(#Eng, "Test vsmc::" #Eng, &rng_testu01_##Eng, false);
+#define VSMC_RNG_TESTU01_OPTION(RNG)                                          \
+    bool rng_testu01_##RNG = false;                                           \
+    option.add(#RNG, "Test vsmc::" #RNG, &rng_testu01_##RNG, false);
 
 #define VSMC_RNG_TESTU01_OPTION_POST option.process(argc, argv);
 
-#define VSMC_RNG_TESTU01(Eng)                                                 \
-    if (rng_testu01_##Eng) {                                                  \
-        char ename[] = #Eng;                                                  \
-        unif01_Gen *gen = unif01_CreateExternGen01(ename, rng_##Eng);         \
+#define VSMC_RNG_TESTU01(RNG)                                                 \
+    if (rng_testu01_##RNG) {                                                  \
+        char ename[] = #RNG;                                                  \
+        unif01_Gen *gen = unif01_CreateExternGen01(ename, rng_##RNG);         \
         if (SmallCrush)                                                       \
             bbattery_SmallCrush(gen);                                         \
         if (Crush)                                                            \

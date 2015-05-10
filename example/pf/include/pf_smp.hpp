@@ -152,17 +152,17 @@ class cv_init : public BASE_INIT<cv_state<Order>, cv_init<Order>>
         std::normal_distribution<> norm_vel(0, sd_vel0);
 
         typedef typename vsmc::Particle<cv>::rng_type rng_type;
-        rng_type eng(sp.rng());
+        rng_type rng(sp.rng());
         typename rng_type::ctr_type ctr;
         vsmc::Counter<typename rng_type::ctr_type>::reset(ctr);
         ctr.back() =
             static_cast<typename rng_type::ctr_type::value_type>(sp.id());
         ctr.back() <<= 16;
-        eng.ctr(ctr);
-        sp.template state<PosX>() = norm_pos(eng);
-        sp.template state<PosY>() = norm_pos(eng);
-        sp.template state<VelX>() = norm_vel(eng);
-        sp.template state<VelY>() = norm_vel(eng);
+        rng.ctr(ctr);
+        sp.template state<PosX>() = norm_pos(rng);
+        sp.template state<PosY>() = norm_pos(rng);
+        sp.template state<VelX>() = norm_vel(rng);
+        sp.template state<VelY>() = norm_vel(rng);
         sp.template state<LogL>() =
             sp.particle().value().log_likelihood(0, sp.id());
 
@@ -213,7 +213,7 @@ class cv_move
         std::normal_distribution<> norm_vel(0, sd_vel);
 
         typedef typename vsmc::Particle<cv>::rng_type rng_type;
-        rng_type eng(sp.rng());
+        rng_type rng(sp.rng());
         typename rng_type::ctr_type ctr;
         vsmc::Counter<typename rng_type::ctr_type>::reset(ctr);
         ctr.back() =
@@ -221,13 +221,13 @@ class cv_move
         ctr.back() <<= 16;
         ctr.back() +=
             static_cast<typename rng_type::ctr_type::value_type>(iter);
-        eng.ctr(ctr);
+        rng.ctr(ctr);
         sp.state(vsmc::Position<PosX>()) +=
-            norm_pos(eng) + delta * sp.state(vsmc::Position<VelX>());
+            norm_pos(rng) + delta * sp.state(vsmc::Position<VelX>());
         sp.state(vsmc::Position<PosY>()) +=
-            norm_pos(eng) + delta * sp.state(vsmc::Position<VelY>());
-        sp.state(vsmc::Position<VelX>()) += norm_vel(eng);
-        sp.state(vsmc::Position<VelY>()) += norm_vel(eng);
+            norm_pos(rng) + delta * sp.state(vsmc::Position<VelY>());
+        sp.state(vsmc::Position<VelX>()) += norm_vel(rng);
+        sp.state(vsmc::Position<VelY>()) += norm_vel(rng);
         sp.state(vsmc::Position<LogL>()) =
             sp.particle().value().log_likelihood(iter, sp.id());
 
