@@ -43,10 +43,10 @@ namespace internal
 {
 
 template <typename ResultType, int R>
-struct ThreefryAVX2RotateImpl;
+struct ThreefryRotateImplAVX2;
 
 template <int R>
-struct ThreefryAVX2RotateImpl<std::uint32_t, R> {
+struct ThreefryRotateImplAVX2<std::uint32_t, R> {
     static __m256i eval(__m256i x)
     {
         __m256i a = _mm256_slli_epi32(x, R);
@@ -57,7 +57,7 @@ struct ThreefryAVX2RotateImpl<std::uint32_t, R> {
 };
 
 template <int R>
-struct ThreefryAVX2RotateImpl<std::uint64_t, R> {
+struct ThreefryRotateImplAVX2<std::uint64_t, R> {
     static __m256i eval(__m256i x)
     {
         __m256i a = _mm256_slli_epi64(x, R);
@@ -68,18 +68,18 @@ struct ThreefryAVX2RotateImpl<std::uint64_t, R> {
 };
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
-struct ThreefryAVX2Rotate {
+struct ThreefryRotateAVX2 {
     static void eval(std::array<__m256i, K> &) {}
 };
 
 template <std::size_t N>
-struct ThreefryAVX2Rotate<std::uint32_t, 2, N, true> {
+struct ThreefryRotateAVX2<std::uint32_t, 2, N, true> {
     static void eval(std::array<__m256i, 2> &state)
     {
         std::get<0>(state) =
             _mm256_add_epi32(std::get<0>(state), std::get<1>(state));
         std::get<1>(state) =
-            ThreefryAVX2RotateImpl<std::uint32_t,
+            ThreefryRotateImplAVX2<std::uint32_t,
                 ThreefryRotateConstantValue<std::uint32_t, 2, r_,
                                        0>::value>::eval(std::get<1>(state));
         std::get<1>(state) =
@@ -88,16 +88,16 @@ struct ThreefryAVX2Rotate<std::uint32_t, 2, N, true> {
 
     private:
     static constexpr std::size_t r_ = (N - 1) % 8;
-}; // struct ThreefryAVX2Rotate
+}; // struct ThreefryRotateAVX2
 
 template <std::size_t N>
-struct ThreefryAVX2Rotate<std::uint32_t, 4, N, true> {
+struct ThreefryRotateAVX2<std::uint32_t, 4, N, true> {
     static void eval(std::array<__m256i, 4> &state)
     {
         std::get<0>(state) =
             _mm256_add_epi32(std::get<0>(state), std::get<i0_>(state));
         std::get<i0_>(state) =
-            ThreefryAVX2RotateImpl<std::uint32_t,
+            ThreefryRotateImplAVX2<std::uint32_t,
                 ThreefryRotateConstantValue<std::uint32_t, 4, r_,
                                        0>::value>::eval(std::get<i0_>(state));
         std::get<i0_>(state) =
@@ -106,7 +106,7 @@ struct ThreefryAVX2Rotate<std::uint32_t, 4, N, true> {
         std::get<2>(state) =
             _mm256_add_epi32(std::get<2>(state), std::get<i2_>(state));
         std::get<i2_>(state) =
-            ThreefryAVX2RotateImpl<std::uint32_t,
+            ThreefryRotateImplAVX2<std::uint32_t,
                 ThreefryRotateConstantValue<std::uint32_t, 4, r_,
                                        1>::value>::eval(std::get<i2_>(state));
         std::get<i2_>(state) =
@@ -117,16 +117,16 @@ struct ThreefryAVX2Rotate<std::uint32_t, 4, N, true> {
     static constexpr std::size_t i0_ = N % 2 ? 1 : 3;
     static constexpr std::size_t i2_ = N % 2 ? 3 : 1;
     static constexpr std::size_t r_ = (N - 1) % 8;
-}; // struct ThreefryAVX2Rotate
+}; // struct ThreefryRotateAVX2
 
 template <std::size_t N>
-struct ThreefryAVX2Rotate<std::uint64_t, 2, N, true> {
+struct ThreefryRotateAVX2<std::uint64_t, 2, N, true> {
     static void eval(std::array<__m256i, 2> &state)
     {
         std::get<0>(state) =
             _mm256_add_epi64(std::get<0>(state), std::get<1>(state));
         std::get<1>(state) =
-            ThreefryAVX2RotateImpl<std::uint64_t,
+            ThreefryRotateImplAVX2<std::uint64_t,
                 ThreefryRotateConstantValue<std::uint64_t, 2, r_,
                                        0>::value>::eval(std::get<1>(state));
         std::get<1>(state) =
@@ -135,16 +135,16 @@ struct ThreefryAVX2Rotate<std::uint64_t, 2, N, true> {
 
     private:
     static constexpr std::size_t r_ = (N - 1) % 8;
-}; // struct ThreefryAVX2Rotate
+}; // struct ThreefryRotateAVX2
 
 template <std::size_t N>
-struct ThreefryAVX2Rotate<std::uint64_t, 4, N, true> {
+struct ThreefryRotateAVX2<std::uint64_t, 4, N, true> {
     static void eval(std::array<__m256i, 4> &state)
     {
         std::get<0>(state) =
             _mm256_add_epi64(std::get<0>(state), std::get<i0_>(state));
         std::get<i0_>(state) =
-            ThreefryAVX2RotateImpl<std::uint64_t,
+            ThreefryRotateImplAVX2<std::uint64_t,
                 ThreefryRotateConstantValue<std::uint64_t, 4, r_,
                                        0>::value>::eval(std::get<i0_>(state));
         std::get<i0_>(state) =
@@ -153,7 +153,7 @@ struct ThreefryAVX2Rotate<std::uint64_t, 4, N, true> {
         std::get<2>(state) =
             _mm256_add_epi64(std::get<2>(state), std::get<i2_>(state));
         std::get<i2_>(state) =
-            ThreefryAVX2RotateImpl<std::uint64_t,
+            ThreefryRotateImplAVX2<std::uint64_t,
                 ThreefryRotateConstantValue<std::uint64_t, 4, r_,
                                        1>::value>::eval(std::get<i2_>(state));
         std::get<i2_>(state) =
@@ -164,19 +164,19 @@ struct ThreefryAVX2Rotate<std::uint64_t, 4, N, true> {
     static constexpr std::size_t i0_ = N % 2 ? 1 : 3;
     static constexpr std::size_t i2_ = N % 2 ? 3 : 1;
     static constexpr std::size_t r_ = (N - 1) % 8;
-}; // struct ThreefryAVX2Rotate
+}; // struct ThreefryRotateAVX2
 
 template <typename ResultType, std::size_t K, std::size_t N,
     bool = (N % 4 == 0)>
-struct ThreefryAVX2InsertKey {
+struct ThreefryInsertKeyAVX2 {
     static void eval(
         std::array<__m256i, K> &, const std::array<__m256i, K + 1> &)
     {
     }
-}; // struct ThreefryAVX2InsertKey
+}; // struct ThreefryInsertKeyAVX2
 
 template <std::size_t N>
-struct ThreefryAVX2InsertKey<std::uint32_t, 2, N, true> {
+struct ThreefryInsertKeyAVX2<std::uint32_t, 2, N, true> {
     static void eval(
         std::array<__m256i, 2> &state, const std::array<__m256i, 3> &par)
     {
@@ -192,10 +192,10 @@ struct ThreefryAVX2InsertKey<std::uint32_t, 2, N, true> {
     static constexpr std::size_t inc_ = N / 4;
     static constexpr std::size_t i0_ = (inc_ + 0) % 3;
     static constexpr std::size_t i1_ = (inc_ + 1) % 3;
-}; // struct ThreefryAVX2InsertKey
+}; // struct ThreefryInsertKeyAVX2
 
 template <std::size_t N>
-struct ThreefryAVX2InsertKey<std::uint32_t, 4, N, true> {
+struct ThreefryInsertKeyAVX2<std::uint32_t, 4, N, true> {
     static void eval(
         std::array<__m256i, 4> &state, const std::array<__m256i, 5> &par)
     {
@@ -217,10 +217,10 @@ struct ThreefryAVX2InsertKey<std::uint32_t, 4, N, true> {
     static constexpr std::size_t i1_ = (inc_ + 1) % 5;
     static constexpr std::size_t i2_ = (inc_ + 2) % 5;
     static constexpr std::size_t i3_ = (inc_ + 3) % 5;
-}; // struct ThreefryAVX2InsertKey
+}; // struct ThreefryInsertKeyAVX2
 
 template <std::size_t N>
-struct ThreefryAVX2InsertKey<std::uint64_t, 2, N, true> {
+struct ThreefryInsertKeyAVX2<std::uint64_t, 2, N, true> {
     static void eval(
         std::array<__m256i, 2> &state, const std::array<__m256i, 3> &par)
     {
@@ -236,10 +236,10 @@ struct ThreefryAVX2InsertKey<std::uint64_t, 2, N, true> {
     static constexpr std::size_t inc_ = N / 4;
     static constexpr std::size_t i0_ = (inc_ + 0) % 3;
     static constexpr std::size_t i1_ = (inc_ + 1) % 3;
-}; // struct ThreefryAVX2InsertKey
+}; // struct ThreefryInsertKeyAVX2
 
 template <std::size_t N>
-struct ThreefryAVX2InsertKey<std::uint64_t, 4, N, true> {
+struct ThreefryInsertKeyAVX2<std::uint64_t, 4, N, true> {
     static void eval(
         std::array<__m256i, 4> &state, const std::array<__m256i, 5> &par)
     {
@@ -261,13 +261,13 @@ struct ThreefryAVX2InsertKey<std::uint64_t, 4, N, true> {
     static constexpr std::size_t i1_ = (inc_ + 1) % 5;
     static constexpr std::size_t i2_ = (inc_ + 2) % 5;
     static constexpr std::size_t i3_ = (inc_ + 3) % 5;
-}; // struct ThreefryAVX2InsertKey
+}; // struct ThreefryInsertKeyAVX2
 
 template <typename, std::size_t>
-struct ThreefryAVX2ParPack;
+struct ThreefryParPackAVX2;
 
 template <>
-struct ThreefryAVX2ParPack<std::uint32_t, 2> {
+struct ThreefryParPackAVX2<std::uint32_t, 2> {
     static void eval(
         const std::array<std::uint32_t, 3> &par, std::array<__m256i, 3> &pack)
     {
@@ -278,10 +278,10 @@ struct ThreefryAVX2ParPack<std::uint32_t, 2> {
         std::get<2>(pack) =
             _mm256_set1_epi32(static_cast<int>(std::get<2>(par)));
     }
-}; // struct ThreefryAVX2ParPack
+}; // struct ThreefryParPackAVX2
 
 template <>
-struct ThreefryAVX2ParPack<std::uint32_t, 4> {
+struct ThreefryParPackAVX2<std::uint32_t, 4> {
     static void eval(
         const std::array<std::uint32_t, 5> &par, std::array<__m256i, 5> &pack)
     {
@@ -296,10 +296,10 @@ struct ThreefryAVX2ParPack<std::uint32_t, 4> {
         std::get<4>(pack) =
             _mm256_set1_epi32(static_cast<int>(std::get<4>(par)));
     }
-}; // struct ThreefryAVX2ParPack
+}; // struct ThreefryParPackAVX2
 
 template <>
-struct ThreefryAVX2ParPack<std::uint64_t, 2> {
+struct ThreefryParPackAVX2<std::uint64_t, 2> {
     static void eval(
         const std::array<std::uint64_t, 3> &par, std::array<__m256i, 3> &pack)
     {
@@ -310,10 +310,10 @@ struct ThreefryAVX2ParPack<std::uint64_t, 2> {
         std::get<2>(pack) =
             _mm256_set1_epi64x(static_cast<long long>(std::get<2>(par)));
     }
-}; // struct ThreefryAVX2ParPack
+}; // struct ThreefryParPackAVX2
 
 template <>
-struct ThreefryAVX2ParPack<std::uint64_t, 4> {
+struct ThreefryParPackAVX2<std::uint64_t, 4> {
     static void eval(
         const std::array<std::uint64_t, 5> &par, std::array<__m256i, 5> &pack)
     {
@@ -328,13 +328,13 @@ struct ThreefryAVX2ParPack<std::uint64_t, 4> {
         std::get<4>(pack) =
             _mm256_set1_epi64x(static_cast<long long>(std::get<4>(par)));
     }
-}; // struct ThreefryAVX2ParPack
+}; // struct ThreefryParPackAVX2
 
 template <typename, std::size_t>
-struct ThreefryAVX2CtrPack;
+struct ThreefryCtrPackAVX2;
 
 template <>
-struct ThreefryAVX2CtrPack<std::uint32_t, 2> {
+struct ThreefryCtrPackAVX2<std::uint32_t, 2> {
     typedef std::array<__m256i, 2> state_type;
     typedef std::array<std::uint32_t, 2> ctr_type;
     typedef Counter<ctr_type> counter;
@@ -377,10 +377,10 @@ struct ThreefryAVX2CtrPack<std::uint32_t, 2> {
                 static_cast<int>(std::get<1>(ctr1)),
                 static_cast<int>(std::get<1>(ctr0)));
     }
-}; // struct ThreefryAVX2CtrPack
+}; // struct ThreefryCtrPackAVX2
 
 template <>
-struct ThreefryAVX2CtrPack<std::uint32_t, 4> {
+struct ThreefryCtrPackAVX2<std::uint32_t, 4> {
     typedef std::array<__m256i, 4> state_type;
     typedef std::array<std::uint32_t, 4> ctr_type;
     typedef Counter<ctr_type> counter;
@@ -441,10 +441,10 @@ struct ThreefryAVX2CtrPack<std::uint32_t, 4> {
                 static_cast<int>(std::get<3>(ctr1)),
                 static_cast<int>(std::get<3>(ctr0)));
     }
-}; // struct ThreefryAVX2CtrPack
+}; // struct ThreefryCtrPackAVX2
 
 template <>
-struct ThreefryAVX2CtrPack<std::uint64_t, 2> {
+struct ThreefryCtrPackAVX2<std::uint64_t, 2> {
     typedef std::array<__m256i, 2> state_type;
     typedef std::array<std::uint64_t, 2> ctr_type;
     typedef Counter<ctr_type> counter;
@@ -471,10 +471,10 @@ struct ThreefryAVX2CtrPack<std::uint64_t, 2> {
                 static_cast<VSMC_INT64>(std::get<1>(ctr1)),
                 static_cast<VSMC_INT64>(std::get<1>(ctr0)));
     }
-}; // struct ThreefryAVX2CtrPack
+}; // struct ThreefryCtrPackAVX2
 
 template <>
-struct ThreefryAVX2CtrPack<std::uint64_t, 4> {
+struct ThreefryCtrPackAVX2<std::uint64_t, 4> {
     typedef std::array<__m256i, 4> state_type;
     typedef std::array<std::uint64_t, 4> ctr_type;
     typedef Counter<ctr_type> counter;
@@ -511,13 +511,13 @@ struct ThreefryAVX2CtrPack<std::uint64_t, 4> {
                 static_cast<VSMC_INT64>(std::get<3>(ctr1)),
                 static_cast<VSMC_INT64>(std::get<3>(ctr0)));
     }
-}; // struct ThreefryAVX2CtrPack
+}; // struct ThreefryCtrPackAVX2
 
 template <typename, std::size_t>
-struct ThreefryAVX2Unpack;
+struct ThreefryUnpackAVX2;
 
 template <typename ResultType, std::size_t K>
-struct ThreefryAVX2Unpack {
+struct ThreefryUnpackAVX2 {
     static constexpr std::size_t M = sizeof(__m256i) / sizeof(ResultType);
 
     static void eval(const std::array<__m256i, K> &state,
@@ -541,40 +541,15 @@ struct ThreefryAVX2Unpack {
         unpack<N + 1>(
             state, buffer, std::integral_constant<bool, N + 1 < K>());
     }
-}; // struct ThreefryAVX2Unpack
+}; // struct ThreefryUnpackAVX2
 
 } // namespace vsmc::internal
 
-/// \brief ThreefryAVX2 RNG engine reimplemented
-/// \ingroup ThreefryAVX2
-///
-/// \details
-/// This is a reimplementation of the algorithm ThreefryAVX2 as described in
-/// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented
-/// in [Random123][r123lib].
-///
-/// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
-/// [r123lib]: https://www.deshawresearch.com/resources_random123.html
-///
-/// Depending on the compilers, processors and RNG configurations, it might be
-/// slightly faster or slower than the original implementation. At most
-/// two-folds performace difference (both faster and slower) were observed.
-///
-/// This implementation is slightly more flexible in the sense that it does
-/// not limit the number of rounds. However, larger number of rounds can have
-/// undesired effects. To say the least, currently all loops are unrolled,
-/// which can slow down significantly when the number of rounds is large.
-///
-/// Compared to `r123:Engine<r123::ThreefryAVX24x32>` etc., when using the
-/// default
-/// constructor or the one with a single seed, the output shall be exactly the
-/// same for the first \f$2^n\f$ iterations, where \f$n\f$ is the number of
-/// bits (32 or 64).  Further iterations may produce different results, as
-/// vSMC increment the counter slightly differently, but it still cover the
-/// same range and has the same period as the original.
+/// \brief Threefry RNG engine reimplemented using AVX2
+/// \ingroup Threefry
 template <typename ResultType, std::size_t K,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
-class ThreefryAVX2Engine
+class ThreefryEngineAVX2
 {
     public:
     typedef ResultType result_type;
@@ -587,16 +562,16 @@ class ThreefryAVX2Engine
     typedef std::array<ResultType, K * M> buffer_type;
 
     public:
-    explicit ThreefryAVX2Engine(result_type s = 0) : index_(K * M)
+    explicit ThreefryEngineAVX2(result_type s = 0) : index_(K * M)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY(AVX2);
         seed(s);
     }
 
     template <typename SeedSeq>
-    explicit ThreefryAVX2Engine(SeedSeq &seq,
+    explicit ThreefryEngineAVX2(SeedSeq &seq,
         typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
-            key_type, ThreefryAVX2Engine<ResultType, K, Rounds>>::value>::type
+            key_type, ThreefryEngineAVX2<ResultType, K, Rounds>>::value>::type
             * = nullptr)
         : index_(K * M)
     {
@@ -604,7 +579,7 @@ class ThreefryAVX2Engine
         seed(seq);
     }
 
-    ThreefryAVX2Engine(const key_type &k) : index_(K * M)
+    ThreefryEngineAVX2(const key_type &k) : index_(K * M)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY(AVX2);
         seed(k);
@@ -623,7 +598,7 @@ class ThreefryAVX2Engine
     template <typename SeedSeq>
     void seed(SeedSeq &seq,
         typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
-            key_type, ThreefryAVX2Engine<ResultType, K, Rounds>>::value>::type
+            key_type, ThreefryEngineAVX2<ResultType, K, Rounds>>::value>::type
             * = nullptr)
     {
         counter::reset(ctr_);
@@ -702,16 +677,16 @@ class ThreefryAVX2Engine
     static constexpr result_type max VSMC_MNE() { return _Max; }
 
     friend bool operator==(
-        const ThreefryAVX2Engine<ResultType, K, Rounds> &eng1,
-        const ThreefryAVX2Engine<ResultType, K, Rounds> &eng2)
+        const ThreefryEngineAVX2<ResultType, K, Rounds> &eng1,
+        const ThreefryEngineAVX2<ResultType, K, Rounds> &eng2)
     {
         return eng1.index_ == eng2.index_ && eng1.ctr_ == eng2.ctr_ &&
             eng1.par_ == eng2.par_;
     }
 
     friend bool operator!=(
-        const ThreefryAVX2Engine<ResultType, K, Rounds> &eng1,
-        const ThreefryAVX2Engine<ResultType, K, Rounds> &eng2)
+        const ThreefryEngineAVX2<ResultType, K, Rounds> &eng1,
+        const ThreefryEngineAVX2<ResultType, K, Rounds> &eng2)
     {
         return !(eng1 == eng2);
     }
@@ -719,7 +694,7 @@ class ThreefryAVX2Engine
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const ThreefryAVX2Engine<ResultType, K, Rounds> &eng)
+        const ThreefryEngineAVX2<ResultType, K, Rounds> &eng)
     {
         if (!os.good())
             return os;
@@ -739,12 +714,12 @@ class ThreefryAVX2Engine
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        ThreefryAVX2Engine<ResultType, K, Rounds> &eng)
+        ThreefryEngineAVX2<ResultType, K, Rounds> &eng)
     {
         if (!is.good())
             return is;
 
-        ThreefryAVX2Engine<ResultType, K, Rounds> eng_tmp;
+        ThreefryEngineAVX2<ResultType, K, Rounds> eng_tmp;
         is >> std::ws >> eng_tmp.ctr_;
         is >> std::ws >> eng_tmp.par_;
         for (std::size_t k = 0; k != K; ++k)
@@ -770,10 +745,10 @@ class ThreefryAVX2Engine
     {
         par_type par;
         state_type state;
-        internal::ThreefryAVX2ParPack<ResultType, K>::eval(par_, par);
-        internal::ThreefryAVX2CtrPack<ResultType, K>::eval(ctr_, state);
+        internal::ThreefryParPackAVX2<ResultType, K>::eval(par_, par);
+        internal::ThreefryCtrPackAVX2<ResultType, K>::eval(ctr_, state);
         generate_buffer<0>(par, state, std::true_type());
-        internal::ThreefryAVX2Unpack<ResultType, K>::eval(state, buffer_);
+        internal::ThreefryUnpackAVX2<ResultType, K>::eval(state, buffer_);
     }
 
     template <std::size_t>
@@ -785,8 +760,8 @@ class ThreefryAVX2Engine
     void generate_buffer(
         const par_type &par, state_type &state, std::true_type)
     {
-        internal::ThreefryAVX2Rotate<ResultType, K, N>::eval(state);
-        internal::ThreefryAVX2InsertKey<ResultType, K, N>::eval(state, par);
+        internal::ThreefryRotateAVX2<ResultType, K, N>::eval(state);
+        internal::ThreefryInsertKeyAVX2<ResultType, K, N>::eval(state, par);
         generate_buffer<N + 1>(
             par, state, std::integral_constant < bool, N<Rounds>());
     }
@@ -809,30 +784,30 @@ class ThreefryAVX2Engine
         par_.back() ^= std::get<N>(key);
         par_xor<N + 1>(key, std::integral_constant<bool, N + 1 < K>());
     }
-}; // class ThreefryAVX2Engine
+}; // class ThreefryEngineAVX2
 
-/// \brief ThreefryAVX22x32 RNG engine reimplemented
-/// \ingroup ThreefryAVX2
-typedef ThreefryAVX2Engine<std::uint32_t, 2> Threefry2x32AVX2;
+/// \brief Threefry2x32 RNG engine reimplemented using AVX2
+/// \ingroup Threefry
+typedef ThreefryEngineAVX2<std::uint32_t, 2> Threefry2x32AVX2;
 
-/// \brief ThreefryAVX24x32 RNG engine reimplemented
-/// \ingroup ThreefryAVX2
-typedef ThreefryAVX2Engine<std::uint32_t, 4> Threefry4x32AVX2;
+/// \brief Threefry4x32 RNG engine reimplemented using AVX2
+/// \ingroup Threefry
+typedef ThreefryEngineAVX2<std::uint32_t, 4> Threefry4x32AVX2;
 
-/// \brief ThreefryAVX22x64 RNG engine reimplemented
-/// \ingroup ThreefryAVX2
-typedef ThreefryAVX2Engine<std::uint64_t, 2> Threefry2x64AVX2;
+/// \brief Threefry2x64 RNG engine reimplemented using AVX2
+/// \ingroup Threefry
+typedef ThreefryEngineAVX2<std::uint64_t, 2> Threefry2x64AVX2;
 
-/// \brief ThreefryAVX24x64 RNG engine reimplemented
-/// \ingroup ThreefryAVX2
-typedef ThreefryAVX2Engine<std::uint64_t, 4> Threefry4x64AVX2;
+/// \brief Threefry4x64 RNG engine reimplemented using AVX2
+/// \ingroup Threefry
+typedef ThreefryEngineAVX2<std::uint64_t, 4> Threefry4x64AVX2;
 
-/// \brief The default 32-bits ThreefryAVX2 engine
-/// \ingroup ThreefryAVX2
+/// \brief The default 32-bits Threefry engine using AVX2
+/// \ingroup Threefry
 typedef Threefry4x32AVX2 ThreefryAVX2;
 
-/// \brief The default 64-bits ThreefryAVX2 engine
-/// \ingroup ThreefryAVX2
+/// \brief The default 64-bits Threefry engine using AVX2
+/// \ingroup Threefry
 typedef Threefry4x64AVX2 ThreefryAVX2_64;
 
 } // namespace vsmc

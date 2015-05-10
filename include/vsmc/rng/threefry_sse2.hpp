@@ -43,10 +43,10 @@ namespace internal
 {
 
 template <typename ResultType, int R>
-struct ThreefrySSE2RotateImpl;
+struct ThreefryRotateImplSSE2;
 
 template <int R>
-struct ThreefrySSE2RotateImpl<std::uint32_t, R> {
+struct ThreefryRotateImplSSE2<std::uint32_t, R> {
     static __m128i eval(__m128i x)
     {
         __m128i a = _mm_slli_epi32(x, R);
@@ -57,7 +57,7 @@ struct ThreefrySSE2RotateImpl<std::uint32_t, R> {
 };
 
 template <int R>
-struct ThreefrySSE2RotateImpl<std::uint64_t, R> {
+struct ThreefryRotateImplSSE2<std::uint64_t, R> {
     static __m128i eval(__m128i x)
     {
         __m128i a = _mm_slli_epi64(x, R);
@@ -68,18 +68,18 @@ struct ThreefrySSE2RotateImpl<std::uint64_t, R> {
 };
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
-struct ThreefrySSE2Rotate {
+struct ThreefryRotateSSE2 {
     static void eval(std::array<__m128i, K> &) {}
 };
 
 template <std::size_t N>
-struct ThreefrySSE2Rotate<std::uint32_t, 2, N, true> {
+struct ThreefryRotateSSE2<std::uint32_t, 2, N, true> {
     static void eval(std::array<__m128i, 2> &state)
     {
         std::get<0>(state) =
             _mm_add_epi32(std::get<0>(state), std::get<1>(state));
         std::get<1>(state) =
-            ThreefrySSE2RotateImpl<std::uint32_t,
+            ThreefryRotateImplSSE2<std::uint32_t,
                 ThreefryRotateConstantValue<std::uint32_t, 2, r_,
                                        0>::value>::eval(std::get<1>(state));
         std::get<1>(state) =
@@ -88,16 +88,16 @@ struct ThreefrySSE2Rotate<std::uint32_t, 2, N, true> {
 
     private:
     static constexpr std::size_t r_ = (N - 1) % 8;
-}; // struct ThreefrySSE2Rotate
+}; // struct ThreefryRotateSSE2
 
 template <std::size_t N>
-struct ThreefrySSE2Rotate<std::uint32_t, 4, N, true> {
+struct ThreefryRotateSSE2<std::uint32_t, 4, N, true> {
     static void eval(std::array<__m128i, 4> &state)
     {
         std::get<0>(state) =
             _mm_add_epi32(std::get<0>(state), std::get<i0_>(state));
         std::get<i0_>(state) =
-            ThreefrySSE2RotateImpl<std::uint32_t,
+            ThreefryRotateImplSSE2<std::uint32_t,
                 ThreefryRotateConstantValue<std::uint32_t, 4, r_,
                                        0>::value>::eval(std::get<i0_>(state));
         std::get<i0_>(state) =
@@ -106,7 +106,7 @@ struct ThreefrySSE2Rotate<std::uint32_t, 4, N, true> {
         std::get<2>(state) =
             _mm_add_epi32(std::get<2>(state), std::get<i2_>(state));
         std::get<i2_>(state) =
-            ThreefrySSE2RotateImpl<std::uint32_t,
+            ThreefryRotateImplSSE2<std::uint32_t,
                 ThreefryRotateConstantValue<std::uint32_t, 4, r_,
                                        1>::value>::eval(std::get<i2_>(state));
         std::get<i2_>(state) =
@@ -117,16 +117,16 @@ struct ThreefrySSE2Rotate<std::uint32_t, 4, N, true> {
     static constexpr std::size_t i0_ = N % 2 ? 1 : 3;
     static constexpr std::size_t i2_ = N % 2 ? 3 : 1;
     static constexpr std::size_t r_ = (N - 1) % 8;
-}; // struct ThreefrySSE2Rotate
+}; // struct ThreefryRotateSSE2
 
 template <std::size_t N>
-struct ThreefrySSE2Rotate<std::uint64_t, 2, N, true> {
+struct ThreefryRotateSSE2<std::uint64_t, 2, N, true> {
     static void eval(std::array<__m128i, 2> &state)
     {
         std::get<0>(state) =
             _mm_add_epi64(std::get<0>(state), std::get<1>(state));
         std::get<1>(state) =
-            ThreefrySSE2RotateImpl<std::uint64_t,
+            ThreefryRotateImplSSE2<std::uint64_t,
                 ThreefryRotateConstantValue<std::uint64_t, 2, r_,
                                        0>::value>::eval(std::get<1>(state));
         std::get<1>(state) =
@@ -135,16 +135,16 @@ struct ThreefrySSE2Rotate<std::uint64_t, 2, N, true> {
 
     private:
     static constexpr std::size_t r_ = (N - 1) % 8;
-}; // struct ThreefrySSE2Rotate
+}; // struct ThreefryRotateSSE2
 
 template <std::size_t N>
-struct ThreefrySSE2Rotate<std::uint64_t, 4, N, true> {
+struct ThreefryRotateSSE2<std::uint64_t, 4, N, true> {
     static void eval(std::array<__m128i, 4> &state)
     {
         std::get<0>(state) =
             _mm_add_epi64(std::get<0>(state), std::get<i0_>(state));
         std::get<i0_>(state) =
-            ThreefrySSE2RotateImpl<std::uint64_t,
+            ThreefryRotateImplSSE2<std::uint64_t,
                 ThreefryRotateConstantValue<std::uint64_t, 4, r_,
                                        0>::value>::eval(std::get<i0_>(state));
         std::get<i0_>(state) =
@@ -153,7 +153,7 @@ struct ThreefrySSE2Rotate<std::uint64_t, 4, N, true> {
         std::get<2>(state) =
             _mm_add_epi64(std::get<2>(state), std::get<i2_>(state));
         std::get<i2_>(state) =
-            ThreefrySSE2RotateImpl<std::uint64_t,
+            ThreefryRotateImplSSE2<std::uint64_t,
                 ThreefryRotateConstantValue<std::uint64_t, 4, r_,
                                        1>::value>::eval(std::get<i2_>(state));
         std::get<i2_>(state) =
@@ -164,19 +164,19 @@ struct ThreefrySSE2Rotate<std::uint64_t, 4, N, true> {
     static constexpr std::size_t i0_ = N % 2 ? 1 : 3;
     static constexpr std::size_t i2_ = N % 2 ? 3 : 1;
     static constexpr std::size_t r_ = (N - 1) % 8;
-}; // struct ThreefrySSE2Rotate
+}; // struct ThreefryRotateSSE2
 
 template <typename ResultType, std::size_t K, std::size_t N,
     bool = (N % 4 == 0)>
-struct ThreefrySSE2InsertKey {
+struct ThreefryInsertKeySSE2 {
     static void eval(
         std::array<__m128i, K> &, const std::array<__m128i, K + 1> &)
     {
     }
-}; // struct ThreefrySSE2InsertKey
+}; // struct ThreefryInsertKeySSE2
 
 template <std::size_t N>
-struct ThreefrySSE2InsertKey<std::uint32_t, 2, N, true> {
+struct ThreefryInsertKeySSE2<std::uint32_t, 2, N, true> {
     static void eval(
         std::array<__m128i, 2> &state, const std::array<__m128i, 3> &par)
     {
@@ -192,10 +192,10 @@ struct ThreefrySSE2InsertKey<std::uint32_t, 2, N, true> {
     static constexpr std::size_t inc_ = N / 4;
     static constexpr std::size_t i0_ = (inc_ + 0) % 3;
     static constexpr std::size_t i1_ = (inc_ + 1) % 3;
-}; // struct ThreefrySSE2InsertKey
+}; // struct ThreefryInsertKeySSE2
 
 template <std::size_t N>
-struct ThreefrySSE2InsertKey<std::uint32_t, 4, N, true> {
+struct ThreefryInsertKeySSE2<std::uint32_t, 4, N, true> {
     static void eval(
         std::array<__m128i, 4> &state, const std::array<__m128i, 5> &par)
     {
@@ -217,10 +217,10 @@ struct ThreefrySSE2InsertKey<std::uint32_t, 4, N, true> {
     static constexpr std::size_t i1_ = (inc_ + 1) % 5;
     static constexpr std::size_t i2_ = (inc_ + 2) % 5;
     static constexpr std::size_t i3_ = (inc_ + 3) % 5;
-}; // struct ThreefrySSE2InsertKey
+}; // struct ThreefryInsertKeySSE2
 
 template <std::size_t N>
-struct ThreefrySSE2InsertKey<std::uint64_t, 2, N, true> {
+struct ThreefryInsertKeySSE2<std::uint64_t, 2, N, true> {
     static void eval(
         std::array<__m128i, 2> &state, const std::array<__m128i, 3> &par)
     {
@@ -236,10 +236,10 @@ struct ThreefrySSE2InsertKey<std::uint64_t, 2, N, true> {
     static constexpr std::size_t inc_ = N / 4;
     static constexpr std::size_t i0_ = (inc_ + 0) % 3;
     static constexpr std::size_t i1_ = (inc_ + 1) % 3;
-}; // struct ThreefrySSE2InsertKey
+}; // struct ThreefryInsertKeySSE2
 
 template <std::size_t N>
-struct ThreefrySSE2InsertKey<std::uint64_t, 4, N, true> {
+struct ThreefryInsertKeySSE2<std::uint64_t, 4, N, true> {
     static void eval(
         std::array<__m128i, 4> &state, const std::array<__m128i, 5> &par)
     {
@@ -261,13 +261,13 @@ struct ThreefrySSE2InsertKey<std::uint64_t, 4, N, true> {
     static constexpr std::size_t i1_ = (inc_ + 1) % 5;
     static constexpr std::size_t i2_ = (inc_ + 2) % 5;
     static constexpr std::size_t i3_ = (inc_ + 3) % 5;
-}; // struct ThreefrySSE2InsertKey
+}; // struct ThreefryInsertKeySSE2
 
 template <typename, std::size_t>
-struct ThreefrySSE2ParPack;
+struct ThreefryParPackSSE2;
 
 template <>
-struct ThreefrySSE2ParPack<std::uint32_t, 2> {
+struct ThreefryParPackSSE2<std::uint32_t, 2> {
     static void eval(
         const std::array<std::uint32_t, 3> &par, std::array<__m128i, 3> &pack)
     {
@@ -275,10 +275,10 @@ struct ThreefrySSE2ParPack<std::uint32_t, 2> {
         std::get<1>(pack) = _mm_set1_epi32(static_cast<int>(std::get<1>(par)));
         std::get<2>(pack) = _mm_set1_epi32(static_cast<int>(std::get<2>(par)));
     }
-}; // struct ThreefrySSE2ParPack
+}; // struct ThreefryParPackSSE2
 
 template <>
-struct ThreefrySSE2ParPack<std::uint32_t, 4> {
+struct ThreefryParPackSSE2<std::uint32_t, 4> {
     static void eval(
         const std::array<std::uint32_t, 5> &par, std::array<__m128i, 5> &pack)
     {
@@ -288,10 +288,10 @@ struct ThreefrySSE2ParPack<std::uint32_t, 4> {
         std::get<3>(pack) = _mm_set1_epi32(static_cast<int>(std::get<3>(par)));
         std::get<4>(pack) = _mm_set1_epi32(static_cast<int>(std::get<4>(par)));
     }
-}; // struct ThreefrySSE2ParPack
+}; // struct ThreefryParPackSSE2
 
 template <>
-struct ThreefrySSE2ParPack<std::uint64_t, 2> {
+struct ThreefryParPackSSE2<std::uint64_t, 2> {
     static void eval(
         const std::array<std::uint64_t, 3> &par, std::array<__m128i, 3> &pack)
     {
@@ -302,10 +302,10 @@ struct ThreefrySSE2ParPack<std::uint64_t, 2> {
         std::get<2>(pack) =
             _mm_set1_epi64x(static_cast<VSMC_INT64>(std::get<2>(par)));
     }
-}; // struct ThreefrySSE2ParPack
+}; // struct ThreefryParPackSSE2
 
 template <>
-struct ThreefrySSE2ParPack<std::uint64_t, 4> {
+struct ThreefryParPackSSE2<std::uint64_t, 4> {
     static void eval(
         const std::array<std::uint64_t, 5> &par, std::array<__m128i, 5> &pack)
     {
@@ -320,13 +320,13 @@ struct ThreefrySSE2ParPack<std::uint64_t, 4> {
         std::get<4>(pack) =
             _mm_set1_epi64x(static_cast<VSMC_INT64>(std::get<4>(par)));
     }
-}; // struct ThreefrySSE2ParPack
+}; // struct ThreefryParPackSSE2
 
 template <typename, std::size_t>
-struct ThreefrySSE2CtrPack;
+struct ThreefryCtrPackSSE2;
 
 template <>
-struct ThreefrySSE2CtrPack<std::uint32_t, 2> {
+struct ThreefryCtrPackSSE2<std::uint32_t, 2> {
     typedef std::array<__m128i, 2> state_type;
     typedef std::array<std::uint32_t, 2> ctr_type;
     typedef Counter<ctr_type> counter;
@@ -351,10 +351,10 @@ struct ThreefrySSE2CtrPack<std::uint32_t, 2> {
             static_cast<int>(std::get<1>(ctr1)),
             static_cast<int>(std::get<1>(ctr0)));
     }
-}; // struct ThreefrySSE2CtrPack
+}; // struct ThreefryCtrPackSSE2
 
 template <>
-struct ThreefrySSE2CtrPack<std::uint32_t, 4> {
+struct ThreefryCtrPackSSE2<std::uint32_t, 4> {
     typedef std::array<__m128i, 4> state_type;
     typedef std::array<std::uint32_t, 4> ctr_type;
     typedef Counter<ctr_type> counter;
@@ -387,10 +387,10 @@ struct ThreefrySSE2CtrPack<std::uint32_t, 4> {
             static_cast<int>(std::get<3>(ctr1)),
             static_cast<int>(std::get<3>(ctr0)));
     }
-}; // struct ThreefrySSE2CtrPack
+}; // struct ThreefryCtrPackSSE2
 
 template <>
-struct ThreefrySSE2CtrPack<std::uint64_t, 2> {
+struct ThreefryCtrPackSSE2<std::uint64_t, 2> {
     typedef std::array<__m128i, 2> state_type;
     typedef std::array<std::uint64_t, 2> ctr_type;
     typedef Counter<ctr_type> counter;
@@ -409,10 +409,10 @@ struct ThreefrySSE2CtrPack<std::uint64_t, 2> {
             _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<1>(ctr1)),
                 static_cast<VSMC_INT64>(std::get<1>(ctr0)));
     }
-}; // struct ThreefrySSE2CtrPack
+}; // struct ThreefryCtrPackSSE2
 
 template <>
-struct ThreefrySSE2CtrPack<std::uint64_t, 4> {
+struct ThreefryCtrPackSSE2<std::uint64_t, 4> {
     typedef std::array<__m128i, 4> state_type;
     typedef std::array<std::uint64_t, 4> ctr_type;
     typedef Counter<ctr_type> counter;
@@ -437,13 +437,13 @@ struct ThreefrySSE2CtrPack<std::uint64_t, 4> {
             _mm_set_epi64x(static_cast<VSMC_INT64>(std::get<3>(ctr1)),
                 static_cast<VSMC_INT64>(std::get<3>(ctr0)));
     }
-}; // struct ThreefrySSE2CtrPack
+}; // struct ThreefryCtrPackSSE2
 
 template <typename, std::size_t>
-struct ThreefrySSE2Unpack;
+struct ThreefryUnpackSSE2;
 
 template <typename ResultType, std::size_t K>
-struct ThreefrySSE2Unpack {
+struct ThreefryUnpackSSE2 {
     static constexpr std::size_t M = sizeof(__m128i) / sizeof(ResultType);
 
     static void eval(const std::array<__m128i, K> &state,
@@ -467,40 +467,15 @@ struct ThreefrySSE2Unpack {
         unpack<N + 1>(
             state, buffer, std::integral_constant<bool, N + 1 < K>());
     }
-}; // struct ThreefrySSE2Unpack
+}; // struct ThreefryUnpackSSE2
 
 } // namespace vsmc::internal
 
-/// \brief ThreefrySSE2 RNG engine reimplemented
-/// \ingroup ThreefrySSE2
-///
-/// \details
-/// This is a reimplementation of the algorithm ThreefrySSE2 as described in
-/// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented
-/// in [Random123][r123lib].
-///
-/// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
-/// [r123lib]: https://www.deshawresearch.com/resources_random123.html
-///
-/// Depending on the compilers, processors and RNG configurations, it might be
-/// slightly faster or slower than the original implementation. At most
-/// two-folds performace difference (both faster and slower) were observed.
-///
-/// This implementation is slightly more flexible in the sense that it does
-/// not limit the number of rounds. However, larger number of rounds can have
-/// undesired effects. To say the least, currently all loops are unrolled,
-/// which can slow down significantly when the number of rounds is large.
-///
-/// Compared to `r123:Engine<r123::ThreefrySSE24x32>` etc., when using the
-/// default
-/// constructor or the one with a single seed, the output shall be exactly the
-/// same for the first \f$2^n\f$ iterations, where \f$n\f$ is the number of
-/// bits (32 or 64).  Further iterations may produce different results, as
-/// vSMC increment the counter slightly differently, but it still cover the
-/// same range and has the same period as the original.
+/// \brief Threefry RNG engine reimplemented using SSE2
+/// \ingroup Threefry
 template <typename ResultType, std::size_t K,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
-class ThreefrySSE2Engine
+class ThreefryEngineSSE2
 {
     public:
     typedef ResultType result_type;
@@ -513,16 +488,16 @@ class ThreefrySSE2Engine
     typedef std::array<ResultType, K * M> buffer_type;
 
     public:
-    explicit ThreefrySSE2Engine(result_type s = 0) : index_(K * M)
+    explicit ThreefryEngineSSE2(result_type s = 0) : index_(K * M)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY(SSE2);
         seed(s);
     }
 
     template <typename SeedSeq>
-    explicit ThreefrySSE2Engine(SeedSeq &seq,
+    explicit ThreefryEngineSSE2(SeedSeq &seq,
         typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
-            key_type, ThreefrySSE2Engine<ResultType, K, Rounds>>::value>::type
+            key_type, ThreefryEngineSSE2<ResultType, K, Rounds>>::value>::type
             * = nullptr)
         : index_(K * M)
     {
@@ -530,7 +505,7 @@ class ThreefrySSE2Engine
         seed(seq);
     }
 
-    ThreefrySSE2Engine(const key_type &k) : index_(K * M)
+    ThreefryEngineSSE2(const key_type &k) : index_(K * M)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY(SSE2);
         seed(k);
@@ -549,7 +524,7 @@ class ThreefrySSE2Engine
     template <typename SeedSeq>
     void seed(SeedSeq &seq,
         typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
-            key_type, ThreefrySSE2Engine<ResultType, K, Rounds>>::value>::type
+            key_type, ThreefryEngineSSE2<ResultType, K, Rounds>>::value>::type
             * = nullptr)
     {
         counter::reset(ctr_);
@@ -628,16 +603,16 @@ class ThreefrySSE2Engine
     static constexpr result_type max VSMC_MNE() { return _Max; }
 
     friend bool operator==(
-        const ThreefrySSE2Engine<ResultType, K, Rounds> &eng1,
-        const ThreefrySSE2Engine<ResultType, K, Rounds> &eng2)
+        const ThreefryEngineSSE2<ResultType, K, Rounds> &eng1,
+        const ThreefryEngineSSE2<ResultType, K, Rounds> &eng2)
     {
         return eng1.index_ == eng2.index_ && eng1.ctr_ == eng2.ctr_ &&
             eng1.par_ == eng2.par_;
     }
 
     friend bool operator!=(
-        const ThreefrySSE2Engine<ResultType, K, Rounds> &eng1,
-        const ThreefrySSE2Engine<ResultType, K, Rounds> &eng2)
+        const ThreefryEngineSSE2<ResultType, K, Rounds> &eng1,
+        const ThreefryEngineSSE2<ResultType, K, Rounds> &eng2)
     {
         return !(eng1 == eng2);
     }
@@ -645,7 +620,7 @@ class ThreefrySSE2Engine
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const ThreefrySSE2Engine<ResultType, K, Rounds> &eng)
+        const ThreefryEngineSSE2<ResultType, K, Rounds> &eng)
     {
         if (!os.good())
             return os;
@@ -665,12 +640,12 @@ class ThreefrySSE2Engine
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        ThreefrySSE2Engine<ResultType, K, Rounds> &eng)
+        ThreefryEngineSSE2<ResultType, K, Rounds> &eng)
     {
         if (!is.good())
             return is;
 
-        ThreefrySSE2Engine<ResultType, K, Rounds> eng_tmp;
+        ThreefryEngineSSE2<ResultType, K, Rounds> eng_tmp;
         is >> std::ws >> eng_tmp.ctr_;
         is >> std::ws >> eng_tmp.par_;
         for (std::size_t k = 0; k != K; ++k)
@@ -696,10 +671,10 @@ class ThreefrySSE2Engine
     {
         par_type par;
         state_type state;
-        internal::ThreefrySSE2ParPack<ResultType, K>::eval(par_, par);
-        internal::ThreefrySSE2CtrPack<ResultType, K>::eval(ctr_, state);
+        internal::ThreefryParPackSSE2<ResultType, K>::eval(par_, par);
+        internal::ThreefryCtrPackSSE2<ResultType, K>::eval(ctr_, state);
         generate_buffer<0>(par, state, std::true_type());
-        internal::ThreefrySSE2Unpack<ResultType, K>::eval(state, buffer_);
+        internal::ThreefryUnpackSSE2<ResultType, K>::eval(state, buffer_);
     }
 
     template <std::size_t>
@@ -711,8 +686,8 @@ class ThreefrySSE2Engine
     void generate_buffer(
         const par_type &par, state_type &state, std::true_type)
     {
-        internal::ThreefrySSE2Rotate<ResultType, K, N>::eval(state);
-        internal::ThreefrySSE2InsertKey<ResultType, K, N>::eval(state, par);
+        internal::ThreefryRotateSSE2<ResultType, K, N>::eval(state);
+        internal::ThreefryInsertKeySSE2<ResultType, K, N>::eval(state, par);
         generate_buffer<N + 1>(
             par, state, std::integral_constant < bool, N<Rounds>());
     }
@@ -735,30 +710,30 @@ class ThreefrySSE2Engine
         par_.back() ^= std::get<N>(key);
         par_xor<N + 1>(key, std::integral_constant<bool, N + 1 < K>());
     }
-}; // class ThreefrySSE2Engine
+}; // class ThreefryEngineSSE2
 
-/// \brief ThreefrySSE22x32 RNG engine reimplemented
-/// \ingroup ThreefrySSE2
-typedef ThreefrySSE2Engine<std::uint32_t, 2> Threefry2x32SSE2;
+/// \brief Threefry2x32 RNG engine reimplemented using SSE2
+/// \ingroup Threefry
+typedef ThreefryEngineSSE2<std::uint32_t, 2> Threefry2x32SSE2;
 
-/// \brief ThreefrySSE24x32 RNG engine reimplemented
-/// \ingroup ThreefrySSE2
-typedef ThreefrySSE2Engine<std::uint32_t, 4> Threefry4x32SSE2;
+/// \brief Threefry4x32 RNG engine reimplemented using SSE2
+/// \ingroup Threefry
+typedef ThreefryEngineSSE2<std::uint32_t, 4> Threefry4x32SSE2;
 
-/// \brief ThreefrySSE22x64 RNG engine reimplemented
-/// \ingroup ThreefrySSE2
-typedef ThreefrySSE2Engine<std::uint64_t, 2> Threefry2x64SSE2;
+/// \brief Threefry2x64 RNG engine reimplemented using SSE2
+/// \ingroup Threefry
+typedef ThreefryEngineSSE2<std::uint64_t, 2> Threefry2x64SSE2;
 
-/// \brief ThreefrySSE24x64 RNG engine reimplemented
-/// \ingroup ThreefrySSE2
-typedef ThreefrySSE2Engine<std::uint64_t, 4> Threefry4x64SSE2;
+/// \brief Threefry4x64 RNG engine reimplemented using SSE2
+/// \ingroup Threefry
+typedef ThreefryEngineSSE2<std::uint64_t, 4> Threefry4x64SSE2;
 
-/// \brief The default 32-bits ThreefrySSE2 engine
-/// \ingroup ThreefrySSE2
+/// \brief The default 32-bits Threefry engine using SSE2
+/// \ingroup Threefry
 typedef Threefry4x32SSE2 ThreefrySSE2;
 
-/// \brief The default 64-bits ThreefrySSE2 engine
-/// \ingroup ThreefrySSE2
+/// \brief The default 64-bits ThreefrySSE2 engine using SSE2
+/// \ingroup Threefry
 typedef Threefry4x64SSE2 ThreefrySSE2_64;
 
 } // namespace vsmc
