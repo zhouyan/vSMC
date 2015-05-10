@@ -34,7 +34,7 @@ suppressPackageStartupMessages(library(rhdf5))
 
 theme_set(theme_bw())
 
-smp <- c("seq", "cilk", "gcd", "omp", "std", "tbb")
+smp <- c("seq", "omp", "tbb")
 exe <- character()
 exe <- c(exe, paste("pf_matrix",     smp, sep = "_"))
 exe <- c(exe, paste("pf_tuple",      smp, sep = "_"))
