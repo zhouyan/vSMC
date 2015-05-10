@@ -62,10 +62,4 @@
 #endif
 #endif
 
-#if VSMC_GCC_VERSION >= 50100
-#ifndef VSMC_HAS_CILK
-#define VSMC_HAS_CILK 1
-#endif
-#endif
-
 #endif // VSMC_INTERNAL_COMPILER_GCC_HPP
