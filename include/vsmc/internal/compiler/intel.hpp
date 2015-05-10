@@ -57,10 +57,8 @@
 #define VSMC_HAS_RDRAND 1
 #endif
 
-#if VSMC_INTEL_VERSION >= 1210
-#ifndef VSMC_HAS_CILK
-#define VSMC_HAS_CILK 1
-#endif
+#ifdef _OPENMP
+#define VSMC_HAS_OMP 1
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_INTEL_HPP

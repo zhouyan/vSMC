@@ -32,7 +32,6 @@
 #include <fstream>
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/state_matrix.hpp>
-#include <vsmc/smp/adapter.hpp>
 #include <vsmc/smp/backend_@smp@.hpp>
 #include <vsmc/math/constants.hpp>
 

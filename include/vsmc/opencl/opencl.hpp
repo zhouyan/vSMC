@@ -34,7 +34,6 @@
 
 #include <vsmc/internal/config.hpp>
 
-#include <vsmc/opencl/adapter.hpp>
 #include <vsmc/opencl/backend_cl.hpp>
 #include <vsmc/opencl/cl_buffer.hpp>
 #include <vsmc/opencl/cl_configure.hpp>

@@ -40,10 +40,8 @@
 #define VSMC_INT64 __int64
 #endif
 
-#if VSMC_MSVC_VERSION >= 1700
-#ifndef VSMC_HAS_PPL
-#define VSMC_HAS_PPL 1
-#endif
+#ifdef _OPENMP
+#define VSMC_HAS_OMP 1
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_MSVC_HPP

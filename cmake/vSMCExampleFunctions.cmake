@@ -36,10 +36,6 @@ FUNCTION (ADD_VSMC_EXECUTABLE exe src)
         TARGET_LINK_LIBRARIES (${exe} ${VSMC_LINK_LIBRARIES})
     ENDIF (DEFINED VSMC_LINK_LIBRARIES)
 
-    IF (LINUX_LIBRT)
-        TARGET_LINK_LIBRARIES (${exe} ${LINUX_LIBRT})
-    ENDIF (LINUX_LIBRT)
-
     GET_TARGET_PROPERTY (compile_flags ${exe} COMPILE_FLAGS)
     IF (NOT compile_flags)
         UNSET (compile_flags)
@@ -69,18 +65,9 @@ FUNCTION (ADD_VSMC_EXECUTABLE exe src)
             TARGET_LINK_LIBRARIES (${exe} ${TestU01_LINK_LIBRARIES})
         ENDIF (${arg} STREQUAL "U01" AND TESTU01_FOUND)
 
-        IF (${arg} STREQUAL "GCD" AND GCD_FOUND)
-            TARGET_LINK_LIBRARIES (${exe} ${GCD_LINK_LIBRARIES})
-        ENDIF (${arg} STREQUAL "GCD" AND GCD_FOUND)
-
         IF (${arg} STREQUAL "TBB" AND TBB_FOUND)
             TARGET_LINK_LIBRARIES (${exe} ${TBB_LINK_LIBRARIES})
         ENDIF (${arg} STREQUAL "TBB" AND TBB_FOUND)
-
-        IF (${arg} STREQUAL "CILK" AND CILK_FOUND)
-            SET (compile_flags "${compile_flags} ${Cilk_CXX_FLAGS}")
-            TARGET_LINK_LIBRARIES (${exe} ${Cilk_LINK_LIBRARIES})
-        ENDIF (${arg} STREQUAL "CILK" AND CILK_FOUND)
 
         IF (${arg} STREQUAL "OMP" AND VSMC_OPENMP_FOUND)
             SET (compile_flags "${compile_flags} ${OpenMP_CXX_FLAGS}")

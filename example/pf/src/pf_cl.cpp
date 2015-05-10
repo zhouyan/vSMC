@@ -78,10 +78,7 @@ int main(int argc, char **argv)
     vsmc::CLManager<>::instance().device().get_info(CL_DEVICE_NAME, name);
     std::cout << "Using device: " << name << std::endl;
 
-    cv_init init;
-    cv_move move;
-    vsmc::MonitorEvalAdapter<cv, vsmc::MonitorEvalCL> monitor("cv_est");
-    sampler.init(init).move(move, false).monitor("pos", 2, monitor);
+    sampler.init(cv_init()).move(cv_move(), false).monitor("pos", 2, cv_est());
     sampler.monitor("pos").name(0) = "pos.x";
     sampler.monitor("pos").name(1) = "pos.y";
 

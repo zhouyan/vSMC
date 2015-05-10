@@ -44,14 +44,8 @@
 /// \defgroup Core Core
 /// \brief Constructing samplers with operations on the whole particle set
 
-/// \defgroup Dispatch Grand Central Dispatch
-/// \brief C++ wrapper of Apple GCD
-
 /// \defgroup Resample Resampling algorithms
 /// \brief Resampling algorithm functor classes
-
-/// \defgroup Adapter Adapter
-/// \brief Adapter class templates for constructing concrete objects
 
 /// \defgroup MPI Message Passing Interface
 /// \brief Parallel samplers using MPI
@@ -62,29 +56,13 @@
 /// \defgroup SMP Symmetric Multiprocessing
 /// \brief Parallel samplers using multi-threading on SMP architecture
 
-/// \defgroup CILK Intel Cilk Plus
-/// \ingroup SMP
-/// \brief Parallel samplers using Intel Cilk Plus
-
-/// \defgroup GCD Grand Central Dispatch
-/// \ingroup SMP
-/// \brief Parallel samplers using Apple GCD
-
 /// \defgroup OMP OpenMP
 /// \ingroup SMP
 /// \brief Parallel samplers using OpenMP
 
-/// \defgroup PPL Parallel Pattern Library
-/// \ingroup SMP
-/// \brief Parallel samplers using Microsoft PPL
-
 /// \defgroup SEQ Sequential
 /// \ingroup SMP
 /// \brief Sequential samplers
-
-/// \defgroup STD C++11 concurrency
-/// \ingroup SMP
-/// \brief Parallel samplers using C++11 concurrency
 
 /// \defgroup TBB Intel Threading Building Blocks
 /// \ingroup SMP
@@ -163,9 +141,6 @@
 /// \ingroup RNGC
 /// \brief Converting random integers to uniform floating points
 
-/// \defgroup Thread Thread
-/// \brief C++11 threading support
-
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
 
@@ -212,12 +187,7 @@
 #include <vsmc/resample/resample.hpp>
 #include <vsmc/rng/rng.hpp>
 #include <vsmc/smp/smp.hpp>
-#include <vsmc/thread/thread.hpp>
 #include <vsmc/utility/utility.hpp>
-
-#if VSMC_HAS_GCD
-#include <vsmc/gcd/gcd.hpp>
-#endif
 
 #if VSMC_HAS_MPI
 #include <vsmc/mpi/mpi.hpp>

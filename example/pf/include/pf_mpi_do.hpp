@@ -36,16 +36,15 @@ template <vsmc::MatrixOrder Order>
 inline void cv_do(
     vsmc::ResampleScheme res, char **argv, const std::string &name)
 {
+    typedef cv_state<Order> cv;
+
     vsmc::Seed::instance().set(101);
     std::size_t N = ParticleNum /
         static_cast<std::size_t>(boost::mpi::communicator().size());
-    vsmc::Sampler<cv_state<Order>> sampler(N, res, 0.5);
+    vsmc::Sampler<cv> sampler(N, res, 0.5);
     sampler.init(cv_init<Order>())
-        .move(vsmc::MoveAdapter<cv_state<Order>, BASE_MOVE, cv_move<Order>>(),
-            true)
-        .monitor(
-            "pos", 2, vsmc::MonitorEvalAdapter<cv_state<Order>, BASE_MONITOR>(
-                          cv_est<Order>) );
+        .move(cv_move<Order>(), false)
+        .monitor("pos", 2, cv_est<Order>());
     sampler.monitor("pos").name(0) = "pos.x";
     sampler.monitor("pos").name(1) = "pos.y";
     sampler.initialize(argv[1]);

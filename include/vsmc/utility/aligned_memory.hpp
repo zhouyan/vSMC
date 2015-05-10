@@ -40,11 +40,6 @@
 #include <malloc.h>
 #endif
 
-#if VSMC_HAS_JEMALLOC
-#include <stdlib.h>
-#include <jemalloc/jemalloc.h>
-#endif
-
 #if VSMC_HAS_TBB_MALLOC
 #include <tbb/scalable_allocator.h>
 #endif
@@ -58,8 +53,6 @@
 #ifndef VSMC_ALIGNED_MEMORY_TYPE
 #if VSMC_HAS_TBB_MALLOC
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryTBB
-#elif VSMC_HAS_JEMALLOC
-#define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryJE
 #elif VSMC_HAS_MKL
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryMKL
 #elif VSMC_HAS_POSIX || defined(VSMC_MSVC)
@@ -186,43 +179,6 @@ class AlignedMemorySYS
 }; // class AlignedMemorySYS
 
 #endif // VSMC_HAS_POSIX
-
-#if VSMC_HAS_JEMALLOC
-
-/// \brief Aligned memory using jemalloc
-/// \ingroup AlignedMemory
-class AlignedMemoryJE
-{
-    public:
-    static void *aligned_malloc(std::size_t n, std::size_t alignment)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY;
-
-        if (n == 0)
-            return nullptr;
-
-#if VSMC_HAS_JEMALLOC_STDAPI
-        void *ptr = aligned_alloc(alignment, n);
-#else
-        void *ptr = je_aligned_alloc(alignment, n);
-#endif
-        if (ptr == nullptr)
-            throw std::bad_alloc();
-
-        return ptr;
-    }
-
-    static void aligned_free(void *ptr)
-    {
-#if VSMC_HAS_JEMALLOC_STDAPI
-        free(ptr);
-#else
-        je_free(ptr);
-#endif
-    }
-}; // AlignedMemoryJE
-
-#endif // VSMC_HAS_JEMALLOC
 
 #if VSMC_HAS_TBB_MALLOC
 

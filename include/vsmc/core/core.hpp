@@ -32,7 +32,6 @@
 #ifndef VSMC_CORE_CORE_HPP
 #define VSMC_CORE_CORE_HPP
 
-#include <vsmc/core/adapter.hpp>
 #include <vsmc/core/monitor.hpp>
 #include <vsmc/core/particle.hpp>
 #include <vsmc/core/path.hpp>

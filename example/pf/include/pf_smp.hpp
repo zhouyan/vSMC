@@ -39,7 +39,6 @@
 #endif
 
 #include <vsmc/core/sampler.hpp>
-#include <vsmc/smp/adapter.hpp>
 #include <vsmc/rng/threefry.hpp>
 
 #if VSMC_HAS_HDF5
@@ -187,7 +186,7 @@ class cv_init : public BASE_INIT<cv_state<Order>, cv_init<Order>>
 };
 
 template <vsmc::MatrixOrder Order>
-class cv_move
+class cv_move : public BASE_MOVE<cv_state<Order>, cv_move<Order>>
 {
     public:
     typedef cv_state<Order> cv;
@@ -198,7 +197,8 @@ class cv_move
         static tbb::affinity_partitioner partitioner;
         return this->parallel_run(iter, particle,
             tbb::blocked_range<typename vsmc::Particle<cv>::size_type>(
-                                      0, particle.size(), partitioner));
+                                      0, particle.size()),
+            partitioner);
     }
 #endif
 
@@ -247,11 +247,17 @@ class cv_move
 };
 
 template <vsmc::MatrixOrder Order>
-inline void cv_est(std::size_t, std::size_t,
-    vsmc::ConstSingleParticle<cv_state<Order>> csp, double *res)
+class cv_est : public BASE_MONITOR<cv_state<Order>, cv_est<Order>>
 {
-    res[0] = csp.state(vsmc::Position<0>());
-    res[1] = csp.state(vsmc::Position<1>());
-}
+    public:
+    typedef cv_state<Order> cv;
+
+    void monitor_state(std::size_t, std::size_t,
+        vsmc::ConstSingleParticle<cv> csp, double *res)
+    {
+        res[0] = csp.state(vsmc::Position<PosX>());
+        res[1] = csp.state(vsmc::Position<PosY>());
+    }
+};
 
 #endif // VSMC_EXAMPLE_PF_SMP_HPP

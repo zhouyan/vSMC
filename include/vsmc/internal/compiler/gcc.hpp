@@ -62,4 +62,8 @@
 #endif
 #endif
 
+#ifdef _OPENMP
+#define VSMC_HAS_OMP 1
+#endif
+
 #endif // VSMC_INTERNAL_COMPILER_GCC_HPP

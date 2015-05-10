@@ -68,20 +68,8 @@
 
 // Parallelization features
 
-#ifndef VSMC_HAS_CILK
-#define VSMC_HAS_CILK 0
-#endif
-
-#ifndef VSMC_HAS_GCD
-#define VSMC_HAS_GCD 0
-#endif
-
 #ifndef VSMC_HAS_OMP
 #define VSMC_HAS_OMP 0
-#endif
-
-#ifndef VSMC_HAS_PPL
-#define VSMC_HAS_PPL 0
 #endif
 
 #ifndef VSMC_HAS_TBB
@@ -124,14 +112,6 @@
 
 #ifndef VSMC_HAS_HDF5
 #define VSMC_HAS_HDF5 0
-#endif
-
-#ifndef VSMC_HAS_JEMALLOC
-#define VSMC_HAS_JEMALLOC 0
-#endif
-
-#ifndef VSMC_HAS_JEMALLOC_STDAPI
-#define VSMC_HAS_JEMALLOC_STDAPI 0
 #endif
 
 #ifndef VSMC_HAS_MKL

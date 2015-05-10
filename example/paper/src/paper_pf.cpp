@@ -34,7 +34,6 @@
 #include <fstream>
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/state_matrix.hpp>
-#include <vsmc/smp/adapter.hpp>
 #include <vsmc/smp/backend_seq.hpp>
 
 const std::size_t DataNum = 100;
@@ -134,22 +133,22 @@ class cv_move : public vsmc::MoveSEQ<cv>
     std::vector<double> incw_;
 };
 
-inline void cv_monitor_state(std::size_t, std::size_t dim,
-    vsmc::ConstSingleParticle<cv> csp, double *res)
+class cv_est : public vsmc::MonitorEvalSEQ<cv>
 {
-    assert(dim <= Dim);
-    for (std::size_t d = 0; d != dim; ++d)
-        res[d] = csp.state(d);
-}
+    public:
+    void monitor_state(std::size_t, std::size_t dim,
+        vsmc::ConstSingleParticle<cv> csp, double *res)
+    {
+        assert(dim <= Dim);
+        for (std::size_t d = 0; d != dim; ++d)
+            res[d] = csp.state(d);
+    }
+};
 
 int main()
 {
     vsmc::Sampler<cv> sampler(ParticleNum, vsmc::Stratified, 0.5);
-    sampler.init(cv_init);
-    sampler.move(cv_move(), false);
-    vsmc::MonitorEvalAdapter<cv, vsmc::MonitorEvalSEQ> cv_est(
-        cv_monitor_state);
-    sampler.monitor("pos", 2, cv_est);
+    sampler.init(cv_init).move(cv_move(), false).monitor("pos", 2, cv_est());
 
     char data_file[] = "paper_pf.data";
     sampler.initialize(data_file);

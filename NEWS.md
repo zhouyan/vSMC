@@ -13,15 +13,26 @@ changes.
 * Everything in the namespace `vsmc::cxx11` is gone. Replace `vsmc::cxx11` with
   `std` shall solve any issues.
 * `Progress` is no longer a class template.
-* The Array module is removed and its use has been replaced by `<array>`
-* The CString module is removed.
-* The Integrate module is removed.
+* `vsmc::Array` is replaced by `std::array`
 * The `RngSet` class template is replaced by `RngSetScalar`, `RngSetVector`,
   `RngSetTBB` etc., and the structures `Scalar`, `Vector`, `TBB` are removed.
 * The OpenCL module has gone through a complete rework. The library now has
   its own C++ wrapper based on `std::shared_ptr` instead of the official
   (outdated) C++ wrapper.
-* The GSL RNG module is removed
+
+## Removed features
+
+* Modules removed
+  - Thread
+  - GCD
+  - Integrate
+  - RNG/GSL
+  - SMP/CILK
+  - SMP/GCD
+  - SMP/PPL
+  - SMP/STD
+  - Utility/Array
+  - Utility/CString
 
 ## New features
 

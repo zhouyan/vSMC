@@ -57,21 +57,13 @@
 #include <cstddef>
 
 #if defined(__APPLE__) || defined(__MACOSX)
-#define VSMC_MACOSX
 #include <Availability.h>
-#define VSMC_MAC_VERSION_MIN_REQUIRED(ver)                                    \
-    __MAC_OS_X_VERSION_MIN_REQUIRED >= ver
-#else
-#define VSMC_MAC_VERSION_MIN_REQUIRED(ver) 0
-#endif
-
-#ifdef VSMC_MACOSX
-#if VSMC_MAC_VERSION_MIN_REQUIRED(__MAC_10_5)
+#if __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_5
 #ifndef VSMC_HAS_POSIX
 #define VSMC_HAS_POSIX 1
 #endif
 #endif
-#else // VSMC_MACOSX
+#else // __APPLE__
 #include <stdlib.h>
 #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
 #ifndef VSMC_HAS_POSIX
@@ -128,17 +120,7 @@
 #endif
 
 #ifndef VSMC_HAS_OMP
-#ifdef _OPENMP
-#define VSMC_HAS_OMP 1
-#endif
-#endif
-
-// OS features
-
-#if VSMC_MAC_VERSION_MIN_REQUIRED(__MAC_10_7)
-#ifndef VSMC_HAS_GCD_LION
-#define VSMC_HAS_GCD_LION 1
-#endif
+#define VSMC_HAS_OMP 0
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_HPP

@@ -33,7 +33,6 @@
 #define VSMC_EXAMPLE_PF_CL_HPP
 
 #include <vsmc/core/sampler.hpp>
-#include <vsmc/opencl/adapter.hpp>
 #include <vsmc/opencl/backend_cl.hpp>
 #include <vsmc/rngc/philox.h>
 
@@ -151,6 +150,15 @@ class cv_move : public vsmc::MoveCL<cv>
     private:
     vsmc::CLBuffer<cl_float> inc_weight_buffer_;
     std::vector<cl_float> inc_weight_;
+};
+
+class cv_est : public vsmc::MonitorEvalCL<cv>
+{
+    public:
+    void monitor_state(std::size_t, std::string &kernel_name)
+    {
+        kernel_name = std::string("cv_est");
+    }
 };
 
 inline void cv_do(vsmc::Sampler<cv> &sampler, vsmc::ResampleScheme res,
