@@ -324,9 +324,6 @@ class PhiloxEngine
     typedef std::array<ResultType, K> ctr_type;
     typedef std::array<ResultType, K / 2> key_type;
 
-    private:
-    typedef Counter<ctr_type> counter;
-
     public:
     explicit PhiloxEngine(result_type s = 0) : index_(K)
     {
@@ -353,7 +350,7 @@ class PhiloxEngine
 
     void seed(result_type s)
     {
-        counter::reset(ctr_);
+        ctr_.fill(0);
         key_.fill(0);
         key_.front() = s;
         index_ = K;
@@ -365,14 +362,14 @@ class PhiloxEngine
             key_type, PhiloxEngine<ResultType, K, Rounds>>::value>::type * =
             nullptr)
     {
-        counter::reset(ctr_);
+        ctr_.fill(0);
         seq.generate(key_.begin(), key_.end());
         index_ = K;
     }
 
     void seed(const key_type &k)
     {
-        counter::reset(ctr_);
+        ctr_.fill(0);
         key_ = k;
         index_ = K;
     }
@@ -383,7 +380,7 @@ class PhiloxEngine
 
     void ctr(const ctr_type &c)
     {
-        counter::set(ctr_, c);
+        ctr_ = c;
         index_ = K;
     }
 
@@ -419,7 +416,7 @@ class PhiloxEngine
             return;
         }
 
-        counter::increment(ctr_, static_cast<result_type>(n / K));
+        internal::increment(ctr_, static_cast<result_type>(n / K));
         index_ = K;
         operator()();
         index_ = n % K;
@@ -488,7 +485,7 @@ class PhiloxEngine
 
     void generate_buffer()
     {
-        counter::increment(ctr_);
+        internal::increment(ctr_);
         buffer_ = ctr_;
         key_type par = key_;
         generate_buffer<0>(par, std::true_type());

@@ -153,7 +153,7 @@ class cv_init : public BASE_INIT<cv_state<Order>, cv_init<Order>>
         typedef typename vsmc::Particle<cv>::rng_type rng_type;
         rng_type rng(sp.rng());
         typename rng_type::ctr_type ctr;
-        vsmc::Counter<typename rng_type::ctr_type>::reset(ctr);
+        ctr.fill(0);
         ctr.back() =
             static_cast<typename rng_type::ctr_type::value_type>(sp.id());
         ctr.back() <<= 16;
@@ -215,7 +215,7 @@ class cv_move : public BASE_MOVE<cv_state<Order>, cv_move<Order>>
         typedef typename vsmc::Particle<cv>::rng_type rng_type;
         rng_type rng(sp.rng());
         typename rng_type::ctr_type ctr;
-        vsmc::Counter<typename rng_type::ctr_type>::reset(ctr);
+        ctr.fill(0);
         ctr.back() =
             static_cast<typename rng_type::ctr_type::value_type>(sp.id());
         ctr.back() <<= 16;

@@ -76,7 +76,7 @@ struct ThreefryCtrPackSSE2 {
     static void eval(ctr_type &ctr, state_type &state)
     {
         ctr_block_type ctr_block;
-        Counter<ctr_type>::increment(ctr, ctr_block);
+        internal::increment(ctr, ctr_block);
         pack<0>(ctr_block, state, std::integral_constant<bool, 0 < K>());
     }
 
@@ -130,10 +130,6 @@ class ThreefryEngineSSE2
     typedef std::array<ResultType, K> ctr_type;
     typedef std::array<ResultType, K> key_type;
 
-    private:
-    typedef Counter<ctr_type> counter;
-
-    public:
     explicit ThreefryEngineSSE2(result_type s = 0) : index_(M_)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY(SSE2);
@@ -159,7 +155,7 @@ class ThreefryEngineSSE2
 
     void seed(result_type s)
     {
-        counter::reset(ctr_);
+        ctr_.fill(0);
         key_type k;
         k.fill(0);
         k.front() = s;
@@ -173,7 +169,7 @@ class ThreefryEngineSSE2
             key_type, ThreefryEngineSSE2<ResultType, K, Rounds>>::value>::type
             * = nullptr)
     {
-        counter::reset(ctr_);
+        ctr_.fill(0);
         key_type k;
         seq.generate(k.begin(), k.end());
         init_par(k);
@@ -182,7 +178,7 @@ class ThreefryEngineSSE2
 
     void seed(const key_type &k)
     {
-        counter::reset(ctr_);
+        ctr_.fill(0);
         init_par(k);
         index_ = M_;
     }
@@ -200,7 +196,7 @@ class ThreefryEngineSSE2
 
     void ctr(const ctr_type &c)
     {
-        counter::set(ctr_, c);
+        ctr_ = c;
         index_ = M_;
     }
 
@@ -236,7 +232,7 @@ class ThreefryEngineSSE2
             return;
         }
 
-        counter::increment(ctr_, static_cast<result_type>(n / M_));
+        internal::increment(ctr_, static_cast<result_type>(n / M_));
         index_ = M_;
         operator()();
         index_ = n % M_;

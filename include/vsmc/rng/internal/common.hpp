@@ -34,7 +34,6 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
-#include <vsmc/utility/counter.hpp>
 
 #ifndef UINT64_C
 #error __STDC_CONSTANT_MACROS not defined before #<stdint.h>
@@ -52,6 +51,20 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, void)
 
 namespace internal
 {
+
+template <typename SeedSeq, typename U, typename V = U, typename W = V>
+struct is_seed_seq
+    : public std::integral_constant<bool,
+          !std::is_convertible<SeedSeq, U>::value &&
+              !std::is_convertible<SeedSeq, V>::value &&
+              !std::is_convertible<SeedSeq, W>::value &&
+              !std::is_same<typename std::remove_cv<SeedSeq>::type,
+                  U>::value &&
+              !std::is_same<typename std::remove_cv<SeedSeq>::type,
+                  V>::value &&
+              !std::is_same<typename std::remove_cv<SeedSeq>::type,
+                  W>::value> {
+};
 
 template <std::size_t K, std::size_t, std::size_t, typename T>
 inline void rng_array_left_assign(std::array<T, K> &, std::false_type)
@@ -123,57 +136,79 @@ inline void rng_array_right_shift(std::array<T, K> &state)
         state, std::integral_constant<bool, (fillzero && A > 0 && A <= K)>());
 }
 
-template <typename SeedSeq, typename U, typename V = U, typename W = V>
-struct is_seed_seq
-    : public std::integral_constant<bool,
-          !std::is_convertible<SeedSeq, U>::value &&
-              !std::is_convertible<SeedSeq, V>::value &&
-              !std::is_convertible<SeedSeq, W>::value &&
-              !std::is_same<typename std::remove_cv<SeedSeq>::type,
-                  U>::value &&
-              !std::is_same<typename std::remove_cv<SeedSeq>::type,
-                  V>::value &&
-              !std::is_same<typename std::remove_cv<SeedSeq>::type,
-                  W>::value> {
-};
+template <std::size_t, typename T, std::size_t K>
+inline static void increment_single(std::array<T, K> &ctr, std::false_type)
+{
+    ++ctr.back();
+}
+
+template <std::size_t N, typename T, std::size_t K>
+inline static void increment_single(std::array<T, K> &ctr, std::true_type)
+{
+    if (++std::get<N>(ctr) != 0)
+        return;
+
+    increment_single<N + 1>(ctr, std::integral_constant<bool, N + 2 < K>());
+}
 
 template <typename T, std::size_t K>
-using ctr_type_8 =
-    typename std::conditional<sizeof(T) * K % sizeof(std::uint8_t) == 0,
-        std::array<std::uint8_t, sizeof(T) * K / sizeof(std::uint8_t)>,
-        std::array<T, K>>::type;
+inline void increment(std::array<T, K> &ctr)
+{
+    increment_single<0>(ctr, std::integral_constant<bool, 1 < K>());
+}
+
+template <std::size_t Blocks, std::size_t, typename T, std::size_t K>
+inline static void increment_block(std::array<T, K> &,
+    std::array<std::array<T, K>, Blocks> &, std::false_type)
+{
+}
+
+template <std::size_t Blocks, std::size_t B, typename T, std::size_t K>
+inline static void increment_block(std::array<T, K> &ctr,
+    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
+{
+    increment(ctr);
+    std::get<B>(ctr_block) = ctr;
+    increment_block<Blocks, B + 1>(
+        ctr, ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
+}
+
+template <std::size_t Blocks, typename T, std::size_t K>
+static void increment(
+    std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
+{
+    increment_block<Blocks, 0>(
+        ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
+}
 
 template <typename T, std::size_t K>
-using ctr_type_16 =
-    typename std::conditional<sizeof(T) * K % sizeof(std::uint16_t) == 0,
-        std::array<std::uint16_t, sizeof(T) * K / sizeof(std::uint16_t)>,
-        ctr_type_8<T, K>>::type;
+inline static void increment(std::array<T, K> &ctr, T nskip)
+{
+    static constexpr T max_val = VSMC_MAX_UINT(T);
 
-template <typename T, std::size_t K>
-using ctr_type_32 =
-    typename std::conditional<sizeof(T) * K % sizeof(std::uint32_t) == 0,
-        std::array<std::uint32_t, sizeof(T) * K / sizeof(std::uint32_t)>,
-        ctr_type_16<T, K>>::type;
+    if (nskip == 0)
+        return;
 
-template <typename T, std::size_t K>
-using ctr_type_64 =
-    typename std::conditional<sizeof(T) * K % sizeof(std::uint64_t) == 0,
-        std::array<std::uint64_t, sizeof(T) * K / sizeof(std::uint64_t)>,
-        ctr_type_32<T, K>>::type;
+    if (K == 1) {
+        ctr.front() += nskip;
+        return;
+    }
 
-#if VSMC_HAS_INT128
-template <typename T, std::size_t K>
-using ctr_type_128 =
-    typename std::conditional<sizeof(T) * K % sizeof(VSMC_INT128) == 0,
-        std::array<unsigned VSMC_INT128, sizeof(T) * K / sizeof(VSMC_INT128)>,
-        ctr_type_64<T, K>>::type;
+    if (nskip == 1) {
+        increment(ctr);
+        return;
+    }
 
-template <typename T, std::size_t K>
-using ctr_type_max = ctr_type_128<T, K>;
-#else
-template <typename T, std::size_t K>
-using ctr_type_max = ctr_type_64<T, K>;
-#endif
+    if (ctr.front() <= max_val - nskip) {
+        ctr.front() += nskip;
+        return;
+    }
+
+    nskip -= max_val - ctr.front();
+    ctr.front() = max_val;
+    increment(ctr);
+    ctr.front() = nskip - 1;
+}
 
 } // namespace vsmc::internal
 

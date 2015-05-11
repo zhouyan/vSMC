@@ -320,12 +320,9 @@ class SeedGenerator<ID, std::array<T, K>>
         set(seed_);
     }
 
-    void skip(skip_type steps)
-    {
-        Counter<result_type>::increment(seed_, steps);
-    }
+    void skip(skip_type steps) { internal::increment(seed_, steps); }
 
-    void skip() { Counter<result_type>::increment(seed_); }
+    void skip() { internal::increment(seed_); }
 
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(

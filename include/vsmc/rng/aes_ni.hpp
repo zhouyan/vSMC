@@ -153,7 +153,7 @@ struct AESNICtrPack {
     static void eval(ctr_type &ctr, state_type &state)
     {
         std::array<ctr_type, Blocks> ctr_blocks;
-        Counter<ctr_type>::increment(ctr, ctr_blocks);
+        internal::increment(ctr, ctr_blocks);
         std::memcpy(state.data(), ctr_blocks.data(), sizeof(__m128i) * Blocks);
     }
 
@@ -229,9 +229,6 @@ template <typename ResultType, typename KeySeq, bool KeySeqInit,
     std::size_t Rounds, std::size_t Blocks>
 class AESNIEngine
 {
-    static constexpr std::size_t K_ =
-        sizeof(__m128i) / sizeof(ResultType) * Blocks;
-
     public:
     typedef ResultType result_type;
     typedef std::array<ResultType, sizeof(__m128i) / sizeof(ResultType)>
@@ -239,12 +236,6 @@ class AESNIEngine
     typedef typename KeySeq::key_type key_type;
     typedef std::array<__m128i, Rounds + 1> key_seq_type;
 
-    private:
-    typedef Counter<ctr_type> counter;
-    typedef std::array<ResultType,
-        sizeof(__m128i) / sizeof(ResultType) * Blocks> buffer_type;
-
-    public:
     explicit AESNIEngine(result_type s = 0) : index_(K_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
@@ -271,7 +262,7 @@ class AESNIEngine
 
     void seed(result_type s)
     {
-        counter::reset(ctr_);
+        ctr_.fill(0);
         key_.fill(0);
         key_.front() = s;
         key_seq_.set(key_);
@@ -283,7 +274,7 @@ class AESNIEngine
         SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
                           result_type, key_type>::value>::type * = nullptr)
     {
-        counter::reset(ctr_);
+        ctr_.fill(0);
         seq.generate(key_.begin(), key_.end());
         key_seq_.set(key_);
         index_ = K_;
@@ -291,7 +282,7 @@ class AESNIEngine
 
     void seed(const key_type &k)
     {
-        counter::reset(ctr_);
+        ctr_.fill(0);
         key_ = k;
         key_seq_.set(k);
         index_ = K_;
@@ -305,7 +296,7 @@ class AESNIEngine
 
     void ctr(const ctr_type &c)
     {
-        counter::set(ctr_, c);
+        ctr_ = c;
         index_ = K_;
     }
 
@@ -342,7 +333,7 @@ class AESNIEngine
             return;
         }
 
-        counter::increment(ctr_, static_cast<result_type>(n / K_));
+        internal::increment(ctr_, static_cast<result_type>(n / K_));
         index_ = K_;
         operator()();
         index_ = n % K_;
@@ -412,15 +403,13 @@ class AESNIEngine
     }
 
     private:
-    // FIXME
-    // buffer_ is automatically 16 bytes aligned
-    // Thus, we assume that ctr_ and buffer_ will also be 16 bytes
-    // alinged
-
     typedef std::array<__m128i, Blocks> state_type;
 
+    static constexpr std::size_t K_ =
+        sizeof(__m128i) / sizeof(ResultType) * Blocks;
+
     internal::AESNIKeySeqStorage<KeySeq, KeySeqInit, Rounds> key_seq_;
-    buffer_type buffer_;
+    std::array<ResultType, K_> buffer_;
     ctr_type ctr_;
     key_type key_;
     std::size_t index_;

@@ -73,9 +73,6 @@ class ThreefryEngine
     typedef std::array<ResultType, K> ctr_type;
     typedef std::array<ResultType, K> key_type;
 
-    private:
-    typedef Counter<ctr_type> counter;
-
     public:
     explicit ThreefryEngine(result_type s = 0) : index_(K)
     {
@@ -102,7 +99,7 @@ class ThreefryEngine
 
     void seed(result_type s)
     {
-        counter::reset(ctr_);
+        ctr_.fill(0);
         key_type k;
         k.fill(0);
         k.front() = s;
@@ -116,7 +113,7 @@ class ThreefryEngine
             key_type, ThreefryEngine<ResultType, K, Rounds>>::value>::type * =
             nullptr)
     {
-        counter::reset(ctr_);
+        ctr_.fill(0);
         key_type k;
         seq.generate(k.begin(), k.end());
         init_par(k);
@@ -125,7 +122,7 @@ class ThreefryEngine
 
     void seed(const key_type &k)
     {
-        counter::reset(ctr_);
+        ctr_.fill(0);
         init_par(k);
         index_ = K;
     }
@@ -143,7 +140,7 @@ class ThreefryEngine
 
     void ctr(const ctr_type &c)
     {
-        counter::set(ctr_, c);
+        ctr_ = c;
         index_ = K;
     }
 
@@ -179,7 +176,7 @@ class ThreefryEngine
             return;
         }
 
-        counter::increment(ctr_, static_cast<result_type>(n / K));
+        internal::increment(ctr_, static_cast<result_type>(n / K));
         index_ = K;
         operator()();
         index_ = n % K;
@@ -248,7 +245,7 @@ class ThreefryEngine
 
     void generate_buffer()
     {
-        counter::increment(ctr_);
+        internal::increment(ctr_);
         buffer_ = ctr_;
         generate_buffer<0>(std::true_type());
     }

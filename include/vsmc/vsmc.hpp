@@ -152,10 +152,6 @@
 /// \ingroup Utility
 /// \brief Query CPUID information
 
-/// \defgroup Counter Counter
-/// \ingroup Utility
-/// \brief Use std::array of unsinged integers as counters
-
 /// \defgroup HDF5IO HDF5 objects IO
 /// \ingroup Utility
 /// \brief Load and store objects in the HDF5 format

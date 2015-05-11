@@ -32,6 +32,7 @@ changes.
   - SMP/PPL
   - SMP/STD
   - Utility/Array
+  - Utility/Counter
   - Utility/CString
 
 ## New features

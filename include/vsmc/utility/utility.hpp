@@ -35,7 +35,6 @@
 #include <vsmc/internal/config.hpp>
 
 #include <vsmc/utility/aligned_memory.hpp>
-#include <vsmc/utility/counter.hpp>
 #include <vsmc/utility/program_option.hpp>
 #include <vsmc/utility/progress.hpp>
 #include <vsmc/utility/stop_watch.hpp>
