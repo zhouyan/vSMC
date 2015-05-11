@@ -22,7 +22,7 @@
 // ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
 // LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 // CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, value, OR PROFITS; OR BUSINESS
 // INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
@@ -119,6 +119,290 @@ inline std::basic_istream<CharT, Traits> &m128i_input(
     }
 
     return is;
+}
+
+template <typename IntType>
+class M128I
+{
+    public:
+    typedef IntType value_type;
+
+    M128I() : value_(_mm_setzero_si128()) {}
+
+    template <typename T>
+    M128I(T n,
+        typename std::enable_if<std::is_integral<T>::value>::type * = nullptr)
+        : value_(set1(n, std::integral_constant<std::size_t, sizeof(T)>()))
+    {
+    }
+
+    M128I(const M128I<IntType> &) = default;
+    M128I(const __m128i &value) : value_(value) {}
+
+    M128I<IntType> &operator=(const M128I<IntType> &) = default;
+    M128I<IntType> &operator=(const __m128i &value)
+    {
+        value_ = value;
+
+        return *this;
+    }
+
+    M128I(M128I<IntType> &&) = default;
+    M128I(__m128i &&value) : value_(std::move(value)) {}
+
+    M128I<IntType> &operator=(M128I<IntType> &&) = default;
+    M128I<IntType> &operator=(__m128i &&value)
+    {
+        value_ = std::move(value);
+
+        return *this;
+    }
+
+    static constexpr std::size_t size()
+    {
+        return sizeof(__m128i) / sizeof(IntType);
+    }
+
+    __m128i &value() { return value_; }
+    const __m128i &value() const { return value_; }
+
+    private:
+    __m128i value_;
+
+    template <typename T>
+    __m128i set1(T n, std::integral_constant<std::size_t, 1>)
+    {
+        return _mm_set1_epi8(static_cast<char>(n));
+    }
+
+    template <typename T>
+    __m128i set1(T n, std::integral_constant<std::size_t, 2>)
+    {
+        return _mm_set1_epi16(static_cast<short>(n));
+    }
+
+    template <typename T>
+    __m128i set1(T n, std::integral_constant<std::size_t, 4>)
+    {
+        return _mm_set1_epi32(static_cast<int>(n));
+    }
+
+    template <typename T>
+    __m128i set1(T n, std::integral_constant<std::size_t, 8>)
+    {
+        return _mm_set1_epi64x(static_cast<VSMC_INT64>(n));
+    }
+}; // class M128I
+
+template <typename T>
+inline M128I<T> m128i_add(const M128I<T> &a, const M128I<T> &b,
+    std::integral_constant<std::size_t, 1>)
+{
+    return M128I<T>(_mm_add_epi8(a.value(), b.value()));
+}
+
+template <typename T>
+inline M128I<T> m128i_add(const M128I<T> &a, const M128I<T> &b,
+    std::integral_constant<std::size_t, 2>)
+{
+    return M128I<T>(_mm_add_epi16(a.value(), b.value()));
+}
+
+template <typename T>
+inline M128I<T> m128i_add(const M128I<T> &a, const M128I<T> &b,
+    std::integral_constant<std::size_t, 4>)
+{
+    return M128I<T>(_mm_add_epi32(a.value(), b.value()));
+}
+
+template <typename T>
+inline M128I<T> m128i_add(const M128I<T> &a, const M128I<T> &b,
+    std::integral_constant<std::size_t, 8>)
+{
+    return M128I<T>(_mm_add_epi64(a.value(), b.value()));
+}
+
+template <typename T>
+inline M128I<T> m128i_sub(const M128I<T> &a, const M128I<T> &b,
+    std::integral_constant<std::size_t, 1>)
+{
+    return M128I<T>(_mm_sub_epi8(a.value(), b.value()));
+}
+
+template <typename T>
+inline M128I<T> m128i_sub(const M128I<T> &a, const M128I<T> &b,
+    std::integral_constant<std::size_t, 2>)
+{
+    return M128I<T>(_mm_sub_epi16(a.value(), b.value()));
+}
+
+template <typename T>
+inline M128I<T> m128i_sub(const M128I<T> &a, const M128I<T> &b,
+    std::integral_constant<std::size_t, 4>)
+{
+    return M128I<T>(_mm_sub_epi32(a.value(), b.value()));
+}
+
+template <typename T>
+inline M128I<T> m128i_sub(const M128I<T> &a, const M128I<T> &b,
+    std::integral_constant<std::size_t, 8>)
+{
+    return M128I<T>(_mm_sub_epi64(a.value(), b.value()));
+}
+
+template <typename T>
+inline M128I<T> m128i_slli(
+    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 1>)
+{
+    return M128I<T>(_mm_slli_epi8(a.value(), imm8));
+}
+
+template <typename T>
+inline M128I<T> m128i_slli(
+    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 2>)
+{
+    return M128I<T>(_mm_slli_epi16(a.value(), imm8));
+}
+
+template <typename T>
+inline M128I<T> m128i_slli(
+    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 4>)
+{
+    return M128I<T>(_mm_slli_epi32(a.value(), imm8));
+}
+
+template <typename T>
+inline M128I<T> m128i_slli(
+    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 8>)
+{
+    return M128I<T>(_mm_slli_epi64(a.value(), imm8));
+}
+
+template <typename T>
+inline M128I<T> m128i_srli(
+    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 1>)
+{
+    return M128I<T>(_mm_srli_epi8(a.value(), imm8));
+}
+
+template <typename T>
+inline M128I<T> m128i_srli(
+    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 2>)
+{
+    return M128I<T>(_mm_srli_epi16(a.value(), imm8));
+}
+
+template <typename T>
+inline M128I<T> m128i_srli(
+    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 4>)
+{
+    return M128I<T>(_mm_srli_epi32(a.value(), imm8));
+}
+
+template <typename T>
+inline M128I<T> m128i_srli(
+    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 8>)
+{
+    return M128I<T>(_mm_srli_epi64(a.value(), imm8));
+}
+
+template <typename T>
+inline M128I<T> operator+(const M128I<T> &a, const M128I<T> &b)
+{
+    return m128i_add(a, b, std::integral_constant<std::size_t, sizeof(T)>());
+}
+
+template <typename T>
+inline M128I<T> &operator+=(M128I<T> &a, const M128I<T> &b)
+{
+    a = a + b;
+
+    return a;
+}
+
+template <typename T>
+inline M128I<T> operator-(const M128I<T> &a, const M128I<T> &b)
+{
+    return m128i_sub(a, b, std::integral_constant<std::size_t, sizeof(T)>());
+}
+
+template <typename T>
+inline M128I<T> &operator-=(M128I<T> &a, const M128I<T> &b)
+{
+    a = a - b;
+
+    return a;
+}
+
+template <typename T>
+inline M128I<T> operator&(const M128I<T> &a, const M128I<T> &b)
+{
+    return M128I<T>(_mm_and_si128(a.value(), b.value()));
+}
+
+template <typename T>
+inline M128I<T> &operator&=(M128I<T> &a, const M128I<T> &b)
+{
+    a = a & b;
+
+    return a;
+}
+
+template <typename T>
+inline M128I<T> operator|(const M128I<T> &a, const M128I<T> &b)
+{
+    return M128I<T>(_mm_or_si128(a.value(), b.value()));
+}
+
+template <typename T>
+inline M128I<T> &operator|=(M128I<T> &a, const M128I<T> &b)
+{
+    a = a | b;
+
+    return a;
+}
+
+template <typename T>
+inline M128I<T> operator^(const M128I<T> &a, const M128I<T> &b) {
+    return M128I<T>(_mm_xor_si128(a.value(), b.value()));
+}
+
+template <typename T>
+inline M128I<T> &operator^=(M128I<T> &a, const M128I<T> &b)
+{
+    a = a ^ b;
+
+    return a;
+}
+
+template <typename T>
+inline M128I<T> operator<<(const M128I<T> &a, int imm8)
+{
+    return m128i_slli(
+        a, imm8, std::integral_constant<std::size_t, sizeof(T)>());
+}
+
+template <typename T>
+inline M128I<T> operator<<=(M128I<T> &a, int imm8)
+{
+    a = a << imm8;
+
+    return a;
+}
+
+template <typename T>
+inline M128I<T> operator>>(const M128I<T> &a, int imm8)
+{
+    return m128i_srli(
+        a, imm8, std::integral_constant<std::size_t, sizeof(T)>());
+}
+
+template <typename T>
+inline M128I<T> operator>>=(M128I<T> &a, int imm8)
+{
+    a = a << imm8;
+
+    return a;
 }
 
 } // namespace vsmc::internal
