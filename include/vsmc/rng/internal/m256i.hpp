@@ -198,25 +198,6 @@ class M256I
     M256I(const M256I<IntType> &) = default;
     M256I(const __m256i &value) : value_(value) {}
 
-    M256I<IntType> &operator=(const M256I<IntType> &) = default;
-    M256I<IntType> &operator=(const __m256i &value)
-    {
-        value_ = value;
-
-        return *this;
-    }
-
-    M256I(M256I<IntType> &&) = default;
-    M256I(__m256i &&value) : value_(std::move(value)) {}
-
-    M256I<IntType> &operator=(M256I<IntType> &&) = default;
-    M256I<IntType> &operator=(__m256i &&value)
-    {
-        value_ = std::move(value);
-
-        return *this;
-    }
-
     static constexpr std::size_t size()
     {
         return sizeof(__m256i) / sizeof(IntType);
