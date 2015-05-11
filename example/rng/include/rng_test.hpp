@@ -67,15 +67,14 @@ inline void rng_test(std::size_t N, const std::string &name,
     vsmc::RDTSCCounter counter;
 #endif
 
-    vsmc::AlignedVector<typename RNG::result_type> result(N);
     watch.start();
     counter.start();
     for (std::size_t i = 0; i != N; ++i)
-        result[i] = rng();
+        rng();
     counter.stop();
     watch.stop();
     std::ofstream rnd("rnd");
-    rnd << result.back() << std::endl;
+    rnd << rng() << std::endl;
     rnd.close();
 
     names.push_back(name);
