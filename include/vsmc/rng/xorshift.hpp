@@ -116,6 +116,76 @@ struct XorshiftEngineTrait {
 namespace internal
 {
 
+template <std::size_t K, std::size_t, std::size_t, typename T>
+inline void xorshift_left_assign(std::array<T, K> &, std::false_type)
+{
+}
+
+template <std::size_t K, std::size_t A, std::size_t I, typename T>
+inline void xorshift_left_assign(std::array<T, K> &state, std::true_type)
+{
+    std::get<I>(state) = std::get<I + A>(state);
+    xorshift_left_assign<K, A, I + 1>(
+        state, std::integral_constant<bool, (I + A + 1 < K)>());
+}
+
+template <std::size_t K, std::size_t, typename T>
+inline void xorshift_left_zero(std::array<T, K> &, std::false_type)
+{
+}
+
+template <std::size_t K, std::size_t I, typename T>
+inline void xorshift_left_zero(std::array<T, K> &state, std::true_type)
+{
+    std::get<I>(state) = 0;
+    xorshift_left_zero<K, I + 1>(
+        state, std::integral_constant<bool, (I + 1 < K)>());
+}
+
+template <std::size_t K, std::size_t A, bool fillzero, typename T>
+inline void xorshift_left_shift(std::array<T, K> &state)
+{
+    xorshift_left_assign<K, A, 0>(
+        state, std::integral_constant<bool, (A > 0 && A < K)>());
+    xorshift_left_zero<K, K - A>(
+        state, std::integral_constant<bool, (fillzero && A > 0 && A <= K)>());
+}
+
+template <std::size_t K, std::size_t, std::size_t, typename T>
+inline void xorshift_right_assign(std::array<T, K> &, std::false_type)
+{
+}
+
+template <std::size_t K, std::size_t A, std::size_t I, typename T>
+inline void xorshift_right_assign(std::array<T, K> &state, std::true_type)
+{
+    std::get<I>(state) = std::get<I - A>(state);
+    xorshift_right_assign<K, A, I - 1>(
+        state, std::integral_constant<bool, (A < I)>());
+}
+
+template <std::size_t K, std::size_t, typename T>
+inline void xorshift_right_zero(std::array<T, K> &, std::false_type)
+{
+}
+
+template <std::size_t K, std::size_t I, typename T>
+inline void xorshift_right_zero(std::array<T, K> &state, std::true_type)
+{
+    std::get<I>(state) = 0;
+    xorshift_right_zero<K, I - 1>(
+        state, std::integral_constant<bool, (I > 0)>());
+}
+
+template <std::size_t K, std::size_t A, bool fillzero, typename T>
+inline void xorshift_right_shift(std::array<T, K> &state)
+{
+    xorshift_right_assign<K, A, K - 1>(
+        state, std::integral_constant<bool, (A > 0 && A < K)>());
+    xorshift_right_zero<K, A - 1>(
+        state, std::integral_constant<bool, (fillzero && A > 0 && A <= K)>());
+}
+
 template <bool, typename ResultType, unsigned>
 struct XorshiftLeft {
     static ResultType shift(ResultType x) { return x; }
@@ -147,7 +217,7 @@ struct XorshiftIndex {
 
     static void shift(std::array<ResultType, K> &state)
     {
-        rng_array_left_shift<K, 1, false>(state);
+        xorshift_left_shift<K, 1, false>(state);
     }
 }; // struct XorshiftIndex
 
