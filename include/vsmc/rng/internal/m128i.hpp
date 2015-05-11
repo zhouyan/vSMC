@@ -136,6 +136,8 @@ class M128I
     {
     }
 
+    M128I(const __m128i &value) : value_(value) {}
+
     template <typename T>
     M128I(T e1, T e0)
         : value_(_mm_set_epi64x(
@@ -171,28 +173,6 @@ class M128I
               static_cast<char>(e3), static_cast<char>(e2),
               static_cast<char>(e1), static_cast<char>(e0)))
     {
-    }
-
-    M128I(const M128I<IntType> &) = default;
-    M128I(const __m128i &value) : value_(value) {}
-
-    M128I<IntType> &operator=(const M128I<IntType> &) = default;
-    M128I<IntType> &operator=(const __m128i &value)
-    {
-        value_ = value;
-
-        return *this;
-    }
-
-    M128I(M128I<IntType> &&) = default;
-    M128I(__m128i &&value) : value_(std::move(value)) {}
-
-    M128I<IntType> &operator=(M128I<IntType> &&) = default;
-    M128I<IntType> &operator=(__m128i &&value)
-    {
-        value_ = std::move(value);
-
-        return *this;
     }
 
     static constexpr std::size_t size()

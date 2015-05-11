@@ -138,6 +138,8 @@ class M256I
     {
     }
 
+    M256I(const __m256i &value) : value_(value) {}
+
     template <typename T>
     M256I(T e3, T e2, T e1, T e0)
         : value_(_mm256_set_epi64x(static_cast<VSMC_INT64>(e3),
@@ -194,9 +196,6 @@ class M256I
                   static_cast<char>(e1), static_cast<char>(e0)))
     {
     }
-
-    M256I(const M256I<IntType> &) = default;
-    M256I(const __m256i &value) : value_(value) {}
 
     static constexpr std::size_t size()
     {
