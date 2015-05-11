@@ -91,10 +91,10 @@ class Counter<std::array<T, K>>
     /// \brief Increment the counter multiple times and store the results
     template <std::size_t Blocks>
     static void increment(
-        ctr_type &ctr, std::array<ctr_type, Blocks> &ctr_blocks)
+        ctr_type &ctr, std::array<ctr_type, Blocks> &ctr_block)
     {
         increment_block<Blocks, 0>(
-            ctr, ctr_blocks, std::integral_constant<bool, 0 < Blocks>());
+            ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
     }
 
     /// \brief Increment a counter by a given value
@@ -150,13 +150,13 @@ class Counter<std::array<T, K>>
     }
 
     template <std::size_t Blocks, std::size_t B>
-    static void increment_block(ctr_type &ctr,
-        std::array<ctr_type, Blocks> &ctr_blocks, std::true_type)
+    static void increment_block(
+        ctr_type &ctr, std::array<ctr_type, Blocks> &ctr_block, std::true_type)
     {
         increment(ctr);
-        std::get<B>(ctr_blocks) = ctr;
+        std::get<B>(ctr_block) = ctr;
         increment_block<Blocks, B + 1>(
-            ctr, ctr_blocks, std::integral_constant<bool, B + 1 < Blocks>());
+            ctr, ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
     }
 }; // struct Counter
 

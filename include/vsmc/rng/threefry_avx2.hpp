@@ -45,7 +45,7 @@ namespace internal
 template <typename ResultType, std::size_t K>
 struct ThreefryParPackAVX2 {
     typedef std::array<ResultType, K + 1> par_type;
-    typedef std::array<internal::M256I<ResultType>, K + 1> par256_type;
+    typedef std::array<M256I<ResultType>, K + 1> par256_type;
 
     static void eval(const par_type &par, par256_type &par256)
     {
@@ -67,76 +67,59 @@ struct ThreefryParPackAVX2 {
     }
 }; // struct ThreefryParPackAVX2
 
-template <typename, std::size_t>
-struct ThreefryCtrPackAVX2;
-
-template <std::size_t K>
-struct ThreefryCtrPackAVX2<std::uint32_t, K> {
-    typedef std::array<internal::M256I<std::uint32_t>, K> state_type;
-    typedef std::array<std::uint32_t, K> ctr_type;
+template <typename ResultType, std::size_t K>
+struct ThreefryCtrPackAVX2 {
+    typedef std::array<M256I<ResultType>, K> state_type;
+    typedef std::array<ResultType, K> ctr_type;
+    typedef std::array<ctr_type, M256I<ResultType>::size()> ctr_block_type;
 
     static void eval(ctr_type &ctr, state_type &state)
     {
-        std::array<ctr_type, 8> ctr_blocks;
-        Counter<ctr_type>::increment(ctr, ctr_blocks);
-        pack<0>(ctr_blocks, state, std::integral_constant<bool, 0 < K>());
+        ctr_block_type ctr_block;
+        Counter<ctr_type>::increment(ctr, ctr_block);
+        pack<0>(ctr_block, state, std::integral_constant<bool, 0 < K>());
     }
 
     private:
     template <std::size_t N>
-    static void pack(
-        const std::array<ctr_type, 8> &, state_type &, std::false_type)
+    static void pack(const ctr_block_type &, state_type &, std::false_type)
     {
     }
 
     template <std::size_t N>
     static void pack(
-        std::array<ctr_type, 8> &ctr_blocks, state_type &state, std::true_type)
+        const ctr_block_type &ctr_block, state_type &state, std::true_type)
     {
-        std::get<N>(state) = _mm256_set_epi32(
-            static_cast<int>(std::get<N>(std::get<0>(ctr_blocks))),
-            static_cast<int>(std::get<N>(std::get<1>(ctr_blocks))),
-            static_cast<int>(std::get<N>(std::get<2>(ctr_blocks))),
-            static_cast<int>(std::get<N>(std::get<3>(ctr_blocks))),
-            static_cast<int>(std::get<N>(std::get<4>(ctr_blocks))),
-            static_cast<int>(std::get<N>(std::get<5>(ctr_blocks))),
-            static_cast<int>(std::get<N>(std::get<6>(ctr_blocks))),
-            static_cast<int>(std::get<N>(std::get<7>(ctr_blocks))));
+        set<N>(ctr_block, state,
+            std::integral_constant<std::size_t, sizeof(ResultType)>());
         pack<N + 1>(
-            ctr_blocks, state, std::integral_constant<bool, N + 1 < K>());
-    }
-}; // struct ThreefryCtrPackAVX2
-
-template <std::size_t K>
-struct ThreefryCtrPackAVX2<std::uint64_t, K> {
-    typedef std::array<internal::M256I<std::uint64_t>, K> state_type;
-    typedef std::array<std::uint64_t, K> ctr_type;
-
-    static void eval(ctr_type &ctr, state_type &state)
-    {
-        std::array<ctr_type, 4> ctr_blocks;
-        Counter<ctr_type>::increment(ctr, ctr_blocks);
-        pack<0>(ctr_blocks, state, std::integral_constant<bool, 0 < K>());
-    }
-
-    private:
-    template <std::size_t N>
-    static void pack(
-        const std::array<ctr_type, 4> &, state_type &, std::false_type)
-    {
+            ctr_block, state, std::integral_constant<bool, N + 1 < K>());
     }
 
     template <std::size_t N>
-    static void pack(const std::array<ctr_type, 4> &ctr_blocks,
-        state_type &state, std::true_type)
+    static void set(const ctr_block_type &ctr_block, state_type &state,
+        std::integral_constant<std::size_t, 4>)
     {
-        std::get<N>(state) = _mm256_set_epi64x(
-            static_cast<VSMC_INT64>(std::get<N>(std::get<0>(ctr_blocks))),
-            static_cast<VSMC_INT64>(std::get<N>(std::get<1>(ctr_blocks))),
-            static_cast<VSMC_INT64>(std::get<N>(std::get<2>(ctr_blocks))),
-            static_cast<VSMC_INT64>(std::get<N>(std::get<3>(ctr_blocks))));
-        pack<N + 1>(
-            ctr_blocks, state, std::integral_constant<bool, N + 1 < K>());
+        std::get<N>(state) =
+            M256I<ResultType>(std::get<N>(std::get<0>(ctr_block)),
+                std::get<N>(std::get<1>(ctr_block)),
+                std::get<N>(std::get<2>(ctr_block)),
+                std::get<N>(std::get<3>(ctr_block)),
+                std::get<N>(std::get<4>(ctr_block)),
+                std::get<N>(std::get<5>(ctr_block)),
+                std::get<N>(std::get<6>(ctr_block)),
+                std::get<N>(std::get<7>(ctr_block)));
+    }
+
+    template <std::size_t N>
+    static void set(const ctr_block_type &ctr_block, state_type &state,
+        std::integral_constant<std::size_t, 8>)
+    {
+        std::get<N>(state) =
+            M256I<ResultType>(std::get<N>(std::get<0>(ctr_block)),
+                std::get<N>(std::get<1>(ctr_block)),
+                std::get<N>(std::get<2>(ctr_block)),
+                std::get<N>(std::get<3>(ctr_block)));
     }
 }; // struct ThreefryCtrPackAVX2
 
@@ -297,10 +280,6 @@ class ThreefryEngineAVX2
         os << eng.ctr_ << ' ';
         os << eng.par_ << ' ';
         os << eng.buffer_ << ' ';
-        for (std::size_t k = 0; k != K; ++k) {
-            internal::m256i_output(os, eng.buffer_[k]);
-            os << ' ';
-        }
         os << eng.index_;
 
         return os;
@@ -317,8 +296,7 @@ class ThreefryEngineAVX2
         ThreefryEngineAVX2<ResultType, K, Rounds> eng_tmp;
         is >> std::ws >> eng_tmp.ctr_;
         is >> std::ws >> eng_tmp.par_;
-        for (std::size_t k = 0; k != K; ++k)
-            internal::m256i_input(is, eng_tmp.buffer_[k]);
+        is >> std::ws >> eng_tmp.buffer_;
         is >> std::ws >> eng_tmp.index_;
 
         if (is.good())
