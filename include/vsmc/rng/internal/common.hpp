@@ -87,6 +87,26 @@ inline void increment(std::array<T, K> &ctr)
     increment_single<0>(ctr, std::integral_constant<bool, 1 < K>());
 }
 
+template <typename T, std::size_t K, T NSkip>
+inline void increment(std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
+{
+    T old = ctr.front();
+    ctr.front() += NSkip;
+
+    if (ctr.front() < old && old != 0)
+        increment_single<1>(ctr, std::integral_constant<bool, 2 < K>());
+}
+
+template <typename T, std::size_t K>
+inline static void increment(std::array<T, K> &ctr, T nskip)
+{
+    T old = ctr.front();
+    ctr.front() += nskip;
+
+    if (ctr.front() < old && old != 0)
+        increment_single<1>(ctr, std::integral_constant<bool, 2 < K>());
+}
+
 template <std::size_t Blocks, std::size_t, typename T, std::size_t K>
 inline static void increment_block(std::array<T, K> &,
     std::array<std::array<T, K>, Blocks> &, std::false_type)
@@ -97,8 +117,8 @@ template <std::size_t Blocks, std::size_t B, typename T, std::size_t K>
 inline static void increment_block(std::array<T, K> &ctr,
     std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
 {
-    increment(ctr);
     std::get<B>(ctr_block) = ctr;
+    increment(std::get<B>(ctr_block), std::integral_constant<T, B + 1>());
     increment_block<Blocks, B + 1>(
         ctr, ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
 }
@@ -109,35 +129,7 @@ static void increment(
 {
     increment_block<Blocks, 0>(
         ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
-}
-
-template <typename T, std::size_t K>
-inline static void increment(std::array<T, K> &ctr, T nskip)
-{
-    static constexpr T max_val = VSMC_MAX_UINT(T);
-
-    if (nskip == 0)
-        return;
-
-    if (K == 1) {
-        ctr.front() += nskip;
-        return;
-    }
-
-    if (nskip == 1) {
-        increment(ctr);
-        return;
-    }
-
-    if (ctr.front() <= max_val - nskip) {
-        ctr.front() += nskip;
-        return;
-    }
-
-    nskip -= max_val - ctr.front();
-    ctr.front() = max_val;
-    increment(ctr);
-    ctr.front() = nskip - 1;
+    ctr = ctr_block.back();
 }
 
 } // namespace vsmc::internal
