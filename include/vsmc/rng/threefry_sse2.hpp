@@ -151,7 +151,7 @@ class ThreefryEngineSSE2
     typedef Counter<ctr_type> counter;
 
     public:
-    explicit ThreefryEngineSSE2(result_type s = 0) : index_(K * M_)
+    explicit ThreefryEngineSSE2(result_type s = 0) : index_(M_)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY(SSE2);
         seed(s);
@@ -162,13 +162,13 @@ class ThreefryEngineSSE2
         typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
             key_type, ThreefryEngineSSE2<ResultType, K, Rounds>>::value>::type
             * = nullptr)
-        : index_(K * M_)
+        : index_(M_)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY(SSE2);
         seed(seq);
     }
 
-    ThreefryEngineSSE2(const key_type &k) : index_(K * M_)
+    ThreefryEngineSSE2(const key_type &k) : index_(M_)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY(SSE2);
         seed(k);
@@ -181,7 +181,7 @@ class ThreefryEngineSSE2
         k.fill(0);
         k.front() = s;
         init_par(k);
-        index_ = K * M_;
+        index_ = M_;
     }
 
     template <typename SeedSeq>
@@ -194,14 +194,14 @@ class ThreefryEngineSSE2
         key_type k;
         seq.generate(k.begin(), k.end());
         init_par(k);
-        index_ = K * M_;
+        index_ = M_;
     }
 
     void seed(const key_type &k)
     {
         counter::reset(ctr_);
         init_par(k);
-        index_ = K * M_;
+        index_ = M_;
     }
 
     ctr_type ctr() const { return ctr_; }
@@ -218,18 +218,18 @@ class ThreefryEngineSSE2
     void ctr(const ctr_type &c)
     {
         counter::set(ctr_, c);
-        index_ = K * M_;
+        index_ = M_;
     }
 
     void key(const key_type &k)
     {
         init_par(k);
-        index_ = K * M_;
+        index_ = M_;
     }
 
     result_type operator()()
     {
-        if (index_ == K * M_) {
+        if (index_ == M_) {
             generate_buffer();
             index_ = 0;
         }
@@ -240,23 +240,23 @@ class ThreefryEngineSSE2
     void discard(result_type nskip)
     {
         std::size_t n = static_cast<std::size_t>(nskip);
-        if (index_ + n <= K * M_) {
+        if (index_ + n <= M_) {
             index_ += n;
             return;
         }
 
-        n -= K * M_ - index_;
-        if (n <= K * M_) {
-            index_ = K * M_;
+        n -= M_ - index_;
+        if (n <= M_) {
+            index_ = M_;
             operator()();
             index_ = n;
             return;
         }
 
-        counter::increment(ctr_, static_cast<result_type>(n / (K * M_)));
-        index_ = K * M_;
+        counter::increment(ctr_, static_cast<result_type>(n / M_));
+        index_ = M_;
         operator()();
-        index_ = n % (K * M_);
+        index_ = n % M_;
     }
 
     static constexpr result_type _Min = 0;
@@ -322,14 +322,14 @@ class ThreefryEngineSSE2
     }
 
     private:
-    typedef std::array<internal::M128I<ResultType>, K> state_type;
     typedef std::array<internal::M128I<ResultType>, K + 1> par_type;
+    typedef std::array<internal::M128I<ResultType>, K> state_type;
 
-    static constexpr std::size_t M_ = internal::M128I<ResultType>::size();
+    static constexpr std::size_t M_ = K * internal::M128I<ResultType>::size();
 
     ctr_type ctr_;
     std::array<ResultType, K + 1> par_;
-    std::array<ResultType, K * M_> buffer_;
+    std::array<ResultType, M_> buffer_;
     std::size_t index_;
 
     void generate_buffer()
@@ -339,7 +339,7 @@ class ThreefryEngineSSE2
         internal::ThreefryParPackSSE2<ResultType, K>::eval(par_, par);
         internal::ThreefryCtrPackSSE2<ResultType, K>::eval(ctr_, state);
         generate_buffer<0>(par, state, std::true_type());
-        std::memcpy(buffer_.data(), state.data(), sizeof(ResultType) * K * M_);
+        std::memcpy(buffer_.data(), state.data(), sizeof(ResultType) * M_);
     }
 
     template <std::size_t>
