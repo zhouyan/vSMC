@@ -165,7 +165,7 @@ class ThreefryEngineAVX2
         key_type k;
         k.fill(0);
         k.front() = s;
-        init_par(k);
+        internal::ThreefryInitPar<ResultType, K>::eval(k, par_);
         index_ = M_;
     }
 
@@ -178,14 +178,14 @@ class ThreefryEngineAVX2
         ctr_.fill(0);
         key_type k;
         seq.generate(k.begin(), k.end());
-        init_par(k);
+        internal::ThreefryInitPar<ResultType, K>::eval(k, par_);
         index_ = M_;
     }
 
     void seed(const key_type &k)
     {
         ctr_.fill(0);
-        init_par(k);
+        internal::ThreefryInitPar<ResultType, K>::eval(k, par_);
         index_ = M_;
     }
 
@@ -208,7 +208,7 @@ class ThreefryEngineAVX2
 
     void key(const key_type &k)
     {
-        init_par(k);
+        internal::ThreefryInitPar<ResultType, K>::eval(k, par_);
         index_ = M_;
     }
 
@@ -337,25 +337,6 @@ class ThreefryEngineAVX2
             state, par);
         generate_buffer<N + 1>(
             par, state, std::integral_constant < bool, N<Rounds>());
-    }
-
-    void init_par(const key_type &key)
-    {
-        par_.back() = internal::ThreefryKSConstantValue<ResultType>::value;
-        par_xor<0>(key, std::integral_constant<bool, 0 < K>());
-    }
-
-    template <std::size_t>
-    void par_xor(const key_type &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    void par_xor(const key_type &key, std::true_type)
-    {
-        std::get<N>(par_) = std::get<N>(key);
-        par_.back() ^= std::get<N>(key);
-        par_xor<N + 1>(key, std::integral_constant<bool, N + 1 < K>());
     }
 }; // class ThreefryEngineAVX2
 

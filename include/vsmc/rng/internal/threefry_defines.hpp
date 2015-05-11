@@ -149,6 +149,32 @@ VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 5, 1, 12)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 6, 1, 22)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 7, 1, 32)
 
+template <typename ResultType, std::size_t K>
+struct ThreefryInitPar {
+    static void eval(const std::array<ResultType, K> &key,
+        std::array<ResultType, K + 1> &par)
+    {
+        par.back() = ThreefryKSConstantValue<ResultType>::value;
+        par_xor<0>(key, par, std::integral_constant<bool, 0 < K>());
+    }
+
+    private:
+    template <std::size_t>
+    static void par_xor(const std::array<ResultType, K> &,
+        std::array<ResultType, K + 1> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void par_xor(const std::array<ResultType, K> &key,
+        std::array<ResultType, K + 1> &par, std::true_type)
+    {
+        std::get<N>(par) = std::get<N>(key);
+        par.back() ^= std::get<N>(key);
+        par_xor<N + 1>(key, par, std::integral_constant<bool, N + 1 < K>());
+    }
+}; // struct ThreefryInitPar
+
 template <typename ResultType>
 struct ThreefryRotateBits
     : public std::integral_constant<int, sizeof(ResultType) * 8> {
