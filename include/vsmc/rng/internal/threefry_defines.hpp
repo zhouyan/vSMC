@@ -51,7 +51,7 @@
 
 #define VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(T, K, N, I, val)             \
     template <>                                                               \
-    struct ThreefryRotateConstantValue<T, K, N, I>                            \
+    struct ThreefryRotateConstant<T, K, N, I>                                 \
         : public std::integral_constant<int, val> {                           \
     };
 
@@ -68,31 +68,30 @@ namespace internal
 {
 
 template <typename>
-struct ThreefryKSConstantValue;
+struct ThreefryKSConstant;
 
 template <typename T, template <typename> class Wrapper>
-struct ThreefryKSConstantValue<Wrapper<T>>
-    : public ThreefryKSConstantValue<T> {
+struct ThreefryKSConstant<Wrapper<T>> : public ThreefryKSConstant<T> {
 };
 
 template <>
-struct ThreefryKSConstantValue<std::uint32_t>
+struct ThreefryKSConstant<std::uint32_t>
     : public std::integral_constant<std::uint32_t, UINT32_C(0x1BD11BDA)> {
 };
 
 template <>
-struct ThreefryKSConstantValue<std::uint64_t>
+struct ThreefryKSConstant<std::uint64_t>
     : public std::integral_constant<std::uint64_t,
           UINT64_C(0x1BD11BDAA9FC1A22)> {
 };
 
 template <typename, std::size_t, std::size_t, std::size_t>
-struct ThreefryRotateConstantValue;
+struct ThreefryRotateConstant;
 
 template <typename T, template <typename> class Wrapper, std::size_t K,
     std::size_t N, std::size_t I>
-struct ThreefryRotateConstantValue<Wrapper<T>, K, N, I>
-    : public ThreefryRotateConstantValue<T, K, N, I> {
+struct ThreefryRotateConstant<Wrapper<T>, K, N, I>
+    : public ThreefryRotateConstant<T, K, N, I> {
 };
 
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 2, 0, 0, 13)
@@ -154,7 +153,7 @@ struct ThreefryInitPar {
     static void eval(const std::array<ResultType, K> &key,
         std::array<ResultType, K + 1> &par)
     {
-        par.back() = ThreefryKSConstantValue<ResultType>::value;
+        par.back() = ThreefryKSConstant<ResultType>::value;
         par_xor<0>(key, par, std::integral_constant<bool, 0 < K>());
     }
 
@@ -204,7 +203,7 @@ struct ThreefryRotate<ResultType, 2, N, true> {
         std::get<0>(state) += std::get<1>(state);
         std::get<1>(state) =
             ThreefryRotateImpl<ResultType,
-                ThreefryRotateConstantValue<ResultType, 2, r_,
+                ThreefryRotateConstant<ResultType, 2, r_,
                                    0>::value>::eval(std::get<1>(state));
         std::get<1>(state) ^= std::get<0>(state);
     }
@@ -220,14 +219,14 @@ struct ThreefryRotate<ResultType, 4, N, true> {
         std::get<0>(state) += std::get<i0_>(state);
         std::get<i0_>(state) =
             ThreefryRotateImpl<ResultType,
-                ThreefryRotateConstantValue<ResultType, 4, r_,
+                ThreefryRotateConstant<ResultType, 4, r_,
                                    0>::value>::eval(std::get<i0_>(state));
         std::get<i0_>(state) ^= std::get<0>(state);
 
         std::get<2>(state) += std::get<i2_>(state);
         std::get<i2_>(state) =
             ThreefryRotateImpl<ResultType,
-                ThreefryRotateConstantValue<ResultType, 4, r_,
+                ThreefryRotateConstant<ResultType, 4, r_,
                                    1>::value>::eval(std::get<i2_>(state));
         std::get<i2_>(state) ^= std::get<2>(state);
     }
