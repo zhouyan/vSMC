@@ -33,19 +33,34 @@
 #define VSMC_RESAMPLE_INTERNAL_COMMON_HPP
 
 #include <vsmc/internal/common.hpp>
+
 #if VSMC_HAS_AES_NI
 #include <vsmc/rng/aes.hpp>
 #include <vsmc/rng/ars.hpp>
 #endif
+
 #include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
+#if VSMC_HAS_AVX2
+#include <vsmc/rng/threefry_avx2.hpp>
+#endif
+#if VSMC_HAS_SSE2
+#include <vsmc/rng/threefry_sse2.hpp>
+#endif
+
 #include <vsmc/rng/u01.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 
 /// \brief Default RNG type for resampling
 /// \ingroup Config
 #ifndef VSMC_RESAMPLE_RNG_TYPE
+#if VSMC_HAS_AVX2
+#define VSMC_RESAMPLE_RNG_TYPE ::vsmc::Threefry4x32AVX2
+#elif VSMC_HAS_SSE2
+#define VSMC_RESAMPLE_RNG_TYPE ::vsmc::Threefry4x32SSE2
+#else
 #define VSMC_RESAMPLE_RNG_TYPE ::vsmc::Threefry4x32
+#endif
 #endif
 
 namespace vsmc

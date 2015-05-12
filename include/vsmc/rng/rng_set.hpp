@@ -42,6 +42,12 @@
 
 #include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
+#if VSMC_HAS_AVX2
+#include <vsmc/rng/threefry_avx2.hpp>
+#endif
+#if VSMC_HAS_SSE2
+#include <vsmc/rng/threefry_sse2.hpp>
+#endif
 
 #if VSMC_HAS_TBB
 #include <tbb/tbb.h>
@@ -54,11 +60,23 @@
 /// \ingroup Config
 #ifndef VSMC_RNG_SET_TYPE
 #if VSMC_USE_TBB
+#if VSMC_HAS_AVX2
+#define VSMC_RNG_SET_TYPE ::vsmc::RngSetTBB<::vsmc::Threefry4x32AVX2>
+#elif VSMC_HAS_SSE2
+#define VSMC_RNG_SET_TYPE ::vsmc::RngSetTBB<::vsmc::Threefry4x32SSE2>
+#else
 #define VSMC_RNG_SET_TYPE ::vsmc::RngSetTBB<::vsmc::Threefry4x32>
+#endif
+#else // VSMC_USE_TBB
+#if VSMC_HAS_AVX2
+#define VSMC_RNG_SET_TYPE ::vsmc::RngSetVector<::vsmc::Threefry4x32AVX2>
+#elif VSMC_HAS_SSE2
+#define VSMC_RNG_SET_TYPE ::vsmc::RngSetVector<::vsmc::Threefry4x32SSE2>
 #else
 #define VSMC_RNG_SET_TYPE ::vsmc::RngSetVector<::vsmc::Threefry4x32>
 #endif
-#endif
+#endif // VSMC_USE_TBB
+#endif // VSMC_RNG_SET_TYPE
 
 namespace vsmc
 {
