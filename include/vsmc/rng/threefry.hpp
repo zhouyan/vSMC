@@ -209,9 +209,9 @@ class ThreefryEngine
         if (!os.good())
             return os;
 
-        os << eng.ctr_ << ' ';
-        os << eng.par_ << ' ';
         os << eng.buffer_ << ' ';
+        os << eng.par_ << ' ';
+        os << eng.ctr_ << ' ';
         os << eng.index_;
 
         return os;
@@ -226,9 +226,9 @@ class ThreefryEngine
             return is;
 
         ThreefryEngine<ResultType, K, Rounds> eng_tmp;
-        is >> std::ws >> eng_tmp.ctr_;
-        is >> std::ws >> eng_tmp.par_;
         is >> std::ws >> eng_tmp.buffer_;
+        is >> std::ws >> eng_tmp.par_;
+        is >> std::ws >> eng_tmp.ctr_;
         is >> std::ws >> eng_tmp.index_;
 
         if (is.good())

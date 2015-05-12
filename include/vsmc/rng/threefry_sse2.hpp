@@ -267,9 +267,9 @@ class ThreefryEngineSSE2
         if (!os.good())
             return os;
 
-        os << eng.ctr_ << ' ';
-        os << eng.par_ << ' ';
         os << eng.buffer_ << ' ';
+        os << eng.par_ << ' ';
+        os << eng.ctr_ << ' ';
         os << eng.index_;
 
         return os;

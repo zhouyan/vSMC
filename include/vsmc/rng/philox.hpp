@@ -204,9 +204,9 @@ class PhiloxEngine
         if (!os.good())
             return os;
 
-        os << eng.ctr_ << ' ';
-        os << eng.key_ << ' ';
         os << eng.buffer_ << ' ';
+        os << eng.key_ << ' ';
+        os << eng.ctr_ << ' ';
         os << eng.index_;
 
         return os;
@@ -222,8 +222,8 @@ class PhiloxEngine
 
         PhiloxEngine<ResultType, K, Rounds> eng_tmp;
         is >> std::ws >> eng_tmp.buffer_;
-        is >> std::ws >> eng_tmp.ctr_;
         is >> std::ws >> eng_tmp.key_;
+        is >> std::ws >> eng_tmp.ctr_;
         is >> std::ws >> eng_tmp.index_;
 
         if (is.good())
