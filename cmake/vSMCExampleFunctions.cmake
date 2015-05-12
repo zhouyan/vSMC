@@ -69,10 +69,10 @@ FUNCTION (ADD_VSMC_EXECUTABLE exe src)
             TARGET_LINK_LIBRARIES (${exe} ${TBB_LINK_LIBRARIES})
         ENDIF (${arg} STREQUAL "TBB" AND TBB_FOUND)
 
-        IF (${arg} STREQUAL "OMP" AND VSMC_OPENMP_FOUND)
+        IF (${arg} STREQUAL "OMP" AND OPENMP_FOUND)
             SET (compile_flags "${compile_flags} ${OpenMP_CXX_FLAGS}")
             TARGET_LINK_LIBRARIES (${exe} ${OpenMP_LINK_LIBRARIES})
-        ENDIF (${arg} STREQUAL "OMP" AND VSMC_OPENMP_FOUND)
+        ENDIF (${arg} STREQUAL "OMP" AND OPENMP_FOUND)
     ENDFOREACH (arg ${ARGN})
 
     IF (compile_flags)
