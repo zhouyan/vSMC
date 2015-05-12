@@ -33,7 +33,6 @@
 #define VSMC_RNG_INTERNAL_COMMON_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/aligned_memory.hpp>
 
 #ifndef UINT64_C
 #error __STDC_CONSTANT_MACROS not defined before #<stdint.h>

@@ -33,6 +33,7 @@
 #define VSMC_RNG_MKL_HPP
 
 #include <vsmc/rng/internal/common.hpp>
+#include <vsmc/utility/aligned_memory.hpp>
 #include <vsmc/utility/mkl.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Dist)     \

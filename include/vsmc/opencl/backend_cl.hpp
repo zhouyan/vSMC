@@ -40,6 +40,7 @@
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/opencl/cl_type.hpp>
 #include <vsmc/rng/seed.hpp>
+#include <vsmc/utility/aligned_memory.hpp>
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_DYNAMIC_STATE_SIZE_RESIZE(Dim)   \
     VSMC_STATIC_ASSERT((Dim == Dynamic),                                      \
