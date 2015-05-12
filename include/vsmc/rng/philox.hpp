@@ -233,9 +233,9 @@ class PhiloxEngine
     }
 
     private:
-    ctr_type ctr_;
-    key_type key_;
     std::array<ResultType, K> buffer_;
+    key_type key_;
+    ctr_type ctr_;
     std::size_t index_;
 
     void generate_buffer()

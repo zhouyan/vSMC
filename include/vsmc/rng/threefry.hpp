@@ -238,9 +238,9 @@ class ThreefryEngine
     }
 
     private:
-    ctr_type ctr_;
-    std::array<ResultType, K + 1> par_;
     std::array<ResultType, K> buffer_;
+    std::array<ResultType, K + 1> par_;
+    ctr_type ctr_;
     std::size_t index_;
 
     void generate_buffer()

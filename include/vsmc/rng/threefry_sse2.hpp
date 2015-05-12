@@ -301,9 +301,9 @@ class ThreefryEngineSSE2
 
     static constexpr std::size_t M_ = K * internal::M128I<ResultType>::size();
 
-    ctr_type ctr_;
+    alignas(16) std::array<ResultType, M_> buffer_;
     std::array<ResultType, K + 1> par_;
-    std::array<ResultType, M_> buffer_;
+    ctr_type ctr_;
     std::size_t index_;
 
     void generate_buffer()

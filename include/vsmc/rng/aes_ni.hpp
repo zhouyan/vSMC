@@ -409,7 +409,7 @@ class AESNIEngine
         sizeof(__m128i) / sizeof(ResultType) * Blocks;
 
     internal::AESNIKeySeqStorage<KeySeq, KeySeqInit, Rounds> key_seq_;
-    std::array<ResultType, K_> buffer_;
+    alignas(16) std::array<ResultType, K_> buffer_;
     ctr_type ctr_;
     key_type key_;
     std::size_t index_;

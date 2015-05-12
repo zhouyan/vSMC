@@ -307,9 +307,9 @@ class ThreefryEngineAVX2
 
     static constexpr std::size_t M_ = K * internal::M256I<ResultType>::size();
 
-    ctr_type ctr_;
+    alignas(32) std::array<ResultType, M_> buffer_;
     std::array<ResultType, K + 1> par_;
-    std::array<ResultType, M_> buffer_;
+    ctr_type ctr_;
     std::size_t index_;
 
     void generate_buffer()
