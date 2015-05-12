@@ -313,8 +313,8 @@ inline bool operator==(const M256I<> &a, const M256I<> &b)
 {
     std::array<std::uint64_t, 4> sa;
     std::array<std::uint64_t, 4> sb;
-    a.store(sa.data());
-    b.store(sb.data());
+    a.store_u(sa.data());
+    b.store_u(sb.data());
 
     return sa == sb;
 }
@@ -328,7 +328,7 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
 
     std::array<std::uint64_t, 4> sa;
     M256I<> ma(a);
-    ma.store(sa.data());
+    ma.store_u(sa.data());
     os << sa;
 
     return os;
@@ -342,7 +342,7 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
         return os;
 
     std::array<T, M256I<T>::size()> sa;
-    a.store(sa.data());
+    a.store_u(sa.data());
     os << sa;
 
     return os;
@@ -360,7 +360,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
 
     if (is.good()) {
         M256I<> ma;
-        ma.load(sa.data());
+        ma.load_u(sa.data());
         a = ma.value();
     }
 
@@ -378,7 +378,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
     is >> sa;
 
     if (is.good())
-        a.load(sa.data());
+        a.load_u(sa.data());
 
     return is;
 }
