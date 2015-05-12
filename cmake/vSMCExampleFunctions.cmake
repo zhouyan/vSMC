@@ -71,7 +71,7 @@ FUNCTION (ADD_VSMC_EXECUTABLE exe src)
 
         IF (${arg} STREQUAL "OMP" AND OPENMP_FOUND)
             SET (compile_flags "${compile_flags} ${OpenMP_CXX_FLAGS}")
-            TARGET_LINK_LIBRARIES (${exe} ${OpenMP_LINK_LIBRARIES})
+            SET (link_flags "${link_flags} ${OpenMP_CXX_FLAGS}")
         ENDIF (${arg} STREQUAL "OMP" AND OPENMP_FOUND)
     ENDFOREACH (arg ${ARGN})
 
@@ -152,7 +152,7 @@ FUNCTION (COPY_FILE_OPTIONAL basename filename)
     IF (EXISTS ${PROJECT_SOURCE_DIR}/${filename})
         COPY_FILE (${basename} ${filename})
     ELSE (EXISTS ${PROJECT_SOURCE_DIR}/${filename})
-            MESSAGE (STATUS "File: ${basename}: ${filename} not available")
+        MESSAGE (STATUS "File: ${basename}: ${filename} not available")
     ENDIF (EXISTS ${PROJECT_SOURCE_DIR}/${filename})
 ENDFUNCTION (COPY_FILE_OPTIONAL)
 
