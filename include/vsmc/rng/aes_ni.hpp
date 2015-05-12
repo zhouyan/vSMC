@@ -33,7 +33,7 @@
 #define VSMC_RNG_AES_NI_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/internal/m128i.hpp>
+#include <vsmc/rng/m128i.hpp>
 #include <wmmintrin.h>
 
 #define VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks)                          \
@@ -61,7 +61,7 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
 {
     public:
     typedef typename KeySeq::key_type key_type;
-    typedef std::array<__m128i, Rounds + 1> key_seq_type;
+    typedef std::array<M128I<>, Rounds + 1> key_seq_type;
 
     key_seq_type get(const key_type &) const { return key_seq_; }
 
@@ -79,10 +79,8 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
         if (!os.good())
             return os;
 
-        for (std::size_t i = 0; i != Rounds + 1; ++i) {
-            internal::m128i_output(os, ks.key_seq_[i]);
-            os << ' ';
-        }
+        for (std::size_t i = 0; i != Rounds + 1; ++i)
+            os << ks.key_seq_[i] << ' ';
 
         return os;
     }
@@ -97,7 +95,7 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
 
         AESNIKeySeqStorage<KeySeq, true, Rounds> ks_tmp;
         for (std::size_t i = 0; i != Rounds + 1; ++i)
-            internal::m128i_input(is, ks_tmp.key_seq_[i]);
+            is >> std::ws >> ks_tmp.key_seq_[i];
 
         if (is.good())
             ks = std::move(ks_tmp);
@@ -114,7 +112,7 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 {
     public:
     typedef typename KeySeq::key_type key_type;
-    typedef std::array<__m128i, Rounds + 1> key_seq_type;
+    typedef std::array<M128I<>, Rounds + 1> key_seq_type;
 
     key_seq_type get(const key_type &k) const
     {
@@ -146,9 +144,8 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
 
 template <typename ResultType, std::size_t Blocks>
 struct AESNICtrPack {
-    typedef std::array<__m128i, Blocks> state_type;
-    typedef std::array<ResultType, sizeof(__m128i) / sizeof(ResultType)>
-        ctr_type;
+    typedef std::array<M128I<>, Blocks> state_type;
+    typedef std::array<ResultType, M128I<ResultType>::size()> ctr_type;
 
     static void eval(ctr_type &ctr, state_type &state)
     {
@@ -231,12 +228,11 @@ class AESNIEngine
 {
     public:
     typedef ResultType result_type;
-    typedef std::array<ResultType, sizeof(__m128i) / sizeof(ResultType)>
-        ctr_type;
+    typedef std::array<ResultType, M128I<ResultType>::size()> ctr_type;
     typedef typename KeySeq::key_type key_type;
-    typedef std::array<__m128i, Rounds + 1> key_seq_type;
+    typedef std::array<M128I<>, Rounds + 1> key_seq_type;
 
-    explicit AESNIEngine(result_type s = 0) : index_(K_)
+    explicit AESNIEngine(result_type s = 0) : index_(M_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         seed(s);
@@ -248,13 +244,13 @@ class AESNIEngine
             internal::is_seed_seq<SeedSeq, result_type, key_type,
                 AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds,
                                       Blocks>>::value>::type * = nullptr)
-        : index_(K_)
+        : index_(M_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         seed(seq);
     }
 
-    AESNIEngine(const key_type &k) : index_(K_)
+    AESNIEngine(const key_type &k) : index_(M_)
     {
         VSMC_STATIC_ASSERT_RNG_AES_NI;
         seed(k);
@@ -266,7 +262,7 @@ class AESNIEngine
         key_.fill(0);
         key_.front() = s;
         key_seq_.set(key_);
-        index_ = K_;
+        index_ = M_;
     }
 
     template <typename SeedSeq>
@@ -277,7 +273,7 @@ class AESNIEngine
         ctr_.fill(0);
         seq.generate(key_.begin(), key_.end());
         key_seq_.set(key_);
-        index_ = K_;
+        index_ = M_;
     }
 
     void seed(const key_type &k)
@@ -285,7 +281,7 @@ class AESNIEngine
         ctr_.fill(0);
         key_ = k;
         key_seq_.set(k);
-        index_ = K_;
+        index_ = M_;
     }
 
     ctr_type ctr() const { return ctr_; }
@@ -297,19 +293,19 @@ class AESNIEngine
     void ctr(const ctr_type &c)
     {
         ctr_ = c;
-        index_ = K_;
+        index_ = M_;
     }
 
     void key(const key_type &k)
     {
         key_ = k;
         key_seq_.set(k);
-        index_ = K_;
+        index_ = M_;
     }
 
     result_type operator()()
     {
-        if (index_ == K_) {
+        if (index_ == M_) {
             generate_buffer();
             index_ = 0;
         }
@@ -320,23 +316,23 @@ class AESNIEngine
     void discard(result_type nskip)
     {
         std::size_t n = static_cast<std::size_t>(nskip);
-        if (index_ + n <= K_) {
+        if (index_ + n <= M_) {
             index_ += n;
             return;
         }
 
-        n -= K_ - index_;
-        if (n <= K_) {
-            index_ = K_;
+        n -= M_ - index_;
+        if (n <= M_) {
+            index_ = M_;
             operator()();
             index_ = n;
             return;
         }
 
-        internal::increment(ctr_, static_cast<result_type>(n / K_));
-        index_ = K_;
+        internal::increment(ctr_, static_cast<result_type>(n / M_));
+        index_ = M_;
         operator()();
-        index_ = n % K_;
+        index_ = n % M_;
     }
 
     static constexpr result_type _Min = 0;
@@ -370,12 +366,10 @@ class AESNIEngine
         if (!os.good())
             return os;
 
-        for (std::size_t i = 0; i != Blocks; ++i) {
-            internal::m128i_output(os, eng.buffer_[i]);
-            os << ' ';
-        }
-        os << eng.ctr_ << ' ';
+        os << eng.key_seq_ << ' ';
+        os << eng.buffer_ << ' ';
         os << eng.key_ << ' ';
+        os << eng.ctr_ << ' ';
         os << eng.index_;
 
         return os;
@@ -390,10 +384,10 @@ class AESNIEngine
             return is;
 
         AESNIEngine<ResultType, KeySeq, KeySeqInit, Rounds, Blocks> eng_tmp;
-        for (std::size_t i = 0; i != Blocks; ++i)
-            internal::m128i_input(is, eng_tmp.buffer_[i]);
-        is >> std::ws >> eng_tmp.ctr_;
+        is >> std::ws >> eng_tmp.key_seq_;
+        is >> std::ws >> eng_tmp.buffer_;
         is >> std::ws >> eng_tmp.key_;
+        is >> std::ws >> eng_tmp.ctr_;
         is >> std::ws >> eng_tmp.index_;
 
         if (is.good())
@@ -403,15 +397,14 @@ class AESNIEngine
     }
 
     private:
-    typedef std::array<__m128i, Blocks> state_type;
+    typedef std::array<M128I<>, Blocks> state_type;
 
-    static constexpr std::size_t K_ =
-        sizeof(__m128i) / sizeof(ResultType) * Blocks;
+    static constexpr std::size_t M_ = Blocks * M128I<ResultType>::size();
 
     internal::AESNIKeySeqStorage<KeySeq, KeySeqInit, Rounds> key_seq_;
-    alignas(16) std::array<ResultType, K_> buffer_;
-    ctr_type ctr_;
+    alignas(16) std::array<ResultType, M_> buffer_;
     key_type key_;
+    ctr_type ctr_;
     std::size_t index_;
 
     void generate_buffer()
@@ -434,7 +427,8 @@ class AESNIEngine
     void enc_first(
         const key_seq_type &ks, state_type &state, std::true_type) const
     {
-        std::get<B>(state) = _mm_xor_si128(std::get<B>(state), ks.front());
+        std::get<B>(state).value() =
+            _mm_xor_si128(std::get<B>(state).value(), ks.front().value());
         enc_first<B + 1>(
             ks, state, std::integral_constant<bool, B + 1 < Blocks>());
     }
@@ -463,8 +457,8 @@ class AESNIEngine
     void enc_round_block(
         const key_seq_type &ks, state_type &state, std::true_type) const
     {
-        std::get<B>(state) =
-            _mm_aesenc_si128(std::get<B>(state), std::get<N>(ks));
+        std::get<B>(state).value() = _mm_aesenc_si128(
+            std::get<B>(state).value(), std::get<N>(ks).value());
         enc_round_block<B + 1, N>(
             ks, state, std::integral_constant<bool, B + 1 < Blocks>());
     }
@@ -478,8 +472,8 @@ class AESNIEngine
     void enc_last(
         const key_seq_type &ks, state_type &state, std::true_type) const
     {
-        std::get<B>(state) =
-            _mm_aesenclast_si128(std::get<B>(state), ks.back());
+        std::get<B>(state).value() = _mm_aesenclast_si128(
+            std::get<B>(state).value(), ks.back().value());
         enc_last<B + 1>(
             ks, state, std::integral_constant<bool, B + 1 < Blocks>());
     }

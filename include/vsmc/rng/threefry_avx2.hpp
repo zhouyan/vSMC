@@ -33,8 +33,8 @@
 #define VSMC_RNG_THREEFRY_AVX2_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/internal/m256i.hpp>
 #include <vsmc/rng/internal/threefry_defines.hpp>
+#include <vsmc/rng/m256i.hpp>
 
 namespace vsmc
 {
@@ -302,10 +302,10 @@ class ThreefryEngineAVX2
     }
 
     private:
-    typedef std::array<internal::M256I<ResultType>, K + 1> par_type;
-    typedef std::array<internal::M256I<ResultType>, K> state_type;
+    typedef std::array<M256I<ResultType>, K + 1> par_type;
+    typedef std::array<M256I<ResultType>, K> state_type;
 
-    static constexpr std::size_t M_ = K * internal::M256I<ResultType>::size();
+    static constexpr std::size_t M_ = K * M256I<ResultType>::size();
 
     alignas(32) std::array<ResultType, M_> buffer_;
     std::array<ResultType, K + 1> par_;
@@ -331,10 +331,8 @@ class ThreefryEngineAVX2
     void generate_buffer(
         const par_type &par, state_type &state, std::true_type)
     {
-        internal::ThreefryRotate<internal::M256I<ResultType>, K, N>::eval(
-            state);
-        internal::ThreefryInsertKey<internal::M256I<ResultType>, K, N>::eval(
-            state, par);
+        internal::ThreefryRotate<M256I<ResultType>, K, N>::eval(state);
+        internal::ThreefryInsertKey<M256I<ResultType>, K, N>::eval(state, par);
         generate_buffer<N + 1>(
             par, state, std::integral_constant < bool, N<Rounds>());
     }

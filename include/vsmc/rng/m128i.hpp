@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/internal/m128i.hpp
+// vSMC/include/vsmc/rng/m128i.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,99 +29,18 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_INTERNAL_M128I_HPP
-#define VSMC_RNG_INTERNAL_M128I_HPP
+#ifndef VSMC_RNG_M128I_HPP
+#define VSMC_RNG_M128I_HPP
 
 #include <vsmc/rng/internal/common.hpp>
 #include <emmintrin.h>
 
-#define VSMC_STATIC_ASSERT_RNG_INTERNAL_M128I_PACK(Offset, T, N)              \
-    VSMC_STATIC_ASSERT(                                                       \
-        ((Offset < N) && (sizeof(T) * (N - Offset) >= sizeof(__m128i))),      \
-        "TRY TO PACK OR UNPACK A TOO SMALL VECTOR INTO OR FROM m128i")
-
 namespace vsmc
 {
 
-namespace internal
-{
-
-template <std::size_t Offset, typename T, std::size_t N>
-inline void m128i_pack_a(const std::array<T, N> &c, __m128i &m)
-{
-    m = _mm_load_si128(reinterpret_cast<const __m128i *>(c.data() + Offset));
-}
-
-template <std::size_t Offset, typename T, std::size_t N>
-inline void m128i_pack_u(const std::array<T, N> &c, __m128i &m)
-{
-    m = _mm_loadu_si128(reinterpret_cast<const __m128i *>(c.data() + Offset));
-}
-
-template <std::size_t Offset, typename T, std::size_t N>
-inline void m128i_unpack_a(const __m128i &m, std::array<T, N> &c)
-{
-    _mm_store_si128(reinterpret_cast<__m128i *>(c.data() + Offset), m);
-}
-
-template <std::size_t Offset, typename T, std::size_t N>
-inline void m128i_unpack_u(const __m128i &m, std::array<T, N> &c)
-{
-    _mm_storeu_si128(reinterpret_cast<__m128i *>(c.data() + Offset), m);
-}
-
-template <std::size_t Offset, typename T, std::size_t N>
-inline void m128i_pack(const std::array<T, N> &c, __m128i &m)
-{
-    VSMC_STATIC_ASSERT_RNG_INTERNAL_M128I_PACK(Offset, T, N);
-    m128i_pack_u<Offset>(c, m);
-}
-
-template <std::size_t Offset, typename T, std::size_t N>
-inline void m128i_unpack(const __m128i &m, std::array<T, N> &c)
-{
-    VSMC_STATIC_ASSERT_RNG_INTERNAL_M128I_PACK(Offset, T, N);
-    m128i_unpack_u<Offset>(m, c);
-}
-
-inline bool m128i_is_equal(const __m128i &a, const __m128i &b)
-{
-    std::array<std::uint64_t, 2> sa;
-    std::array<std::uint64_t, 2> sb;
-    m128i_unpack<0>(a, sa);
-    m128i_unpack<0>(b, sb);
-
-    return sa == sb;
-}
-
-template <typename CharT, typename Traits>
-inline std::basic_ostream<CharT, Traits> &m128i_output(
-    std::basic_ostream<CharT, Traits> &os, const __m128i &a)
-{
-    if (os.good()) {
-        std::array<unsigned char, 16> sa;
-        m128i_unpack<0>(a, sa);
-        os << sa;
-    }
-
-    return os;
-}
-
-template <typename CharT, typename Traits>
-inline std::basic_istream<CharT, Traits> &m128i_input(
-    std::basic_istream<CharT, Traits> &is, __m128i &a)
-{
-    if (is.good()) {
-        std::array<unsigned char, 16> sa;
-        is >> sa;
-        if (is)
-            m128i_pack<0>(sa, a);
-    }
-
-    return is;
-}
-
-template <typename IntType>
+/// \brief Using `__m128i` as integer vector
+/// \ingroup RNG
+template <typename IntType = __m128i>
 class M128I
 {
     public:
@@ -183,6 +102,47 @@ class M128I
     __m128i &value() { return value_; }
     const __m128i &value() const { return value_; }
 
+    __m128i *data() { return &value_; }
+    const __m128i *data() const { return &value_; }
+
+    template <typename T>
+    void load_a(const T *mem)
+    {
+        value_ = _mm_load_si128(reinterpret_cast<const __m128i *>(mem));
+    }
+
+    template <typename T>
+    void load_u(const T *mem)
+    {
+        value_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(mem));
+    }
+
+    template <typename T>
+    void load(const T *mem)
+    {
+        reinterpret_cast<std::uintptr_t>(mem) % 16 == 0 ? load_a(mem) :
+                                                          load_u(mem);
+    }
+
+    template <typename T>
+    void store_a(T *mem) const
+    {
+        _mm_store_si128(reinterpret_cast<__m128i *>(mem), value_);
+    }
+
+    template <typename T>
+    void store_u(T *mem) const
+    {
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(mem), value_);
+    }
+
+    template <typename T>
+    void store(T *mem) const
+    {
+        reinterpret_cast<std::uintptr_t>(mem) % 16 == 0 ? store_a(mem) :
+                                                          store_u(mem);
+    }
+
     private:
     __m128i value_;
 
@@ -210,6 +170,9 @@ class M128I
         return _mm_set1_epi64x(static_cast<VSMC_INT64>(n));
     }
 }; // class M128I
+
+namespace internal
+{
 
 template <typename T>
 inline M128I<T> m128i_add(const M128I<T> &a, const M128I<T> &b,
@@ -323,10 +286,104 @@ inline M128I<T> m128i_srli(
     return M128I<T>(_mm_srli_epi64(a.value(), imm8));
 }
 
+} // namespace internal
+
+inline bool operator==(const M128I<> &a, const M128I<> &b)
+{
+    std::array<std::uint64_t, 2> sa;
+    std::array<std::uint64_t, 2> sb;
+    a.store(sa.data());
+    b.store(sb.data());
+
+    return sa == sb;
+}
+
+template <typename T>
+inline bool operator==(const M128I<T> &a, const M128I<T> &b)
+{
+    std::array<std::uint64_t, 2> sa;
+    std::array<std::uint64_t, 2> sb;
+    a.store(sa.data());
+    b.store(sb.data());
+
+    return sa == sb;
+}
+
+template <typename T>
+inline bool operator!=(const M128I<T> &a, const M128I<T> &b)
+{
+    return !(a == b);
+}
+
+template <typename CharT, typename Traits>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const __m128i &a)
+{
+    if (!os.good())
+        return os;
+
+    std::array<std::uint64_t, 2> sa;
+    M128I<> ma(a);
+    ma.store(sa.data());
+    os << sa;
+
+    return os;
+}
+
+template <typename CharT, typename Traits, typename T>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const M128I<T> &a)
+{
+    if (!os.good())
+        return os;
+
+    std::array<T, M128I<T>::size()> sa;
+    a.store(sa.data());
+    os << sa;
+
+    return os;
+}
+
+template <typename CharT, typename Traits>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, __m128i &a)
+{
+    if (!is.good())
+        return is;
+
+    std::array<std::uint64_t, 2> sa;
+    is >> sa;
+
+    if (is.good()) {
+        M128I<> ma;
+        ma.load(sa.data());
+        a = ma.value();
+    }
+
+    return is;
+}
+
+template <typename CharT, typename Traits, typename T>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, M128I<T> &a)
+{
+    if (!is.good())
+        return is;
+
+    std::array<T, M128I<T>::size()> sa;
+    is >> sa;
+
+    if (is.good())
+        a.load(sa.data());
+
+    return is;
+}
+
 template <typename T>
 inline M128I<T> operator+(const M128I<T> &a, const M128I<T> &b)
 {
-    return m128i_add(a, b, std::integral_constant<std::size_t, sizeof(T)>());
+    return internal::m128i_add(
+        a, b, std::integral_constant<std::size_t, sizeof(T)>());
 }
 
 template <typename T>
@@ -340,7 +397,8 @@ inline M128I<T> &operator+=(M128I<T> &a, const M128I<T> &b)
 template <typename T>
 inline M128I<T> operator-(const M128I<T> &a, const M128I<T> &b)
 {
-    return m128i_sub(a, b, std::integral_constant<std::size_t, sizeof(T)>());
+    return internal::m128i_sub(
+        a, b, std::integral_constant<std::size_t, sizeof(T)>());
 }
 
 template <typename T>
@@ -395,7 +453,7 @@ inline M128I<T> &operator^=(M128I<T> &a, const M128I<T> &b)
 template <typename T>
 inline M128I<T> operator<<(const M128I<T> &a, int imm8)
 {
-    return m128i_slli(
+    return internal::m128i_slli(
         a, imm8, std::integral_constant<std::size_t, sizeof(T)>());
 }
 
@@ -410,7 +468,7 @@ inline M128I<T> operator<<=(M128I<T> &a, int imm8)
 template <typename T>
 inline M128I<T> operator>>(const M128I<T> &a, int imm8)
 {
-    return m128i_srli(
+    return internal::m128i_srli(
         a, imm8, std::integral_constant<std::size_t, sizeof(T)>());
 }
 
@@ -422,8 +480,6 @@ inline M128I<T> operator>>=(M128I<T> &a, int imm8)
     return a;
 }
 
-} // namespace vsmc::internal
-
 } // namespace vsmc
 
-#endif // VSMC_RNG_INTERNAL_M128I_HPP
+#endif // VSMC_RNG_M128I_HPP

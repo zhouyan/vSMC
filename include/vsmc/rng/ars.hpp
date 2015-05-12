@@ -57,16 +57,16 @@ namespace internal
 {
 
 template <std::size_t>
-struct ARSWeylConstantValue;
+struct ARSWeylConstant;
 
 template <>
-struct ARSWeylConstantValue<0> : public std::integral_constant<std::uint64_t,
-                                     UINT64_C(0xBB67AE8584CAA73B)> {
+struct ARSWeylConstant<0> : public std::integral_constant<std::uint64_t,
+                                UINT64_C(0xBB67AE8584CAA73B)> {
 };
 
 template <>
-struct ARSWeylConstantValue<1> : public std::integral_constant<std::uint64_t,
-                                     UINT64_C(0x9E3779B97F4A7C15)> {
+struct ARSWeylConstant<1> : public std::integral_constant<std::uint64_t,
+                                UINT64_C(0x9E3779B97F4A7C15)> {
 };
 
 } // namespace vsmc::traits::internal
@@ -79,7 +79,7 @@ struct ARSWeylConstantValue<1> : public std::integral_constant<std::uint64_t,
 /// or
 /// the Weyl constant.
 template <std::size_t I>
-struct ARSWeylConstantTrait : public internal::ARSWeylConstantValue<I> {
+struct ARSWeylConstantTrait : public internal::ARSWeylConstant<I> {
 };
 
 } // namespace vsmc::traits
@@ -90,35 +90,34 @@ template <typename ResultType>
 class ARSKeySeq
 {
     public:
-    typedef std::array<ResultType, 16 / sizeof(ResultType)> key_type;
+    typedef std::array<ResultType, M128I<ResultType>::size()> key_type;
 
     ARSKeySeq()
-        : weyl_(_mm_set_epi64x(static_cast<std::int64_t>(
-                                   traits::ARSWeylConstantTrait<0>::value),
-              static_cast<std::int64_t>(
-                                   traits::ARSWeylConstantTrait<1>::value)))
+        : weyl_(traits::ARSWeylConstantTrait<0>::value,
+              traits::ARSWeylConstantTrait<1>::value)
     {
     }
 
     template <std::size_t Rp1>
-    void generate(const key_type &key, std::array<__m128i, Rp1> &key_seq)
+    void generate(const key_type &key, std::array<M128I<>, Rp1> &key_seq)
     {
-        internal::m128i_pack<0>(key, key_seq.front());
+        key_seq.front().load(key.data());
         generate_seq<1>(key_seq, std::integral_constant<bool, 1 < Rp1>());
     }
 
     private:
-    const __m128i weyl_;
+    const M128I<std::uint64_t> weyl_;
 
     template <std::size_t, std::size_t Rp1>
-    void generate_seq(std::array<__m128i, Rp1> &, std::false_type)
+    void generate_seq(std::array<M128I<>, Rp1> &, std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq(std::array<__m128i, Rp1> &key_seq, std::true_type)
+    void generate_seq(std::array<M128I<>, Rp1> &key_seq, std::true_type)
     {
-        std::get<N>(key_seq) = _mm_add_epi64(std::get<N - 1>(key_seq), weyl_);
+        std::get<N>(key_seq).value() =
+            _mm_add_epi64(std::get<N - 1>(key_seq).value(), weyl_.value());
         generate_seq<N + 1>(
             key_seq, std::integral_constant<bool, N + 1 < Rp1>());
     }

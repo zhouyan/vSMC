@@ -37,8 +37,7 @@
 
 #define VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(N, val)                            \
     template <>                                                               \
-    struct AESRoundConstantValue<N>                                           \
-        : public std::integral_constant<int, val> {                           \
+    struct AESRoundConstant<N> : public std::integral_constant<int, val> {    \
     };
 
 /// \brief AESEngine default blocks
@@ -54,7 +53,7 @@ namespace internal
 {
 
 template <std::size_t N>
-struct AESRoundConstantValue;
+struct AESRoundConstant;
 
 VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0x00, 0x8D)
 VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0x01, 0x01)
@@ -316,28 +315,28 @@ VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0xFF, 0x8D)
 struct AESKeyInit {
     template <std::size_t Offset, std::size_t N, typename T,
         std::size_t KeySize, std::size_t Rp1>
-    static void key_init(const std::array<T, KeySize> &key,
-        std::array<__m128i, Rp1> &key_seq, __m128i &xmm)
+    static void eval(const std::array<T, KeySize> &key,
+        std::array<__m128i, Rp1> &ks, __m128i &xmm)
     {
-        key_init_xmm<Offset, N>(
-            key, key_seq, xmm, std::integral_constant < bool, N<Rp1>());
+        init<Offset, N>(key, ks, xmm, std::integral_constant < bool, N<Rp1>());
     }
 
     private:
     template <std::size_t, std::size_t, typename T, std::size_t KeySize,
         std::size_t Rp1>
-    static void key_init_xmm(const std::array<T, KeySize> &,
+    static void init(const std::array<T, KeySize> &,
         std::array<__m128i, Rp1> &, __m128i &, std::false_type)
     {
     }
 
     template <std::size_t Offset, std::size_t N, typename T,
         std::size_t KeySize, std::size_t Rp1>
-    static void key_init_xmm(const std::array<T, KeySize> &key,
-        std::array<__m128i, Rp1> &key_seq, __m128i &xmm, std::true_type)
+    static void init(const std::array<T, KeySize> &key,
+        std::array<__m128i, Rp1> &ks, __m128i &xmm, std::true_type)
     {
-        m128i_pack<Offset>(key, xmm);
-        std::get<N>(key_seq) = xmm;
+        M128I<> tmp;
+        tmp.load(key.data());
+        std::get<N>(ks) = xmm = tmp.value();
     }
 }; // struct AESKeyInit
 
@@ -352,10 +351,12 @@ class AES128KeySeq
     typedef std::array<ResultType, 16 / sizeof(ResultType)> key_type;
 
     template <std::size_t Rp1>
-    void generate(const key_type &key, std::array<__m128i, Rp1> &key_seq)
+    void generate(const key_type &key, std::array<M128I<>, Rp1> &key_seq)
     {
-        internal::AESKeyInit::key_init<0, 0>(key, key_seq, xmm1_);
-        generate_seq<1>(key_seq, std::integral_constant<bool, 1 < Rp1>());
+        std::array<__m128i, Rp1> ks;
+        internal::AESKeyInit::eval<0, 0>(key, ks, xmm1_);
+        generate_seq<1>(ks, std::integral_constant<bool, 1 < Rp1>());
+        std::memcpy(key_seq.data(), ks.data(), sizeof(__m128i) * Rp1);
     }
 
     private:
@@ -369,14 +370,13 @@ class AES128KeySeq
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq(std::array<__m128i, Rp1> &key_seq, std::true_type)
+    void generate_seq(std::array<__m128i, Rp1> &ks, std::true_type)
     {
         xmm2_ = _mm_aeskeygenassist_si128(
-            xmm1_, internal::AESRoundConstantValue<N>::value);
+            xmm1_, internal::AESRoundConstant<N>::value);
         expand_key();
-        std::get<N>(key_seq) = xmm1_;
-        generate_seq<N + 1>(
-            key_seq, std::integral_constant<bool, N + 1 < Rp1>());
+        std::get<N>(ks) = xmm1_;
+        generate_seq<N + 1>(ks, std::integral_constant<bool, N + 1 < Rp1>());
     }
 
     void expand_key()
@@ -481,14 +481,16 @@ class AES192KeySeq
     typedef std::array<ResultType, 24 / sizeof(ResultType)> key_type;
 
     template <std::size_t Rp1>
-    void generate(const key_type &key, std::array<__m128i, Rp1> &key_seq)
+    void generate(const key_type &key, std::array<M128I<>, Rp1> &key_seq)
     {
+        std::array<__m128i, Rp1> ks;
+
         std::array<std::uint64_t, 3> key_tmp;
         std::memcpy(key_tmp.data(), key.data(), 24);
-        internal::AESKeyInit::key_init<0, 0>(key_tmp, key_seq, xmm1_);
+        internal::AESKeyInit::eval<0, 0>(key_tmp, ks, xmm1_);
         std::get<0>(key_tmp) = std::get<2>(key_tmp);
         std::get<1>(key_tmp) = 0;
-        internal::AESKeyInit::key_init<0, 1>(key_tmp, key_seq, xmm7_);
+        internal::AESKeyInit::eval<0, 1>(key_tmp, ks, xmm7_);
 
         xmm3_ = _mm_setzero_si128();
         xmm6_ = _mm_setzero_si128();
@@ -497,8 +499,10 @@ class AES192KeySeq
         std::array<unsigned char, Rp1 * 16 + 16> ks_tmp;
         generate_seq<1, Rp1>(
             ks_tmp.data(), std::integral_constant<bool, 24 < Rp1 * 16>());
-        copy_key(key_seq, ks_tmp.data(),
-            std::integral_constant<bool, 24 < Rp1 * 16>());
+        copy_key(
+            ks, ks_tmp.data(), std::integral_constant<bool, 24 < Rp1 * 16>());
+
+        std::memcpy(key_seq.data(), ks.data(), sizeof(__m128i) * Rp1);
     }
 
     private:
@@ -532,7 +536,7 @@ class AES192KeySeq
         // Required Storage: N * 24 + 16;
 
         xmm2_ = _mm_aeskeygenassist_si128(
-            xmm4_, internal::AESRoundConstantValue<N>::value);
+            xmm4_, internal::AESRoundConstant<N>::value);
         generate_key_expansion();
         _mm_storeu_si128(reinterpret_cast<__m128i *>(ks_ptr + N * 24), xmm1_);
     }
@@ -583,10 +587,10 @@ class AES192KeySeq
     }
 
     template <std::size_t Rp1>
-    void copy_key(std::array<__m128i, Rp1> &key_seq,
-        const unsigned char *ks_ptr, std::true_type)
+    void copy_key(std::array<__m128i, Rp1> &ks, const unsigned char *ks_ptr,
+        std::true_type)
     {
-        unsigned char *dst = reinterpret_cast<unsigned char *>(key_seq.data());
+        unsigned char *dst = reinterpret_cast<unsigned char *>(ks.data());
         std::memcpy(dst + 24, ks_ptr + 24, Rp1 * 16 - 24);
     }
 }; // class AES192KeySeq
@@ -671,12 +675,13 @@ class AES256KeySeq
     typedef std::array<ResultType, 32 / sizeof(ResultType)> key_type;
 
     template <std::size_t Rp1>
-    void generate(const key_type &key, std::array<__m128i, Rp1> &key_seq)
+    void generate(const key_type &key, std::array<M128I<>, Rp1> &key_seq)
     {
-        internal::AESKeyInit::key_init<0, 0>(key, key_seq, xmm1_);
-        internal::AESKeyInit::key_init<16 / sizeof(ResultType), 1>(
-            key, key_seq, xmm3_);
-        generate_seq<2>(key_seq, std::integral_constant<bool, 2 < Rp1>());
+        std::array<__m128i, Rp1> ks;
+        internal::AESKeyInit::eval<0, 0>(key, ks, xmm1_);
+        internal::AESKeyInit::eval<16 / sizeof(ResultType), 1>(key, ks, xmm3_);
+        generate_seq<2>(ks, std::integral_constant<bool, 2 < Rp1>());
+        std::memcpy(key_seq.data(), ks.data(), sizeof(__m128i) * Rp1);
     }
 
     private:
@@ -691,28 +696,27 @@ class AES256KeySeq
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq(std::array<__m128i, Rp1> &key_seq, std::true_type)
+    void generate_seq(std::array<__m128i, Rp1> &ks, std::true_type)
     {
-        generate_key<N>(key_seq, std::integral_constant<bool, N % 2 == 0>());
-        generate_seq<N + 1>(
-            key_seq, std::integral_constant<bool, N + 1 < Rp1>());
+        generate_key<N>(ks, std::integral_constant<bool, N % 2 == 0>());
+        generate_seq<N + 1>(ks, std::integral_constant<bool, N + 1 < Rp1>());
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_key(std::array<__m128i, Rp1> &key_seq, std::true_type)
+    void generate_key(std::array<__m128i, Rp1> &ks, std::true_type)
     {
         xmm2_ = _mm_aeskeygenassist_si128(
-            xmm3_, internal::AESRoundConstantValue<N / 2>::value);
+            xmm3_, internal::AESRoundConstant<N / 2>::value);
         expand_key(std::true_type());
-        std::get<N>(key_seq) = xmm1_;
+        std::get<N>(ks) = xmm1_;
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_key(std::array<__m128i, Rp1> &key_seq, std::false_type)
+    void generate_key(std::array<__m128i, Rp1> &ks, std::false_type)
     {
         xmm4_ = _mm_aeskeygenassist_si128(xmm1_, 0);
         expand_key(std::false_type());
-        std::get<N>(key_seq) = xmm3_;
+        std::get<N>(ks) = xmm3_;
     }
 
     void expand_key(std::true_type)

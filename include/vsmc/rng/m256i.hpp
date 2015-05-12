@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/internal/m256i.hpp
+// vSMC/include/vsmc/rng/m256i.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,101 +29,19 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_INTERNAL_M256I_HPP
-#define VSMC_RNG_INTERNAL_M256I_HPP
+#ifndef VSMC_RNG_M256I_HPP
+#define VSMC_RNG_M256I_HPP
 
 #include <vsmc/rng/internal/common.hpp>
+#include <vsmc/rng/m128i.hpp>
 #include <immintrin.h>
-
-#define VSMC_STATIC_ASSERT_RNG_INTERNAL_M256I_PACK(Offset, T, N)              \
-    VSMC_STATIC_ASSERT(                                                       \
-        ((Offset < N) && (sizeof(T) * (N - Offset) >= sizeof(__m256i))),      \
-        "TRY TO PACK OR UNPACK A TOO SMALL VECTOR INTO OR FROM m256i")
 
 namespace vsmc
 {
 
-namespace internal
-{
-
-template <std::size_t Offset, typename T, std::size_t N>
-inline void m256i_pack_a(const std::array<T, N> &c, __m256i &m)
-{
-    m = _mm256_load_si256(
-        reinterpret_cast<const __m256i *>(c.data() + Offset));
-}
-
-template <std::size_t Offset, typename T, std::size_t N>
-inline void m256i_pack_u(const std::array<T, N> &c, __m256i &m)
-{
-    m = _mm256_loadu_si256(
-        reinterpret_cast<const __m256i *>(c.data() + Offset));
-}
-
-template <std::size_t Offset, typename T, std::size_t N>
-inline void m256i_unpack_a(const __m256i &m, std::array<T, N> &c)
-{
-    _mm256_store_si256(reinterpret_cast<__m256i *>(c.data() + Offset), m);
-}
-
-template <std::size_t Offset, typename T, std::size_t N>
-inline void m256i_unpack_u(const __m256i &m, std::array<T, N> &c)
-{
-    _mm256_storeu_si256(reinterpret_cast<__m256i *>(c.data() + Offset), m);
-}
-
-template <std::size_t Offset, typename T, std::size_t N>
-inline void m256i_pack(const std::array<T, N> &c, __m256i &m)
-{
-    VSMC_STATIC_ASSERT_RNG_INTERNAL_M256I_PACK(Offset, T, N);
-    m256i_pack_u<Offset>(c, m);
-}
-
-template <std::size_t Offset, typename T, std::size_t N>
-inline void m256i_unpack(const __m256i &m, std::array<T, N> &c)
-{
-    VSMC_STATIC_ASSERT_RNG_INTERNAL_M256I_PACK(Offset, T, N);
-    m256i_unpack_u<Offset>(m, c);
-}
-
-inline bool m256i_is_equal(const __m256i &a, const __m256i &b)
-{
-    std::array<std::uint64_t, 4> sa;
-    std::array<std::uint64_t, 4> sb;
-    m256i_unpack<0>(a, sa);
-    m256i_unpack<0>(b, sb);
-
-    return sa == sb;
-}
-
-template <typename CharT, typename Traits>
-inline std::basic_ostream<CharT, Traits> &m256i_output(
-    std::basic_ostream<CharT, Traits> &os, const __m256i &a)
-{
-    if (os.good()) {
-        std::array<unsigned char, 32> sa;
-        m256i_unpack<0>(a, sa);
-        os << sa;
-    }
-
-    return os;
-}
-
-template <typename CharT, typename Traits>
-inline std::basic_istream<CharT, Traits> &m256i_input(
-    std::basic_istream<CharT, Traits> &is, __m256i &a)
-{
-    if (is.good()) {
-        std::array<unsigned char, 32> sa;
-        is >> sa;
-        if (is)
-            m256i_pack<0>(sa, a);
-    }
-
-    return is;
-}
-
-template <typename IntType>
+/// \brief Using `__mm256i` as integer vector
+/// \ingroup RNG
+template <typename IntType = __m256i>
 class M256I
 {
     public:
@@ -205,6 +123,47 @@ class M256I
     __m256i &value() { return value_; }
     const __m256i &value() const { return value_; }
 
+    __m256i *data() { return &value_; }
+    const __m256i *data() const { return &value_; }
+
+    template <typename T>
+    void load_a(const T *mem)
+    {
+        value_ = _mm256_load_si256(reinterpret_cast<const __m256i *>(mem));
+    }
+
+    template <typename T>
+    void load_u(const T *mem)
+    {
+        value_ = _mm256_loadu_si256(reinterpret_cast<const __m256i *>(mem));
+    }
+
+    template <typename T>
+    void load(const T *mem)
+    {
+        reinterpret_cast<std::uintptr_t>(mem) % 32 == 0 ? load_a(mem) :
+                                                          load_u(mem);
+    }
+
+    template <typename T>
+    void store_a(T *mem) const
+    {
+        _mm256_store_si256(reinterpret_cast<__m256i *>(mem), value_);
+    }
+
+    template <typename T>
+    void store_u(T *mem) const
+    {
+        _mm256_storeu_si256(reinterpret_cast<__m256i *>(mem), value_);
+    }
+
+    template <typename T>
+    void store(T *mem) const
+    {
+        reinterpret_cast<std::uintptr_t>(mem) % 32 == 0 ? store_a(mem) :
+                                                          store_u(mem);
+    }
+
     private:
     __m256i value_;
 
@@ -232,6 +191,9 @@ class M256I
         return _mm256_set1_epi64x(static_cast<long long>(n));
     }
 }; // class M256I
+
+namespace internal
+{
 
 template <typename T>
 inline M256I<T> m256i_add(const M256I<T> &a, const M256I<T> &b,
@@ -345,10 +307,87 @@ inline M256I<T> m256i_srli(
     return M256I<T>(_mm256_srli_epi64(a.value(), imm8));
 }
 
+} // namespace vsmc::internal
+
+inline bool operator==(const M256I<> &a, const M256I<> &b)
+{
+    std::array<std::uint64_t, 4> sa;
+    std::array<std::uint64_t, 4> sb;
+    a.store(sa.data());
+    b.store(sb.data());
+
+    return sa == sb;
+}
+
+template <typename CharT, typename Traits>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const __m256i &a)
+{
+    if (!os.good())
+        return os;
+
+    std::array<std::uint64_t, 4> sa;
+    M256I<> ma(a);
+    ma.store(sa.data());
+    os << sa;
+
+    return os;
+}
+
+template <typename CharT, typename Traits, typename T>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const M256I<T> &a)
+{
+    if (!os.good())
+        return os;
+
+    std::array<T, M256I<T>::size()> sa;
+    a.store(sa.data());
+    os << sa;
+
+    return os;
+}
+
+template <typename CharT, typename Traits>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, __m256i &a)
+{
+    if (!is.good())
+        return is;
+
+    std::array<std::uint64_t, 4> sa;
+    is >> sa;
+
+    if (is.good()) {
+        M256I<> ma;
+        ma.load(sa.data());
+        a = ma.value();
+    }
+
+    return is;
+}
+
+template <typename CharT, typename Traits, typename T>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, M256I<T> &a)
+{
+    if (!is.good())
+        return is;
+
+    std::array<T, M256I<T>::size()> sa;
+    is >> sa;
+
+    if (is.good())
+        a.load(sa.data());
+
+    return is;
+}
+
 template <typename T>
 inline M256I<T> operator+(const M256I<T> &a, const M256I<T> &b)
 {
-    return m256i_add(a, b, std::integral_constant<std::size_t, sizeof(T)>());
+    return internal::m256i_add(
+        a, b, std::integral_constant<std::size_t, sizeof(T)>());
 }
 
 template <typename T>
@@ -362,7 +401,8 @@ inline M256I<T> &operator+=(M256I<T> &a, const M256I<T> &b)
 template <typename T>
 inline M256I<T> operator-(const M256I<T> &a, const M256I<T> &b)
 {
-    return m256i_sub(a, b, std::integral_constant<std::size_t, sizeof(T)>());
+    return internal::m256i_sub(
+        a, b, std::integral_constant<std::size_t, sizeof(T)>());
 }
 
 template <typename T>
@@ -417,7 +457,7 @@ inline M256I<T> &operator^=(M256I<T> &a, const M256I<T> &b)
 template <typename T>
 inline M256I<T> operator<<(const M256I<T> &a, int imm8)
 {
-    return m256i_slli(
+    return internal::m256i_slli(
         a, imm8, std::integral_constant<std::size_t, sizeof(T)>());
 }
 
@@ -432,7 +472,7 @@ inline M256I<T> operator<<=(M256I<T> &a, int imm8)
 template <typename T>
 inline M256I<T> operator>>(const M256I<T> &a, int imm8)
 {
-    return m256i_srli(
+    return internal::m256i_srli(
         a, imm8, std::integral_constant<std::size_t, sizeof(T)>());
 }
 
@@ -444,8 +484,6 @@ inline M256I<T> operator>>=(M256I<T> &a, int imm8)
     return a;
 }
 
-} // namespace vsmc::internal
-
 } // namespace vsmc
 
-#endif // VSMC_RNG_INTERNAL_M256I_HPP
+#endif // VSMC_RNG_M256I_HPP
