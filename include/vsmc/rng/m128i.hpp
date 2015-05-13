@@ -35,11 +35,6 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <emmintrin.h>
 
-#define VSMC_STATIC_ASSERT_RNG_M128I(IntType)                                 \
-    VSMC_STATIC_ASSERT((std::is_same<IntType, __m128i>::value ||              \
-                           std::is_integral<IntType>::value),                 \
-        "**M256I** USED WITH NON-INTEGER TEMPLATE PARAMTER")
-
 namespace vsmc
 {
 
@@ -51,10 +46,7 @@ class M128I
     public:
     typedef IntType value_type;
 
-    M128I() : value_(_mm_setzero_si128())
-    {
-        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
-    }
+    M128I() = default;
 
     M128I(const __m128i &value) : value_(value) {}
 
@@ -63,14 +55,12 @@ class M128I
         typename std::enable_if<std::is_integral<T>::value>::type * = nullptr)
         : value_(set1(n, std::integral_constant<std::size_t, sizeof(T)>()))
     {
-        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
     }
 
     template <typename T>
     M128I(const M128I<T> &other)
         : value_(other.value())
     {
-        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
     }
 
     template <typename T>
@@ -130,11 +120,12 @@ class M128I
                                                           store_u(mem);
     }
 
+    void set0() { value_ = _mm_setzero_si128(); }
+
     template <typename T>
     void set1(T n)
     {
         value_ = set1(n, std::integral_constant<std::size_t, sizeof(T)>());
-        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
     }
 
     template <typename T>

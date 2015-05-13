@@ -35,11 +35,6 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <immintrin.h>
 
-#define VSMC_STATIC_ASSERT_RNG_M256I(IntType)                                 \
-    VSMC_STATIC_ASSERT((std::is_same<IntType, __m256i>::value ||              \
-                           std::is_integral<IntType>::value),                 \
-        "**M256I** USED WITH NON-INTEGER TEMPLATE PARAMTER")
-
 namespace vsmc
 {
 
@@ -51,21 +46,14 @@ class M256I
     public:
     typedef IntType value_type;
 
-    M256I() : value_(_mm256_setzero_si256())
-    {
-        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
-    }
+    M256I() = default;
 
-    M256I(const __m256i &value) : value_(value)
-    {
-        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
-    }
+    M256I(const __m256i &value) : value_(value) {}
 
     template <typename T>
     M256I(T n,
         typename std::enable_if<std::is_integral<T>::value>::type * = nullptr)
     {
-        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
         set1(n);
     }
 
@@ -73,7 +61,6 @@ class M256I
     M256I(const M256I<T> &other)
         : value_(other.value())
     {
-        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
     }
 
     template <typename T>
@@ -133,11 +120,12 @@ class M256I
                                                           store_u(mem);
     }
 
+    void set0() { value_ = _mm256_setzero_si256(); }
+
     template <typename T>
     void set1(T n)
     {
         value_ = set1(n, std::integral_constant<std::size_t, sizeof(T)>());
-        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
     }
 
     template <typename T>
