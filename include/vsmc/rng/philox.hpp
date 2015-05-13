@@ -269,8 +269,8 @@ class PhiloxEngine
 {
     public:
     typedef ResultType result_type;
-    typedef std::array<ResultType, K> ctr_type;
     typedef std::array<ResultType, K / 2> key_type;
+    typedef std::array<ResultType, K> ctr_type;
 
     public:
     explicit PhiloxEngine(result_type s = 0) : index_(K)

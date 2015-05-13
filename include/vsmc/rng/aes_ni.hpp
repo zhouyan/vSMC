@@ -228,9 +228,9 @@ class AESNIEngine
 {
     public:
     typedef ResultType result_type;
-    typedef std::array<ResultType, M128I<ResultType>::size()> ctr_type;
     typedef typename KeySeq::key_type key_type;
     typedef std::array<M128I<>, Rounds + 1> key_seq_type;
+    typedef std::array<ResultType, M128I<ResultType>::size()> ctr_type;
 
     explicit AESNIEngine(result_type s = 0) : index_(M_)
     {

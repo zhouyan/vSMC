@@ -70,8 +70,8 @@ class ThreefryEngine
 {
     public:
     typedef ResultType result_type;
-    typedef std::array<ResultType, K> ctr_type;
     typedef std::array<ResultType, K> key_type;
+    typedef std::array<ResultType, K> ctr_type;
 
     public:
     explicit ThreefryEngine(result_type s = 0) : index_(K)

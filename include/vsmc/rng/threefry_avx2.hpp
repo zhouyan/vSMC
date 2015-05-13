@@ -131,8 +131,8 @@ class ThreefryEngineAVX2
 {
     public:
     typedef ResultType result_type;
-    typedef std::array<ResultType, K> ctr_type;
     typedef std::array<ResultType, K> key_type;
+    typedef std::array<ResultType, K> ctr_type;
 
     explicit ThreefryEngineAVX2(result_type s = 0) : index_(M_)
     {
