@@ -142,21 +142,6 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
     }
 }; // struct AESNIKeySeqStorage
 
-template <typename ResultType, std::size_t Blocks>
-struct AESNICtrPack {
-    typedef std::array<M128I<>, Blocks> state_type;
-    typedef std::array<ResultType, M128I<ResultType>::size()> ctr_type;
-
-    static void eval(ctr_type &ctr, state_type &state)
-    {
-        std::array<ctr_type, Blocks> ctr_blocks;
-        internal::increment(ctr, ctr_blocks);
-        std::memcpy(state.data(), ctr_blocks.data(), sizeof(__m128i) * Blocks);
-    }
-
-    private:
-}; // struct AESNICtrPack
-
 } // namespace vsmc::internal
 
 /// \brief RNG engine using AES-NI instructions
@@ -402,20 +387,25 @@ class AESNIEngine
     static constexpr std::size_t M_ = Blocks * M128I<ResultType>::size();
 
     internal::AESNIKeySeqStorage<KeySeq, KeySeqInit, Rounds> key_seq_;
-    alignas(16) std::array<ResultType, M_> buffer_;
+    std::array<ResultType, M_> buffer_;
     key_type key_;
     ctr_type ctr_;
     std::size_t index_;
 
     void generate_buffer()
     {
-        state_type state;
+        union {
+            state_type state;
+            std::array<ctr_type, Blocks> ctr_block;
+            std::array<ResultType, M_> result;
+        } buf;
+        internal::increment(ctr_, buf.ctr_block);
         const key_seq_type ks(key_seq_.get(key_));
-        internal::AESNICtrPack<ResultType, Blocks>::eval(ctr_, state);
-        enc_first<0>(ks, state, std::true_type());
-        enc_round<1>(ks, state, std::integral_constant<bool, 1 < Rounds>());
-        enc_last<0>(ks, state, std::true_type());
-        std::memcpy(buffer_.data(), state.data(), sizeof(__m128i) * Blocks);
+        enc_first<0>(ks, buf.state, std::true_type());
+        enc_round<1>(
+            ks, buf.state, std::integral_constant<bool, 1 < Rounds>());
+        enc_last<0>(ks, buf.state, std::true_type());
+        buffer_ = buf.result;
     }
 
     template <std::size_t>
