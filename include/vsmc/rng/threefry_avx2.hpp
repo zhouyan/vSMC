@@ -61,7 +61,7 @@ struct ThreefryParPackAVX2 {
     template <std::size_t N>
     static void pack(const par_type &par, par256_type &par256, std::true_type)
     {
-        std::get<N>(par256) = std::get<N>(par);
+        std::get<N>(par256).set1(std::get<N>(par));
         pack<N + 1>(
             par, par256, std::integral_constant<bool, N + 1 < K + 1>());
     }
@@ -100,26 +100,24 @@ struct ThreefryCtrPackAVX2 {
     static void set(const ctr_block_type &ctr_block, state_type &state,
         std::integral_constant<std::size_t, 4>)
     {
-        std::get<N>(state) =
-            M256I<ResultType>(std::get<N>(std::get<0>(ctr_block)),
-                std::get<N>(std::get<1>(ctr_block)),
-                std::get<N>(std::get<2>(ctr_block)),
-                std::get<N>(std::get<3>(ctr_block)),
-                std::get<N>(std::get<4>(ctr_block)),
-                std::get<N>(std::get<5>(ctr_block)),
-                std::get<N>(std::get<6>(ctr_block)),
-                std::get<N>(std::get<7>(ctr_block)));
+        std::get<N>(state).set(std::get<N>(std::get<0>(ctr_block)),
+            std::get<N>(std::get<1>(ctr_block)),
+            std::get<N>(std::get<2>(ctr_block)),
+            std::get<N>(std::get<3>(ctr_block)),
+            std::get<N>(std::get<4>(ctr_block)),
+            std::get<N>(std::get<5>(ctr_block)),
+            std::get<N>(std::get<6>(ctr_block)),
+            std::get<N>(std::get<7>(ctr_block)));
     }
 
     template <std::size_t N>
     static void set(const ctr_block_type &ctr_block, state_type &state,
         std::integral_constant<std::size_t, 8>)
     {
-        std::get<N>(state) =
-            M256I<ResultType>(std::get<N>(std::get<0>(ctr_block)),
-                std::get<N>(std::get<1>(ctr_block)),
-                std::get<N>(std::get<2>(ctr_block)),
-                std::get<N>(std::get<3>(ctr_block)));
+        std::get<N>(state).set(std::get<N>(std::get<0>(ctr_block)),
+            std::get<N>(std::get<1>(ctr_block)),
+            std::get<N>(std::get<2>(ctr_block)),
+            std::get<N>(std::get<3>(ctr_block)));
     }
 }; // struct ThreefryCtrPackAVX2
 

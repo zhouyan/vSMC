@@ -56,53 +56,12 @@ class M128I
         VSMC_STATIC_ASSERT_RNG_M128I(IntType);
     }
 
+    M128I(const __m128i &value) : value_(value) {}
+
     template <typename T>
     M128I(T n,
         typename std::enable_if<std::is_integral<T>::value>::type * = nullptr)
         : value_(set1(n, std::integral_constant<std::size_t, sizeof(T)>()))
-    {
-        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
-    }
-
-    M128I(const __m128i &value) : value_(value) {}
-
-    template <typename T>
-    M128I(T e1, T e0)
-        : value_(_mm_set_epi64x(
-              static_cast<VSMC_INT64>(e1), static_cast<VSMC_INT64>(e0)))
-    {
-        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
-    }
-
-    template <typename T>
-    M128I(T e3, T e2, T e1, T e0)
-        : value_(_mm_set_epi32(static_cast<int>(e3), static_cast<int>(e2),
-              static_cast<int>(e1), static_cast<int>(e0)))
-    {
-        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
-    }
-
-    template <typename T>
-    M128I(T e7, T e6, T e5, T e4, T e3, T e2, T e1, T e0)
-        : value_(_mm_set_epi16(static_cast<short>(e7), static_cast<short>(e6),
-              static_cast<short>(e5), static_cast<short>(e4),
-              static_cast<short>(e3), static_cast<short>(e2),
-              static_cast<short>(e1), static_cast<short>(e0)))
-    {
-        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
-    }
-
-    template <typename T>
-    M128I(T e15, T e14, T e13, T e12, T e11, T e10, T e9, T e8, T e7, T e6,
-        T e5, T e4, T e3, T e2, T e1, T e0)
-        : value_(_mm_set_epi8(static_cast<char>(e15), static_cast<char>(e14),
-              static_cast<char>(e13), static_cast<char>(e12),
-              static_cast<char>(e11), static_cast<char>(e10),
-              static_cast<char>(e9), static_cast<char>(e8),
-              static_cast<char>(e7), static_cast<char>(e6),
-              static_cast<char>(e5), static_cast<char>(e4),
-              static_cast<char>(e3), static_cast<char>(e2),
-              static_cast<char>(e1), static_cast<char>(e0)))
     {
         VSMC_STATIC_ASSERT_RNG_M128I(IntType);
     }
@@ -169,6 +128,50 @@ class M128I
     {
         reinterpret_cast<std::uintptr_t>(mem) % 16 == 0 ? store_a(mem) :
                                                           store_u(mem);
+    }
+
+    template <typename T>
+    void set1(T n)
+    {
+        value_ = set1(n, std::integral_constant<std::size_t, sizeof(T)>());
+        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
+    }
+
+    template <typename T>
+    void set(T e1, T e0)
+    {
+        value_ = _mm_set_epi64x(
+            static_cast<VSMC_INT64>(e1), static_cast<VSMC_INT64>(e0));
+    }
+
+    template <typename T>
+    void set(T e3, T e2, T e1, T e0)
+    {
+        value_ = _mm_set_epi32(static_cast<int>(e3), static_cast<int>(e2),
+            static_cast<int>(e1), static_cast<int>(e0));
+    }
+
+    template <typename T>
+    void set(T e7, T e6, T e5, T e4, T e3, T e2, T e1, T e0)
+    {
+        value_ = _mm_set_epi16(static_cast<short>(e7), static_cast<short>(e6),
+            static_cast<short>(e5), static_cast<short>(e4),
+            static_cast<short>(e3), static_cast<short>(e2),
+            static_cast<short>(e1), static_cast<short>(e0));
+    }
+
+    template <typename T>
+    void set(T e15, T e14, T e13, T e12, T e11, T e10, T e9, T e8, T e7, T e6,
+        T e5, T e4, T e3, T e2, T e1, T e0)
+    {
+        value_ = _mm_set_epi8(static_cast<char>(e15), static_cast<char>(e14),
+            static_cast<char>(e13), static_cast<char>(e12),
+            static_cast<char>(e11), static_cast<char>(e10),
+            static_cast<char>(e9), static_cast<char>(e8),
+            static_cast<char>(e7), static_cast<char>(e6),
+            static_cast<char>(e5), static_cast<char>(e4),
+            static_cast<char>(e3), static_cast<char>(e2),
+            static_cast<char>(e1), static_cast<char>(e0));
     }
 
     private:

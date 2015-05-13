@@ -93,9 +93,9 @@ class ARSKeySeq
     typedef std::array<ResultType, M128I<ResultType>::size()> key_type;
 
     ARSKeySeq()
-        : weyl_(traits::ARSWeylConstantTrait<0>::value,
-              traits::ARSWeylConstantTrait<1>::value)
     {
+        weyl_.set(traits::ARSWeylConstantTrait<0>::value,
+            traits::ARSWeylConstantTrait<1>::value);
     }
 
     template <std::size_t Rp1>
@@ -106,7 +106,7 @@ class ARSKeySeq
     }
 
     private:
-    const M128I<std::uint64_t> weyl_;
+    M128I<std::uint64_t> weyl_;
 
     template <std::size_t, std::size_t Rp1>
     void generate_seq(std::array<M128I<>, Rp1> &, std::false_type)

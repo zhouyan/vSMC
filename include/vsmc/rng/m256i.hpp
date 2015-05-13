@@ -58,75 +58,17 @@ class M256I
         VSMC_STATIC_ASSERT_RNG_M256I(IntType);
     }
 
+    M256I(const __m256i &value) : value_(value)
+    {
+        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
+    }
+
     template <typename T>
     M256I(T n,
         typename std::enable_if<std::is_integral<T>::value>::type * = nullptr)
-        : value_(set1(n, std::integral_constant<std::size_t, sizeof(T)>()))
     {
         VSMC_STATIC_ASSERT_RNG_M256I(IntType);
-    }
-
-    M256I(const __m256i &value) : value_(value) {}
-
-    template <typename T>
-    M256I(T e3, T e2, T e1, T e0)
-        : value_(_mm256_set_epi64x(static_cast<VSMC_INT64>(e3),
-              static_cast<VSMC_INT64>(e2), static_cast<VSMC_INT64>(e1),
-              static_cast<VSMC_INT64>(e0)))
-    {
-        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
-    }
-
-    template <typename T>
-    M256I(T e7, T e6, T e5, T e4, T e3, T e2, T e1, T e0)
-        : value_(_mm256_set_epi32(static_cast<int>(e7), static_cast<int>(e6),
-              static_cast<int>(e5), static_cast<int>(e4), static_cast<int>(e3),
-              static_cast<int>(e2), static_cast<int>(e1),
-              static_cast<int>(e0)))
-    {
-        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
-    }
-
-    template <typename T>
-    M256I(T e15, T e14, T e13, T e12, T e11, T e10, T e9, T e8, T e7, T e6,
-        T e5, T e4, T e3, T e2, T e1, T e0)
-        : value_(_mm256_set_epi16(static_cast<short>(e15),
-              static_cast<short>(e14), static_cast<short>(e13),
-              static_cast<short>(e12), static_cast<short>(e11),
-              static_cast<short>(e10), static_cast<short>(e9),
-              static_cast<short>(e8), static_cast<short>(e7),
-              static_cast<short>(e6), static_cast<short>(e5),
-              static_cast<short>(e4), static_cast<short>(e3),
-              static_cast<short>(e2), static_cast<short>(e1),
-              static_cast<short>(e0)))
-    {
-        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
-    }
-
-    template <typename T>
-    M256I(T e31, T e30, T e29, T e28, T e27, T e26, T e25, T e24, T e23, T e22,
-        T e21, T e20, T e19, T e18, T e17, T e16, T e15, T e14, T e13, T e12,
-        T e11, T e10, T e9, T e8, T e7, T e6, T e5, T e4, T e3, T e2, T e1,
-        T e0)
-        : value_(
-              _mm256_set_epi8(static_cast<char>(e31), static_cast<char>(e30),
-                  static_cast<char>(e29), static_cast<char>(e28),
-                  static_cast<char>(e27), static_cast<char>(e26),
-                  static_cast<char>(e25), static_cast<char>(e24),
-                  static_cast<char>(e23), static_cast<char>(e22),
-                  static_cast<char>(e21), static_cast<char>(e20),
-                  static_cast<char>(e19), static_cast<char>(e18),
-                  static_cast<char>(e17), static_cast<char>(e16),
-                  static_cast<char>(e15), static_cast<char>(e14),
-                  static_cast<char>(e13), static_cast<char>(e12),
-                  static_cast<char>(e11), static_cast<char>(e10),
-                  static_cast<char>(e9), static_cast<char>(e8),
-                  static_cast<char>(e7), static_cast<char>(e6),
-                  static_cast<char>(e5), static_cast<char>(e4),
-                  static_cast<char>(e3), static_cast<char>(e2),
-                  static_cast<char>(e1), static_cast<char>(e0)))
-    {
-        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
+        set1(n);
     }
 
     template <typename T>
@@ -191,6 +133,69 @@ class M256I
     {
         reinterpret_cast<std::uintptr_t>(mem) % 32 == 0 ? store_a(mem) :
                                                           store_u(mem);
+    }
+
+    template <typename T>
+    void set1(T n)
+    {
+        value_ = set1(n, std::integral_constant<std::size_t, sizeof(T)>());
+        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
+    }
+
+    template <typename T>
+    void set(T e3, T e2, T e1, T e0)
+    {
+        value_ = _mm256_set_epi64x(static_cast<VSMC_INT64>(e3),
+            static_cast<VSMC_INT64>(e2), static_cast<VSMC_INT64>(e1),
+            static_cast<VSMC_INT64>(e0));
+    }
+
+    template <typename T>
+    void set(T e7, T e6, T e5, T e4, T e3, T e2, T e1, T e0)
+    {
+        value_ = _mm256_set_epi32(static_cast<int>(e7), static_cast<int>(e6),
+            static_cast<int>(e5), static_cast<int>(e4), static_cast<int>(e3),
+            static_cast<int>(e2), static_cast<int>(e1), static_cast<int>(e0));
+    }
+
+    template <typename T>
+    void set(T e15, T e14, T e13, T e12, T e11, T e10, T e9, T e8, T e7, T e6,
+        T e5, T e4, T e3, T e2, T e1, T e0)
+    {
+        value_ =
+            _mm256_set_epi16(static_cast<short>(e15), static_cast<short>(e14),
+                static_cast<short>(e13), static_cast<short>(e12),
+                static_cast<short>(e11), static_cast<short>(e10),
+                static_cast<short>(e9), static_cast<short>(e8),
+                static_cast<short>(e7), static_cast<short>(e6),
+                static_cast<short>(e5), static_cast<short>(e4),
+                static_cast<short>(e3), static_cast<short>(e2),
+                static_cast<short>(e1), static_cast<short>(e0));
+    }
+
+    template <typename T>
+    void set(T e31, T e30, T e29, T e28, T e27, T e26, T e25, T e24, T e23,
+        T e22, T e21, T e20, T e19, T e18, T e17, T e16, T e15, T e14, T e13,
+        T e12, T e11, T e10, T e9, T e8, T e7, T e6, T e5, T e4, T e3, T e2,
+        T e1, T e0)
+    {
+        value_ =
+            _mm256_set_epi8(static_cast<char>(e31), static_cast<char>(e30),
+                static_cast<char>(e29), static_cast<char>(e28),
+                static_cast<char>(e27), static_cast<char>(e26),
+                static_cast<char>(e25), static_cast<char>(e24),
+                static_cast<char>(e23), static_cast<char>(e22),
+                static_cast<char>(e21), static_cast<char>(e20),
+                static_cast<char>(e19), static_cast<char>(e18),
+                static_cast<char>(e17), static_cast<char>(e16),
+                static_cast<char>(e15), static_cast<char>(e14),
+                static_cast<char>(e13), static_cast<char>(e12),
+                static_cast<char>(e11), static_cast<char>(e10),
+                static_cast<char>(e9), static_cast<char>(e8),
+                static_cast<char>(e7), static_cast<char>(e6),
+                static_cast<char>(e5), static_cast<char>(e4),
+                static_cast<char>(e3), static_cast<char>(e2),
+                static_cast<char>(e1), static_cast<char>(e0));
     }
 
     private:

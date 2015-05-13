@@ -61,7 +61,7 @@ struct ThreefryParPackSSE2 {
     template <std::size_t N>
     static void pack(const par_type &par, par128_type &par128, std::true_type)
     {
-        std::get<N>(par128) = std::get<N>(par);
+        std::get<N>(par128).set1(std::get<N>(par));
         pack<N + 1>(
             par, par128, std::integral_constant<bool, N + 1 < K + 1>());
     }
@@ -100,20 +100,18 @@ struct ThreefryCtrPackSSE2 {
     static void set(const ctr_block_type &ctr_block, state_type &state,
         std::integral_constant<std::size_t, 4>)
     {
-        std::get<N>(state) =
-            M128I<ResultType>(std::get<N>(std::get<0>(ctr_block)),
-                std::get<N>(std::get<1>(ctr_block)),
-                std::get<N>(std::get<2>(ctr_block)),
-                std::get<N>(std::get<3>(ctr_block)));
+        std::get<N>(state).set(std::get<N>(std::get<0>(ctr_block)),
+            std::get<N>(std::get<1>(ctr_block)),
+            std::get<N>(std::get<2>(ctr_block)),
+            std::get<N>(std::get<3>(ctr_block)));
     }
 
     template <std::size_t N>
     static void set(const ctr_block_type &ctr_block, state_type &state,
         std::integral_constant<std::size_t, 8>)
     {
-        std::get<N>(state) =
-            M128I<ResultType>(std::get<N>(std::get<0>(ctr_block)),
-                std::get<N>(std::get<1>(ctr_block)));
+        std::get<N>(state).set(std::get<N>(std::get<0>(ctr_block)),
+            std::get<N>(std::get<1>(ctr_block)));
     }
 }; // struct ThreefryCtrPackSSE2
 
