@@ -307,11 +307,14 @@ class ThreefryEngineSSE2
     void generate_buffer()
     {
         par_type par;
-        state_type state;
+        union {
+            state_type state;
+            std::array<ResultType, M_> result;
+        } buf;
         internal::ThreefryParPackSSE2<ResultType, K>::eval(par_, par);
-        internal::ThreefryCtrPackSSE2<ResultType, K>::eval(ctr_, state);
-        generate_buffer<0>(par, state, std::true_type());
-        std::memcpy(buffer_.data(), state.data(), sizeof(ResultType) * M_);
+        internal::ThreefryCtrPackSSE2<ResultType, K>::eval(ctr_, buf.state);
+        generate_buffer<0>(par, buf.state, std::true_type());
+        buffer_ = buf.result;
     }
 
     template <std::size_t>
