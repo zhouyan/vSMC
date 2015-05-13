@@ -36,6 +36,12 @@
 #include <vsmc/rng/m128i.hpp>
 #include <immintrin.h>
 
+#define VSMC_STATIC_ASSERT_RNG_M256I(IntType)                                 \
+    VSMC_STATIC_ASSERT((std::is_same<IntType, __m256i>::value ||              \
+                           std::is_same<IntType, __m128i>::value ||           \
+                           std::is_integral<IntType>::value),                 \
+        "**M256I** USED WITH NON-INTEGER TEMPLATE PARAMTER")
+
 namespace vsmc
 {
 
@@ -47,13 +53,17 @@ class M256I
     public:
     typedef IntType value_type;
 
-    M256I() : value_(_mm256_setzero_si256()) {}
+    M256I() : value_(_mm256_setzero_si256())
+    {
+        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
+    }
 
     template <typename T>
     M256I(T n,
         typename std::enable_if<std::is_integral<T>::value>::type * = nullptr)
         : value_(set1(n, std::integral_constant<std::size_t, sizeof(T)>()))
     {
+        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
     }
 
     M256I(const __m256i &value) : value_(value) {}
@@ -64,6 +74,7 @@ class M256I
               static_cast<VSMC_INT64>(e2), static_cast<VSMC_INT64>(e1),
               static_cast<VSMC_INT64>(e0)))
     {
+        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
     }
 
     template <typename T>
@@ -73,6 +84,7 @@ class M256I
               static_cast<int>(e2), static_cast<int>(e1),
               static_cast<int>(e0)))
     {
+        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
     }
 
     template <typename T>
@@ -88,6 +100,7 @@ class M256I
               static_cast<short>(e2), static_cast<short>(e1),
               static_cast<short>(e0)))
     {
+        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
     }
 
     template <typename T>
@@ -113,6 +126,22 @@ class M256I
                   static_cast<char>(e3), static_cast<char>(e2),
                   static_cast<char>(e1), static_cast<char>(e0)))
     {
+        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
+    }
+
+    template <typename T>
+    M256I(const M256I<T> &other)
+        : value_(other.value())
+    {
+        VSMC_STATIC_ASSERT_RNG_M256I(IntType);
+    }
+
+    template <typename T>
+    M256I<IntType> &operator=(const M256I<T> &other)
+    {
+        value_ = other.value_;
+
+        return *this;
     }
 
     static constexpr std::size_t size()

@@ -35,6 +35,11 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <emmintrin.h>
 
+#define VSMC_STATIC_ASSERT_RNG_M128I(IntType)                                 \
+    VSMC_STATIC_ASSERT((std::is_same<IntType, __m128i>::value ||              \
+                           std::is_integral<IntType>::value),                 \
+        "**M256I** USED WITH NON-INTEGER TEMPLATE PARAMTER")
+
 namespace vsmc
 {
 
@@ -46,13 +51,17 @@ class M128I
     public:
     typedef IntType value_type;
 
-    M128I() : value_(_mm_setzero_si128()) {}
+    M128I() : value_(_mm_setzero_si128())
+    {
+        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
+    }
 
     template <typename T>
     M128I(T n,
         typename std::enable_if<std::is_integral<T>::value>::type * = nullptr)
         : value_(set1(n, std::integral_constant<std::size_t, sizeof(T)>()))
     {
+        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
     }
 
     M128I(const __m128i &value) : value_(value) {}
@@ -62,6 +71,7 @@ class M128I
         : value_(_mm_set_epi64x(
               static_cast<VSMC_INT64>(e1), static_cast<VSMC_INT64>(e0)))
     {
+        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
     }
 
     template <typename T>
@@ -69,6 +79,7 @@ class M128I
         : value_(_mm_set_epi32(static_cast<int>(e3), static_cast<int>(e2),
               static_cast<int>(e1), static_cast<int>(e0)))
     {
+        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
     }
 
     template <typename T>
@@ -78,6 +89,7 @@ class M128I
               static_cast<short>(e3), static_cast<short>(e2),
               static_cast<short>(e1), static_cast<short>(e0)))
     {
+        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
     }
 
     template <typename T>
@@ -92,6 +104,22 @@ class M128I
               static_cast<char>(e3), static_cast<char>(e2),
               static_cast<char>(e1), static_cast<char>(e0)))
     {
+        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
+    }
+
+    template <typename T>
+    M128I(const M128I<T> &other)
+        : value_(other.value())
+    {
+        VSMC_STATIC_ASSERT_RNG_M128I(IntType);
+    }
+
+    template <typename T>
+    M128I<IntType> &operator=(const M128I<T> &other)
+    {
+        value_ = other.value();
+
+        return *this;
     }
 
     static constexpr std::size_t size()
