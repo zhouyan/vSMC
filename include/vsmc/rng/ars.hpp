@@ -76,8 +76,7 @@ struct ARSWeylConstant<1> : public std::integral_constant<std::uint64_t,
 ///
 /// \details
 /// The two specializaiton (N = 0, 1) corresponds to lower and upper 64-bits
-/// or
-/// the Weyl constant.
+/// or the Weyl constant.
 template <std::size_t I>
 struct ARSWeylConstantTrait : public internal::ARSWeylConstant<I> {
 };
@@ -129,8 +128,7 @@ class ARSKeySeq
 /// \details
 /// This is a reimplementation of the ARS engine as described in
 /// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented
-/// in
-/// [Random123][r123lib].
+/// in [Random123][r123lib].
 ///
 /// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
 /// [r123lib]: https://www.deshawresearch.com/resources_random123.html

@@ -33,12 +33,10 @@
 #define VSMC_RNG_M256I_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/m128i.hpp>
 #include <immintrin.h>
 
 #define VSMC_STATIC_ASSERT_RNG_M256I(IntType)                                 \
     VSMC_STATIC_ASSERT((std::is_same<IntType, __m256i>::value ||              \
-                           std::is_same<IntType, __m128i>::value ||           \
                            std::is_integral<IntType>::value),                 \
         "**M256I** USED WITH NON-INTEGER TEMPLATE PARAMTER")
 
