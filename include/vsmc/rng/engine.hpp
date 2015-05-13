@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/rng.hpp
+// vSMC/include/vsmc/rng/engine.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,22 +29,36 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_RNG_HPP
-#define VSMC_RNG_RNG_HPP
+#ifndef VSMC_RNG_ENGINE_HPP
+#define VSMC_RNG_ENGINE_HPP
 
 #include <vsmc/internal/config.hpp>
 
-#include <vsmc/rng/distribution.hpp>
-#include <vsmc/rng/engine.hpp>
-#include <vsmc/rng/rng_set.hpp>
-#include <vsmc/rng/seed.hpp>
+#include <vsmc/rng/philox.hpp>
+#include <vsmc/rng/threefry.hpp>
+#include <vsmc/rng/xor_combine_engine.hpp>
+#include <vsmc/rng/xorshift.hpp>
+
+#if VSMC_HAS_AES_NI
+#include <vsmc/rng/aes.hpp>
+#include <vsmc/rng/aes_ni.hpp>
+#include <vsmc/rng/ars.hpp>
+#endif
 
 #if VSMC_HAS_AVX2
-#include <vsmc/rng/m256i.hpp>
+#include <vsmc/rng/threefry_avx2.hpp>
 #endif
 
 #if VSMC_HAS_SSE2
-#include <vsmc/rng/m128i.hpp>
+#include <vsmc/rng/threefry_sse2.hpp>
 #endif
 
-#endif // VSMC_RNG_RNG_HPP
+#if VSMC_HAS_MKL
+#include <vsmc/rng/mkl.hpp>
+#endif
+
+#if VSMC_HAS_RDRAND
+#include <vsmc/rng/rdrand.hpp>
+#endif
+
+#endif // VSMC_RNG_ENGINE_HPP
