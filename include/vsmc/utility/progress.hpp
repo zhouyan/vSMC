@@ -102,7 +102,6 @@ class Progress
     /// Otherwise, whatever progress has been made will be shown.
     void stop(bool finished = true)
     {
-        in_progress_ = false;
         join();
         if (finished && iter_ < total_)
             iter_ = total_;
@@ -156,6 +155,7 @@ class Progress
 
     void join()
     {
+        in_progress_ = false;
         if (thread_ptr_ != nullptr) {
             if (thread_ptr_->joinable())
                 thread_ptr_->join();
