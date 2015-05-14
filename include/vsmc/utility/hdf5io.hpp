@@ -262,6 +262,15 @@ inline ::hsize_t hdf5size(
     return bytes;
 }
 
+/// \brief Get the number of elements of the data in the HDF5 format given type
+/// \ingroup HDF5IO
+template <typename T>
+inline ::hsize_t hdf5size(
+    const std::string &file_name, const std::string &data_name)
+{
+    return hdf5size(file_name, data_name) / sizeof(T);
+}
+
 /// \brief Load raw data in the HDF5 format
 /// \ingroup HDF5IO
 template <typename T, typename OutputIter>
