@@ -26,11 +26,14 @@ changes.
   - Thread
   - GCD
   - Integrate
+  - Core/Adapter
+  - SMP/Adapter
   - RNG/GSL
   - SMP/CILK
   - SMP/GCD
   - SMP/PPL
   - SMP/STD
+  - OpenCL/Adapter
   - Utility/Array
   - Utility/Counter
   - Utility/CString
