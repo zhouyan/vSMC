@@ -45,7 +45,7 @@
 #if VSMC_USE_TBB
 #define VSMC_RNG_SET_TYPE ::vsmc::RngSetTBB<::vsmc::Rng>
 #else
-#define VSMC_RNG_SET_TYPE ::vsmc::RngSetVector<::vsmc::Philox2x32>
+#define VSMC_RNG_SET_TYPE ::vsmc::RngSetVector<::vsmc::Rng>
 #endif
 #endif // VSMC_RNG_SET_TYPE
 

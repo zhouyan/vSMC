@@ -432,10 +432,6 @@ class AES128Engine : public AESNIEngine<ResultType, AES128KeySeq<ResultType>,
     }
 }; // class AES128Engine
 
-/// \brief AES-128 RNG engine with 32-bits integers output and default blocks
-/// \ingroup AESNIRNG
-typedef AES128Engine<std::uint32_t> AES128_32;
-
 /// \brief AES-128 RNG engine with 32-bits integers output and 1 block
 /// \ingroup AESNIRNG
 typedef AES128Engine<std::uint32_t, 1> AES128_1x32;
@@ -452,10 +448,6 @@ typedef AES128Engine<std::uint32_t, 4> AES128_4x32;
 /// \ingroup AESNIRNG
 typedef AES128Engine<std::uint32_t, 8> AES128_8x32;
 
-/// \brief AES-128 RNG engine with 64-bits integers output and default blocks
-/// \ingroup AESNIRNG
-typedef AES128Engine<std::uint64_t> AES128_64;
-
 /// \brief AES-128 RNG engine with 64-bits integers output and 1 block
 /// \ingroup AESNIRNG
 typedef AES128Engine<std::uint64_t, 1> AES128_1x64;
@@ -471,6 +463,14 @@ typedef AES128Engine<std::uint64_t, 4> AES128_4x64;
 /// \brief AES-128 RNG engine with 64-bits integers output and 8 blocks
 /// \ingroup AESNIRNG
 typedef AES128Engine<std::uint64_t, 8> AES128_8x64;
+
+/// \brief AES-128 RNG engine with 32-bits integers output and default blocks
+/// \ingroup AESNIRNG
+typedef AES128_4x32 AES128;
+
+/// \brief AES-128 RNG engine with 64-bits integers output and default blocks
+/// \ingroup AESNIRNG
+typedef AES128_4x64 AES128_64;
 
 /// \brief AES192Engine key sequence generator
 /// \ingroup AESNIRNG
@@ -626,10 +626,6 @@ class AES192Engine : public AESNIEngine<ResultType, AES192KeySeq<ResultType>,
     }
 }; // class AES192Engine
 
-/// \brief AES-192 RNG engine with 32-bits integers output and default blocks
-/// \ingroup AESNIRNG
-typedef AES192Engine<std::uint32_t> AES192_32;
-
 /// \brief AES-192 RNG engine with 32-bits integers output and 1 block
 /// \ingroup AESNIRNG
 typedef AES192Engine<std::uint32_t, 1> AES192_1x32;
@@ -646,10 +642,6 @@ typedef AES192Engine<std::uint32_t, 4> AES192_4x32;
 /// \ingroup AESNIRNG
 typedef AES192Engine<std::uint32_t, 8> AES192_8x32;
 
-/// \brief AES-192 RNG engine with 64-bits integers output and default blocks
-/// \ingroup AESNIRNG
-typedef AES192Engine<std::uint64_t> AES192_64;
-
 /// \brief AES-192 RNG engine with 64-bits integers output and 1 block
 /// \ingroup AESNIRNG
 typedef AES192Engine<std::uint64_t, 1> AES192_1x64;
@@ -665,6 +657,14 @@ typedef AES192Engine<std::uint64_t, 4> AES192_4x64;
 /// \brief AES-192 RNG engine with 64-bits integers output and 8 blocks
 /// \ingroup AESNIRNG
 typedef AES192Engine<std::uint64_t, 8> AES192_8x64;
+
+/// \brief AES-192 RNG engine with 32-bits integers output and default blocks
+/// \ingroup AESNIRNG
+typedef AES192_4x32 AES192;
+
+/// \brief AES-192 RNG engine with 64-bits integers output and default blocks
+/// \ingroup AESNIRNG
+typedef AES192_4x64 AES192_64;
 
 /// \brief AES256Engine key sequence generator
 /// \ingroup AESNIRNG
@@ -775,10 +775,6 @@ class AES256Engine : public AESNIEngine<ResultType, AES256KeySeq<ResultType>,
     }
 }; // class AES256Engine
 
-/// \brief AES-256 RNG engine with 32-bits integers output and default blocks
-/// \ingroup AESNIRNG
-typedef AES256Engine<std::uint32_t> AES256_32;
-
 /// \brief AES-256 RNG engine with 32-bits integers output and 1 block
 /// \ingroup AESNIRNG
 typedef AES256Engine<std::uint32_t, 1> AES256_1x32;
@@ -795,10 +791,6 @@ typedef AES256Engine<std::uint32_t, 4> AES256_4x32;
 /// \ingroup AESNIRNG
 typedef AES256Engine<std::uint32_t, 8> AES256_8x32;
 
-/// \brief AES-256 RNG engine with 64-bits integers output and default blocks
-/// \ingroup AESNIRNG
-typedef AES256Engine<std::uint64_t> AES256_64;
-
 /// \brief AES-256 RNG engine with 64-bits integers output and 1 block
 /// \ingroup AESNIRNG
 typedef AES256Engine<std::uint64_t, 1> AES256_1x64;
@@ -814,6 +806,14 @@ typedef AES256Engine<std::uint64_t, 4> AES256_4x64;
 /// \brief AES-256 RNG engine with 64-bits integers output and 8 blocks
 /// \ingroup AESNIRNG
 typedef AES256Engine<std::uint64_t, 8> AES256_8x64;
+
+/// \brief AES-256 RNG engine with 32-bits integers output and default blocks
+/// \ingroup AESNIRNG
+typedef AES256_4x32 AES256;
+
+/// \brief AES-256 RNG engine with 64-bits integers output and default blocks
+/// \ingroup AESNIRNG
+typedef AES256_4x64 AES256_64;
 
 } // namespace vsmc
 
