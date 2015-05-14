@@ -70,13 +70,13 @@ VSMC_DEFINE_SMP_FORWARD(TBB)
 
 /// \brief Particle::value_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
-template <typename BaseState>
-class StateTBB : public BaseState
+template <typename StateBase>
+class StateTBB : public StateBase
 {
     public:
-    typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
+    typedef typename traits::SizeTypeTrait<StateBase>::type size_type;
 
-    explicit StateTBB(size_type N) : BaseState(N) {}
+    explicit StateTBB(size_type N) : StateBase(N) {}
 
     template <typename IntType>
     void copy(size_type N, const IntType *copy_from)
@@ -90,7 +90,7 @@ class StateTBB : public BaseState
     class work_type
     {
         public:
-        work_type(StateTBB<BaseState> *state, const IntType *copy_from)
+        work_type(StateTBB<StateBase> *state, const IntType *copy_from)
             : state_(state), copy_from_(copy_from)
         {
         }
@@ -104,7 +104,7 @@ class StateTBB : public BaseState
         }
 
         private:
-        StateTBB<BaseState> *const state_;
+        StateTBB<StateBase> *const state_;
         const IntType *const copy_from_;
     }; // class work_type
 

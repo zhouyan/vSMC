@@ -42,22 +42,22 @@ VSMC_DEFINE_SMP_FORWARD(OMP)
 
 /// \brief Particle::value_type subtype using OpenMP
 /// \ingroup OMP
-template <typename BaseState>
-class StateOMP : public BaseState
+template <typename StateBase>
+class StateOMP : public StateBase
 {
     public:
     typedef typename traits::OMPSizeTypeTrait<
-        typename traits::SizeTypeTrait<BaseState>::type>::type size_type;
+        typename traits::SizeTypeTrait<StateBase>::type>::type size_type;
 
     explicit StateOMP(size_type N)
-        : BaseState(
-              static_cast<typename traits::SizeTypeTrait<BaseState>::type>(N))
+        : StateBase(
+              static_cast<typename traits::SizeTypeTrait<StateBase>::type>(N))
     {
     }
 
     size_type size() const
     {
-        return static_cast<size_type>(BaseState::size());
+        return static_cast<size_type>(StateBase::size());
     }
 
     template <typename IntType>

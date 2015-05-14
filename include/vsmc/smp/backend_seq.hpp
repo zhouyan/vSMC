@@ -41,13 +41,13 @@ VSMC_DEFINE_SMP_FORWARD(SEQ)
 
 /// \brief Particle::value_type subtype
 /// \ingroup SEQ
-template <typename BaseState>
-class StateSEQ : public BaseState
+template <typename StateBase>
+class StateSEQ : public StateBase
 {
     public:
-    typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
+    typedef typename traits::SizeTypeTrait<StateBase>::type size_type;
 
-    explicit StateSEQ(size_type N) : BaseState(N) {}
+    explicit StateSEQ(size_type N) : StateBase(N) {}
 }; // class StateSEQ
 
 /// \brief Sampler<T>::init_type subtype

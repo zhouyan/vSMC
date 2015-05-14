@@ -216,17 +216,17 @@ class WeightSetMPI : public WeightSetBase
 
 /// \brief Particle::value_type subtype using MPI
 /// \ingroup MPI
-template <typename BaseState, typename ID>
-class StateMPI : public BaseState
+template <typename StateBase, typename ID>
+class StateMPI : public StateBase
 {
     public:
-    typedef typename traits::SizeTypeTrait<BaseState>::type size_type;
-    typedef WeightSetMPI<typename traits::WeightSetTypeTrait<BaseState>::type,
+    typedef typename traits::SizeTypeTrait<StateBase>::type size_type;
+    typedef WeightSetMPI<typename traits::WeightSetTypeTrait<StateBase>::type,
         ID> weight_set_type;
     typedef ID mpi_id;
 
     explicit StateMPI(size_type N)
-        : BaseState(N)
+        : StateBase(N)
         , world_(MPICommunicator<ID>::instance().get(),
               ::boost::mpi::comm_duplicate)
         , offset_(0)
@@ -256,7 +256,7 @@ class StateMPI : public BaseState
     /// copy.
     ///
     /// \details
-    /// The `BaseState` type is required to have the following members -
+    /// The `StateBase` type is required to have the following members -
     /// `state_pack_type`: A type that used to pack state values. It shall be
     /// serializable. That is, a `state_pack_type` object is acceptable by
     /// `boost::mpi::communicator::send` etc. Both
@@ -315,14 +315,14 @@ class StateMPI : public BaseState
     {
         VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH;
 
-        copy_pre_processor_dispatch(has_copy_pre_processor_<BaseState>());
+        copy_pre_processor_dispatch(has_copy_pre_processor_<StateBase>());
         copy_from_.resize(N);
         if (world_.rank() == 0)
             std::copy(copy_from, copy_from + N, copy_from_.begin());
         ::boost::mpi::broadcast(world_, copy_from_, 0);
         copy_this_node(N, copy_from_.data(), copy_recv_, copy_send_);
         copy_inter_node(copy_recv_, copy_send_);
-        copy_post_processor_dispatch(has_copy_post_processor_<BaseState>());
+        copy_post_processor_dispatch(has_copy_post_processor_<StateBase>());
     }
 
     /// \brief A duplicated MPI communicator for this state value object
@@ -401,7 +401,7 @@ class StateMPI : public BaseState
     /// each
     /// `to` in the range `0` to `N - 1`
     /// - If both `to` and `from = copy_from[to]` are particles on this node,
-    /// use `BaseState::copy` to copy the parties. Otherwise,
+    /// use `StateBase::copy` to copy the parties. Otherwise,
     /// - If `to` is a particle on this node, insert a pair into `copy_recv`,
     /// whose values are the rank of the node from which this node shall
     /// receive the particle and the particle id *on this node* where the
@@ -428,7 +428,7 @@ class StateMPI : public BaseState
             copy_from_this_[to] =
                 rank_this == rank(from) ? local_id(from) : to;
         }
-        BaseState::copy(this->size(), copy_from_this_.data());
+        StateBase::copy(this->size(), copy_from_this_.data());
 
         copy_recv.clear();
         copy_send.clear();
@@ -486,22 +486,22 @@ class StateMPI : public BaseState
     std::vector<size_type> copy_from_this_;
     std::vector<std::pair<int, size_type>> copy_recv_;
     std::vector<std::pair<int, size_type>> copy_send_;
-    typename BaseState::state_pack_type pack_recv_;
-    typename BaseState::state_pack_type pack_send_;
+    typename StateBase::state_pack_type pack_recv_;
+    typename StateBase::state_pack_type pack_send_;
 
     VSMC_DEFINE_METHOD_CHECKER(copy_pre_processor, void, ())
     VSMC_DEFINE_METHOD_CHECKER(copy_post_processor, void, ())
 
     void copy_pre_processor_dispatch(std::true_type)
     {
-        BaseState::copy_pre_processor();
+        StateBase::copy_pre_processor();
     }
 
     void copy_pre_processor_dispatch(std::false_type) {}
 
     void copy_post_processor_dispatch(std::true_type)
     {
-        BaseState::copy_post_processor();
+        StateBase::copy_post_processor();
     }
 
     void copy_post_processor_dispatch(std::false_type) {}
