@@ -34,31 +34,20 @@
 
 #include "rng_test.hpp"
 
-#include <vsmc/rng/threefry.hpp>
+#include <vsmc/rng/engine.hpp>
+#include <vsmc/rng/uniform_real_distribution.hpp>
+#include <vsmc/rng/stable_distribution.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
-#define VSMC_RNG_DIST_B1(Dist, p1)                                            \
+#define VSMC_RNG_DIST_1(Dist, p1)                                            \
     {                                                                         \
-        std::Dist##_distribution dist(p1);                                    \
+        Dist dist(p1);                                                        \
         rng_dist(N, dist, #Dist "(" #p1 ")", names, size, sw, bytes, cycles); \
     }
 
-#define VSMC_RNG_DIST_B2(Dist, p1, p2)                                        \
+#define VSMC_RNG_DIST_2(Dist, p1, p2)                                        \
     {                                                                         \
-        std::Dist##_distribution dist(p1, p2);                                \
-        rng_dist(N, dist, #Dist "(" #p1 ", " #p2 ")", names, size, sw, bytes, \
-            cycles);                                                          \
-    }
-
-#define VSMC_RNG_DIST_T1(Dist, p1)                                            \
-    {                                                                         \
-        std::Dist##_distribution<> dist(p1);                                  \
-        rng_dist(N, dist, #Dist "(" #p1 ")", names, size, sw, bytes, cycles); \
-    }
-
-#define VSMC_RNG_DIST_T2(Dist, p1, p2)                                        \
-    {                                                                         \
-        std::Dist##_distribution<> dist(p1, p2);                              \
+        Dist dist(p1, p2);                                                    \
         rng_dist(N, dist, #Dist "(" #p1 ", " #p2 ")", names, size, sw, bytes, \
             cycles);                                                          \
     }
@@ -69,7 +58,7 @@ inline void rng_dist(std::size_t N, Dist &dist, const std::string &name,
     std::vector<vsmc::StopWatch> &sw, std::vector<std::size_t> &bytes,
     std::vector<uint64_t> &cycles)
 {
-    vsmc::Threefry4x64 rng;
+    vsmc::Rng rng;
     vsmc::StopWatch watch;
 #if VSMC_HAS_RDTSCP
     vsmc::RDTSCPCounter counter;

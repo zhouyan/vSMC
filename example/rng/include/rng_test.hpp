@@ -51,7 +51,7 @@
     rng_test<RNG>(N, #RNG, names, size, sw, bytes, cycles);
 
 #define VSMC_RNG_TEST_POST                                                    \
-    rng_output_sw(prog_name, names, size, sw, bytes, cycles);
+    rng_output_sw(N, prog_name, names, size, sw, bytes, cycles);
 
 template <typename RNG>
 inline void rng_test(std::size_t N, const std::string &name,
@@ -85,7 +85,7 @@ inline void rng_test(std::size_t N, const std::string &name,
     cycles.push_back(counter.cycles());
 }
 
-inline void rng_output_sw(const std::string &prog_name,
+inline void rng_output_sw(std::size_t N, const std::string &prog_name,
     const std::vector<std::string> &names, std::vector<std::size_t> &size,
     const std::vector<vsmc::StopWatch> &sw,
     const std::vector<std::size_t> &bytes, std::vector<std::uint64_t> &cycles)
@@ -96,29 +96,32 @@ inline void rng_output_sw(const std::string &prog_name,
     if (sw.size() != M)
         return;
 
-    std::cout << std::string(90, '=') << std::endl;
-    std::cout << std::left << std::setw(40) << prog_name;
+    std::cout << std::string(120, '=') << std::endl;
+    std::cout << std::left << std::setw(55) << prog_name;
     std::cout << std::right << std::setw(5) << "Size";
     std::cout << std::right << std::setw(15) << "Time (ms)";
     std::cout << std::right << std::setw(15) << "GB/s";
+    std::cout << std::right << std::setw(15) << "cpN";
     std::cout << std::right << std::setw(15) << "cpB";
     std::cout << std::endl;
-    std::cout << std::string(90, '-') << std::endl;
+    std::cout << std::string(120, '-') << std::endl;
 
     for (std::size_t i = 0; i != M; ++i) {
         double time = sw[i].milliseconds();
         double b = static_cast<double>(bytes[i]);
         double c = static_cast<double>(cycles[i]);
         double gbps = b / time * 1e-6;
+        double cpN = c / N;
         double cpB = c / b;
-        std::cout << std::left << std::setw(40) << names[i];
+        std::cout << std::left << std::setw(55) << names[i];
         std::cout << std::right << std::setw(5) << size[i];
         std::cout << std::right << std::setw(15) << std::fixed << time;
         std::cout << std::right << std::setw(15) << std::fixed << gbps;
+        std::cout << std::right << std::setw(15) << std::fixed << cpN;
         std::cout << std::right << std::setw(15) << std::fixed << cpB;
         std::cout << std::endl;
     }
-    std::cout << std::string(90, '=') << std::endl;
+    std::cout << std::string(120, '=') << std::endl;
 }
 
 #endif // VSMC_EXAMPLE_RNG_TEST_HPP
