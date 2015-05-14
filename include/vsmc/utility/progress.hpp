@@ -85,10 +85,6 @@ class Progress
         show_iter_ = show_iter;
         interval_ms_ = std::max(1.0, interval_s * 1000);
 
-        iter_ = 0;
-        print_first_ = true;
-        in_progress_ = true;
-
         watch_.reset();
         watch_.start();
         fork();
@@ -150,6 +146,9 @@ class Progress
     void fork()
     {
         join();
+        iter_ = 0;
+        print_first_ = true;
+        in_progress_ = true;
         thread_ptr_ = new std::thread(print_start_, this);
     }
 
