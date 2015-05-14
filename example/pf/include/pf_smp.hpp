@@ -78,15 +78,13 @@ static const std::size_t VelY = 3;
 static const std::size_t LogL = 4;
 
 template <vsmc::MatrixOrder Order>
-class cv_state : public BASE_STATE<typename BaseState<Order>::type>
+class cv_state : public StateBase<Order>
 {
     public:
     typedef vsmc::RngSetScalar<vsmc::Threefry4x32> rng_set_type;
+    typedef typename StateBase<Order>::size_type size_type;
 
-    typedef typename BASE_STATE<typename BaseState<Order>::type> base_state;
-    typedef typename base_state::size_type size_type;
-
-    cv_state(size_type N) : BASE_STATE<typename BaseState<Order>::type>(N) {}
+    cv_state(size_type N) : StateBase<Order>(N) {}
 
     double &obs_x(std::size_t iter) { return obs_x_[iter]; }
     double &obs_y(std::size_t iter) { return obs_y_[iter]; }
@@ -128,7 +126,7 @@ class cv_state : public BASE_STATE<typename BaseState<Order>::type>
 };
 
 template <vsmc::MatrixOrder Order>
-class cv_init : public BASE_INIT<cv_state<Order>, cv_init<Order>>
+class cv_init : public InitializeSMP<cv_state<Order>, cv_init<Order>>
 {
     public:
     typedef cv_state<Order> cv;
@@ -186,7 +184,7 @@ class cv_init : public BASE_INIT<cv_state<Order>, cv_init<Order>>
 };
 
 template <vsmc::MatrixOrder Order>
-class cv_move : public BASE_MOVE<cv_state<Order>, cv_move<Order>>
+class cv_move : public MoveSMP<cv_state<Order>, cv_move<Order>>
 {
     public:
     typedef cv_state<Order> cv;
@@ -247,7 +245,7 @@ class cv_move : public BASE_MOVE<cv_state<Order>, cv_move<Order>>
 };
 
 template <vsmc::MatrixOrder Order>
-class cv_est : public BASE_MONITOR<cv_state<Order>, cv_est<Order>>
+class cv_est : public MonitorEvalSMP<cv_state<Order>, cv_est<Order>>
 {
     public:
     typedef cv_state<Order> cv;

@@ -32,15 +32,12 @@
 #ifndef VSMC_EXAMPLE_PF_MATRIX_MPI_HPP
 #define VSMC_EXAMPLE_PF_MATRIX_MPI_HPP
 
-#define BASE_STATE vsmc::StateMPI
-
 #include <vsmc/core/state_matrix.hpp>
 #include <vsmc/mpi/backend_mpi.hpp>
 
 template <vsmc::MatrixOrder Order>
-struct BaseState {
-    typedef BASE_SMP_STATE<vsmc::StateMatrix<Order, 5, double>> type;
-};
+using StateBase =
+    vsmc::StateMPI<StateSMP<vsmc::StateMatrix<Order, 5, double>>>;
 
 #include "pf_smp.hpp"
 #include "pf_mpi_do.hpp"

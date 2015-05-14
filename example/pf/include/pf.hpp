@@ -29,17 +29,23 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-// clang-format off
 #ifndef VSMC_EXAMPLE_PF_@SMP@_HPP
 #define VSMC_EXAMPLE_PF_@SMP@_HPP
 
-#define BASE_SMP_STATE vsmc::State@SMP@
-
-#define BASE_INIT vsmc::Initialize@SMP@
-#define BASE_MOVE vsmc::Move@SMP@
-#define BASE_MONITOR vsmc::MonitorEval@SMP@
-// clang-format on
-
 #include <vsmc/smp/backend_@smp@.hpp>
+
+// clang-format off
+template <typename T>
+using StateSMP = vsmc::State@SMP@<T>;
+
+template <typename T, typename Derived>
+using InitializeSMP = vsmc::Initialize@SMP@<T, Derived>;
+
+template <typename T, typename Derived>
+using MoveSMP = vsmc::Move@SMP@<T, Derived>;
+
+template <typename T, typename Derived>
+using MonitorEvalSMP = vsmc::MonitorEval@SMP@<T, Derived>;
+// clang-format on
 
 #endif // VSMC_EXAMPLE_PF_@SMP@_HPP

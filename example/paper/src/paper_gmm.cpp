@@ -34,17 +34,23 @@
 #include <vsmc/core/state_matrix.hpp>
 #include <vsmc/smp/backend_@smp@.hpp>
 #include <vsmc/math/constants.hpp>
-
-// clang-format off
-#define BASE_STATE vsmc::State@SMP@
-#define BASE_INIT vsmc::Initialize@SMP@
-#define BASE_MOVE vsmc::Move@SMP@
-#define BASE_PATH vsmc::PathEval@SMP@
-// clang-format on
-
 #ifdef VSMC_PAPER_MPI
 #include <vsmc/mpi/backend_mpi.hpp>
 #endif
+
+// clang-format off
+template <typename T>
+using StateSMP = vsmc::State@SMP@<T>;
+
+template <typename T, typename Derived>
+using InitializeSMP = vsmc::Initialize@SMP@<T, Derived>;
+
+template <typename T, typename Derived>
+using MoveSMP = vsmc::Move@SMP@<T, Derived>;
+
+template <typename T, typename Derived>
+using PathEvalSMP = vsmc::PathEval@SMP@<T, Derived>;
+// clang-format on
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -218,12 +224,12 @@ class gmm_param
 
 //////////////////////////////////////////////////////////////////////////////
 
-typedef BASE_STATE<vsmc::StateMatrix<vsmc::RowMajor, 1, gmm_param>> BaseState;
+typedef StateSMP<vsmc::StateMatrix<vsmc::RowMajor, 1, gmm_param>> StateBase;
 
 #ifdef VSMC_PAPER_MPI
-typedef vsmc::StateMPI<BaseState> gmm_state_base;
+typedef vsmc::StateMPI<StateBase> gmm_state_base;
 #else
-typedef BaseState gmm_state_base;
+typedef StateBase gmm_state_base;
 #endif
 
 class gmm_state : public gmm_state_base
@@ -370,7 +376,7 @@ class gmm_state : public gmm_state_base
 
 //////////////////////////////////////////////////////////////////////////////
 
-class gmm_init : public BASE_INIT<gmm_state, gmm_init>
+class gmm_init : public InitializeSMP<gmm_state, gmm_init>
 {
     public:
     std::size_t initialize_state(vsmc::SingleParticle<gmm_state> sp)
@@ -449,7 +455,7 @@ class gmm_move_smc
 
 //////////////////////////////////////////////////////////////////////////////
 
-class gmm_move_mu : public BASE_MOVE<gmm_state, gmm_move_mu>
+class gmm_move_mu : public MoveSMP<gmm_state, gmm_move_mu>
 {
     public:
     std::size_t move_state(std::size_t, vsmc::SingleParticle<gmm_state> sp)
@@ -474,7 +480,7 @@ class gmm_move_mu : public BASE_MOVE<gmm_state, gmm_move_mu>
 
 //////////////////////////////////////////////////////////////////////////////
 
-class gmm_move_lambda : public BASE_MOVE<gmm_state, gmm_move_lambda>
+class gmm_move_lambda : public MoveSMP<gmm_state, gmm_move_lambda>
 {
     public:
     std::size_t move_state(std::size_t, vsmc::SingleParticle<gmm_state> sp)
@@ -499,7 +505,7 @@ class gmm_move_lambda : public BASE_MOVE<gmm_state, gmm_move_lambda>
 
 //////////////////////////////////////////////////////////////////////////////
 
-class gmm_move_weight : public BASE_MOVE<gmm_state, gmm_move_weight>
+class gmm_move_weight : public MoveSMP<gmm_state, gmm_move_weight>
 {
     public:
     std::size_t move_state(std::size_t, vsmc::SingleParticle<gmm_state> sp)
@@ -533,7 +539,7 @@ class gmm_move_weight : public BASE_MOVE<gmm_state, gmm_move_weight>
 
 //////////////////////////////////////////////////////////////////////////////
 
-class gmm_path : public BASE_PATH<gmm_state, gmm_path>
+class gmm_path : public PathEvalSMP<gmm_state, gmm_path>
 {
     public:
     double path_state(std::size_t, vsmc::ConstSingleParticle<gmm_state> sp)
