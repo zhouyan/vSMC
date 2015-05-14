@@ -354,7 +354,7 @@ class StateCL
     }
 
     template <typename IntType>
-    void copy(std::size_t N, const IntType *copy_from)
+    void copy(size_type N, const IntType *copy_from)
     {
         VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_COPY_SIZE_MISMATCH;
 
