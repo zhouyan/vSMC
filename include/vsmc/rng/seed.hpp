@@ -299,6 +299,12 @@ class SeedGenerator<ID, std::array<T, K>>
         return std::get<0>(s2);
     }
 
+    void set(T s)
+    {
+        seed_.fill(0);
+        seed_.front() = s;
+    }
+
     void set(result_type seed) { seed_ = seed; }
 
     result_type seed() const { return seed_; }
