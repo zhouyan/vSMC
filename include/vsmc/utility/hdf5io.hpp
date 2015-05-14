@@ -740,8 +740,8 @@ inline void hdf5store(const StateTuple<ColMajor, T, Types...> &state,
 /// \brief Store a StateCL in the HDF5 format
 /// \ingroup HDF5IO
 template <MatrixOrder Order, typename T, std::size_t StateSize,
-    typename FPType, typename ID>
-inline void hdf5store(const StateCL<StateSize, FPType, ID> &state,
+    typename RealType, typename ID>
+inline void hdf5store(const StateCL<StateSize, RealType, ID> &state,
     const std::string &file_name, const std::string &data_name,
     bool append = false)
 {

@@ -39,15 +39,15 @@
     VSMC_RUNTIME_ASSERT((n < N_ && (n == n_ || n == n_ + 1 || n_ == N_)),     \
         "**U01Sequence" #Method "::operator[]** INVALID INDEX")
 
-#define VSMC_DEFINE_RNG_U01(FPType, Left, Right, left, right, UBits, FBits)   \
+#define VSMC_DEFINE_RNG_U01(RealType, Left, Right, left, right, UBits, FBits) \
     template <>                                                               \
-    struct U01<Left, Right, uint##UBits##_t, FPType> {                        \
-        FPType operator()(uint##UBits##_t u) const                            \
+    struct U01<Left, Right, uint##UBits##_t, RealType> {                      \
+        RealType operator()(uint##UBits##_t u) const                          \
         {                                                                     \
             return ::vsmc_u01_##left##_##right##_u##UBits##_f##FBits(u);      \
         }                                                                     \
                                                                               \
-        static FPType uint2fp(uint##UBits##_t u)                              \
+        static RealType uint2fp(uint##UBits##_t u)                            \
         {                                                                     \
             return ::vsmc_u01_##left##_##right##_u##UBits##_f##FBits(u);      \
         }                                                                     \
@@ -172,11 +172,11 @@ VSMC_DEFINE_RNG_U01(double, Open, Open, open, open, 64, 64)
 /// last time it is called.
 /// - `n` can only be either `0`, `nlast`, or `nlast + 1`
 /// - `n` can be at most `N - 1`.
-template <typename RngType>
+template <typename URNG>
 class U01SequenceSorted
 {
     public:
-    U01SequenceSorted(std::size_t N, RngType &rng)
+    U01SequenceSorted(std::size_t N, URNG &rng)
         : N_(N), n_(N), u_(0), lmax_(0), rng_(rng), runif_(0, 1)
     {
     }
@@ -204,7 +204,7 @@ class U01SequenceSorted
     std::size_t n_;
     double u_;
     double lmax_;
-    RngType &rng_;
+    URNG &rng_;
     std::uniform_real_distribution<double> runif_;
 }; // U01SequenceSorted
 
@@ -218,11 +218,11 @@ class U01SequenceSorted
 /// sequence as if by sorting. It is done by generating
 /// \f$u_i = U_i / N + (i - 1) / N\f$ where \f$U_i\f$ is uniform \f$[0,1)\f$
 /// random variates.
-template <typename RngType>
+template <typename URNG>
 class U01SequenceStratified
 {
     public:
-    U01SequenceStratified(std::size_t N, RngType &rng)
+    U01SequenceStratified(std::size_t N, URNG &rng)
         : N_(N), n_(N), u_(0), delta_(1.0 / N), rng_(rng), runif_(0, 1)
     {
     }
@@ -247,7 +247,7 @@ class U01SequenceStratified
     std::size_t n_;
     double u_;
     double delta_;
-    RngType &rng_;
+    URNG &rng_;
     std::uniform_real_distribution<double> runif_;
 }; // class U01SequenceStratified
 
@@ -261,11 +261,11 @@ class U01SequenceStratified
 /// sequence as if by sorting. It is done by generating
 /// \f$u_i = U / N + (i - 1) / N\f$ where \f$U\f$ is uniform \f$[0,1)\f$
 /// random variates and it is generated only once for all \f$i\f$.
-template <typename RngType>
+template <typename URNG>
 class U01SequenceSystematic
 {
     public:
-    U01SequenceSystematic(std::size_t N, RngType &rng)
+    U01SequenceSystematic(std::size_t N, URNG &rng)
         : N_(N), n_(N), u_(0), u0_(0), delta_(1.0 / N)
     {
         std::uniform_real_distribution<double> runif(0, 1);

@@ -40,15 +40,7 @@
 /// \brief Default RNG type for resampling
 /// \ingroup Config
 #ifndef VSMC_RESAMPLE_RNG_TYPE
-#if VSMC_HAS_AES_NI
-#define VSMC_RESAMPLE_RNG_TYPE ::vsmc::ARS_4x32
-#elif VSMC_HAS_AVX2
-#define VSMC_RESAMPLE_RNG_TYPE ::vsmc::Threefry4x32AVX2
-#elif VSMC_HAS_SSE2
-#define VSMC_RESAMPLE_RNG_TYPE ::vsmc::Threefry4x32SSE2
-#else
-#define VSMC_RESAMPLE_RNG_TYPE ::vsmc::Threefry4x32
-#endif
+#define VSMC_RESAMPLE_RNG_TYPE VSMC_RNG_TYPE
 #endif
 
 namespace vsmc

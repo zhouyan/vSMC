@@ -43,18 +43,10 @@
 /// \ingroup Config
 #ifndef VSMC_RNG_SET_TYPE
 #if VSMC_USE_TBB
-#if VSMC_HAS_AES_NI
-#define VSMC_RNG_SET_TYPE ::vsmc::RngSetTBB<::vsmc::ARS_4x32>
-#elif VSMC_HAS_AVX2
-#define VSMC_RNG_SET_TYPE ::vsmc::RngSetTBB<::vsmc::Threefry4x32AVX2>
-#elif VSMC_HAS_SSE2
-#define VSMC_RNG_SET_TYPE ::vsmc::RngSetTBB<::vsmc::Threefry4x32SSE2>
+#define VSMC_RNG_SET_TYPE ::vsmc::RngSetTBB<::vsmc::Rng>
 #else
-#define VSMC_RNG_SET_TYPE ::vsmc::RngSetTBB<::vsmc::Threefry4x32>
+#define VSMC_RNG_SET_TYPE ::vsmc::RngSetVector<::vsmc::Philox2x32>
 #endif
-#else // VSMC_USE_TBB
-#define VSMC_RNG_SET_TYPE ::vsmc::RngSetVector<::vsmc::Threefry4x32>
-#endif // VSMC_USE_TBB
 #endif // VSMC_RNG_SET_TYPE
 
 namespace vsmc
@@ -218,12 +210,14 @@ class RngSetMKL<MKLEngine<BRNG, ResultType>>
 
 #endif // VSMC_HAS_TBB
 
+typedef VSMC_RNG_SET_TYPE RngSet;
+
 namespace traits
 {
 
 /// \brief Particle::rng_set_type trait
 /// \ingroup Traits
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, VSMC_RNG_SET_TYPE)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSet)
 
 } // namespace vsmc::traits
 

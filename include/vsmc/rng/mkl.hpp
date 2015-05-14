@@ -36,9 +36,9 @@
 #include <vsmc/utility/aligned_memory.hpp>
 #include <vsmc/utility/mkl.hpp>
 
-#define VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Dist)     \
-    VSMC_STATIC_ASSERT((std::is_same<FPType, float>::value ||                 \
-                           std::is_same<FPType, double>::value),              \
+#define VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(RealType, Dist)   \
+    VSMC_STATIC_ASSERT((std::is_same<RealType, float>::value ||               \
+                           std::is_same<RealType, double>::value),            \
         "**MKL" #Dist                                                         \
         "Distribution** USED WITH ResultType OTHER THAN float OR double")
 
@@ -672,17 +672,18 @@ class MKLNegBinomialDistribution
 
 /// \brief MKL Gaussian distribution
 /// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
-class MKLGaussianDistribution
-    : public MKLDistribution<FPType, MKLGaussianDistribution<FPType, Method>>
+template <typename RealType, MKL_INT Method>
+class MKLGaussianDistribution : public MKLDistribution<RealType,
+                                    MKLGaussianDistribution<RealType, Method>>
 {
     public:
-    typedef FPType result_type;
+    typedef RealType result_type;
 
     explicit MKLGaussianDistribution(result_type mean = 0, result_type sd = 1)
         : mean_(mean), sd_(sd)
     {
-        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Gaussian);
+        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(
+            RealType, Gaussian);
     }
 
     template <MKL_INT BRNG>
@@ -709,20 +710,20 @@ class MKLGaussianDistribution
 
 /// \brief MKL Exponential distribution
 /// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
+template <typename RealType, MKL_INT Method>
 class MKLExponentialDistribution
-    : public MKLDistribution<FPType,
-          MKLExponentialDistribution<FPType, Method>>
+    : public MKLDistribution<RealType,
+          MKLExponentialDistribution<RealType, Method>>
 {
     public:
-    typedef FPType result_type;
+    typedef RealType result_type;
 
     explicit MKLExponentialDistribution(
         result_type displacement = 0, result_type scale = 1)
         : disp_(displacement), scale_(scale)
     {
         VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(
-            FPType, Exponential);
+            RealType, Exponential);
     }
 
     template <MKL_INT BRNG>
@@ -749,18 +750,18 @@ class MKLExponentialDistribution
 
 /// \brief MKL Laplace distribution
 /// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
-class MKLLaplaceDistribution
-    : public MKLDistribution<FPType, MKLLaplaceDistribution<FPType, Method>>
+template <typename RealType, MKL_INT Method>
+class MKLLaplaceDistribution : public MKLDistribution<RealType,
+                                   MKLLaplaceDistribution<RealType, Method>>
 {
     public:
-    typedef FPType result_type;
+    typedef RealType result_type;
 
     explicit MKLLaplaceDistribution(
         result_type mean = 0, result_type scale = 1)
         : mean_(mean), scale_(scale)
     {
-        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Laplace);
+        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(RealType, Laplace);
     }
 
     template <MKL_INT BRNG>
@@ -787,18 +788,18 @@ class MKLLaplaceDistribution
 
 /// \brief MKL Weibull distribution
 /// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
-class MKLWeibullDistribution
-    : public MKLDistribution<FPType, MKLWeibullDistribution<FPType, Method>>
+template <typename RealType, MKL_INT Method>
+class MKLWeibullDistribution : public MKLDistribution<RealType,
+                                   MKLWeibullDistribution<RealType, Method>>
 {
     public:
-    typedef FPType result_type;
+    typedef RealType result_type;
 
     explicit MKLWeibullDistribution(result_type shape = 1,
         result_type displacement = 0, result_type scale = 1)
         : shape_(shape), disp_(displacement), scale_(scale)
     {
-        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Weibull);
+        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(RealType, Weibull);
     }
 
     template <MKL_INT BRNG>
@@ -826,18 +827,18 @@ class MKLWeibullDistribution
 
 /// \brief MKL Cauchy distribution
 /// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
+template <typename RealType, MKL_INT Method>
 class MKLCauchyDistribution
-    : public MKLDistribution<FPType, MKLCauchyDistribution<FPType, Method>>
+    : public MKLDistribution<RealType, MKLCauchyDistribution<RealType, Method>>
 {
     public:
-    typedef FPType result_type;
+    typedef RealType result_type;
 
     explicit MKLCauchyDistribution(
         result_type displacement = 0, result_type scale = 1)
         : disp_(displacement), scale_(scale)
     {
-        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Cauchy);
+        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(RealType, Cauchy);
     }
 
     template <MKL_INT BRNG>
@@ -864,18 +865,19 @@ class MKLCauchyDistribution
 
 /// \brief MKL Rayleigh distribution
 /// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
-class MKLRayleighDistribution
-    : public MKLDistribution<FPType, MKLRayleighDistribution<FPType, Method>>
+template <typename RealType, MKL_INT Method>
+class MKLRayleighDistribution : public MKLDistribution<RealType,
+                                    MKLRayleighDistribution<RealType, Method>>
 {
     public:
-    typedef FPType result_type;
+    typedef RealType result_type;
 
     explicit MKLRayleighDistribution(
         result_type displacement = 0, result_type scale = 1)
         : disp_(displacement), scale_(scale)
     {
-        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Rayleigh);
+        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(
+            RealType, Rayleigh);
     }
 
     template <MKL_INT BRNG>
@@ -902,18 +904,20 @@ class MKLRayleighDistribution
 
 /// \brief MKL Lognormal distribution
 /// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
+template <typename RealType, MKL_INT Method>
 class MKLLognormalDistribution
-    : public MKLDistribution<FPType, MKLLognormalDistribution<FPType, Method>>
+    : public MKLDistribution<RealType,
+          MKLLognormalDistribution<RealType, Method>>
 {
     public:
-    typedef FPType result_type;
+    typedef RealType result_type;
 
     explicit MKLLognormalDistribution(result_type mean = 0, result_type sd = 1,
         result_type displacement = 0, result_type scale = 1)
         : mean_(mean), sd_(sd), disp_(displacement), scale_(scale)
     {
-        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Lognormal);
+        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(
+            RealType, Lognormal);
     }
 
     template <MKL_INT BRNG>
@@ -942,18 +946,18 @@ class MKLLognormalDistribution
 
 /// \brief MKL Gumbel distribution
 /// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
+template <typename RealType, MKL_INT Method>
 class MKLGumbelDistribution
-    : public MKLDistribution<FPType, MKLGumbelDistribution<FPType, Method>>
+    : public MKLDistribution<RealType, MKLGumbelDistribution<RealType, Method>>
 {
     public:
-    typedef FPType result_type;
+    typedef RealType result_type;
 
     explicit MKLGumbelDistribution(
         result_type displacement = 0, result_type scale = 1)
         : disp_(displacement), scale_(scale)
     {
-        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Gumbel);
+        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(RealType, Gumbel);
     }
 
     template <MKL_INT BRNG>
@@ -980,18 +984,18 @@ class MKLGumbelDistribution
 
 /// \brief MKL Gamma distribution
 /// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
+template <typename RealType, MKL_INT Method>
 class MKLGammaDistribution
-    : public MKLDistribution<FPType, MKLGammaDistribution<FPType, Method>>
+    : public MKLDistribution<RealType, MKLGammaDistribution<RealType, Method>>
 {
     public:
-    typedef FPType result_type;
+    typedef RealType result_type;
 
     explicit MKLGammaDistribution(result_type shape = 1,
         result_type displacement = 0, result_type scale = 1)
         : shape_(shape), disp_(displacement), scale_(scale)
     {
-        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Gamma);
+        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(RealType, Gamma);
     }
 
     template <MKL_INT BRNG>
@@ -1019,19 +1023,19 @@ class MKLGammaDistribution
 
 /// \brief MKL Beta distribution
 /// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
+template <typename RealType, MKL_INT Method>
 class MKLBetaDistribution
-    : public MKLDistribution<FPType, MKLBetaDistribution<FPType, Method>>
+    : public MKLDistribution<RealType, MKLBetaDistribution<RealType, Method>>
 {
     public:
-    typedef FPType result_type;
+    typedef RealType result_type;
 
     explicit MKLBetaDistribution(result_type shape1 = 1,
         result_type shape2 = 1, result_type displacement = 0,
         result_type scale = 1)
         : shape1_(shape1), shape2_(shape2), disp_(displacement), scale_(scale)
     {
-        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Beta);
+        VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(RealType, Beta);
     }
 
     template <MKL_INT BRNG>

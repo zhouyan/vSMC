@@ -32,6 +32,20 @@
 #ifndef VSMC_RNG_ENGINE_HPP
 #define VSMC_RNG_ENGINE_HPP
 
+/// \brief Default RNG type
+/// \ingroup Config
+#ifndef VSMC_RNG_TYPE
+#if VSMC_HAS_AES_NI
+#define VSMC_RNG_TYPE ::vsmc::ARS_4x32
+#elif VSMC_HAS_AVX2
+#define VSMC_RNG_TYPE ::vsmc::Threefry4x32AVX2
+#elif VSMC_HAS_SSE2
+#define VSMC_RNG_TYPE ::vsmc::Threefry4x32SSE2
+#else
+#define VSMC_RNG_TYPE ::vsmc::Threefry4x32
+#endif
+#endif
+
 #include <vsmc/internal/config.hpp>
 
 #include <vsmc/rng/philox.hpp>
@@ -60,5 +74,12 @@
 #if VSMC_HAS_RDRAND
 #include <vsmc/rng/rdrand.hpp>
 #endif
+
+namespace vsmc
+{
+
+typedef VSMC_RNG_TYPE Rng;
+
+} // namespace vsmc
 
 #endif // VSMC_RNG_ENGINE_HPP

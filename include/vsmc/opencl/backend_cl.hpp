@@ -53,7 +53,7 @@
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(type)           \
     VSMC_STATIC_ASSERT((std::is_same<type, ::cl_float>::value ||              \
                            std::is_same<type, ::cl_double>::value),           \
-        "**StateCL** USED WITH FPType OTHER THAN cl_float OR cl_double")
+        "**StateCL** USED WITH RealType OTHER THAN cl_float OR cl_double")
 
 #define VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_BUILD(func)                     \
     VSMC_RUNTIME_ASSERT((build()),                                            \
@@ -146,12 +146,12 @@ inline void set_cl_fp_type<cl_double>(std::stringstream &ss)
     ss << "#endif\n";
 }
 
-template <typename FPType>
+template <typename RealType>
 inline std::string cl_source_macros(
     std::size_t size, std::size_t state_size, std::size_t seed)
 {
     std::stringstream ss;
-    set_cl_fp_type<FPType>(ss);
+    set_cl_fp_type<RealType>(ss);
 
     ss << "#ifndef SIZE\n";
     ss << "#define SIZE " << size << "UL\n";
@@ -193,12 +193,12 @@ struct IsDerivedFromStateCL
 
 /// \brief Particle::value_type subtype using OpenCL
 /// \ingroup OpenCL
-template <std::size_t StateSize, typename FPType, typename ID>
+template <std::size_t StateSize, typename RealType, typename ID>
 class StateCL
 {
     public:
     typedef ::cl_ulong size_type;
-    typedef FPType fp_type;
+    typedef RealType fp_type;
     typedef ID cl_id;
     typedef CLManager<ID> manager_type;
     typedef typename std::conditional<StateSize == Dynamic, std::vector<char>,
@@ -267,14 +267,10 @@ class StateCL
     /// occurs
     ///
     /// \details
-    /// Note that a few macros are defined before the user supplied
-    /// `source`.
-    /// Say the template parameter `StateSize == 4`, `FPType` of
-    /// this class is
-    /// set to `cl_float`, and there are `1000` particles, then the
-    /// complete
-    /// source, which acutally get compiled looks like the
-    /// following
+    /// Note that a few macros are defined before the user supplied `source`.
+    /// Say the template parameter `StateSize == 4`, `RealType` of this class
+    /// is set to `cl_float`, and there are `1000` particles, then the complete
+    /// source, which acutally get compiled looks like the following
     /// ~~~{.cpp}
     /// #ifndef FP_TYPE
     /// #define FP_TYPE float
@@ -299,9 +295,8 @@ class StateCL
     /// // The actual seed is vsmc::Seed::instance().get()
     /// // ... User source, passed by the source argument
     /// ~~~
-    /// After build, `vsmc::Seed::instance().skip(N)` is called
-    /// with `N`
-    /// being the nubmer of particles.
+    /// After build, `vsmc::Seed::instance().skip(N)` is called with `N` being
+    /// the nubmer of particles.
     template <typename CharT, typename Traits>
     void build(const std::string &source, const std::string &flags,
         std::basic_ostream<CharT, Traits> &os)

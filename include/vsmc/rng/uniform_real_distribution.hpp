@@ -59,63 +59,18 @@ namespace internal
 {
 
 template <std::uint64_t, std::uint64_t>
-struct UniformRealDistributionFRIntType;
+struct UniformRealDistributionIntType;
 
 template <>
-struct UniformRealDistributionFRIntType<0,
+struct UniformRealDistributionIntType<0,
     static_cast<std::uint64_t>(VSMC_MAX_UINT(std::uint32_t))> {
     typedef std::uint32_t type;
 };
 
 template <>
-struct UniformRealDistributionFRIntType<0, VSMC_MAX_UINT(std::uint64_t)> {
+struct UniformRealDistributionIntType<0, VSMC_MAX_UINT(std::uint64_t)> {
     typedef std::uint64_t type;
 };
-
-template <typename FPType, typename Left, typename Right, typename Eng, bool>
-class UniformRealDistributionOp
-{
-    static constexpr std::uint64_t uint32_t_max_ =
-        static_cast<std::uint64_t>(VSMC_MAX_UINT(std::uint32_t));
-
-    static constexpr std::uint64_t uint64_t_max_ =
-        VSMC_MAX_UINT(std::uint64_t);
-
-    public:
-    static FPType uint2fp(Eng &eng)
-    {
-        static const std::uint64_t eng_max =
-            static_cast<std::uint64_t>(eng.max VSMC_MNE());
-
-        VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(
-            (eng.min VSMC_MNE()));
-        VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX(eng_max);
-
-        if (eng_max == uint32_t_max_)
-            return U01<Left, Right, std::uint32_t, FPType>::uint2fp(
-                static_cast<std::uint32_t>(eng()));
-
-        if (eng_max == uint64_t_max_)
-            return U01<Left, Right, std::uint64_t, FPType>::uint2fp(
-                static_cast<std::uint64_t>(eng()));
-
-        return 0;
-    }
-}; // class UniformRealDistributionOp
-
-template <typename FPType, typename Left, typename Right, typename Eng>
-class UniformRealDistributionOp<FPType, Left, Right, Eng, true>
-{
-    typedef typename internal::UniformRealDistributionFRIntType<
-        Eng::min VSMC_MNE(), Eng::max VSMC_MNE()>::type eng_uint_t;
-
-    public:
-    static FPType uint2fp(Eng &eng)
-    {
-        return U01<Left, Right, eng_uint_t, FPType>::uint2fp(
-            static_cast<eng_uint_t>(eng()));
-    }
-}; // class UniformRealDistributionOp
 
 } // namespace vsmc::interal
 
@@ -128,57 +83,20 @@ class UniformRealDistributionOp<FPType, Left, Right, Eng, true>
 /// - It allows the interval to be either open or closed on both sides.
 /// - It requires that the uniform random number generator to produce integers
 ///   on the full range of either `std::uint32_t` or `std::uint64_t`.
-/// \tparam FPType The floating points type of results
+/// \tparam RealType The floating points type of results
 /// \tparam Left Shall the left side of the interval be Open or Closed
 /// \tparam Right Shall the right side of the interval be Open or Closed
-/// \tparam MinMaxIsConstexpr Whether or not UniformRealDistribution shall
-/// expect RNG engines that will be used with it has their `min` and `max`
-/// member functions defined as contant expresssion. For example,
-/// ~~~{.cpp}
-/// struct Engine1
-/// {
-///     static constexpr std::uint32_t min ();
-///     static constexpr std::uint32_t max ();
-///     std::uint32_t operator() ();
-/// };
-///
-/// struct Engine2
-/// {
-///     std::uint32_t min ();
-///     std::uint32_t max ();
-///     std::uint32_t operator() ();
-/// };
-///
-/// Engine1 eng1;
-/// Engine2 eng2;
-/// UniformRealDistribution<double, true>  runif1(0, 1);
-/// UniformRealDistribution<double, false> runif2(0, 1);
-///
-/// runif1(eng1); // OK
-/// runif1(eng2); // ERROR! Engine2 does not have contant expression min/max
-/// runif2(eng1); // OK, but less efficient than runif1(eng1)
-/// runif2(eng2); // OK
-/// ~~~
-/// Without C++11 support, this template parameter has no effect and the
-/// distribution will always determine whether the RNG engine generates (full
-/// range) 32-bits or 64-bits unsigned integers, and raise a runtime assertion
-/// failure if it does neither. With C++11 support, and when this template
-/// parameter is set to `true`, then the distribution will make the decision
-/// at
-/// compile time, and will rais a static assertion failure if the generated
-/// integers does not cover the full range of either 32-bits or 64-bits
-/// unsigned integers.
-template <typename FPType = double, typename Left = Closed,
-    typename Right = Open, bool MinMaxIsConstexpr = false>
+template <typename RealType = double, typename Left = Closed,
+    typename Right = Open>
 class UniformRealDistribution
 {
     public:
-    typedef FPType result_type;
+    typedef RealType result_type;
 
     struct param_type {
-        typedef FPType result_type;
+        typedef RealType result_type;
 
-        typedef UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr>
+        typedef UniformRealDistribution<RealType, Left, Right>
             distribution_type;
 
         explicit param_type(result_type a = 0, result_type b = 1)
@@ -282,19 +200,21 @@ class UniformRealDistribution
     /// Eng::max() == std::numeric_limits<std::uint64_t>::max()
     /// )
     /// ~~~
+    /// and both `min` and `max` are `constexpr`
     template <typename Eng>
     result_type operator()(Eng &eng) const
     {
-        return internal::UniformRealDistributionOp<FPType, Left, Right, Eng,
-                   MinMaxIsConstexpr>::uint2fp(eng) *
+        return U01<Left, Right,
+                   typename internal::UniformRealDistributionIntType<
+                       Eng::min VSMC_MNE(), Eng::max VSMC_MNE()>::type,
+                   RealType>::uint2fp(eng()) *
             (b_ - a_) +
             a_;
     }
 
-    friend bool operator==(const UniformRealDistribution<FPType, Left, Right,
-                               MinMaxIsConstexpr> &runif1,
-        const UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr>
-            &runif2)
+    friend bool operator==(
+        const UniformRealDistribution<RealType, Left, Right> &runif1,
+        const UniformRealDistribution<RealType, Left, Right> &runif2)
     {
         if (runif1.a_ < runif2.a_ || runif1.a_ > runif1.a_)
             return false;
@@ -303,10 +223,9 @@ class UniformRealDistribution
         return true;
     }
 
-    friend bool operator!=(const UniformRealDistribution<FPType, Left, Right,
-                               MinMaxIsConstexpr> &runif1,
-        const UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr>
-            &runif2)
+    friend bool operator!=(
+        const UniformRealDistribution<RealType, Left, Right> &runif1,
+        const UniformRealDistribution<RealType, Left, Right> &runif2)
     {
         return !(runif1 == runif2);
     }
@@ -314,8 +233,7 @@ class UniformRealDistribution
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr>
-            &runif)
+        const UniformRealDistribution<RealType, Left, Right> &runif)
     {
         if (!os.good())
             return os;
@@ -328,7 +246,7 @@ class UniformRealDistribution
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        UniformRealDistribution<FPType, Left, Right, MinMaxIsConstexpr> &runif)
+        UniformRealDistribution<RealType, Left, Right> &runif)
     {
         if (!is.good())
             return is;
@@ -353,6 +271,22 @@ class UniformRealDistribution
     result_type a_;
     result_type b_;
 }; // class UniformRealDistribution
+
+template <typename RealType = double>
+using UniformRealOpenOpenDistribution =
+    UniformRealDistribution<RealType, Open, Open>;
+
+template <typename RealType = double>
+using UniformRealOpenClosedDistribution =
+    UniformRealDistribution<RealType, Open, Closed>;
+
+template <typename RealType = double>
+using UniformRealClosedOpenDistribution =
+    UniformRealDistribution<RealType, Closed, Open>;
+
+template <typename RealType = double>
+using UniformRealClosedClosedDistribution =
+    UniformRealDistribution<RealType, Closed, Closed>;
 
 } // namespace vsmc
 

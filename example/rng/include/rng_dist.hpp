@@ -39,13 +39,13 @@
 #include <vsmc/rng/stable_distribution.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
-#define VSMC_RNG_DIST_1(Dist, p1)                                            \
+#define VSMC_RNG_DIST_1(Dist, p1)                                             \
     {                                                                         \
         Dist dist(p1);                                                        \
         rng_dist(N, dist, #Dist "(" #p1 ")", names, size, sw, bytes, cycles); \
     }
 
-#define VSMC_RNG_DIST_2(Dist, p1, p2)                                        \
+#define VSMC_RNG_DIST_2(Dist, p1, p2)                                         \
     {                                                                         \
         Dist dist(p1, p2);                                                    \
         rng_dist(N, dist, #Dist "(" #p1 ", " #p2 ")", names, size, sw, bytes, \

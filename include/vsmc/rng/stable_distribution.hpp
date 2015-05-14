@@ -54,17 +54,17 @@ namespace vsmc
 
 /// \brief Stable distribution
 /// \ingroup Distribution
-template <typename FPType>
+template <typename RealType = double>
 class StableDistribution
 {
     private:
     public:
-    typedef FPType result_type;
+    typedef RealType result_type;
 
     struct param_type {
-        typedef FPType result_type;
+        typedef RealType result_type;
 
-        typedef StableDistribution<FPType> distribution_type;
+        typedef StableDistribution<RealType> distribution_type;
 
         explicit param_type(result_type stability = 1,
             result_type skewness = 0, result_type location = 0,
@@ -229,8 +229,8 @@ class StableDistribution
             return trans_a(standard_a(eng));
     }
 
-    friend bool operator==(const StableDistribution<FPType> &rstable1,
-        const StableDistribution<FPType> &rstable2)
+    friend bool operator==(const StableDistribution<RealType> &rstable1,
+        const StableDistribution<RealType> &rstable2)
     {
         if (rstable1.stability_ < rstable2.stability_ ||
             rstable1.stability_ > rstable2.stability_)
@@ -247,8 +247,8 @@ class StableDistribution
         return true;
     }
 
-    friend bool operator!=(const StableDistribution<FPType> &rstable1,
-        const StableDistribution<FPType> &rstable2)
+    friend bool operator!=(const StableDistribution<RealType> &rstable1,
+        const StableDistribution<RealType> &rstable2)
     {
         return !(rstable1 == rstable2);
     }
@@ -256,7 +256,7 @@ class StableDistribution
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const StableDistribution<FPType> &rstable)
+        const StableDistribution<RealType> &rstable)
     {
         if (!os.good())
             return os;
@@ -270,7 +270,7 @@ class StableDistribution
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        StableDistribution<FPType> &rstable)
+        StableDistribution<RealType> &rstable)
     {
         if (!is.good())
             return is;
