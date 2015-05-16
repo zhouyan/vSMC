@@ -97,9 +97,9 @@ class cv_state : public StateBase<Order>
         const double nu = 10;
 
         double llh_x =
-            scale * (this->state(id, vsmc::Position<PosX>()) - obs_x_[iter]);
+            scale * (this->state(id, vsmc::Index<PosX>()) - obs_x_[iter]);
         double llh_y =
-            scale * (this->state(id, vsmc::Position<PosY>()) - obs_y_[iter]);
+            scale * (this->state(id, vsmc::Index<PosY>()) - obs_y_[iter]);
 
         llh_x = log(1 + llh_x * llh_x / nu);
         llh_y = log(1 + llh_y * llh_y / nu);
@@ -175,7 +175,7 @@ class cv_init : public InitializeSMP<cv_state<Order>, cv_init<Order>>
     {
         log_weight_.resize(particle.size());
         particle.value().read_state(
-            vsmc::Position<LogL>(), log_weight_.data());
+            vsmc::Index<LogL>(), log_weight_.data());
         particle.weight_set().set_log_weight(log_weight_.data());
     }
 
@@ -220,13 +220,13 @@ class cv_move : public MoveSMP<cv_state<Order>, cv_move<Order>>
         ctr.back() +=
             static_cast<typename rng_type::ctr_type::value_type>(iter);
         rng.ctr(ctr);
-        sp.state(vsmc::Position<PosX>()) +=
-            norm_pos(rng) + delta * sp.state(vsmc::Position<VelX>());
-        sp.state(vsmc::Position<PosY>()) +=
-            norm_pos(rng) + delta * sp.state(vsmc::Position<VelY>());
-        sp.state(vsmc::Position<VelX>()) += norm_vel(rng);
-        sp.state(vsmc::Position<VelY>()) += norm_vel(rng);
-        sp.state(vsmc::Position<LogL>()) =
+        sp.state(vsmc::Index<PosX>()) +=
+            norm_pos(rng) + delta * sp.state(vsmc::Index<VelX>());
+        sp.state(vsmc::Index<PosY>()) +=
+            norm_pos(rng) + delta * sp.state(vsmc::Index<VelY>());
+        sp.state(vsmc::Index<VelX>()) += norm_vel(rng);
+        sp.state(vsmc::Index<VelY>()) += norm_vel(rng);
+        sp.state(vsmc::Index<LogL>()) =
             sp.particle().value().log_likelihood(iter, sp.id());
 
         return 1;
@@ -236,7 +236,7 @@ class cv_move : public MoveSMP<cv_state<Order>, cv_move<Order>>
     {
         inc_weight_.resize(particle.size());
         particle.value().read_state(
-            vsmc::Position<LogL>(), inc_weight_.data());
+            vsmc::Index<LogL>(), inc_weight_.data());
         particle.weight_set().add_log_weight(inc_weight_.data());
     }
 
@@ -253,8 +253,8 @@ class cv_est : public MonitorEvalSMP<cv_state<Order>, cv_est<Order>>
     void monitor_state(std::size_t, std::size_t,
         vsmc::ConstSingleParticle<cv> csp, double *res)
     {
-        res[0] = csp.state(vsmc::Position<PosX>());
-        res[1] = csp.state(vsmc::Position<PosY>());
+        res[0] = csp.state(vsmc::Index<PosX>());
+        res[1] = csp.state(vsmc::Index<PosY>());
     }
 };
 

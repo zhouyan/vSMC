@@ -83,7 +83,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         }
 
         template <std::size_t Pos>
-        state_type &state(Position<Pos>) const
+        state_type &state(Index<Pos>) const
         {
             return this->state(Pos);
         }
@@ -111,7 +111,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         }
 
         template <std::size_t Pos>
-        const state_type &state(Position<Pos>) const
+        const state_type &state(Index<Pos>) const
         {
             return this->state(Pos);
         }
@@ -159,7 +159,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     }
 
     template <std::size_t Pos, typename OutputIter>
-    void read_state(Position<Pos>, OutputIter first) const
+    void read_state(Index<Pos>, OutputIter first) const
     {
         read_state(Pos, first);
     }
@@ -279,13 +279,13 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     }
 
     template <std::size_t Pos>
-    T &state(size_type id, Position<Pos>)
+    T &state(size_type id, Index<Pos>)
     {
         return state(id, Pos);
     }
 
     template <std::size_t Pos>
-    const T &state(size_type id, Position<Pos>) const
+    const T &state(size_type id, Index<Pos>) const
     {
         return state(id, Pos);
     }
@@ -382,13 +382,13 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     }
 
     template <std::size_t Pos>
-    T &state(size_type id, Position<Pos>)
+    T &state(size_type id, Index<Pos>)
     {
         return state(id, Pos);
     }
 
     template <std::size_t Pos>
-    const T &state(size_type id, Position<Pos>) const
+    const T &state(size_type id, Index<Pos>) const
     {
         return state(id, Pos);
     }

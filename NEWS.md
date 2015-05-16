@@ -19,6 +19,8 @@ changes.
 * The OpenCL module has gone through a complete rework. The library now has
   its own C++ wrapper based on `std::shared_ptr` instead of the official
   (outdated) C++ wrapper.
+* The index type `Position` is renamed to `Index`, and it is now a template
+  alias to `std::integral_constant`
 
 ## Removed features
 

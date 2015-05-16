@@ -33,6 +33,7 @@
 #define VSMC_INTERNAL_DEFINES_HPP
 
 #include <vsmc/internal/config.hpp>
+#include <type_traits>
 
 /// \brief Avoid MSVC stupid behavior: MNE = Macro No Expansion
 #define VSMC_MNE
@@ -86,13 +87,12 @@ enum MonitorStage {
 /// \brief Function template argument used for position
 /// \ingroup Definitions
 template <std::size_t N>
-struct Position {
-    typedef std::size_t size_type;
-    typedef Position<N> type;
-    static constexpr size_type value = N;
-    constexpr operator size_type() const { return value; }
-    constexpr size_type operator()() const { return value; }
-}; // struct Position
+using Index = std::integral_constant<std::size_t, N>;
+
+#if VSMC_HAS_BACKWARD_COMPATIBILITY
+template <std::size_t N>
+using Position = Index<N>;
+#endif
 
 } // namespace vsmc
 

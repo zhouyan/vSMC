@@ -96,13 +96,13 @@ class StateTupleBase
         template <typename Archive>
         void serialize(Archive &ar, const unsigned)
         {
-            serialize(ar, Position<0>());
+            serialize(ar, Index<0>());
         }
 
         template <typename Archive>
         void serialize(Archive &ar, const unsigned) const
         {
-            serialize(ar, Position<0>());
+            serialize(ar, Index<0>());
         }
 
         private:
@@ -110,26 +110,26 @@ class StateTupleBase
         static constexpr std::size_t dim_ = sizeof...(Types) + 1;
 
         template <typename Archive, std::size_t Pos>
-        void serialize(Archive &ar, Position<Pos>)
+        void serialize(Archive &ar, Index<Pos>)
         {
             ar &std::get<Pos>(data_);
-            serialize(ar, Position<Pos + 1>());
+            serialize(ar, Index<Pos + 1>());
         }
 
         template <typename Archive>
-        void serialize(Archive &, Position<dim_>)
+        void serialize(Archive &, Index<dim_>)
         {
         }
 
         template <typename Archive, std::size_t Pos>
-        void serialize(Archive &ar, Position<Pos>) const
+        void serialize(Archive &ar, Index<Pos>) const
         {
             ar &std::get<Pos>(data_);
-            serialize(ar, Position<Pos + 1>());
+            serialize(ar, Index<Pos + 1>());
         }
 
         template <typename Archive>
-        void serialize(Archive &, Position<dim_>) const
+        void serialize(Archive &, Index<dim_>) const
         {
         }
     }; // struct state_pack_type
@@ -145,16 +145,16 @@ class StateTupleBase
         static constexpr std::size_t dim() { return S::dim(); }
 
         template <std::size_t Pos>
-        typename state_type<Pos>::type &state(Position<Pos>) const
+        typename state_type<Pos>::type &state(Index<Pos>) const
         {
             return this->mutable_particle_ptr()->value().state(
-                this->id(), Position<Pos>());
+                this->id(), Index<Pos>());
         }
 
         template <std::size_t Pos>
         typename state_type<Pos>::type &state() const
         {
-            return this->state(Position<Pos>());
+            return this->state(Index<Pos>());
         }
     }; // struct single_particle_type
 
@@ -169,16 +169,16 @@ class StateTupleBase
         static constexpr std::size_t dim() { return S::dim(); }
 
         template <std::size_t Pos>
-        const typename state_type<Pos>::type &state(Position<Pos>) const
+        const typename state_type<Pos>::type &state(Index<Pos>) const
         {
             return this->particle_ptr()->value().state(
-                this->id(), Position<Pos>());
+                this->id(), Index<Pos>());
         }
 
         template <std::size_t Pos>
         const typename state_type<Pos>::type &state() const
         {
-            return this->state(Position<Pos>());
+            return this->state(Index<Pos>());
         }
     }; // struct const_single_particle_type
 
@@ -187,18 +187,18 @@ class StateTupleBase
     static constexpr std::size_t dim() { return dim_; }
 
     template <std::size_t Pos, typename OutputIter>
-    void read_state(Position<Pos>, OutputIter first) const
+    void read_state(Index<Pos>, OutputIter first) const
     {
         const StateTuple<Order, T, Types...> *sptr =
             static_cast<const StateTuple<Order, T, Types...> *>(this);
         for (size_type i = 0; i != size_; ++i, ++first)
-            *first = sptr->state(i, Position<Pos>());
+            *first = sptr->state(i, Index<Pos>());
     }
 
     template <std::size_t Pos, typename OutputIter>
     void read_state(OutputIter first) const
     {
-        read_state(Position<Pos>(), first);
+        read_state(Index<Pos>(), first);
     }
 
     template <typename CharT, typename Traits>
@@ -209,7 +209,7 @@ class StateTupleBase
             return os;
 
         for (size_type i = 0; i != size_; ++i)
-            print_particle(os, i, sepchar, Position<0>());
+            print_particle(os, i, sepchar, Index<0>());
 
         return os;
     }
@@ -223,21 +223,21 @@ class StateTupleBase
 
     template <std::size_t Pos, typename CharT, typename Traits>
     void print_particle(std::basic_ostream<CharT, Traits> &os, size_type id,
-        char sepchar, Position<Pos>) const
+        char sepchar, Index<Pos>) const
     {
         const StateTuple<Order, T, Types...> *sptr =
             static_cast<const StateTuple<Order, T, Types...> *>(this);
-        os << sptr->state(id, Position<Pos>()) << sepchar;
-        print_particle(os, id, sepchar, Position<Pos + 1>());
+        os << sptr->state(id, Index<Pos>()) << sepchar;
+        print_particle(os, id, sepchar, Index<Pos + 1>());
     }
 
     template <typename CharT, typename Traits>
     void print_particle(std::basic_ostream<CharT, Traits> &os, size_type id,
-        char, Position<dim_ - 1>) const
+        char, Index<dim_ - 1>) const
     {
         const StateTuple<Order, T, Types...> *sptr =
             static_cast<const StateTuple<Order, T, Types...> *>(this);
-        os << sptr->state(id, Position<dim_ - 1>()) << '\n';
+        os << sptr->state(id, Index<dim_ - 1>()) << '\n';
     }
 }; // class StateTupleBase
 
@@ -265,14 +265,14 @@ class StateTuple<RowMajor, T, Types...>
 
     template <std::size_t Pos>
     typename state_tuple_base_type::template state_type<Pos>::type &state(
-        size_type id, Position<Pos>)
+        size_type id, Index<Pos>)
     {
         return std::get<Pos>(state_[id]);
     }
 
     template <std::size_t Pos>
     const typename state_tuple_base_type::template state_type<Pos>::type &
-        state(size_type id, Position<Pos>) const
+        state(size_type id, Index<Pos>) const
     {
         return std::get<Pos>(state_[id]);
     }
@@ -281,14 +281,14 @@ class StateTuple<RowMajor, T, Types...>
     typename state_tuple_base_type::template state_type<Pos>::type &state(
         size_type id)
     {
-        return state(id, Position<Pos>());
+        return state(id, Index<Pos>());
     }
 
     template <std::size_t Pos>
     const typename state_tuple_base_type::template state_type<Pos>::type &
         state(size_type id) const
     {
-        return state(id, Position<Pos>());
+        return state(id, Index<Pos>());
     }
 
     typename state_tuple_base_type::state_tuple_type *data()
@@ -348,19 +348,19 @@ class StateTuple<ColMajor, T, Types...>
 
     explicit StateTuple(size_type N) : state_tuple_base_type(N)
     {
-        init_state(N, Position<0>());
+        init_state(N, Index<0>());
     }
 
     template <std::size_t Pos>
     typename state_tuple_base_type::template state_type<Pos>::type &state(
-        size_type id, Position<Pos>)
+        size_type id, Index<Pos>)
     {
         return std::get<Pos>(state_)[id];
     }
 
     template <std::size_t Pos>
     const typename state_tuple_base_type::template state_type<Pos>::type &
-        state(size_type id, Position<Pos>) const
+        state(size_type id, Index<Pos>) const
     {
         return std::get<Pos>(state_)[id];
     }
@@ -369,26 +369,26 @@ class StateTuple<ColMajor, T, Types...>
     typename state_tuple_base_type::template state_type<Pos>::type &state(
         size_type id)
     {
-        return state(id, Position<Pos>());
+        return state(id, Index<Pos>());
     }
 
     template <std::size_t Pos>
     const typename state_tuple_base_type::template state_type<Pos>::type &
         state(size_type id) const
     {
-        return state(id, Position<Pos>());
+        return state(id, Index<Pos>());
     }
 
     template <std::size_t Pos>
     typename state_tuple_base_type::template state_type<Pos>::type *data(
-        Position<Pos>)
+        Index<Pos>)
     {
         return std::get<Pos>(state_).data();
     }
 
     template <std::size_t Pos>
     const typename state_tuple_base_type::template state_type<Pos>::type *data(
-        Position<Pos>) const
+        Index<Pos>) const
     {
         return std::get<Pos>(state_).data();
     }
@@ -409,7 +409,7 @@ class StateTuple<ColMajor, T, Types...>
     typename state_tuple_base_type::state_tuple_ptr_type data()
     {
         typename state_tuple_base_type::state_tuple_ptr_type dptr;
-        insert_data(dptr, Position<0>());
+        insert_data(dptr, Index<0>());
 
         return dptr;
     }
@@ -417,7 +417,7 @@ class StateTuple<ColMajor, T, Types...>
     typename state_tuple_base_type::state_tuple_cptr_type data() const
     {
         typename state_tuple_base_type::state_tuple_cptr_type dptr;
-        insert_data(dptr, Position<0>());
+        insert_data(dptr, Index<0>());
 
         return dptr;
     }
@@ -436,25 +436,25 @@ class StateTuple<ColMajor, T, Types...>
         if (from == to)
             return;
 
-        copy_particle(from, to, Position<0>());
+        copy_particle(from, to, Index<0>());
     }
 
     state_pack_type state_pack(size_type id) const
     {
         state_pack_type pack;
-        pack_particle(id, pack, Position<0>());
+        pack_particle(id, pack, Index<0>());
 
         return pack;
     }
 
     void state_unpack(size_type id, const state_pack_type &pack)
     {
-        unpack_particle(id, pack, Position<0>());
+        unpack_particle(id, pack, Index<0>());
     }
 
     void state_unpack(size_type id, state_pack_type &&pack)
     {
-        unpack_particle(id, std::move(pack), Position<0>());
+        unpack_particle(id, std::move(pack), Index<0>());
     }
 
     private:
@@ -462,67 +462,65 @@ class StateTuple<ColMajor, T, Types...>
     std::tuple<std::vector<T>, std::vector<Types>...> state_;
 
     template <std::size_t Pos>
-    void init_state(size_type N, Position<Pos>)
+    void init_state(size_type N, Index<Pos>)
     {
         std::get<Pos>(state_).resize(N);
-        init_state(N, Position<Pos + 1>());
+        init_state(N, Index<Pos + 1>());
     }
 
-    void init_state(size_type N, Position<sizeof...(Types)>)
+    void init_state(size_type N, Index<sizeof...(Types)>)
     {
         std::get<sizeof...(Types)>(state_).resize(N);
     }
 
     template <std::size_t Pos, typename PTRType>
-    void insert_data(PTRType &dptr, Position<Pos>) const
+    void insert_data(PTRType &dptr, Index<Pos>) const
     {
         std::get<Pos>(dptr) = data<Pos>();
-        insert_data(dptr, Position<Pos + 1>());
+        insert_data(dptr, Index<Pos + 1>());
     }
 
     template <typename PTRType>
-    void insert_data(PTRType &dptr, Position<sizeof...(Types)>) const
+    void insert_data(PTRType &dptr, Index<sizeof...(Types)>) const
     {
         std::get<sizeof...(Types)>(dptr) = data<sizeof...(Types)>();
     }
 
     template <std::size_t Pos>
-    void copy_particle(size_type from, size_type to, Position<Pos>)
+    void copy_particle(size_type from, size_type to, Index<Pos>)
     {
-        state(to, Position<Pos>()) = state(from, Position<Pos>());
-        copy_particle(from, to, Position<Pos + 1>());
+        state(to, Index<Pos>()) = state(from, Index<Pos>());
+        copy_particle(from, to, Index<Pos + 1>());
     }
 
-    void copy_particle(size_type, size_type, Position<dim_>) {}
+    void copy_particle(size_type, size_type, Index<dim_>) {}
 
     template <std::size_t Pos>
-    void pack_particle(
-        size_type id, state_pack_type &pack, Position<Pos>) const
+    void pack_particle(size_type id, state_pack_type &pack, Index<Pos>) const
     {
-        std::get<Pos>(pack.data()) = state(id, Position<Pos>());
-        pack_particle(id, pack, Position<Pos + 1>());
+        std::get<Pos>(pack.data()) = state(id, Index<Pos>());
+        pack_particle(id, pack, Index<Pos + 1>());
     }
 
-    void pack_particle(size_type, state_pack_type &, Position<dim_>) const {}
+    void pack_particle(size_type, state_pack_type &, Index<dim_>) const {}
 
     template <std::size_t Pos>
-    void unpack_particle(
-        size_type id, const state_pack_type &pack, Position<Pos>)
+    void unpack_particle(size_type id, const state_pack_type &pack, Index<Pos>)
     {
-        state(id, Position<Pos>()) = std::get<Pos>(pack.data());
-        unpack_particle(id, pack, Position<Pos + 1>());
+        state(id, Index<Pos>()) = std::get<Pos>(pack.data());
+        unpack_particle(id, pack, Index<Pos + 1>());
     }
 
-    void unpack_particle(size_type, const state_pack_type &, Position<dim_>) {}
+    void unpack_particle(size_type, const state_pack_type &, Index<dim_>) {}
 
     template <std::size_t Pos>
-    void unpack_particle(size_type id, state_pack_type &&pack, Position<Pos>)
+    void unpack_particle(size_type id, state_pack_type &&pack, Index<Pos>)
     {
-        state(id, Position<Pos>()) = std::move(std::get<Pos>(pack.data()));
-        unpack_particle(id, std::move(pack), Position<Pos + 1>());
+        state(id, Index<Pos>()) = std::move(std::get<Pos>(pack.data()));
+        unpack_particle(id, std::move(pack), Index<Pos + 1>());
     }
 
-    void unpack_particle(size_type, state_pack_type &&, Position<dim_>) {}
+    void unpack_particle(size_type, state_pack_type &&, Index<dim_>) {}
 }; // class StateTuple
 
 } // namespace vsmc
