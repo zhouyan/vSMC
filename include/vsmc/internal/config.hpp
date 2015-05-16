@@ -57,7 +57,7 @@
 /// \brief Try to emulate vSMC v1 behaviors
 /// \ingroup Config
 #ifndef VSMC_HAS_BACKWARD_COMPATIBILITY
-#define VSMC_HAS_BACKWARD_COMPATIBILITY 0
+#define VSMC_HAS_BACKWARD_COMPATIBILITY 1
 #endif
 
 /// \brief Turn vSMC runtime assertions into exceptions

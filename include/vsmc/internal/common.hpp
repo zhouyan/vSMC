@@ -79,6 +79,10 @@
 namespace vsmc
 {
 
+#if VSMC_HAS_BACKWARD_COMPATIBILITY
+namespace cxx11 = std;
+#endif
+
 namespace internal
 {
 
