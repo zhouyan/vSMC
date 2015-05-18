@@ -39,7 +39,6 @@
 #endif
 
 #include <vsmc/core/sampler.hpp>
-#include <vsmc/rng/threefry.hpp>
 
 #if VSMC_HAS_HDF5
 #include <vsmc/utility/hdf5io.hpp>
@@ -147,18 +146,10 @@ class cv_init : public InitializeSMP<cv_state<Order>, cv_init<Order>>
         std::normal_distribution<> norm_pos(0, sd_pos0);
         std::normal_distribution<> norm_vel(0, sd_vel0);
 
-        typedef typename vsmc::Particle<cv>::rng_type rng_type;
-        rng_type rng(sp.rng());
-        typename rng_type::ctr_type ctr;
-        ctr.fill(0);
-        ctr.back() =
-            static_cast<typename rng_type::ctr_type::value_type>(sp.id());
-        ctr.back() <<= 16;
-        rng.ctr(ctr);
-        sp.template state<PosX>() = norm_pos(rng);
-        sp.template state<PosY>() = norm_pos(rng);
-        sp.template state<VelX>() = norm_vel(rng);
-        sp.template state<VelY>() = norm_vel(rng);
+        sp.template state<PosX>() = norm_pos(sp.rng());
+        sp.template state<PosY>() = norm_pos(sp.rng());
+        sp.template state<VelX>() = norm_vel(sp.rng());
+        sp.template state<VelY>() = norm_vel(sp.rng());
         sp.template state<LogL>() =
             sp.particle().value().log_likelihood(0, sp.id());
 
@@ -173,8 +164,7 @@ class cv_init : public InitializeSMP<cv_state<Order>, cv_init<Order>>
     void post_processor(vsmc::Particle<cv> &particle)
     {
         log_weight_.resize(particle.size());
-        particle.value().read_state(
-            vsmc::Index<LogL>(), log_weight_.data());
+        particle.value().read_state(vsmc::Index<LogL>(), log_weight_.data());
         particle.weight_set().set_log_weight(log_weight_.data());
     }
 
@@ -209,22 +199,12 @@ class cv_move : public MoveSMP<cv_state<Order>, cv_move<Order>>
         std::normal_distribution<> norm_pos(0, sd_pos);
         std::normal_distribution<> norm_vel(0, sd_vel);
 
-        typedef typename vsmc::Particle<cv>::rng_type rng_type;
-        rng_type rng(sp.rng());
-        typename rng_type::ctr_type ctr;
-        ctr.fill(0);
-        ctr.back() =
-            static_cast<typename rng_type::ctr_type::value_type>(sp.id());
-        ctr.back() <<= 16;
-        ctr.back() +=
-            static_cast<typename rng_type::ctr_type::value_type>(iter);
-        rng.ctr(ctr);
         sp.state(vsmc::Index<PosX>()) +=
-            norm_pos(rng) + delta * sp.state(vsmc::Index<VelX>());
+            norm_pos(sp.rng()) + delta * sp.state(vsmc::Index<VelX>());
         sp.state(vsmc::Index<PosY>()) +=
-            norm_pos(rng) + delta * sp.state(vsmc::Index<VelY>());
-        sp.state(vsmc::Index<VelX>()) += norm_vel(rng);
-        sp.state(vsmc::Index<VelY>()) += norm_vel(rng);
+            norm_pos(sp.rng()) + delta * sp.state(vsmc::Index<VelY>());
+        sp.state(vsmc::Index<VelX>()) += norm_vel(sp.rng());
+        sp.state(vsmc::Index<VelY>()) += norm_vel(sp.rng());
         sp.state(vsmc::Index<LogL>()) =
             sp.particle().value().log_likelihood(iter, sp.id());
 
@@ -234,8 +214,7 @@ class cv_move : public MoveSMP<cv_state<Order>, cv_move<Order>>
     void post_processor(std::size_t, vsmc::Particle<cv> &particle)
     {
         inc_weight_.resize(particle.size());
-        particle.value().read_state(
-            vsmc::Index<LogL>(), inc_weight_.data());
+        particle.value().read_state(vsmc::Index<LogL>(), inc_weight_.data());
         particle.weight_set().add_log_weight(inc_weight_.data());
     }
 
