@@ -44,7 +44,7 @@ namespace vsmc
 namespace traits
 {
 
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, void)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
 
 } // namespace vsmc::traits
 
