@@ -32,8 +32,9 @@
 #include <fstream>
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/state_matrix.hpp>
-#include <vsmc/smp/backend_@smp@.hpp>
 #include <vsmc/math/constants.hpp>
+#include <vsmc/smp/backend_@smp@.hpp>
+#include <vsmc/utility/stop_watch.hpp>
 #ifdef VSMC_PAPER_MPI
 #include <vsmc/mpi/backend_mpi.hpp>
 #endif
@@ -418,7 +419,7 @@ class gmm_init : public InitializeSMP<gmm_state, gmm_init>
 class gmm_move_smc
 {
     public:
-    typedef std::function<void(std::size_t, vsmc::Particle<gmm_state> &)>
+    typedef std::function<void(std::size_t, vsmc::Particle<gmm_state> &) >
         alpha_setter_type;
 
     gmm_move_smc(const alpha_setter_type &alpha_setter)
@@ -685,18 +686,23 @@ int main(
         .mcmc(gmm_move_mu(), false)
         .mcmc(gmm_move_lambda(), true)
         .mcmc(gmm_move_weight(), true)
-        .path_sampling(gmm_path())
-        .initialize(const_cast<char *>(DataFile.c_str()))
-        .iterate(IterNum);
+        .path_sampling(gmm_path());
 
+    vsmc::StopWatch watch;
+    watch.start();
+    sampler.initialize(const_cast<char *>(DataFile.c_str())).iterate(IterNum);
     double ps = sampler.path().log_zconst();
 #ifdef VSMC_PAPER_MPI
     double ps_sum = 0;
     boost::mpi::reduce(World, ps, ps_sum, std::plus<double>(), 0);
     ps = ps_sum;
 #endif
-    if (Master)
+    watch.stop();
+
+    if (Master) {
         std::cout << "Path sampling estimate: " << ps << std::endl;
+        std::cout << "Wallclock Time: " << watch.seconds() << "s" << std::endl;
+    }
 
     return 0;
 }
