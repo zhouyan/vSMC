@@ -72,9 +72,9 @@ struct HDF5LoadDataPtr {
 
     void set(std::size_t, T *ptr) { ptr_ = ptr; }
 
-    bool set_ptr() const { return ptr_ == nullptr; }
-
     T *get() { return ptr_ == nullptr ? data_.data() : ptr_; }
+
+    bool is_raw_ptr() const { return ptr_ == nullptr; }
 
     private:
     T *ptr_;
@@ -108,9 +108,9 @@ struct HDF5StoreDataPtr {
         return ptr + n;
     }
 
-    bool set_ptr() const { return ptr_ == nullptr; }
-
     const T *get() const { return ptr_ == nullptr ? data_.data() : ptr_; }
+
+    bool is_raw_ptr() const { return ptr_ == nullptr; }
 
     private:
     const T *ptr_;
@@ -287,7 +287,7 @@ inline OutputIter hdf5load(const std::string &file_name,
     ::hid_t dataset = ::H5Dopen(datafile, data_name.c_str(), H5P_DEFAULT);
     ::hid_t datatype = ::H5Dget_type(dataset);
     ::H5Dread(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
-    if (data_ptr.set_ptr()) {
+    if (data_ptr.is_raw_ptr()) {
         first += n;
     } else {
         for (std::size_t i = 0; i != n; ++i, ++first)
