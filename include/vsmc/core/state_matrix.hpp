@@ -61,20 +61,22 @@ namespace internal
 template <std::size_t Dim>
 class StateMatrixDim
 {
-    protected:
+    public:
     static constexpr std::size_t dim() { return Dim; }
 
+    protected:
     void swap(StateMatrixDim<Dim> &) {}
 }; // class StateMatrixDim
 
 template <>
 class StateMatrixDim<Dynamic>
 {
-    protected:
+    public:
     StateMatrixDim() : dim_(1) {}
 
     std::size_t dim() const { return dim_; }
 
+    protected:
     void swap(StateMatrixDim<Dynamic> &other) { std::swap(dim_, other.dim_); }
 
     void resize_dim(std::size_t dim) { dim_ = dim; }
