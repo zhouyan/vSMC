@@ -35,36 +35,29 @@
 #include <vsmc/internal/common.hpp>
 
 #define VSMC_DEFINE_SMP_BASE_COPY(Name)                                       \
-    Name##Base() {}                                                           \
-    Name##Base(const Name##Base<T, Derived> &) {}                             \
-    Name##Base<T, Derived> &operator=(const Name##Base<T, Derived> &)         \
-    {                                                                         \
-        return *this;                                                         \
-    }                                                                         \
+    Name##Base() = default;                                                   \
+    Name##Base(const Name##Base<T, Derived> &) = default;                     \
+    Name##Base<T, Derived> &operator=(const Name##Base<T, Derived> &) =       \
+        default;                                                              \
+    Name##Base(Name##Base<T, Derived> &&) = default;                          \
+    Name##Base<T, Derived> &operator=(Name##Base<T, Derived> &&) = default;   \
     VSMC_CRTP_DESTRUCTOR_PREFIX ~Name##Base() {}
 
 #define VSMC_DEFINE_SMP_BASE_COPY_VIRTUAL(Name)                               \
-    Name##Base() {}                                                           \
-    Name##Base(const Name##Base<T, Virtual> &) {}                             \
-    Name##Base<T, Virtual> &operator=(const Name##Base<T, Virtual> &)         \
-    {                                                                         \
-        return *this;                                                         \
-    }                                                                         \
+    Name##Base() = default;                                                   \
+    Name##Base(const Name##Base<T, Virtual> &) = default;                     \
+    Name##Base<T, Virtual> &operator=(const Name##Base<T, Virtual> &) =       \
+        default;                                                              \
+    Name##Base(Name##Base<T, Virtual> &&) = default;                          \
+    Name##Base<T, Virtual> &operator=(Name##Base<T, Virtual> &&) = default;   \
     virtual ~Name##Base() {}
 
 #define VSMC_DEFINE_SMP_IMPL_COPY(Impl, Name)                                 \
-    Name##Impl() {}                                                           \
-    Name##Impl(const Name##Impl<T, Derived> &other)                           \
-        : Name##Base<T, Derived>(other)                                       \
-    {                                                                         \
-    }                                                                         \
-    Name##Impl<T, Derived> &operator=(const Name##Impl<T, Derived> &other)    \
-    {                                                                         \
-        if (this != &other)                                                   \
-            Name##Base<T, Derived>::operator=(other);                         \
-                                                                              \
-        return *this;                                                         \
-    }                                                                         \
+    Name##Impl() = default;                                                   \
+    Name##Impl(const Name##Impl<T, Derived> &) = default;                     \
+    Name##Impl<T, Derived> &operator=(Name##Impl<T, Derived> &) = default;    \
+    Name##Impl(Name##Impl<T, Derived> &&) = default;                          \
+    Name##Impl<T, Derived> &operator=(Name##Impl<T, Derived> &&) = default;   \
     ~Name##Impl() {}
 
 #define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(basename)                \
