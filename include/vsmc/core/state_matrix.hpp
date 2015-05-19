@@ -55,10 +55,40 @@
 namespace vsmc
 {
 
+namespace internal
+{
+
+template <std::size_t Dim>
+class StateMatrixDim
+{
+    protected:
+    static constexpr std::size_t dim() { return Dim; }
+
+    void swap(StateMatrixDim<Dim> &) {}
+}; // class StateMatrixDim
+
+template <>
+class StateMatrixDim<Dynamic>
+{
+    protected:
+    StateMatrixDim() : dim_(1) {}
+
+    std::size_t dim() const { return dim_; }
+
+    void swap(StateMatrixDim<Dynamic> &other) { std::swap(dim_, other.dim_); }
+
+    void resize_dim(std::size_t dim) { dim_ = dim; }
+
+    private:
+    std::size_t dim_;
+}; // class StateMatrixDim
+
+} // namespace vsmc::internal
+
 /// \brief Base type of StateTuple
 /// \ingroup Core
 template <MatrixOrder Order, std::size_t Dim, typename T>
-class StateMatrixBase : public traits::DimTrait<Dim>
+class StateMatrixBase : public internal::StateMatrixDim<Dim>
 {
     public:
     typedef std::size_t size_type;
@@ -128,7 +158,7 @@ class StateMatrixBase : public traits::DimTrait<Dim>
         VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim);
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_DIM_SIZE(dim);
 
-        traits::DimTrait<Dim>::resize_dim(dim);
+        internal::StateMatrixDim<Dim>::resize_dim(dim);
         data_.resize(size_ * dim);
     }
 
@@ -148,6 +178,13 @@ class StateMatrixBase : public traits::DimTrait<Dim>
     T *data() { return data_.data(); }
 
     const T *data() const { return data_.data(); }
+
+    void swap(StateMatrixBase<Order, Dim, T> &other)
+    {
+        internal::StateMatrixDim<Dim>::swap(other);
+        std::swap(size_, other.size_);
+        data_.swap(other.data_);
+    }
 
     template <typename OutputIter>
     void read_state(std::size_t pos, OutputIter first) const
@@ -499,7 +536,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     void copy_particle_dispatch(size_type from, size_type to, std::false_type)
     {
         copy_particle_pos<0>(this->data() + from, this->data() + to,
-                std::integral_constant<bool, 0 < Dim>());
+            std::integral_constant<bool, 0 < Dim>());
     }
 
     template <std::size_t D>

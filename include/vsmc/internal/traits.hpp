@@ -204,28 +204,6 @@ struct OMPSizeTypeTrait {
 };
 #endif
 
-/// \brief Dimension trait for StateMatrix and StateCL (fixed dimension)
-/// \ingroup Traits
-template <std::size_t Dim>
-struct DimTrait {
-    static constexpr std::size_t dim() { return Dim; }
-};
-
-/// \brief Dimension trait for StateMatrix and StateCL (dynamic dimension)
-/// \ingroup Traits
-template <>
-struct DimTrait<Dynamic> {
-    DimTrait() : dim_(1) {}
-
-    std::size_t dim() const { return dim_; }
-
-    protected:
-    void resize_dim(std::size_t dim) { dim_ = dim; }
-
-    private:
-    std::size_t dim_;
-}; // struct DimTrait
-
 } // namespace vsmc::traits
 
 } // namespace vsmc
