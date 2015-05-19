@@ -329,13 +329,14 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         if (from == to)
             return;
 
-        std::copy(row_data(from), row_data(from + 1), row_data(to));
+        copy_particle_dispatch(from, to, std::integral_constant < bool,
+            Dim == Dynamic || 8 < Dim > ());
     }
 
     state_pack_type state_pack(size_type id) const
     {
         state_pack_type pack(this->create_pack());
-        std::copy(row_data(id), row_data(id + 1), pack.data());
+        std::copy(row_data(id), row_data(id) + this->dim(), pack.data());
 
         return pack;
     }
@@ -356,6 +357,31 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
         const T *ptr = pack.data();
         std::move(ptr, ptr + this->dim(), row_data(id));
+    }
+
+    private:
+    void copy_particle_dispatch(size_type from, size_type to, std::true_type)
+    {
+        std::copy(row_data(from), row_data(from) + this->dim(), row_data(to));
+    }
+
+    void copy_particle_dispatch(size_type from, size_type to, std::false_type)
+    {
+        copy_particle_pos<0>(row_data(from), row_data(to),
+            std::integral_constant<bool, 0 < Dim>());
+    }
+
+    template <std::size_t D>
+    void copy_particle_pos(const T *, T *, std::false_type)
+    {
+    }
+
+    template <std::size_t D>
+    void copy_particle_pos(const T *from, T *to, std::true_type)
+    {
+        to[D] = from[D];
+        copy_particle_pos<D + 1>(
+            from, to, std::integral_constant<bool, D + 1 < Dim>());
     }
 }; // class StateMatrix
 
@@ -432,8 +458,8 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         if (from == to)
             return;
 
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            state(to, d) = state(from, d);
+        copy_particle_dispatch(from, to, std::integral_constant < bool,
+            Dim == Dynamic || 8 < Dim > ());
     }
 
     state_pack_type state_pack(size_type id) const
@@ -461,6 +487,32 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
         for (std::size_t d = 0; d != this->dim(); ++d)
             state(id, d) = std::move(pack[d]);
+    }
+
+    private:
+    void copy_particle_dispatch(size_type from, size_type to, std::true_type)
+    {
+        for (std::size_t d = 0; d != this->dim(); ++d)
+            state(to, d) = state(from, d);
+    }
+
+    void copy_particle_dispatch(size_type from, size_type to, std::false_type)
+    {
+        copy_particle_pos<0>(this->data() + from, this->data() + to,
+                std::integral_constant<bool, 0 < Dim>());
+    }
+
+    template <std::size_t D>
+    void copy_particle_pos(const T *, T *, std::false_type)
+    {
+    }
+
+    template <std::size_t D>
+    void copy_particle_pos(const T *from, T *to, std::true_type)
+    {
+        to[D * this->size()] = from[D * this->size()];
+        copy_particle_pos<D + 1>(
+            from, to, std::integral_constant<bool, D + 1 < Dim>());
     }
 }; // class StateMatrix
 
