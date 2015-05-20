@@ -34,11 +34,6 @@
 
 #include <vsmc/opencl/internal/common.hpp>
 
-#if defined(VSMC_CLANG) || defined(VSMC_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-
 #if defined(VSMC_INTEL)
 #pragma warning(push)
 #pragma warning(disable : 1478)
@@ -1889,10 +1884,6 @@ inline std::vector<CLKernel> CLProgram::get_kernels() const
 }
 
 } // namespace vsmc
-
-#if defined(VSMC_CLANG) || defined(VSMC_GCC)
-#pragma GCC diagnostic pop
-#endif
 
 #if defined(VSMC_INTEL)
 #pragma warning(pop)
