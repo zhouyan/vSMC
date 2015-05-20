@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/internal/forward.hpp
+// vSMC/include/vsmc/mpi/internal/common.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,50 +29,19 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_INTERNAL_FORWARD_HPP
-#define VSMC_INTERNAL_FORWARD_HPP
+#ifndef VSMC_MPI_INTERNAL_COMMON_HPP
+#define VSMC_MPI_INTERNAL_COMMON_HPP
 
-#include <vsmc/internal/config.hpp>
-#include <vsmc/internal/defines.hpp>
+#include <vsmc/internal/common.hpp>
+#include <boost/mpi.hpp>
 
 namespace vsmc
 {
 
-template <typename>
-class Sampler;
+/// \brief Template parameter type for default behavior
+/// \ingroup MPI
+struct MPIDefault;
 
-template <typename>
-class Particle;
+} // namespace vsmc
 
-template <typename>
-class Monitor;
-
-template <typename>
-class Path;
-
-template <typename>
-class SingleParticle;
-
-template <typename>
-class ConstSingleParticle;
-
-template <typename>
-class SingleParticleBase;
-
-template <typename>
-class ConstSingleParticleBase;
-
-class WeightSet;
-
-template <MatrixOrder, std::size_t, typename>
-class StateMatrix;
-
-template <MatrixOrder, typename, typename...>
-class StateTuple;
-
-template <std::size_t, typename, typename>
-class StateCL;
-
-} // namesapce vsmc
-
-#endif // VSMC_INTERNAL_FORWARD_HPP
+#endif // VSMC_MPI_INTERNAL_COMMON_HPP

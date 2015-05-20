@@ -32,7 +32,7 @@
 #ifndef VSMC_MPI_BACKEND_MPI_HPP
 #define VSMC_MPI_BACKEND_MPI_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/mpi/internal/common.hpp>
 #include <vsmc/core/weight_set.hpp>
 #include <vsmc/mpi/mpi_datatype.hpp>
 #include <vsmc/mpi/mpi_manager.hpp>
@@ -47,7 +47,7 @@ namespace vsmc
 
 /// \brief Particle::weight_set_type subtype using MPI
 /// \ingroup MPI
-template <typename WeightSetBase, typename ID>
+template <typename WeightSetBase, typename ID = MPIDefault>
 class WeightSetMPI : public WeightSetBase
 {
     public:
@@ -216,7 +216,7 @@ class WeightSetMPI : public WeightSetBase
 
 /// \brief Particle::value_type subtype using MPI
 /// \ingroup MPI
-template <typename StateBase, typename ID>
+template <typename StateBase, typename ID = MPIDefault>
 class StateMPI : public StateBase
 {
     public:

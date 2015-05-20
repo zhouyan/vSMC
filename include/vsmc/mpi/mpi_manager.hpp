@@ -32,9 +32,8 @@
 #ifndef VSMC_MPI_MPI_MANAGER_HPP
 #define VSMC_MPI_MPI_MANAGER_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/mpi/internal/common.hpp>
 #include <vsmc/rng/seed.hpp>
-#include <boost/mpi.hpp>
 
 namespace vsmc
 {
@@ -98,7 +97,7 @@ class MPIEnvironment
 ///
 /// \details
 /// Use specialization of the singleton to configure different StateMPI
-template <typename ID>
+template <typename ID = MPIDefault>
 class MPICommunicator
 {
     public:

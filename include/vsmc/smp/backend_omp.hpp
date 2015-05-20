@@ -38,7 +38,24 @@
 namespace vsmc
 {
 
-VSMC_DEFINE_SMP_FORWARD(OMP)
+namespace traits
+{
+
+#if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
+template <typename T>
+struct OMPSizeTypeTrait {
+    typedef T type;
+};
+#else
+template <typename T>
+struct OMPSizeTypeTrait {
+    typedef typename std::make_signed<T>::type type;
+};
+#endif
+
+} // namespace vsmc::traits
+
+VSMC_DEFINE_SMP_BACKEND_FORWARD(OMP)
 
 /// \brief Particle::value_type subtype using OpenMP
 /// \ingroup OMP
@@ -63,8 +80,6 @@ class StateOMP : public StateBase
     template <typename IntType>
     void copy(size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(OMP);
-
 #pragma omp parallel for default(shared)
         for (size_type to = 0; to < N; ++to)
             this->copy_particle(copy_from[to], to);
@@ -94,7 +109,7 @@ class InitializeOMP : public InitializeBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_IMPL_COPY(OMP, Initialize)
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, Initialize)
 }; // class InitializeOMP
 
 /// \brief Sampler<T>::move_type subtype using OpenMP
@@ -119,7 +134,7 @@ class MoveOMP : public MoveBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_IMPL_COPY(OMP, Move)
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, Move)
 }; // class MoveOMP
 
 /// \brief Monitor<T>::eval_type subtype using OpenMP
@@ -144,7 +159,7 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_IMPL_COPY(OMP, MonitorEval)
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, MonitorEval)
 }; // class MonitorEvalOMP
 
 /// \brief Path<T>::eval_type subtype using OpenMP
@@ -171,7 +186,7 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_IMPL_COPY(OMP, PathEval)
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, PathEval)
 }; // class PathEvalOMP
 
 } // namespace vsmc

@@ -32,9 +32,8 @@
 #ifndef VSMC_MPI_MPI_DATATYPE_HPP
 #define VSMC_MPI_MPI_DATATYPE_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/mpi/internal/common.hpp>
 #include <vsmc/core/state_tuple.hpp>
-#include <boost/mpi.hpp>
 
 namespace boost
 {

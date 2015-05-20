@@ -41,20 +41,9 @@
 /// \brief A constant expression that give maximum of unsigned integer types
 #define VSMC_MAX_UINT(type) static_cast<type>(~(static_cast<type>(0)))
 
-/// \brief CRTP style base classes (virtual) destructor
-/// \ingroup Definitions
-///
-/// \details
-/// This macro is defined to `virtual` if compiled in when
-/// `VSMC_NO_RUNTIME_ASSERT` is enabled; otherwise it is empty.
-#if VSMC_NO_RUNTIME_ASSERT
-#define VSMC_CRTP_DESTRUCTOR_PREFIX
-#else
-#define VSMC_CRTP_DESTRUCTOR_PREFIX virtual
-#endif
-
 namespace vsmc
 {
+struct NullType;
 
 /// \brief Dynamic dimension
 /// \ingroup Definitions
@@ -74,14 +63,6 @@ enum MatrixOrder {
 enum MatrixTrans {
     NoTrans = 111, ///< The matrix shall not be transposed
     Trans = 112    ///< The matrix shall be transposed
-};
-
-/// \brief Monitor stage
-/// \ingroup Definitions
-enum MonitorStage {
-    MonitorMove,     ///< Monitor evaluated after moves
-    MonitorResample, ///< Monitor evaluated after resampling
-    MonitorMCMC      ///< Monitor evaluated after MCMC moves
 };
 
 /// \brief Function template argument used for position

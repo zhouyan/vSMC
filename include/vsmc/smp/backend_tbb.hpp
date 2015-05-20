@@ -66,7 +66,7 @@
 namespace vsmc
 {
 
-VSMC_DEFINE_SMP_FORWARD(TBB)
+VSMC_DEFINE_SMP_BACKEND_FORWARD(TBB)
 
 /// \brief Particle::value_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
@@ -81,7 +81,6 @@ class StateTBB : public StateBase
     template <typename IntType>
     void copy(size_type N, const IntType *copy_from)
     {
-        VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(TBB);
         parallel_copy_run(copy_from, ::tbb::blocked_range<size_type>(0, N));
     }
 
@@ -189,7 +188,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_IMPL_COPY(TBB, Initialize)
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(TBB, Initialize)
 
     class work_type
     {
@@ -298,7 +297,7 @@ class MoveTBB : public MoveBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_IMPL_COPY(TBB, Move)
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(TBB, Move)
 
     class work_type
     {
@@ -413,7 +412,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_IMPL_COPY(TBB, MonitorEval)
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(TBB, MonitorEval)
 
     class work_type
     {
@@ -528,7 +527,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_IMPL_COPY(TBB, PathEval)
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(TBB, PathEval)
 
     class work_type
     {

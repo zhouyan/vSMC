@@ -178,32 +178,6 @@ namespace traits
 /// \ingroup Traits
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
 
-/// \brief Particle::weight_set_type trait
-/// \ingroup Traits
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(WeightSetType, weight_set_type, WeightSet)
-
-/// \brief SingleParticle base class trait
-/// \ingroup Traits
-VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
-    SingleParticleBaseType, single_particle_type, SingleParticleBase)
-
-/// \brief ConstSingleParticle base class trait
-/// \ingroup Traits
-VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(ConstSingleParticleBaseType,
-    const_single_particle_type, ConstSingleParticleBase)
-
-#if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
-template <typename T>
-struct OMPSizeTypeTrait {
-    typedef T type;
-};
-#else
-template <typename T>
-struct OMPSizeTypeTrait {
-    typedef typename std::ptrdiff_t type;
-};
-#endif
-
 } // namespace vsmc::traits
 
 } // namespace vsmc

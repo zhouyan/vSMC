@@ -50,6 +50,14 @@
 namespace vsmc
 {
 
+/// \brief Monitor stage
+/// \ingroup Definitions
+enum MonitorStage {
+    MonitorMove,     ///< Monitor evaluated after moves
+    MonitorResample, ///< Monitor evaluated after resampling
+    MonitorMCMC      ///< Monitor evaluated after MCMC moves
+};
+
 /// \brief Monitor for Monte Carlo integration
 /// \ingroup Core
 template <typename T>
@@ -58,7 +66,7 @@ class Monitor
     public:
     typedef T value_type;
     typedef std::function<void(
-        std::size_t, std::size_t, const Particle<T> &, double *)> eval_type;
+        std::size_t, std::size_t, const Particle<T> &, double *) > eval_type;
 
     /// \brief Construct a Monitor with an evaluation object
     ///

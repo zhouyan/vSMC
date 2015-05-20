@@ -58,8 +58,10 @@ ADD_HEADER_EXECUTABLE(vsmc/math/cblas     TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/math/vmath     TRUE)
 
 ADD_HEADER_EXECUTABLE(vsmc/mpi/mpi ${VSMC_MPI_FOUND} "MPI")
-ADD_HEADER_EXECUTABLE(vsmc/mpi/backend_mpi ${VSMC_MPI_FOUND} "MPI")
-ADD_HEADER_EXECUTABLE(vsmc/mpi/mpi_manager ${VSMC_MPI_FOUND} "MPI")
+ADD_HEADER_EXECUTABLE(vsmc/mpi/backend_mpi     ${VSMC_MPI_FOUND} "MPI")
+ADD_HEADER_EXECUTABLE(vsmc/mpi/mpi_datatype    ${VSMC_MPI_FOUND} "MPI")
+ADD_HEADER_EXECUTABLE(vsmc/mpi/mpi_manager     ${VSMC_MPI_FOUND} "MPI")
+ADD_HEADER_EXECUTABLE(vsmc/mpi/internal/common ${VSMC_MPI_FOUND} "MPI")
 
 ADD_HEADER_EXECUTABLE(vsmc/opencl/opencl ${OPENCL_FOUND} "OCL")
 ADD_HEADER_EXECUTABLE(vsmc/opencl/backend_cl          ${OPENCL_FOUND} "OCL")

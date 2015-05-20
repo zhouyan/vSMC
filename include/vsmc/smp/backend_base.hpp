@@ -34,16 +34,22 @@
 
 #include <vsmc/internal/common.hpp>
 
-#define VSMC_DEFINE_SMP_BASE_COPY(Name)                                       \
+#if VSMC_NO_RUNTIME_ASSERT
+#define VSMC_BACKEND_BASE_DESTRUCTOR_PREFIX
+#else
+#define VSMC_BACKEND_BASE_DESTRUCTOR_PREFIX virtual
+#endif
+
+#define VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL(Name)                            \
     Name##Base() = default;                                                   \
     Name##Base(const Name##Base<T, Derived> &) = default;                     \
     Name##Base<T, Derived> &operator=(const Name##Base<T, Derived> &) =       \
         default;                                                              \
     Name##Base(Name##Base<T, Derived> &&) = default;                          \
     Name##Base<T, Derived> &operator=(Name##Base<T, Derived> &&) = default;   \
-    VSMC_CRTP_DESTRUCTOR_PREFIX ~Name##Base() {}
+    VSMC_BACKEND_BASE_DESTRUCTOR_PREFIX ~Name##Base() {}
 
-#define VSMC_DEFINE_SMP_BASE_COPY_VIRTUAL(Name)                               \
+#define VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(Name)                    \
     Name##Base() = default;                                                   \
     Name##Base(const Name##Base<T, Virtual> &) = default;                     \
     Name##Base<T, Virtual> &operator=(const Name##Base<T, Virtual> &) =       \
@@ -52,25 +58,33 @@
     Name##Base<T, Virtual> &operator=(Name##Base<T, Virtual> &&) = default;   \
     virtual ~Name##Base() {}
 
-#define VSMC_DEFINE_SMP_IMPL_COPY(Impl, Name)                                 \
-    Name##Impl() = default;                                                   \
-    Name##Impl(const Name##Impl<T, Derived> &) = default;                     \
-    Name##Impl<T, Derived> &operator=(Name##Impl<T, Derived> &) = default;    \
-    Name##Impl(Name##Impl<T, Derived> &&) = default;                          \
-    Name##Impl<T, Derived> &operator=(Name##Impl<T, Derived> &&) = default;   \
-    ~Name##Impl() {}
+#define VSMC_DEFINE_SMP_BACKEND_SPECIAL(SMP, Name)                            \
+    Name##SMP() = default;                                                    \
+    Name##SMP(const Name##SMP<T, Derived> &) = default;                       \
+    Name##SMP<T, Derived> &operator=(Name##SMP<T, Derived> &) = default;      \
+    Name##SMP(Name##SMP<T, Derived> &&) = default;                            \
+    Name##SMP<T, Derived> &operator=(Name##SMP<T, Derived> &&) = default;     \
+    ~Name##SMP() {}
+
+#define VSMC_DEFINE_SMP_BACKEND_FORWARD(Name)                                 \
+    template <typename T, typename = Virtual>                                 \
+    class Initialize##Name;                                                   \
+    template <typename T, typename = Virtual>                                 \
+    class Move##Name;                                                         \
+    template <typename T, typename = Virtual>                                 \
+    class MonitorEval##Name;                                                  \
+    template <typename T, typename = Virtual>                                 \
+    class PathEval##Name;
 
 #define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(basename)                \
     VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this) != nullptr),           \
         "DERIVED FROM " #basename                                             \
         " WITH INCORRECT **Derived** TEMPLATE PARAMTER");
 
-#define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_COPY_SIZE_MISMATCH(name)         \
-    VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),          \
-        "**State" #name "::copy** SIZE MISMATCH")
-
 namespace vsmc
 {
+
+struct Virtual;
 
 /// \brief Initialize base dispatch class
 /// \ingroup SMP
@@ -99,7 +113,7 @@ class InitializeBase
     }
 
     protected:
-    VSMC_DEFINE_SMP_BASE_COPY(Initialize)
+    VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL(Initialize)
 
     private:
     // non-static non-const
@@ -223,7 +237,7 @@ class InitializeBase<T, Virtual>
     virtual void post_processor(Particle<T> &) {}
 
     protected:
-    VSMC_DEFINE_SMP_BASE_COPY_VIRTUAL(Initialize)
+    VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(Initialize)
 }; // class InitializeBase<T, Virtual>
 
 /// \brief Move base dispatch class
@@ -248,7 +262,7 @@ class MoveBase
     }
 
     protected:
-    VSMC_DEFINE_SMP_BASE_COPY(Move)
+    VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL(Move)
 
     private:
     // non-static non-const
@@ -350,7 +364,7 @@ class MoveBase<T, Virtual>
     virtual void post_processor(std::size_t, Particle<T> &) {}
 
     protected:
-    VSMC_DEFINE_SMP_BASE_COPY_VIRTUAL(Move)
+    VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(Move)
 }; // class MoveBase<T, Virtual>
 
 /// \brief Monitor evalution base dispatch class
@@ -376,7 +390,7 @@ class MonitorEvalBase
     }
 
     protected:
-    VSMC_DEFINE_SMP_BASE_COPY(MonitorEval)
+    VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL(MonitorEval)
 
     private:
     // non-static non-const
@@ -484,7 +498,7 @@ class MonitorEvalBase<T, Virtual>
     virtual void post_processor(std::size_t, const Particle<T> &) {}
 
     protected:
-    VSMC_DEFINE_SMP_BASE_COPY_VIRTUAL(MonitorEval)
+    VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(MonitorEval)
 }; // class MonitorEvalBase<T, Virtual>
 
 /// \brief Path evalution base dispatch class
@@ -514,7 +528,7 @@ class PathEvalBase
     }
 
     protected:
-    VSMC_DEFINE_SMP_BASE_COPY(PathEval)
+    VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL(PathEval)
 
     private:
     // non-static non-const
@@ -643,7 +657,7 @@ class PathEvalBase<T, Virtual>
     virtual void post_processor(std::size_t, const Particle<T> &) {}
 
     protected:
-    VSMC_DEFINE_SMP_BASE_COPY_VIRTUAL(PathEval)
+    VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(PathEval)
 }; // class PathEval<T, Virtual>
 
 } // namespace vsmc

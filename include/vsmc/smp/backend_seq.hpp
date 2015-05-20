@@ -37,7 +37,7 @@
 namespace vsmc
 {
 
-VSMC_DEFINE_SMP_FORWARD(SEQ)
+VSMC_DEFINE_SMP_BACKEND_FORWARD(SEQ)
 
 /// \brief Particle::value_type subtype
 /// \ingroup SEQ
@@ -71,7 +71,7 @@ class InitializeSEQ : public InitializeBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_IMPL_COPY(SEQ, Initialize)
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(SEQ, Initialize)
 }; // class InitializeSEQ
 
 /// \brief Sampler<T>::move_type subtype
@@ -94,7 +94,7 @@ class MoveSEQ : public MoveBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_IMPL_COPY(SEQ, Move)
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(SEQ, Move)
 }; // class MoveSEQ
 
 /// \brief Monitor<T>::eval_type subtype
@@ -117,7 +117,7 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_IMPL_COPY(SEQ, MonitorEval)
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(SEQ, MonitorEval)
 }; // class MonitorEvalSEQ
 
 /// \brief Path<T>::eval_type subtype
@@ -142,7 +142,7 @@ class PathEvalSEQ : public PathEvalBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_IMPL_COPY(SEQ, PathEval)
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(SEQ, PathEval)
 }; // class PathEvalSEQ
 
 } // namespace vsmc

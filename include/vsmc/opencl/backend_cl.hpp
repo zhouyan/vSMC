@@ -46,10 +46,6 @@
     VSMC_STATIC_ASSERT((Dim == Dynamic),                                      \
         "**StateCL::resize_dim** USED WITH A FIXED DIMENSION OBJECT")
 
-#define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(derived, user)     \
-    VSMC_STATIC_ASSERT((internal::IsDerivedFromStateCL<derived>::value),      \
-        "**" #user "** USED WITH A STATE TYPE NOT DERIVED FROM StateCL")
-
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_FP_TYPE(type)           \
     VSMC_STATIC_ASSERT((std::is_same<type, ::cl_float>::value ||              \
                            std::is_same<type, ::cl_double>::value),           \
@@ -71,36 +67,34 @@
     VSMC_RUNTIME_ASSERT((psize >= dim),                                       \
         "**StateCL::state_unpack** INPUT PACK SIZE TOO SMALL")
 
-#define VSMC_DEFINE_OPENCL_COPY(Name)                                         \
+#define VSMC_DEFINE_OPENCL_BACKEND_CL_SPECIAL(Name)                           \
     Name() : build_id_(-1) {}                                                 \
-    Name(const Name<T, PlaceHolder> &) = default;                             \
-    Name<T, PlaceHolder> &operator=(const Name<T, PlaceHolder> &) = default;  \
+    Name(const Name<T> &) = default;                                          \
+    Name<T> &operator=(const Name<T> &) = default;                            \
+    Name(Name<T> &&) = default;                                               \
+    Name<T> &operator=(Name<T> &&) = default;                                 \
     virtual ~Name() {}
 
-#define VSMC_DEFINE_OPENCL_MOVE(Name)                                         \
-    Name(Name<T, PlaceHolder> &&) = default;                                  \
-    Name<T, PlaceHolder> &operator=(Name<T, PlaceHolder> &&) = default;
-
-#define VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL                                   \
+#define VSMC_DEFINE_OPENCL_BACKEND_CL_CONFIGURE_KERNEL                        \
     CLConfigure &configure() { return configure_; }                           \
     const CLConfigure &configure() const { return configure_; }               \
     const CLKernel &kernel() { return kernel_; }                              \
     const std::string &kernel_name() const { return kernel_name_; }
 
-#define VSMC_DEFINE_OPENCL_SET_KERNEL                                         \
+#define VSMC_DEFINE_OPENCL_BACKEND_CL_SET_KERNEL                              \
     if (kname.empty()) {                                                      \
         kernel_name_.clear();                                                 \
         return;                                                               \
     }                                                                         \
     if (build_id_ != particle.value().build_id() || kernel_name_ != kname) {  \
         build_id_ = particle.value().build_id();                              \
-        kernel_name_ = kname;                                                 \
+        kernel_name_ = std::move(kname);                                      \
         kernel_ = particle.value().create_kernel(kernel_name_);               \
         configure_.local_size(                                                \
             particle.size(), kernel_, particle.value().manager().device());   \
     }
 
-#define VSMC_DEFINE_OPENCL_MEMBER_DATA                                        \
+#define VSMC_DEFINE_OPENCL_BACKEND_CL_MEMBER_DATA                             \
     CLConfigure configure_;                                                   \
     int build_id_;                                                            \
     CLKernel kernel_;                                                         \
@@ -168,32 +162,11 @@ inline std::string cl_source_macros(
     return ss.str();
 }
 
-template <typename D>
-struct IsDerivedFromStateCLImpl {
-    private:
-    struct char2 {
-        char c1;
-        char c2;
-    };
-
-    template <std::size_t Dim, typename T, typename ID>
-    static char test(const StateCL<Dim, T, ID> *);
-    static char2 test(...);
-
-    public:
-    enum { value = sizeof(test(static_cast<const D *>(0))) == sizeof(char) };
-}; // struct IsDerivedFromStateImpl
-
-template <typename D>
-struct IsDerivedFromStateCL
-    : public std::integral_constant<bool, IsDerivedFromStateCLImpl<D>::value> {
-};
-
 } // namespace vsmc::internal
 
 /// \brief Particle::value_type subtype using OpenCL
 /// \ingroup OpenCL
-template <std::size_t StateSize, typename RealType, typename ID>
+template <std::size_t StateSize, typename RealType, typename ID = CLDefault>
 class StateCL
 {
     public:
@@ -515,7 +488,7 @@ class StateCL
 /// In summary, on the host side, it is a `cl::Buffer` object being
 /// passed to
 /// the kernel, which is not much unlike `void *` pointer.
-template <typename T, typename PlaceHolder = NullType>
+template <typename T>
 class InitializeCL
 {
     public:
@@ -530,8 +503,6 @@ class InitializeCL
 
     std::size_t operator()(Particle<T> &particle, void *param)
     {
-        VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, InitializeCL);
-
         set_kernel(particle);
         if (kernel_name_.empty())
             return 0;
@@ -565,7 +536,7 @@ class InitializeCL
     {
         std::string kname;
         initialize_state(kname);
-        VSMC_DEFINE_OPENCL_SET_KERNEL;
+        VSMC_DEFINE_OPENCL_BACKEND_CL_SET_KERNEL;
     }
 
     virtual void set_kernel_args(const Particle<T> &particle)
@@ -583,14 +554,13 @@ class InitializeCL
             accept_buffer_.data());
     }
 
-    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
+    VSMC_DEFINE_OPENCL_BACKEND_CL_CONFIGURE_KERNEL
 
     protected:
-    VSMC_DEFINE_OPENCL_COPY(InitializeCL)
-    VSMC_DEFINE_OPENCL_MOVE(InitializeCL)
+    VSMC_DEFINE_OPENCL_BACKEND_CL_SPECIAL(InitializeCL)
 
     private:
-    VSMC_DEFINE_OPENCL_MEMBER_DATA;
+    VSMC_DEFINE_OPENCL_BACKEND_CL_MEMBER_DATA;
     CLBuffer<::cl_ulong, typename T::cl_id> accept_buffer_;
     std::vector<::cl_ulong> accept_host_;
 }; // class InitializeCL
@@ -606,7 +576,7 @@ class InitializeCL
 /// ulong
 /// *accept);
 /// ~~~
-template <typename T, typename PlaceHolder = NullType>
+template <typename T>
 class MoveCL
 {
     public:
@@ -621,8 +591,6 @@ class MoveCL
 
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
     {
-        VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, MoveCL);
-
         set_kernel(iter, particle);
         if (kernel_name_.empty())
             return 0;
@@ -654,7 +622,7 @@ class MoveCL
     {
         std::string kname;
         move_state(iter, kname);
-        VSMC_DEFINE_OPENCL_SET_KERNEL;
+        VSMC_DEFINE_OPENCL_BACKEND_CL_SET_KERNEL;
     }
 
     virtual void set_kernel_args(std::size_t iter, const Particle<T> &particle)
@@ -672,14 +640,13 @@ class MoveCL
             particle.value().state_buffer().data(), accept_buffer_.data());
     }
 
-    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
+    VSMC_DEFINE_OPENCL_BACKEND_CL_CONFIGURE_KERNEL
 
     protected:
-    VSMC_DEFINE_OPENCL_COPY(MoveCL)
-    VSMC_DEFINE_OPENCL_MOVE(MoveCL)
+    VSMC_DEFINE_OPENCL_BACKEND_CL_SPECIAL(MoveCL)
 
     private:
-    VSMC_DEFINE_OPENCL_MEMBER_DATA;
+    VSMC_DEFINE_OPENCL_BACKEND_CL_MEMBER_DATA;
     CLBuffer<::cl_ulong, typename T::cl_id> accept_buffer_;
     std::vector<::cl_ulong> accept_host_;
 }; // class MoveCL
@@ -694,7 +661,7 @@ class MoveCL
 /// void kern (ulong iter, ulong dim, __global state_type *state,
 ///            __global fp_type *res);
 /// ~~~
-template <typename T, typename PlaceHolder = NullType>
+template <typename T>
 class MonitorEvalCL
 {
     public:
@@ -710,8 +677,6 @@ class MonitorEvalCL
     void operator()(std::size_t iter, std::size_t dim,
         const Particle<T> &particle, double *res)
     {
-        VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, MonitorEvalCL);
-
         set_kernel(iter, dim, particle);
         if (kernel_name_.empty())
             return;
@@ -734,7 +699,7 @@ class MonitorEvalCL
     {
         std::string kname;
         monitor_state(iter, kname);
-        VSMC_DEFINE_OPENCL_SET_KERNEL;
+        VSMC_DEFINE_OPENCL_BACKEND_CL_SET_KERNEL;
     }
 
     virtual void set_kernel_args(
@@ -751,14 +716,13 @@ class MonitorEvalCL
             particle.value().state_buffer().data(), buffer_.data());
     }
 
-    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
+    VSMC_DEFINE_OPENCL_BACKEND_CL_CONFIGURE_KERNEL
 
     protected:
-    VSMC_DEFINE_OPENCL_COPY(MonitorEvalCL)
-    VSMC_DEFINE_OPENCL_MOVE(MonitorEvalCL)
+    VSMC_DEFINE_OPENCL_BACKEND_CL_SPECIAL(MonitorEvalCL)
 
     private:
-    VSMC_DEFINE_OPENCL_MEMBER_DATA;
+    VSMC_DEFINE_OPENCL_BACKEND_CL_MEMBER_DATA;
     CLBuffer<typename T::fp_type, typename T::cl_id> buffer_;
 }; // class MonitorEvalCL
 
@@ -772,7 +736,7 @@ class MonitorEvalCL
 /// void kern (ulong iter, __global state_type *state,
 ///            __global state_type *res);
 /// ~~~
-template <typename T, typename PlaceHolder = NullType>
+template <typename T>
 class PathEvalCL
 {
     public:
@@ -788,8 +752,6 @@ class PathEvalCL
     double operator()(
         std::size_t iter, const Particle<T> &particle, double *res)
     {
-        VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_STATE_CL_TYPE(T, PathEvalCL);
-
         set_kernel(iter, particle);
         if (kernel_name_.empty())
             return 0;
@@ -814,7 +776,7 @@ class PathEvalCL
     {
         std::string kname;
         path_state(iter, kname);
-        VSMC_DEFINE_OPENCL_SET_KERNEL;
+        VSMC_DEFINE_OPENCL_BACKEND_CL_SET_KERNEL;
     }
 
     virtual void set_kernel_args(std::size_t iter, const Particle<T> &particle)
@@ -829,14 +791,13 @@ class PathEvalCL
             particle.value().state_buffer().data(), buffer_.data());
     }
 
-    VSMC_DEFINE_OPENCL_CONFIGURE_KERNEL
+    VSMC_DEFINE_OPENCL_BACKEND_CL_CONFIGURE_KERNEL
 
     protected:
-    VSMC_DEFINE_OPENCL_COPY(PathEvalCL)
-    VSMC_DEFINE_OPENCL_MOVE(PathEvalCL)
+    VSMC_DEFINE_OPENCL_BACKEND_CL_SPECIAL(PathEvalCL)
 
     private:
-    VSMC_DEFINE_OPENCL_MEMBER_DATA;
+    VSMC_DEFINE_OPENCL_BACKEND_CL_MEMBER_DATA;
     CLBuffer<typename T::fp_type, typename T::cl_id> buffer_;
 }; // class PathEvalCL
 

@@ -115,6 +115,10 @@ inline int cl_opencl_c_version(::cl_device_id device)
 
 } // namespace vsmc::internal
 
+/// \brief Template parameter type for default behavior
+/// \ingroup OpenCL
+struct CLDefault;
+
 } // namespace vsmc
 
 #endif // VSMC_OPENCL_INTERNAL_COMMON_HPP
