@@ -41,7 +41,6 @@ ADD_HEADER_EXECUTABLE(vsmc/core/path            TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/core/sampler         TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/core/single_particle TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/core/state_matrix    TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/core/state_tuple     TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/core/weight_set      TRUE)
 
 ADD_HEADER_EXECUTABLE(vsmc/internal/assert   TRUE)

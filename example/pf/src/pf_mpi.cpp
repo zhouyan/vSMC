@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/pf/src/pf_tuple_mpi.cpp
+// vSMC/example/pf/src/pf_mpi.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,7 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define VSMC_PF_MPI
+
 #include "pf_@smp@.hpp"
-#include "pf_tuple_mpi.hpp"
 
 int main(int argc, char **argv) { PF_MAIN_MPI; }

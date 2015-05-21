@@ -65,16 +65,6 @@ enum MatrixTrans {
     Trans = 112    ///< The matrix shall be transposed
 };
 
-/// \brief Function template argument used for position
-/// \ingroup Definitions
-template <std::size_t N>
-using Index = std::integral_constant<std::size_t, N>;
-
-#if VSMC_HAS_BACKWARD_COMPATIBILITY
-template <std::size_t N>
-using Position = Index<N>;
-#endif
-
 } // namespace vsmc
 
 #endif // VSMC_INTERNAL_DEFINES_HPP

@@ -87,7 +87,7 @@ class StateMatrixDim<Dynamic>
 
 } // namespace vsmc::internal
 
-/// \brief Base type of StateTuple
+/// \brief Base type of StateMatrix
 /// \ingroup Core
 template <MatrixOrder Order, std::size_t Dim, typename T>
 class StateMatrixBase : public internal::StateMatrixDim<Dim>
@@ -113,18 +113,6 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
             return this->mutable_particle_ptr()->value().state(
                 this->id(), pos);
         }
-
-        template <std::size_t Pos>
-        state_type &state(Index<Pos>) const
-        {
-            return this->state(Pos);
-        }
-
-        template <std::size_t Pos>
-        state_type &state() const
-        {
-            return this->state(Pos);
-        }
     }; // struct single_particle_type
 
     template <typename S>
@@ -140,18 +128,6 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         const state_type &state(std::size_t pos) const
         {
             return this->particle_ptr()->value().state(this->id(), pos);
-        }
-
-        template <std::size_t Pos>
-        const state_type &state(Index<Pos>) const
-        {
-            return this->state(Pos);
-        }
-
-        template <std::size_t Pos>
-        const state_type &state() const
-        {
-            return this->state(Pos);
         }
     }; // struct const_single_particle_type
 
@@ -195,18 +171,6 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
             static_cast<const StateMatrix<Order, Dim, T> *>(this);
         for (size_type i = 0; i != size_; ++i, ++first)
             *first = sptr->state(i, pos);
-    }
-
-    template <std::size_t Pos, typename OutputIter>
-    void read_state(Index<Pos>, OutputIter first) const
-    {
-        read_state(Pos, first);
-    }
-
-    template <std::size_t Pos, typename OutputIter>
-    void read_state(OutputIter first) const
-    {
-        read_state(Pos, first);
     }
 
     template <typename OutputIterIter>
@@ -317,30 +281,6 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         return this->data()[id * this->dim() + pos];
     }
 
-    template <std::size_t Pos>
-    T &state(size_type id, Index<Pos>)
-    {
-        return state(id, Pos);
-    }
-
-    template <std::size_t Pos>
-    const T &state(size_type id, Index<Pos>) const
-    {
-        return state(id, Pos);
-    }
-
-    template <std::size_t Pos>
-    T &state(size_type id)
-    {
-        return state(id, Pos);
-    }
-
-    template <std::size_t Pos>
-    const T &state(size_type id) const
-    {
-        return state(id, Pos);
-    }
-
     using state_matrix_base_type::data;
 
     T *data(size_type id) { return row_data(id); }
@@ -444,30 +384,6 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     const T &state(size_type id, std::size_t pos) const
     {
         return this->data()[pos * this->size() + id];
-    }
-
-    template <std::size_t Pos>
-    T &state(size_type id, Index<Pos>)
-    {
-        return state(id, Pos);
-    }
-
-    template <std::size_t Pos>
-    const T &state(size_type id, Index<Pos>) const
-    {
-        return state(id, Pos);
-    }
-
-    template <std::size_t Pos>
-    T &state(size_type id)
-    {
-        return state(id, Pos);
-    }
-
-    template <std::size_t Pos>
-    const T &state(size_type id) const
-    {
-        return state(id, Pos);
     }
 
     using state_matrix_base_type::data;

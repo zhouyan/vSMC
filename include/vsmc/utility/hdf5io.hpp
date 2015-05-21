@@ -527,66 +527,11 @@ inline void hdf5store_list_insert(std::size_t N, const std::string &file_name,
 namespace internal
 {
 
-template <typename TupleVectorType>
-inline void hdf5_tuple_vector_resize(
-    std::size_t n, TupleVectorType &vec, Index<0>)
-{
-    std::get<0>(vec).resize(n);
-}
-
-template <typename TupleVectorType, std::size_t Pos>
-inline void hdf5_tuple_vector_resize(
-    std::size_t n, TupleVectorType &vec, Index<Pos>)
-{
-    std::get<Pos>(vec).resize(n);
-    hdf5_tuple_vector_resize(n, vec, Index<Pos - 1>());
-}
-
-template <typename TupleVectorType, typename InputIter>
-inline void hdf5_tuple_vector_copy(
-    std::size_t n, TupleVectorType &vec, InputIter first, Index<0>)
-{
-    typedef typename std::iterator_traits<InputIter>::value_type tuple_type;
-    typedef typename std::tuple_element<0, tuple_type>::type value_type;
-    value_type *dst = std::get<0>(vec).data();
-    InputIter ffirst = first;
-    for (std::size_t i = 0; i != n; ++i, ++ffirst)
-        dst[i] = std::get<0>(*ffirst);
-}
-
-template <typename TupleVectorType, typename InputIter, std::size_t Pos>
-inline void hdf5_tuple_vector_copy(
-    std::size_t n, TupleVectorType &vec, InputIter first, Index<Pos>)
-{
-    typedef typename std::iterator_traits<InputIter>::value_type tuple_type;
-    typedef typename std::tuple_element<Pos, tuple_type>::type value_type;
-    value_type *dst = std::get<Pos>(vec).data();
-    InputIter ffirst = first;
-    for (std::size_t i = 0; i != n; ++i, ++ffirst)
-        dst[i] = std::get<Pos>(*ffirst);
-    hdf5_tuple_vector_copy(n, vec, first, Index<Pos - 1>());
-}
-
-template <typename TupleVectorType, typename TuplePtrType>
-inline void hdf5_tuple_vector_ptr(
-    const TupleVectorType &vec, TuplePtrType &ptr, Index<0>)
-{
-    std::get<0>(ptr) = std::get<0>(vec).data();
-}
-
-template <typename TupleVectorType, typename TuplePtrType, std::size_t Pos>
-inline void hdf5_tuple_vector_ptr(
-    const TupleVectorType &vec, TuplePtrType &ptr, Index<Pos>)
-{
-    std::get<Pos>(ptr) = std::get<Pos>(vec).data();
-    hdf5_tuple_vector_ptr(vec, ptr, Index<Pos - 1>());
-}
-
 template <typename InputIter, typename... InputIters>
 inline void hdf5store_list_insert_tuple(std::size_t nrow,
     const std::string &file_name, const std::string &data_name,
     const std::tuple<InputIter, InputIters...> &first, const std::string *sptr,
-    Index<0>)
+    std::integral_constant<std::size_t, 0>)
 {
     typedef typename std::tuple_element<0,
         std::tuple<InputIter, InputIters...>>::type iter_type;
@@ -601,7 +546,7 @@ template <typename InputIter, typename... InputIters, std::size_t Pos>
 inline void hdf5store_list_insert_tuple(std::size_t nrow,
     const std::string &file_name, const std::string &data_name,
     const std::tuple<InputIter, InputIters...> &first, const std::string *sptr,
-    Index<Pos>)
+    std::integral_constant<std::size_t, Pos>)
 {
     typedef typename std::tuple_element<Pos,
         std::tuple<InputIter, InputIters...>>::type iter_type;
@@ -610,8 +555,8 @@ inline void hdf5store_list_insert_tuple(std::size_t nrow,
     data_ptr.set(nrow, std::get<Pos>(first));
     const dtype *data = data_ptr.get();
     hdf5store_list_insert<dtype>(nrow, file_name, data_name, data, *sptr);
-    hdf5store_list_insert_tuple(
-        nrow, file_name, data_name, first, --sptr, Index<Pos - 1>());
+    hdf5store_list_insert_tuple(nrow, file_name, data_name, first, --sptr,
+        std::integral_constant<std::size_t, Pos - 1>());
 }
 
 } // namespace vsmc::internal
@@ -646,8 +591,8 @@ inline void hdf5store_list(std::size_t nrow, const std::string &file_name,
     vnames.set(dim, sfirst);
     const std::string *sptr = vnames.get() + dim;
     hdf5store_list_empty(file_name, data_name, append);
-    internal::hdf5store_list_insert_tuple(
-        nrow, file_name, data_name, first, --sptr, Index<dim - 1>());
+    internal::hdf5store_list_insert_tuple(nrow, file_name, data_name, first,
+        --sptr, std::integral_constant<std::size_t, dim - 1>());
 }
 
 /// \brief Store a Sampler in the HDF5 format
@@ -701,49 +646,6 @@ inline void hdf5store(const StateMatrix<Order, Dim, T> &state,
 {
     hdf5store_matrix<Order, T>(
         state.size(), state.dim(), file_name, data_name, state.data(), append);
-}
-
-/// \brief Store a StateTuple in the HDF5 format
-/// \ingroup HDF5IO
-template <typename T, typename... Types>
-inline void hdf5store(const StateTuple<RowMajor, T, Types...> &state,
-    const std::string &file_name, const std::string &data_name,
-    bool append = false)
-{
-    static constexpr std::size_t dim = sizeof...(Types) + 1;
-    std::vector<std::string> vnames;
-    vnames.reserve(dim);
-    for (std::size_t i = 0; i != dim; ++i)
-        vnames.push_back("V" + internal::itos(i));
-
-    std::tuple<std::vector<T>, std::vector<Types>...> data_vec;
-    internal::hdf5_tuple_vector_resize(
-        state.size(), data_vec, Index<dim - 1>());
-    internal::hdf5_tuple_vector_copy(
-        state.size(), data_vec, state.data(), Index<dim - 1>());
-
-    typename std::tuple<const T *, const Types *...> data_ptr;
-    internal::hdf5_tuple_vector_ptr(data_vec, data_ptr, Index<dim - 1>());
-
-    hdf5store_list(
-        state.size(), file_name, data_name, data_ptr, vnames.data(), append);
-}
-
-/// \brief Store a StateTuple in the HDF5 format
-/// \ingroup HDF5IO
-template <typename T, typename... Types>
-inline void hdf5store(const StateTuple<ColMajor, T, Types...> &state,
-    const std::string &file_name, const std::string &data_name,
-    bool append = false)
-{
-    static constexpr std::size_t dim = sizeof...(Types) + 1;
-    std::vector<std::string> vnames;
-    vnames.reserve(dim);
-    for (std::size_t i = 0; i != dim; ++i)
-        vnames.push_back("V" + internal::itos(i));
-
-    hdf5store_list(state.size(), file_name, data_name, state.data(),
-        vnames.data(), append);
 }
 
 /// \brief Store a StateCL in the HDF5 format

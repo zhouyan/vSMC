@@ -33,7 +33,6 @@
 #define VSMC_MPI_MPI_DATATYPE_HPP
 
 #include <vsmc/mpi/internal/common.hpp>
-#include <vsmc/core/state_tuple.hpp>
 
 namespace boost
 {
@@ -45,7 +44,9 @@ struct is_mpi_datatype<std::array<T, N>>
     : public std::conditional<std::is_fundamental<T>::value, mpl::true_,
           mpl::false_>::type {
 };
-}
+
 } // namespace boost::mpi
+
+} // namespace boost
 
 #endif // VSMC_MPI_MPI_DATATYPE_HPP

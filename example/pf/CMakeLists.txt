@@ -33,34 +33,33 @@ PROJECT (vSMCExample-pf CXX)
 INCLUDE_DIRECTORIES (${PROJECT_BINARY_DIR}/include)
 INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
 
-SET (PF_SMP_STATE matrix; tuple)
-SET (PF_STATE ${PF_SMP_STATE})
+SET (PF_STATE smp)
 IF (VSMC_MPI_FOUND)
-    SET (PF_STATE ${PF_STATE}; matrix_mpi; tuple_mpi)
+    SET (PF_STATE ${PF_STATE}; mpi)
 ENDIF (VSMC_MPI_FOUND)
 
-FUNCTION (ADD_PF_SMP_CHECK pf_state smp)
-    ADD_CUSTOM_TARGET (pf_${state}_${smp}-check
-        DEPENDS pf_${state}_${smp} pf-files
-        COMMAND pf_${state}_${smp}
-        "pf.data" "pf_${state}_${smp}" ">>pf.out"
-        COMMENT "Running pf_${state}_${smp}"
+FUNCTION (ADD_PF_SMP_CHECK backend)
+    ADD_CUSTOM_TARGET (pf_smp_${backend}-check
+        DEPENDS pf_smp_${backend} pf-files
+        COMMAND pf_smp_${backend}
+        "pf.data" "pf_smp_${backend}" ">>pf.out"
+        COMMENT "Running pf_smp_${backend}"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-    ADD_DEPENDENCIES (pf_${state}-check pf_${state}_${smp}-check)
-ENDFUNCTION (ADD_PF_SMP_CHECK base smp)
+    ADD_DEPENDENCIES (pf_smp-check pf_smp_${backend}-check)
+ENDFUNCTION (ADD_PF_SMP_CHECK smp)
 
-FUNCTION (ADD_PF_MPI_CHECK pf_state smp)
-    ADD_CUSTOM_TARGET (pf_${state}_mpi_${smp}-check
-        DEPENDS pf_${state}_mpi_${smp} pf-files
+FUNCTION (ADD_PF_MPI_CHECK backend)
+    ADD_CUSTOM_TARGET (pf_mpi_${backend}-check
+        DEPENDS pf_mpi_${backend} pf-files
         COMMAND ${VSMC_MPIEXEC}
         ${VSMC_MPIEXEC_NUMPROC_FLAG} "2"
         ${VSMC_MPIEXEC_PREFLAGS}
-        ${PROJECT_BINARY_DIR}/pf_${state}_mpi_${smp}
+        ${PROJECT_BINARY_DIR}/pf_mpi_${backend}
         ${VSMC_MPIEXEC_POSTFLAGS}
-        "pf.data" "pf_${state}_mpi_${smp}" ">>pf.out"
-        COMMENT "Running pf_${state}_mpi_${smp}"
+        "pf.data" "pf_mpi_${backend}" ">>pf.out"
+        COMMENT "Running pf_mpi_${backend}"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-    ADD_DEPENDENCIES (pf_${state}_mpi-check pf_${state}_mpi_${smp}-check)
+    ADD_DEPENDENCIES (pf_mpi-check pf_mpi_${backend}-check)
 ENDFUNCTION (ADD_PF_MPI_CHECK base smp)
 
 ADD_SMP_EXAMPLE (pf "${PF_STATE}" "HDF5")
@@ -69,22 +68,20 @@ COPY_FILE (pf pf.data)
 COPY_FILE (pf pf.R)
 
 ADD_CUSTOM_TARGET (pf-check)
+ADD_CUSTOM_TARGET (pf_smp-check)
+ADD_DEPENDENCIES (pf-check pf_smp-check)
+IF (VSMC_MPI_FOUND)
+    ADD_CUSTOM_TARGET (pf_mpi-check)
+    ADD_DEPENDENCIES (pf-check pf_mpi-check)
+ENDIF (VSMC_MPI_FOUND)
 ADD_DEPENDENCIES (check pf-check)
 
-FOREACH (state ${PF_SMP_STATE})
-    ADD_CUSTOM_TARGET (pf_${state}-check)
-    ADD_DEPENDENCIES (pf-check pf_${state}-check)
+FOREACH (backend ${SMP_EXECUTABLES})
+    ADD_PF_SMP_CHECK (${backend})
     IF (VSMC_MPI_FOUND)
-        ADD_CUSTOM_TARGET (pf_${state}_mpi-check)
-        ADD_DEPENDENCIES (pf-check pf_${state}_mpi-check)
+        ADD_PF_MPI_CHECK (${backend})
     ENDIF (VSMC_MPI_FOUND)
-    FOREACH (smp ${SMP_EXECUTABLES})
-        ADD_PF_SMP_CHECK (${state} ${smp})
-        IF (VSMC_MPI_FOUND)
-            ADD_PF_MPI_CHECK (${state} ${smp})
-        ENDIF (VSMC_MPI_FOUND)
-    ENDFOREACH (smp ${SMP_EXECUTABLES})
-ENDFOREACH (state ${PF_SMP_STATE})
+ENDFOREACH (backend ${SMP_EXECUTABLES})
 
 IF (OPENCL_FOUND)
     COPY_FILE (pf pf_cl.cl)

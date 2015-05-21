@@ -29,6 +29,7 @@ changes.
   - GCD
   - Integrate
   - Core/Adapter
+  - Core/StateTuple
   - SMP/Adapter
   - RNG/GSL
   - SMP/CILK

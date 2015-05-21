@@ -67,9 +67,6 @@ class WeightSet;
 template <MatrixOrder, std::size_t, typename>
 class StateMatrix;
 
-template <MatrixOrder, typename, typename...>
-class StateTuple;
-
 template <std::size_t, typename, typename>
 class StateCL;
 

@@ -36,10 +36,8 @@ theme_set(theme_bw())
 
 smp <- c("seq", "omp", "tbb")
 exe <- character()
-exe <- c(exe, paste("pf_matrix",     smp, sep = "_"))
-exe <- c(exe, paste("pf_tuple",      smp, sep = "_"))
-exe <- c(exe, paste("pf_matrix_mpi", smp, sep = "_"))
-exe <- c(exe, paste("pf_tuple_mpi",  smp, sep = "_"))
+exe <- c(exe, paste("pf_smp", smp, sep = "_"))
+exe <- c(exe, paste("pf_mpi", smp, sep = "_"))
 exe <- c(exe, "pf_cl", "pf_cl_mpi")
 res <- c(
     "Multinomial",

@@ -38,7 +38,6 @@
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/core/state_matrix.hpp>
-#include <vsmc/core/state_tuple.hpp>
 #include <vsmc/core/weight_set.hpp>
 
 #endif // VSMC_CORE_CORE_HPP
