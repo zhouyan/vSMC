@@ -120,6 +120,7 @@ class SeedGenerator
     result_type get()
     {
         skip();
+
         return seed_ * divisor_ + remainder_;
     }
 
@@ -128,10 +129,8 @@ class SeedGenerator
     /// \brief Set the internal seed
     ///
     /// \details
-    /// If `seed` is larger than the maximum of the internal seed, than it
-    /// will
-    /// be round up to fit into the range. For example, say the range is from
-    /// 1
+    /// If `seed` is larger than the maximum of the internal seed, than it will
+    /// be round up to fit into the range. For example, say the range is from 1
     /// to 1000, and the new internal seed is 6061, it will be round up to 61.
     void set(result_type seed) { seed_ = seed % seed_max_; }
 
@@ -172,7 +171,13 @@ class SeedGenerator
     }
 
     /// \brief Skip the internal seed by 1 step
-    void skip() { seed_ = seed_ == seed_max_ ? 1 : (seed_ + 1); }
+    void skip()
+    {
+        if (seed_ < seed_max_)
+            ++seed_;
+        else
+            seed_ = 1;
+    }
 
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
