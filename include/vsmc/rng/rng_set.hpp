@@ -42,12 +42,8 @@
 /// \brief Default RNG set type
 /// \ingroup Config
 #ifndef VSMC_RNG_SET_TYPE
-#if VSMC_USE_TBB
-#define VSMC_RNG_SET_TYPE ::vsmc::RngSetTBB<::vsmc::Rng>
-#else
 #define VSMC_RNG_SET_TYPE ::vsmc::RngSetVector<::vsmc::Rng>
 #endif
-#endif // VSMC_RNG_SET_TYPE
 
 namespace vsmc
 {
@@ -116,48 +112,6 @@ class RngSetVector
     private:
     std::vector<rng_type> rng_;
 }; // class RngSetVector
-
-#if VSMC_HAS_TBB
-
-/// \brief Thread local RNG set
-/// \ingroup RNG
-template <typename RngType>
-class RngSetTBB
-{
-    public:
-    typedef RngType rng_type;
-    typedef std::size_t size_type;
-
-    explicit RngSetTBB(size_type N = 0) : size_(N), rng_(rng_init)
-    {
-        rng_init();
-    }
-
-    size_type size() const { return size_; }
-
-    void resize(std::size_t) {}
-
-    void seed() { rng_.clear(); }
-
-    rng_type &operator[](size_type) { return rng_.local(); }
-
-    private:
-    std::size_t size_;
-    ::tbb::combinable<rng_type> rng_;
-
-    static rng_type rng_init()
-    {
-        static ::tbb::mutex mtx;
-
-        ::tbb::mutex::scoped_lock lock(mtx);
-        rng_type rng;
-        Seed::instance().seed_rng(rng);
-
-        return rng;
-    }
-}; // class RngSetTBB
-
-#endif // VSMC_HAS_TBB
 
 typedef VSMC_RNG_SET_TYPE RngSet;
 
