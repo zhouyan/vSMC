@@ -354,8 +354,8 @@ class StateCL
             CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, state_tmp_host_.data());
 
         std::memset(state_idx_host_.data(), 0, size_);
-        manager().read_buffer(state_tmp_buffer_.data(), size_ * state_size_,
-            state_tmp_host_.data());
+        manager().read_buffer(
+            state_buffer_.data(), size_ * state_size_, state_tmp_host_.data());
     }
 
     void copy_post_processor()
@@ -383,8 +383,8 @@ class StateCL
             pack.size(), state_size_);
 
         state_idx_host_[id] = 1;
-        std::memcpy(
-            &state_tmp_host_[id * state_size_], pack.data(), state_size_);
+        std::memcpy(state_tmp_host_.data() + id * state_size_, pack.data(),
+            state_size_);
     }
 
     CLConfigure &copy_configure() { return copy_.configure(); }

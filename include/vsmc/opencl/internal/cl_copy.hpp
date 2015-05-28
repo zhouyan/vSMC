@@ -64,7 +64,8 @@ class CLCopy
         const CLMemory &idx, const CLMemory &tmp, const CLMemory &state)
     {
         cl_set_kernel_args(kernel_post_, 0, idx, tmp, state);
-        manager().run_kernel(kernel_, size_, configure_post_.local_size());
+        manager().run_kernel(
+            kernel_post_, size_, configure_post_.local_size());
     }
 
     void build(std::size_t size, std::size_t state_size)
@@ -109,8 +110,13 @@ class CLCopy
 
     const CLKernel &kernel() { return kernel_; }
 
+    const CLKernel &kernel_post() { return kernel_post_; }
+
     CLConfigure &configure() { return configure_; }
     const CLConfigure &configure() const { return configure_; }
+
+    CLConfigure &configure_post() { return configure_post; }
+    const CLConfigure &configure_post() const { return configure_post; }
 
     private:
     std::size_t size_;
