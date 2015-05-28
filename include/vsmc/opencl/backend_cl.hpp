@@ -423,7 +423,7 @@ class StateCL
                 CL_MEM_READ_ONLY|CL_MEM_USE_HOST_PTR, &state_tmp_host_[0]);
 
         std::memset(&state_idx_host_[0], 0, size_);
-        manager().read_buffer(state_tmp_buffer_.data(), size_ * state_size_,
+        manager().read_buffer(state_buffer_.data(), size_ * state_size_,
                 &state_tmp_host_[0]);
     }
 
