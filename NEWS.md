@@ -14,8 +14,8 @@ changes.
   `std` shall solve any issues.
 * `Progress` is no longer a class template.
 * `vsmc::Array` is replaced by `std::array`
-* The `RngSet` class template is replaced by `RngSetScalar`, `RngSetVector`,
-  `RngSetTBB` etc., and the structures `Scalar`, `Vector`, `TBB` are removed.
+* The `RngSet` class template is replaced by `RngSetScalar` and `RngSetVector`,
+  and the structures `Scalar` and `Vector` are removed.
 * The OpenCL module has gone through a complete rework. The library now has
   its own C++ wrapper based on `std::shared_ptr` instead of the official
   (outdated) C++ wrapper.
