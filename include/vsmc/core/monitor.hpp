@@ -33,7 +33,6 @@
 #define VSMC_CORE_MONITOR_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/aligned_memory.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(func)                             \
     VSMC_RUNTIME_ASSERT(                                                      \
@@ -348,9 +347,9 @@ class Monitor
     MonitorStage stage_;
     std::vector<std::string> name_;
     std::vector<std::size_t> index_;
-    AlignedVector<double> record_;
-    AlignedVector<double> result_;
-    AlignedVector<double> buffer_;
+    Vector<double> record_;
+    Vector<double> result_;
+    Vector<double> buffer_;
 
     void push_back(std::size_t iter)
     {

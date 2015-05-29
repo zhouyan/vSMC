@@ -36,7 +36,6 @@
 #include <vsmc/core/weight_set.hpp>
 #include <vsmc/mpi/mpi_datatype.hpp>
 #include <vsmc/mpi/mpi_manager.hpp>
-#include <vsmc/utility/aligned_memory.hpp>
 
 #define VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH                \
     VSMC_RUNTIME_ASSERT(                                                      \
@@ -125,7 +124,7 @@ class WeightSetMPI : public WeightSetBase
     double compute_ess(const double *first, bool use_log) const
     {
         const size_type N = static_cast<size_type>(this->size());
-        AlignedVector<double> buffer(N);
+        Vector<double> buffer(N);
         double *const bptr = buffer.data();
 
         if (use_log) {
@@ -172,7 +171,7 @@ class WeightSetMPI : public WeightSetBase
         const size_type N = static_cast<size_type>(this->size());
         const double *bptr = first;
         const double *const wptr = this->weight_data();
-        AlignedVector<double> buffer;
+        Vector<double> buffer;
         if (use_log) {
             buffer.resize(N);
             double *const cptr = buffer.data();

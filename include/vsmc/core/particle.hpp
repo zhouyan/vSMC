@@ -38,7 +38,6 @@
 #include <vsmc/resample/resample.hpp>
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
-#include <vsmc/utility/aligned_memory.hpp>
 
 namespace vsmc
 {
@@ -241,8 +240,8 @@ class Particle
     rng_set_type rng_set_;
     resample_rng_type resample_rng_;
 
-    AlignedVector<size_type> replication_;
-    AlignedVector<size_type> copy_from_;
+    Vector<size_type> replication_;
+    Vector<size_type> copy_from_;
 }; // class Particle
 
 } // namespace vsmc

@@ -42,6 +42,8 @@
 #include <vsmc/math/constants.hpp>
 #include <vsmc/math/vmath.hpp>
 
+#include <vsmc/utility/aligned_memory.hpp>
+
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -65,6 +67,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <new>
 #include <numeric>
 #include <random>
 #include <sstream>

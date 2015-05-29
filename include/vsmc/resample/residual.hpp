@@ -72,8 +72,8 @@ class Resample<internal::ResampleResidual>
     }
 
     private:
-    AlignedVector<double> residual_;
-    AlignedVector<double> integral_;
+    Vector<double> residual_;
+    Vector<double> integral_;
 }; // Residual resampling
 
 } // namespace vsmc

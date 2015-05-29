@@ -34,7 +34,6 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/rng/discrete_distribution.hpp>
-#include <vsmc/utility/aligned_memory.hpp>
 
 namespace vsmc
 {
@@ -102,7 +101,7 @@ class WeightSet
     template <typename InputIter>
     double ess(InputIter first, bool use_log) const
     {
-        AlignedVector<double> buffer(size_);
+        Vector<double> buffer(size_);
         std::copy_n(first, size_, buffer.begin());
 
         return compute_ess(buffer.data(), use_log);
@@ -112,7 +111,7 @@ class WeightSet
     template <typename RandomIter>
     double ess(RandomIter first, int stride, bool use_log) const
     {
-        AlignedVector<double> buffer(size_);
+        Vector<double> buffer(size_);
         for (size_type i = 0; i != size_; ++i, first += stride)
             buffer[i] = *first;
 
@@ -123,7 +122,7 @@ class WeightSet
     template <typename InputIter>
     double cess(InputIter first, bool use_log) const
     {
-        AlignedVector<double> buffer(size_);
+        Vector<double> buffer(size_);
         std::copy_n(first, size_, buffer.begin());
 
         return compute_cess(buffer.data(), use_log);
@@ -133,7 +132,7 @@ class WeightSet
     template <typename RandomIter>
     double cess(RandomIter first, int stride, bool use_log) const
     {
-        AlignedVector<double> buffer(size_);
+        Vector<double> buffer(size_);
         for (size_type i = 0; i != size_; ++i, first += stride)
             buffer[i] = *first;
 
@@ -350,7 +349,7 @@ class WeightSet
     /// \brief Compute ESS given (logarithm) unormalzied incremental weights
     virtual double compute_ess(const double *first, bool use_log) const
     {
-        AlignedVector<double> buffer(size_);
+        Vector<double> buffer(size_);
         if (use_log) {
             math::vAdd(size_, log_weight_.data(), first, buffer.data());
             double dmax = buffer[0];
@@ -375,7 +374,7 @@ class WeightSet
     /// \brief Compute CESS given (logarithm) unormalized incremental weights
     virtual double compute_cess(const double *first, bool use_log) const
     {
-        AlignedVector<double> buffer;
+        Vector<double> buffer;
         if (use_log) {
             buffer.resize(size_);
             math::vExp(size_, first, buffer.data());
@@ -396,8 +395,8 @@ class WeightSet
     private:
     size_type size_;
     double ess_;
-    AlignedVector<double> weight_;
-    AlignedVector<double> log_weight_;
+    Vector<double> weight_;
+    Vector<double> log_weight_;
     DiscreteDistribution<size_type> draw_;
 
     void post_set_log_weight()

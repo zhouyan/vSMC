@@ -40,7 +40,6 @@
 #include <vsmc/opencl/cl_manip.hpp>
 #include <vsmc/opencl/cl_type.hpp>
 #include <vsmc/rng/seed.hpp>
-#include <vsmc/utility/aligned_memory.hpp>
 
 #define VSMC_STATIC_ASSERT_OPENCL_BACKEND_CL_DYNAMIC_STATE_SIZE_RESIZE(Dim)   \
     VSMC_STATIC_ASSERT((Dim == Dynamic),                                      \
@@ -408,8 +407,8 @@ class StateCL
 
     CLBuffer<char, ID> state_idx_buffer_;
     CLBuffer<char, ID> state_tmp_buffer_;
-    AlignedVector<char> state_idx_host_;
-    AlignedVector<char> state_tmp_host_;
+    Vector<char> state_idx_host_;
+    Vector<char> state_tmp_host_;
 
     template <typename CharT, typename Traits>
     void build_program(

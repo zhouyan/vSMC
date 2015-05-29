@@ -53,7 +53,7 @@ inline void rng_cl_rng(std::size_t N, std::size_t M,
 
     typedef typename RNG::result_type result_type;
 
-    vsmc::AlignedVector<result_type> cpp(N);
+    vsmc::Vector<result_type> cpp(N);
     RNG rng(1);
     watch.reset();
     watch.start();
@@ -62,7 +62,7 @@ inline void rng_cl_rng(std::size_t N, std::size_t M,
     watch.stop();
     double tcpp = watch.milliseconds();
 
-    vsmc::AlignedVector<result_type> c(N);
+    vsmc::Vector<result_type> c(N);
     CRNG crng;
     cinit(&crng, 1);
     watch.reset();
@@ -79,7 +79,7 @@ inline void rng_cl_rng(std::size_t N, std::size_t M,
     }
 
     std::size_t n = N / M + 1;
-    vsmc::AlignedVector<result_type> cl(n * M);
+    vsmc::Vector<result_type> cl(n * M);
     vsmc::CLBuffer<result_type> buffer(n * M);
     vsmc::CLKernel kernel(program, "kernel_" + name);
     vsmc::cl_set_kernel_args(
@@ -143,11 +143,11 @@ inline double rng_cl_normal01(std::size_t N, double *c)
 
 template <typename FPType>
 inline void rng_cl_normal01(std::size_t N, const vsmc::CLProgram &program,
-    std::vector<vsmc::AlignedVector<FPType>> &result)
+    std::vector<vsmc::Vector<FPType>> &result)
 {
     vsmc::StopWatch watch;
 
-    vsmc::AlignedVector<FPType> cpp(N);
+    vsmc::Vector<FPType> cpp(N);
     vsmc::Philox2x32 rng(1);
     std::normal_distribution<FPType> rnorm(0, 1);
     watch.reset();
@@ -157,10 +157,10 @@ inline void rng_cl_normal01(std::size_t N, const vsmc::CLProgram &program,
     watch.stop();
     double tcpp = watch.milliseconds();
 
-    vsmc::AlignedVector<FPType> c(N);
+    vsmc::Vector<FPType> c(N);
     double tc = rng_cl_normal01(N, c.data());
 
-    vsmc::AlignedVector<FPType> cl(N);
+    vsmc::Vector<FPType> cl(N);
     vsmc::CLBuffer<FPType> buffer(N);
     vsmc::CLKernel kernel(program, "kernel_Normal01");
     vsmc::cl_set_kernel_args(
@@ -222,11 +222,11 @@ inline double rng_cl_gammak1(std::size_t N, double *c, double shape)
 
 template <typename FPType>
 inline void rng_cl_gammak1(std::size_t N, const vsmc::CLProgram &program,
-    FPType shape, std::vector<vsmc::AlignedVector<FPType>> &result)
+    FPType shape, std::vector<vsmc::Vector<FPType>> &result)
 {
     vsmc::StopWatch watch;
 
-    vsmc::AlignedVector<FPType> cpp(N);
+    vsmc::Vector<FPType> cpp(N);
     vsmc::Philox2x32 rng(1);
     std::gamma_distribution<FPType> rgamma(shape, 1);
     watch.reset();
@@ -236,10 +236,10 @@ inline void rng_cl_gammak1(std::size_t N, const vsmc::CLProgram &program,
     watch.stop();
     double tcpp = watch.milliseconds();
 
-    vsmc::AlignedVector<FPType> c(N);
+    vsmc::Vector<FPType> c(N);
     double tc = rng_cl_gammak1(N, c.data(), shape);
 
-    vsmc::AlignedVector<FPType> cl(N);
+    vsmc::Vector<FPType> cl(N);
     vsmc::CLBuffer<FPType> buffer(N);
     vsmc::CLKernel kernel(program, "kernel_GammaK1");
     vsmc::cl_set_kernel_args(
@@ -293,7 +293,7 @@ inline void rng_cl(std::size_t N, const vsmc::CLProgram &program)
     rng_cl_rng<vsmc::Threefry4x64, vsmc_threefry4x64>(N, 4, program,
         vsmc_threefry4x64_init, vsmc_threefry4x64_rand, "Threefry4x64");
 
-    std::vector<vsmc::AlignedVector<FPType>> result;
+    std::vector<vsmc::Vector<FPType>> result;
     std::cout << std::string(120, '-') << std::endl;
     rng_cl_normal01<FPType>(N, program, result);
     std::cout << std::string(120, '-') << std::endl;

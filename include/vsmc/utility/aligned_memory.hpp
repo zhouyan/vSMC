@@ -32,7 +32,15 @@
 #ifndef VSMC_UTILITY_ALIGNED_MEMORY
 #define VSMC_UTILITY_ALIGNED_MEMORY
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/assert.hpp>
+
+#include <cstddef>
+#include <cstdlib>
+#include <memory>
+#include <new>
+#include <type_traits>
+#include <vector>
 
 #if VSMC_HAS_POSIX
 #include <stdlib.h>
@@ -298,7 +306,8 @@ class AlignedAllocator : public std::allocator<T>
 }; // class AlignedAllocator
 
 template <typename T>
-using AlignedVector = std::vector<T, AlignedAllocator<T>>;
+using Vector = typename std::conditional<std::is_scalar<T>::value,
+    std::vector<T, AlignedAllocator<T>>, std::vector<T>>::type;
 
 } // namespace vsmc
 

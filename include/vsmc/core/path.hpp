@@ -33,7 +33,6 @@
 #define VSMC_CORE_PATH_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/aligned_memory.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_PATH_ITER(func)                              \
     VSMC_RUNTIME_ASSERT((iter < iter_size()),                                 \
@@ -239,9 +238,9 @@ class Path
     bool record_only_;
     double log_zconst_;
     std::vector<std::size_t> index_;
-    AlignedVector<double> integrand_;
-    AlignedVector<double> grid_;
-    AlignedVector<double> buffer_;
+    Vector<double> integrand_;
+    Vector<double> grid_;
+    Vector<double> buffer_;
 
     void push_back(std::size_t iter, double grid, double integrand)
     {

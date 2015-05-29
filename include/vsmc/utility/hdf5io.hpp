@@ -78,7 +78,7 @@ struct HDF5LoadDataPtr {
 
     private:
     T *ptr_;
-    std::vector<T> data_;
+    Vector<T> data_;
 }; // struct HDF5LoadDataPtr
 
 template <typename T>
@@ -114,7 +114,7 @@ struct HDF5StoreDataPtr {
 
     private:
     const T *ptr_;
-    std::vector<T> data_;
+    Vector<T> data_;
 }; // struct HDF5StoreDataPtr
 
 } // namespace vsmc::internal
@@ -609,20 +609,20 @@ inline void hdf5store(const Sampler<T> &sampler, const std::string &file_name,
         return;
 
     std::size_t ncol_int = sampler.summary_header_size_int();
-    std::vector<std::string> header_int(ncol_int);
-    std::vector<size_type> data_int(nrow * ncol_int);
+    Vector<std::string> header_int(ncol_int);
+    Vector<size_type> data_int(nrow * ncol_int);
     sampler.summary_header_int(header_int.begin());
     sampler.template summary_data_int<ColMajor>(data_int.begin());
-    std::vector<const size_type *> data_ptr_int(ncol_int);
+    Vector<const size_type *> data_ptr_int(ncol_int);
     for (std::size_t j = 0; j != ncol_int; ++j)
         data_ptr_int[j] = data_int.data() + j * nrow;
 
     std::size_t ncol = sampler.summary_header_size();
-    std::vector<std::string> header(ncol);
-    std::vector<double> data(nrow * ncol);
+    Vector<std::string> header(ncol);
+    Vector<double> data(nrow * ncol);
     sampler.summary_header(header.begin());
     sampler.template summary_data<ColMajor>(data.begin());
-    std::vector<const double *> data_ptr(ncol);
+    Vector<const double *> data_ptr(ncol);
     for (std::size_t j = 0; j != ncol; ++j)
         data_ptr[j] = data.data() + j * nrow;
 
@@ -659,7 +659,7 @@ inline void hdf5store(const StateCL<StateSize, RealType, ID> &state,
     std::size_t nrow = state.size();
     std::size_t ncol = state.state_size() / sizeof(T);
     std::size_t N = nrow * ncol;
-    std::vector<T> data(N);
+    Vector<T> data(N);
     state.manager().template read_buffer<T>(
         state.state_buffer().data(), N, data.data());
     hdf5store_matrix<Order, T>(

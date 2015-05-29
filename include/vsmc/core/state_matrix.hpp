@@ -34,7 +34,6 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/single_particle.hpp>
-#include <vsmc/utility/aligned_memory.hpp>
 
 #define VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim)          \
     VSMC_STATIC_ASSERT((Dim == Dynamic),                                      \
@@ -235,9 +234,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
 
     private:
     size_type size_;
-    typename std::conditional<std::is_scalar<T>::value ||
-            std::is_pod<T>::value,
-        AlignedVector<T>, std::vector<T>>::type data_;
+    Vector<T> data_;
 
     std::vector<T> create_pack_dispatch(std::true_type) const
     {
