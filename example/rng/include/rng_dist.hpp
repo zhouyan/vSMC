@@ -54,9 +54,9 @@
 
 template <typename Dist>
 inline void rng_dist(std::size_t N, Dist &dist, const std::string &name,
-    std::vector<std::string> &names, std::vector<std::size_t> &size,
-    std::vector<vsmc::StopWatch> &sw, std::vector<std::size_t> &bytes,
-    std::vector<uint64_t> &cycles)
+    vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
+    vsmc::Vector<vsmc::StopWatch> &sw, vsmc::Vector<std::size_t> &bytes,
+    vsmc::Vector<uint64_t> &cycles)
 {
     vsmc::Rng rng;
     vsmc::StopWatch watch;

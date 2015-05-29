@@ -41,11 +41,11 @@
     std::string prog_name(#prog);                                             \
     if (argc > 1)                                                             \
         N = static_cast<std::size_t>(std::atoi(argv[1]));                     \
-    std::vector<std::string> names;                                           \
-    std::vector<std::size_t> size;                                            \
-    std::vector<vsmc::StopWatch> sw;                                          \
-    std::vector<std::size_t> bytes;                                           \
-    std::vector<std::uint64_t> cycles;
+    vsmc::Vector<std::string> names;                                          \
+    vsmc::Vector<std::size_t> size;                                           \
+    vsmc::Vector<vsmc::StopWatch> sw;                                         \
+    vsmc::Vector<std::size_t> bytes;                                          \
+    vsmc::Vector<std::uint64_t> cycles;
 
 #define VSMC_RNG_TEST(RNG)                                                    \
     rng_test<RNG>(N, #RNG, names, size, sw, bytes, cycles);
@@ -55,9 +55,9 @@
 
 template <typename RNG>
 inline void rng_test(std::size_t N, const std::string &name,
-    std::vector<std::string> &names, std::vector<std::size_t> &size,
-    std::vector<vsmc::StopWatch> &sw, std::vector<std::size_t> &bytes,
-    std::vector<std::uint64_t> &cycles)
+    vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
+    vsmc::Vector<vsmc::StopWatch> &sw, vsmc::Vector<std::size_t> &bytes,
+    vsmc::Vector<std::uint64_t> &cycles)
 {
     RNG rng;
     vsmc::StopWatch watch;
@@ -86,9 +86,10 @@ inline void rng_test(std::size_t N, const std::string &name,
 }
 
 inline void rng_output_sw(std::size_t N, const std::string &prog_name,
-    const std::vector<std::string> &names, std::vector<std::size_t> &size,
-    const std::vector<vsmc::StopWatch> &sw,
-    const std::vector<std::size_t> &bytes, std::vector<std::uint64_t> &cycles)
+    const vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
+    const vsmc::Vector<vsmc::StopWatch> &sw,
+    const vsmc::Vector<std::size_t> &bytes,
+    vsmc::Vector<std::uint64_t> &cycles)
 {
     std::size_t M = names.size();
     if (M == 0)

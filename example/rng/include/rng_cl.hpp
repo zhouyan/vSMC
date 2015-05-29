@@ -143,7 +143,7 @@ inline double rng_cl_normal01(std::size_t N, double *c)
 
 template <typename FPType>
 inline void rng_cl_normal01(std::size_t N, const vsmc::CLProgram &program,
-    std::vector<vsmc::Vector<FPType>> &result)
+    vsmc::Vector<vsmc::Vector<FPType>> &result)
 {
     vsmc::StopWatch watch;
 
@@ -222,7 +222,7 @@ inline double rng_cl_gammak1(std::size_t N, double *c, double shape)
 
 template <typename FPType>
 inline void rng_cl_gammak1(std::size_t N, const vsmc::CLProgram &program,
-    FPType shape, std::vector<vsmc::Vector<FPType>> &result)
+    FPType shape, vsmc::Vector<vsmc::Vector<FPType>> &result)
 {
     vsmc::StopWatch watch;
 
@@ -293,7 +293,7 @@ inline void rng_cl(std::size_t N, const vsmc::CLProgram &program)
     rng_cl_rng<vsmc::Threefry4x64, vsmc_threefry4x64>(N, 4, program,
         vsmc_threefry4x64_init, vsmc_threefry4x64_rand, "Threefry4x64");
 
-    std::vector<vsmc::Vector<FPType>> result;
+    vsmc::Vector<vsmc::Vector<FPType>> result;
     std::cout << std::string(120, '-') << std::endl;
     rng_cl_normal01<FPType>(N, program, result);
     std::cout << std::string(120, '-') << std::endl;
@@ -307,7 +307,7 @@ inline void rng_cl(std::size_t N, const vsmc::CLProgram &program)
 #if VSMC_HAS_HDF5
     std::size_t nrow = N;
     std::size_t ncol = result.size();
-    std::vector<FPType> mat(nrow * ncol);
+    vsmc::Vector<FPType> mat(nrow * ncol);
     FPType *first = mat.data();
     for (std::size_t i = 0; i != ncol; ++i)
         first = std::copy(result[i].begin(), result[i].end(), first);

@@ -138,8 +138,8 @@ class cv_state : public StateBase<Order>
     }
 
     private:
-    std::vector<double> obs_x_;
-    std::vector<double> obs_y_;
+    vsmc::Vector<double> obs_x_;
+    vsmc::Vector<double> obs_y_;
 };
 
 template <vsmc::MatrixOrder Order>
@@ -177,7 +177,7 @@ class cv_init : public InitializeSMP<cv_state<Order>, cv_init<Order>>
     }
 
     private:
-    std::vector<double> log_weight_;
+    vsmc::Vector<double> log_weight_;
 };
 
 template <vsmc::MatrixOrder Order>
@@ -213,7 +213,7 @@ class cv_move : public MoveSMP<cv_state<Order>, cv_move<Order>>
     }
 
     private:
-    std::vector<double> inc_weight_;
+    vsmc::Vector<double> inc_weight_;
 };
 
 template <vsmc::MatrixOrder Order>

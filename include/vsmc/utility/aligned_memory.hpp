@@ -271,18 +271,37 @@ class AlignedAllocator : public std::allocator<T>
 
     AlignedAllocator() { VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY; }
 
-    AlignedAllocator(const AlignedAllocator<T, Alignment> &other)
+    AlignedAllocator(const AlignedAllocator<T, Alignment, Memory> &other)
         : std::allocator<T>(other)
     {
         VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY;
     }
 
     template <typename U>
-    AlignedAllocator(const AlignedAllocator<U, Alignment> &other)
+    AlignedAllocator(const AlignedAllocator<U, Alignment, Memory> &other)
         : std::allocator<T>(static_cast<std::allocator<U>>(other))
     {
         VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY;
     }
+
+    AlignedAllocator<T, Alignment, Memory> &operator=(
+        const AlignedAllocator<T, Alignment, Memory> &) = default;
+
+    AlignedAllocator(AlignedAllocator<T, Alignment, Memory> &&other)
+        : std::allocator<T>(std::move(other))
+    {
+        VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY;
+    }
+
+    template <typename U>
+    AlignedAllocator(AlignedAllocator<U, Alignment, Memory> &&other)
+        : std::allocator<T>(static_cast<std::allocator<U>>(std::move(other)))
+    {
+        VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY;
+    }
+
+    AlignedAllocator<T, Alignment, Memory> &operator=(
+        AlignedAllocator<T, Alignment, Memory> &&) = default;
 
     ~AlignedAllocator() {}
 
@@ -305,6 +324,15 @@ class AlignedAllocator : public std::allocator<T>
     Memory memory_;
 }; // class AlignedAllocator
 
+/// \brief Aligned allocator for scalar type and `std::allocator` for others
+/// \ingroup AlignedMemory
+template <typename T>
+using Allocator = typename std::conditional<std::is_scalar<T>::value,
+    AlignedAllocator<T>, std::allocator<T>>::type;
+
+/// \brief Alias to `std::vector` using Aligned allocator for scalar type and
+/// `std::allocator` for others
+/// \ingroup AlignedMemory
 template <typename T>
 using Vector = typename std::conditional<std::is_scalar<T>::value,
     std::vector<T, AlignedAllocator<T>>, std::vector<T>>::type;

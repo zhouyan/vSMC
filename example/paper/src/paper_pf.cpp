@@ -72,8 +72,8 @@ class cv : public vsmc::StateMatrix<vsmc::RowMajor, Dim, double>
     }
 
     private:
-    std::vector<double> x_obs_;
-    std::vector<double> y_obs_;
+    vsmc::Vector<double> x_obs_;
+    vsmc::Vector<double> y_obs_;
 };
 
 inline std::size_t cv_init(vsmc::Particle<cv> &particle, void *filename)
@@ -85,7 +85,7 @@ inline std::size_t cv_init(vsmc::Particle<cv> &particle, void *filename)
     const double sd_vel0 = 1;
     std::normal_distribution<double> norm_pos(0, sd_pos0);
     std::normal_distribution<double> norm_vel(0, sd_vel0);
-    std::vector<double> log_weight(particle.size());
+    vsmc::Vector<double> log_weight(particle.size());
 
     for (vsmc::Particle<cv>::size_type i = 0; i != particle.size(); ++i) {
         particle.value().state(i, 0) = norm_pos(particle.rng(i));
@@ -130,7 +130,7 @@ class cv_move : public vsmc::MoveSEQ<cv>
     }
 
     private:
-    std::vector<double> incw_;
+    vsmc::Vector<double> incw_;
 };
 
 class cv_est : public vsmc::MonitorEvalSEQ<cv>

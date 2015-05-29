@@ -69,8 +69,8 @@ class cv : public cv_base
         if (!file)
             return;
 
-        std::vector<cl_float> x(DataNum);
-        std::vector<cl_float> y(DataNum);
+        vsmc::Vector<cl_float> x(DataNum);
+        vsmc::Vector<cl_float> y(DataNum);
         std::ifstream data(file);
         for (std::size_t i = 0; i != DataNum; ++i)
             data >> x[i] >> y[i];
@@ -119,7 +119,7 @@ class cv_init : public vsmc::InitializeCL<cv>
 
     private:
     vsmc::CLBuffer<cl_float> log_weight_buffer_;
-    std::vector<cl_float> log_weight_;
+    vsmc::Vector<cl_float> log_weight_;
 };
 
 class cv_move : public vsmc::MoveCL<cv>
@@ -149,7 +149,7 @@ class cv_move : public vsmc::MoveCL<cv>
 
     private:
     vsmc::CLBuffer<cl_float> inc_weight_buffer_;
-    std::vector<cl_float> inc_weight_;
+    vsmc::Vector<cl_float> inc_weight_;
 };
 
 class cv_est : public vsmc::MonitorEvalCL<cv>

@@ -212,15 +212,15 @@ class gmm_param
     double log_prior_old_;
     double log_likelihood_old_;
 
-    std::vector<double> mu_;
-    std::vector<double> lambda_;
-    std::vector<double> weight_;
+    vsmc::Vector<double> mu_;
+    vsmc::Vector<double> lambda_;
+    vsmc::Vector<double> weight_;
 
-    std::vector<double> mu_old_;
-    std::vector<double> lambda_old_;
-    std::vector<double> weight_old_;
+    vsmc::Vector<double> mu_old_;
+    vsmc::Vector<double> lambda_old_;
+    vsmc::Vector<double> weight_old_;
 
-    std::vector<double> log_lambda_;
+    vsmc::Vector<double> log_lambda_;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -372,7 +372,7 @@ class gmm_state : public gmm_state_base
     double lambda_sd_;
     double weight_sd_;
 
-    std::vector<double> obs_;
+    vsmc::Vector<double> obs_;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -451,7 +451,7 @@ class gmm_move_smc
 
     private:
     alpha_setter_type alpha_setter_;
-    std::vector<double> incw_;
+    vsmc::Vector<double> incw_;
 };
 
 //////////////////////////////////////////////////////////////////////////////
