@@ -419,7 +419,7 @@ class gmm_init : public InitializeSMP<gmm_state, gmm_init>
 class gmm_move_smc
 {
     public:
-    typedef std::function<void(std::size_t, vsmc::Particle<gmm_state> &) >
+    typedef std::function<void(std::size_t, vsmc::Particle<gmm_state> &)>
         alpha_setter_type;
 
     gmm_move_smc(const alpha_setter_type &alpha_setter)
