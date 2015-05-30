@@ -419,7 +419,7 @@ class gmm_init : public InitializeSMP<gmm_state, gmm_init>
 class gmm_move_smc
 {
     public:
-    typedef std::function<void(std::size_t, vsmc::Particle<gmm_state> &)>
+    typedef std::function<void(std::size_t, vsmc::Particle<gmm_state> &) >
         alpha_setter_type;
 
     gmm_move_smc(const alpha_setter_type &alpha_setter)
@@ -543,12 +543,12 @@ class gmm_move_weight : public MoveSMP<gmm_state, gmm_move_weight>
 class gmm_path : public PathEvalSMP<gmm_state, gmm_path>
 {
     public:
-    double path_state(std::size_t, vsmc::ConstSingleParticle<gmm_state> sp)
+    double path_state(std::size_t, vsmc::SingleParticle<gmm_state> sp)
     {
         return sp.state(0).log_likelihood();
     }
 
-    double path_grid(std::size_t, const vsmc::Particle<gmm_state> &particle)
+    double path_grid(std::size_t, vsmc::Particle<gmm_state> &particle)
     {
         return particle.value().alpha();
     }

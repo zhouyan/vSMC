@@ -70,29 +70,6 @@ class SingleParticleBase
     Particle<T> *particle_ptr_;
 }; // class SingleParticleBase
 
-/// \brief A const variant to SingleParticle
-/// \ingroup Core
-template <typename T>
-class ConstSingleParticleBase
-{
-    public:
-    ConstSingleParticleBase(
-        typename Particle<T>::size_type id, const Particle<T> *particle_ptr)
-        : id_(id), particle_ptr_(particle_ptr)
-    {
-    }
-
-    typename Particle<T>::size_type id() const { return id_; }
-
-    const Particle<T> &particle() const { return *particle_ptr_; }
-
-    const Particle<T> *particle_ptr() const { return particle_ptr_; }
-
-    private:
-    typename Particle<T>::size_type id_;
-    const Particle<T> *particle_ptr_;
-}; // class ConstSingleParticleBase
-
 namespace traits
 {
 
@@ -100,11 +77,6 @@ namespace traits
 /// \ingroup Traits
 VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
     SingleParticleBaseType, single_particle_type, SingleParticleBase)
-
-/// \brief ConstSingleParticle base class trait
-/// \ingroup Traits
-VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(ConstSingleParticleBaseType,
-    const_single_particle_type, ConstSingleParticleBase)
 
 } // namespace vsmc::traits
 
@@ -141,22 +113,6 @@ class SingleParticle : public traits::SingleParticleBaseTypeTrait<T>::type
     {
     }
 }; // class SingleParticle
-
-/// \brief A const variant to SingleParticle
-/// \ingroup Core
-template <typename T>
-class ConstSingleParticle
-    : public traits::ConstSingleParticleBaseTypeTrait<T>::type
-{
-    typedef typename traits::ConstSingleParticleBaseTypeTrait<T>::type base;
-
-    public:
-    ConstSingleParticle(
-        typename Particle<T>::size_type id, const Particle<T> *particle_ptr)
-        : base(id, particle_ptr)
-    {
-    }
-}; // class ConstSingleParticle
 
 } // namespace vsmc
 

@@ -531,14 +531,14 @@ class InitializeCL
             accept_host_.end(), static_cast<::cl_ulong>(0)));
     }
 
-    virtual void set_kernel(const Particle<T> &particle)
+    virtual void set_kernel(Particle<T> &particle)
     {
         std::string kname;
         initialize_state(kname);
         VSMC_DEFINE_OPENCL_BACKEND_CL_SET_KERNEL;
     }
 
-    virtual void set_kernel_args(const Particle<T> &particle)
+    virtual void set_kernel_args(Particle<T> &particle)
     {
         accept_host_.resize(particle.size());
         if (particle.value().manager().opencl_version() >= 120) {
@@ -617,14 +617,14 @@ class MoveCL
             accept_host_.end(), static_cast<::cl_ulong>(0)));
     }
 
-    virtual void set_kernel(std::size_t iter, const Particle<T> &particle)
+    virtual void set_kernel(std::size_t iter, Particle<T> &particle)
     {
         std::string kname;
         move_state(iter, kname);
         VSMC_DEFINE_OPENCL_BACKEND_CL_SET_KERNEL;
     }
 
-    virtual void set_kernel_args(std::size_t iter, const Particle<T> &particle)
+    virtual void set_kernel_args(std::size_t iter, Particle<T> &particle)
     {
         accept_host_.resize(particle.size());
         if (particle.value().manager().opencl_version() >= 120) {
@@ -673,8 +673,8 @@ class MonitorEvalCL
     /// `kernel_args_offset`
     static constexpr ::cl_uint kernel_args_offset() { return 4; }
 
-    void operator()(std::size_t iter, std::size_t dim,
-        const Particle<T> &particle, double *res)
+    void operator()(
+        std::size_t iter, std::size_t dim, Particle<T> &particle, double *res)
     {
         set_kernel(iter, dim, particle);
         if (kernel_name_.empty())
@@ -690,11 +690,11 @@ class MonitorEvalCL
     }
 
     virtual void monitor_state(std::size_t, std::string &) {}
-    virtual void pre_processor(std::size_t, const Particle<T> &) {}
-    virtual void post_processor(std::size_t, const Particle<T> &) {}
+    virtual void pre_processor(std::size_t, Particle<T> &) {}
+    virtual void post_processor(std::size_t, Particle<T> &) {}
 
     virtual void set_kernel(
-        std::size_t iter, std::size_t, const Particle<T> &particle)
+        std::size_t iter, std::size_t, Particle<T> &particle)
     {
         std::string kname;
         monitor_state(iter, kname);
@@ -702,7 +702,7 @@ class MonitorEvalCL
     }
 
     virtual void set_kernel_args(
-        std::size_t iter, std::size_t dim, const Particle<T> &particle)
+        std::size_t iter, std::size_t dim, Particle<T> &particle)
     {
         if (particle.value().manager().opencl_version() >= 120) {
             buffer_.resize(particle.size() * dim,
@@ -748,8 +748,7 @@ class PathEvalCL
     /// `kernel_args_offset`
     static constexpr ::cl_uint kernel_args_offset() { return 3; }
 
-    double operator()(
-        std::size_t iter, const Particle<T> &particle, double *res)
+    double operator()(std::size_t iter, Particle<T> &particle, double *res)
     {
         set_kernel(iter, particle);
         if (kernel_name_.empty())
@@ -767,18 +766,18 @@ class PathEvalCL
     }
 
     virtual void path_state(std::size_t, std::string &) {}
-    virtual double path_grid(std::size_t, const Particle<T> &) { return 0; }
-    virtual void pre_processor(std::size_t, const Particle<T> &) {}
-    virtual void post_processor(std::size_t, const Particle<T> &) {}
+    virtual double path_grid(std::size_t, Particle<T> &) { return 0; }
+    virtual void pre_processor(std::size_t, Particle<T> &) {}
+    virtual void post_processor(std::size_t, Particle<T> &) {}
 
-    virtual void set_kernel(std::size_t iter, const Particle<T> &particle)
+    virtual void set_kernel(std::size_t iter, Particle<T> &particle)
     {
         std::string kname;
         path_state(iter, kname);
         VSMC_DEFINE_OPENCL_BACKEND_CL_SET_KERNEL;
     }
 
-    virtual void set_kernel_args(std::size_t iter, const Particle<T> &particle)
+    virtual void set_kernel_args(std::size_t iter, Particle<T> &particle)
     {
         if (particle.value().manager().opencl_version() >= 120) {
             buffer_.resize(

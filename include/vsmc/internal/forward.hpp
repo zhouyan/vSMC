@@ -54,13 +54,7 @@ template <typename>
 class SingleParticle;
 
 template <typename>
-class ConstSingleParticle;
-
-template <typename>
 class SingleParticleBase;
-
-template <typename>
-class ConstSingleParticleBase;
 
 class WeightSet;
 

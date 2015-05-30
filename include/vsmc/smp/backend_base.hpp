@@ -373,18 +373,18 @@ template <typename T, typename Derived>
 class MonitorEvalBase
 {
     public:
-    void monitor_state(std::size_t iter, std::size_t dim,
-        ConstSingleParticle<T> csp, double *res)
+    void monitor_state(
+        std::size_t iter, std::size_t dim, SingleParticle<T> sp, double *res)
     {
-        monitor_state_dispatch(iter, dim, csp, res, &Derived::monitor_state);
+        monitor_state_dispatch(iter, dim, sp, res, &Derived::monitor_state);
     }
 
-    void pre_processor(std::size_t iter, const Particle<T> &particle)
+    void pre_processor(std::size_t iter, Particle<T> &particle)
     {
         pre_processor_dispatch(iter, particle, &Derived::pre_processor);
     }
 
-    void post_processor(std::size_t iter, const Particle<T> &particle)
+    void post_processor(std::size_t iter, Particle<T> &particle)
     {
         post_processor_dispatch(iter, particle, &Derived::post_processor);
     }
@@ -397,23 +397,22 @@ class MonitorEvalBase
 
     template <typename D>
     void monitor_state_dispatch(std::size_t iter, std::size_t dim,
-        ConstSingleParticle<T> csp, double *res,
-        void (D::*)(std::size_t, std::size_t, ConstSingleParticle<T>,
-                                    double *))
+        SingleParticle<T> sp, double *res,
+        void (D::*)(std::size_t, std::size_t, SingleParticle<T>, double *))
     {
-        static_cast<Derived *>(this)->monitor_state(iter, dim, csp, res);
+        static_cast<Derived *>(this)->monitor_state(iter, dim, sp, res);
     }
 
     template <typename D>
-    void pre_processor_dispatch(std::size_t iter, const Particle<T> &particle,
-        void (D::*)(std::size_t, const Particle<T> &))
+    void pre_processor_dispatch(std::size_t iter, Particle<T> &particle,
+        void (D::*)(std::size_t, Particle<T> &))
     {
         static_cast<Derived *>(this)->pre_processor(iter, particle);
     }
 
     template <typename D>
-    void post_processor_dispatch(std::size_t iter, const Particle<T> &particle,
-        void (D::*)(std::size_t, const Particle<T> &))
+    void post_processor_dispatch(std::size_t iter, Particle<T> &particle,
+        void (D::*)(std::size_t, Particle<T> &))
     {
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
@@ -422,23 +421,23 @@ class MonitorEvalBase
 
     template <typename D>
     void monitor_state_dispatch(std::size_t iter, std::size_t dim,
-        ConstSingleParticle<T> csp, double *res,
-        void (D::*)(std::size_t, std::size_t, ConstSingleParticle<T>, double *)
+        SingleParticle<T> sp, double *res,
+        void (D::*)(std::size_t, std::size_t, SingleParticle<T>, double *)
             const)
     {
-        static_cast<Derived *>(this)->monitor_state(iter, dim, csp, res);
+        static_cast<Derived *>(this)->monitor_state(iter, dim, sp, res);
     }
 
     template <typename D>
-    void pre_processor_dispatch(std::size_t iter, const Particle<T> &particle,
-        void (D::*)(std::size_t, const Particle<T> &) const)
+    void pre_processor_dispatch(std::size_t iter, Particle<T> &particle,
+        void (D::*)(std::size_t, Particle<T> &) const)
     {
         static_cast<Derived *>(this)->pre_processor(iter, particle);
     }
 
     template <typename D>
-    void post_processor_dispatch(std::size_t iter, const Particle<T> &particle,
-        void (D::*)(std::size_t, const Particle<T> &) const)
+    void post_processor_dispatch(std::size_t iter, Particle<T> &particle,
+        void (D::*)(std::size_t, Particle<T> &) const)
     {
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
@@ -446,40 +445,39 @@ class MonitorEvalBase
     // static
 
     void monitor_state_dispatch(std::size_t iter, std::size_t dim,
-        ConstSingleParticle<T> csp, double *res,
-        void (*)(std::size_t, std::size_t, ConstSingleParticle<T>, double *))
+        SingleParticle<T> sp, double *res,
+        void (*)(std::size_t, std::size_t, SingleParticle<T>, double *))
     {
-        Derived::monitor_state(iter, dim, csp, res);
+        Derived::monitor_state(iter, dim, sp, res);
     }
 
-    void pre_processor_dispatch(std::size_t iter, const Particle<T> &particle,
-        void (*)(std::size_t, const Particle<T> &))
+    void pre_processor_dispatch(std::size_t iter, Particle<T> &particle,
+        void (*)(std::size_t, Particle<T> &))
     {
         Derived::pre_processor(iter, particle);
     }
 
-    void post_processor_dispatch(std::size_t iter, const Particle<T> &particle,
-        void (*)(std::size_t, const Particle<T> &))
+    void post_processor_dispatch(std::size_t iter, Particle<T> &particle,
+        void (*)(std::size_t, Particle<T> &))
     {
         Derived::post_processor(iter, particle);
     }
 
     // base
 
-    void monitor_state_dispatch(std::size_t, std::size_t,
-        ConstSingleParticle<T>, double *,
-        void (MonitorEvalBase::*)(std::size_t, std::size_t,
-                                    ConstSingleParticle<T>, double *))
+    void monitor_state_dispatch(std::size_t, std::size_t, SingleParticle<T>,
+        double *, void (MonitorEvalBase::*)(std::size_t, std::size_t,
+                                    SingleParticle<T>, double *))
     {
     }
 
-    void pre_processor_dispatch(std::size_t, const Particle<T> &,
-        void (MonitorEvalBase::*)(std::size_t, const Particle<T> &))
+    void pre_processor_dispatch(std::size_t, Particle<T> &,
+        void (MonitorEvalBase::*)(std::size_t, Particle<T> &))
     {
     }
 
-    void post_processor_dispatch(std::size_t, const Particle<T> &,
-        void (MonitorEvalBase::*)(std::size_t, const Particle<T> &))
+    void post_processor_dispatch(std::size_t, Particle<T> &,
+        void (MonitorEvalBase::*)(std::size_t, Particle<T> &))
     {
     }
 }; // class MonitorBase
@@ -491,11 +489,11 @@ class MonitorEvalBase<T, Virtual>
 {
     public:
     virtual void monitor_state(
-        std::size_t, std::size_t, ConstSingleParticle<T>, double *)
+        std::size_t, std::size_t, SingleParticle<T>, double *)
     {
     }
-    virtual void pre_processor(std::size_t, const Particle<T> &) {}
-    virtual void post_processor(std::size_t, const Particle<T> &) {}
+    virtual void pre_processor(std::size_t, Particle<T> &) {}
+    virtual void post_processor(std::size_t, Particle<T> &) {}
 
     protected:
     VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(MonitorEval)
@@ -507,22 +505,22 @@ template <typename T, typename Derived>
 class PathEvalBase
 {
     public:
-    double path_state(std::size_t iter, ConstSingleParticle<T> csp)
+    double path_state(std::size_t iter, SingleParticle<T> sp)
     {
-        return path_state_dispatch(iter, csp, &Derived::path_state);
+        return path_state_dispatch(iter, sp, &Derived::path_state);
     }
 
-    double path_grid(std::size_t iter, const Particle<T> &particle)
+    double path_grid(std::size_t iter, Particle<T> &particle)
     {
         return path_grid_dispatch(iter, particle, &Derived::path_grid);
     }
 
-    void pre_processor(std::size_t iter, const Particle<T> &particle)
+    void pre_processor(std::size_t iter, Particle<T> &particle)
     {
         pre_processor_dispatch(iter, particle, &Derived::pre_processor);
     }
 
-    void post_processor(std::size_t iter, const Particle<T> &particle)
+    void post_processor(std::size_t iter, Particle<T> &particle)
     {
         post_processor_dispatch(iter, particle, &Derived::post_processor);
     }
@@ -534,29 +532,29 @@ class PathEvalBase
     // non-static non-const
 
     template <typename D>
-    double path_state_dispatch(std::size_t iter, ConstSingleParticle<T> csp,
-        double (D::*)(std::size_t, ConstSingleParticle<T>))
+    double path_state_dispatch(std::size_t iter, SingleParticle<T> sp,
+        double (D::*)(std::size_t, SingleParticle<T>))
     {
-        return static_cast<Derived *>(this)->path_state(iter, csp);
+        return static_cast<Derived *>(this)->path_state(iter, sp);
     }
 
     template <typename D>
-    double path_grid_dispatch(std::size_t iter, const Particle<T> &particle,
-        double (D::*)(std::size_t, const Particle<T> &))
+    double path_grid_dispatch(std::size_t iter, Particle<T> &particle,
+        double (D::*)(std::size_t, Particle<T> &))
     {
         return static_cast<Derived *>(this)->path_grid(iter, particle);
     }
 
     template <typename D>
-    void pre_processor_dispatch(std::size_t iter, const Particle<T> &particle,
-        void (D::*)(std::size_t, const Particle<T> &))
+    void pre_processor_dispatch(std::size_t iter, Particle<T> &particle,
+        void (D::*)(std::size_t, Particle<T> &))
     {
         static_cast<Derived *>(this)->pre_processor(iter, particle);
     }
 
     template <typename D>
-    void post_processor_dispatch(std::size_t iter, const Particle<T> &particle,
-        void (D::*)(std::size_t, const Particle<T> &))
+    void post_processor_dispatch(std::size_t iter, Particle<T> &particle,
+        void (D::*)(std::size_t, Particle<T> &))
     {
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
@@ -564,80 +562,80 @@ class PathEvalBase
     // non-static const
 
     template <typename D>
-    double path_state_dispatch(std::size_t iter, ConstSingleParticle<T> csp,
-        double (D::*)(std::size_t, ConstSingleParticle<T>) const)
+    double path_state_dispatch(std::size_t iter, SingleParticle<T> sp,
+        double (D::*)(std::size_t, SingleParticle<T>) const)
     {
-        return static_cast<Derived *>(this)->path_state(iter, csp);
+        return static_cast<Derived *>(this)->path_state(iter, sp);
     }
 
     template <typename D>
-    double path_grid_dispatch(std::size_t iter, const Particle<T> &particle,
-        double (D::*)(std::size_t, const Particle<T> &) const)
+    double path_grid_dispatch(std::size_t iter, Particle<T> &particle,
+        double (D::*)(std::size_t, Particle<T> &) const)
     {
         return static_cast<Derived *>(this)->path_grid(iter, particle);
     }
 
     template <typename D>
-    void pre_processor_dispatch(std::size_t iter, const Particle<T> &particle,
-        void (D::*)(std::size_t, const Particle<T> &) const)
+    void pre_processor_dispatch(std::size_t iter, Particle<T> &particle,
+        void (D::*)(std::size_t, Particle<T> &) const)
     {
         static_cast<Derived *>(this)->pre_processor(iter, particle);
     }
 
     template <typename D>
-    void post_processor_dispatch(std::size_t iter, const Particle<T> &particle,
-        void (D::*)(std::size_t, const Particle<T> &) const)
+    void post_processor_dispatch(std::size_t iter, Particle<T> &particle,
+        void (D::*)(std::size_t, Particle<T> &) const)
     {
         static_cast<Derived *>(this)->post_processor(iter, particle);
     }
 
     // static
 
-    double path_state_dispatch(std::size_t iter, ConstSingleParticle<T> csp,
-        double (*)(std::size_t, ConstSingleParticle<T>))
+    double path_state_dispatch(std::size_t iter, SingleParticle<T> sp,
+        double (*)(std::size_t, SingleParticle<T>))
     {
-        return Derived::path_state(iter, csp);
+        return Derived::path_state(iter, sp);
     }
 
-    double path_grid_dispatch(std::size_t iter, const Particle<T> &particle,
-        double (*)(std::size_t, const Particle<T> &))
+    double path_grid_dispatch(std::size_t iter, Particle<T> &particle,
+        double (*)(std::size_t, Particle<T> &))
     {
         return Derived::path_grid(iter, particle);
     }
 
-    void pre_processor_dispatch(std::size_t iter, const Particle<T> &particle,
-        void (*)(std::size_t, const Particle<T> &))
+    void pre_processor_dispatch(std::size_t iter, Particle<T> &particle,
+        void (*)(std::size_t, Particle<T> &))
     {
         Derived::pre_processor(iter, particle);
     }
 
-    void post_processor_dispatch(std::size_t iter, const Particle<T> &particle,
-        void (*)(std::size_t, const Particle<T> &))
+    void post_processor_dispatch(std::size_t iter, Particle<T> &particle,
+        void (*)(std::size_t, Particle<T> &))
     {
         Derived::post_processor(iter, particle);
     }
 
     // base
 
-    double path_state_dispatch(std::size_t, ConstSingleParticle<T>,
-        double (PathEvalBase::*)(std::size_t, ConstSingleParticle<T>))
+    double path_state_dispatch(std::size_t, SingleParticle<T>,
+        double (PathEvalBase::*)(std::size_t, SingleParticle<T>))
     {
         return 0;
     }
 
-    double path_grid_dispatch(std::size_t, const Particle<T> &,
-        double (PathEvalBase::*)(std::size_t, const Particle<T> &))
+    double path_grid_dispatch(std::size_t, Particle<T> &,
+        double (PathEvalBase::*)(std::size_t, Particle<T> &))
     {
         return 0;
     }
 
-    void pre_processor_dispatch(std::size_t, const Particle<T> &,
-        void (PathEvalBase::*)(std::size_t, const Particle<T> &))
+    void pre_processor_dispatch(std::size_t, Particle<T> &,
+        void (PathEvalBase::*)(std::size_t, Particle<T> &))
     {
     }
 
-    void post_processor_dispatch(std::size_t, const Particle<T> &,
-        void (PathEvalBase::*)(std::size_t, const Particle<T> &))
+    void post_processor_dispatch(std::size_t, Particle<T> &,
+        void (PathEvalBase::*)(std::size_t, Particle<T> &))
     {
     }
 }; // class PathEvalBase
@@ -648,13 +646,10 @@ template <typename T>
 class PathEvalBase<T, Virtual>
 {
     public:
-    virtual double path_state(std::size_t, ConstSingleParticle<T>)
-    {
-        return 0;
-    }
-    virtual double path_grid(std::size_t, const Particle<T> &) { return 0; }
-    virtual void pre_processor(std::size_t, const Particle<T> &) {}
-    virtual void post_processor(std::size_t, const Particle<T> &) {}
+    virtual double path_state(std::size_t, SingleParticle<T>) { return 0; }
+    virtual double path_grid(std::size_t, Particle<T> &) { return 0; }
+    virtual void pre_processor(std::size_t, Particle<T> &) {}
+    virtual void post_processor(std::size_t, Particle<T> &) {}
 
     protected:
     VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(PathEval)

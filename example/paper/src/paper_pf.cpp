@@ -136,12 +136,12 @@ class cv_move : public vsmc::MoveSEQ<cv>
 class cv_est : public vsmc::MonitorEvalSEQ<cv>
 {
     public:
-    void monitor_state(std::size_t, std::size_t dim,
-        vsmc::ConstSingleParticle<cv> csp, double *res)
+    void monitor_state(
+        std::size_t, std::size_t dim, vsmc::SingleParticle<cv> sp, double *res)
     {
         assert(dim <= Dim);
         for (std::size_t d = 0; d != dim; ++d)
-            res[d] = csp.state(d);
+            res[d] = sp.state(d);
     }
 };
 

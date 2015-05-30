@@ -114,22 +114,6 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         }
     }; // struct single_particle_type
 
-    template <typename S>
-    struct const_single_particle_type : public ConstSingleParticleBase<S> {
-        const_single_particle_type(typename Particle<S>::size_type id,
-            const Particle<S> *particle_ptr)
-            : ConstSingleParticleBase<S>(id, particle_ptr)
-        {
-        }
-
-        std::size_t dim() const { return this->particle_ptr()->value().dim(); }
-
-        const state_type &state(std::size_t pos) const
-        {
-            return this->particle_ptr()->value().state(this->id(), pos);
-        }
-    }; // struct const_single_particle_type
-
     void resize_dim(std::size_t dim)
     {
         VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim);

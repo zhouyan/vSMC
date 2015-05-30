@@ -65,7 +65,7 @@ class Monitor
     public:
     typedef T value_type;
     typedef std::function<void(
-        std::size_t, std::size_t, const Particle<T> &, double *)> eval_type;
+        std::size_t, std::size_t, Particle<T> &, double *)> eval_type;
 
     /// \brief Construct a Monitor with an evaluation object
     ///
@@ -86,8 +86,8 @@ class Monitor
     ///
     /// The evaluation object has the signature
     /// ~~~{.cpp}
-    /// void eval (std::size_t iter, std::size_t dim, const Particle<T>
-    /// &particle, double *result)
+    /// void eval (std::size_t iter, std::size_t dim, Particle<T> &particle,
+    /// double *result)
     /// ~~~
     /// where the first three arguments are passed in by the Sampler at the
     /// end of each iteration. The evaluation occurs after the possible MCMC
@@ -296,8 +296,7 @@ class Monitor
     /// it use the user defined evaluation object to compute results. When a
     /// Monitor is constructed, `recording()` always returns `true`. It can be
     /// turned off by `turn_off()` and turned on later by `turn_on()`.
-    void eval(
-        std::size_t iter, const Particle<T> &particle, MonitorStage stage)
+    void eval(std::size_t iter, Particle<T> &particle, MonitorStage stage)
     {
         if (!recording_)
             return;

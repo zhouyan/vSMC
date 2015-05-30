@@ -103,15 +103,15 @@ template <typename T, typename Derived>
 class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
 {
     public:
-    void operator()(std::size_t iter, std::size_t dim,
-        const Particle<T> &particle, double *res)
+    void operator()(
+        std::size_t iter, std::size_t dim, Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         for (size_type i = 0; i != N; ++i) {
-            this->monitor_state(iter, dim,
-                ConstSingleParticle<T>(i, &particle), res + i * dim);
+            this->monitor_state(
+                iter, dim, SingleParticle<T>(i, &particle), res + i * dim);
         }
         this->post_processor(iter, particle);
     }
@@ -126,16 +126,13 @@ template <typename T, typename Derived>
 class PathEvalSEQ : public PathEvalBase<T, Derived>
 {
     public:
-    double operator()(
-        std::size_t iter, const Particle<T> &particle, double *res)
+    double operator()(std::size_t iter, Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
-        for (size_type i = 0; i != N; ++i) {
-            res[i] =
-                this->path_state(iter, ConstSingleParticle<T>(i, &particle));
-        }
+        for (size_type i = 0; i != N; ++i)
+            res[i] = this->path_state(iter, SingleParticle<T>(i, &particle));
         this->post_processor(iter, particle);
 
         return this->path_grid(iter, particle);

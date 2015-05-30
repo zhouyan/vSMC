@@ -403,8 +403,8 @@ template <typename T, typename Derived>
 class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 {
     public:
-    void operator()(std::size_t iter, std::size_t dim,
-        const Particle<T> &particle, double *res)
+    void operator()(
+        std::size_t iter, std::size_t dim, Particle<T> &particle, double *res)
     {
         parallel_run(iter, dim, particle, res,
             ::tbb::blocked_range<typename Particle<T>::size_type>(
@@ -420,7 +420,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         typedef typename Particle<T>::size_type size_type;
 
         work_type(MonitorEvalTBB<T, Derived> *monitor, std::size_t iter,
-            std::size_t dim, const Particle<T> *particle, double *res)
+            std::size_t dim, Particle<T> *particle, double *res)
             : monitor_(monitor)
             , iter_(iter)
             , dim_(dim)
@@ -433,7 +433,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         {
             for (size_type id = range.begin(); id != range.end(); ++id) {
                 monitor_->monitor_state(iter_, dim_,
-                    ConstSingleParticle<T>(id, particle_), res_ + id * dim_);
+                    SingleParticle<T>(id, particle_), res_ + id * dim_);
             }
         }
 
@@ -441,19 +441,19 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         MonitorEvalTBB<T, Derived> *const monitor_;
         const std::size_t iter_;
         const std::size_t dim_;
-        const Particle<T> *const particle_;
+        Particle<T> *const particle_;
         double *const res_;
     }; // class work_type
 
-    void parallel_run(std::size_t iter, std::size_t dim,
-        const Particle<T> &particle, double *res,
+    void parallel_run(std::size_t iter, std::size_t dim, Particle<T> &particle,
+        double *res,
         const ::tbb::blocked_range<typename Particle<T>::size_type> &range)
     {
         VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MONITOR_EVAL((range, work));
     }
 
-    void parallel_run(std::size_t iter, std::size_t dim,
-        const Particle<T> &particle, double *res,
+    void parallel_run(std::size_t iter, std::size_t dim, Particle<T> &particle,
+        double *res,
         const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
         const ::tbb::auto_partitioner &partitioner)
     {
@@ -461,8 +461,8 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
             (range, work, partitioner));
     }
 
-    void parallel_run(std::size_t iter, std::size_t dim,
-        const Particle<T> &particle, double *res,
+    void parallel_run(std::size_t iter, std::size_t dim, Particle<T> &particle,
+        double *res,
         const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
         const ::tbb::simple_partitioner &partitioner)
     {
@@ -470,8 +470,8 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
             (range, work, partitioner));
     }
 
-    void parallel_run(std::size_t iter, std::size_t dim,
-        const Particle<T> &particle, double *res,
+    void parallel_run(std::size_t iter, std::size_t dim, Particle<T> &particle,
+        double *res,
         const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
         ::tbb::affinity_partitioner &partitioner)
     {
@@ -480,8 +480,8 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
     }
 
 #if __TBB_TASK_GROUP_CONTEXT
-    void parallel_run(std::size_t iter, std::size_t dim,
-        const Particle<T> &particle, double *res,
+    void parallel_run(std::size_t iter, std::size_t dim, Particle<T> &particle,
+        double *res,
         const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
         const ::tbb::auto_partitioner &partitioner,
         ::tbb::task_group_context &context)
@@ -490,8 +490,8 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
             (range, work, partitioner, context));
     }
 
-    void parallel_run(std::size_t iter, std::size_t dim,
-        const Particle<T> &particle, double *res,
+    void parallel_run(std::size_t iter, std::size_t dim, Particle<T> &particle,
+        double *res,
         const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
         const ::tbb::simple_partitioner &partitioner,
         ::tbb::task_group_context &context)
@@ -500,8 +500,8 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
             (range, work, partitioner, context));
     }
 
-    void parallel_run(std::size_t iter, std::size_t dim,
-        const Particle<T> &particle, double *res,
+    void parallel_run(std::size_t iter, std::size_t dim, Particle<T> &particle,
+        double *res,
         const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
         ::tbb::affinity_partitioner &partitioner,
         ::tbb::task_group_context &context)
@@ -518,8 +518,7 @@ template <typename T, typename Derived>
 class PathEvalTBB : public PathEvalBase<T, Derived>
 {
     public:
-    double operator()(
-        std::size_t iter, const Particle<T> &particle, double *res)
+    double operator()(std::size_t iter, Particle<T> &particle, double *res)
     {
         return parallel_run(iter, particle, res,
             ::tbb::blocked_range<typename Particle<T>::size_type>(
@@ -535,7 +534,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
         typedef typename Particle<T>::size_type size_type;
 
         work_type(PathEvalTBB<T, Derived> *path, std::size_t iter,
-            const Particle<T> *particle, double *res)
+            Particle<T> *particle, double *res)
             : path_(path), iter_(iter), particle_(particle), res_(res)
         {
         }
@@ -543,27 +542,25 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
         void operator()(const ::tbb::blocked_range<size_type> &range) const
         {
             for (size_type id = range.begin(); id != range.end(); ++id) {
-                res_[id] = path_->path_state(
-                    iter_, ConstSingleParticle<T>(id, particle_));
+                res_[id] =
+                    path_->path_state(iter_, SingleParticle<T>(id, particle_));
             }
         }
 
         private:
         PathEvalTBB<T, Derived> *const path_;
         const std::size_t iter_;
-        const Particle<T> *const particle_;
+        Particle<T> *const particle_;
         double *const res_;
     }; // class ParallelPathState
 
-    double parallel_run(std::size_t iter, const Particle<T> &particle,
-        double *res,
+    double parallel_run(std::size_t iter, Particle<T> &particle, double *res,
         const ::tbb::blocked_range<typename Particle<T>::size_type> &range)
     {
         VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_PATH_EVAL((range, work));
     }
 
-    double parallel_run(std::size_t iter, const Particle<T> &particle,
-        double *res,
+    double parallel_run(std::size_t iter, Particle<T> &particle, double *res,
         const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
         const ::tbb::auto_partitioner &partitioner)
     {
@@ -571,8 +568,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
             (range, work, partitioner));
     }
 
-    double parallel_run(std::size_t iter, const Particle<T> &particle,
-        double *res,
+    double parallel_run(std::size_t iter, Particle<T> &particle, double *res,
         const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
         const ::tbb::simple_partitioner &partitioner)
     {
@@ -580,8 +576,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
             (range, work, partitioner));
     }
 
-    double parallel_run(std::size_t iter, const Particle<T> &particle,
-        double *res,
+    double parallel_run(std::size_t iter, Particle<T> &particle, double *res,
         const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
         ::tbb::affinity_partitioner &partitioner)
     {
@@ -590,8 +585,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
     }
 
 #if __TBB_TASK_GROUP_CONTEXT
-    double parallel_run(std::size_t iter, const Particle<T> &particle,
-        double *res,
+    double parallel_run(std::size_t iter, Particle<T> &particle, double *res,
         const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
         const ::tbb::auto_partitioner &partitioner,
         ::tbb::task_group_context &context)
@@ -600,8 +594,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
             (range, work, partitioner, context));
     }
 
-    double parallel_run(std::size_t iter, const Particle<T> &particle,
-        double *res,
+    double parallel_run(std::size_t iter, Particle<T> &particle, double *res,
         const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
         const ::tbb::simple_partitioner &partitioner,
         ::tbb::task_group_context &context)
@@ -610,8 +603,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
             (range, work, partitioner, context));
     }
 
-    double parallel_run(std::size_t iter, const Particle<T> &particle,
-        double *res,
+    double parallel_run(std::size_t iter, Particle<T> &particle, double *res,
         const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
         ::tbb::affinity_partitioner &partitioner,
         ::tbb::task_group_context &context)

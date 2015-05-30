@@ -222,11 +222,11 @@ class cv_meval : public MonitorEvalSMP<cv_state<Order>, cv_meval<Order>>
     public:
     typedef cv_state<Order> cv;
 
-    void monitor_state(std::size_t, std::size_t,
-        vsmc::ConstSingleParticle<cv> csp, double *res)
+    void monitor_state(
+        std::size_t, std::size_t, vsmc::SingleParticle<cv> sp, double *res)
     {
-        res[0] = csp.state(PosX);
-        res[1] = csp.state(PosY);
+        res[0] = sp.state(PosX);
+        res[1] = sp.state(PosY);
     }
 };
 

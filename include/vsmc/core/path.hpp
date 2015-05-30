@@ -52,7 +52,7 @@ class Path
 {
     public:
     typedef T value_type;
-    typedef std::function<double(std::size_t, const Particle<T> &, double *)>
+    typedef std::function<double(std::size_t, Particle<T> &, double *)>
         eval_type;
 
     /// \brief Construct a Path with an evaluation object
@@ -70,7 +70,7 @@ class Path
     ///
     /// The evaluation object has the signature
     /// ~~~{.cpp}
-    /// double eval (std::size_t iter, const Particle<T> &particle, double
+    /// double eval (std::size_t iter, Particle<T> &particle, double
     /// *integrand)
     /// ~~~
     /// where the first two arguments are passed in by the Sampler at the end
@@ -185,7 +185,7 @@ class Path
     /// Perform the evaluation for a given iteration and a Particle<T> object
     ///
     /// \sa Monitor::eval()
-    void eval(std::size_t iter, const Particle<T> &particle)
+    void eval(std::size_t iter, Particle<T> &particle)
     {
         if (!recording_)
             return;

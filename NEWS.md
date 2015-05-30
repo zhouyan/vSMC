@@ -21,6 +21,10 @@ changes.
   (outdated) C++ wrapper.
 * The index type `Position` is renamed to `Index`, and it is now a template
   alias to `std::integral_constant`
+* The structure `ConstSingleParticle` is removed. All of its occurrence shall
+  be replaced by `SingleParticle`. In addition, in most places, where the API
+  previously accept `const Particle<T> &` shall now accept `Particle<T> &`
+  instead.
 
 ## Removed features
 

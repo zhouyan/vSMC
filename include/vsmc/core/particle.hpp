@@ -54,8 +54,6 @@ class Particle
     typedef typename traits::RngSetTypeTrait<T>::type rng_set_type;
     typedef typename traits::ResampleRngTypeTrait<T>::type resample_rng_type;
     typedef typename rng_set_type::rng_type rng_type;
-    typedef SingleParticle<T> sp_type;
-    typedef ConstSingleParticle<T> csp_type;
 
     typedef std::function<void(std::size_t, std::size_t, resample_rng_type &,
         const double *, size_type *)> resample_type;
@@ -151,18 +149,6 @@ class Particle
 
     /// \brief Get an (parallel) RNG stream for a given particle
     rng_type &rng(size_type id) { return rng_set_[id]; }
-
-    /// \brief Get a SingleParticle
-    sp_type sp(size_type id) { return sp_type(id, this); }
-
-    /// \brief Get a ConstSingleParticle
-    csp_type sp(size_type id) const { return csp_type(id, this); }
-
-    /// \brief Get a ConstSingleParticle
-    csp_type csp(size_type id) { return csp_type(id, this); }
-
-    /// \brief Get a ConstSingleParticle
-    csp_type csp(size_type id) const { return csp_type(id, this); }
 
     /// \brief Get the (sequential) RNG used stream for resampling
     resample_rng_type &resample_rng() { return resample_rng_; }
