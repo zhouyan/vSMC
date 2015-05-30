@@ -65,7 +65,7 @@ class Monitor
     public:
     typedef T value_type;
     typedef std::function<void(
-        std::size_t, std::size_t, const Particle<T> &, double *) > eval_type;
+        std::size_t, std::size_t, const Particle<T> &, double *)> eval_type;
 
     /// \brief Construct a Monitor with an evaluation object
     ///
