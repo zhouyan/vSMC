@@ -237,7 +237,7 @@ class Path
     bool recording_;
     bool record_only_;
     double log_zconst_;
-    std::vector<std::size_t> index_;
+    Vector<std::size_t> index_;
     Vector<double> integrand_;
     Vector<double> grid_;
     Vector<double> buffer_;

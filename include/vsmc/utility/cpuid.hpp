@@ -729,7 +729,7 @@ class CPUID
     template <typename CharT, typename Traits>
     static void print_cache(std::basic_ostream<CharT, Traits> &os)
     {
-        std::vector<cache_param_type> caches;
+        Vector<cache_param_type> caches;
         unsigned max_ecx = cache_param_num();
         for (unsigned ecx = 0x00; ecx != max_ecx; ++ecx)
             caches.push_back(cache_param(ecx));
@@ -842,7 +842,7 @@ class CPUID
     static void print_feature(std::basic_ostream<CharT, Traits> &os)
     {
         if (max_eax() >= 0x01) {
-            std::vector<std::string> feats;
+            Vector<std::string> feats;
             feature_str1(feats);
             if (feats.size() != 0) {
                 os << "Processor info and features\n";
@@ -851,7 +851,7 @@ class CPUID
             }
         }
         if (max_eax() >= 0x07) {
-            std::vector<std::string> feats;
+            Vector<std::string> feats;
             feature_str7(feats);
             if (feats.size() != 0) {
                 print_equal(os);
@@ -861,7 +861,7 @@ class CPUID
             }
         }
         if (max_eax_ext() >= ext0_ + 1U) {
-            std::vector<std::string> feats;
+            Vector<std::string> feats;
             feature_str_ext1(feats);
             if (feats.size() != 0) {
                 print_equal(os);
@@ -874,7 +874,7 @@ class CPUID
 
     template <typename CharT, typename Traits>
     static void print_feature(
-        std::basic_ostream<CharT, Traits> &os, std::vector<std::string> &feats)
+        std::basic_ostream<CharT, Traits> &os, Vector<std::string> &feats)
     {
         std::sort(feats.begin(), feats.end());
         for (std::size_t i = 0; i != feats.size(); ++i) {
@@ -893,7 +893,7 @@ class CPUID
             os << std::string(fix - str.size(), ' ');
     }
 
-    static void feature_str1(std::vector<std::string> &feats)
+    static void feature_str1(Vector<std::string> &feats)
     {
         feature_str<CPUIDFeatureSSE3>(feats);
         feature_str<CPUIDFeaturePCLMULQDQ>(feats);
@@ -958,7 +958,7 @@ class CPUID
         feature_str<CPUIDFeaturePBE>(feats);
     }
 
-    static void feature_str7(std::vector<std::string> &feats)
+    static void feature_str7(Vector<std::string> &feats)
     {
         feature_str<CPUIDFeatureFSGSBASE>(feats);
         feature_str<CPUIDFeatureBMI1>(feats);
@@ -989,7 +989,7 @@ class CPUID
         feature_str<CPUIDFeatureAVX512VBMI>(feats);
     }
 
-    static void feature_str_ext1(std::vector<std::string> &feats)
+    static void feature_str_ext1(Vector<std::string> &feats)
     {
         feature_str<CPUIDFeatureExtLAHF_LM>(feats);
         feature_str<CPUIDFeatureExtCMP_LEGACY>(feats);
@@ -1048,7 +1048,7 @@ class CPUID
     }
 
     template <CPUIDFeature Feat>
-    static void feature_str(std::vector<std::string> &feats)
+    static void feature_str(Vector<std::string> &feats)
     {
         if (has_feature<Feat>())
             feats.push_back(CPUIDFeatureInfo<Feat>::str());

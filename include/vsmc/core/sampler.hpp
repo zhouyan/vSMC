@@ -720,14 +720,14 @@ class Sampler
         std::size_t nrow = iter_size();
 
         std::size_t ncol_int = summary_header_size_int();
-        std::vector<std::string> header_int(ncol_int);
-        std::vector<size_type> data_int(nrow * ncol_int);
+        Vector<std::string> header_int(ncol_int);
+        Vector<size_type> data_int(nrow * ncol_int);
         summary_header_int(header_int.begin());
         summary_data_int<RowMajor>(data_int.begin());
 
         std::size_t ncol = summary_header_size();
-        std::vector<std::string> header(ncol);
-        std::vector<double> data(nrow * ncol);
+        Vector<std::string> header(ncol);
+        Vector<double> data(nrow * ncol);
         summary_header(header.begin());
         summary_data<RowMajor>(data.begin());
 
@@ -753,18 +753,18 @@ class Sampler
     private:
     bool init_by_iter_;
     init_type init_;
-    std::vector<move_type> move_queue_;
-    std::vector<mcmc_type> mcmc_queue_;
+    Vector<move_type> move_queue_;
+    Vector<mcmc_type> mcmc_queue_;
 
     resample_type resample_op_;
     double resample_threshold_;
 
     Particle<T> particle_;
     std::size_t iter_num_;
-    std::vector<std::size_t> size_history_;
-    std::vector<double> ess_history_;
-    std::vector<bool> resampled_history_;
-    std::vector<std::vector<std::size_t>> accept_history_;
+    Vector<std::size_t> size_history_;
+    Vector<double> ess_history_;
+    Vector<bool> resampled_history_;
+    Vector<Vector<std::size_t>> accept_history_;
 
     Path<T> path_;
     monitor_map_type monitor_;
@@ -772,13 +772,13 @@ class Sampler
     void do_acch()
     {
         if (accept_history_.empty())
-            accept_history_.push_back(std::vector<std::size_t>());
+            accept_history_.push_back(Vector<std::size_t>());
 
         std::size_t acc_size = move_queue_.size() + mcmc_queue_.size();
         if (accept_history_.size() < acc_size) {
             std::size_t diff = acc_size - accept_history_.size();
             for (std::size_t d = 0; d != diff; ++d)
-                accept_history_.push_back(std::vector<std::size_t>());
+                accept_history_.push_back(Vector<std::size_t>());
         }
         for (std::size_t i = 0; i != accept_history_.size(); ++i)
             accept_history_[i].resize(iter_size());
@@ -884,7 +884,7 @@ class Sampler
 
         std::size_t piter = 0;
 
-        std::vector<std::pair<std::size_t, const Monitor<T> *>> miter;
+        Vector<std::pair<std::size_t, const Monitor<T> *>> miter;
         for (const auto &m : monitor_)
             if (m.second.iter_size() > 0)
                 miter.push_back(std::make_pair(0, &m.second));

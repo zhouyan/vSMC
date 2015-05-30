@@ -345,8 +345,8 @@ class Monitor
     bool recording_;
     bool record_only_;
     MonitorStage stage_;
-    std::vector<std::string> name_;
-    std::vector<std::size_t> index_;
+    Vector<std::string> name_;
+    Vector<std::size_t> index_;
     Vector<double> record_;
     Vector<double> result_;
     Vector<double> buffer_;

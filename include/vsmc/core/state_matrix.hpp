@@ -94,7 +94,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     public:
     typedef std::size_t size_type;
     typedef T state_type;
-    typedef typename std::conditional<Dim == Dynamic, std::vector<T>,
+    typedef typename std::conditional<Dim == Dynamic || 8 < Dim, Vector<T>,
         std::array<T, Dim>>::type state_pack_type;
 
     template <typename S>
@@ -229,16 +229,16 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     state_pack_type create_pack() const
     {
         return create_pack_dispatch(
-            std::integral_constant<bool, Dim == Dynamic>());
+            std::integral_constant < bool, Dim == Dynamic || 8 < Dim > ());
     }
 
     private:
     size_type size_;
     Vector<T> data_;
 
-    std::vector<T> create_pack_dispatch(std::true_type) const
+    Vector<T> create_pack_dispatch(std::true_type) const
     {
-        return std::vector<T>(this->dim());
+        return Vector<T>(this->dim());
     }
 
     std::array<T, Dim> create_pack_dispatch(std::false_type) const

@@ -324,14 +324,18 @@ class AlignedAllocator : public std::allocator<T>
     Memory memory_;
 }; // class AlignedAllocator
 
-/// \brief Aligned allocator for scalar type and `std::allocator` for others
+/// \brief AlignedAllocator for scalar type and `std::allocator` for others
 /// \ingroup AlignedMemory
 template <typename T>
 using Allocator = typename std::conditional<std::is_scalar<T>::value,
     AlignedAllocator<T>, std::allocator<T>>::type;
 
-/// \brief Alias to `std::vector` using Aligned allocator for scalar type and
-/// `std::allocator` for others
+/// \brief Vector type using AlignedAllocator
+/// \ingroup AlignedMemory
+template <typename T>
+using AlignedVector = std::vector<T, AlignedAllocator<T>>;
+
+/// \brief AlignedVector for scalar type and `std::vector` for others
 /// \ingroup AlignedMemory
 template <typename T>
 using Vector = typename std::conditional<std::is_scalar<T>::value,

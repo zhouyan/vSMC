@@ -49,7 +49,7 @@ class DiscreteDistribution
 {
     public:
     typedef IntType result_type;
-    typedef std::vector<double> param_type;
+    typedef Vector<double> param_type;
 
     DiscreteDistribution() {}
 
@@ -119,7 +119,7 @@ class DiscreteDistribution
         return param_.size() == 0 ? 0 : param_.size() - 1;
     }
 
-    std::vector<double> probability() const { return param_; }
+    Vector<double> probability() const { return param_; }
 
     template <typename URNG>
     result_type operator()(URNG &eng) const
@@ -232,7 +232,7 @@ class DiscreteDistribution
         std::size_t n;
         is >> std::ws >> n;
 
-        std::vector<double> param(n);
+        Vector<double> param(n);
         for (std::size_t i = 0; i != n; ++i)
             is >> std::ws >> param[i];
 
