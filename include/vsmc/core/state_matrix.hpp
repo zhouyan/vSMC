@@ -105,12 +105,11 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         {
         }
 
-        std::size_t dim() const { return this->particle_ptr()->value().dim(); }
+        std::size_t dim() const { return this->particle().value().dim(); }
 
         state_type &state(std::size_t pos) const
         {
-            return this->mutable_particle_ptr()->value().state(
-                this->id(), pos);
+            return this->particle().value().state(this->id(), pos);
         }
     }; // struct single_particle_type
 

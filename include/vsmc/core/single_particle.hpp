@@ -51,19 +51,12 @@ class SingleParticleBase
 
     typename Particle<T>::size_type id() const { return id_; }
 
-    const Particle<T> &particle() const { return *particle_ptr_; }
-
-    const Particle<T> *particle_ptr() const { return particle_ptr_; }
+    Particle<T> &particle() const { return *particle_ptr_; }
 
     typename Particle<T>::rng_type &rng() const
     {
         return particle_ptr_->rng(id_);
     }
-
-    protected:
-    Particle<T> &mutable_particle() const { return *particle_ptr_; }
-
-    Particle<T> *mutable_particle_ptr() const { return particle_ptr_; }
 
     private:
     typename Particle<T>::size_type id_;
@@ -94,9 +87,9 @@ VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
 /// struct single_particle_type
 /// {
 ///     typedef IntType size_type;
-///     single_particle_type (size_type id, Particle<S> *particle_ptr);
-///     size_type id () const;
-///     const Particle<S> *particle_ptr () const;
+///     single_particle_type(size_type id, Particle<S> *particle_ptr);
+///     size_type id() const;
+///     Particle<S> &particle() const;
 /// };
 /// ~~~
 /// Usually you can safely derive `single_particle_type<S>` from
