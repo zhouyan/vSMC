@@ -150,7 +150,7 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
                 iter, dim, SingleParticle<T>(
                                static_cast<typename Particle<T>::size_type>(i),
                                &particle),
-                res + i * dim);
+                res + static_cast<std::size_t>(i) * dim);
         }
         this->post_processor(iter, particle);
     }

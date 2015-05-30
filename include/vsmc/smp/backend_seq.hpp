@@ -110,8 +110,8 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
         const size_type N = static_cast<size_type>(particle.size());
         this->pre_processor(iter, particle);
         for (size_type i = 0; i != N; ++i) {
-            this->monitor_state(
-                iter, dim, SingleParticle<T>(i, &particle), res + i * dim);
+            this->monitor_state(iter, dim, SingleParticle<T>(i, &particle),
+                res + static_cast<std::size_t>(i) * dim);
         }
         this->post_processor(iter, particle);
     }

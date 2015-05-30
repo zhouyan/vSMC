@@ -96,9 +96,9 @@ class StateTBB : public StateBase
 
         void operator()(const ::tbb::blocked_range<size_type> &range) const
         {
-            for (size_type id = range.begin(); id != range.end(); ++id) {
+            for (size_type i = range.begin(); i != range.end(); ++i) {
                 state_->copy_particle(
-                    static_cast<size_type>(copy_from_[id]), id);
+                    static_cast<size_type>(copy_from_[i]), i);
             }
         }
 
@@ -207,9 +207,9 @@ class InitializeTBB : public InitializeBase<T, Derived>
 
         void operator()(const ::tbb::blocked_range<size_type> &range)
         {
-            for (size_type id = range.begin(); id != range.end(); ++id) {
+            for (size_type i = range.begin(); i != range.end(); ++i) {
                 accept_ +=
-                    init_->initialize_state(SingleParticle<T>(id, particle_));
+                    init_->initialize_state(SingleParticle<T>(i, particle_));
             }
         }
 
@@ -320,9 +320,9 @@ class MoveTBB : public MoveBase<T, Derived>
 
         void operator()(const ::tbb::blocked_range<size_type> &range)
         {
-            for (size_type id = range.begin(); id != range.end(); ++id) {
+            for (size_type i = range.begin(); i != range.end(); ++i) {
                 accept_ +=
-                    move_->move_state(iter_, SingleParticle<T>(id, particle_));
+                    move_->move_state(iter_, SingleParticle<T>(i, particle_));
             }
         }
 
@@ -431,9 +431,10 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
 
         void operator()(const ::tbb::blocked_range<size_type> &range) const
         {
-            for (size_type id = range.begin(); id != range.end(); ++id) {
+            for (size_type i = range.begin(); i != range.end(); ++i) {
                 monitor_->monitor_state(iter_, dim_,
-                    SingleParticle<T>(id, particle_), res_ + id * dim_);
+                    SingleParticle<T>(i, particle_),
+                    res_ + static_cast<std::size_t>(i) * dim_);
             }
         }
 
@@ -541,9 +542,9 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
         void operator()(const ::tbb::blocked_range<size_type> &range) const
         {
-            for (size_type id = range.begin(); id != range.end(); ++id) {
-                res_[id] =
-                    path_->path_state(iter_, SingleParticle<T>(id, particle_));
+            for (size_type i = range.begin(); i != range.end(); ++i) {
+                res_[i] =
+                    path_->path_state(iter_, SingleParticle<T>(i, particle_));
             }
         }
 
