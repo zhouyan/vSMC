@@ -38,22 +38,19 @@
 namespace vsmc
 {
 
-namespace traits
+namespace internal
 {
 
 #if defined(_OPENMP) && _OPENMP >= 200805 // OpenMP 3.0
 template <typename T>
-struct OMPSizeTypeTrait {
-    typedef T type;
-};
+using OMPSizeType = typename traits::SizeTypeTrait<T>::type;
 #else
 template <typename T>
-struct OMPSizeTypeTrait {
-    typedef typename std::make_signed<T>::type type;
-};
+using OMPSizeType =
+    std::make_signed<typename traits::SizeTypeTrait<T>::type>::type;
 #endif
 
-} // namespace vsmc::traits
+} // namespace vsmc::internal
 
 VSMC_DEFINE_SMP_BACKEND_FORWARD(OMP)
 
@@ -63,26 +60,20 @@ template <typename StateBase>
 class StateOMP : public StateBase
 {
     public:
-    typedef typename traits::OMPSizeTypeTrait<
-        typename traits::SizeTypeTrait<StateBase>::type>::type size_type;
+    typedef typename traits::SizeTypeTrait<StateBase>::type size_type;
 
-    explicit StateOMP(size_type N)
-        : StateBase(
-              static_cast<typename traits::SizeTypeTrait<StateBase>::type>(N))
-    {
-    }
-
-    size_type size() const
-    {
-        return static_cast<size_type>(StateBase::size());
-    }
+    explicit StateOMP(size_type N) : StateBase(N) {}
 
     template <typename IntType>
     void copy(size_type N, const IntType *copy_from)
     {
+        internal::OMPSizeType<StateBase> NN =
+            static_cast<internal::OMPSizeType<StateBase>>(N);
 #pragma omp parallel for default(shared)
-        for (size_type to = 0; to < N; ++to)
-            this->copy_particle(copy_from[to], to);
+        for (internal::OMPSizeType<StateBase> to = 0; to < NN; ++to) {
+            this->copy_particle(static_cast<size_type>(copy_from[to]),
+                static_cast<size_type>(to));
+        }
     }
 }; // class StateOMP
 
@@ -94,15 +85,16 @@ class InitializeOMP : public InitializeBase<T, Derived>
     public:
     std::size_t operator()(Particle<T> &particle, void *param)
     {
-        typedef typename traits::OMPSizeTypeTrait<
-            typename Particle<T>::size_type>::type size_type;
-        const size_type N = static_cast<size_type>(particle.size());
+        internal::OMPSizeType<T> N =
+            static_cast<internal::OMPSizeType<T>>(particle.size());
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         std::size_t accept = 0;
 #pragma omp parallel for reduction(+ : accept) default(shared)
-        for (size_type i = 0; i < N; ++i)
-            accept += this->initialize_state(SingleParticle<T>(i, &particle));
+        for (internal::OMPSizeType<T> i = 0; i < N; ++i) {
+            accept += this->initialize_state(SingleParticle<T>(
+                static_cast<typename Particle<T>::size_type>(i), &particle));
+        }
         this->post_processor(particle);
 
         return accept;
@@ -120,14 +112,17 @@ class MoveOMP : public MoveBase<T, Derived>
     public:
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
     {
-        typedef typename traits::OMPSizeTypeTrait<
-            typename Particle<T>::size_type>::type size_type;
-        const size_type N = static_cast<size_type>(particle.size());
+        const internal::OMPSizeType<T> N =
+            static_cast<internal::OMPSizeType<T>>(particle.size());
         this->pre_processor(iter, particle);
         std::size_t accept = 0;
 #pragma omp parallel for reduction(+ : accept) default(shared)
-        for (size_type i = 0; i < N; ++i)
-            accept += this->move_state(iter, SingleParticle<T>(i, &particle));
+        for (internal::OMPSizeType<T> i = 0; i < N; ++i) {
+            accept += this->move_state(
+                iter, SingleParticle<T>(
+                          static_cast<typename Particle<T>::size_type>(i),
+                          &particle));
+        }
         this->post_processor(iter, particle);
 
         return accept;
@@ -146,14 +141,16 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
     void operator()(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *res)
     {
-        typedef typename traits::OMPSizeTypeTrait<
-            typename Particle<T>::size_type>::type size_type;
-        const size_type N = static_cast<size_type>(particle.size());
+        const internal::OMPSizeType<T> N =
+            static_cast<internal::OMPSizeType<T>>(particle.size());
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(shared)
-        for (size_type i = 0; i < N; ++i) {
+        for (internal::OMPSizeType<T> i = 0; i < N; ++i) {
             this->monitor_state(
-                iter, dim, SingleParticle<T>(i, &particle), res + i * dim);
+                iter, dim, SingleParticle<T>(
+                               static_cast<typename Particle<T>::size_type>(i),
+                               &particle),
+                res + i * dim);
         }
         this->post_processor(iter, particle);
     }
@@ -170,13 +167,16 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
     public:
     double operator()(std::size_t iter, Particle<T> &particle, double *res)
     {
-        typedef typename traits::OMPSizeTypeTrait<
-            typename Particle<T>::size_type>::type size_type;
-        const size_type N = static_cast<size_type>(particle.size());
+        const internal::OMPSizeType<T> N =
+            static_cast<internal::OMPSizeType<T>>(particle.size());
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(shared)
-        for (size_type i = 0; i < N; ++i)
-            res[i] = this->path_state(iter, SingleParticle<T>(i, &particle));
+        for (internal::OMPSizeType<T> i = 0; i < N; ++i) {
+            res[i] = this->path_state(
+                iter, SingleParticle<T>(
+                          static_cast<typename Particle<T>::size_type>(i),
+                          &particle));
+        }
         this->post_processor(iter, particle);
 
         return this->path_grid(iter, particle);
