@@ -47,7 +47,7 @@ using OMPSizeType = typename traits::SizeTypeTrait<T>::type;
 #else
 template <typename T>
 using OMPSizeType =
-    std::make_signed<typename traits::SizeTypeTrait<T>::type>::type;
+    typename std::make_signed<typename traits::SizeTypeTrait<T>::type>::type;
 #endif
 
 } // namespace vsmc::internal
