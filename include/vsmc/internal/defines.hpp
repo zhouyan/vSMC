@@ -66,6 +66,17 @@ enum MatrixTrans {
     Trans = 112    ///< The matrix shall be transposed
 };
 
+/// \brief Resampling schemes
+/// \ingroup Definitions
+enum ResampleScheme {
+    Multinomial,        ///< Multinomial resampling
+    Residual,           ///< Residual resampling
+    Stratified,         ///< Stratified resampling
+    Systematic,         ///< Systematic resampling
+    ResidualStratified, ///< Stratified resampling on residuals
+    ResidualSystematic  ///< Systematic resampling on residuals
+};
+
 } // namespace vsmc
 
 #endif // VSMC_INTERNAL_DEFINES_HPP

@@ -55,17 +55,6 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(
 
 } // namespace vsmc::traits
 
-/// \brief Resampling schemes
-/// \ingroup Resample
-enum ResampleScheme {
-    Multinomial,        ///< Multinomial resampling
-    Residual,           ///< Residual resampling
-    Stratified,         ///< Stratified resampling
-    Systematic,         ///< Systematic resampling
-    ResidualStratified, ///< Stratified resampling on residuals
-    ResidualSystematic  ///< Systematic resampling on residuals
-};                      // enum ResampleScheme
-
 } // namespace vsmc
 
 #endif // VSMC_RESAMPLE_INTERNAL_COMMON_HPP
