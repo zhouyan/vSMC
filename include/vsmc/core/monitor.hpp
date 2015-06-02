@@ -42,9 +42,9 @@
     VSMC_RUNTIME_ASSERT((iter < iter_size()),                                 \
         "**Monitor::" #func "** INVALID ITERATION NUMBER ARGUMENT")
 
-#define VSMC_RUNTIME_ASSERT_CORE_MONITOR_FUNCTOR(func, caller, name)          \
-    VSMC_RUNTIME_ASSERT(static_cast<bool>(func),                              \
-        "**Monitor::" #caller "** INVALID " #name " OBJECT")
+#define VSMC_RUNTIME_ASSERT_CORE_MONITOR_EVAL                                 \
+    VSMC_RUNTIME_ASSERT(static_cast<bool>(eval_),                             \
+        "**Monitor::eval** INVALID EVALUATION OBJECT")
 
 namespace vsmc
 {
@@ -304,7 +304,7 @@ class Monitor
         if (stage != stage_)
             return;
 
-        VSMC_RUNTIME_ASSERT_CORE_MONITOR_FUNCTOR(eval_, eval, EVALUATION);
+        VSMC_RUNTIME_ASSERT_CORE_MONITOR_EVAL;
 
         result_.resize(dim_);
         if (record_only_) {

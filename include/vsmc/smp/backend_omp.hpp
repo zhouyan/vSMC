@@ -49,7 +49,7 @@ template <typename StateBase>
 class StateOMP : public StateBase
 {
     public:
-    typedef typename traits::SizeTypeTrait<StateBase>::type size_type;
+    typedef traits::SizeType<StateBase> size_type;
 
     explicit StateOMP(size_type N) : StateBase(N) {}
 

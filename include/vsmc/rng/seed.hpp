@@ -280,9 +280,9 @@ class SeedGenerator<ID, std::array<T, K>>
     void seed_rng(RngType &rng)
     {
         seed_rng_dispatch(
-            rng, std::integral_constant<bool,
-                     std::is_same<result_type, typename traits::KeyTypeTrait<
-                                                   RngType>::type>::value>());
+            rng,
+            std::integral_constant<bool,
+                std::is_same<result_type, traits::KeyType<RngType>>::value>());
     }
 
     result_type get()

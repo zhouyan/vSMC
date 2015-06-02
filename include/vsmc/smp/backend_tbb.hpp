@@ -74,7 +74,7 @@ template <typename StateBase>
 class StateTBB : public StateBase
 {
     public:
-    typedef typename traits::SizeTypeTrait<StateBase>::type size_type;
+    typedef traits::SizeType<StateBase> size_type;
 
     explicit StateTBB(size_type N) : StateBase(N) {}
 

@@ -91,13 +91,11 @@ VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
 /// Usually you can safely derive `single_particle_type<S>` from
 /// SingleParticleBase<S> and add methods specific to `S`.
 template <typename T>
-class SingleParticle : public traits::SingleParticleBaseTypeTrait<T>::type
+class SingleParticle : public traits::SingleParticleBaseType<T>
 {
-    typedef typename traits::SingleParticleBaseTypeTrait<T>::type base;
-
     public:
     SingleParticle(typename Particle<T>::size_type id, Particle<T> *pptr)
-        : base(id, pptr)
+        : traits::SingleParticleBaseType<T>(id, pptr)
     {
     }
 }; // class SingleParticle

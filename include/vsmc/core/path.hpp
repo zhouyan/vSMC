@@ -38,9 +38,9 @@
     VSMC_RUNTIME_ASSERT((iter < iter_size()),                                 \
         "**Path::" #func "** INVALID ITERATION NUMBER ARGUMENT")
 
-#define VSMC_RUNTIME_ASSERT_CORE_PATH_FUNCTOR(func, caller, name)             \
-    VSMC_RUNTIME_ASSERT(static_cast<bool>(func),                              \
-        "**Path::" #caller "** INVALID " #name " OBJECT")
+#define VSMC_RUNTIME_ASSERT_CORE_PATH_EVAL                                    \
+    VSMC_RUNTIME_ASSERT(                                                      \
+        static_cast<bool>(eval_), "**Path::eval** INVALID EVALUAITON OBJECT")
 
 namespace vsmc
 {
@@ -190,7 +190,7 @@ class Path
         if (!recording_)
             return;
 
-        VSMC_RUNTIME_ASSERT_CORE_PATH_FUNCTOR(eval_, eval, EVALUATION);
+        VSMC_RUNTIME_ASSERT_CORE_PATH_EVAL;
 
         if (record_only_) {
             double integrand = 0;

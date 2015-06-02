@@ -84,7 +84,10 @@
     struct Outer##Trait {                                                     \
         static constexpr bool value = internal::Has##Outer<T>::value;         \
         typedef typename internal::Outer##Dispatch<T, value>::type type;      \
-    };
+    };                                                                        \
+                                                                              \
+    template <typename T>                                                     \
+    using Outer = typename Outer##Trait<T>::type;
 
 #define VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(Outer, Inner, Default)       \
     template <typename T>                                                     \
@@ -133,7 +136,10 @@
     struct Outer##Trait {                                                     \
         static constexpr bool value = internal::Has##Outer<T>::value;         \
         typedef typename internal::Outer##Dispatch<T, value>::type type;      \
-    };
+    };                                                                        \
+                                                                              \
+    template <typename T>                                                     \
+    using Outer = typename Outer##Trait<T>::type;
 
 #define VSMC_DEFINE_METHOD_CHECKER(name, RT, Args)                            \
     template <typename U>                                                     \
