@@ -195,13 +195,13 @@ class InitializeTBB : public InitializeBase<T, Derived>
         public:
         typedef typename Particle<T>::size_type size_type;
 
-        work_type(InitializeTBB<T, Derived> *init, Particle<T> *particle)
-            : init_(init), particle_(particle), accept_(0)
+        work_type(InitializeTBB<T, Derived> *init, Particle<T> *pptr)
+            : init_(init), pptr_(pptr), accept_(0)
         {
         }
 
         work_type(const work_type &other, ::tbb::split)
-            : init_(other.init_), particle_(other.particle_), accept_(0)
+            : init_(other.init_), pptr_(other.pptr_), accept_(0)
         {
         }
 
@@ -209,7 +209,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 accept_ +=
-                    init_->initialize_state(SingleParticle<T>(i, particle_));
+                    init_->initialize_state(SingleParticle<T>(i, pptr_));
             }
         }
 
@@ -219,7 +219,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
 
         private:
         InitializeTBB<T, Derived> *const init_;
-        Particle<T> *const particle_;
+        Particle<T> *const pptr_;
         std::size_t accept_;
     }; // class work_type
 
@@ -305,15 +305,15 @@ class MoveTBB : public MoveBase<T, Derived>
         typedef typename Particle<T>::size_type size_type;
 
         work_type(
-            MoveTBB<T, Derived> *move, std::size_t iter, Particle<T> *particle)
-            : move_(move), iter_(iter), particle_(particle), accept_(0)
+            MoveTBB<T, Derived> *move, std::size_t iter, Particle<T> *pptr)
+            : move_(move), iter_(iter), pptr_(pptr), accept_(0)
         {
         }
 
         work_type(const work_type &other, ::tbb::split)
             : move_(other.move_)
             , iter_(other.iter_)
-            , particle_(other.particle_)
+            , pptr_(other.pptr_)
             , accept_(0)
         {
         }
@@ -322,7 +322,7 @@ class MoveTBB : public MoveBase<T, Derived>
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 accept_ +=
-                    move_->move_state(iter_, SingleParticle<T>(i, particle_));
+                    move_->move_state(iter_, SingleParticle<T>(i, pptr_));
             }
         }
 
@@ -333,7 +333,7 @@ class MoveTBB : public MoveBase<T, Derived>
         private:
         MoveTBB<T, Derived> *const move_;
         const std::size_t iter_;
-        Particle<T> *const particle_;
+        Particle<T> *const pptr_;
         std::size_t accept_;
     }; // class work_type
 
@@ -420,12 +420,8 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         typedef typename Particle<T>::size_type size_type;
 
         work_type(MonitorEvalTBB<T, Derived> *monitor, std::size_t iter,
-            std::size_t dim, Particle<T> *particle, double *res)
-            : monitor_(monitor)
-            , iter_(iter)
-            , dim_(dim)
-            , particle_(particle)
-            , res_(res)
+            std::size_t dim, Particle<T> *pptr, double *res)
+            : monitor_(monitor), iter_(iter), dim_(dim), pptr_(pptr), res_(res)
         {
         }
 
@@ -433,7 +429,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 monitor_->monitor_state(iter_, dim_,
-                    SingleParticle<T>(i, particle_),
+                    SingleParticle<T>(i, pptr_),
                     res_ + static_cast<std::size_t>(i) * dim_);
             }
         }
@@ -442,7 +438,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         MonitorEvalTBB<T, Derived> *const monitor_;
         const std::size_t iter_;
         const std::size_t dim_;
-        Particle<T> *const particle_;
+        Particle<T> *const pptr_;
         double *const res_;
     }; // class work_type
 
@@ -535,8 +531,8 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
         typedef typename Particle<T>::size_type size_type;
 
         work_type(PathEvalTBB<T, Derived> *path, std::size_t iter,
-            Particle<T> *particle, double *res)
-            : path_(path), iter_(iter), particle_(particle), res_(res)
+            Particle<T> *pptr, double *res)
+            : path_(path), iter_(iter), pptr_(pptr), res_(res)
         {
         }
 
@@ -544,14 +540,14 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
                 res_[i] =
-                    path_->path_state(iter_, SingleParticle<T>(i, particle_));
+                    path_->path_state(iter_, SingleParticle<T>(i, pptr_));
             }
         }
 
         private:
         PathEvalTBB<T, Derived> *const path_;
         const std::size_t iter_;
-        Particle<T> *const particle_;
+        Particle<T> *const pptr_;
         double *const res_;
     }; // class ParallelPathState
 

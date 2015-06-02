@@ -43,24 +43,20 @@ template <typename T>
 class SingleParticleBase
 {
     public:
-    SingleParticleBase(
-        typename Particle<T>::size_type id, Particle<T> *particle_ptr)
-        : id_(id), particle_ptr_(particle_ptr)
+    SingleParticleBase(typename Particle<T>::size_type id, Particle<T> *pptr)
+        : id_(id), pptr_(pptr)
     {
     }
 
     typename Particle<T>::size_type id() const { return id_; }
 
-    Particle<T> &particle() const { return *particle_ptr_; }
+    Particle<T> &particle() const { return *pptr_; }
 
-    typename Particle<T>::rng_type &rng() const
-    {
-        return particle_ptr_->rng(id_);
-    }
+    typename Particle<T>::rng_type &rng() const { return pptr_->rng(id_); }
 
     private:
     typename Particle<T>::size_type id_;
-    Particle<T> *particle_ptr_;
+    Particle<T> *pptr_;
 }; // class SingleParticleBase
 
 namespace traits
@@ -87,7 +83,7 @@ VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
 /// struct single_particle_type
 /// {
 ///     typedef IntType size_type;
-///     single_particle_type(size_type id, Particle<S> *particle_ptr);
+///     single_particle_type(size_type id, Particle<S> *pptr);
 ///     size_type id() const;
 ///     Particle<S> &particle() const;
 /// };
@@ -100,9 +96,8 @@ class SingleParticle : public traits::SingleParticleBaseTypeTrait<T>::type
     typedef typename traits::SingleParticleBaseTypeTrait<T>::type base;
 
     public:
-    SingleParticle(
-        typename Particle<T>::size_type id, Particle<T> *particle_ptr)
-        : base(id, particle_ptr)
+    SingleParticle(typename Particle<T>::size_type id, Particle<T> *pptr)
+        : base(id, pptr)
     {
     }
 }; // class SingleParticle

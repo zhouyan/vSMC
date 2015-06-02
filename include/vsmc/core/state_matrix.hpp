@@ -100,8 +100,8 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     template <typename S>
     struct single_particle_type : public SingleParticleBase<S> {
         single_particle_type(
-            typename Particle<S>::size_type id, Particle<S> *particle_ptr)
-            : SingleParticleBase<S>(id, particle_ptr)
+            typename Particle<S>::size_type id, Particle<S> *pptr)
+            : SingleParticleBase<S>(id, pptr)
         {
         }
 
