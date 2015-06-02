@@ -536,7 +536,7 @@ inline void hdf5store_list_insert_tuple(std::size_t nrow,
     typedef typename std::tuple_element<0,
         std::tuple<InputIter, InputIters...>>::type iter_type;
     typedef typename std::iterator_traits<iter_type>::value_type dtype;
-    internal::HDF5StoreDataPtr<dtype> data_ptr;
+    HDF5StoreDataPtr<dtype> data_ptr;
     data_ptr.set(nrow, std::get<0>(first));
     const dtype *data = data_ptr.get();
     hdf5store_list_insert<dtype>(nrow, file_name, data_name, data, *sptr);
@@ -551,7 +551,7 @@ inline void hdf5store_list_insert_tuple(std::size_t nrow,
     typedef typename std::tuple_element<Pos,
         std::tuple<InputIter, InputIters...>>::type iter_type;
     typedef typename std::iterator_traits<iter_type>::value_type dtype;
-    internal::HDF5StoreDataPtr<dtype> data_ptr;
+    HDF5StoreDataPtr<dtype> data_ptr;
     data_ptr.set(nrow, std::get<Pos>(first));
     const dtype *data = data_ptr.get();
     hdf5store_list_insert<dtype>(nrow, file_name, data_name, data, *sptr);

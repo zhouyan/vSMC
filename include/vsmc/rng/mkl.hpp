@@ -93,9 +93,6 @@ class MKLGammaDistribution;
 template <typename = double, MKL_INT = VSL_RNG_METHOD_BETA_CJA>
 class MKLBetaDistribution;
 
-namespace traits
-{
-
 /// \brief MKLEngine uniform bits trait
 /// \ingroup Traits
 ///
@@ -117,7 +114,7 @@ struct MKLUniformBitsTrait<BRNG, unsigned> {
     typedef MKLUniformBits32Distribution type;
     static constexpr unsigned min VSMC_MNE = 0;
     static constexpr unsigned max VSMC_MNE = VSMC_MAX_UINT(unsigned);
-}; // struct MKLUniformBitsTrait
+};
 
 /// \brief Default uniform bits generator for MKLEngine with
 /// `unsigned MKL_INT64` output
@@ -128,9 +125,7 @@ struct MKLUniformBitsTrait<BRNG, unsigned MKL_INT64> {
     static constexpr unsigned MKL_INT64 min VSMC_MNE = 0;
     static constexpr unsigned MKL_INT64 max VSMC_MNE =
         VSMC_MAX_UINT(unsigned MKL_INT64);
-}; // struct MKLUniformBitsTrait
-
-} // namespace traits
+};
 
 namespace internal
 {
@@ -145,7 +140,7 @@ struct MKLSkipAheadVSL {
             return;
 
         int status = ::vslSkipAheadStream(stream.ptr(), nskip);
-        internal::mkl_error_check(
+        mkl_error_check(
             status, "MKLSkipAheadVSL::skip", "::vslSkipAheadStream");
     }
 
@@ -189,7 +184,7 @@ struct MKLSkipAheadForce {
 
     private:
     Vector<ResultType> buffer_;
-    typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
+    typename MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
     MKL_INT buffer_size_;
 }; // strut SkipAheadForce
 
@@ -235,7 +230,7 @@ class MKLEngine
     typedef MKLStream<BRNG> stream_type;
 
     explicit MKLEngine(
-        MKL_UINT s = traits::MKLSeedTrait<BRNG>::value, MKL_INT offset = 0)
+        MKL_UINT s = MKLSeedTrait<BRNG>::value, MKL_INT offset = 0)
         : stream_(s, offset)
         , buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE)
         , index_(buffer_size_)
@@ -290,9 +285,9 @@ class MKLEngine
     }
 
     static constexpr result_type _Min =
-        traits::MKLUniformBitsTrait<BRNG, ResultType>::min VSMC_MNE;
+        MKLUniformBitsTrait<BRNG, ResultType>::min VSMC_MNE;
     static constexpr result_type _Max =
-        traits::MKLUniformBitsTrait<BRNG, ResultType>::max VSMC_MNE;
+        MKLUniformBitsTrait<BRNG, ResultType>::max VSMC_MNE;
 
     static constexpr result_type min VSMC_MNE() { return _Min; }
     static constexpr result_type max VSMC_MNE() { return _Max; }
@@ -311,7 +306,7 @@ class MKLEngine
     private:
     stream_type stream_;
     typename internal::MKLSkipAhead<BRNG, ResultType>::type skip_ahead_;
-    typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
+    typename MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
     Vector<result_type> buffer_;
     MKL_INT buffer_size_;
     MKL_INT index_;

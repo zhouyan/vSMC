@@ -69,17 +69,12 @@ class ResampleResidualStratified
     Vector<double> integral_;
 }; // ResampleResidualStratified
 
-namespace traits
-{
-
 /// \brief Type trait of ResidualStratified scheme
 /// \ingroup Resample
 template <>
 struct ResampleTypeTrait<ResidualStratified> {
     typedef ResampleResidualStratified type;
 };
-
-} // namespace vsmc::traits
 
 } // namespace vsmc
 

@@ -135,9 +135,6 @@ struct MKLOffset<VSL_BRNG_WH> {
 
 } // namespace vsmc::internal
 
-namespace traits
-{
-
 /// \brief Default seed for MKL RNG
 /// \ingroup Traits
 template <MKL_INT>
@@ -155,8 +152,6 @@ template <>
 struct MKLSeedTrait<VSL_BRNG_NIEDERR>
     : public std::integral_constant<MKL_UINT, 10> {
 };
-
-} // namespace traits
 
 /// \brief MKL resource management base class
 /// \ingroup MKL
@@ -245,7 +240,7 @@ class MKLStream : public MKLBase<VSLStreamStatePtr, MKLStream<BRNG>>
 {
     public:
     explicit MKLStream(
-        MKL_UINT s = traits::MKLSeedTrait<BRNG>::value, MKL_INT offset = 0)
+        MKL_UINT s = MKLSeedTrait<BRNG>::value, MKL_INT offset = 0)
     {
         reset(s, offset);
     }

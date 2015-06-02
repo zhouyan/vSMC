@@ -83,36 +83,6 @@
 namespace vsmc
 {
 
-namespace traits
-{
-
-/// \brief Traits of XorshiftEngine
-/// \ingroup Traits
-template <typename ResultType>
-struct XorshiftEngineTrait {
-    /// \brief Maximum number of states (e.g., 4 in Xorshift4x64) that an
-    /// unrolled loop will be used
-    ///
-    /// \details
-    /// The original implementation of Marsaglia promote each value. That is,
-    /// e.g., for a state of four integers `x, y, z, w`, there is a step
-    /// `x = y; y = z; z = w`. This can be generalized to the situation of
-    /// any abitrary number of integers. For the number of integers smaller
-    /// than or equal to this value, the original implementation will be used,
-    /// equivalent to
-    /// ~~~{.cpp}
-    /// for (std::size_t i = 0; i != n - 1; ++i)
-    ///     state[i] = state[i + 1];
-    /// ~~~
-    /// where `n` is the number of the integers. The loop will be unrolled at
-    /// compile time. Otherwise, no loop will be performed. Instead, a
-    /// circular
-    /// buffer is implemented through the use of modulo operation.
-    static constexpr std::size_t max_loop_unroll = 4;
-}; // struct XorshiftEngineTrait
-
-} // namespace vsmc::traits
-
 namespace internal
 {
 
@@ -207,7 +177,7 @@ struct XorshiftRight<true, ResultType, A> {
 };
 
 template <typename ResultType, std::size_t K, std::size_t R, std::size_t S,
-    bool = (K <= traits::XorshiftEngineTrait<ResultType>::max_loop_unroll)>
+    bool = (K <= 8)>
 struct XorshiftIndex {
     void reset() {}
 

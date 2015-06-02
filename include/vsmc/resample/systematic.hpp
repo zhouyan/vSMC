@@ -52,17 +52,12 @@ class ResampleSystematic
     }
 }; // ResampleSystematic
 
-namespace traits
-{
-
 /// \brief Type trait of Systematic scheme
 /// \ingroup Resample
 template <>
 struct ResampleTypeTrait<Systematic> {
     typedef ResampleSystematic type;
 };
-
-} // namespace vsmc::traits
 
 } // namespace vsmc
 

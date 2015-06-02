@@ -115,14 +115,9 @@ class RngSetVector
 
 typedef VSMC_RNG_SET_TYPE RngSet;
 
-namespace traits
-{
-
 /// \brief Particle::rng_set_type trait
 /// \ingroup Traits
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSet)
-
-} // namespace vsmc::traits
 
 } // namespace vsmc
 

@@ -59,15 +59,10 @@ class SingleParticleBase
     Particle<T> *pptr_;
 }; // class SingleParticleBase
 
-namespace traits
-{
-
 /// \brief SingleParticle base class trait
 /// \ingroup Traits
 VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
     SingleParticleBaseType, single_particle_type, SingleParticleBase)
-
-} // namespace vsmc::traits
 
 /// \brief A thin wrapper over a complete Particle
 /// \ingroup Core
@@ -75,7 +70,7 @@ VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
 /// \details
 /// This is the basic SingleParticle available for any type of Particle. To
 /// extend it for type `T`. One can either specialize
-/// vsmc::traits::SingleParticleBaseTypeTrait<T> or define a class template
+/// vsmc::SingleParticleBaseTypeTrait<T> or define a class template
 /// named `single_particle_type` within `T` with the following minimum
 /// requirement.
 /// ~~~{.cpp}
@@ -91,11 +86,11 @@ VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
 /// Usually you can safely derive `single_particle_type<S>` from
 /// SingleParticleBase<S> and add methods specific to `S`.
 template <typename T>
-class SingleParticle : public traits::SingleParticleBaseType<T>
+class SingleParticle : public SingleParticleBaseType<T>
 {
     public:
     SingleParticle(typename Particle<T>::size_type id, Particle<T> *pptr)
-        : traits::SingleParticleBaseType<T>(id, pptr)
+        : SingleParticleBaseType<T>(id, pptr)
     {
     }
 }; // class SingleParticle

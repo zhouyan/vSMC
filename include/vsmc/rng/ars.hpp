@@ -50,9 +50,6 @@
 namespace vsmc
 {
 
-namespace traits
-{
-
 namespace internal
 {
 
@@ -69,7 +66,7 @@ struct ARSWeylConstant<1> : public std::integral_constant<std::uint64_t,
                                 UINT64_C(0x9E3779B97F4A7C15)> {
 };
 
-} // namespace vsmc::traits::internal
+} // namespace vsmc::internal
 
 /// \brief ARSEngine Weyl sequence constants
 /// \ingroup Traits
@@ -81,8 +78,6 @@ template <std::size_t I>
 struct ARSWeylConstantTrait : public internal::ARSWeylConstant<I> {
 };
 
-} // namespace vsmc::traits
-
 /// \brief Default ARSEngine key sequence generator
 /// \ingroup AESNIRNG
 template <typename ResultType>
@@ -93,8 +88,8 @@ class ARSKeySeq
 
     ARSKeySeq()
     {
-        weyl_.set(traits::ARSWeylConstantTrait<0>::value,
-            traits::ARSWeylConstantTrait<1>::value);
+        weyl_.set(
+            ARSWeylConstantTrait<0>::value, ARSWeylConstantTrait<1>::value);
     }
 
     template <std::size_t Rp1>

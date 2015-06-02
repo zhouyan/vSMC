@@ -52,17 +52,12 @@ class ResampleStratified
     }
 }; // ResampleStratified
 
-namespace traits
-{
-
 /// \brief Type trait of Stratified scheme
 /// \ingroup Resample
 template <>
 struct ResampleTypeTrait<Stratified> {
     typedef ResampleStratified type;
 };
-
-} // namespace vsmc::traits
 
 } // namespace vsmc
 

@@ -76,7 +76,7 @@ struct ThreefryCtrPackSSE2 {
     static void eval(ctr_type &ctr, state_type &state)
     {
         ctr_block_type ctr_block;
-        internal::increment(ctr, ctr_block);
+        increment(ctr, ctr_block);
         pack<0>(ctr_block, state, std::integral_constant<bool, 0 < K>());
     }
 

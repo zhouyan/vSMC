@@ -177,14 +177,9 @@
 namespace vsmc
 {
 
-namespace traits
-{
-
 /// \brief Particle::size_type etc., traits
 /// \ingroup Traits
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
-
-} // namespace vsmc::traits
 
 } // namespace vsmc
 

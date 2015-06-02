@@ -48,11 +48,11 @@ template <typename T>
 class Particle
 {
     public:
-    typedef traits::SizeType<T> size_type;
+    typedef SizeType<T> size_type;
     typedef T value_type;
-    typedef traits::WeightSetType<T> weight_set_type;
-    typedef traits::RngSetType<T> rng_set_type;
-    typedef traits::ResampleRngType<T> resample_rng_type;
+    typedef WeightSetType<T> weight_set_type;
+    typedef RngSetType<T> rng_set_type;
+    typedef ResampleRngType<T> resample_rng_type;
     typedef typename rng_set_type::rng_type rng_type;
 
     typedef std::function<void(std::size_t, std::size_t, resample_rng_type &,
@@ -61,8 +61,8 @@ class Particle
     explicit Particle(size_type N)
         : size_(N)
         , value_(N)
-        , weight_set_(static_cast<traits::SizeType<weight_set_type>>(N))
-        , rng_set_(static_cast<traits::SizeType<rng_set_type>>(N))
+        , weight_set_(static_cast<SizeType<weight_set_type>>(N))
+        , rng_set_(static_cast<SizeType<rng_set_type>>(N))
     {
         Seed::instance().seed_rng(resample_rng_);
     }
@@ -183,8 +183,7 @@ class Particle
     ///     * If `end != weight + N`, GO TO step 5. Otherwise, GO TO Step 3
     /// 3. Performing resampling, produce replication number of each particle
     ///     * (Allocate `size_type *replication` for size `N`)
-    ///     * (Create RNG engine `resample_rng` according to
-    ///     traits::ResampleRngType)
+    ///     * (Create RNG engine `resample_rng` according to ResampleRngType)
     ///     * Call `op(N, resample_rng, weight, replication)`
     /// 4. Transform replication numbers into parent particle indices
     /// 5. Set `const size_type *cptr` according to results of Step 2.

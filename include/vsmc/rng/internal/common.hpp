@@ -41,15 +41,10 @@
 namespace vsmc
 {
 
-namespace traits
+namespace internal
 {
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
-
-} // namespace vsmc::traits
-
-namespace internal
-{
 
 template <typename SeedSeq, typename U, typename V = U, typename W = V>
 struct is_seed_seq
