@@ -127,8 +127,10 @@
 #define VSMC_HAS_RDRAND 0
 #endif
 
+#if defined(_OPENMP) &&_OPENMP >= 200805
 #ifndef VSMC_HAS_OMP
-#define VSMC_HAS_OMP 0
+#define VSMC_HAS_OMP 1
+#endif
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_HPP

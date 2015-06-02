@@ -48,6 +48,13 @@ class StateSEQ : public StateBase
     typedef typename traits::SizeTypeTrait<StateBase>::type size_type;
 
     explicit StateSEQ(size_type N) : StateBase(N) {}
+
+    template <typename IntType>
+    void copy(size_type N, const IntType *copy_from)
+    {
+        for (size_type to = 0; to != N; ++to)
+            this->copy_particle(static_cast<size_type>(copy_from[to]), to);
+    }
 }; // class StateSEQ
 
 /// \brief Sampler<T>::init_type subtype
@@ -59,7 +66,7 @@ class InitializeSEQ : public InitializeBase<T, Derived>
     std::size_t operator()(Particle<T> &particle, void *param)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.size());
+        const size_type N = particle.size();
         this->initialize_param(particle, param);
         this->pre_processor(particle);
         std::size_t accept = 0;
@@ -83,7 +90,7 @@ class MoveSEQ : public MoveBase<T, Derived>
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.size());
+        const size_type N = particle.size();
         this->pre_processor(iter, particle);
         std::size_t accept = 0;
         for (size_type i = 0; i != N; ++i)
@@ -107,7 +114,7 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.size());
+        const size_type N = particle.size();
         this->pre_processor(iter, particle);
         for (size_type i = 0; i != N; ++i) {
             this->monitor_state(iter, dim, SingleParticle<T>(i, &particle),
@@ -129,7 +136,7 @@ class PathEvalSEQ : public PathEvalBase<T, Derived>
     double operator()(std::size_t iter, Particle<T> &particle, double *res)
     {
         typedef typename Particle<T>::size_type size_type;
-        const size_type N = static_cast<size_type>(particle.size());
+        const size_type N = particle.size();
         this->pre_processor(iter, particle);
         for (size_type i = 0; i != N; ++i)
             res[i] = this->path_state(iter, SingleParticle<T>(i, &particle));
