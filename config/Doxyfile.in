@@ -1992,8 +1992,9 @@ INCLUDE_FILE_PATTERNS  = *.h \
 
 PREDEFINED             = __TBB_TASK_GROUP_CONTEXT \
                          VSMC_HAS_MKL \
-                         VSMC_HAS_TBB \
-                         VSMC_HAS_POSIX
+                         VSMC_HAS_OMP \
+                         VSMC_HAS_POSIX \
+                         VSMC_HAS_TBB
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
