@@ -36,9 +36,7 @@
 
 #include <vsmc/smp/backend_base.hpp>
 #include <vsmc/smp/backend_seq.hpp>
-#if VSMC_HAS_OMP
 #include <vsmc/smp/backend_omp.hpp>
-#endif
 #if VSMC_HAS_TBB
 #include <vsmc/smp/backend_tbb.hpp>
 #endif
