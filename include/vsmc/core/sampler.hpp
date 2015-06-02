@@ -244,22 +244,22 @@ class Sampler
     {
         switch (scheme) {
             case Multinomial:
-                resample_op_ = ResampleType<Multinomial>::type();
+                resample_op_ = ResampleMultinomial();
                 break;
             case Residual:
-                resample_op_ = ResampleType<Residual>::type();
+                resample_op_ = ResampleResidual();
                 break;
             case Stratified:
-                resample_op_ = ResampleType<Stratified>::type();
+                resample_op_ = ResampleStratified();
                 break;
             case Systematic:
-                resample_op_ = ResampleType<Systematic>::type();
+                resample_op_ = ResampleSystematic();
                 break;
             case ResidualStratified:
-                resample_op_ = ResampleType<ResidualStratified>::type();
+                resample_op_ = ResampleResidualStratified();
                 break;
             case ResidualSystematic:
-                resample_op_ = ResampleType<ResidualSystematic>::type();
+                resample_op_ = ResampleResidualSystematic();
                 break;
         }
 

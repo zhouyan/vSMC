@@ -33,22 +33,14 @@
 #define VSMC_RESAMPLE_RESIDUAL_SYSTEMATIC_HPP
 
 #include <vsmc/resample/internal/common.hpp>
+#include <vsmc/resample/transform.hpp>
 
 namespace vsmc
 {
 
-namespace internal
-{
-
-typedef std::integral_constant<ResampleScheme, ResidualSystematic>
-    ResampleResidualSystematic;
-
-} // namespace vsmc::internal
-
 /// \brief Residual systematic resampling
 /// \ingroup Resample
-template <>
-class Resample<internal::ResampleResidualSystematic>
+class ResampleResidualSystematic
 {
     public:
     template <typename IntType, typename RngType>
@@ -67,7 +59,7 @@ class Resample<internal::ResampleResidualSystematic>
             R += static_cast<IntType>(integral_[i]);
         std::size_t NN = N - static_cast<std::size_t>(R);
         U01SequenceSystematic<RngType> u01seq(NN, rng);
-        internal::trans_usrp(M, NN, residual_.data(), u01seq, replication);
+        resample_trans_u01_rep(M, NN, residual_.data(), u01seq, replication);
         for (std::size_t i = 0; i != M; ++i)
             replication[i] += static_cast<IntType>(integral_[i]);
     }
@@ -75,7 +67,7 @@ class Resample<internal::ResampleResidualSystematic>
     private:
     Vector<double> residual_;
     Vector<double> integral_;
-}; // Residual systematic resampling
+}; // ResampleResidualSystematic
 
 } // namespace vsmc
 

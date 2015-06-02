@@ -204,7 +204,7 @@ class Particle
                 replication_.resize(N);
                 copy_from_.resize(N);
                 op(N, N, resample_rng_, rwptr, replication_.data());
-                internal::trans_rpcf(
+                resample_trans_rep_cf(
                     N, N, replication_.data(), copy_from_.data());
                 value_.copy(N, copy_from_.data());
             } else {

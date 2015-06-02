@@ -33,21 +33,14 @@
 #define VSMC_RESAMPLE_STRATIFIED_HPP
 
 #include <vsmc/resample/internal/common.hpp>
+#include <vsmc/resample/transform.hpp>
 
 namespace vsmc
 {
 
-namespace internal
-{
-
-typedef std::integral_constant<ResampleScheme, Stratified> ResampleStratified;
-
-} // namespace vsmc::internal
-
 /// \brief Stratified resampling
 /// \ingroup Resample
-template <>
-class Resample<internal::ResampleStratified>
+class ResampleStratified
 {
     public:
     template <typename IntType, typename RngType>
@@ -55,9 +48,9 @@ class Resample<internal::ResampleStratified>
         const double *weight, IntType *replication)
     {
         U01SequenceStratified<RngType> u01seq(N, rng);
-        internal::trans_usrp(M, N, weight, u01seq, replication);
+        resample_trans_u01_rep(M, N, weight, u01seq, replication);
     }
-}; // Stratified resampling
+}; // ResampleStratified
 
 } // namespace vsmc
 

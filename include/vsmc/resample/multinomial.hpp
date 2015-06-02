@@ -33,22 +33,14 @@
 #define VSMC_RESAMPLE_MULTINOMIAL_HPP
 
 #include <vsmc/resample/internal/common.hpp>
+#include <vsmc/resample/transform.hpp>
 
 namespace vsmc
 {
 
-namespace internal
-{
-
-typedef std::integral_constant<ResampleScheme, Multinomial>
-    ResampleMultinomial;
-
-} // namespace vsmc::internal
-
 /// \brief Multinomial resampling
 /// \ingroup Resample
-template <>
-class Resample<internal::ResampleMultinomial>
+class ResampleMultinomial
 {
     public:
     template <typename IntType, typename RngType>
@@ -56,9 +48,9 @@ class Resample<internal::ResampleMultinomial>
         const double *weight, IntType *replication)
     {
         U01SequenceSorted<RngType> u01seq(N, rng);
-        internal::trans_usrp(M, N, weight, u01seq, replication);
+        resample_trans_u01_rep(M, N, weight, u01seq, replication);
     }
-}; // Mulitnomial resampling
+}; // ResampleMultinomial
 
 } // namespace vsmc
 

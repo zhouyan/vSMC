@@ -43,6 +43,7 @@
 
 namespace vsmc
 {
+
 struct NullType;
 
 /// \brief Dynamic dimension

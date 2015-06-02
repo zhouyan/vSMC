@@ -33,21 +33,14 @@
 #define VSMC_RESAMPLE_SYSTEMATIC_HPP
 
 #include <vsmc/resample/internal/common.hpp>
+#include <vsmc/resample/transform.hpp>
 
 namespace vsmc
 {
 
-namespace internal
-{
-
-typedef std::integral_constant<ResampleScheme, Systematic> ResampleSystematic;
-
-} // namespace vsmc::internal
-
 /// \brief Systematic resampling
 /// \ingroup Resample
-template <>
-class Resample<internal::ResampleSystematic>
+class ResampleSystematic
 {
     public:
     template <typename IntType, typename RngType>
@@ -55,9 +48,9 @@ class Resample<internal::ResampleSystematic>
         const double *weight, IntType *replication)
     {
         U01SequenceSystematic<RngType> u01seq(N, rng);
-        internal::trans_usrp(M, N, weight, u01seq, replication);
+        resample_trans_u01_rep(M, N, weight, u01seq, replication);
     }
-}; // Systematic resampling
+}; // ResampleSystematic
 
 } // namespace vsmc
 
