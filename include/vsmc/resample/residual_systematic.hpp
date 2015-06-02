@@ -69,6 +69,18 @@ class ResampleResidualSystematic
     Vector<double> integral_;
 }; // ResampleResidualSystematic
 
+namespace traits
+{
+
+/// \brief Type trait of ResidualSystematic scheme
+/// \ingroup Resample
+template <>
+struct ResampleTypeTrait<ResidualSystematic> {
+    typedef ResampleResidualSystematic type;
+};
+
+} // namespace vsmc::traits
+
 } // namespace vsmc
 
 #endif // VSMC_RESAMPLE_RESIDUAL_SYSTEMATIC_HPP

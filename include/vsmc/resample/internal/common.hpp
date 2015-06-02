@@ -53,6 +53,16 @@ namespace traits
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(
     ResampleRngType, resample_rng_type, VSMC_RESAMPLE_RNG_TYPE)
 
+/// \brief Type trait of ResampleScheme parameter
+/// \ingroup Resample
+template <ResampleScheme>
+struct ResampleTypeTrait;
+
+/// \brief Type of resample class corresponding to ResampleScheme parameter
+/// \ingroup Resample
+template <ResampleScheme Scheme>
+using ResampleType = typename ResampleTypeTrait<Scheme>::type;
+
 } // namespace vsmc::traits
 
 } // namespace vsmc

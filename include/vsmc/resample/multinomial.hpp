@@ -52,6 +52,18 @@ class ResampleMultinomial
     }
 }; // ResampleMultinomial
 
+namespace traits
+{
+
+/// \brief Type trait of Multinomial scheme
+/// \ingroup Resample
+template <>
+struct ResampleTypeTrait<Multinomial> {
+    typedef ResampleMultinomial type;
+};
+
+} // namespace vsmc::traits
+
 } // namespace vsmc
 
 #endif //  VSMC_RESAMPLE_MULTINOMIAL_HPP
