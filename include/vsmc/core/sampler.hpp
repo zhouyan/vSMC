@@ -69,9 +69,9 @@ class Sampler
 
     /// \brief Construct a Sampler without selection of resampling method
     explicit Sampler(size_type N)
-        : init_by_iter_(false)
+        : particle_(N)
+        , init_by_iter_(false)
         , resample_threshold_(resample_threshold_never())
-        , particle_(N)
         , iter_num_(0)
         , path_(typename Path<T>::eval_type())
     {
@@ -83,9 +83,9 @@ class Sampler
     /// \details
     /// By default, resampling will be performed at every iteration.
     Sampler(size_type N, ResampleScheme scheme)
-        : init_by_iter_(false)
+        : particle_(N)
+        , init_by_iter_(false)
         , resample_threshold_(resample_threshold_always())
-        , particle_(N)
         , iter_num_(0)
         , path_(typename Path<T>::eval_type())
     {
@@ -97,9 +97,9 @@ class Sampler
     /// \details
     /// By default, resampling will be performed at every iteration.
     Sampler(size_type N, const resample_type &res_op)
-        : init_by_iter_(false)
+        : particle_(N)
+        , init_by_iter_(false)
         , resample_threshold_(resample_threshold_always())
-        , particle_(N)
         , iter_num_(0)
         , path_(typename Path<T>::eval_type())
     {
@@ -109,9 +109,9 @@ class Sampler
     /// \brief Construct a Sampler with a built-in resampling scheme and a
     /// threshold for resampling
     Sampler(size_type N, ResampleScheme scheme, double resample_threshold)
-        : init_by_iter_(false)
+        : particle_(N)
+        , init_by_iter_(false)
         , resample_threshold_(resample_threshold)
-        , particle_(N)
         , iter_num_(0)
         , path_(typename Path<T>::eval_type())
     {
@@ -122,9 +122,9 @@ class Sampler
     /// threshold for resampling
     Sampler(
         size_type N, const resample_type &res_op, double resample_threshold)
-        : init_by_iter_(false)
+        : particle_(N)
+        , init_by_iter_(false)
         , resample_threshold_(resample_threshold)
-        , particle_(N)
         , iter_num_(0)
         , path_(typename Path<T>::eval_type())
     {
@@ -155,18 +155,21 @@ class Sampler
     Sampler<T> &clone(const Sampler<T> &other, bool retain_rng)
     {
         if (this != &other) {
-            if (retain_rng) {
-                typename Particle<T>::rng_set_type rset(
-                    std::move(particle_.rng_set()));
-                typename Particle<T>::resample_rng_type rrng(
-                    std::move(particle_.resample_rng()));
-                *this = other;
-                particle_.rng_set() = std::move(rset);
-                particle_.resample_rng() = std::move(rrng);
-                particle_.rng_set().resize(other.size());
-            } else {
-                *this = other;
-            }
+            particle_.clone(other.particle_, retain_rng);
+
+            init_by_iter_ = other.init_by_iter_;
+            init_ = other.init_;
+            move_queue_ = other.move_queue_;
+            mcmc_queue_ = other.mcmc_queue_;
+
+            resample_op_ = other.resample_op_;
+            resample_threshold_ = other.resample_threshold_;
+
+            iter_num_ = other.iter_num_;
+            size_history_ = other.size_history_;
+            ess_history_ = other.ess_history_;
+            resampled_history_ = other.resampled_history_;
+            accept_history_ = other.accept_history_;
         }
 
         return *this;
@@ -175,18 +178,21 @@ class Sampler
     Sampler<T> &clone(Sampler<T> &&other, bool retain_rng)
     {
         if (this != &other) {
-            if (retain_rng) {
-                typename Particle<T>::rng_set_type rset(
-                    std::move(particle_.rng_set()));
-                typename Particle<T>::resample_rng_type rrng(
-                    std::move(particle_.resample_rng()));
-                *this = std::move(other);
-                particle_.rng_set() = std::move(rset);
-                particle_.resample_rng() = std::move(rrng);
-                particle_.rng_set().resize(other.size());
-            } else {
-                *this = std::move(other);
-            }
+            particle_.clone(std::move(other.particle_), retain_rng);
+
+            init_by_iter_ = other.init_by_iter_;
+            init_ = std::move(other.init_);
+            move_queue_ = std::move(other.move_queue_);
+            mcmc_queue_ = std::move(other.mcmc_queue_);
+
+            resample_op_ = std::move(other.resample_op_);
+            resample_threshold_ = other.resample_threshold_;
+
+            iter_num_ = other.iter_num_;
+            size_history_ = std::move(other.size_history_);
+            ess_history_ = std::move(other.ess_history_);
+            resampled_history_ = std::move(other.resampled_history_);
+            accept_history_ = std::move(other.accept_history_);
         }
 
         return *this;
@@ -243,18 +249,10 @@ class Sampler
     Sampler<T> &resample_scheme(ResampleScheme scheme)
     {
         switch (scheme) {
-            case Multinomial:
-                resample_op_ = ResampleMultinomial();
-                break;
-            case Residual:
-                resample_op_ = ResampleResidual();
-                break;
-            case Stratified:
-                resample_op_ = ResampleStratified();
-                break;
-            case Systematic:
-                resample_op_ = ResampleSystematic();
-                break;
+            case Multinomial: resample_op_ = ResampleMultinomial(); break;
+            case Residual: resample_op_ = ResampleResidual(); break;
+            case Stratified: resample_op_ = ResampleStratified(); break;
+            case Systematic: resample_op_ = ResampleSystematic(); break;
             case ResidualStratified:
                 resample_op_ = ResampleResidualStratified();
                 break;
@@ -751,6 +749,8 @@ class Sampler
     }
 
     private:
+    Particle<T> particle_;
+
     bool init_by_iter_;
     init_type init_;
     Vector<move_type> move_queue_;
@@ -759,7 +759,6 @@ class Sampler
     resample_type resample_op_;
     double resample_threshold_;
 
-    Particle<T> particle_;
     std::size_t iter_num_;
     Vector<std::size_t> size_history_;
     Vector<double> ess_history_;

@@ -90,15 +90,13 @@ class Particle
     Particle<T> &clone(const Particle<T> &other, bool retain_rng)
     {
         if (this != &other) {
-            if (retain_rng) {
-                rng_set_type rset(std::move(rng_set_));
-                resample_rng_type rrng(std::move(resample_rng_));
-                *this = other;
-                rng_set_ = std::move(rset);
-                resample_rng_ = std::move(rrng);
-                rng_set_.resize(other.size());
-            } else {
-                *this = other;
+            size_ = other.size_;
+            value_ = other.value_;
+            weight_set_ = other.weight_set_;
+
+            if (!retain_rng) {
+                rng_set_ = other.rng_set_;
+                resample_rng_ = other.resample_rng_;
             }
         }
 
@@ -108,15 +106,13 @@ class Particle
     Particle<T> &clone(Particle<T> &&other, bool retain_rng)
     {
         if (this != &other) {
-            if (retain_rng) {
-                rng_set_type rset(std::move(rng_set_));
-                resample_rng_type rrng(std::move(resample_rng_));
-                *this = std::move(other);
-                rng_set_ = std::move(rset);
-                resample_rng_ = std::move(rrng);
-                rng_set_.resize(other.size());
-            } else {
-                *this = std::move(other);
+            size_ = other.size_;
+            value_ = std::move(other.value_);
+            weight_set_ = std::move(other.weight_set_);
+
+            if (!retain_rng) {
+                rng_set_ = other.rng_set_;
+                resample_rng_ = other.resample_rng_;
             }
         }
 
