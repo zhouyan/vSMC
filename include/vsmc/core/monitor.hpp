@@ -317,8 +317,8 @@ class Monitor
         const std::size_t N = static_cast<std::size_t>(particle.size());
         buffer_.resize(N * dim_);
         eval_(iter, dim_, particle, buffer_.data());
-        math::gemv(ColMajor, NoTrans, dim_, N, 1, buffer_.data(), dim_,
-            particle.weight_set().weight_data(), 1, 0, result_.data(), 1);
+        math::gemv(ColMajor, NoTrans, dim_, N, 1.0, buffer_.data(), dim_,
+            particle.weight_set().weight_data(), 1, 0.0, result_.data(), 1);
         push_back(iter);
     }
 
