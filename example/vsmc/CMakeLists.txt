@@ -108,7 +108,7 @@ ADD_HEADER_EXECUTABLE(vsmc/rng/internal/threefry_defines TRUE)
 
 ADD_HEADER_EXECUTABLE(vsmc/smp/smp TRUE "CILK" "GCD" "OMP" "STD" "TBB")
 ADD_HEADER_EXECUTABLE(vsmc/smp/backend_base TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/smp/backend_omp  TRUE "OMP")
+ADD_HEADER_EXECUTABLE(vsmc/smp/backend_omp  ${OPENMP_FOUND} "OMP")
 ADD_HEADER_EXECUTABLE(vsmc/smp/backend_seq  TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/smp/backend_tbb  ${TBB_FOUND} "TBB")
 

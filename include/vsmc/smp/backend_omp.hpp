@@ -33,9 +33,6 @@
 #define VSMC_SMP_BACKEND_OMP_HPP
 
 #include <vsmc/smp/backend_base.hpp>
-
-#if VSMC_HAS_OMP
-
 #include <omp.h>
 
 namespace vsmc
@@ -159,31 +156,5 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
 }; // class PathEvalOMP
 
 } // namespace vsmc
-
-#else // VSMC_HAS_OMP
-
-#include <vsmc/smp/backend_seq.hpp>
-
-namespace vsmc
-{
-
-template <typename StateBase>
-using StateOMP = StateSEQ<StateBase>;
-
-template <typename T, typename Derived>
-using InitializeOMP = InitializeSEQ<T, Derived>;
-
-template <typename T, typename Derived>
-using MoveOMP = MoveSEQ<T, Derived>;
-
-template <typename T, typename Derived>
-using MonitorEvalOMP = MonitorEvalSEQ<T, Derived>;
-
-template <typename T, typename Derived>
-using PathEvalOMP = PathEvalSEQ<T, Derived>;
-
-} // namespace vsmc
-
-#endif // VSMC_HAS_OMP
 
 #endif // VSMC_SMP_BACKEND_OMP_HPP
