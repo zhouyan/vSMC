@@ -54,14 +54,14 @@ class StateIndex
 
     std::size_t iter_size() const { return index_.size(); }
 
-    std::size_t operator()(size_type id, std::size_t iter) const
+    size_type operator()(size_type id, std::size_t iter) const
     {
         return index(id, iter);
     }
 
     size_type index(size_type id, std::size_t iter) const
     {
-        std::size_t iter_current = iter_size() - 1;
+        std::size_t iter_current = index_.size() - 1;
         size_type idx = index_.back()[id];
         while (iter_current != iter) {
             --iter_current;
@@ -94,10 +94,43 @@ class StateIndex
 
     void clear() { index_.clear(); }
 
+    template <MatrixOrder ROrder, typename OutputIter>
+    void read_index_matrix(OutputIter first) const
+    {
+        if (index_.size() == 0)
+            return;
+
+        if (index_.size() == 1) {
+            std::copy(index_.front().begin(), index_.front().end(), first);
+
+            return;
+        }
+
+        Vector<size_type> idxmat(size_ * index_.size());
+        size_type *cf = idxmat.data();
+        for (std::size_t d = 0; d != index_.size(); ++d)
+            cf = std::copy(index_[d].begin(), index_[d].end(), cf);
+        for (std::size_t d = 0; d != index_.size() - 1; ++d) {
+            cf -= size_;
+            size_type *ct = cf - size_;
+            for (std::size_t i = 0; i != size_; ++i)
+                ct[i] = ct[cf[i]];
+        }
+
+        if (ROrder == ColMajor)
+            std::copy(idxmat.begin(), idxmat.end(), first);
+
+        if (ROrder == RowMajor) {
+            for (size_type i = 0; i != size_; ++i)
+                for (std::size_t d = 0; d != index_.size(); ++d, ++first)
+                    *first = idxmat[d * size_ + i];
+        }
+    }
+
     private:
     size_type size_;
-    Vector<std::size_t> identity_;
-    Vector<Vector<std::size_t>> index_;
+    Vector<size_type> identity_;
+    Vector<Vector<size_type>> index_;
 }; // class StateIndex
 
 } // namespace vsmc
