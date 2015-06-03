@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/core/core.hpp
+// vSMC/include/vsmc/core/state_index.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,16 +29,77 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_CORE_CORE_HPP
-#define VSMC_CORE_CORE_HPP
+#ifndef VSMC_CORE_STATE_INDEX_HPP
+#define VSMC_CORE_STATE_INDEX_HPP
 
-#include <vsmc/core/monitor.hpp>
-#include <vsmc/core/particle.hpp>
-#include <vsmc/core/path.hpp>
-#include <vsmc/core/sampler.hpp>
-#include <vsmc/core/single_particle.hpp>
-#include <vsmc/core/state_index.hpp>
-#include <vsmc/core/state_matrix.hpp>
-#include <vsmc/core/weight_set.hpp>
+#include <vsmc/internal/common.hpp>
 
-#endif // VSMC_CORE_CORE_HPP
+namespace vsmc
+{
+
+/// \brief Record and access state index
+/// \ingroup Core
+class StateIndex
+{
+    public:
+    typedef std::size_t size_type;
+
+    StateIndex(size_type N) : size_(N), identity_(N)
+    {
+        for (size_type i = 0; i != N; ++i)
+            identity_[i] = i;
+    }
+
+    size_type size() const { return size_; }
+
+    std::size_t iter_size() const { return index_.size(); }
+
+    std::size_t operator()(size_type id, std::size_t iter) const
+    {
+        return index(id, iter);
+    }
+
+    size_type index(size_type id, std::size_t iter) const
+    {
+        std::size_t iter_current = iter_size() - 1;
+        size_type idx = index_.back()[id];
+        while (iter_current != iter) {
+            --iter_current;
+            idx = index_[iter_current][idx];
+        }
+
+        return idx;
+    }
+
+    void iterate() { index_.push_back(identity_); }
+
+    template <typename InputIter>
+    void iterate(InputIter first)
+    {
+        Vector<std::size_t> tmp(size_);
+        std::copy_n(first, size_, tmp.begin());
+        index_.push_back(std::move(tmp));
+    }
+
+    void reset(std::size_t iter)
+    {
+        std::copy(identity_.begin(), identity_.end(), index_[iter].begin());
+    }
+
+    template <typename InputIter>
+    void reset(std::size_t iter, InputIter first)
+    {
+        std::copy_n(first, size_, index_[iter].begin());
+    }
+
+    void clear() { index_.clear(); }
+
+    private:
+    size_type size_;
+    Vector<std::size_t> identity_;
+    Vector<Vector<std::size_t>> index_;
+}; // class StateIndex
+
+} // namespace vsmc
+
+#endif // VSMC_CORE_STATE_INDEX_HPP
