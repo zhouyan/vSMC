@@ -71,61 +71,49 @@ class StateIndex
         return idx;
     }
 
-    void iterate() { index_.push_back(identity_); }
+    Vector<Vector<size_type>> index() const
+    {
+        if (index_.size() <= 1)
+            return index_;
+
+        Vector<Vector<size_type>> idx(index_.size());
+        for (auto &v : idx)
+            v.resize(size_);
+
+        idx.back() = index_.back();
+        for (std::size_t iter = index_.size() - 1; iter != 0; --iter) {
+            size_type *ct = idx[iter - 1].data();
+            const size_type *cf = idx[iter].data();
+            const size_type *id = index_[iter - 1].data();
+            for (std::size_t i = 0; i != size_; ++i)
+                ct[i] = id[cf[i]];
+        }
+
+        return idx;
+    }
+
+    void push_back() { index_.push_back(identity_); }
 
     template <typename InputIter>
-    void iterate(InputIter first)
+    void push_back(InputIter first)
     {
         Vector<std::size_t> tmp(size_);
         std::copy_n(first, size_, tmp.begin());
         index_.push_back(std::move(tmp));
     }
 
-    void reset(std::size_t iter)
+    void fill(std::size_t iter)
     {
         std::copy(identity_.begin(), identity_.end(), index_[iter].begin());
     }
 
     template <typename InputIter>
-    void reset(std::size_t iter, InputIter first)
+    void fill(std::size_t iter, InputIter first)
     {
         std::copy_n(first, size_, index_[iter].begin());
     }
 
     void clear() { index_.clear(); }
-
-    template <MatrixOrder ROrder, typename OutputIter>
-    void read_index_matrix(OutputIter first) const
-    {
-        if (index_.size() == 0)
-            return;
-
-        if (index_.size() == 1) {
-            std::copy(index_.front().begin(), index_.front().end(), first);
-
-            return;
-        }
-
-        Vector<size_type> idxmat(size_ * index_.size());
-        size_type *cf = idxmat.data();
-        for (std::size_t d = 0; d != index_.size(); ++d)
-            cf = std::copy(index_[d].begin(), index_[d].end(), cf);
-        for (std::size_t d = 0; d != index_.size() - 1; ++d) {
-            cf -= size_;
-            size_type *ct = cf - size_;
-            for (std::size_t i = 0; i != size_; ++i)
-                ct[i] = ct[cf[i]];
-        }
-
-        if (ROrder == ColMajor)
-            std::copy(idxmat.begin(), idxmat.end(), first);
-
-        if (ROrder == RowMajor) {
-            for (size_type i = 0; i != size_; ++i)
-                for (std::size_t d = 0; d != index_.size(); ++d, ++first)
-                    *first = idxmat[d * size_ + i];
-        }
-    }
 
     private:
     size_type size_;
