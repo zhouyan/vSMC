@@ -54,17 +54,19 @@ namespace internal
 {
 
 template <std::size_t>
-struct ARSWeylConstant;
+class ARSWeylConstant;
 
 template <>
-struct ARSWeylConstant<0> : public std::integral_constant<std::uint64_t,
-                                UINT64_C(0xBB67AE8584CAA73B)> {
-};
+class ARSWeylConstant<0> : public std::integral_constant<std::uint64_t,
+                               UINT64_C(0xBB67AE8584CAA73B)>
+{
+}; // class ARSWeylConstant
 
 template <>
-struct ARSWeylConstant<1> : public std::integral_constant<std::uint64_t,
-                                UINT64_C(0x9E3779B97F4A7C15)> {
-};
+class ARSWeylConstant<1> : public std::integral_constant<std::uint64_t,
+                               UINT64_C(0x9E3779B97F4A7C15)>
+{
+}; // class ARSWeylConstant
 
 } // namespace vsmc::internal
 
@@ -75,8 +77,9 @@ struct ARSWeylConstant<1> : public std::integral_constant<std::uint64_t,
 /// The two specializaiton (N = 0, 1) corresponds to lower and upper 64-bits
 /// or the Weyl constant.
 template <std::size_t I>
-struct ARSWeylConstantTrait : public internal::ARSWeylConstant<I> {
-};
+class ARSWeylConstantTrait : public internal::ARSWeylConstant<I>
+{
+}; // class ARSWeylConstantTrait
 
 /// \brief Default ARSEngine key sequence generator
 /// \ingroup AESNIRNG

@@ -59,18 +59,22 @@ namespace internal
 {
 
 template <std::uint64_t, std::uint64_t>
-struct UniformRealDistributionIntType;
+class UniformRealDistributionIntType;
 
 template <>
-struct UniformRealDistributionIntType<0,
-    static_cast<std::uint64_t>(VSMC_MAX_UINT(std::uint32_t))> {
+class UniformRealDistributionIntType<0,
+    static_cast<std::uint64_t>(VSMC_MAX_UINT(std::uint32_t))>
+{
+    public:
     typedef std::uint32_t type;
-};
+}; // class UniformRealDistributionIntType
 
 template <>
-struct UniformRealDistributionIntType<0, VSMC_MAX_UINT(std::uint64_t)> {
+class UniformRealDistributionIntType<0, VSMC_MAX_UINT(std::uint64_t)>
+{
+    public:
     typedef std::uint64_t type;
-};
+}; // class UniformRealDistributionIntType
 
 } // namespace vsmc::interal
 
@@ -93,7 +97,9 @@ class UniformRealDistribution
     public:
     typedef RealType result_type;
 
-    struct param_type {
+    class param_type
+    {
+        public:
         typedef RealType result_type;
 
         typedef UniformRealDistribution<RealType, Left, Right>

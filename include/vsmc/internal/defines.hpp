@@ -44,27 +44,27 @@
 namespace vsmc
 {
 
-struct NullType;
+class NullType;
 
 /// \brief Dynamic dimension
 /// \ingroup Definitions
 enum {
     Dynamic = 0 ///< Used to specify a dimension template parameter is dynamic
-};
+};              // enum
 
 /// \brief Matrix order
 /// \ingroup Definitions
 enum MatrixOrder {
     RowMajor = 101, ///< Data are stored row by row in memory
     ColMajor = 102  ///< Data are stored column by column in memory
-};
+};                  // enum MatrixOrder
 
 /// \brief Matrix Transpose
 /// \ingroup Definitions
 enum MatrixTrans {
     NoTrans = 111, ///< The matrix shall not be transposed
     Trans = 112    ///< The matrix shall be transposed
-};
+};                 // enum MatrixTrans
 
 /// \brief Resampling schemes
 /// \ingroup Definitions
@@ -75,7 +75,7 @@ enum ResampleScheme {
     Systematic,         ///< Systematic resampling
     ResidualStratified, ///< Stratified resampling on residuals
     ResidualSystematic  ///< Systematic resampling on residuals
-};
+};                      // enum ResampleScheme
 
 } // namespace vsmc
 

@@ -37,8 +37,9 @@
 
 #define VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(N, val)                            \
     template <>                                                               \
-    struct AESRoundConstant<N> : public std::integral_constant<int, val> {    \
-    };
+    class AESRoundConstant<N> : public std::integral_constant<int, val>       \
+    {                                                                         \
+    }; // class AESRoundConstant
 
 /// \brief AESEngine default blocks
 /// \ingroup Config
@@ -53,7 +54,7 @@ namespace internal
 {
 
 template <std::size_t N>
-struct AESRoundConstant;
+class AESRoundConstant;
 
 VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0x00, 0x8D)
 VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0x01, 0x01)
@@ -312,7 +313,9 @@ VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0xFD, 0xE8)
 VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0xFE, 0xCB)
 VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0xFF, 0x8D)
 
-struct AESKeyInit {
+class AESKeyInit
+{
+    public:
     template <std::size_t Offset, std::size_t N, typename T,
         std::size_t KeySize, std::size_t Rp1>
     static void eval(const std::array<T, KeySize> &key,
@@ -338,7 +341,7 @@ struct AESKeyInit {
         tmp.load(key.data());
         std::get<N>(ks) = xmm = tmp.value();
     }
-}; // struct AESKeyInit
+}; // class AESKeyInit
 
 } // namespace vsmc::internal
 

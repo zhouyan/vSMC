@@ -55,7 +55,7 @@ enum MonitorStage {
     MonitorMove,     ///< Monitor evaluated after moves
     MonitorResample, ///< Monitor evaluated after resampling
     MonitorMCMC      ///< Monitor evaluated after MCMC moves
-};
+};                   // enum MonitorStage
 
 /// \brief Monitor for Monte Carlo integration
 /// \ingroup Core

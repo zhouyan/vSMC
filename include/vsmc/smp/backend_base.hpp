@@ -84,7 +84,10 @@
 namespace vsmc
 {
 
-struct Virtual;
+/// \brief Template type parameter that cause the base class to use dynamic
+/// dispatch
+/// \ingroup SMP
+class Virtual;
 
 /// \brief Initialize base dispatch class
 /// \ingroup SMP

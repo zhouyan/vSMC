@@ -39,20 +39,23 @@
 
 #define VSMC_DEFINE_TYPE_DISPATCH_TRAIT(Outer, Inner, Default)                \
     template <typename T>                                                     \
-    struct Outer##Trait;                                                      \
+    class Outer##Trait;                                                       \
                                                                               \
     namespace internal                                                        \
     {                                                                         \
                                                                               \
     template <typename T>                                                     \
-    struct Has##Outer##Impl {                                                 \
-        private:                                                              \
-        struct char2 {                                                        \
+    class Has##Outer##Impl                                                    \
+    {                                                                         \
+        class char2                                                           \
+        {                                                                     \
             char c1;                                                          \
             char c2;                                                          \
         };                                                                    \
+                                                                              \
         template <typename U>                                                 \
         static char test(typename U::Inner *);                                \
+                                                                              \
         template <typename U>                                                 \
         static char2 test(...);                                               \
                                                                               \
@@ -62,26 +65,34 @@
     };                                                                        \
                                                                               \
     template <typename T>                                                     \
-    struct Has##Outer                                                         \
-        : public std::integral_constant<bool, Has##Outer##Impl<T>::value> {   \
+    class Has##Outer                                                          \
+        : public std::integral_constant<bool, Has##Outer##Impl<T>::value>     \
+    {                                                                         \
     };                                                                        \
                                                                               \
     template <typename T, bool>                                               \
-    struct Outer##Dispatch;                                                   \
+    class Outer##Dispatch;                                                    \
                                                                               \
     template <typename T>                                                     \
-    struct Outer##Dispatch<T, false> {                                        \
+    class Outer##Dispatch<T, false>                                           \
+    {                                                                         \
+        public:                                                               \
         typedef Default type;                                                 \
     };                                                                        \
                                                                               \
     template <typename T>                                                     \
-    struct Outer##Dispatch<T, true> {                                         \
+    class Outer##Dispatch<T, true>                                            \
+    {                                                                         \
+        public:                                                               \
         typedef typename T::Inner type;                                       \
     };                                                                        \
-    }                                                                         \
+                                                                              \
+    } /* namespace interanl */                                                \
                                                                               \
     template <typename T>                                                     \
-    struct Outer##Trait {                                                     \
+    class Outer##Trait                                                        \
+    {                                                                         \
+        public:                                                               \
         static constexpr bool value = internal::Has##Outer<T>::value;         \
         typedef typename internal::Outer##Dispatch<T, value>::type type;      \
     };                                                                        \
@@ -91,20 +102,23 @@
 
 #define VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(Outer, Inner, Default)       \
     template <typename T>                                                     \
-    struct Outer##Trait;                                                      \
+    class Outer##Trait;                                                       \
                                                                               \
     namespace internal                                                        \
     {                                                                         \
                                                                               \
     template <typename T>                                                     \
-    struct Has##Outer##Impl {                                                 \
-        private:                                                              \
-        struct char2 {                                                        \
+    class Has##Outer##Impl                                                    \
+    {                                                                         \
+        class char2                                                           \
+        {                                                                     \
             char c1;                                                          \
             char c2;                                                          \
         };                                                                    \
+                                                                              \
         template <typename U>                                                 \
         static char test(typename U::template Inner<T> *);                    \
+                                                                              \
         template <typename U>                                                 \
         static char2 test(...);                                               \
                                                                               \
@@ -114,26 +128,33 @@
     };                                                                        \
                                                                               \
     template <typename T>                                                     \
-    struct Has##Outer                                                         \
-        : public std::integral_constant<bool, Has##Outer##Impl<T>::value> {   \
+    class Has##Outer                                                          \
+        : public std::integral_constant<bool, Has##Outer##Impl<T>::value>     \
+    {                                                                         \
     };                                                                        \
                                                                               \
     template <typename T, bool>                                               \
-    struct Outer##Dispatch;                                                   \
+    class Outer##Dispatch;                                                    \
                                                                               \
     template <typename T>                                                     \
-    struct Outer##Dispatch<T, false> {                                        \
+    class Outer##Dispatch<T, false>                                           \
+    {                                                                         \
+        public:                                                               \
         typedef Default<T> type;                                              \
     };                                                                        \
                                                                               \
     template <typename T>                                                     \
-    struct Outer##Dispatch<T, true> {                                         \
+    class Outer##Dispatch<T, true>                                            \
+    {                                                                         \
+        public:                                                               \
         typedef typename T::template Inner<T> type;                           \
     };                                                                        \
     }                                                                         \
                                                                               \
     template <typename T>                                                     \
-    struct Outer##Trait {                                                     \
+    class Outer##Trait                                                        \
+    {                                                                         \
+        public:                                                               \
         static constexpr bool value = internal::Has##Outer<T>::value;         \
         typedef typename internal::Outer##Dispatch<T, value>::type type;      \
     };                                                                        \
@@ -143,24 +164,32 @@
 
 #define VSMC_DEFINE_METHOD_CHECKER(name, RT, Args)                            \
     template <typename U>                                                     \
-    struct has_##name##_impl_ {                                               \
-        private:                                                              \
-        struct char2 {                                                        \
+    class has_##name##_impl_                                                  \
+    {                                                                         \
+        class char2                                                           \
+        {                                                                     \
             char c1;                                                          \
             char c2;                                                          \
         };                                                                    \
+                                                                              \
         template <typename V, RT(V::*) Args>                                  \
-        struct sfinae_;                                                       \
+        class sfinae_;                                                        \
+                                                                              \
         template <typename V, RT(V::*) Args const>                            \
-        struct sfinae_const_;                                                 \
+        class sfinae_const_;                                                  \
+                                                                              \
         template <typename V, RT(*) Args>                                     \
-        struct sfinae_static_;                                                \
+        class sfinae_static_;                                                 \
+                                                                              \
         template <typename V>                                                 \
         static char test(sfinae_<V, &V::name> *);                             \
+                                                                              \
         template <typename V>                                                 \
         static char test(sfinae_const_<V, &V::name> *);                       \
+                                                                              \
         template <typename V>                                                 \
         static char test(sfinae_static_<V, &V::name> *);                      \
+                                                                              \
         template <typename V>                                                 \
         static char2 test(...);                                               \
                                                                               \
@@ -170,9 +199,10 @@
     };                                                                        \
                                                                               \
     template <typename U>                                                     \
-    struct has_##name##_                                                      \
-        : public std::integral_constant<bool, has_##name##_impl_<U>::value> { \
-    };
+    class has_##name##_                                                       \
+        : public std::integral_constant<bool, has_##name##_impl_<U>::value>   \
+    {                                                                         \
+    }; // class has_##name##_
 
 namespace vsmc
 {

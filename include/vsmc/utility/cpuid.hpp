@@ -40,23 +40,27 @@
 
 #define VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(feat, a, c, i, b)              \
     template <>                                                               \
-    struct CPUIDFeatureInfo<CPUIDFeature##feat> {                             \
+    class CPUIDFeatureInfo<CPUIDFeature##feat>                                \
+    {                                                                         \
+        public:                                                               \
         static std::string str() { return std::string(#feat); }               \
         static constexpr unsigned eax = a##U;                                 \
         static constexpr unsigned ecx = c##U;                                 \
         static constexpr unsigned bit = b##U;                                 \
         static constexpr std::size_t index = i;                               \
-    };
+    }; // class CPUIDFeatureInfo
 
 #define VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO_EXT(feat, a, c, i, b)          \
     template <>                                                               \
-    struct CPUIDFeatureInfo<CPUIDFeatureExt##feat> {                          \
+    class CPUIDFeatureInfo<CPUIDFeatureExt##feat>                             \
+    {                                                                         \
+        public:                                                               \
         static std::string str() { return std::string(#feat); }               \
         static constexpr unsigned eax = 0x80000000U + a##U;                   \
         static constexpr unsigned ecx = c##U;                                 \
         static constexpr unsigned bit = b##U;                                 \
         static constexpr std::size_t index = i;                               \
-    };
+    }; // CPUIDFeatureInfo
 
 namespace vsmc
 {
@@ -245,7 +249,9 @@ enum CPUIDCacheType {
 /// \details
 /// This class is specialized for each value of CPUIDFeature
 template <CPUIDFeature>
-struct CPUIDFeatureInfo {
+class CPUIDFeatureInfo
+{
+    public:
     /// \brief A short string representing the feature
     static std::string str();
 
@@ -260,7 +266,7 @@ struct CPUIDFeatureInfo {
 
     /// \brief The bit number of the feature in the register
     static constexpr unsigned bit = 0x00U;
-}; // struct CPUIDFeatureInfo
+}; // class CPUIDFeatureInfo
 
 VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(SSE3, 0x01, 0x00, 2, 0)
 VSMC_DEFINE_UTILITY_CPUID_FEATURE_INFO(PCLMULQDQ, 0x01, 0x00, 2, 1)
@@ -420,7 +426,9 @@ class CPUID
     typedef std::array<unsigned, 4> reg_type;
 
     /// \brief Structure of deterministic cache parameter
-    struct cache_param_type {
+    class cache_param_type
+    {
+        public:
         cache_param_type(const reg_type &reg)
             : level_(0)
             , max_proc_sharing_(0)
@@ -520,7 +528,7 @@ class CPUID
         bool wbinvd_;
         bool inclusiveness_;
         bool complex_indexing_;
-    }; // struct cache_param_type
+    }; // class cache_param_type
 
     /// \brief Get CPU feature using CPUID
     template <typename CharT, typename Traits>

@@ -53,7 +53,7 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(
 /// \brief Type trait of ResampleScheme parameter
 /// \ingroup Resample
 template <ResampleScheme>
-struct ResampleTypeTrait;
+class ResampleTypeTrait;
 
 /// \brief Type of resample class corresponding to ResampleScheme parameter
 /// \ingroup Resample

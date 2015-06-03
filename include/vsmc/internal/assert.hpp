@@ -95,14 +95,18 @@ namespace internal
 {
 
 template <bool>
-struct StaticAssert {
+class StaticAssert
+{
+    public:
     static void test(int *) {}
-};
+}; // class StaticAssert
 
 template <>
-struct StaticAssert<true> {
+class StaticAssert<true>
+{
+    public:
     static void test(...) {}
-};
+}; // class StaticAssert
 
 } // namespace vsmc::internal
 

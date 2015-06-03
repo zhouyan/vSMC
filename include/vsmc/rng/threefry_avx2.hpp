@@ -43,7 +43,9 @@ namespace internal
 {
 
 template <typename ResultType, std::size_t K>
-struct ThreefryParPackAVX2 {
+class ThreefryParPackAVX2
+{
+    public:
     typedef std::array<ResultType, K + 1> par_type;
     typedef std::array<M256I<ResultType>, K + 1> par256_type;
 
@@ -65,10 +67,12 @@ struct ThreefryParPackAVX2 {
         pack<N + 1>(
             par, par256, std::integral_constant<bool, N + 1 < K + 1>());
     }
-}; // struct ThreefryParPackAVX2
+}; // class ThreefryParPackAVX2
 
 template <typename ResultType, std::size_t K>
-struct ThreefryCtrPackAVX2 {
+class ThreefryCtrPackAVX2
+{
+    public:
     typedef std::array<M256I<ResultType>, K> state_type;
     typedef std::array<ResultType, K> ctr_type;
     typedef std::array<ctr_type, M256I<ResultType>::size()> ctr_block_type;
@@ -119,7 +123,7 @@ struct ThreefryCtrPackAVX2 {
             std::get<N>(std::get<2>(ctr_block)),
             std::get<N>(std::get<3>(ctr_block)));
     }
-}; // struct ThreefryCtrPackAVX2
+}; // class ThreefryCtrPackAVX2
 
 } // namespace vsmc::internal
 

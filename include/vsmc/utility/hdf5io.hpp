@@ -61,7 +61,9 @@ inline void hdf5io_matrix_dim<ColMajor>(
 }
 
 template <typename T>
-struct HDF5LoadDataPtr {
+class HDF5LoadDataPtr
+{
+    public:
     HDF5LoadDataPtr() : ptr_(nullptr) {}
 
     template <typename OutputIter>
@@ -79,10 +81,12 @@ struct HDF5LoadDataPtr {
     private:
     T *ptr_;
     Vector<T> data_;
-}; // struct HDF5LoadDataPtr
+}; // class HDF5LoadDataPtr
 
 template <typename T>
-struct HDF5StoreDataPtr {
+class HDF5StoreDataPtr
+{
+    public:
     HDF5StoreDataPtr() : ptr_(nullptr) {}
 
     template <typename InputIter>
@@ -115,7 +119,7 @@ struct HDF5StoreDataPtr {
     private:
     const T *ptr_;
     Vector<T> data_;
-}; // struct HDF5StoreDataPtr
+}; // class HDF5StoreDataPtr
 
 } // namespace vsmc::internal
 

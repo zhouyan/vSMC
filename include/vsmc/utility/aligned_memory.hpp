@@ -265,9 +265,11 @@ class AlignedAllocator : public std::allocator<T>
     typedef typename std::allocator<T>::pointer pointer;
 
     template <typename U>
-    struct rebind {
+    class rebind
+    {
+        public:
         typedef AlignedAllocator<U, Alignment> other;
-    };
+    }; // class rebind
 
     AlignedAllocator() { VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY; }
 

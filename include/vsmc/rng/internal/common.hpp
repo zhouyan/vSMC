@@ -47,7 +47,7 @@ namespace internal
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
 
 template <typename SeedSeq, typename U, typename V = U, typename W = V>
-struct is_seed_seq
+class is_seed_seq
     : public std::integral_constant<bool,
           !std::is_convertible<SeedSeq, U>::value &&
               !std::is_convertible<SeedSeq, V>::value &&
@@ -56,9 +56,9 @@ struct is_seed_seq
                   U>::value &&
               !std::is_same<typename std::remove_cv<SeedSeq>::type,
                   V>::value &&
-              !std::is_same<typename std::remove_cv<SeedSeq>::type,
-                  W>::value> {
-};
+              !std::is_same<typename std::remove_cv<SeedSeq>::type, W>::value>
+{
+}; // class is_seed_seq
 
 template <std::size_t, typename T, std::size_t K>
 inline static void increment_single(std::array<T, K> &ctr, std::false_type)

@@ -105,32 +105,38 @@ class MKLBetaDistribution;
 /// This traits also need to have two static constant member data, `min` and
 /// `max`
 template <MKL_INT, typename>
-struct MKLUniformBitsTrait;
+class MKLUniformBitsTrait;
 
 /// \brief Default uniform bits generator for MKLEngine with `unsigned` output
 /// \ingroup Traits
 template <MKL_INT BRNG>
-struct MKLUniformBitsTrait<BRNG, unsigned> {
+class MKLUniformBitsTrait<BRNG, unsigned>
+{
+    public:
     typedef MKLUniformBits32Distribution type;
     static constexpr unsigned min VSMC_MNE = 0;
     static constexpr unsigned max VSMC_MNE = VSMC_MAX_UINT(unsigned);
-};
+}; // class MKLUniformBitsTrait
 
 /// \brief Default uniform bits generator for MKLEngine with
 /// `unsigned MKL_INT64` output
 /// \ingroup Traits
 template <MKL_INT BRNG>
-struct MKLUniformBitsTrait<BRNG, unsigned MKL_INT64> {
+class MKLUniformBitsTrait<BRNG, unsigned MKL_INT64>
+{
+    public:
     typedef MKLUniformBits64Distribution type;
     static constexpr unsigned MKL_INT64 min VSMC_MNE = 0;
     static constexpr unsigned MKL_INT64 max VSMC_MNE =
         VSMC_MAX_UINT(unsigned MKL_INT64);
-};
+}; // class MKLUniformBitsTrait
 
 namespace internal
 {
 
-struct MKLSkipAheadVSL {
+class MKLSkipAheadVSL
+{
+    public:
     typedef long long size_type;
 
     template <MKL_INT BRNG>
@@ -146,10 +152,12 @@ struct MKLSkipAheadVSL {
 
     static void buffer_size(MKL_INT) {}
     static MKL_INT buffer_size() { return 0; }
-}; // struct SkipAheadVSL
+}; // class SkipAheadVSL
 
 template <MKL_INT BRNG, typename ResultType>
-struct MKLSkipAheadForce {
+class MKLSkipAheadForce
+{
+    public:
     typedef MKL_INT size_type;
 
     MKLSkipAheadForce() : buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE) {}
@@ -186,37 +194,49 @@ struct MKLSkipAheadForce {
     Vector<ResultType> buffer_;
     typename MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
     MKL_INT buffer_size_;
-}; // strut SkipAheadForce
+}; // class SkipAheadForce
 
 template <MKL_INT BRNG, typename ResultType>
-struct MKLSkipAhead {
+class MKLSkipAhead
+{
+    public:
     typedef MKLSkipAheadForce<BRNG, ResultType> type;
-};
+}; // clas MKLSkipAhead
 
 template <typename ResultType>
-struct MKLSkipAhead<VSL_BRNG_MCG31, ResultType> {
+class MKLSkipAhead<VSL_BRNG_MCG31, ResultType>
+{
+    public:
     typedef MKLSkipAheadVSL type;
-};
+}; // clas MKLSkipAhead
 
 template <typename ResultType>
-struct MKLSkipAhead<VSL_BRNG_MCG59, ResultType> {
+class MKLSkipAhead<VSL_BRNG_MCG59, ResultType>
+{
+    public:
     typedef MKLSkipAheadVSL type;
-};
+}; // clas MKLSkipAhead
 
 template <typename ResultType>
-struct MKLSkipAhead<VSL_BRNG_MRG32K3A, ResultType> {
+class MKLSkipAhead<VSL_BRNG_MRG32K3A, ResultType>
+{
+    public:
     typedef MKLSkipAheadVSL type;
-};
+}; // clas MKLSkipAhead
 
 template <typename ResultType>
-struct MKLSkipAhead<VSL_BRNG_SOBOL, ResultType> {
+class MKLSkipAhead<VSL_BRNG_SOBOL, ResultType>
+{
+    public:
     typedef MKLSkipAheadVSL type;
-};
+}; // clas MKLSkipAhead
 
 template <typename ResultType>
-struct MKLSkipAhead<VSL_BRNG_NIEDERR, ResultType> {
+class MKLSkipAhead<VSL_BRNG_NIEDERR, ResultType>
+{
+    public:
     typedef MKLSkipAheadVSL type;
-};
+}; // clas MKLSkipAhead
 
 } // namespace vsmc::internal
 
@@ -229,8 +249,7 @@ class MKLEngine
     typedef ResultType result_type;
     typedef MKLStream<BRNG> stream_type;
 
-    explicit MKLEngine(
-        MKL_UINT s = MKLSeedTrait<BRNG>::value, MKL_INT offset = 0)
+    explicit MKLEngine(MKL_UINT s = MKLSeed<BRNG>::value, MKL_INT offset = 0)
         : stream_(s, offset)
         , buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE)
         , index_(buffer_size_)

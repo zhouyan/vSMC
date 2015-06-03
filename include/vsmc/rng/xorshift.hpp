@@ -157,42 +157,54 @@ inline void xorshift_right_shift(std::array<T, K> &state)
 }
 
 template <bool, typename ResultType, unsigned>
-struct XorshiftLeft {
-    static ResultType shift(ResultType x) { return x; }
-};
+class XorshiftLeft
+{
+    public:
+    static ResultType eval(ResultType x) { return x; }
+}; // class XorshiftLeft
 
 template <typename ResultType, unsigned A>
-struct XorshiftLeft<true, ResultType, A> {
-    static ResultType shift(ResultType x) { return x ^ (x << A); }
-};
+class XorshiftLeft<true, ResultType, A>
+{
+    public:
+    static ResultType eval(ResultType x) { return x ^ (x << A); }
+}; // class XorshiftLeft
 
 template <bool, typename ResultType, unsigned>
-struct XorshiftRight {
-    static ResultType shift(ResultType x) { return x; }
-};
+class XorshiftRight
+{
+    public:
+    static ResultType eval(ResultType x) { return x; }
+}; // class XorshiftRight
 
 template <typename ResultType, unsigned A>
-struct XorshiftRight<true, ResultType, A> {
-    static ResultType shift(ResultType x) { return x ^ (x >> A); }
-};
+class XorshiftRight<true, ResultType, A>
+{
+    public:
+    static ResultType eval(ResultType x) { return x ^ (x >> A); }
+}; // class XorshiftRight
 
 template <typename ResultType, std::size_t K, std::size_t R, std::size_t S,
     bool = (K <= 8)>
-struct XorshiftIndex {
+class XorshiftIndex
+{
+    public:
     void reset() {}
 
     static constexpr std::size_t r() { return K - R; }
     static constexpr std::size_t s() { return K - S; }
     static constexpr std::size_t k() { return K - 1; }
 
-    static void shift(std::array<ResultType, K> &state)
+    static void eval(std::array<ResultType, K> &state)
     {
         xorshift_left_shift<K, 1, false>(state);
     }
-}; // struct XorshiftIndex
+}; // class XorshiftIndex
 
 template <typename ResultType, std::size_t K, std::size_t R, std::size_t S>
-struct XorshiftIndex<ResultType, K, R, S, false> {
+class XorshiftIndex<ResultType, K, R, S, false>
+{
+    public:
     XorshiftIndex() : iter_(0) {}
 
     void reset() { iter_ = 0; }
@@ -201,11 +213,11 @@ struct XorshiftIndex<ResultType, K, R, S, false> {
     std::size_t s() { return (K - S + iter_) % K; }
     std::size_t k() { return (K - 1 + iter_) % K; }
 
-    void shift(std::array<ResultType, K> &) { iter_ = (iter_ + 1) % K; }
+    void eval(std::array<ResultType, K> &) { iter_ = (iter_ + 1) % K; }
 
     private:
     std::size_t iter_;
-}; // struct XorshiftIndex
+}; // class XorshiftIndex
 
 template <unsigned A, unsigned B, unsigned C, unsigned, typename ResultType,
     std::size_t R, std::size_t S>
@@ -225,14 +237,14 @@ inline ResultType xorshift(std::array<ResultType, K> &state,
     XorshiftIndex<ResultType, K, R, S> &index)
 {
     ResultType xr = state[index.r()];
-    xr = XorshiftLeft<A != 0, ResultType, A>::shift(xr);
-    xr = XorshiftRight<B != 0, ResultType, B>::shift(xr);
+    xr = XorshiftLeft<A != 0, ResultType, A>::eval(xr);
+    xr = XorshiftRight<B != 0, ResultType, B>::eval(xr);
 
     ResultType xs = state[index.s()];
-    xs = XorshiftLeft<C != 0, ResultType, C>::shift(xs);
-    xs = XorshiftRight<D != 0, ResultType, D>::shift(xs);
+    xs = XorshiftLeft<C != 0, ResultType, C>::eval(xs);
+    xs = XorshiftRight<D != 0, ResultType, D>::eval(xs);
 
-    index.shift(state);
+    index.eval(state);
 
     return state[index.k()] = xs ^ xr;
 }

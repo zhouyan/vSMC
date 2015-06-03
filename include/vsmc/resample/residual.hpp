@@ -72,9 +72,11 @@ class ResampleResidual
 /// \brief Type trait of Residual scheme
 /// \ingroup Resample
 template <>
-struct ResampleTypeTrait<Residual> {
+class ResampleTypeTrait<Residual>
+{
+    public:
     typedef ResampleResidual type;
-};
+}; // class ResampleTypeTrait
 
 } // namespace vsmc
 

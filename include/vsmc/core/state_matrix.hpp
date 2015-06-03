@@ -98,7 +98,9 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         std::array<T, Dim>>::type state_pack_type;
 
     template <typename S>
-    struct single_particle_type : public SingleParticleBase<S> {
+    class single_particle_type : public SingleParticleBase<S>
+    {
+        public:
         single_particle_type(
             typename Particle<S>::size_type id, Particle<S> *pptr)
             : SingleParticleBase<S>(id, pptr)
@@ -111,7 +113,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         {
             return this->particle().value().state(this->id(), pos);
         }
-    }; // struct single_particle_type
+    }; // class single_particle_type
 
     void resize_dim(std::size_t dim)
     {

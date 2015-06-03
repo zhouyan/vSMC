@@ -75,13 +75,14 @@ VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
 /// requirement.
 /// ~~~{.cpp}
 /// template <typename S> // S: StateType, such as StateMatrix<Dim, T>
-/// struct single_particle_type
+/// class single_particle_type
 /// {
+///     public:
 ///     typedef IntType size_type;
 ///     single_particle_type(size_type id, Particle<S> *pptr);
 ///     size_type id() const;
 ///     Particle<S> &particle() const;
-/// };
+/// }; // class single_particle_type
 /// ~~~
 /// Usually you can safely derive `single_particle_type<S>` from
 /// SingleParticleBase<S> and add methods specific to `S`.

@@ -54,14 +54,16 @@
 
 #define VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(T, I, val)                       \
     template <>                                                               \
-    struct PhiloxWeylConstant<T, I> : public std::integral_constant<T, val> { \
-    };
+    class PhiloxWeylConstant<T, I> : public std::integral_constant<T, val>    \
+    {                                                                         \
+    }; // class PhiloxWeylConstant
 
 #define VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(T, K, I, val)                   \
     template <>                                                               \
-    struct PhiloxRoundConstant<T, K, I>                                       \
-        : public std::integral_constant<T, val> {                             \
-    };
+    class PhiloxRoundConstant<T, K, I>                                        \
+        : public std::integral_constant<T, val>                               \
+    {                                                                         \
+    }; // PhiloxRoundConstant
 
 /// \brief PhiloxEngine default rounds
 /// \ingroup Config
@@ -76,7 +78,7 @@ namespace internal
 {
 
 template <typename, std::size_t>
-struct PhiloxWeylConstant;
+class PhiloxWeylConstant;
 
 VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(std::uint32_t, 0, UINT32_C(0x9E3779B9))
 VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(std::uint32_t, 1, UINT32_C(0xBB67AE85))
@@ -87,7 +89,7 @@ VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(
     std::uint64_t, 1, UINT64_C(0xBB67AE8584CAA73B))
 
 template <typename, std::size_t, std::size_t>
-struct PhiloxRoundConstant;
+class PhiloxRoundConstant;
 
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
     std::uint32_t, 2, 0, UINT32_C(0xD256D193))
@@ -106,26 +108,32 @@ VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
     std::uint64_t, 4, 1, UINT64_C(0xCA5A826395121157))
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 1)>
-struct PhiloxBumpKey {
+class PhiloxBumpKey
+{
+    public:
     static void eval(std::array<ResultType, K / 2> &) {}
-};
+}; // class PhiloxBumpKey
 
 template <typename ResultType, std::size_t N>
-struct PhiloxBumpKey<ResultType, 2, N, true> {
+class PhiloxBumpKey<ResultType, 2, N, true>
+{
+    public:
     static void eval(std::array<ResultType, 1> &par)
     {
         std::get<0>(par) += PhiloxWeylConstant<ResultType, 0>::value;
     }
-}; // struct PhiloxBumpKey
+}; // class PhiloxBumpKey
 
 template <typename ResultType, std::size_t N>
-struct PhiloxBumpKey<ResultType, 4, N, true> {
+class PhiloxBumpKey<ResultType, 4, N, true>
+{
+    public:
     static void eval(std::array<ResultType, 2> &par)
     {
         std::get<0>(par) += PhiloxWeylConstant<ResultType, 0>::value;
         std::get<1>(par) += PhiloxWeylConstant<ResultType, 1>::value;
     }
-}; // struct PhiloxBumpKey
+}; // class PhiloxBumpKey
 
 template <std::size_t K, std::size_t I>
 inline void philox_hilo(std::uint32_t b, std::uint32_t &hi, std::uint32_t &lo)
@@ -187,15 +195,19 @@ inline void philox_hilo(std::uint64_t b, std::uint64_t &hi, std::uint64_t &lo)
 #endif // VSMC_HAS_INT128
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
-struct PhiloxRound {
+class PhiloxRound
+{
+    public:
     static void eval(
         std::array<ResultType, K> &, const std::array<ResultType, K / 2> &)
     {
     }
-}; // struct PhiloxRound
+}; // class PhiloxRound
 
 template <typename ResultType, std::size_t N>
-struct PhiloxRound<ResultType, 2, N, true> {
+class PhiloxRound<ResultType, 2, N, true>
+{
+    public:
     static void eval(
         std::array<ResultType, 2> &state, const std::array<ResultType, 1> &par)
     {
@@ -206,10 +218,12 @@ struct PhiloxRound<ResultType, 2, N, true> {
         std::get<0>(state) = hi ^ std::get<1>(state);
         std::get<1>(state) = lo;
     }
-}; // struct PhiloxRound
+}; // class PhiloxRound
 
 template <typename ResultType, std::size_t N>
-struct PhiloxRound<ResultType, 4, N, true> {
+class PhiloxRound<ResultType, 4, N, true>
+{
+    public:
     static void eval(
         std::array<ResultType, 4> &state, const std::array<ResultType, 2> &par)
     {
@@ -227,7 +241,7 @@ struct PhiloxRound<ResultType, 4, N, true> {
         std::get<2>(state) = hi2 ^ std::get<3>(state);
         std::get<3>(state) = lo3;
     }
-}; // struct PhiloxRound
+}; // class PhiloxRound
 
 } // namespace vsmc::internal
 

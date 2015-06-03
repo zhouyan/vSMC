@@ -117,7 +117,7 @@ inline int cl_opencl_c_version(::cl_device_id device)
 
 /// \brief Template parameter type for default behavior
 /// \ingroup OpenCL
-struct CLDefault;
+class CLDefault;
 
 } // namespace vsmc
 

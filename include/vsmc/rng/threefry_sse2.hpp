@@ -43,7 +43,9 @@ namespace internal
 {
 
 template <typename ResultType, std::size_t K>
-struct ThreefryParPackSSE2 {
+class ThreefryParPackSSE2
+{
+    public:
     typedef std::array<ResultType, K + 1> par_type;
     typedef std::array<M128I<ResultType>, K + 1> par128_type;
 
@@ -65,10 +67,12 @@ struct ThreefryParPackSSE2 {
         pack<N + 1>(
             par, par128, std::integral_constant<bool, N + 1 < K + 1>());
     }
-}; // struct ThreefryParPackSSE2
+}; // class ThreefryParPackSSE2
 
 template <typename ResultType, std::size_t K>
-struct ThreefryCtrPackSSE2 {
+class ThreefryCtrPackSSE2
+{
+    public:
     typedef std::array<M128I<ResultType>, K> state_type;
     typedef std::array<ResultType, K> ctr_type;
     typedef std::array<ctr_type, M128I<ResultType>::size()> ctr_block_type;
@@ -113,7 +117,7 @@ struct ThreefryCtrPackSSE2 {
         std::get<N>(state).set(std::get<N>(std::get<0>(ctr_block)),
             std::get<N>(std::get<1>(ctr_block)));
     }
-}; // struct ThreefryCtrPackSSE2
+}; // class ThreefryCtrPackSSE2
 
 } // namespace vsmc::internal
 

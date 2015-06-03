@@ -51,9 +51,10 @@
 
 #define VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(T, K, N, I, val)             \
     template <>                                                               \
-    struct ThreefryRotateConstant<T, K, N, I>                                 \
-        : public std::integral_constant<int, val> {                           \
-    };
+    class ThreefryRotateConstant<T, K, N, I>                                  \
+        : public std::integral_constant<int, val>                             \
+    {                                                                         \
+    }; // class ThreefryRotateConstant
 
 /// \brief ThreefryEngine default rounds
 /// \ingroup Config
@@ -68,31 +69,35 @@ namespace internal
 {
 
 template <typename>
-struct ThreefryKSConstant;
+class ThreefryKSConstant;
 
 template <typename T, template <typename> class Wrapper>
-struct ThreefryKSConstant<Wrapper<T>> : public ThreefryKSConstant<T> {
-};
+class ThreefryKSConstant<Wrapper<T>> : public ThreefryKSConstant<T>
+{
+}; // class ThreefryKSConstant
 
 template <>
-struct ThreefryKSConstant<std::uint32_t>
-    : public std::integral_constant<std::uint32_t, UINT32_C(0x1BD11BDA)> {
-};
+class ThreefryKSConstant<std::uint32_t>
+    : public std::integral_constant<std::uint32_t, UINT32_C(0x1BD11BDA)>
+{
+}; // class ThreefryKSConstant
 
 template <>
-struct ThreefryKSConstant<std::uint64_t>
+class ThreefryKSConstant<std::uint64_t>
     : public std::integral_constant<std::uint64_t,
-          UINT64_C(0x1BD11BDAA9FC1A22)> {
-};
+          UINT64_C(0x1BD11BDAA9FC1A22)>
+{
+}; // class ThreefryKSConstant
 
 template <typename, std::size_t, std::size_t, std::size_t>
-struct ThreefryRotateConstant;
+class ThreefryRotateConstant;
 
 template <typename T, template <typename> class Wrapper, std::size_t K,
     std::size_t N, std::size_t I>
-struct ThreefryRotateConstant<Wrapper<T>, K, N, I>
-    : public ThreefryRotateConstant<T, K, N, I> {
-};
+class ThreefryRotateConstant<Wrapper<T>, K, N, I>
+    : public ThreefryRotateConstant<T, K, N, I>
+{
+}; // class ThreefryRotateConstant
 
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 2, 0, 0, 13)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 2, 1, 0, 15)
@@ -149,7 +154,9 @@ VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 6, 1, 22)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 7, 1, 32)
 
 template <typename ResultType, std::size_t K>
-struct ThreefryInitPar {
+class ThreefryInitPar
+{
+    public:
     static void eval(const std::array<ResultType, K> &key,
         std::array<ResultType, K + 1> &par)
     {
@@ -172,32 +179,40 @@ struct ThreefryInitPar {
         par.back() ^= std::get<N>(key);
         par_xor<N + 1>(key, par, std::integral_constant<bool, N + 1 < K>());
     }
-}; // struct ThreefryInitPar
+}; // class ThreefryInitPar
 
 template <typename ResultType>
-struct ThreefryRotateBits
-    : public std::integral_constant<int, sizeof(ResultType) * 8> {
-};
+class ThreefryRotateBits
+    : public std::integral_constant<int, sizeof(ResultType) * 8>
+{
+}; // class ThreefryRotateBits
 
 template <typename T, template <typename> class Wrapper>
-struct ThreefryRotateBits<Wrapper<T>> : public ThreefryRotateBits<T> {
-};
+class ThreefryRotateBits<Wrapper<T>> : public ThreefryRotateBits<T>
+{
+}; // class ThreefryRotateBits
 
 template <typename ResultType, int R>
-struct ThreefryRotateImpl {
+class ThreefryRotateImpl
+{
+    public:
     static ResultType eval(const ResultType &x)
     {
         return (x << R) | (x >> (ThreefryRotateBits<ResultType>::value - R));
     }
-}; // struct ThreefryRotateImpl
+}; // class ThreefryRotateImpl
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
-struct ThreefryRotate {
+class ThreefryRotate
+{
+    public:
     static void eval(std::array<ResultType, K> &) {}
-};
+}; // class ThreefryRotate
 
 template <typename ResultType, std::size_t N>
-struct ThreefryRotate<ResultType, 2, N, true> {
+class ThreefryRotate<ResultType, 2, N, true>
+{
+    public:
     static void eval(std::array<ResultType, 2> &state)
     {
         std::get<0>(state) += std::get<1>(state);
@@ -210,10 +225,12 @@ struct ThreefryRotate<ResultType, 2, N, true> {
 
     private:
     static constexpr std::size_t r_ = (N - 1) % 8;
-}; // struct ThreefryRotate
+}; // class ThreefryRotate
 
 template <typename ResultType, std::size_t N>
-struct ThreefryRotate<ResultType, 4, N, true> {
+class ThreefryRotate<ResultType, 4, N, true>
+{
+    public:
     static void eval(std::array<ResultType, 4> &state)
     {
         std::get<0>(state) += std::get<i0_>(state);
@@ -235,29 +252,35 @@ struct ThreefryRotate<ResultType, 4, N, true> {
     static constexpr std::size_t i0_ = N % 2 ? 1 : 3;
     static constexpr std::size_t i2_ = N % 2 ? 3 : 1;
     static constexpr std::size_t r_ = (N - 1) % 8;
-}; // struct ThreefryRotate
+}; // class ThreefryRotate
 
 template <typename ResultType, std::size_t Inc>
-struct ThreefryInsertKeyInc
-    : public std::integral_constant<ResultType, static_cast<ResultType>(Inc)> {
-};
+class ThreefryInsertKeyInc
+    : public std::integral_constant<ResultType, static_cast<ResultType>(Inc)>
+{
+}; // class ThreefryInsertKeyInc
 
 template <typename T, template <typename> class Wrapper, std::size_t Inc>
-struct ThreefryInsertKeyInc<Wrapper<T>, Inc>
-    : public ThreefryInsertKeyInc<T, Inc> {
-};
+class ThreefryInsertKeyInc<Wrapper<T>, Inc>
+    : public ThreefryInsertKeyInc<T, Inc>
+{
+}; // class ThreefryInsertKeyInc
 
 template <typename ResultType, std::size_t K, std::size_t N,
     bool = (N % 4 == 0)>
-struct ThreefryInsertKey {
+class ThreefryInsertKey
+{
+    public:
     static void eval(
         std::array<ResultType, K> &, const std::array<ResultType, K + 1> &)
     {
     }
-}; // struct ThreefryInsertKey
+}; // class ThreefryInsertKey
 
 template <typename ResultType, std::size_t N>
-struct ThreefryInsertKey<ResultType, 2, N, true> {
+class ThreefryInsertKey<ResultType, 2, N, true>
+{
+    public:
     static void eval(
         std::array<ResultType, 2> &state, const std::array<ResultType, 3> &par)
     {
@@ -271,10 +294,12 @@ struct ThreefryInsertKey<ResultType, 2, N, true> {
     static constexpr std::size_t inc_ = N / 4;
     static constexpr std::size_t i0_ = (inc_ + 0) % 3;
     static constexpr std::size_t i1_ = (inc_ + 1) % 3;
-}; // struct ThreefryInsertKey
+}; // class ThreefryInsertKey
 
 template <typename ResultType, std::size_t N>
-struct ThreefryInsertKey<ResultType, 4, N, true> {
+class ThreefryInsertKey<ResultType, 4, N, true>
+{
+    public:
     static void eval(
         std::array<ResultType, 4> &state, const std::array<ResultType, 5> &par)
     {
@@ -292,7 +317,7 @@ struct ThreefryInsertKey<ResultType, 4, N, true> {
     static constexpr std::size_t i1_ = (inc_ + 1) % 5;
     static constexpr std::size_t i2_ = (inc_ + 2) % 5;
     static constexpr std::size_t i3_ = (inc_ + 3) % 5;
-}; // struct ThreefryInsertKey
+}; // class ThreefryInsertKey
 
 } // namespace vsmc::internal
 

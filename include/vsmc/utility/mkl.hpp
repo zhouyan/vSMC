@@ -92,15 +92,19 @@ inline void mkl_error_check(int status, const char *func, const char *mklf)
 }
 #endif
 
-struct MKLOffsetZero {
+class MKLOffsetZero
+{
+    public:
     static constexpr MKL_INT min VSMC_MNE() { return 0; }
     static constexpr MKL_INT max VSMC_MNE() { return 0; }
     static void set(MKL_INT) {}
     static constexpr MKL_INT get() { return 0; }
-}; // struct OffsetZero
+}; // class OffsetZero
 
 template <MKL_INT MaxOffset>
-struct MKLOffsetDynamic {
+class MKLOffsetDynamic
+{
+    public:
     MKLOffsetDynamic() : offset_(0) {}
 
     static constexpr MKL_INT min VSMC_MNE() { return 0; }
@@ -116,42 +120,49 @@ struct MKLOffsetDynamic {
 
     private:
     MKL_INT offset_;
-}; // struct OffsetDynamic
+}; // class OffsetDynamic
 
 template <MKL_INT>
-struct MKLOffset {
+class MKLOffset
+{
+    public:
     typedef MKLOffsetZero type;
-};
+}; // class MKLOffset
 
 template <>
-struct MKLOffset<VSL_BRNG_MT2203> {
+class MKLOffset<VSL_BRNG_MT2203>
+{
+    public:
     typedef MKLOffsetDynamic<6024> type;
-};
+}; // class MKLOffset
 
 template <>
-struct MKLOffset<VSL_BRNG_WH> {
+class MKLOffset<VSL_BRNG_WH>
+{
+    public:
     typedef MKLOffsetDynamic<273> type;
-};
+}; // class MKLOffset
 
 } // namespace vsmc::internal
 
 /// \brief Default seed for MKL RNG
 /// \ingroup Traits
 template <MKL_INT>
-struct MKLSeedTrait : public std::integral_constant<MKL_UINT, 1> {
-};
+class MKLSeed : public std::integral_constant<MKL_UINT, 1>
+{
+}; // class MKLSeed
 
 /// \brief Default seed for MKL Sobol quasi-RNG
 template <>
-struct MKLSeedTrait<VSL_BRNG_SOBOL>
-    : public std::integral_constant<MKL_UINT, 10> {
-};
+class MKLSeed<VSL_BRNG_SOBOL> : public std::integral_constant<MKL_UINT, 10>
+{
+}; // class MKLSeed
 
 /// \brief Default seed for MKL Niederr quasi-RNG
 template <>
-struct MKLSeedTrait<VSL_BRNG_NIEDERR>
-    : public std::integral_constant<MKL_UINT, 10> {
-};
+class MKLSeed<VSL_BRNG_NIEDERR> : public std::integral_constant<MKL_UINT, 10>
+{
+}; // class MKLSeed
 
 /// \brief MKL resource management base class
 /// \ingroup MKL
@@ -171,7 +182,7 @@ class MKLBase
 
         private:
         int status_;
-    };
+    }; // class deleter_type
 
     MKLBase() = default;
     MKLBase(const MKLBase<MKLPtr, Derived> &) = delete;
@@ -239,8 +250,7 @@ template <MKL_INT BRNG>
 class MKLStream : public MKLBase<VSLStreamStatePtr, MKLStream<BRNG>>
 {
     public:
-    explicit MKLStream(
-        MKL_UINT s = MKLSeedTrait<BRNG>::value, MKL_INT offset = 0)
+    explicit MKLStream(MKL_UINT s = MKLSeed<BRNG>::value, MKL_INT offset = 0)
     {
         reset(s, offset);
     }

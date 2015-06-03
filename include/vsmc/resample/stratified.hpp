@@ -55,9 +55,11 @@ class ResampleStratified
 /// \brief Type trait of Stratified scheme
 /// \ingroup Resample
 template <>
-struct ResampleTypeTrait<Stratified> {
+class ResampleTypeTrait<Stratified>
+{
+    public:
     typedef ResampleStratified type;
-};
+}; // class ResampleTypeTrait
 
 } // namespace vsmc
 

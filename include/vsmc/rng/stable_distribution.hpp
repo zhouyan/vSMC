@@ -61,7 +61,9 @@ class StableDistribution
     public:
     typedef RealType result_type;
 
-    struct param_type {
+    class param_type
+    {
+        public:
         typedef RealType result_type;
 
         typedef StableDistribution<RealType> distribution_type;

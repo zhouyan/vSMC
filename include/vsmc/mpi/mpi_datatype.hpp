@@ -36,14 +36,16 @@
 
 namespace boost
 {
+
 namespace mpi
 {
 
 template <typename T, std::size_t N>
-struct is_mpi_datatype<std::array<T, N>>
+class is_mpi_datatype<std::array<T, N>>
     : public std::conditional<std::is_fundamental<T>::value, mpl::true_,
-          mpl::false_>::type {
-};
+          mpl::false_>::type
+{
+}; // class is_mpi_datatype
 
 } // namespace boost::mpi
 

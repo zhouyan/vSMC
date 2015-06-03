@@ -473,7 +473,7 @@ class StateCL
 /// arguments will
 /// be set by InitializeCL::opeartor(). For example
 /// ~~~{.cpp}
-/// type struct {
+/// typedef struct {
 ///     state_type v1;
 ///     state_type v2;
 ///     // ...

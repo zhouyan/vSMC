@@ -41,7 +41,9 @@
 
 #define VSMC_DEFINE_RNG_U01(RealType, Left, Right, left, right, UBits, FBits) \
     template <>                                                               \
-    struct U01<Left, Right, uint##UBits##_t, RealType> {                      \
+    class U01<Left, Right, uint##UBits##_t, RealType>                         \
+    {                                                                         \
+        public:                                                               \
         RealType operator()(uint##UBits##_t u) const                          \
         {                                                                     \
             return ::vsmc_u01_##left##_##right##_u##UBits##_f##FBits(u);      \
@@ -51,23 +53,21 @@
         {                                                                     \
             return ::vsmc_u01_##left##_##right##_u##UBits##_f##FBits(u);      \
         }                                                                     \
-    };
+    }; // class U01
 
 namespace vsmc
 {
 
 /// \brief Parameter type for open interval
 /// \ingroup U01
-struct Open {
-};
+class Open;
 
 /// \brief Parameter type for closed interval
 /// \ingroup U01
-struct Closed {
-};
+class Closed;
 
 template <typename, typename, typename, typename>
-struct U01;
+class U01;
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1]\f$
 /// \ingroup U01

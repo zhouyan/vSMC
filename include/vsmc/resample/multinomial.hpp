@@ -55,9 +55,11 @@ class ResampleMultinomial
 /// \brief Type trait of Multinomial scheme
 /// \ingroup Resample
 template <>
-struct ResampleTypeTrait<Multinomial> {
+class ResampleTypeTrait<Multinomial>
+{
+    public:
     typedef ResampleMultinomial type;
-};
+}; // class ResampleTypeTrait
 
 } // namespace vsmc
 

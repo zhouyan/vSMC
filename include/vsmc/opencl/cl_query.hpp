@@ -43,7 +43,7 @@ namespace vsmc
 enum OpenCLDeviceFeature {
     OpenCLDeviceDoubleFP,    ///< Double precision floating points
     OpenCLDeviceImageSupport ///< Image support
-};
+};                           // enum OpenCLDeviceFeature
 
 /// \brief Query OpenCL information
 /// \ingroup OpenCL

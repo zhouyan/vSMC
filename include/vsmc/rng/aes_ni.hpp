@@ -105,7 +105,7 @@ class AESNIKeySeqStorage<KeySeq, true, Rounds>
 
     private:
     key_seq_type key_seq_;
-}; // struct AESNIKeySeqStorage
+}; // class AESNIKeySeqStorage
 
 template <typename KeySeq, std::size_t Rounds>
 class AESNIKeySeqStorage<KeySeq, false, Rounds>
@@ -140,7 +140,7 @@ class AESNIKeySeqStorage<KeySeq, false, Rounds>
     {
         return is;
     }
-}; // struct AESNIKeySeqStorage
+}; // class AESNIKeySeqStorage
 
 } // namespace vsmc::internal
 

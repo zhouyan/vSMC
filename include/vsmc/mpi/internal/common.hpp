@@ -40,7 +40,7 @@ namespace vsmc
 
 /// \brief Template parameter type for default behavior
 /// \ingroup MPI
-struct MPIDefault;
+class MPIDefault;
 
 } // namespace vsmc
 
