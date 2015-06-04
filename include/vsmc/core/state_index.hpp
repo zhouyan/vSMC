@@ -54,11 +54,6 @@ class StateIndex
 
     std::size_t iter_size() const { return index_.size(); }
 
-    size_type operator()(size_type id, std::size_t iter) const
-    {
-        return index(id, iter);
-    }
-
     size_type index(size_type id, std::size_t iter) const
     {
         std::size_t iter_current = index_.size() - 1;
@@ -102,13 +97,19 @@ class StateIndex
         index_.push_back(std::move(tmp));
     }
 
-    void fill(std::size_t iter)
+    void reset()
     {
-        std::copy(identity_.begin(), identity_.end(), index_[iter].begin());
+        std::copy(identity_.begin(), identity_.end(), index_.back().begin());
     }
 
     template <typename InputIter>
-    void fill(std::size_t iter, InputIter first)
+    void reset(InputIter first)
+    {
+        std::copy_n(first, size_, index_.back().begin());
+    }
+
+    template <typename InputIter>
+    void reset(std::size_t iter, InputIter first)
     {
         std::copy_n(first, size_, index_[iter].begin());
     }

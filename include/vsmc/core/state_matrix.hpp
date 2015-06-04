@@ -126,17 +126,6 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
 
     size_type size() const { return size_; }
 
-    state_type &operator()(std::size_t i, std::size_t pos)
-    {
-        return static_cast<StateMatrix<Order, Dim, T> *>(this)->state(i, pos);
-    }
-
-    const state_type &operator()(std::size_t i, std::size_t pos) const
-    {
-        return static_cast<const StateMatrix<Order, Dim, T> *>(this)->state(
-            i, pos);
-    }
-
     T *data() { return data_.data(); }
 
     const T *data() const { return data_.data(); }
