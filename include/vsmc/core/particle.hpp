@@ -196,14 +196,13 @@ class Particle
         if (resampled) {
             const double *const rwptr = weight_set_.resample_weight_data();
             if (rwptr != nullptr) {
-                replication_.resize(N);
-                copy_from_.resize(N);
-                op(N, N, resample_rng_, rwptr, replication_.data());
-                resample_trans_rep_cf(
-                    N, N, replication_.data(), copy_from_.data());
-                value_.copy(N, copy_from_.data());
+                Vector<size_type> rep(N);
+                Vector<size_type> cf(N);
+                op(N, N, resample_rng_, rwptr, rep.data());
+                resample_trans_rep_cf(N, N, rep.data(), cf.data());
+                value_.copy(N, cf.data());
             } else {
-                value_.copy(N, static_cast<const std::size_t *>(nullptr));
+                value_.copy(N, static_cast<const size_type *>(nullptr));
             }
             weight_set_.set_equal_weight();
         }
@@ -217,9 +216,6 @@ class Particle
     weight_set_type weight_set_;
     rng_set_type rng_set_;
     resample_rng_type resample_rng_;
-
-    Vector<size_type> replication_;
-    Vector<size_type> copy_from_;
 }; // class Particle
 
 } // namespace vsmc
