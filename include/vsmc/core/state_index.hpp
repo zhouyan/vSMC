@@ -57,45 +57,13 @@ class StateIndex
     size_type size() const { return size_; }
 
     /// \brief Number of iterations recorded
-    std::size_t iter_size() const { return iter_size_ }
+    std::size_t iter_size() const { return iter_size_; }
 
-    /// \brief Get the index given the particle ID and iteration number,
-    /// starting with zero.
-    ///
-    /// \details
-    /// The index is traced back using the history. The cost is O(iter_size() -
-    /// iter)
-    size_type index(size_type id, std::size_t iter) const
-    {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER((iter_size_ > iter), index);
-
-        std::size_t iter_current = iter_size_ - 1;
-        size_type idx = index_.back()[id];
-        while (iter_current != iter) {
-            --iter_current;
-            idx = index_[iter_current][idx];
-        }
-
-        return idx;
-    }
-
-    /// \brief Read the index matrix traced back using the recorded the history
-    ///
-    /// \details
-    /// The index matrix is considered to be such that each column corresponds
-    /// to an iteration.
-    template <MatrixOrder Order, typename OutputIter>
-    void read_index_matrix(OutputIter first)
-    {
-        Vector<Vector<size_type>> idxmat(
-            index_matrix(std::integral_constant<MatrixOrder, Order>()));
-
-        for (std::size_t i = 0; i != idxmat.size(); + i)
-            first = std::copy(idxmat[i].begin(), idxmat[i].end(), first);
-    }
-
-    /// \brief Reset the history
+    /// \brief Reset history
     void reset() { iter_size_ = 0; }
+
+    /// \brief Release memory
+    void clear() { index_.clear(); }
 
     void push_back()
     {
@@ -139,7 +107,40 @@ class StateIndex
         std::copy_n(first, size_, index_[iter].begin());
     }
 
-    void clear() { index_.clear(); }
+    /// \brief Get the index given the particle ID and iteration number,
+    /// starting with zero.
+    ///
+    /// \details
+    /// The index is traced back using the history. The cost is O(iter_size() -
+    /// iter)
+    size_type index(size_type id, std::size_t iter) const
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER((iter_size_ > iter), index);
+
+        std::size_t iter_current = iter_size_ - 1;
+        size_type idx = index_.back()[id];
+        while (iter_current != iter) {
+            --iter_current;
+            idx = index_[iter_current][idx];
+        }
+
+        return idx;
+    }
+
+    /// \brief Read the index matrix traced back using the recorded the history
+    ///
+    /// \details
+    /// The index matrix is considered to be such that each column corresponds
+    /// to an iteration.
+    template <MatrixOrder Order, typename OutputIter>
+    void read_index_matrix(OutputIter first)
+    {
+        Vector<Vector<size_type>> idxmat(
+            index_matrix(std::integral_constant<MatrixOrder, Order>()));
+
+        for (std::size_t i = 0; i != idxmat.size(); ++i)
+            first = std::copy(idxmat[i].begin(), idxmat[i].end(), first);
+    }
 
     private:
     size_type size_;
@@ -161,7 +162,7 @@ class StateIndex
         if (iter_size_ == 1)
             return idxmat;
 
-        for (std::siz_t iter = iter_size_ - 1; iter != 0; --iter) {
+        for (std::size_t iter = iter_size_ - 1; iter != 0; --iter) {
             std::size_t iter_next = iter - 1;
             for (std::size_t i = 0; i != size_; ++i)
                 idxmat[i][iter_next] = index_[iter_next][idxmat[i][iter]];
