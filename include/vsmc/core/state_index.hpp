@@ -34,6 +34,10 @@
 
 #include <vsmc/internal/common.hpp>
 
+#define VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER(test, func)                 \
+    VSMC_RUNTIME_ASSERT(                                                      \
+        (test), "**StateIndex::" #func "ITERATION NUMBER OUT OF RANGE")
+
 namespace vsmc
 {
 
@@ -52,11 +56,20 @@ class StateIndex
 
     size_type size() const { return size_; }
 
-    std::size_t iter_size() const { return index_.size(); }
+    /// \brief Number of iterations recorded
+    std::size_t iter_size() const { return iter_size_ }
 
+    /// \brief Get the index given the particle ID and iteration number,
+    /// starting with zero.
+    ///
+    /// \details
+    /// The index is traced back using the history. The cost is O(iter_size() -
+    /// iter)
     size_type index(size_type id, std::size_t iter) const
     {
-        std::size_t iter_current = index_.size() - 1;
+        VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER((iter_size_ > iter), index);
+
+        std::size_t iter_current = iter_size_ - 1;
         size_type idx = index_.back()[id];
         while (iter_current != iter) {
             --iter_current;
@@ -66,51 +79,63 @@ class StateIndex
         return idx;
     }
 
-    Vector<Vector<size_type>> index() const
+    /// \brief Read the index matrix traced back using the recorded the history
+    ///
+    /// \details
+    /// The index matrix is considered to be such that each column corresponds
+    /// to an iteration.
+    template <MatrixOrder Order, typename OutputIter>
+    void read_index_matrix(OutputIter first)
     {
-        if (index_.size() <= 1)
-            return index_;
+        Vector<Vector<size_type>> idxmat(
+            index_matrix(std::integral_constant<MatrixOrder, Order>()));
 
-        Vector<Vector<size_type>> idx(index_.size());
-        for (auto &v : idx)
-            v.resize(size_);
-
-        idx.back() = index_.back();
-        for (std::size_t iter = index_.size() - 1; iter != 0; --iter) {
-            size_type *ct = idx[iter - 1].data();
-            const size_type *cf = idx[iter].data();
-            const size_type *id = index_[iter - 1].data();
-            for (std::size_t i = 0; i != size_; ++i)
-                ct[i] = id[cf[i]];
-        }
-
-        return idx;
+        for (std::size_t i = 0; i != idxmat.size(); + i)
+            first = std::copy(idxmat[i].begin(), idxmat[i].end(), first);
     }
 
-    void push_back() { index_.push_back(identity_); }
+    /// \brief Reset the history
+    void reset() { iter_size_ = 0; }
+
+    void push_back()
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER(
+            (index_.size() >= iter_size_), push_back);
+
+        ++iter_size_;
+        if (index_.size() < iter_size_)
+            index_.push_back(identity_);
+        else
+            index_[iter_size_ - 1] = identity_;
+    }
 
     template <typename InputIter>
     void push_back(InputIter first)
     {
-        Vector<std::size_t> tmp(size_);
-        std::copy_n(first, size_, tmp.begin());
-        index_.push_back(std::move(tmp));
+        push_back();
+        std::copy_n(first, size_, index_[iter_size_ - 1].data());
     }
 
-    void reset()
+    void insert()
     {
-        std::copy(identity_.begin(), identity_.end(), index_.back().begin());
-    }
+        VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER((iter_size_ > 0), insert);
 
-    template <typename InputIter>
-    void reset(InputIter first)
-    {
-        std::copy_n(first, size_, index_.back().begin());
+        std::copy_n(identity_.data(), size_, index_[iter_size_ - 1].data());
     }
 
     template <typename InputIter>
-    void reset(std::size_t iter, InputIter first)
+    void insert(InputIter first)
     {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER((iter_size_ > 0), insert);
+
+        std::copy_n(first, size_, index_[iter_size_ - 1].begin());
+    }
+
+    template <typename InputIter>
+    void insert(std::size_t iter, InputIter first)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER((iter_size_ > iter), insert);
+
         std::copy_n(first, size_, index_[iter].begin());
     }
 
@@ -118,8 +143,52 @@ class StateIndex
 
     private:
     size_type size_;
+    std::size_t iter_size_;
     Vector<size_type> identity_;
     Vector<Vector<size_type>> index_;
+
+    Vector<Vector<size_type>> index_matrix(
+        std::integral_constant<MatrixOrder, RowMajor>) const
+    {
+        Vector<Vector<size_type>> idxmat(size_);
+        for (auto &v : idxmat)
+            v.resize(iter_size_);
+        if (iter_size_ == 0)
+            return idxmat;
+
+        for (size_type i = 0; i != size_; ++i)
+            idxmat[i].back() = index_.back()[i];
+        if (iter_size_ == 1)
+            return idxmat;
+
+        for (std::siz_t iter = iter_size_ - 1; iter != 0; --iter) {
+            std::size_t iter_next = iter - 1;
+            for (std::size_t i = 0; i != size_; ++i)
+                idxmat[i][iter_next] = index_[iter_next][idxmat[i][iter]];
+        }
+
+        return idxmat;
+    }
+
+    Vector<Vector<size_type>> index_matrix(
+        std::integral_constant<MatrixOrder, ColMajor>) const
+    {
+        if (iter_size_ <= 1)
+            return index_;
+
+        Vector<Vector<size_type>> idxmat(iter_size_);
+        for (auto &v : idxmat)
+            v.resize(size_);
+
+        idxmat.back() = index_.back();
+        for (std::size_t iter = iter_size_ - 1; iter != 0; --iter) {
+            std::size_t iter_next = iter - 1;
+            for (std::size_t i = 0; i != size_; ++i)
+                idxmat[iter_next][i] = index_[iter_next][idxmat[iter][i]];
+        }
+
+        return idxmat;
+    }
 }; // class StateIndex
 
 } // namespace vsmc

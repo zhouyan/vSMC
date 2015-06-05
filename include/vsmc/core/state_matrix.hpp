@@ -162,19 +162,13 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
             const StateMatrix<Order, Dim, T> *sptr =
                 static_cast<const StateMatrix<Order, Dim, T> *>(this);
             if (ROrder == RowMajor) {
-                for (size_type i = 0; i != size_; ++i) {
-                    for (std::size_t d = 0; d != this->dim(); ++d) {
-                        *first = sptr->state(i, d);
-                        ++first;
-                    }
-                }
+                for (size_type i = 0; i != size_; ++i)
+                    for (std::size_t d = 0; d != this->dim(); ++d)
+                        *first++ = sptr->state(i, d);
             } else if (ROrder == ColMajor) {
-                for (std::size_t d = 0; d != this->dim(); ++d) {
-                    for (size_type i = 0; i != size_; ++i) {
-                        *first = sptr->state(i, d);
-                        ++first;
-                    }
-                }
+                for (std::size_t d = 0; d != this->dim(); ++d)
+                    for (size_type i = 0; i != size_; ++i)
+                        *first++ = sptr->state(i, d);
             }
         }
     }
