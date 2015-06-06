@@ -46,15 +46,13 @@ namespace vsmc
 class StateIndex
 {
     public:
-    typedef std::size_t size_type;
-
-    StateIndex(size_type N) : size_(N), identity_(N)
+    StateIndex(std::size_t N) : size_(N), identity_(N)
     {
-        for (size_type i = 0; i != N; ++i)
+        for (std::size_t i = 0; i != N; ++i)
             identity_[i] = i;
     }
 
-    size_type size() const { return size_; }
+    std::size_t size() const { return size_; }
 
     /// \brief Number of iterations recorded
     std::size_t iter_size() const { return iter_size_; }
@@ -86,7 +84,8 @@ class StateIndex
 
     void insert()
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER((iter_size_ > 0), insert);
+        VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER(
+            (iter_size_ > 0 && index_.size() >= iter_size_), insert);
 
         std::copy_n(identity_.data(), size_, index_[iter_size_ - 1].data());
     }
@@ -94,7 +93,8 @@ class StateIndex
     template <typename InputIter>
     void insert(InputIter first)
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER((iter_size_ > 0), insert);
+        VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER(
+            (iter_size_ > 0 && index_.size() >= iter_size_), insert);
 
         std::copy_n(first, size_, index_[iter_size_ - 1].begin());
     }
@@ -102,7 +102,8 @@ class StateIndex
     template <typename InputIter>
     void insert(std::size_t iter, InputIter first)
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER((iter_size_ > iter), insert);
+        VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER(
+            (iter_size_ > iter && index_.size() >= iter_size_), insert);
 
         std::copy_n(first, size_, index_[iter].begin());
     }
@@ -113,12 +114,13 @@ class StateIndex
     /// \details
     /// The index is traced back using the history. The cost is O(iter_size() -
     /// iter)
-    size_type index(size_type id, std::size_t iter) const
+    std::size_t index(std::size_t id, std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER((iter_size_ > iter), index);
+        VSMC_RUNTIME_ASSERT_CORE_STATE_INDEX_ITER(
+            (iter_size_ > iter && index_.size() >= iter_size_), index);
 
         std::size_t iter_current = iter_size_ - 1;
-        size_type idx = index_.back()[id];
+        std::size_t idx = index_.back()[id];
         while (iter_current != iter) {
             --iter_current;
             idx = index_[iter_current][idx];
@@ -127,65 +129,65 @@ class StateIndex
         return idx;
     }
 
-    /// \brief Read the index matrix traced back using the recorded the history
-    ///
-    /// \details
-    /// The index matrix is considered to be such that each column corresponds
-    /// to an iteration.
-    template <MatrixOrder Order, typename OutputIter>
-    void read_index_matrix(OutputIter first)
+    template <MatrixOrder Order>
+    Vector<std::size_t> index_matrix() const
     {
-        Vector<Vector<size_type>> idxmat(
-            index_matrix(std::integral_constant<MatrixOrder, Order>()));
-
-        for (std::size_t i = 0; i != idxmat.size(); ++i)
-            first = std::copy(idxmat[i].begin(), idxmat[i].end(), first);
+        return index_matrix_dispatch(
+            std::integral_constant<MatrixOrder, Order>());
     }
 
     private:
-    size_type size_;
+    std::size_t size_;
     std::size_t iter_size_;
-    Vector<size_type> identity_;
-    Vector<Vector<size_type>> index_;
+    Vector<std::size_t> identity_;
+    Vector<Vector<std::size_t>> index_;
 
-    Vector<Vector<size_type>> index_matrix(
+    Vector<std::size_t> index_matrix_dispatch(
         std::integral_constant<MatrixOrder, RowMajor>) const
     {
-        Vector<Vector<size_type>> idxmat(size_);
-        for (auto &v : idxmat)
-            v.resize(iter_size_);
-        if (iter_size_ == 0)
+        Vector<std::size_t> idxmat(size_ * iter_size_);
+        if (size_ * iter_size_ == 0)
             return idxmat;
 
-        for (size_type i = 0; i != size_; ++i)
-            idxmat[i].back() = index_.back()[i];
+        std::size_t *back = idxmat.data() + iter_size_ - 1;
+        for (std::size_t i = 0; i != size_; ++i, back += iter_size_)
+            *back = index_[iter_size_ - 1][i];
         if (iter_size_ == 1)
             return idxmat;
 
         for (std::size_t iter = iter_size_ - 1; iter != 0; --iter) {
-            std::size_t iter_next = iter - 1;
-            for (std::size_t i = 0; i != size_; ++i)
-                idxmat[i][iter_next] = index_[iter_next][idxmat[i][iter]];
+            const std::size_t *idx = index_[iter - 1].data();
+            const std::size_t *last = idxmat.data() + iter;
+            std::size_t *next = idxmat.data() + iter - 1;
+            for (std::size_t i = 0; i != size_; ++i) {
+                *next = idx[*last];
+                last += iter_size_;
+                next += iter_size_;
+            }
         }
 
         return idxmat;
     }
 
-    Vector<Vector<size_type>> index_matrix(
+    Vector<std::size_t> index_matrix_dispatch(
         std::integral_constant<MatrixOrder, ColMajor>) const
     {
-        if (iter_size_ <= 1)
-            return index_;
+        Vector<std::size_t> idxmat(size_ * iter_size_);
+        if (size_ * iter_size_ == 0)
+            return idxmat;
 
-        Vector<Vector<size_type>> idxmat(iter_size_);
-        for (auto &v : idxmat)
-            v.resize(size_);
+        std::size_t *back = idxmat.data() + size_ * (iter_size_ - 1);
+        for (std::size_t i = 0; i != size_; ++i)
+            back[i] = index_[iter_size_ - 1][i];
+        if (iter_size_ == 1)
+            return idxmat;
 
-        idxmat.back() = index_.back();
         for (std::size_t iter = iter_size_ - 1; iter != 0; --iter) {
-            std::size_t iter_next = iter - 1;
+            const std::size_t *idx = index_[iter - 1].data();
+            const std::size_t *last = idxmat.data() + size_ * iter;
+            std::size_t *next = idxmat.data() + size_ * (iter - 1);
             for (std::size_t i = 0; i != size_; ++i)
-                idxmat[iter_next][i] = index_[iter_next][idxmat[iter][i]];
+                next[i] = idx[last[i]];
         }
 
         return idxmat;
