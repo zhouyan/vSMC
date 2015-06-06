@@ -86,9 +86,8 @@ class WeightSet
     {
         double coeff = 1 / math::asum(N, weight, 1);
         math::scal(N, coeff, weight, 1);
-        double res = math::nrm2(N, weight, 1);
 
-        return 1 / (res * res);
+        return 1 / math::dot(N, weight, 1, weight, 1);
     }
 
     /// \brief The number of particles
@@ -366,9 +365,8 @@ class WeightSet
 
         double coeff = 1 / math::asum(size_, buffer.data(), 1);
         math::scal(size_, coeff, buffer.data(), 1);
-        double res = math::nrm2(size_, buffer.data(), 1);
 
-        return 1 / (res * res);
+        return 1 / math::dot(size_, buffer.data(), 1, buffer.data(), 1);
     }
 
     /// \brief Compute CESS given (logarithm) unormalized incremental weights
