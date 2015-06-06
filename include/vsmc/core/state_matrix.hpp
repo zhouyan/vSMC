@@ -369,8 +369,9 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     {
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH;
 
-        for (size_type to = 0; to != N; ++to)
-            copy_particle(static_cast<size_type>(copy_from[to]), to);
+        for (std::size_t d = 0; d != this->dim(); ++d)
+            for (size_type to = 0; to != N; ++to)
+                state(to, d) = state(static_cast<size_type>(copy_from[to]), d);
     }
 
     void copy_particle(size_type from, size_type to)
