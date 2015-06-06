@@ -42,20 +42,7 @@ VSMC_DEFINE_SMP_BACKEND_FORWARD(SEQ)
 /// \brief Particle::value_type subtype
 /// \ingroup SEQ
 template <typename StateBase>
-class StateSEQ : public StateBase
-{
-    public:
-    typedef SizeType<StateBase> size_type;
-
-    explicit StateSEQ(size_type N) : StateBase(N) {}
-
-    template <typename IntType>
-    void copy(size_type N, const IntType *copy_from)
-    {
-        for (size_type to = 0; to != N; ++to)
-            this->copy_particle(static_cast<size_type>(copy_from[to]), to);
-    }
-}; // class StateSEQ
+using StateSEQ = StateBase;
 
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup SEQ
