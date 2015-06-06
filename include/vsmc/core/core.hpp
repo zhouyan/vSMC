@@ -37,7 +37,6 @@
 #include <vsmc/core/path.hpp>
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/single_particle.hpp>
-#include <vsmc/core/state_index.hpp>
 #include <vsmc/core/state_matrix.hpp>
 #include <vsmc/core/weight_set.hpp>
 

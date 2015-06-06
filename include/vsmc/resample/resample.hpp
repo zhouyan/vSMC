@@ -34,11 +34,13 @@
 
 #include <vsmc/internal/config.hpp>
 
+#include <vsmc/resample/index.hpp>
 #include <vsmc/resample/multinomial.hpp>
 #include <vsmc/resample/residual.hpp>
-#include <vsmc/resample/stratified.hpp>
-#include <vsmc/resample/systematic.hpp>
 #include <vsmc/resample/residual_stratified.hpp>
 #include <vsmc/resample/residual_systematic.hpp>
+#include <vsmc/resample/stratified.hpp>
+#include <vsmc/resample/systematic.hpp>
+#include <vsmc/resample/transform.hpp>
 
 #endif // VSMC_RESAMPLE_RESAMPLE_HPP
