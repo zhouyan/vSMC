@@ -113,7 +113,7 @@ class WeightSetMPI : public WeightSetBase
         gcoeff = 1 / gcoeff;
         math::scal(N, gcoeff, wptr, 1);
 
-        double less = math::dot(N, wptr, 1, wtpr, 1);
+        double less = math::dot(N, wptr, 1, wptr, 1);
         double gess = 0;
         ::boost::mpi::all_reduce(world_, less, gess, std::plus<double>());
         gess = 1 / gess;
