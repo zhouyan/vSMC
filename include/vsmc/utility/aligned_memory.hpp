@@ -70,6 +70,12 @@
 #endif
 #endif
 
+/// \brief Defualt alignment
+/// \ingroup Config
+#ifndef VSMC_ALIGNMENT
+#define VSMC_ALIGNMENT 32
+#endif
+
 #define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(Alignment)     \
     VSMC_STATIC_ASSERT(                                                       \
         (Alignment != 0 && (Alignment & (Alignment - 1)) == 0),               \
@@ -256,7 +262,7 @@ typedef VSMC_ALIGNED_MEMORY_TYPE AlignedMemory;
 /// `aligned_malloc` shall behave similar to `std::malloc` but take an
 /// additional arguments for alignment. The member function `aligned_free`
 /// shall behave just like `std::free`.
-template <typename T, std::size_t Alignment = 32,
+template <typename T, std::size_t Alignment = VSMC_ALIGNMENT,
     typename Memory = AlignedMemory>
 class AlignedAllocator : public std::allocator<T>
 {
