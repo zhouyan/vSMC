@@ -51,11 +51,11 @@ class StateOMP : public StateBase
     explicit StateOMP(size_type N) : StateBase(N) {}
 
     template <typename IntType>
-    void copy(size_type N, const IntType *copy_from)
+    void copy(size_type N, const IntType *src_idx)
     {
 #pragma omp parallel for default(shared)
-        for (size_type to = 0; to < N; ++to)
-            this->copy_particle(static_cast<size_type>(copy_from[to]), to);
+        for (size_type i = 0; i < N; ++i)
+            this->copy_particle(static_cast<size_type>(src_idx[i]), i);
     }
 }; // class StateOMP
 

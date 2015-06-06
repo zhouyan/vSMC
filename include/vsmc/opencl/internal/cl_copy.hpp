@@ -54,9 +54,9 @@ class CLCopy
 
     static manager_type &manager() { return manager_type::instance(); }
 
-    void operator()(const CLMemory &copy_from, const CLMemory &state)
+    void operator()(const CLMemory &src_idx, const CLMemory &state)
     {
-        cl_set_kernel_args(kernel_, 0, copy_from, state);
+        cl_set_kernel_args(kernel_, 0, src_idx, state);
         manager().run_kernel(kernel_, size_, configure_.local_size());
     }
 
@@ -77,14 +77,14 @@ class CLCopy
         ss << "#define Size " << size << "UL\n";
         ss << "typedef struct {char c[" << state_size << "];} state_type;";
 
-        ss << "__kernel void copy (__global const ulong *copy_from,\n";
+        ss << "__kernel void copy (__global const ulong *src_idx,\n";
         ss << "                    __global state_type *state)\n";
         ss << "{\n";
-        ss << "    ulong to = get_global_id(0);\n";
-        ss << "    if (to >= Size) return;\n";
-        ss << "    ulong from = copy_from[to];\n";
-        ss << "    if (to == from) return;\n";
-        ss << "    state[to] = state[from];\n";
+        ss << "    ulong dst = get_global_id(0);\n";
+        ss << "    if (dst >= Size) return;\n";
+        ss << "    ulong src = src_idx[dst];\n";
+        ss << "    if (dst == src) return;\n";
+        ss << "    state[dst] = state[src];\n";
         ss << "}\n";
 
         ss << "__kernel void copy_post (__global const char *idx,\n";

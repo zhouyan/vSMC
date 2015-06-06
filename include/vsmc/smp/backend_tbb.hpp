@@ -79,9 +79,9 @@ class StateTBB : public StateBase
     explicit StateTBB(size_type N) : StateBase(N) {}
 
     template <typename IntType>
-    void copy(size_type N, const IntType *copy_from)
+    void copy(size_type N, const IntType *src_idx)
     {
-        parallel_copy_run(copy_from, ::tbb::blocked_range<size_type>(0, N));
+        parallel_copy_run(src_idx, ::tbb::blocked_range<size_type>(0, N));
     }
 
     protected:
@@ -89,87 +89,86 @@ class StateTBB : public StateBase
     class work_type
     {
         public:
-        work_type(StateTBB<StateBase> *state, const IntType *copy_from)
-            : state_(state), copy_from_(copy_from)
+        work_type(StateTBB<StateBase> *state, const IntType *src_idx)
+            : state_(state), src_idx_(src_idx)
         {
         }
 
         void operator()(const ::tbb::blocked_range<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                state_->copy_particle(
-                    static_cast<size_type>(copy_from_[i]), i);
+                state_->copy_particle(static_cast<size_type>(src_idx_[i]), i);
             }
         }
 
         private:
         StateTBB<StateBase> *const state_;
-        const IntType *const copy_from_;
+        const IntType *const src_idx_;
     }; // class work_type
 
     template <typename IntType>
     void parallel_copy_run(
-        const IntType *copy_from, const ::tbb::blocked_range<size_type> &range)
+        const IntType *src_idx, const ::tbb::blocked_range<size_type> &range)
     {
-        ::tbb::parallel_for(range, work_type<IntType>(this, copy_from));
+        ::tbb::parallel_for(range, work_type<IntType>(this, src_idx));
     }
 
     template <typename IntType>
-    void parallel_copy_run(const IntType *copy_from,
+    void parallel_copy_run(const IntType *src_idx,
         const ::tbb::blocked_range<size_type> &range,
         const ::tbb::auto_partitioner &partitioner)
     {
         ::tbb::parallel_for(
-            range, work_type<IntType>(this, copy_from), partitioner);
+            range, work_type<IntType>(this, src_idx), partitioner);
     }
 
     template <typename IntType>
-    void parallel_copy_run(const IntType *copy_from,
+    void parallel_copy_run(const IntType *src_idx,
         const ::tbb::blocked_range<size_type> &range,
         const ::tbb::simple_partitioner &partitioner)
     {
         ::tbb::parallel_for(
-            range, work_type<IntType>(this, copy_from), partitioner);
+            range, work_type<IntType>(this, src_idx), partitioner);
     }
 
     template <typename IntType>
-    void parallel_copy_run(const IntType *copy_from,
+    void parallel_copy_run(const IntType *src_idx,
         const ::tbb::blocked_range<size_type> &range,
         ::tbb::affinity_partitioner &partitioner)
     {
         ::tbb::parallel_for(
-            range, work_type<IntType>(this, copy_from), partitioner);
+            range, work_type<IntType>(this, src_idx), partitioner);
     }
 
 #if __TBB_TASK_GROUP_CONTEXT
     template <typename IntType>
-    void parallel_copy_run(const IntType *copy_from,
+    void parallel_copy_run(const IntType *src_idx,
         const ::tbb::blocked_range<size_type> &range,
         const ::tbb::auto_partitioner &partitioner,
         ::tbb::task_group_context &context)
     {
         ::tbb::parallel_for(
-            range, work_type<IntType>(this, copy_from), partitioner, context);
+            range, work_type<IntType>(this, src_idx), partitioner, context);
     }
 
     template <typename IntType>
-    void parallel_copy_run(const IntType *copy_from,
+    void parallel_copy_run(const IntType *src_idx,
         const ::tbb::blocked_range<size_type> &range,
         const ::tbb::simple_partitioner &partitioner,
         ::tbb::task_group_context &context)
     {
         ::tbb::parallel_for(
-            range, work_type<IntType>(this, copy_from), partitioner, context);
+            range, work_type<IntType>(this, src_idx), partitioner, context);
     }
 
     template <typename IntType>
-    void parallel_copy_run(const IntType *copy_from,
+    void parallel_copy_run(const IntType *src_idx,
         const ::tbb::blocked_range<size_type> &range,
         ::tbb::affinity_partitioner &partitioner,
         ::tbb::task_group_context &context)
     {
         ::tbb::parallel_for(
-            range, work_type<IntType>(this, copy_from), partitioner, context);
+            range, work_type<IntType>(this, src_idx), partitioner, context);
     }
 #endif // __TBB_TASK_GROUP_CONTEXT
 };     // class StateTBB

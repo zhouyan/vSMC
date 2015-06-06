@@ -184,10 +184,10 @@ class StateCL
         , state_buffer_(state_size_ * size_)
     {
         if (manager().opencl_version() >= 120) {
-            copy_from_buffer_.resize(
+            src_idx_buffer_.resize(
                 size_, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY);
         } else {
-            copy_from_buffer_.resize(size_, CL_MEM_READ_ONLY);
+            src_idx_buffer_.resize(size_, CL_MEM_READ_ONLY);
         }
     }
 
@@ -326,13 +326,13 @@ class StateCL
     }
 
     template <typename IntType>
-    void copy(size_type N, const IntType *copy_from)
+    void copy(size_type N, const IntType *src_idx)
     {
         VSMC_RUNTIME_ASSERT_OPENCL_BACKEND_CL_COPY_SIZE_MISMATCH;
 
         manager().template write_buffer<size_type>(
-            copy_from_buffer_.data(), N, copy_from);
-        copy_(copy_from_buffer_.data(), state_buffer_.data());
+            src_idx_buffer_.data(), N, src_idx);
+        copy_(src_idx_buffer_.data(), state_buffer_.data());
     }
 
     void copy_pre_processor()
@@ -402,7 +402,7 @@ class StateCL
     int build_id_;
 
     CLBuffer<char, ID> state_buffer_;
-    CLBuffer<size_type, ID> copy_from_buffer_;
+    CLBuffer<size_type, ID> src_idx_buffer_;
     internal::CLCopy<ID> copy_;
 
     CLBuffer<char, ID> state_idx_buffer_;

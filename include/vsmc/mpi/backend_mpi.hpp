@@ -248,8 +248,8 @@ class StateMPI : public StateBase
     /// \brief Copy particles
     ///
     /// \param N The number of particles on all nodes
-    /// \param copy_from A vector of length `N`, for each particle with global
-    /// id `to`, `copy_from[to]` is the global id of the particle it shall
+    /// \param src_idx A vector of length `N`, for each particle with global
+    /// id `dst`, `src_idx[dst]` is the global id of the particle it shall
     /// copy.
     ///
     /// \details
@@ -284,13 +284,13 @@ class StateMPI : public StateBase
     /// In vSMC, the resampling algorithms generate the number of replications
     /// of each particle. Particles with replication zero need to copy other
     /// particles. The vector of the number of replications is transfered to
-    /// `copy_from` by Particle::resample, and it is generated in such a way
+    /// `src_idx` by Particle::resample, and it is generated in such a way
     /// that each particle will copy from somewhere close to itself.
     /// Therefore,
     /// transferring between nodes is minimized.
     ///
     /// This default implementation perform three stages of copy.
-    /// - Stage one: Generate a local duplicate of `copy_from` on node `0` and
+    /// - Stage one: Generate a local duplicate of `src_idx` on node `0` and
     /// broadcast it to all nodes.
     /// - Stage two: Perform local copy, copy those particles where the
     /// destination and source are both on this node. This is performed in
@@ -306,16 +306,16 @@ class StateMPI : public StateBase
     /// case,
     /// then it can be a performance bottle neck.
     template <typename IntType>
-    void copy(size_type N, const IntType *copy_from)
+    void copy(size_type N, const IntType *src_idx)
     {
         VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH;
 
         copy_pre_processor_dispatch(has_copy_pre_processor_<StateBase>());
-        copy_from_.resize(N);
+        src_idx_.resize(N);
         if (world_.rank() == 0)
-            std::copy(copy_from, copy_from + N, copy_from_.begin());
-        ::boost::mpi::broadcast(world_, copy_from_, 0);
-        copy_this_node(N, copy_from_.data(), copy_recv_, copy_send_);
+            std::copy(src_idx, src_idx + N, src_idx_.begin());
+        ::boost::mpi::broadcast(world_, src_idx_, 0);
+        copy_this_node(N, src_idx_.data(), copy_recv_, copy_send_);
         copy_inter_node(copy_recv_, copy_send_);
         copy_post_processor_dispatch(has_copy_post_processor_<StateBase>());
     }
@@ -387,28 +387,28 @@ class StateMPI : public StateBase
     /// \brief Perform local copy
     ///
     /// \param N The number of particles on all nodes
-    /// \param copy_from The beginning of the copy_from vector
+    /// \param src_idx The beginning of the src_idx vector
     /// \param copy_recv All particles that shall be received at this node
     /// \param copy_send All particles that shall be send from this node
     ///
     /// \details
-    /// `copy_from` is a pointer that can access a vector of size `N`. For
+    /// `src_idx` is a pointer that can access a vector of size `N`. For
     /// each
-    /// `to` in the range `0` to `N - 1`
-    /// - If both `to` and `from = copy_from[to]` are particles on this node,
+    /// `dst` in the range `0` to `N - 1`
+    /// - If both `dst` and `src = src_idx[dst]` are particles on this node,
     /// use `StateBase::copy` to copy the parties. Otherwise,
-    /// - If `to` is a particle on this node, insert a pair into `copy_recv`,
+    /// - If `dst` is a particle on this node, insert a pair into `copy_recv`,
     /// whose values are the rank of the node from which this node shall
     /// receive the particle and the particle id *on this node* where the
     /// particle received shall be unpacked. Otherwise,
-    /// - If `from = copy_from[to]` is a particle on this node, insert a pair
+    /// - If `src = src_idx[dst]` is a particle on this node, insert a pair
     /// into `copy_send`, whose values are the rank of the node to which this
     /// node shall send the particle and the particle id *on this node* where
     /// the particle sent shall be packed. Otherwise do nothing.
     ///
-    /// It is important the the vector accessed through `copy_from_first` is
+    /// It is important the the vector accessed through `src_idx_first` is
     /// the same for all nodes. Otherwise the behavior is undefined.
-    void copy_this_node(size_type N, const size_type *copy_from,
+    void copy_this_node(size_type N, const size_type *src_idx,
         std::vector<std::pair<int, size_type>> &copy_recv,
         std::vector<std::pair<int, size_type>> &copy_send)
     {
@@ -416,23 +416,22 @@ class StateMPI : public StateBase
 
         const int rank_this = world_.rank();
 
-        copy_from_this_.resize(this->size());
-        const size_type *first = copy_from + offset_;
-        for (size_type to = 0; to != this->size(); ++to, ++first) {
-            size_type from = *first;
-            copy_from_this_[to] =
-                rank_this == rank(from) ? local_id(from) : to;
+        src_idx_this_.resize(this->size());
+        const size_type *first = src_idx + offset_;
+        for (size_type dst = 0; dst != this->size(); ++dst, ++first) {
+            size_type src = *first;
+            src_idx_this_[dst] = rank_this == rank(src) ? local_id(src) : dst;
         }
-        StateBase::copy(this->size(), copy_from_this_.data());
+        StateBase::copy(this->size(), src_idx_this_.data());
 
         copy_recv.clear();
         copy_send.clear();
-        for (size_type to = 0; to != N; ++to, ++copy_from) {
-            size_type from = *copy_from;
-            int rank_recv = rank(to);
-            int rank_send = rank(from);
-            size_type id_recv = local_id(to);
-            size_type id_send = local_id(from);
+        for (size_type dst = 0; dst != N; ++dst) {
+            size_type src = src_idx[dst];
+            int rank_recv = rank(dst);
+            int rank_send = rank(src);
+            size_type id_recv = local_id(dst);
+            size_type id_send = local_id(src);
             if (rank_this == rank_recv && rank_this == rank_send) {
                 continue;
             } else if (rank_this == rank_recv) {
@@ -477,8 +476,8 @@ class StateMPI : public StateBase
     bool size_equal_;
     std::vector<size_type> size_all_;
     int copy_tag_;
-    std::vector<size_type> copy_from_;
-    std::vector<size_type> copy_from_this_;
+    std::vector<size_type> src_idx_;
+    std::vector<size_type> src_idx_this_;
     std::vector<std::pair<int, size_type>> copy_recv_;
     std::vector<std::pair<int, size_type>> copy_send_;
     typename StateBase::state_pack_type pack_recv_;

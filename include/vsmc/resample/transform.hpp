@@ -74,13 +74,13 @@ inline void resample_trans_u01_rep(std::size_t M, std::size_t N,
 /// \brief Transform uniform [0, 1] sequence into parent indices
 /// \ingroup Resample
 template <typename IntType, typename U01SeqType>
-inline void resample_trans_u01_cf(std::size_t M, std::size_t N,
-    const double *weight, U01SeqType &&u01seq, IntType *copy_from)
+inline void resample_trans_u01_index(std::size_t M, std::size_t N,
+    const double *weight, U01SeqType &&u01seq, IntType *src_dix)
 {
     if (M == 0 || N == 0)
         return;
 
-    std::memset(copy_from, 0, sizeof(IntType) * N);
+    std::memset(src_dix, 0, sizeof(IntType) * N);
 
     if (M == 1)
         return;
@@ -90,46 +90,46 @@ inline void resample_trans_u01_cf(std::size_t M, std::size_t N,
     for (std::size_t i = 0; i != M - 1; ++i) {
         accw += weight[i];
         while (n != N && u01seq[n] <= accw)
-            copy_from[n++] = static_cast<IntType>(i);
+            src_dix[n++] = static_cast<IntType>(i);
     }
     while (n != N)
-        copy_from[n++] = static_cast<IntType>(M - 1);
+        src_dix[n++] = static_cast<IntType>(M - 1);
 }
 
 /// \brief Transform replication numbers into parent indices
 /// \ingroup Resample
 template <typename IntType1, typename IntType2>
-inline void resample_trans_rep_cf(std::size_t M, std::size_t N,
-    const IntType1 *replication, IntType2 *copy_from)
+inline void resample_trans_rep_index(std::size_t M, std::size_t N,
+    const IntType1 *replication, IntType2 *src_dix)
 {
     if (M == 0 || N == 0)
         return;
 
     if (M != N) {
-        std::size_t to = 0;
-        for (std::size_t from = 0; from != M; ++from) {
-            const IntType1 rep = replication[from];
+        std::size_t dst = 0;
+        for (std::size_t src = 0; src != M; ++src) {
+            const IntType1 rep = replication[src];
             for (IntType1 r = 0; r != rep; ++r)
-                copy_from[to++] = static_cast<IntType2>(from);
+                src_dix[dst++] = static_cast<IntType2>(src);
         }
         return;
     }
 
     IntType1 time = 0;
-    IntType2 from = 0;
-    for (std::size_t to = 0; to != N; ++to) {
-        if (replication[to] != 0) {
-            copy_from[to] = static_cast<IntType2>(to);
+    IntType2 src = 0;
+    for (std::size_t dst = 0; dst != N; ++dst) {
+        if (replication[dst] != 0) {
+            src_dix[dst] = static_cast<IntType2>(dst);
         } else {
-            // replication[to] has zero child, copy from elsewhere
-            if (replication[from] < time + 2) {
-                // only 1 child left on replication[from]
+            // replication[dst] has zero child, copy from elsewhere
+            if (replication[src] < time + 2) {
+                // only 1 child left on replication[src]
                 time = 0;
-                do // move from to a position with at least 2 children
-                    ++from;
-                while (replication[from] < 2);
+                do // move src to a position with at least 2 children
+                    ++src;
+                while (replication[src] < 2);
             }
-            copy_from[to] = from;
+            src_dix[dst] = src;
             ++time;
         }
     }
@@ -138,8 +138,8 @@ inline void resample_trans_rep_cf(std::size_t M, std::size_t N,
 /// \brief Transform parent indices into replication numbers
 /// \ingroup Resample
 template <typename IntType1, typename IntType2>
-inline void resample_trans_cf_rep(std::size_t M, std::size_t N,
-    const IntType1 *copy_from, IntType2 *replication)
+inline void resample_trans_index_rep(std::size_t M, std::size_t N,
+    const IntType1 *src_dix, IntType2 *replication)
 {
     if (M == 0 || N == 0)
         return;
@@ -147,7 +147,7 @@ inline void resample_trans_cf_rep(std::size_t M, std::size_t N,
     std::memset(replication, 0, sizeof(IntType2) * M);
 
     for (std::size_t i = 0; i != N; ++i)
-        ++replication[copy_from[i]];
+        ++replication[src_dix[i]];
 }
 
 } // namespace vsmc
