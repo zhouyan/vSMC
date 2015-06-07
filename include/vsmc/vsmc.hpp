@@ -148,10 +148,6 @@
 /// \ingroup Utility
 /// \brief Memory allocation with alignment requirement
 
-/// \defgroup CPUID CPUID
-/// \ingroup Utility
-/// \brief Query CPUID information
-
 /// \defgroup HDF5IO HDF5 objects IO
 /// \ingroup Utility
 /// \brief Load and store objects in the HDF5 format
@@ -167,10 +163,6 @@
 /// \defgroup Progress Progress
 /// \ingroup Utility
 /// \brief Display progress while algorithms proceed
-
-/// \defgroup RDTSC RDTSC
-/// \ingroup Utility
-/// \brief CPU clock cycles count using RDTSC and RDTSCP
 
 /// \defgroup StopWatch Stop watch
 /// \ingroup Utility

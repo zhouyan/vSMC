@@ -6,7 +6,7 @@ int main(int argc, char **argv)
 
     VSMC_RNG_DIST_1(vsmc::StableDistribution<>, 1);
     VSMC_RNG_DIST_1(vsmc::StableDistribution<>, 0.1);
-    VSMC_RNG_DIST_1(vsmc::StableDistribution<>, 10);
+    VSMC_RNG_DIST_1(vsmc::StableDistribution<>, 1.5);
     VSMC_RNG_DIST_2(vsmc::UniformRealOpenOpenDistribution<>, 0, 1);
     VSMC_RNG_DIST_2(vsmc::UniformRealOpenClosedDistribution<>, 0, 1);
     VSMC_RNG_DIST_2(vsmc::UniformRealClosedOpenDistribution<>, 0, 1);

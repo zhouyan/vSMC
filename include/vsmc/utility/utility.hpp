@@ -39,11 +39,6 @@
 #include <vsmc/utility/progress.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
-#if VSMC_HAS_X86
-#include <vsmc/utility/cpuid.hpp>
-#include <vsmc/utility/rdtsc.hpp>
-#endif
-
 #if VSMC_HAS_HDF5
 #include <vsmc/utility/hdf5io.hpp>
 #endif

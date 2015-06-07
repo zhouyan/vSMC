@@ -42,35 +42,27 @@
 #define VSMC_RNG_DIST_1(Dist, p1)                                             \
     {                                                                         \
         Dist dist(p1);                                                        \
-        rng_dist(N, dist, #Dist "(" #p1 ")", names, size, sw, bytes, cycles); \
+        rng_dist(N, dist, #Dist "(" #p1 ")", names, size, sw, bytes);         \
     }
 
 #define VSMC_RNG_DIST_2(Dist, p1, p2)                                         \
     {                                                                         \
         Dist dist(p1, p2);                                                    \
-        rng_dist(N, dist, #Dist "(" #p1 ", " #p2 ")", names, size, sw, bytes, \
-            cycles);                                                          \
+        rng_dist(                                                             \
+            N, dist, #Dist "(" #p1 ", " #p2 ")", names, size, sw, bytes);     \
     }
 
 template <typename Dist>
 inline void rng_dist(std::size_t N, Dist &dist, const std::string &name,
     vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
-    vsmc::Vector<vsmc::StopWatch> &sw, vsmc::Vector<std::size_t> &bytes,
-    vsmc::Vector<uint64_t> &cycles)
+    vsmc::Vector<vsmc::StopWatch> &sw, vsmc::Vector<std::size_t> &bytes)
 {
     vsmc::Rng rng;
     vsmc::StopWatch watch;
-#if VSMC_HAS_RDTSCP
-    vsmc::RDTSCPCounter counter;
-#else
-    vsmc::RDTSCCounter counter;
-#endif
 
     watch.start();
-    counter.start();
     for (std::size_t i = 0; i != N; ++i)
         dist(rng);
-    counter.stop();
     watch.stop();
     std::ofstream rnd("rnd");
     rnd << dist(rng) << std::endl;
@@ -80,7 +72,6 @@ inline void rng_dist(std::size_t N, Dist &dist, const std::string &name,
     size.push_back(sizeof(Dist));
     sw.push_back(watch);
     bytes.push_back(N * sizeof(typename Dist::result_type));
-    cycles.push_back(counter.cycles());
 }
 
 #endif // VSMC_EXAMPLE_RNG_DIST_HPP
