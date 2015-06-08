@@ -43,7 +43,7 @@ template <typename ID = CLDefault>
 class CLSetup
 {
     public:
-    typedef ID id;
+    using cl_id = ID;
 
     CLSetup(const CLSetup<ID> &) = delete;
     CLSetup<ID> &operator=(const CLSetup<ID> &) = delete;

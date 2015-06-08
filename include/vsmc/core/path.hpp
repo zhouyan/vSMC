@@ -51,9 +51,9 @@ template <typename T>
 class Path
 {
     public:
-    typedef T value_type;
-    typedef std::function<double(std::size_t, Particle<T> &, double *)>
-        eval_type;
+    using value_type = T;
+    using eval_type =
+        std::function<double(std::size_t, Particle<T> &, double *)>;
 
     /// \brief Construct a Path with an evaluation object
     ///

@@ -50,8 +50,8 @@ template <typename WeightSetBase, typename ID = MPIDefault>
 class WeightSetMPI : public WeightSetBase
 {
     public:
-    typedef SizeType<WeightSetBase> size_type;
-    typedef ID mpi_id;
+    using size_type = SizeType<WeightSetBase>;
+    using mpi_id = ID;
 
     explicit WeightSetMPI(size_type N)
         : WeightSetBase(N)
@@ -218,9 +218,9 @@ template <typename StateBase, typename ID = MPIDefault>
 class StateMPI : public StateBase
 {
     public:
-    typedef SizeType<StateBase> size_type;
-    typedef WeightSetMPI<WeightSetType<StateBase>, ID> weight_set_type;
-    typedef ID mpi_id;
+    using size_type = SizeType<StateBase>;
+    using weight_set_type = WeightSetMPI<WeightSetType<StateBase>, ID>;
+    using mpi_id = ID;
 
     explicit StateMPI(size_type N)
         : StateBase(N)

@@ -59,8 +59,8 @@ template <typename CLPtr, typename Derived>
 class CLBase
 {
     public:
-    typedef CLPtr pointer;
-    typedef typename std::remove_pointer<CLPtr>::type element_type;
+    using pointer = CLPtr;
+    using element_type = typename std::remove_pointer<CLPtr>::type;
 
     CLBase() : ptr_(nullptr, [](pointer p) { Derived::release(p); }) {}
 

@@ -60,8 +60,8 @@ template <typename KeySeq, std::size_t Rounds>
 class AESNIKeySeqStorage<KeySeq, true, Rounds>
 {
     public:
-    typedef typename KeySeq::key_type key_type;
-    typedef std::array<M128I<>, Rounds + 1> key_seq_type;
+    using key_type = typename KeySeq::key_type;
+    using key_seq_type = std::array<M128I<>, Rounds + 1>;
 
     key_seq_type get(const key_type &) const { return key_seq_; }
 
@@ -111,8 +111,8 @@ template <typename KeySeq, std::size_t Rounds>
 class AESNIKeySeqStorage<KeySeq, false, Rounds>
 {
     public:
-    typedef typename KeySeq::key_type key_type;
-    typedef std::array<M128I<>, Rounds + 1> key_seq_type;
+    using key_type = typename KeySeq::key_type;
+    using key_seq_type = std::array<M128I<>, Rounds + 1>;
 
     key_seq_type get(const key_type &k) const
     {
@@ -212,10 +212,10 @@ template <typename ResultType, typename KeySeq, bool KeySeqInit,
 class AESNIEngine
 {
     public:
-    typedef ResultType result_type;
-    typedef typename KeySeq::key_type key_type;
-    typedef std::array<M128I<>, Rounds + 1> key_seq_type;
-    typedef std::array<ResultType, M128I<ResultType>::size()> ctr_type;
+    using result_type = ResultType;
+    using key_type = typename KeySeq::key_type;
+    using key_seq_type = std::array<M128I<>, Rounds + 1>;
+    using ctr_type = std::array<ResultType, M128I<ResultType>::size()>;
 
     explicit AESNIEngine(result_type s = 0) : index_(M_)
     {
@@ -382,7 +382,7 @@ class AESNIEngine
     }
 
     private:
-    typedef std::array<M128I<>, Blocks> state_type;
+    using state_type = std::array<M128I<>, Blocks>;
 
     static constexpr std::size_t M_ = Blocks * M128I<ResultType>::size();
 

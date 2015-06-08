@@ -46,7 +46,7 @@ template <typename StateBase>
 class StateOMP : public StateBase
 {
     public:
-    typedef SizeType<StateBase> size_type;
+    using size_type = SizeType<StateBase>;
 
     explicit StateOMP(size_type N) : StateBase(N) {}
 
@@ -67,7 +67,7 @@ class InitializeOMP : public InitializeBase<T, Derived>
     public:
     std::size_t operator()(Particle<T> &particle, void *param)
     {
-        typedef typename Particle<T>::size_type size_type;
+        using size_type = typename Particle<T>::size_type;
         const size_type N = particle.size();
         this->initialize_param(particle, param);
         this->pre_processor(particle);
@@ -92,7 +92,7 @@ class MoveOMP : public MoveBase<T, Derived>
     public:
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
     {
-        typedef typename Particle<T>::size_type size_type;
+        using size_type = typename Particle<T>::size_type;
         const size_type N = particle.size();
         this->pre_processor(iter, particle);
         std::size_t accept = 0;
@@ -117,7 +117,7 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
     void operator()(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *res)
     {
-        typedef typename Particle<T>::size_type size_type;
+        using size_type = typename Particle<T>::size_type;
         const size_type N = particle.size();
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(shared)
@@ -140,7 +140,7 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
     public:
     double operator()(std::size_t iter, Particle<T> &particle, double *res)
     {
-        typedef typename Particle<T>::size_type size_type;
+        using size_type = typename Particle<T>::size_type;
         const size_type N = particle.size();
         this->pre_processor(iter, particle);
 #pragma omp parallel for default(shared)

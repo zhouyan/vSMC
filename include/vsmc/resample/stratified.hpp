@@ -58,7 +58,7 @@ template <>
 class ResampleTypeTrait<Stratified>
 {
     public:
-    typedef ResampleStratified type;
+    using type = ResampleStratified;
 }; // class ResampleTypeTrait
 
 } // namespace vsmc

@@ -77,14 +77,14 @@
     class Outer##Dispatch<T, false>                                           \
     {                                                                         \
         public:                                                               \
-        typedef Default type;                                                 \
+        using type = Default;                                                 \
     };                                                                        \
                                                                               \
     template <typename T>                                                     \
     class Outer##Dispatch<T, true>                                            \
     {                                                                         \
         public:                                                               \
-        typedef typename T::Inner type;                                       \
+        using type = typename T::Inner;                                       \
     };                                                                        \
                                                                               \
     } /* namespace interanl */                                                \
@@ -94,7 +94,7 @@
     {                                                                         \
         public:                                                               \
         static constexpr bool value = internal::Has##Outer<T>::value;         \
-        typedef typename internal::Outer##Dispatch<T, value>::type type;      \
+        using type = typename internal::Outer##Dispatch<T, value>::type;      \
     };                                                                        \
                                                                               \
     template <typename T>                                                     \
@@ -140,14 +140,14 @@
     class Outer##Dispatch<T, false>                                           \
     {                                                                         \
         public:                                                               \
-        typedef Default<T> type;                                              \
+        using type = Default<T>;                                              \
     };                                                                        \
                                                                               \
     template <typename T>                                                     \
     class Outer##Dispatch<T, true>                                            \
     {                                                                         \
         public:                                                               \
-        typedef typename T::template Inner<T> type;                           \
+        using type = typename T::template Inner<T>;                           \
     };                                                                        \
     }                                                                         \
                                                                               \
@@ -156,7 +156,7 @@
     {                                                                         \
         public:                                                               \
         static constexpr bool value = internal::Has##Outer<T>::value;         \
-        typedef typename internal::Outer##Dispatch<T, value>::type type;      \
+        using type = typename internal::Outer##Dispatch<T, value>::type;      \
     };                                                                        \
                                                                               \
     template <typename T>                                                     \

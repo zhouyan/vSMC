@@ -57,16 +57,14 @@ namespace vsmc
 template <typename RealType = double>
 class StableDistribution
 {
-    private:
     public:
-    typedef RealType result_type;
+    using result_type = RealType;
 
     class param_type
     {
         public:
-        typedef RealType result_type;
-
-        typedef StableDistribution<RealType> distribution_type;
+        using result_type = RealType;
+        using distribution_type = StableDistribution<RealType>;
 
         explicit param_type(result_type stability = 1,
             result_type skewness = 0, result_type location = 0,

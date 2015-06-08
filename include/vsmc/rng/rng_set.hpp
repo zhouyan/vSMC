@@ -54,8 +54,8 @@ template <typename RngType>
 class RngSetScalar
 {
     public:
-    typedef RngType rng_type;
-    typedef std::size_t size_type;
+    using rng_type = RngType;
+    using size_type = std::size_t;
 
     explicit RngSetScalar(size_type N = 0) : size_(N) { seed(); }
 
@@ -78,8 +78,8 @@ template <typename RngType>
 class RngSetVector
 {
     public:
-    typedef RngType rng_type;
-    typedef typename AlignedVector<rng_type>::size_type size_type;
+    using rng_type = RngType;
+    using size_type = typename AlignedVector<rng_type>::size_type;
 
     explicit RngSetVector(size_type N = 0) : rng_(N, rng_type()) { seed(); }
 
@@ -113,7 +113,7 @@ class RngSetVector
     AlignedVector<rng_type> rng_;
 }; // class RngSetVector
 
-typedef VSMC_RNG_SET_TYPE RngSet;
+using RngSet = VSMC_RNG_SET_TYPE;
 
 /// \brief Particle::rng_set_type trait
 /// \ingroup Traits

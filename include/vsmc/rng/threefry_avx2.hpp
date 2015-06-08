@@ -46,8 +46,8 @@ template <typename ResultType, std::size_t K>
 class ThreefryParPackAVX2
 {
     public:
-    typedef std::array<ResultType, K + 1> par_type;
-    typedef std::array<M256I<ResultType>, K + 1> par256_type;
+    using par_type = std::array<ResultType, K + 1>;
+    using par256_type = std::array<M256I<ResultType>, K + 1>;
 
     static void eval(const par_type &par, par256_type &par256)
     {
@@ -73,9 +73,9 @@ template <typename ResultType, std::size_t K>
 class ThreefryCtrPackAVX2
 {
     public:
-    typedef std::array<M256I<ResultType>, K> state_type;
-    typedef std::array<ResultType, K> ctr_type;
-    typedef std::array<ctr_type, M256I<ResultType>::size()> ctr_block_type;
+    using state_type = std::array<M256I<ResultType>, K>;
+    using ctr_type = std::array<ResultType, K>;
+    using ctr_block_type = std::array<ctr_type, M256I<ResultType>::size()>;
 
     static void eval(ctr_type &ctr, state_type &state)
     {
@@ -134,9 +134,9 @@ template <typename ResultType, std::size_t K,
 class ThreefryEngineAVX2
 {
     public:
-    typedef ResultType result_type;
-    typedef std::array<ResultType, K> key_type;
-    typedef std::array<ResultType, K> ctr_type;
+    using result_type = ResultType;
+    using key_type = std::array<ResultType, K>;
+    using ctr_type = std::array<ResultType, K>;
 
     explicit ThreefryEngineAVX2(result_type s = 0) : index_(M_)
     {
@@ -304,8 +304,8 @@ class ThreefryEngineAVX2
     }
 
     private:
-    typedef std::array<M256I<ResultType>, K + 1> par_type;
-    typedef std::array<M256I<ResultType>, K> state_type;
+    using par_type = std::array<M256I<ResultType>, K + 1>;
+    using state_type = std::array<M256I<ResultType>, K>;
 
     static constexpr std::size_t M_ = K * M256I<ResultType>::size();
 
@@ -345,27 +345,27 @@ class ThreefryEngineAVX2
 
 /// \brief Threefry2x32 RNG engine reimplemented using AVX2
 /// \ingroup Threefry
-typedef ThreefryEngineAVX2<std::uint32_t, 2> Threefry2x32AVX2;
+using Threefry2x32AVX2 = ThreefryEngineAVX2<std::uint32_t, 2>;
 
 /// \brief Threefry4x32 RNG engine reimplemented using AVX2
 /// \ingroup Threefry
-typedef ThreefryEngineAVX2<std::uint32_t, 4> Threefry4x32AVX2;
+using Threefry4x32AVX2 = ThreefryEngineAVX2<std::uint32_t, 4>;
 
 /// \brief Threefry2x64 RNG engine reimplemented using AVX2
 /// \ingroup Threefry
-typedef ThreefryEngineAVX2<std::uint64_t, 2> Threefry2x64AVX2;
+using Threefry2x64AVX2 = ThreefryEngineAVX2<std::uint64_t, 2>;
 
 /// \brief Threefry4x64 RNG engine reimplemented using AVX2
 /// \ingroup Threefry
-typedef ThreefryEngineAVX2<std::uint64_t, 4> Threefry4x64AVX2;
+using Threefry4x64AVX2 = ThreefryEngineAVX2<std::uint64_t, 4>;
 
 /// \brief The default 32-bits Threefry engine using AVX2
 /// \ingroup Threefry
-typedef Threefry4x32AVX2 ThreefryAVX2;
+using ThreefryAVX2 = Threefry4x32AVX2;
 
 /// \brief The default 64-bits Threefry engine using AVX2
 /// \ingroup Threefry
-typedef Threefry4x64AVX2 ThreefryAVX2_64;
+using ThreefryAVX2_64 = Threefry4x64AVX2;
 
 } // namespace vsmc
 

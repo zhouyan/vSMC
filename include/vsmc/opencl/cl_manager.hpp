@@ -127,7 +127,7 @@ template <typename ID = CLDefault>
 class CLManager
 {
     public:
-    typedef ID cl_id;
+    using cl_id = ID;
 
     CLManager(const CLManager<ID> &) = delete;
 

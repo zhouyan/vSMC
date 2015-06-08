@@ -51,9 +51,9 @@ template <typename T, typename ID = CLDefault>
 class CLBuffer
 {
     public:
-    typedef T value_type;
-    typedef std::size_t size_type;
-    typedef CLManager<ID> manager_type;
+    using value_type = T;
+    using size_type = std::size_t;
+    using manager_type = CLManager<ID>;
 
     CLBuffer(size_type N = 0, ::cl_mem_flags flag = CL_MEM_READ_WRITE,
         void *host_ptr = nullptr)

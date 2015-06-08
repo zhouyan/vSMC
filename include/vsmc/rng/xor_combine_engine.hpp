@@ -59,9 +59,9 @@ template <typename Eng1, typename Eng2, typename Eng1::result_type S1 = 0,
 class XorCombineEngine
 {
     public:
-    typedef typename Eng1::result_type result_type;
-    typedef Eng1 engine1_type;
-    typedef Eng2 engine2_type;
+    using result_type = typename Eng1::result_type;
+    using engine1_type = Eng1;
+    using engine2_type = Eng2;
 
     explicit XorCombineEngine(result_type s = 1) : eng1_(s), eng2_(s)
     {

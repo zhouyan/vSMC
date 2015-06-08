@@ -48,8 +48,8 @@ template <typename IntType = int>
 class DiscreteDistribution
 {
     public:
-    typedef IntType result_type;
-    typedef Vector<double> param_type;
+    using result_type = IntType;
+    using param_type = Vector<double>;
 
     DiscreteDistribution() {}
 
@@ -149,8 +149,8 @@ class DiscreteDistribution
     result_type operator()(URNG &eng, InputIter first, InputIter last,
         bool normalized = false) const
     {
-        typedef
-            typename std::iterator_traits<InputIter>::value_type value_type;
+        using value_type =
+            typename std::iterator_traits<InputIter>::value_type;
 
         std::uniform_real_distribution<value_type> runif(0, 1);
         value_type u = runif(eng);

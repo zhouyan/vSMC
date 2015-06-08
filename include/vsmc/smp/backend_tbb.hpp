@@ -74,7 +74,7 @@ template <typename StateBase>
 class StateTBB : public StateBase
 {
     public:
-    typedef SizeType<StateBase> size_type;
+    using size_type = SizeType<StateBase>;
 
     explicit StateTBB(size_type N) : StateBase(N) {}
 
@@ -192,7 +192,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
     class work_type
     {
         public:
-        typedef typename Particle<T>::size_type size_type;
+        using size_type = typename Particle<T>::size_type;
 
         work_type(InitializeTBB<T, Derived> *init, Particle<T> *pptr)
             : init_(init), pptr_(pptr), accept_(0)
@@ -301,7 +301,7 @@ class MoveTBB : public MoveBase<T, Derived>
     class work_type
     {
         public:
-        typedef typename Particle<T>::size_type size_type;
+        using size_type = typename Particle<T>::size_type;
 
         work_type(
             MoveTBB<T, Derived> *move, std::size_t iter, Particle<T> *pptr)
@@ -416,7 +416,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
     class work_type
     {
         public:
-        typedef typename Particle<T>::size_type size_type;
+        using size_type = typename Particle<T>::size_type;
 
         work_type(MonitorEvalTBB<T, Derived> *monitor, std::size_t iter,
             std::size_t dim, Particle<T> *pptr, double *res)
@@ -527,7 +527,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
     class work_type
     {
         public:
-        typedef typename Particle<T>::size_type size_type;
+        using size_type = typename Particle<T>::size_type;
 
         work_type(PathEvalTBB<T, Derived> *path, std::size_t iter,
             Particle<T> *pptr, double *res)

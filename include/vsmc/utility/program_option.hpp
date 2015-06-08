@@ -521,10 +521,10 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
 /// \ingroup Option
 class ProgramOptionMap
 {
-    typedef std::map<std::string, std::pair<ProgramOption *, std::size_t>>
-        option_map_type;
-    typedef std::list<std::pair<std::string, const ProgramOption *>>
-        option_list_type;
+    using option_map_type =
+        std::map<std::string, std::pair<ProgramOption *, std::size_t>>;
+    using option_list_type =
+        std::list<std::pair<std::string, const ProgramOption *>>;
 
     public:
     explicit ProgramOptionMap(bool silent = false, bool auto_help = true)

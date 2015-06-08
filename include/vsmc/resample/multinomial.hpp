@@ -58,7 +58,7 @@ template <>
 class ResampleTypeTrait<Multinomial>
 {
     public:
-    typedef ResampleMultinomial type;
+    using type = ResampleMultinomial;
 }; // class ResampleTypeTrait
 
 } // namespace vsmc

@@ -48,15 +48,14 @@ template <typename T>
 class Particle
 {
     public:
-    typedef SizeType<T> size_type;
-    typedef T value_type;
-    typedef WeightSetType<T> weight_set_type;
-    typedef RngSetType<T> rng_set_type;
-    typedef ResampleRngType<T> resample_rng_type;
-    typedef typename rng_set_type::rng_type rng_type;
-
-    typedef std::function<void(std::size_t, std::size_t, resample_rng_type &,
-        const double *, size_type *)> resample_type;
+    using size_type = SizeType<T>;
+    using value_type = T;
+    using weight_set_type = WeightSetType<T>;
+    using rng_set_type = RngSetType<T>;
+    using resample_rng_type = ResampleRngType<T>;
+    using rng_type = typename rng_set_type::rng_type;
+    using resample_type = std::function<void(std::size_t, std::size_t,
+        resample_rng_type &, const double *, size_type *)>;
 
     explicit Particle(size_type N)
         : size_(N)

@@ -69,9 +69,9 @@ template <typename ResultType, std::size_t K,
 class ThreefryEngine
 {
     public:
-    typedef ResultType result_type;
-    typedef std::array<ResultType, K> key_type;
-    typedef std::array<ResultType, K> ctr_type;
+    using result_type = ResultType;
+    using key_type = std::array<ResultType, K>;
+    using ctr_type = std::array<ResultType, K>;
 
     public:
     explicit ThreefryEngine(result_type s = 0) : index_(K)
@@ -266,27 +266,27 @@ class ThreefryEngine
 
 /// \brief Threefry2x32 RNG engine reimplemented
 /// \ingroup Threefry
-typedef ThreefryEngine<std::uint32_t, 2> Threefry2x32;
+using Threefry2x32 = ThreefryEngine<std::uint32_t, 2>;
 
 /// \brief Threefry4x32 RNG engine reimplemented
 /// \ingroup Threefry
-typedef ThreefryEngine<std::uint32_t, 4> Threefry4x32;
+using Threefry4x32 = ThreefryEngine<std::uint32_t, 4>;
 
 /// \brief Threefry2x64 RNG engine reimplemented
 /// \ingroup Threefry
-typedef ThreefryEngine<std::uint64_t, 2> Threefry2x64;
+using Threefry2x64 = ThreefryEngine<std::uint64_t, 2>;
 
 /// \brief Threefry4x64 RNG engine reimplemented
 /// \ingroup Threefry
-typedef ThreefryEngine<std::uint64_t, 4> Threefry4x64;
+using Threefry4x64 = ThreefryEngine<std::uint64_t, 4>;
 
 /// \brief The default 32-bits Threefry engine
 /// \ingroup Threefry
-typedef Threefry4x32 Threefry;
+using Threefry = Threefry4x32;
 
 /// \brief The default 64-bits Threefry engine
 /// \ingroup Threefry
-typedef Threefry4x64 Threefry_64;
+using Threefry_64 = Threefry4x64;
 
 } // namespace vsmc
 

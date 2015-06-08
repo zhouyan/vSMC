@@ -126,21 +126,21 @@ template <MKL_INT>
 class MKLOffset
 {
     public:
-    typedef MKLOffsetZero type;
+    using type = MKLOffsetZero;
 }; // class MKLOffset
 
 template <>
 class MKLOffset<VSL_BRNG_MT2203>
 {
     public:
-    typedef MKLOffsetDynamic<6024> type;
+    using type = MKLOffsetDynamic<6024>;
 }; // class MKLOffset
 
 template <>
 class MKLOffset<VSL_BRNG_WH>
 {
     public:
-    typedef MKLOffsetDynamic<273> type;
+    using type = MKLOffsetDynamic<273>;
 }; // class MKLOffset
 
 } // namespace vsmc::internal
@@ -170,8 +170,8 @@ template <typename MKLPtr, typename Derived>
 class MKLBase
 {
     public:
-    typedef MKLPtr pointer;
-    typedef typename std::remove_pointer<MKLPtr>::type element_type;
+    using pointer = MKLPtr;
+    using element_type = typename std::remove_pointer<MKLPtr>::type;
 
     class deleter_type
     {
@@ -358,7 +358,7 @@ template <typename ResultType = double>
 class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
 {
     public:
-    typedef ResultType result_type;
+    using result_type = ResultType;
 
     MKLSSTask()
     {
@@ -492,7 +492,7 @@ template <typename ResultType = double>
 class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
 {
     public:
-    typedef ResultType result_type;
+    using result_type = ResultType;
 
     MKLConvTask()
     {
@@ -812,7 +812,7 @@ template <typename ResultType = double>
 class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
 {
     public:
-    typedef ResultType result_type;
+    using result_type = ResultType;
 
     MKLCorrTask()
     {
@@ -1132,7 +1132,7 @@ template <typename ResultType = double>
 class MKLDFTask
 {
     public:
-    typedef ResultType result_type;
+    using result_type = ResultType;
 
     MKLDFTask()
     {

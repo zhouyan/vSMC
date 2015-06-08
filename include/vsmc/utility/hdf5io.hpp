@@ -537,13 +537,13 @@ inline void hdf5store_list_insert_tuple(std::size_t nrow,
     const std::tuple<InputIter, InputIters...> &first, const std::string *sptr,
     std::integral_constant<std::size_t, 0>)
 {
-    typedef typename std::tuple_element<0,
-        std::tuple<InputIter, InputIters...>>::type iter_type;
-    typedef typename std::iterator_traits<iter_type>::value_type dtype;
-    HDF5StoreDataPtr<dtype> data_ptr;
+    using value_type =
+        typename std::iterator_traits<typename std::tuple_element<0,
+            std::tuple<InputIter, InputIters...>>::type>::value_type;
+    HDF5StoreDataPtr<value_type> data_ptr;
     data_ptr.set(nrow, std::get<0>(first));
-    const dtype *data = data_ptr.get();
-    hdf5store_list_insert<dtype>(nrow, file_name, data_name, data, *sptr);
+    const value_type *data = data_ptr.get();
+    hdf5store_list_insert<value_type>(nrow, file_name, data_name, data, *sptr);
 }
 
 template <typename InputIter, typename... InputIters, std::size_t Pos>
@@ -552,13 +552,13 @@ inline void hdf5store_list_insert_tuple(std::size_t nrow,
     const std::tuple<InputIter, InputIters...> &first, const std::string *sptr,
     std::integral_constant<std::size_t, Pos>)
 {
-    typedef typename std::tuple_element<Pos,
-        std::tuple<InputIter, InputIters...>>::type iter_type;
-    typedef typename std::iterator_traits<iter_type>::value_type dtype;
-    HDF5StoreDataPtr<dtype> data_ptr;
+    using value_type =
+        typename std::iterator_traits<typename std::tuple_element<Pos,
+            std::tuple<InputIter, InputIters...>>::type>::value_type;
+    HDF5StoreDataPtr<value_type> data_ptr;
     data_ptr.set(nrow, std::get<Pos>(first));
-    const dtype *data = data_ptr.get();
-    hdf5store_list_insert<dtype>(nrow, file_name, data_name, data, *sptr);
+    const value_type *data = data_ptr.get();
+    hdf5store_list_insert<value_type>(nrow, file_name, data_name, data, *sptr);
     hdf5store_list_insert_tuple(nrow, file_name, data_name, first, --sptr,
         std::integral_constant<std::size_t, Pos - 1>());
 }
@@ -605,7 +605,7 @@ template <typename T>
 inline void hdf5store(const Sampler<T> &sampler, const std::string &file_name,
     const std::string &data_name, bool append = false)
 {
-    typedef typename Sampler<T>::size_type size_type;
+    using size_type = typename Sampler<T>::size_type;
 
     std::size_t nrow = sampler.iter_size();
 

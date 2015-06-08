@@ -47,8 +47,8 @@ template <typename IntType = std::size_t>
 class ResampleIndex
 {
     public:
-    typedef std::size_t size_type;
-    typedef IntType index_type;
+    using size_type = std::size_t;
+    using index_type = IntType;
 
     ResampleIndex(size_type N) : size_(N), identity_(N)
     {

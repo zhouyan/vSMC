@@ -44,7 +44,7 @@ template <typename IntType = __m128i>
 class M128I
 {
     public:
-    typedef IntType value_type;
+    using value_type = IntType;
 
     M128I() = default;
 

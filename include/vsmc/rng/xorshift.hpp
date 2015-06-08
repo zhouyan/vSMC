@@ -272,7 +272,7 @@ template <typename ResultType, std::size_t K, unsigned A, unsigned B,
 class XorshiftEngine
 {
     public:
-    typedef ResultType result_type;
+    using result_type = ResultType;
 
     explicit XorshiftEngine(result_type s = 1)
     {
@@ -393,8 +393,8 @@ template <typename Eng, typename Eng::result_type D = 362437,
 class XorwowEngine
 {
     public:
-    typedef typename Eng::result_type result_type;
-    typedef Eng engine_type;
+    using result_type = typename Eng::result_type;
+    using engine_type = Eng;
 
     explicit XorwowEngine(result_type s = 1) : eng_(s), weyl_(DInit) {}
 
@@ -488,143 +488,143 @@ class XorwowEngine
 
 /// \brief Xorshift RNG engine generating \f$2^{32}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorshiftEngine<std::uint32_t, 1, 13, 17, 5, 0, 0, 0> Xorshift1x32;
+using Xorshift1x32 = XorshiftEngine<std::uint32_t, 1, 13, 17, 5, 0, 0, 0>;
 
 /// \brief Xorshift RNG engine generating \f$2^{64}-1\f$ 64-bits integers
 /// \ingroup Xorshift
-typedef XorshiftEngine<std::uint64_t, 1, 13, 7, 17, 0, 0, 0> Xorshift1x64;
+using Xorshift1x64 = XorshiftEngine<std::uint64_t, 1, 13, 7, 17, 0, 0, 0>;
 
 /// \brief Xorshift RNG engine generating \f$2^{64}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorshiftEngine<std::uint32_t, 2, 17, 14, 12, 19, 2, 1> Xorshift2x32;
+using Xorshift2x32 = XorshiftEngine<std::uint32_t, 2, 17, 14, 12, 19, 2, 1>;
 
 /// \brief Xorshift RNG engine generating \f$2^{128}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorshiftEngine<std::uint32_t, 4, 15, 14, 12, 17, 4, 3> Xorshift4x32;
+using Xorshift4x32 = XorshiftEngine<std::uint32_t, 4, 15, 14, 12, 17, 4, 3>;
 
 /// \brief Xorshift RNG engine generating \f$2^{256}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorshiftEngine<std::uint32_t, 8, 18, 13, 14, 15, 8, 3> Xorshift8x32;
+using Xorshift8x32 = XorshiftEngine<std::uint32_t, 8, 18, 13, 14, 15, 8, 3>;
 
 /// \brief Xorshift RNG engine generating \f$2^{512}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorshiftEngine<std::uint32_t, 16, 17, 15, 13, 14, 16, 1> Xorshift16x32;
+using Xorshift16x32 = XorshiftEngine<std::uint32_t, 16, 17, 15, 13, 14, 16, 1>;
 
 /// \brief Xorshift RNG engine generating \f$2^{1024}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorshiftEngine<std::uint32_t, 32, 19, 11, 13, 16, 32, 15>
-    Xorshift32x32;
+using Xorshift32x32 =
+    XorshiftEngine<std::uint32_t, 32, 19, 11, 13, 16, 32, 15>;
 
 /// \brief Xorshift RNG engine generating \f$2^{2048}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorshiftEngine<std::uint32_t, 64, 19, 12, 14, 15, 64, 59>
-    Xorshift64x32;
+using Xorshift64x32 =
+    XorshiftEngine<std::uint32_t, 64, 19, 12, 14, 15, 64, 59>;
 
 /// \brief Xorshift RNG engine generating \f$2^{4096}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorshiftEngine<std::uint32_t, 128, 17, 12, 13, 15, 128, 95>
-    Xorshift128x32;
+using Xorshift128x32 =
+    XorshiftEngine<std::uint32_t, 128, 17, 12, 13, 15, 128, 95>;
 
 /// \brief Xorshift RNG engine generating \f$2^{128}-1\f$ 64-bits integers
 /// \ingroup Xorshift
-typedef XorshiftEngine<std::uint64_t, 2, 33, 31, 28, 29, 2, 1> Xorshift2x64;
+using Xorshift2x64 = XorshiftEngine<std::uint64_t, 2, 33, 31, 28, 29, 2, 1>;
 
 /// \brief Xorshift RNG engine generating \f$2^{256}-1\f$ 64-bits integers
 /// \ingroup Xorshift
-typedef XorshiftEngine<std::uint64_t, 4, 37, 27, 29, 33, 4, 3> Xorshift4x64;
+using Xorshift4x64 = XorshiftEngine<std::uint64_t, 4, 37, 27, 29, 33, 4, 3>;
 
 /// \brief Xorshift RNG engine generating \f$2^{512}-1\f$ 64-bits integers
 /// \ingroup Xorshift
-typedef XorshiftEngine<std::uint64_t, 8, 37, 26, 29, 34, 8, 1> Xorshift8x64;
+using Xorshift8x64 = XorshiftEngine<std::uint64_t, 8, 37, 26, 29, 34, 8, 1>;
 
 /// \brief Xorshift RNG engine generating \f$2^{1024}-1\f$ 64-bits integers
 /// \ingroup Xorshift
-typedef XorshiftEngine<std::uint64_t, 16, 34, 29, 25, 31, 16, 7> Xorshift16x64;
+using Xorshift16x64 = XorshiftEngine<std::uint64_t, 16, 34, 29, 25, 31, 16, 7>;
 
 /// \brief Xorshift RNG engine generating \f$2^{2048}-1\f$ 64-bits integers
 /// \ingroup Xorshift
-typedef XorshiftEngine<std::uint64_t, 32, 35, 27, 26, 37, 32, 1> Xorshift32x64;
+using Xorshift32x64 = XorshiftEngine<std::uint64_t, 32, 35, 27, 26, 37, 32, 1>;
 
 /// \brief Xorshift RNG engine generating \f$2^{4096}-1\f$ 64-bits integers
 /// \ingroup Xorshift
-typedef XorshiftEngine<std::uint64_t, 64, 33, 26, 27, 29, 64, 53>
-    Xorshift64x64;
+using Xorshift64x64 =
+    XorshiftEngine<std::uint64_t, 64, 33, 26, 27, 29, 64, 53>;
 
 /// \brief The default 32-bits Xorshift RNG engine
 /// \ingroup Xorshift
-typedef Xorshift128x32 Xorshift;
+using Xorshift = Xorshift128x32;
 
 /// \brief The default 64-bits Xorshift RNG engine
 /// \ingroup Xorshift
-typedef Xorshift64x64 Xorshift_64;
+using Xorshift_64 = Xorshift64x64;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{32}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorwowEngine<Xorshift1x32> Xorwow1x32;
+using Xorwow1x32 = XorwowEngine<Xorshift1x32>;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{64}-1\f$ 64-bits integers
 /// \ingroup Xorshift
-typedef XorwowEngine<Xorshift1x64> Xorwow1x64;
+using Xorwow1x64 = XorwowEngine<Xorshift1x64>;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{64}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorwowEngine<Xorshift2x32> Xorwow2x32;
+using Xorwow2x32 = XorwowEngine<Xorshift2x32>;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{128}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorwowEngine<Xorshift4x32> Xorwow4x32;
+using Xorwow4x32 = XorwowEngine<Xorshift4x32>;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{256}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorwowEngine<Xorshift8x32> Xorwow8x32;
+using Xorwow8x32 = XorwowEngine<Xorshift8x32>;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{512}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorwowEngine<Xorshift16x32> Xorwow16x32;
+using Xorwow16x32 = XorwowEngine<Xorshift16x32>;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{1024}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorwowEngine<Xorshift32x32> Xorwow32x32;
+using Xorwow32x32 = XorwowEngine<Xorshift32x32>;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{2048}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorwowEngine<Xorshift64x32> Xorwow64x32;
+using Xorwow64x32 = XorwowEngine<Xorshift64x32>;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{4096}-1\f$ 32-bits integers
 /// \ingroup Xorshift
-typedef XorwowEngine<Xorshift128x32> Xorwow128x32;
+using Xorwow128x32 = XorwowEngine<Xorshift128x32>;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{128}-1\f$ 64-bits integers
 /// \ingroup Xorshift
-typedef XorwowEngine<Xorshift2x64> Xorwow2x64;
+using Xorwow2x64 = XorwowEngine<Xorshift2x64>;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{256}-1\f$ 64-bits integers
 /// \ingroup Xorshift
-typedef XorwowEngine<Xorshift4x64> Xorwow4x64;
+using Xorwow4x64 = XorwowEngine<Xorshift4x64>;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{512}-1\f$ 64-bits integers
 /// \ingroup Xorshift
-typedef XorwowEngine<Xorshift8x64> Xorwow8x64;
+using Xorwow8x64 = XorwowEngine<Xorshift8x64>;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{1024}-1\f$ 64-bits integers
 /// \ingroup Xorshift
-typedef XorwowEngine<Xorshift16x64> Xorwow16x64;
+using Xorwow16x64 = XorwowEngine<Xorshift16x64>;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{2048}-1\f$ 64-bits integers
 /// \ingroup Xorshift
-typedef XorwowEngine<Xorshift32x64> Xorwow32x64;
+using Xorwow32x64 = XorwowEngine<Xorshift32x64>;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{4096}-1\f$ 64-bits integers
 /// \ingroup Xorshift
-typedef XorwowEngine<Xorshift64x64> Xorwow64x64;
+using Xorwow64x64 = XorwowEngine<Xorshift64x64>;
 
 /// \brief The default 32-bits Xorwow RNG engine
 /// \ingroup Xorshift
-typedef Xorwow128x32 Xorwow;
+using Xorwow = Xorwow128x32;
 
 /// \brief The default 64-bits Xorwow RNG engine
 /// \ingroup Xorshift
-typedef Xorwow64x64 Xorwow_64;
+using Xorwow_64 = Xorwow64x64;
 
 } // namespace vsmc
 

@@ -50,7 +50,7 @@ template <typename WatchType>
 class StopWatchGuard
 {
     public:
-    typedef WatchType watch_type;
+    using watch_type = WatchType;
 
     StopWatchGuard(watch_type &watch, bool start = true)
         : start_(start), watch_(watch)
@@ -76,7 +76,7 @@ template <typename ClockType>
 class StopWatchClockAdapter
 {
     public:
-    typedef ClockType clock_type;
+    using clock_type = ClockType;
 
     StopWatchClockAdapter() : elapsed_(0), running_(false) { reset(); }
 
@@ -186,7 +186,7 @@ class StopWatchClockAdapter
 
 /// \brief Stop watch using `<chrono>`
 /// \ingroup StopWatch
-typedef StopWatchClockAdapter<VSMC_STOP_WATCH_CLOCK_TYPE> StopWatch;
+using StopWatch = StopWatchClockAdapter<VSMC_STOP_WATCH_CLOCK_TYPE>;
 
 } // namespace vsmc
 

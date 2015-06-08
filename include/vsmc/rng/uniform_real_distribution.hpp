@@ -66,14 +66,14 @@ class UniformRealDistributionIntType<0,
     static_cast<std::uint64_t>(VSMC_MAX_UINT(std::uint32_t))>
 {
     public:
-    typedef std::uint32_t type;
+    using type = std::uint32_t;
 }; // class UniformRealDistributionIntType
 
 template <>
 class UniformRealDistributionIntType<0, VSMC_MAX_UINT(std::uint64_t)>
 {
     public:
-    typedef std::uint64_t type;
+    using type = std::uint64_t;
 }; // class UniformRealDistributionIntType
 
 } // namespace vsmc::interal
@@ -95,15 +95,14 @@ template <typename RealType = double, typename Left = Closed,
 class UniformRealDistribution
 {
     public:
-    typedef RealType result_type;
+    using result_type = RealType;
 
     class param_type
     {
         public:
-        typedef RealType result_type;
-
-        typedef UniformRealDistribution<RealType, Left, Right>
-            distribution_type;
+        using result_type = RealType;
+        using distribution_type =
+            UniformRealDistribution<RealType, Left, Right>;
 
         explicit param_type(result_type a = 0, result_type b = 1)
             : a_(a), b_(b)

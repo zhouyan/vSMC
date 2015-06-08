@@ -75,7 +75,7 @@ template <>
 class ResampleTypeTrait<Residual>
 {
     public:
-    typedef ResampleResidual type;
+    using type = ResampleResidual;
 }; // class ResampleTypeTrait
 
 } // namespace vsmc

@@ -97,7 +97,7 @@ class MKLBetaDistribution;
 /// \ingroup Traits
 ///
 /// \details
-/// To use MKLEngine with those MKL BRNG that has not been typedefed by vSMC,
+/// To use MKLEngine with those MKL BRNG that has not been aliased by vSMC,
 /// one need to specialize this trait, which has member type `type`, and this
 /// type has member `operator() (MKLStream<BRNG> &, MKL_INT, ResultType *)`
 /// such that given the stream object, it is able to generate uniform integers.
@@ -113,7 +113,7 @@ template <MKL_INT BRNG>
 class MKLUniformBitsTrait<BRNG, unsigned>
 {
     public:
-    typedef MKLUniformBits32Distribution type;
+    using type = MKLUniformBits32Distribution;
     static constexpr unsigned min VSMC_MNE = 0;
     static constexpr unsigned max VSMC_MNE = VSMC_MAX_UINT(unsigned);
 }; // class MKLUniformBitsTrait
@@ -125,7 +125,7 @@ template <MKL_INT BRNG>
 class MKLUniformBitsTrait<BRNG, unsigned MKL_INT64>
 {
     public:
-    typedef MKLUniformBits64Distribution type;
+    using type = MKLUniformBits64Distribution;
     static constexpr unsigned MKL_INT64 min VSMC_MNE = 0;
     static constexpr unsigned MKL_INT64 max VSMC_MNE =
         VSMC_MAX_UINT(unsigned MKL_INT64);
@@ -137,7 +137,7 @@ namespace internal
 class MKLSkipAheadVSL
 {
     public:
-    typedef long long size_type;
+    using size_type = long long;
 
     template <MKL_INT BRNG>
     void operator()(MKLStream<BRNG> &stream, size_type nskip)
@@ -158,7 +158,7 @@ template <MKL_INT BRNG, typename ResultType>
 class MKLSkipAheadForce
 {
     public:
-    typedef MKL_INT size_type;
+    using size_type = MKL_INT;
 
     MKLSkipAheadForce() : buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE) {}
 
@@ -200,42 +200,42 @@ template <MKL_INT BRNG, typename ResultType>
 class MKLSkipAhead
 {
     public:
-    typedef MKLSkipAheadForce<BRNG, ResultType> type;
+    using type = MKLSkipAheadForce<BRNG, ResultType>;
 }; // clas MKLSkipAhead
 
 template <typename ResultType>
 class MKLSkipAhead<VSL_BRNG_MCG31, ResultType>
 {
     public:
-    typedef MKLSkipAheadVSL type;
+    using type = MKLSkipAheadVSL;
 }; // clas MKLSkipAhead
 
 template <typename ResultType>
 class MKLSkipAhead<VSL_BRNG_MCG59, ResultType>
 {
     public:
-    typedef MKLSkipAheadVSL type;
+    using type = MKLSkipAheadVSL;
 }; // clas MKLSkipAhead
 
 template <typename ResultType>
 class MKLSkipAhead<VSL_BRNG_MRG32K3A, ResultType>
 {
     public:
-    typedef MKLSkipAheadVSL type;
+    using type = MKLSkipAheadVSL;
 }; // clas MKLSkipAhead
 
 template <typename ResultType>
 class MKLSkipAhead<VSL_BRNG_SOBOL, ResultType>
 {
     public:
-    typedef MKLSkipAheadVSL type;
+    using type = MKLSkipAheadVSL;
 }; // clas MKLSkipAhead
 
 template <typename ResultType>
 class MKLSkipAhead<VSL_BRNG_NIEDERR, ResultType>
 {
     public:
-    typedef MKLSkipAheadVSL type;
+    using type = MKLSkipAheadVSL;
 }; // clas MKLSkipAhead
 
 } // namespace vsmc::internal
@@ -246,8 +246,8 @@ template <MKL_INT BRNG, typename ResultType>
 class MKLEngine
 {
     public:
-    typedef ResultType result_type;
-    typedef MKLStream<BRNG> stream_type;
+    using result_type = ResultType;
+    using stream_type = MKLStream<BRNG>;
 
     explicit MKLEngine(MKL_UINT s = MKLSeed<BRNG>::value, MKL_INT offset = 0)
         : stream_(s, offset)
@@ -333,60 +333,60 @@ class MKLEngine
 
 /// \brief A 59-bits multiplicative congruential generator
 /// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_MCG59, unsigned> MKL_MCG59;
+using MKL_MCG59 = MKLEngine<VSL_BRNG_MCG59, unsigned>;
 
 /// \brief A Mersenne-Twister pseudoranom number genertor
 /// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_MT19937, unsigned> MKL_MT19937;
+using MKL_MT19937 = MKLEngine<VSL_BRNG_MT19937, unsigned>;
 
 /// \brief A Mersenne-Twister pseudoranom number genertor (64-bits)
 /// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_MT19937, unsigned MKL_INT64> MKL_MT19937_64;
+using MKL_MT19937_64 = MKLEngine<VSL_BRNG_MT19937, unsigned MKL_INT64>;
 
 /// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor
 /// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_MT2203, unsigned> MKL_MT2203;
+using MKL_MT2203 = MKLEngine<VSL_BRNG_MT2203, unsigned>;
 
 /// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor
 /// (64-bits)
 /// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_MT2203, unsigned MKL_INT64> MKL_MT2203_64;
+using MKL_MT2203_64 = MKLEngine<VSL_BRNG_MT2203, unsigned MKL_INT64>;
 
 /// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number genertor
 /// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_SFMT19937, unsigned> MKL_SFMT19937;
+using MKL_SFMT19937 = MKLEngine<VSL_BRNG_SFMT19937, unsigned>;
 
 /// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number genertor
 /// (64-bits)
 /// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_SFMT19937, unsigned MKL_INT64> MKL_SFMT19937_64;
+using MKL_SFMT19937_64 = MKLEngine<VSL_BRNG_SFMT19937, unsigned MKL_INT64>;
 
 /// \brief A non-determinstic random number generator
 /// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_NONDETERM, unsigned> MKL_NONDETERM;
+using MKL_NONDETERM = MKLEngine<VSL_BRNG_NONDETERM, unsigned>;
 
 /// \brief A non-determinstic random number generator (64-bits)
 /// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_NONDETERM, unsigned MKL_INT64> MKL_NONDETERM_64;
+using MKL_NONDETERM_64 = MKLEngine<VSL_BRNG_NONDETERM, unsigned MKL_INT64>;
 
 #if INTEL_MKL_VERSION >= 110300
 
 /// \brief A counter-based random number generator
 /// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_ARS5, unsigned> MKL_ARS5;
+using MKL_ARS5 = MKLEngine<VSL_BRNG_ARS5, unsigned>;
 
 /// \brief A counter-based random number generator (64-bits)
 /// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_ARS5, unsigned MKL_INT64> MKL_ARS5_64;
+using MKL_ARS5_64 = MKLEngine<VSL_BRNG_ARS5, unsigned MKL_INT64>;
 
 /// \brief A counter-based random number generator
 /// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_PHILOX4X32X10, unsigned> MKL_PHILOX4X32X10;
+using MKL_PHILOX4X32X10 = MKLEngine<VSL_BRNG_PHILOX4X32X10, unsigned>;
 
 /// \brief A counter-based random number generator (64-bits)
 /// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_PHILOX4X32X10, unsigned MKL_INT64>
-    MKL_PHILOX4X32X10_64;
+using MKL_PHILOX4X32X10_64 =
+    MKLEngine<VSL_BRNG_PHILOX4X32X10, unsigned MKL_INT64>;
 
 #endif // INTEL_MKL_VERSION >= 110300
 
@@ -396,7 +396,7 @@ template <typename ResultType, typename Derived>
 class MKLDistribution
 {
     public:
-    typedef ResultType result_type;
+    using result_type = ResultType;
 
     MKLDistribution()
         : buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE), index_(buffer_size_)
@@ -467,7 +467,7 @@ class MKLUniformBits32Distribution
     : public MKLDistribution<unsigned, MKLUniformBits32Distribution>
 {
     public:
-    typedef unsigned result_type;
+    using result_type = unsigned;
 
     template <MKL_INT BRNG>
     void generate(MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
@@ -484,7 +484,7 @@ class MKLUniformBits64Distribution
     : public MKLDistribution<unsigned MKL_INT64, MKLUniformBits64Distribution>
 {
     public:
-    typedef unsigned MKL_INT64 result_type;
+    using result_type = unsigned MKL_INT64;
 
     template <MKL_INT BRNG>
     void generate(MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
@@ -502,7 +502,7 @@ class MKLUniformDistribution : public MKLDistribution<ResultType,
                                    MKLUniformDistribution<ResultType, Method>>
 {
     public:
-    typedef ResultType result_type;
+    using result_type = ResultType;
 
     explicit MKLUniformDistribution(result_type a = 0, result_type b = 1)
         : a_(a), b_(b)
@@ -543,7 +543,7 @@ class MKLBernoulliDistribution
     : public MKLDistribution<MKL_INT, MKLBernoulliDistribution<Method>>
 {
     public:
-    typedef MKL_INT result_type;
+    using result_type = MKL_INT;
 
     explicit MKLBernoulliDistribution(double p = 0.5) : p_(p) {}
 
@@ -565,7 +565,7 @@ class MKLGeometricDistribution
     : public MKLDistribution<MKL_INT, MKLGeometricDistribution<Method>>
 {
     public:
-    typedef MKL_INT result_type;
+    using result_type = MKL_INT;
 
     explicit MKLGeometricDistribution(double p = 0.5) : p_(p) {}
 
@@ -587,7 +587,7 @@ class MKLBinomialDistribution
     : public MKLDistribution<MKL_INT, MKLBinomialDistribution<Method>>
 {
     public:
-    typedef MKL_INT result_type;
+    using result_type = MKL_INT;
 
     explicit MKLBinomialDistribution(result_type ntrial = 1, double p = 0.5)
         : ntrial_(ntrial), p_(p)
@@ -613,7 +613,7 @@ class MKLHypergeometricDistribution
     : public MKLDistribution<MKL_INT, MKLHypergeometricDistribution<Method>>
 {
     public:
-    typedef MKL_INT result_type;
+    using result_type = MKL_INT;
 
     MKLHypergeometricDistribution(
         result_type population, result_type sample, result_type mask)
@@ -642,7 +642,7 @@ class MKLPoissonDistribution
     : public MKLDistribution<MKL_INT, MKLPoissonDistribution<Method>>
 {
     public:
-    typedef MKL_INT result_type;
+    using result_type = MKL_INT;
 
     explicit MKLPoissonDistribution(double lambda = 1) : lambda_(lambda) {}
 
@@ -664,7 +664,7 @@ class MKLNegBinomialDistribution
     : public MKLDistribution<MKL_INT, MKLNegBinomialDistribution<Method>>
 {
     public:
-    typedef MKL_INT result_type;
+    using result_type = MKL_INT;
 
     explicit MKLNegBinomialDistribution(double ntrial = 1, double p = 0.5)
         : ntrial_(ntrial), p_(p)
@@ -691,7 +691,7 @@ class MKLGaussianDistribution : public MKLDistribution<RealType,
                                     MKLGaussianDistribution<RealType, Method>>
 {
     public:
-    typedef RealType result_type;
+    using result_type = RealType;
 
     explicit MKLGaussianDistribution(result_type mean = 0, result_type sd = 1)
         : mean_(mean), sd_(sd)
@@ -730,7 +730,7 @@ class MKLExponentialDistribution
           MKLExponentialDistribution<RealType, Method>>
 {
     public:
-    typedef RealType result_type;
+    using result_type = RealType;
 
     explicit MKLExponentialDistribution(
         result_type displacement = 0, result_type scale = 1)
@@ -769,7 +769,7 @@ class MKLLaplaceDistribution : public MKLDistribution<RealType,
                                    MKLLaplaceDistribution<RealType, Method>>
 {
     public:
-    typedef RealType result_type;
+    using result_type = RealType;
 
     explicit MKLLaplaceDistribution(
         result_type mean = 0, result_type scale = 1)
@@ -807,7 +807,7 @@ class MKLWeibullDistribution : public MKLDistribution<RealType,
                                    MKLWeibullDistribution<RealType, Method>>
 {
     public:
-    typedef RealType result_type;
+    using result_type = RealType;
 
     explicit MKLWeibullDistribution(result_type shape = 1,
         result_type displacement = 0, result_type scale = 1)
@@ -846,7 +846,7 @@ class MKLCauchyDistribution
     : public MKLDistribution<RealType, MKLCauchyDistribution<RealType, Method>>
 {
     public:
-    typedef RealType result_type;
+    using result_type = RealType;
 
     explicit MKLCauchyDistribution(
         result_type displacement = 0, result_type scale = 1)
@@ -884,7 +884,7 @@ class MKLRayleighDistribution : public MKLDistribution<RealType,
                                     MKLRayleighDistribution<RealType, Method>>
 {
     public:
-    typedef RealType result_type;
+    using result_type = RealType;
 
     explicit MKLRayleighDistribution(
         result_type displacement = 0, result_type scale = 1)
@@ -924,7 +924,7 @@ class MKLLognormalDistribution
           MKLLognormalDistribution<RealType, Method>>
 {
     public:
-    typedef RealType result_type;
+    using result_type = RealType;
 
     explicit MKLLognormalDistribution(result_type mean = 0, result_type sd = 1,
         result_type displacement = 0, result_type scale = 1)
@@ -965,7 +965,7 @@ class MKLGumbelDistribution
     : public MKLDistribution<RealType, MKLGumbelDistribution<RealType, Method>>
 {
     public:
-    typedef RealType result_type;
+    using result_type = RealType;
 
     explicit MKLGumbelDistribution(
         result_type displacement = 0, result_type scale = 1)
@@ -1003,7 +1003,7 @@ class MKLGammaDistribution
     : public MKLDistribution<RealType, MKLGammaDistribution<RealType, Method>>
 {
     public:
-    typedef RealType result_type;
+    using result_type = RealType;
 
     explicit MKLGammaDistribution(result_type shape = 1,
         result_type displacement = 0, result_type scale = 1)
@@ -1042,7 +1042,7 @@ class MKLBetaDistribution
     : public MKLDistribution<RealType, MKLBetaDistribution<RealType, Method>>
 {
     public:
-    typedef RealType result_type;
+    using result_type = RealType;
 
     explicit MKLBetaDistribution(result_type shape1 = 1,
         result_type shape2 = 1, result_type displacement = 0,

@@ -78,7 +78,7 @@ VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
 /// class single_particle_type
 /// {
 ///     public:
-///     typedef IntType size_type;
+///     using size_type = IntType;
 ///     single_particle_type(size_type id, Particle<S> *pptr);
 ///     size_type id() const;
 ///     Particle<S> &particle() const;

@@ -170,12 +170,11 @@ template <std::size_t StateSize, typename RealType, typename ID = CLDefault>
 class StateCL
 {
     public:
-    typedef ::cl_ulong size_type;
-    typedef RealType fp_type;
-    typedef ID cl_id;
-    typedef CLManager<ID> manager_type;
-    typedef typename std::conditional<StateSize == Dynamic, std::vector<char>,
-        std::array<char, StateSize>>::type state_pack_type;
+    using size_type = ::cl_ulong;
+    using fp_type = RealType;
+    using cl_id = ID;
+    using manager_type = CLManager<ID>;
+    using state_pack_type = Vector<char>;
 
     explicit StateCL(size_type N)
         : state_size_(StateSize == Dynamic ? 1 : StateSize)
@@ -370,7 +369,7 @@ class StateCL
 
     state_pack_type state_pack(size_type id) const
     {
-        state_pack_type pack(create_pack());
+        state_pack_type pack(this->state_size());
         std::memcpy(pack.data(), state_tmp_host_.data() + id * state_size_,
             state_size_);
 
@@ -439,22 +438,6 @@ class StateCL
         }
         copy_.build(size_, state_size_);
         build_ = true;
-    }
-
-    state_pack_type create_pack() const
-    {
-        return create_pack_dispatch(
-            std::integral_constant<bool, StateSize == Dynamic>());
-    }
-
-    std::vector<char> create_pack_dispatch(std::true_type) const
-    {
-        return std::vector<char>(this->state_size());
-    }
-
-    std::array<char, StateSize> create_pack_dispatch(std::false_type) const
-    {
-        return std::array<char, StateSize>();
     }
 }; // class StateCL
 

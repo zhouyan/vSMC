@@ -91,8 +91,8 @@ template <typename ID, typename ResultType = VSMC_SEED_RESULT_TYPE>
 class SeedGenerator
 {
     public:
-    typedef ResultType result_type;
-    typedef ResultType skip_type;
+    using result_type = ResultType;
+    using skip_type = ResultType;
 
     SeedGenerator(const SeedGenerator<ID, ResultType> &) = delete;
 
@@ -243,7 +243,7 @@ class SeedGenerator
 /// ~~~{.cpp}
 /// #include <vsmc/rng/seed.hpp>
 ///
-/// typedef SeedGeneartor<NullType, std::array<std::uint32_t, 4> > Seed4x32;
+/// using Seed4x32 = SeedGeneartor<NullType, std::array<std::uint32_t, 4> >;
 /// Seed4x32 &seed = SeedType::instance();
 /// boost::mpi::communicator world;
 /// Seed4x32::result_type s;
@@ -255,8 +255,8 @@ template <typename ID, typename T, std::size_t K>
 class SeedGenerator<ID, std::array<T, K>>
 {
     public:
-    typedef std::array<T, K> result_type;
-    typedef T skip_type;
+    using result_type = std::array<T, K>;
+    using skip_type = T;
 
     SeedGenerator(const SeedGenerator<ID, std::array<T, K>> &) = delete;
 
@@ -404,7 +404,7 @@ class SeedGenerator<ID, std::array<T, K>>
 
 /// \brief The default Seed type
 /// \ingroup RNG
-typedef SeedGenerator<NullType, VSMC_SEED_RESULT_TYPE> Seed;
+using Seed = SeedGenerator<NullType, VSMC_SEED_RESULT_TYPE>;
 
 } // namespace vsmc
 

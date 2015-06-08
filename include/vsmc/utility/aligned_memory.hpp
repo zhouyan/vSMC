@@ -249,7 +249,7 @@ class AlignedMemoryMKL
 
 /// \brief Default AlignedMemory type
 /// \ingroup AlignedMemory
-typedef VSMC_ALIGNED_MEMORY_TYPE AlignedMemory;
+using AlignedMemory = VSMC_ALIGNED_MEMORY_TYPE;
 
 /// \brief Aligned allocator
 /// \ingroup AlignedMemory
@@ -267,14 +267,14 @@ template <typename T, std::size_t Alignment = VSMC_ALIGNMENT,
 class AlignedAllocator : public std::allocator<T>
 {
     public:
-    typedef typename std::allocator<T>::size_type size_type;
-    typedef typename std::allocator<T>::pointer pointer;
+    using size_type = typename std::allocator<T>::size_type;
+    using pointer = typename std::allocator<T>::pointer;
 
     template <typename U>
     class rebind
     {
         public:
-        typedef AlignedAllocator<U, Alignment> other;
+        using other = AlignedAllocator<U, Alignment>;
     }; // class rebind
 
     AlignedAllocator() { VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY; }

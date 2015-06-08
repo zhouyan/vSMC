@@ -46,7 +46,7 @@ template <typename ID>
 class CLCopy
 {
     public:
-    typedef CLManager<ID> manager_type;
+    using manager_type = CLManager<ID>;
 
     CLCopy() : size_(0) {}
 

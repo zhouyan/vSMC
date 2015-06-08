@@ -59,13 +59,13 @@ template <typename T>
 class Sampler
 {
     public:
-    typedef typename Particle<T>::size_type size_type;
-    typedef typename Particle<T>::resample_type resample_type;
-    typedef T value_type;
-    typedef std::function<std::size_t(Particle<T> &, void *)> init_type;
-    typedef std::function<std::size_t(std::size_t, Particle<T> &)> move_type;
-    typedef std::function<std::size_t(std::size_t, Particle<T> &)> mcmc_type;
-    typedef std::map<std::string, Monitor<T>> monitor_map_type;
+    using size_type = typename Particle<T>::size_type;
+    using resample_type = typename Particle<T>::resample_type;
+    using value_type = T;
+    using init_type = std::function<std::size_t(Particle<T> &, void *)>;
+    using move_type = std::function<std::size_t(std::size_t, Particle<T> &)>;
+    using mcmc_type = std::function<std::size_t(std::size_t, Particle<T> &)>;
+    using monitor_map_type = std::map<std::string, Monitor<T>>;
 
     /// \brief Construct a Sampler without selection of resampling method
     explicit Sampler(size_type N)
@@ -855,7 +855,7 @@ class Sampler
     template <typename OutputIter>
     void summary_data_row_int(OutputIter first) const
     {
-        typedef typename std::iterator_traits<OutputIter>::value_type int_type;
+        using int_type = typename std::iterator_traits<OutputIter>::value_type;
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
             *first++ = static_cast<int_type>(size_history_[iter]);
             *first++ = static_cast<int_type>(resampled_history_[iter]);

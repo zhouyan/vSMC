@@ -52,7 +52,7 @@ class InitializeSEQ : public InitializeBase<T, Derived>
     public:
     std::size_t operator()(Particle<T> &particle, void *param)
     {
-        typedef typename Particle<T>::size_type size_type;
+        using size_type = typename Particle<T>::size_type;
         const size_type N = particle.size();
         this->initialize_param(particle, param);
         this->pre_processor(particle);
@@ -76,7 +76,7 @@ class MoveSEQ : public MoveBase<T, Derived>
     public:
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
     {
-        typedef typename Particle<T>::size_type size_type;
+        using size_type = typename Particle<T>::size_type;
         const size_type N = particle.size();
         this->pre_processor(iter, particle);
         std::size_t accept = 0;
@@ -100,7 +100,7 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
     void operator()(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *res)
     {
-        typedef typename Particle<T>::size_type size_type;
+        using size_type = typename Particle<T>::size_type;
         const size_type N = particle.size();
         this->pre_processor(iter, particle);
         for (size_type i = 0; i != N; ++i) {
@@ -122,7 +122,7 @@ class PathEvalSEQ : public PathEvalBase<T, Derived>
     public:
     double operator()(std::size_t iter, Particle<T> &particle, double *res)
     {
-        typedef typename Particle<T>::size_type size_type;
+        using size_type = typename Particle<T>::size_type;
         const size_type N = particle.size();
         this->pre_processor(iter, particle);
         for (size_type i = 0; i != N; ++i)

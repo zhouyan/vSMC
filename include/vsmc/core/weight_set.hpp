@@ -43,7 +43,7 @@ namespace vsmc
 class WeightSet
 {
     public:
-    typedef std::size_t size_type;
+    using size_type = std::size_t;
 
     explicit WeightSet(size_type N)
         : size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N)
@@ -424,7 +424,7 @@ class WeightSet
 class WeightSetNull
 {
     public:
-    typedef std::size_t size_type;
+    using size_type = std::size_t;
 
     explicit WeightSetNull(size_type) {}
 

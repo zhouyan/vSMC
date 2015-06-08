@@ -282,9 +282,9 @@ template <typename ResultType, std::size_t K,
 class PhiloxEngine
 {
     public:
-    typedef ResultType result_type;
-    typedef std::array<ResultType, K / 2> key_type;
-    typedef std::array<ResultType, K> ctr_type;
+    using result_type = ResultType;
+    using key_type = std::array<ResultType, K / 2>;
+    using ctr_type = std::array<ResultType, K>;
 
     public:
     explicit PhiloxEngine(result_type s = 0) : index_(K)
@@ -470,27 +470,27 @@ class PhiloxEngine
 
 /// \brief Philox2x32 RNG engine reimplemented
 /// \ingroup Philox
-typedef PhiloxEngine<std::uint32_t, 2> Philox2x32;
+using Philox2x32 = PhiloxEngine<std::uint32_t, 2>;
 
 /// \brief Philox4x32 RNG engine reimplemented
 /// \ingroup Philox
-typedef PhiloxEngine<std::uint32_t, 4> Philox4x32;
+using Philox4x32 = PhiloxEngine<std::uint32_t, 4>;
 
 /// \brief Philox2x64 RNG engine reimplemented
 /// \ingroup Philox
-typedef PhiloxEngine<std::uint64_t, 2> Philox2x64;
+using Philox2x64 = PhiloxEngine<std::uint64_t, 2>;
 
 /// \brief Philox4x64 RNG engine reimplemented
 /// \ingroup Philox
-typedef PhiloxEngine<std::uint64_t, 4> Philox4x64;
+using Philox4x64 = PhiloxEngine<std::uint64_t, 4>;
 
 /// \brief The default 32-bits Philox engine
 /// \ingroup Philox
-typedef Philox4x32 Philox;
+using Philox = Philox4x32;
 
 /// \brief The default 64-bits Philox engine
 /// \ingroup Philox
-typedef Philox4x64 Philox_64;
+using Philox_64 = Philox4x64;
 
 } // namespace vsmc
 

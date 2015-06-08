@@ -103,7 +103,7 @@ template <typename ResultType, std::size_t NTrialMax = VSMC_RDRAND_NTRIAL_MAX>
 class RDRANDEngine
 {
     public:
-    typedef ResultType result_type;
+    using result_type = ResultType;
 
     explicit RDRANDEngine(result_type = 0)
     {
@@ -181,15 +181,15 @@ class RDRANDEngine
 
 /// \brief C++11 Engine using 16-bits RDRAND instruction
 /// \ingroup RDRAND
-typedef RDRANDEngine<std::uint16_t> RDRAND16;
+using RDRAND16 = RDRANDEngine<std::uint16_t>;
 
 /// \brief C++11 Engine using 32-bits RDRAND instruction
 /// \ingroup RDRAND
-typedef RDRANDEngine<std::uint32_t> RDRAND32;
+using RDRAND32 = RDRANDEngine<std::uint32_t>;
 
 /// \brief C++11 Engine using 64-bits RDRAND instruction
 /// \ingroup RDRAND
-typedef RDRANDEngine<std::uint64_t> RDRAND64;
+using RDRAND64 = RDRANDEngine<std::uint64_t>;
 
 } // namespace vsmc
 

@@ -92,10 +92,9 @@ template <MatrixOrder Order, std::size_t Dim, typename T>
 class StateMatrixBase : public internal::StateMatrixDim<Dim>
 {
     public:
-    typedef std::size_t size_type;
-    typedef T state_type;
-    typedef typename std::conditional<Dim == Dynamic || 8 < Dim, Vector<T>,
-        std::array<T, Dim>>::type state_pack_type;
+    using size_type = std::size_t;
+    using state_type = T;
+    using state_pack_type = Vector<T>;
 
     template <typename S>
     class single_particle_type : public SingleParticleBase<S>
@@ -194,25 +193,9 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     protected:
     explicit StateMatrixBase(size_type N) : size_(N), data_(N * Dim) {}
 
-    state_pack_type create_pack() const
-    {
-        return create_pack_dispatch(
-            std::integral_constant < bool, Dim == Dynamic || 8 < Dim > ());
-    }
-
     private:
     size_type size_;
     Vector<T> data_;
-
-    Vector<T> create_pack_dispatch(std::true_type) const
-    {
-        return Vector<T>(this->dim());
-    }
-
-    std::array<T, Dim> create_pack_dispatch(std::false_type) const
-    {
-        return std::array<T, Dim>();
-    }
 }; // class StateMatrixBase
 
 template <typename CharT, typename Traits, MatrixOrder Order, std::size_t Dim,
@@ -230,9 +213,9 @@ template <std::size_t Dim, typename T>
 class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 {
     public:
-    typedef StateMatrixBase<RowMajor, Dim, T> state_matrix_base_type;
-    typedef typename state_matrix_base_type::size_type size_type;
-    typedef typename state_matrix_base_type::state_pack_type state_pack_type;
+    using state_matrix_base_type = StateMatrixBase<RowMajor, Dim, T>;
+    using size_type = typename state_matrix_base_type::size_type;
+    using state_pack_type = typename state_matrix_base_type::state_pack_type;
 
     explicit StateMatrix(size_type N) : state_matrix_base_type(N) {}
 
@@ -279,7 +262,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     state_pack_type state_pack(size_type id) const
     {
-        state_pack_type pack(this->create_pack());
+        state_pack_type pack(this->dim());
         std::copy(row_data(id), row_data(id) + this->dim(), pack.data());
 
         return pack;
@@ -335,9 +318,9 @@ template <std::size_t Dim, typename T>
 class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 {
     public:
-    typedef StateMatrixBase<ColMajor, Dim, T> state_matrix_base_type;
-    typedef typename state_matrix_base_type::size_type size_type;
-    typedef typename state_matrix_base_type::state_pack_type state_pack_type;
+    using state_matrix_base_type = StateMatrixBase<ColMajor, Dim, T>;
+    using size_type = typename state_matrix_base_type::size_type;
+    using state_pack_type = typename state_matrix_base_type::state_pack_type;
 
     explicit StateMatrix(size_type N) : state_matrix_base_type(N) {}
 
@@ -385,7 +368,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     state_pack_type state_pack(size_type id) const
     {
-        state_pack_type pack(this->create_pack());
+        state_pack_type pack(this->dim());
         for (std::size_t d = 0; d != this->dim(); ++d)
             pack[d] = state(id, d);
 

@@ -46,8 +46,8 @@ template <typename ResultType, std::size_t K>
 class ThreefryParPackSSE2
 {
     public:
-    typedef std::array<ResultType, K + 1> par_type;
-    typedef std::array<M128I<ResultType>, K + 1> par128_type;
+    using par_type = std::array<ResultType, K + 1>;
+    using par128_type = std::array<M128I<ResultType>, K + 1>;
 
     static void eval(const par_type &par, par128_type &par128)
     {
@@ -73,9 +73,9 @@ template <typename ResultType, std::size_t K>
 class ThreefryCtrPackSSE2
 {
     public:
-    typedef std::array<M128I<ResultType>, K> state_type;
-    typedef std::array<ResultType, K> ctr_type;
-    typedef std::array<ctr_type, M128I<ResultType>::size()> ctr_block_type;
+    using state_type = std::array<M128I<ResultType>, K>;
+    using ctr_type = std::array<ResultType, K>;
+    using ctr_block_type = std::array<ctr_type, M128I<ResultType>::size()>;
 
     static void eval(ctr_type &ctr, state_type &state)
     {
@@ -128,9 +128,9 @@ template <typename ResultType, std::size_t K,
 class ThreefryEngineSSE2
 {
     public:
-    typedef ResultType result_type;
-    typedef std::array<ResultType, K> key_type;
-    typedef std::array<ResultType, K> ctr_type;
+    using result_type = ResultType;
+    using key_type = std::array<ResultType, K>;
+    using ctr_type = std::array<ResultType, K>;
 
     explicit ThreefryEngineSSE2(result_type s = 0) : index_(M_)
     {
@@ -298,8 +298,8 @@ class ThreefryEngineSSE2
     }
 
     private:
-    typedef std::array<M128I<ResultType>, K + 1> par_type;
-    typedef std::array<M128I<ResultType>, K> state_type;
+    using par_type = std::array<M128I<ResultType>, K + 1>;
+    using state_type = std::array<M128I<ResultType>, K>;
 
     static constexpr std::size_t M_ = K * M128I<ResultType>::size();
 
@@ -339,27 +339,27 @@ class ThreefryEngineSSE2
 
 /// \brief Threefry2x32 RNG engine reimplemented using SSE2
 /// \ingroup Threefry
-typedef ThreefryEngineSSE2<std::uint32_t, 2> Threefry2x32SSE2;
+using Threefry2x32SSE2 = ThreefryEngineSSE2<std::uint32_t, 2>;
 
 /// \brief Threefry4x32 RNG engine reimplemented using SSE2
 /// \ingroup Threefry
-typedef ThreefryEngineSSE2<std::uint32_t, 4> Threefry4x32SSE2;
+using Threefry4x32SSE2 = ThreefryEngineSSE2<std::uint32_t, 4>;
 
 /// \brief Threefry2x64 RNG engine reimplemented using SSE2
 /// \ingroup Threefry
-typedef ThreefryEngineSSE2<std::uint64_t, 2> Threefry2x64SSE2;
+using Threefry2x64SSE2 = ThreefryEngineSSE2<std::uint64_t, 2>;
 
 /// \brief Threefry4x64 RNG engine reimplemented using SSE2
 /// \ingroup Threefry
-typedef ThreefryEngineSSE2<std::uint64_t, 4> Threefry4x64SSE2;
+using Threefry4x64SSE2 = ThreefryEngineSSE2<std::uint64_t, 4>;
 
 /// \brief The default 32-bits Threefry engine using SSE2
 /// \ingroup Threefry
-typedef Threefry4x32SSE2 ThreefrySSE2;
+using ThreefrySSE2 = Threefry4x32SSE2;
 
 /// \brief The default 64-bits ThreefrySSE2 engine using SSE2
 /// \ingroup Threefry
-typedef Threefry4x64SSE2 ThreefrySSE2_64;
+using ThreefrySSE2_64 = Threefry4x64SSE2;
 
 } // namespace vsmc
 
