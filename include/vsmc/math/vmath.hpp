@@ -38,8 +38,6 @@
 
 #if VSMC_USE_MKL_VML
 #include <mkl.h>
-#elif VSMC_USE_ACCELERATE_VFORCE
-#include <Accelerate/Accelerate.h>
 #endif
 
 #define VSMC_DEFINE_MATH_VMATH_1(func, name)                                  \
@@ -58,9 +56,9 @@
             y[i] = func(a[i], b[i]);                                          \
     }
 
-#define VSMC_DEFINE_MATH_VMATH_B(op, vname)                                   \
+#define VSMC_DEFINE_MATH_VMATH_B(op, name)                                    \
     template <typename T>                                                     \
-    inline void v##vname(std::size_t n, const T *a, const T *b, T *y)         \
+    inline void v##name(std::size_t n, const T *a, const T *b, T *y)          \
     {                                                                         \
         for (std::size_t i = 0; i != n; ++i)                                  \
             y[i] = a[i] op b[i];                                              \
@@ -446,80 +444,6 @@ VSMC_DEFINE_MATH_VMATH_VML_1(ErfcInv)
 VSMC_DEFINE_MATH_VMATH_VML_1(CdfNormInv)
 VSMC_DEFINE_MATH_VMATH_VML_1(LGamma)
 VSMC_DEFINE_MATH_VMATH_VML_1(TGamma)
-
-} // namespace vsmc::math
-
-} // namespace vsmc
-
-#elif VSMC_USE_ACCELERATE_VFORCE
-
-#define VSMC_DEFINE_MATH_VMATH_VFORCE_1(func, name)                           \
-    inline void v##name(std::size_t n, const float *a, float *y)              \
-    {                                                                         \
-        const int in = static_cast<int>(n);                                   \
-        ::vv##func##f(y, a, &in);                                             \
-    }                                                                         \
-    inline void v##name(std::size_t n, const double *a, double *y)            \
-    {                                                                         \
-        const int in = static_cast<int>(n);                                   \
-        ::vv##func(y, a, &in);                                                \
-    }
-
-#define VSMC_DEFINE_MATH_VMATH_VFORCE_2(func, name)                           \
-    inline void v##name(                                                      \
-        std::size_t n, const float *a, const float *b, float *y)              \
-    {                                                                         \
-        const int in = static_cast<int>(n);                                   \
-        ::vv##func##f(y, a, b, &in);                                          \
-    }                                                                         \
-    inline void v##name(                                                      \
-        std::size_t n, const double *a, const double *b, double *y)           \
-    {                                                                         \
-        const int in = static_cast<int>(n);                                   \
-        ::vv##func(y, a, b, &in);                                             \
-    }
-
-namespace vsmc
-{
-
-namespace math
-{
-
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(rec, Inv)
-VSMC_DEFINE_MATH_VMATH_VFORCE_2(div, Div)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(sqrt, Sqrt)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(rsqrt, InvSqrt)
-VSMC_DEFINE_MATH_VMATH_VFORCE_2(pow, Pow)
-
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(exp, Exp)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(log, Ln)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(log10, Log10)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(log1p, Log1p)
-
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(cos, Cos)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(sin, Sin)
-inline void vSinCos(std::size_t n, const float *a, float *y, float *z)
-{
-    int in = static_cast<int>(n);
-    ::vvsincosf(z, y, a, &in);
-}
-inline void vSinCos(std::size_t n, const double *a, double *y, double *z)
-{
-    int in = static_cast<int>(n);
-    ::vvsincos(z, y, a, &in);
-}
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(tan, Tan)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(acos, Acos)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(asin, Asin)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(atan, Atan)
-VSMC_DEFINE_MATH_VMATH_VFORCE_2(atan2, Atan2)
-
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(cosh, Cosh)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(sinh, Sinh)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(tanh, Tanh)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(acosh, Acosh)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(asinh, Asinh)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(atanh, Atanh)
 
 } // namespace vsmc::math
 

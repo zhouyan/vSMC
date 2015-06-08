@@ -40,9 +40,6 @@
 #if VSMC_USE_MKL_CBLAS
 #include <mkl.h>
 #define VSMC_CBLAS_INT MKL_INT
-#elif VSMC_USE_ACCELERATE_CBLAS
-#include <Accelerate/Accelerate.h>
-#define VSMC_CBLAS_INT int
 #elif VSMC_HAS_CBLAS
 #include <cblas.h>
 #ifndef VSMC_CBLAS_INT
