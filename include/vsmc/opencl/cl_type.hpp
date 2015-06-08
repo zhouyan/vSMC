@@ -169,7 +169,7 @@ class CLNDRange
     public:
     CLNDRange() : null_(true) {}
 
-    CLNDRange(std::size_t x, std::size_t y = 0, std::size_t z = 0)
+    explicit CLNDRange(std::size_t x, std::size_t y = 0, std::size_t z = 0)
         : null_(false)
     {
         std::get<0>(range_) = x;
@@ -189,7 +189,7 @@ class CLNDRange
 class CLDevice : public CLBase<::cl_device_id, CLDevice>
 {
     public:
-    CLDevice(::cl_device_id ptr = nullptr) { reset(ptr); }
+    explicit CLDevice(::cl_device_id ptr = nullptr) { reset(ptr); }
 
     /// \brief `clCreateSubDevices`
     std::vector<CLDevice> sub_devices(
@@ -248,7 +248,7 @@ class CLDevice : public CLBase<::cl_device_id, CLDevice>
 class CLPlatform : public CLBase<::cl_platform_id, CLPlatform>
 {
     public:
-    CLPlatform(::cl_platform_id ptr = nullptr) { reset(ptr); }
+    explicit CLPlatform(::cl_platform_id ptr = nullptr) { reset(ptr); }
 
     /// \brief `clGetPlatformIDs`
     static std::vector<CLPlatform> platforms()
@@ -328,7 +328,7 @@ class CLPlatform : public CLBase<::cl_platform_id, CLPlatform>
 class CLContext : public CLBase<::cl_context, CLContext>
 {
     public:
-    CLContext(::cl_context ptr = nullptr) { reset(ptr); }
+    explicit CLContext(::cl_context ptr = nullptr) { reset(ptr); }
 
     /// \brief `clCreateContext`
     CLContext(const ::cl_context_properties *properties,
@@ -448,10 +448,10 @@ class CLContext : public CLBase<::cl_context, CLContext>
 class CLEvent : public CLBase<::cl_event, CLEvent>
 {
     public:
-    CLEvent(::cl_event ptr = nullptr) { reset(ptr); }
+    explicit CLEvent(::cl_event ptr = nullptr) { reset(ptr); }
 
     /// \brief `clCreateUserEvent`
-    CLEvent(const CLContext &context)
+    explicit CLEvent(const CLContext &context)
     {
         ::cl_int status = CL_SUCCESS;
         ::cl_event ptr = ::clCreateUserEvent(context.get(), &status);
@@ -588,7 +588,7 @@ class CLEvent : public CLBase<::cl_event, CLEvent>
 class CLMemory : public CLBase<::cl_mem, CLMemory>
 {
     public:
-    CLMemory(::cl_mem ptr = nullptr) { reset(ptr); }
+    explicit CLMemory(::cl_mem ptr = nullptr) { reset(ptr); }
 
     /// \brief `clCreateBuffer`
     CLMemory(const CLContext &context, ::cl_mem_flags flags, std::size_t size,
@@ -665,7 +665,7 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
 class CLSampler : public CLBase<::cl_sampler, CLSampler>
 {
     public:
-    CLSampler(::cl_sampler ptr = nullptr) { reset(ptr); }
+    explicit CLSampler(::cl_sampler ptr = nullptr) { reset(ptr); }
 
     /// \brief `clCreateSampler`
     CLSampler(const CLContext &context, ::cl_bool normalized_coords,
@@ -721,7 +721,7 @@ class CLSampler : public CLBase<::cl_sampler, CLSampler>
 class CLProgram : public CLBase<::cl_program, CLProgram>
 {
     public:
-    CLProgram(::cl_program ptr = nullptr) { reset(ptr); }
+    explicit CLProgram(::cl_program ptr = nullptr) { reset(ptr); }
 
     /// \brief `clCreateProgramWithSource`
     CLProgram(
@@ -1035,7 +1035,7 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
 class CLKernel : public CLBase<::cl_kernel, CLKernel>
 {
     public:
-    CLKernel(::cl_kernel ptr = nullptr) { reset(ptr); }
+    explicit CLKernel(::cl_kernel ptr = nullptr) { reset(ptr); }
 
     /// \brief `clCreateKernel`
     CLKernel(const CLProgram &program, const std::string &kernel_name)
@@ -1275,7 +1275,7 @@ class CLKernel : public CLBase<::cl_kernel, CLKernel>
 class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
 {
     public:
-    CLCommandQueue(::cl_command_queue ptr = nullptr) { reset(ptr); }
+    explicit CLCommandQueue(::cl_command_queue ptr = nullptr) { reset(ptr); }
 
     /// \brief `clCreateCommandQueue`
     CLCommandQueue(const CLContext &context, const CLDevice &device,
