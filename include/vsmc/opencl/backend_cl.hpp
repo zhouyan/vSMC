@@ -38,6 +38,7 @@
 #include <vsmc/opencl/cl_configure.hpp>
 #include <vsmc/opencl/cl_manager.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
+#include <vsmc/opencl/cl_query.hpp>
 #include <vsmc/opencl/cl_type.hpp>
 #include <vsmc/rng/seed.hpp>
 

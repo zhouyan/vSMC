@@ -34,7 +34,6 @@
 
 #include <vsmc/opencl/internal/common.hpp>
 #include <vsmc/opencl/cl_manip.hpp>
-#include <vsmc/opencl/cl_query.hpp>
 #include <vsmc/opencl/cl_setup.hpp>
 #include <vsmc/opencl/cl_type.hpp>
 
@@ -144,14 +143,10 @@ class CLManager
 
     /// \brief The minimum OpenCL version supported by all devices in the
     /// context of this manager
-    ///
-    /// \sa CLQuery::opencl_version
     int opencl_version() const { return opencl_version_; }
 
     /// \brief The minimum OpenCL C version supported by all devices in the
     /// context of this manager
-    ///
-    /// \sa CLQuery::opencl_version
     int opencl_c_version() const { return opencl_c_version_; }
 
     /// \brief The platform currently being used
@@ -404,11 +399,11 @@ class CLManager
 
     void check_opencl_version()
     {
-        opencl_version_ = CLQuery::opencl_version(device_.get());
-        opencl_c_version_ = CLQuery::opencl_c_version(device_.get());
+        opencl_version_ = internal::cl_opencl_version(device_.get());
+        opencl_c_version_ = internal::cl_opencl_c_version(device_.get());
         for (std::size_t i = 0; i != device_vec_.size(); ++i) {
-            int ocl = CLQuery::opencl_version(device_vec_[i].get());
-            int oclc = CLQuery::opencl_c_version(device_vec_[i].get());
+            int ocl = internal::cl_opencl_version(device_vec_[i].get());
+            int oclc = internal::cl_opencl_c_version(device_vec_[i].get());
             if (opencl_version_ > ocl)
                 opencl_version_ = ocl;
             if (opencl_c_version_ > ocl)
