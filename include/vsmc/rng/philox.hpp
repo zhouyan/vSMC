@@ -286,7 +286,6 @@ class PhiloxEngine
     using key_type = std::array<ResultType, K / 2>;
     using ctr_type = std::array<ResultType, K>;
 
-    public:
     explicit PhiloxEngine(result_type s = 0) : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_PHILOX;

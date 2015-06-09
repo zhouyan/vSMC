@@ -73,7 +73,6 @@ class ThreefryEngine
     using key_type = std::array<ResultType, K>;
     using ctr_type = std::array<ResultType, K>;
 
-    public:
     explicit ThreefryEngine(result_type s = 0) : index_(K)
     {
         VSMC_STATIC_ASSERT_RNG_THREEFRY();
