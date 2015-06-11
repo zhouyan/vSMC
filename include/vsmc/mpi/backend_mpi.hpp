@@ -91,20 +91,20 @@ class WeightSetMPI : public WeightSetBase
 
     void normalize_log_weight()
     {
-        const size_type N = static_cast<size_type>(this->size());
-        double *const lwptr = this->mutable_log_weight_data();
+        const std::size_t N = static_cast<std::size_t>(this->size());
+        double *const wptr = this->mutable_weight_data();
 
-        double lmax_weight = *(std::max_element(lwptr, lwptr + N));
+        double lmax_weight = *(std::max_element(wptr, wptr + N));
         double gmax_weight = 0;
         ::boost::mpi::all_reduce(
             world_, lmax_weight, gmax_weight, ::boost::mpi::maximum<double>());
-        for (size_type i = 0; i != N; ++i)
-            lwptr[i] -= gmax_weight;
+        for (std::size_t i = 0; i != N; ++i)
+            wptr[i] -= gmax_weight;
     }
 
     void normalize_weight()
     {
-        const size_type N = static_cast<size_type>(this->size());
+        const std::size_t N = static_cast<std::size_t>(this->size());
         double *const wptr = this->mutable_weight_data();
 
         double lcoeff = math::asum(N, wptr, 1);
@@ -122,43 +122,34 @@ class WeightSetMPI : public WeightSetBase
 
     double compute_ess(const double *first, bool use_log) const
     {
-        const size_type N = static_cast<size_type>(this->size());
-        Vector<double> buffer(N);
-        double *const bptr = buffer.data();
+        const std::size_t N = static_cast<std::size_t>(this->size());
+        const double *const wptr = this->weight_data();
 
+        Vector<double> buffer(N);
         if (use_log) {
-            const double *const lwptr = this->log_weight_data();
-            for (size_type i = 0; i != N; ++i)
-                bptr[i] = lwptr[i] + first[i];
-            double lmax_weight = bptr[0];
-            for (size_type i = 0; i != N; ++i)
-                if (lmax_weight < bptr[i])
-                    lmax_weight = bptr[i];
-            double gmax_weight = 0;
-            ::boost::mpi::all_reduce(world_, lmax_weight, gmax_weight,
-                ::boost::mpi::maximum<double>());
-            for (size_type i = 0; i != N; ++i)
-                bptr[i] -= gmax_weight;
-            for (size_type i = 0; i != N; ++i)
-                bptr[i] = std::exp(bptr[i]);
+            math::vLn(N, wptr, buffer.data());
+            math::vAdd(N, buffer.data(), first, buffer.data());
+            double lwmax = buffer[0];
+            for (std::size_t i = 0; i != N; ++i)
+                if (lwmax < buffer[i])
+                    lwmax = buffer[i];
+            double gwmax = 0;
+            ::boost::mpi::all_reduce(
+                world_, lwmax, gwmax, ::boost::mpi::maximum<double>());
+            gwmax = -gwmax;
+            for (std::size_t i = 0; i != N; ++i)
+                buffer[i] += gwmax;
+            math::vExp(N, buffer.data(), buffer.data());
         } else {
-            const double *const wptr = this->weight_data();
-            for (size_type i = 0; i != N; ++i)
-                bptr[i] = wptr[i] * first[i];
+            math::vMul(N, wptr, first, buffer.data());
         }
 
-        double lcoeff = 0;
-        for (size_type i = 0; i != N; ++i)
-            lcoeff += bptr[i];
+        double lcoeff = math::asum(N, buffer.data(), 1);
         double gcoeff = 0;
         ::boost::mpi::all_reduce(world_, lcoeff, gcoeff, std::plus<double>());
-        gcoeff = 1 / gcoeff;
-        for (size_type i = 0; i != N; ++i)
-            bptr[i] *= gcoeff;
+        math::scal(N, 1 / gcoeff, buffer.data(), 1);
 
-        double less = 0;
-        for (size_type i = 0; i != N; ++i)
-            less += bptr[i] * bptr[i];
+        double less = math::dot(N, buffer.data(), 1, buffer.data(), 1);
         double gess = 0;
         ::boost::mpi::all_reduce(world_, less, gess, std::plus<double>());
 
@@ -167,21 +158,19 @@ class WeightSetMPI : public WeightSetBase
 
     double compute_cess(const double *first, bool use_log) const
     {
-        const size_type N = static_cast<size_type>(this->size());
-        const double *bptr = first;
+        const std::size_t N = static_cast<std::size_t>(this->size());
         const double *const wptr = this->weight_data();
+
         Vector<double> buffer;
         if (use_log) {
             buffer.resize(N);
-            double *const cptr = buffer.data();
-            for (size_type i = 0; i != N; ++i)
-                cptr[i] = std::exp(first[i]);
-            bptr = cptr;
+            math::vExp(N, first, buffer.data());
         }
+        const double *const bptr = use_log ? buffer.data() : first;
 
         double labove = 0;
         double lbelow = 0;
-        for (size_type i = 0; i != N; ++i) {
+        for (std::size_t i = 0; i != N; ++i) {
             double wb = wptr[i] * bptr[i];
             labove += wb;
             lbelow += wb * bptr[i];

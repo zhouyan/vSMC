@@ -46,7 +46,7 @@ class WeightSet
     using size_type = std::size_t;
 
     explicit WeightSet(size_type N)
-        : size_(N), ess_(static_cast<double>(N)), weight_(N), log_weight_(N)
+        : size_(N), ess_(static_cast<double>(N)), weight_(N)
     {
     }
 
@@ -75,9 +75,9 @@ class WeightSet
     /// \brief Normalize logarithm weights such that the maximum is zero
     static void normalize_log_weight(std::size_t N, double *log_weight)
     {
-        double dmax = *(std::max_element(log_weight, log_weight + N));
+        double wmax = *(std::max_element(log_weight, log_weight + N));
         for (std::size_t i = 0; i != N; ++i)
-            log_weight[i] -= dmax;
+            log_weight[i] -= wmax;
     }
 
     /// \brief Normalize weights such that the summation is one and return the
@@ -170,34 +170,14 @@ class WeightSet
             *first = weight_[i];
     }
 
-    /// \brief Read unnormalized logarithm weights through an output iterator
-    template <typename OutputIter>
-    void read_log_weight(OutputIter first) const
-    {
-        std::copy(log_weight_.begin(), log_weight_.end(), first);
-    }
-
-    /// \brief Read unnormalized logarithm weights through a random access
-    /// iterator with (possible non-uniform stride)
-    template <typename RandomIter>
-    void read_log_weight(RandomIter first, int stride) const
-    {
-        for (size_type i = 0; i != size_; ++i, first += stride)
-            *first = log_weight_[i];
-    }
-
     /// \brief Get the normalized weight of the id'th particle
     double weight(size_type id) const { return weight_[id]; }
-
-    /// \brief Get the unnormalized logarithm weight of the id'th particle
-    double log_weight(size_type id) const { return log_weight_[id]; }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS
     /// such that each particle has a equal weight
     void set_equal_weight()
     {
         set_ess(set_equal_weight(size_, resample_size(), weight_.data()));
-        std::memset(log_weight_.data(), 0, sizeof(double) * size_);
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -233,6 +213,17 @@ class WeightSet
         post_set_weight();
     }
 
+    void mul_weight(const double *first)
+    {
+        math::vMul(size_, weight_.data(), first, weight_.data());
+        post_set_weight();
+    }
+
+    void mul_weight(double *first)
+    {
+        mul_weight(const_cast<const double *>(first));
+    }
+
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
     /// multiply the normalized weight with (possible unnormalized)
     /// incremental
@@ -253,7 +244,7 @@ class WeightSet
     template <typename InputIter>
     void set_log_weight(InputIter first)
     {
-        std::copy_n(first, size_, log_weight_.begin());
+        std::copy_n(first, size_, weight_.begin());
         post_set_log_weight();
     }
 
@@ -265,7 +256,7 @@ class WeightSet
     void set_log_weight(RandomIter first, int stride)
     {
         for (size_type i = 0; i != size_; ++i, first += stride)
-            log_weight_[i] = *first;
+            weight_[i] = *first;
         post_set_log_weight();
     }
 
@@ -275,9 +266,22 @@ class WeightSet
     template <typename InputIter>
     void add_log_weight(InputIter first)
     {
+        weight2log_weight();
         for (size_type i = 0; i != size_; ++i, ++first)
-            log_weight_[i] += *first;
+            weight_[i] += *first;
         post_set_log_weight();
+    }
+
+    void add_log_weight(const double *first)
+    {
+        weight2log_weight();
+        math::vAdd(size_, weight_.data(), first, weight_.data());
+        post_set_log_weight();
+    }
+
+    void add_log_weight(double *first)
+    {
+        add_log_weight(const_cast<const double *>(first));
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -287,8 +291,9 @@ class WeightSet
     template <typename RandomIter>
     void add_log_weight(RandomIter first, int stride)
     {
+        weight2log_weight();
         for (size_type i = 0; i != size_; ++i, first += stride)
-            log_weight_[i] += *first;
+            weight_[i] += *first;
         post_set_log_weight();
     }
 
@@ -308,9 +313,6 @@ class WeightSet
     /// \brief Read only access to the raw data of weight
     const double *weight_data() const { return weight_.data(); }
 
-    /// \brief Read only access to the raw data of logarithm weight
-    const double *log_weight_data() const { return log_weight_.data(); }
-
     protected:
     /// \brief Set the value of ESS;
     void set_ess(double e) { ess_ = e; }
@@ -318,25 +320,22 @@ class WeightSet
     /// \brief Write access to the raw data of weight
     double *mutable_weight_data() { return weight_.data(); }
 
-    /// \brief Write access to the raw data of logarithm weight
-    double *mutable_log_weight_data() { return log_weight_.data(); }
-
     /// \brief Compute unormalized logarithm weights from normalized weights
     virtual void log_weight2weight()
     {
-        math::vExp(size_, log_weight_.data(), weight_.data());
+        math::vExp(size_, weight_.data(), weight_.data());
     }
 
     /// \brief Compute unormalized weights from normalized logarithm weights
     virtual void weight2log_weight()
     {
-        math::vLn(size_, weight_.data(), log_weight_.data());
+        math::vLn(size_, weight_.data(), weight_.data());
     }
 
     /// \brief Normalize logarithm weights such that the maximum is zero
     virtual void normalize_log_weight()
     {
-        normalize_log_weight(size_, log_weight_.data());
+        normalize_log_weight(size_, weight_.data());
     }
 
     /// \brief Normalize weights such that the summation is one
@@ -350,21 +349,22 @@ class WeightSet
     {
         Vector<double> buffer(size_);
         if (use_log) {
-            math::vAdd(size_, log_weight_.data(), first, buffer.data());
-            double dmax = buffer[0];
+            math::vLn(size_, weight_.data(), buffer.data());
+            math::vAdd(size_, buffer.data(), first, buffer.data());
+            double wmax = buffer[0];
             for (size_type i = 0; i != size_; ++i)
-                if (dmax < buffer[i])
-                    dmax = buffer[i];
-            dmax = -dmax;
+                if (wmax < buffer[i])
+                    wmax = buffer[i];
+            wmax = -wmax;
             for (size_type i = 0; i != size_; ++i)
-                buffer[i] += dmax;
+                buffer[i] += wmax;
             math::vExp(size_, buffer.data(), buffer.data());
         } else {
             math::vMul(size_, weight_.data(), first, buffer.data());
         }
 
-        double coeff = 1 / math::asum(size_, buffer.data(), 1);
-        math::scal(size_, coeff, buffer.data(), 1);
+        double coeff = math::asum(size_, buffer.data(), 1);
+        math::scal(size_, 1 / coeff, buffer.data(), 1);
 
         return 1 / math::dot(size_, buffer.data(), 1, buffer.data(), 1);
     }
@@ -394,7 +394,6 @@ class WeightSet
     size_type size_;
     double ess_;
     Vector<double> weight_;
-    Vector<double> log_weight_;
     DiscreteDistribution<size_type> draw_;
 
     void post_set_log_weight()
@@ -404,12 +403,7 @@ class WeightSet
         normalize_weight();
     }
 
-    void post_set_weight()
-    {
-        normalize_weight();
-        weight2log_weight();
-        normalize_log_weight();
-    }
+    void post_set_weight() { normalize_weight(); }
 }; // class WeightSet
 
 /// \brief An empty weight set class
@@ -470,19 +464,7 @@ class WeightSetNull
     {
     }
 
-    template <typename OutputIter>
-    void read_log_weight(OutputIter) const
-    {
-    }
-
-    template <typename RandomIter>
-    void read_log_weight(RandomIter, int) const
-    {
-    }
-
     double weight(size_type) const { return 1; }
-
-    double log_weight(size_type) const { return 0; }
 
     void set_equal_weight() {}
 
@@ -535,8 +517,6 @@ class WeightSetNull
     const double *resample_weight_data() const { return nullptr; }
 
     const double *weight_data() const { return nullptr; }
-
-    const double *log_weight_data() const { return nullptr; }
 
     private:
     static double ess_inf() { return std::numeric_limits<double>::infinity(); }
