@@ -35,9 +35,10 @@
 #
 # The following variables are set
 #
-# MKL_FOUND          - TRUE if MKL is found and work correctly
-# MKL_INCLUDE_DIR    - The directory containing MKL headers, e.g., mkl_vml.h
-# MKL_LINK_LIBRARIES - MKL libraries that shall be linked to
+# MKL_FOUND                 - TRUE if MKL is found and work correctly
+# MKL_INCLUDE_DIR           - The directory containing MKL headers
+# MKL_LINK_LIBRARIES        - MKL libraries that shall be linked to
+# MKL_BLAS95_LINK_LIBRARIES - MKL libraries for Fortran 95 interface to BLAS
 #
 # The following variables affect the behavior of this module
 #
@@ -53,9 +54,23 @@ IF (NOT DEFINED MKL_LINK_LIBRARIES)
     FIND_LIBRARY (MKL_LINK_LIBRARIES mkl_rt
         PATHS ${MKL_LIB_PATH} ENV LIBRARY_PATH NO_DEFAULT_PATH)
     FIND_LIBRARY (MKL_LINK_LIBRARIES mkl_rt)
+
     FIND_LIBRARY (MKL_LINK_LIBRARIES mkl_rt_dll
         PATHS ${MKL_LIB_PATH} ENV LIB NO_DEFAULT_PATH)
     FIND_LIBRARY (MKL_LINK_LIBRARIES mkl_rt_dll)
+
+    FIND_LIBRARY (MKL_BLAS95_LINK_LIBRARIES mkl_blas95
+        PATHS ${MKL_LIB_PATH} ENV LIBRARY_PATH NO_DEFAULT_PATH)
+    FIND_LIBRARY (MKL_BLAS95_LINK_LIBRARIES mkl_blas95)
+
+    FIND_LIBRARY (MKL_BLAS95_LP64_LINK_LIBRARIES mkl_blas95_lp64
+        PATHS ${MKL_LIB_PATH} ENV LIBRARY_PATH NO_DEFAULT_PATH)
+    FIND_LIBRARY (MKL_BLAS95_LP64_LINK_LIBRARIES mkl_blas95_lp64)
+
+    FIND_LIBRARY (MKL_BLAS95_ILP64_LINK_LIBRARIES mkl_blas95_ilp64
+        PATHS ${MKL_LIB_PATH} ENV LIBRARY_PATH NO_DEFAULT_PATH)
+    FIND_LIBRARY (MKL_BLAS95_ILP64_LINK_LIBRARIES mkl_blas95_ilp64)
+
     IF (MKL_LINK_LIBRARIES)
         MESSAGE (STATUS "Found MKL libraries: ${MKL_LINK_LIBRARIES}")
         SET (MKL_LINK_LIBRARIES ${MKL_LINK_LIBRARIES}
