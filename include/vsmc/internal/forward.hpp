@@ -56,7 +56,7 @@ class SingleParticle;
 template <typename>
 class SingleParticleBase;
 
-class WeightSet;
+class Weight;
 
 template <MatrixOrder, std::size_t, typename>
 class StateMatrix;

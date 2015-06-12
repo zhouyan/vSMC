@@ -680,7 +680,7 @@ inline void hdf5store(const Particle<T> &particle,
     hdf5store_list_empty(file_name, data_name, append);
     hdf5store(particle.value(), file_name, data_name + "/value", true);
     hdf5store_matrix<ColMajor, double>(particle.size(), 1, file_name,
-        data_name + "/weight", particle.weight_set().weight_data(), true);
+        data_name + "/weight", particle.weight().data(), true);
 }
 
 /// \brief Store a Particle with StateCL value type in the HDF5 format
@@ -694,7 +694,7 @@ inline void hdf5store(const Particle<U> &particle,
     hdf5store<Order, T>(
         particle.value(), file_name, data_name + "/value", true);
     hdf5store_matrix<ColMajor, double>(particle.size(), 1, file_name,
-        data_name + "/weight", particle.weight_set().weight_data(), true);
+        data_name + "/weight", particle.weight().data(), true);
 }
 
 } // namespace vsmc

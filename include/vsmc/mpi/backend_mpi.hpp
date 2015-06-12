@@ -33,7 +33,7 @@
 #define VSMC_MPI_BACKEND_MPI_HPP
 
 #include <vsmc/mpi/internal/common.hpp>
-#include <vsmc/core/weight_set.hpp>
+#include <vsmc/core/weight.hpp>
 #include <vsmc/mpi/mpi_datatype.hpp>
 #include <vsmc/mpi/mpi_manager.hpp>
 
@@ -44,17 +44,17 @@
 namespace vsmc
 {
 
-/// \brief Particle::weight_set_type subtype using MPI
+/// \brief Particle::weight_type subtype using MPI
 /// \ingroup MPI
-template <typename WeightSetBase, typename ID = MPIDefault>
-class WeightSetMPI : public WeightSetBase
+template <typename WeightBase, typename ID = MPIDefault>
+class WeightMPI : public WeightBase
 {
     public:
-    using size_type = SizeType<WeightSetBase>;
+    using size_type = SizeType<WeightBase>;
     using mpi_id = ID;
 
-    explicit WeightSetMPI(size_type N)
-        : WeightSetBase(N)
+    explicit WeightMPI(size_type N)
+        : WeightBase(N)
         , world_(MPICommunicator<ID>::instance().get(),
               ::boost::mpi::comm_duplicate)
         , resample_size_(0)
@@ -81,7 +81,7 @@ class WeightSetMPI : public WeightSetBase
         }
     }
 
-    const double *resample_weight_data() const
+    const double *resample_data() const
     {
         resample_weight_.resize(resample_size_);
         read_resample_weight(resample_weight_.data());
@@ -89,23 +89,10 @@ class WeightSetMPI : public WeightSetBase
         return world_.rank() == 0 ? resample_weight_.data() : nullptr;
     }
 
-    void normalize_log_weight()
+    void normalize()
     {
         const std::size_t N = static_cast<std::size_t>(this->size());
-        double *const wptr = this->mutable_weight_data();
-
-        double lmax_weight = *(std::max_element(wptr, wptr + N));
-        double gmax_weight = 0;
-        ::boost::mpi::all_reduce(
-            world_, lmax_weight, gmax_weight, ::boost::mpi::maximum<double>());
-        for (std::size_t i = 0; i != N; ++i)
-            wptr[i] -= gmax_weight;
-    }
-
-    void normalize_weight()
-    {
-        const std::size_t N = static_cast<std::size_t>(this->size());
-        double *const wptr = this->mutable_weight_data();
+        double *const wptr = this->mutable_data();
 
         double lcoeff = math::asum(N, wptr, 1);
         double gcoeff = 0;
@@ -120,25 +107,34 @@ class WeightSetMPI : public WeightSetBase
         this->set_ess(gess);
     }
 
+    void normalize_log()
+    {
+        const std::size_t N = static_cast<std::size_t>(this->size());
+        double *const wptr = this->mutable_data();
+
+        double lmax_weight = *(std::max_element(wptr, wptr + N));
+        double gmax_weight = 0;
+        ::boost::mpi::all_reduce(
+            world_, lmax_weight, gmax_weight, ::boost::mpi::maximum<double>());
+        for (std::size_t i = 0; i != N; ++i)
+            wptr[i] -= gmax_weight;
+    }
+
     double compute_ess(const double *first, bool use_log) const
     {
         const std::size_t N = static_cast<std::size_t>(this->size());
-        const double *const wptr = this->weight_data();
+        const double *const wptr = this->data();
 
         Vector<double> buffer(N);
         if (use_log) {
             math::vLn(N, wptr, buffer.data());
             math::vAdd(N, buffer.data(), first, buffer.data());
-            double lwmax = buffer[0];
-            for (std::size_t i = 0; i != N; ++i)
-                if (lwmax < buffer[i])
-                    lwmax = buffer[i];
+            double lwmax = *(std::max_element(buffer.begin(), buffer.end()));
             double gwmax = 0;
             ::boost::mpi::all_reduce(
                 world_, lwmax, gwmax, ::boost::mpi::maximum<double>());
-            gwmax = -gwmax;
             for (std::size_t i = 0; i != N; ++i)
-                buffer[i] += gwmax;
+                buffer[i] -= gwmax;
             math::vExp(N, buffer.data(), buffer.data());
         } else {
             math::vMul(N, wptr, first, buffer.data());
@@ -159,7 +155,7 @@ class WeightSetMPI : public WeightSetBase
     double compute_cess(const double *first, bool use_log) const
     {
         const std::size_t N = static_cast<std::size_t>(this->size());
-        const double *const wptr = this->weight_data();
+        const double *const wptr = this->data();
 
         Vector<double> buffer;
         if (use_log) {
@@ -199,7 +195,7 @@ class WeightSetMPI : public WeightSetBase
         else
             ::boost::mpi::gather(world_, weight_, 0);
     }
-}; // class WeightSetMPI
+}; // class WeightMPI
 
 /// \brief Particle::value_type subtype using MPI
 /// \ingroup MPI
@@ -208,7 +204,7 @@ class StateMPI : public StateBase
 {
     public:
     using size_type = SizeType<StateBase>;
-    using weight_set_type = WeightSetMPI<WeightSetType<StateBase>, ID>;
+    using weight_type = WeightMPI<WeightType<StateBase>, ID>;
     using mpi_id = ID;
 
     explicit StateMPI(size_type N)

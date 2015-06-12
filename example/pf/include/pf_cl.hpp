@@ -102,24 +102,24 @@ class cv_init : public vsmc::InitializeCL<cv>
 
     void pre_processor(vsmc::Particle<cv> &particle)
     {
-        log_weight_.resize(particle.size());
-        log_weight_buffer_.resize(particle.size());
+        w_.resize(particle.size());
+        w_buffer_.resize(particle.size());
 
         vsmc::cl_set_kernel_args(kernel(), kernel_args_offset(),
-            log_weight_buffer_.data(), particle.value().obs_x(),
+            w_buffer_.data(), particle.value().obs_x(),
             particle.value().obs_y());
     }
 
     void post_processor(vsmc::Particle<cv> &particle)
     {
         particle.value().manager().read_buffer(
-            log_weight_buffer_.data(), particle.size(), log_weight_.data());
-        particle.weight_set().set_log_weight(log_weight_.data());
+            w_buffer_.data(), particle.size(), w_.data());
+        particle.weight().set_log(w_.data());
     }
 
     private:
-    vsmc::CLBuffer<cl_float> log_weight_buffer_;
-    vsmc::Vector<cl_float> log_weight_;
+    vsmc::Vector<cl_float> w_;
+    vsmc::CLBuffer<cl_float> w_buffer_;
 };
 
 class cv_move : public vsmc::MoveCL<cv>
@@ -132,24 +132,24 @@ class cv_move : public vsmc::MoveCL<cv>
 
     void pre_processor(std::size_t, vsmc::Particle<cv> &particle)
     {
-        inc_weight_.resize(particle.size());
-        inc_weight_buffer_.resize(particle.size());
+        w_.resize(particle.size());
+        w_buffer_.resize(particle.size());
 
         vsmc::cl_set_kernel_args(kernel(), kernel_args_offset(),
-            inc_weight_buffer_.data(), particle.value().obs_x(),
+            w_buffer_.data(), particle.value().obs_x(),
             particle.value().obs_y());
     }
 
     void post_processor(std::size_t, vsmc::Particle<cv> &particle)
     {
         particle.value().manager().read_buffer(
-            inc_weight_buffer_.data(), particle.size(), inc_weight_.data());
-        particle.weight_set().add_log_weight(inc_weight_.data());
+            w_buffer_.data(), particle.size(), w_.data());
+        particle.weight().add_log(w_.data());
     }
 
     private:
-    vsmc::CLBuffer<cl_float> inc_weight_buffer_;
-    vsmc::Vector<cl_float> inc_weight_;
+    vsmc::Vector<cl_float> w_;
+    vsmc::CLBuffer<cl_float> w_buffer_;
 };
 
 class cv_est : public vsmc::MonitorEvalCL<cv>

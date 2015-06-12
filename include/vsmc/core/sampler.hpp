@@ -794,7 +794,7 @@ class Sampler
             m.second.clear();
 
         iter_num_ = 0;
-        particle_.weight_set().set_equal_weight();
+        particle_.weight().set_equal();
     }
 
     void do_init(void *param)
@@ -837,7 +837,7 @@ class Sampler
     void do_resample()
     {
         size_history_.push_back(size());
-        ess_history_.push_back(particle_.weight_set().ess());
+        ess_history_.push_back(particle_.weight().ess());
         resampled_history_.push_back(
             particle_.resample(resample_op_, resample_threshold_));
     }

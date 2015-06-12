@@ -171,13 +171,13 @@ class cv_init : public InitializeSMP<cv_state<Order>, cv_init<Order>>
 
     void post_processor(vsmc::Particle<cv> &particle)
     {
-        log_weight_.resize(particle.size());
-        particle.value().read_state(LogL, log_weight_.data());
-        particle.weight_set().set_log_weight(log_weight_.data());
+        w_.resize(particle.size());
+        particle.value().read_state(LogL, w_.data());
+        particle.weight().set_log(w_.data());
     }
 
     private:
-    vsmc::Vector<double> log_weight_;
+    vsmc::Vector<double> w_;
 };
 
 template <vsmc::MatrixOrder Order>
@@ -207,13 +207,13 @@ class cv_move : public MoveSMP<cv_state<Order>, cv_move<Order>>
 
     void post_processor(std::size_t, vsmc::Particle<cv> &particle)
     {
-        inc_weight_.resize(particle.size());
-        particle.value().read_state(LogL, inc_weight_.data());
-        particle.weight_set().add_log_weight(inc_weight_.data());
+        w_.resize(particle.size());
+        particle.value().read_state(LogL, w_.data());
+        particle.weight().add_log(w_.data());
     }
 
     private:
-    vsmc::Vector<double> inc_weight_;
+    vsmc::Vector<double> w_;
 };
 
 template <vsmc::MatrixOrder Order>

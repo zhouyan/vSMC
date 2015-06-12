@@ -34,7 +34,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/single_particle.hpp>
-#include <vsmc/core/weight_set.hpp>
+#include <vsmc/core/weight.hpp>
 #include <vsmc/resample/resample.hpp>
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
@@ -50,7 +50,7 @@ class Particle
     public:
     using size_type = SizeType<T>;
     using value_type = T;
-    using weight_set_type = WeightSetType<T>;
+    using weight_type = WeightType<T>;
     using rng_set_type = RngSetType<T>;
     using resample_rng_type = ResampleRngType<T>;
     using rng_type = typename rng_set_type::rng_type;
@@ -60,7 +60,7 @@ class Particle
     explicit Particle(size_type N)
         : size_(N)
         , value_(N)
-        , weight_set_(static_cast<SizeType<weight_set_type>>(N))
+        , weight_(static_cast<SizeType<weight_type>>(N))
         , rng_set_(static_cast<SizeType<rng_set_type>>(N))
     {
         Seed::instance().seed_rng(resample_rng_);
@@ -91,7 +91,7 @@ class Particle
         if (this != &other) {
             size_ = other.size_;
             value_ = other.value_;
-            weight_set_ = other.weight_set_;
+            weight_ = other.weight_;
 
             if (!retain_rng) {
                 rng_set_ = other.rng_set_;
@@ -107,7 +107,7 @@ class Particle
         if (this != &other) {
             size_ = other.size_;
             value_ = std::move(other.value_);
-            weight_set_ = std::move(other.weight_set_);
+            weight_ = std::move(other.weight_);
 
             if (!retain_rng) {
                 rng_set_ = other.rng_set_;
@@ -128,10 +128,10 @@ class Particle
     const value_type &value() const { return value_; }
 
     /// \brief Read and write access to the weight collection object
-    weight_set_type &weight_set() { return weight_set_; }
+    weight_type &weight() { return weight_; }
 
     /// \brief Read only access to the weight collection object
-    const weight_set_type &weight_set() const { return weight_set_; }
+    const weight_type &weight() const { return weight_; }
 
     /// \brief Read and write access to the RNG collection object
     rng_set_type &rng_set() { return rng_set_; }
@@ -154,10 +154,10 @@ class Particle
     /// \return true if resampling was performed
     bool resample(const resample_type &op, double threshold)
     {
-        std::size_t N = static_cast<std::size_t>(weight_set_.resample_size());
-        bool resampled = weight_set_.ess() < threshold * N;
+        std::size_t N = static_cast<std::size_t>(weight_.resample_size());
+        bool resampled = weight_.ess() < threshold * N;
         if (resampled) {
-            const double *const rwptr = weight_set_.resample_weight_data();
+            const double *const rwptr = weight_.resample_data();
             if (rwptr != nullptr) {
                 Vector<size_type> rep(N);
                 Vector<size_type> idx(N);
@@ -167,7 +167,7 @@ class Particle
             } else {
                 value_.copy(N, static_cast<const size_type *>(nullptr));
             }
-            weight_set_.set_equal_weight();
+            weight_.set_equal();
         }
 
         return resampled;
@@ -176,7 +176,7 @@ class Particle
     private:
     size_type size_;
     value_type value_;
-    weight_set_type weight_set_;
+    weight_type weight_;
     rng_set_type rng_set_;
     resample_rng_type resample_rng_;
 }; // class Particle

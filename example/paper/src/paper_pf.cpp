@@ -85,16 +85,16 @@ inline std::size_t cv_init(vsmc::Particle<cv> &particle, void *filename)
     const double sd_vel0 = 1;
     std::normal_distribution<double> norm_pos(0, sd_pos0);
     std::normal_distribution<double> norm_vel(0, sd_vel0);
-    vsmc::Vector<double> log_weight(particle.size());
+    vsmc::Vector<double> w(particle.size());
 
     for (vsmc::Particle<cv>::size_type i = 0; i != particle.size(); ++i) {
         particle.value().state(i, 0) = norm_pos(particle.rng(i));
         particle.value().state(i, 1) = norm_pos(particle.rng(i));
         particle.value().state(i, 2) = norm_vel(particle.rng(i));
         particle.value().state(i, 3) = norm_vel(particle.rng(i));
-        log_weight[i] = particle.value().log_likelihood(0, i);
+        w[i] = particle.value().log_likelihood(0, i);
     }
-    particle.weight_set().set_log_weight(log_weight.begin());
+    particle.weight().set_log(w.begin());
 
     return 0;
 }
@@ -104,7 +104,7 @@ class cv_move : public vsmc::MoveSEQ<cv>
     public:
     void pre_processor(std::size_t, vsmc::Particle<cv> &particle)
     {
-        incw_.resize(particle.size());
+        w_.resize(particle.size());
     }
 
     std::size_t move_state(std::size_t iter, vsmc::SingleParticle<cv> sp)
@@ -119,18 +119,18 @@ class cv_move : public vsmc::MoveSEQ<cv>
         sp.state(1) += norm_pos(sp.rng()) + delta * sp.state(3);
         sp.state(2) += norm_vel(sp.rng());
         sp.state(3) += norm_vel(sp.rng());
-        incw_[sp.id()] = sp.particle().value().log_likelihood(iter, sp.id());
+        w_[sp.id()] = sp.particle().value().log_likelihood(iter, sp.id());
 
         return 0;
     }
 
     void post_processor(std::size_t, vsmc::Particle<cv> &particle)
     {
-        particle.weight_set().add_log_weight(incw_.begin());
+        particle.weight().add_log(w_.begin());
     }
 
     private:
-    vsmc::Vector<double> incw_;
+    vsmc::Vector<double> w_;
 };
 
 class cv_est : public vsmc::MonitorEvalSEQ<cv>

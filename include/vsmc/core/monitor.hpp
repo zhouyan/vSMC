@@ -318,7 +318,7 @@ class Monitor
         buffer_.resize(N * dim_);
         eval_(iter, dim_, particle, buffer_.data());
         math::gemv(ColMajor, NoTrans, dim_, N, 1.0, buffer_.data(), dim_,
-            particle.weight_set().weight_data(), 1, 0.0, result_.data(), 1);
+            particle.weight().data(), 1, 0.0, result_.data(), 1);
         push_back(iter);
     }
 

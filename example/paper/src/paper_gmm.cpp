@@ -410,7 +410,7 @@ class gmm_init : public InitializeSMP<gmm_state, gmm_init>
         if (filename)
             particle.value().read_data(static_cast<const char *>(filename));
         particle.value().alpha(0);
-        particle.weight_set().set_equal_weight();
+        particle.weight().set_equal();
     }
 };
 
@@ -438,20 +438,18 @@ class gmm_move_smc
         particle.value().lambda_sd((1 + std::sqrt(1 / alpha)) * 0.15);
         particle.value().weight_sd((1 + std::sqrt(1 / alpha)) * 0.2);
 
-        incw_.resize(particle.size());
+        w_.resize(particle.size());
         double coeff = particle.value().alpha_inc();
-        for (vsmc::Particle<gmm_state>::size_type i = 0; i != particle.size();
-             ++i) {
-            incw_[i] = coeff * particle.value().state(i, 0).log_likelihood();
-        }
-        particle.weight_set().add_log_weight(incw_.data());
+        for (std::size_t i = 0; i != particle.size(); ++i)
+            w_[i] = coeff * particle.value().state(i, 0).log_likelihood();
+        particle.weight().add_log(w_.data());
 
         return 0;
     }
 
     private:
     alpha_setter_type alpha_setter_;
-    vsmc::Vector<double> incw_;
+    vsmc::Vector<double> w_;
 };
 
 //////////////////////////////////////////////////////////////////////////////
