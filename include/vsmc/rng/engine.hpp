@@ -78,7 +78,7 @@
 namespace vsmc
 {
 
-using Rng = VSMC_RNG_TYPE;
+using RNG = VSMC_RNG_TYPE;
 
 } // namespace vsmc
 

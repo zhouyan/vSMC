@@ -51,8 +51,8 @@ class Particle
     using size_type = SizeType<T>;
     using value_type = T;
     using weight_type = WeightType<T>;
-    using rng_set_type = RngSetType<T>;
-    using resample_rng_type = ResampleRngType<T>;
+    using rng_set_type = RNGSetType<T>;
+    using resample_rng_type = ResampleRNGType<T>;
     using rng_type = typename rng_set_type::rng_type;
     using resample_type = std::function<void(std::size_t, std::size_t,
         resample_rng_type &, const double *, size_type *)>;

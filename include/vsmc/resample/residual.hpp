@@ -43,8 +43,8 @@ namespace vsmc
 class ResampleResidual
 {
     public:
-    template <typename IntType, typename RngType>
-    void operator()(std::size_t M, std::size_t N, RngType &rng,
+    template <typename IntType, typename RNGType>
+    void operator()(std::size_t M, std::size_t N, RNGType &rng,
         const double *weight, IntType *replication)
     {
         residual_.resize(M);
@@ -58,7 +58,7 @@ class ResampleResidual
         for (std::size_t i = 0; i != M; ++i)
             R += static_cast<IntType>(integral_[i]);
         std::size_t NN = N - static_cast<std::size_t>(R);
-        U01SequenceSorted<RngType> u01seq(NN, rng);
+        U01SequenceSorted<RNGType> u01seq(NN, rng);
         resample_trans_u01_rep(M, NN, residual_.data(), u01seq, replication);
         for (std::size_t i = 0; i != M; ++i)
             replication[i] += static_cast<IntType>(integral_[i]);

@@ -57,7 +57,7 @@ inline void rng_dist(std::size_t N, Dist &dist, const std::string &name,
     vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
     vsmc::Vector<vsmc::StopWatch> &sw, vsmc::Vector<std::size_t> &bytes)
 {
-    vsmc::Rng rng;
+    vsmc::RNG rng;
     vsmc::StopWatch watch;
 
     watch.start();

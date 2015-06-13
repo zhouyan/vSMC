@@ -42,7 +42,7 @@
 /// \brief Default RNG set type
 /// \ingroup Config
 #ifndef VSMC_RNG_SET_TYPE
-#define VSMC_RNG_SET_TYPE ::vsmc::RngSetVector<::vsmc::Rng>
+#define VSMC_RNG_SET_TYPE ::vsmc::RNGSetVector<::vsmc::RNG>
 #endif
 
 namespace vsmc
@@ -50,14 +50,14 @@ namespace vsmc
 
 /// \brief Scalar RNG set
 /// \ingroup RNG
-template <typename RngType>
-class RngSetScalar
+template <typename RNGType>
+class RNGSetScalar
 {
     public:
-    using rng_type = RngType;
+    using rng_type = RNGType;
     using size_type = std::size_t;
 
-    explicit RngSetScalar(size_type N = 0) : size_(N) { seed(); }
+    explicit RNGSetScalar(size_type N = 0) : size_(N) { seed(); }
 
     size_type size() const { return size_; }
 
@@ -70,18 +70,18 @@ class RngSetScalar
     private:
     std::size_t size_;
     rng_type rng_;
-}; // class RngSetScalar
+}; // class RNGSetScalar
 
 /// \brief Vector RNG set
 /// \ingroup RNG
-template <typename RngType>
-class RngSetVector
+template <typename RNGType>
+class RNGSetVector
 {
     public:
-    using rng_type = RngType;
+    using rng_type = RNGType;
     using size_type = typename AlignedVector<rng_type>::size_type;
 
-    explicit RngSetVector(size_type N = 0) : rng_(N, rng_type()) { seed(); }
+    explicit RNGSetVector(size_type N = 0) : rng_(N, rng_type()) { seed(); }
 
     size_type size() const { return rng_.size(); }
 
@@ -111,13 +111,13 @@ class RngSetVector
 
     private:
     AlignedVector<rng_type> rng_;
-}; // class RngSetVector
+}; // class RNGSetVector
 
-using RngSet = VSMC_RNG_SET_TYPE;
+using RNGSet = VSMC_RNG_SET_TYPE;
 
 /// \brief Particle::rng_set_type trait
 /// \ingroup Traits
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RngSetType, rng_set_type, RngSet)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RNGSetType, rng_set_type, RNGSet)
 
 } // namespace vsmc
 

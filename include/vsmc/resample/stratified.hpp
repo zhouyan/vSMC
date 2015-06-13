@@ -43,11 +43,11 @@ namespace vsmc
 class ResampleStratified
 {
     public:
-    template <typename IntType, typename RngType>
-    void operator()(std::size_t M, std::size_t N, RngType &rng,
+    template <typename IntType, typename RNGType>
+    void operator()(std::size_t M, std::size_t N, RNGType &rng,
         const double *weight, IntType *replication)
     {
-        U01SequenceStratified<RngType> u01seq(N, rng);
+        U01SequenceStratified<RNGType> u01seq(N, rng);
         resample_trans_u01_rep(M, N, weight, u01seq, replication);
     }
 }; // ResampleStratified

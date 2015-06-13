@@ -107,8 +107,8 @@ class SeedGenerator
     }
 
     /// \brief Equivalent to `rng.seed(get())`
-    template <typename RngType>
-    void seed_rng(RngType &rng)
+    template <typename RNGType>
+    void seed_rng(RNGType &rng)
     {
         rng.seed(get());
     }
@@ -274,15 +274,15 @@ class SeedGenerator<ID, std::array<T, K>>
     /// `rng.seed(std::get<0>(get()))`.
     ///
     /// \details
-    /// If `RngType::key_type` exists and it is the same as `result_type`, call
+    /// If `RNGType::key_type` exists and it is the same as `result_type`, call
     /// the former, otherwise the later.
-    template <typename RngType>
-    void seed_rng(RngType &rng)
+    template <typename RNGType>
+    void seed_rng(RNGType &rng)
     {
         seed_rng_dispatch(rng,
             std::integral_constant<bool,
                               std::is_same<result_type,
-                                       internal::KeyType<RngType>>::value>());
+                                       internal::KeyType<RNGType>>::value>());
     }
 
     result_type get()
@@ -389,14 +389,14 @@ class SeedGenerator<ID, std::array<T, K>>
         modulo(divisor_, remainder_);
     }
 
-    template <typename RngType>
-    void seed_rng_dispatch(RngType &rng, std::true_type)
+    template <typename RNGType>
+    void seed_rng_dispatch(RNGType &rng, std::true_type)
     {
         rng.seed(get());
     }
 
-    template <typename RngType>
-    void seed_rng_dispatch(RngType &rng, std::false_type)
+    template <typename RNGType>
+    void seed_rng_dispatch(RNGType &rng, std::false_type)
     {
         rng.seed(get_scalar());
     }

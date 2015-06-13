@@ -48,7 +48,7 @@ namespace vsmc
 /// \brief Particle::resample_rng_type trait
 /// \ingroup Traits
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(
-    ResampleRngType, resample_rng_type, VSMC_RESAMPLE_RNG_TYPE)
+    ResampleRNGType, resample_rng_type, VSMC_RESAMPLE_RNG_TYPE)
 
 /// \brief Type trait of ResampleScheme parameter
 /// \ingroup Resample
