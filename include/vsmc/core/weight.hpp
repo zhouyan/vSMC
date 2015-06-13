@@ -75,8 +75,7 @@ class Weight
     /// ESS
     static double normalize(std::size_t N, double *first)
     {
-        double coeff = 1 / math::asum(N, first, 1);
-        math::scal(N, coeff, first, 1);
+        math::scal(N, 1 / math::asum(N, first, 1), first, 1);
 
         return 1 / math::dot(N, first, 1, first, 1);
     }
@@ -328,8 +327,8 @@ class Weight
             math::vMul(size_, data_.data(), first, buffer.data());
         }
 
-        double coeff = math::asum(size_, buffer.data(), 1);
-        math::scal(size_, 1 / coeff, buffer.data(), 1);
+        math::scal(
+            size_, 1 / math::asum(size_, buffer.data(), 1), buffer.data(), 1);
 
         return 1 / math::dot(size_, buffer.data(), 1, buffer.data(), 1);
     }

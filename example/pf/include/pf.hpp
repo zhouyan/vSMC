@@ -39,6 +39,7 @@
 #include <vsmc/smp/backend_@smp@.hpp>
 #if VSMC_HAS_HDF5
 #include <vsmc/utility/hdf5io.hpp>
+#include <vsmc/utility/stop_watch.hpp>
 #endif
 #ifdef VSMC_PF_MPI
 #include <vsmc/mpi/backend_mpi.hpp>
@@ -110,16 +111,14 @@ class cv_state : public StateBase<Order>
 
     double log_likelihood(std::size_t iter, size_type id) const
     {
-        using std::log;
-
         const double scale = 10;
         const double nu = 10;
 
         double llh_x = scale * (this->state(id, PosX) - obs_x_[iter]);
         double llh_y = scale * (this->state(id, PosY) - obs_y_[iter]);
 
-        llh_x = log(1 + llh_x * llh_x / nu);
-        llh_y = log(1 + llh_y * llh_y / nu);
+        llh_x = std::log(1 + llh_x * llh_x / nu);
+        llh_y = std::log(1 + llh_y * llh_y / nu);
 
         return -0.5 * (nu + 1) * (llh_x + llh_y);
     }
@@ -188,10 +187,8 @@ class cv_move : public MoveSMP<cv_state<Order>, cv_move<Order>>
 
     std::size_t move_state(std::size_t iter, vsmc::SingleParticle<cv> sp) const
     {
-        using std::sqrt;
-
-        const double sd_pos = sqrt(0.02);
-        const double sd_vel = sqrt(0.001);
+        const double sd_pos = std::sqrt(0.02);
+        const double sd_vel = std::sqrt(0.001);
         const double delta = 0.1;
         std::normal_distribution<> norm_pos(0, sd_pos);
         std::normal_distribution<> norm_vel(0, sd_vel);
@@ -257,8 +254,27 @@ inline void cv_do(
     sampler.monitor("pos", 2, cv_meval<Order>());
     sampler.monitor("pos").name(0) = "pos.x";
     sampler.monitor("pos").name(1) = "pos.y";
+
+    vsmc::StopWatch watch;
+#ifdef VSMC_PF_MPI
+    if (world.rank() == 0) {
+#endif
+        watch.reset();
+        watch.start();
+#ifdef VSMC_PF_MPI
+    }
+#endif
     sampler.initialize(argv[1]);
     sampler.iterate(DataNum - 1);
+#ifdef VSMC_PF_MPI
+    if (world.rank() == 0) {
+#endif
+        watch.stop();
+        std::cout << std::setw(40) << std::left << name;
+        std::cout << watch.milliseconds() << std::endl;
+#ifdef VSMC_PF_MPI
+    }
+#endif
 
     std::ofstream pf_sampler(pf_txt);
     pf_sampler << sampler << std::endl;
