@@ -36,28 +36,28 @@
 
 #if VSMC_HAS_RNGC_DOUBLE
 
-#define vsmc_u01_open_open_u32 vsmc_u01_open_open_u32_f64
-#define vsmc_u01_open_closed_u32 vsmc_u01_open_closed_u32_f64
-#define vsmc_u01_closed_open_u32 vsmc_u01_closed_closed_u32_f64
 #define vsmc_u01_closed_closed_u32 vsmc_u01_closed_closed_u32_f64
+#define vsmc_u01_closed_open_u32 vsmc_u01_closed_open_u32_f64
+#define vsmc_u01_open_closed_u32 vsmc_u01_open_closed_u32_f64
+#define vsmc_u01_open_open_u32 vsmc_u01_open_open_u32_f64
 
-#define vsmc_u01_open_open_u64 vsmc_u01_open_open_u64_f64
-#define vsmc_u01_open_closed_u64 vsmc_u01_open_closed_u64_f64
-#define vsmc_u01_closed_open_u64 vsmc_u01_closed_closed_u64_f64
 #define vsmc_u01_closed_closed_u64 vsmc_u01_closed_closed_u64_f64
+#define vsmc_u01_closed_open_u64 vsmc_u01_closed_open_u64_f64
+#define vsmc_u01_open_closed_u64 vsmc_u01_open_closed_u64_f64
+#define vsmc_u01_open_open_u64 vsmc_u01_open_open_u64_f64
 
 #else // VSMC_HAS_RNGC_DOUBLE
 
-#define vsmc_u01_open_open_u32 vsmc_u01_open_open_u32_f32
-#define vsmc_u01_open_closed_u32 vsmc_u01_open_closed_u32_f32
-#define vsmc_u01_closed_open_u32 vsmc_u01_closed_closed_u32_f32
 #define vsmc_u01_closed_closed_u32 vsmc_u01_closed_closed_u32_f32
+#define vsmc_u01_closed_open_u32 vsmc_u01_closed_open_u32_f32
+#define vsmc_u01_open_closed_u32 vsmc_u01_open_closed_u32_f32
+#define vsmc_u01_open_open_u32 vsmc_u01_open_open_u32_f32
 
 #endif // VSMC_HAS_RNGC_DOUBLE
 
-#define VSMC_RNGC_U01_31f (1.0f / (1024.0f * 1024.0f * 1024.0f * 2.0f))
-#define VSMC_RNGC_U01_24f (128.0f * VSMC_RNGC_U01_31f)
-#define VSMC_RNGC_U01_23f (256.0f * VSMC_RNGC_U01_31f)
+#define VSMC_RNGC_U01_31 (1.0f / (1024.0f * 1024.0f * 1024.0f * 2.0f))
+#define VSMC_RNGC_U01_24 (128.0f * VSMC_RNGC_U01_31)
+#define VSMC_RNGC_U01_23 (256.0f * VSMC_RNGC_U01_31)
 #define VSMC_RNGC_U01_32 (1.0 / (1024.0 * 1024.0 * 1024.0 * 4.0))
 #define VSMC_RNGC_U01_63 (2.0 * VSMC_RNGC_U01_32 * VSMC_RNGC_U01_32)
 #define VSMC_RNGC_U01_53 (1024.0 * VSMC_RNGC_U01_63)
@@ -67,28 +67,28 @@
 /// \ingroup U01C
 VSMC_STATIC_INLINE float vsmc_u01_closed_closed_u32_f32(uint32_t u)
 {
-    return ((u & 0x7fffffc0) + (u & 0x40)) * VSMC_RNGC_U01_31f;
+    return ((u & 0x7FFFFFC0) + (u & 0x40)) * VSMC_RNGC_U01_31;
 }
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1)\f$
 /// \ingroup U01C
 VSMC_STATIC_INLINE float vsmc_u01_closed_open_u32_f32(uint32_t u)
 {
-    return (u >> 8) * VSMC_RNGC_U01_24f;
+    return (u >> 8) * VSMC_RNGC_U01_24;
 }
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$(0,1]\f$
 /// \ingroup U01C
 VSMC_STATIC_INLINE float vsmc_u01_open_closed_u32_f32(uint32_t u)
 {
-    return (1.0f + (u >> 8)) * VSMC_RNGC_U01_24f;
+    return (1.0f + (u >> 8)) * VSMC_RNGC_U01_24;
 }
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$(0,1)\f$
 /// \ingroup U01C
 VSMC_STATIC_INLINE float vsmc_u01_open_open_u32_f32(uint32_t u)
 {
-    return (0.5f + (u >> 9)) * VSMC_RNGC_U01_23f;
+    return (0.5f + (u >> 9)) * VSMC_RNGC_U01_23;
 }
 
 #if VSMC_HAS_RNGC_DOUBLE
@@ -129,7 +129,7 @@ VSMC_STATIC_INLINE double vsmc_u01_open_open_u32_f64(uint32_t u)
 /// \ingroup U01C
 VSMC_STATIC_INLINE double vsmc_u01_closed_closed_u64_f64(uint64_t u)
 {
-    return ((u & UINT64_C(0x7ffffffffffffe00)) + (u & 0x200)) *
+    return ((u & UINT64_C(0x7FFFFFFFFFFFFE00)) + (u & 0x200)) *
         VSMC_RNGC_U01_63;
 }
 
