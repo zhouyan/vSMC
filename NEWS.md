@@ -25,6 +25,32 @@ changes.
   be replaced by `SingleParticle`. In addition, in most places, where the API
   previously accept `const Particle<T> &` shall now accept `Particle<T> &`
   instead.
+* Member functions of SMP bases classes are renamed to use a more consistent
+  pattern 
+  - `pre_processor` -> `eval_pre`
+  - `post_processor` -> `eval_post`
+  - `initialize_param` -> `eval_param`
+  - `initialize_state` -> `eval_sp`
+  - `move_state` -> `eval_sp`
+  - `monitor_state` -> `eval_sp`
+  - `path_state` -> `eval_sp`
+  - `path_grid` -> `eval_grid`
+* Member function in base value classes `StateMPI` and `StateCL` are renamed
+  - `copy_pre_processor` -> `copy_pre`
+  - `copy_post_processor` -> `copy_pre`
+* Weight classes are renamed
+  - `WeightSet` -> `Weight`
+  - `WeightSetMPI` -> `WeightMPI`
+  The header file `weight_set.hpp` is also renamed to `weight`
+* `Weight` (formerly `WeightSet`)'s interface has been overhauled
+  - `set_weight` -> `set`
+  - `set_log_weight` -> `set_log`
+  - `mul_weight` -> `mul`
+  - `add_log_weight` -> `add_log`
+  - `weight_data` -> `data`
+* `Particle::weight_set` renamed to `Particle::weight`
+* `weight_set_type` renamed to `weight_type`
+* All occurrence of `Rng` are renamed to `RNG`
 
 ## Removed features
 
