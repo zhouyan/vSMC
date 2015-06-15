@@ -295,14 +295,14 @@ class StateMPI : public StateBase
     {
         VSMC_RUNTIME_ASSERT_MPI_BACKEND_MPI_COPY_SIZE_MISMATCH;
 
-        copy_pre_processor_dispatch(has_copy_pre_processor_<StateBase>());
+        copy_pre_dispatch(has_copy_pre_<StateBase>());
         src_idx_.resize(N);
         if (world_.rank() == 0)
             std::copy(src_idx, src_idx + N, src_idx_.begin());
         ::boost::mpi::broadcast(world_, src_idx_, 0);
         copy_this_node(N, src_idx_.data(), copy_recv_, copy_send_);
         copy_inter_node(copy_recv_, copy_send_);
-        copy_post_processor_dispatch(has_copy_post_processor_<StateBase>());
+        copy_post_dispatch(has_copy_post_<StateBase>());
     }
 
     /// \brief A duplicated MPI communicator for this state value object
@@ -468,22 +468,13 @@ class StateMPI : public StateBase
     typename StateBase::state_pack_type pack_recv_;
     typename StateBase::state_pack_type pack_send_;
 
-    VSMC_DEFINE_METHOD_CHECKER(copy_pre_processor, void, ())
-    VSMC_DEFINE_METHOD_CHECKER(copy_post_processor, void, ())
+    VSMC_DEFINE_METHOD_CHECKER(copy_pre, void, ())
+    VSMC_DEFINE_METHOD_CHECKER(copy_post, void, ())
 
-    void copy_pre_processor_dispatch(std::true_type)
-    {
-        StateBase::copy_pre_processor();
-    }
-
-    void copy_pre_processor_dispatch(std::false_type) {}
-
-    void copy_post_processor_dispatch(std::true_type)
-    {
-        StateBase::copy_post_processor();
-    }
-
-    void copy_post_processor_dispatch(std::false_type) {}
+    void copy_pre_dispatch(std::true_type) { StateBase::copy_pre(); }
+    void copy_pre_dispatch(std::false_type) {}
+    void copy_post_dispatch(std::true_type) { StateBase::copy_post(); }
+    void copy_post_dispatch(std::false_type) {}
 }; // class StateMPI
 
 } // namespace vsmc

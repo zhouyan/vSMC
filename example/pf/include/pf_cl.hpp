@@ -100,7 +100,7 @@ class cv_init : public vsmc::InitializeCL<cv>
         particle.value().read_data(static_cast<const char *>(file));
     }
 
-    void pre_processor(vsmc::Particle<cv> &particle)
+    void eval_pre(vsmc::Particle<cv> &particle)
     {
         w_.resize(particle.size());
         w_buffer_.resize(particle.size());
@@ -110,7 +110,7 @@ class cv_init : public vsmc::InitializeCL<cv>
             particle.value().obs_y());
     }
 
-    void post_processor(vsmc::Particle<cv> &particle)
+    void eval_post(vsmc::Particle<cv> &particle)
     {
         particle.value().manager().read_buffer(
             w_buffer_.data(), particle.size(), w_.data());
@@ -130,7 +130,7 @@ class cv_move : public vsmc::MoveCL<cv>
         kernel_name = std::string("cv_move");
     }
 
-    void pre_processor(std::size_t, vsmc::Particle<cv> &particle)
+    void eval_pre(std::size_t, vsmc::Particle<cv> &particle)
     {
         w_.resize(particle.size());
         w_buffer_.resize(particle.size());
@@ -140,7 +140,7 @@ class cv_move : public vsmc::MoveCL<cv>
             particle.value().obs_y());
     }
 
-    void post_processor(std::size_t, vsmc::Particle<cv> &particle)
+    void eval_post(std::size_t, vsmc::Particle<cv> &particle)
     {
         particle.value().manager().read_buffer(
             w_buffer_.data(), particle.size(), w_.data());

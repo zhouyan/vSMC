@@ -36,32 +36,32 @@
 #include <tbb/tbb.h>
 
 #define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_INITIALIZE(args)             \
-    this->initialize_param(particle, param);                                  \
-    this->pre_processor(particle);                                            \
+    this->eval_param(particle, param);                                        \
+    this->eval_pre(particle);                                                 \
     work_type work(this, &particle);                                          \
     ::tbb::parallel_reduce args;                                              \
-    this->post_processor(particle);                                           \
+    this->eval_post(particle);                                                \
     return work.accept();
 
 #define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MOVE(args)                   \
-    this->pre_processor(iter, particle);                                      \
+    this->eval_pre(iter, particle);                                           \
     work_type work(this, iter, &particle);                                    \
     ::tbb::parallel_reduce args;                                              \
-    this->post_processor(iter, particle);                                     \
+    this->eval_post(iter, particle);                                          \
     return work.accept();
 
 #define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MONITOR_EVAL(args)           \
-    this->pre_processor(iter, particle);                                      \
+    this->eval_pre(iter, particle);                                           \
     work_type work(this, iter, dim, &particle, res);                          \
     ::tbb::parallel_for args;                                                 \
-    this->post_processor(iter, particle);
+    this->eval_post(iter, particle);
 
 #define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_PATH_EVAL(args)              \
-    this->pre_processor(iter, particle);                                      \
+    this->eval_pre(iter, particle);                                           \
     work_type work(this, iter, &particle, res);                               \
     ::tbb::parallel_for args;                                                 \
-    this->post_processor(iter, particle);                                     \
-    return this->path_grid(iter, particle);
+    this->eval_post(iter, particle);                                          \
+    return this->eval_grid(iter, particle);
 
 namespace vsmc
 {
@@ -206,10 +206,8 @@ class InitializeTBB : public InitializeBase<T, Derived>
 
         void operator()(const ::tbb::blocked_range<size_type> &range)
         {
-            for (size_type i = range.begin(); i != range.end(); ++i) {
-                accept_ +=
-                    init_->initialize_state(SingleParticle<T>(i, pptr_));
-            }
+            for (size_type i = range.begin(); i != range.end(); ++i)
+                accept_ += init_->eval_sp(SingleParticle<T>(i, pptr_));
         }
 
         void join(const work_type &other) { accept_ += other.accept_; }
@@ -319,10 +317,8 @@ class MoveTBB : public MoveBase<T, Derived>
 
         void operator()(const ::tbb::blocked_range<size_type> &range)
         {
-            for (size_type i = range.begin(); i != range.end(); ++i) {
-                accept_ +=
-                    move_->move_state(iter_, SingleParticle<T>(i, pptr_));
-            }
+            for (size_type i = range.begin(); i != range.end(); ++i)
+                accept_ += move_->eval_sp(iter_, SingleParticle<T>(i, pptr_));
         }
 
         void join(const work_type &other) { accept_ += other.accept_; }
@@ -427,8 +423,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         void operator()(const ::tbb::blocked_range<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                monitor_->monitor_state(iter_, dim_,
-                    SingleParticle<T>(i, pptr_),
+                monitor_->eval_sp(iter_, dim_, SingleParticle<T>(i, pptr_),
                     res_ + static_cast<std::size_t>(i) * dim_);
             }
         }
@@ -537,10 +532,8 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
 
         void operator()(const ::tbb::blocked_range<size_type> &range) const
         {
-            for (size_type i = range.begin(); i != range.end(); ++i) {
-                res_[i] =
-                    path_->path_state(iter_, SingleParticle<T>(i, pptr_));
-            }
+            for (size_type i = range.begin(); i != range.end(); ++i)
+                res_[i] = path_->eval_sp(iter_, SingleParticle<T>(i, pptr_));
         }
 
         private:

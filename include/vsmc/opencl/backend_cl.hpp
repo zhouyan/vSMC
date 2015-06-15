@@ -335,7 +335,7 @@ class StateCL
         copy_(src_idx_buffer_.data(), state_buffer_.data());
     }
 
-    void copy_pre_processor()
+    void copy_pre()
     {
         state_idx_host_.resize(size_);
         if (manager().opencl_version() >= 120) {
@@ -357,7 +357,7 @@ class StateCL
             state_buffer_.data(), size_ * state_size_, state_tmp_host_.data());
     }
 
-    void copy_post_processor()
+    void copy_post()
     {
         manager().write_buffer(
             state_idx_buffer_.data(), size_, state_idx_host_.data());
@@ -445,13 +445,13 @@ class StateCL
 /// \ingroup OpenCL
 ///
 /// \details
-/// Kernel requirement (`initialize_state`)
+/// Kernel requirement
 /// ~~~{.cpp}
 /// __kernel
 /// void kern (__global state_type *state, __global ulong *accept);
 /// ~~~
 /// - Kernels can have additonal arguments and set by the user in
-/// `pre_processor`.
+/// `eval_pre`.
 /// - `state` has size `N * StateSize` where `accept` has size `N`.
 /// - The declaration does not have to much this, but the first
 /// arguments will
@@ -491,19 +491,19 @@ class InitializeCL
             return 0;
 
         set_kernel_args(particle);
-        initialize_param(particle, param);
-        pre_processor(particle);
+        eval_param(particle, param);
+        eval_pre(particle);
         particle.value().manager().run_kernel(
             kernel_, particle.size(), configure_.local_size());
-        post_processor(particle);
+        eval_post(particle);
 
         return accept_count(particle, accept_buffer_.data());
     }
 
-    virtual void initialize_param(Particle<T> &, void *) {}
-    virtual void initialize_state(std::string &) {}
-    virtual void pre_processor(Particle<T> &) {}
-    virtual void post_processor(Particle<T> &) {}
+    virtual void eval_param(Particle<T> &, void *) {}
+    virtual void eval_sp(std::string &) {}
+    virtual void eval_pre(Particle<T> &) {}
+    virtual void eval_post(Particle<T> &) {}
 
     virtual std::size_t accept_count(
         Particle<T> &particle, const CLMemory &accept_buffer)
@@ -518,7 +518,7 @@ class InitializeCL
     virtual void set_kernel(Particle<T> &particle)
     {
         std::string kname;
-        initialize_state(kname);
+        eval_sp(kname);
         VSMC_DEFINE_OPENCL_BACKEND_CL_SET_KERNEL;
     }
 
@@ -552,7 +552,7 @@ class InitializeCL
 /// \ingroup OpenCL
 ///
 /// \details
-/// Kernel requirement (`move_state`)
+/// Kernel requirement
 /// ~~~{.cpp}
 /// __kernel
 /// void kern (ulong iter, __global state_type *state, __global
@@ -579,17 +579,17 @@ class MoveCL
             return 0;
 
         set_kernel_args(iter, particle);
-        pre_processor(iter, particle);
+        eval_pre(iter, particle);
         particle.value().manager().run_kernel(
             kernel_, particle.size(), configure_.local_size());
-        post_processor(iter, particle);
+        eval_post(iter, particle);
 
         return accept_count(particle, accept_buffer_.data());
     }
 
-    virtual void move_state(std::size_t, std::string &) {}
-    virtual void pre_processor(std::size_t, Particle<T> &) {}
-    virtual void post_processor(std::size_t, Particle<T> &) {}
+    virtual void eval_sp(std::size_t, std::string &) {}
+    virtual void eval_pre(std::size_t, Particle<T> &) {}
+    virtual void eval_post(std::size_t, Particle<T> &) {}
 
     virtual std::size_t accept_count(
         Particle<T> &particle, const CLMemory &accept_buffer)
@@ -604,7 +604,7 @@ class MoveCL
     virtual void set_kernel(std::size_t iter, Particle<T> &particle)
     {
         std::string kname;
-        move_state(iter, kname);
+        eval_sp(iter, kname);
         VSMC_DEFINE_OPENCL_BACKEND_CL_SET_KERNEL;
     }
 
@@ -665,17 +665,17 @@ class MonitorEvalCL
             return;
 
         set_kernel_args(iter, dim, particle);
-        pre_processor(iter, particle);
+        eval_pre(iter, particle);
         particle.value().manager().run_kernel(
             kernel_, particle.size(), configure_.local_size());
         particle.value().manager().template read_buffer<typename T::fp_type>(
             buffer_.data(), particle.value().size() * dim, res);
-        post_processor(iter, particle);
+        eval_post(iter, particle);
     }
 
     virtual void monitor_state(std::size_t, std::string &) {}
-    virtual void pre_processor(std::size_t, Particle<T> &) {}
-    virtual void post_processor(std::size_t, Particle<T> &) {}
+    virtual void eval_pre(std::size_t, Particle<T> &) {}
+    virtual void eval_post(std::size_t, Particle<T> &) {}
 
     virtual void set_kernel(
         std::size_t iter, std::size_t, Particle<T> &particle)
@@ -713,7 +713,7 @@ class MonitorEvalCL
 /// \ingroup OpenCL
 ///
 /// \details
-/// Kernel requirement (`path_state`)
+/// Kernel requirement
 /// ~~~{.cpp}
 /// __kernel
 /// void kern (ulong iter, __global state_type *state,
@@ -739,25 +739,25 @@ class PathEvalCL
             return 0;
 
         set_kernel_args(iter, particle);
-        pre_processor(iter, particle);
+        eval_pre(iter, particle);
         particle.value().manager().run_kernel(
             kernel_, particle.size(), configure_.local_size());
         particle.value().manager().template read_buffer<typename T::fp_type>(
             buffer_.data(), particle.value().size(), res);
-        post_processor(iter, particle);
+        eval_post(iter, particle);
 
-        return this->path_grid(iter, particle);
+        return this->eval_grid(iter, particle);
     }
 
-    virtual void path_state(std::size_t, std::string &) {}
-    virtual double path_grid(std::size_t, Particle<T> &) { return 0; }
-    virtual void pre_processor(std::size_t, Particle<T> &) {}
-    virtual void post_processor(std::size_t, Particle<T> &) {}
+    virtual void eval_sp(std::size_t, std::string &) {}
+    virtual double eval_grid(std::size_t, Particle<T> &) { return 0; }
+    virtual void eval_pre(std::size_t, Particle<T> &) {}
+    virtual void eval_post(std::size_t, Particle<T> &) {}
 
     virtual void set_kernel(std::size_t iter, Particle<T> &particle)
     {
         std::string kname;
-        path_state(iter, kname);
+        eval_sp(iter, kname);
         VSMC_DEFINE_OPENCL_BACKEND_CL_SET_KERNEL;
     }
 

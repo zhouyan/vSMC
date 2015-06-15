@@ -168,7 +168,7 @@ class cv_init : public InitializeSMP<cv_state<Order>, cv_init<Order>>
         particle.value().read_data(static_cast<const char *>(file));
     }
 
-    void post_processor(vsmc::Particle<cv> &particle)
+    void eval_post(vsmc::Particle<cv> &particle)
     {
         w_.resize(particle.size());
         particle.value().read_state(LogL, w_.data());
@@ -202,7 +202,7 @@ class cv_move : public MoveSMP<cv_state<Order>, cv_move<Order>>
         return 1;
     }
 
-    void post_processor(std::size_t, vsmc::Particle<cv> &particle)
+    void eval_post(std::size_t, vsmc::Particle<cv> &particle)
     {
         w_.resize(particle.size());
         particle.value().read_state(LogL, w_.data());

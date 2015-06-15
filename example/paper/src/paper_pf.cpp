@@ -102,12 +102,12 @@ inline std::size_t cv_init(vsmc::Particle<cv> &particle, void *filename)
 class cv_move : public vsmc::MoveSEQ<cv>
 {
     public:
-    void pre_processor(std::size_t, vsmc::Particle<cv> &particle)
+    void eval_pre(std::size_t, vsmc::Particle<cv> &particle)
     {
         w_.resize(particle.size());
     }
 
-    std::size_t move_state(std::size_t iter, vsmc::SingleParticle<cv> sp)
+    std::size_t eval_sp(std::size_t iter, vsmc::SingleParticle<cv> sp)
     {
         const double sd_pos = std::sqrt(0.02);
         const double sd_vel = std::sqrt(0.001);
@@ -124,7 +124,7 @@ class cv_move : public vsmc::MoveSEQ<cv>
         return 0;
     }
 
-    void post_processor(std::size_t, vsmc::Particle<cv> &particle)
+    void eval_post(std::size_t, vsmc::Particle<cv> &particle)
     {
         particle.weight().add_log(w_.begin());
     }
@@ -136,7 +136,7 @@ class cv_move : public vsmc::MoveSEQ<cv>
 class cv_est : public vsmc::MonitorEvalSEQ<cv>
 {
     public:
-    void monitor_state(
+    void eval_sp(
         std::size_t, std::size_t dim, vsmc::SingleParticle<cv> sp, double *res)
     {
         assert(dim <= Dim);
