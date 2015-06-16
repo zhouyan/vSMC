@@ -380,7 +380,7 @@ class gmm_state : public gmm_state_base
 class gmm_init : public InitializeSMP<gmm_state, gmm_init>
 {
     public:
-    std::size_t initialize_state(vsmc::SingleParticle<gmm_state> sp)
+    std::size_t eval_sp(vsmc::SingleParticle<gmm_state> sp)
     {
         const gmm_state &state = sp.particle().value();
         gmm_param &param = sp.state(0);
@@ -405,7 +405,7 @@ class gmm_init : public InitializeSMP<gmm_state, gmm_init>
         return 1;
     }
 
-    void initialize_param(vsmc::Particle<gmm_state> &particle, void *filename)
+    void eval_param(vsmc::Particle<gmm_state> &particle, void *filename)
     {
         if (filename)
             particle.value().read_data(static_cast<const char *>(filename));
@@ -457,7 +457,7 @@ class gmm_move_smc
 class gmm_move_mu : public MoveSMP<gmm_state, gmm_move_mu>
 {
     public:
-    std::size_t move_state(std::size_t, vsmc::SingleParticle<gmm_state> sp)
+    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<gmm_state> sp)
     {
         const gmm_state &state = sp.particle().value();
         gmm_param &param = sp.state(0);
@@ -482,7 +482,7 @@ class gmm_move_mu : public MoveSMP<gmm_state, gmm_move_mu>
 class gmm_move_lambda : public MoveSMP<gmm_state, gmm_move_lambda>
 {
     public:
-    std::size_t move_state(std::size_t, vsmc::SingleParticle<gmm_state> sp)
+    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<gmm_state> sp)
     {
         const gmm_state &state = sp.particle().value();
         gmm_param &param = sp.state(0);
@@ -507,7 +507,7 @@ class gmm_move_lambda : public MoveSMP<gmm_state, gmm_move_lambda>
 class gmm_move_weight : public MoveSMP<gmm_state, gmm_move_weight>
 {
     public:
-    std::size_t move_state(std::size_t, vsmc::SingleParticle<gmm_state> sp)
+    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<gmm_state> sp)
     {
         const gmm_state &state = sp.particle().value();
         gmm_param &param = sp.state(0);
@@ -541,12 +541,12 @@ class gmm_move_weight : public MoveSMP<gmm_state, gmm_move_weight>
 class gmm_path : public PathEvalSMP<gmm_state, gmm_path>
 {
     public:
-    double path_state(std::size_t, vsmc::SingleParticle<gmm_state> sp)
+    double eval_sp(std::size_t, vsmc::SingleParticle<gmm_state> sp)
     {
         return sp.state(0).log_likelihood();
     }
 
-    double path_grid(std::size_t, vsmc::Particle<gmm_state> &particle)
+    double eval_grid(std::size_t, vsmc::Particle<gmm_state> &particle)
     {
         return particle.value().alpha();
     }

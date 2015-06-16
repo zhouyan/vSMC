@@ -90,12 +90,12 @@ class cv : public cv_base
 class cv_init : public vsmc::InitializeCL<cv>
 {
     public:
-    void initialize_state(std::string &kernel_name)
+    void eval_sp(std::string &kernel_name)
     {
         kernel_name = std::string("cv_init");
     }
 
-    void initialize_param(vsmc::Particle<cv> &particle, void *file)
+    void eval_param(vsmc::Particle<cv> &particle, void *file)
     {
         particle.value().read_data(static_cast<const char *>(file));
     }
@@ -125,7 +125,7 @@ class cv_init : public vsmc::InitializeCL<cv>
 class cv_move : public vsmc::MoveCL<cv>
 {
     public:
-    void move_state(std::size_t, std::string &kernel_name)
+    void eval_sp(std::size_t, std::string &kernel_name)
     {
         kernel_name = std::string("cv_move");
     }
@@ -155,7 +155,7 @@ class cv_move : public vsmc::MoveCL<cv>
 class cv_est : public vsmc::MonitorEvalCL<cv>
 {
     public:
-    void monitor_state(std::size_t, std::string &kernel_name)
+    void eval_sp(std::size_t, std::string &kernel_name)
     {
         kernel_name = std::string("cv_est");
     }

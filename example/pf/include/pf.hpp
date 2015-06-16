@@ -147,7 +147,7 @@ class cv_init : public InitializeSMP<cv_state<Order>, cv_init<Order>>
     public:
     typedef cv_state<Order> cv;
 
-    std::size_t initialize_state(vsmc::SingleParticle<cv> sp) const
+    std::size_t eval_sp(vsmc::SingleParticle<cv> sp) const
     {
         const double sd_pos0 = 2;
         const double sd_vel0 = 1;
@@ -163,7 +163,7 @@ class cv_init : public InitializeSMP<cv_state<Order>, cv_init<Order>>
         return 1;
     }
 
-    void initialize_param(vsmc::Particle<cv> &particle, void *file) const
+    void eval_param(vsmc::Particle<cv> &particle, void *file) const
     {
         particle.value().read_data(static_cast<const char *>(file));
     }
@@ -185,7 +185,7 @@ class cv_move : public MoveSMP<cv_state<Order>, cv_move<Order>>
     public:
     typedef cv_state<Order> cv;
 
-    std::size_t move_state(std::size_t iter, vsmc::SingleParticle<cv> sp) const
+    std::size_t eval_sp(std::size_t iter, vsmc::SingleParticle<cv> sp) const
     {
         const double sd_pos = std::sqrt(0.02);
         const double sd_vel = std::sqrt(0.001);
@@ -219,7 +219,7 @@ class cv_meval : public MonitorEvalSMP<cv_state<Order>, cv_meval<Order>>
     public:
     typedef cv_state<Order> cv;
 
-    void monitor_state(
+    void eval_sp(
         std::size_t, std::size_t, vsmc::SingleParticle<cv> sp, double *res)
     {
         res[0] = sp.state(PosX);

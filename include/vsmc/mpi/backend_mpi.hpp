@@ -61,7 +61,6 @@ class WeightMPI : public WeightBase
     {
         ::boost::mpi::all_reduce(
             world_, N, resample_size_, std::plus<size_type>());
-        this->set_ess(static_cast<double>(resample_size_));
     }
 
     /// \brief A duplicated MPI communicator for this weight set object
@@ -89,96 +88,6 @@ class WeightMPI : public WeightBase
         return world_.rank() == 0 ? resample_weight_.data() : nullptr;
     }
 
-    void normalize()
-    {
-        const std::size_t N = static_cast<std::size_t>(this->size());
-        double *const wptr = this->mutable_data();
-
-        double lcoeff = math::asum(N, wptr, 1);
-        double gcoeff = 0;
-        ::boost::mpi::all_reduce(world_, lcoeff, gcoeff, std::plus<double>());
-        gcoeff = 1 / gcoeff;
-        math::scal(N, gcoeff, wptr, 1);
-
-        double less = math::dot(N, wptr, 1, wptr, 1);
-        double gess = 0;
-        ::boost::mpi::all_reduce(world_, less, gess, std::plus<double>());
-        gess = 1 / gess;
-        this->set_ess(gess);
-    }
-
-    void normalize_log()
-    {
-        const std::size_t N = static_cast<std::size_t>(this->size());
-        double *const wptr = this->mutable_data();
-
-        double lmax_weight = *(std::max_element(wptr, wptr + N));
-        double gmax_weight = 0;
-        ::boost::mpi::all_reduce(
-            world_, lmax_weight, gmax_weight, ::boost::mpi::maximum<double>());
-        for (std::size_t i = 0; i != N; ++i)
-            wptr[i] -= gmax_weight;
-    }
-
-    double compute_ess(const double *first, bool use_log) const
-    {
-        const std::size_t N = static_cast<std::size_t>(this->size());
-        const double *const wptr = this->data();
-
-        Vector<double> buffer(N);
-        if (use_log) {
-            math::vLn(N, wptr, buffer.data());
-            math::vAdd(N, buffer.data(), first, buffer.data());
-            double lwmax = *(std::max_element(buffer.begin(), buffer.end()));
-            double gwmax = 0;
-            ::boost::mpi::all_reduce(
-                world_, lwmax, gwmax, ::boost::mpi::maximum<double>());
-            for (std::size_t i = 0; i != N; ++i)
-                buffer[i] -= gwmax;
-            math::vExp(N, buffer.data(), buffer.data());
-        } else {
-            math::vMul(N, wptr, first, buffer.data());
-        }
-
-        double lcoeff = math::asum(N, buffer.data(), 1);
-        double gcoeff = 0;
-        ::boost::mpi::all_reduce(world_, lcoeff, gcoeff, std::plus<double>());
-        math::scal(N, 1 / gcoeff, buffer.data(), 1);
-
-        double less = math::dot(N, buffer.data(), 1, buffer.data(), 1);
-        double gess = 0;
-        ::boost::mpi::all_reduce(world_, less, gess, std::plus<double>());
-
-        return 1 / gess;
-    }
-
-    double compute_cess(const double *first, bool use_log) const
-    {
-        const std::size_t N = static_cast<std::size_t>(this->size());
-        const double *const wptr = this->data();
-
-        Vector<double> buffer;
-        if (use_log) {
-            buffer.resize(N);
-            math::vExp(N, first, buffer.data());
-        }
-        const double *const bptr = use_log ? buffer.data() : first;
-
-        double labove = 0;
-        double lbelow = 0;
-        for (std::size_t i = 0; i != N; ++i) {
-            double wb = wptr[i] * bptr[i];
-            labove += wb;
-            lbelow += wb * bptr[i];
-        }
-        double gabove = 0;
-        double gbelow = 0;
-        ::boost::mpi::all_reduce(world_, labove, gabove, std::plus<double>());
-        ::boost::mpi::all_reduce(world_, lbelow, gbelow, std::plus<double>());
-
-        return gabove * gabove / gbelow;
-    }
-
     private:
     ::boost::mpi::communicator world_;
     size_type resample_size_;
@@ -194,6 +103,43 @@ class WeightMPI : public WeightBase
             ::boost::mpi::gather(world_, weight_, weight_all_, 0);
         else
             ::boost::mpi::gather(world_, weight_, 0);
+    }
+
+    double get_ess() const
+    {
+        const std::size_t N = static_cast<std::size_t>(this->size());
+        const double *const wptr = this->data();
+
+        double less = math::dot(N, wptr, 1, wptr, 1);
+        double gess = 0;
+        ::boost::mpi::all_reduce(world_, less, gess, std::plus<double>());
+
+        return 1 / gess;
+    }
+
+    void normalize()
+    {
+        const std::size_t N = static_cast<std::size_t>(this->size());
+        double *const wptr = this->mutable_data();
+
+        double lcoeff = math::asum(N, wptr, 1);
+        double gcoeff = 0;
+        ::boost::mpi::all_reduce(world_, lcoeff, gcoeff, std::plus<double>());
+        gcoeff = 1 / gcoeff;
+        math::scal(N, gcoeff, wptr, 1);
+    }
+
+    void normalize_log()
+    {
+        const std::size_t N = static_cast<std::size_t>(this->size());
+        double *const wptr = this->mutable_data();
+
+        double lmax_weight = *(std::max_element(wptr, wptr + N));
+        double gmax_weight = 0;
+        ::boost::mpi::all_reduce(
+            world_, lmax_weight, gmax_weight, ::boost::mpi::maximum<double>());
+        for (std::size_t i = 0; i != N; ++i)
+            wptr[i] -= gmax_weight;
     }
 }; // class WeightMPI
 

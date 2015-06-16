@@ -38,6 +38,29 @@
 namespace vsmc
 {
 
+/// \brief Compute the ess given normalized weights
+/// \ingroup Core
+inline double weight_ess(std::size_t N, const double *first)
+{
+    return 1 / math::dot(N, first, 1, first, 1);
+}
+
+/// \brief Normalize weights such that the summation is one
+/// \ingroup Core
+static void weight_normalize(std::size_t N, double *first)
+{
+    math::scal(N, 1 / math::asum(N, first, 1), first, 1);
+}
+
+/// \brief Normalize logarithm weights such that the maximum is zero
+/// \ingroup Core
+static void weight_normalize_log(std::size_t N, double *first)
+{
+    double wmax = *(std::max_element(first, first + N));
+    for (std::size_t i = 0; i != N; ++i)
+        first[i] -= wmax;
+}
+
 /// \brief Weight class
 /// \ingroup Core
 class Weight
@@ -45,10 +68,7 @@ class Weight
     public:
     using size_type = std::size_t;
 
-    explicit Weight(size_type N)
-        : size_(N), ess_(static_cast<double>(N)), data_(N)
-    {
-    }
+    explicit Weight(size_type N) : size_(N), ess_(0), data_(N) {}
 
     Weight(const Weight &) = default;
     Weight &operator=(const Weight &) = default;
@@ -57,100 +77,20 @@ class Weight
 
     virtual ~Weight() {}
 
-    /// \brief Set all weights to be equal, normalized and return the ESS
-    ///
-    /// \param N Number of particles in weight
-    /// \param RN Number  of particles used for resampling
-    /// \param first Weights to be equalized
-    static double set_equal(std::size_t N, std::size_t RN, double *first)
-    {
-        double ess = static_cast<double>(RN);
-        if (first != nullptr)
-            std::fill_n(first, N, 1 / ess);
-
-        return ess;
-    }
-
-    /// \brief Normalize weights such that the summation is one and return the
-    /// ESS
-    static double normalize(std::size_t N, double *first)
-    {
-        math::scal(N, 1 / math::asum(N, first, 1), first, 1);
-
-        return 1 / math::dot(N, first, 1, first, 1);
-    }
-
-    /// \brief Normalize logarithm weights such that the maximum is zero
-    static void normalize_log(std::size_t N, double *first)
-    {
-        double wmax = *(std::max_element(first, first + N));
-        for (std::size_t i = 0; i != N; ++i)
-            first[i] -= wmax;
-    }
-
     /// \brief The number of particles
     size_type size() const { return size_; }
-
-    /// \brief ESS of the current weights
-    double ess() const { return ess_; }
-
-    /// \brief Compute ESS given (log) incremental weights
-    template <typename InputIter>
-    double ess(InputIter first, bool use_log) const
-    {
-        Vector<double> buffer(size_);
-        std::copy_n(first, size_, buffer.begin());
-
-        return compute_ess(buffer.data(), use_log);
-    }
-
-    /// \brief Compute ESS given (log) incremental weights
-    template <typename RandomIter>
-    double ess(RandomIter first, int stride, bool use_log) const
-    {
-        Vector<double> buffer(size_);
-        for (size_type i = 0; i != size_; ++i, first += stride)
-            buffer[i] = *first;
-
-        return compute_ess(buffer.data(), use_log);
-    }
-
-    /// \brief Compute CESS given (log) incremental weights
-    template <typename InputIter>
-    double cess(InputIter first, bool use_log) const
-    {
-        Vector<double> buffer(size_);
-        std::copy_n(first, size_, buffer.begin());
-
-        return compute_cess(buffer.data(), use_log);
-    }
-
-    /// \brief Compute CESS given (log) incremental weights
-    template <typename RandomIter>
-    double cess(RandomIter first, int stride, bool use_log) const
-    {
-        Vector<double> buffer(size_);
-        for (size_type i = 0; i != size_; ++i, first += stride)
-            buffer[i] = *first;
-
-        return compute_cess(buffer.data(), use_log);
-    }
 
     /// \brief Size of the weight set for the purpose of resampling
     virtual size_type resample_size() const { return size(); }
 
-    /// \brief Read normalized weights through a pointer for the purpose of
-    /// resampling
-    ///
-    /// \details
-    /// In this class, `resample_weight` and `weight` are identical. However,
-    /// in derived classes they might not be. For example, in `WeightMPI`,
-    /// the `resample_weight` give a vector of normalized weights on all nodes
-    /// while `weight` give the weights on the calling node.
-    virtual void read_resample_weight(double *first) const
-    {
-        read_weight(first);
-    }
+    /// \brief ESS of the current weights
+    double ess() const { return ess_; }
+
+    /// \brief Read only access to the raw data of weight
+    const double *data() const { return data_.data(); }
+
+    /// \brief Read only access to the resampling weights
+    virtual const double *resample_data() const { return data_.data(); }
 
     /// \brief Read normalized weights through an output iterator
     template <typename OutputIter>
@@ -168,11 +108,19 @@ class Weight
             *first = data_[i];
     }
 
+    /// \brief Read normalized weights through a pointer for the purpose of
+    /// resampling
+    virtual void read_resample_weight(double *first) const
+    {
+        read_weight(first);
+    }
+
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS
     /// such that each particle has a equal weight
     void set_equal()
     {
-        set_ess(set_equal(size_, resample_size(), data_.data()));
+        std::fill(data_.begin(), data_.end(), 1.0);
+        post_set();
     }
 
     /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
@@ -293,66 +241,9 @@ class Weight
         return draw_(eng, data_.begin(), data_.end(), true);
     }
 
-    /// \brief Read only access to the resampling weights
-    virtual const double *resample_data() const { return data_.data(); }
-
-    /// \brief Read only access to the raw data of weight
-    const double *data() const { return data_.data(); }
-
     protected:
-    /// \brief Set the value of ESS;
-    void set_ess(double e) { ess_ = e; }
-
     /// \brief Write access to the raw data of weight
     double *mutable_data() { return data_.data(); }
-
-    /// \brief Normalize weights such that the summation is one
-    virtual void normalize() { set_ess(normalize(size_, data_.data())); }
-
-    /// \brief Normalize logarithm weights such that the maximum is zero
-    virtual void normalize_log() { normalize_log(size_, data_.data()); }
-
-    /// \brief Compute ESS given (logarithm) unormalzied incremental weights
-    virtual double compute_ess(const double *first, bool use_log) const
-    {
-        Vector<double> buffer(size_);
-        if (use_log) {
-            math::vLn(size_, data_.data(), buffer.data());
-            math::vAdd(size_, buffer.data(), first, buffer.data());
-            double wmax = *(std::max_element(buffer.begin(), buffer.end()));
-            for (size_type i = 0; i != size_; ++i)
-                buffer[i] -= wmax;
-            math::vExp(size_, buffer.data(), buffer.data());
-        } else {
-            math::vMul(size_, data_.data(), first, buffer.data());
-        }
-
-        math::scal(
-            size_, 1 / math::asum(size_, buffer.data(), 1), buffer.data(), 1);
-
-        return 1 / math::dot(size_, buffer.data(), 1, buffer.data(), 1);
-    }
-
-    /// \brief Compute CESS given (logarithm) unormalized incremental weights
-    virtual double compute_cess(const double *first, bool use_log) const
-    {
-        Vector<double> buffer;
-        if (use_log) {
-            buffer.resize(size_);
-            math::vExp(size_, first, buffer.data());
-        }
-        const double *const bptr = use_log ? buffer.data() : first;
-
-        double above = 0;
-        double below = 0;
-        for (size_type i = 0; i != size_; ++i) {
-            double wb = data_[i] * bptr[i];
-            above += wb;
-            below += wb * bptr[i];
-        }
-
-        return above * above / below;
-    }
 
     private:
     size_type size_;
@@ -360,14 +251,24 @@ class Weight
     Vector<double> data_;
     DiscreteDistribution<size_type> draw_;
 
-    void post_set() { normalize(); }
+    void post_set()
+    {
+        normalize();
+        ess_ = get_ess();
+    }
 
     void post_set_log()
     {
         normalize_log();
         math::vExp(size_, data_.data(), data_.data());
-        normalize();
+        post_set();
     }
+
+    virtual double get_ess() const { return weight_ess(size_, data_.data()); }
+
+    virtual void normalize() { weight_normalize(size_, data_.data()); }
+
+    virtual void normalize_log() { weight_normalize_log(size_, data_.data()); }
 }; // class Weight
 
 /// \brief An empty weight set class
@@ -388,35 +289,13 @@ class WeightNull
 
     size_type size() const { return 0; }
 
-    double ess() const { return ess_inf(); }
-
-    template <typename InputIter>
-    double ess(InputIter, bool) const
-    {
-        return ess_inf();
-    }
-
-    template <typename RandomIter>
-    double ess(RandomIter, int, bool) const
-    {
-        return ess_inf();
-    }
-
-    template <typename InputIter>
-    double cess(InputIter, bool) const
-    {
-        return ess_inf();
-    }
-
-    template <typename RandomIter>
-    double cess(RandomIter, int, bool) const
-    {
-        return ess_inf();
-    }
-
     size_type resample_size() const { return 0; }
 
-    void read_resample_weight(double *) const {}
+    double ess() const { return std::numeric_limits<double>::infinity(); }
+
+    const double *resample_data() const { return nullptr; }
+
+    const double *data() const { return nullptr; }
 
     template <typename OutputIter>
     void read_weight(OutputIter) const
@@ -427,6 +306,8 @@ class WeightNull
     void read_weight(RandomIter, int) const
     {
     }
+
+    void read_resample_weight(double *) const {}
 
     void set_equal() {}
 
@@ -475,13 +356,6 @@ class WeightNull
     {
         return 0;
     }
-
-    const double *resample_data() const { return nullptr; }
-
-    const double *data() const { return nullptr; }
-
-    private:
-    static double ess_inf() { return std::numeric_limits<double>::infinity(); }
 }; // class WeightEmtpy
 
 /// \brief Particle::weight_type trait
