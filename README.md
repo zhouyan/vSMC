@@ -29,13 +29,8 @@ To make the documentations one need [Doxygen][Doxygen] 1.8.3 or later.
 ~~~sh
 make docs
 ~~~
-The documentation of the [master][vSMCDocMaster] and
-[develop][vSMCDocDevelop] branches can be found online.
-
-A [tutorial][vSMCTutorial] is also available. However, it describes an earlier
-version of the library.  There are a few incompatibilities with the current
-version. It is still highly relevant. Users shall use the Doxygen generated
-documentations when things do not work exactly the same way as in the tutorial.
+The documentation of the [master][vSMCDocMaster] and [develop][vSMCDocDevelop]
+branches can be found online.
 
 # Examples
 
@@ -109,4 +104,3 @@ in the `LICENSE` file distributed with the source.
 [icpc]: http://software.intel.com/en-us/intel-compilers
 [vSMCDocMaster]: http://zhouyan.github.io/vSMCDoc/master
 [vSMCDocDevelop]: http://zhouyan.github.io/vSMCDoc/develop
-[vSMCTutorial]: http://zhouyan.github.io/vSMCDoc/tutorial.pdf
