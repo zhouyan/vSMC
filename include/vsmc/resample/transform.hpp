@@ -114,7 +114,7 @@ inline void resample_trans_rep_index(std::size_t M, std::size_t N,
     }
 
     IntType1 time = 0;
-    IntType2 src = 0;
+    std::size_t src = 0;
     for (std::size_t dst = 0; dst != N; ++dst) {
         if (replication[dst] != 0) {
             src_idx[dst] = static_cast<IntType2>(dst);
@@ -127,7 +127,7 @@ inline void resample_trans_rep_index(std::size_t M, std::size_t N,
                     ++src;
                 while (replication[src] < 2);
             }
-            src_idx[dst] = src;
+            src_idx[dst] = static_cast<IntType2>(src);
             ++time;
         }
     }
