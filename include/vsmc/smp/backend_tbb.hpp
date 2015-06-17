@@ -194,20 +194,20 @@ class InitializeTBB : public InitializeBase<T, Derived>
         public:
         using size_type = typename Particle<T>::size_type;
 
-        work_type(InitializeTBB<T, Derived> *init, Particle<T> *pptr)
-            : init_(init), pptr_(pptr), accept_(0)
+        work_type(InitializeTBB<T, Derived> *wptr, Particle<T> *pptr)
+            : wptr_(wptr), pptr_(pptr), accept_(0)
         {
         }
 
         work_type(const work_type &other, ::tbb::split)
-            : init_(other.init_), pptr_(other.pptr_), accept_(0)
+            : wptr_(other.wptr_), pptr_(other.pptr_), accept_(0)
         {
         }
 
         void operator()(const ::tbb::blocked_range<size_type> &range)
         {
             for (size_type i = range.begin(); i != range.end(); ++i)
-                accept_ += init_->eval_sp(SingleParticle<T>(i, pptr_));
+                accept_ += wptr_->eval_sp(SingleParticle<T>(i, pptr_));
         }
 
         void join(const work_type &other) { accept_ += other.accept_; }
@@ -215,7 +215,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
         std::size_t accept() const { return accept_; }
 
         private:
-        InitializeTBB<T, Derived> *const init_;
+        InitializeTBB<T, Derived> *const wptr_;
         Particle<T> *const pptr_;
         std::size_t accept_;
     }; // class work_type
@@ -302,13 +302,13 @@ class MoveTBB : public MoveBase<T, Derived>
         using size_type = typename Particle<T>::size_type;
 
         work_type(
-            MoveTBB<T, Derived> *move, std::size_t iter, Particle<T> *pptr)
-            : move_(move), iter_(iter), pptr_(pptr), accept_(0)
+            MoveTBB<T, Derived> *wptr, std::size_t iter, Particle<T> *pptr)
+            : wptr_(wptr), iter_(iter), pptr_(pptr), accept_(0)
         {
         }
 
         work_type(const work_type &other, ::tbb::split)
-            : move_(other.move_)
+            : wptr_(other.wptr_)
             , iter_(other.iter_)
             , pptr_(other.pptr_)
             , accept_(0)
@@ -318,7 +318,7 @@ class MoveTBB : public MoveBase<T, Derived>
         void operator()(const ::tbb::blocked_range<size_type> &range)
         {
             for (size_type i = range.begin(); i != range.end(); ++i)
-                accept_ += move_->eval_sp(iter_, SingleParticle<T>(i, pptr_));
+                accept_ += wptr_->eval_sp(iter_, SingleParticle<T>(i, pptr_));
         }
 
         void join(const work_type &other) { accept_ += other.accept_; }
@@ -326,7 +326,7 @@ class MoveTBB : public MoveBase<T, Derived>
         std::size_t accept() const { return accept_; }
 
         private:
-        MoveTBB<T, Derived> *const move_;
+        MoveTBB<T, Derived> *const wptr_;
         const std::size_t iter_;
         Particle<T> *const pptr_;
         std::size_t accept_;
@@ -414,22 +414,22 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         public:
         using size_type = typename Particle<T>::size_type;
 
-        work_type(MonitorEvalTBB<T, Derived> *monitor, std::size_t iter,
+        work_type(MonitorEvalTBB<T, Derived> *wptr, std::size_t iter,
             std::size_t dim, Particle<T> *pptr, double *res)
-            : monitor_(monitor), iter_(iter), dim_(dim), pptr_(pptr), res_(res)
+            : wptr_(wptr), iter_(iter), dim_(dim), pptr_(pptr), res_(res)
         {
         }
 
         void operator()(const ::tbb::blocked_range<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                monitor_->eval_sp(iter_, dim_, SingleParticle<T>(i, pptr_),
+                wptr_->eval_sp(iter_, dim_, SingleParticle<T>(i, pptr_),
                     res_ + static_cast<std::size_t>(i) * dim_);
             }
         }
 
         private:
-        MonitorEvalTBB<T, Derived> *const monitor_;
+        MonitorEvalTBB<T, Derived> *const wptr_;
         const std::size_t iter_;
         const std::size_t dim_;
         Particle<T> *const pptr_;
@@ -524,20 +524,20 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
         public:
         using size_type = typename Particle<T>::size_type;
 
-        work_type(PathEvalTBB<T, Derived> *path, std::size_t iter,
+        work_type(PathEvalTBB<T, Derived> *wptr, std::size_t iter,
             Particle<T> *pptr, double *res)
-            : path_(path), iter_(iter), pptr_(pptr), res_(res)
+            : wptr_(wptr), iter_(iter), pptr_(pptr), res_(res)
         {
         }
 
         void operator()(const ::tbb::blocked_range<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i)
-                res_[i] = path_->eval_sp(iter_, SingleParticle<T>(i, pptr_));
+                res_[i] = wptr_->eval_sp(iter_, SingleParticle<T>(i, pptr_));
         }
 
         private:
-        PathEvalTBB<T, Derived> *const path_;
+        PathEvalTBB<T, Derived> *const wptr_;
         const std::size_t iter_;
         Particle<T> *const pptr_;
         double *const res_;
