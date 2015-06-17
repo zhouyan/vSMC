@@ -41,9 +41,9 @@ exe <- c(exe, paste("pf_mpi", smp, sep = "_"))
 exe <- c(exe, "pf_cl", "pf_cl_mpi")
 res <- c(
     "Multinomial",
-    "Residual",
     "Stratified",
     "Systematic",
+    "Residual",
     "ResidualStratified",
     "ResidualSystematic")
 runs <- expand.grid(exe, res)

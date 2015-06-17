@@ -47,26 +47,14 @@ class ResampleResidual
     void operator()(std::size_t M, std::size_t N, RNGType &rng,
         const double *weight, IntType *replication)
     {
-        residual_.resize(M);
-        integral_.resize(M);
-        for (std::size_t i = 0; i != M; ++i)
-            residual_[i] = std::modf(N * weight[i], integral_.data() + i);
-        double coeff = 1 / math::asum(M, residual_.data(), 1);
-        math::scal(M, coeff, residual_.data(), 1);
-
-        IntType R = 0;
-        for (std::size_t i = 0; i != M; ++i)
-            R += static_cast<IntType>(integral_[i]);
-        std::size_t NN = N - static_cast<std::size_t>(R);
-        U01SequenceSorted<RNGType> u01seq(NN, rng);
-        resample_trans_u01_rep(M, NN, residual_.data(), u01seq, replication);
-        for (std::size_t i = 0; i != M; ++i)
-            replication[i] += static_cast<IntType>(integral_[i]);
+        Vector<IntType> integ(M);
+        Vector<double> resid(M);
+        std::size_t R =
+            trans_residual(M, N, weight, resid.data(), integ.data());
+        U01SequenceSorted<RNGType> u01seq(R, rng);
+        resample_trans_u01_rep(M, R, resid.data(), u01seq, replication);
+        math::vAdd(M, replication, integ.data(), replication);
     }
-
-    private:
-    Vector<double> residual_;
-    Vector<double> integral_;
 }; // ResampleResidual
 
 /// \brief Type trait of Residual scheme

@@ -638,7 +638,7 @@ class MoveCL
 /// \ingroup OpenCL
 ///
 /// \details
-/// Kernel requirement (`monitor_state`)
+/// Kernel requirement
 /// ~~~{.cpp}
 /// __kernel
 /// void kern (ulong iter, ulong dim, __global state_type *state,
@@ -673,7 +673,7 @@ class MonitorEvalCL
         eval_post(iter, particle);
     }
 
-    virtual void monitor_state(std::size_t, std::string &) {}
+    virtual void eval_sp(std::size_t, std::string &) {}
     virtual void eval_pre(std::size_t, Particle<T> &) {}
     virtual void eval_post(std::size_t, Particle<T> &) {}
 
@@ -681,7 +681,7 @@ class MonitorEvalCL
         std::size_t iter, std::size_t, Particle<T> &particle)
     {
         std::string kname;
-        monitor_state(iter, kname);
+        eval_sp(iter, kname);
         VSMC_DEFINE_OPENCL_BACKEND_CL_SET_KERNEL;
     }
 

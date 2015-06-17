@@ -148,6 +148,25 @@ inline void resample_trans_index_rep(std::size_t M, std::size_t N,
         ++replication[src_idx[i]];
 }
 
+/// \brief Transform normalized weights to normalized residual and integrals,
+/// and return the number of remaining elements to be resampled
+/// \ingroup Resample
+template <typename IntType>
+inline std::size_t trans_residual(std::size_t M, std::size_t N,
+    const double *weight, double *resid, IntType *integ)
+{
+    double integral = 0;
+    const double coeff = static_cast<double>(N);
+    for (std::size_t i = 0; i != M; ++i) {
+        resid[i] = std::modf(coeff * weight[i], &integral);
+        integ[i] = static_cast<IntType>(integral);
+    }
+    math::scal(M, 1 / math::asum(M, resid, 1), resid, 1);
+    IntType R = std::accumulate(integ, integ + M, static_cast<IntType>(0));
+
+    return N - static_cast<std::size_t>(R);
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RESAMPLE_TRANSFORM_HPP

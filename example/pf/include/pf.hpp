@@ -56,9 +56,9 @@
         return -1;                                                            \
     }                                                                         \
     PF_CV_DO(Multinomial);                                                    \
-    PF_CV_DO(Residual);                                                       \
     PF_CV_DO(Stratified);                                                     \
     PF_CV_DO(Systematic);                                                     \
+    PF_CV_DO(Residual);                                                       \
     PF_CV_DO(ResidualStratified);                                             \
     PF_CV_DO(ResidualSystematic);                                             \
     return 0;

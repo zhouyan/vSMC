@@ -70,9 +70,9 @@ enum MatrixTrans {
 /// \ingroup Definitions
 enum ResampleScheme {
     Multinomial,        ///< Multinomial resampling
-    Residual,           ///< Residual resampling
     Stratified,         ///< Stratified resampling
     Systematic,         ///< Systematic resampling
+    Residual,           ///< Residual resampling
     ResidualStratified, ///< Stratified resampling on residuals
     ResidualSystematic  ///< Systematic resampling on residuals
 };                      // enum ResampleScheme
