@@ -32,7 +32,7 @@
 module vsmc_random
     use, intrinsic :: iso_c_binding
     type, bind(c) :: vsmc_rng
-        integer(kind = c_long_long), dimension(128) :: state
+        integer(kind = c_int64_t), dimension(128) :: state
     end type vsmc_rng
 
     interface
@@ -40,7 +40,7 @@ module vsmc_random
             use, intrinsic :: iso_c_binding
             import :: vsmc_rng
             type(vsmc_rng) :: rng
-            integer(kind = c_int), value :: seed
+            integer(kind = c_int32_t), value :: seed
         end subroutine vsmc_rng_init
     end interface
 
@@ -49,18 +49,36 @@ module vsmc_random
             use, intrinsic :: iso_c_binding
             import :: vsmc_rng
             type(vsmc_rng) :: rng
-            integer(kind = c_int), value :: seed
+            integer(kind = c_int32_t), value :: seed
         end subroutine vsmc_rng_seed
     end interface
 
     interface
-        subroutine vsmc_rng_rand(rng, n, r) bind(c)
+        subroutine vsmc_rng_key(rng, key) bind(c)
             use, intrinsic :: iso_c_binding
             import :: vsmc_rng
             type(vsmc_rng) :: rng
-            integer(kind = c_int), value :: n
+            integer(kind = c_int32_t), dimension(4) :: key
+        end subroutine vsmc_rng_key
+    end interface
+
+    interface
+        subroutine vsmc_rng_ctr(rng, ctr) bind(c)
+            use, intrinsic :: iso_c_binding
+            import :: vsmc_rng
+            type(vsmc_rng) :: rng
+            integer(kind = c_int32_t), dimension(4) :: ctr
+        end subroutine vsmc_rng_ctr
+    end interface
+
+    interface
+        subroutine vsmc_rng_gen(rng, n, r) bind(c)
+            use, intrinsic :: iso_c_binding
+            import :: vsmc_rng
+            type(vsmc_rng) :: rng
+            integer(kind = c_int32_t), value :: n
             integer(kind = c_int), dimension(*) :: r
-        end subroutine vsmc_rng_rand
+        end subroutine vsmc_rng_gen
     end interface
 
     interface

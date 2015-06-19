@@ -62,19 +62,35 @@ inline RNG &rng_cast(vsmc_rng *rng_ptr)
 
 extern "C" {
 
-void vsmc_rng_init(vsmc_rng *rng_ptr, unsigned seed)
+void vsmc_rng_init(vsmc_rng *rng_ptr, uint32_t seed)
 {
     ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
     rng = ::vsmc::RNG(seed);
 }
 
-void vsmc_rng_seed(vsmc_rng *rng_ptr, unsigned seed)
+void vsmc_rng_seed(vsmc_rng *rng_ptr, uint32_t seed)
 {
     ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
     rng.seed(seed);
 }
 
-void vsmc_rng_rand(vsmc_rng *rng_ptr, int n, unsigned *r)
+void vsmc_rng_key(vsmc_rng *rng_ptr, uint32_t key[4])
+{
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    typename ::vsmc::RNG::key_type k;
+    std::memcpy(k.data(), key, sizeof(uint32_t) * 4);
+    rng.key(k);
+}
+
+void vsmc_rng_ctr(vsmc_rng *rng_ptr, uint32_t ctr[4])
+{
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    typename ::vsmc::RNG::ctr_type c;
+    std::memcpy(c.data(), ctr, sizeof(uint32_t) * 4);
+    rng.ctr(c);
+}
+
+void vsmc_rng_gen(vsmc_rng *rng_ptr, int n, unsigned *r)
 {
     ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
     for (int i = 0; i != n; ++i)

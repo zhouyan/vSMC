@@ -42,9 +42,11 @@ typedef struct {
     uint64_t state[128];
 } vsmc_rng;
 
-void vsmc_rng_init(vsmc_rng *, unsigned seed);
-void vsmc_rng_seed(vsmc_rng *, unsigned seed);
-void vsmc_rng_rand(vsmc_rng *, int, unsigned *);
+void vsmc_rng_init(vsmc_rng *, uint32_t);
+void vsmc_rng_seed(vsmc_rng *, uint32_t);
+void vsmc_rng_key(vsmc_rng *, uint32_t[4]);
+void vsmc_rng_ctr(vsmc_rng *, uint32_t[4]);
+void vsmc_rng_gen(vsmc_rng *, int, unsigned *);
 
 void vsmc_rng_uniform_int(vsmc_rng *, int, int *, int, int);
 void vsmc_rng_uniform_real(vsmc_rng *, int, double *, double, double);
