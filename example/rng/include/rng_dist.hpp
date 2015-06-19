@@ -60,6 +60,7 @@ inline void rng_dist(std::size_t N, Dist &dist, const std::string &name,
     vsmc::RNG rng;
     vsmc::StopWatch watch;
 
+    watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
         dist(rng);

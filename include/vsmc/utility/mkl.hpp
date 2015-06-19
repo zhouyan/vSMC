@@ -32,7 +32,7 @@
 #ifndef VSMC_UTILITY_MKL_HPP
 #define VSMC_UTILITY_MKL_HPP
 
-#include <vsmc/rng/internal/common.hpp>
+#include <vsmc/internal/common.hpp>
 #include <mkl.h>
 
 #define VSMC_STATIC_ASSERT_UTILITY_MKL_SS_TASK_RESULT_TYPE(ResultType)        \
@@ -247,7 +247,7 @@ inline void swap(
 /// \brief MKL `VSLStreamStatePtr`
 /// \ingroup MKL
 template <MKL_INT BRNG>
-class MKLStream : public MKLBase<VSLStreamStatePtr, MKLStream<BRNG>>
+class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream<BRNG>>
 {
     public:
     explicit MKLStream(MKL_UINT s = MKLSeed<BRNG>::value, MKL_INT offset = 0)
@@ -267,7 +267,7 @@ class MKLStream : public MKLBase<VSLStreamStatePtr, MKLStream<BRNG>>
 
     MKLStream(const MKLStream<BRNG> &other) : offset_(other.offset_)
     {
-        VSLStreamStatePtr ptr = nullptr;
+        ::VSLStreamStatePtr ptr = nullptr;
         internal::mkl_error_check(::vslCopyStream(&ptr, other.get()),
             "MKLStream::MKLStream", "::vslCopyStream");
         this->reset_ptr(ptr);
@@ -278,7 +278,7 @@ class MKLStream : public MKLBase<VSLStreamStatePtr, MKLStream<BRNG>>
         if (this != &other) {
             offset_ = other.offset_;
             if (this->get() == nullptr) {
-                VSLStreamStatePtr ptr = nullptr;
+                ::VSLStreamStatePtr ptr = nullptr;
                 internal::mkl_error_check(::vslCopyStream(&ptr, other.get()),
                     "MKLStream::operator=", "::vslCopyStream");
                 this->reset_ptr(ptr);
@@ -307,7 +307,7 @@ class MKLStream : public MKLBase<VSLStreamStatePtr, MKLStream<BRNG>>
         reset(s);
     }
 
-    static int release(VSLStreamStatePtr ptr)
+    static int release(::VSLStreamStatePtr ptr)
     {
         if (ptr == nullptr)
             return 0;
@@ -323,7 +323,7 @@ class MKLStream : public MKLBase<VSLStreamStatePtr, MKLStream<BRNG>>
 
     int reset(MKL_UINT s, MKL_INT offset)
     {
-        VSLStreamStatePtr ptr = nullptr;
+        ::VSLStreamStatePtr ptr = nullptr;
         int status = ::vslNewStream(&ptr, BRNG + offset, s);
         internal::mkl_error_check(
             status, "MKLStream::reset", "::vslNewStream");
@@ -355,7 +355,7 @@ class MKLStream : public MKLBase<VSLStreamStatePtr, MKLStream<BRNG>>
 /// \brief MKL `VSLSSTaskPtr`
 /// \ingroup MKL
 template <typename ResultType = double>
-class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
+class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<ResultType>>
 {
     public:
     using result_type = ResultType;
@@ -373,7 +373,7 @@ class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
         reset(p, n, xstorage, x, w, indices);
     }
 
-    static int release(VSLSSTaskPtr ptr)
+    static int release(::VSLSSTaskPtr ptr)
     {
         if (ptr == nullptr)
             return 0;
@@ -389,7 +389,7 @@ class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
         const result_type *x, const result_type *w = nullptr,
         const MKL_INT *indices = nullptr)
     {
-        VSLSSTaskPtr ptr = nullptr;
+        ::VSLSSTaskPtr ptr = nullptr;
         int status = reset_dispatch(&ptr, p, n, xstorage, x, w, indices);
         this->reset_ptr(ptr);
 
@@ -413,7 +413,7 @@ class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
     }
 
     private:
-    static int reset_dispatch(VSLSSTaskPtr *task, const MKL_INT *p,
+    static int reset_dispatch(::VSLSSTaskPtr *task, const MKL_INT *p,
         const MKL_INT *n, const MKL_INT *xstorage, const float *x,
         const float *w, const MKL_INT *indices)
     {
@@ -424,7 +424,7 @@ class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLSSTaskPtr *task, const MKL_INT *p,
+    static int reset_dispatch(::VSLSSTaskPtr *task, const MKL_INT *p,
         const MKL_INT *n, const MKL_INT *xstorage, const double *x,
         const double *w, const MKL_INT *indices)
     {
@@ -436,7 +436,7 @@ class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
     }
 
     static int edit_task_dispatch(
-        VSLSSTaskPtr task, MKL_INT parameter, const float *par_addr)
+        ::VSLSSTaskPtr task, MKL_INT parameter, const float *par_addr)
     {
         int status = ::vslsSSEditTask(task, parameter, par_addr);
         internal::mkl_error_check(
@@ -446,7 +446,7 @@ class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
     }
 
     static int edit_task_dispatch(
-        VSLSSTaskPtr task, MKL_INT parameter, const double *par_addr)
+        ::VSLSSTaskPtr task, MKL_INT parameter, const double *par_addr)
     {
         int status = ::vsldSSEditTask(task, parameter, par_addr);
         internal::mkl_error_check(
@@ -456,7 +456,7 @@ class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
     }
 
     static int edit_task_dispatch(
-        VSLSSTaskPtr task, MKL_INT parameter, const MKL_INT *par_addr)
+        ::VSLSSTaskPtr task, MKL_INT parameter, const MKL_INT *par_addr)
     {
         int status = ::vsliSSEditTask(task, parameter, par_addr);
         internal::mkl_error_check(
@@ -465,7 +465,7 @@ class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
         return status;
     }
 
-    static int compute_dispatch(VSLSSTaskPtr task,
+    static int compute_dispatch(::VSLSSTaskPtr task,
         unsigned MKL_INT64 estimates, MKL_INT method, const float *)
     {
         int status = ::vslsSSCompute(task, estimates, method);
@@ -475,7 +475,7 @@ class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
         return status;
     }
 
-    static int compute_dispatch(VSLSSTaskPtr task,
+    static int compute_dispatch(::VSLSSTaskPtr task,
         unsigned MKL_INT64 estimates, MKL_INT method, const double *)
     {
         int status = ::vsldSSCompute(task, estimates, method);
@@ -489,7 +489,7 @@ class MKLSSTask : public MKLBase<VSLSSTaskPtr, MKLSSTask<ResultType>>
 /// \brief MKL `VSLConvTaskPtr`
 /// \ingroup MKL
 template <typename ResultType = double>
-class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
+class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
 {
     public:
     using result_type = ResultType;
@@ -536,7 +536,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
     {
         VSMC_STATIC_ASSERT_UTILITY_MKL_CONV_TASK_RESULT_TYPE(ResultType);
 
-        VSLConvTaskPtr ptr = nullptr;
+        ::VSLConvTaskPtr ptr = nullptr;
         internal::mkl_error_check(::vslConvCopyTask(&ptr, other.get()),
             "MKLConvTask::MKLConvTask", "::vslConvCopyTask");
         this->reset_ptr(ptr);
@@ -545,7 +545,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
     MKLConvTask<ResultType> &operator=(const MKLConvTask<ResultType> &other)
     {
         if (this != &other) {
-            VSLConvTaskPtr ptr = nullptr;
+            ::VSLConvTaskPtr ptr = nullptr;
             internal::mkl_error_check(::vslConvCopyTask(&ptr, other.get()),
                 "MKLConvTask::operator=", "::vslConvCopyTask");
             this->reset_ptr(ptr);
@@ -557,7 +557,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
     MKLConvTask(MKLConvTask<ResultType> &&) = default;
     MKLConvTask<ResultType> &operator=(MKLConvTask<ResultType> &&) = default;
 
-    static int release(VSLConvTaskPtr ptr)
+    static int release(::VSLConvTaskPtr ptr)
     {
         if (ptr == nullptr)
             return 0;
@@ -573,7 +573,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
     int reset(MKL_INT mode, MKL_INT dims, const MKL_INT *xshape,
         const MKL_INT *yshape, const MKL_INT *zshape)
     {
-        VSLConvTaskPtr ptr = nullptr;
+        ::VSLConvTaskPtr ptr = nullptr;
         int status = reset_dispatch(&ptr, mode, dims, xshape, yshape, zshape);
         this->reset_ptr(ptr);
 
@@ -584,7 +584,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
     int reset(
         MKL_INT mode, const MKL_INT xshape, MKL_INT yshape, MKL_INT zshape)
     {
-        VSLConvTaskPtr ptr = nullptr;
+        ::VSLConvTaskPtr ptr = nullptr;
         int status = reset_dispatch(&ptr, mode, xshape, yshape, zshape);
         this->reset_ptr(ptr);
 
@@ -596,7 +596,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT *yshape, const MKL_INT *zshape, const result_type *x,
         const MKL_INT *xstride)
     {
-        VSLConvTaskPtr ptr = nullptr;
+        ::VSLConvTaskPtr ptr = nullptr;
         int status = reset_dispatch(
             &ptr, mode, dims, xshape, yshape, zshape, x, xstride);
         this->reset_ptr(ptr);
@@ -608,7 +608,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
     int reset(MKL_INT mode, MKL_INT xshape, MKL_INT yshape, MKL_INT zshape,
         const result_type *x, const MKL_INT xstride)
     {
-        VSLConvTaskPtr ptr = nullptr;
+        ::VSLConvTaskPtr ptr = nullptr;
         int status =
             reset_dispatch(&ptr, mode, xshape, yshape, zshape, x, xstride);
         this->reset_ptr(ptr);
@@ -617,7 +617,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
     }
 
     private:
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, float *)
     {
@@ -629,7 +629,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, double *)
     {
@@ -641,7 +641,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, MKL_Complex8 *)
     {
@@ -653,7 +653,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, MKL_Complex16 *)
     {
@@ -665,7 +665,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         float *)
     {
@@ -676,7 +676,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         double *)
     {
@@ -687,7 +687,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         MKL_Complex8 *)
     {
@@ -698,7 +698,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         MKL_Complex16 *)
     {
@@ -709,7 +709,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const float *x, const MKL_INT *xstride)
     {
@@ -721,7 +721,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const double *x, const MKL_INT *xstride)
     {
@@ -733,7 +733,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const MKL_Complex8 *x, const MKL_INT *xstride)
     {
@@ -745,7 +745,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const MKL_Complex16 *x, const MKL_INT *xstride)
     {
@@ -757,7 +757,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const float *x, const MKL_INT xstride)
     {
@@ -769,7 +769,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const double *x, const MKL_INT xstride)
     {
@@ -781,7 +781,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const MKL_Complex8 *x, const MKL_INT xstride)
     {
@@ -793,7 +793,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLConvTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLConvTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const MKL_Complex16 *x, const MKL_INT xstride)
     {
@@ -809,7 +809,7 @@ class MKLConvTask : public MKLBase<VSLConvTaskPtr, MKLConvTask<ResultType>>
 /// \brief MKL `VSLCorrTaskPtr`
 /// \ingroup MKL
 template <typename ResultType = double>
-class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
+class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
 {
     public:
     using result_type = ResultType;
@@ -856,7 +856,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     {
         VSMC_STATIC_ASSERT_UTILITY_MKL_CORR_TASK_RESULT_TYPE(ResultType);
 
-        VSLCorrTaskPtr ptr = nullptr;
+        ::VSLCorrTaskPtr ptr = nullptr;
         internal::mkl_error_check(::vslCorrCopyTask(&ptr, other.get()),
             "MKLCorrTask::MKLCorrTask", "::vslCorrCopyTask");
         this->reset_ptr(ptr);
@@ -865,7 +865,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     MKLCorrTask<ResultType> &operator=(const MKLCorrTask<ResultType> &other)
     {
         if (this != &other) {
-            VSLCorrTaskPtr ptr = nullptr;
+            ::VSLCorrTaskPtr ptr = nullptr;
             internal::mkl_error_check(::vslCorrCopyTask(&ptr, other.get()),
                 "MKLCorrTask::operator=", "::vslCorrCopyTask");
             this->reset_ptr(ptr);
@@ -877,7 +877,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     MKLCorrTask(MKLCorrTask<ResultType> &&) = default;
     MKLCorrTask<ResultType> &operator=(MKLCorrTask<ResultType> &&) = default;
 
-    static int release(VSLCorrTaskPtr ptr)
+    static int release(::VSLCorrTaskPtr ptr)
     {
         if (ptr == nullptr)
             return 0;
@@ -893,7 +893,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     int reset(MKL_INT mode, MKL_INT dims, const MKL_INT *xshape,
         const MKL_INT *yshape, const MKL_INT *zshape)
     {
-        VSLCorrTaskPtr ptr = nullptr;
+        ::VSLCorrTaskPtr ptr = nullptr;
         int status = reset_dispatch(&ptr, mode, dims, xshape, yshape, zshape);
         this->reset_ptr(ptr);
 
@@ -904,7 +904,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     int reset(
         MKL_INT mode, const MKL_INT xshape, MKL_INT yshape, MKL_INT zshape)
     {
-        VSLCorrTaskPtr ptr = nullptr;
+        ::VSLCorrTaskPtr ptr = nullptr;
         int status = reset_dispatch(&ptr, mode, xshape, yshape, zshape);
         this->reset_ptr(ptr);
 
@@ -916,7 +916,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT *yshape, const MKL_INT *zshape, const result_type *x,
         const MKL_INT *xstride)
     {
-        VSLCorrTaskPtr ptr = nullptr;
+        ::VSLCorrTaskPtr ptr = nullptr;
         int status = reset_dispatch(
             &ptr, mode, dims, xshape, yshape, zshape, x, xstride);
         this->reset_ptr(ptr);
@@ -928,7 +928,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     int reset(MKL_INT mode, MKL_INT xshape, MKL_INT yshape, MKL_INT zshape,
         const result_type *x, const MKL_INT xstride)
     {
-        VSLCorrTaskPtr ptr = nullptr;
+        ::VSLCorrTaskPtr ptr = nullptr;
         int status =
             reset_dispatch(&ptr, mode, xshape, yshape, zshape, x, xstride);
         this->reset_ptr(ptr);
@@ -937,7 +937,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     }
 
     private:
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, float *)
     {
@@ -949,7 +949,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, double *)
     {
@@ -961,7 +961,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, MKL_Complex8 *)
     {
@@ -973,7 +973,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, MKL_Complex16 *)
     {
@@ -985,7 +985,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         float *)
     {
@@ -996,7 +996,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         double *)
     {
@@ -1007,7 +1007,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         MKL_Complex8 *)
     {
@@ -1018,7 +1018,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         MKL_Complex16 *)
     {
@@ -1029,7 +1029,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const float *x, const MKL_INT *xstride)
     {
@@ -1041,7 +1041,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const double *x, const MKL_INT *xstride)
     {
@@ -1053,7 +1053,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const MKL_Complex8 *x, const MKL_INT *xstride)
     {
@@ -1065,7 +1065,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         MKL_INT dims, const MKL_INT *xshape, const MKL_INT *yshape,
         const MKL_INT *zshape, const MKL_Complex16 *x, const MKL_INT *xstride)
     {
@@ -1077,7 +1077,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const float *x, const MKL_INT xstride)
     {
@@ -1089,7 +1089,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const double *x, const MKL_INT xstride)
     {
@@ -1101,7 +1101,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const MKL_Complex8 *x, const MKL_INT xstride)
     {
@@ -1113,7 +1113,7 @@ class MKLCorrTask : public MKLBase<VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         return status;
     }
 
-    static int reset_dispatch(VSLCorrTaskPtr *task, const MKL_INT mode,
+    static int reset_dispatch(::VSLCorrTaskPtr *task, const MKL_INT mode,
         const MKL_INT xshape, const MKL_INT yshape, const MKL_INT zshape,
         const MKL_Complex16 *x, const MKL_INT xstride)
     {
@@ -1146,7 +1146,7 @@ class MKLDFTask
         reset(nx, x, xhint, ny, y, yhint);
     }
 
-    static int release(DFTaskPtr ptr)
+    static int release(::DFTaskPtr ptr)
     {
         if (ptr == nullptr)
             return 0;
@@ -1161,7 +1161,7 @@ class MKLDFTask
     int reset(MKL_INT nx, const result_type *x, MKL_INT xhint, MKL_INT ny,
         const result_type *y, MKL_INT yhint)
     {
-        DFTaskPtr ptr = nullptr;
+        ::DFTaskPtr ptr = nullptr;
         int status = reset_dispatch(&ptr, nx, x, xhint, ny, y, yhint);
         this->reset_ptr(ptr);
 
@@ -1169,7 +1169,7 @@ class MKLDFTask
     }
 
     private:
-    static int reset_dispatch(DFTaskPtr *task, MKL_INT nx, const float *x,
+    static int reset_dispatch(::DFTaskPtr *task, MKL_INT nx, const float *x,
         MKL_INT xhint, MKL_INT ny, const float *y, MKL_INT yhint)
     {
         int status = ::dfsNewTask1D(task, nx, x, xhint, ny, y, yhint);
@@ -1179,7 +1179,7 @@ class MKLDFTask
         return status;
     }
 
-    static int reset_dispatch(DFTaskPtr *task, MKL_INT nx, const double *x,
+    static int reset_dispatch(::DFTaskPtr *task, MKL_INT nx, const double *x,
         MKL_INT xhint, MKL_INT ny, const double *y, MKL_INT yhint)
     {
         int status = ::dfdNewTask1D(task, nx, x, xhint, ny, y, yhint);

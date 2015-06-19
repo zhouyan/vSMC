@@ -48,10 +48,18 @@
 
 #include <vsmc/internal/config.hpp>
 
-#include <vsmc/rng/philox.hpp>
-#include <vsmc/rng/threefry.hpp>
 #include <vsmc/rng/xor_combine_engine.hpp>
 #include <vsmc/rng/xorshift.hpp>
+
+#include <vsmc/rng/philox.hpp>
+
+#include <vsmc/rng/threefry.hpp>
+#if VSMC_HAS_AVX2
+#include <vsmc/rng/threefry_avx2.hpp>
+#endif
+#if VSMC_HAS_SSE2
+#include <vsmc/rng/threefry_sse2.hpp>
+#endif
 
 #if VSMC_HAS_AES_NI
 #include <vsmc/rng/aes.hpp>
@@ -59,20 +67,12 @@
 #include <vsmc/rng/ars.hpp>
 #endif
 
-#if VSMC_HAS_AVX2
-#include <vsmc/rng/threefry_avx2.hpp>
-#endif
-
-#if VSMC_HAS_SSE2
-#include <vsmc/rng/threefry_sse2.hpp>
+#if VSMC_HAS_RDRAND
+#include <vsmc/rng/rdrand.hpp>
 #endif
 
 #if VSMC_HAS_MKL
 #include <vsmc/rng/mkl.hpp>
-#endif
-
-#if VSMC_HAS_RDRAND
-#include <vsmc/rng/rdrand.hpp>
 #endif
 
 namespace vsmc

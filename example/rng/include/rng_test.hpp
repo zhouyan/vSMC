@@ -34,6 +34,9 @@
 
 #include <vsmc/utility/aligned_memory.hpp>
 #include <vsmc/utility/stop_watch.hpp>
+#if VSMC_HAS_MKL
+#include <vsmc/rng/mkl_std.hpp>
+#endif
 
 #define VSMC_RNG_TEST_PRE(prog)                                               \
     std::size_t N = 1000000;                                                  \
@@ -45,32 +48,55 @@
     vsmc::Vector<vsmc::StopWatch> sw;                                         \
     vsmc::Vector<std::size_t> bytes;
 
-#define VSMC_RNG_TEST(RNG) rng_test<RNG>(N, #RNG, names, size, sw, bytes);
+#define VSMC_RNG_TEST(RNGType)                                                \
+    rng_test<RNGType>(N, #RNGType, names, size, sw, bytes);
 
 #define VSMC_RNG_TEST_POST rng_output_sw(prog_name, names, size, sw, bytes);
 
-template <typename RNG>
+template <typename RNGType>
 inline void rng_test(std::size_t N, const std::string &name,
     vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
     vsmc::Vector<vsmc::StopWatch> &sw, vsmc::Vector<std::size_t> &bytes)
 {
-    RNG rng;
-    vsmc::StopWatch watch;
-    typename RNG::result_type result = 0;
+    typedef typename RNGType::result_type result_type;
 
+    RNGType rng;
+    vsmc::StopWatch watch;
+    result_type result = 0;
+    const std::size_t nbytes = N * sizeof(result_type);
+
+    watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
         result += rng();
     watch.stop();
+    names.push_back(name);
+    size.push_back(sizeof(RNGType));
+    sw.push_back(watch);
+    bytes.push_back(nbytes);
+
+#if VSMC_HAS_MKL && !defined(VSMC_RNG_TEST_MKL)
+    const std::size_t M = nbytes / sizeof(unsigned);
+    vsmc::Vector<unsigned> r(M);
+    VSLStreamStatePtr stream = nullptr;
+    MKL_INT brng = vsmc::mkl_std_register_brng<RNGType>();
+    vslNewStream(&stream, brng, 1);
+    watch.reset();
+    watch.start();
+    viRngUniformBits(VSL_RNG_METHOD_UNIFORMBITS_STD, stream,
+        static_cast<MKL_INT>(M), r.data());
+    watch.stop();
+    names.push_back(name + " (MKL Stream)");
+    size.push_back(sizeof(vsmc::internal::MKLSTDStreamState<RNGType>));
+    sw.push_back(watch);
+    bytes.push_back(nbytes);
+
+    result += static_cast<result_type>(r.back());
+#endif
 
     std::ofstream rnd("rnd");
     rnd << result << std::endl;
     rnd.close();
-
-    names.push_back(name);
-    size.push_back(sizeof(RNG));
-    sw.push_back(watch);
-    bytes.push_back(N * sizeof(typename RNG::result_type));
 }
 
 inline void rng_output_sw(const std::string &prog_name,

@@ -490,10 +490,6 @@ class XorwowEngine
 /// \ingroup Xorshift
 using Xorshift1x32 = XorshiftEngine<std::uint32_t, 1, 13, 17, 5, 0, 0, 0>;
 
-/// \brief Xorshift RNG engine generating \f$2^{64}-1\f$ 64-bits integers
-/// \ingroup Xorshift
-using Xorshift1x64 = XorshiftEngine<std::uint64_t, 1, 13, 7, 17, 0, 0, 0>;
-
 /// \brief Xorshift RNG engine generating \f$2^{64}-1\f$ 32-bits integers
 /// \ingroup Xorshift
 using Xorshift2x32 = XorshiftEngine<std::uint32_t, 2, 17, 14, 12, 19, 2, 1>;
@@ -524,6 +520,10 @@ using Xorshift64x32 =
 /// \ingroup Xorshift
 using Xorshift128x32 =
     XorshiftEngine<std::uint32_t, 128, 17, 12, 13, 15, 128, 95>;
+
+/// \brief Xorshift RNG engine generating \f$2^{64}-1\f$ 64-bits integers
+/// \ingroup Xorshift
+using Xorshift1x64 = XorshiftEngine<std::uint64_t, 1, 13, 7, 17, 0, 0, 0>;
 
 /// \brief Xorshift RNG engine generating \f$2^{128}-1\f$ 64-bits integers
 /// \ingroup Xorshift
@@ -562,10 +562,6 @@ using Xorshift_64 = Xorshift64x64;
 /// \ingroup Xorshift
 using Xorwow1x32 = XorwowEngine<Xorshift1x32>;
 
-/// \brief Xorwow RNG engine using Xorshfit \f$2^{64}-1\f$ 64-bits integers
-/// \ingroup Xorshift
-using Xorwow1x64 = XorwowEngine<Xorshift1x64>;
-
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{64}-1\f$ 32-bits integers
 /// \ingroup Xorshift
 using Xorwow2x32 = XorwowEngine<Xorshift2x32>;
@@ -593,6 +589,10 @@ using Xorwow64x32 = XorwowEngine<Xorshift64x32>;
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{4096}-1\f$ 32-bits integers
 /// \ingroup Xorshift
 using Xorwow128x32 = XorwowEngine<Xorshift128x32>;
+
+/// \brief Xorwow RNG engine using Xorshfit \f$2^{64}-1\f$ 64-bits integers
+/// \ingroup Xorshift
+using Xorwow1x64 = XorwowEngine<Xorshift1x64>;
 
 /// \brief Xorwow RNG engine using Xorshfit \f$2^{128}-1\f$ 64-bits integers
 /// \ingroup Xorshift

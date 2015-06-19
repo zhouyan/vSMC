@@ -1,0 +1,307 @@
+//============================================================================
+// vSMC/include/vsmc/rng/mkl_std.hpp
+//----------------------------------------------------------------------------
+//                         vSMC: Scalable Monte Carlo
+//----------------------------------------------------------------------------
+// Copyright (c) 2013-2015, Yan Zhou
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//   Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimer.
+//
+//   Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//============================================================================
+
+#include <vsmc/internal/common.hpp>
+#include <vsmc/rng/engine.hpp>
+#include <vsmc/utility/mkl.hpp>
+
+#define VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(RNGType, name)                  \
+    extern "C" {                                                              \
+    inline int vsmc_mkl_std_init_##name(                                      \
+        int method, VSLStreamStatePtr stream, int n, const unsigned *param)   \
+    {                                                                         \
+        return ::vsmc::internal::mkl_std_init<RNGType>(                       \
+            method, stream, n, param);                                        \
+    }                                                                         \
+                                                                              \
+    inline int vsmc_mkl_std_sbrng_##name(                                     \
+        VSLStreamStatePtr stream, int n, float *r, float a, float b)          \
+    {                                                                         \
+        return ::vsmc::internal::mkl_std_uniform_real<RNGType, float>(        \
+            stream, n, r, a, b);                                              \
+    }                                                                         \
+                                                                              \
+    inline int vsmc_mkl_std_dbrng_##name(                                     \
+        VSLStreamStatePtr stream, int n, double *r, double a, double b)       \
+    {                                                                         \
+        return ::vsmc::internal::mkl_std_uniform_real<RNGType, double>(       \
+            stream, n, r, a, b);                                              \
+    }                                                                         \
+                                                                              \
+    inline int vsmc_mkl_std_ibrng_##name(                                     \
+        VSLStreamStatePtr stream, int n, unsigned *r)                         \
+    {                                                                         \
+        return ::vsmc::internal::mkl_std_uniform_int<RNGType>(stream, n, r);  \
+    }                                                                         \
+                                                                              \
+    inline MKL_INT vsmc_mkl_std_register_##name()                             \
+    {                                                                         \
+        VSLBRngProperties properties;                                         \
+        properties.StreamStateSize =                                          \
+            sizeof(::vsmc::internal::MKLSTDStreamState<RNGType>);             \
+        properties.NSeeds = 1;                                                \
+        properties.IncludesZero = RNGType::min() == 0 ? 1 : 0;                \
+        properties.WordSize = sizeof(typename RNGType::result_type);          \
+        properties.NBits = properties.WordSize * 8;                           \
+        properties.InitStream = vsmc_mkl_std_init_##name;                     \
+        properties.sBRng = vsmc_mkl_std_sbrng_##name;                         \
+        properties.dBRng = vsmc_mkl_std_dbrng_##name;                         \
+        properties.iBRng = vsmc_mkl_std_ibrng_##name;                         \
+                                                                              \
+        return static_cast<MKL_INT>(::vslRegisterBrng(&properties));          \
+    }                                                                         \
+                                                                              \
+    } /* extern "C" */                                                        \
+    namespace vsmc                                                            \
+    {                                                                         \
+                                                                              \
+    template <>                                                               \
+    inline MKL_INT mkl_std_register_brng<RNGType>()                           \
+    {                                                                         \
+        return ::vsmc_mkl_std_register_##name();                              \
+    }                                                                         \
+                                                                              \
+    } // namespace vsmc
+
+namespace vsmc
+{
+
+namespace internal
+{
+
+template <typename RNGType>
+class MKLSTDStreamState
+{
+    public:
+    unsigned reserved1[2];
+    unsigned reserved2[2];
+    RNGType rng;
+}; // class MKLSTDStreamState
+
+template <typename RNGType>
+inline int mkl_std_init(
+    int method, ::VSLStreamStatePtr stream, int n, const unsigned *param)
+{
+    RNGType &rng =
+        (*reinterpret_cast<MKLSTDStreamState<RNGType> *>(stream)).rng;
+    if (method == VSL_INIT_METHOD_STANDARD)
+        rng = RNGType(param[0]);
+    if (method == VSL_INIT_METHOD_LEAPFROG)
+        return VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED;
+    if (method == VSL_INIT_METHOD_SKIPAHEAD)
+        rng.discard(static_cast<unsigned>(n));
+
+    return 0;
+}
+
+template <typename RNGType, typename RealType>
+inline int mkl_std_uniform_real(
+    ::VSLStreamStatePtr stream, int n, RealType *r, RealType a, RealType b)
+{
+    RNGType &rng =
+        (*reinterpret_cast<MKLSTDStreamState<RNGType> *>(stream)).rng;
+    std::uniform_real_distribution<RealType> runif(a, b);
+    for (int i = 0; i != n; ++i)
+        r[i] = runif(rng);
+
+    return 0;
+}
+
+template <typename RNGType>
+inline int mkl_std_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
+    unsigned *r, std::integral_constant<std::size_t, sizeof(unsigned)>)
+{
+    RNGType &rng =
+        (*reinterpret_cast<MKLSTDStreamState<RNGType> *>(stream)).rng;
+    for (int i = 0; i != n; ++i)
+        r[i] = static_cast<unsigned>(rng());
+
+    return 0;
+}
+
+template <typename RNGType>
+inline int mkl_std_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
+    unsigned *r, std::integral_constant<std::size_t, sizeof(unsigned) / 2>)
+{
+    RNGType &rng =
+        (*reinterpret_cast<MKLSTDStreamState<RNGType> *>(stream)).rng;
+    typename RNGType::result_type *result =
+        reinterpret_cast<typename RNGType::result_type *>(r);
+    for (int i = 0; i != n * 2; ++i)
+        result[i] = rng();
+
+    return 0;
+}
+
+template <typename RNGType>
+inline int mkl_std_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
+    unsigned *r, std::integral_constant<std::size_t, sizeof(unsigned) * 2>)
+{
+    RNGType &rng =
+        (*reinterpret_cast<MKLSTDStreamState<RNGType> *>(stream)).rng;
+    typename RNGType::result_type *result =
+        reinterpret_cast<typename RNGType::result_type *>(r);
+    for (int i = 0; i != n / 2; ++i)
+        result[i] = rng();
+    if (n % 2 != 0)
+        r[n - 1] = static_cast<unsigned>(rng());
+
+    return 0;
+}
+
+template <typename RNGType>
+inline int mkl_std_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
+{
+    return mkl_std_uniform_int_dispatch<RNGType>(
+        stream, n, r, std::integral_constant<std::size_t,
+                          sizeof(typename RNGType::result_type)>());
+}
+
+} // namespace vsmc::internal
+
+/// \brief Register a C++11 RNG engine for use as a MKL BRNG
+template <typename RNGType>
+MKL_INT mkl_std_register_brng();
+
+} // namespace vsmc
+
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(std::mt19937, mt19937)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(std::minstd_rand0, minstd_rand0)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(std::minstd_rand, minstd_rand)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(std::mt19937_64, mt19937_64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(std::ranlux24_base, ranlux24_base)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(std::ranlux48_base, ranlux48_base)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(std::ranlux24, ranlux24)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(std::ranlux48, ranlux48)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(std::knuth_b, knuth_b)
+
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorshift1x32, xorshift1x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorshift2x32, xorshift2x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorshift4x32, xorshift4x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorshift8x32, xorshift8x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorshift16x32, xorshift16x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorshift32x32, xorshift32x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorshift64x32, xorshift64x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorshift128x32, xorshift128x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorshift1x64, xorshift1x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorshift2x64, xorshift2x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorshift4x64, xorshift4x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorshift8x64, xorshift8x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorshift16x64, xorshift16x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorshift32x64, xorshift32x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorshift64x64, xorshift64x64)
+
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorwow1x32, xorwow1x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorwow2x32, xorwow2x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorwow4x32, xorwow4x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorwow8x32, xorwow8x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorwow16x32, xorwow16x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorwow32x32, xorwow32x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorwow64x32, xorwow64x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorwow128x32, xorwow128x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorwow1x64, xorwow1x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorwow2x64, xorwow2x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorwow4x64, xorwow4x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorwow8x64, xorwow8x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorwow16x64, xorwow16x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorwow32x64, xorwow32x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Xorwow64x64, xorwow64x64)
+
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Philox2x32, philox2x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Philox4x32, philox4x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Philox2x64, philox2x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Philox4x64, philox4x64)
+
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Threefry2x32, threefry2x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Threefry4x32, threefry4x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Threefry2x64, threefry2x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::Threefry4x64, threefry4x64)
+#if VSMC_HAS_AVX2
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(
+    ::vsmc::Threefry2x32AVX2, threefry2x32avx2)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(
+    ::vsmc::Threefry4x32AVX2, threefry4x32avx2)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(
+    ::vsmc::Threefry2x64AVX2, threefry2x64avx2)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(
+    ::vsmc::Threefry4x64AVX2, threefry4x64avx2)
+#endif // VSMC_HAS_AVX2
+#if VSMC_HAS_SSE2
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(
+    ::vsmc::Threefry2x32SSE2, threefry2x32sse2)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(
+    ::vsmc::Threefry4x32SSE2, threefry4x32sse2)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(
+    ::vsmc::Threefry2x64SSE2, threefry2x64sse2)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(
+    ::vsmc::Threefry4x64SSE2, threefry4x64sse2)
+#endif // VSMC_HAS_SSE2
+
+#if VSMC_HAS_AES_NI
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES128_1x32, aes128_1x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES128_2x32, aes128_2x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES128_4x32, aes128_4x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES128_8x32, aes128_8x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES128_1x64, aes128_1x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES128_2x64, aes128_2x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES128_4x64, aes128_4x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES128_8x64, aes128_8x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES192_1x32, aes192_1x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES192_2x32, aes192_2x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES192_4x32, aes192_4x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES192_8x32, aes192_8x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES192_1x64, aes192_1x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES192_2x64, aes192_2x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES192_4x64, aes192_4x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES192_8x64, aes192_8x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES256_1x32, aes256_1x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES256_2x32, aes256_2x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES256_4x32, aes256_4x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES256_8x32, aes256_8x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES256_1x64, aes256_1x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES256_2x64, aes256_2x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES256_4x64, aes256_4x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::AES256_8x64, aes256_8x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::ARS_1x32, ars_1x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::ARS_2x32, ars_2x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::ARS_4x32, ars_4x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::ARS_8x32, ars_8x32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::ARS_1x64, ars_1x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::ARS_2x64, ars_2x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::ARS_4x64, ars_4x64)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::ARS_8x64, ars_8x64)
+#endif // VSMC_HAS_AES_NI
+
+#if VSMC_HAS_RDRAND
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::RDRAND32, rdrand16)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::RDRAND32, rdrand32)
+VSMC_DEFINE_RNG_MKL_STD_REGISTER_BRNG(::vsmc::RDRAND64, rdrand64)
+#endif // VSMC_HAS_RDRAND

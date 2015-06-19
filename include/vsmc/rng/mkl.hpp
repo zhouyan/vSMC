@@ -267,7 +267,8 @@ class MKLEngine
     stream_type &stream() { return stream_; }
     const stream_type &stream() const { return stream_; }
 
-    /// \brief Set the buffer size, zero or negative value restore the default
+    /// \brief Set the buffer size, zero or negative value restore the
+    /// default
     void buffer_size(MKL_INT size)
     {
         buffer_size_ = size > 0 ? size : VSMC_RNG_MKL_VSL_BUFFER_SIZE;
@@ -304,11 +305,13 @@ using MKL_MT2203 = MKLEngine<VSL_BRNG_MT2203, 32>;
 /// \ingroup MKLRNG
 using MKL_MT2203_64 = MKLEngine<VSL_BRNG_MT2203, 64>;
 
-/// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number genertor
+/// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number
+/// genertor
 /// \ingroup MKLRNG
 using MKL_SFMT19937 = MKLEngine<VSL_BRNG_SFMT19937, 32>;
 
-/// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number genertor
+/// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number
+/// genertor
 /// (64-bits)
 /// \ingroup MKLRNG
 using MKL_SFMT19937_64 = MKLEngine<VSL_BRNG_SFMT19937, 64>;
