@@ -34,7 +34,7 @@
 
 #include <vsmc/utility/aligned_memory.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#if VSMC_HAS_MKL
+#if VSMC_HAS_MKL && VSMC_HAS_RUNTIME_LIBRARY && !defined(VSMC_RNG_TEST_MKL)
 #include <vsmc/rng/mkl_std.hpp>
 #endif
 
@@ -75,11 +75,11 @@ inline void rng_test(std::size_t N, const std::string &name,
     sw.push_back(watch);
     bytes.push_back(nbytes);
 
-#if VSMC_HAS_MKL && !defined(VSMC_RNG_TEST_MKL)
+#if VSMC_HAS_MKL && VSMC_HAS_RUNTIME_LIBRARY && !defined(VSMC_RNG_TEST_MKL)
     const std::size_t M = nbytes / sizeof(unsigned);
     vsmc::Vector<unsigned> r(M);
     VSLStreamStatePtr stream = nullptr;
-    MKL_INT brng = vsmc::mkl_std_register_brng<RNGType>();
+    MKL_INT brng = vsmc::mkl_std_brng<RNGType>();
     vslNewStream(&stream, brng, 1);
     watch.reset();
     watch.start();
@@ -87,7 +87,7 @@ inline void rng_test(std::size_t N, const std::string &name,
         static_cast<MKL_INT>(M), r.data());
     watch.stop();
     names.push_back(name + " (MKL Stream)");
-    size.push_back(sizeof(vsmc::internal::MKLSTDStreamState<RNGType>));
+    size.push_back(sizeof(RNGType));
     sw.push_back(watch);
     bytes.push_back(nbytes);
 

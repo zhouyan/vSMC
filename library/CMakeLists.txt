@@ -1,5 +1,5 @@
 # ============================================================================
-#  vSMC/example/CMakeLists.txt
+#  vSMC/library/CMakeLists.txt
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
@@ -29,37 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT (vSMCExample C CXX)
+PROJECT (vSMCLibrary C CXX)
 
-INCLUDE (vSMCExampleFunctions)
-ADD_DEFINITIONS (${EXAMPLE_DEFINITIONS})
-
-##############################################################################
-# Check examples
-##############################################################################
-
-ADD_CUSTOM_TARGET (example-files)
-ADD_DEPENDENCIES (example example-files)
-
-SET (EXAMPLES ${EXAMPLES} "vsmc")
-ADD_SUBDIRECTORY (vsmc)
-
-SET (EXAMPLES ${EXAMPLES} "paper")
-ADD_SUBDIRECTORY (paper)
-
-SET (EXAMPLES ${EXAMPLES} "pf")
-ADD_SUBDIRECTORY (pf)
-
-SET (EXAMPLES ${EXAMPLES} "rng")
-ADD_SUBDIRECTORY (rng)
-
-##############################################################################
-# Enable examples
-##############################################################################
-
-MESSAGE (STATUS "=================== Enable examples ===================")
-FOREACH (example ${EXAMPLES})
-    MESSAGE (STATUS ${example})
-ENDFOREACH (example ${EXAMPLES})
-
-MESSAGE (STATUS "=======================================================")
+ADD_LIBRARY (libvsmc ${PROJECT_SOURCE_DIR}/src/rng_mkl_std.cpp)
+SET_TARGET_PROPERTIES (libvsmc PROPERTIES OUTPUT_NAME vsmc)
