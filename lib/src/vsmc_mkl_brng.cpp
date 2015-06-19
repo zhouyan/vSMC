@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/src/lib/rngc_mkl_std.hpp
+// vSMC/lib/src/vsmc_mkl_brng.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,48 +29,45 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/mkl_std.hpp>
+#include <vsmc/rngc/mkl_brng.h>
+#include <vsmc/rng/engine.hpp>
 
-#ifdef VSMC_DEFINE_RNG_MKL_STD_BRNG
-#undef VSMC_DEFINE_RNG_MKL_STD_BRNG
+#ifdef VSMC_DEFINE_RNG_C_API_ENGINE
+#undef VSMC_DEFINE_RNG_C_API_ENGINE
 #endif
 
-#define VSMC_DEFINE_RNG_MKL_STD_BRNG(RNGType, name)                           \
-    int vsmc_mkl_std_init_##name(                                             \
-        int, VSLStreamStatePtr, int, const unsigned *);                       \
-    int vsmc_mkl_std_init_##name(                                             \
+#define VSMC_DEFINE_RNG_C_API_ENGINE(RNGType, name)                           \
+    int vsmc_mkl_init_##name(int, VSLStreamStatePtr, int, const unsigned *);  \
+    int vsmc_mkl_init_##name(                                                 \
         int method, VSLStreamStatePtr stream, int n, const unsigned *param)   \
     {                                                                         \
-        return ::vsmc::internal::mkl_std_init<RNGType>(                       \
-            method, stream, n, param);                                        \
+        return ::vsmc::internal::mkl_init<RNGType>(method, stream, n, param); \
     }                                                                         \
                                                                               \
-    int vsmc_mkl_std_sbrng_##name(                                            \
-        VSLStreamStatePtr, int, float *, float, float);                       \
-    int vsmc_mkl_std_sbrng_##name(                                            \
+    int vsmc_mkl_sbrng_##name(VSLStreamStatePtr, int, float *, float, float); \
+    int vsmc_mkl_sbrng_##name(                                                \
         VSLStreamStatePtr stream, int n, float *r, float a, float b)          \
     {                                                                         \
-        return ::vsmc::internal::mkl_std_uniform_real<RNGType, float>(        \
+        return ::vsmc::internal::mkl_uniform_real<RNGType, float>(            \
             stream, n, r, a, b);                                              \
     }                                                                         \
                                                                               \
-    int vsmc_mkl_std_dbrng_##name(                                            \
+    int vsmc_mkl_dbrng_##name(                                                \
         VSLStreamStatePtr, int, double *, double, double);                    \
-    int vsmc_mkl_std_dbrng_##name(                                            \
+    int vsmc_mkl_dbrng_##name(                                                \
         VSLStreamStatePtr stream, int n, double *r, double a, double b)       \
     {                                                                         \
-        return ::vsmc::internal::mkl_std_uniform_real<RNGType, double>(       \
+        return ::vsmc::internal::mkl_uniform_real<RNGType, double>(           \
             stream, n, r, a, b);                                              \
     }                                                                         \
                                                                               \
-    int vsmc_mkl_std_ibrng_##name(VSLStreamStatePtr, int, unsigned *);        \
-    int vsmc_mkl_std_ibrng_##name(                                            \
-        VSLStreamStatePtr stream, int n, unsigned *r)                         \
+    int vsmc_mkl_ibrng_##name(VSLStreamStatePtr, int, unsigned *);            \
+    int vsmc_mkl_ibrng_##name(VSLStreamStatePtr stream, int n, unsigned *r)   \
     {                                                                         \
-        return ::vsmc::internal::mkl_std_uniform_int<RNGType>(stream, n, r);  \
+        return ::vsmc::internal::mkl_uniform_int<RNGType>(stream, n, r);      \
     }                                                                         \
                                                                               \
-    int vsmc_mkl_std_brng_##name(void)                                        \
+    int vsmc_mkl_brng_##name(void)                                            \
     {                                                                         \
         VSLBRngProperties properties;                                         \
         properties.StreamStateSize =                                          \
@@ -79,10 +76,10 @@
         properties.IncludesZero = RNGType::min() == 0 ? 1 : 0;                \
         properties.WordSize = sizeof(typename RNGType::result_type);          \
         properties.NBits = properties.WordSize * 8;                           \
-        properties.InitStream = vsmc_mkl_std_init_##name;                     \
-        properties.sBRng = vsmc_mkl_std_sbrng_##name;                         \
-        properties.dBRng = vsmc_mkl_std_dbrng_##name;                         \
-        properties.iBRng = vsmc_mkl_std_ibrng_##name;                         \
+        properties.InitStream = vsmc_mkl_init_##name;                         \
+        properties.sBRng = vsmc_mkl_sbrng_##name;                             \
+        properties.dBRng = vsmc_mkl_dbrng_##name;                             \
+        properties.iBRng = vsmc_mkl_ibrng_##name;                             \
                                                                               \
         return ::vslRegisterBrng(&properties);                                \
     }
@@ -90,7 +87,8 @@
 namespace vsmc
 {
 
-namespace internal {
+namespace internal
+{
 
 template <typename RNGType>
 class MKLSTDStreamState
@@ -102,7 +100,7 @@ class MKLSTDStreamState
 }; // class MKLSTDStreamState
 
 template <typename RNGType>
-inline int mkl_std_init(
+inline int mkl_init(
     int method, ::VSLStreamStatePtr stream, int n, const unsigned *param)
 {
     RNGType &rng =
@@ -118,7 +116,7 @@ inline int mkl_std_init(
 }
 
 template <typename RNGType, typename RealType>
-inline int mkl_std_uniform_real(
+inline int mkl_uniform_real(
     ::VSLStreamStatePtr stream, int n, RealType *r, RealType a, RealType b)
 {
     RNGType &rng =
@@ -131,7 +129,7 @@ inline int mkl_std_uniform_real(
 }
 
 template <typename RNGType>
-inline int mkl_std_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
+inline int mkl_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
     unsigned *r, std::integral_constant<std::size_t, sizeof(unsigned)>)
 {
     RNGType &rng =
@@ -143,7 +141,7 @@ inline int mkl_std_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
 }
 
 template <typename RNGType>
-inline int mkl_std_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
+inline int mkl_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
     unsigned *r, std::integral_constant<std::size_t, sizeof(unsigned) / 2>)
 {
     RNGType &rng =
@@ -157,7 +155,7 @@ inline int mkl_std_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
 }
 
 template <typename RNGType>
-inline int mkl_std_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
+inline int mkl_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
     unsigned *r, std::integral_constant<std::size_t, sizeof(unsigned) * 2>)
 {
     RNGType &rng =
@@ -173,9 +171,9 @@ inline int mkl_std_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
 }
 
 template <typename RNGType>
-inline int mkl_std_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
+inline int mkl_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
 {
-    return mkl_std_uniform_int_dispatch<RNGType>(
+    return mkl_uniform_int_dispatch<RNGType>(
         stream, n, r, std::integral_constant<std::size_t,
                           sizeof(typename RNGType::result_type)>());
 }
@@ -186,6 +184,6 @@ inline int mkl_std_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
 
 extern "C" {
 
-#include <vsmc/rng/internal/mkl_std_defines.hpp>
+#include <vsmc/rng/internal/c_api_engine.hpp>
 
 } // extern "C"

@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/vsmc.h
+// vSMC/include/vsmc/rng/mkl_brng.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,10 +29,33 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_VSMC_H
-#define VSMC_VSMC_H
+#ifndef VSMC_RNG_MKL_BRNG_HPP
+#define VSMC_RNG_MKL_BRNG_HPP
 
+#include <vsmc/rng/internal/common.hpp>
+#include <vsmc/rng/engine.hpp>
 #include <vsmc/rngc/mkl_brng.h>
-#include <vsmc/rngc/random.h>
 
-#endif // VSMC_VSMC_H
+#ifdef VSMC_DEFINE_RNG_C_API
+#undef VSMC_DEFINE_RNG_C_API
+#endif
+
+#define VSMC_DEFINE_RNG_C_API_ENGINE(RNGType, name)                           \
+    template <>                                                               \
+    inline MKL_INT mkl_brng<RNGType>()                                        \
+    {                                                                         \
+        return static_cast<MKL_INT>(::vsmc_mkl_brng_##name());                \
+    }
+
+namespace vsmc
+{
+
+/// \brief Register a C++11 RNG engine for use as a MKL BRNG
+template <typename RNGType>
+MKL_INT mkl_brng();
+
+#include <vsmc/rng/internal/c_api_engine.hpp>
+
+} // namespace vsmc
+
+#endif // VSMC_RNG_MKL_BRNG_HPP

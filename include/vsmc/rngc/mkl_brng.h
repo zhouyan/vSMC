@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/mkl_std.hpp
+// vSMC/include/vsmc/rngc/mkl_brng.h
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,29 +29,30 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_MKL_STD_HPP
-#define VSMC_RNG_MKL_STD_HPP
+#ifndef VSMC_RNGC_MKL_BRNG_H
+#define VSMC_RNGC_MKL_BRNG_H
 
-#include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/engine.hpp>
-#include <vsmc/rngc/mkl_std.h>
+#ifdef VSMC_DEFINE_RNG_C_API_ENGINE
+#undef VSMC_DEFINE_RNG_C_API_ENGINE
+#endif
 
-#define VSMC_DEFINE_RNG_MKL_STD_BRNG(RNGType, name)                           \
-    template <>                                                               \
-    inline MKL_INT mkl_std_brng<RNGType>()                                    \
-    {                                                                         \
-        return static_cast<MKL_INT>(::vsmc_mkl_std_brng_##name());            \
-    }
+#ifdef VSMC_DEFINE_RNG_C_API_ENGINE_ALL
+#undef VSMC_DEFINE_RNG_C_API_ENGINE_ALL
+#endif
 
-namespace vsmc
-{
+#define VSMC_DEFINE_RNG_C_API_ENGINE(RNGType, name) \
+    int vsmc_mkl_brng_##name(void);
 
-/// \brief Register a C++11 RNG engine for use as a MKL BRNG
-template <typename RNGType>
-MKL_INT mkl_std_brng();
+#define VSMC_DEFINE_RNG_C_API_ENGINE_ALL 1
 
-#include <vsmc/rng/internal/mkl_std_defines.hpp>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-} // namespace vsmc
+#include <vsmc/rng/internal/c_api_engine.hpp>
 
-#endif // VSMC_RNG_MKL_STD_HPP
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#endif // VSMC_RNGC_MKL_BRNG_H

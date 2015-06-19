@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/vsmc.h
+// vSMC/include/vsmc/rngc/random.h
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,10 +29,45 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_VSMC_H
-#define VSMC_VSMC_H
+#ifndef VSMC_RNGC_RANDOM_H
+#define VSMC_RNGC_RANDOM_H
 
-#include <vsmc/rngc/mkl_brng.h>
-#include <vsmc/rngc/random.h>
+#include <stdint.h>
 
-#endif // VSMC_VSMC_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct {
+    uint64_t state[128];
+} vsmc_rng;
+
+void vsmc_rng_init(vsmc_rng *, unsigned seed);
+void vsmc_rng_seed(vsmc_rng *, unsigned seed);
+void vsmc_rng_rand(vsmc_rng *, int, unsigned *);
+
+void vsmc_rng_uniform_int(vsmc_rng *, int, int *, int, int);
+void vsmc_rng_uniform_real(vsmc_rng *, int, double *, double, double);
+void vsmc_rng_bernoulli(vsmc_rng *, int, int *, double);
+void vsmc_rng_binomial(vsmc_rng *, int, int *, int, double);
+void vsmc_rng_negative_binomial(vsmc_rng *, int, int *, int, double);
+void vsmc_rng_geometric(vsmc_rng *, int, int *, double);
+void vsmc_rng_poisson(vsmc_rng *, int, int *, double);
+void vsmc_rng_exponential(vsmc_rng *, int, double *, double);
+void vsmc_rng_gamma(vsmc_rng *, int, double *, double, double);
+void vsmc_rng_weibull(vsmc_rng *, int, double *, double, double);
+void vsmc_rng_extreme_value(vsmc_rng *, int, double *, double, double);
+void vsmc_rng_normal(vsmc_rng *, int, double *, double, double);
+void vsmc_rng_lognormal(vsmc_rng *, int, double *, double, double);
+void vsmc_rng_chi_squared(vsmc_rng *, int, double *, double);
+void vsmc_rng_cauchy(vsmc_rng *, int, double *, double, double);
+void vsmc_rng_fisher_f(vsmc_rng *, int, double *, double, double);
+void vsmc_rng_student_t(vsmc_rng *, int, double *, double);
+void vsmc_rng_stable(
+    vsmc_rng *, int, double *, double, double, double, double);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#endif // VSMC_RNGC_RANDOM_H

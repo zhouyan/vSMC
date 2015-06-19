@@ -29,4 +29,5 @@
 !  POSSIBILITY OF SUCH DAMAGE.
 ! ============================================================================
 
-include "vsmc/rngc/mkl_std.f90"
+include "vsmc/rngc/mkl_brng.f90"
+include "vsmc/rngc/random.f90"

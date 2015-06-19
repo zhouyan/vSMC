@@ -1,5 +1,5 @@
 # ============================================================================
-#  vSMC/library/CMakeLists.txt
+#  vSMC/lib/CMakeLists.txt
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
@@ -29,7 +29,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT (vSMCLibrary C CXX)
+PROJECT (vSMCLib C CXX)
 
-ADD_LIBRARY (libvsmc ${PROJECT_SOURCE_DIR}/src/rng_mkl_std.cpp)
+SET (VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
+    ${PROJECT_SOURCE_DIR}/src/vsmc_random.cpp)
+
+IF (MKL_FOUND)
+    SET (VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
+        ${PROJECT_SOURCE_DIR}/src/vsmc_mkl_brng.cpp)
+ENDIF (MKL_FOUND)
+
+ADD_LIBRARY (libvsmc ${VSMC_LIB_SOURCE})
 SET_TARGET_PROPERTIES (libvsmc PROPERTIES OUTPUT_NAME vsmc)
+ADD_DEPENDENCIES (lib libvsmc)

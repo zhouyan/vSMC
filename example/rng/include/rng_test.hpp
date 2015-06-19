@@ -35,7 +35,7 @@
 #include <vsmc/utility/aligned_memory.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 #if VSMC_HAS_MKL && VSMC_HAS_RUNTIME_LIBRARY && !defined(VSMC_RNG_TEST_MKL)
-#include <vsmc/rng/mkl_std.hpp>
+#include <vsmc/rng/mkl_brng.hpp>
 #endif
 
 #define VSMC_RNG_TEST_PRE(prog)                                               \
@@ -79,7 +79,7 @@ inline void rng_test(std::size_t N, const std::string &name,
     const std::size_t M = nbytes / sizeof(unsigned);
     vsmc::Vector<unsigned> r(M);
     VSLStreamStatePtr stream = nullptr;
-    MKL_INT brng = vsmc::mkl_std_brng<RNGType>();
+    MKL_INT brng = vsmc::mkl_brng<RNGType>();
     vslNewStream(&stream, brng, 1);
     watch.reset();
     watch.start();

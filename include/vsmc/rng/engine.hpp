@@ -32,6 +32,8 @@
 #ifndef VSMC_RNG_ENGINE_HPP
 #define VSMC_RNG_ENGINE_HPP
 
+#include <vsmc/internal/config.hpp>
+
 /// \brief Default RNG type
 /// \ingroup Config
 #ifndef VSMC_RNG_TYPE
@@ -45,8 +47,6 @@
 #define VSMC_RNG_TYPE ::vsmc::Threefry
 #endif
 #endif
-
-#include <vsmc/internal/config.hpp>
 
 #include <vsmc/rng/xor_combine_engine.hpp>
 #include <vsmc/rng/xorshift.hpp>
