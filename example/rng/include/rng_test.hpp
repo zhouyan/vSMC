@@ -50,7 +50,7 @@
 #endif
 
 #define VSMC_RNG_TEST_PRE(prog)                                               \
-    std::size_t N = 100;                                                  \
+    std::size_t N = 1000000;                                                  \
     std::string prog_name(#prog);                                             \
     if (argc > 1)                                                             \
         N = static_cast<std::size_t>(std::atoi(argv[1]));                     \
