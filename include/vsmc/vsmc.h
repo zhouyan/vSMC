@@ -39,10 +39,10 @@ extern "C" {
 #endif
 
 /// \defgroup C_API C API
-/// \@{
+/// @{
 
 /// \defgroup C_API_RNG Random number generating
-/// \@{
+/// @{
 
 /// \brief `vsmc::RNG`
 typedef struct {
@@ -157,10 +157,10 @@ void vsmc_rng_stable(vsmc_rng *rng_ptr, int n, double *r, double stability,
 void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,
     const double *weight, int normalized);
 
-/// \@}
+/// @}
 
 /// \defgroup C_API_MLK_BRNG Register MKL BRNG (`vsmc::mkl_brng`)
-/// \@{
+/// @{
 
 int vsmc_mkl_brng_mt19937(void);
 int vsmc_mkl_brng_minstd_rand0(void);
@@ -253,18 +253,18 @@ int vsmc_mkl_brng_rdrand16(void);
 int vsmc_mkl_brng_rdrand32(void);
 int vsmc_mkl_brng_rdrand64(void);
 
-/// \@}
+/// @}
 
 /// \defgroup C_API_Memory Memory allocation
-/// \@{
+/// @{
 
 void *vsmc_malloc(size_t n, int alignment);
 void vsmc_free(void *ptr);
 
-/// \@}
+/// @}
 
 /// \defgroup C_API_Resample Resample algorithms
-/// \@{
+/// @{
 
 typedef enum {
     VSMC_RESAMPLE_MULTINOMIAL,
@@ -301,7 +301,9 @@ void vsmc_resample_residual_systematic(
 void vsmc_resample(int m, int n, vsmc_rng *rng_ptr, const double *weight,
     int *replication, vsmc_resample_scheme scheme);
 
-/// \@}
+/// @}
+
+/// @}
 
 #ifdef __cplusplus
 } // extern "C"
