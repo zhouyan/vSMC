@@ -32,9 +32,9 @@
 #ifndef VSMC_RNG_MKL_BRNG_HPP
 #define VSMC_RNG_MKL_BRNG_HPP
 
+#include <vsmc/vsmc.h>
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/engine.hpp>
-#include <vsmc/rngc/mkl_brng.h>
 
 #ifdef VSMC_DEFINE_RNG_C_API
 #undef VSMC_DEFINE_RNG_C_API

@@ -44,6 +44,9 @@
 #include <vsmc/utility/stop_watch.hpp>
 #if VSMC_RNG_TEST_C_API
 #include <vsmc/vsmc.h>
+#if VSMC_HAS_MKL
+#include <vsmc/rng/mkl_brng.hpp>
+#endif
 #endif
 
 #define VSMC_RNG_TEST_PRE(prog)                                               \
@@ -79,7 +82,7 @@ inline void rng_test(std::size_t N, const std::string &name,
     rng.uniform_bits(static_cast<MKL_INT>(N), r.data());
     watch.stop();
     result = r.back();
-#elif VSMC_RNG_TEST_C_API && !VSMC_RNG_TEST_MKL
+#elif VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
     MKL_INT brng = vsmc::mkl_brng<RNGType>();
     const std::size_t M = nbytes / sizeof(unsigned);
     vsmc::Vector<unsigned> r(M);
