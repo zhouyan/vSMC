@@ -74,42 +74,45 @@ inline void rng_test(std::size_t N, const std::string &name,
     vsmc::StopWatch watch;
     result_type result = 0;
     const std::size_t nbytes = N * sizeof(result_type);
+    std::ofstream rnd("rnd");
+
+    names.push_back(name);
+    size.push_back(sizeof(RNGType));
+
+    RNGType rng;
+    watch.reset();
+    watch.start();
+    for (std::size_t i = 0; i != N; ++i)
+        result += rng();
+    watch.stop();
+    rnd << result << std::endl;
+    sw.push_back(watch);
+    bytes.push_back(nbytes);
 
 #if VSMC_RNG_TEST_C_API && VSMC_RNG_TEST_MKL
-    RNGType rng;
     vsmc::Vector<result_type> r(N);
+    watch.reset();
     watch.start();
     rng.uniform_bits(static_cast<MKL_INT>(N), r.data());
     watch.stop();
-    result = r.back();
+    rnd << std::accumulate(r.begin(), r.end(), result) << std::endl;
+    sw.push_back(watch);
+    bytes.push_back(nbytes);
 #elif VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
     MKL_INT brng = vsmc::mkl_brng<RNGType>();
     const std::size_t M = nbytes / sizeof(unsigned);
     vsmc::Vector<unsigned> r(M);
     VSLStreamStatePtr stream = nullptr;
     vslNewStream(&stream, brng, 1);
+    watch.reset();
     watch.start();
     viRngUniformBits(VSL_RNG_METHOD_UNIFORMBITS_STD, stream,
         static_cast<MKL_INT>(M), r.data());
     watch.stop();
-    result = static_cast<result_type>(r.back());
-#else
-    RNGType rng;
-    watch.start();
-    for (std::size_t i = 0; i != N; ++i)
-        result += rng();
-    watch.stop();
-    result = rng();
-#endif
-
-    names.push_back(name);
-    size.push_back(sizeof(RNGType));
+    rnd << std::accumulate(r.begin(), r.end(), 0u) << std::endl;
     sw.push_back(watch);
     bytes.push_back(nbytes);
-
-    std::ofstream rnd("rnd");
-    rnd << result << std::endl;
-    rnd.close();
+#endif
 }
 
 inline void rng_output_sw(const std::string &prog_name,
@@ -117,31 +120,40 @@ inline void rng_output_sw(const std::string &prog_name,
     const vsmc::Vector<vsmc::StopWatch> &sw,
     const vsmc::Vector<std::size_t> &bytes)
 {
-    std::size_t M = names.size();
-    if (M == 0)
-        return;
-    if (sw.size() != M)
-        return;
+    std::size_t N = names.size();
+    std::size_t R = sw.size() / N;
+    std::size_t lwid = 94;
+    int swid = 5;
+    int twid = 15;
+    int gwid = 15;
+    int Twid = twid * static_cast<int>(R);
+    int Gwid = gwid * static_cast<int>(R);
+    int nwid = static_cast<int>(lwid) - swid - Twid - Gwid;
 
-    std::cout << std::string(90, '=') << std::endl;
-    std::cout << std::left << std::setw(55) << prog_name;
-    std::cout << std::right << std::setw(5) << "Size";
-    std::cout << std::right << std::setw(15) << "Time (ms)";
-    std::cout << std::right << std::setw(15) << "GB/s";
+    std::cout << std::string(lwid, '=') << std::endl;
+    std::cout << std::left << std::setw(nwid) << prog_name;
+    std::cout << std::right << std::setw(swid) << "Size";
+    std::cout << std::right << std::setw(Twid) << "Time (ms)";
+    std::cout << std::right << std::setw(Gwid) << "GB/s";
     std::cout << std::endl;
-    std::cout << std::string(90, '-') << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
 
-    for (std::size_t i = 0; i != M; ++i) {
-        double time = sw[i].milliseconds();
-        double b = static_cast<double>(bytes[i]);
-        double gbps = b / time * 1e-6;
-        std::cout << std::left << std::setw(55) << names[i];
-        std::cout << std::right << std::setw(5) << size[i];
-        std::cout << std::right << std::setw(15) << std::fixed << time;
-        std::cout << std::right << std::setw(15) << std::fixed << gbps;
+    for (std::size_t i = 0; i != N; ++i) {
+        std::cout << std::left << std::setw(nwid) << names[i];
+        std::cout << std::right << std::setw(swid) << size[i];
+        for (std::size_t r = 0; r != R; ++r) {
+            double time = sw[i * R + r].milliseconds();
+            std::cout << std::right << std::setw(twid) << std::fixed << time;
+        }
+        for (std::size_t r = 0; r != R; ++r) {
+            double time = sw[i * R + r].milliseconds();
+            double b = static_cast<double>(bytes[i * R + r]);
+            double gbps = b / time * 1e-6;
+            std::cout << std::right << std::setw(gwid) << std::fixed << gbps;
+        }
         std::cout << std::endl;
     }
-    std::cout << std::string(90, '=') << std::endl;
+    std::cout << std::string(lwid, '=') << std::endl;
 }
 
 #endif // VSMC_EXAMPLE_RNG_TEST_HPP

@@ -38,94 +38,81 @@
 #include <vsmc/rng/stable_distribution.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
-#if VSMC_RNG_TEST_C_API
-#define VSMC_RNG_DIST_1(Dist, name, p1)                                       \
+#define VSMC_RNG_DIST_C_PRE(Dist, name)                                       \
+    vsmc::Vector<DistResultType<Dist>> r(N);                                  \
+    vsmc::StopWatch watch;                                                    \
+    vsmc_rng rng;                                                             \
+    vsmc_rng_init(&rng, 1);                                                   \
+    watch.start();
+
+#define VSMC_RNG_DIST_C_POST(Dist, name)                                      \
+    watch.stop();                                                             \
+    sw.push_back(watch);                                                      \
+    bytes.push_back(N * sizeof(DistResultType<Dist>));                        \
+    std::ofstream rnd("rnd");                                                 \
+    rnd << r.back() << std::endl;                                             \
+    rnd.close();
+
+#define VSMC_RNG_DIST_1_C(Dist, name, p1)                                     \
     {                                                                         \
-        vsmc::Vector<DistResultType<Dist>> r(N);                              \
-        vsmc::StopWatch watch;                                                \
-        vsmc_rng rng;                                                         \
-        vsmc_rng_init(&rng, 1);                                               \
         std::string dname(#name "(" #p1 ")");                                 \
-                                                                              \
-        watch.start();                                                        \
+        VSMC_RNG_DIST_C_PRE(Dist, name);                                      \
         vsmc_rng_##name(&rng, static_cast<int>(N), r.data(), p1);             \
-        watch.stop();                                                         \
-                                                                              \
-        names.push_back(dname);                                               \
-        size.push_back(sizeof(Dist));                                         \
-        sw.push_back(watch);                                                  \
-        bytes.push_back(N * sizeof(DistResultType<Dist>));                    \
-                                                                              \
-        std::ofstream rnd("rnd");                                             \
-        rnd << r.back() << std::endl;                                         \
-        rnd.close();                                                          \
+        VSMC_RNG_DIST_C_POST(Dist, name);                                     \
     }
 
-#define VSMC_RNG_DIST_2(Dist, name, p1, p2)                                   \
+#define VSMC_RNG_DIST_2_C(Dist, name, p1, p2)                                 \
     {                                                                         \
-        vsmc::Vector<DistResultType<Dist>> r(N);                              \
-        vsmc::StopWatch watch;                                                \
-        vsmc_rng rng;                                                         \
-        vsmc_rng_init(&rng, 1);                                               \
         std::string dname(#name "(" #p1 "," #p2 ")");                         \
-                                                                              \
-        watch.start();                                                        \
+        VSMC_RNG_DIST_C_PRE(Dist, name);                                      \
         vsmc_rng_##name(&rng, static_cast<int>(N), r.data(), p1, p2);         \
-        watch.stop();                                                         \
-                                                                              \
-        names.push_back(dname);                                               \
-        size.push_back(sizeof(Dist));                                         \
-        sw.push_back(watch);                                                  \
-        bytes.push_back(N * sizeof(DistResultType<Dist>));                    \
-                                                                              \
-        std::ofstream rnd("rnd");                                             \
-        rnd << r.back() << std::endl;                                         \
-        rnd.close();                                                          \
+        VSMC_RNG_DIST_C_POST(Dist, name);                                     \
     }
 
-#define VSMC_RNG_DIST_4(Dist, name, p1, p2, p3, p4)                           \
+#define VSMC_RNG_DIST_4_C(Dist, name, p1, p2, p3, p4)                         \
     {                                                                         \
-        vsmc::Vector<DistResultType<Dist>> r(N);                              \
-        vsmc::StopWatch watch;                                                \
-        vsmc_rng rng;                                                         \
-        vsmc_rng_init(&rng, 1);                                               \
         std::string dname(#name "(" #p1 "," #p2 "," #p3 "," #p4 ")");         \
-                                                                              \
-        watch.start();                                                        \
+        VSMC_RNG_DIST_C_PRE(Dist, name);                                      \
         vsmc_rng_##name(&rng, static_cast<int>(N), r.data(), p1, p2, p3, p4); \
-        watch.stop();                                                         \
-                                                                              \
-        names.push_back(dname);                                               \
-        size.push_back(sizeof(Dist));                                         \
-        sw.push_back(watch);                                                  \
-        bytes.push_back(N * sizeof(DistResultType<Dist>));                    \
-                                                                              \
-        std::ofstream rnd("rnd");                                             \
-        rnd << r.back() << std::endl;                                         \
-        rnd.close();                                                          \
+        VSMC_RNG_DIST_C_POST(Dist, name);                                     \
     }
-#else // VSMC_RNG_TEST_C_API
-#define VSMC_RNG_DIST_1(Dist, name, p1)                                       \
+
+#define VSMC_RNG_DIST_1_CPP(Dist, name, p1)                                   \
     {                                                                         \
         Dist dist(p1);                                                        \
         std::string dname(#name "(" #p1 ")");                                 \
         rng_dist(N, dist, dname, names, size, sw, bytes);                     \
     }
 
-#define VSMC_RNG_DIST_2(Dist, name, p1, p2)                                   \
+#define VSMC_RNG_DIST_2_CPP(Dist, name, p1, p2)                               \
     {                                                                         \
         Dist dist(p1, p2);                                                    \
         std::string dname(#name "(" #p1 "," #p2 ")");                         \
         rng_dist(N, dist, dname, names, size, sw, bytes);                     \
     }
 
-#define VSMC_RNG_DIST_4(Dist, name, p1, p2, p3, p4)                           \
+#define VSMC_RNG_DIST_4_CPP(Dist, name, p1, p2, p3, p4)                       \
     {                                                                         \
         Dist dist(p1, p2, p3, p4);                                            \
         std::string dname(#name "(" #p1 "," #p2 "," #p3 "," #p4 ")");         \
         rng_dist(N, dist, dname, names, size, sw, bytes);                     \
     }
-#endif // VSMC_RNG_TEST_C_API
+
+#if VSMC_RNG_TEST_C_API
+#define VSMC_RNG_DIST_1(Dist, name, p1)                                       \
+    VSMC_RNG_DIST_1_CPP(Dist, name, p1);                                      \
+    VSMC_RNG_DIST_1_C(Dist, name, p1);
+#define VSMC_RNG_DIST_2(Dist, name, p1, p2)                                   \
+    VSMC_RNG_DIST_2_CPP(Dist, name, p1, p2);                                  \
+    VSMC_RNG_DIST_2_C(Dist, name, p1, p2);
+#define VSMC_RNG_DIST_4(Dist, name, p1, p2, p3, p4)                           \
+    VSMC_RNG_DIST_4_CPP(Dist, name, p1, p2, p3, p4);                          \
+    VSMC_RNG_DIST_4_C(Dist, name, p1, p2, p3, p4);
+#else
+#define VSMC_RNG_DIST_1 VSMC_RNG_DIST_1_CPP
+#define VSMC_RNG_DIST_2 VSMC_RNG_DIST_2_CPP
+#define VSMC_RNG_DIST_4 VSMC_RNG_DIST_4_CPP
+#endif
 
 template <typename Dist>
 class DistResultTypeTrait

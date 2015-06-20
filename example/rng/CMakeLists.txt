@@ -38,17 +38,14 @@ ADD_DEPENDENCIES (example rng)
 ADD_CUSTOM_TARGET (rng-files)
 ADD_DEPENDENCIES (example-files rng-files)
 
+IF (VSMC_ENABLE_LIBRARY)
+    ADD_DEFINITIONS (-DVSMC_RNG_TEST_C_API=1)
+ENDIF (VSMC_ENABLE_LIBRARY)
+
 FUNCTION (ADD_RNG_TEST name)
     ADD_VSMC_EXECUTABLE (rng_${name}
         ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp)
     ADD_DEPENDENCIES (rng rng_${name})
-    IF (VSMC_ENABLE_LIBRARY AND MKL_FOUND)
-        ADD_VSMC_EXECUTABLE (rng_${name}_c
-            ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp)
-        SET_TARGET_PROPERTIES (rng_${name}_c PROPERTIES COMPILE_FLAGS
-            "-DVSMC_RNG_TEST_C_API=1")
-        ADD_DEPENDENCIES (rng rng_${name}_c)
-    ENDIF (VSMC_ENABLE_LIBRARY AND MKL_FOUND)
 ENDFUNCTION (ADD_RNG_TEST)
 
 ADD_RNG_TEST(dist)
