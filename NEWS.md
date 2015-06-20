@@ -26,7 +26,7 @@ changes.
   previously accept `const Particle<T> &` shall now accept `Particle<T> &`
   instead.
 * Member functions of SMP bases classes are renamed to use a more consistent
-  pattern 
+  pattern
   - `pre_processor` -> `eval_pre`
   - `post_processor` -> `eval_post`
   - `initialize_param` -> `eval_param`
