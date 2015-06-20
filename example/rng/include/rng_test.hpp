@@ -97,7 +97,7 @@ inline void rng_test(std::size_t N, const std::string &name,
     RNGType rng;
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        rng();
+        result += rng();
     watch.stop();
     result = rng();
 #endif

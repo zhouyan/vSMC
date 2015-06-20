@@ -211,10 +211,12 @@ class StableDistribution
     result_type skewness() const { return skewness_; }
     result_type location() const { return location_; }
     result_type scale() const { return scale_; }
+
     result_type min VSMC_MNE() const
     {
         return -std::numeric_limits<result_type>::infinity();
     }
+
     result_type max VSMC_MNE() const
     {
         return std::numeric_limits<result_type>::infinity();

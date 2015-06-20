@@ -193,6 +193,7 @@ class UniformRealDistribution
 
     result_type a() const { return a_; }
     result_type b() const { return b_; }
+
     result_type min VSMC_MNE() const { return a_; }
     result_type max VSMC_MNE() const { return b_; }
 

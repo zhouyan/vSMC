@@ -121,7 +121,7 @@
 
 #define VSMC_RNG_DIST_4(Dist, name, p1, p2, p3, p4)                           \
     {                                                                         \
-        Dist dist(p1);                                                        \
+        Dist dist(p1, p2, p3, p4);                                            \
         std::string dname(#name "(" #p1 "," #p2 "," #p3 "," #p4 ")");         \
         rng_dist(N, dist, dname, names, size, sw, bytes);                     \
     }
@@ -153,8 +153,9 @@ inline void rng_dist(std::size_t N, Dist &dist, const std::string &name,
     vsmc::RNG rng;
 
     watch.start();
+    DistResultType<Dist> result = 0;
     for (std::size_t i = 0; i != N; ++i)
-        dist(rng);
+        result += dist(rng);
     watch.stop();
 
     names.push_back(name);
@@ -163,7 +164,7 @@ inline void rng_dist(std::size_t N, Dist &dist, const std::string &name,
     bytes.push_back(N * sizeof(DistResultType<Dist>));
 
     std::ofstream rnd("rnd");
-    rnd << dist(rng) << std::endl;
+    rnd << result << std::endl;
     rnd.close();
 }
 
