@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/mkl_brng.hpp
+// vSMC/lib/src/vsmc_memory.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,34 +29,16 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_MKL_BRNG_HPP
-#define VSMC_RNG_MKL_BRNG_HPP
-
 #include <vsmc/vsmc.h>
-#include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/engine.hpp>
 
-#ifdef VSMC_DEFINE_RNG_C_API
-#undef VSMC_DEFINE_RNG_C_API
-#endif
+extern "C" {
 
-#define VSMC_DEFINE_RNG_C_API_ENGINE(RNGType, name)                           \
-    template <>                                                               \
-    inline MKL_INT mkl_brng<RNGType>()                                        \
-    {                                                                         \
-        return static_cast<MKL_INT>(::vsmc_mkl_brng_##name());                \
-    }
-
-namespace vsmc
+void *vsmc_malloc(size_t n, int alignemnt)
 {
+    return ::vsmc::AlignedMemory::aligned_malloc(
+        n, static_cast<std::size_t>(alignment));
+}
 
-/// \brief Register a C++11 RNG engine for use as a MKL BRNG
-/// \ingroup MKL
-template <typename RNGType>
-MKL_INT mkl_brng();
+void vsmc_free(void *ptr) { ::vsmc::AlignedMemory::aligned_free(ptr); }
 
-#include <vsmc/rng/internal/c_api_engine.hpp>
-
-} // namespace vsmc
-
-#endif // VSMC_RNG_MKL_BRNG_HPP
+} // extern "C"

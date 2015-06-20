@@ -32,6 +32,8 @@
 #ifndef VSMC_VSMC_H
 #define VSMC_VSMC_H
 
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -157,7 +159,7 @@ void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,
 
 /// \@}
 
-/// \defgroup C_API_MKL_BRNG Register MKL BRNG (`vsmc::mkl_brng`)
+/// \defgroup C_API_MLK_BRNG Register MKL BRNG (`vsmc::mkl_brng`)
 /// \@{
 
 int vsmc_mkl_brng_mt19937(void);
@@ -250,6 +252,14 @@ int vsmc_mkl_brng_ars_8x64(void);
 int vsmc_mkl_brng_rdrand16(void);
 int vsmc_mkl_brng_rdrand32(void);
 int vsmc_mkl_brng_rdrand64(void);
+
+/// \@}
+
+/// \defgroup C_API_Memory Memory allocation
+/// \@{
+
+void *vsmc_malloc(size_t n, int alignemnt);
+void vsmc_free(void *ptr);
 
 /// \@}
 
