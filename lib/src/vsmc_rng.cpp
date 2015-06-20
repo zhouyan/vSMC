@@ -46,14 +46,13 @@ namespace internal
 
 inline RNG &rng_cast(vsmc_rng *rng_ptr)
 {
-    if (reinterpret_cast<std::uintptr_t>(rng_ptr->state) % 32 == 0)
-        return *(reinterpret_cast<RNG *>(rng_ptr->state));
-    else if (reinterpret_cast<std::uintptr_t>(rng_ptr->state) % 32 == 8)
-        return *(reinterpret_cast<RNG *>(rng_ptr->state + 3));
-    else if (reinterpret_cast<std::uintptr_t>(rng_ptr->state) % 32 == 16)
-        return *(reinterpret_cast<RNG *>(rng_ptr->state + 2));
-    else
-        return *(reinterpret_cast<RNG *>(rng_ptr->state + 1));
+    std::uintptr_t r = reinterpret_cast<std::uintptr_t>(rng_ptr->state) % 32;
+
+    if (r == 0)
+        return *(reinterpret_cast<::vsmc::RNG *>(rng_ptr->state));
+
+    return *(reinterpret_cast<::vsmc::RNG *>(
+        rng_ptr->state + (32 - r) / sizeof(unsigned)));
 }
 
 } // namespace internal

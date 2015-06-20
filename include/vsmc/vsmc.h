@@ -44,7 +44,7 @@ extern "C" {
 
 /// \brief `vsmc::RNG`
 typedef struct {
-    unsigned long long state[32];
+    unsigned state[64];
 } vsmc_rng;
 
 /// \brief `sizeof(vsmc::RNG) + 4`
