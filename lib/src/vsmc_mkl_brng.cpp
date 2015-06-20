@@ -106,7 +106,7 @@ inline int mkl_init(
     RNGType &rng =
         (*reinterpret_cast<MKLSTDStreamState<RNGType> *>(stream)).rng;
     if (method == VSL_INIT_METHOD_STANDARD)
-        rng = RNGType(param[0]);
+        rng = RNGType(static_cast<typename RNGType::result_type>(param[0]));
     if (method == VSL_INIT_METHOD_LEAPFROG)
         return VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED;
     if (method == VSL_INIT_METHOD_SKIPAHEAD)
