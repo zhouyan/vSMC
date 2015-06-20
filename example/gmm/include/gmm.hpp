@@ -43,7 +43,7 @@
 #include <vsmc/smp/backend_@smp@.hpp>
 #include <vsmc/utility/program_option.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#ifdef VSMC_GMM_MPI
+#if VSMC_GMM_MPI
 #include <vsmc/mpi/backend_mpi.hpp>
 #endif
 
