@@ -29,9 +29,6 @@
 !  POSSIBILITY OF SUCH DAMAGE.
 ! ============================================================================
 
-!< \defgroup Fortran_API Fortran API
-!< @{
-
 module vsmc
     use, intrinsic :: iso_c_binding
     type vsmc_rng
@@ -1176,5 +1173,3 @@ module vsmc
         end subroutine vsmc_resample
     end interface
 end module vsmc
-
-!< @}

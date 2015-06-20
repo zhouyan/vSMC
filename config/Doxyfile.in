@@ -784,6 +784,7 @@ FILE_PATTERNS          = *.h \
                          *.c \
                          *.cpp \
                          *.cl \
+                         *.f90 \
                          *.md
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
