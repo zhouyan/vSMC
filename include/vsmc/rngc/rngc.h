@@ -37,7 +37,5 @@
 #include <vsmc/rngc/gammak1.h>
 #include <vsmc/rngc/normal01.h>
 #include <vsmc/rngc/u01.h>
-#include <vsmc/rngc/mkl_brng.h>
-#include <vsmc/rngc/random.h>
 
 #endif // VSMC_RNGC_RNGC_H

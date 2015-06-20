@@ -32,6 +32,229 @@
 #ifndef VSMC_VSMC_H
 #define VSMC_VSMC_H
 
-#include <vsmc/rngc/rngc.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/// \defgroup C_API C API
+/// \@{
+
+/// \defgroup C_API_RNG Random number generating
+/// \@{
+
+/// \brief `vsmc::RNG`
+typedef struct {
+    unsigned long long state[32];
+} vsmc_rng;
+
+/// \brief `sizeof(vsmc::RNG) + 4`
+int vsmc_rng_size();
+
+/// \brief `vsmc::RNG` constructor
+void vsmc_rng_init(vsmc_rng *rng_ptr, unsigned seed);
+
+/// \brief `vsmc::RNG::seed`
+void vsmc_rng_seed(vsmc_rng *rng_ptr, unsigned seed);
+
+/// \brief `vsmc::RNG::key`
+void vsmc_rng_get_key(vsmc_rng *rng_ptr, int n, unsigned *key);
+
+/// \brief `vsmc::RNG::key`
+void vsmc_rng_set_key(vsmc_rng *rng_ptr, int n, const unsigned *key);
+
+/// \brief `vsmc::RNG::ctr`
+void vsmc_rng_get_ctr(vsmc_rng *rng_ptr, int n, unsigned *ctr);
+
+/// \brief `vsmc::RNG::ctr`
+void vsmc_rng_set_ctr(vsmc_rng *rng_ptr, int n, const unsigned *ctr);
+
+/// \brief `vsmc::RNG::operator()`
+void vsmc_rng_rand(vsmc_rng *rng_ptr, int n, unsigned *r);
+
+/// \brief `std::uniform_int_distribution<int>`
+void vsmc_rng_uniform_int(vsmc_rng *rng_ptr, int n, int *r, int a, int b);
+
+/// \brief `std::uniform_real_distribution<double>`
+void vsmc_rng_uniform_real(
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
+
+/// \brief `vsmc::UniformRealDistribution<double, Closed, Closed>`
+void vsmc_rng_uniform_real_cc(
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
+
+/// \brief `vsmc::UniformRealDistribution<double, Closed, Open>`
+void vsmc_rng_uniform_real_co(
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
+
+/// \brief `vsmc::UniformRealDistribution<double, Open, Closed>`
+void vsmc_rng_uniform_real_oc(
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
+
+/// \brief `vsmc::UniformRealDistribution<double, Open, Open>`
+void vsmc_rng_uniform_real_oo(
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
+
+/// \brief `std::bernoulli_distribution`
+void vsmc_rng_bernoulli(vsmc_rng *rng_ptr, int n, int *r, double p);
+
+/// \brief `std::binomial_distribution<int>`
+void vsmc_rng_binomial(vsmc_rng *rng_ptr, int n, int *r, int t, double p);
+
+/// \brief `std::negative_binomial_distribution<int>`
+void vsmc_rng_negative_binomial(
+    vsmc_rng *rng_ptr, int n, int *r, int k, double p);
+
+/// \brief `std::geometri_distribution<int>`
+void vsmc_rng_geometric(vsmc_rng *rng_ptr, int n, int *r, double p);
+
+/// \brief `std::poisson_distribution<int>`
+void vsmc_rng_poisson(vsmc_rng *rng_ptr, int n, int *r, double mean);
+
+/// \brief `std::exponential_distribution<double>`
+void vsmc_rng_exponential(vsmc_rng *rng_ptr, int n, double *r, double rate);
+
+/// \brief `std::gamma_distribution<double>`
+void vsmc_rng_gamma(
+    vsmc_rng *rng_ptr, int n, double *r, double shape, double scale);
+
+/// \brief `std::weibull_distribution<double>`
+void vsmc_rng_weibull(
+    vsmc_rng *rng_ptr, int n, double *r, double shape, double scale);
+
+/// \brief `std::extreme_value_distribution<double>`
+void vsmc_rng_extreme_value(
+    vsmc_rng *rng_ptr, int n, double *r, double location, double scale);
+
+/// \brief `std::normal_distribution<double>`
+void vsmc_rng_normal(
+    vsmc_rng *rng_ptr, int n, double *r, double mean, double sd);
+
+/// \brief `std::lognormal_distribution<double>`
+void vsmc_rng_lognormal(
+    vsmc_rng *rng_ptr, int n, double *r, double logmean, double logsd);
+
+/// \brief `std::chi_squared_distribution<double>`
+void vsmc_rng_chi_squared(vsmc_rng *rng_ptr, int n, double *r, double df);
+
+/// \brief `std::cachy_distribution<double>`
+void vsmc_rng_cauchy(
+    vsmc_rng *rng_ptr, int n, double *r, double location, double scale);
+
+/// \brief `std::fisher_f_distribution<double>`
+void vsmc_rng_fisher_f(
+    vsmc_rng *rng_ptr, int n, double *r, double df1, double df2);
+
+/// \brief `std::student_t_distribution<double>`
+void vsmc_rng_student_t(vsmc_rng *rng_ptr, int n, double *r, double df);
+
+/// \brief `vsmc::StableDistribution<double>`
+void vsmc_rng_stable(vsmc_rng *rng_ptr, int n, double *r, double stability,
+    double skewness, double location, double scale);
+
+/// \brief `vsmc::DiscreteDistribution<int>`
+void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,
+    const double *weight, int normalized);
+
+/// \@}
+
+/// \defgroup C_API_MKL_BRNG Register MKL BRNG (`vsmc::mkl_brng`)
+/// \@{
+
+int vsmc_mkl_brng_mt19937(void);
+int vsmc_mkl_brng_minstd_rand0(void);
+int vsmc_mkl_brng_minstd_rand(void);
+int vsmc_mkl_brng_mt19937_64(void);
+int vsmc_mkl_brng_ranlux24_base(void);
+int vsmc_mkl_brng_ranlux48_base(void);
+int vsmc_mkl_brng_ranlux24(void);
+int vsmc_mkl_brng_ranlux48(void);
+int vsmc_mkl_brng_knuth_b(void);
+int vsmc_mkl_brng_xorshift1x32(void);
+int vsmc_mkl_brng_xorshift2x32(void);
+int vsmc_mkl_brng_xorshift4x32(void);
+int vsmc_mkl_brng_xorshift8x32(void);
+int vsmc_mkl_brng_xorshift16x32(void);
+int vsmc_mkl_brng_xorshift32x32(void);
+int vsmc_mkl_brng_xorshift64x32(void);
+int vsmc_mkl_brng_xorshift128x32(void);
+int vsmc_mkl_brng_xorshift1x64(void);
+int vsmc_mkl_brng_xorshift2x64(void);
+int vsmc_mkl_brng_xorshift4x64(void);
+int vsmc_mkl_brng_xorshift8x64(void);
+int vsmc_mkl_brng_xorshift16x64(void);
+int vsmc_mkl_brng_xorshift32x64(void);
+int vsmc_mkl_brng_xorshift64x64(void);
+int vsmc_mkl_brng_xorwow1x32(void);
+int vsmc_mkl_brng_xorwow2x32(void);
+int vsmc_mkl_brng_xorwow4x32(void);
+int vsmc_mkl_brng_xorwow8x32(void);
+int vsmc_mkl_brng_xorwow16x32(void);
+int vsmc_mkl_brng_xorwow32x32(void);
+int vsmc_mkl_brng_xorwow64x32(void);
+int vsmc_mkl_brng_xorwow128x32(void);
+int vsmc_mkl_brng_xorwow1x64(void);
+int vsmc_mkl_brng_xorwow2x64(void);
+int vsmc_mkl_brng_xorwow4x64(void);
+int vsmc_mkl_brng_xorwow8x64(void);
+int vsmc_mkl_brng_xorwow16x64(void);
+int vsmc_mkl_brng_xorwow32x64(void);
+int vsmc_mkl_brng_xorwow64x64(void);
+int vsmc_mkl_brng_philox2x32(void);
+int vsmc_mkl_brng_philox4x32(void);
+int vsmc_mkl_brng_philox2x64(void);
+int vsmc_mkl_brng_philox4x64(void);
+int vsmc_mkl_brng_threefry2x32(void);
+int vsmc_mkl_brng_threefry4x32(void);
+int vsmc_mkl_brng_threefry2x64(void);
+int vsmc_mkl_brng_threefry4x64(void);
+int vsmc_mkl_brng_threefry2x32avx2(void);
+int vsmc_mkl_brng_threefry4x32avx2(void);
+int vsmc_mkl_brng_threefry2x64avx2(void);
+int vsmc_mkl_brng_threefry4x64avx2(void);
+int vsmc_mkl_brng_threefry2x32sse2(void);
+int vsmc_mkl_brng_threefry4x32sse2(void);
+int vsmc_mkl_brng_threefry2x64sse2(void);
+int vsmc_mkl_brng_threefry4x64sse2(void);
+int vsmc_mkl_brng_aes128_1x32(void);
+int vsmc_mkl_brng_aes128_2x32(void);
+int vsmc_mkl_brng_aes128_4x32(void);
+int vsmc_mkl_brng_aes128_8x32(void);
+int vsmc_mkl_brng_aes128_1x64(void);
+int vsmc_mkl_brng_aes128_2x64(void);
+int vsmc_mkl_brng_aes128_4x64(void);
+int vsmc_mkl_brng_aes128_8x64(void);
+int vsmc_mkl_brng_aes192_1x32(void);
+int vsmc_mkl_brng_aes192_2x32(void);
+int vsmc_mkl_brng_aes192_4x32(void);
+int vsmc_mkl_brng_aes192_8x32(void);
+int vsmc_mkl_brng_aes192_1x64(void);
+int vsmc_mkl_brng_aes192_2x64(void);
+int vsmc_mkl_brng_aes192_4x64(void);
+int vsmc_mkl_brng_aes192_8x64(void);
+int vsmc_mkl_brng_aes256_1x32(void);
+int vsmc_mkl_brng_aes256_2x32(void);
+int vsmc_mkl_brng_aes256_4x32(void);
+int vsmc_mkl_brng_aes256_8x32(void);
+int vsmc_mkl_brng_aes256_1x64(void);
+int vsmc_mkl_brng_aes256_2x64(void);
+int vsmc_mkl_brng_aes256_4x64(void);
+int vsmc_mkl_brng_aes256_8x64(void);
+int vsmc_mkl_brng_ars_1x32(void);
+int vsmc_mkl_brng_ars_2x32(void);
+int vsmc_mkl_brng_ars_4x32(void);
+int vsmc_mkl_brng_ars_8x32(void);
+int vsmc_mkl_brng_ars_1x64(void);
+int vsmc_mkl_brng_ars_2x64(void);
+int vsmc_mkl_brng_ars_4x64(void);
+int vsmc_mkl_brng_ars_8x64(void);
+int vsmc_mkl_brng_rdrand16(void);
+int vsmc_mkl_brng_rdrand32(void);
+int vsmc_mkl_brng_rdrand64(void);
+
+/// \@}
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif // VSMC_VSMC_H

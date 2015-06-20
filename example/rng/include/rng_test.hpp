@@ -43,7 +43,7 @@
 #include <vsmc/utility/aligned_memory.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 #if VSMC_RNG_TEST_C_API
-#include <vsmc/rng/mkl_brng.hpp>
+#include <vsmc/vsmc.h>
 #endif
 
 #define VSMC_RNG_TEST_PRE(prog)                                               \

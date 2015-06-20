@@ -29,7 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rngc/mkl_brng.h>
+#include <vsmc/vsmc.h>
 #include <vsmc/rng/engine.hpp>
 
 #ifdef VSMC_DEFINE_RNG_C_API_ENGINE

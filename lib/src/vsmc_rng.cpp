@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/vsmc_random.cpp
+// vSMC/lib/src/vsmc_rng.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,9 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rngc/random.h>
+#include <vsmc/vsmc.h>
 #include <vsmc/rng/engine.hpp>
-#include <vsmc/rng/stable_distribution.hpp>
+#include <vsmc/rng/distribution.hpp>
 
 #define VSMC_DEFINE_RNG_RANDOM_DIST                                           \
     ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);                   \
@@ -64,35 +64,61 @@ extern "C" {
 
 int vsmc_rng_size() { return sizeof(::vsmc::RNG) + 4; }
 
-void vsmc_rng_init(vsmc_rng *rng_ptr, uint32_t seed)
+void vsmc_rng_init(vsmc_rng *rng_ptr, unsigned seed)
 {
     ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
     rng = ::vsmc::RNG(seed);
 }
 
-void vsmc_rng_seed(vsmc_rng *rng_ptr, uint32_t seed)
+void vsmc_rng_seed(vsmc_rng *rng_ptr, unsigned seed)
 {
     ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
     rng.seed(seed);
 }
 
-void vsmc_rng_key(vsmc_rng *rng_ptr, uint32_t key[4])
+void vsmc_rng_get_key(vsmc_rng *rng_ptr, int n, unsigned *key)
+{
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    typename ::vsmc::RNG::key_type k(rng.key());
+    std::size_t dst_size = static_cast<std::size_t>(n) * sizeof(unsigned);
+    std::size_t src_size = sizeof(typename ::vsmc::RNG::key_type);
+    std::size_t size = src_size < dst_size ? src_size : dst_size;
+    std::memcpy(key, k.data(), size);
+}
+
+void vsmc_rng_set_key(vsmc_rng *rng_ptr, int n, const unsigned *key)
 {
     ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
     typename ::vsmc::RNG::key_type k;
-    std::memcpy(k.data(), key, sizeof(uint32_t) * 4);
+    std::size_t src_size = static_cast<std::size_t>(n) * sizeof(unsigned);
+    std::size_t dst_size = sizeof(typename ::vsmc::RNG::key_type);
+    std::size_t size = src_size < dst_size ? src_size : dst_size;
+    std::memcpy(k.data(), key, size);
     rng.key(k);
 }
 
-void vsmc_rng_ctr(vsmc_rng *rng_ptr, uint32_t ctr[4])
+void vsmc_rng_get_ctr(vsmc_rng *rng_ptr, int n, unsigned *ctr)
+{
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    typename ::vsmc::RNG::ctr_type c(rng.ctr());
+    std::size_t dst_size = static_cast<std::size_t>(n) * sizeof(unsigned);
+    std::size_t src_size = sizeof(typename ::vsmc::RNG::ctr_type);
+    std::size_t size = src_size < dst_size ? src_size : dst_size;
+    std::memcpy(ctr, c.data(), size);
+}
+
+void vsmc_rng_set_ctr(vsmc_rng *rng_ptr, int n, const unsigned *ctr)
 {
     ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
     typename ::vsmc::RNG::ctr_type c;
-    std::memcpy(c.data(), ctr, sizeof(uint32_t) * 4);
+    std::size_t src_size = static_cast<std::size_t>(n) * sizeof(unsigned);
+    std::size_t dst_size = sizeof(typename ::vsmc::RNG::ctr_type);
+    std::size_t size = src_size < dst_size ? src_size : dst_size;
+    std::memcpy(c.data(), ctr, size);
     rng.ctr(c);
 }
 
-void vsmc_rng_gen(vsmc_rng *rng_ptr, int n, unsigned *r)
+void vsmc_rng_rand(vsmc_rng *rng_ptr, int n, unsigned *r)
 {
     ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
     for (int i = 0; i != n; ++i)
@@ -109,6 +135,38 @@ void vsmc_rng_uniform_real(
     vsmc_rng *rng_ptr, int n, double *r, double a, double b)
 {
     std::uniform_real_distribution<double> dist(a, b);
+    VSMC_DEFINE_RNG_RANDOM_DIST;
+}
+
+void vsmc_rng_uniform_real_cc(
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b)
+{
+    vsmc::UniformRealDistribution<double, ::vsmc::Closed, ::vsmc::Closed> dist(
+        a, b);
+    VSMC_DEFINE_RNG_RANDOM_DIST;
+}
+
+void vsmc_rng_uniform_real_co(
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b)
+{
+    vsmc::UniformRealDistribution<double, ::vsmc::Closed, ::vsmc::Open> dist(
+        a, b);
+    VSMC_DEFINE_RNG_RANDOM_DIST;
+}
+
+void vsmc_rng_uniform_real_oc(
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b)
+{
+    vsmc::UniformRealDistribution<double, ::vsmc::Open, ::vsmc::Closed> dist(
+        a, b);
+    VSMC_DEFINE_RNG_RANDOM_DIST;
+}
+
+void vsmc_rng_uniform_real_oo(
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b)
+{
+    vsmc::UniformRealDistribution<double, ::vsmc::Open, ::vsmc::Open> dist(
+        a, b);
     VSMC_DEFINE_RNG_RANDOM_DIST;
 }
 
@@ -216,6 +274,18 @@ void vsmc_rng_stable(vsmc_rng *rng_ptr, int n, double *r, double stability,
     ::vsmc::StableDistribution<double> dist(
         stability, skewness, location, scale);
     VSMC_DEFINE_RNG_RANDOM_DIST;
+}
+
+void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,
+    const double *weight, int normalized)
+{
+    ::vsmc::DiscreteDistribution<int> dist;
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    bool norm = normalized != 0;
+    const double *first = weight;
+    const double *last = weight + m;
+    for (int i = 0; i != n; ++i)
+        r[i] = dist(rng, first, last, norm);
 }
 
 } // extern "C"

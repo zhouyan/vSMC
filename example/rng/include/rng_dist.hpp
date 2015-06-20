@@ -37,9 +37,6 @@
 #include <vsmc/rng/uniform_real_distribution.hpp>
 #include <vsmc/rng/stable_distribution.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#if VSMC_RNG_TEST_C_API
-#include <vsmc/rngc/random.h>
-#endif
 
 #if VSMC_RNG_TEST_C_API
 #define VSMC_RNG_DIST_1(Dist, name, p1)                                       \
