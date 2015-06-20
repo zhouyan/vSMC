@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/resample/residual_stratified.hpp
+// vSMC/lib/src/vsmc_rng_cast.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,43 +29,30 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RESAMPLE_RESIDUAL_STRATIFIED_HPP
-#define VSMC_RESAMPLE_RESIDUAL_STRATIFIED_HPP
+#ifndef VSMC_LIB_RNG_CAST_HPP
+#define VSMC_LIB_RNG_CAST_HPP
 
-#include <vsmc/resample/internal/common.hpp>
-#include <vsmc/resample/transform.hpp>
+#include <vsmc/rng/engine.hpp>
 
 namespace vsmc
 {
 
-/// \brief Residual stratified resampling
-/// \ingroup Resample
-class ResampleResidualStratified
+namespace internal
 {
-    public:
-    template <typename IntType, typename RNGType>
-    void operator()(std::size_t M, std::size_t N, RNGType &rng,
-        const double *weight, IntType *replication)
-    {
-        Vector<IntType> integ(M);
-        Vector<double> resid(M);
-        std::size_t R =
-            resample_trans_residual(M, N, weight, resid.data(), integ.data());
-        U01SequenceStratified<RNGType> u01seq(R, rng);
-        resample_trans_u01_rep(M, R, resid.data(), u01seq, replication);
-        math::vAdd(M, replication, integ.data(), replication);
-    }
-}; // ResampleResidualStratified
 
-/// \brief Type trait of ResidualStratified scheme
-/// \ingroup Resample
-template <>
-class ResampleTypeTrait<ResidualStratified>
+inline RNG &rng_cast(vsmc_rng *rng_ptr)
 {
-    public:
-    using type = ResampleResidualStratified;
-}; // class ResampleTypeTrait
+    std::uintptr_t r = reinterpret_cast<std::uintptr_t>(rng_ptr->state) % 32;
+
+    if (r == 0)
+        return *(reinterpret_cast<::vsmc::RNG *>(rng_ptr->state));
+
+    return *(reinterpret_cast<::vsmc::RNG *>(
+        rng_ptr->state + (32 - r) / sizeof(unsigned)));
+}
+
+} // namespace internal
 
 } // namespace vsmc
 
-#endif // VSMC_RESAMPLE_RESIDUAL_STRATIFIED_HPP
+#endif // VSMC_LIB_RNG_CAST_HPP

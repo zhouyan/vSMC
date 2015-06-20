@@ -30,10 +30,11 @@
 //============================================================================
 
 #include <vsmc/vsmc.h>
+#include <vsmc/utility/aligned_memory.hpp>
 
 extern "C" {
 
-void *vsmc_malloc(size_t n, int alignemnt)
+void *vsmc_malloc(size_t n, int alignment)
 {
     return ::vsmc::AlignedMemory::aligned_malloc(
         n, static_cast<std::size_t>(alignment));

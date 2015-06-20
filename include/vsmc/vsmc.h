@@ -258,10 +258,39 @@ int vsmc_mkl_brng_rdrand64(void);
 /// \defgroup C_API_Memory Memory allocation
 /// \@{
 
-void *vsmc_malloc(size_t n, int alignemnt);
+void *vsmc_malloc(size_t n, int alignment);
 void vsmc_free(void *ptr);
 
 /// \@}
+
+/// \defgroup C_API_Resample Resample algorithms
+/// \@}
+
+void vsmc_resample_trans_u01_rep(
+    int m, int n, const double *weight, const double *u01, int *replication);
+void vsmc_resample_trans_u01_index(
+    int m, int n, const double *weight, const double *u01, int *src_idx);
+void vsmc_resample_trans_rep_index(
+    int m, int n, const int *replication, int *src_idx);
+void vsmc_resample_trans_index_rep(
+    int m, int n, const int *src_idx, int *replication);
+int vsmc_resample_trans_residual(
+    int m, int n, const double *weight, double *resid, int *integ);
+
+void vsmc_resample_multinomial(
+    int m, int n, vsmc_rng *rng_ptr, const double *weight, int *replication);
+void vsmc_resample_stratified(
+    int m, int n, vsmc_rng *rng_ptr, const double *weight, int *replication);
+void vsmc_resample_systematic(
+    int m, int n, vsmc_rng *rng_ptr, const double *weight, int *replication);
+void vsmc_resample_residual(
+    int m, int n, vsmc_rng *rng_ptr, const double *weight, int *replication);
+void vsmc_resample_residual_stratified(
+    int m, int n, vsmc_rng *rng_ptr, const double *weight, int *replication);
+void vsmc_resample_residual_systematic(
+    int m, int n, vsmc_rng *rng_ptr, const double *weight, int *replication);
+
+/// \@{
 
 #ifdef __cplusplus
 } // extern "C"

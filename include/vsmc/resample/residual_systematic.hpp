@@ -50,7 +50,7 @@ class ResampleResidualSystematic
         Vector<IntType> integ(M);
         Vector<double> resid(M);
         std::size_t R =
-            trans_residual(M, N, weight, resid.data(), integ.data());
+            resample_trans_residual(M, N, weight, resid.data(), integ.data());
         U01SequenceSystematic<RNGType> u01seq(R, rng);
         resample_trans_u01_rep(M, R, resid.data(), u01seq, replication);
         math::vAdd(M, replication, integ.data(), replication);

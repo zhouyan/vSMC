@@ -67,7 +67,7 @@ inline void resample_trans_u01_rep(std::size_t M, std::size_t N,
             ++j;
         }
     }
-    replication[M - 1] = N - j;
+    replication[M - 1] = static_cast<IntType>(N - j);
 }
 
 /// \brief Transform uniform [0, 1] sequence into parent indices
@@ -152,7 +152,7 @@ inline void resample_trans_index_rep(std::size_t M, std::size_t N,
 /// and return the number of remaining elements to be resampled
 /// \ingroup Resample
 template <typename IntType>
-inline std::size_t trans_residual(std::size_t M, std::size_t N,
+inline std::size_t resample_trans_residual(std::size_t M, std::size_t N,
     const double *weight, double *resid, IntType *integ)
 {
     double integral = 0;

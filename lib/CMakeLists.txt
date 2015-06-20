@@ -32,7 +32,10 @@
 PROJECT (vSMCLib C CXX)
 
 SET (VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
-    ${PROJECT_SOURCE_DIR}/src/vsmc_rng.cpp)
+    ${PROJECT_SOURCE_DIR}/src/vsmc_memory.cpp
+    ${PROJECT_SOURCE_DIR}/src/vsmc_resample.cpp
+    ${PROJECT_SOURCE_DIR}/src/vsmc_rng.cpp
+    )
 
 IF (MKL_FOUND)
     SET (VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
