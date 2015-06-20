@@ -42,18 +42,16 @@ FUNCTION (ADD_RNG_TEST name)
     ADD_VSMC_EXECUTABLE (rng_${name}
         ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp)
     ADD_DEPENDENCIES (rng rng_${name})
-    IF (MKL_FOUND AND VSMC_ENABLE_LIBRARY)
-        ADD_VSMC_EXECUTABLE (rng_${name}_brng
+    IF (VSMC_ENABLE_LIBRARY AND MKL_FOUND)
+        ADD_VSMC_EXECUTABLE (rng_${name}_c
             ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp)
-        SET_TARGET_PROPERTIES (rng_${name}_brng PROPERTIES COMPILE_FLAGS
-            "-DVSMC_RNG_TEST_BRNG=1")
-        TARGET_LINK_LIBRARIES (rng_${name}_brng libvsmc)
-        ADD_DEPENDENCIES (rng rng_${name}_brng)
-    ENDIF (MKL_FOUND AND VSMC_ENABLE_LIBRARY)
+        SET_TARGET_PROPERTIES (rng_${name}_c PROPERTIES COMPILE_FLAGS
+            "-DVSMC_RNG_TEST_C_API=1")
+        ADD_DEPENDENCIES (rng rng_${name}_c)
+    ENDIF (VSMC_ENABLE_LIBRARY AND MKL_FOUND)
 ENDFUNCTION (ADD_RNG_TEST)
 
-ADD_VSMC_EXECUTABLE (rng_dist ${PROJECT_SOURCE_DIR}/src/rng_dist.cpp)
-ADD_DEPENDENCIES (rng rng_dist)
+ADD_RNG_TEST(dist)
 
 ADD_RNG_TEST(std)
 ADD_RNG_TEST(philox)

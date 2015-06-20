@@ -70,8 +70,8 @@ __kernel void cv_init(__global cv *state, __global ulong *accept,
     const fp_type sd_vel0 = 1;
     cv sp = state[i];
 
-    vsmc_rng rng;
-    vsmc_rng_init(&rng, SEED + i);
+    vsmc_crng rng;
+    vsmc_crng_init(&rng, SEED + i);
     rng.ctr.v[1] = i;
     vsmc_normal01 rnorm;
     vsmc_normal01_init(&rnorm, &rng);
@@ -101,8 +101,8 @@ __kernel void cv_move(ulong iter, __global cv *state, __global ulong *accept,
     const fp_type delta = 0.1F;
     cv sp = state[i];
 
-    vsmc_rng rng;
-    vsmc_rng_init(&rng, SEED + i);
+    vsmc_crng rng;
+    vsmc_crng_init(&rng, SEED + i);
     rng.ctr.v[1] = i;
     vsmc_normal01 rnorm;
     vsmc_normal01_init(&rnorm, &rng);

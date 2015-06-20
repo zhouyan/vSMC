@@ -55,7 +55,7 @@
 
 #define VSMC_DEFINE_RNGC_GAMMAK1_INIT(F, FT)                                  \
     VSMC_STATIC_INLINE void vsmc_gammak1_f##F##_init(                         \
-        vsmc_gammak1_f##F *rgamma, vsmc_rng *rng, FT shape)                   \
+        vsmc_gammak1_f##F *rgamma, vsmc_crng *rng, FT shape)                  \
     {                                                                         \
         rgamma->c_shape = shape;                                              \
         vsmc_normal01_f##F##_init(&(rgamma->rnorm), rng);                     \
@@ -115,7 +115,7 @@
 
 #define VSMC_DEFINE_RNGC_GAMMAK1_RAND(F, FT)                                  \
     VSMC_STATIC_INLINE FT vsmc_gammak1_f##F##_rand(                           \
-        vsmc_gammak1_f##F *rgamma, vsmc_rng *rng)                             \
+        vsmc_gammak1_f##F *rgamma, vsmc_crng *rng)                            \
     {                                                                         \
         const FT c_shape = rgamma->c_shape;                                   \
         const FT c_s2 = rgamma->c_s2;                                         \
@@ -133,7 +133,7 @@
             return 0;                                                         \
                                                                               \
         if (!(c_shape < 1) && !(c_shape > 1)) {                               \
-            FT u = vsmc_u01_open_open_u32_f##F(vsmc_rng_rand(rng));           \
+            FT u = vsmc_u01_open_open_u32_f##F(vsmc_crng_rand(rng));          \
             return -VSMC_LOG_F##F(u);                                         \
         }                                                                     \
                                                                               \
@@ -141,8 +141,8 @@
             const FT c_exp_m1 = VSMC_F##F##_C(0.3678794411714423);            \
             FT b = 1 + c_exp_m1 * c_shape;                                    \
             while (1) {                                                       \
-                FT u = vsmc_u01_open_open_u32_f##F(vsmc_rng_rand(rng));       \
-                FT v = vsmc_u01_open_open_u32_f##F(vsmc_rng_rand(rng));       \
+                FT u = vsmc_u01_open_open_u32_f##F(vsmc_crng_rand(rng));      \
+                FT v = vsmc_u01_open_open_u32_f##F(vsmc_crng_rand(rng));      \
                 FT p = b * u;                                                 \
                 FT e = -VSMC_LOG_F##F(v);                                     \
                 if (p >= 1) {                                                 \
@@ -162,7 +162,7 @@
         if (t >= 0)                                                           \
             return x * x;                                                     \
                                                                               \
-        FT u = vsmc_u01_open_open_u32_f##F(vsmc_rng_rand(rng));               \
+        FT u = vsmc_u01_open_open_u32_f##F(vsmc_crng_rand(rng));              \
         if (c_d * u <= t * t * t)                                             \
             return x * x;                                                     \
                                                                               \
@@ -196,8 +196,8 @@
         }                                                                     \
                                                                               \
         while (1) {                                                           \
-            FT e = vsmc_u01_open_open_u32_f##F(vsmc_rng_rand(rng));           \
-            u = vsmc_u01_open_open_u32_f##F(vsmc_rng_rand(rng));              \
+            FT e = vsmc_u01_open_open_u32_f##F(vsmc_crng_rand(rng));          \
+            u = vsmc_u01_open_open_u32_f##F(vsmc_crng_rand(rng));             \
             e = -VSMC_LOG_F##F(e);                                            \
             u = u + u - 1;                                                    \
             t = u < 0 ? c_b - c_si * e : c_b + c_si * e;                      \

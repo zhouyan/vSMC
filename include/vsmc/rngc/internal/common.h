@@ -103,20 +103,20 @@ typedef ulong uint64_t;
 
 /// \brief Default RNG state
 /// \ingroup RNGC
-#ifndef vsmc_rng
-#define vsmc_rng vsmc_philox2x32
+#ifndef vsmc_crng
+#define vsmc_crng vsmc_philox2x32
 #endif
 
 /// \brief Initialize default RNG state
 /// \ingroup RNGC
-#ifndef vsmc_rng_init
-#define vsmc_rng_init vsmc_philox2x32_init
+#ifndef vsmc_crng_init
+#define vsmc_crng_init vsmc_philox2x32_init
 #endif
 
 /// \brief Generate random 32-bits integers from default RNG
 /// \ingroup RNGC
-#ifndef vsmc_rng_rand
-#define vsmc_rng_rand vsmc_philox2x32_rand
+#ifndef vsmc_crng_rand
+#define vsmc_crng_rand vsmc_philox2x32_rand
 #endif
 
 #endif // VSMC_RNGC_INTERNAL_COMMON_H

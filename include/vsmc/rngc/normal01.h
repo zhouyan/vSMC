@@ -55,16 +55,16 @@
 
 #define VSMC_DEFINE_RNGC_NORMAL01_INIT(F, FT)                                 \
     VSMC_STATIC_INLINE void vsmc_normal01_f##F##_init(                        \
-        vsmc_normal01_f##F *rnorm, vsmc_rng *rng)                             \
+        vsmc_normal01_f##F *rnorm, vsmc_crng *rng)                            \
     {                                                                         \
-        rnorm->u1 = vsmc_u01_open_closed_u32_f##F(vsmc_rng_rand(rng));        \
-        rnorm->u2 = vsmc_u01_open_closed_u32_f##F(vsmc_rng_rand(rng));        \
+        rnorm->u1 = vsmc_u01_open_closed_u32_f##F(vsmc_crng_rand(rng));       \
+        rnorm->u2 = vsmc_u01_open_closed_u32_f##F(vsmc_crng_rand(rng));       \
         rnorm->saved = 1;                                                     \
     }
 
 #define VSMC_DEFINE_RNGC_NORMAL01_RAND(F, FT)                                 \
     VSMC_STATIC_INLINE FT vsmc_normal01_f##F##_rand(                          \
-        vsmc_normal01_f##F *rnorm, vsmc_rng *rng)                             \
+        vsmc_normal01_f##F *rnorm, vsmc_crng *rng)                            \
     {                                                                         \
         const FT c_2pi = VSMC_F##F##_C(6.2831853071795865);                   \
         if (rnorm->saved) {                                                   \

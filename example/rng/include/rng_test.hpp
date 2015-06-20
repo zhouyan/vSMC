@@ -32,8 +32,8 @@
 #ifndef VSMC_EXAMPLE_RNG_TEST_HPP
 #define VSMC_EXAMPLE_RNG_TEST_HPP
 
-#ifndef VSMC_RNG_TEST_BRNG
-#define VSMC_RNG_TEST_BRNG 0
+#ifndef VSMC_RNG_TEST_C_API
+#define VSMC_RNG_TEST_C_API 0
 #endif
 
 #ifndef VSMC_RNG_TEST_MKL
@@ -42,12 +42,12 @@
 
 #include <vsmc/utility/aligned_memory.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#if VSMC_RNG_TEST_BRNG
+#if VSMC_RNG_TEST_C_API
 #include <vsmc/rng/mkl_brng.hpp>
 #endif
 
 #define VSMC_RNG_TEST_PRE(prog)                                               \
-    std::size_t N = 1000000;                                                  \
+    std::size_t N = 100;                                                  \
     std::string prog_name(#prog);                                             \
     if (argc > 1)                                                             \
         N = static_cast<std::size_t>(std::atoi(argv[1]));                     \
@@ -72,14 +72,14 @@ inline void rng_test(std::size_t N, const std::string &name,
     result_type result = 0;
     const std::size_t nbytes = N * sizeof(result_type);
 
-#if VSMC_RNG_TEST_BRNG && VSMC_RNG_TEST_MKL
+#if VSMC_RNG_TEST_C_API && VSMC_RNG_TEST_MKL
     RNGType rng;
     vsmc::Vector<result_type> r(N);
     watch.start();
     rng.uniform_bits(static_cast<MKL_INT>(N), r.data());
     watch.stop();
     result = r.back();
-#elif VSMC_RNG_TEST_BRNG && !VSMC_RNG_TEST_MKL
+#elif VSMC_RNG_TEST_C_API && !VSMC_RNG_TEST_MKL
     MKL_INT brng = vsmc::mkl_brng<RNGType>();
     const std::size_t M = nbytes / sizeof(unsigned);
     vsmc::Vector<unsigned> r(M);
@@ -99,14 +99,14 @@ inline void rng_test(std::size_t N, const std::string &name,
     result = rng();
 #endif
 
-    std::ofstream rnd("rnd");
-    rnd << result << std::endl;
-    rnd.close();
-
     names.push_back(name);
     size.push_back(sizeof(RNGType));
     sw.push_back(watch);
     bytes.push_back(nbytes);
+
+    std::ofstream rnd("rnd");
+    rnd << result << std::endl;
+    rnd.close();
 }
 
 inline void rng_output_sw(const std::string &prog_name,

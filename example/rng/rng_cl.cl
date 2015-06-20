@@ -155,8 +155,8 @@ __kernel void kernel_Normal01(ulong n, __global fp_type *buffer)
     if (i >= n)
         return;
 
-    vsmc_rng rng;
-    vsmc_rng_init(&rng, i);
+    vsmc_crng rng;
+    vsmc_crng_init(&rng, i);
     vsmc_normal01 dist;
     vsmc_normal01_init(&dist, &rng);
 
@@ -169,8 +169,8 @@ __kernel void kernel_GammaK1(ulong n, __global fp_type *buffer, fp_type shape)
     if (i >= n)
         return;
 
-    vsmc_rng rng;
-    vsmc_rng_init(&rng, i);
+    vsmc_crng rng;
+    vsmc_crng_init(&rng, i);
     vsmc_gammak1 dist;
     vsmc_gammak1_init(&dist, &rng, shape);
 

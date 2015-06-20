@@ -32,7 +32,6 @@
 #ifndef VSMC_VSMC_H
 #define VSMC_VSMC_H
 
-#include <vsmc/rngc/mkl_brng.h>
-#include <vsmc/rngc/random.h>
+#include <vsmc/rngc/rngc.h>
 
 #endif // VSMC_VSMC_H

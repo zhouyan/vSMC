@@ -111,8 +111,8 @@ inline double rng_cl_normal01(std::size_t N, float *c)
 {
     vsmc::StopWatch watch;
 
-    vsmc_rng rng;
-    vsmc_rng_init(&rng, 1);
+    vsmc_crng rng;
+    vsmc_crng_init(&rng, 1);
     vsmc_normal01_f32 norm01;
     vsmc_normal01_f32_init(&norm01, &rng);
     watch.reset();
@@ -128,8 +128,8 @@ inline double rng_cl_normal01(std::size_t N, double *c)
 {
     vsmc::StopWatch watch;
 
-    vsmc_rng rng;
-    vsmc_rng_init(&rng, 1);
+    vsmc_crng rng;
+    vsmc_crng_init(&rng, 1);
     vsmc_normal01_f64 norm01;
     vsmc_normal01_f64_init(&norm01, &rng);
     watch.reset();
@@ -190,8 +190,8 @@ inline double rng_cl_gammak1(std::size_t N, float *c, float shape)
 {
     vsmc::StopWatch watch;
 
-    vsmc_rng rng;
-    vsmc_rng_init(&rng, 1);
+    vsmc_crng rng;
+    vsmc_crng_init(&rng, 1);
     vsmc_gammak1_f32 gammak1;
     vsmc_gammak1_f32_init(&gammak1, &rng, shape);
     watch.reset();
@@ -207,8 +207,8 @@ inline double rng_cl_gammak1(std::size_t N, double *c, double shape)
 {
     vsmc::StopWatch watch;
 
-    vsmc_rng rng;
-    vsmc_rng_init(&rng, 1);
+    vsmc_crng rng;
+    vsmc_crng_init(&rng, 1);
     vsmc_gammak1_f64 gammak1;
     vsmc_gammak1_f64_init(&gammak1, &rng, shape);
     watch.reset();
