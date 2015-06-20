@@ -74,8 +74,6 @@ class CLBase
 
     pointer get() const { return ptr_.get(); }
 
-    pointer ptr() const { return ptr_.get(); }
-
     long use_count() const { return ptr_.use_count(); }
 
     bool unique() const { return ptr_.unique(); }

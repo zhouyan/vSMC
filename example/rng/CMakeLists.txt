@@ -36,27 +36,25 @@ ADD_CUSTOM_TARGET (rng)
 ADD_DEPENDENCIES (example rng)
 
 ADD_CUSTOM_TARGET (rng-files)
-ADD_DEPENDENCIES (rng rng-files)
-
-ADD_CUSTOM_TARGET (rng-check)
-ADD_DEPENDENCIES (check rng-check)
-
-ADD_CUSTOM_TARGET (rng-pdf)
-ADD_DEPENDENCIES (pdf rng-pdf)
+ADD_DEPENDENCIES (example-files rng-files)
 
 FUNCTION (ADD_RNG_TEST name)
     ADD_VSMC_EXECUTABLE (rng_${name}
-        ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp ${ARGN})
+        ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp)
     ADD_DEPENDENCIES (rng rng_${name})
-    ADD_CUSTOM_TARGET (rng_${name}-check
-        COMMAND rng_${name} ">>rng.out"
-        DEPENDS rng_${name}
-        COMMENT "Running rng_${name}"
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-    ADD_DEPENDENCIES (rng-check rng_${name}-check)
+    IF (MKL_FOUND AND VSMC_ENABLE_LIBRARY)
+        ADD_VSMC_EXECUTABLE (rng_${name}_brng
+            ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp)
+        SET_TARGET_PROPERTIES (rng_${name}_brng PROPERTIES COMPILE_FLAGS
+            "-DVSMC_RNG_TEST_BRNG=1")
+        TARGET_LINK_LIBRARIES (rng_${name}_brng libvsmc)
+        ADD_DEPENDENCIES (rng rng_${name}_brng)
+    ENDIF (MKL_FOUND AND VSMC_ENABLE_LIBRARY)
 ENDFUNCTION (ADD_RNG_TEST)
 
-ADD_RNG_TEST(dist)
+ADD_VSMC_EXECUTABLE (rng_dist ${PROJECT_SOURCE_DIR}/src/rng_dist.cpp)
+ADD_DEPENDENCIES (rng rng_dist)
+
 ADD_RNG_TEST(std)
 ADD_RNG_TEST(philox)
 ADD_RNG_TEST(threefry)
@@ -72,7 +70,7 @@ IF (RDRAND_FOUND)
 ENDIF (RDRAND_FOUND)
 
 IF (MKL_FOUND)
-    ADD_RNG_TEST(mkl "MKL")
+    ADD_RNG_TEST(mkl)
 ENDIF (MKL_FOUND)
 
 IF (OPENCL_FOUND)
@@ -82,17 +80,4 @@ IF (OPENCL_FOUND)
         ${PROJECT_SOURCE_DIR}/src/rng_cl.cpp "OCL" "HDF5")
     ADD_DEPENDENCIES (rng rng_cl)
     ADD_DEPENDENCIES (example_cl rng_cl)
-    ADD_CUSTOM_TARGET (rng_cl-check
-        DEPENDS rng_cl rng-files
-        COMMAND rng_cl "1000" "float"
-        "vSMCOpenCLDefault" "vSMCOpenCLDefault" "vSMCOpenCLDefault"
-        "-I ${VSMC_INCLUDE_DIR}" ">>rng_cl.out"
-        COMMENT "Running rng_cl"
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-    ADD_CUSTOM_TARGET (rng_cl-pdf
-        DEPENDS rng-files rng_cl-check
-        COMMAND Rscript "${PROJECT_BINARY_DIR}/rng_cl.R"
-        COMMENT "Plotting rng_cl-check results"
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-    ADD_DEPENDENCIES (pdf rng_cl-pdf)
 ENDIF (OPENCL_FOUND)

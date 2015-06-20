@@ -204,8 +204,6 @@ class MKLBase
 
     pointer get() const { return ptr_.get(); }
 
-    pointer ptr() const { return ptr_.get(); }
-
     deleter_type &get_deleter() { return ptr_.get_deleter(); }
     const deleter_type &get_deleter() const { return ptr_.get_deleter(); }
 

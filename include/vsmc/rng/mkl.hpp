@@ -77,7 +77,7 @@ class MKLUniformBits<32>
     static void eval(MKLStream<BRNG> &stream, MKL_INT n, unsigned *r)
     {
         int status = ::viRngUniformBits32(
-            VSL_RNG_METHOD_UNIFORMBITS32_STD, stream.ptr(), n, r);
+            VSL_RNG_METHOD_UNIFORMBITS32_STD, stream.get(), n, r);
         mkl_error_check(
             status, "MKLUniformBits::eval", "::viRngUniformBits32");
     }
@@ -91,7 +91,7 @@ class MKLUniformBits<64>
     static void eval(MKLStream<BRNG> &stream, MKL_INT n, unsigned MKL_INT64 *r)
     {
         int status = ::viRngUniformBits64(
-            VSL_RNG_METHOD_UNIFORMBITS64_STD, stream.ptr(), n, r);
+            VSL_RNG_METHOD_UNIFORMBITS64_STD, stream.get(), n, r);
         mkl_error_check(
             status, "MKLUniformBits::eval", "::viRngUniformBits64");
     }
@@ -108,7 +108,7 @@ class MKLDiscardSkipAhead
         if (nskip == 0)
             return;
 
-        int status = ::vslSkipAheadStream(stream.ptr(), nskip);
+        int status = ::vslSkipAheadStream(stream.get(), nskip);
         mkl_error_check(
             status, "MKLDiscardSkipAhead::skip", "::vslSkipAheadStream");
     }
@@ -234,12 +234,16 @@ class MKLEngine
     {
         if (index_ == buffer_size_) {
             buffer_.resize(static_cast<std::size_t>(buffer_size_));
-            internal::MKLUniformBits<Bits>::eval(
-                stream_, buffer_size_, buffer_.data());
+            uniform_bits(buffer_size_, buffer_.data());
             index_ = 0;
         }
 
         return buffer_[static_cast<std::size_t>(index_++)];
+    }
+
+    void uniform_bits(MKL_INT n, result_type *r)
+    {
+        internal::MKLUniformBits<Bits>::eval(stream_, n, r);
     }
 
     /// \brief Discard results

@@ -39,9 +39,10 @@ extern "C" {
 #endif
 
 typedef struct {
-    uint64_t state[128];
+    uint64_t state[32];
 } vsmc_rng;
 
+int vsmc_rng_size();
 void vsmc_rng_init(vsmc_rng *, uint32_t);
 void vsmc_rng_seed(vsmc_rng *, uint32_t);
 void vsmc_rng_key(vsmc_rng *, uint32_t[4]);

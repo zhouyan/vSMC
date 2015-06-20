@@ -32,8 +32,15 @@
 module vsmc_random
     use, intrinsic :: iso_c_binding
     type, bind(c) :: vsmc_rng
-        integer(kind = c_int64_t), dimension(128) :: state
+        integer(kind = c_int64_t), dimension(24) :: state
     end type vsmc_rng
+
+    interface
+        function vsmc_rng_size() bind(c)
+            use, intrinsic :: iso_c_binding
+            integer(kind = c_int) :: vsmc_rng_size
+        end function vsmc_rng_size()
+    end interface
 
     interface
         subroutine vsmc_rng_init(rng, seed) bind(c)

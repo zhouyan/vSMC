@@ -32,9 +32,17 @@
 #ifndef VSMC_EXAMPLE_RNG_TEST_HPP
 #define VSMC_EXAMPLE_RNG_TEST_HPP
 
+#ifndef VSMC_RNG_TEST_BRNG
+#define VSMC_RNG_TEST_BRNG 0
+#endif
+
+#ifndef VSMC_RNG_TEST_MKL
+#define VSMC_RNG_TEST_MKL 0
+#endif
+
 #include <vsmc/utility/aligned_memory.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#if VSMC_HAS_MKL && VSMC_HAS_RUNTIME_LIBRARY && !defined(VSMC_RNG_TEST_MKL)
+#if VSMC_RNG_TEST_BRNG
 #include <vsmc/rng/mkl_brng.hpp>
 #endif
 
@@ -60,43 +68,45 @@ inline void rng_test(std::size_t N, const std::string &name,
 {
     typedef typename RNGType::result_type result_type;
 
-    RNGType rng;
     vsmc::StopWatch watch;
     result_type result = 0;
     const std::size_t nbytes = N * sizeof(result_type);
 
-    watch.reset();
+#if VSMC_RNG_TEST_BRNG && VSMC_RNG_TEST_MKL
+    RNGType rng;
+    vsmc::Vector<result_type> r(N);
     watch.start();
-    for (std::size_t i = 0; i != N; ++i)
-        result += rng();
+    rng.uniform_bits(static_cast<MKL_INT>(N), r.data());
     watch.stop();
-    names.push_back(name);
-    size.push_back(sizeof(RNGType));
-    sw.push_back(watch);
-    bytes.push_back(nbytes);
-
-#if VSMC_HAS_MKL && VSMC_HAS_RUNTIME_LIBRARY && !defined(VSMC_RNG_TEST_MKL)
+    result = r.back();
+#elif VSMC_RNG_TEST_BRNG && !VSMC_RNG_TEST_MKL
+    MKL_INT brng = vsmc::mkl_brng<RNGType>();
     const std::size_t M = nbytes / sizeof(unsigned);
     vsmc::Vector<unsigned> r(M);
     VSLStreamStatePtr stream = nullptr;
-    MKL_INT brng = vsmc::mkl_brng<RNGType>();
     vslNewStream(&stream, brng, 1);
-    watch.reset();
     watch.start();
     viRngUniformBits(VSL_RNG_METHOD_UNIFORMBITS_STD, stream,
         static_cast<MKL_INT>(M), r.data());
     watch.stop();
-    names.push_back(name + " (MKL Stream)");
-    size.push_back(sizeof(RNGType));
-    sw.push_back(watch);
-    bytes.push_back(nbytes);
-
-    result += static_cast<result_type>(r.back());
+    result = static_cast<result_type>(r.back());
+#else
+    RNGType rng;
+    watch.start();
+    for (std::size_t i = 0; i != N; ++i)
+        rng();
+    watch.stop();
+    result = rng();
 #endif
 
     std::ofstream rnd("rnd");
     rnd << result << std::endl;
     rnd.close();
+
+    names.push_back(name);
+    size.push_back(sizeof(RNGType));
+    sw.push_back(watch);
+    bytes.push_back(nbytes);
 }
 
 inline void rng_output_sw(const std::string &prog_name,

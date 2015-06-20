@@ -62,6 +62,8 @@ inline RNG &rng_cast(vsmc_rng *rng_ptr)
 
 extern "C" {
 
+int vsmc_rng_size() { return sizeof(::vsmc::RNG) + 4; }
+
 void vsmc_rng_init(vsmc_rng *rng_ptr, uint32_t seed)
 {
     ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
