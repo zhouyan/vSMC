@@ -51,9 +51,9 @@ static const std::size_t ParticleNum = 1000;
 static const std::size_t StateSize = 4 * sizeof(cl_float);
 
 #ifdef VSMC_PF_CL_MPI
-typedef vsmc::StateMPI<vsmc::StateCL<StateSize, cl_float>> cv_base;
+using cv_base = vsmc::StateMPI<vsmc::StateCL<StateSize, cl_float>>;
 #else
-typedef vsmc::StateCL<StateSize, cl_float> cv_base;
+using cv_base = vsmc::StateCL<StateSize, cl_float>;
 #endif
 
 class cv : public cv_base

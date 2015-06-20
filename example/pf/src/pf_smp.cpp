@@ -31,4 +31,4 @@
 
 #include "pf_@smp@.hpp"
 
-int main(int argc, char **argv) { PF_MAIN; }
+int main(int argc, char **argv) { pf_main(argc, argv); }

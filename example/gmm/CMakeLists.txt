@@ -1,5 +1,5 @@
 # ============================================================================
-#  vSMC/example/paper/paper_pf.R
+#  vSMC/example/gmm/CMakeLists.txt
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
@@ -29,19 +29,15 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-suppressPackageStartupMessages(library(ggplot2))
+PROJECT (vSMCExample-gmm CXX)
+INCLUDE_DIRECTORIES (${PROJECT_BINARY_DIR}/include)
+INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
 
-pf.data <- read.table("paper_pf.data", header = FALSE)
-pf.est <- read.table("paper_pf.est", header = TRUE)
-pf.plot.data <- data.frame(
-    x = c(pf.est$pos.1, pf.data$V1),
-    y = c(pf.est$pos.2, pf.data$V2),
-    Data = ordered(c(rep("Estimates", 100), rep("Observations", 100)),
-        levels = c("Estimates", "Observations")))
-pf.plot <- ggplot(pf.plot.data) + aes(x = x, y = y, group = Data,
-    color = Data, linetype = Data) + geom_line() + geom_point() +
-    xlab("X position") + ylab("Y position") + theme_bw()
+SET (GMM smp)
+IF (VSMC_MPI_FOUND)
+    SET (GMM ${GMM}; mpi)
+ENDIF (VSMC_MPI_FOUND)
 
-pdf("pf.pdf", width = 8, height = 5)
-print(pf.plot)
-GC <- dev.off()
+ADD_SMP_EXAMPLE (gmm "${GMM}")
+
+COPY_FILE (gmm gmm.data)

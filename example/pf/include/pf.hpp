@@ -34,38 +34,20 @@
 #define VSMC_EXAMPLE_PF_@SMP@_HPP
 // clang-format on
 
+#ifndef VSMC_PF_MPI
+#define VSMC_PF_MPI 0
+#endif
+
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/state_matrix.hpp>
 #include <vsmc/smp/backend_@smp@.hpp>
+#include <vsmc/utility/stop_watch.hpp>
 #if VSMC_HAS_HDF5
 #include <vsmc/utility/hdf5io.hpp>
-#include <vsmc/utility/stop_watch.hpp>
 #endif
-#ifdef VSMC_PF_MPI
+#if VSMC_PF_MPI
 #include <vsmc/mpi/backend_mpi.hpp>
 #endif
-
-#define PF_CV_DO(Res)                                                         \
-    cv_do<vsmc::RowMajor>(vsmc::Res, argv, "." #Res ".row");                  \
-    cv_do<vsmc::ColMajor>(vsmc::Res, argv, "." #Res ".col");
-
-#define PF_MAIN                                                               \
-    if (argc < 3) {                                                           \
-        std::cout << "Usage: " << argv[0] << " <input file>"                  \
-                  << " <output file>" << std::endl;                           \
-        return -1;                                                            \
-    }                                                                         \
-    PF_CV_DO(Multinomial);                                                    \
-    PF_CV_DO(Stratified);                                                     \
-    PF_CV_DO(Systematic);                                                     \
-    PF_CV_DO(Residual);                                                       \
-    PF_CV_DO(ResidualStratified);                                             \
-    PF_CV_DO(ResidualSystematic);                                             \
-    return 0;
-
-#define PF_MAIN_MPI                                                           \
-    vsmc::MPIEnvironment env(argc, argv);                                     \
-    PF_MAIN;
 
 // clang-format off
 template <typename T>
@@ -89,7 +71,7 @@ static const std::size_t VelX = 2;
 static const std::size_t VelY = 3;
 static const std::size_t LogL = 4;
 
-#ifdef VSMC_PF_MPI
+#if VSMC_PF_MPI
 template <vsmc::MatrixOrder Order>
 using StateBase =
     vsmc::StateMPI<StateSMP<vsmc::StateMatrix<Order, 5, double>>>;
@@ -99,12 +81,12 @@ using StateBase = StateSMP<vsmc::StateMatrix<Order, 5, double>>;
 #endif
 
 template <vsmc::MatrixOrder Order>
-class cv_state : public StateBase<Order>
+class pf_state : public StateBase<Order>
 {
     public:
-    typedef typename StateBase<Order>::size_type size_type;
+    using size_type = typename StateBase<Order>::size_type;
 
-    cv_state(size_type N) : StateBase<Order>(N) {}
+    pf_state(size_type N) : StateBase<Order>(N) {}
 
     double &obs_x(std::size_t iter) { return obs_x_[iter]; }
     double &obs_y(std::size_t iter) { return obs_y_[iter]; }
@@ -142,12 +124,10 @@ class cv_state : public StateBase<Order>
 };
 
 template <vsmc::MatrixOrder Order>
-class cv_init : public InitializeSMP<cv_state<Order>, cv_init<Order>>
+class pf_init : public InitializeSMP<pf_state<Order>, pf_init<Order>>
 {
     public:
-    typedef cv_state<Order> cv;
-
-    std::size_t eval_sp(vsmc::SingleParticle<cv> sp) const
+    std::size_t eval_sp(vsmc::SingleParticle<pf_state<Order>> sp) const
     {
         const double sd_pos0 = 2;
         const double sd_vel0 = 1;
@@ -163,12 +143,13 @@ class cv_init : public InitializeSMP<cv_state<Order>, cv_init<Order>>
         return 1;
     }
 
-    void eval_param(vsmc::Particle<cv> &particle, void *file) const
+    void eval_param(
+        vsmc::Particle<pf_state<Order>> &particle, void *file) const
     {
         particle.value().read_data(static_cast<const char *>(file));
     }
 
-    void eval_post(vsmc::Particle<cv> &particle)
+    void eval_post(vsmc::Particle<pf_state<Order>> &particle)
     {
         w_.resize(particle.size());
         particle.value().read_state(LogL, w_.data());
@@ -180,12 +161,11 @@ class cv_init : public InitializeSMP<cv_state<Order>, cv_init<Order>>
 };
 
 template <vsmc::MatrixOrder Order>
-class cv_move : public MoveSMP<cv_state<Order>, cv_move<Order>>
+class pf_move : public MoveSMP<pf_state<Order>, pf_move<Order>>
 {
     public:
-    typedef cv_state<Order> cv;
-
-    std::size_t eval_sp(std::size_t iter, vsmc::SingleParticle<cv> sp) const
+    std::size_t eval_sp(
+        std::size_t iter, vsmc::SingleParticle<pf_state<Order>> sp) const
     {
         const double sd_pos = std::sqrt(0.02);
         const double sd_vel = std::sqrt(0.001);
@@ -202,7 +182,7 @@ class cv_move : public MoveSMP<cv_state<Order>, cv_move<Order>>
         return 1;
     }
 
-    void eval_post(std::size_t, vsmc::Particle<cv> &particle)
+    void eval_post(std::size_t, vsmc::Particle<pf_state<Order>> &particle)
     {
         w_.resize(particle.size());
         particle.value().read_state(LogL, w_.data());
@@ -214,13 +194,11 @@ class cv_move : public MoveSMP<cv_state<Order>, cv_move<Order>>
 };
 
 template <vsmc::MatrixOrder Order>
-class cv_meval : public MonitorEvalSMP<cv_state<Order>, cv_meval<Order>>
+class pf_meval : public MonitorEvalSMP<pf_state<Order>, pf_meval<Order>>
 {
     public:
-    typedef cv_state<Order> cv;
-
-    void eval_sp(
-        std::size_t, std::size_t, vsmc::SingleParticle<cv> sp, double *res)
+    void eval_sp(std::size_t, std::size_t,
+        vsmc::SingleParticle<pf_state<Order>> sp, double *res)
     {
         res[0] = sp.state(PosX);
         res[1] = sp.state(PosY);
@@ -228,53 +206,45 @@ class cv_meval : public MonitorEvalSMP<cv_state<Order>, cv_meval<Order>>
 };
 
 template <vsmc::MatrixOrder Order>
-inline void cv_do(
-    vsmc::ResampleScheme res, char **argv, const std::string &name)
+inline void pf_run(vsmc::ResampleScheme scheme, const std::string &datafile,
+    const std::string &prog, const std::string &name)
 {
-#ifdef VSMC_PF_MPI
+#if VSMC_PF_MPI
     boost::mpi::communicator world;
+    const bool master = (world.rank() == 0);
     std::size_t N = ParticleNum / static_cast<std::size_t>(world.size());
     std::stringstream ss;
     ss << name << ".r" << world.rank();
     std::string rname(ss.str());
-    std::string pf_txt(argv[2] + rname + ".txt");
-    std::string pf_h5(argv[2] + rname + ".h5");
+    std::string pf_txt(prog + rname + ".txt");
+    std::string pf_h5(prog + rname + ".h5");
+    vsmc::Seed::instance().modulo(
+        static_cast<vsmc::Seed::skip_type>(world.size()),
+        static_cast<vsmc::Seed::skip_type>(world.rank()));
 #else
+    const bool master = true;
     std::size_t N = ParticleNum;
-    std::string pf_txt(argv[2] + name + ".txt");
-    std::string pf_h5(argv[2] + name + ".h5");
+    std::string pf_txt(prog + name + ".txt");
+    std::string pf_h5(prog + name + ".h5");
 #endif
 
-    typedef cv_state<Order> cv;
-
     vsmc::Seed::instance().set(101);
-    vsmc::Sampler<cv> sampler(N, res, 0.5);
-    sampler.init(cv_init<Order>());
-    sampler.move(cv_move<Order>(), false);
-    sampler.monitor("pos", 2, cv_meval<Order>());
+    vsmc::Sampler<pf_state<Order>> sampler(N, scheme, 0.5);
+    sampler.init(pf_init<Order>());
+    sampler.move(pf_move<Order>(), false);
+    sampler.monitor("pos", 2, pf_meval<Order>());
     sampler.monitor("pos").name(0) = "pos.x";
     sampler.monitor("pos").name(1) = "pos.y";
 
     vsmc::StopWatch watch;
-#ifdef VSMC_PF_MPI
-    if (world.rank() == 0) {
-#endif
-        watch.reset();
-        watch.start();
-#ifdef VSMC_PF_MPI
-    }
-#endif
-    sampler.initialize(argv[1]);
+    watch.start();
+    sampler.initialize(const_cast<char *>(datafile.c_str()));
     sampler.iterate(DataNum - 1);
-#ifdef VSMC_PF_MPI
-    if (world.rank() == 0) {
-#endif
-        watch.stop();
+    watch.stop();
+    if (master) {
         std::cout << std::setw(40) << std::left << name;
         std::cout << watch.milliseconds() << std::endl;
-#ifdef VSMC_PF_MPI
     }
-#endif
 
     std::ofstream pf_sampler(pf_txt);
     pf_sampler << sampler << std::endl;
@@ -283,6 +253,43 @@ inline void cv_do(
 #if VSMC_HAS_HDF5
     vsmc::hdf5store(sampler, pf_h5, "Sampler");
 #endif
+}
+
+inline void pf_run(vsmc::ResampleScheme scheme, char **argv)
+{
+    std::string resname;
+    switch (scheme) {
+        case vsmc::Multinomial: resname = "Multinomial"; break;
+        case vsmc::Stratified: resname = "Stratified"; break;
+        case vsmc::Systematic: resname = "Systematic"; break;
+        case vsmc::Residual: resname = "Residual"; break;
+        case vsmc::ResidualStratified: resname = "ResidualStratified"; break;
+        case vsmc::ResidualSystematic: resname = "ResidualSystematic"; break;
+    }
+    pf_run<vsmc::RowMajor>(scheme, argv[1], argv[2], "." + resname + ".row");
+    pf_run<vsmc::ColMajor>(scheme, argv[1], argv[2], "." + resname + ".col");
+}
+
+inline int pf_main(int argc, char **argv)
+{
+#if VSMC_PF_MPI
+    vsmc::MPIEnvironment env(argc, argv);
+#endif
+
+    if (argc < 3) {
+        std::cout << "Usage: " << argv[0] << " <input file>"
+                  << " <output file>" << std::endl;
+        return -1;
+    }
+
+    pf_run(vsmc::Multinomial, argv);
+    pf_run(vsmc::Stratified, argv);
+    pf_run(vsmc::Systematic, argv);
+    pf_run(vsmc::Residual, argv);
+    pf_run(vsmc::ResidualStratified, argv);
+    pf_run(vsmc::ResidualSystematic, argv);
+
+    return 0;
 }
 
 #endif // VSMC_EXAMPLE_PF_@SMP@_HPP

@@ -4,14 +4,14 @@ int main(int argc, char **argv)
 {
     VSMC_RNG_TEST_PRE(rng_dist);
 
-    typedef vsmc::UniformRealDistribution<double, vsmc::Closed, vsmc::Closed>
-        UniformRealCC;
-    typedef vsmc::UniformRealDistribution<double, vsmc::Closed, vsmc::Open>
-        UniformRealCO;
-    typedef vsmc::UniformRealDistribution<double, vsmc::Open, vsmc::Closed>
-        UniformRealOC;
-    typedef vsmc::UniformRealDistribution<double, vsmc::Open, vsmc::Open>
-        UniformRealOO;
+    using UniformRealCC =
+        vsmc::UniformRealDistribution<double, vsmc::Closed, vsmc::Closed>;
+    using UniformRealCO =
+        vsmc::UniformRealDistribution<double, vsmc::Closed, vsmc::Open>;
+    using UniformRealOC =
+        vsmc::UniformRealDistribution<double, vsmc::Open, vsmc::Closed>;
+    using UniformRealOO =
+        vsmc::UniformRealDistribution<double, vsmc::Open, vsmc::Open>;
 
     VSMC_RNG_DIST_2(
         std::uniform_int_distribution<int>, uniform_int, -100, 100);

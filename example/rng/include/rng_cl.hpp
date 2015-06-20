@@ -49,9 +49,9 @@ inline void rng_cl_rng(std::size_t N, std::size_t M,
     const vsmc::CLProgram &program, CRNGInit &cinit, CRNGRand &crand,
     const std::string &name)
 {
-    vsmc::StopWatch watch;
+    using result_type = typename RNG::result_type;
 
-    typedef typename RNG::result_type result_type;
+    vsmc::StopWatch watch;
 
     vsmc::Vector<result_type> cpp(N);
     RNG rng(1);

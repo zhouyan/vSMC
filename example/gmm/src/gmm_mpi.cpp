@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/pf/src/pf_mpi.cpp
+// vSMC/example/gmm/src/gmm_mpi.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#define VSMC_PF_MPI 1
+#define VSMC_GMM_MPI 1
 
-#include "pf_@smp@.hpp"
+#include "gmm_@smp@.hpp"
 
-int main(int argc, char **argv) { pf_main(argc, argv); }
+int main(int argc, char **argv) { gmm_main(argc, argv); }

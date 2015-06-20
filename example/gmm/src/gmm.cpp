@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/paper/src/paper_gmm_mpi.cpp
+// vSMC/example/gmm/src/gmm.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,6 +29,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#define VSMC_PAPER_MPI
+#include "pf_@smp@.hpp"
 
-#include "paper_gmm_@smp@.cpp"
+int main(int argc, char **argv) { gmm_run(argc, argv); }

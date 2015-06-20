@@ -69,7 +69,7 @@ inline void rng_test(std::size_t N, const std::string &name,
     vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
     vsmc::Vector<vsmc::StopWatch> &sw, vsmc::Vector<std::size_t> &bytes)
 {
-    typedef typename RNGType::result_type result_type;
+    using result_type = typename RNGType::result_type;
 
     vsmc::StopWatch watch;
     result_type result = 0;

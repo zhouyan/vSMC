@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/paper/src/paper_gmm.cpp
+// vSMC/example/gmm/include/gmm.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,13 +29,21 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <fstream>
+// clang-format off
+#ifndef VSMC_EXAMPLE_GMM_@SMP@_HPP
+#define VSMC_EXAMPLE_GMM_@SMP@_HPP
+// clang-format on
+
+#ifndef VSMC_GMM_MPI
+#define VSMC_GMM_MPI 0
+#endif
+
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/state_matrix.hpp>
-#include <vsmc/math/constants.hpp>
 #include <vsmc/smp/backend_@smp@.hpp>
+#include <vsmc/utility/program_option.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#ifdef VSMC_PAPER_MPI
+#ifdef VSMC_GMM_MPI
 #include <vsmc/mpi/backend_mpi.hpp>
 #endif
 
@@ -52,8 +60,6 @@ using MoveSMP = vsmc::Move@SMP@<T, Derived>;
 template <typename T, typename Derived>
 using PathEvalSMP = vsmc::PathEval@SMP@<T, Derived>;
 // clang-format on
-
-//////////////////////////////////////////////////////////////////////////////
 
 class gmm_param
 {
@@ -223,21 +229,20 @@ class gmm_param
     vsmc::Vector<double> log_lambda_;
 };
 
-//////////////////////////////////////////////////////////////////////////////
-
-typedef StateSMP<vsmc::StateMatrix<vsmc::RowMajor, 1, gmm_param>> StateBase;
-
-#ifdef VSMC_PAPER_MPI
-typedef vsmc::StateMPI<StateBase> gmm_state_base;
+#if VSMC_GMM_MPI
+using StateBase =
+    vsmc::StateMPI<StateSMP<vsmc::StateMatrix<vsmc::RowMajor, 1, gmm_param>>>;
 #else
-typedef StateBase gmm_state_base;
+using StateBase = StateSMP<vsmc::StateMatrix<vsmc::RowMajor, 1, gmm_param>>;
 #endif
 
-class gmm_state : public gmm_state_base
+class gmm_state : public StateBase
 {
     public:
+    using size_type = typename StateBase::size_type;
+
     gmm_state(size_type N)
-        : gmm_state_base(N)
+        : StateBase(N)
         , comp_num_(0)
         , alpha_(0)
         , alpha_inc_(0)
@@ -375,8 +380,6 @@ class gmm_state : public gmm_state_base
     vsmc::Vector<double> obs_;
 };
 
-//////////////////////////////////////////////////////////////////////////////
-
 class gmm_init : public InitializeSMP<gmm_state, gmm_init>
 {
     public:
@@ -414,8 +417,6 @@ class gmm_init : public InitializeSMP<gmm_state, gmm_init>
     }
 };
 
-//////////////////////////////////////////////////////////////////////////////
-
 class gmm_move_smc
 {
     public:
@@ -452,8 +453,6 @@ class gmm_move_smc
     vsmc::Vector<double> w_;
 };
 
-//////////////////////////////////////////////////////////////////////////////
-
 class gmm_move_mu : public MoveSMP<gmm_state, gmm_move_mu>
 {
     public:
@@ -477,8 +476,6 @@ class gmm_move_mu : public MoveSMP<gmm_state, gmm_move_mu>
     }
 };
 
-//////////////////////////////////////////////////////////////////////////////
-
 class gmm_move_lambda : public MoveSMP<gmm_state, gmm_move_lambda>
 {
     public:
@@ -501,8 +498,6 @@ class gmm_move_lambda : public MoveSMP<gmm_state, gmm_move_lambda>
         return param.mh_reject_lambda(p, u);
     }
 };
-
-//////////////////////////////////////////////////////////////////////////////
 
 class gmm_move_weight : public MoveSMP<gmm_state, gmm_move_weight>
 {
@@ -536,8 +531,6 @@ class gmm_move_weight : public MoveSMP<gmm_state, gmm_move_weight>
     }
 };
 
-//////////////////////////////////////////////////////////////////////////////
-
 class gmm_path : public PathEvalSMP<gmm_state, gmm_path>
 {
     public:
@@ -551,8 +544,6 @@ class gmm_path : public PathEvalSMP<gmm_state, gmm_path>
         return particle.value().alpha();
     }
 };
-
-//////////////////////////////////////////////////////////////////////////////
 
 class gmm_alpha_linear
 {
@@ -568,8 +559,6 @@ class gmm_alpha_linear
     private:
     std::size_t iter_num_;
 };
-
-//////////////////////////////////////////////////////////////////////////////
 
 class gmm_alpha_prior
 {
@@ -594,91 +583,53 @@ class gmm_alpha_prior
     std::size_t power_;
 };
 
-//////////////////////////////////////////////////////////////////////////////
-
-int main(
-#ifdef VSMC_PAPER_MPI
-    int argc, char **argv
-#endif
-    )
+inline int gmm_main(int argc, char **argv)
 {
-#ifdef VSMC_PAPER_MPI
+#if VSMC_GMM_MPI
     vsmc::MPIEnvironment env(argc, argv);
-    boost::mpi::communicator World;
-    const bool Master = (World.rank() == 0);
+    boost::mpi::communicator world;
+    const bool master = (world.rank() == 0);
+    vsmc::Seed::instance().modulo(
+        static_cast<vsmc::Seed::skip_type>(world.size()),
+        static_cast<vsmc::Seed::skip_type>(world.rank()));
 #else
-    const bool Master = true;
+    const bool master = true;
 #endif
 
-    if (Master) {
-        for (int i = 0; i != 78; ++i)
-            std::cout << '=';
-        std::cout << std::endl;
-        std::cout << "Configurations" << std::endl;
-        for (int i = 0; i != 78; ++i)
-            std::cout << '-';
-        std::cout << std::endl;
-    }
+    std::size_t N = 1000;
+    std::size_t n = 100;
+    std::size_t c = 4;
+    std::size_t power = 2;
+    std::string datafile("gmm.data");
 
-    std::size_t ParticleNum = 0;
-    if (Master) {
-        std::cout << "Enter the number of particles: " << std::endl;
-        std::cin >> ParticleNum;
-    }
-
-    std::size_t CompNum = 0;
-    if (Master) {
-        std::cout << "Enter the number of components: " << std::endl;
-        std::cin >> CompNum;
-    }
-
-    int AnnealingScheme = 0;
-    while (AnnealingScheme != 1 && AnnealingScheme != 2 && Master) {
-        std::cout << "Choose the annealing scheme:" << std::endl;
-        std::cout << "[1] Linear: alpha = t / T" << std::endl;
-        std::cout << "[2] Prior:  alpha = (t / T)^p" << std::endl;
-        std::cout << "Enter [1 or 2]: " << std::endl;
-        std::cin >> AnnealingScheme;
-    }
-
-    std::size_t PriorPower = 0;
-    if (AnnealingScheme == 2 && Master) {
-        std::cout << "Enter the power of prior scheme: " << std::endl;
-        std::cin >> PriorPower;
-    }
-
-    std::size_t IterNum = 0;
-    if (Master) {
-        std::cout << "Enter the number of iterations: " << std::endl;
-        ;
-        std::cin >> IterNum;
-    }
-
-    std::string DataFile;
-    if (Master) {
-        std::cout << "Enter the file name of the data: " << std::endl;
-        ;
-        std::cin >> DataFile;
-    }
-
-#ifdef VSMC_PAPER_MPI
-    boost::mpi::broadcast(World, ParticleNum, 0);
-    boost::mpi::broadcast(World, CompNum, 0);
-    boost::mpi::broadcast(World, AnnealingScheme, 0);
-    boost::mpi::broadcast(World, PriorPower, 0);
-    boost::mpi::broadcast(World, IterNum, 0);
-    boost::mpi::broadcast(World, DataFile, 0);
-    ParticleNum = ParticleNum / static_cast<std::size_t>(World.size());
+    if (master) {
+        vsmc::ProgramOptionMap option;
+        option.add("N", "Number of particles", &N, 1000)
+            .add("n", "Number of iterations", &n, 100)
+            .add("c", "Number of components", &c, 4)
+            .add("power", "Power of the prior annealing (0 for linear)",
+                &power, 2)
+            .add("datafile", "File name of the data", &datafile, "gmm.data");
+        option.process(argc, argv);
+#if VSMC_GMM_MPI
+        boost::mpi::broadcast(world, N, 0);
+        boost::mpi::broadcast(world, n, 0);
+        boost::mpi::broadcast(world, c, 0);
+        boost::mpi::broadcast(world, power, 0);
+        boost::mpi::broadcast(world, datafile, 0);
+        N = N / static_cast<std::size_t>(world.size());
 #endif
+    }
 
     gmm_move_smc::alpha_setter_type alpha_setter;
-    if (AnnealingScheme == 1)
-        alpha_setter = gmm_alpha_linear(IterNum);
-    if (AnnealingScheme == 2)
-        alpha_setter = gmm_alpha_prior(IterNum, PriorPower);
+    if (power == 0)
+        alpha_setter = gmm_alpha_linear(n);
+    else
+        alpha_setter = gmm_alpha_prior(n, power);
 
-    vsmc::Sampler<gmm_state> sampler(ParticleNum, vsmc::Stratified, 0.5);
-    sampler.particle().value().comp_num(CompNum);
+    vsmc::Seed::instance().set(101);
+    vsmc::Sampler<gmm_state> sampler(N, vsmc::Stratified, 0.5);
+    sampler.particle().value().comp_num(c);
     sampler.init(gmm_init())
         .move(gmm_move_smc(alpha_setter), false)
         .mcmc(gmm_move_mu(), false)
@@ -688,19 +639,21 @@ int main(
 
     vsmc::StopWatch watch;
     watch.start();
-    sampler.initialize(const_cast<char *>(DataFile.c_str())).iterate(IterNum);
+    sampler.initialize(const_cast<char *>(datafile.c_str())).iterate(n);
     double ps = sampler.path().log_zconst();
-#ifdef VSMC_PAPER_MPI
+#if VSMC_GMM_MPI
     double ps_sum = 0;
-    boost::mpi::reduce(World, ps, ps_sum, std::plus<double>(), 0);
+    boost::mpi::reduce(world, ps, ps_sum, std::plus<double>(), 0);
     ps = ps_sum;
 #endif
     watch.stop();
 
-    if (Master) {
+    if (master) {
         std::cout << "Path sampling estimate: " << ps << std::endl;
         std::cout << "Wallclock Time: " << watch.seconds() << "s" << std::endl;
     }
 
     return 0;
 }
+
+#endif // VSMC_EXAMPLE_GMM_@SMP@_HPP

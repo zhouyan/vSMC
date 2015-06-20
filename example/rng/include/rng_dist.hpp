@@ -118,14 +118,14 @@ template <typename Dist>
 class DistResultTypeTrait
 {
     public:
-    typedef typename Dist::result_type type;
+    using type = typename Dist::result_type;
 };
 
 template <>
 class DistResultTypeTrait<std::bernoulli_distribution>
 {
     public:
-    typedef int type;
+    using type = int;
 };
 
 template <typename Dist>
