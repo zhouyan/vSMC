@@ -38,7 +38,7 @@ module vsmc
     interface
         function vsmc_rng_size() bind(c)
             use, intrinsic :: iso_c_binding
-            integer(kind = c_int) vsmc_rng_size
+            integer(kind = c_int) :: vsmc_rng_size
         end function vsmc_rng_size
     end interface
 
