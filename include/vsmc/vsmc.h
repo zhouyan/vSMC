@@ -266,6 +266,15 @@ void vsmc_free(void *ptr);
 /// \defgroup C_API_Resample Resample algorithms
 /// \@}
 
+typedef enum {
+    VSMC_RESAMPLE_MULTINOMIAL,
+    VSMC_RESAMPLE_STRATIFIED,
+    VSMC_RESAMPLE_SYSTEMATIC,
+    VSMC_RESAMPLE_RESIDUAL,
+    VSMC_RESAMPLE_RESIDUAL_STRATIFIED,
+    VSMC_RESAMPLE_RESIDUAL_SYSTEMATIC
+} vsmc_resample_scheme;
+
 void vsmc_resample_trans_u01_rep(
     int m, int n, const double *weight, const double *u01, int *replication);
 void vsmc_resample_trans_u01_index(
@@ -289,6 +298,8 @@ void vsmc_resample_residual_stratified(
     int m, int n, vsmc_rng *rng_ptr, const double *weight, int *replication);
 void vsmc_resample_residual_systematic(
     int m, int n, vsmc_rng *rng_ptr, const double *weight, int *replication);
+void vsmc_resample(int m, int n, vsmc_rng *rng_ptr, const double *weight,
+    int *replication, vsmc_resample_scheme scheme)
 
 /// \@{
 

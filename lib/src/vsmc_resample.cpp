@@ -88,5 +88,32 @@ VSMC_DEFINE_C_API_RESAMPLE(Residual, residual)
 VSMC_DEFINE_C_API_RESAMPLE(ResidualStratified, residual_stratified)
 VSMC_DEFINE_C_API_RESAMPLE(ResidualSystematic, residual_systematic)
 
+void vsmc_resample(int m, int n, vsmc_rng *rng_ptr, const double *weight,
+    int *replication, vsmc_resample_scheme scheme)
+{
+    switch (scheme) {
+        case VSMC_RESAMPLE_MULTINOMIAL:
+            vsmc_resample_multinomial(m, n, rng_ptr, weight, replication);
+            break;
+        case VSMC_RESAMPLE_STRATIFIED:
+            vsmc_resample_stratified(m, n, rng_ptr, weight, replication);
+            break;
+        case VSMC_RESAMPLE_SYSTEMATIC:
+            vsmc_resample_systematic(m, n, rng_ptr, weight, replication);
+            break;
+        case VSMC_RESAMPLE_RESIDUAL:
+            vsmc_resample_residual(m, n, rng_ptr, weight, replication);
+            break;
+        case VSMC_RESAMPLE_RESIDUAL_STRATIFIED:
+            vsmc_resample_residual_stratified(
+                m, n, rng_ptr, weight, replication);
+            break;
+        case VSMC_RESAMPLE_RESIDUAL_SYSTEMATIC:
+            vsmc_resample_residual_systematic(
+                m, n, rng_ptr, weight, replication);
+            break;
+    }
+}
+
 } // extern "C"
 
