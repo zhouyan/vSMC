@@ -51,6 +51,17 @@ inline RNG &rng_cast(vsmc_rng *rng_ptr)
         rng_ptr->state + (32 - r) / sizeof(unsigned)));
 }
 
+inline const RNG &rng_cast(const vsmc_rng *rng_ptr)
+{
+    std::uintptr_t r = reinterpret_cast<std::uintptr_t>(rng_ptr->state) % 32;
+
+    if (r == 0)
+        return *(reinterpret_cast<const ::vsmc::RNG *>(rng_ptr->state));
+
+    return *(reinterpret_cast<const ::vsmc::RNG *>(
+        rng_ptr->state + (32 - r) / sizeof(unsigned)));
+}
+
 } // namespace internal
 
 } // namespace vsmc

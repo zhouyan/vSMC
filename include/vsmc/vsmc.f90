@@ -33,7 +33,7 @@ module vsmc
     use, intrinsic :: iso_c_binding
     implicit none
 
-    type vsmc_rng
+    type, bind(c) :: vsmc_rng
         integer(kind = c_int), dimension(64) :: state
     end type vsmc_rng
 

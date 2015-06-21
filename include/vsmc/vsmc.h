@@ -46,32 +46,32 @@ extern "C" {
 
 /// \brief `vsmc::RNG`
 typedef struct {
-    unsigned state[64];
+    int state[64];
 } vsmc_rng;
 
 /// \brief `sizeof(vsmc::RNG) + 4`
 int vsmc_rng_size();
 
 /// \brief `vsmc::RNG` constructor
-void vsmc_rng_init(vsmc_rng *rng_ptr, unsigned seed);
+void vsmc_rng_init(vsmc_rng *rng_ptr, int seed);
 
 /// \brief `vsmc::RNG::seed`
-void vsmc_rng_seed(vsmc_rng *rng_ptr, unsigned seed);
+void vsmc_rng_seed(vsmc_rng *rng_ptr, int seed);
 
 /// \brief `vsmc::RNG::key`
-void vsmc_rng_get_key(vsmc_rng *rng_ptr, int n, unsigned *key);
+void vsmc_rng_get_key(const vsmc_rng *rng_ptr, int n, int *key);
 
 /// \brief `vsmc::RNG::key`
-void vsmc_rng_set_key(vsmc_rng *rng_ptr, int n, const unsigned *key);
+void vsmc_rng_set_key(vsmc_rng *rng_ptr, int n, const int *key);
 
 /// \brief `vsmc::RNG::ctr`
-void vsmc_rng_get_ctr(vsmc_rng *rng_ptr, int n, unsigned *ctr);
+void vsmc_rng_get_ctr(const vsmc_rng *rng_ptr, int n, int *ctr);
 
 /// \brief `vsmc::RNG::ctr`
-void vsmc_rng_set_ctr(vsmc_rng *rng_ptr, int n, const unsigned *ctr);
+void vsmc_rng_set_ctr(vsmc_rng *rng_ptr, int n, const int *ctr);
 
 /// \brief `vsmc::RNG::operator()`
-void vsmc_rng_rand(vsmc_rng *rng_ptr, int n, unsigned *r);
+void vsmc_rng_rand(vsmc_rng *rng_ptr, int n, int *r);
 
 /// \brief `std::uniform_int_distribution<int>`
 void vsmc_rng_uniform_int(vsmc_rng *rng_ptr, int n, int *r, int a, int b);
