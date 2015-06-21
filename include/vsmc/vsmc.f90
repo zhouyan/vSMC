@@ -31,6 +31,8 @@
 
 module vsmc
     use, intrinsic :: iso_c_binding
+    implicit none
+
     type vsmc_rng
         integer(kind = c_int), dimension(64) :: state
     end type vsmc_rng
@@ -1172,4 +1174,5 @@ module vsmc
             integer(kind = kind(VSMC_RESAMPLE_SCHEME_MULTINOMIAL)) scheme
         end subroutine vsmc_resample
     end interface
+
 end module vsmc
