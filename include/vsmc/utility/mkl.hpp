@@ -296,6 +296,8 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream<BRNG>>
 
     void seed(MKL_UINT s) { reset(s); }
 
+    void seed(MKL_UINT s, MKL_INT offset) { reset(s, offset); }
+
     template <typename SeedSeq>
     void seed(
         SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,

@@ -220,7 +220,17 @@ class MKLEngine
     {
     }
 
-    void seed(MKL_UINT s) { stream_.seed(s); }
+    void seed(MKL_UINT s)
+    {
+        stream_.seed(s);
+        index_ = buffer_size_;
+    }
+
+    void seed(MKL_UINT s, MKL_INT offset)
+    {
+        stream_.seed(s, offset);
+        index_ = buffer_size_;
+    }
 
     template <typename SeedSeq>
     void seed(SeedSeq &seq,

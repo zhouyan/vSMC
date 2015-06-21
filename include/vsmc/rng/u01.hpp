@@ -133,6 +133,45 @@ VSMC_DEFINE_RNG_U01(double, Open, Closed, open, closed, 64, 64)
 /// \ingroup U01
 VSMC_DEFINE_RNG_U01(double, Open, Open, open, open, 64, 64)
 
+/// \brief Tranform a sequence of standard uniform random numbers to sorted
+/// sequence
+///
+/// \details
+/// This function does not acutally sort the sequence `u01`, instead `u01seq`
+/// is a sequence generated such that it comes from the same distribution of
+/// the sorted sequence.
+inline void u01_sorted(std::size_t N, const double *u01, double *u01seq)
+{
+    math::vLn(N, u01, u01seq);
+    double lmax = 0;
+    for (std::size_t i = 0; i != N; ++i) {
+        lmax += u01seq[i] / (N - i);
+        u01seq[i] = 1 - std::exp(lmax);
+    }
+}
+
+/// \brief Transform a sequence of standard uniform random numbers to a
+/// stratified sequence
+inline void u01_stratified(std::size_t N, const double *u01, double *u01seq)
+{
+    double delta = 1.0 / N;
+    for (std::size_t i = 0; i != N; ++i)
+        u01seq[i] = u01[i] * delta + i * delta;
+}
+
+/// \brief Transform a single standard uniform random number to a systematic
+/// sequence
+inline void u01_systematic(std::size_t N, double u01, double *u01seq)
+{
+    if (N == 0)
+        return;
+
+    double delta = 1.0 / N;
+    u01seq[0] = u01 * delta;
+    for (std::size_t i = 1; i != N; ++i)
+        u01seq[i] = u01seq[i - 1] + delta;
+}
+
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
 /// variates by sorting.
 /// \ingroup U01
@@ -181,8 +220,6 @@ class U01SequenceSorted
     {
     }
 
-    /// \brief Generate the n-th random variates
-    ///
     double operator[](std::size_t n)
     {
         VSMC_RUNTIME_ASSERT_RNG_U01_U01_SEQUENCE(Sorted)
@@ -190,7 +227,7 @@ class U01SequenceSorted
         if (n == n_)
             return u_;
 
-        lmax_ += std::log(1 - runif_(rng_)) / (N_ - n);
+        lmax_ += std::log(runif_(rng_)) / (N_ - n);
         n_ = n;
         u_ = 1 - std::exp(lmax_);
 
