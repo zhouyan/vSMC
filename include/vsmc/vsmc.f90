@@ -387,6 +387,33 @@ module vsmc
     end interface
 
     interface
+        subroutine vsmc_rng_u01_sorted(n, u01, u01seq)
+            use, intrinsic :: iso_c_binding
+            integer(kind = c_int), value :: n
+            real(kind = c_double), dimension(*) :: u01
+            real(kind = c_double), dimension(*) :: u01seq
+        end subroutine vsmc_rng_u01_sorted
+    end interface
+
+    interface
+        subroutine vsmc_rng_u01_stratified(n, u01, u01seq)
+            use, intrinsic :: iso_c_binding
+            integer(kind = c_int), value :: n
+            real(kind = c_double), dimension(*) :: u01
+            real(kind = c_double), dimension(*) :: u01seq
+        end subroutine vsmc_rng_u01_stratified
+    end interface
+
+    interface
+        subroutine vsmc_rng_u01_systematic(n, u01, u01seq)
+            use, intrinsic :: iso_c_binding
+            integer(kind = c_int), value :: n
+            real(kind = c_double), value :: u01
+            real(kind = c_double), dimension(*) :: u01seq
+        end subroutine vsmc_rng_u01_systematic
+    end interface
+
+    interface
         function vsmc_mkl_brng_mt19937() bind(c)
             use, intrinsic :: iso_c_binding
             integer(kind = c_int) :: vsmc_mkl_brng_mt19937

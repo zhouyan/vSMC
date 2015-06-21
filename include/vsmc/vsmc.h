@@ -157,6 +157,15 @@ void vsmc_rng_stable(vsmc_rng *rng_ptr, int n, double *r, double stability,
 void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,
     const double *weight, int normalized);
 
+/// \brief `vsmc::u01_sorted`
+void vsmc_rng_u01_sorted(int n, const double *u01, double *u01seq);
+
+/// \brief `vsmc::u01_stratifed`
+void vsmc_rng_u01_stratified(int n, const double *u01, double *u01seq);
+
+/// \brief `vsmc::u01_systematic`
+void vsmc_rng_u01_systematic(int n, double u01, double *u01seq);
+
 /// @}
 
 /// \defgroup C_API_MLK_BRNG Register MKL BRNG (`vsmc::mkl_brng`)
