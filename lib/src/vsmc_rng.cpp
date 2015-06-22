@@ -216,10 +216,11 @@ void vsmc_rng_normal(
 }
 
 void vsmc_rng_lognormal(
-    vsmc_rng *rng_ptr, int n, double *r, double logmean, double logsd)
+    vsmc_rng *rng_ptr, int n, double *r, double m, double s)
 {
-    std::lognormal_distribution<double> dist(logmean, logsd);
-    VSMC_DEFINE_RNG_RANDOM_DIST;
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    ::vsmc::lognormal_distribution<double>(
+        rng, static_cast<std::size_t>(n), r, m, s);
 }
 
 void vsmc_rng_chi_squared(vsmc_rng *rng_ptr, int n, double *r, double df)

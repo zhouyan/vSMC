@@ -301,14 +301,14 @@ module vsmc
     end interface
 
     interface
-        subroutine vsmc_rng_lognormal(rng, n, r, logmean, logsd) bind(c)
+        subroutine vsmc_rng_lognormal(rng, n, r, m, s) bind(c)
             use, intrinsic :: iso_c_binding
             import :: vsmc_rng
             type(vsmc_rng) :: rng
             integer(kind = c_int), value :: n
             real(kind = c_double), dimension(*) :: r
-            real(kind = c_double), value :: logmean
-            real(kind = c_double), value :: logsd
+            real(kind = c_double), value :: m
+            real(kind = c_double), value :: s
         end subroutine vsmc_rng_lognormal
     end interface
 

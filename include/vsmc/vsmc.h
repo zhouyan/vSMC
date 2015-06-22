@@ -133,7 +133,7 @@ void vsmc_rng_normal(
 
 /// \brief `std::lognormal_distribution<double>`
 void vsmc_rng_lognormal(
-    vsmc_rng *rng_ptr, int n, double *r, double logmean, double logsd);
+    vsmc_rng *rng_ptr, int n, double *r, double m, double s);
 
 /// \brief `std::chi_squared_distribution<double>`
 void vsmc_rng_chi_squared(vsmc_rng *rng_ptr, int n, double *r, double df);

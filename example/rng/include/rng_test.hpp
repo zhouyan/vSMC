@@ -101,95 +101,109 @@ inline void rng_test(std::size_t N, const std::string &name,
     vsmc::StopWatch watch;
     double result = 0;
     vsmc::Vector<double> r(N);
-    std::ofstream rnd("rnd");
 
     std::uniform_real_distribution<double> runif_std(0, 1);
+    for (std::size_t i = 0; i != N; ++i)
+        result += runif_std(rng);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
         result += runif_std(rng);
     watch.stop();
     sw.push_back(watch);
-    rnd << result << std::endl;
 
     vsmc::UniformRealDistributionType<RNGType, double> runif_vsmc(0, 1);
+    for (std::size_t i = 0; i != N; ++i)
+        result += runif_vsmc(rng);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
         result += runif_vsmc(rng);
     watch.stop();
     sw.push_back(watch);
-    rnd << result << std::endl;
 
 #if VSMC_RNG_TEST_C_API && VSMC_RNG_TEST_MKL
+    vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, rng.stream().get(),
+        static_cast<MKL_INT>(N), r.data(), 0, 1);
+    result += std::accumulate(r.begin(), r.end(), result);
     watch.reset();
     watch.start();
     vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, rng.stream().get(),
         static_cast<MKL_INT>(N), r.data(), 0, 1);
     watch.stop();
     sw.push_back(watch);
-    result = std::accumulate(r.begin(), r.end(), result);
-    rnd << result << std::endl;
+    result += std::accumulate(r.begin(), r.end(), result);
 #elif VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
     MKL_INT brng = vsmc::mkl_brng<RNGType>();
     VSLStreamStatePtr stream = nullptr;
     vslNewStream(&stream, brng, 1);
+    vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, static_cast<MKL_INT>(N),
+        r.data(), 0, 1);
+    result += std::accumulate(r.begin(), r.end(), result);
     watch.reset();
     watch.start();
     vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, static_cast<MKL_INT>(N),
         r.data(), 0, 1);
     watch.stop();
     sw.push_back(watch);
-    result = std::accumulate(r.begin(), r.end(), result);
-    rnd << result << std::endl;
+    result += std::accumulate(r.begin(), r.end(), result);
 #endif
 
     std::normal_distribution<double> rnorm_std(0, 1);
+    for (std::size_t i = 0; i != N; ++i)
+        result += rnorm_std(rng);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
         result += rnorm_std(rng);
     watch.stop();
     sw.push_back(watch);
-    rnd << result << std::endl;
 
     vsmc::NormalDistribution<double> rnorm_vsmc(0, 1);
+    for (std::size_t i = 0; i != N; ++i)
+        result += rnorm_vsmc(rng);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
         result += rnorm_vsmc(rng);
     watch.stop();
     sw.push_back(watch);
-    rnd << result << std::endl;
 
+    vsmc::normal_distribution(rng, N, r.data(), 0.0, 1.0);
+    result += std::accumulate(r.begin(), r.end(), result);
     watch.reset();
     watch.start();
     vsmc::normal_distribution(rng, N, r.data(), 0.0, 1.0);
     watch.stop();
     sw.push_back(watch);
-    result = std::accumulate(r.begin(), r.end(), result);
-    rnd << result << std::endl;
+    result += std::accumulate(r.begin(), r.end(), result);
 
 #if VSMC_RNG_TEST_C_API && VSMC_RNG_TEST_MKL
+    vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, rng.stream().get(),
+        static_cast<MKL_INT>(N), r.data(), 0, 1);
+    result += std::accumulate(r.begin(), r.end(), result);
     watch.reset();
     watch.start();
     vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, rng.stream().get(),
         static_cast<MKL_INT>(N), r.data(), 0, 1);
     watch.stop();
     sw.push_back(watch);
-    result = std::accumulate(r.begin(), r.end(), result);
-    rnd << result << std::endl;
+    result += std::accumulate(r.begin(), r.end(), result);
 #elif VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
+    vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream,
+        static_cast<MKL_INT>(N), r.data(), 0, 1);
+    result += std::accumulate(r.begin(), r.end(), result);
     watch.reset();
     watch.start();
     vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream,
         static_cast<MKL_INT>(N), r.data(), 0, 1);
     watch.stop();
     sw.push_back(watch);
-    result = std::accumulate(r.begin(), r.end(), result);
-    rnd << result << std::endl;
+    result += std::accumulate(r.begin(), r.end(), result);
 #endif
 
+    std::ofstream rnd("rnd");
+    rnd << result << std::endl;
     rnd.close();
 }
 

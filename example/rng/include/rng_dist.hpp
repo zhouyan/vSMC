@@ -38,11 +38,9 @@
     vsmc::Vector<DistResultType<Dist>> r(N);                                  \
     vsmc::StopWatch watch;                                                    \
     vsmc_rng rng;                                                             \
-    vsmc_rng_init(&rng, 1);                                                   \
-    watch.start();
+    vsmc_rng_init(&rng, 1);
 
 #define VSMC_RNG_DIST_C_POST(Dist, name)                                      \
-    watch.stop();                                                             \
     sw.push_back(watch);                                                      \
     std::ofstream rnd("rnd");                                                 \
     rnd << r.back() << std::endl;                                             \
@@ -53,6 +51,9 @@
         std::string dname(#name "(" #p1 ")");                                 \
         VSMC_RNG_DIST_C_PRE(Dist, name);                                      \
         vsmc_rng_##name(&rng, static_cast<int>(N), r.data(), p1);             \
+        watch.start();                                                        \
+        vsmc_rng_##name(&rng, static_cast<int>(N), r.data(), p1);             \
+        watch.stop();                                                         \
         VSMC_RNG_DIST_C_POST(Dist, name);                                     \
     }
 
@@ -61,6 +62,9 @@
         std::string dname(#name "(" #p1 "," #p2 ")");                         \
         VSMC_RNG_DIST_C_PRE(Dist, name);                                      \
         vsmc_rng_##name(&rng, static_cast<int>(N), r.data(), p1, p2);         \
+        watch.start();                                                        \
+        vsmc_rng_##name(&rng, static_cast<int>(N), r.data(), p1, p2);         \
+        watch.stop();                                                         \
         VSMC_RNG_DIST_C_POST(Dist, name);                                     \
     }
 
@@ -69,6 +73,9 @@
         std::string dname(#name "(" #p1 "," #p2 "," #p3 "," #p4 ")");         \
         VSMC_RNG_DIST_C_PRE(Dist, name);                                      \
         vsmc_rng_##name(&rng, static_cast<int>(N), r.data(), p1, p2, p3, p4); \
+        watch.start();                                                        \
+        vsmc_rng_##name(&rng, static_cast<int>(N), r.data(), p1, p2, p3, p4); \
+        watch.stop();                                                         \
         VSMC_RNG_DIST_C_POST(Dist, name);                                     \
     }
 
@@ -134,8 +141,10 @@ inline void rng_dist(std::size_t N, Dist &dist, const std::string &name,
     vsmc::StopWatch watch;
     vsmc::RNG rng;
 
-    watch.start();
     DistResultType<Dist> result = 0;
+    for (std::size_t i = 0; i != N; ++i)
+        result += dist(rng);
+    watch.start();
     for (std::size_t i = 0; i != N; ++i)
         result += dist(rng);
     watch.stop();

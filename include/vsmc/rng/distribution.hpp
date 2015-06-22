@@ -35,6 +35,7 @@
 #include <vsmc/internal/config.hpp>
 
 #include <vsmc/rng/discrete_distribution.hpp>
+#include <vsmc/rng/lognormal_distribution.hpp>
 #include <vsmc/rng/normal_distribution.hpp>
 #include <vsmc/rng/stable_distribution.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
