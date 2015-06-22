@@ -105,11 +105,20 @@ inline void rng_test(std::size_t N, const std::string &name,
     vsmc::Vector<double> r(N);
     std::ofstream rnd("rnd");
 
-    vsmc::UniformRealDistributionType<RNGType, double> runif(0, 1);
+    std::uniform_real_distribution<double> rstd(0, 1);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        result += runif(rng);
+        result += rstd(rng);
+    watch.stop();
+    sw.push_back(watch);
+    rnd << result << std::endl;
+
+    vsmc::UniformRealDistributionType<RNGType, double> rvsmc(0, 1);
+    watch.reset();
+    watch.start();
+    for (std::size_t i = 0; i != N; ++i)
+        result += rvsmc(rng);
     watch.stop();
     sw.push_back(watch);
     rnd << result << std::endl;
@@ -137,25 +146,75 @@ inline void rng_test(std::size_t N, const std::string &name,
     rnd << result << std::endl;
 #endif
 
+    std::normal_distribution<double> rnorm(0, 1);
+    watch.reset();
+    watch.start();
+    for (std::size_t i = 0; i != N; ++i)
+        result += rnorm(rng);
+    watch.stop();
+    sw.push_back(watch);
+    rnd << result << std::endl;
+
+#if VSMC_RNG_TEST_C_API && VSMC_RNG_TEST_MKL
+    watch.reset();
+    watch.start();
+    vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, rng.stream().get(),
+        static_cast<MKL_INT>(N), r.data(), 0, 1);
+    watch.stop();
+    sw.push_back(watch);
+    result = std::accumulate(r.begin(), r.end(), result);
+    rnd << result << std::endl;
+#elif VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
+    watch.reset();
+    watch.start();
+    vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream,
+        static_cast<MKL_INT>(N), r.data(), 0, 1);
+    watch.stop();
+    sw.push_back(watch);
+    result = std::accumulate(r.begin(), r.end(), result);
+    rnd << result << std::endl;
+#endif
+
     rnd.close();
 }
 
 inline void rng_output_sw(const std::string &prog_name,
-    const vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
+    const vsmc::Vector<std::string> &names,
+    const vsmc::Vector<std::size_t> &size,
     const vsmc::Vector<vsmc::StopWatch> &sw)
 {
     std::size_t N = names.size();
     std::size_t R = sw.size() / N;
-    std::size_t lwid = 94;
-    int swid = 5;
+    std::size_t lwid = 120;
     int twid = 15;
+    int swid = 5;
     int Twid = twid * static_cast<int>(R);
     int nwid = static_cast<int>(lwid) - swid - Twid;
 
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::left << std::setw(nwid) << prog_name;
     std::cout << std::right << std::setw(swid) << "Size";
-    std::cout << std::right << std::setw(Twid) << "Time (ms)";
+    switch (R) {
+        case 1: // Only time
+            std::cout << std::right << std::setw(twid) << "Time (ms)";
+            break;
+        case 2: // rng_dist
+            std::cout << std::right << std::setw(twid) << "C++";
+            std::cout << std::right << std::setw(twid) << "C";
+            break;
+        case 3: // rng_test without c api or mkl
+            std::cout << std::right << std::setw(twid) << "U01 (STD)";
+            std::cout << std::right << std::setw(twid) << "U01 (VSMC)";
+            std::cout << std::right << std::setw(twid) << "Normal (STD)";
+            break;
+        case 5: // rng_test with c api and mkl
+            std::cout << std::right << std::setw(twid) << "U01 (STD)";
+            std::cout << std::right << std::setw(twid) << "U01 (VSMC)";
+            std::cout << std::right << std::setw(twid) << "U01 (MKL)";
+            std::cout << std::right << std::setw(twid) << "Normal (STD)";
+            std::cout << std::right << std::setw(twid) << "Normal (MKL)";
+            break;
+    }
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
 
