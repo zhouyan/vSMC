@@ -94,8 +94,6 @@ inline void rng_test(std::size_t N, const std::string &name,
     vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
     vsmc::Vector<vsmc::StopWatch> &sw)
 {
-    using result_type = typename RNGType::result_type;
-
     names.push_back(name);
     size.push_back(sizeof(RNGType));
 
