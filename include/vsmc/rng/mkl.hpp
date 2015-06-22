@@ -158,13 +158,6 @@ class MKLDiscard
 }; // clas MKLDiscard
 
 template <std::size_t Bits>
-class MKLDiscard<VSL_BRNG_MCG31, Bits>
-{
-    public:
-    using type = MKLDiscardSkipAhead;
-}; // clas MKLDiscard
-
-template <std::size_t Bits>
 class MKLDiscard<VSL_BRNG_MCG59, Bits>
 {
     public:
@@ -172,21 +165,14 @@ class MKLDiscard<VSL_BRNG_MCG59, Bits>
 }; // clas MKLDiscard
 
 template <std::size_t Bits>
-class MKLDiscard<VSL_BRNG_MRG32K3A, Bits>
+class MKLDiscard<VSL_BRNG_MT19937, Bits>
 {
     public:
     using type = MKLDiscardSkipAhead;
 }; // clas MKLDiscard
 
 template <std::size_t Bits>
-class MKLDiscard<VSL_BRNG_SOBOL, Bits>
-{
-    public:
-    using type = MKLDiscardSkipAhead;
-}; // clas MKLDiscard
-
-template <std::size_t Bits>
-class MKLDiscard<VSL_BRNG_NIEDERR, Bits>
+class MKLDiscard<VSL_BRNG_SFMT19937, Bits>
 {
     public:
     using type = MKLDiscardSkipAhead;
