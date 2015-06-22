@@ -114,7 +114,7 @@ class MKLOffsetDynamic
     void set(MKL_INT n)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_MKL_VSL_OFFSET(n);
-        offset_ = n;
+        offset_ = n % MaxOffset;
     }
 
     MKL_INT get() const { return offset_; }
@@ -294,7 +294,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream<BRNG>>
     MKLStream(MKLStream<BRNG> &&) = default;
     MKLStream<BRNG> &operator=(MKLStream<BRNG> &&) = default;
 
-    void seed(MKL_UINT s) { reset(s); }
+    void seed(MKL_UINT s) { reset(s, s); }
 
     void seed(MKL_UINT s, MKL_INT offset) { reset(s, offset); }
 
