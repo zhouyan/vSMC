@@ -33,6 +33,7 @@
 #define VSMC_RNG_NORMAL_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
+#include <vsmc/rng/u01_distribution.hpp>
 #include <vsmc/rng/uniform_real_distribution.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_NORMAL_DISTRIBUTION_PARAM_CHECK(stddev)       \
@@ -42,6 +43,38 @@
 
 namespace vsmc
 {
+
+/// \brief Generating normal random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
+    RealType mean = 0, RealType stddev = 1)
+{
+    U01DistributionType<RNGType, RealType> runif;
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = runif(rng);
+    const std::size_t nu = n / 2;
+    vsmc::Vector<double> s(nu);
+    RealType *const u1 = r;
+    RealType *const u2 = r + nu;
+    math::vLn(nu, u1, s.data());
+    math::scal(nu, -2, s.data(), 1);
+    math::vSqrt(nu, s.data(), s.data());
+    math::scal(nu, math::pi_2<RealType>(), u2, 1);
+    math::vSin(nu, u2, u1);
+    math::vCos(nu, u2, u2);
+    math::vMul(nu, u1, s.data(), u1);
+    math::vMul(nu, u2, s.data(), u2);
+    if (n % 2 != 0) {
+        RealType v1 = runif(rng);
+        RealType v2 = runif(rng);
+        r[n - 1] = std::sqrt(-2 * std::log(v1)) *
+            std::cos(math::pi_2<RealType>() * v2);
+    }
+    math::scal(n, stddev, r, 1);
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] += mean;
+}
 
 /// \brief Normal distribution
 /// \ingroup Distribution

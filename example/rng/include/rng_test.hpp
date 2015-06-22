@@ -162,6 +162,14 @@ inline void rng_test(std::size_t N, const std::string &name,
     sw.push_back(watch);
     rnd << result << std::endl;
 
+    watch.reset();
+    watch.start();
+    vsmc::normal_distribution(rng, N, r.data(), 0.0, 1.0);
+    watch.stop();
+    sw.push_back(watch);
+    result = std::accumulate(r.begin(), r.end(), result);
+    rnd << result << std::endl;
+
 #if VSMC_RNG_TEST_C_API && VSMC_RNG_TEST_MKL
     watch.reset();
     watch.start();
@@ -192,7 +200,7 @@ inline void rng_output_sw(const std::string &prog_name,
 {
     std::size_t N = names.size();
     std::size_t R = sw.size() / N;
-    std::size_t lwid = 120;
+    std::size_t lwid = 160;
     int twid = 15;
     int swid = 5;
     int Twid = twid * static_cast<int>(R);
@@ -209,18 +217,20 @@ inline void rng_output_sw(const std::string &prog_name,
             std::cout << std::right << std::setw(twid) << "C++";
             std::cout << std::right << std::setw(twid) << "C";
             break;
-        case 4: // rng_test without c api or mkl
+        case 5: // rng_test without c api or mkl
             std::cout << std::right << std::setw(twid) << "U01 (STD)";
             std::cout << std::right << std::setw(twid) << "U01 (vSMC)";
             std::cout << std::right << std::setw(twid) << "Normal (STD)";
             std::cout << std::right << std::setw(twid) << "Normal (vSMC)";
+            std::cout << std::right << std::setw(twid) << "Normal (Batch)";
             break;
-        case 6: // rng_test with c api and mkl
+        case 7: // rng_test with c api and mkl
             std::cout << std::right << std::setw(twid) << "U01 (STD)";
             std::cout << std::right << std::setw(twid) << "U01 (vSMC)";
             std::cout << std::right << std::setw(twid) << "U01 (MKL)";
             std::cout << std::right << std::setw(twid) << "Normal (STD)";
             std::cout << std::right << std::setw(twid) << "Normal (vSMC)";
+            std::cout << std::right << std::setw(twid) << "Normal (Batch)";
             std::cout << std::right << std::setw(twid) << "Normal (MKL)";
             break;
     }

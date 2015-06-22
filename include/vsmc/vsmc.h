@@ -129,7 +129,7 @@ void vsmc_rng_extreme_value(
 
 /// \brief `vsmc::NormalDistribution<double>`
 void vsmc_rng_normal(
-    vsmc_rng *rng_ptr, int n, double *r, double mean, double sd);
+    vsmc_rng *rng_ptr, int n, double *r, double mean, double stddev);
 
 /// \brief `std::lognormal_distribution<double>`
 void vsmc_rng_lognormal(

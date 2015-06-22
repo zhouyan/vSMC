@@ -208,10 +208,11 @@ void vsmc_rng_extreme_value(
 }
 
 void vsmc_rng_normal(
-    vsmc_rng *rng_ptr, int n, double *r, double mean, double sd)
+    vsmc_rng *rng_ptr, int n, double *r, double mean, double stddev)
 {
-    vsmc::NormalDistribution<double> dist(mean, sd);
-    VSMC_DEFINE_RNG_RANDOM_DIST;
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    ::vsmc::normal_distribution<double>(
+        rng, static_cast<std::size_t>(n), r, mean, stddev);
 }
 
 void vsmc_rng_lognormal(

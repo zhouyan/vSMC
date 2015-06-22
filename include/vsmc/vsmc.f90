@@ -289,14 +289,14 @@ module vsmc
     end interface
 
     interface
-        subroutine vsmc_rng_normal(rng, n, r, mean, sd) bind(c)
+        subroutine vsmc_rng_normal(rng, n, r, mean, stddev) bind(c)
             use, intrinsic :: iso_c_binding
             import :: vsmc_rng
             type(vsmc_rng) :: rng
             integer(kind = c_int), value :: n
             real(kind = c_double), dimension(*) :: r
             real(kind = c_double), value :: mean
-            real(kind = c_double), value :: sd
+            real(kind = c_double), value :: stddev
         end subroutine vsmc_rng_normal
     end interface
 

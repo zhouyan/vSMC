@@ -55,13 +55,13 @@
 
 #endif // VSMC_HAS_RNGC_DOUBLE
 
-#define VSMC_RNGC_U01_31 (1.0f / (1024.0f * 1024.0f * 1024.0f * 2.0f))
-#define VSMC_RNGC_U01_24 (128.0f * VSMC_RNGC_U01_31)
-#define VSMC_RNGC_U01_23 (256.0f * VSMC_RNGC_U01_31)
-#define VSMC_RNGC_U01_32 (1.0 / (1024.0 * 1024.0 * 1024.0 * 4.0))
-#define VSMC_RNGC_U01_63 (2.0 * VSMC_RNGC_U01_32 * VSMC_RNGC_U01_32)
-#define VSMC_RNGC_U01_53 (1024.0 * VSMC_RNGC_U01_63)
-#define VSMC_RNGC_U01_52 (2048.0 * VSMC_RNGC_U01_63)
+#define VSMC_RNGC_U01_31 (1.0f / 2147483648.0f)        // 2^{-31}
+#define VSMC_RNGC_U01_24 (1.0f / 16777216.0f)          // 2^{-24}
+#define VSMC_RNGC_U01_23 (1.0f / 8388608.0f)           // 2^{-23}
+#define VSMC_RNGC_U01_32 (1.0 / 4294967296.0)          // 2^{-32}
+#define VSMC_RNGC_U01_63 (1.0 / 9223372036854775808.0) // 2^{-63}
+#define VSMC_RNGC_U01_53 (1.0 / 9007199254740992.0)    // 2^{-53}
+#define VSMC_RNGC_U01_52 (1.0 / 4503599627370496.0)    // 2^{-52}
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1]\f$
 /// \ingroup U01C
