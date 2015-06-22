@@ -38,6 +38,44 @@
 #error __STDC_CONSTANT_MACROS not defined before #<stdint.h>
 #endif
 
+#define VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS                                \
+    param_type param() const { return param_; }                               \
+    void param(const param_type &param) { param_ = param; }                   \
+    void reset() { param_.reset(); }                                          \
+                                                                              \
+    friend bool operator==(                                                   \
+        const distribution_type &dist1, const distribution_type &dist2)       \
+    {                                                                         \
+        return dist1.param() == dist2.param();                                \
+    }                                                                         \
+                                                                              \
+    friend bool operator!=(                                                   \
+        const distribution_type &dist1, const distribution_type &dist2)       \
+    {                                                                         \
+        return dist1.param() != dist2.param();                                \
+    }                                                                         \
+                                                                              \
+    template <typename CharT, typename Traits>                                \
+    friend std::basic_ostream<CharT, Traits> &operator<<(                     \
+        std::basic_ostream<CharT, Traits> &os, const distribution_type &dist) \
+    {                                                                         \
+        os << dist.param();                                                   \
+                                                                              \
+        return os;                                                            \
+    }                                                                         \
+                                                                              \
+    template <typename CharT, typename Traits>                                \
+    friend std::basic_istream<CharT, Traits> &operator>>(                     \
+        std::basic_istream<CharT, Traits> &is, distribution_type &dist)       \
+    {                                                                         \
+        param_type param;                                                     \
+        is >> param;                                                          \
+        if (is.good())                                                        \
+            dist.param(std::move(param));                                     \
+                                                                              \
+        return is;                                                            \
+    }
+
 namespace vsmc
 {
 
@@ -45,6 +83,14 @@ namespace internal
 {
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
+
+template <typename RealType>
+bool is_equal(RealType a, RealType b)
+{
+    if (a > b || a < b)
+        return false;
+    return true;
+}
 
 template <int N>
 class RNGBitsNMax

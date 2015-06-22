@@ -113,7 +113,7 @@ void vsmc_rng_uniform_int(vsmc_rng *rng_ptr, int n, int *r, int a, int b)
 void vsmc_rng_uniform_real(
     vsmc_rng *rng_ptr, int n, double *r, double a, double b)
 {
-    std::uniform_real_distribution<double> dist(a, b);
+    ::vsmc::UniformRealDistributionType<::vsmc::RNG, double> dist(a, b);
     VSMC_DEFINE_RNG_RANDOM_DIST;
 }
 
@@ -210,7 +210,7 @@ void vsmc_rng_extreme_value(
 void vsmc_rng_normal(
     vsmc_rng *rng_ptr, int n, double *r, double mean, double sd)
 {
-    std::normal_distribution<double> dist(mean, sd);
+    vsmc::NormalDistribution<double> dist(mean, sd);
     VSMC_DEFINE_RNG_RANDOM_DIST;
 }
 

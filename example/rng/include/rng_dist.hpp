@@ -33,10 +33,6 @@
 #define VSMC_EXAMPLE_RNG_DIST_HPP
 
 #include "rng_test.hpp"
-#include <vsmc/rng/engine.hpp>
-#include <vsmc/rng/uniform_real_distribution.hpp>
-#include <vsmc/rng/stable_distribution.hpp>
-#include <vsmc/utility/stop_watch.hpp>
 
 #define VSMC_RNG_DIST_C_PRE(Dist, name)                                       \
     vsmc::Vector<DistResultType<Dist>> r(N);                                  \
@@ -79,21 +75,21 @@
 #define VSMC_RNG_DIST_1_CPP(Dist, name, p1)                                   \
     {                                                                         \
         Dist dist(p1);                                                        \
-        std::string dname(#name "(" #p1 ")");                                 \
+        std::string dname(#Dist "(" #p1 ")");                                 \
         rng_dist(N, dist, dname, names, size, sw);                            \
     }
 
 #define VSMC_RNG_DIST_2_CPP(Dist, name, p1, p2)                               \
     {                                                                         \
         Dist dist(p1, p2);                                                    \
-        std::string dname(#name "(" #p1 "," #p2 ")");                         \
+        std::string dname(#Dist "(" #p1 "," #p2 ")");                         \
         rng_dist(N, dist, dname, names, size, sw);                            \
     }
 
 #define VSMC_RNG_DIST_4_CPP(Dist, name, p1, p2, p3, p4)                       \
     {                                                                         \
         Dist dist(p1, p2, p3, p4);                                            \
-        std::string dname(#name "(" #p1 "," #p2 "," #p3 "," #p4 ")");         \
+        std::string dname(#Dist "(" #p1 "," #p2 "," #p3 "," #p4 ")");         \
         rng_dist(N, dist, dname, names, size, sw);                            \
     }
 

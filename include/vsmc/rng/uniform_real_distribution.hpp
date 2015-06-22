@@ -36,21 +36,9 @@
 #include <vsmc/rng/u01.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_PARAM_CHECK(a, b)   \
-    VSMC_RUNTIME_ASSERT((a <= b),                                             \
-        "**UniformRealDistribution** CONSTRUCTED WITH INVALID "               \
-        "MINIMUM AND MAXIMUM PARAMTER VALUES")
-
-#define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MIN(eng_min)    \
-    VSMC_RUNTIME_ASSERT((eng_min == 0),                                       \
-        "**UniformRealDistribution::operator()** "                            \
-        "ENGINE MEMBER FUNCTION min() RETURN A VALUE OTHER THAN ZERO")
-
-#define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_ENG_MAX(eng_max)    \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (eng_max == uint32_t_max_ || eng_max == uint64_t_max_),               \
-        "**UniformRealDistribution::operator()** "                            \
-        "ENGINE MEMBER FUNCTION max() RETURN A VALUE OTHER THAN "             \
-        "THE MAXIMUM OF std::uint32_t OR std::uint64_t")
+    VSMC_RUNTIME_ASSERT((a <= b), "**UniformRealDistribution** CONSTRUCTED "  \
+                                  "WITH INVALID MINIMUM AND MAXIMUM "         \
+                                  "PARAMTER VALUES")
 
 namespace vsmc
 {
@@ -105,6 +93,7 @@ class UniformRealDistribution
 {
     public:
     using result_type = RealType;
+    using distribution_type = UniformRealDistribution<RealType, Left, Right>;
 
     class param_type
     {
@@ -116,6 +105,7 @@ class UniformRealDistribution
         explicit param_type(result_type a = 0, result_type b = 1)
             : a_(a), b_(b)
         {
+            invariant();
         }
 
         result_type a() const { return a_; }
@@ -124,9 +114,9 @@ class UniformRealDistribution
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
-            if (param1.a_ < param2.a_ || param1.a_ > param2.a_)
+            if (!is_equal(param1.a_, param2.a_))
                 return false;
-            if (param1.b_ < param2.b_ || param1.b_ > param2.b_)
+            if (!is_equal(param1.b_, param2.b_))
                 return false;
             return true;
         }
@@ -144,7 +134,8 @@ class UniformRealDistribution
             if (!os.good())
                 return os;
 
-            os << param.a_ << ' ' << param.b_;
+            os << param.a_ << ' ';
+            os << param.b_;
 
             return os;
         }
@@ -162,12 +153,10 @@ class UniformRealDistribution
             is >> std::ws >> b;
 
             if (is.good()) {
-                if (a <= b) {
-                    param.a_ = a;
-                    param.b_ = b;
-                } else {
+                if (a <= b)
+                    param = param_type(a, b);
+                else
                     is.setstate(std::ios_base::failbit);
-                }
             }
 
             return is;
@@ -176,105 +165,47 @@ class UniformRealDistribution
         private:
         result_type a_;
         result_type b_;
+
+        friend distribution_type;
+
+        void invariant()
+        {
+            VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_PARAM_CHECK(
+                a_, b_);
+        }
+
+        void reset() {}
     }; // class param_type
 
     explicit UniformRealDistribution(result_type a = 0, result_type b = 1)
-        : a_(a), b_(b)
+        : param_(a, b)
     {
-        VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_PARAM_CHECK(a_, b_);
     }
 
-    explicit UniformRealDistribution(const param_type &param)
-        : a_(param.a()), b_(param.b())
+    explicit UniformRealDistribution(const param_type &param) : param_(param)
     {
-        VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_PARAM_CHECK(a_, b_);
     }
 
-    param_type param() const { return param_type(a_, b_); }
+    result_type a() const { return param_.a_; }
+    result_type b() const { return param_.b_; }
 
-    void param(const param_type &param)
-    {
-        a_ = param.a();
-        b_ = param.b();
-    }
+    result_type min VSMC_MNE() const { return param_.a_; }
+    result_type max VSMC_MNE() const { return param_.b_; }
 
-    void reset() const {}
-
-    result_type a() const { return a_; }
-    result_type b() const { return b_; }
-
-    result_type min VSMC_MNE() const { return a_; }
-    result_type max VSMC_MNE() const { return b_; }
-
-    /// \brief Generate uniform random variates
     template <typename RNGType>
     result_type operator()(RNGType &rng) const
     {
         using int_type = internal::UniformRealDistributionIntType<RNGType>;
         return U01<Left, Right, int_type, RealType>::uint2fp(
                    static_cast<int_type>(rng())) *
-            (b_ - a_) +
-            a_;
+            (param_.b_ - param_.a_) +
+            param_.a_;
     }
 
-    friend bool operator==(
-        const UniformRealDistribution<RealType, Left, Right> &runif1,
-        const UniformRealDistribution<RealType, Left, Right> &runif2)
-    {
-        if (runif1.a_ < runif2.a_ || runif1.a_ > runif1.a_)
-            return false;
-        if (runif1.b_ < runif2.b_ || runif1.b_ > runif1.b_)
-            return false;
-        return true;
-    }
-
-    friend bool operator!=(
-        const UniformRealDistribution<RealType, Left, Right> &runif1,
-        const UniformRealDistribution<RealType, Left, Right> &runif2)
-    {
-        return !(runif1 == runif2);
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os,
-        const UniformRealDistribution<RealType, Left, Right> &runif)
-    {
-        if (!os.good())
-            return os;
-
-        os << runif.a_ << ' ' << runif.b_;
-
-        return os;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is,
-        UniformRealDistribution<RealType, Left, Right> &runif)
-    {
-        if (!is.good())
-            return is;
-
-        result_type a = 1;
-        result_type b = 0;
-        is >> std::ws >> a;
-        is >> std::ws >> b;
-        if (is.good()) {
-            if (a <= b) {
-                runif.a_ = a;
-                runif.b_ = b;
-            } else {
-                is.setstate(std::ios_base::failbit);
-            }
-        }
-
-        return is;
-    }
+    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
-    result_type a_;
-    result_type b_;
+    param_type param_;
 }; // class UniformRealDistribution
 
 namespace internal
@@ -311,20 +242,20 @@ using UniformRealDistributionType =
     typename UniformRealDistributionTypeTrait<RNGType, RealType>::type;
 
 template <typename RealType = double>
-using UniformRealOpenOpenDistribution =
+using UniformRealCCDistribution =
+    UniformRealDistribution<RealType, Closed, Closed>;
+
+template <typename RealType = double>
+using UniformRealOODistribution =
     UniformRealDistribution<RealType, Open, Open>;
 
 template <typename RealType = double>
-using UniformRealOpenClosedDistribution =
-    UniformRealDistribution<RealType, Open, Closed>;
-
-template <typename RealType = double>
-using UniformRealClosedOpenDistribution =
+using UniformRealCODistribution =
     UniformRealDistribution<RealType, Closed, Open>;
 
 template <typename RealType = double>
-using UniformRealClosedClosedDistribution =
-    UniformRealDistribution<RealType, Closed, Closed>;
+using UniformRealOCDistribution =
+    UniformRealDistribution<RealType, Open, Closed>;
 
 } // namespace vsmc
 

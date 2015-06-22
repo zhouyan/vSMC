@@ -40,7 +40,7 @@
 #define VSMC_RNG_TEST_MKL 0
 #endif
 
-#include <vsmc/rng/uniform_real_distribution.hpp>
+#include <vsmc/rng/rng.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 #if VSMC_RNG_TEST_C_API
 #include <vsmc/vsmc.h>
@@ -103,20 +103,20 @@ inline void rng_test(std::size_t N, const std::string &name,
     vsmc::Vector<double> r(N);
     std::ofstream rnd("rnd");
 
-    std::uniform_real_distribution<double> rstd(0, 1);
+    std::uniform_real_distribution<double> runif_std(0, 1);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        result += rstd(rng);
+        result += runif_std(rng);
     watch.stop();
     sw.push_back(watch);
     rnd << result << std::endl;
 
-    vsmc::UniformRealDistributionType<RNGType, double> rvsmc(0, 1);
+    vsmc::UniformRealDistributionType<RNGType, double> runif_vsmc(0, 1);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        result += rvsmc(rng);
+        result += runif_vsmc(rng);
     watch.stop();
     sw.push_back(watch);
     rnd << result << std::endl;
@@ -144,11 +144,20 @@ inline void rng_test(std::size_t N, const std::string &name,
     rnd << result << std::endl;
 #endif
 
-    std::normal_distribution<double> rnorm(0, 1);
+    std::normal_distribution<double> rnorm_std(0, 1);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        result += rnorm(rng);
+        result += rnorm_std(rng);
+    watch.stop();
+    sw.push_back(watch);
+    rnd << result << std::endl;
+
+    vsmc::NormalDistribution<double> rnorm_vsmc(0, 1);
+    watch.reset();
+    watch.start();
+    for (std::size_t i = 0; i != N; ++i)
+        result += rnorm_vsmc(rng);
     watch.stop();
     sw.push_back(watch);
     rnd << result << std::endl;
@@ -200,16 +209,18 @@ inline void rng_output_sw(const std::string &prog_name,
             std::cout << std::right << std::setw(twid) << "C++";
             std::cout << std::right << std::setw(twid) << "C";
             break;
-        case 3: // rng_test without c api or mkl
+        case 4: // rng_test without c api or mkl
             std::cout << std::right << std::setw(twid) << "U01 (STD)";
-            std::cout << std::right << std::setw(twid) << "U01 (VSMC)";
+            std::cout << std::right << std::setw(twid) << "U01 (vSMC)";
             std::cout << std::right << std::setw(twid) << "Normal (STD)";
+            std::cout << std::right << std::setw(twid) << "Normal (vSMC)";
             break;
-        case 5: // rng_test with c api and mkl
+        case 6: // rng_test with c api and mkl
             std::cout << std::right << std::setw(twid) << "U01 (STD)";
-            std::cout << std::right << std::setw(twid) << "U01 (VSMC)";
+            std::cout << std::right << std::setw(twid) << "U01 (vSMC)";
             std::cout << std::right << std::setw(twid) << "U01 (MKL)";
             std::cout << std::right << std::setw(twid) << "Normal (STD)";
+            std::cout << std::right << std::setw(twid) << "Normal (vSMC)";
             std::cout << std::right << std::setw(twid) << "Normal (MKL)";
             break;
     }

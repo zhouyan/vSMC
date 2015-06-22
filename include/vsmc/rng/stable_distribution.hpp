@@ -60,6 +60,7 @@ class StableDistribution
 {
     public:
     using result_type = RealType;
+    using distribution_type = StableDistribution<RealType>;
 
     class param_type
     {
@@ -75,6 +76,7 @@ class StableDistribution
             , location_(location)
             , scale_(scale)
         {
+            invariant();
         }
 
         result_type stability() const { return stability_; }
@@ -85,16 +87,13 @@ class StableDistribution
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
-            if (param1.stability_ < param2.stability_ ||
-                param1.stability_ > param2.stability_)
+            if (!internal::is_equal(param1.stability_, param2.stability_))
                 return false;
-            if (param1.skewness_ < param2.skewness_ ||
-                param1.skewness_ > param2.skewness_)
+            if (!internal::is_equal(param1.skewness_, param2.skewness_))
                 return false;
-            if (param1.location_ < param2.location_ ||
-                param1.location_ > param2.location_)
+            if (!internal::is_equal(param1.location_, param2.location_))
                 return false;
-            if (param1.scale_ < param2.scale_ || param1.scale_ > param2.scale_)
+            if (!internal::is_equal(param1.scale_, param2.scale_))
                 return false;
             return true;
         }
@@ -112,8 +111,13 @@ class StableDistribution
             if (!os.good())
                 return os;
 
-            os << param.stability_ << ' ' << param.skewness_ << ' ';
-            os << param.location_ << ' ' << param.scale_ << ' ';
+            os << param.stability_ << ' ';
+            os << param.skewness_ << ' ';
+            os << param.location_ << ' ';
+            os << param.scale_ << ' ';
+            os << param.zeta_ << ' ';
+            os << param.xi_ << ' ';
+            os << param.stability_1_;
 
             return os;
         }
@@ -129,18 +133,21 @@ class StableDistribution
             result_type skewness = 0;
             result_type location = 0;
             result_type scale = 0;
+            result_type zeta;
+            result_type xi;
+            bool stability_1;
             is >> std::ws >> stability;
             is >> std::ws >> skewness;
             is >> std::ws >> location;
             is >> std::ws >> scale;
+            is >> std::ws >> zeta;
+            is >> std::ws >> xi;
+            is >> std::ws >> stability_1;
 
             if (is.good()) {
                 if (stability > 0 && stability <= 2 && skewness >= -1 &&
                     skewness <= 1 && scale > 0) {
-                    param.stability_ = stability;
-                    param.skewness_ = skewness;
-                    param.location_ = location;
-                    param.scale_ = scale;
+                    param = param_type(stability, skewness, location, scale);
                 } else {
                     is.setstate(std::ios_base::failbit);
                 }
@@ -154,64 +161,49 @@ class StableDistribution
         result_type skewness_;
         result_type location_;
         result_type scale_;
+        result_type zeta_;
+        result_type xi_;
+        bool stability_1_;
+
+        friend distribution_type;
+
+        void invariant()
+        {
+            VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_STABILITY(
+                stability_);
+            VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_SKEWNESS(
+                skewness_);
+            VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_SCALE(
+                scale_);
+
+            if (stability_ < 1 || stability_ > 1) {
+                stability_1_ = false;
+                zeta_ = -skewness_ *
+                    std::tan(math::pi_by2<result_type>() * stability_);
+                xi_ = 1 / stability_ * std::atan(-zeta_);
+            } else {
+                stability_1_ = true;
+                zeta_ = -std::numeric_limits<result_type>::infinity();
+                xi_ = math::pi_by2<result_type>();
+            }
+        }
+
+        void reset() {}
     }; // class param_type
 
     explicit StableDistribution(result_type stability = 1,
         result_type skewness = 0, result_type location = 0,
         result_type scale = 1)
-        : stability_(stability)
-        , skewness_(skewness)
-        , location_(location)
-        , scale_(scale)
-        , zeta_(0)
-        , xi_(0)
-        , stability_1_(false)
+        : param_(stability, skewness, location, scale)
     {
-        VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_STABILITY(
-            stability_);
-        VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_SKEWNESS(
-            skewness_);
-        VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_SCALE(scale_);
-        invariant();
     }
 
-    explicit StableDistribution(const param_type &param)
-        : stability_(param.stability())
-        , skewness_(param.skewness())
-        , location_(param.location())
-        , scale_(param.scale())
-        , zeta_(0)
-        , xi_(0)
-        , stability_1_(false)
-    {
-        VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_STABILITY(
-            stability_);
-        VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_SKEWNESS(
-            skewness_);
-        VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_SCALE(scale_);
-        invariant();
-    }
+    explicit StableDistribution(const param_type &param) : param_(param) {}
 
-    param_type param() const
-    {
-        return param_type(stability_, skewness_, location_, scale_);
-    }
-
-    void param(const param_type &param)
-    {
-        stability_ = param.stability();
-        skewness_ = param.skewness();
-        location_ = param.location();
-        scale_ = param.scale();
-        invariant();
-    }
-
-    void reset() const {}
-
-    result_type stability() const { return stability_; }
-    result_type skewness() const { return skewness_; }
-    result_type location() const { return location_; }
-    result_type scale() const { return scale_; }
+    result_type stability() const { return param_.stability_; }
+    result_type skewness() const { return param_.skewness_; }
+    result_type location() const { return param_.location_; }
+    result_type scale() const { return param_.scale_; }
 
     result_type min VSMC_MNE() const
     {
@@ -226,90 +218,16 @@ class StableDistribution
     template <typename RNGType>
     result_type operator()(RNGType &rng) const
     {
-        if (stability_1_)
+        if (param_.stability_1_)
             return trans_1(standard_1(rng));
         else
             return trans_a(standard_a(rng));
     }
 
-    friend bool operator==(const StableDistribution<RealType> &rstable1,
-        const StableDistribution<RealType> &rstable2)
-    {
-        if (rstable1.stability_ < rstable2.stability_ ||
-            rstable1.stability_ > rstable2.stability_)
-            return false;
-        if (rstable1.skewness_ < rstable2.skewness_ ||
-            rstable1.skewness_ > rstable2.skewness_)
-            return false;
-        if (rstable1.location_ < rstable2.location_ ||
-            rstable1.location_ > rstable2.location_)
-            return false;
-        if (rstable1.scale_ < rstable2.scale_ ||
-            rstable1.scale_ > rstable2.scale_)
-            return false;
-        return true;
-    }
-
-    friend bool operator!=(const StableDistribution<RealType> &rstable1,
-        const StableDistribution<RealType> &rstable2)
-    {
-        return !(rstable1 == rstable2);
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os,
-        const StableDistribution<RealType> &rstable)
-    {
-        if (!os.good())
-            return os;
-
-        os << rstable.stability_ << ' ' << rstable.skewness_ << ' ';
-        os << rstable.location_ << ' ' << rstable.scale_ << ' ';
-
-        return os;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is,
-        StableDistribution<RealType> &rstable)
-    {
-        if (!is.good())
-            return is;
-
-        result_type stability = 0;
-        result_type skewness = 0;
-        result_type location = 0;
-        result_type scale = 0;
-        is >> std::ws >> stability;
-        is >> std::ws >> skewness;
-        is >> std::ws >> location;
-        is >> std::ws >> scale;
-
-        if (is.good()) {
-            if (stability > 0 && stability <= 2 && skewness >= -1 &&
-                skewness <= 1 && scale > 0) {
-                rstable.stability_ = stability;
-                rstable.skewness_ = skewness;
-                rstable.location_ = location;
-                rstable.scale_ = scale;
-            } else {
-                is.setstate(std::ios_base::failbit);
-            }
-        }
-
-        return is;
-    }
+    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
-    result_type stability_;
-    result_type skewness_;
-    result_type location_;
-    result_type scale_;
-    result_type zeta_;
-    result_type xi_;
-    bool stability_1_;
+    param_type param_;
 
     template <typename RNGType>
     result_type standard_1(RNGType &rng) const
@@ -318,11 +236,12 @@ class StableDistribution
         result_type w = -std::log(1 - runif(rng));
         result_type u = (runif(rng) - 0.5) * math::pi<result_type>();
         result_type a =
-            (math::pi_by2<result_type>() + skewness_ * u) * std::tan(u);
+            (math::pi_by2<result_type>() + param_.skewness_ * u) * std::tan(u);
         result_type b =
             std::log(math::pi_by2<result_type>() * w * std::cos(u));
-        result_type c = std::log(math::pi_by2<result_type>() + skewness_ * u);
-        result_type x = (a - skewness_ * (b - c)) / xi_;
+        result_type c =
+            std::log(math::pi_by2<result_type>() + param_.skewness_ * u);
+        result_type x = (a - param_.skewness_ * (b - c)) / param_.xi_;
 
         return x;
     }
@@ -333,11 +252,12 @@ class StableDistribution
         std::uniform_real_distribution<result_type> runif(0, 1);
         result_type w = -std::log(1 - runif(rng));
         result_type u = (runif(rng) - 0.5) * math::pi<result_type>();
-        result_type a = 0.5 * std::log(1 + zeta_ * zeta_) / stability_;
-        result_type b = std::sin(stability_ * (u + xi_));
-        result_type c = std::log(std::cos(u)) / stability_;
-        result_type d = (1 - stability_) / stability_ *
-            std::log(std::cos(u - stability_ * (u + xi_)) / w);
+        result_type a = 0.5 * std::log(1 + param_.zeta_ * param_.zeta_) /
+            param_.stability_;
+        result_type b = std::sin(param_.stability_ * (u + param_.xi_));
+        result_type c = std::log(std::cos(u)) / param_.stability_;
+        result_type d = (1 - param_.stability_) / param_.stability_ *
+            std::log(std::cos(u - param_.stability_ * (u + param_.xi_)) / w);
         result_type x = b * std::exp(a - c + d);
 
         return x;
@@ -345,25 +265,14 @@ class StableDistribution
 
     result_type trans_1(result_type x) const
     {
-        return scale_ * x + location_ +
-            2 * math::pi_inv<result_type>() * skewness_ * scale_ *
-            std::log(scale_);
+        return param_.scale_ * x + param_.location_ +
+            2 * math::pi_inv<result_type>() * param_.skewness_ *
+            param_.scale_ * std::log(param_.scale_);
     }
 
-    result_type trans_a(result_type x) const { return scale_ * x + location_; }
-
-    void invariant()
+    result_type trans_a(result_type x) const
     {
-        if (stability_ < 1 || stability_ > 1) {
-            stability_1_ = false;
-            zeta_ = -skewness_ *
-                std::tan(math::pi_by2<result_type>() * stability_);
-            xi_ = 1 / stability_ * std::atan(-zeta_);
-        } else {
-            stability_1_ = true;
-            zeta_ = -std::numeric_limits<result_type>::infinity();
-            xi_ = math::pi_by2<result_type>();
-        }
+        return param_.scale_ * x + param_.location_;
     }
 }; // class StableDistributionBase
 
