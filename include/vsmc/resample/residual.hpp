@@ -51,7 +51,7 @@ class ResampleResidual
         Vector<double> resid(M);
         std::size_t R =
             resample_trans_residual(M, N, weight, resid.data(), integ.data());
-        U01SequenceSorted<RNGType> u01seq(R, rng);
+        U01SequenceSorted<RNGType, double> u01seq(R, rng);
         resample_trans_u01_rep(M, R, resid.data(), u01seq, replication);
         math::vAdd(M, replication, integ.data(), replication);
     }

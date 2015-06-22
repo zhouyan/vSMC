@@ -33,6 +33,7 @@
 #define VSMC_RNG_DISCRETE_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
+#include <vsmc/rng/uniform_real_distribution.hpp>
 #include <vsmc/math/cblas.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param)         \
@@ -121,15 +122,15 @@ class DiscreteDistribution
 
     Vector<double> probability() const { return param_; }
 
-    template <typename URNG>
-    result_type operator()(URNG &eng) const
+    template <typename RNGType>
+    result_type operator()(RNGType &rng) const
     {
-        return operator()(eng, param_.begin(), param_.end(), true);
+        return operator()(rng, param_.begin(), param_.end(), true);
     }
 
     /// \brief Draw sample with external probabilities
     ///
-    /// \param eng A uniform random number generator
+    /// \param rng A uniform random number generator
     /// \param first The first iterator of the weights sequence.
     /// \param last The one past the end iterator of the weights sequence.
     /// \param normalized If the weights are already normalized
@@ -145,15 +146,15 @@ class DiscreteDistribution
     /// which will lead to uncessary dynamic memory allocation. This function
     /// does not use dynamic memory and improve performance for normalized
     /// weights.
-    template <typename URNG, typename InputIter>
-    result_type operator()(URNG &eng, InputIter first, InputIter last,
+    template <typename RNGType, typename InputIter>
+    result_type operator()(RNGType &rng, InputIter first, InputIter last,
         bool normalized = false) const
     {
         using value_type =
             typename std::iterator_traits<InputIter>::value_type;
 
-        std::uniform_real_distribution<value_type> runif(0, 1);
-        value_type u = runif(eng);
+        UniformRealDistributionType<RNGType, value_type> runif(0, 1);
+        value_type u = runif(rng);
 
         if (!normalized) {
             value_type mulw =

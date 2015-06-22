@@ -47,7 +47,7 @@ class ResampleMultinomial
     void operator()(std::size_t M, std::size_t N, RNGType &rng,
         const double *weight, IntType *replication)
     {
-        U01SequenceSorted<RNGType> u01seq(N, rng);
+        U01SequenceSorted<RNGType, double> u01seq(N, rng);
         resample_trans_u01_rep(M, N, weight, u01seq, replication);
     }
 }; // ResampleMultinomial

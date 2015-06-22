@@ -114,6 +114,10 @@
 /// \ingroup RNG
 /// \brief Converting random integers to uniform floating points
 
+/// \defgroup U01Sequence U01 Sequence
+/// \ingroup RNG
+/// \brief Generating ordered uniform random sequence
+
 /// \defgroup Xorshift Xorshift
 /// \ingroup RNG
 /// \brief Random number generating using the Xorshift algorithm

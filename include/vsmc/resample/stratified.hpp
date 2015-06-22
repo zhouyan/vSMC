@@ -47,7 +47,7 @@ class ResampleStratified
     void operator()(std::size_t M, std::size_t N, RNGType &rng,
         const double *weight, IntType *replication)
     {
-        U01SequenceStratified<RNGType> u01seq(N, rng);
+        U01SequenceStratified<RNGType, double> u01seq(N, rng);
         resample_trans_u01_rep(M, N, weight, u01seq, replication);
     }
 }; // ResampleStratified

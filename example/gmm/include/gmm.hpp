@@ -388,9 +388,10 @@ class gmm_init : public InitializeSMP<gmm_state, gmm_init>
         const gmm_state &state = sp.particle().value();
         gmm_param &param = sp.state(0);
 
-        std::normal_distribution<> rmu(state.mu0(), state.sd0());
-        std::gamma_distribution<> rlambda(state.shape0(), state.scale0());
-        std::gamma_distribution<> rweight(1, 1);
+        std::normal_distribution<double> rmu(state.mu0(), state.sd0());
+        std::gamma_distribution<double> rlambda(
+            state.shape0(), state.scale0());
+        std::gamma_distribution<double> rweight(1, 1);
 
         double sum = 0;
         for (std::size_t i = 0; i != param.comp_num(); ++i) {
@@ -461,8 +462,8 @@ class gmm_move_mu : public MoveSMP<gmm_state, gmm_move_mu>
         const gmm_state &state = sp.particle().value();
         gmm_param &param = sp.state(0);
 
-        std::normal_distribution<> rmu(0, state.mu_sd());
-        std::uniform_real_distribution<> runif(0, 1);
+        std::normal_distribution<double> rmu(0, state.mu_sd());
+        std::uniform_real_distribution<double> runif(0, 1);
 
         double p = param.log_prior() + state.alpha() * param.log_likelihood();
         param.save_old();
@@ -484,8 +485,8 @@ class gmm_move_lambda : public MoveSMP<gmm_state, gmm_move_lambda>
         const gmm_state &state = sp.particle().value();
         gmm_param &param = sp.state(0);
 
-        std::lognormal_distribution<> rlambda(0, state.lambda_sd());
-        std::uniform_real_distribution<> runif(0, 1);
+        std::lognormal_distribution<double> rlambda(0, state.lambda_sd());
+        std::uniform_real_distribution<double> runif(0, 1);
 
         double p = param.log_prior() + state.alpha() * param.log_likelihood();
         param.save_old();
@@ -507,8 +508,8 @@ class gmm_move_weight : public MoveSMP<gmm_state, gmm_move_weight>
         const gmm_state &state = sp.particle().value();
         gmm_param &param = sp.state(0);
 
-        std::normal_distribution<> rweight(0, state.weight_sd());
-        std::uniform_real_distribution<> runif(0, 1);
+        std::normal_distribution<double> rweight(0, state.weight_sd());
+        std::uniform_real_distribution<double> runif(0, 1);
 
         double p = param.log_prior() + state.alpha() * param.log_likelihood();
         param.save_old();

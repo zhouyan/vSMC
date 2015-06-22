@@ -47,7 +47,7 @@ class ResampleSystematic
     void operator()(std::size_t M, std::size_t N, RNGType &rng,
         const double *weight, IntType *replication)
     {
-        U01SequenceSystematic<RNGType> u01seq(N, rng);
+        U01SequenceSystematic<RNGType, double> u01seq(N, rng);
         resample_trans_u01_rep(M, N, weight, u01seq, replication);
     }
 }; // ResampleSystematic

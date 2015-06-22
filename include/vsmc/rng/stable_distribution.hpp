@@ -33,6 +33,7 @@
 #define VSMC_RNG_STABLE_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
+#include <vsmc/rng/uniform_real_distribution.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_STABILITY(a)  \
     VSMC_RUNTIME_ASSERT((a > 0 && a <= 2),                                    \
@@ -222,13 +223,13 @@ class StableDistribution
         return std::numeric_limits<result_type>::infinity();
     }
 
-    template <typename Eng>
-    result_type operator()(Eng &eng) const
+    template <typename RNGType>
+    result_type operator()(RNGType &rng) const
     {
         if (stability_1_)
-            return trans_1(standard_1(eng));
+            return trans_1(standard_1(rng));
         else
-            return trans_a(standard_a(eng));
+            return trans_a(standard_a(rng));
     }
 
     friend bool operator==(const StableDistribution<RealType> &rstable1,
@@ -310,12 +311,12 @@ class StableDistribution
     result_type xi_;
     bool stability_1_;
 
-    template <typename Eng>
-    result_type standard_1(Eng &eng) const
+    template <typename RNGType>
+    result_type standard_1(RNGType &rng) const
     {
-        std::uniform_real_distribution<result_type> runif(0, 1);
-        result_type w = -std::log(1 - runif(eng));
-        result_type u = (runif(eng) - 0.5) * math::pi<result_type>();
+        UniformRealDistributionType<RNGType, result_type> runif(0, 1);
+        result_type w = -std::log(1 - runif(rng));
+        result_type u = (runif(rng) - 0.5) * math::pi<result_type>();
         result_type a =
             (math::pi_by2<result_type>() + skewness_ * u) * std::tan(u);
         result_type b =
@@ -326,12 +327,12 @@ class StableDistribution
         return x;
     }
 
-    template <typename Eng>
-    result_type standard_a(Eng &eng) const
+    template <typename RNGType>
+    result_type standard_a(RNGType &rng) const
     {
         std::uniform_real_distribution<result_type> runif(0, 1);
-        result_type w = -std::log(1 - runif(eng));
-        result_type u = (runif(eng) - 0.5) * math::pi<result_type>();
+        result_type w = -std::log(1 - runif(rng));
+        result_type u = (runif(rng) - 0.5) * math::pi<result_type>();
         result_type a = 0.5 * std::log(1 + zeta_ * zeta_) / stability_;
         result_type b = std::sin(stability_ * (u + xi_));
         result_type c = std::log(std::cos(u)) / stability_;

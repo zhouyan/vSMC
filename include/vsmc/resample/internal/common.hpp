@@ -34,7 +34,7 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/rng/engine.hpp>
-#include <vsmc/rng/u01.hpp>
+#include <vsmc/rng/u01_sequence.hpp>
 
 /// \brief Default RNG type for resampling
 /// \ingroup Config
