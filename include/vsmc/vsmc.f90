@@ -359,6 +359,18 @@ module vsmc
     end interface
 
     interface
+        subroutine vsmc_rng_laplace(rng, n, r, location, scal) bind(c)
+            use, intrinsic :: iso_c_binding
+            import :: vsmc_rng
+            type(vsmc_rng) :: rng
+            integer(kind = c_int), value :: n
+            real(kind = c_double), dimension(*) :: r
+            real(kind = c_double), value :: location
+            real(kind = c_double), value :: scal
+        end subroutine vsmc_rng_laplace
+    end interface
+
+    interface
         subroutine vsmc_rng_stable(&
                 rng, n, r, stability, skewness, location, scal) bind(c)
             use, intrinsic :: iso_c_binding

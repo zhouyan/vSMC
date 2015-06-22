@@ -148,6 +148,10 @@ void vsmc_rng_fisher_f(
 /// \brief `std::student_t_distribution<double>`
 void vsmc_rng_student_t(vsmc_rng *rng_ptr, int n, double *r, double df);
 
+/// \brief `vsmc::LaplaceDistribution<double>`
+void vsmc_rng_laplace(
+    vsmc_rng *rng_ptr, int n, double *r, double location, double scal);
+
 /// \brief `vsmc::StableDistribution<double>`
 void vsmc_rng_stable(vsmc_rng *rng_ptr, int n, double *r, double stability,
     double skewness, double location, double scale);
