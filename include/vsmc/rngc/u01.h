@@ -67,7 +67,8 @@
 /// \ingroup U01C
 VSMC_STATIC_INLINE float vsmc_u01_closed_closed_u32_f32(uint32_t u)
 {
-    return ((u & 0x7FFFFFC0) + (u & 0x40)) * VSMC_RNGC_U01_31;
+    return ((u & UINT32_C(0x7FFFFFC0)) + (u & UINT32_C(0x40))) *
+        VSMC_RNGC_U01_31;
 }
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1)\f$
@@ -129,7 +130,7 @@ VSMC_STATIC_INLINE double vsmc_u01_open_open_u32_f64(uint32_t u)
 /// \ingroup U01C
 VSMC_STATIC_INLINE double vsmc_u01_closed_closed_u64_f64(uint64_t u)
 {
-    return ((u & UINT64_C(0x7FFFFFFFFFFFFE00)) + (u & 0x200)) *
+    return ((u & UINT64_C(0x7FFFFFFFFFFFFE00)) + (u & UINT64_C(0x200))) *
         VSMC_RNGC_U01_63;
 }
 
