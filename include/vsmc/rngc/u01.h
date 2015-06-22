@@ -126,6 +126,50 @@ VSMC_STATIC_INLINE double vsmc_u01_open_open_u32_f64(uint32_t u)
     return (0.5 + u) * VSMC_RNGC_U01_32;
 }
 
+/// \brief Converting 64-bits unsigned to single precision uniform \f$[0,1]\f$
+/// \ingroup U01C
+VSMC_STATIC_INLINE float vsmc_u01_closed_closed_u64_f32(uint64_t u)
+{
+#ifdef __cplusplus
+    return vsmc_u01_closed_closed_u32_f32(static_cast<uint32_t>(u));
+#else
+    return vsmc_u01_closed_closed_u32_f32(((uint32_t) u));
+#endif
+}
+
+/// \brief Converting 64-bits unsigned to single precision uniform \f$[0,1)\f$
+/// \ingroup U01C
+VSMC_STATIC_INLINE float vsmc_u01_closed_open_u64_f32(uint64_t u)
+{
+#ifdef __cplusplus
+    return vsmc_u01_closed_open_u32_f32(static_cast<uint32_t>(u));
+#else
+    return vsmc_u01_closed_open_u32_f32(((uint32_t) u));
+#endif
+}
+
+/// \brief Converting 64-bits unsigned to single precision uniform \f$(0,1]\f$
+/// \ingroup U01C
+VSMC_STATIC_INLINE float vsmc_u01_open_closed_u64_f32(uint64_t u)
+{
+#ifdef __cplusplus
+    return vsmc_u01_open_closed_u32_f32(static_cast<uint32_t>(u));
+#else
+    return vsmc_u01_open_closed_u32_f32(((uint32_t) u));
+#endif
+}
+
+/// \brief Converting 64-bits unsigned to single precision uniform \f$(0,1)\f$
+/// \ingroup U01C
+VSMC_STATIC_INLINE float vsmc_u01_open_open_u64_f32(uint64_t u)
+{
+#ifdef __cplusplus
+    return vsmc_u01_open_open_u32_f32(static_cast<uint32_t>(u));
+#else
+    return vsmc_u01_open_open_u32_f32(((uint32_t) u));
+#endif
+}
+
 /// \brief Converting 64-bits unsigned to double precision uniform \f$[0,1]\f$
 /// \ingroup U01C
 VSMC_STATIC_INLINE double vsmc_u01_closed_closed_u64_f64(uint64_t u)
@@ -153,50 +197,6 @@ VSMC_STATIC_INLINE double vsmc_u01_open_closed_u64_f64(uint64_t u)
 VSMC_STATIC_INLINE double vsmc_u01_open_open_u64_f64(uint64_t u)
 {
     return (0.5 + (u >> 12)) * VSMC_RNGC_U01_52;
-}
-
-/// \brief Converting 64-bits unsigned to single precision uniform \f$[0,1]\f$
-/// \ingroup U01C
-VSMC_STATIC_INLINE float vsmc_u01_closed_closed_u64_f32(uint64_t u)
-{
-#ifdef __cplusplus
-    return static_cast<float>(vsmc_u01_closed_closed_u64_f64(u));
-#else
-    return (float) vsmc_u01_closed_closed_u64_f64(u);
-#endif
-}
-
-/// \brief Converting 64-bits unsigned to single precision uniform \f$[0,1)\f$
-/// \ingroup U01C
-VSMC_STATIC_INLINE float vsmc_u01_closed_open_u64_f32(uint64_t u)
-{
-#ifdef __cplusplus
-    return static_cast<float>(vsmc_u01_closed_open_u64_f64(u));
-#else
-    return (float) vsmc_u01_closed_open_u64_f64(u);
-#endif
-}
-
-/// \brief Converting 64-bits unsigned to single precision uniform \f$(0,1]\f$
-/// \ingroup U01C
-VSMC_STATIC_INLINE float vsmc_u01_open_closed_u64_f32(uint64_t u)
-{
-#ifdef __cplusplus
-    return static_cast<float>(vsmc_u01_open_closed_u64_f64(u));
-#else
-    return (float) vsmc_u01_open_closed_u64_f64(u);
-#endif
-}
-
-/// \brief Converting 64-bits unsigned to single precision uniform \f$(0,1)\f$
-/// \ingroup U01C
-VSMC_STATIC_INLINE float vsmc_u01_open_open_u64_f32(uint64_t u)
-{
-#ifdef __cplusplus
-    return static_cast<float>(vsmc_u01_open_open_u64_f64(u));
-#else
-    return (float) vsmc_u01_open_open_u64_f64(u);
-#endif
 }
 
 #endif // VSMC_HAS_RNGC_DOUBLE
