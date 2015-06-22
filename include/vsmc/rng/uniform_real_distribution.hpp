@@ -33,7 +33,7 @@
 #define VSMC_RNG_UNIFORM_REAL_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/u01.hpp>
+#include <vsmc/rng/u01_distribution.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_UNIFORM_REAL_DISTRIBUTION_PARAM_CHECK(a, b)   \
     VSMC_RUNTIME_ASSERT((a <= b), "**UniformRealDistribution** CONSTRUCTED "  \
@@ -43,50 +43,8 @@
 namespace vsmc
 {
 
-namespace internal
-{
-
-template <int Bits, bool = Bits >= 32, bool = Bits >= 64>
-class UniformRealDistributionIntTypeTraitImpl;
-
-template <int Bits>
-class UniformRealDistributionIntTypeTraitImpl<Bits, true, false>
-{
-    public:
-    using type = std::uint32_t;
-}; // class UniformRealDistribuitonIntTypeTraitImpl
-
-template <int Bits>
-class UniformRealDistributionIntTypeTraitImpl<Bits, true, true>
-{
-    public:
-    using type = std::uint64_t;
-}; // class UniformRealDistribuitonIntTypeTraitImpl
-
-template <typename RNGType>
-class UniformRealDistributionIntTypeTrait
-    : public UniformRealDistributionIntTypeTraitImpl<RNGBits<RNGType>::value>
-{
-}; // class UniformRealTypeDistributionIntTypeTrait
-
-template <typename RNGType>
-using UniformRealDistributionIntType =
-    typename UniformRealDistributionIntTypeTrait<RNGType>::type;
-
-} // namespace vsmc::interal
-
-/// \brief Uniform real distribution with variants open/closed variants
+/// \brief Uniform real distribution with open/closed variants
 /// \ingroup Distribution
-///
-/// \details
-/// This distribution is almost identical to C++11
-/// `std::uniform_real_distribution`. But it differs in two important aspects
-/// - It allows the interval to be either open or closed on both sides.
-/// - It requires that the uniform random number generator to produce integers
-///   on the full range of either `std::uint32_t` or `std::uint64_t`.
-/// \tparam RealType The floating points type of results
-/// \tparam Left Shall the left side of the interval be Open or Closed
-/// \tparam Right Shall the right side of the interval be Open or Closed
 template <typename RealType = double, typename Left = Closed,
     typename Right = Open>
 class UniformRealDistribution
@@ -122,7 +80,7 @@ class UniformRealDistribution
         }
 
         friend bool operator!=(
-            const param_type param1, const param_type param2)
+            const param_type &param1, const param_type &param2)
         {
             return !(param1 == param2);
         }
@@ -165,6 +123,7 @@ class UniformRealDistribution
         private:
         result_type a_;
         result_type b_;
+        U01Distribution<RealType, Left, Right> u01_;
 
         friend distribution_type;
 
@@ -195,11 +154,9 @@ class UniformRealDistribution
     template <typename RNGType>
     result_type operator()(RNGType &rng) const
     {
-        using int_type = internal::UniformRealDistributionIntType<RNGType>;
-        return U01<Left, Right, int_type, RealType>::uint2fp(
-                   static_cast<int_type>(rng())) *
-            (param_.b_ - param_.a_) +
-            param_.a_;
+        U01Distribution<RealType, Left, Right> u01;
+
+        return u01(rng) * (param_.b_ - param_.a_) + param_.a_;
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
@@ -228,6 +185,8 @@ class UniformRealDistributionTypeTraitImpl<RNGType, RealType, false>
 
 } // namespace vsmc::internal
 
+/// \brief Uniform real distribution type trait
+/// \ingroup Distribution
 template <typename RNGType, typename RealType = double>
 class UniformRealDistributionTypeTrait
 {
@@ -237,22 +196,32 @@ class UniformRealDistributionTypeTrait
             RealType>::type;
 }; // class UniformRealDistributionTypeTrait
 
+/// \brief Uniform real distribution type
+/// \ingroup Distribution
 template <typename RNGType, typename RealType = double>
 using UniformRealDistributionType =
     typename UniformRealDistributionTypeTrait<RNGType, RealType>::type;
 
+/// \brief Uniform real distribution on cloed-closed interval
+/// \ingroup Distribution
 template <typename RealType = double>
 using UniformRealCCDistribution =
     UniformRealDistribution<RealType, Closed, Closed>;
 
+/// \brief Uniform real distribution on cloed-open interval
+/// \ingroup Distribution
 template <typename RealType = double>
 using UniformRealOODistribution =
     UniformRealDistribution<RealType, Open, Open>;
 
+/// \brief Uniform real distribution on open-closed interval
+/// \ingroup Distribution
 template <typename RealType = double>
 using UniformRealCODistribution =
     UniformRealDistribution<RealType, Closed, Open>;
 
+/// \brief Uniform real distribution on open-open interval
+/// \ingroup Distribution
 template <typename RealType = double>
 using UniformRealOCDistribution =
     UniformRealDistribution<RealType, Open, Closed>;

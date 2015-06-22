@@ -37,7 +37,7 @@
 #include <vsmc/rng/discrete_distribution.hpp>
 #include <vsmc/rng/normal_distribution.hpp>
 #include <vsmc/rng/stable_distribution.hpp>
-#include <vsmc/rng/u01.hpp>
+#include <vsmc/rng/u01_distribution.hpp>
 #include <vsmc/rng/u01_sequence.hpp>
 #include <vsmc/rng/uniform_real_distribution.hpp>
 

@@ -33,7 +33,7 @@
 #define VSMC_RNG_NORMAL_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/uniform_real_distribution.hpp>
+#include <vsmc/rng/u01_distribution.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_NORMAL_DISTRIBUTION_PARAM_CHECK(sigma)        \
     VSMC_RUNTIME_ASSERT((sigma > 0), "**NormalDistribution** CONSTRUCTED "    \
@@ -87,7 +87,7 @@ class NormalDistribution
         }
 
         friend bool operator!=(
-            const param_type param1, const param_type param2)
+            const param_type &param1, const param_type &param2)
         {
             return !(param1 == param2);
         }
@@ -182,15 +182,14 @@ class NormalDistribution
     result_type operator()(RNGType &rng)
     {
         if (!param_.saved_) {
-            UniformRealDistributionType<RNGType, RealType> runif(0, 1);
+            U01DistributionType<RNGType, RealType> runif;
             param_.u1_ = std::sqrt(-2 * std::log(runif(rng)));
             param_.u2_ = math::pi_2<result_type>() * runif(rng);
         }
         param_.saved_ = !param_.saved_;
-        double z = param_.saved_ ? param_.u1_ * std::cos(param_.u2_) :
-                                   param_.u1_ * std::sin(param_.u2_);
+        double z = param_.saved_ ? std::cos(param_.u2_) : std::sin(param_.u2_);
 
-        return param_.mean_ + param_.sigma_ * z;
+        return param_.mean_ + param_.sigma_ * param_.u1_ * z;
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS

@@ -33,7 +33,7 @@
 #define VSMC_RNG_U01_SEQUENCE_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/uniform_real_distribution.hpp>
+#include <vsmc/rng/u01_distribution.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_U01_SEQUENCE(Method)                          \
     VSMC_RUNTIME_ASSERT((n < N_ && (n == n_ || n == n_ + 1 || n_ == N_)),     \
@@ -99,7 +99,7 @@ inline void u01_systematic(std::size_t N, RealType u01, RealType *u01seq)
 /// ~~~{.cpp}
 /// const std::size_t N = 1000;
 /// std::mt19937 rng;
-/// std::uniform_real_distribution<double> runif(0, 1);
+/// std::uniform_real_distribution<double> runif;
 /// std::vector<double> u01(N);
 /// for (std::size_t i = 0; i != N; ++i)
 ///     u01[i] = runif(rng);
@@ -134,7 +134,7 @@ class U01SequenceSorted
     using result_type = RealType;
 
     U01SequenceSorted(std::size_t N, RNGType &rng)
-        : N_(N), n_(N), u_(0), lmax_(0), rng_(rng), runif_(0, 1)
+        : N_(N), n_(N), u_(0), lmax_(0), rng_(rng)
     {
     }
 
@@ -160,7 +160,7 @@ class U01SequenceSorted
     result_type u_;
     result_type lmax_;
     RNGType &rng_;
-    UniformRealDistributionType<RNGType, double> runif_;
+    U01DistributionType<RNGType, double> runif_;
 }; // U01SequenceSorted
 
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
@@ -185,7 +185,6 @@ class U01SequenceStratified
         , u_(0)
         , delta_(1 / static_cast<result_type>(N))
         , rng_(rng)
-        , runif_(0, 1)
     {
     }
 
@@ -210,7 +209,7 @@ class U01SequenceStratified
     result_type u_;
     result_type delta_;
     RNGType &rng_;
-    UniformRealDistributionType<RNGType, double> runif_;
+    U01DistributionType<RNGType, double> runif_;
 }; // class U01SequenceStratified
 
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
@@ -232,7 +231,7 @@ class U01SequenceSystematic
     U01SequenceSystematic(std::size_t N, RNGType &rng)
         : N_(N), n_(N), u_(0), u0_(0), delta_(1 / static_cast<result_type>(N))
     {
-        UniformRealDistributionType<RNGType, double> runif(0, 1);
+        U01DistributionType<RNGType, double> runif;
         u0_ = runif(rng) * delta_;
     }
 

@@ -33,7 +33,7 @@
 #define VSMC_RNG_STABLE_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/uniform_real_distribution.hpp>
+#include <vsmc/rng/u01_distribution.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_STABLE_DISTRIBUTION_PARAM_CHECK_STABILITY(a)  \
     VSMC_RUNTIME_ASSERT((a > 0 && a <= 2),                                    \
@@ -99,7 +99,7 @@ class StableDistribution
         }
 
         friend bool operator!=(
-            const param_type param1, const param_type param2)
+            const param_type &param1, const param_type &param2)
         {
             return !(param1 == param2);
         }
@@ -232,7 +232,7 @@ class StableDistribution
     template <typename RNGType>
     result_type standard_1(RNGType &rng) const
     {
-        UniformRealDistributionType<RNGType, result_type> runif(0, 1);
+        U01DistributionType<RNGType, RealType> runif;
         result_type w = -std::log(1 - runif(rng));
         result_type u = (runif(rng) - 0.5) * math::pi<result_type>();
         result_type a =
@@ -249,7 +249,7 @@ class StableDistribution
     template <typename RNGType>
     result_type standard_a(RNGType &rng) const
     {
-        std::uniform_real_distribution<result_type> runif(0, 1);
+        U01DistributionType<RNGType, RealType> runif;
         result_type w = -std::log(1 - runif(rng));
         result_type u = (runif(rng) - 0.5) * math::pi<result_type>();
         result_type a = 0.5 * std::log(1 + param_.zeta_ * param_.zeta_) /

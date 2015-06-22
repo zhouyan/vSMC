@@ -33,7 +33,7 @@
 #define VSMC_RNG_DISCRETE_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/uniform_real_distribution.hpp>
+#include <vsmc/rng/u01_distribution.hpp>
 #include <vsmc/math/cblas.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(flag)          \
@@ -102,7 +102,7 @@ class DiscreteDistribution
         }
 
         friend bool operator!=(
-            const param_type param1, const param_type param2)
+            const param_type &param1, const param_type &param2)
         {
             return !(param1 == param2);
         }
@@ -260,7 +260,7 @@ class DiscreteDistribution
         using value_type =
             typename std::iterator_traits<InputIter>::value_type;
 
-        UniformRealDistributionType<RNGType, value_type> runif(0, 1);
+        U01DistributionType<RNGType, value_type> runif;
         value_type u = runif(rng);
 
         if (!normalized) {

@@ -40,7 +40,7 @@
 
 #define VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS                                \
     param_type param() const { return param_; }                               \
-    void param(const param_type &param) { param_ = param; }                   \
+    void param(const param_type &par) { param_ = par; }                       \
     void reset() { param_.reset(); }                                          \
                                                                               \
     friend bool operator==(                                                   \
