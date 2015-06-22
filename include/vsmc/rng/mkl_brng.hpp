@@ -37,11 +37,7 @@
 #include <vsmc/rng/engine.hpp>
 #include <vsmc/utility/mkl.hpp>
 
-#ifdef VSMC_DEFINE_RNG_C_API
-#undef VSMC_DEFINE_RNG_C_API
-#endif
-
-#define VSMC_DEFINE_RNG_C_API_ENGINE(RNGType, name)                           \
+#define VSMC_DEFINE_RNG_MKL_BRNG(RNGType, name)                               \
     template <>                                                               \
     inline MKL_INT mkl_brng<RNGType>()                                        \
     {                                                                         \
@@ -56,7 +52,7 @@ namespace vsmc
 template <typename RNGType>
 MKL_INT mkl_brng();
 
-#include <vsmc/rng/internal/c_api_engine.hpp>
+#include <vsmc/rng/internal/mkl_brng_defines.hpp>
 
 } // namespace vsmc
 

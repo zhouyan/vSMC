@@ -33,11 +33,7 @@
 #include <vsmc/rng/engine.hpp>
 #include <vsmc/rng/uniform_real_distribution.hpp>
 
-#ifdef VSMC_DEFINE_RNG_C_API_ENGINE
-#undef VSMC_DEFINE_RNG_C_API_ENGINE
-#endif
-
-#define VSMC_DEFINE_RNG_C_API_ENGINE(RNGType, name)                           \
+#define VSMC_DEFINE_RNG_MKL_BRNG(RNGType, name)                               \
     int vsmc_mkl_init_##name(int, VSLStreamStatePtr, int, const unsigned *);  \
     int vsmc_mkl_init_##name(                                                 \
         int method, VSLStreamStatePtr stream, int n, const unsigned *param)   \
@@ -166,6 +162,6 @@ inline int mkl_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
 
 extern "C" {
 
-#include <vsmc/rng/internal/c_api_engine.hpp>
+#include <vsmc/rng/internal/mkl_brng_defines.hpp>
 
 } // extern "C"
