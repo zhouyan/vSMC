@@ -251,19 +251,19 @@ void vsmc_rng_student_t(vsmc_rng *rng_ptr, int n, double *r, double df)
 }
 
 void vsmc_rng_laplace(
-    vsmc_rng *rng_ptr, int n, double *r, double location, double scal)
+    vsmc_rng *rng_ptr, int n, double *r, double location, double scale)
 {
     ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
     ::vsmc::laplace_distribution<double>(
-        rng, static_cast<std::size_t>(n), r, location, scal);
+        rng, static_cast<std::size_t>(n), r, location, scale);
 }
 
 void vsmc_rng_stable(vsmc_rng *rng_ptr, int n, double *r, double stability,
     double skewness, double location, double scale)
 {
-    ::vsmc::StableDistribution<double> dist(
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    ::vsmc::stable_distribution<double>(rng, static_cast<std::size_t>(n), r,
         stability, skewness, location, scale);
-    VSMC_DEFINE_RNG_RANDOM_DIST;
 }
 
 void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,

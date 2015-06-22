@@ -53,6 +53,86 @@
 namespace vsmc
 {
 
+/// \brief Generating stable random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+void stable_distribution(RNGType &rng, std::size_t n, RealType *r,
+    RealType stability = 1, RealType skewness = 0, RealType location = 0,
+    RealType scale = 1)
+{
+    U01DistributionType<RNGType, RealType> runif;
+
+    if (stability < 1 || stability > 1) {
+        Vector<RealType> w(n);
+        Vector<RealType> u(n);
+        Vector<RealType> b(n);
+        Vector<RealType> c(n);
+        Vector<RealType> d(n);
+        RealType zeta =
+            -skewness * std::tan(math::pi_by2<RealType>() * stability);
+        RealType xi = 1 / stability * std::atan(-zeta);
+        RealType a = 0.5 * std::log(1 + zeta * zeta) / stability;
+        for (std::size_t i = 0; i != n; ++i)
+            w[i] = -runif(rng);
+        for (std::size_t i = 0; i != n; ++i)
+            u[i] = runif(rng) - 0.5;
+        math::vLog1p(n, w.data(), w.data());
+        for (std::size_t i = 0; i != n; ++i)
+            w[i] = -w[i];
+        math::scal(n, math::pi<RealType>(), u.data(), 1);
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = u[i] + xi;
+        math::scal(n, stability, r, 1);
+        math::vSin(n, r, b.data());
+        math::vCos(n, u.data(), c.data());
+        math::vLn(n, c.data(), c.data());
+        math::scal(n, 1 / stability, c.data(), 1);
+        math::vSub(n, u.data(), r, d.data());
+        math::vCos(n, d.data(), d.data());
+        math::vDiv(n, d.data(), w.data(), d.data());
+        math::vLn(n, d.data(), d.data());
+        math::scal(n, (1 - stability) / stability, d.data(), 1);
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = a - c[i];
+        math::vAdd(n, r, d.data(), r);
+        math::vExp(n, r, r);
+        math::vMul(n, b.data(), r, r);
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = location + scale * r[i];
+    } else {
+        Vector<RealType> w(n);
+        Vector<RealType> u(n);
+        Vector<RealType> a(n);
+        Vector<RealType> b(n);
+        Vector<RealType> c(n);
+        for (std::size_t i = 0; i != n; ++i)
+            w[i] = -runif(rng);
+        for (std::size_t i = 0; i != n; ++i)
+            u[i] = runif(rng) - 0.5;
+        math::vLog1p(n, w.data(), w.data());
+        math::scal(n, -math::pi_by2<RealType>(), w.data(), 1);
+        math::scal(n, math::pi<RealType>(), u.data(), 1);
+        math::vTan(n, u.data(), a.data());
+        for (std::size_t i = 0; i != n; ++i)
+            c[i] = skewness * u[i];
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = math::pi_by2<RealType>() + c[i];
+        math::vMul(n, a.data(), r, a.data());
+        math::vCos(n, u.data(), b.data());
+        math::vMul(n, w.data(), b.data(), b.data());
+        math::vLn(n, b.data(), b.data());
+        math::vLn(n, r, c.data());
+        math::vSub(n, b.data(), c.data(), r);
+        math::scal(n, skewness, r, 1);
+        math::vSub(n, a.data(), r, r);
+        RealType offset = location +
+            2 * math::pi_inv<RealType>() * skewness * scale * std::log(scale);
+        RealType coeff = scale / math::pi_by2<RealType>();
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = offset + coeff * r[i];
+    }
+}
+
 /// \brief Stable distribution
 /// \ingroup Distribution
 template <typename RealType = double>

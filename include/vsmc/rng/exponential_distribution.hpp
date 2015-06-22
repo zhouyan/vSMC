@@ -133,7 +133,7 @@ class ExponentialDistribution
         void invariant()
         {
             VSMC_RUNTIME_ASSERT_RNG_EXPONENTIAL_DISTRIBUTION_PARAM_CHECK(
-                lambda);
+                lambda_);
         }
 
         void reset() {}
