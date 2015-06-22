@@ -95,7 +95,8 @@ class DiscreteDistribution
                 return false;
 
             for (std::size_t i = 0; i != param1.probability_.size(); ++i)
-                if (!is_equal(param1.probability_[i], param2.probability_[i]))
+                if (!internal::is_equal(
+                        param1.probability_[i], param2.probability_[i]))
                     return false;
 
             return true;
