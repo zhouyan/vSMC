@@ -58,23 +58,32 @@ namespace vsmc
 namespace internal
 {
 
-template <std::uint64_t, std::uint64_t>
-class UniformRealDistributionIntType;
+template <int Bits, bool = Bits >= 32, bool = Bits >= 64>
+class UniformRealDistributionIntTypeTraitImpl;
 
-template <>
-class UniformRealDistributionIntType<0,
-    static_cast<std::uint64_t>(VSMC_MAX_UINT(std::uint32_t))>
+template <int Bits>
+class UniformRealDistributionIntTypeTraitImpl<Bits, true, false>
 {
     public:
     using type = std::uint32_t;
-}; // class UniformRealDistributionIntType
+}; // class UniformRealDistribuitonIntTypeTraitImpl
 
-template <>
-class UniformRealDistributionIntType<0, VSMC_MAX_UINT(std::uint64_t)>
+template <int Bits>
+class UniformRealDistributionIntTypeTraitImpl<Bits, true, true>
 {
     public:
     using type = std::uint64_t;
-}; // class UniformRealDistributionIntType
+}; // class UniformRealDistribuitonIntTypeTraitImpl
+
+template <typename RNGType>
+class UniformRealDistributionIntTypeTrait
+    : public UniformRealDistributionIntTypeTraitImpl<RNGBits<RNGType>::value>
+{
+}; // class UniformRealTypeDistributionIntTypeTrait
+
+template <typename RNGType>
+using UniformRealDistributionIntType =
+    typename UniformRealDistributionIntTypeTrait<RNGType>::type;
 
 } // namespace vsmc::interal
 
@@ -198,22 +207,12 @@ class UniformRealDistribution
     result_type max VSMC_MNE() const { return b_; }
 
     /// \brief Generate uniform random variates
-    ///
-    /// \tparam Eng Requirement:
-    /// ~~~{.cpp}
-    /// Eng::min() == 0 && (
-    /// Eng::max() == std::numeric_limits<std::uint32_t>::max() ||
-    /// Eng::max() == std::numeric_limits<std::uint64_t>::max()
-    /// )
-    /// ~~~
-    /// and both `min` and `max` are `constexpr`
-    template <typename Eng>
-    result_type operator()(Eng &eng) const
+    template <typename RNGType>
+    result_type operator()(RNGType &rng) const
     {
-        return U01<Left, Right,
-                   typename internal::UniformRealDistributionIntType<
-                       Eng::min VSMC_MNE(), Eng::max VSMC_MNE()>::type,
-                   RealType>::uint2fp(eng()) *
+        using int_type = internal::UniformRealDistributionIntType<RNGType>;
+        return U01<Left, Right, int_type, RealType>::uint2fp(
+                   static_cast<int_type>(rng())) *
             (b_ - a_) +
             a_;
     }
@@ -282,9 +281,7 @@ namespace internal
 {
 
 template <typename RNGType, typename RealType,
-    bool = (RNGType::min VSMC_MNE() == 0 &&
-        (RNGType::max VSMC_MNE() == VSMC_MAX_UINT(std::uint32_t) ||
-                RNGType::max VSMC_MNE() == VSMC_MAX_UINT(std::uint64_t)))>
+    bool = RNGBits<RNGType>::value >= 32>
 class UniformRealDistributionTypeTraitImpl
 {
     public:

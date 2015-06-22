@@ -46,6 +46,37 @@ namespace internal
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
 
+template <int N>
+class RNGBitsNMax
+{
+    public:
+    static constexpr std::uint64_t value = VSMC_MAX_UINT(std::uint64_t) >>
+        (64 - N);
+}; // class RNGBitsNMax
+
+template <typename RNGType, int N>
+class RNGBitsN
+{
+    static constexpr std::uint64_t umax = RNGType::max VSMC_MNE();
+    static constexpr std::uint64_t bmax = RNGBitsNMax<N>::value;
+
+    public:
+    static constexpr int value =
+        umax < bmax ? RNGBitsN<RNGType, N - 1>::value : N;
+}; // class RNGBitsN
+
+template <typename RNGType>
+class RNGBitsN<RNGType, 0>
+{
+    public:
+    static constexpr int value = 0;
+}; // class RNGBitsN
+
+template <typename RNGType>
+class RNGBits : public RNGBitsN<RNGType, 64>
+{
+}; // class RNGBits
+
 template <typename SeedSeq, typename U, typename V = U, typename W = V>
 class is_seed_seq
     : public std::integral_constant<bool,

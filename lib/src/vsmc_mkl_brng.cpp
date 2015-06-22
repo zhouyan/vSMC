@@ -76,7 +76,7 @@
         properties.NSeeds = 1;                                                \
         properties.IncludesZero = RNGType::min() == 0 ? 1 : 0;                \
         properties.WordSize = sizeof(typename RNGType::result_type);          \
-        properties.NBits = ::vsmc::internal::mkl_bits<RNGType>();             \
+        properties.NBits = ::vsmc::internal::RNGBits<RNGType>::value;         \
         properties.InitStream = vsmc_mkl_init_##name;                         \
         properties.sBRng = vsmc_mkl_sbrng_##name;                             \
         properties.dBRng = vsmc_mkl_dbrng_##name;                             \
@@ -99,20 +99,6 @@ class MKLStreamState
     unsigned reserved2[2];
     RNGType rng;
 }; // class MKLStreamState
-
-template <typename RNGType>
-int mkl_bits()
-{
-    std::uint64_t umax = RNGType::max VSMC_MNE();
-    std::uint64_t bmax = VSMC_MAX_UINT(std::uint64_t);
-    int bits = 64;
-    while (umax < bmax) {
-        --bits;
-        bmax >>= 1;
-    }
-
-    return bits;
-}
 
 template <typename RNGType>
 inline int mkl_init(
