@@ -180,10 +180,11 @@ void vsmc_rng_poisson(vsmc_rng *rng_ptr, int n, int *r, double mean)
     VSMC_DEFINE_RNG_RANDOM_DIST;
 }
 
-void vsmc_rng_exponential(vsmc_rng *rng_ptr, int n, double *r, double rate)
+void vsmc_rng_exponential(vsmc_rng *rng_ptr, int n, double *r, double lambda)
 {
-    std::exponential_distribution<double> dist(rate);
-    VSMC_DEFINE_RNG_RANDOM_DIST;
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    ::vsmc::exponential_distribution<double>(
+        rng, static_cast<std::size_t>(n), r, lambda);
 }
 
 void vsmc_rng_gamma(

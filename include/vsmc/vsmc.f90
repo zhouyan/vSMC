@@ -242,7 +242,7 @@ module vsmc
     end interface
 
     interface
-        subroutine vsmc_rng_exponential(rng, n, r, rate) bind(c)
+        subroutine vsmc_rng_exponential(rng, n, r, lambda) bind(c)
             use, intrinsic :: iso_c_binding
             import :: vsmc_rng
             type(vsmc_rng) :: rng

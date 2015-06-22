@@ -113,7 +113,7 @@ void vsmc_rng_geometric(vsmc_rng *rng_ptr, int n, int *r, double p);
 void vsmc_rng_poisson(vsmc_rng *rng_ptr, int n, int *r, double mean);
 
 /// \brief `std::exponential_distribution<double>`
-void vsmc_rng_exponential(vsmc_rng *rng_ptr, int n, double *r, double rate);
+void vsmc_rng_exponential(vsmc_rng *rng_ptr, int n, double *r, double lambda);
 
 /// \brief `std::gamma_distribution<double>`
 void vsmc_rng_gamma(
