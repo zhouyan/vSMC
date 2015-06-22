@@ -131,6 +131,14 @@ class MKLOffset
 }; // class MKLOffset
 
 template <>
+class MKLOffset<Dynamic>
+{
+    public:
+    using type =
+        MKLOffsetDynamic<std::numeric_limits<MKL_INT>::max VSMC_MNE()>;
+}; // class MKLOffset
+
+template <>
 class MKLOffset<VSL_BRNG_MT2203>
 {
     public:
@@ -334,7 +342,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream<BRNG>>
         return status;
     }
 
-    static constexpr MKL_INT brng() { return BRNG; }
+    MKL_INT brng() const { return BRNG + offset_.get(); }
 
     static constexpr MKL_INT min_offset()
     {
@@ -344,10 +352,6 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream<BRNG>>
     {
         return internal::MKLOffset<BRNG>::type::max VSMC_MNE();
     }
-
-    void offset(MKL_INT n) { offset_.offset(n); }
-
-    MKL_INT offset() const { return offset_.offset(); }
 
     private:
     typename internal::MKLOffset<BRNG>::type offset_;

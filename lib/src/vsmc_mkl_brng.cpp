@@ -129,7 +129,7 @@ inline int mkl_uniform_real(
 
 template <typename RNGType>
 inline int mkl_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
-    unsigned *r, std::integral_constant<std::size_t, sizeof(unsigned)>)
+    unsigned *r, std::integral_constant<std::size_t, 4>)
 {
     RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
     for (int i = 0; i != n; ++i)
@@ -140,28 +140,14 @@ inline int mkl_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
 
 template <typename RNGType>
 inline int mkl_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
-    unsigned *r, std::integral_constant<std::size_t, sizeof(unsigned) / 2>)
+    unsigned *r, std::integral_constant<std::size_t, 8>)
 {
     RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
-    typename RNGType::result_type *result =
-        reinterpret_cast<typename RNGType::result_type *>(r);
-    for (int i = 0; i != n * 2; ++i)
-        result[i] = rng();
-
-    return 0;
-}
-
-template <typename RNGType>
-inline int mkl_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
-    unsigned *r, std::integral_constant<std::size_t, sizeof(unsigned) * 2>)
-{
-    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
-    typename RNGType::result_type *result =
-        reinterpret_cast<typename RNGType::result_type *>(r);
-    for (int i = 0; i != n / 2; ++i)
-        result[i] = rng();
-    if (n % 2 != 0)
-        r[n - 1] = static_cast<unsigned>(rng());
+    for (int i = 0; i != n; ++i) {
+        typename RNGType::result_type result = rng();
+        *r++ = static_cast<unsigned>(result);
+        *r++ = static_cast<unsigned>(result >> 32);
+    }
 
     return 0;
 }
