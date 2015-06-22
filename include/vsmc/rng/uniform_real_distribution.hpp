@@ -278,6 +278,41 @@ class UniformRealDistribution
     result_type b_;
 }; // class UniformRealDistribution
 
+namespace internal
+{
+
+template <typename RNGType, typename RealType,
+    bool = (RNGType::min VSMC_MNE() == 0 &&
+        (RNGType::max VSMC_MNE() == VSMC_MAX_UINT(std::uint32_t) ||
+                RNGType::max VSMC_MNE() == VSMC_MAX_UINT(std::uint64_t)))>
+class UniformRealDistributionTypeTraitImpl
+{
+    public:
+    using type = UniformRealDistribution<RealType, Closed, Open>;
+}; // class UniformrealDistributionTypeTraitImpl
+
+template <typename RNGType, typename RealType>
+class UniformRealDistributionTypeTraitImpl<RNGType, RealType, false>
+{
+    public:
+    using type = std::uniform_real_distribution<RealType>;
+}; // class UniformrealDistributionTypeTraitImpl
+
+} // namespace vsmc::internal
+
+template <typename RNGType, typename RealType = double>
+class UniformRealDistributionTypeTrait
+{
+    public:
+    using type =
+        typename internal::UniformRealDistributionTypeTraitImpl<RNGType,
+            RealType>::type;
+}; // class UniformRealDistributionTypeTrait
+
+template <typename RNGType, typename RealType = double>
+using UniformRealDistributionType =
+    typename UniformRealDistributionTypeTrait<RNGType, RealType>::type;
+
 template <typename RealType = double>
 using UniformRealOpenOpenDistribution =
     UniformRealDistribution<RealType, Open, Open>;

@@ -48,7 +48,6 @@
 #define VSMC_RNG_DIST_C_POST(Dist, name)                                      \
     watch.stop();                                                             \
     sw.push_back(watch);                                                      \
-    bytes.push_back(N * sizeof(DistResultType<Dist>));                        \
     std::ofstream rnd("rnd");                                                 \
     rnd << r.back() << std::endl;                                             \
     rnd.close();
@@ -81,21 +80,21 @@
     {                                                                         \
         Dist dist(p1);                                                        \
         std::string dname(#name "(" #p1 ")");                                 \
-        rng_dist(N, dist, dname, names, size, sw, bytes);                     \
+        rng_dist(N, dist, dname, names, size, sw);                            \
     }
 
 #define VSMC_RNG_DIST_2_CPP(Dist, name, p1, p2)                               \
     {                                                                         \
         Dist dist(p1, p2);                                                    \
         std::string dname(#name "(" #p1 "," #p2 ")");                         \
-        rng_dist(N, dist, dname, names, size, sw, bytes);                     \
+        rng_dist(N, dist, dname, names, size, sw);                            \
     }
 
 #define VSMC_RNG_DIST_4_CPP(Dist, name, p1, p2, p3, p4)                       \
     {                                                                         \
         Dist dist(p1, p2, p3, p4);                                            \
         std::string dname(#name "(" #p1 "," #p2 "," #p3 "," #p4 ")");         \
-        rng_dist(N, dist, dname, names, size, sw, bytes);                     \
+        rng_dist(N, dist, dname, names, size, sw);                            \
     }
 
 #if VSMC_RNG_TEST_C_API
@@ -134,7 +133,7 @@ using DistResultType = typename DistResultTypeTrait<Dist>::type;
 template <typename Dist>
 inline void rng_dist(std::size_t N, Dist &dist, const std::string &name,
     vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
-    vsmc::Vector<vsmc::StopWatch> &sw, vsmc::Vector<std::size_t> &bytes)
+    vsmc::Vector<vsmc::StopWatch> &sw)
 {
     vsmc::StopWatch watch;
     vsmc::RNG rng;
@@ -148,7 +147,6 @@ inline void rng_dist(std::size_t N, Dist &dist, const std::string &name,
     names.push_back(name);
     size.push_back(sizeof(Dist));
     sw.push_back(watch);
-    bytes.push_back(N * sizeof(DistResultType<Dist>));
 
     std::ofstream rnd("rnd");
     rnd << result << std::endl;

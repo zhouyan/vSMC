@@ -40,7 +40,7 @@
 #define VSMC_RNG_TEST_MKL 0
 #endif
 
-#include <vsmc/utility/aligned_memory.hpp>
+#include <vsmc/rng/uniform_real_distribution.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 #if VSMC_RNG_TEST_C_API
 #include <vsmc/vsmc.h>
@@ -56,85 +56,106 @@
         N = static_cast<std::size_t>(std::atoi(argv[1]));                     \
     vsmc::Vector<std::string> names;                                          \
     vsmc::Vector<std::size_t> size;                                           \
-    vsmc::Vector<vsmc::StopWatch> sw;                                         \
-    vsmc::Vector<std::size_t> bytes;
+    vsmc::Vector<vsmc::StopWatch> sw;
 
-#define VSMC_RNG_TEST(RNGType)                                                \
-    rng_test<RNGType>(N, #RNGType, names, size, sw, bytes);
+#define VSMC_RNG_TEST(RNGType) rng_test<RNGType>(N, #RNGType, names, size, sw);
 
-#define VSMC_RNG_TEST_POST rng_output_sw(prog_name, names, size, sw, bytes);
+#define VSMC_RNG_TEST_POST rng_output_sw(prog_name, names, size, sw);
+
+template <typename RNGType>
+inline double rng_test(std::size_t N, vsmc::Vector<vsmc::StopWatch> &sw,
+    RNGType &rng, vsmc::StopWatch &watch, std::true_type)
+{
+    double result = 0;
+    vsmc::UniformRealDistribution<double, vsmc::Closed, vsmc::Open> runif(
+        0, 1);
+    watch.reset();
+    watch.start();
+    for (std::size_t i = 0; i != N; ++i)
+        result += runif(rng);
+    watch.stop();
+    sw.push_back(watch);
+
+    return result;
+}
+
+template <typename RNGType>
+inline double rng_test(std::size_t, vsmc::Vector<vsmc::StopWatch> &sw,
+    RNGType &, vsmc::StopWatch &watch, std::false_type)
+{
+    watch.reset();
+    sw.push_back(watch);
+
+    return 0;
+}
 
 template <typename RNGType>
 inline void rng_test(std::size_t N, const std::string &name,
     vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
-    vsmc::Vector<vsmc::StopWatch> &sw, vsmc::Vector<std::size_t> &bytes)
+    vsmc::Vector<vsmc::StopWatch> &sw)
 {
     using result_type = typename RNGType::result_type;
-
-    vsmc::StopWatch watch;
-    result_type result = 0;
-    const std::size_t nbytes = N * sizeof(result_type);
-    std::ofstream rnd("rnd");
 
     names.push_back(name);
     size.push_back(sizeof(RNGType));
 
     RNGType rng;
+    vsmc::StopWatch watch;
+    double result = 0;
+    vsmc::Vector<double> r(N);
+    std::ofstream rnd("rnd");
+
+    vsmc::UniformRealDistributionType<RNGType, double> runif(0, 1);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        result += rng();
+        result += runif(rng);
     watch.stop();
-    rnd << result << std::endl;
     sw.push_back(watch);
-    bytes.push_back(nbytes);
+    rnd << result << std::endl;
 
 #if VSMC_RNG_TEST_C_API && VSMC_RNG_TEST_MKL
-    vsmc::Vector<result_type> r(N);
     watch.reset();
     watch.start();
-    rng.uniform_bits(static_cast<MKL_INT>(N), r.data());
+    vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, rng.stream().get(),
+        static_cast<MKL_INT>(N), r.data(), 0, 1);
     watch.stop();
-    rnd << std::accumulate(r.begin(), r.end(), result) << std::endl;
     sw.push_back(watch);
-    bytes.push_back(nbytes);
+    result = std::accumulate(r.begin(), r.end(), result);
+    rnd << result << std::endl;
 #elif VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
     MKL_INT brng = vsmc::mkl_brng<RNGType>();
-    const std::size_t M = nbytes / sizeof(unsigned);
-    vsmc::Vector<unsigned> r(M);
     VSLStreamStatePtr stream = nullptr;
     vslNewStream(&stream, brng, 1);
     watch.reset();
     watch.start();
-    viRngUniformBits(VSL_RNG_METHOD_UNIFORMBITS_STD, stream,
-        static_cast<MKL_INT>(M), r.data());
+    vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, static_cast<MKL_INT>(N),
+        r.data(), 0, 1);
     watch.stop();
-    rnd << std::accumulate(r.begin(), r.end(), 0u) << std::endl;
     sw.push_back(watch);
-    bytes.push_back(nbytes);
+    result = std::accumulate(r.begin(), r.end(), result);
+    rnd << result << std::endl;
 #endif
+
+    rnd.close();
 }
 
 inline void rng_output_sw(const std::string &prog_name,
     const vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
-    const vsmc::Vector<vsmc::StopWatch> &sw,
-    const vsmc::Vector<std::size_t> &bytes)
+    const vsmc::Vector<vsmc::StopWatch> &sw)
 {
     std::size_t N = names.size();
     std::size_t R = sw.size() / N;
     std::size_t lwid = 94;
     int swid = 5;
     int twid = 15;
-    int gwid = 15;
     int Twid = twid * static_cast<int>(R);
-    int Gwid = gwid * static_cast<int>(R);
-    int nwid = static_cast<int>(lwid) - swid - Twid - Gwid;
+    int nwid = static_cast<int>(lwid) - swid - Twid;
 
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::left << std::setw(nwid) << prog_name;
     std::cout << std::right << std::setw(swid) << "Size";
     std::cout << std::right << std::setw(Twid) << "Time (ms)";
-    std::cout << std::right << std::setw(Gwid) << "GB/s";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
 
@@ -144,12 +165,6 @@ inline void rng_output_sw(const std::string &prog_name,
         for (std::size_t r = 0; r != R; ++r) {
             double time = sw[i * R + r].milliseconds();
             std::cout << std::right << std::setw(twid) << std::fixed << time;
-        }
-        for (std::size_t r = 0; r != R; ++r) {
-            double time = sw[i * R + r].milliseconds();
-            double b = static_cast<double>(bytes[i * R + r]);
-            double gbps = b / time * 1e-6;
-            std::cout << std::right << std::setw(gwid) << std::fixed << gbps;
         }
         std::cout << std::endl;
     }

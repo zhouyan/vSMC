@@ -31,6 +31,7 @@
 
 #include <vsmc/vsmc.h>
 #include <vsmc/rng/engine.hpp>
+#include <vsmc/rng/uniform_real_distribution.hpp>
 
 #ifdef VSMC_DEFINE_RNG_C_API_ENGINE
 #undef VSMC_DEFINE_RNG_C_API_ENGINE
@@ -71,11 +72,11 @@
     {                                                                         \
         VSLBRngProperties properties;                                         \
         properties.StreamStateSize =                                          \
-            sizeof(::vsmc::internal::MKLSTDStreamState<RNGType>);             \
+            sizeof(::vsmc::internal::MKLStreamState<RNGType>);                \
         properties.NSeeds = 1;                                                \
         properties.IncludesZero = RNGType::min() == 0 ? 1 : 0;                \
         properties.WordSize = sizeof(typename RNGType::result_type);          \
-        properties.NBits = properties.WordSize * 8;                           \
+        properties.NBits = ::vsmc::internal::mkl_bits<RNGType>();             \
         properties.InitStream = vsmc_mkl_init_##name;                         \
         properties.sBRng = vsmc_mkl_sbrng_##name;                             \
         properties.dBRng = vsmc_mkl_dbrng_##name;                             \
@@ -91,20 +92,33 @@ namespace internal
 {
 
 template <typename RNGType>
-class MKLSTDStreamState
+class MKLStreamState
 {
     public:
     unsigned reserved1[2];
     unsigned reserved2[2];
     RNGType rng;
-}; // class MKLSTDStreamState
+}; // class MKLStreamState
+
+template <typename RNGType>
+int mkl_bits()
+{
+    std::uint64_t umax = RNGType::max VSMC_MNE();
+    std::uint64_t bmax = VSMC_MAX_UINT(std::uint64_t);
+    int bits = 64;
+    while (umax < bmax) {
+        --bits;
+        bmax >>= 1;
+    }
+
+    return bits;
+}
 
 template <typename RNGType>
 inline int mkl_init(
     int method, ::VSLStreamStatePtr stream, int n, const unsigned *param)
 {
-    RNGType &rng =
-        (*reinterpret_cast<MKLSTDStreamState<RNGType> *>(stream)).rng;
+    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
     if (method == VSL_INIT_METHOD_STANDARD)
         rng = RNGType(static_cast<typename RNGType::result_type>(param[0]));
     if (method == VSL_INIT_METHOD_LEAPFROG)
@@ -119,9 +133,8 @@ template <typename RNGType, typename RealType>
 inline int mkl_uniform_real(
     ::VSLStreamStatePtr stream, int n, RealType *r, RealType a, RealType b)
 {
-    RNGType &rng =
-        (*reinterpret_cast<MKLSTDStreamState<RNGType> *>(stream)).rng;
-    std::uniform_real_distribution<RealType> runif(a, b);
+    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
+    ::vsmc::UniformRealDistributionType<RNGType, RealType> runif(a, b);
     for (int i = 0; i != n; ++i)
         r[i] = runif(rng);
 
@@ -132,8 +145,7 @@ template <typename RNGType>
 inline int mkl_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
     unsigned *r, std::integral_constant<std::size_t, sizeof(unsigned)>)
 {
-    RNGType &rng =
-        (*reinterpret_cast<MKLSTDStreamState<RNGType> *>(stream)).rng;
+    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
     for (int i = 0; i != n; ++i)
         r[i] = static_cast<unsigned>(rng());
 
@@ -144,8 +156,7 @@ template <typename RNGType>
 inline int mkl_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
     unsigned *r, std::integral_constant<std::size_t, sizeof(unsigned) / 2>)
 {
-    RNGType &rng =
-        (*reinterpret_cast<MKLSTDStreamState<RNGType> *>(stream)).rng;
+    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
     typename RNGType::result_type *result =
         reinterpret_cast<typename RNGType::result_type *>(r);
     for (int i = 0; i != n * 2; ++i)
@@ -158,8 +169,7 @@ template <typename RNGType>
 inline int mkl_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
     unsigned *r, std::integral_constant<std::size_t, sizeof(unsigned) * 2>)
 {
-    RNGType &rng =
-        (*reinterpret_cast<MKLSTDStreamState<RNGType> *>(stream)).rng;
+    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
     typename RNGType::result_type *result =
         reinterpret_cast<typename RNGType::result_type *>(r);
     for (int i = 0; i != n / 2; ++i)

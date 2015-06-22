@@ -35,6 +35,7 @@
 #include <vsmc/vsmc.h>
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/engine.hpp>
+#include <vsmc/utility/mkl.hpp>
 
 #ifdef VSMC_DEFINE_RNG_C_API
 #undef VSMC_DEFINE_RNG_C_API
