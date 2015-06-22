@@ -35,10 +35,10 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_NORMAL_DISTRIBUTION_PARAM_CHECK(sigma)        \
-    VSMC_RUNTIME_ASSERT((sigma > 0), "**NormalDistribution** CONSTRUCTED "    \
-                                     "WITH INVALID STANDARD DEVIATION "       \
-                                     "PARAMETER VALUE")
+#define VSMC_RUNTIME_ASSERT_RNG_NORMAL_DISTRIBUTION_PARAM_CHECK(stddev)       \
+    VSMC_RUNTIME_ASSERT((stddev > 0), "**NormalDistribution** CONSTRUCTED "   \
+                                      "WITH INVALID STANDARD DEVIATION "      \
+                                      "PARAMETER VALUE")
 
 namespace vsmc
 {
@@ -59,21 +59,21 @@ class NormalDistribution
         using result_type = RealType;
         using distribution_type = NormalDistribution<RealType>;
 
-        explicit param_type(result_type mean = 0, result_type sigma = 1)
-            : mean_(mean), sigma_(sigma), u1_(0), u2_(0), saved_(false)
+        explicit param_type(result_type mean = 0, result_type stddev = 1)
+            : mean_(mean), stddev_(stddev), u1_(0), u2_(0), saved_(false)
         {
             invariant();
         }
 
         result_type mean() const { return mean_; }
-        result_type sigma() const { return sigma_; }
+        result_type stddev() const { return stddev_; }
 
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
             if (!internal::is_equal(param1.mean_, param2.mean_))
                 return false;
-            if (!internal::is_equal(param1.sigma_, param2.sigma_))
+            if (!internal::is_equal(param1.stddev_, param2.stddev_))
                 return false;
             if (!internal::is_equal(param1.u1_, param2.u1_))
                 return false;
@@ -100,7 +100,7 @@ class NormalDistribution
                 return os;
 
             os << param.mean_ << ' ';
-            os << param.sigma_ << ' ';
+            os << param.stddev_ << ' ';
             os << param.u1_ << ' ';
             os << param.u2_ << ' ';
             os << param.saved_;
@@ -116,19 +116,19 @@ class NormalDistribution
                 return is;
 
             result_type mean = 0;
-            result_type sigma = 0;
+            result_type stddev = 0;
             result_type u1 = 0;
             result_type u2 = 0;
             bool saved = false;
             is >> std::ws >> mean;
-            is >> std::ws >> sigma;
+            is >> std::ws >> stddev;
             is >> std::ws >> u1;
             is >> std::ws >> u2;
             is >> std::ws >> saved;
 
             if (is.good()) {
-                if (sigma > 0) {
-                    param = param_type(mean, sigma);
+                if (stddev > 0) {
+                    param = param_type(mean, stddev);
                     param.u1_ = u1;
                     param.u2_ = u2;
                     param.saved_ = saved;
@@ -142,7 +142,7 @@ class NormalDistribution
 
         private:
         result_type mean_;
-        result_type sigma_;
+        result_type stddev_;
         result_type u1_;
         result_type u2_;
         bool saved_;
@@ -151,22 +151,22 @@ class NormalDistribution
 
         void invariant()
         {
-            VSMC_RUNTIME_ASSERT_RNG_NORMAL_DISTRIBUTION_PARAM_CHECK(sigma_);
+            VSMC_RUNTIME_ASSERT_RNG_NORMAL_DISTRIBUTION_PARAM_CHECK(stddev_);
             saved_ = false;
         }
 
         void reset() { saved_ = false; }
     }; // class param_type
 
-    explicit NormalDistribution(result_type mean = 0, result_type sigma = 1)
-        : param_(mean, sigma)
+    explicit NormalDistribution(result_type mean = 0, result_type stddev = 1)
+        : param_(mean, stddev)
     {
     }
 
     explicit NormalDistribution(const param_type &param) : param_(param) {}
 
     result_type mean() const { return param_.mean_; }
-    result_type sigma() const { return param_.sigma_; }
+    result_type stddev() const { return param_.stddev_; }
 
     result_type min VSMC_MNE() const
     {
@@ -189,7 +189,7 @@ class NormalDistribution
         param_.saved_ = !param_.saved_;
         double z = param_.saved_ ? std::cos(param_.u2_) : std::sin(param_.u2_);
 
-        return param_.mean_ + param_.sigma_ * param_.u1_ * z;
+        return param_.mean_ + param_.stddev_ * param_.u1_ * z;
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
