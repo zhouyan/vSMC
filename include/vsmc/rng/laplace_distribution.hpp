@@ -72,7 +72,6 @@ void laplace_distribution(RNGType &rng, std::size_t n, RealType *r,
 template <typename RealType>
 class LaplaceDistribution
 {
-
     public:
     using result_type = RealType;
     using distribution_type = LaplaceDistribution<RealType>;
@@ -116,7 +115,7 @@ class LaplaceDistribution
                 return os;
 
             os << param.location_ << ' ';
-            os << param.scale_ << ' ';
+            os << param.scale_;
 
             return os;
         }
@@ -134,11 +133,10 @@ class LaplaceDistribution
             is >> std::ws >> scale;
 
             if (is.good()) {
-                if (scale > 0) {
+                if (scale > 0)
                     param = param_type(location, scale);
-                } else {
+                else
                     is.setstate(std::ios_base::failbit);
-                }
             }
 
             return is;

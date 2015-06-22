@@ -57,7 +57,6 @@ void lognormal_distribution(
 template <typename RealType>
 class LogNormalDistribution
 {
-
     public:
     using result_type = RealType;
     using distribution_type = LogNormalDistribution<RealType>;

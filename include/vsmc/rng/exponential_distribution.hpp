@@ -100,7 +100,7 @@ class ExponentialDistribution
             if (!os.good())
                 return os;
 
-            os << param.lambda_ << ' ';
+            os << param.lambda_;
 
             return os;
         }
@@ -116,11 +116,10 @@ class ExponentialDistribution
             is >> std::ws >> lambda;
 
             if (is.good()) {
-                if (lambda > 0) {
+                if (lambda > 0)
                     param = param_type(lambda);
-                } else {
+                else
                     is.setstate(std::ios_base::failbit);
-                }
             }
 
             return is;

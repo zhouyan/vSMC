@@ -80,7 +80,6 @@ void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
 template <typename RealType>
 class NormalDistribution
 {
-
     public:
     using result_type = RealType;
     using distribution_type = NormalDistribution<RealType>;

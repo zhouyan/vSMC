@@ -62,7 +62,6 @@ void cauchy_distribution(
 template <typename RealType>
 class CauchyDistribution
 {
-
     public:
     using result_type = RealType;
     using distribution_type = CauchyDistribution<RealType>;
@@ -106,7 +105,7 @@ class CauchyDistribution
                 return os;
 
             os << param.a_ << ' ';
-            os << param.b_ << ' ';
+            os << param.b_;
 
             return os;
         }
@@ -124,11 +123,10 @@ class CauchyDistribution
             is >> std::ws >> b;
 
             if (is.good()) {
-                if (b > 0) {
+                if (b > 0)
                     param = param_type(a, b);
-                } else {
+                else
                     is.setstate(std::ios_base::failbit);
-                }
             }
 
             return is;
