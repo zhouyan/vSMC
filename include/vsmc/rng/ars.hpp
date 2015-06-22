@@ -200,12 +200,12 @@ using ARS_8x64 = ARSEngine<std::uint64_t, VSMC_RNG_ARS_ROUNDS, 8>;
 /// \brief ARS RNG engine with 32-bits integers output, default blocks and
 /// default rounds
 /// \ingroup AESNIRNG
-using ARS = ARS_4x32;
+using ARS = ARS_1x32;
 
 /// \brief ARS RNG engine with 64-bits integers output, default blocks and
 /// default rounds
 /// \ingroup AESNIRNG
-using ARS_64 = ARS_4x64;
+using ARS_64 = ARS_1x64;
 
 } // namespace vsmc
 
