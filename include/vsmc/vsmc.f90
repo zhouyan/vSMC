@@ -324,14 +324,14 @@ module vsmc
     end interface
 
     interface
-        subroutine vsmc_rng_cauchy(rng, n, r, location, scal) bind(c)
+        subroutine vsmc_rng_cauchy(rng, n, r, a, b) bind(c)
             use, intrinsic :: iso_c_binding
             import :: vsmc_rng
             type(vsmc_rng) :: rng
             integer(kind = c_int), value :: n
             real(kind = c_double), dimension(*) :: r
-            real(kind = c_double), value :: location
-            real(kind = c_double), value :: scal
+            real(kind = c_double), value :: a
+            real(kind = c_double), value :: b
         end subroutine vsmc_rng_cauchy
     end interface
 

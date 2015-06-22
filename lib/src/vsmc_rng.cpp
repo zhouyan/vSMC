@@ -230,11 +230,11 @@ void vsmc_rng_chi_squared(vsmc_rng *rng_ptr, int n, double *r, double df)
     VSMC_DEFINE_RNG_RANDOM_DIST;
 }
 
-void vsmc_rng_cauchy(
-    vsmc_rng *rng_ptr, int n, double *r, double location, double scale)
+void vsmc_rng_cauchy(vsmc_rng *rng_ptr, int n, double *r, double a, double b)
 {
-    std::cauchy_distribution<double> dist(location, scale);
-    VSMC_DEFINE_RNG_RANDOM_DIST;
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    ::vsmc::cauchy_distribution<double>(
+        rng, static_cast<std::size_t>(n), r, a, b);
 }
 
 void vsmc_rng_fisher_f(

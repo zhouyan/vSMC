@@ -139,8 +139,7 @@ void vsmc_rng_lognormal(
 void vsmc_rng_chi_squared(vsmc_rng *rng_ptr, int n, double *r, double df);
 
 /// \brief `std::cachy_distribution<double>`
-void vsmc_rng_cauchy(
-    vsmc_rng *rng_ptr, int n, double *r, double location, double scale);
+void vsmc_rng_cauchy(vsmc_rng *rng_ptr, int n, double *r, double a, double b);
 
 /// \brief `std::fisher_f_distribution<double>`
 void vsmc_rng_fisher_f(

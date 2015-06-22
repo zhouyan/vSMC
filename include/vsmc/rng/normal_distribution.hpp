@@ -71,9 +71,8 @@ void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
         r[n - 1] = std::sqrt(-2 * std::log(v1)) *
             std::cos(math::pi_2<RealType>() * v2);
     }
-    math::scal(n, stddev, r, 1);
     for (std::size_t i = 0; i != n; ++i)
-        r[i] += mean;
+        r[i] += mean + stddev * r[i];
 }
 
 /// \brief Normal distribution
