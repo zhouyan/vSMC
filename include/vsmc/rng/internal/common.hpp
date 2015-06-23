@@ -205,6 +205,13 @@ static void increment(
 
 } // namespace vsmc::internal
 
+template <typename RNGType>
+void rng_rand (RNGType &rng, std::size_t n, typename RNGType::result_type *r)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = rng();
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_INTERNAL_COMMON_HPP

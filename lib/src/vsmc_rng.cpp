@@ -100,8 +100,8 @@ void vsmc_rng_set_ctr(vsmc_rng *rng_ptr, int n, const int *ctr)
 void vsmc_rng_rand(vsmc_rng *rng_ptr, int n, int *r)
 {
     ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
-    for (int i = 0; i != n; ++i)
-        r[i] = static_cast<int>(rng());
+    ::vsmc::rng_rand(rng, static_cast<std::size_t>(n),
+        reinterpret_cast<::vsmc::RNG::result_type *>(r));
 }
 
 void vsmc_rng_uniform_int(vsmc_rng *rng_ptr, int n, int *r, int a, int b)
