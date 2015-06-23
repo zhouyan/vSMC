@@ -63,33 +63,6 @@
 #define VSMC_RNG_TEST_POST rng_output_sw(prog_name, names, size, sw);
 
 template <typename RNGType>
-inline double rng_test(std::size_t N, vsmc::Vector<vsmc::StopWatch> &sw,
-    RNGType &rng, vsmc::StopWatch &watch, std::true_type)
-{
-    double result = 0;
-    vsmc::UniformRealDistribution<double, vsmc::Closed, vsmc::Open> runif(
-        0, 1);
-    watch.reset();
-    watch.start();
-    for (std::size_t i = 0; i != N; ++i)
-        result += runif(rng);
-    watch.stop();
-    sw.push_back(watch);
-
-    return result;
-}
-
-template <typename RNGType>
-inline double rng_test(std::size_t, vsmc::Vector<vsmc::StopWatch> &sw,
-    RNGType &, vsmc::StopWatch &watch, std::false_type)
-{
-    watch.reset();
-    sw.push_back(watch);
-
-    return 0;
-}
-
-template <typename RNGType>
 inline void rng_test(std::size_t N, const std::string &name,
     vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
     vsmc::Vector<vsmc::StopWatch> &sw)
@@ -136,9 +109,9 @@ inline void rng_test(std::size_t N, const std::string &name,
     watch.start();
     viRngUniformBits(VSL_RNG_METHOD_UNIFORMBITS_STD, stream,
         static_cast<MKL_INT>(M), ur.data());
+    result += static_cast<double>(std::accumulate(ur.begin(), ur.end(), 0u));
     watch.stop();
     sw.push_back(watch);
-    result += static_cast<double>(std::accumulate(ur.begin(), ur.end(), 0u));
 #endif
 
     std::uniform_real_distribution<double> runif_std(0, 1);
@@ -169,9 +142,9 @@ inline void rng_test(std::size_t N, const std::string &name,
     watch.start();
     vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, static_cast<MKL_INT>(N),
         r.data(), 0, 1);
+    result += std::accumulate(r.begin(), r.end(), result);
     watch.stop();
     sw.push_back(watch);
-    result += std::accumulate(r.begin(), r.end(), result);
 #endif
 
     std::normal_distribution<double> rnorm_std(0, 1);
@@ -199,9 +172,9 @@ inline void rng_test(std::size_t N, const std::string &name,
     watch.reset();
     watch.start();
     vsmc::normal_distribution(rng, N, r.data(), 0.0, 1.0);
+    result += std::accumulate(r.begin(), r.end(), result);
     watch.stop();
     sw.push_back(watch);
-    result += std::accumulate(r.begin(), r.end(), result);
 
 #if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
     vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream,
@@ -211,9 +184,9 @@ inline void rng_test(std::size_t N, const std::string &name,
     watch.start();
     vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream,
         static_cast<MKL_INT>(N), r.data(), 0, 1);
+    result += std::accumulate(r.begin(), r.end(), result);
     watch.stop();
     sw.push_back(watch);
-    result += std::accumulate(r.begin(), r.end(), result);
 #endif
 
 #if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
