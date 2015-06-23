@@ -39,6 +39,7 @@ int main(int argc, char **argv)
     VSMC_RNG_TEST_PRE(rng_mkl);
 
     VSMC_RNG_TEST(vsmc::MKL_MCG59);
+    VSMC_RNG_TEST(vsmc::MKL_MCG59_64);
     VSMC_RNG_TEST(vsmc::MKL_MT19937);
     VSMC_RNG_TEST(vsmc::MKL_MT19937_64);
     VSMC_RNG_TEST(vsmc::MKL_MT2203);

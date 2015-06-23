@@ -288,6 +288,10 @@ class MKLEngine
 /// \ingroup MKLRNG
 using MKL_MCG59 = MKLEngine<VSL_BRNG_MCG59, 32>;
 
+/// \brief A 59-bits multiplicative congruential generator (64-bits)
+/// \ingroup MKLRNG
+using MKL_MCG59_64 = MKLEngine<VSL_BRNG_MCG59, 64>;
+
 /// \brief A Mersenne-Twister pseudoranom number genertor
 /// \ingroup MKLRNG
 using MKL_MT19937 = MKLEngine<VSL_BRNG_MT19937, 32>;
