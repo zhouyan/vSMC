@@ -35,19 +35,27 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rngc/u01.h>
 
-#define VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(                                 \
-    RealType, Left, Right, left, right, UBits, FBits)                         \
+#define VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                            \
+    Left, Right, left, right, UBits, FBits, RealType)                         \
     template <>                                                               \
-    class U01<Left, Right, uint##UBits##_t, RealType>                         \
+    class U01<Left, Right, std::uint##UBits##_t, RealType>                    \
     {                                                                         \
         public:                                                               \
-        RealType operator()(uint##UBits##_t u) const { return uint2fp(u); }   \
-                                                                              \
-        static RealType uint2fp(uint##UBits##_t u)                            \
+        static RealType eval(uint##UBits##_t u)                               \
         {                                                                     \
             return ::vsmc_u01_##left##_##right##_u##UBits##_f##FBits(u);      \
         }                                                                     \
     }; // class U01
+
+#define VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(UBits, FBits, RealType)          \
+    VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                                \
+        Closed, Closed, closed, closed, UBits, FBits, RealType)               \
+    VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                                \
+        Closed, Open, closed, open, UBits, FBits, RealType)                   \
+    VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                                \
+        Open, Closed, open, closed, UBits, FBits, RealType)                   \
+    VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                                \
+        Open, Open, open, open, UBits, FBits, RealType)
 
 namespace vsmc
 {
@@ -60,83 +68,16 @@ class Open;
 /// \ingroup Distribution
 class Closed;
 
+namespace internal
+{
+
 template <typename, typename, typename, typename>
 class U01;
 
-/// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1]\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(
-    float, Closed, Closed, closed, closed, 32, 32)
-
-/// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1)\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(float, Closed, Open, closed, open, 32, 32)
-
-/// \brief Converting 32-bits unsigned to single precision uniform \f$(0,1]\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(float, Open, Closed, open, closed, 32, 32)
-
-/// \brief Converting 32-bits unsigned to single precision uniform \f$(0,1)\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(float, Open, Open, open, open, 32, 32)
-
-/// \brief Converting 32-bits unsigned to double precision uniform \f$[0,1]\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(
-    double, Closed, Closed, closed, closed, 32, 64)
-
-/// \brief Converting 32-bits unsigned to double precision uniform \f$[0,1)\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(
-    double, Closed, Open, closed, open, 32, 64)
-
-/// \brief Converting 32-bits unsigned to double precision uniform \f$(0,1]\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(
-    double, Open, Closed, open, closed, 32, 64)
-
-/// \brief Converting 32-bits unsigned to double precision uniform \f$(0,1)\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(double, Open, Open, open, open, 32, 64)
-
-/// \brief Converting 64-bits unsigned to single precision uniform \f$[0,1]\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(
-    float, Closed, Closed, closed, closed, 64, 32)
-
-/// \brief Converting 64-bits unsigned to single precision uniform \f$[0,1)\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(float, Closed, Open, closed, open, 64, 32)
-
-/// \brief Converting 64-bits unsigned to single precision uniform \f$(0,1]\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(float, Open, Closed, open, closed, 64, 32)
-
-/// \brief Converting 64-bits unsigned to single precision uniform \f$(0,1)\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(float, Open, Open, open, open, 64, 32)
-
-/// \brief Converting 64-bits unsigned to double precision uniform \f$[0,1]\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(
-    double, Closed, Closed, closed, closed, 64, 64)
-
-/// \brief Converting 64-bits unsigned to double precision uniform \f$[0,1)\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(
-    double, Closed, Open, closed, open, 64, 64)
-
-/// \brief Converting 64-bits unsigned to double precision uniform \f$(0,1]\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(
-    double, Open, Closed, open, closed, 64, 64)
-
-/// \brief Converting 64-bits unsigned to double precision uniform \f$(0,1)\f$
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(double, Open, Open, open, open, 64, 64)
-
-namespace internal
-{
+VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(32, 32, float)
+VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(32, 64, double)
+VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(64, 32, float)
+VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(64, 64, double)
 
 template <int Bits, bool = Bits >= 32, bool = Bits >= 64>
 class U01DistributionIntTypeTraitImpl;
@@ -231,10 +172,10 @@ class U01Distribution
     template <typename RNGType>
     result_type operator()(RNGType &rng) const
     {
-        using int_type = internal::U01DistributionIntType<RNGType>;
+        using uint_type = internal::U01DistributionIntType<RNGType>;
 
-        return U01<Left, Right, int_type, RealType>::uint2fp(
-            static_cast<int_type>(rng()));
+        return internal::U01<Closed, Open, uint_type, RealType>::eval(
+            static_cast<uint_type>(rng()));
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
