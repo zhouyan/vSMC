@@ -74,119 +74,88 @@ inline void rng_test(std::size_t N, const std::string &name,
     vsmc::StopWatch watch;
     double result = 0;
     vsmc::Vector<double> r(N);
+    std::size_t i;
+    MKL_INT n = static_cast<MKL_INT>(N);
+    MKL_INT m = 1000;
 
-#if VSMC_RNG_TEST_C_API && VSMC_RNG_TEST_MKL
+#if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
+#if VSMC_RNG_TEST_MKL
     MKL_INT brng = rng.stream().brng();
-    VSLStreamStatePtr stream = nullptr;
-    vslNewStream(&stream, rng.stream().brng(), 1);
-#elif VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
+#else
     MKL_INT brng = vsmc::mkl_brng<RNGType>();
+#endif
     VSLStreamStatePtr stream = nullptr;
     vslNewStream(&stream, brng, 1);
 #endif
 
-    typename RNGType::result_type uresult = 0;
-    for (std::size_t i = 0; i != N; ++i)
-        uresult += rng();
-    watch.reset();
-    watch.start();
-    for (std::size_t i = 0; i != N; ++i)
-        uresult += rng();
-    watch.stop();
-    sw.push_back(watch);
-    result += static_cast<double>(uresult);
-
-#if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
-    VSLBRngProperties properties;
-    vslGetBrngProperties(brng, &properties);
-    std::size_t B = N * sizeof(typename RNGType::result_type);
-    std::size_t M = B / static_cast<std::size_t>(properties.WordSize);
-    vsmc::Vector<unsigned> ur(B / sizeof(unsigned));
-    viRngUniformBits(VSL_RNG_METHOD_UNIFORMBITS_STD, stream,
-        static_cast<MKL_INT>(M), ur.data());
-    result += static_cast<double>(std::accumulate(ur.begin(), ur.end(), 0u));
-    watch.reset();
-    watch.start();
-    viRngUniformBits(VSL_RNG_METHOD_UNIFORMBITS_STD, stream,
-        static_cast<MKL_INT>(M), ur.data());
-    result += static_cast<double>(std::accumulate(ur.begin(), ur.end(), 0u));
-    watch.stop();
-    sw.push_back(watch);
-#endif
-
     std::uniform_real_distribution<double> runif_std(0, 1);
-    for (std::size_t i = 0; i != N; ++i)
-        result += runif_std(rng);
     watch.reset();
     watch.start();
-    for (std::size_t i = 0; i != N; ++i)
-        result += runif_std(rng);
+    i = 0;
+    while (i != N && runif_std(rng) < 1)
+        ++i;
     watch.stop();
     sw.push_back(watch);
+    result += runif_std(rng);
 
     vsmc::UniformRealDistributionType<RNGType, double> runif_vsmc(0, 1);
-    for (std::size_t i = 0; i != N; ++i)
-        result += runif_vsmc(rng);
     watch.reset();
     watch.start();
-    for (std::size_t i = 0; i != N; ++i)
-        result += runif_vsmc(rng);
+    i = 0;
+    while (i != N && runif_vsmc(rng) < 1)
+        ++i;
     watch.stop();
     sw.push_back(watch);
+    result += runif_vsmc(rng);
 
 #if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
-    vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, static_cast<MKL_INT>(N),
-        r.data(), 0, 1);
-    result += std::accumulate(r.begin(), r.end(), result);
+    vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, m, r.data(), 0, 1);
     watch.reset();
     watch.start();
-    vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, static_cast<MKL_INT>(N),
-        r.data(), 0, 1);
-    result += std::accumulate(r.begin(), r.end(), result);
+    vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, n, r.data(), 0, 1);
     watch.stop();
     sw.push_back(watch);
+    result += r.back();
 #endif
 
     std::normal_distribution<double> rnorm_std(0, 1);
-    for (std::size_t i = 0; i != N; ++i)
-        result += rnorm_std(rng);
     watch.reset();
     watch.start();
-    for (std::size_t i = 0; i != N; ++i)
-        result += rnorm_std(rng);
+    i = 0;
+    while (i != N && rnorm_std(rng) < std::numeric_limits<double>::infinity())
+        ++i;
     watch.stop();
     sw.push_back(watch);
+    result += rnorm_std(rng);
 
     vsmc::NormalDistribution<double> rnorm_vsmc(0, 1);
-    for (std::size_t i = 0; i != N; ++i)
-        result += rnorm_vsmc(rng);
     watch.reset();
     watch.start();
-    for (std::size_t i = 0; i != N; ++i)
-        result += rnorm_vsmc(rng);
+    i = 0;
+    while (i != N && rnorm_vsmc(rng) < std::numeric_limits<double>::infinity())
+        ++i;
     watch.stop();
     sw.push_back(watch);
+    result += rnorm_vsmc(rng);
 
     vsmc::normal_distribution(rng, N, r.data(), 0.0, 1.0);
-    result += std::accumulate(r.begin(), r.end(), result);
     watch.reset();
     watch.start();
     vsmc::normal_distribution(rng, N, r.data(), 0.0, 1.0);
-    result += std::accumulate(r.begin(), r.end(), result);
     watch.stop();
     sw.push_back(watch);
+    result += r.back();
 
 #if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
-    vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream,
-        static_cast<MKL_INT>(N), r.data(), 0, 1);
-    result += std::accumulate(r.begin(), r.end(), result);
+    vdRngGaussian(
+        VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream, m, r.data(), 0, 1);
     watch.reset();
     watch.start();
-    vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream,
-        static_cast<MKL_INT>(N), r.data(), 0, 1);
-    result += std::accumulate(r.begin(), r.end(), result);
+    vdRngGaussian(
+        VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream, n, r.data(), 0, 1);
     watch.stop();
     sw.push_back(watch);
+    result += r.back();
 #endif
 
 #if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
@@ -222,17 +191,14 @@ inline void rng_output_sw(const std::string &prog_name,
             std::cout << std::right << std::setw(twid) << "C++";
             std::cout << std::right << std::setw(twid) << "C";
             break;
-        case 6: // rng_test without c api or mkl
-            std::cout << std::right << std::setw(twid) << "Bits";
+        case 5: // rng_test without c api or mkl
             std::cout << std::right << std::setw(twid) << "U01 (STD)";
             std::cout << std::right << std::setw(twid) << "U01 (vSMC)";
             std::cout << std::right << std::setw(twid) << "Normal (STD)";
             std::cout << std::right << std::setw(twid) << "Normal (vSMC)";
             std::cout << std::right << std::setw(twid) << "Normal (Batch)";
             break;
-        case 9: // rng_test with c api and mkl
-            std::cout << std::right << std::setw(twid) << "Bits";
-            std::cout << std::right << std::setw(twid) << "Bits (MKL)";
+        case 7: // rng_test with c api and mkl
             std::cout << std::right << std::setw(twid) << "U01 (STD)";
             std::cout << std::right << std::setw(twid) << "U01 (vSMC)";
             std::cout << std::right << std::setw(twid) << "U01 (MKL)";
