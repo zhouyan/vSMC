@@ -1386,12 +1386,6 @@ class M256
     const __m256 *data() const { return &value_; }
 
     template <typename T>
-    M256I<T> m256i() const
-    {
-        return M256I<T>(_mm256_castsi256_ps(value_));
-    }
-
-    template <typename T>
     void load_a(const T *mem)
     {
         value_ = _mm256_load_ps(reinterpret_cast<const float *>(mem));
@@ -1584,12 +1578,6 @@ class M256D
 
     __m256d *data() { return &value_; }
     const __m256d *data() const { return &value_; }
-
-    template <typename T>
-    M256I<T> m256i() const
-    {
-        return M256I<T>(_mm256_castsi256_pd(value_));
-    }
 
     template <typename T>
     void load_a(const T *mem)
