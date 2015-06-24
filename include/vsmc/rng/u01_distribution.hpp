@@ -33,51 +33,13 @@
 #define VSMC_RNG_U01_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rngc/u01.h>
-
-#define VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                            \
-    Left, Right, left, right, UBits, FBits, RealType)                         \
-    template <>                                                               \
-    class U01<Left, Right, std::uint##UBits##_t, RealType>                    \
-    {                                                                         \
-        public:                                                               \
-        static RealType eval(uint##UBits##_t u)                               \
-        {                                                                     \
-            return ::vsmc_u01_##left##_##right##_u##UBits##_f##FBits(u);      \
-        }                                                                     \
-    }; // class U01
-
-#define VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(UBits, FBits, RealType)          \
-    VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                                \
-        Closed, Closed, closed, closed, UBits, FBits, RealType)               \
-    VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                                \
-        Closed, Open, closed, open, UBits, FBits, RealType)                   \
-    VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                                \
-        Open, Closed, open, closed, UBits, FBits, RealType)                   \
-    VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                                \
-        Open, Open, open, open, UBits, FBits, RealType)
+#include <vsmc/rng/u01.hpp>
 
 namespace vsmc
 {
 
-/// \brief Parameter type for open interval
-/// \ingroup Distribution
-class Open;
-
-/// \brief Parameter type for closed interval
-/// \ingroup Distribution
-class Closed;
-
 namespace internal
 {
-
-template <typename, typename, typename, typename>
-class U01;
-
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(32, 32, float)
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(32, 64, double)
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(64, 32, float)
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(64, 64, double)
 
 template <int Bits, bool = Bits >= 32, bool = Bits >= 64>
 class U01DistributionIntTypeTraitImpl;
@@ -174,7 +136,7 @@ class U01Distribution
     {
         using uint_type = internal::U01DistributionIntType<RNGType>;
 
-        return internal::U01<Closed, Open, uint_type, RealType>::eval(
+        return U01<uint_type, RealType, Left, Right>::eval(
             static_cast<uint_type>(rng()));
     }
 
