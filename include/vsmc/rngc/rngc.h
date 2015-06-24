@@ -32,6 +32,7 @@
 #ifndef VSMC_RNGC_RNGC_H
 #define VSMC_RNGC_RNGC_H
 
+#include <vsmc/internal/config.h>
 #include <vsmc/rngc/philox.h>
 #include <vsmc/rngc/threefry.h>
 #include <vsmc/rngc/gammak1.h>

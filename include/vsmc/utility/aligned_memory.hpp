@@ -32,7 +32,7 @@
 #ifndef VSMC_UTILITY_ALIGNED_MEMORY
 #define VSMC_UTILITY_ALIGNED_MEMORY
 
-#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/config.h>
 #include <vsmc/internal/assert.hpp>
 
 #include <cstddef>

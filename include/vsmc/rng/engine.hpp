@@ -32,7 +32,7 @@
 #ifndef VSMC_RNG_ENGINE_HPP
 #define VSMC_RNG_ENGINE_HPP
 
-#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/config.h>
 
 /// \brief Default RNG type
 /// \ingroup Config

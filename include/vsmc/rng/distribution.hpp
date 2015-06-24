@@ -32,8 +32,7 @@
 #ifndef VSMC_RNG_DISTRIBUTION_HPP
 #define VSMC_RNG_DISTRIBUTION_HPP
 
-#include <vsmc/internal/config.hpp>
-
+#include <vsmc/internal/config.h>
 #include <vsmc/rng/cauchy_distribution.hpp>
 #include <vsmc/rng/discrete_distribution.hpp>
 #include <vsmc/rng/exponential_distribution.hpp>

@@ -32,8 +32,7 @@
 #ifndef VSMC_RNG_RNG_HPP
 #define VSMC_RNG_RNG_HPP
 
-#include <vsmc/internal/config.hpp>
-
+#include <vsmc/internal/config.h>
 #include <vsmc/rng/distribution.hpp>
 #include <vsmc/rng/engine.hpp>
 #include <vsmc/rng/rng_set.hpp>

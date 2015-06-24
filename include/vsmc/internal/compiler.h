@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/internal/compiler.hpp
+// vSMC/include/vsmc/internal/compiler.h
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_INTERNAL_COMPILER_HPP
-#define VSMC_INTERNAL_COMPILER_HPP
+#ifndef VSMC_INTERNAL_COMPILER_H
+#define VSMC_INTERNAL_COMPILER_H
 
 // Compiler feature check macros
 
@@ -54,7 +54,7 @@
 #define __has_feature(x) 0
 #endif
 
-#include <cstddef>
+#include <stddef.h>
 
 #if defined(__APPLE__) || defined(__MACOSX)
 #include <Availability.h>
@@ -83,16 +83,16 @@
 
 #if defined(__INTEL_COMPILER)
 #define VSMC_INTEL
-#include <vsmc/internal/compiler/intel.hpp>
+#include <vsmc/internal/compiler/intel.h>
 #elif defined(__clang__)
 #define VSMC_CLANG
-#include <vsmc/internal/compiler/clang.hpp>
+#include <vsmc/internal/compiler/clang.h>
 #elif defined(__GNUC__)
 #define VSMC_GCC
-#include <vsmc/internal/compiler/gcc.hpp>
+#include <vsmc/internal/compiler/gcc.h>
 #elif defined(_MSC_VER)
 #define VSMC_MSVC
-#include <vsmc/internal/compiler/msvc.hpp>
+#include <vsmc/internal/compiler/msvc.h>
 #endif
 
 #ifndef VSMC_INT64

@@ -172,7 +172,7 @@
 /// \ingroup Utility
 /// \brief Time measurement
 
-#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/config.h>
 
 #include <vsmc/core/core.hpp>
 #include <vsmc/math/math.hpp>

@@ -32,7 +32,7 @@
 #ifndef VSMC_INTERNAL_FORWARD_HPP
 #define VSMC_INTERNAL_FORWARD_HPP
 
-#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/config.h>
 #include <vsmc/internal/defines.hpp>
 
 namespace vsmc

@@ -32,8 +32,7 @@
 #ifndef VSMC_SMP_SMP_HPP
 #define VSMC_SMP_SMP_HPP
 
-#include <vsmc/internal/config.hpp>
-
+#include <vsmc/internal/config.h>
 #include <vsmc/smp/backend_base.hpp>
 #include <vsmc/smp/backend_seq.hpp>
 #if VSMC_HAS_OMP

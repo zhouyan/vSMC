@@ -32,8 +32,7 @@
 #ifndef VSMC_RESAMPLE_RESAMPLE_HPP
 #define VSMC_RESAMPLE_RESAMPLE_HPP
 
-#include <vsmc/internal/config.hpp>
-
+#include <vsmc/internal/config.h>
 #include <vsmc/resample/index.hpp>
 #include <vsmc/resample/multinomial.hpp>
 #include <vsmc/resample/residual.hpp>

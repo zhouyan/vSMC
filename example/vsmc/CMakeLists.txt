@@ -45,8 +45,6 @@ ADD_HEADER_EXECUTABLE(vsmc/core/weight          TRUE)
 
 ADD_HEADER_EXECUTABLE(vsmc/internal/assert   TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/internal/common   TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/internal/compiler TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/internal/config   TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/internal/defines  TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/internal/forward  TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/internal/traits   TRUE)

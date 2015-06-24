@@ -32,8 +32,7 @@
 #ifndef VSMC_MPI_MPI_HPP
 #define VSMC_MPI_MPI_HPP
 
-#include <vsmc/internal/config.hpp>
-
+#include <vsmc/internal/config.h>
 #include <vsmc/mpi/backend_mpi.hpp>
 #include <vsmc/mpi/mpi_datatype.hpp>
 #include <vsmc/mpi/mpi_manager.hpp>

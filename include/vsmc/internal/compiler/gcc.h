@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/internal/compiler/intel.hpp
+// vSMC/include/vsmc/internal/compiler/gcc.h
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,15 +29,16 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_INTERNAL_COMPILER_INTEL_HPP
-#define VSMC_INTERNAL_COMPILER_INTEL_HPP
+#ifndef VSMC_INTERNAL_COMPILER_GCC_H
+#define VSMC_INTERNAL_COMPILER_GCC_H
 
-#define VSMC_INTEL_NONEXIST 0xFFFFFFFFUL
+#define VSMC_GCC_NONEXIST 0xFFFFFFFFUL
 
-#define VSMC_INTEL_VERSION __INTEL_COMPILER
+#define VSMC_GCC_VERSION                                                      \
+    (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 
 #ifndef VSMC_INT64
-#define VSMC_INT64 __int64
+#define VSMC_INT64 long long
 #endif
 
 #ifdef __x86_64__
@@ -61,16 +62,16 @@
 #endif
 #endif
 
-#ifdef __AVX__
+#ifdef __AES__
 #ifndef VSMC_HAS_AES_NI
 #define VSMC_HAS_AES_NI 1
 #endif
 #endif
 
-#ifdef __AVX2__
+#ifdef __RDRND__
 #ifndef VSMC_HAS_RDRAND
 #define VSMC_HAS_RDRAND 1
 #endif
 #endif
 
-#endif // VSMC_INTERNAL_COMPILER_INTEL_HPP
+#endif // VSMC_INTERNAL_COMPILER_GCC_H

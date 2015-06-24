@@ -32,8 +32,7 @@
 #ifndef VSMC_OPENCL_OPENCL_HPP
 #define VSMC_OPENCL_OPENCL_HPP
 
-#include <vsmc/internal/config.hpp>
-
+#include <vsmc/internal/config.h>
 #include <vsmc/opencl/backend_cl.hpp>
 #include <vsmc/opencl/cl_buffer.hpp>
 #include <vsmc/opencl/cl_configure.hpp>

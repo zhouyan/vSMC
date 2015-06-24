@@ -32,7 +32,7 @@
 #ifndef VSMC_INTERNAL_TRAITS_HPP
 #define VSMC_INTERNAL_TRAITS_HPP
 
-#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/config.h>
 #include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/forward.hpp>
 #include <type_traits>

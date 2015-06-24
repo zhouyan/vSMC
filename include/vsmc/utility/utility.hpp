@@ -32,8 +32,7 @@
 #ifndef VSMC_UTILITY_UTILITY_HPP
 #define VSMC_UTILITY_UTILITY_HPP
 
-#include <vsmc/internal/config.hpp>
-
+#include <vsmc/internal/config.h>
 #include <vsmc/utility/aligned_memory.hpp>
 #include <vsmc/utility/program_option.hpp>
 #include <vsmc/utility/progress.hpp>

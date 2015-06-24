@@ -32,7 +32,7 @@
 #ifndef VSMC_MATH_CBLAS_HPP
 #define VSMC_MATH_CBLAS_HPP
 
-#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/config.h>
 #include <vsmc/internal/defines.hpp>
 #include <cmath>
 #include <numeric>

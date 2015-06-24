@@ -32,7 +32,7 @@
 #ifndef VSMC_INTERNAL_DEFINES_HPP
 #define VSMC_INTERNAL_DEFINES_HPP
 
-#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/config.h>
 #include <type_traits>
 
 /// \brief Avoid MSVC stupid behavior: MNE = Macro No Expansion
