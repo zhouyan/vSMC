@@ -138,13 +138,13 @@ class is_seed_seq
 }; // class is_seed_seq
 
 template <std::size_t, typename T, std::size_t K>
-inline static void increment_single(std::array<T, K> &ctr, std::false_type)
+inline void increment_single(std::array<T, K> &ctr, std::false_type)
 {
     ++ctr.back();
 }
 
 template <std::size_t N, typename T, std::size_t K>
-inline static void increment_single(std::array<T, K> &ctr, std::true_type)
+inline void increment_single(std::array<T, K> &ctr, std::true_type)
 {
     if (++std::get<N>(ctr) != 0)
         return;
@@ -153,9 +153,8 @@ inline static void increment_single(std::array<T, K> &ctr, std::true_type)
 }
 
 template <typename T, std::size_t K>
-inline void increment(std::array<T, K> &ctr)
+inline void increment(std::array<T, K> &, std::integral_constant<T, 0>)
 {
-    increment_single<0>(ctr, std::integral_constant<bool, 1 < K>());
 }
 
 template <typename T, std::size_t K, T NSkip>
@@ -163,44 +162,86 @@ inline void increment(std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
 {
     T old = ctr.front();
     ctr.front() += NSkip;
+    if (ctr.front() > old)
+        return;
 
-    if (ctr.front() < old && old != 0)
-        increment_single<1>(ctr, std::integral_constant<bool, 2 < K>());
+    increment_single<1>(ctr, std::integral_constant<bool, 2 < K>());
 }
 
 template <typename T, std::size_t K>
-inline static void increment(std::array<T, K> &ctr, T nskip)
+inline void increment(std::array<T, K> &ctr, T nskip)
 {
     T old = ctr.front();
     ctr.front() += nskip;
+    if (ctr.front() > old || nskip == 0)
+        return;
 
-    if (ctr.front() < old && old != 0)
-        increment_single<1>(ctr, std::integral_constant<bool, 2 < K>());
+    increment_single<1>(ctr, std::integral_constant<bool, 2 < K>());
 }
 
 template <std::size_t Blocks, std::size_t, typename T, std::size_t K>
-inline static void increment_block(std::array<T, K> &,
+inline void increment_block(std::array<T, K> &,
     std::array<std::array<T, K>, Blocks> &, std::false_type)
 {
 }
 
 template <std::size_t Blocks, std::size_t B, typename T, std::size_t K>
-inline static void increment_block(std::array<T, K> &ctr,
+inline void increment_block(std::array<T, K> &ctr,
     std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
 {
     std::get<B>(ctr_block) = ctr;
     increment(std::get<B>(ctr_block), std::integral_constant<T, B + 1>());
     increment_block<Blocks, B + 1>(
-        ctr, ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
+        ctr, ctr_block, std::integral_constant<bool, B + 2 < Blocks>());
+}
+
+template <std::size_t Blocks, std::size_t, typename T, std::size_t K>
+inline void increment_block_safe(std::array<T, K> &,
+    std::array<std::array<T, K>, Blocks> &, std::false_type)
+{
+}
+
+template <std::size_t Blocks, std::size_t B, typename T, std::size_t K>
+inline void increment_block_safe(std::array<T, K> &ctr,
+    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
+{
+    std::get<B>(ctr_block) = ctr;
+    std::get<B>(ctr_block).front() += B + 1;
+    increment_block_safe<Blocks, B + 1>(
+        ctr, ctr_block, std::integral_constant<bool, B + 2 < Blocks>());
+}
+
+template <std::size_t Blocks, typename T, std::size_t K>
+inline void increment_block_back(std::array<T, K> &ctr,
+    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
+{
+    ctr_block.back() = ctr;
+    T old = ctr_block.back().front();
+    ctr_block.back().front() += Blocks;
+    if (ctr_block.back().front() > old) {
+        increment_block_safe<Blocks, 0>(
+            ctr, ctr_block, std::integral_constant<bool, 1 < Blocks>());
+    } else {
+        increment_single<1>(
+            ctr_block.back(), std::integral_constant<bool, 2 < K>());
+        increment_block<Blocks, 0>(
+            ctr, ctr_block, std::integral_constant<bool, 1 < Blocks>());
+    }
+    ctr = ctr_block.back();
+}
+
+template <typename T, std::size_t K>
+inline void increment(std::array<T, K> &ctr)
+{
+    increment_single<0>(ctr, std::integral_constant<bool, 1 < K>());
 }
 
 template <std::size_t Blocks, typename T, std::size_t K>
 static void increment(
     std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
 {
-    increment_block<Blocks, 0>(
+    increment_block_back<Blocks>(
         ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
-    ctr = ctr_block.back();
 }
 
 } // namespace vsmc::internal
