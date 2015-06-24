@@ -42,28 +42,48 @@
 namespace vsmc
 {
 
+namespace internal
+{
+
+template <typename RealType, typename RNGType>
+inline void laplace_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
+    RealType location, RealType scale, RealType *s)
+{
+    u01_distribution(rng, n, r);
+    for (std::size_t i = 0; i != n; ++i) {
+        r[i] -= 0.5;
+        if (r[i] > 0) {
+            r[i] *= 2;
+            s[i] = -scale;
+        } else {
+            r[i] *= -2;
+            s[i] = scale;
+        }
+    }
+    math::vLog1p(n, r, r);
+    math::vMul(n, r, s, r);
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] += location;
+}
+
+} // namespace vsmc::internal
+
 /// \brief Generating laplace random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void laplace_distribution(RNGType &rng, std::size_t n, RealType *r,
     RealType location = 0, RealType scale = 1)
 {
-    u01_distribution(rng, n, r);
-    Vector<RealType> b(n);
-    for (std::size_t i = 0; i != n; ++i) {
-        r[i] -= 0.5;
-        if (r[i] > 0) {
-            r[i] *= 2;
-            b[i] = -scale;
-        } else {
-            r[i] *= -2;
-            b[i] = scale;
-        }
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    Vector<RealType> s(k);
+    for (std::size_t i = 0; i != m; ++i) {
+        internal::laplace_distribution_impl(
+            rng, k, r + i * k, location, scale, s.data());
     }
-    math::vLog1p(n, r, r);
-    math::vMul(n, r, b.data(), r);
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] += location;
+    internal::laplace_distribution_impl(
+        rng, l, r + m * k, location, scale, s.data());
 }
 
 /// \brief Laplace distribution

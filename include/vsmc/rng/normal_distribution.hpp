@@ -44,34 +44,55 @@
 namespace vsmc
 {
 
+namespace internal
+{
+
+template <typename RealType, typename RNGType>
+inline void normal_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
+    RealType mean, RealType stddev, RealType *s)
+{
+    u01_distribution(rng, n, r);
+    const std::size_t nu = n / 2;
+    RealType *const u1 = r;
+    RealType *const u2 = r + nu;
+    math::vLn(nu, u1, s);
+    math::scal(nu, static_cast<RealType>(-2), s, 1);
+    math::vSqrt(nu, s, s);
+    math::scal(nu, math::pi_2<RealType>(), u2, 1);
+    math::vSin(nu, u2, u1);
+    math::vCos(nu, u2, u2);
+    math::vMul(nu, u1, s, u1);
+    math::vMul(nu, u2, s, u2);
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] += mean + stddev * r[i];
+}
+
+} // namespace vsmc::internal
+
 /// \brief Generating normal random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
     RealType mean = 0, RealType stddev = 1)
 {
-    u01_distribution(rng, n, r);
-    const std::size_t nu = n / 2;
-    vsmc::Vector<double> s(nu);
-    RealType *const u1 = r;
-    RealType *const u2 = r + nu;
-    math::vLn(nu, u1, s.data());
-    math::scal(nu, static_cast<RealType>(-2), s.data(), 1);
-    math::vSqrt(nu, s.data(), s.data());
-    math::scal(nu, math::pi_2<RealType>(), u2, 1);
-    math::vSin(nu, u2, u1);
-    math::vCos(nu, u2, u2);
-    math::vMul(nu, u1, s.data(), u1);
-    math::vMul(nu, u2, s.data(), u2);
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    Vector<RealType> s(k);
+    for (std::size_t i = 0; i != m; ++i) {
+        internal::normal_distribution_impl(
+            rng, k, r + i * k, mean, stddev, s.data());
+    }
+    internal::normal_distribution_impl(
+        rng, l, r + m * k, mean, stddev, s.data());
     if (n % 2 != 0) {
         U01DistributionType<RNGType, RealType> runif;
         RealType v1 = runif(rng);
         RealType v2 = runif(rng);
-        r[n - 1] = std::sqrt(-2 * std::log(v1)) *
-            std::cos(math::pi_2<RealType>() * v2);
+        r[n - 1] = mean +
+            stddev * std::sqrt(-2 * std::log(v1)) *
+                std::cos(math::pi_2<RealType>() * v2);
     }
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] += mean + stddev * r[i];
 }
 
 /// \brief Normal distribution

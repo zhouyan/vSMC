@@ -42,17 +42,34 @@
 namespace vsmc
 {
 
-/// \brief Generating cauchy random variates
-/// \ingroup Distribution
+namespace internal
+{
+
 template <typename RealType, typename RNGType>
-inline void cauchy_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1)
+inline void cauchy_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     u01_distribution(rng, n, r);
     math::scal(n, math::pi<RealType>(), r, 1);
     math::vTan(n, r, r);
     for (std::size_t i = 0; i != n; ++i)
         r[i] = a + b * r[i];
+}
+
+} // namespace vsmc::internal
+
+/// \brief Generating cauchy random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void cauchy_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i)
+        internal::cauchy_distribution_impl(rng, k, r + i * k, a, b);
+    internal::cauchy_distribution_impl(rng, l, r + m * k, a, b);
 }
 
 /// \brief Cauchy distribution
