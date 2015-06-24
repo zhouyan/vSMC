@@ -48,9 +48,7 @@ template <typename RealType, typename RNGType>
 void cauchy_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1)
 {
-    U01DistributionType<RNGType, RealType> runif;
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = runif(rng);
+    u01_distribution(rng, n, r);
     math::scal(n, math::pi<RealType>(), r, 1);
     math::vTan(n, r, r);
     for (std::size_t i = 0; i != n; ++i)

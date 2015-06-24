@@ -34,7 +34,6 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
-#include <vsmc/rng/uniform_real_distribution.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_LAPLACE_DISTRIBUTION_PARAM_CHECK(scale)       \
     VSMC_RUNTIME_ASSERT((scale > 0), "**LaplaceDistribution** CONSTRUCTED "   \
@@ -49,10 +48,10 @@ template <typename RealType, typename RNGType>
 void laplace_distribution(RNGType &rng, std::size_t n, RealType *r,
     RealType location = 0, RealType scale = 1)
 {
-    U01DistributionType<RNGType, RealType> runif;
+    u01_distribution(rng, n, r);
     Vector<RealType> b(n);
     for (std::size_t i = 0; i != n; ++i) {
-        r[i] = runif(rng) - 0.5;
+        r[i] -= 0.5;
         if (r[i] > 0) {
             r[i] *= 2;
             b[i] = -scale;

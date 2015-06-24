@@ -43,6 +43,17 @@
 namespace vsmc
 {
 
+/// \brief Generate uniform real random variates
+template <typename RealType, typename RNGType>
+inline void uniform_real_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1)
+{
+    RealType d = b - a;
+    U01DistributionType<RNGType, RealType> runif;
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = a + d * runif(rng);
+}
+
 /// \brief Uniform real distribution with open/closed variants
 /// \ingroup Distribution
 template <typename RealType = double, typename Left = Closed,

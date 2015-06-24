@@ -49,9 +49,7 @@ template <typename RealType, typename RNGType>
 void exponential_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType lambda = 1)
 {
-    U01DistributionType<RNGType, RealType> runif;
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = runif(rng);
+    u01_distribution(rng, n, r);
     math::vLn(n, r, r);
     math::scal(n, -1 / lambda, r, 1);
 }

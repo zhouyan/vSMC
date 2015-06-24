@@ -106,6 +106,14 @@ inline void rng_test(std::size_t N, const std::string &name,
     sw.push_back(watch);
     result += vsmc::math::asum(N, r.data(), 1);
 
+    vsmc::uniform_real_distribution(rng, N, r.data(), 0.0, 1.0);
+    watch.reset();
+    watch.start();
+    vsmc::uniform_real_distribution(rng, N, r.data(), 0.0, 1.0);
+    watch.stop();
+    sw.push_back(watch);
+    result += vsmc::math::asum(N, r.data(), 1);
+
 #if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
     vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, m, r.data(), 0, 1);
     watch.reset();
@@ -187,16 +195,18 @@ inline void rng_output_sw(const std::string &prog_name,
             std::cout << std::right << std::setw(twid) << "C++";
             std::cout << std::right << std::setw(twid) << "C";
             break;
-        case 5: // rng_test without c api or mkl
+        case 6: // rng_test without c api or mkl
             std::cout << std::right << std::setw(twid) << "U01 (STD)";
             std::cout << std::right << std::setw(twid) << "U01 (vSMC)";
+            std::cout << std::right << std::setw(twid) << "U01 (Batch)";
             std::cout << std::right << std::setw(twid) << "Normal (STD)";
             std::cout << std::right << std::setw(twid) << "Normal (vSMC)";
             std::cout << std::right << std::setw(twid) << "Normal (Batch)";
             break;
-        case 7: // rng_test with c api and mkl
+        case 8: // rng_test with c api and mkl
             std::cout << std::right << std::setw(twid) << "U01 (STD)";
             std::cout << std::right << std::setw(twid) << "U01 (vSMC)";
+            std::cout << std::right << std::setw(twid) << "U01 (Batch)";
             std::cout << std::right << std::setw(twid) << "U01 (MKL)";
             std::cout << std::right << std::setw(twid) << "Normal (STD)";
             std::cout << std::right << std::setw(twid) << "Normal (vSMC)";

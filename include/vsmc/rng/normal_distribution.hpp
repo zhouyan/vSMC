@@ -50,9 +50,7 @@ template <typename RealType, typename RNGType>
 void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
     RealType mean = 0, RealType stddev = 1)
 {
-    U01DistributionType<RNGType, RealType> runif;
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = runif(rng);
+    u01_distribution(rng, n, r);
     const std::size_t nu = n / 2;
     vsmc::Vector<double> s(nu);
     RealType *const u1 = r;
@@ -66,6 +64,7 @@ void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
     math::vMul(nu, u1, s.data(), u1);
     math::vMul(nu, u2, s.data(), u2);
     if (n % 2 != 0) {
+        U01DistributionType<RNGType, RealType> runif;
         RealType v1 = runif(rng);
         RealType v2 = runif(rng);
         r[n - 1] = std::sqrt(-2 * std::log(v1)) *

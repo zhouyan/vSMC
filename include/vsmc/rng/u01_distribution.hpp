@@ -215,6 +215,15 @@ using U01CODistribution = U01Distribution<RealType, Closed, Open>;
 template <typename RealType = double>
 using U01OCDistribution = U01Distribution<RealType, Open, Closed>;
 
+/// \brief Generate standard uniform random variates
+template <typename RealType, typename RNGType>
+inline void u01_distribution(RNGType &rng, std::size_t n, RealType *r)
+{
+    U01DistributionType<RNGType, RealType> runif;
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = runif(rng);
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_U01_HPP

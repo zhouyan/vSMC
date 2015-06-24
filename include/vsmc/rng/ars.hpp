@@ -44,7 +44,7 @@
 /// \brief ARSEngine default rounds
 /// \ingroup Config
 #ifndef VSMC_RNG_ARS_ROUNDS
-#define VSMC_RNG_ARS_ROUNDS 7
+#define VSMC_RNG_ARS_ROUNDS 5
 #endif
 
 namespace vsmc

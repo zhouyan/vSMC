@@ -116,9 +116,8 @@ inline int mkl_uniform_real(
     ::VSLStreamStatePtr stream, int n, RealType *r, RealType a, RealType b)
 {
     RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
-    ::vsmc::UniformRealDistributionType<RNGType, RealType> runif(a, b);
-    for (int i = 0; i != n; ++i)
-        r[i] = runif(rng);
+    ::vsmc::uniform_real_distribution(
+        rng, static_cast<std::size_t>(n), r, a, b);
 
     return 0;
 }
