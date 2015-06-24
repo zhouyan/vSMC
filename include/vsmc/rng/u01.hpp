@@ -34,12 +34,7 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rngc/u01.h>
-#if VSMC_HAS_SSE2
-#include <vsmc/rng/m128i.hpp>
-#endif
-#if VSMC_HAS_AVX2
-#include <vsmc/rng/m256i.hpp>
-#endif
+#include <vsmc/utility/simd.hpp>
 
 #define VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                            \
     UBits, FBits, RealType, Left, Right, left, right)                         \
@@ -94,14 +89,6 @@ class U01
     : public internal::U01Impl<sizeof(UIntType), sizeof(RealType), Left, Right>
 {
 }; // class U01
-
-#if VSMC_HAS_SSE2
-
-namespace internal
-{
-} // namespace vsmc::internal
-
-#endif // VSMC_HAS_SSE2
 
 } // namespace vsmc
 

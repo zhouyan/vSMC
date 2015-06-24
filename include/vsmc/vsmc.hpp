@@ -168,6 +168,10 @@
 /// \ingroup Utility
 /// \brief Display progress while algorithms proceed
 
+/// \defgroup SIMD SIMD
+/// \ingroup Utility
+/// \brief SIMD
+
 /// \defgroup StopWatch Stop watch
 /// \ingroup Utility
 /// \brief Time measurement

@@ -33,7 +33,8 @@
 #define VSMC_RNG_AES_NI_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/m128i.hpp>
+#include <vsmc/rngc/u01.h>
+#include <vsmc/utility/simd.hpp>
 #include <wmmintrin.h>
 
 #define VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks)                          \

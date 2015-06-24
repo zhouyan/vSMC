@@ -38,12 +38,4 @@
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
 
-#if VSMC_HAS_AVX2
-#include <vsmc/rng/m256i.hpp>
-#endif
-
-#if VSMC_HAS_SSE2
-#include <vsmc/rng/m128i.hpp>
-#endif
-
 #endif // VSMC_RNG_RNG_HPP
