@@ -64,7 +64,7 @@ inline void normal_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
     math::vMul(nu, u1, s, u1);
     math::vMul(nu, u2, s, u2);
     for (std::size_t i = 0; i != n; ++i)
-        r[i] += mean + stddev * r[i];
+        r[i] = mean + stddev * r[i];
 }
 
 } // namespace vsmc::internal
@@ -75,10 +75,10 @@ template <typename RealType, typename RNGType>
 inline void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
     RealType mean = 0, RealType stddev = 1)
 {
-    const std::size_t k = 1000;
+    const std::size_t k = 2000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    RealType s[k];
+    RealType s[k / 2];
     for (std::size_t i = 0; i != m; ++i)
         internal::normal_distribution_impl(rng, k, r + i * k, mean, stddev, s);
     internal::normal_distribution_impl(rng, l, r + m * k, mean, stddev, s);
@@ -108,7 +108,7 @@ class NormalDistribution
         using distribution_type = NormalDistribution<RealType>;
 
         explicit param_type(result_type mean = 0, result_type stddev = 1)
-            : mean_(mean), stddev_(stddev), u_(0), v_(0), saved_(false)
+            : mean_(mean), stddev_(stddev), v_(0), saved_(false)
         {
             invariant();
         }
@@ -122,8 +122,6 @@ class NormalDistribution
             if (!internal::is_equal(param1.mean_, param2.mean_))
                 return false;
             if (!internal::is_equal(param1.stddev_, param2.stddev_))
-                return false;
-            if (!internal::is_equal(param1.u_, param2.u_))
                 return false;
             if (!internal::is_equal(param1.v_, param2.v_))
                 return false;
@@ -149,7 +147,6 @@ class NormalDistribution
 
             os << param.mean_ << ' ';
             os << param.stddev_ << ' ';
-            os << param.u_ << ' ';
             os << param.v_ << ' ';
             os << param.saved_;
 
@@ -165,19 +162,16 @@ class NormalDistribution
 
             result_type mean = 0;
             result_type stddev = 0;
-            result_type u = 0;
             result_type v = 0;
             bool saved = false;
             is >> std::ws >> mean;
             is >> std::ws >> stddev;
-            is >> std::ws >> u;
             is >> std::ws >> v;
             is >> std::ws >> saved;
 
             if (is.good()) {
                 if (stddev > 0) {
                     param = param_type(mean, stddev);
-                    param.u_ = u;
                     param.v_ = v;
                     param.saved_ = saved;
                 } else {
@@ -191,7 +185,6 @@ class NormalDistribution
         private:
         result_type mean_;
         result_type stddev_;
-        result_type u_;
         result_type v_;
         bool saved_;
 
@@ -229,24 +222,25 @@ class NormalDistribution
     template <typename RNGType>
     result_type operator()(RNGType &rng)
     {
-        if (!param_.saved_) {
-            UniformRealDistributionType<RNGType, RealType> runif(-1, 1);
-            result_type u = 0;
-            result_type v = 0;
-            result_type s = 0;
-            do {
-                u = runif(rng);
-                v = runif(rng);
-                s = u * u + v * v;
-            } while (s > 1 || s <= 0);
-            s = std::sqrt(-2 * std::log(s) / s);
-            param_.u_ = u * s;
-            param_.v_ = v * s;
+        if (param_.saved_) {
+            param_.saved_ = false;
+            return param_.v_;
         }
-        param_.saved_ = !param_.saved_;
-        double z = param_.saved_ ? param_.u_ : param_.v_;
 
-        return param_.mean_ + param_.stddev_ * z;
+        U01DistributionType<RNGType, RealType> runif;
+        result_type s = 0;
+        result_type u = 0;
+        result_type v = 0;
+        do {
+            u = runif(rng) - 0.5;
+            v = runif(rng) - 0.5;
+            s = u * u + v * v;
+        } while (s > 0.25 || s <= 0);
+        s = 2 * param_.stddev_ * std::sqrt(-0.5 * std::log(4 * s) / s);
+        param_.v_ = param_.mean_ + v * s;
+        param_.saved_ = true;
+
+        return param_.mean_ + u * s;
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS

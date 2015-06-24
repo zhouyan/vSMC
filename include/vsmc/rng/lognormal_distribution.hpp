@@ -35,10 +35,6 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/normal_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_LOGNORMAL_DISTRIBUTION_PARAM_CHECK(s)         \
-    VSMC_RUNTIME_ASSERT((s > 0), "**LognormalDistribution** CONSTRUCTED "     \
-                                 "WITH INVALID SCALE PARAMETER VALUE")
-
 namespace vsmc
 {
 
@@ -68,30 +64,18 @@ class LognormalDistribution
         using distribution_type = LognormalDistribution<RealType>;
 
         explicit param_type(result_type m = 0, result_type s = 1)
-            : m_(m), s_(s), u_(0), v_(0), saved_(false)
+            : normal_(m, s)
         {
             invariant();
         }
 
-        result_type m() const { return m_; }
-        result_type s() const { return s_; }
+        result_type m() const { return normal_.mean(); }
+        result_type s() const { return normal_.stddev(); }
 
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
-            if (!internal::is_equal(param1.m_, param2.m_))
-                return false;
-            if (!internal::is_equal(param1.s_, param2.s_))
-                return false;
-            if (!internal::is_equal(param1.u_, param2.u_))
-                return false;
-            if (!internal::is_equal(param1.v_, param2.v_))
-                return false;
-            if (param1.saved_ && !param2.saved)
-                return false;
-            if (!param1.saved_ && param2.saved)
-                return false;
-            return true;
+            return param1.normal_ == param2.normal_;
         }
 
         friend bool operator!=(
@@ -107,11 +91,7 @@ class LognormalDistribution
             if (!os.good())
                 return os;
 
-            os << param.m_ << ' ';
-            os << param.s_ << ' ';
-            os << param.u_ << ' ';
-            os << param.v_ << ' ';
-            os << param.saved_;
+            os << param.normal_ << ' ';
 
             return os;
         }
@@ -123,47 +103,23 @@ class LognormalDistribution
             if (!is.good())
                 return is;
 
-            result_type m = 0;
-            result_type s = 0;
-            result_type u = 0;
-            result_type v = 0;
-            bool saved = false;
-            is >> std::ws >> m;
-            is >> std::ws >> s;
-            is >> std::ws >> u;
-            is >> std::ws >> v;
-            is >> std::ws >> saved;
+            NormalDistribution<RealType> normal;
+            is >> std::ws >> normal;
 
-            if (is.good()) {
-                if (s > 0) {
-                    param = param_type(m, s);
-                    param.u_ = u;
-                    param.v_ = v;
-                    param.saved_ = saved;
-                } else {
-                    is.setstate(std::ios_base::failbit);
-                }
-            }
+            if (is.good())
+                param.normal_ = std::move(normal);
 
             return is;
         }
 
         private:
-        result_type m_;
-        result_type s_;
-        result_type u_;
-        result_type v_;
-        bool saved_;
+        NormalDistribution<RealType> normal_;
 
         friend distribution_type;
 
-        void invariant()
-        {
-            VSMC_RUNTIME_ASSERT_RNG_NORMAL_DISTRIBUTION_PARAM_CHECK(s_);
-            saved_ = false;
-        }
+        void invariant() {}
 
-        void reset() { saved_ = false; }
+        void reset() { normal_.reset(); }
     }; // class param_type
 
     explicit LognormalDistribution(result_type m = 0, result_type s = 1)
@@ -186,24 +142,7 @@ class LognormalDistribution
     template <typename RNGType>
     result_type operator()(RNGType &rng)
     {
-        if (!param_.saved_) {
-            UniformRealDistributionType<RNGType, RealType> runif(-1, 1);
-            result_type u = 0;
-            result_type v = 0;
-            result_type s = 0;
-            do {
-                u = runif(rng);
-                v = runif(rng);
-                s = u * u + v * v;
-            } while (s > 1 || s <= 0);
-            s = std::sqrt(-2 * std::log(s) / s);
-            param_.u_ = u * s;
-            param_.v_ = v * s;
-        }
-        param_.saved_ = !param_.saved_;
-        double z = param_.saved_ ? param_.u_ : param_.v_;
-
-        return std::exp(param_.m_ + param_.s_ * z);
+        return std::exp(param_.normal_(rng));
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
