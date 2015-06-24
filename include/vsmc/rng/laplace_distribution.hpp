@@ -45,7 +45,7 @@ namespace vsmc
 /// \brief Generating laplace random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
-void laplace_distribution(RNGType &rng, std::size_t n, RealType *r,
+inline void laplace_distribution(RNGType &rng, std::size_t n, RealType *r,
     RealType location = 0, RealType scale = 1)
 {
     u01_distribution(rng, n, r);

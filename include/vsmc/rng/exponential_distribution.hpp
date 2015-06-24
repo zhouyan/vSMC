@@ -46,7 +46,7 @@ namespace vsmc
 /// \brief Generating exponential random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
-void exponential_distribution(
+inline void exponential_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType lambda = 1)
 {
     u01_distribution(rng, n, r);

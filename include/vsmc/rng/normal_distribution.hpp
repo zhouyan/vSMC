@@ -47,7 +47,7 @@ namespace vsmc
 /// \brief Generating normal random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
-void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
+inline void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
     RealType mean = 0, RealType stddev = 1)
 {
     u01_distribution(rng, n, r);

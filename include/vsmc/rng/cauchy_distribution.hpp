@@ -45,7 +45,7 @@ namespace vsmc
 /// \brief Generating cauchy random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
-void cauchy_distribution(
+inline void cauchy_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1)
 {
     u01_distribution(rng, n, r);

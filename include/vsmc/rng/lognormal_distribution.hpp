@@ -45,7 +45,7 @@ namespace vsmc
 /// \brief Generating log-normal random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
-void lognormal_distribution(
+inline void lognormal_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType m = 0, RealType s = 1)
 {
     normal_distribution(rng, n, r, m, s);
