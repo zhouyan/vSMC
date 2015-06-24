@@ -717,12 +717,6 @@ class M128D
     const __m128d *data() const { return &value_; }
 
     template <typename T>
-    M128I<T> m128i() const
-    {
-        return M128I<T>(_mm_castsi128_pd(value_));
-    }
-
-    template <typename T>
     void load_a(const T *mem)
     {
         value_ = _mm_load_pd(reinterpret_cast<const double *>(mem));
