@@ -32,7 +32,9 @@
 #ifndef VSMC_INTERNAL_COMPILER_H
 #define VSMC_INTERNAL_COMPILER_H
 
-// Compiler feature check macros
+#ifndef __STDC_CONSTANT_MACROS
+#define __STDC_CONSTANT_MACROS
+#endif
 
 #ifndef __has_attribute
 #define __has_attribute(x) 0
@@ -54,34 +56,10 @@
 #define __has_feature(x) 0
 #endif
 
-#include <stddef.h>
-
-#if defined(__APPLE__) || defined(__MACOSX)
-#include <Availability.h>
-#if __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_5
-#ifndef VSMC_HAS_POSIX
-#define VSMC_HAS_POSIX 1
-#endif
-#endif
-#else // __APPLE__
-#include <stdlib.h>
-#if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
-#ifndef VSMC_HAS_POSIX
-#define VSMC_HAS_POSIX 1
-#endif
-#endif // _POSIX_C_SOURCE >= 200112L
-#if defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 600
-#ifndef VSMC_HAS_POSIX
-#define VSMC_HAS_POSIX 1
-#endif
-#endif // _XOPEN_SOURCE >= 600
-#endif // VSMC_MACOSX
-
-#ifndef VSMC_HAS_POSIX
-#define VSMC_HAS_POSIX 0
-#endif
-
-#if defined(__INTEL_COMPILER)
+#if defined(__OPENCL_VERSION__)
+#define VSMC_OPENCL
+#include <vsmc/internal/compiler/opencl.h>
+#elif defined(__INTEL_COMPILER)
 #define VSMC_INTEL
 #include <vsmc/internal/compiler/intel.h>
 #elif defined(__clang__)
@@ -93,6 +71,40 @@
 #elif defined(_MSC_VER)
 #define VSMC_MSVC
 #include <vsmc/internal/compiler/msvc.h>
+#endif
+
+#ifndef VSMC_OPENCL
+#ifdef __cplusplus
+#include <cstdlib>
+#include <cstddef>
+#include <cstdint>
+#include <cmath>
+#else
+#include <stdlib.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <math.h>
+#endif
+#endif
+
+#ifndef UINT64_C
+#error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
+#endif
+
+#ifndef VSMC_HAS_RNGC_DOUBLE
+#define VSMC_HAS_RNGC_DOUBLE 1
+#endif
+
+#ifndef VSMC_STATIC_INLINE
+#ifdef __cplusplus
+#define VSMC_STATIC_INLINE inline
+#else
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#define VSMC_STATIC_INLINE static inline
+#else
+#define VSMC_STATIC_INLINE static
+#endif
+#endif
 #endif
 
 #ifndef VSMC_INT64

@@ -32,49 +32,6 @@
 #ifndef VSMC_INTERNAL_CONFIG_H
 #define VSMC_INTERNAL_CONFIG_H
 
-#ifdef __OPENCL_VERSION__
-#ifndef VSMC_HAS_RNGC_DOUBLE
-#define VSMC_HAS_RNGC_DOUBLE 0
-#endif
-typedef uint uint32_t;
-typedef ulong uint64_t;
-#define UINT32_C(x) ((uint32_t)(x##U))
-#define UINT64_C(x) ((uint64_t)(x##UL))
-#ifndef VSMC_STATIC_INLINE
-#if defined(__OPENCL_C_VERSION__) && __OPENCL_C_VERSION__ >= 120
-#define VSMC_STATIC_INLINE static inline
-#else
-#define VSMC_STATIC_INLINE inline
-#endif
-#endif // VSMC_STATIC_INLINE
-#else  // __OPENCL_VERSION__
-#ifndef VSMC_HAS_RNGC_DOUBLE
-#define VSMC_HAS_RNGC_DOUBLE 1
-#endif
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif
-#include <stdint.h>
-#ifndef UINT64_C
-#error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
-#endif
-#ifdef __cplusplus
-#ifndef VSMC_STATIC_INLINE
-#define VSMC_STATIC_INLINE inline
-#endif
-#include <cmath>
-#else // __cplusplus
-#ifndef VSMC_STATIC_INLINE
-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-#define VSMC_STATIC_INLINE static inline
-#else
-#define VSMC_STATIC_INLINE static
-#endif
-#endif // VSMC_STATIC_INLINE
-#include <math.h>
-#endif // __cplusplus
-#endif // __OPENCL_VERSION__
-
 #include <vsmc/internal/compiler.h>
 
 #ifndef VSMC_NO_RUNTIME_ASSERT
@@ -103,6 +60,34 @@ typedef ulong uint64_t;
 /// \ingroup Config
 #ifndef VSMC_RUNTIME_WARNING_AS_EXCEPTION
 #define VSMC_RUNTIME_WARNING_AS_EXCEPTION 0
+#endif
+
+// POSIX
+
+#ifndef VSMC_OPENCL
+#if defined(__APPLE__) || defined(__MACOSX)
+#include <Availability.h>
+#if __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_5
+#ifndef VSMC_HAS_POSIX
+#define VSMC_HAS_POSIX 1
+#endif
+#endif
+#else // __APPLE__
+#if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
+#ifndef VSMC_HAS_POSIX
+#define VSMC_HAS_POSIX 1
+#endif
+#endif // _POSIX_C_SOURCE >= 200112L
+#if defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 600
+#ifndef VSMC_HAS_POSIX
+#define VSMC_HAS_POSIX 1
+#endif
+#endif // _XOPEN_SOURCE >= 600
+#endif // VSMC_MACOSX
+#endif
+
+#ifndef VSMC_HAS_POSIX
+#define VSMC_HAS_POSIX 0
 #endif
 
 // Parallelization features
