@@ -95,52 +95,97 @@ class ARSKeySeq
             ARSWeylConstantTrait<0>::value, ARSWeylConstantTrait<1>::value);
     }
 
-    template <std::size_t Rp1>
-    void generate(const key_type &key, std::array<M128I<>, Rp1> &key_seq)
+    void key(const key_type &k) { key_.load(k.data()); }
+
+    key_type key() const
     {
-        key_seq.front().load(key.data());
-        generate_seq<1>(key_seq, std::integral_constant<bool, 1 < Rp1>());
+        key_type k;
+        key_.store(k.data());
+
+        return k; 
+    }
+
+    const __m128i &get(std::integral_constant<std::size_t, 0>)
+    {
+        round_key_ = key_;
+
+        return round_key_.value();
+    }
+
+    template <std::size_t N>
+    const __m128i &get(std::integral_constant<std::size_t, N>)
+    {
+        round_key_ += weyl_;
+
+        return round_key_.value();
+    }
+
+    friend bool operator==(
+        const ARSKeySeq<ResultType> &ks1, const ARSKeySeq<ResultType> &ks2)
+    {
+        if (ks1.round_key_ != ks2.round_key_)
+            return false;
+        if (ks1.weyl_ != ks2.weyl_)
+            return false;
+        if (ks1.key_ != ks2.key_)
+            return false;
+        return true;
+    }
+
+    friend bool operator!=(
+        const ARSKeySeq<ResultType> &ks1, const ARSKeySeq<ResultType> &ks2)
+    {
+        return !(ks1 == ks2);
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os, const ARSKeySeq<ResultType> &ks)
+    {
+        if (!os.good())
+            return os;
+
+        os << ks.round_key_ << ' ';
+        os << ks.weyl_ << ' ';
+        os << ks.key_;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is, ARSKeySeq<ResultType> &ks)
+    {
+        if (!is.good())
+            return is;
+
+        ARSKeySeq<ResultType> ks_tmp;
+        is >> std::ws >> ks_tmp.round_key_;
+        is >> std::ws >> ks_tmp.weyl_;
+        is >> std::ws >> ks_tmp.key_;
+
+        if (is.good())
+            ks = std::move(ks_tmp);
+
+        return is;
     }
 
     private:
+    M128I<std::uint64_t> round_key_;
     M128I<std::uint64_t> weyl_;
-
-    template <std::size_t, std::size_t Rp1>
-    void generate_seq(std::array<M128I<>, Rp1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N, std::size_t Rp1>
-    void generate_seq(std::array<M128I<>, Rp1> &key_seq, std::true_type)
-    {
-        std::get<N>(key_seq).value() =
-            _mm_add_epi64(std::get<N - 1>(key_seq).value(), weyl_.value());
-        generate_seq<N + 1>(
-            key_seq, std::integral_constant<bool, N + 1 < Rp1>());
-    }
+    M128I<std::uint64_t> key_;
 }; // class ARSKeySeq
 
 /// \brief ARS RNG engine
 /// \ingroup AESNIRNG
-///
-/// \details
-/// This is a reimplementation of the ARS engine as described in
-/// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented
-/// in [Random123][r123lib].
-///
-/// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
-/// [r123lib]: https://www.deshawresearch.com/resources_random123.html
-///
-/// \sa ARSKeySeq
-/// \sa AESNIEngine
 template <typename ResultType, std::size_t Rounds = VSMC_RNG_ARS_ROUNDS,
     std::size_t Blocks = VSMC_RNG_ARS_BLOCKS>
-class ARSEngine : public AESNIEngine<ResultType, ARSKeySeq<ResultType>, false,
-                      Rounds, Blocks>
+class ARSEngine
+    : public AESNIEngine<ResultType, ARSKeySeq<ResultType>, Rounds, Blocks>
 {
     public:
     using base_eng_type =
-        AESNIEngine<ResultType, ARSKeySeq<ResultType>, false, Rounds, Blocks>;
+        AESNIEngine<ResultType, ARSKeySeq<ResultType>, Rounds, Blocks>;
 
     explicit ARSEngine(ResultType s = 0) : base_eng_type(s) {}
 
