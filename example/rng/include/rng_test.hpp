@@ -74,7 +74,7 @@ inline void rng_test(std::size_t N, const std::string &name,
     vsmc::StopWatch watch;
     double result = 0;
     vsmc::Vector<double> r(N);
-    std::size_t i;
+    vsmc::Vector<typename RNGType::result_type> u(N);
     MKL_INT n = static_cast<MKL_INT>(N);
     MKL_INT m = 1000;
 
@@ -91,22 +91,20 @@ inline void rng_test(std::size_t N, const std::string &name,
     std::uniform_real_distribution<double> runif_std(0, 1);
     watch.reset();
     watch.start();
-    i = 0;
-    while (i != N && runif_std(rng) < 1)
-        ++i;
+    for (std::size_t i = 0; i != N; ++i)
+        r[i] = runif_std(rng);
     watch.stop();
     sw.push_back(watch);
-    result += runif_std(rng);
+    result += vsmc::math::asum(N, r.data(), 1);
 
     vsmc::UniformRealDistributionType<RNGType, double> runif_vsmc(0, 1);
     watch.reset();
     watch.start();
-    i = 0;
-    while (i != N && runif_vsmc(rng) < 1)
-        ++i;
+    for (std::size_t i = 0; i != N; ++i)
+        r[i] = runif_vsmc(rng);
     watch.stop();
     sw.push_back(watch);
-    result += runif_vsmc(rng);
+    result += vsmc::math::asum(N, r.data(), 1);
 
 #if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
     vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, m, r.data(), 0, 1);
@@ -121,22 +119,20 @@ inline void rng_test(std::size_t N, const std::string &name,
     std::normal_distribution<double> rnorm_std(0, 1);
     watch.reset();
     watch.start();
-    i = 0;
-    while (i != N && rnorm_std(rng) < std::numeric_limits<double>::infinity())
-        ++i;
+    for (std::size_t i = 0; i != N; ++i)
+        r[i] = rnorm_std(rng);
     watch.stop();
     sw.push_back(watch);
-    result += rnorm_std(rng);
+    result += vsmc::math::asum(N, r.data(), 1);
 
     vsmc::NormalDistribution<double> rnorm_vsmc(0, 1);
     watch.reset();
     watch.start();
-    i = 0;
-    while (i != N && rnorm_vsmc(rng) < std::numeric_limits<double>::infinity())
-        ++i;
+    for (std::size_t i = 0; i != N; ++i)
+        r[i] = rnorm_vsmc(rng);
     watch.stop();
     sw.push_back(watch);
-    result += rnorm_vsmc(rng);
+    result += vsmc::math::asum(N, r.data(), 1);
 
     vsmc::normal_distribution(rng, N, r.data(), 0.0, 1.0);
     watch.reset();
