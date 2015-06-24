@@ -31,12 +31,6 @@
 
 #include "rng_test.hpp"
 #include <vsmc/rng/threefry.hpp>
-#if VSMC_HAS_SSE2
-#include <vsmc/rng/threefry_sse2.hpp>
-#endif
-#if VSMC_HAS_AVX2
-#include <vsmc/rng/threefry_avx2.hpp>
-#endif
 
 int main(int argc, char **argv)
 {
