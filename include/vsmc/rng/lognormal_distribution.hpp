@@ -36,7 +36,7 @@
 #include <vsmc/rng/normal_distribution.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_LOGNORMAL_DISTRIBUTION_PARAM_CHECK(s)         \
-    VSMC_RUNTIME_ASSERT((s > 0), "**LogNormalDistribution** CONSTRUCTED "     \
+    VSMC_RUNTIME_ASSERT((s > 0), "**LognormalDistribution** CONSTRUCTED "     \
                                  "WITH INVALID SCALE PARAMETER VALUE")
 
 namespace vsmc
@@ -52,20 +52,20 @@ void lognormal_distribution(
     math::vExp(n, r, r);
 }
 
-/// \brief LogNormal distribution
+/// \brief Lognormal distribution
 /// \ingroup Distribution
 template <typename RealType>
-class LogNormalDistribution
+class LognormalDistribution
 {
     public:
     using result_type = RealType;
-    using distribution_type = LogNormalDistribution<RealType>;
+    using distribution_type = LognormalDistribution<RealType>;
 
     class param_type
     {
         public:
         using result_type = RealType;
-        using distribution_type = LogNormalDistribution<RealType>;
+        using distribution_type = LognormalDistribution<RealType>;
 
         explicit param_type(result_type m = 0, result_type s = 1)
             : m_(m), s_(s), u_(0), v_(0), saved_(false)
@@ -166,12 +166,12 @@ class LogNormalDistribution
         void reset() { saved_ = false; }
     }; // class param_type
 
-    explicit LogNormalDistribution(result_type m = 0, result_type s = 1)
+    explicit LognormalDistribution(result_type m = 0, result_type s = 1)
         : param_(m, s)
     {
     }
 
-    explicit LogNormalDistribution(const param_type &param) : param_(param) {}
+    explicit LognormalDistribution(const param_type &param) : param_(param) {}
 
     result_type m() const { return param_.m_; }
     result_type s() const { return param_.s_; }
@@ -210,7 +210,7 @@ class LogNormalDistribution
 
     private:
     param_type param_;
-}; // class LogNormalDistribution
+}; // class LognormalDistribution
 
 } // namespace vsmc
 
