@@ -78,13 +78,10 @@ inline void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    Vector<RealType> s(k);
-    for (std::size_t i = 0; i != m; ++i) {
-        internal::normal_distribution_impl(
-            rng, k, r + i * k, mean, stddev, s.data());
-    }
-    internal::normal_distribution_impl(
-        rng, l, r + m * k, mean, stddev, s.data());
+    RealType s[k];
+    for (std::size_t i = 0; i != m; ++i)
+        internal::normal_distribution_impl(rng, k, r + i * k, mean, stddev, s);
+    internal::normal_distribution_impl(rng, l, r + m * k, mean, stddev, s);
     if (n % 2 != 0) {
         U01DistributionType<RNGType, RealType> runif;
         RealType v1 = runif(rng);

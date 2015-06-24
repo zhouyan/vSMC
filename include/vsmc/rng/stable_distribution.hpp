@@ -138,38 +138,29 @@ inline void stable_distribution(RNGType &rng, std::size_t n, RealType *r,
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
+    RealType w[k];
+    RealType u[k];
+    RealType x[k];
+    RealType y[k];
+    RealType z[k];
     if (stability < 1 || stability > 1) {
-        Vector<RealType> w(k);
-        Vector<RealType> u(k);
-        Vector<RealType> b(k);
-        Vector<RealType> c(k);
-        Vector<RealType> d(k);
         RealType zeta =
             -skewness * std::tan(math::pi_by2<RealType>() * stability);
         RealType xi = 1 / stability * std::atan(-zeta);
         RealType a = 0.5 * std::log(1 + zeta * zeta) / stability;
         for (std::size_t i = 0; i != m; ++i) {
             internal::stable_distribution_impl_a(rng, k, r + i * k, stability,
-                skewness, location, scale, w.data(), u.data(), a, b.data(),
-                c.data(), d.data(), xi);
+                skewness, location, scale, w, u, a, x, y, z, xi);
         }
         internal::stable_distribution_impl_a(rng, l, r + m * k, stability,
-            skewness, location, scale, w.data(), u.data(), a, b.data(),
-            c.data(), d.data(), xi);
+            skewness, location, scale, w, u, a, x, y, z, xi);
     } else {
-        Vector<RealType> w(k);
-        Vector<RealType> u(k);
-        Vector<RealType> a(k);
-        Vector<RealType> b(k);
-        Vector<RealType> c(k);
         for (std::size_t i = 0; i != m; ++i) {
             internal::stable_distribution_impl_1(rng, k, r + i * k, stability,
-                skewness, location, scale, w.data(), a.data(), u.data(),
-                b.data(), c.data());
+                skewness, location, scale, w, u, x, y, z);
         }
         internal::stable_distribution_impl_1(rng, l, r + m * k, stability,
-            skewness, location, scale, w.data(), u.data(), a.data(), b.data(),
-            c.data());
+            skewness, location, scale, w, u, x, y, z);
     }
 }
 

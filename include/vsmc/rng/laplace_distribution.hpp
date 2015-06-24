@@ -77,13 +77,12 @@ inline void laplace_distribution(RNGType &rng, std::size_t n, RealType *r,
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    Vector<RealType> s(k);
+    RealType s[k];
     for (std::size_t i = 0; i != m; ++i) {
         internal::laplace_distribution_impl(
-            rng, k, r + i * k, location, scale, s.data());
+            rng, k, r + i * k, location, scale, s);
     }
-    internal::laplace_distribution_impl(
-        rng, l, r + m * k, location, scale, s.data());
+    internal::laplace_distribution_impl(rng, l, r + m * k, location, scale, s);
 }
 
 /// \brief Laplace distribution
