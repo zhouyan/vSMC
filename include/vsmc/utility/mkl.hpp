@@ -93,85 +93,7 @@ inline void mkl_error_check(int status, const char *func, const char *mklf)
 }
 #endif
 
-class MKLOffsetZero
-{
-    public:
-    static constexpr MKL_INT min VSMC_MNE() { return 0; }
-    static constexpr MKL_INT max VSMC_MNE() { return 0; }
-    static void set(MKL_INT) {}
-    static constexpr MKL_INT get() { return 0; }
-}; // class OffsetZero
-
-template <MKL_INT MaxOffset>
-class MKLOffsetDynamic
-{
-    public:
-    MKLOffsetDynamic() : offset_(0) {}
-
-    static constexpr MKL_INT min VSMC_MNE() { return 0; }
-    static constexpr MKL_INT max VSMC_MNE() { return MaxOffset; }
-
-    void set(MKL_INT n)
-    {
-        VSMC_RUNTIME_ASSERT_UTILITY_MKL_VSL_OFFSET(n);
-        offset_ = n % MaxOffset;
-    }
-
-    MKL_INT get() const { return offset_; }
-
-    private:
-    MKL_INT offset_;
-}; // class OffsetDynamic
-
-template <MKL_INT>
-class MKLOffset
-{
-    public:
-    using type = MKLOffsetZero;
-}; // class MKLOffset
-
-template <>
-class MKLOffset<Dynamic>
-{
-    public:
-    using type =
-        MKLOffsetDynamic<std::numeric_limits<MKL_INT>::max VSMC_MNE()>;
-}; // class MKLOffset
-
-template <>
-class MKLOffset<VSL_BRNG_MT2203>
-{
-    public:
-    using type = MKLOffsetDynamic<6024>;
-}; // class MKLOffset
-
-template <>
-class MKLOffset<VSL_BRNG_WH>
-{
-    public:
-    using type = MKLOffsetDynamic<273>;
-}; // class MKLOffset
-
 } // namespace vsmc::internal
-
-/// \brief Default seed for MKL RNG
-/// \ingroup Traits
-template <MKL_INT>
-class MKLSeed : public std::integral_constant<MKL_UINT, 1>
-{
-}; // class MKLSeed
-
-/// \brief Default seed for MKL Sobol quasi-RNG
-template <>
-class MKLSeed<VSL_BRNG_SOBOL> : public std::integral_constant<MKL_UINT, 10>
-{
-}; // class MKLSeed
-
-/// \brief Default seed for MKL Niederr quasi-RNG
-template <>
-class MKLSeed<VSL_BRNG_NIEDERR> : public std::integral_constant<MKL_UINT, 10>
-{
-}; // class MKLSeed
 
 /// \brief MKL resource management base class
 /// \ingroup MKL
@@ -253,26 +175,19 @@ inline void swap(
 
 /// \brief MKL `VSLStreamStatePtr`
 /// \ingroup MKL
-template <MKL_INT BRNG>
-class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream<BRNG>>
+class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
 {
     public:
-    explicit MKLStream(MKL_UINT s = MKLSeed<BRNG>::value, MKL_INT offset = 0)
+    MKLStream() = default;
+
+    MKLStream(MKL_INT brng, MKL_UINT seed) { reset(brng, seed); }
+
+    MKLStream(MKL_INT brng, MKL_INT n, unsigned *params)
     {
-        reset(s, offset);
+        reset(brng, n, params);
     }
 
-    template <typename SeedSeq>
-    explicit MKLStream(
-        SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
-                          MKL_UINT, MKLStream<BRNG>>::value>::type * = nullptr)
-    {
-        MKL_UINT s = 0;
-        seq.generate(&s, &s + 1);
-        reset(s);
-    }
-
-    MKLStream(const MKLStream<BRNG> &other) : offset_(other.offset_)
+    MKLStream(const MKLStream &other) : brng_(other.brng_)
     {
         ::VSLStreamStatePtr ptr = nullptr;
         internal::mkl_error_check(::vslCopyStream(&ptr, other.get()),
@@ -280,10 +195,10 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream<BRNG>>
         this->reset_ptr(ptr);
     }
 
-    MKLStream<BRNG> &operator=(const MKLStream<BRNG> &other)
+    MKLStream &operator=(const MKLStream &other)
     {
         if (this != &other) {
-            offset_ = other.offset_;
+            brng_ = other.brng_;
             if (this->get() == nullptr) {
                 ::VSLStreamStatePtr ptr = nullptr;
                 internal::mkl_error_check(::vslCopyStream(&ptr, other.get()),
@@ -299,22 +214,8 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream<BRNG>>
         return *this;
     }
 
-    MKLStream(MKLStream<BRNG> &&) = default;
-    MKLStream<BRNG> &operator=(MKLStream<BRNG> &&) = default;
-
-    void seed(MKL_UINT s) { reset(s, s); }
-
-    void seed(MKL_UINT s, MKL_INT offset) { reset(s, offset); }
-
-    template <typename SeedSeq>
-    void seed(
-        SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
-                          MKL_UINT, MKLStream<BRNG>>::value>::type * = nullptr)
-    {
-        MKL_UINT s = 0;
-        seq.generate(&s, &s + 1);
-        reset(s);
-    }
+    MKLStream(MKLStream &&) = default;
+    MKLStream &operator=(MKLStream &&) = default;
 
     static int release(::VSLStreamStatePtr ptr)
     {
@@ -328,33 +229,34 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream<BRNG>>
         return status;
     }
 
-    int reset(MKL_UINT s) { return reset(s, offset_.get()); }
-
-    int reset(MKL_UINT s, MKL_INT offset)
+    int reset(MKL_INT brng, MKL_UINT seed)
     {
         ::VSLStreamStatePtr ptr = nullptr;
-        int status = ::vslNewStream(&ptr, BRNG + offset, s);
+        int status = ::vslNewStream(&ptr, brng, seed);
         internal::mkl_error_check(
             status, "MKLStream::reset", "::vslNewStream");
-        offset_.set(offset);
+        brng_ = brng;
         this->reset_ptr(ptr);
 
         return status;
     }
 
-    MKL_INT brng() const { return BRNG + offset_.get(); }
+    int reset(MKL_INT brng, MKL_INT n, unsigned *params)
+    {
+        ::VSLStreamStatePtr ptr = nullptr;
+        int status = ::vslNewStreamEx(&ptr, brng, n, params);
+        internal::mkl_error_check(
+            status, "MKLStream::reset", "::vslNewStreamEx");
+        brng_ = brng;
+        this->reset_ptr(ptr);
 
-    static constexpr MKL_INT min_offset()
-    {
-        return internal::MKLOffset<BRNG>::type::min VSMC_MNE();
+        return status;
     }
-    static constexpr MKL_INT max_offset()
-    {
-        return internal::MKLOffset<BRNG>::type::max VSMC_MNE();
-    }
+
+    MKL_INT brng() const { return brng_; }
 
     private:
-    typename internal::MKLOffset<BRNG>::type offset_;
+    MKL_INT brng_;
 }; // class MKLStream
 
 /// \brief MKL `VSLSSTaskPtr`

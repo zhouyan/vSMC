@@ -33,7 +33,6 @@
 #define VSMC_RNG_MKL_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/utility/aligned_memory.hpp>
 #include <vsmc/utility/mkl.hpp>
 
 #ifndef VSMC_RNG_MKL_VSL_BUFFER_SIZE
@@ -45,6 +44,65 @@ namespace vsmc
 
 namespace internal
 {
+
+class MKLOffsetZero
+{
+    public:
+    static constexpr MKL_INT min VSMC_MNE() { return 0; }
+    static constexpr MKL_INT max VSMC_MNE() { return 0; }
+    static void set(MKL_INT) {}
+    static constexpr MKL_INT get() { return 0; }
+}; // class OffsetZero
+
+template <MKL_INT MaxOffset>
+class MKLOffsetDynamic
+{
+    public:
+    MKLOffsetDynamic() : offset_(0) {}
+
+    static constexpr MKL_INT min VSMC_MNE() { return 0; }
+    static constexpr MKL_INT max VSMC_MNE() { return MaxOffset; }
+
+    void set(MKL_INT n)
+    {
+        VSMC_RUNTIME_ASSERT_UTILITY_MKL_VSL_OFFSET(n);
+        offset_ = n % MaxOffset;
+    }
+
+    MKL_INT get() const { return offset_; }
+
+    private:
+    MKL_INT offset_;
+}; // class OffsetDynamic
+
+template <MKL_INT>
+class MKLOffset
+{
+    public:
+    using type = MKLOffsetZero;
+}; // class MKLOffset
+
+template <>
+class MKLOffset<Dynamic>
+{
+    public:
+    using type =
+        MKLOffsetDynamic<std::numeric_limits<MKL_INT>::max VSMC_MNE()>;
+}; // class MKLOffset
+
+template <>
+class MKLOffset<VSL_BRNG_MT2203>
+{
+    public:
+    using type = MKLOffsetDynamic<6024>;
+}; // class MKLOffset
+
+template <>
+class MKLOffset<VSL_BRNG_WH>
+{
+    public:
+    using type = MKLOffsetDynamic<273>;
+}; // class MKLOffset
 
 template <std::size_t>
 class MKLResultTypeTrait;
@@ -73,8 +131,7 @@ template <>
 class MKLUniformBits<32>
 {
     public:
-    template <MKL_INT BRNG>
-    static void eval(MKLStream<BRNG> &stream, MKL_INT n, unsigned *r)
+    static void eval(MKLStream &stream, MKL_INT n, unsigned *r)
     {
         int status = ::viRngUniformBits32(
             VSL_RNG_METHOD_UNIFORMBITS32_STD, stream.get(), n, r);
@@ -87,8 +144,7 @@ template <>
 class MKLUniformBits<64>
 {
     public:
-    template <MKL_INT BRNG>
-    static void eval(MKLStream<BRNG> &stream, MKL_INT n, unsigned MKL_INT64 *r)
+    static void eval(MKLStream &stream, MKL_INT n, unsigned MKL_INT64 *r)
     {
         int status = ::viRngUniformBits64(
             VSL_RNG_METHOD_UNIFORMBITS64_STD, stream.get(), n, r);
@@ -102,8 +158,7 @@ class MKLDiscardSkipAhead
     public:
     using size_type = long long;
 
-    template <MKL_INT BRNG>
-    void operator()(MKLStream<BRNG> &stream, size_type nskip)
+    void operator()(MKLStream &stream, size_type nskip)
     {
         if (nskip == 0)
             return;
@@ -125,7 +180,7 @@ class MKLDiscardGeneral
 
     MKLDiscardGeneral() : buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE) {}
 
-    void operator()(MKLStream<BRNG> &stream, size_type nskip)
+    void operator()(MKLStream &stream, size_type nskip)
     {
         if (nskip == 0)
             return;
@@ -137,13 +192,6 @@ class MKLDiscardGeneral
         }
         MKLUniformBits<Bits>::eval(stream, nskip, buffer_.data());
     }
-
-    void buffer_size(MKL_INT size)
-    {
-        buffer_size_ = size > 0 ? size : VSMC_RNG_MKL_VSL_BUFFER_SIZE;
-    }
-
-    MKL_INT buffer_size() { return buffer_size_; }
 
     private:
     Vector<MKLResultType<Bits>> buffer_;
@@ -187,34 +235,30 @@ class MKLEngine
 {
     public:
     using result_type = internal::MKLResultType<Bits>;
-    using stream_type = MKLStream<BRNG>;
 
-    explicit MKLEngine(MKL_UINT s = MKLSeed<BRNG>::value, MKL_INT offset = 0)
-        : stream_(s, offset)
-        , buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE)
-        , index_(buffer_size_)
+    explicit MKLEngine(MKL_UINT s = 1)
+        : buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE), index_(buffer_size_)
     {
+        seed(s);
     }
 
     template <typename SeedSeq>
     explicit MKLEngine(SeedSeq &seq,
         typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
             MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
-        : stream_(seq)
-        , buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE)
-        , index_(buffer_size_)
+        : buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE), index_(buffer_size_)
     {
+        seed(seq);
+    }
+
+    MKLEngine(MKL_UINT s, MKL_INT offset)
+    {
+        seed(s, offset);
     }
 
     void seed(MKL_UINT s)
     {
-        stream_.seed(s);
-        index_ = buffer_size_;
-    }
-
-    void seed(MKL_UINT s, MKL_INT offset)
-    {
-        stream_.seed(s, offset);
+        stream_.reset(BRNG, s);
         index_ = buffer_size_;
     }
 
@@ -223,7 +267,18 @@ class MKLEngine
         typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
             MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
     {
-        stream_.seed(seq);
+        MKL_UINT s;
+        seq.generate(&s, &s + 1);
+        stream_.reset(BRNG, s);
+        index_ = buffer_size_;
+    }
+
+    void seed(MKL_UINT s, MKL_INT offset)
+    {
+        typename internal::MKLOffset<BRNG>::type off;
+        off.set(offset);
+        stream_.reset(BRNG + off.get(), s);
+        index_ = buffer_size_;
     }
 
     result_type operator()()
@@ -264,8 +319,8 @@ class MKLEngine
     static constexpr result_type min VSMC_MNE() { return _Min; }
     static constexpr result_type max VSMC_MNE() { return _Max; }
 
-    stream_type &stream() { return stream_; }
-    const stream_type &stream() const { return stream_; }
+    MKLStream &stream() { return stream_; }
+    const MKLStream &stream() const { return stream_; }
 
     /// \brief Set the buffer size, zero or negative value restore the
     /// default
@@ -277,7 +332,7 @@ class MKLEngine
     MKL_INT buffer_size() { return buffer_size_; }
 
     private:
-    stream_type stream_;
+    MKLStream stream_;
     internal::MKLDiscard<BRNG, Bits> discard_;
     Vector<result_type> buffer_;
     MKL_INT buffer_size_;
@@ -347,6 +402,26 @@ using MKL_PHILOX4X32X10 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 32>;
 using MKL_PHILOX4X32X10_64 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 64>;
 
 #endif // INTEL_MKL_VERSION >= 110300
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    float *r, float mean, float stddev)
+{
+    int status = ::vsRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2,
+        rng.stream().get(), static_cast<MKL_INT>(n), r, mean, stddev);
+    internal::mkl_error_check(
+        status, "normal_distribution", "::vsRngGaussian");
+}
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    double *r, double mean, double stddev)
+{
+    int status = ::vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2,
+        rng.stream().get(), static_cast<MKL_INT>(n), r, mean, stddev);
+    internal::mkl_error_check(
+        status, "normal_distribution", "::vdRngGaussian");
+}
 
 } // namespace vsmc
 
