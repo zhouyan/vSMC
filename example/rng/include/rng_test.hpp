@@ -86,7 +86,7 @@ inline void rng_test(std::size_t N, const std::string &name,
 #endif
     VSLStreamStatePtr stream = nullptr;
     vslNewStream(&stream, brng, 1);
-    size.back() += vslGetStreamSize(stream);
+    size.back() += static_cast<std::size_t>(vslGetStreamSize(stream));
 #endif
 
     std::uniform_real_distribution<double> runif_std(0, 1);
