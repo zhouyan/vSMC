@@ -80,12 +80,13 @@ inline void rng_test(std::size_t N, const std::string &name,
 
 #if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
 #if VSMC_RNG_TEST_MKL
-    MKL_INT brng = rng.stream().brng();
+    MKL_INT brng = rng.stream().get_stream_state_brng();
 #else
     MKL_INT brng = vsmc::mkl_brng<RNGType>();
 #endif
     VSLStreamStatePtr stream = nullptr;
     vslNewStream(&stream, brng, 1);
+    size.back() += vslGetStreamSize(stream);
 #endif
 
     std::uniform_real_distribution<double> runif_std(0, 1);

@@ -187,7 +187,8 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
         reset(brng, n, params);
     }
 
-    MKLStream(const MKLStream &other) : brng_(other.brng_)
+    MKLStream(const MKLStream &other)
+        : MKLBase<::VSLStreamStatePtr, MKLStream>()
     {
         ::VSLStreamStatePtr ptr = nullptr;
         internal::mkl_error_check(::vslCopyStream(&ptr, other.get()),
@@ -198,7 +199,6 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     MKLStream &operator=(const MKLStream &other)
     {
         if (this != &other) {
-            brng_ = other.brng_;
             if (this->get() == nullptr) {
                 ::VSLStreamStatePtr ptr = nullptr;
                 internal::mkl_error_check(::vslCopyStream(&ptr, other.get()),
@@ -235,7 +235,6 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
         int status = ::vslNewStream(&ptr, brng, seed);
         internal::mkl_error_check(
             status, "MKLStream::reset", "::vslNewStream");
-        brng_ = brng;
         this->reset_ptr(ptr);
 
         return status;
@@ -247,16 +246,17 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
         int status = ::vslNewStreamEx(&ptr, brng, n, params);
         internal::mkl_error_check(
             status, "MKLStream::reset", "::vslNewStreamEx");
-        brng_ = brng;
         this->reset_ptr(ptr);
 
         return status;
     }
 
-    MKL_INT brng() const { return brng_; }
+    int get_stream_size() const { return ::vslGetStreamSize(this->get()); }
 
-    private:
-    MKL_INT brng_;
+    int get_stream_state_brng() const
+    {
+        return ::vslGetStreamStateBrng(this->get());
+    }
 }; // class MKLStream
 
 /// \brief MKL `VSLSSTaskPtr`
