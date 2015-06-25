@@ -102,7 +102,7 @@ class ARSKeySeq
         key_type k;
         key_.store(k.data());
 
-        return k; 
+        return k;
     }
 
     const __m128i &get(std::integral_constant<std::size_t, 0>)

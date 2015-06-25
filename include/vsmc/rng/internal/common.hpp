@@ -237,7 +237,7 @@ inline void increment(std::array<T, K> &ctr)
 }
 
 template <std::size_t Blocks, typename T, std::size_t K>
-static void increment(
+inline void increment(
     std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
 {
     increment_block_back<Blocks>(
