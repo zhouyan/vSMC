@@ -52,7 +52,7 @@ inline void exponential_distribution_impl(
 {
     u01_distribution(rng, n, r);
     math::vLn(n, r, r);
-    math::scal(n, -1 / lambda, r, 1);
+    math::vMul(n, -1 / lambda, r, r);
 }
 
 } // namespace vsmc::internal

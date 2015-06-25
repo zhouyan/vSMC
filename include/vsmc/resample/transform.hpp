@@ -161,7 +161,7 @@ inline std::size_t resample_trans_residual(std::size_t M, std::size_t N,
         resid[i] = std::modf(coeff * weight[i], &integral);
         integ[i] = static_cast<IntType>(integral);
     }
-    math::scal(M, 1 / math::asum(M, resid, 1), resid, 1);
+    math::vMul(M, 1 / std::accumulate(resid, resid + M, 0.0), resid, resid);
     IntType R = std::accumulate(integ, integ + M, static_cast<IntType>(0));
 
     return N - static_cast<std::size_t>(R);

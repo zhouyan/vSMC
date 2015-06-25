@@ -56,9 +56,9 @@ inline void normal_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
     RealType *const u1 = r;
     RealType *const u2 = r + nu;
     math::vLn(nu, u1, s);
-    math::scal(nu, static_cast<RealType>(-2), s, 1);
+    math::vMul(nu, static_cast<RealType>(-2), s, s);
     math::vSqrt(nu, s, s);
-    math::scal(nu, math::pi_2<RealType>(), u2, 1);
+    math::vMul(nu, math::pi_2<RealType>(), u2, u2);
     math::vSin(nu, u2, u1);
     math::vCos(nu, u2, u2);
     math::vMul(nu, u1, s, u1);

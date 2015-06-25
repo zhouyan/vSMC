@@ -50,7 +50,7 @@ inline void cauchy_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     u01_distribution(rng, n, r);
-    math::scal(n, math::pi<RealType>(), r, 1);
+    math::vMul(n, math::pi<RealType>(), r, r);
     math::vTan(n, r, r);
     for (std::size_t i = 0; i != n; ++i)
         r[i] = a + b * r[i];

@@ -49,7 +49,7 @@ inline double weight_ess(std::size_t N, const double *first)
 /// \ingroup Core
 static void weight_normalize(std::size_t N, double *first)
 {
-    math::scal(N, 1 / math::asum(N, first, 1), first, 1);
+    math::vMul(N, 1 / std::accumulate(first, first + N, 0.0), first, first);
 }
 
 /// \brief Normalize logarithm weights such that the maximum is zero

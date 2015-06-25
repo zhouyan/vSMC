@@ -122,11 +122,11 @@ class WeightMPI : public WeightBase
         const std::size_t N = static_cast<std::size_t>(this->size());
         double *const wptr = this->mutable_data();
 
-        double lcoeff = math::asum(N, wptr, 1);
+        double lcoeff = std::accumulate(wptr, wptr + N, 0.0);
         double gcoeff = 0;
         ::boost::mpi::all_reduce(world_, lcoeff, gcoeff, std::plus<double>());
         gcoeff = 1 / gcoeff;
-        math::scal(N, gcoeff, wptr, 1);
+        math::vMul(N, gcoeff, wptr, wptr);
     }
 
     void normalize_log()

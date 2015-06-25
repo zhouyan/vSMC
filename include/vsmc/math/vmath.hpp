@@ -64,6 +64,22 @@
             y[i] = a[i] op b[i];                                              \
     }
 
+#define VSMC_DEFINE_MATH_VMATH_VS(op, name)                                   \
+    template <typename T>                                                     \
+    inline void v##name(std::size_t n, const T *a, T b, T *y)                 \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = a[i] op b;                                                 \
+    }
+
+#define VSMC_DEFINE_MATH_VMATH_SV(op, name)                                   \
+    template <typename T>                                                     \
+    inline void v##name(std::size_t n, T a, const T *b, T *y)                 \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = a op b[i];                                                 \
+    }
+
 namespace vsmc
 {
 
@@ -147,14 +163,32 @@ inline T vmath_cdfnorminv(T a)
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i + b_i\f$
 VSMC_DEFINE_MATH_VMATH_B(+, Add)
 
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i + b\f$
+VSMC_DEFINE_MATH_VMATH_VS(+, Add)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a + b_i\f$
+VSMC_DEFINE_MATH_VMATH_SV(+, Add)
+
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i - b_i\f$
 VSMC_DEFINE_MATH_VMATH_B(-, Sub)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i - b\f$
+VSMC_DEFINE_MATH_VMATH_VS(-, Sub)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a - b_i\f$
+VSMC_DEFINE_MATH_VMATH_SV(-, Sub)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^2\f$
 VSMC_DEFINE_MATH_VMATH_1(internal::vmath_sqr, Sqr)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b_i\f$
 VSMC_DEFINE_MATH_VMATH_B(*, Mul)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b\f$
+VSMC_DEFINE_MATH_VMATH_VS(*, Mul)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i\f$
+VSMC_DEFINE_MATH_VMATH_SV(*, Mul)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = |a_i|\f$
 VSMC_DEFINE_MATH_VMATH_1(fabs, Abs)
@@ -182,6 +216,12 @@ VSMC_DEFINE_MATH_VMATH_1(internal::vmath_inv, Inv)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i / b_i\f$
 VSMC_DEFINE_MATH_VMATH_B(/, Div)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i / b\f$
+VSMC_DEFINE_MATH_VMATH_VS(/, Div)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a / b_i\f$
+VSMC_DEFINE_MATH_VMATH_SV(/, Div)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt{a_i}\f$
 VSMC_DEFINE_MATH_VMATH_1(sqrt, Sqrt)
