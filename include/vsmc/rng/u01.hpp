@@ -43,11 +43,14 @@
         Right>                                                                \
     {                                                                         \
         public:                                                               \
-        static RealType eval(uint##UBits##_t u)                               \
+        template <typename UIntType>                                          \
+        static RealType eval(UIntType u)                                      \
         {                                                                     \
-            return ::vsmc_u01_##left##_##right##_u##UBits##_f##FBits(u);      \
+            return ::vsmc_u01_##left##_##right##_u##UBits##_f##FBits(         \
+                static_cast<uint##UBits##_t>(u));                             \
         }                                                                     \
-    }; // class U01
+    }
+; // class U01
 
 #define VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(UBits, FBits, RealType)          \
     VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                                \
