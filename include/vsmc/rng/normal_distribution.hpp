@@ -75,7 +75,7 @@ template <typename RealType, typename RNGType>
 inline void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
     RealType mean = 0, RealType stddev = 1)
 {
-    const std::size_t k = 2000;
+    const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     RealType s[k / 2];

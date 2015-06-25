@@ -49,8 +49,7 @@
             return ::vsmc_u01_##left##_##right##_u##UBits##_f##FBits(         \
                 static_cast<uint##UBits##_t>(u));                             \
         }                                                                     \
-    }
-; // class U01
+    }; // class U01Impl
 
 #define VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(UBits, FBits, RealType)          \
     VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                                \

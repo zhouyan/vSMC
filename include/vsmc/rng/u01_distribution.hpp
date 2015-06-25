@@ -41,6 +41,77 @@ namespace vsmc
 namespace internal
 {
 
+template <typename RealType, typename RNGType>
+inline void u01_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, std::false_type, std::false_type)
+{
+    std::uniform_real_distribution<RealType> runif(0, 1);
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = runif(rng);
+}
+
+template <typename RealType, typename RNGType>
+inline void u01_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, std::uint32_t *s)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        s[i] = static_cast<std::uint32_t>(rng());
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = U01<std::uint32_t, RealType, Closed, Open>::eval(s[i]);
+}
+
+template <typename RealType, typename RNGType>
+inline void u01_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, std::uint64_t *s)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        s[i] = static_cast<std::uint64_t>(rng());
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = U01<std::uint64_t, RealType, Closed, Open>::eval(s[i]);
+}
+
+template <typename RealType, typename RNGType>
+inline void u01_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, std::true_type, std::false_type)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    std::uint32_t s[k];
+    for (std::size_t i = 0; i != m; ++i)
+        u01_distribution_impl(rng, k, r + i * k, s);
+    u01_distribution_impl(rng, l, r + m * k, s);
+}
+
+template <typename RealType, typename RNGType>
+inline void u01_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, std::true_type, std::true_type)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    std::uint64_t s[k];
+    for (std::size_t i = 0; i != m; ++i)
+        u01_distribution_impl(rng, k, r + i * k, s);
+    u01_distribution_impl(rng, l, r + m * k, s);
+}
+
+} // namespace vsmc::internal
+
+/// \brief Generate standard uniform random variates
+template <typename RealType, typename RNGType>
+inline void u01_distribution(RNGType &rng, std::size_t n, RealType *r)
+{
+    internal::u01_distribution_impl(
+        rng, n, r, std::integral_constant<bool,
+                       internal::RNGBits<RNGType>::value >= 32>(),
+        std::integral_constant<bool,
+            internal::RNGBits<RNGType>::value >= 64>());
+}
+
+namespace internal
+{
+
 template <int Bits, bool = Bits >= 32, bool = Bits >= 64>
 class U01DistributionIntTypeTraitImpl;
 
@@ -214,15 +285,6 @@ using U01CODistribution = U01Distribution<RealType, Closed, Open>;
 /// \ingroup Distribution
 template <typename RealType = double>
 using U01OCDistribution = U01Distribution<RealType, Open, Closed>;
-
-/// \brief Generate standard uniform random variates
-template <typename RealType, typename RNGType>
-inline void u01_distribution(RNGType &rng, std::size_t n, RealType *r)
-{
-    U01DistributionType<RNGType, RealType> runif;
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = runif(rng);
-}
 
 } // namespace vsmc
 
