@@ -140,7 +140,7 @@ template <>
 class MKLUniformBits<64>
 {
     public:
-    static void eval(MKLStream &stream, MKL_INT n, unsigned MKL_INT64 *r)
+    static void eval(const MKLStream &stream, MKL_INT n, unsigned MKL_INT64 *r)
     {
         int status = ::viRngUniformBits64(
             VSL_RNG_METHOD_UNIFORMBITS64_STD, stream.get(), n, r);
@@ -152,14 +152,9 @@ class MKLUniformBits<64>
 class MKLDiscardSkipAhead
 {
     public:
-    void operator()(MKLStream &stream, long long nskip)
+    static void eval(const MKLStream &stream, long long nskip)
     {
-        if (nskip == 0)
-            return;
-
-        int status = ::vslSkipAheadStream(stream.get(), nskip);
-        mkl_error_check(
-            status, "MKLDiscardSkipAhead::skip", "::vslSkipAheadStream");
+        stream.skip_ahead(nskip);
     }
 }; // class DiscardSkipAhead
 
@@ -167,7 +162,7 @@ template <MKL_INT BRNG, std::size_t Bits>
 class MKLDiscardGeneral
 {
     public:
-    void operator()(MKLStream &stream, long long nskip)
+    static void eval(MKLStream &stream, long long nskip)
     {
         if (nskip == 0)
             return;
@@ -267,8 +262,7 @@ class MKLEngine
 
     void discard(long long nskip)
     {
-        internal::MKLDiscard<BRNG, Bits> skip;
-        skip(stream_, nskip);
+        internal::MKLDiscard<BRNG, Bits>::eval(stream_, nskip);
         index_ = M_;
     }
 

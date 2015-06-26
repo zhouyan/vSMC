@@ -80,15 +80,11 @@ inline void rng_test(std::size_t N, const std::string &name,
 
 #if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
 #if VSMC_RNG_TEST_MKL
-    MKL_INT brng = rng.stream().get_stream_state_brng();
-    VSLStreamStatePtr stream = nullptr;
-    vslNewStream(&stream, brng, 1);
-    size.back() += static_cast<std::size_t>(vslGetStreamSize(stream));
+    MKL_INT brng = rng.stream().get_brng();
 #else
     MKL_INT brng = vsmc::mkl_brng<RNGType>();
-    VSLStreamStatePtr stream = nullptr;
-    vslNewStream(&stream, brng, 1);
 #endif
+    vsmc::MKLStream stream(brng, 1);
 #endif
 
     std::uniform_real_distribution<double> runif_std(0, 1);
@@ -118,10 +114,10 @@ inline void rng_test(std::size_t N, const std::string &name,
     result += vsmc::math::asum(N, r.data(), 1);
 
 #if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
-    vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, m, r.data(), 0, 1);
+    vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream.get(), m, r.data(), 0, 1);
     watch.reset();
     watch.start();
-    vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, n, r.data(), 0, 1);
+    vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream.get(), n, r.data(), 0, 1);
     watch.stop();
     sw.push_back(watch);
     result += r.back();
@@ -155,18 +151,14 @@ inline void rng_test(std::size_t N, const std::string &name,
 
 #if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
     vdRngGaussian(
-        VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream, m, r.data(), 0, 1);
+        VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream.get(), m, r.data(), 0, 1);
     watch.reset();
     watch.start();
     vdRngGaussian(
-        VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream, n, r.data(), 0, 1);
+        VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream.get(), n, r.data(), 0, 1);
     watch.stop();
     sw.push_back(watch);
     result += r.back();
-#endif
-
-#if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
-    vslDeleteStream(&stream);
 #endif
 
     std::ofstream rnd("rnd");

@@ -251,11 +251,88 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
         return status;
     }
 
-    int get_stream_size() const { return ::vslGetStreamSize(this->get()); }
-
-    int get_stream_state_brng() const
+    /// \brief `vslSaveStreamF`
+    int save_f(const std::string &fname) const
     {
-        return ::vslGetStreamStateBrng(this->get());
+        int status = ::vslSaveStreamF(this->get(), fname.c_str());
+        internal::mkl_error_check(
+            status, "MKLStream::save_f", "::vslSaveStreamF");
+
+        return status;
+    }
+
+    /// \brief `vslSaveStreamF`
+    int load_f(const std::string &fname)
+    {
+        ::VSLStreamStatePtr ptr = nullptr;
+        int status = ::vslSaveStreamF(&ptr, fname.c_str());
+        internal::mkl_error_check(
+            status, "MKLStream::load_f", "::vslSaveStreamF");
+        this->reset_ptr(ptr);
+
+        return status;
+    }
+
+    /// \brief `vslSaveStreamM`
+    int save_m(char *memptr) const
+    {
+        int status = ::vslSaveStreamM(this->get(), memptr);
+        internal::mkl_error_check(
+            status, "MKLStream::save_m", "::vslSaveStreamM");
+
+        return status;
+    }
+
+    /// \brief `vslLoadStreamM`
+    int load_m(const char *memptr)
+    {
+        ::VSLStreamStatePtr ptr = nullptr;
+        int status = ::vslLoadStreamM(&ptr, memptr);
+        internal::mkl_error_check(
+            status, "MKLStream::load_m", "::vslLoadStreamM");
+        this->reset_ptr(ptr);
+
+        return status;
+    }
+
+    /// \brief `vslGetStreamSize`
+    int get_size() const { return ::vslGetStreamSize(this->get()); }
+
+    /// \brief `vslLeapfrogStream`
+    int leapfrog(MKL_INT k, MKL_INT nstreams) const
+    {
+        int status = ::vslLeapfrogStream(this->get(), k, nstreams);
+        internal::mkl_error_check(
+            status, "MKLStream::leapfrog", "::vslLeapfrogStream");
+
+        return status;
+    }
+
+    /// \brief `vslSkipAheadStream`
+    int skip_ahead(long long nskip) const
+    {
+        int status = ::vslSkipAheadStream(this->get(), nskip);
+        internal::mkl_error_check(
+            status, "MKLStream::skip_ahead", "::vslSkipAheadStream");
+
+        return status;
+    }
+
+    /// \brief `vslGetStreamStateBrng`
+    int get_brng() const { return ::vslGetStreamStateBrng(this->get()); }
+
+    /// \brief `vslGetNumRegBrngs`
+    static int get_num_reg_brngs() { return ::vslGetNumRegBrngs(); }
+
+    /// \brief `vslGetBrngProperties`
+    static int get_brng_properties(
+        MKL_INT brng, ::VSLBRngProperties &properties)
+    {
+        int status = ::vslGetBrngProperties(brng, &properties);
+        internal::mkl_error_check(status, "MKLStream::get_brng_properties",
+            "::vslGetBrngProperties");
+
+        return status;
     }
 }; // class MKLStream
 
