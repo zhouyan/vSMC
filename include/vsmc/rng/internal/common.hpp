@@ -246,6 +246,8 @@ inline void increment(
 
 } // namespace vsmc::internal
 
+/// \brief Generate random bits
+/// \ingroup RNG
 template <typename RNGType>
 void rng_rand(RNGType &rng, std::size_t n, typename RNGType::result_type *r)
 {
