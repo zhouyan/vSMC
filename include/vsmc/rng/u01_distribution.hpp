@@ -51,23 +51,24 @@ inline void u01_distribution_impl(
 }
 
 template <typename RealType, typename RNGType>
-inline void u01_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, std::uint32_t *s)
+inline void u01_distribution_impl_u32(
+    RNGType &rng, std::size_t n, RealType *r, typename RNGType::result_type *s)
 {
-    for (std::size_t i = 0; i != n; ++i)
-        s[i] = static_cast<std::uint32_t>(rng());
+    rng_rand(rng, n, s);
     for (std::size_t i = 0; i != n; ++i)
         r[i] = U01<std::uint32_t, RealType, Closed, Open>::eval(s[i]);
 }
 
 template <typename RealType, typename RNGType>
-inline void u01_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, std::uint64_t *s)
+inline void u01_distribution_impl_u64(
+    RNGType &rng, std::size_t n, RealType *r, typename RNGType::result_type *s)
 {
+    rng_rand(rng, n / 2, s);
+    std::uint32_t *u = reinterpret_cast<std::uint32_t *>(s);
+    if (n % 2 != 0)
+        u[n - 1] = static_cast<std::uint32_t>(rng());
     for (std::size_t i = 0; i != n; ++i)
-        s[i] = static_cast<std::uint64_t>(rng());
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = U01<std::uint64_t, RealType, Closed, Open>::eval(s[i]);
+        r[i] = U01<std::uint64_t, RealType, Closed, Open>::eval(u[i]);
 }
 
 template <typename RealType, typename RNGType>
@@ -77,10 +78,10 @@ inline void u01_distribution_impl(
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    std::uint32_t s[k];
+    typename RNGType::result_type s[k];
     for (std::size_t i = 0; i != m; ++i)
-        u01_distribution_impl(rng, k, r + i * k, s);
-    u01_distribution_impl(rng, l, r + m * k, s);
+        u01_distribution_impl_u32(rng, k, r + i * k, s);
+    u01_distribution_impl_u32(rng, l, r + m * k, s);
 }
 
 template <typename RealType, typename RNGType>
@@ -90,10 +91,10 @@ inline void u01_distribution_impl(
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    std::uint64_t s[k];
+    typename RNGType::result_type s[k];
     for (std::size_t i = 0; i != m; ++i)
-        u01_distribution_impl(rng, k, r + i * k, s);
-    u01_distribution_impl(rng, l, r + m * k, s);
+        u01_distribution_impl_u64(rng, k, r + i * k, s);
+    u01_distribution_impl_u64(rng, l, r + m * k, s);
 }
 
 } // namespace vsmc::internal

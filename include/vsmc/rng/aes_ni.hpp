@@ -137,6 +137,25 @@ class AESNIEngine
         return buffer_[index_++];
     }
 
+    void operator()(std::size_t n, result_type *r)
+    {
+        const std::size_t p = n % M_;
+        for (std::size_t i = 0; i != p; ++i)
+            *r++ = operator()();
+        n /= M_;
+        const std::size_t k = 1000;
+        const std::size_t m = n / k;
+        const std::size_t l = n % k;
+        state_type s[k];
+        for (std::size_t i = 0; i != m; ++i) {
+            generate_buffer(k, s);
+            std::memcpy(r, s, k * M_ * sizeof(result_type));
+            r += k * M_;
+        }
+        generate_buffer(l, s);
+        std::memcpy(r, s, l * M_ * sizeof(result_type));
+    }
+
     void discard(result_type nskip)
     {
         std::size_t n = static_cast<std::size_t>(nskip);
@@ -240,11 +259,29 @@ class AESNIEngine
             std::array<ctr_type, Blocks> ctr_block;
             std::array<ResultType, M_> result;
         } buf;
+
         internal::increment(ctr_, buf.ctr_block);
         enc_first(buf.state);
         enc_round<1>(buf.state, std::integral_constant<bool, 1 < Rounds>());
         enc_last(buf.state);
         buffer_ = buf.result;
+    }
+
+    void generate_buffer(std::size_t n, state_type *s)
+    {
+        union {
+            state_type state;
+            std::array<ctr_type, Blocks> ctr_block;
+        } buf;
+
+        for (std::size_t i = 0; i != n; ++i) {
+            internal::increment(ctr_, buf.ctr_block);
+            enc_first(buf.state);
+            enc_round<1>(
+                buf.state, std::integral_constant<bool, 1 < Rounds>());
+            enc_last(buf.state);
+            s[i] = buf.state;
+        }
     }
 
     void enc_first(state_type &state)
@@ -318,6 +355,14 @@ class AESNIEngine
             state, round_key, std::integral_constant<bool, B + 1 < Blocks>());
     }
 }; // class AESNIEngine
+
+template <typename ResultType, typename KeySeqType, std::size_t Rounds,
+    std::size_t Blocks>
+void rng_rand(AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> &rng,
+    std::size_t n, ResultType *r)
+{
+    rng(n, r);
+}
 
 } // namespace vsmc
 
