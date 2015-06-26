@@ -35,10 +35,6 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/utility/mkl.hpp>
 
-#ifndef VSMC_RNG_MKL_VSL_BUFFER_SIZE
-#define VSMC_RNG_MKL_VSL_BUFFER_SIZE 1024
-#endif
-
 namespace vsmc
 {
 
@@ -156,9 +152,7 @@ class MKLUniformBits<64>
 class MKLDiscardSkipAhead
 {
     public:
-    using size_type = long long;
-
-    void operator()(MKLStream &stream, size_type nskip)
+    void operator()(MKLStream &stream, long long nskip)
     {
         if (nskip == 0)
             return;
@@ -167,35 +161,26 @@ class MKLDiscardSkipAhead
         mkl_error_check(
             status, "MKLDiscardSkipAhead::skip", "::vslSkipAheadStream");
     }
-
-    static void buffer_size(MKL_INT) {}
-    static MKL_INT buffer_size() { return 0; }
 }; // class DiscardSkipAhead
 
 template <MKL_INT BRNG, std::size_t Bits>
 class MKLDiscardGeneral
 {
     public:
-    using size_type = MKL_INT;
-
-    MKLDiscardGeneral() : buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE) {}
-
-    void operator()(MKLStream &stream, size_type nskip)
+    void operator()(MKLStream &stream, long long nskip)
     {
         if (nskip == 0)
             return;
 
-        buffer_.resize(buffer_size_);
-        while (nskip > buffer_size_) {
-            MKLUniformBits<Bits>::eval(stream, buffer_size_, buffer_.data());
-            nskip -= buffer_size_;
+        std::array<MKLResultType<Bits>, 1000> buffer;
+        const MKL_INT k = static_cast<MKL_INT>(buffer.size());
+        while (nskip > k) {
+            MKLUniformBits<Bits>::eval(stream, k, buffer.data());
+            nskip -= k;
         }
-        MKLUniformBits<Bits>::eval(stream, nskip, buffer_.data());
+        MKLUniformBits<Bits>::eval(
+            stream, static_cast<MKL_INT>(nskip), buffer.data());
     }
-
-    private:
-    Vector<MKLResultType<Bits>> buffer_;
-    MKL_INT buffer_size_;
 }; // class DiscardGeneral
 
 template <MKL_INT BRNG, std::size_t Bits>
@@ -236,28 +221,20 @@ class MKLEngine
     public:
     using result_type = internal::MKLResultType<Bits>;
 
-    explicit MKLEngine(MKL_UINT s = 1)
-        : buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE), index_(buffer_size_)
-    {
-        seed(s);
-    }
+    explicit MKLEngine(MKL_UINT s = 1) : index_(M_) { seed(s); }
 
     template <typename SeedSeq>
     explicit MKLEngine(SeedSeq &seq,
         typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
             MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
-        : buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE), index_(buffer_size_)
+        : index_(M_)
     {
         seed(seq);
     }
 
     MKLEngine(MKL_UINT s, MKL_INT offset) { seed(s, offset); }
 
-    void seed(MKL_UINT s)
-    {
-        stream_.reset(BRNG, s);
-        index_ = buffer_size_;
-    }
+    void seed(MKL_UINT s) { seed(s, 0); }
 
     template <typename SeedSeq>
     void seed(SeedSeq &seq,
@@ -266,8 +243,7 @@ class MKLEngine
     {
         MKL_UINT s;
         seq.generate(&s, &s + 1);
-        stream_.reset(BRNG, s);
-        index_ = buffer_size_;
+        seed(s, 0);
     }
 
     void seed(MKL_UINT s, MKL_INT offset)
@@ -275,39 +251,26 @@ class MKLEngine
         typename internal::MKLOffset<BRNG>::type off;
         off.set(offset);
         stream_.reset(BRNG + off.get(), s);
-        index_ = buffer_size_;
+        index_ = M_;
     }
 
     result_type operator()()
     {
-        if (index_ == buffer_size_) {
-            buffer_.resize(static_cast<std::size_t>(buffer_size_));
-            uniform_bits(buffer_size_, buffer_.data());
+        if (index_ == M_) {
+            buffer_.resize(M_);
+            internal::MKLUniformBits<Bits>::eval(
+                stream_, static_cast<MKL_INT>(M_), buffer_.data());
             index_ = 0;
         }
 
-        return buffer_[static_cast<std::size_t>(index_++)];
+        return buffer_[index_++];
     }
 
-    void uniform_bits(MKL_INT n, result_type *r)
+    void discard(long long nskip)
     {
-        internal::MKLUniformBits<Bits>::eval(stream_, n, r);
-    }
-
-    /// \brief Discard results
-    ///
-    /// \details
-    /// The the behavior is slightly different from that in C++11 standard.
-    /// Calling `discard(nskip)` is not equivalent to call `operator()`
-    /// `nskip`
-    /// times. Instead, it ensures that at least `nskip` results are
-    /// discarded.
-    /// There may be a few more than `nskip` also discarded.
-    void discard(std::size_t nskip)
-    {
-        discard_(stream_, static_cast<typename internal::MKLDiscard<BRNG,
-                              Bits>::type::size_type>(nskip));
-        index_ = buffer_size_;
+        internal::MKLDiscard<BRNG, Bits> skip;
+        skip(stream_, nskip);
+        index_ = M_;
     }
 
     static constexpr result_type _Min = 0;
@@ -319,21 +282,12 @@ class MKLEngine
     MKLStream &stream() { return stream_; }
     const MKLStream &stream() const { return stream_; }
 
-    /// \brief Set the buffer size, zero or negative value restore the
-    /// default
-    void buffer_size(MKL_INT size)
-    {
-        buffer_size_ = size > 0 ? size : VSMC_RNG_MKL_VSL_BUFFER_SIZE;
-    }
-
-    MKL_INT buffer_size() { return buffer_size_; }
-
     private:
+    static constexpr std::size_t M_ = 1000;
+
     MKLStream stream_;
-    internal::MKLDiscard<BRNG, Bits> discard_;
     Vector<result_type> buffer_;
-    MKL_INT buffer_size_;
-    MKL_INT index_;
+    std::size_t index_;
 }; // class MKLEngine
 
 /// \brief A 59-bits multiplicative congruential generator
@@ -399,6 +353,14 @@ using MKL_PHILOX4X32X10 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 32>;
 using MKL_PHILOX4X32X10_64 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 64>;
 
 #endif // INTEL_MKL_VERSION >= 110300
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void rng_rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    typename MKLEngine<BRNG, Bits>::result_type *r)
+{
+    internal::MKLUniformBits<Bits>::eval(
+        rng.stream(), static_cast<MKL_INT>(n), r);
+}
 
 template <MKL_INT BRNG, std::size_t Bits>
 inline void cauchy_distribution(
@@ -499,12 +461,31 @@ inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
 }
 
 template <MKL_INT BRNG, std::size_t Bits>
+inline void u01_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r)
+{
+    int status = ::vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD, rng.stream().get(),
+        static_cast<MKL_INT>(n), r, 0, 1);
+    internal::mkl_error_check(status, "u01_distribution", "::vsRngUniform");
+}
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void u01_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r)
+{
+    int status = ::vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, rng.stream().get(),
+        static_cast<MKL_INT>(n), r, 0, 1);
+    internal::mkl_error_check(status, "u01_distribution", "::vdRngUniform");
+}
+
+template <MKL_INT BRNG, std::size_t Bits>
 inline void uniform_real_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
     int status = ::vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD, rng.stream().get(),
         static_cast<MKL_INT>(n), r, a, b);
-    internal::mkl_error_check(status, "cauchy_distribution", "::vsRngUniform");
+    internal::mkl_error_check(
+        status, "uniform_real_distribution", "::vsRngUniform");
 }
 
 template <MKL_INT BRNG, std::size_t Bits>
