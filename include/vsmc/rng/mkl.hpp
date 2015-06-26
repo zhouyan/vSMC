@@ -129,10 +129,7 @@ class MKLUniformBits<32>
     public:
     static void eval(MKLStream &stream, MKL_INT n, unsigned *r)
     {
-        int status = ::viRngUniformBits32(
-            VSL_RNG_METHOD_UNIFORMBITS32_STD, stream.get(), n, r);
-        mkl_error_check(
-            status, "MKLUniformBits::eval", "::viRngUniformBits32");
+        stream.uniform_bits32(n, r);
     }
 }; // class MKLUniformBits
 
@@ -142,10 +139,7 @@ class MKLUniformBits<64>
     public:
     static void eval(const MKLStream &stream, MKL_INT n, unsigned MKL_INT64 *r)
     {
-        int status = ::viRngUniformBits64(
-            VSL_RNG_METHOD_UNIFORMBITS64_STD, stream.get(), n, r);
-        mkl_error_check(
-            status, "MKLUniformBits::eval", "::viRngUniformBits64");
+        stream.uniform_bits64(n, r);
     }
 }; // class MKLUniformBits
 
@@ -347,7 +341,7 @@ using MKL_PHILOX4X32X10_64 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 64>;
 
 #endif // INTEL_MKL_VERSION >= 110300
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, std::size_t Bits, typename RealType>
 inline void rng_rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     typename MKLEngine<BRNG, Bits>::result_type *r)
 {
@@ -355,140 +349,53 @@ inline void rng_rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
         rng.stream(), static_cast<MKL_INT>(n), r);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
-inline void cauchy_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
+template <MKL_INT BRNG, std::size_t Bits, typename RealType>
+inline void cauchy_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    RealType *r, RealType a, RealType b)
 {
-    int status = ::vsRngCauchy(VSL_RNG_METHOD_CAUCHY_ICDF, rng.stream().get(),
-        static_cast<MKL_INT>(n), r, a, b);
-    internal::mkl_error_check(status, "cauchy_distribution", "::vsRngCauchy");
+    rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
-inline void cauchy_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
-{
-    int status = ::vdRngCauchy(VSL_RNG_METHOD_CAUCHY_ICDF, rng.stream().get(),
-        static_cast<MKL_INT>(n), r, a, b);
-    internal::mkl_error_check(status, "cauchy_distribution", "::vdRngCauchy");
-}
-
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, std::size_t Bits, typename RealType>
 inline void exponential_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float lambda)
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, RealType *r, RealType lambda)
 {
-    int status = ::vsRngExponential(VSL_RNG_METHOD_EXPONENTIAL_ICDF,
-        rng.stream().get(), static_cast<MKL_INT>(n), r, 0, 1 / lambda);
-    internal::mkl_error_check(
-        status, "exponential_distribution", "::vsRngExponential");
+    rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
-inline void exponential_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double lambda)
-{
-    int status = ::vdRngExponential(VSL_RNG_METHOD_EXPONENTIAL_ICDF,
-        rng.stream().get(), static_cast<MKL_INT>(n), r, 0, 1 / lambda);
-    internal::mkl_error_check(
-        status, "exponential_distribution", "::vdRngExponential");
-}
-
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, std::size_t Bits, typename RealType>
 inline void laplace_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
-    float *r, float location, float scale)
+    RealType *r, RealType location, RealType scale)
 {
-    int status = ::vsRngLaplace(VSL_RNG_METHOD_LAPLACE_ICDF,
-        rng.stream().get(), static_cast<MKL_INT>(n), r, location, scale);
-    internal::mkl_error_check(
-        status, "laplace_distribution", "::vsRngLaplace");
+    rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
-inline void laplace_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
-    double *r, double location, double scale)
+template <MKL_INT BRNG, std::size_t Bits, typename RealType>
+inline void lognormal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    RealType *r, RealType m, RealType s)
 {
-    int status = ::vdRngLaplace(VSL_RNG_METHOD_LAPLACE_ICDF,
-        rng.stream().get(), static_cast<MKL_INT>(n), r, location, scale);
-    internal::mkl_error_check(
-        status, "laplace_distribution", "::vdRngLaplace");
+    rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
-inline void lognormal_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float m, float s)
-{
-    int status = ::vsRngLognormal(VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2,
-        rng.stream().get(), static_cast<MKL_INT>(n), r, m, s, 0, 1);
-    internal::mkl_error_check(
-        status, "lognormal_distribution", "::vsRngLognormal");
-}
-
-template <MKL_INT BRNG, std::size_t Bits>
-inline void lognormal_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double m, double s)
-{
-    int status = ::vdRngLognormal(VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2,
-        rng.stream().get(), static_cast<MKL_INT>(n), r, m, s, 0, 1);
-    internal::mkl_error_check(
-        status, "lognormal_distribution", "::vdRngLognormal");
-}
-
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, std::size_t Bits, typename RealType>
 inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
-    float *r, float mean, float stddev)
+    RealType *r, RealType mean, RealType stddev)
 {
-    int status = ::vsRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2,
-        rng.stream().get(), static_cast<MKL_INT>(n), r, mean, stddev);
-    internal::mkl_error_check(
-        status, "normal_distribution", "::vsRngGaussian");
+    rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
-inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
-    double *r, double mean, double stddev)
-{
-    int status = ::vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2,
-        rng.stream().get(), static_cast<MKL_INT>(n), r, mean, stddev);
-    internal::mkl_error_check(
-        status, "normal_distribution", "::vdRngGaussian");
-}
-
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, std::size_t Bits, typename RealType>
 inline void u01_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r)
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, RealType *r)
 {
-    int status = ::vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD, rng.stream().get(),
-        static_cast<MKL_INT>(n), r, 0, 1);
-    internal::mkl_error_check(status, "u01_distribution", "::vsRngUniform");
+    rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
-inline void u01_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r)
+template <MKL_INT BRNG, std::size_t Bits, typename RealType>
+inline void uniform_real_distribution(MKLEngine<BRNG, Bits> &rng,
+    std::size_t n, RealType *r, RealType a, RealType b)
 {
-    int status = ::vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, rng.stream().get(),
-        static_cast<MKL_INT>(n), r, 0, 1);
-    internal::mkl_error_check(status, "u01_distribution", "::vdRngUniform");
-}
-
-template <MKL_INT BRNG, std::size_t Bits>
-inline void uniform_real_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
-{
-    int status = ::vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD, rng.stream().get(),
-        static_cast<MKL_INT>(n), r, a, b);
-    internal::mkl_error_check(
-        status, "uniform_real_distribution", "::vsRngUniform");
-}
-
-template <MKL_INT BRNG, std::size_t Bits>
-inline void uniform_real_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
-{
-    int status = ::vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, rng.stream().get(),
-        static_cast<MKL_INT>(n), r, a, b);
-    internal::mkl_error_check(
-        status, "uniform_real_distribution", "::vdRngUniform");
+    rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
 }
 
 } // namespace vsmc
