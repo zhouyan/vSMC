@@ -323,7 +323,7 @@ class ThreefryInsertKey<ResultType, 4, N, true>
 
 } // namespace vsmc::internal
 
-/// \brief Threefry RNG engine reimplemented
+/// \brief Threefry RNG engine
 /// \ingroup Threefry
 template <typename ResultType, std::size_t K,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
@@ -451,8 +451,15 @@ class ThreefryEngine
     friend bool operator==(const ThreefryEngine<ResultType, K, Rounds> &eng1,
         const ThreefryEngine<ResultType, K, Rounds> &eng2)
     {
-        return eng1.index_ == eng2.index_ && eng1.ctr_ == eng2.ctr_ &&
-            eng1.par_ == eng2.par_;
+        if (eng1.buffer_ != eng2.buffer_)
+            return false;
+        if (eng1.par_ != eng2.par_)
+            return false;
+        if (eng1.ctr_ != eng2.ctr_)
+            return false;
+        if (eng1.index_ != eng2.index_)
+            return false;
+        return true;
     }
 
     friend bool operator!=(const ThreefryEngine<ResultType, K, Rounds> &eng1,
@@ -524,19 +531,19 @@ class ThreefryEngine
     }
 }; // class ThreefryEngine
 
-/// \brief Threefry2x32 RNG engine reimplemented
+/// \brief Threefry2x32 RNG engine
 /// \ingroup Threefry
 using Threefry2x32 = ThreefryEngine<std::uint32_t, 2>;
 
-/// \brief Threefry4x32 RNG engine reimplemented
+/// \brief Threefry4x32 RNG engine
 /// \ingroup Threefry
 using Threefry4x32 = ThreefryEngine<std::uint32_t, 4>;
 
-/// \brief Threefry2x64 RNG engine reimplemented
+/// \brief Threefry2x64 RNG engine
 /// \ingroup Threefry
 using Threefry2x64 = ThreefryEngine<std::uint64_t, 2>;
 
-/// \brief Threefry4x64 RNG engine reimplemented
+/// \brief Threefry4x64 RNG engine
 /// \ingroup Threefry
 using Threefry4x64 = ThreefryEngine<std::uint64_t, 4>;
 
@@ -632,7 +639,7 @@ class ThreefryCtrPackSSE2
 
 } // namespace vsmc::internal
 
-/// \brief Threefry RNG engine reimplemented using SSE2
+/// \brief Threefry RNG engine using SSE2
 /// \ingroup Threefry
 template <typename ResultType, std::size_t K,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
@@ -761,8 +768,15 @@ class ThreefryEngineSSE2
         const ThreefryEngineSSE2<ResultType, K, Rounds> &eng1,
         const ThreefryEngineSSE2<ResultType, K, Rounds> &eng2)
     {
-        return eng1.index_ == eng2.index_ && eng1.ctr_ == eng2.ctr_ &&
-            eng1.par_ == eng2.par_;
+        if (eng1.buffer_ != eng2.buffer_)
+            return false;
+        if (eng1.par_ != eng2.par_)
+            return false;
+        if (eng1.ctr_ != eng2.ctr_)
+            return false;
+        if (eng1.index_ != eng2.index_)
+            return false;
+        return true;
     }
 
     friend bool operator!=(
@@ -848,19 +862,19 @@ class ThreefryEngineSSE2
     }
 }; // class ThreefryEngineSSE2
 
-/// \brief Threefry2x32 RNG engine reimplemented using SSE2
+/// \brief Threefry2x32 RNG engine using SSE2
 /// \ingroup Threefry
 using Threefry2x32SSE2 = ThreefryEngineSSE2<std::uint32_t, 2>;
 
-/// \brief Threefry4x32 RNG engine reimplemented using SSE2
+/// \brief Threefry4x32 RNG engine using SSE2
 /// \ingroup Threefry
 using Threefry4x32SSE2 = ThreefryEngineSSE2<std::uint32_t, 4>;
 
-/// \brief Threefry2x64 RNG engine reimplemented using SSE2
+/// \brief Threefry2x64 RNG engine using SSE2
 /// \ingroup Threefry
 using Threefry2x64SSE2 = ThreefryEngineSSE2<std::uint64_t, 2>;
 
-/// \brief Threefry4x64 RNG engine reimplemented using SSE2
+/// \brief Threefry4x64 RNG engine using SSE2
 /// \ingroup Threefry
 using Threefry4x64SSE2 = ThreefryEngineSSE2<std::uint64_t, 4>;
 
@@ -964,7 +978,7 @@ class ThreefryCtrPackAVX2
 
 } // namespace vsmc::internal
 
-/// \brief Threefry RNG engine reimplemented using AVX2
+/// \brief Threefry RNG engine using AVX2
 /// \ingroup Threefry
 template <typename ResultType, std::size_t K,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
@@ -1093,8 +1107,15 @@ class ThreefryEngineAVX2
         const ThreefryEngineAVX2<ResultType, K, Rounds> &eng1,
         const ThreefryEngineAVX2<ResultType, K, Rounds> &eng2)
     {
-        return eng1.index_ == eng2.index_ && eng1.ctr_ == eng2.ctr_ &&
-            eng1.par_ == eng2.par_;
+        if (eng1.buffer_ != eng2.buffer_)
+            return false;
+        if (eng1.par_ != eng2.par_)
+            return false;
+        if (eng1.ctr_ != eng2.ctr_)
+            return false;
+        if (eng1.index_ != eng2.index_)
+            return false;
+        return true;
     }
 
     friend bool operator!=(
@@ -1187,19 +1208,19 @@ class ThreefryEngineAVX2
     }
 }; // class ThreefryEngineAVX2
 
-/// \brief Threefry2x32 RNG engine reimplemented using AVX2
+/// \brief Threefry2x32 RNG engine using AVX2
 /// \ingroup Threefry
 using Threefry2x32AVX2 = ThreefryEngineAVX2<std::uint32_t, 2>;
 
-/// \brief Threefry4x32 RNG engine reimplemented using AVX2
+/// \brief Threefry4x32 RNG engine using AVX2
 /// \ingroup Threefry
 using Threefry4x32AVX2 = ThreefryEngineAVX2<std::uint32_t, 4>;
 
-/// \brief Threefry2x64 RNG engine reimplemented using AVX2
+/// \brief Threefry2x64 RNG engine using AVX2
 /// \ingroup Threefry
 using Threefry2x64AVX2 = ThreefryEngineAVX2<std::uint64_t, 2>;
 
-/// \brief Threefry4x64 RNG engine reimplemented using AVX2
+/// \brief Threefry4x64 RNG engine using AVX2
 /// \ingroup Threefry
 using Threefry4x64AVX2 = ThreefryEngineAVX2<std::uint64_t, 4>;
 

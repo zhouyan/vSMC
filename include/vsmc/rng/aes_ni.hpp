@@ -166,39 +166,39 @@ class AESNIEngine
     static constexpr result_type max VSMC_MNE() { return _Max; }
 
     friend bool operator==(
-        const AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> &rng1,
-        const AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> &rng2)
+        const AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> &eng1,
+        const AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> &eng2)
     {
-        if (rng1.buffer_ != rng2.buffer_)
+        if (eng1.buffer_ != eng2.buffer_)
             return false;
-        if (rng1.key_seq_ != rng2.key_seq_)
+        if (eng1.key_seq_ != eng2.key_seq_)
             return false;
-        if (rng1.ctr_ != rng2.ctr_)
+        if (eng1.ctr_ != eng2.ctr_)
             return false;
-        if (rng1.index_ != rng2.index_)
+        if (eng1.index_ != eng2.index_)
             return false;
         return true;
     }
 
     friend bool operator!=(
-        const AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> &rng1,
-        const AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> &rng2)
+        const AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> &eng1,
+        const AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> &eng2)
     {
-        return !(rng1 == rng2);
+        return !(eng1 == eng2);
     }
 
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> &rng)
+        const AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> &eng)
     {
         if (!os.good())
             return os;
 
-        os << rng.buffer_ << ' ';
-        os << rng.key_seq_ << ' ';
-        os << rng.ctr_ << ' ';
-        os << rng.index_;
+        os << eng.buffer_ << ' ';
+        os << eng.key_seq_ << ' ';
+        os << eng.ctr_ << ' ';
+        os << eng.index_;
 
         return os;
     }
@@ -206,19 +206,19 @@ class AESNIEngine
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> &rng)
+        AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> &eng)
     {
         if (!is.good())
             return is;
 
-        AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> rng_tmp;
-        is >> std::ws >> rng_tmp.buffer_;
-        is >> std::ws >> rng_tmp.key_seq_;
-        is >> std::ws >> rng_tmp.ctr_;
-        is >> std::ws >> rng_tmp.index_;
+        AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> eng_tmp;
+        is >> std::ws >> eng_tmp.buffer_;
+        is >> std::ws >> eng_tmp.key_seq_;
+        is >> std::ws >> eng_tmp.ctr_;
+        is >> std::ws >> eng_tmp.index_;
 
         if (is.good())
-            rng = std::move(rng_tmp);
+            eng = std::move(eng_tmp);
 
         return is;
     }

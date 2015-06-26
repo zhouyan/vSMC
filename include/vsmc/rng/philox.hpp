@@ -107,44 +107,6 @@ VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
     std::uint64_t, 4, 1, UINT64_C(0xCA5A826395121157))
 
-template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 1)>
-class PhiloxBumpKey
-{
-    public:
-    static void eval(std::array<ResultType, K / 2> &) {}
-}; // class PhiloxBumpKey
-
-template <typename ResultType, std::size_t N>
-class PhiloxBumpKey<ResultType, 2, N, true>
-{
-    public:
-    static void eval(std::array<ResultType, 1> &par)
-    {
-        std::get<0>(par) += PhiloxWeylConstant<ResultType, 0>::value;
-    }
-}; // class PhiloxBumpKey
-
-template <typename ResultType, std::size_t N>
-class PhiloxBumpKey<ResultType, 4, N, true>
-{
-    public:
-    static void eval(std::array<ResultType, 2> &par)
-    {
-        std::get<0>(par) += PhiloxWeylConstant<ResultType, 0>::value;
-        std::get<1>(par) += PhiloxWeylConstant<ResultType, 1>::value;
-    }
-}; // class PhiloxBumpKey
-
-template <std::size_t K, std::size_t I>
-inline void philox_hilo(std::uint32_t b, std::uint32_t &hi, std::uint32_t &lo)
-{
-    std::uint64_t prod = static_cast<std::uint64_t>(b) *
-        static_cast<std::uint64_t>(
-                             PhiloxRoundConstant<std::uint32_t, K, I>::value);
-    hi = static_cast<std::uint32_t>(prod >> 32);
-    lo = static_cast<std::uint32_t>(prod);
-}
-
 #if VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
@@ -193,6 +155,44 @@ inline void philox_hilo(std::uint64_t b, std::uint64_t &hi, std::uint64_t &lo)
 }
 
 #endif // VSMC_HAS_INT128
+
+template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 1)>
+class PhiloxBumpKey
+{
+    public:
+    static void eval(std::array<ResultType, K / 2> &) {}
+}; // class PhiloxBumpKey
+
+template <typename ResultType, std::size_t N>
+class PhiloxBumpKey<ResultType, 2, N, true>
+{
+    public:
+    static void eval(std::array<ResultType, 1> &par)
+    {
+        std::get<0>(par) += PhiloxWeylConstant<ResultType, 0>::value;
+    }
+}; // class PhiloxBumpKey
+
+template <typename ResultType, std::size_t N>
+class PhiloxBumpKey<ResultType, 4, N, true>
+{
+    public:
+    static void eval(std::array<ResultType, 2> &par)
+    {
+        std::get<0>(par) += PhiloxWeylConstant<ResultType, 0>::value;
+        std::get<1>(par) += PhiloxWeylConstant<ResultType, 1>::value;
+    }
+}; // class PhiloxBumpKey
+
+template <std::size_t K, std::size_t I>
+inline void philox_hilo(std::uint32_t b, std::uint32_t &hi, std::uint32_t &lo)
+{
+    std::uint64_t prod = static_cast<std::uint64_t>(b) *
+        static_cast<std::uint64_t>(
+                             PhiloxRoundConstant<std::uint32_t, K, I>::value);
+    hi = static_cast<std::uint32_t>(prod >> 32);
+    lo = static_cast<std::uint32_t>(prod);
+}
 
 template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
 class PhiloxRound
@@ -245,7 +245,7 @@ class PhiloxRound<ResultType, 4, N, true>
 
 } // namespace vsmc::internal
 
-/// \brief Philox RNG engine reimplemented
+/// \brief Philox RNG engine
 /// \ingroup Philox
 template <typename ResultType, std::size_t K,
     std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
@@ -362,8 +362,15 @@ class PhiloxEngine
     friend bool operator==(const PhiloxEngine<ResultType, K, Rounds> &eng1,
         const PhiloxEngine<ResultType, K, Rounds> &eng2)
     {
-        return eng1.index_ == eng2.index_ && eng1.ctr_ == eng2.ctr_ &&
-            eng1.key_ == eng2.key_;
+        if (eng1.buffer_ != eng2.buffer_)
+            return false;
+        if (eng1.key_ != eng2.key_)
+            return false;
+        if (eng1.ctr_ != eng2.ctr_)
+            return false;
+        if (eng1.index_ != eng2.index_)
+            return false;
+        return true;
     }
 
     friend bool operator!=(const PhiloxEngine<ResultType, K, Rounds> &eng1,
@@ -437,19 +444,19 @@ class PhiloxEngine
     }
 }; // class PhiloxEngine
 
-/// \brief Philox2x32 RNG engine reimplemented
+/// \brief Philox2x32 RNG engine
 /// \ingroup Philox
 using Philox2x32 = PhiloxEngine<std::uint32_t, 2>;
 
-/// \brief Philox4x32 RNG engine reimplemented
+/// \brief Philox4x32 RNG engine
 /// \ingroup Philox
 using Philox4x32 = PhiloxEngine<std::uint32_t, 4>;
 
-/// \brief Philox2x64 RNG engine reimplemented
+/// \brief Philox2x64 RNG engine
 /// \ingroup Philox
 using Philox2x64 = PhiloxEngine<std::uint64_t, 2>;
 
-/// \brief Philox4x64 RNG engine reimplemented
+/// \brief Philox4x64 RNG engine
 /// \ingroup Philox
 using Philox4x64 = PhiloxEngine<std::uint64_t, 4>;
 
