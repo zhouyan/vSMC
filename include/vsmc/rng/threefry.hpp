@@ -835,11 +835,12 @@ class ThreefryEngineSSE2
 
     void generate_buffer()
     {
-        par_type par;
         union {
             state_type state;
             std::array<ResultType, M_> result;
         } buf;
+
+        par_type par;
         internal::ThreefryParPackSSE2<ResultType, K>::eval(par_, par);
         internal::ThreefryCtrPackSSE2<ResultType, K>::eval(ctr_, buf.state);
         generate_buffer<0>(par, buf.state, std::true_type());
@@ -1174,22 +1175,16 @@ class ThreefryEngineAVX2
 
     void generate_buffer()
     {
-        par_type par;
-        internal::ThreefryParPackAVX2<ResultType, K>::eval(par_, par);
-
         union {
             state_type state;
             std::array<ResultType, M_> result;
         } buf;
 
-        generate_buffer(par, buf.state);
+        par_type par;
+        internal::ThreefryParPackAVX2<ResultType, K>::eval(par_, par);
+        internal::ThreefryCtrPackAVX2<ResultType, K>::eval(ctr_, buf.state);
+        generate_buffer<0>(par, buf.state, std::true_type());
         buffer_ = buf.result;
-    }
-
-    void generate_buffer(const par_type &par, state_type &state)
-    {
-        internal::ThreefryCtrPackAVX2<ResultType, K>::eval(ctr_, state);
-        generate_buffer<0>(par, state, std::true_type());
     }
 
     template <std::size_t>
