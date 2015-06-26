@@ -111,13 +111,19 @@ class AESNIEngine
         index_ = M_;
     }
 
-    ctr_type ctr() const { return ctr_; }
+    ctr_type ctr() const
+    {
+        ctr_type c;
+        std::memcpy(c.data(), ctr_.data(), sizeof(ctr_type));
+
+        return c;
+    }
 
     key_type key() const { return key_seq_.key(); }
 
     void ctr(const ctr_type &c)
     {
-        ctr_ = c;
+        std::memcpy(ctr_.data(), c.data(), sizeof(ctr_type));
         index_ = M_;
     }
 

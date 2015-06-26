@@ -236,12 +236,27 @@ inline void increment(std::array<T, K> &ctr)
     increment_single<0>(ctr, std::integral_constant<bool, 1 < K>());
 }
 
+template <std::size_t K>
+inline void increment(std::array<std::uint32_t, K> &ctr)
+{
+    increment(*(reinterpret_cast<std::array<std::uint64_t, K / 2> *>(&ctr)));
+}
+
 template <std::size_t Blocks, typename T, std::size_t K>
 inline void increment(
     std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
 {
     increment_block_back<Blocks>(
         ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
+}
+
+template <std::size_t Blocks, std::size_t K>
+inline void increment(std::array<std::uint32_t, K> &ctr,
+    std::array<std::array<std::uint32_t, K>, Blocks> &ctr_block)
+{
+    increment(*(reinterpret_cast<std::array<std::uint64_t, K / 2> *>(&ctr)),
+        *(reinterpret_cast<std::array<std::array<std::uint64_t, K / 2>, Blocks>
+                *>(&ctr_block)));
 }
 
 } // namespace vsmc::internal

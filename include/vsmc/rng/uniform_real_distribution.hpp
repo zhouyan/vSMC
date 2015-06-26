@@ -102,7 +102,7 @@ inline void uniform_real_distribution_impl(RNGType &rng, std::size_t n,
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    typename RNGType::result_type s[k];
+    typename RNGType::result_type s[k / 2 + 1];
     for (std::size_t i = 0; i != m; ++i)
         uniform_real_distribution_impl_u64(rng, k, r + i * k, a, b, s);
     uniform_real_distribution_impl_u64(rng, l, r + m * k, a, b, s);
