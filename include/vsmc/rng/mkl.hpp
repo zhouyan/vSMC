@@ -257,7 +257,6 @@ class MKLEngine
     result_type operator()()
     {
         if (index_ == M_) {
-            buffer_.resize(M_);
             internal::MKLUniformBits<Bits>::eval(
                 stream_, static_cast<MKL_INT>(M_), buffer_.data());
             index_ = 0;
@@ -286,7 +285,7 @@ class MKLEngine
     static constexpr std::size_t M_ = 1000;
 
     MKLStream stream_;
-    Vector<result_type> buffer_;
+    std::array<result_type, M_> buffer_;
     std::size_t index_;
 }; // class MKLEngine
 
