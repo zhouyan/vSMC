@@ -85,7 +85,7 @@ VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(64, 64, double)
 
 } // namespace vsmc::internal
 
-template <typename UIntType, typename RealType = double,
+template <typename UIntType = std::uint32_t, typename RealType = double,
     typename Left = Closed, typename Right = Open>
 class U01
     : public internal::U01Impl<sizeof(UIntType), sizeof(RealType), Left, Right>
