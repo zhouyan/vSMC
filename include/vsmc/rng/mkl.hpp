@@ -137,7 +137,7 @@ template <>
 class MKLUniformBits<64>
 {
     public:
-    static void eval(const MKLStream &stream, MKL_INT n, unsigned MKL_INT64 *r)
+    static void eval(MKLStream &stream, MKL_INT n, unsigned MKL_INT64 *r)
     {
         stream.uniform_bits64(n, r);
     }
@@ -146,7 +146,7 @@ class MKLUniformBits<64>
 class MKLDiscardSkipAhead
 {
     public:
-    static void eval(const MKLStream &stream, long long nskip)
+    static void eval(MKLStream &stream, long long nskip)
     {
         stream.skip_ahead(nskip);
     }
