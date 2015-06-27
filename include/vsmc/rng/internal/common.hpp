@@ -140,16 +140,17 @@ class is_seed_seq
 template <std::size_t, typename T, std::size_t K>
 inline void increment_single(std::array<T, K> &ctr, std::false_type)
 {
-    ++ctr.back();
+    ++std::get<K - 1>(ctr);
 }
 
 template <std::size_t N, typename T, std::size_t K>
 inline void increment_single(std::array<T, K> &ctr, std::true_type)
 {
-    if (++std::get<N>(ctr) != 0)
-        return;
-
-    increment_single<N + 1>(ctr, std::integral_constant<bool, N + 2 < K>());
+    ++std::get<N>(ctr);
+    if (std::get<N>(ctr) == 0) {
+        increment_single<N + 1>(
+            ctr, std::integral_constant<bool, N + 2 < K>());
+    }
 }
 
 template <typename T, std::size_t K>
