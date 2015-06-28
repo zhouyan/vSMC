@@ -33,6 +33,7 @@
 #define VSMC_RNG_INTERNAL_COMMON_HPP
 
 #include <vsmc/internal/common.hpp>
+#include <vsmc/utility/simd.hpp>
 
 #ifndef UINT64_C
 #error __STDC_CONSTANT_MACROS not defined before #<stdint.h>
@@ -220,15 +221,74 @@ inline void increment(
     ctr = ctr_block.back();
 }
 
+#if VSMC_HAS_AVX2
+
+inline void increment_safe_set(
+    const std::array<std::uint32_t, 2> &ctr, M256I<> &c)
+{
+    c.set(std::get<1>(ctr), std::get<0>(ctr), std::get<1>(ctr),
+        std::get<0>(ctr), std::get<1>(ctr), std::get<0>(ctr), std::get<1>(ctr),
+        std::get<0>(ctr));
+}
+
+inline void increment_safe_set(
+    const std::array<std::uint32_t, 4> &ctr, M256I<> &c)
+{
+    c.set(std::get<3>(ctr), std::get<2>(ctr), std::get<1>(ctr),
+        std::get<0>(ctr), std::get<3>(ctr), std::get<2>(ctr), std::get<1>(ctr),
+        std::get<0>(ctr));
+}
+
+inline void increment_safe_set(
+    const std::array<std::uint64_t, 2> &ctr, M256I<> &c)
+{
+    c.set(std::get<1>(ctr), std::get<0>(ctr), std::get<1>(ctr),
+        std::get<0>(ctr));
+}
+
+inline void increment_safe_set(
+    const std::array<std::uint64_t, 4> &ctr, M256I<> &c)
+{
+    c.load_u(ctr.data());
+}
+
+template <typename T, std::size_t K>
+inline void increment_safe_set(
+    T n, std::array<T, K> &ctr, std::array<T, K> *ctr_block)
+{
+    const std::size_t k = M256I<T>::size() / K;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+
+    M256I<> c;
+    increment_safe_set(ctr, c);
+    for (T i = 0; i != m; ++i, ctr_block += k)
+        c.store_u(ctr_block);
+    for (std::size_t i = 0; i != l; ++i)
+        ctr_block[i] = ctr;
+}
+
+#else // VSMC_HAS_AVX2
+
+template <typename T, std::size_t K>
+inline void increment_safe_set(
+    T n, std::array<T, K> &ctr, std::array<T, K> *ctr_block)
+{
+    for (T i = 0; i != n; ++i)
+        ctr_block[i] = ctr;
+}
+
+#endif // VSMC_HAS_AVX2
+
 template <typename T, std::size_t K>
 inline void increment_safe(
     T n, std::array<T, K> &ctr, std::array<T, K> *ctr_block)
 {
     increment(ctr);
-    for (T i = 0; i != n; ++i) {
-        ctr_block[i] = ctr;
-        ctr_block[i].front() += i;
-    }
+    increment_safe_set(n, ctr, ctr_block);
+    T *c = ctr_block[0].data();
+    for (T i = 0; i != n; ++i, c += K)
+        *c += i;
     ctr = ctr_block[n - 1];
 }
 
@@ -239,9 +299,11 @@ inline void increment(
     if (n == 0)
         return;
 
-    const std::size_t m =
-        static_cast<std::size_t>(std::numeric_limits<T>::max VSMC_MNE());
-    if ((n < m) && (static_cast<std::size_t>(ctr.front()) < m - n)) {
+    const std::uint64_t m =
+        static_cast<std::uint64_t>(std::numeric_limits<T>::max VSMC_MNE());
+    const std::uint64_t l = static_cast<std::uint64_t>(ctr.front());
+    const std::uint64_t k = static_cast<std::uint64_t>(n);
+    if (k < m && l < m - k) {
         increment_safe(static_cast<T>(n), ctr, ctr_block);
     } else {
         for (std::size_t i = 0; i != n; ++i) {
