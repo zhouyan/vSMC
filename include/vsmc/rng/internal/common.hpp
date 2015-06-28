@@ -138,111 +138,117 @@ class is_seed_seq
 }; // class is_seed_seq
 
 template <std::size_t, typename T, std::size_t K>
-inline void increment_single(std::array<T, K> &ctr, std::false_type)
+inline void increment_single(std::array<T, K> &, std::false_type)
 {
-    ++std::get<K - 1>(ctr);
 }
 
 template <std::size_t N, typename T, std::size_t K>
 inline void increment_single(std::array<T, K> &ctr, std::true_type)
 {
-    ++std::get<N>(ctr);
-    if (std::get<N>(ctr) == 0) {
-        increment_single<N + 1>(
-            ctr, std::integral_constant<bool, N + 2 < K>());
-    }
-}
-
-template <typename T, std::size_t K>
-inline void increment(std::array<T, K> &, std::integral_constant<T, 0>)
-{
-}
-
-template <typename T, std::size_t K, T NSkip>
-inline void increment(std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
-{
-    T old = ctr.front();
-    ctr.front() += NSkip;
-    if (ctr.front() > old)
+    if (++std::get<N>(ctr) != 0)
         return;
 
-    increment_single<1>(ctr, std::integral_constant<bool, 2 < K>());
-}
-
-template <typename T, std::size_t K>
-inline void increment(std::array<T, K> &ctr, T nskip)
-{
-    T old = ctr.front();
-    ctr.front() += nskip;
-    if (ctr.front() > old || nskip == 0)
-        return;
-
-    increment_single<1>(ctr, std::integral_constant<bool, 2 < K>());
-}
-
-template <std::size_t Blocks, std::size_t, typename T, std::size_t K>
-inline void increment_block(std::array<T, K> &,
-    std::array<std::array<T, K>, Blocks> &, std::false_type)
-{
-}
-
-template <std::size_t Blocks, std::size_t B, typename T, std::size_t K>
-inline void increment_block(std::array<T, K> &ctr,
-    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
-{
-    std::get<B>(ctr_block) = ctr;
-    increment(std::get<B>(ctr_block), std::integral_constant<T, B + 1>());
-    increment_block<Blocks, B + 1>(
-        ctr, ctr_block, std::integral_constant<bool, B + 2 < Blocks>());
-}
-
-template <std::size_t Blocks, std::size_t, typename T, std::size_t K>
-inline void increment_block_safe(std::array<T, K> &,
-    std::array<std::array<T, K>, Blocks> &, std::false_type)
-{
-}
-
-template <std::size_t Blocks, std::size_t B, typename T, std::size_t K>
-inline void increment_block_safe(std::array<T, K> &ctr,
-    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
-{
-    std::get<B>(ctr_block) = ctr;
-    std::get<B>(ctr_block).front() += B + 1;
-    increment_block_safe<Blocks, B + 1>(
-        ctr, ctr_block, std::integral_constant<bool, B + 2 < Blocks>());
-}
-
-template <std::size_t Blocks, typename T, std::size_t K>
-inline void increment_block_back(std::array<T, K> &ctr,
-    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
-{
-    ctr_block.back() = ctr;
-    T old = ctr_block.back().front();
-    ctr_block.back().front() += Blocks;
-    if (ctr_block.back().front() > old) {
-        increment_block_safe<Blocks, 0>(
-            ctr, ctr_block, std::integral_constant<bool, 1 < Blocks>());
-    } else {
-        increment_single<1>(
-            ctr_block.back(), std::integral_constant<bool, 2 < K>());
-        increment_block<Blocks, 0>(
-            ctr, ctr_block, std::integral_constant<bool, 1 < Blocks>());
-    }
-    ctr = ctr_block.back();
+    increment_single<N + 1>(ctr, std::integral_constant<bool, N + 1 < K>());
 }
 
 template <typename T, std::size_t K>
 inline void increment(std::array<T, K> &ctr)
 {
-    increment_single<0>(ctr, std::integral_constant<bool, 1 < K>());
+    increment_single<0>(ctr, std::true_type());
 }
 
-template <std::size_t Blocks, typename T, std::size_t K>
+template <typename T, std::size_t K, T NSkip>
+inline void increment(std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
+{
+    if (ctr.front() < std::numeric_limits<T>::max VSMC_MNE() - NSkip)
+        ctr.front() += NSkip;
+    else
+        increment_single<0>(ctr, std::true_type());
+}
+
+template <typename T, std::size_t K>
+inline void increment(std::array<T, K> &ctr, T nskip)
+{
+    if (ctr.front() < std::numeric_limits<T>::max VSMC_MNE() - nskip)
+        ctr.front() += nskip;
+    else
+        increment_single<0>(ctr, std::true_type());
+}
+
+template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
+inline void increment_block(std::array<T, K> &,
+    std::array<std::array<T, K>, Blocks> &, std::false_type)
+{
+}
+
+template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
+inline void increment_block(std::array<T, K> &ctr,
+    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
+{
+    std::get<B>(ctr_block) = ctr;
+    increment(std::get<B>(ctr_block), std::integral_constant<T, B + 1>());
+    increment_block<B + 1>(
+        ctr, ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
+}
+
+template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
+inline void increment_block_safe(std::array<T, K> &,
+    std::array<std::array<T, K>, Blocks> &, std::false_type)
+{
+}
+
+template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
+inline void increment_block_safe(std::array<T, K> &ctr,
+    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
+{
+    std::get<B>(ctr_block) = ctr;
+    ++std::get<B>(ctr_block).front();
+    increment_block<B + 1>(
+        ctr, ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
+}
+
+template <typename T, std::size_t K, std::size_t Blocks>
 inline void increment(
     std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
 {
-    increment_block_back<Blocks>(
-        ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
+    const T limit =
+        std::numeric_limits<T>::max VSMC_MNE() - static_cast<T>(Blocks);
+    if (ctr.front() < limit)
+        increment_block_safe<0>(ctr, ctr_block, std::true_type());
+    else
+        increment_block<0>(ctr, ctr_block, std::true_type());
+    ctr = ctr_block.back();
+}
+
+template <typename T, std::size_t K>
+inline void increment_safe(
+    T n, std::array<T, K> &ctr, std::array<T, K> *ctr_block)
+{
+    increment(ctr);
+    for (T i = 0; i != n; ++i) {
+        ctr_block[i] = ctr;
+        ctr_block[i].front() += i;
+    }
+    ctr = ctr_block[n - 1];
+}
+
+template <typename T, std::size_t K>
+inline void increment(
+    std::size_t n, std::array<T, K> &ctr, std::array<T, K> *ctr_block)
+{
+    if (n == 0)
+        return;
+
+    const std::size_t m =
+        static_cast<std::size_t>(std::numeric_limits<T>::max VSMC_MNE());
+    if ((n < m) && (static_cast<std::size_t>(ctr.front()) < m - n)) {
+        increment_safe(static_cast<T>(n), ctr, ctr_block);
+    } else {
+        for (std::size_t i = 0; i != n; ++i) {
+            increment(ctr);
+            ctr_block[i] = ctr;
+        }
+    }
 }
 
 } // namespace vsmc::internal

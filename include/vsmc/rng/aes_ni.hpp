@@ -143,26 +143,7 @@ class AESNIEngine
         return buffer_[index_++];
     }
 
-    void operator()(std::size_t n, result_type *r)
-    {
-        const std::size_t K = 8;
-        const std::size_t M = K * M128I<ResultType>::size();
-        const std::size_t p = n % M;
-        for (std::size_t i = 0; i != p; ++i)
-            *r++ = operator()();
-        n /= M;
-        const std::size_t k = 1000;
-        const std::size_t m = n / k;
-        const std::size_t l = n % k;
-        std::array<__m128i, K> s[k];
-        for (std::size_t i = 0; i != m; ++i) {
-            generate_buffer(k, s);
-            std::memcpy(r, s, k * M * sizeof(result_type));
-            r += k * M;
-        }
-        generate_buffer(l, s);
-        std::memcpy(r, s, l * M * sizeof(result_type));
-    }
+    void operator()(std::size_t n, result_type *r) { generate_buffer(n, r); }
 
     void discard(result_type nskip)
     {
@@ -278,24 +259,43 @@ class AESNIEngine
         buffer_ = buf.result;
     }
 
-    template <std::size_t K>
-    void generate_buffer(std::size_t n, std::array<__m128i, K> *s)
+    void generate_buffer(std::size_t n, result_type *r)
     {
-        union {
-            std::array<__m128i, K> state;
-            std::array<ctr_type, K> ctr_block;
-        } buf;
+        if (n * sizeof(result_type) <= 32) {
+            for (std::size_t i = 0; i != n; ++i)
+                r[i] = operator()();
+            return;
+        }
+
+        std::size_t p = 32 -
+            static_cast<std::size_t>(reinterpret_cast<std::uintptr_t>(r) % 32);
+        if (p % sizeof(result_type) == 0) {
+            p /= sizeof(result_type);
+            for (std::size_t i = 0; i != p; ++i)
+                r[i] = operator()();
+            n -= p;
+            r += p;
+        }
 
         rk_type rk;
         round_key(rk);
-        for (std::size_t i = 0; i != n; ++i) {
-            internal::increment(ctr_, buf.ctr_block);
-            enc_first(buf.state, rk);
-            enc_round<1>(
-                buf.state, rk, std::integral_constant<bool, 1 < Rounds>());
-            enc_last(buf.state, rk);
-            s[i] = buf.state;
+        const std::size_t K = 8;
+        const std::size_t M = K * M128I<ResultType>::size();
+        const std::size_t m = n / M;
+        ctr_type *c = reinterpret_cast<ctr_type *>(r);
+        std::array<__m128i, K> *s =
+            reinterpret_cast<std::array<__m128i, K> *>(r);
+        internal::increment(m * K, ctr_, c);
+        for (std::size_t i = 0; i != m; ++i) {
+            enc_first(s[i], rk);
+            enc_round<1>(s[i], rk, std::integral_constant<bool, 1 < Rounds>());
+            enc_last(s[i], rk);
         }
+        n -= m * M;
+        r += m * M;
+
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = operator()();
     }
 
     template <std::size_t K>
