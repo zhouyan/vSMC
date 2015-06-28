@@ -345,13 +345,6 @@ template <MKL_INT BRNG, std::size_t Bits, typename RealType>
 inline void rng_rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     typename MKLEngine<BRNG, Bits>::result_type *r)
 {
-    const std::size_t k =
-        static_cast<std::size_t>(std::numeric_limits<MKL_INT>::max VSMC_MNE());
-    while (n > static_cast<std::size_t>(k)) {
-        internal::MKLUniformBits<Bits>::eval(
-            rng.stream(), static_cast<MKL_INT>(k), r);
-        n -= static_cast<std::size_t>(k);
-    }
     internal::MKLUniformBits<Bits>::eval(
         rng.stream(), static_cast<MKL_INT>(n), r);
 }
@@ -360,12 +353,6 @@ template <MKL_INT BRNG, std::size_t Bits, typename RealType>
 inline void cauchy_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     RealType *r, RealType a, RealType b)
 {
-    const std::size_t k =
-        static_cast<std::size_t>(std::numeric_limits<MKL_INT>::max VSMC_MNE());
-    while (n > static_cast<std::size_t>(k)) {
-        rng.stream().cauchy(k, r, a, b);
-        n -= static_cast<std::size_t>(k);
-    }
     rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
 }
 
@@ -373,13 +360,6 @@ template <MKL_INT BRNG, std::size_t Bits, typename RealType>
 inline void exponential_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, RealType *r, RealType lambda)
 {
-    const std::size_t k =
-        static_cast<std::size_t>(std::numeric_limits<MKL_INT>::max VSMC_MNE());
-    while (n > k) {
-        rng.stream().exponential(static_cast<MKL_INT>(k), r, 0, 1 / lambda);
-        n -= k;
-        r += k;
-    }
     rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
 }
 
@@ -387,13 +367,6 @@ template <MKL_INT BRNG, std::size_t Bits, typename RealType>
 inline void laplace_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     RealType *r, RealType location, RealType scale)
 {
-    const std::size_t k =
-        static_cast<std::size_t>(std::numeric_limits<MKL_INT>::max VSMC_MNE());
-    while (n > k) {
-        rng.stream().laplace(static_cast<MKL_INT>(k), r, location, scale);
-        n -= k;
-        r += k;
-    }
     rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
 }
 
@@ -401,13 +374,6 @@ template <MKL_INT BRNG, std::size_t Bits, typename RealType>
 inline void lognormal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     RealType *r, RealType m, RealType s)
 {
-    const std::size_t k =
-        static_cast<std::size_t>(std::numeric_limits<MKL_INT>::max VSMC_MNE());
-    while (n > k) {
-        rng.stream().lognormal(static_cast<MKL_INT>(k), r, m, s, 0, 1);
-        n -= k;
-        r += k;
-    }
     rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
 }
 
@@ -415,13 +381,6 @@ template <MKL_INT BRNG, std::size_t Bits, typename RealType>
 inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     RealType *r, RealType mean, RealType stddev)
 {
-    const std::size_t k =
-        static_cast<std::size_t>(std::numeric_limits<MKL_INT>::max VSMC_MNE());
-    while (n > k) {
-        rng.stream().gaussian(static_cast<MKL_INT>(k), r, mean, stddev);
-        n -= k;
-        r += k;
-    }
     rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
 }
 
@@ -429,13 +388,6 @@ template <MKL_INT BRNG, std::size_t Bits, typename RealType>
 inline void u01_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, RealType *r)
 {
-    const std::size_t k =
-        static_cast<std::size_t>(std::numeric_limits<MKL_INT>::max VSMC_MNE());
-    while (n > k) {
-        rng.stream().uniform(static_cast<MKL_INT>(k), r, 0, 1);
-        n -= k;
-        r += k;
-    }
     rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
 }
 
@@ -443,13 +395,6 @@ template <MKL_INT BRNG, std::size_t Bits, typename RealType>
 inline void uniform_real_distribution(MKLEngine<BRNG, Bits> &rng,
     std::size_t n, RealType *r, RealType a, RealType b)
 {
-    const std::size_t k =
-        static_cast<std::size_t>(std::numeric_limits<MKL_INT>::max VSMC_MNE());
-    while (n > k) {
-        rng.stream().uniform(static_cast<MKL_INT>(k), r, a, b);
-        n -= k;
-        r += k;
-    }
     rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
 }
 
