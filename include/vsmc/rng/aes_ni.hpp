@@ -145,21 +145,23 @@ class AESNIEngine
 
     void operator()(std::size_t n, result_type *r)
     {
-        const std::size_t p = n % M_;
+        const std::size_t K = 8;
+        const std::size_t M = K * M128I<ResultType>::size();
+        const std::size_t p = n % M;
         for (std::size_t i = 0; i != p; ++i)
             *r++ = operator()();
-        n /= M_;
+        n /= M;
         const std::size_t k = 1000;
         const std::size_t m = n / k;
         const std::size_t l = n % k;
-        state_type s[k];
+        std::array<__m128i, K> s[k];
         for (std::size_t i = 0; i != m; ++i) {
             generate_buffer(k, s);
-            std::memcpy(r, s, k * M_ * sizeof(result_type));
-            r += k * M_;
+            std::memcpy(r, s, k * M * sizeof(result_type));
+            r += k * M;
         }
         generate_buffer(l, s);
-        std::memcpy(r, s, l * M_ * sizeof(result_type));
+        std::memcpy(r, s, l * M * sizeof(result_type));
     }
 
     void discard(result_type nskip)
@@ -249,7 +251,6 @@ class AESNIEngine
     }
 
     private:
-    using state_type = std::array<__m128i, Blocks>;
     using rk_type = std::array<__m128i, Rounds + 1>;
 
     static constexpr std::size_t M_ = Blocks * M128I<ResultType>::size();
@@ -262,7 +263,7 @@ class AESNIEngine
     void generate_buffer()
     {
         union {
-            state_type state;
+            std::array<__m128i, Blocks> state;
             std::array<ctr_type, Blocks> ctr_block;
             std::array<ResultType, M_> result;
         } buf;
@@ -277,11 +278,12 @@ class AESNIEngine
         buffer_ = buf.result;
     }
 
-    void generate_buffer(std::size_t n, state_type *s)
+    template <std::size_t K>
+    void generate_buffer(std::size_t n, std::array<__m128i, K> *s)
     {
         union {
-            state_type state;
-            std::array<ctr_type, Blocks> ctr_block;
+            std::array<__m128i, K> state;
+            std::array<ctr_type, K> ctr_block;
         } buf;
 
         rk_type rk;
@@ -296,69 +298,74 @@ class AESNIEngine
         }
     }
 
-    void enc_first(state_type &state, const rk_type &rk)
+    template <std::size_t K>
+    void enc_first(std::array<__m128i, K> &state, const rk_type &rk)
     {
         enc_first<0>(state, rk, std::true_type());
     }
 
-    template <std::size_t>
-    void enc_first(state_type &, const rk_type &, std::false_type)
+    template <std::size_t, std::size_t K>
+    void enc_first(std::array<__m128i, K> &, const rk_type &, std::false_type)
     {
     }
 
-    template <std::size_t B>
-    void enc_first(state_type &state, const rk_type &rk, std::true_type)
+    template <std::size_t B, std::size_t K>
+    void enc_first(
+        std::array<__m128i, K> &state, const rk_type &rk, std::true_type)
     {
         std::get<B>(state) =
             _mm_xor_si128(std::get<B>(state), std::get<0>(rk));
-        enc_first<B + 1>(
-            state, rk, std::integral_constant<bool, B + 1 < Blocks>());
+        enc_first<B + 1>(state, rk, std::integral_constant<bool, B + 1 < K>());
     }
 
-    template <std::size_t>
-    void enc_round(state_type &, const rk_type &, std::false_type)
+    template <std::size_t, std::size_t K>
+    void enc_round(std::array<__m128i, K> &, const rk_type &, std::false_type)
     {
     }
 
-    template <std::size_t N>
-    void enc_round(state_type &state, const rk_type &rk, std::true_type)
+    template <std::size_t N, std::size_t K>
+    void enc_round(
+        std::array<__m128i, K> &state, const rk_type &rk, std::true_type)
     {
-        enc_round<0, N>(state, rk, std::true_type());
+        enc_round_block<0, N>(state, rk, std::true_type());
         enc_round<N + 1>(
             state, rk, std::integral_constant<bool, N + 1 < Rounds>());
     }
 
-    template <std::size_t, std::size_t>
-    void enc_round(state_type &, const rk_type &, std::false_type)
+    template <std::size_t, std::size_t, std::size_t K>
+    void enc_round_block(
+        std::array<__m128i, K> &, const rk_type &, std::false_type)
     {
     }
 
-    template <std::size_t B, std::size_t N>
-    void enc_round(state_type &state, const rk_type &rk, std::true_type)
+    template <std::size_t B, std::size_t N, std::size_t K>
+    void enc_round_block(
+        std::array<__m128i, K> &state, const rk_type &rk, std::true_type)
     {
         std::get<B>(state) =
             _mm_aesenc_si128(std::get<B>(state), std::get<N>(rk));
-        enc_round<B + 1, N>(
-            state, rk, std::integral_constant<bool, B + 1 < Blocks>());
+        enc_round_block<B + 1, N>(
+            state, rk, std::integral_constant<bool, B + 1 < K>());
     }
 
-    void enc_last(state_type &state, const rk_type &rk)
+    template <std::size_t K>
+    void enc_last(std::array<__m128i, K> &state, const rk_type &rk)
     {
         enc_last<0>(state, rk, std::true_type());
     }
 
-    template <std::size_t>
-    void enc_last(state_type &, const rk_type &, std::false_type)
+    template <std::size_t, std::size_t K>
+    void enc_last(std::array<__m128i, K> &, const rk_type &, std::false_type)
     {
     }
 
-    template <std::size_t B>
-    void enc_last(state_type &state, const rk_type &rk, std::true_type)
+    template <std::size_t B, std::size_t K>
+    void enc_last(
+        std::array<__m128i, K> &state, const rk_type &rk, std::true_type)
     {
         std::get<B>(state) =
             _mm_aesenclast_si128(std::get<B>(state), std::get<Rounds>(rk));
-        enc_last<B + 1>(
-            state, rk, std::integral_constant<bool, B + 1 < Blocks>());
+        enc_last<B + 1>(state, rk, std::integral_constant<bool, B + 1 < K>());
     }
 
     template <size_t N>
