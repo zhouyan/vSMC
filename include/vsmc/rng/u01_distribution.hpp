@@ -68,7 +68,7 @@ inline void u01_distribution_impl_u64(
     if (n % 2 != 0)
         u[n - 1] = static_cast<std::uint32_t>(rng());
     for (std::size_t i = 0; i != n; ++i)
-        r[i] = U01<std::uint64_t, RealType, Closed, Open>::eval(u[i]);
+        r[i] = U01<std::uint32_t, RealType, Closed, Open>::eval(u[i]);
 }
 
 template <typename RealType, typename RNGType>
