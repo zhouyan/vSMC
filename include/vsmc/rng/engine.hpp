@@ -50,8 +50,6 @@
 
 #include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
-#include <vsmc/rng/xor_combine_engine.hpp>
-#include <vsmc/rng/xorshift.hpp>
 
 #if VSMC_HAS_AES_NI
 #include <vsmc/rng/aes.hpp>

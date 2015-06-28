@@ -100,8 +100,6 @@ ADD_HEADER_EXECUTABLE(vsmc/rng/threefry                  TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/u01_distribution          TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/u01_sequence              TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/uniform_real_distribution TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/rng/xor_combine_engine        TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/rng/xorshift                  TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/internal/common           TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/internal/mkl_brng_defines ${MKL_FOUND} "MKL")
 
