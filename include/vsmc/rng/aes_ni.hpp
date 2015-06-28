@@ -249,7 +249,8 @@ class AESNIEngine
     }
 
     private:
-    using state_type = std::array<M128I<>, Blocks>;
+    using state_type = std::array<__m128i, Blocks>;
+    using rk_type = std::array<__m128i, Rounds + 1>;
 
     static constexpr std::size_t M_ = Blocks * M128I<ResultType>::size();
 
@@ -266,10 +267,13 @@ class AESNIEngine
             std::array<ResultType, M_> result;
         } buf;
 
+        rk_type rk;
+        round_key(rk);
         internal::increment(ctr_, buf.ctr_block);
-        enc_first(buf.state);
-        enc_round<1>(buf.state, std::integral_constant<bool, 1 < Rounds>());
-        enc_last(buf.state);
+        enc_first(buf.state, rk);
+        enc_round<1>(
+            buf.state, rk, std::integral_constant<bool, 1 < Rounds>());
+        enc_last(buf.state, rk);
         buffer_ = buf.result;
     }
 
@@ -280,91 +284,102 @@ class AESNIEngine
             std::array<ctr_type, Blocks> ctr_block;
         } buf;
 
+        rk_type rk;
+        round_key(rk);
         for (std::size_t i = 0; i != n; ++i) {
             internal::increment(ctr_, buf.ctr_block);
-            enc_first(buf.state);
+            enc_first(buf.state, rk);
             enc_round<1>(
-                buf.state, std::integral_constant<bool, 1 < Rounds>());
-            enc_last(buf.state);
+                buf.state, rk, std::integral_constant<bool, 1 < Rounds>());
+            enc_last(buf.state, rk);
             s[i] = buf.state;
         }
     }
 
-    void enc_first(state_type &state)
+    void enc_first(state_type &state, const rk_type &rk)
     {
-        __m128i round_key =
-            key_seq_.get(std::integral_constant<std::size_t, 0>());
-        enc_first<0>(state, round_key, std::true_type());
+        enc_first<0>(state, rk, std::true_type());
     }
 
     template <std::size_t>
-    void enc_first(state_type &, const __m128i &, std::false_type)
+    void enc_first(state_type &, const rk_type &, std::false_type)
     {
     }
 
     template <std::size_t B>
-    void enc_first(state_type &state, const __m128i &round_key, std::true_type)
+    void enc_first(state_type &state, const rk_type &rk, std::true_type)
     {
-        std::get<B>(state).value() =
-            _mm_xor_si128(std::get<B>(state).value(), round_key);
+        std::get<B>(state) =
+            _mm_xor_si128(std::get<B>(state), std::get<0>(rk));
         enc_first<B + 1>(
-            state, round_key, std::integral_constant<bool, B + 1 < Blocks>());
+            state, rk, std::integral_constant<bool, B + 1 < Blocks>());
     }
 
     template <std::size_t>
-    void enc_round(state_type &, std::false_type)
+    void enc_round(state_type &, const rk_type &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    void enc_round(state_type &state, std::true_type)
+    void enc_round(state_type &state, const rk_type &rk, std::true_type)
     {
-        __m128i round_key =
-            key_seq_.get(std::integral_constant<std::size_t, N>());
-        enc_round<0, N>(state, round_key, std::true_type());
+        enc_round<0, N>(state, rk, std::true_type());
         enc_round<N + 1>(
-            state, std::integral_constant<bool, N + 1 < Rounds>());
+            state, rk, std::integral_constant<bool, N + 1 < Rounds>());
     }
 
     template <std::size_t, std::size_t>
-    void enc_round(state_type &, const __m128i &, std::false_type)
+    void enc_round(state_type &, const rk_type &, std::false_type)
     {
     }
 
     template <std::size_t B, std::size_t N>
-    void enc_round(state_type &state, const __m128i &round_key, std::true_type)
+    void enc_round(state_type &state, const rk_type &rk, std::true_type)
     {
-        std::get<B>(state).value() =
-            _mm_aesenc_si128(std::get<B>(state).value(), round_key);
+        std::get<B>(state) =
+            _mm_aesenc_si128(std::get<B>(state), std::get<N>(rk));
         enc_round<B + 1, N>(
-            state, round_key, std::integral_constant<bool, B + 1 < Blocks>());
+            state, rk, std::integral_constant<bool, B + 1 < Blocks>());
     }
 
-    void enc_last(state_type &state)
+    void enc_last(state_type &state, const rk_type &rk)
     {
-        __m128i round_key =
-            key_seq_.get(std::integral_constant<std::size_t, Rounds>());
-        enc_last<0>(state, round_key, std::true_type());
+        enc_last<0>(state, rk, std::true_type());
     }
 
     template <std::size_t>
-    void enc_last(state_type &, const __m128i &, std::false_type)
+    void enc_last(state_type &, const rk_type &, std::false_type)
     {
     }
 
     template <std::size_t B>
-    void enc_last(state_type &state, const __m128i &round_key, std::true_type)
+    void enc_last(state_type &state, const rk_type &rk, std::true_type)
     {
-        std::get<B>(state).value() =
-            _mm_aesenclast_si128(std::get<B>(state).value(), round_key);
+        std::get<B>(state) =
+            _mm_aesenclast_si128(std::get<B>(state), std::get<Rounds>(rk));
         enc_last<B + 1>(
-            state, round_key, std::integral_constant<bool, B + 1 < Blocks>());
+            state, rk, std::integral_constant<bool, B + 1 < Blocks>());
     }
+
+    template <size_t N>
+    void round_key(rk_type &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    void round_key(rk_type &rk, std::true_type)
+    {
+        std::get<N>(rk) =
+            key_seq_.get(std::integral_constant<std::size_t, N>());
+        round_key<N + 1>(rk, std::integral_constant < bool, N<Rounds>());
+    }
+
+    void round_key(rk_type &rk) { round_key<0>(rk, std::true_type()); }
 }; // class AESNIEngine
 
 template <typename ResultType, typename KeySeqType, std::size_t Rounds,
     std::size_t Blocks>
-void rng_rand(AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> &rng,
+inline void rng_rand(AESNIEngine<ResultType, KeySeqType, Rounds, Blocks> &rng,
     std::size_t n, ResultType *r)
 {
     rng(n, r);

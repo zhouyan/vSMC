@@ -685,86 +685,20 @@ using AES256KeySeq = internal::AESKeySeq<ResultType, Rounds,
 /// \brief AES-128 RNG engine
 /// \ingroup AESNIRNG
 template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-class AES128Engine
-    : public AESNIEngine<ResultType, AES128KeySeq<ResultType, 10>, 10, Blocks>
-{
-
-    public:
-    using base_eng_type =
-        AESNIEngine<ResultType, AES128KeySeq<ResultType, 10>, 10, Blocks>;
-
-    explicit AES128Engine(ResultType s = 0) : base_eng_type(s) {}
-
-    template <typename SeedSeq>
-    explicit AES128Engine(SeedSeq &seq,
-        typename std::enable_if<
-            internal::is_seed_seq<SeedSeq, typename base_eng_type::result_type,
-                typename base_eng_type::key_type,
-                AES128Engine<ResultType, Blocks>>::value>::type * = nullptr)
-        : base_eng_type(seq)
-    {
-    }
-
-    AES128Engine(const typename base_eng_type::key_type &k) : base_eng_type(k)
-    {
-    }
-}; // class AES128Engine
+using AES128Engine =
+    AESNIEngine<ResultType, AES128KeySeq<ResultType, 10>, 10, Blocks>;
 
 /// \brief AES-192 RNG engine
 /// \ingroup AESNIRNG
 template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-class AES192Engine
-    : public AESNIEngine<ResultType, AES192KeySeq<ResultType, 12>, 12, Blocks>
-{
-
-    public:
-    using base_eng_type =
-        AESNIEngine<ResultType, AES192KeySeq<ResultType, 12>, 12, Blocks>;
-
-    explicit AES192Engine(ResultType s = 0) : base_eng_type(s) {}
-
-    template <typename SeedSeq>
-    explicit AES192Engine(SeedSeq &seq,
-        typename std::enable_if<
-            internal::is_seed_seq<SeedSeq, typename base_eng_type::result_type,
-                typename base_eng_type::key_type,
-                AES192Engine<ResultType, Blocks>>::value>::type * = nullptr)
-        : base_eng_type(seq)
-    {
-    }
-
-    AES192Engine(const typename base_eng_type::key_type &k) : base_eng_type(k)
-    {
-    }
-}; // class AES192Engine
+using AES192Engine =
+    AESNIEngine<ResultType, AES192KeySeq<ResultType, 12>, 12, Blocks>;
 
 /// \brief AES-256 RNG engine
 /// \ingroup AESNIRNG
 template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-class AES256Engine
-    : public AESNIEngine<ResultType, AES256KeySeq<ResultType, 14>, 14, Blocks>
-{
-
-    public:
-    using base_eng_type =
-        AESNIEngine<ResultType, AES256KeySeq<ResultType, 14>, 14, Blocks>;
-
-    explicit AES256Engine(ResultType s = 0) : base_eng_type(s) {}
-
-    template <typename SeedSeq>
-    explicit AES256Engine(SeedSeq &seq,
-        typename std::enable_if<
-            internal::is_seed_seq<SeedSeq, typename base_eng_type::result_type,
-                typename base_eng_type::key_type,
-                AES256Engine<ResultType, Blocks>>::value>::type * = nullptr)
-        : base_eng_type(seq)
-    {
-    }
-
-    AES256Engine(const typename base_eng_type::key_type &k) : base_eng_type(k)
-    {
-    }
-}; // class AES256Engine
+using AES256Engine =
+    AESNIEngine<ResultType, AES256KeySeq<ResultType, 14>, 14, Blocks>;
 
 /// \brief AES-128 RNG engine with 32-bits integers output and 1 block
 /// \ingroup AESNIRNG

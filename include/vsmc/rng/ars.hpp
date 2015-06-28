@@ -180,27 +180,8 @@ class ARSKeySeq
 /// \ingroup AESNIRNG
 template <typename ResultType, std::size_t Rounds = VSMC_RNG_ARS_ROUNDS,
     std::size_t Blocks = VSMC_RNG_ARS_BLOCKS>
-class ARSEngine
-    : public AESNIEngine<ResultType, ARSKeySeq<ResultType>, Rounds, Blocks>
-{
-    public:
-    using base_eng_type =
-        AESNIEngine<ResultType, ARSKeySeq<ResultType>, Rounds, Blocks>;
-
-    explicit ARSEngine(ResultType s = 0) : base_eng_type(s) {}
-
-    template <typename SeedSeq>
-    explicit ARSEngine(SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq,
-            typename base_eng_type::result_type,
-            typename base_eng_type::key_type,
-            ARSEngine<ResultType, Rounds, Blocks>>::value>::type * = nullptr)
-        : base_eng_type(seq)
-    {
-    }
-
-    ARSEngine(const typename base_eng_type::key_type &k) : base_eng_type(k) {}
-}; // class ARSEngine
+using ARSEngine =
+    AESNIEngine<ResultType, ARSKeySeq<ResultType>, Rounds, Blocks>;
 
 /// \brief ARS RNG engine with 32-bits integers output, 1 block and default
 /// rounds
