@@ -59,12 +59,10 @@ inline void normal_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
     math::vMul(nu, static_cast<RealType>(-2), s, s);
     math::vSqrt(nu, s, s);
     math::vMul(nu, math::pi_2<RealType>(), u2, u2);
-    math::vSin(nu, u2, u1);
-    math::vCos(nu, u2, u2);
-    math::vMul(nu, u1, s, u1);
-    math::vMul(nu, u2, s, u2);
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = mean + stddev * r[i];
+    math::vSinCos(nu, u2, u1, u2);
+    math::vMul(nu, stddev, s, s);
+    math::vFMA(nu, mean, s, u1, u1);
+    math::vFMA(nu, mean, s, u2, u2);
 }
 
 } // namespace vsmc::internal
