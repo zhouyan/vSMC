@@ -215,9 +215,18 @@ inline void vFMA(std::size_t n, const T *a, const T *b, const T *x, T *y)
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = a + b_i * x_i\f$.
+template <typename T>
+inline void vFMA(std::size_t n, T a, const T *b, const T *x, T *y)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = a + b[i] * x[i];
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = a + b * x_i\f$.
 template <typename T>
-inline void vFMA(std::size_t n, T a, const T b, const T *x, T *y)
+inline void vFMA(std::size_t n, T a, T b, const T *x, T *y)
 {
     for (std::size_t i = 0; i != n; ++i)
         y[i] = a + b * x[i];
@@ -310,10 +319,10 @@ VSMC_DEFINE_MATH_VMATH_1(sin, Sin)
 template <typename T>
 inline void vSinCos(std::size_t n, const T *a, T *y, T *z)
 {
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::sin(a[i]);
-    for (std::size_t i = 0; i != n; ++i)
-        z[i] = std::cos(a[i]);
+    vSin(n, a, y);
+    vSqr(n, y, z);
+    vSub(n, static_cast<T>(1), z, z);
+    vSqrt(n, z, z);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \tan(a_i)\f$
