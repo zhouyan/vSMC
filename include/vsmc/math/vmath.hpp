@@ -205,6 +205,24 @@ inline void vLinearFrac(std::size_t n, const T *a, const T *b, T beta_a,
         y[i] /= beta_b * b[i] + mu_b;
 }
 
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = a_i + b_i * x_i\f$.
+template <typename T>
+inline void vFMA(std::size_t n, const T *a, const T *b, const T *x, T *y)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = a[i] + b[i] * x[i];
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = a + b * x_i\f$.
+template <typename T>
+inline void vFMA(std::size_t n, T a, const T b, const T *x, T *y)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = a + b * x[i];
+}
+
 /// @}
 
 /// \defgroup vPower Power and root functions
