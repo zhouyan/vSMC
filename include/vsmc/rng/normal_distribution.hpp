@@ -227,12 +227,12 @@ class NormalDistribution
 
         result_type u = 0;
         result_type v = 0;
-        result_type s = 0;
-        generate_uvs(
-            rng, u, v, s, std::integral_constant<bool,
-                              internal::RNGBits<RNGType>::value >= 64>());
-        s = 2 * param_.stddev_ * std::sqrt(-0.5 * std::log(4 * s) / s);
-        param_.v_ = param_.mean_ + v * s;
+        generate_uv(rng, u, v, std::integral_constant<bool,
+                                   internal::RNGBits<RNGType>::value >= 64>());
+        result_type s = param_.stddev_ * std::sqrt(-2 * std::log(u));
+        v = std::sin(math::pi_2<result_type>() * v);
+        u = std::sqrt(1 - v * v);
+        param_.v_ = param_.mean_ * v * s;
         param_.saved_ = true;
 
         return param_.mean_ + u * s;
@@ -244,27 +244,21 @@ class NormalDistribution
     param_type param_;
 
     template <typename RNGType>
-    void generate_uvs(RNGType &rng, result_type &u, result_type &v,
-        result_type &s, std::false_type)
+    void generate_uv(
+        RNGType &rng, result_type &u, result_type &v, std::false_type)
     {
         U01DistributionType<RNGType, RealType> runif;
-        do {
-            u = runif(rng) - 0.5;
-            v = runif(rng) - 0.5;
-            s = u * u + v * v;
-        } while (s > 0.25 || s <= 0);
+        u = 1 - runif(rng);
+        v = 1 - runif(rng);
     }
 
     template <typename RNGType>
-    void generate_uvs(RNGType &rng, result_type &u, result_type &v,
-        result_type &s, std::true_type)
+    void generate_uv(
+        RNGType &rng, result_type &u, result_type &v, std::true_type)
     {
-        do {
-            std::uint64_t r = static_cast<std::uint64_t>(rng());
-            u = U01<std::uint32_t, RealType>::eval(r) - 0.5;
-            v = U01<std::uint32_t, RealType>::eval(r >> 32) - 0.5;
-            s = u * u + v * v;
-        } while (s > 0.25 || s <= 0);
+        std::uint64_t r = static_cast<std::uint64_t>(rng());
+        u = U01<std::uint32_t, RealType, Open, Closed>::eval(r);
+        v = U01<std::uint32_t, RealType, Open, Closed>::eval(r >> 32);
     }
 }; // class NormalDistribution
 
