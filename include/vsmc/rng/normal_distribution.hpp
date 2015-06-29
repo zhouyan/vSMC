@@ -51,10 +51,11 @@ template <typename RealType, typename RNGType>
 inline void normal_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
     RealType mean, RealType stddev, RealType *s)
 {
-    u01_distribution(rng, n, r);
     const std::size_t nu = n / 2;
     RealType *const u1 = r;
     RealType *const u2 = r + nu;
+    u01_distribution(rng, n, r);
+    math::vSub(n, static_cast<RealType>(1), r, r);
     math::vLn(nu, u1, s);
     math::vMul(nu, static_cast<RealType>(-2), s, s);
     math::vSqrt(nu, s, s);
