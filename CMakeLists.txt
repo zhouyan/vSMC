@@ -325,6 +325,8 @@ FOREACH (feature ${FEATURES})
     MESSAGE (STATUS ${feature})
 ENDFOREACH (feature ${FEATURES})
 
+MESSAGE (STATUS "Linked libraries: ${VSMC_LINK_LIBRARIES}")
+
 ##############################################################################
 # Library
 ##############################################################################

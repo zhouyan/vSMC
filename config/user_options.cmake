@@ -29,33 +29,33 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-# Unix-like systems usually don't need these settings
-# However, on Windows, if the PATH are not properly set, you can configure the
-# following options to help CMake find vSMC's dependencies
+IF (MSVC)
+    SET (BOOST_ROOT "C:/Program Files/Boost" CACHE PATH "Boost ROOT")
+    SET (TBB_ROOT "C:/Program Files/Intel/TBB/4.2")
+    SET (TBB_INC_PATH "${TBB_ROOT}/include" CACHE PATH "TBB include")
+    IF (MSVC_VERSION EQUAL 1600)
+        SET (TBB_LIB_PATH "${TBB_ROOT}/lib/intel64/vc10" CACHE PATH "TBB lib")
+    ELSEIF (MSVC_VERSION EQUAL 1700)
+        SET (TBB_LIB_PATH "${TBB_ROOT}/lib/intel64/vc11" CACHE PATH "TBB lib")
+    ELSEIF (MSVC_VERSION EQUAL 1800)
+        SET (TBB_LIB_PATH "${TBB_ROOT}/lib/intel64/vc12" CACHE PATH "TBB lib")
+    ENDIF (MSVC_VERSION EQUAL 1600)
+    SET (OpenCL_INC_PATH "C:/Program Files (x86)/Intel/OpenCL SDK/3.2/include"
+        CACHE PATH "OpenCL include path")
+    SET (OpenCL_LIB_PATH "C:/Program Files (x86)/Intel/OpenCL SDK/3.2/lib/x64"
+        CACHE PATH "OpenCL lib path")
+ENDIF (MSVC)
 
-##############################################################################
-
-# The root directory to find Boost
-# Under this directory `include/boost` and `lib` directory shall be found
-SET (BOOST_ROOT "C:/Program Files/Boost" CACHE PATH "Boost ROOT")
-
-##############################################################################
-
-# Paths to Intel TBB
-SET (TBB_ROOT "C:/Program Files/Intel/TBB/4.2")
-SET (TBB_INC_PATH "${TBB_ROOT}/include" CACHE PATH "TBB include")
-IF (MSVC_VERSION EQUAL 1600)
-    SET (TBB_LIB_PATH "${TBB_ROOT}/lib/intel64/vc10" CACHE PATH "TBB lib")
-ELSEIF (MSVC_VERSION EQUAL 1700)
-    SET (TBB_LIB_PATH "${TBB_ROOT}/lib/intel64/vc11" CACHE PATH "TBB lib")
-ELSEIF (MSVC_VERSION EQUAL 1800)
-    SET (TBB_LIB_PATH "${TBB_ROOT}/lib/intel64/vc12" CACHE PATH "TBB lib")
-ENDIF (MSVC_VERSION EQUAL 1600)
-
-##############################################################################
-
-# Paths to Intel OpenCL
-SET (OpenCL_INC_PATH "C:/Program Files (x86)/Intel/OpenCL SDK/3.2/include"
-    CACHE PATH "OpenCL include path")
-SET (OpenCL_LIB_PATH "C:/Program Files (x86)/Intel/OpenCL SDK/3.2/lib/x64"
-    CACHE PATH "OpenCL lib path")
+IF (NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
+    IF (APPLE)
+        SET (VSMC_LINK_LIBRARIES ${VSMC_LINK_LIBRARIES}
+            /opt/intel/lib/libimf.a)
+        SET (VSMC_LINK_LIBRARIES ${VSMC_LINK_LIBRARIES}
+            /opt/intel/lib/libintlc.dylib)
+    ELSEIF (UNIX)
+        SET (VSMC_LINK_LIBRARIES ${VSMC_LINK_LIBRARIES}
+            /opt/intel/lib/intel64/libimf.a)
+        SET (VSMC_LINK_LIBRARIES ${VSMC_LINK_LIBRARIES}
+            /opt/intel/lib/intel64/libintlc.so)
+    ENDIF (APPLE)
+ENDIF (NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
