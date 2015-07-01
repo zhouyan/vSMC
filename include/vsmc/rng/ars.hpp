@@ -35,16 +35,16 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/aes_ni.hpp>
 
-/// \brief ARSEngine default blocks
-/// \ingroup Config
-#ifndef VSMC_RNG_ARS_BLOCKS
-#define VSMC_RNG_ARS_BLOCKS 1
-#endif
-
 /// \brief ARSEngine default rounds
 /// \ingroup Config
 #ifndef VSMC_RNG_ARS_ROUNDS
 #define VSMC_RNG_ARS_ROUNDS 5
+#endif
+
+/// \brief ARSEngine default blocks
+/// \ingroup Config
+#ifndef VSMC_RNG_ARS_BLOCKS
+#define VSMC_RNG_ARS_BLOCKS 4
 #endif
 
 namespace vsmc
@@ -58,13 +58,13 @@ class ARSWeylConstant;
 
 template <>
 class ARSWeylConstant<0> : public std::integral_constant<std::uint64_t,
-                               UINT64_C(0xBB67AE8584CAA73B)>
+                               UINT64_C(0x9E3779B97F4A7C15)>
 {
 }; // class ARSWeylConstant
 
 template <>
 class ARSWeylConstant<1> : public std::integral_constant<std::uint64_t,
-                               UINT64_C(0x9E3779B97F4A7C15)>
+                               UINT64_C(0xBB67AE8584CAA73B)>
 {
 }; // class ARSWeylConstant
 
@@ -83,17 +83,11 @@ class ARSWeylConstantTrait : public internal::ARSWeylConstant<I>
 
 /// \brief Default ARSEngine key sequence generator
 /// \ingroup AESNIRNG
-template <typename ResultType>
+template <typename T>
 class ARSKeySeq
 {
     public:
-    using key_type = std::array<ResultType, M128I<ResultType>::size()>;
-
-    ARSKeySeq()
-    {
-        weyl_.set(
-            ARSWeylConstantTrait<0>::value, ARSWeylConstantTrait<1>::value);
-    }
+    using key_type = std::array<T, M128I<T>::size()>;
 
     void key(const key_type &k) { key_.load(k.data()); }
 
@@ -108,37 +102,32 @@ class ARSKeySeq
     template <std::size_t Rp1>
     void generate(std::array<M128I<>, Rp1> &rk) const
     {
+        M128I<std::uint64_t> weyl;
+        weyl.set(
+            ARSWeylConstantTrait<1>::value, ARSWeylConstantTrait<0>::value);
         std::get<0>(rk).value() = key_.value();
-        generate<1>(rk, std::integral_constant<bool, 1 < Rp1>());
+        generate<1>(rk, weyl, std::integral_constant<bool, 1 < Rp1>());
     }
 
-    friend bool operator==(
-        const ARSKeySeq<ResultType> &ks1, const ARSKeySeq<ResultType> &ks2)
+    friend bool operator==(const ARSKeySeq<T> &ks1, const ARSKeySeq<T> &ks2)
     {
-        if (ks1.round_key_ != ks2.round_key_)
-            return false;
-        if (ks1.weyl_ != ks2.weyl_)
-            return false;
         if (ks1.key_ != ks2.key_)
             return false;
         return true;
     }
 
-    friend bool operator!=(
-        const ARSKeySeq<ResultType> &ks1, const ARSKeySeq<ResultType> &ks2)
+    friend bool operator!=(const ARSKeySeq<T> &ks1, const ARSKeySeq<T> &ks2)
     {
         return !(ks1 == ks2);
     }
 
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os, const ARSKeySeq<ResultType> &ks)
+        std::basic_ostream<CharT, Traits> &os, const ARSKeySeq<T> &ks)
     {
         if (!os.good())
             return os;
 
-        os << ks.round_key_ << ' ';
-        os << ks.weyl_ << ' ';
         os << ks.key_;
 
         return os;
@@ -146,14 +135,12 @@ class ARSKeySeq
 
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is, ARSKeySeq<ResultType> &ks)
+        std::basic_istream<CharT, Traits> &is, ARSKeySeq<T> &ks)
     {
         if (!is.good())
             return is;
 
-        ARSKeySeq<ResultType> ks_tmp;
-        is >> std::ws >> ks_tmp.round_key_;
-        is >> std::ws >> ks_tmp.weyl_;
+        ARSKeySeq<T> ks_tmp;
         is >> std::ws >> ks_tmp.key_;
 
         if (is.good())
@@ -163,20 +150,21 @@ class ARSKeySeq
     }
 
     private:
-    M128I<std::uint64_t> weyl_;
     M128I<std::uint64_t> key_;
 
     template <std::size_t, std::size_t Rp1>
-    void generate(std::array<M128I<>, Rp1> &, std::false_type) const
+    void generate(std::array<M128I<>, Rp1> &, const M128I<std::uint64_t> &,
+        std::false_type) const
     {
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate(std::array<M128I<>, Rp1> &rk, std::true_type) const
+    void generate(std::array<M128I<>, Rp1> &rk,
+        const M128I<std::uint64_t> &weyl, std::true_type) const
     {
         std::get<N>(rk) =
-            _mm_add_epi64(std::get<N - 1>(rk).value(), weyl_.value());
-        generate<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
+            _mm_add_epi64(std::get<N - 1>(rk).value(), weyl.value());
+        generate<N + 1>(rk, weyl, std::integral_constant<bool, N + 1 < Rp1>());
     }
 }; // class ARSKeySeq
 
@@ -230,12 +218,12 @@ using ARS_8x64 = ARSEngine<std::uint64_t, VSMC_RNG_ARS_ROUNDS, 8>;
 /// \brief ARS RNG engine with 32-bits integers output, default blocks and
 /// default rounds
 /// \ingroup AESNIRNG
-using ARS = ARS_4x32;
+using ARS = ARSEngine<std::uint32_t>;
 
 /// \brief ARS RNG engine with 64-bits integers output, default blocks and
 /// default rounds
 /// \ingroup AESNIRNG
-using ARS_64 = ARS_4x64;
+using ARS_64 = ARSEngine<std::uint64_t>;
 
 } // namespace vsmc
 

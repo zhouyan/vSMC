@@ -71,6 +71,12 @@
 #define VSMC_RNG_PHILOX_ROUNDS 10
 #endif
 
+/// \brief PhiloxEngine default vector length
+/// \ingroup Config
+#ifndef VSMC_RNG_PHILOX_VECTOR_LENGTH
+#define VSMC_RNG_PHILOX_VECTOR_LENGTH 4
+#endif
+
 namespace vsmc
 {
 
@@ -156,31 +162,31 @@ inline void philox_hilo(std::uint64_t b, std::uint64_t &hi, std::uint64_t &lo)
 
 #endif // VSMC_HAS_INT128
 
-template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 1)>
+template <typename T, std::size_t K, std::size_t N, bool = (N > 1)>
 class PhiloxBumpKey
 {
     public:
-    static void eval(std::array<ResultType, K / 2> &) {}
+    static void eval(std::array<T, K / 2> &) {}
 }; // class PhiloxBumpKey
 
-template <typename ResultType, std::size_t N>
-class PhiloxBumpKey<ResultType, 2, N, true>
+template <typename T, std::size_t N>
+class PhiloxBumpKey<T, 2, N, true>
 {
     public:
-    static void eval(std::array<ResultType, 1> &par)
+    static void eval(std::array<T, 1> &par)
     {
-        std::get<0>(par) += PhiloxWeylConstant<ResultType, 0>::value;
+        std::get<0>(par) += PhiloxWeylConstant<T, 0>::value;
     }
 }; // class PhiloxBumpKey
 
-template <typename ResultType, std::size_t N>
-class PhiloxBumpKey<ResultType, 4, N, true>
+template <typename T, std::size_t N>
+class PhiloxBumpKey<T, 4, N, true>
 {
     public:
-    static void eval(std::array<ResultType, 2> &par)
+    static void eval(std::array<T, 2> &par)
     {
-        std::get<0>(par) += PhiloxWeylConstant<ResultType, 0>::value;
-        std::get<1>(par) += PhiloxWeylConstant<ResultType, 1>::value;
+        std::get<0>(par) += PhiloxWeylConstant<T, 0>::value;
+        std::get<1>(par) += PhiloxWeylConstant<T, 1>::value;
     }
 }; // class PhiloxBumpKey
 
@@ -194,25 +200,21 @@ inline void philox_hilo(std::uint32_t b, std::uint32_t &hi, std::uint32_t &lo)
     lo = static_cast<std::uint32_t>(prod);
 }
 
-template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
+template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
 class PhiloxRound
 {
     public:
-    static void eval(
-        std::array<ResultType, K> &, const std::array<ResultType, K / 2> &)
-    {
-    }
+    static void eval(std::array<T, K> &, const std::array<T, K / 2> &) {}
 }; // class PhiloxRound
 
-template <typename ResultType, std::size_t N>
-class PhiloxRound<ResultType, 2, N, true>
+template <typename T, std::size_t N>
+class PhiloxRound<T, 2, N, true>
 {
     public:
-    static void eval(
-        std::array<ResultType, 2> &state, const std::array<ResultType, 1> &par)
+    static void eval(std::array<T, 2> &state, const std::array<T, 1> &par)
     {
-        ResultType hi = 0;
-        ResultType lo = 0;
+        T hi = 0;
+        T lo = 0;
         philox_hilo<2, 0>(std::get<0>(state), hi, lo);
         hi ^= std::get<0>(par);
         std::get<0>(state) = hi ^ std::get<1>(state);
@@ -220,17 +222,16 @@ class PhiloxRound<ResultType, 2, N, true>
     }
 }; // class PhiloxRound
 
-template <typename ResultType, std::size_t N>
-class PhiloxRound<ResultType, 4, N, true>
+template <typename T, std::size_t N>
+class PhiloxRound<T, 4, N, true>
 {
     public:
-    static void eval(
-        std::array<ResultType, 4> &state, const std::array<ResultType, 2> &par)
+    static void eval(std::array<T, 4> &state, const std::array<T, 2> &par)
     {
-        ResultType hi0 = 0;
-        ResultType lo1 = 0;
-        ResultType hi2 = 0;
-        ResultType lo3 = 0;
+        T hi0 = 0;
+        T lo1 = 0;
+        T hi2 = 0;
+        T lo3 = 0;
         philox_hilo<4, 1>(std::get<2>(state), hi0, lo1);
         philox_hilo<4, 0>(std::get<0>(state), hi2, lo3);
 
@@ -247,7 +248,7 @@ class PhiloxRound<ResultType, 4, N, true>
 
 /// \brief Philox RNG engine
 /// \ingroup Philox
-template <typename ResultType, std::size_t K,
+template <typename ResultType, std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
 class PhiloxEngine
 {
@@ -462,11 +463,11 @@ using Philox4x64 = PhiloxEngine<std::uint64_t, 4>;
 
 /// \brief The default 32-bits Philox engine
 /// \ingroup Philox
-using Philox = Philox4x32;
+using Philox = PhiloxEngine<std::uint32_t>;
 
 /// \brief The default 64-bits Philox engine
 /// \ingroup Philox
-using Philox_64 = Philox4x64;
+using Philox_64 = PhiloxEngine<std::uint64_t>;
 
 } // namespace vsmc
 

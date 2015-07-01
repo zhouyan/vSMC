@@ -44,7 +44,7 @@
 /// \brief AESEngine default blocks
 /// \ingroup Config
 #ifndef VSMC_RNG_AES_BLOCKS
-#define VSMC_RNG_AES_BLOCKS 1
+#define VSMC_RNG_AES_BLOCKS 4
 #endif
 
 namespace vsmc
@@ -343,7 +343,7 @@ class AESKeyInit
     }
 }; // class AESKeyInit
 
-template <typename ResultType, std::size_t Rounds, typename KeySeqGenerator>
+template <typename T, std::size_t Rounds, typename KeySeqGenerator>
 class AESKeySeq
 {
     public:
@@ -360,9 +360,8 @@ class AESKeySeq
 
     void generate(std::array<M128I<>, Rounds + 1> &rk) const { rk = key_seq_; }
 
-    friend bool operator==(
-        const AESKeySeq<ResultType, Rounds, KeySeqGenerator> &ks1,
-        const AESKeySeq<ResultType, Rounds, KeySeqGenerator> &ks2)
+    friend bool operator==(const AESKeySeq<T, Rounds, KeySeqGenerator> &ks1,
+        const AESKeySeq<T, Rounds, KeySeqGenerator> &ks2)
     {
         if (ks1.key_seq_ != ks2.key_seq_)
             return false;
@@ -371,9 +370,8 @@ class AESKeySeq
         return true;
     }
 
-    friend bool operator!=(
-        const AESKeySeq<ResultType, Rounds, KeySeqGenerator> &ks1,
-        const AESKeySeq<ResultType, Rounds, KeySeqGenerator> &ks2)
+    friend bool operator!=(const AESKeySeq<T, Rounds, KeySeqGenerator> &ks1,
+        const AESKeySeq<T, Rounds, KeySeqGenerator> &ks2)
     {
         return !(ks1 == ks2);
     }
@@ -381,7 +379,7 @@ class AESKeySeq
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const AESKeySeq<ResultType, Rounds, KeySeqGenerator> &ks)
+        const AESKeySeq<T, Rounds, KeySeqGenerator> &ks)
     {
         if (!os.good())
             return os;
@@ -395,12 +393,12 @@ class AESKeySeq
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        AESKeySeq<ResultType, Rounds, KeySeqGenerator> &ks)
+        AESKeySeq<T, Rounds, KeySeqGenerator> &ks)
     {
         if (!is.good())
             return is;
 
-        AESKeySeq<ResultType, Rounds, KeySeqGenerator> ks_tmp;
+        AESKeySeq<T, Rounds, KeySeqGenerator> ks_tmp;
         is >> std::ws >> ks_tmp.key_seq_;
         is >> std::ws >> ks_tmp.key_;
 
@@ -415,11 +413,11 @@ class AESKeySeq
     key_type key_;
 }; // class AESKeySeq
 
-template <typename ResultType>
+template <typename T>
 class AES128KeySeqGenerator
 {
     public:
-    using key_type = std::array<ResultType, 16 / sizeof(ResultType)>;
+    using key_type = std::array<T, 16 / sizeof(T)>;
 
     template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<M128I<>, Rp1> &key_seq)
@@ -462,11 +460,11 @@ class AES128KeySeqGenerator
     }
 }; // class AES128KeySeq
 
-template <typename ResultType>
+template <typename T>
 class AES192KeySeqGenerator
 {
     public:
-    using key_type = std::array<ResultType, 24 / sizeof(ResultType)>;
+    using key_type = std::array<T, 24 / sizeof(T)>;
 
     template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<M128I<>, Rp1> &key_seq)
@@ -582,18 +580,18 @@ class AES192KeySeqGenerator
     }
 }; // class AES192KeySeq
 
-template <typename ResultType>
+template <typename T>
 class AES256KeySeqGenerator
 {
     public:
-    using key_type = std::array<ResultType, 32 / sizeof(ResultType)>;
+    using key_type = std::array<T, 32 / sizeof(T)>;
 
     template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<M128I<>, Rp1> &key_seq)
     {
         std::array<__m128i, Rp1> ks;
         AESKeyInit::eval<0, 0>(key, ks, xmm1_);
-        AESKeyInit::eval<16 / sizeof(ResultType), 1>(key, ks, xmm3_);
+        AESKeyInit::eval<16 / sizeof(T), 1>(key, ks, xmm3_);
         generate_seq<2>(ks, std::integral_constant<bool, 2 < Rp1>());
         std::memcpy(key_seq.data(), ks.data(), sizeof(__m128i) * Rp1);
     }
@@ -730,11 +728,11 @@ using AES128_8x64 = AES128Engine<std::uint64_t, 8>;
 
 /// \brief AES-128 RNG engine with 32-bits integers output and default blocks
 /// \ingroup AESNIRNG
-using AES128 = AES128_4x32;
+using AES128 = AES128Engine<std::uint32_t>;
 
 /// \brief AES-128 RNG engine with 64-bits integers output and default blocks
 /// \ingroup AESNIRNG
-using AES128_64 = AES128_4x64;
+using AES128_64 = AES128Engine<std::uint64_t>;
 
 /// \brief AES-192 RNG engine with 32-bits integers output and 1 block
 /// \ingroup AESNIRNG
@@ -770,11 +768,11 @@ using AES192_8x64 = AES192Engine<std::uint64_t, 8>;
 
 /// \brief AES-192 RNG engine with 32-bits integers output and default blocks
 /// \ingroup AESNIRNG
-using AES192 = AES192_4x32;
+using AES192 = AES192Engine<std::uint32_t>;
 
 /// \brief AES-192 RNG engine with 64-bits integers output and default blocks
 /// \ingroup AESNIRNG
-using AES192_64 = AES192_4x64;
+using AES192_64 = AES192Engine<std::uint64_t>;
 
 /// \brief AES-256 RNG engine with 32-bits integers output and 1 block
 /// \ingroup AESNIRNG
@@ -810,11 +808,11 @@ using AES256_8x64 = AES256Engine<std::uint64_t, 8>;
 
 /// \brief AES-256 RNG engine with 32-bits integers output and default blocks
 /// \ingroup AESNIRNG
-using AES256 = AES256_4x32;
+using AES256 = AES256Engine<std::uint32_t>;
 
 /// \brief AES-256 RNG engine with 64-bits integers output and default blocks
 /// \ingroup AESNIRNG
-using AES256_64 = AES256_4x64;
+using AES256_64 = AES256Engine<std::uint64_t>;
 
 } // namespace vsmc
 

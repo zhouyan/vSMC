@@ -34,6 +34,73 @@
 
 #include <vsmc/internal/common.hpp>
 
+#define VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(                           \
+    Type, CType, op, bin, assign)                                             \
+    template <typename T>                                                     \
+    inline Type &assign(Type &a, const Type &b)                               \
+    {                                                                         \
+        a = a op b;                                                           \
+                                                                              \
+        return a;                                                             \
+    }                                                                         \
+                                                                              \
+    template <typename T>                                                     \
+    inline Type bin(const Type &a, CType b)                                   \
+    {                                                                         \
+        Type x;                                                               \
+        x.set1(b);                                                            \
+                                                                              \
+        return a + x;                                                         \
+    }                                                                         \
+                                                                              \
+    template <typename T>                                                     \
+    inline Type bin(CType a, const Type &b)                                   \
+    {                                                                         \
+        Type x;                                                               \
+        x.set1(a);                                                            \
+                                                                              \
+        return x + b;                                                         \
+    }                                                                         \
+                                                                              \
+    template <typename T>                                                     \
+    inline Type &assign(Type &a, CType b)                                     \
+    {                                                                         \
+        a = a + b;                                                            \
+                                                                              \
+        return a;                                                             \
+    }
+
+#define VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(Type, CType, op, bin, assign) \
+    inline Type &assign(Type &a, const Type &b)                               \
+    {                                                                         \
+        a = a op b;                                                           \
+                                                                              \
+        return a;                                                             \
+    }                                                                         \
+                                                                              \
+    inline Type bin(const Type &a, CType b)                                   \
+    {                                                                         \
+        Type x;                                                               \
+        x.set1(b);                                                            \
+                                                                              \
+        return a + x;                                                         \
+    }                                                                         \
+                                                                              \
+    inline Type bin(CType a, const Type &b)                                   \
+    {                                                                         \
+        Type x;                                                               \
+        x.set1(a);                                                            \
+                                                                              \
+        return x + b;                                                         \
+    }                                                                         \
+                                                                              \
+    inline Type &assign(Type &a, CType b)                                     \
+    {                                                                         \
+        a = a + b;                                                            \
+                                                                              \
+        return a;                                                             \
+    }
+
 #if VSMC_HAS_SSE2
 #include <emmintrin.h>
 
@@ -51,13 +118,6 @@ class M128I
     M128I() = default;
 
     M128I(const __m128i &value) : value_(value) {}
-
-    template <typename T>
-    M128I(T n,
-        typename std::enable_if<std::is_integral<T>::value>::type * = nullptr)
-        : value_(set1(n, std::integral_constant<std::size_t, sizeof(T)>()))
-    {
-    }
 
     template <typename T>
     M128I(const M128I<T> &other)
@@ -411,26 +471,10 @@ inline M128I<T> operator+(const M128I<T> &a, const M128I<T> &b)
 }
 
 template <typename T>
-inline M128I<T> &operator+=(M128I<T> &a, const M128I<T> &b)
-{
-    a = a + b;
-
-    return a;
-}
-
-template <typename T>
 inline M128I<T> operator-(const M128I<T> &a, const M128I<T> &b)
 {
     return internal::m128i_sub(
         a, b, std::integral_constant<std::size_t, sizeof(T)>());
-}
-
-template <typename T>
-inline M128I<T> &operator-=(M128I<T> &a, const M128I<T> &b)
-{
-    a = a - b;
-
-    return a;
 }
 
 template <typename T>
@@ -440,38 +484,14 @@ inline M128I<T> operator&(const M128I<T> &a, const M128I<T> &b)
 }
 
 template <typename T>
-inline M128I<T> &operator&=(M128I<T> &a, const M128I<T> &b)
-{
-    a = a & b;
-
-    return a;
-}
-
-template <typename T>
 inline M128I<T> operator|(const M128I<T> &a, const M128I<T> &b)
 {
     return M128I<T>(_mm_or_si128(a.value(), b.value()));
 }
 
 template <typename T>
-inline M128I<T> &operator|=(M128I<T> &a, const M128I<T> &b)
-{
-    a = a | b;
-
-    return a;
-}
-
-template <typename T>
 inline M128I<T> operator^(const M128I<T> &a, const M128I<T> &b) {
     return M128I<T>(_mm_xor_si128(a.value(), b.value()));
-}
-
-template <typename T>
-inline M128I<T> &operator^=(M128I<T> &a, const M128I<T> &b)
-{
-    a = a ^ b;
-
-    return a;
 }
 
 template <typename T>
@@ -504,6 +524,17 @@ inline M128I<T> operator>>=(M128I<T> &a, int imm8)
     return a;
 }
 
+VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
+    M128I<T>, T, +, operator+, operator+=)
+VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
+    M128I<T>, T, -, operator-, operator-=)
+VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
+    M128I<T>, T, &, operator&, operator&=)
+VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
+    M128I<T>, T, |, operator|, operator|=)
+VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
+    M128I<T>, T, ^, operator^, operator^=)
+
 /// \brief `__m128`
 /// \ingroup SIMD
 class M128
@@ -512,13 +543,6 @@ class M128
     M128() = default;
 
     M128(const __m128 &value) : value_(value) {}
-
-    M128(float e) : value_(_mm_set1_ps(e)) {}
-
-    M128(float e3, float e2, float e1, float e0)
-        : value_(_mm_set_ps(e3, e2, e1, e0))
-    {
-    }
 
     __m128 &value() { return value_; }
     const __m128 &value() const { return value_; }
@@ -582,23 +606,9 @@ inline M128 operator+(const M128 &a, const M128 &b)
     return M128(_mm_add_ps(a.value(), b.value()));
 }
 
-inline M128 &operator+=(M128 &a, const M128 &b)
-{
-    a = a + b;
-
-    return a;
-}
-
 inline M128 operator-(const M128 &a, const M128 &b)
 {
     return M128(_mm_sub_ps(a.value(), b.value()));
-}
-
-inline M128 &operator-=(M128 &a, const M128 &b)
-{
-    a = a - b;
-
-    return a;
 }
 
 inline M128 operator*(const M128 &a, const M128 &b)
@@ -606,96 +616,15 @@ inline M128 operator*(const M128 &a, const M128 &b)
     return M128(_mm_mul_ps(a.value(), b.value()));
 }
 
-inline M128 &operator*=(M128 &a, const M128 &b)
-{
-    a = a * b;
-
-    return a;
-}
-
 inline M128 operator/(const M128 &a, const M128 &b)
 {
     return M128(_mm_div_ps(a.value(), b.value()));
 }
 
-inline M128 &operator/=(M128 &a, const M128 &b)
-{
-    a = a / b;
-
-    return a;
-}
-
-namespace internal
-{
-
-template <typename T>
-inline void convert_m128i_ps(
-    const M128I<T> &n, M128 *f, std::integral_constant<std::size_t, 1>)
-{
-    alignas(16) T a[16];
-    alignas(16) float b[16];
-    n.store_a(a);
-    for (std::size_t i = 0; i != 16; ++i)
-        b[i] = static_cast<float>(a[i]);
-    f[0].load_a(b + 0);
-    f[1].load_a(b + 4);
-    f[2].load_a(b + 8);
-    f[3].load_a(b + 12);
-}
-
-template <typename T>
-inline void convert_m128i_ps(
-    const M128I<T> &n, M128 *f, std::integral_constant<std::size_t, 2>)
-{
-    alignas(16) T a[8];
-    alignas(16) float b[8];
-    n.store_a(a);
-    b[0] = static_cast<float>(a[0]);
-    b[1] = static_cast<float>(a[1]);
-    b[2] = static_cast<float>(a[2]);
-    b[3] = static_cast<float>(a[3]);
-    b[4] = static_cast<float>(a[4]);
-    b[5] = static_cast<float>(a[5]);
-    b[6] = static_cast<float>(a[6]);
-    b[7] = static_cast<float>(a[7]);
-    f[0].load_a(b + 0);
-    f[1].load_a(b + 4);
-}
-
-template <typename T>
-inline void convert_m128i_ps(
-    const M128I<T> &n, M128 *f, std::integral_constant<std::size_t, 4>)
-{
-    alignas(16) T a[4];
-    alignas(16) float b[4];
-    n.store_a(a);
-    b[0] = static_cast<float>(a[0]);
-    b[1] = static_cast<float>(a[1]);
-    b[2] = static_cast<float>(a[2]);
-    b[3] = static_cast<float>(a[3]);
-    f[0].load_a(b);
-}
-
-template <typename T>
-inline void convert_m128i_ps(
-    const M128I<T> &n, M128 *f, std::integral_constant<std::size_t, 8>)
-{
-    alignas(16) T a[2];
-    alignas(16) float b[2];
-    n.store_a(a);
-    b[0] = static_cast<float>(a[0]);
-    b[1] = static_cast<float>(a[1]);
-    f[0].set(0, 0, b[1], b[0]);
-}
-
-} // namespace vsmc::internal
-
-template <typename T>
-inline void convert_m128i_ps(const M128I<T> &n, M128 *f)
-{
-    internal::convert_m128i_ps(
-        n, f, std::integral_constant<std::size_t, sizeof(T)>());
-}
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(M128, float, +, operator+, operator+=)
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(M128, float, -, operator-, operator-=)
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(M128, float, *, operator*, operator*=)
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(M128, float, /, operator/, operator/=)
 
 /// \brief `__m128d`
 /// \ingroup SIMD
@@ -705,10 +634,6 @@ class M128D
     M128D() = default;
 
     M128D(const __m128d &value) : value_(value) {}
-
-    M128D(double e) : value_(_mm_set1_pd(e)) {}
-
-    M128D(double e1, double e0) : value_(_mm_set_pd(e1, e0)) {}
 
     __m128d &value() { return value_; }
     const __m128d &value() const { return value_; }
@@ -762,18 +687,11 @@ class M128D
 
     private:
     __m128d value_;
-}; // class M128
+}; // class M128D
 
 inline M128D operator+(const M128D &a, const M128D &b)
 {
     return M128D(_mm_add_pd(a.value(), b.value()));
-}
-
-inline M128D &operator+=(M128D &a, const M128D &b)
-{
-    a = a + b;
-
-    return a;
 }
 
 inline M128D operator-(const M128D &a, const M128D &b)
@@ -781,23 +699,9 @@ inline M128D operator-(const M128D &a, const M128D &b)
     return M128D(_mm_sub_pd(a.value(), b.value()));
 }
 
-inline M128D &operator-=(M128D &a, const M128D &b)
-{
-    a = a - b;
-
-    return a;
-}
-
 inline M128D operator*(const M128D &a, const M128D &b)
 {
     return M128D(_mm_mul_pd(a.value(), b.value()));
-}
-
-inline M128D &operator*=(M128D &a, const M128D &b)
-{
-    a = a * b;
-
-    return a;
 }
 
 inline M128D operator/(const M128D &a, const M128D &b)
@@ -805,91 +709,14 @@ inline M128D operator/(const M128D &a, const M128D &b)
     return M128D(_mm_div_pd(a.value(), b.value()));
 }
 
-inline M128D &operator/=(M128D &a, const M128D &b)
-{
-    a = a / b;
-
-    return a;
-}
-
-namespace internal
-{
-
-template <typename T>
-inline void convert_m128i_pd(
-    const M128I<T> &n, M128D *f, std::integral_constant<std::size_t, 1>)
-{
-    alignas(16) T a[16];
-    alignas(16) double b[16];
-    n.store_a(a);
-    for (std::size_t i = 0; i != 16; ++i)
-        b[i] = static_cast<double>(a[i]);
-    f[0].load_a(b + 0);
-    f[1].load_a(b + 2);
-    f[2].load_a(b + 4);
-    f[3].load_a(b + 6);
-    f[4].load_a(b + 8);
-    f[5].load_a(b + 10);
-    f[6].load_a(b + 12);
-    f[7].load_a(b + 14);
-}
-
-template <typename T>
-inline void convert_m128i_pd(
-    const M128I<T> &n, M128D *f, std::integral_constant<std::size_t, 2>)
-{
-    alignas(16) T a[8];
-    alignas(16) double b[8];
-    n.store_a(a);
-    b[0] = static_cast<double>(a[0]);
-    b[1] = static_cast<double>(a[1]);
-    b[2] = static_cast<double>(a[2]);
-    b[3] = static_cast<double>(a[3]);
-    b[4] = static_cast<double>(a[4]);
-    b[5] = static_cast<double>(a[5]);
-    b[6] = static_cast<double>(a[6]);
-    b[7] = static_cast<double>(a[7]);
-    f[0].load_a(b + 0);
-    f[1].load_a(b + 2);
-    f[2].load_a(b + 4);
-    f[3].load_a(b + 6);
-}
-
-template <typename T>
-inline void convert_m128i_pd(
-    const M128I<T> &n, M128D *f, std::integral_constant<std::size_t, 4>)
-{
-    alignas(16) T a[4];
-    alignas(16) double b[4];
-    n.store_a(a);
-    b[0] = static_cast<double>(a[0]);
-    b[1] = static_cast<double>(a[1]);
-    b[2] = static_cast<double>(a[2]);
-    b[3] = static_cast<double>(a[3]);
-    f[0].load_a(b + 0);
-    f[1].load_a(b + 2);
-}
-
-template <typename T>
-inline void convert_m128i_pd(
-    const M128I<T> &n, M128D *f, std::integral_constant<std::size_t, 8>)
-{
-    alignas(16) T a[2];
-    alignas(16) double b[2];
-    n.store_a(a);
-    b[0] = static_cast<double>(a[0]);
-    b[1] = static_cast<double>(a[1]);
-    f[0].load_a(b);
-}
-
-} // namespace vsmc::internal
-
-template <typename T>
-inline void convert_m128i_pd(const M128I<T> &n, M128D *f)
-{
-    internal::convert_m128i_pd(
-        n, f, std::integral_constant<std::size_t, sizeof(T)>());
-}
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(
+    M128D, double, +, operator+, operator+=)
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(
+    M128D, double, -, operator-, operator-=)
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(
+    M128D, double, *, operator*, operator*=)
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(
+    M128D, double, /, operator/, operator/=)
 
 #endif // VSMC_HAS_SSE2
 
@@ -907,13 +734,6 @@ class M256I
     M256I() = default;
 
     M256I(const __m256i &value) : value_(value) {}
-
-    template <typename T>
-    M256I(T n,
-        typename std::enable_if<std::is_integral<T>::value>::type * = nullptr)
-    {
-        set1(n);
-    }
 
     template <typename T>
     M256I(const M256I<T> &other)
@@ -1269,26 +1089,10 @@ inline M256I<T> operator+(const M256I<T> &a, const M256I<T> &b)
 }
 
 template <typename T>
-inline M256I<T> &operator+=(M256I<T> &a, const M256I<T> &b)
-{
-    a = a + b;
-
-    return a;
-}
-
-template <typename T>
 inline M256I<T> operator-(const M256I<T> &a, const M256I<T> &b)
 {
     return internal::m256i_sub(
         a, b, std::integral_constant<std::size_t, sizeof(T)>());
-}
-
-template <typename T>
-inline M256I<T> &operator-=(M256I<T> &a, const M256I<T> &b)
-{
-    a = a - b;
-
-    return a;
 }
 
 template <typename T>
@@ -1298,38 +1102,14 @@ inline M256I<T> operator&(const M256I<T> &a, const M256I<T> &b)
 }
 
 template <typename T>
-inline M256I<T> &operator&=(M256I<T> &a, const M256I<T> &b)
-{
-    a = a & b;
-
-    return a;
-}
-
-template <typename T>
 inline M256I<T> operator|(const M256I<T> &a, const M256I<T> &b)
 {
     return M256I<T>(_mm256_or_si256(a.value(), b.value()));
 }
 
 template <typename T>
-inline M256I<T> &operator|=(M256I<T> &a, const M256I<T> &b)
-{
-    a = a | b;
-
-    return a;
-}
-
-template <typename T>
 inline M256I<T> operator^(const M256I<T> &a, const M256I<T> &b) {
     return M256I<T>(_mm256_xor_si256(a.value(), b.value()));
-}
-
-template <typename T>
-inline M256I<T> &operator^=(M256I<T> &a, const M256I<T> &b)
-{
-    a = a ^ b;
-
-    return a;
 }
 
 template <typename T>
@@ -1362,6 +1142,17 @@ inline M256I<T> operator>>=(M256I<T> &a, int imm8)
     return a;
 }
 
+VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
+    M256I<T>, T, +, operator+, operator+=)
+VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
+    M256I<T>, T, -, operator-, operator-=)
+VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
+    M256I<T>, T, &, operator&, operator&=)
+VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
+    M256I<T>, T, |, operator|, operator|=)
+VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
+    M256I<T>, T, ^, operator^, operator^=)
+
 /// \brief `__m256`
 /// \ingroup SIMD
 class M256
@@ -1370,14 +1161,6 @@ class M256
     M256() = default;
 
     M256(const __m256 &value) : value_(value) {}
-
-    M256(float e) : value_(_mm256_set1_ps(e)) {}
-
-    M256(float e7, float e6, float e5, float e4, float e3, float e2, float e1,
-        float e0)
-        : value_(_mm256_set_ps(e7, e6, e5, e4, e3, e2, e1, e0))
-    {
-    }
 
     __m256 &value() { return value_; }
     const __m256 &value() const { return value_; }
@@ -1442,23 +1225,9 @@ inline M256 operator+(const M256 &a, const M256 &b)
     return M256(_mm256_add_ps(a.value(), b.value()));
 }
 
-inline M256 &operator+=(M256 &a, const M256 &b)
-{
-    a = a + b;
-
-    return a;
-}
-
 inline M256 operator-(const M256 &a, const M256 &b)
 {
     return M256(_mm256_sub_ps(a.value(), b.value()));
-}
-
-inline M256 &operator-=(M256 &a, const M256 &b)
-{
-    a = a - b;
-
-    return a;
 }
 
 inline M256 operator*(const M256 &a, const M256 &b)
@@ -1466,96 +1235,15 @@ inline M256 operator*(const M256 &a, const M256 &b)
     return M256(_mm256_mul_ps(a.value(), b.value()));
 }
 
-inline M256 &operator*=(M256 &a, const M256 &b)
-{
-    a = a * b;
-
-    return a;
-}
-
 inline M256 operator/(const M256 &a, const M256 &b)
 {
     return M256(_mm256_div_ps(a.value(), b.value()));
 }
 
-inline M256 &operator/=(M256 &a, const M256 &b)
-{
-    a = a / b;
-
-    return a;
-}
-
-namespace internal
-{
-
-template <typename T>
-inline void convert_m256i_ps(
-    const M256I<T> &n, M256 *f, std::integral_constant<std::size_t, 1>)
-{
-    alignas(32) T a[32];
-    alignas(32) float b[32];
-    n.store_a(a);
-    for (std::size_t i = 0; i != 32; ++i)
-        b[i] = static_cast<float>(a[i]);
-    f[0].load_a(b + 0);
-    f[1].load_a(b + 8);
-    f[2].load_a(b + 16);
-    f[3].load_a(b + 24);
-}
-
-template <typename T>
-inline void convert_m256i_ps(
-    const M256I<T> &n, M256 *f, std::integral_constant<std::size_t, 2>)
-{
-    alignas(32) T a[16];
-    alignas(32) float b[16];
-    n.store_a(a);
-    for (std::size_t i = 0; i != 16; ++i)
-        b[i] = static_cast<float>(a[i]);
-    f[0].load_a(b + 0);
-    f[1].load_a(b + 8);
-}
-
-template <typename T>
-inline void convert_m256i_ps(
-    const M256I<T> &n, M256 *f, std::integral_constant<std::size_t, 4>)
-{
-    alignas(32) T a[8];
-    alignas(32) float b[8];
-    n.store_a(a);
-    b[0] = static_cast<float>(a[0]);
-    b[1] = static_cast<float>(a[1]);
-    b[2] = static_cast<float>(a[2]);
-    b[3] = static_cast<float>(a[3]);
-    b[4] = static_cast<float>(a[4]);
-    b[5] = static_cast<float>(a[5]);
-    b[6] = static_cast<float>(a[6]);
-    b[7] = static_cast<float>(a[7]);
-    f[0].load_a(b);
-}
-
-template <typename T>
-inline void convert_m256i_ps(
-    const M256I<T> &n, M256 *f, std::integral_constant<std::size_t, 8>)
-{
-    alignas(32) T a[4];
-    alignas(32) float b[4];
-    n.store_a(a);
-    b[0] = static_cast<float>(a[0]);
-    b[1] = static_cast<float>(a[1]);
-    b[2] = static_cast<float>(a[2]);
-    b[3] = static_cast<float>(a[3]);
-    f[0].set(0, 0, 0, 0, b[3], b[2], b[1], b[0]);
-}
-
-} // namespace vsmc::internal
-
-template <typename T>
-inline void convert_m256i_ps(const M256I<T> &n, M256 *f)
-{
-    internal::convert_m256i_ps(
-        n, f, std::integral_constant<std::size_t, sizeof(T)>());
-}
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(M256, float, +, operator+, operator+=)
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(M256, float, -, operator-, operator-=)
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(M256, float, *, operator*, operator*=)
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(M256, float, /, operator/, operator/=)
 
 /// \brief `__m256d`
 /// \ingroup SIMD
@@ -1565,13 +1253,6 @@ class M256D
     M256D() = default;
 
     M256D(const __m256d &value) : value_(value) {}
-
-    M256D(double e) : value_(_mm256_set1_pd(e)) {}
-
-    M256D(double e3, double e2, double e1, double e0)
-        : value_(_mm256_set_pd(e3, e2, e1, e0))
-    {
-    }
 
     __m256d &value() { return value_; }
     const __m256d &value() const { return value_; }
@@ -1628,18 +1309,11 @@ class M256D
 
     private:
     __m256d value_;
-}; // class M256
+}; // class M256D
 
 inline M256D operator+(const M256D &a, const M256D &b)
 {
     return M256D(_mm256_add_pd(a.value(), b.value()));
-}
-
-inline M256D &operator+=(M256D &a, const M256D &b)
-{
-    a = a + b;
-
-    return a;
 }
 
 inline M256D operator-(const M256D &a, const M256D &b)
@@ -1647,23 +1321,9 @@ inline M256D operator-(const M256D &a, const M256D &b)
     return M256D(_mm256_sub_pd(a.value(), b.value()));
 }
 
-inline M256D &operator-=(M256D &a, const M256D &b)
-{
-    a = a - b;
-
-    return a;
-}
-
 inline M256D operator*(const M256D &a, const M256D &b)
 {
     return M256D(_mm256_mul_pd(a.value(), b.value()));
-}
-
-inline M256D &operator*=(M256D &a, const M256D &b)
-{
-    a = a * b;
-
-    return a;
 }
 
 inline M256D operator/(const M256D &a, const M256D &b)
@@ -1671,82 +1331,14 @@ inline M256D operator/(const M256D &a, const M256D &b)
     return M256D(_mm256_div_pd(a.value(), b.value()));
 }
 
-inline M256D &operator/=(M256D &a, const M256D &b)
-{
-    a = a / b;
-
-    return a;
-}
-
-namespace internal
-{
-
-template <typename T>
-inline void convert_m256i_pd(
-    const M256I<T> &n, M256D *f, std::integral_constant<std::size_t, 1>)
-{
-    alignas(32) T a[32];
-    alignas(32) double b[32];
-    n.store_a(a);
-    for (std::size_t i = 0; i != 32; ++i)
-        b[i] = static_cast<double>(a[i]);
-    f[0].load_a(b + 0);
-    f[1].load_a(b + 8);
-    f[2].load_a(b + 16);
-    f[3].load_a(b + 24);
-}
-
-template <typename T>
-inline void convert_m256i_pd(
-    const M256I<T> &n, M256D *f, std::integral_constant<std::size_t, 2>)
-{
-    alignas(32) T a[16];
-    alignas(32) double b[16];
-    n.store_a(a);
-    for (std::size_t i = 0; i != 16; ++i)
-        b[i] = static_cast<double>(a[i]);
-    f[0].load_a(b + 0);
-    f[1].load_a(b + 8);
-}
-
-template <typename T>
-inline void convert_m256i_pd(
-    const M256I<T> &n, M256D *f, std::integral_constant<std::size_t, 4>)
-{
-    alignas(32) T a[8];
-    alignas(32) double b[8];
-    n.store_a(a);
-    b[0] = static_cast<double>(a[0]);
-    b[1] = static_cast<double>(a[1]);
-    b[2] = static_cast<double>(a[2]);
-    b[3] = static_cast<double>(a[3]);
-    b[4] = static_cast<double>(a[4]);
-    b[5] = static_cast<double>(a[5]);
-    b[6] = static_cast<double>(a[6]);
-    b[7] = static_cast<double>(a[7]);
-    f[0].load_a(b);
-}
-
-template <typename T>
-inline void convert_m256i_pd(
-    const M256I<T> &n, M256D *f, std::integral_constant<std::size_t, 8>)
-{
-    alignas(32) T a[2];
-    alignas(32) double b[2];
-    n.store_a(a);
-    b[0] = static_cast<double>(a[0]);
-    b[1] = static_cast<double>(a[1]);
-    f[0].load_a(b);
-}
-
-} // namespace vsmc::internal
-
-template <typename T>
-inline void convert_m256i_pd(const M256I<T> &n, M256D *f)
-{
-    internal::convert_m256i_pd(
-        n, f, std::integral_constant<std::size_t, sizeof(T)>());
-}
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(
+    M256D, double, +, operator+, operator+=)
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(
+    M256D, double, -, operator-, operator-=)
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(
+    M256D, double, *, operator*, operator*=)
+VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(
+    M256D, double, /, operator/, operator/=)
 
 #endif // VSMC_HAS_AVX2
 

@@ -58,6 +58,12 @@
     {                                                                         \
     }; // class ThreefryRotateConstant
 
+/// \brief ThreefryEngine default vector length
+/// \ingroup Config
+#ifndef VSMC_RNG_THREEFRY_VECTOR_LENGTH
+#define VSMC_RNG_THREEFRY_VECTOR_LENGTH 4
+#endif
+
 /// \brief ThreefryEngine default rounds
 /// \ingroup Config
 #ifndef VSMC_RNG_THREEFRY_ROUNDS
@@ -73,8 +79,8 @@ namespace internal
 template <typename>
 class ThreefryKSConstant;
 
-template <typename T, template <typename> class Wrapper>
-class ThreefryKSConstant<Wrapper<T>> : public ThreefryKSConstant<T>
+template <typename T, template <typename> class SIMD>
+class ThreefryKSConstant<SIMD<T>> : public ThreefryKSConstant<T>
 {
 }; // class ThreefryKSConstant
 
@@ -94,9 +100,9 @@ class ThreefryKSConstant<std::uint64_t>
 template <typename, std::size_t, std::size_t, std::size_t>
 class ThreefryRotateConstant;
 
-template <typename T, template <typename> class Wrapper, std::size_t K,
+template <typename T, template <typename> class SIMD, std::size_t K,
     std::size_t N, std::size_t I>
-class ThreefryRotateConstant<Wrapper<T>, K, N, I>
+class ThreefryRotateConstant<SIMD<T>, K, N, I>
     : public ThreefryRotateConstant<T, K, N, I>
 {
 }; // class ThreefryRotateConstant
@@ -155,27 +161,26 @@ VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 5, 1, 12)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 6, 1, 22)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 7, 1, 32)
 
-template <typename ResultType, std::size_t K>
+template <typename T, std::size_t K>
 class ThreefryInitPar
 {
     public:
-    static void eval(const std::array<ResultType, K> &key,
-        std::array<ResultType, K + 1> &par)
+    static void eval(const std::array<T, K> &key, std::array<T, K + 1> &par)
     {
-        par.back() = ThreefryKSConstant<ResultType>::value;
+        par.back() = ThreefryKSConstant<T>::value;
         par_xor<0>(key, par, std::integral_constant<bool, 0 < K>());
     }
 
     private:
     template <std::size_t>
-    static void par_xor(const std::array<ResultType, K> &,
-        std::array<ResultType, K + 1> &, std::false_type)
+    static void par_xor(
+        const std::array<T, K> &, std::array<T, K + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void par_xor(const std::array<ResultType, K> &key,
-        std::array<ResultType, K + 1> &par, std::true_type)
+    static void par_xor(
+        const std::array<T, K> &key, std::array<T, K + 1> &par, std::true_type)
     {
         std::get<N>(par) = std::get<N>(key);
         par.back() ^= std::get<N>(key);
@@ -183,45 +188,43 @@ class ThreefryInitPar
     }
 }; // class ThreefryInitPar
 
-template <typename ResultType>
-class ThreefryRotateBits
-    : public std::integral_constant<int, sizeof(ResultType) * 8>
+template <typename T>
+class ThreefryRotateBits : public std::integral_constant<int, sizeof(T) * 8>
 {
 }; // class ThreefryRotateBits
 
-template <typename T, template <typename> class Wrapper>
-class ThreefryRotateBits<Wrapper<T>> : public ThreefryRotateBits<T>
+template <typename T, template <typename> class SIMD>
+class ThreefryRotateBits<SIMD<T>> : public ThreefryRotateBits<T>
 {
 }; // class ThreefryRotateBits
 
-template <typename ResultType, int R>
+template <typename T, int R>
 class ThreefryRotateImpl
 {
     public:
-    static ResultType eval(const ResultType &x)
+    static T eval(const T &x)
     {
-        return (x << R) | (x >> (ThreefryRotateBits<ResultType>::value - R));
+        return (x << R) | (x >> (ThreefryRotateBits<T>::value - R));
     }
 }; // class ThreefryRotateImpl
 
-template <typename ResultType, std::size_t K, std::size_t N, bool = (N > 0)>
+template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
 class ThreefryRotate
 {
     public:
-    static void eval(std::array<ResultType, K> &) {}
+    static void eval(std::array<T, K> &) {}
 }; // class ThreefryRotate
 
-template <typename ResultType, std::size_t N>
-class ThreefryRotate<ResultType, 2, N, true>
+template <typename T, std::size_t N>
+class ThreefryRotate<T, 2, N, true>
 {
     public:
-    static void eval(std::array<ResultType, 2> &state)
+    static void eval(std::array<T, 2> &state)
     {
         std::get<0>(state) += std::get<1>(state);
         std::get<1>(state) =
-            ThreefryRotateImpl<ResultType,
-                ThreefryRotateConstant<ResultType, 2, r_,
-                                   0>::value>::eval(std::get<1>(state));
+            ThreefryRotateImpl<T, ThreefryRotateConstant<T, 2, r_,
+                                      0>::value>::eval(std::get<1>(state));
         std::get<1>(state) ^= std::get<0>(state);
     }
 
@@ -229,24 +232,22 @@ class ThreefryRotate<ResultType, 2, N, true>
     static constexpr std::size_t r_ = (N - 1) % 8;
 }; // class ThreefryRotate
 
-template <typename ResultType, std::size_t N>
-class ThreefryRotate<ResultType, 4, N, true>
+template <typename T, std::size_t N>
+class ThreefryRotate<T, 4, N, true>
 {
     public:
-    static void eval(std::array<ResultType, 4> &state)
+    static void eval(std::array<T, 4> &state)
     {
         std::get<0>(state) += std::get<i0_>(state);
         std::get<i0_>(state) =
-            ThreefryRotateImpl<ResultType,
-                ThreefryRotateConstant<ResultType, 4, r_,
-                                   0>::value>::eval(std::get<i0_>(state));
+            ThreefryRotateImpl<T, ThreefryRotateConstant<T, 4, r_,
+                                      0>::value>::eval(std::get<i0_>(state));
         std::get<i0_>(state) ^= std::get<0>(state);
 
         std::get<2>(state) += std::get<i2_>(state);
         std::get<i2_>(state) =
-            ThreefryRotateImpl<ResultType,
-                ThreefryRotateConstant<ResultType, 4, r_,
-                                   1>::value>::eval(std::get<i2_>(state));
+            ThreefryRotateImpl<T, ThreefryRotateConstant<T, 4, r_,
+                                      1>::value>::eval(std::get<i2_>(state));
         std::get<i2_>(state) ^= std::get<2>(state);
     }
 
@@ -256,40 +257,33 @@ class ThreefryRotate<ResultType, 4, N, true>
     static constexpr std::size_t r_ = (N - 1) % 8;
 }; // class ThreefryRotate
 
-template <typename ResultType, std::size_t Inc>
+template <typename T, std::size_t Inc>
 class ThreefryInsertKeyInc
-    : public std::integral_constant<ResultType, static_cast<ResultType>(Inc)>
+    : public std::integral_constant<T, static_cast<T>(Inc)>
 {
 }; // class ThreefryInsertKeyInc
 
-template <typename T, template <typename> class Wrapper, std::size_t Inc>
-class ThreefryInsertKeyInc<Wrapper<T>, Inc>
-    : public ThreefryInsertKeyInc<T, Inc>
+template <typename T, template <typename> class SIMD, std::size_t Inc>
+class ThreefryInsertKeyInc<SIMD<T>, Inc> : public ThreefryInsertKeyInc<T, Inc>
 {
 }; // class ThreefryInsertKeyInc
 
-template <typename ResultType, std::size_t K, std::size_t N,
-    bool = (N % 4 == 0)>
+template <typename T, std::size_t K, std::size_t N, bool = (N % 4 == 0)>
 class ThreefryInsertKey
 {
     public:
-    static void eval(
-        std::array<ResultType, K> &, const std::array<ResultType, K + 1> &)
-    {
-    }
+    static void eval(std::array<T, K> &, const std::array<T, K + 1> &) {}
 }; // class ThreefryInsertKey
 
-template <typename ResultType, std::size_t N>
-class ThreefryInsertKey<ResultType, 2, N, true>
+template <typename T, std::size_t N>
+class ThreefryInsertKey<T, 2, N, true>
 {
     public:
-    static void eval(
-        std::array<ResultType, 2> &state, const std::array<ResultType, 3> &par)
+    static void eval(std::array<T, 2> &state, const std::array<T, 3> &par)
     {
         std::get<0>(state) += std::get<i0_>(par);
         std::get<1>(state) += std::get<i1_>(par);
-        std::get<1>(state) += static_cast<ResultType>(
-            ThreefryInsertKeyInc<ResultType, inc_>::value);
+        std::get<1>(state) += ThreefryInsertKeyInc<T, inc_>::value;
     }
 
     private:
@@ -298,19 +292,17 @@ class ThreefryInsertKey<ResultType, 2, N, true>
     static constexpr std::size_t i1_ = (inc_ + 1) % 3;
 }; // class ThreefryInsertKey
 
-template <typename ResultType, std::size_t N>
-class ThreefryInsertKey<ResultType, 4, N, true>
+template <typename T, std::size_t N>
+class ThreefryInsertKey<T, 4, N, true>
 {
     public:
-    static void eval(
-        std::array<ResultType, 4> &state, const std::array<ResultType, 5> &par)
+    static void eval(std::array<T, 4> &state, const std::array<T, 5> &par)
     {
         std::get<0>(state) += std::get<i0_>(par);
         std::get<1>(state) += std::get<i1_>(par);
         std::get<2>(state) += std::get<i2_>(par);
         std::get<3>(state) += std::get<i3_>(par);
-        std::get<3>(state) += static_cast<ResultType>(
-            ThreefryInsertKeyInc<ResultType, inc_>::value);
+        std::get<3>(state) += ThreefryInsertKeyInc<T, inc_>::value;
     }
 
     private:
@@ -325,7 +317,7 @@ class ThreefryInsertKey<ResultType, 4, N, true>
 
 /// \brief Threefry RNG engine
 /// \ingroup Threefry
-template <typename ResultType, std::size_t K,
+template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
 class ThreefryEngine
 {
@@ -549,11 +541,11 @@ using Threefry4x64 = ThreefryEngine<std::uint64_t, 4>;
 
 /// \brief The default 32-bits Threefry engine
 /// \ingroup Threefry
-using Threefry = Threefry4x32;
+using Threefry = ThreefryEngine<std::uint32_t>;
 
 /// \brief The default 64-bits Threefry engine
 /// \ingroup Threefry
-using Threefry_64 = Threefry4x64;
+using Threefry_64 = ThreefryEngine<std::uint64_t>;
 
 #if VSMC_HAS_SSE2
 
@@ -641,7 +633,7 @@ class ThreefryCtrPackSSE2
 
 /// \brief Threefry RNG engine using SSE2
 /// \ingroup Threefry
-template <typename ResultType, std::size_t K,
+template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
 class ThreefryEngineSSE2
 {
@@ -881,11 +873,11 @@ using Threefry4x64SSE2 = ThreefryEngineSSE2<std::uint64_t, 4>;
 
 /// \brief The default 32-bits Threefry engine using SSE2
 /// \ingroup Threefry
-using ThreefrySSE2 = Threefry4x32SSE2;
+using ThreefrySSE2 = ThreefryEngineSSE2<std::uint32_t>;
 
 /// \brief The default 64-bits ThreefrySSE2 engine using SSE2
 /// \ingroup Threefry
-using ThreefrySSE2_64 = Threefry4x64SSE2;
+using ThreefrySSE2_64 = ThreefryEngineSSE2<std::uint64_t>;
 
 #endif // VSMC_HAS_SSE2
 
@@ -981,7 +973,7 @@ class ThreefryCtrPackAVX2
 
 /// \brief Threefry RNG engine using AVX2
 /// \ingroup Threefry
-template <typename ResultType, std::size_t K,
+template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
 class ThreefryEngineAVX2
 {
@@ -1221,11 +1213,11 @@ using Threefry4x64AVX2 = ThreefryEngineAVX2<std::uint64_t, 4>;
 
 /// \brief The default 32-bits Threefry engine using AVX2
 /// \ingroup Threefry
-using ThreefryAVX2 = Threefry4x32AVX2;
+using ThreefryAVX2 = ThreefryEngineAVX2<std::uint32_t>;
 
 /// \brief The default 64-bits Threefry engine using AVX2
 /// \ingroup Threefry
-using ThreefryAVX2_64 = Threefry4x64AVX2;
+using ThreefryAVX2_64 = ThreefryEngineAVX2<std::uint64_t>;
 
 #endif // VSMC_HAS_AVX2
 
