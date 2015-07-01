@@ -50,9 +50,6 @@
 namespace vsmc
 {
 
-namespace math
-{
-
 /// \defgroup CBLAS1 BLAS level 1 routines and functions
 /// \ingroup CBLAS
 /// @{
@@ -157,16 +154,11 @@ inline void gemv(MatrixOrder order, MatrixTrans trans, std::size_t m,
 
 /// @}
 
-} // namespace vsmc::math
-
 } // namespace vsmc
 
 #ifdef VSMC_CBLAS_INT
 
 namespace vsmc
-{
-
-namespace math
 {
 
 inline float asum(std::size_t n, const float *x, std::size_t incx)
@@ -277,8 +269,6 @@ inline void gemv(MatrixOrder order, MatrixTrans trans, std::size_t m,
         static_cast<VSMC_CBLAS_INT>(incx), beta, y,
         static_cast<VSMC_CBLAS_INT>(incy));
 }
-
-} // namespace vsmc::math
 
 } // namespace vsmc
 

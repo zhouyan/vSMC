@@ -204,7 +204,7 @@ class Path
         buffer_.resize(N);
         double grid = eval_(iter, particle, buffer_.data());
         double integrand =
-            math::dot(N, particle.weight().data(), 1, buffer_.data(), 1);
+            dot(N, particle.weight().data(), 1, buffer_.data(), 1);
         push_back(iter, grid, integrand);
     }
 

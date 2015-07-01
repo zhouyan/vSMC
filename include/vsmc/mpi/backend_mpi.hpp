@@ -110,7 +110,7 @@ class WeightMPI : public WeightBase
         const std::size_t N = static_cast<std::size_t>(this->size());
         const double *const wptr = this->data();
 
-        double less = math::dot(N, wptr, 1, wptr, 1);
+        double less = dot(N, wptr, 1, wptr, 1);
         double gess = 0;
         ::boost::mpi::all_reduce(world_, less, gess, std::plus<double>());
 
@@ -126,7 +126,7 @@ class WeightMPI : public WeightBase
         double gcoeff = 0;
         ::boost::mpi::all_reduce(world_, lcoeff, gcoeff, std::plus<double>());
         gcoeff = 1 / gcoeff;
-        math::vMul(N, gcoeff, wptr, wptr);
+        mul(N, gcoeff, wptr, wptr);
     }
 
     void normalize_log()

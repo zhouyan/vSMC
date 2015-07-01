@@ -67,27 +67,27 @@ inline void stable_distribution_impl_a(RNGType &rng, std::size_t n,
         w[i] = -runif(rng);
     for (std::size_t i = 0; i != n; ++i)
         u[i] = runif(rng) - 0.5;
-    math::vLog1p(n, w, w);
+    log1p(n, w, w);
     for (std::size_t i = 0; i != n; ++i)
         w[i] = -w[i];
-    math::vMul(n, math::pi<RealType>(), u, u);
+    mul(n, pi<RealType>(), u, u);
     for (std::size_t i = 0; i != n; ++i)
         r[i] = u[i] + xi;
-    math::vMul(n, stability, r, r);
-    math::vSin(n, r, b);
-    math::vCos(n, u, c);
-    math::vLn(n, c, c);
-    math::vMul(n, 1 / stability, c, c);
-    math::vSub(n, u, r, d);
-    math::vCos(n, d, d);
-    math::vDiv(n, d, w, d);
-    math::vLn(n, d, d);
-    math::vMul(n, (1 - stability) / stability, d, d);
+    mul(n, stability, r, r);
+    sin(n, r, b);
+    cos(n, u, c);
+    log(n, c, c);
+    mul(n, 1 / stability, c, c);
+    sub(n, u, r, d);
+    cos(n, d, d);
+    div(n, d, w, d);
+    log(n, d, d);
+    mul(n, (1 - stability) / stability, d, d);
     for (std::size_t i = 0; i != n; ++i)
         r[i] = a - c[i];
-    math::vAdd(n, r, d, r);
-    math::vExp(n, r, r);
-    math::vMul(n, b, r, r);
+    add(n, r, d, r);
+    exp(n, r, r);
+    mul(n, b, r, r);
     for (std::size_t i = 0; i != n; ++i)
         r[i] = location + scale * r[i];
 }
@@ -103,25 +103,25 @@ inline void stable_distribution_impl_1(RNGType &rng, std::size_t n,
         w[i] = -runif(rng);
     for (std::size_t i = 0; i != n; ++i)
         u[i] = runif(rng) - 0.5;
-    math::vLog1p(n, w, w);
-    math::vMul(n, -math::pi_by2<RealType>(), w, w);
-    math::vMul(n, math::pi<RealType>(), u, u);
-    math::vTan(n, u, a);
+    log1p(n, w, w);
+    mul(n, -pi_by2<RealType>(), w, w);
+    mul(n, pi<RealType>(), u, u);
+    tan(n, u, a);
     for (std::size_t i = 0; i != n; ++i)
         c[i] = skewness * u[i];
     for (std::size_t i = 0; i != n; ++i)
-        r[i] = math::pi_by2<RealType>() + c[i];
-    math::vMul(n, a, r, a);
-    math::vCos(n, u, b);
-    math::vMul(n, w, b, b);
-    math::vLn(n, b, b);
-    math::vLn(n, r, c);
-    math::vSub(n, b, c, r);
-    math::vMul(n, skewness, r, r);
-    math::vSub(n, a, r, r);
-    RealType offset = location +
-        2 * math::pi_inv<RealType>() * skewness * scale * std::log(scale);
-    RealType coeff = scale / math::pi_by2<RealType>();
+        r[i] = pi_by2<RealType>() + c[i];
+    mul(n, a, r, a);
+    cos(n, u, b);
+    mul(n, w, b, b);
+    log(n, b, b);
+    log(n, r, c);
+    sub(n, b, c, r);
+    mul(n, skewness, r, r);
+    sub(n, a, r, r);
+    RealType offset =
+        location + 2 * pi_inv<RealType>() * skewness * scale * std::log(scale);
+    RealType coeff = scale / pi_by2<RealType>();
     for (std::size_t i = 0; i != n; ++i)
         r[i] = offset + coeff * r[i];
 }
@@ -144,8 +144,7 @@ inline void stable_distribution(RNGType &rng, std::size_t n, RealType *r,
     RealType y[k];
     RealType z[k];
     if (stability < 1 || stability > 1) {
-        RealType zeta =
-            -skewness * std::tan(math::pi_by2<RealType>() * stability);
+        RealType zeta = -skewness * std::tan(pi_by2<RealType>() * stability);
         RealType xi = 1 / stability * std::atan(-zeta);
         RealType a = 0.5 * std::log(1 + zeta * zeta) / stability;
         for (std::size_t i = 0; i != m; ++i) {
@@ -289,13 +288,13 @@ class StableDistribution
 
             if (stability_ < 1 || stability_ > 1) {
                 stability_1_ = false;
-                zeta_ = -skewness_ *
-                    std::tan(math::pi_by2<result_type>() * stability_);
+                zeta_ =
+                    -skewness_ * std::tan(pi_by2<result_type>() * stability_);
                 xi_ = 1 / stability_ * std::atan(-zeta_);
             } else {
                 stability_1_ = true;
                 zeta_ = -std::numeric_limits<result_type>::infinity();
-                xi_ = math::pi_by2<result_type>();
+                xi_ = pi_by2<result_type>();
             }
         }
 
@@ -345,13 +344,11 @@ class StableDistribution
     {
         U01DistributionType<RNGType, RealType> runif;
         result_type w = -std::log(1 - runif(rng));
-        result_type u = (runif(rng) - 0.5) * math::pi<result_type>();
+        result_type u = (runif(rng) - 0.5) * pi<result_type>();
         result_type a =
-            (math::pi_by2<result_type>() + param_.skewness_ * u) * std::tan(u);
-        result_type b =
-            std::log(math::pi_by2<result_type>() * w * std::cos(u));
-        result_type c =
-            std::log(math::pi_by2<result_type>() + param_.skewness_ * u);
+            (pi_by2<result_type>() + param_.skewness_ * u) * std::tan(u);
+        result_type b = std::log(pi_by2<result_type>() * w * std::cos(u));
+        result_type c = std::log(pi_by2<result_type>() + param_.skewness_ * u);
         result_type x = (a - param_.skewness_ * (b - c)) / param_.xi_;
 
         return x;
@@ -362,7 +359,7 @@ class StableDistribution
     {
         U01DistributionType<RNGType, RealType> runif;
         result_type w = -std::log(1 - runif(rng));
-        result_type u = (runif(rng) - 0.5) * math::pi<result_type>();
+        result_type u = (runif(rng) - 0.5) * pi<result_type>();
         result_type a = 0.5 * std::log(1 + param_.zeta_ * param_.zeta_) /
             param_.stability_;
         result_type b = std::sin(param_.stability_ * (u + param_.xi_));
@@ -377,8 +374,8 @@ class StableDistribution
     result_type trans_1(result_type x) const
     {
         return param_.scale_ * x + param_.location_ +
-            2 * math::pi_inv<result_type>() * param_.skewness_ *
-            param_.scale_ * std::log(param_.scale_);
+            2 * pi_inv<result_type>() * param_.skewness_ * param_.scale_ *
+            std::log(param_.scale_);
     }
 
     result_type trans_a(result_type x) const

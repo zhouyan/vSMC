@@ -42,14 +42,14 @@ namespace vsmc
 /// \ingroup Core
 inline double weight_ess(std::size_t N, const double *first)
 {
-    return 1 / math::dot(N, first, 1, first, 1);
+    return 1 / dot(N, first, 1, first, 1);
 }
 
 /// \brief Normalize weights such that the summation is one
 /// \ingroup Core
 static void weight_normalize(std::size_t N, double *first)
 {
-    math::vMul(N, 1 / std::accumulate(first, first + N, 0.0), first, first);
+    ::vsmc::mul(N, 1 / std::accumulate(first, first + N, 0.0), first, first);
 }
 
 /// \brief Normalize logarithm weights such that the maximum is zero
@@ -158,7 +158,7 @@ class Weight
 
     void mul(const double *first)
     {
-        math::vMul(size_, data_.data(), first, data_.data());
+        ::vsmc::mul(size_, data_.data(), first, data_.data());
         post_set();
     }
 
@@ -206,7 +206,7 @@ class Weight
     template <typename InputIter>
     void add_log(InputIter first)
     {
-        math::vLn(size_, data_.data(), data_.data());
+        log(size_, data_.data(), data_.data());
         for (size_type i = 0; i != size_; ++i, ++first)
             data_[i] += *first;
         post_set_log();
@@ -214,8 +214,8 @@ class Weight
 
     void add_log(const double *first)
     {
-        math::vLn(size_, data_.data(), data_.data());
-        math::vAdd(size_, data_.data(), first, data_.data());
+        log(size_, data_.data(), data_.data());
+        add(size_, data_.data(), first, data_.data());
         post_set_log();
     }
 
@@ -228,7 +228,7 @@ class Weight
     template <typename RandomIter>
     void add_log(RandomIter first, int stride)
     {
-        math::vLn(size_, data_.data(), data_.data());
+        log(size_, data_.data(), data_.data());
         for (size_type i = 0; i != size_; ++i, first += stride)
             data_[i] += *first;
         post_set_log();
@@ -260,7 +260,7 @@ class Weight
     void post_set_log()
     {
         normalize_log();
-        math::vExp(size_, data_.data(), data_.data());
+        exp(size_, data_.data(), data_.data());
         post_set();
     }
 

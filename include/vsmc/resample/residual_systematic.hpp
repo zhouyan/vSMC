@@ -53,7 +53,7 @@ class ResampleResidualSystematic
             resample_trans_residual(M, N, weight, resid.data(), integ.data());
         U01SequenceSystematic<RNGType, double> u01seq(R, rng);
         resample_trans_u01_rep(M, R, resid.data(), u01seq, replication);
-        math::vAdd(M, replication, integ.data(), replication);
+        add(M, replication, integ.data(), replication);
     }
 }; // ResampleResidualSystematic
 

@@ -57,9 +57,6 @@
 namespace vsmc
 {
 
-namespace math
-{
-
 /// \brief \f$\pi\f$
 /// \ingroup Constants
 VSMC_DEFINE_MATH_CONSTANTS(pi, 3.141592653589793238462643383279502884197)
@@ -288,8 +285,6 @@ VSMC_DEFINE_MATH_CONSTANTS(
 /// \ingroup Constants
 VSMC_DEFINE_MATH_CONSTANTS(
     ln_ln_2, -0.3665129205816643270124391582326694694543)
-
-} // namespace vsmc::math
 
 } // namespace vsmc
 

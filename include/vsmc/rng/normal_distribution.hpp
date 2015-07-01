@@ -55,15 +55,15 @@ inline void normal_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
     RealType *const u1 = r;
     RealType *const u2 = r + nu;
     u01_distribution(rng, n, r);
-    math::vSub(n, static_cast<RealType>(1), r, r);
-    math::vLn(nu, u1, s);
-    math::vMul(nu, static_cast<RealType>(-2), s, s);
-    math::vSqrt(nu, s, s);
-    math::vMul(nu, math::pi_2<RealType>(), u2, u2);
-    math::vSinCos(nu, u2, u1, u2);
-    math::vMul(nu, stddev, s, s);
-    math::vFMA(nu, mean, s, u1, u1);
-    math::vFMA(nu, mean, s, u2, u2);
+    sub(n, static_cast<RealType>(1), r, r);
+    log(nu, u1, s);
+    mul(nu, static_cast<RealType>(-2), s, s);
+    sqrt(nu, s, s);
+    mul(nu, pi_2<RealType>(), u2, u2);
+    sin_cos(nu, u2, u1, u2);
+    mul(nu, stddev, s, s);
+    fma(nu, mean, s, u1, u1);
+    fma(nu, mean, s, u2, u2);
 }
 
 } // namespace vsmc::internal
@@ -87,7 +87,7 @@ inline void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
         RealType v2 = runif(rng);
         r[n - 1] = mean +
             stddev * std::sqrt(-2 * std::log(v1)) *
-                std::cos(math::pi_2<RealType>() * v2);
+                std::cos(pi_2<RealType>() * v2);
     }
 }
 
@@ -231,7 +231,7 @@ class NormalDistribution
         generate_uv(rng, u, v, std::integral_constant<bool,
                                    internal::RNGBits<RNGType>::value >= 64>());
         result_type s = param_.stddev_ * std::sqrt(-2 * std::log(u));
-        v = std::sin(math::pi_2<result_type>() * v);
+        v = std::sin(pi_2<result_type>() * v);
         u = std::sqrt(1 - v * v);
         param_.v_ = param_.mean_ * v * s;
         param_.saved_ = true;

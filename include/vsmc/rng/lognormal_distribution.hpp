@@ -45,7 +45,7 @@ inline void lognormal_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType m = 0, RealType s = 1)
 {
     normal_distribution(rng, n, r, m, s);
-    math::vExp(n, r, r);
+    exp(n, r, r);
 }
 
 /// \brief Lognormal distribution

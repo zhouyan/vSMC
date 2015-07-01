@@ -141,7 +141,7 @@ class DiscreteDistribution
             if (is.good()) {
                 double sum = 0;
                 if (is_positive(probability, sum)) {
-                    math::vMul(probability.size(), 1 / sum, probability.data(),
+                    mul(probability.size(), 1 / sum, probability.data(),
                         probability.data());
                     param.probability_ = std::move(probability);
                 } else {
@@ -169,7 +169,7 @@ class DiscreteDistribution
 #else
             is_positive(probability_, sum);
 #endif
-            math::vMul(probability_.size(), 1 / sum, probability_.data(),
+            mul(probability_.size(), 1 / sum, probability_.data(),
                 probability_.data());
         }
 

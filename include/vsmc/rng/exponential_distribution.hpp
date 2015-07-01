@@ -51,8 +51,8 @@ inline void exponential_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType lambda)
 {
     u01_distribution(rng, n, r);
-    math::vLn(n, r, r);
-    math::vMul(n, -1 / lambda, r, r);
+    log(n, r, r);
+    mul(n, -1 / lambda, r, r);
 }
 
 } // namespace vsmc::internal

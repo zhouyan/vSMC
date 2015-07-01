@@ -60,8 +60,8 @@ inline void laplace_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
             s[i] = scale;
         }
     }
-    math::vLog1p(n, r, r);
-    math::vMul(n, r, s, r);
+    log1p(n, r, r);
+    mul(n, r, s, r);
     for (std::size_t i = 0; i != n; ++i)
         r[i] += location;
 }

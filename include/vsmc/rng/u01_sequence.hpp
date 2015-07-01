@@ -53,7 +53,7 @@ namespace vsmc
 template <typename RealType>
 inline void u01_sorted(std::size_t N, const RealType *u01, RealType *u01seq)
 {
-    math::vLn(N, u01, u01seq);
+    log(N, u01, u01seq);
     RealType lmax = 0;
     for (std::size_t i = 0; i != N; ++i) {
         lmax += u01seq[i] / (N - i);
