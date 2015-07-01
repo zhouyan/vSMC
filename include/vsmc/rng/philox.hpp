@@ -113,6 +113,16 @@ VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
     std::uint64_t, 4, 1, UINT64_C(0xCA5A826395121157))
 
+template <std::size_t K, std::size_t I>
+inline void philox_hilo(std::uint32_t b, std::uint32_t &hi, std::uint32_t &lo)
+{
+    std::uint64_t prod = static_cast<std::uint64_t>(b) *
+        static_cast<std::uint64_t>(
+                             PhiloxRoundConstant<std::uint32_t, K, I>::value);
+    hi = static_cast<std::uint32_t>(prod >> 32);
+    lo = static_cast<std::uint32_t>(prod);
+}
+
 #if VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
@@ -189,16 +199,6 @@ class PhiloxBumpKey<T, 4, N, true>
         std::get<1>(par) += PhiloxWeylConstant<T, 1>::value;
     }
 }; // class PhiloxBumpKey
-
-template <std::size_t K, std::size_t I>
-inline void philox_hilo(std::uint32_t b, std::uint32_t &hi, std::uint32_t &lo)
-{
-    std::uint64_t prod = static_cast<std::uint64_t>(b) *
-        static_cast<std::uint64_t>(
-                             PhiloxRoundConstant<std::uint32_t, K, I>::value);
-    hi = static_cast<std::uint32_t>(prod >> 32);
-    lo = static_cast<std::uint32_t>(prod);
-}
 
 template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
 class PhiloxRound
