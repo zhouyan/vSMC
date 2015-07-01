@@ -358,11 +358,7 @@ class AESKeySeq
 
     key_type key() const { return key_; }
 
-    template <std::size_t N>
-    const __m128i &get(std::integral_constant<std::size_t, N>) const
-    {
-        return std::get<N>(key_seq_).value();
-    }
+    void generate(std::array<M128I<>, Rounds + 1> &rk) const { rk = key_seq_; }
 
     friend bool operator==(
         const AESKeySeq<ResultType, Rounds, KeySeqGenerator> &ks1,

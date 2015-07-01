@@ -105,19 +105,11 @@ class ARSKeySeq
         return k;
     }
 
-    const __m128i &get(std::integral_constant<std::size_t, 0>)
+    template <std::size_t Rp1>
+    void generate(std::array<M128I<>, Rp1> &rk) const
     {
-        round_key_ = key_;
-
-        return round_key_.value();
-    }
-
-    template <std::size_t N>
-    const __m128i &get(std::integral_constant<std::size_t, N>)
-    {
-        round_key_ += weyl_;
-
-        return round_key_.value();
+        std::get<0>(rk).value() = key_.value();
+        generate<1>(rk, std::integral_constant<bool, 1 < Rp1>());
     }
 
     friend bool operator==(
@@ -171,9 +163,21 @@ class ARSKeySeq
     }
 
     private:
-    M128I<std::uint64_t> round_key_;
     M128I<std::uint64_t> weyl_;
     M128I<std::uint64_t> key_;
+
+    template <std::size_t, std::size_t Rp1>
+    void generate(std::array<M128I<>, Rp1> &, std::false_type) const
+    {
+    }
+
+    template <std::size_t N, std::size_t Rp1>
+    void generate(std::array<M128I<>, Rp1> &rk, std::true_type) const
+    {
+        std::get<N>(rk) =
+            _mm_add_epi64(std::get<N - 1>(rk).value(), weyl_.value());
+        generate<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
+    }
 }; // class ARSKeySeq
 
 /// \brief ARS RNG engine
