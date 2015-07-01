@@ -130,7 +130,7 @@ template <typename T>
 inline T vmath_cdf_norm(T a)
 {
     return static_cast<T>(0.5) +
-        static_cast<T>(0.5) * std::erf(a * sqrt_1by2<T>());
+        static_cast<T>(0.5) * std::erf(a * const_sqrt_1by2<T>());
 }
 
 template <typename T>

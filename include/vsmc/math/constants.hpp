@@ -34,22 +34,22 @@
 
 #define VSMC_DEFINE_MATH_CONSTANTS(name, val)                                 \
     template <typename T>                                                     \
-    inline T name() noexcept                                                  \
+    inline T const_##name() noexcept                                          \
     {                                                                         \
         return static_cast<T>(val##l);                                        \
     }                                                                         \
     template <>                                                               \
-    inline float name<float>() noexcept                                       \
+    inline float const_##name<float>() noexcept                               \
     {                                                                         \
         return val##f;                                                        \
     }                                                                         \
     template <>                                                               \
-    inline double name<double>() noexcept                                     \
+    inline double const_##name<double>() noexcept                             \
     {                                                                         \
         return val;                                                           \
     }                                                                         \
     template <>                                                               \
-    inline long double name<long double>() noexcept                           \
+    inline long double const_##name<long double>() noexcept                   \
     {                                                                         \
         return val##l;                                                        \
     }

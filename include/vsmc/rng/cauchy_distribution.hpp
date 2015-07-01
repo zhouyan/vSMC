@@ -50,7 +50,7 @@ inline void cauchy_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     u01_distribution(rng, n, r);
-    mul(n, pi<RealType>(), r, r);
+    mul(n, const_pi<RealType>(), r, r);
     tan(n, r, r);
     for (std::size_t i = 0; i != n; ++i)
         r[i] = a + b * r[i];
@@ -187,7 +187,7 @@ class CauchyDistribution
         U01DistributionType<RNGType, RealType> runif;
 
         return param_.a_ +
-            param_.b_ * std::tan(pi<result_type>() * runif(rng));
+            param_.b_ * std::tan(const_pi<result_type>() * runif(rng));
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS

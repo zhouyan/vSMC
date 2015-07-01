@@ -70,7 +70,7 @@ inline void stable_distribution_impl_a(RNGType &rng, std::size_t n,
     log1p(n, w, w);
     for (std::size_t i = 0; i != n; ++i)
         w[i] = -w[i];
-    mul(n, pi<RealType>(), u, u);
+    mul(n, const_pi<RealType>(), u, u);
     for (std::size_t i = 0; i != n; ++i)
         r[i] = u[i] + xi;
     mul(n, stability, r, r);
@@ -104,13 +104,13 @@ inline void stable_distribution_impl_1(RNGType &rng, std::size_t n,
     for (std::size_t i = 0; i != n; ++i)
         u[i] = runif(rng) - 0.5;
     log1p(n, w, w);
-    mul(n, -pi_by2<RealType>(), w, w);
-    mul(n, pi<RealType>(), u, u);
+    mul(n, -const_pi_by2<RealType>(), w, w);
+    mul(n, const_pi<RealType>(), u, u);
     tan(n, u, a);
     for (std::size_t i = 0; i != n; ++i)
         c[i] = skewness * u[i];
     for (std::size_t i = 0; i != n; ++i)
-        r[i] = pi_by2<RealType>() + c[i];
+        r[i] = const_pi_by2<RealType>() + c[i];
     mul(n, a, r, a);
     cos(n, u, b);
     mul(n, w, b, b);
@@ -119,9 +119,9 @@ inline void stable_distribution_impl_1(RNGType &rng, std::size_t n,
     sub(n, b, c, r);
     mul(n, skewness, r, r);
     sub(n, a, r, r);
-    RealType offset =
-        location + 2 * pi_inv<RealType>() * skewness * scale * std::log(scale);
-    RealType coeff = scale / pi_by2<RealType>();
+    RealType offset = location +
+        2 * const_pi_inv<RealType>() * skewness * scale * std::log(scale);
+    RealType coeff = scale / const_pi_by2<RealType>();
     for (std::size_t i = 0; i != n; ++i)
         r[i] = offset + coeff * r[i];
 }
@@ -144,7 +144,8 @@ inline void stable_distribution(RNGType &rng, std::size_t n, RealType *r,
     RealType y[k];
     RealType z[k];
     if (stability < 1 || stability > 1) {
-        RealType zeta = -skewness * std::tan(pi_by2<RealType>() * stability);
+        RealType zeta =
+            -skewness * std::tan(const_pi_by2<RealType>() * stability);
         RealType xi = 1 / stability * std::atan(-zeta);
         RealType a = 0.5 * std::log(1 + zeta * zeta) / stability;
         for (std::size_t i = 0; i != m; ++i) {
@@ -288,13 +289,13 @@ class StableDistribution
 
             if (stability_ < 1 || stability_ > 1) {
                 stability_1_ = false;
-                zeta_ =
-                    -skewness_ * std::tan(pi_by2<result_type>() * stability_);
+                zeta_ = -skewness_ *
+                    std::tan(const_pi_by2<result_type>() * stability_);
                 xi_ = 1 / stability_ * std::atan(-zeta_);
             } else {
                 stability_1_ = true;
                 zeta_ = -std::numeric_limits<result_type>::infinity();
-                xi_ = pi_by2<result_type>();
+                xi_ = const_pi_by2<result_type>();
             }
         }
 
@@ -344,11 +345,13 @@ class StableDistribution
     {
         U01DistributionType<RNGType, RealType> runif;
         result_type w = -std::log(1 - runif(rng));
-        result_type u = (runif(rng) - 0.5) * pi<result_type>();
+        result_type u = (runif(rng) - 0.5) * const_pi<result_type>();
         result_type a =
-            (pi_by2<result_type>() + param_.skewness_ * u) * std::tan(u);
-        result_type b = std::log(pi_by2<result_type>() * w * std::cos(u));
-        result_type c = std::log(pi_by2<result_type>() + param_.skewness_ * u);
+            (const_pi_by2<result_type>() + param_.skewness_ * u) * std::tan(u);
+        result_type b =
+            std::log(const_pi_by2<result_type>() * w * std::cos(u));
+        result_type c =
+            std::log(const_pi_by2<result_type>() + param_.skewness_ * u);
         result_type x = (a - param_.skewness_ * (b - c)) / param_.xi_;
 
         return x;
@@ -359,7 +362,7 @@ class StableDistribution
     {
         U01DistributionType<RNGType, RealType> runif;
         result_type w = -std::log(1 - runif(rng));
-        result_type u = (runif(rng) - 0.5) * pi<result_type>();
+        result_type u = (runif(rng) - 0.5) * const_pi<result_type>();
         result_type a = 0.5 * std::log(1 + param_.zeta_ * param_.zeta_) /
             param_.stability_;
         result_type b = std::sin(param_.stability_ * (u + param_.xi_));
@@ -374,8 +377,8 @@ class StableDistribution
     result_type trans_1(result_type x) const
     {
         return param_.scale_ * x + param_.location_ +
-            2 * pi_inv<result_type>() * param_.skewness_ * param_.scale_ *
-            std::log(param_.scale_);
+            2 * const_pi_inv<result_type>() * param_.skewness_ *
+            param_.scale_ * std::log(param_.scale_);
     }
 
     result_type trans_a(result_type x) const

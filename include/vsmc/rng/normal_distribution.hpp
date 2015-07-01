@@ -59,7 +59,7 @@ inline void normal_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
     log(nu, u1, s);
     mul(nu, static_cast<RealType>(-2), s, s);
     sqrt(nu, s, s);
-    mul(nu, pi_2<RealType>(), u2, u2);
+    mul(nu, const_pi_2<RealType>(), u2, u2);
     sin_cos(nu, u2, u1, u2);
     mul(nu, stddev, s, s);
     fma(nu, mean, s, u1, u1);
@@ -87,7 +87,7 @@ inline void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
         RealType v2 = runif(rng);
         r[n - 1] = mean +
             stddev * std::sqrt(-2 * std::log(v1)) *
-                std::cos(pi_2<RealType>() * v2);
+                std::cos(const_pi_2<RealType>() * v2);
     }
 }
 
@@ -231,7 +231,7 @@ class NormalDistribution
         generate_uv(rng, u, v, std::integral_constant<bool,
                                    internal::RNGBits<RNGType>::value >= 64>());
         result_type s = param_.stddev_ * std::sqrt(-2 * std::log(u));
-        v = std::sin(pi_2<result_type>() * v);
+        v = std::sin(const_pi_2<result_type>() * v);
         u = std::sqrt(1 - v * v);
         param_.v_ = param_.mean_ * v * s;
         param_.saved_ = true;
