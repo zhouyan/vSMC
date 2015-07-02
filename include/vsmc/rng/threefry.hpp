@@ -835,23 +835,23 @@ class ThreefryEngineSSE2
         par_type par;
         internal::ThreefryParPackSSE2<ResultType, K>::eval(par_, par);
         internal::ThreefryCtrPackSSE2<ResultType, K>::eval(ctr_, buf.state);
-        generate_buffer<0>(par, buf.state, std::true_type());
+        generate_buffer<0>(buf.state, par, std::true_type());
         buffer_ = buf.result;
     }
 
     template <std::size_t>
-    void generate_buffer(const par_type &, state_type &, std::false_type)
+    void generate_buffer(state_type &, const par_type &, std::false_type)
     {
     }
 
     template <std::size_t N>
     void generate_buffer(
-        const par_type &par, state_type &state, std::true_type)
+        state_type &state, const par_type &par, std::true_type)
     {
         internal::ThreefryRotate<M128I<ResultType>, K, N>::eval(state);
         internal::ThreefryInsertKey<M128I<ResultType>, K, N>::eval(state, par);
         generate_buffer<N + 1>(
-            par, state, std::integral_constant < bool, N<Rounds>());
+            state, par, std::integral_constant < bool, N<Rounds>());
     }
 }; // class ThreefryEngineSSE2
 
@@ -1175,23 +1175,23 @@ class ThreefryEngineAVX2
         par_type par;
         internal::ThreefryParPackAVX2<ResultType, K>::eval(par_, par);
         internal::ThreefryCtrPackAVX2<ResultType, K>::eval(ctr_, buf.state);
-        generate_buffer<0>(par, buf.state, std::true_type());
+        generate_buffer<0>(buf.state, par, std::true_type());
         buffer_ = buf.result;
     }
 
     template <std::size_t>
-    void generate_buffer(const par_type &, state_type &, std::false_type)
+    void generate_buffer(state_type &, const par_type &, std::false_type)
     {
     }
 
     template <std::size_t N>
     void generate_buffer(
-        const par_type &par, state_type &state, std::true_type)
+        state_type &state, const par_type &par, std::true_type)
     {
         internal::ThreefryRotate<M256I<ResultType>, K, N>::eval(state);
         internal::ThreefryInsertKey<M256I<ResultType>, K, N>::eval(state, par);
         generate_buffer<N + 1>(
-            par, state, std::integral_constant < bool, N<Rounds>());
+            state, par, std::integral_constant < bool, N<Rounds>());
     }
 }; // class ThreefryEngineAVX2
 
