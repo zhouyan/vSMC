@@ -329,8 +329,10 @@ class PhiloxEngine
             index_ = 0;
         }
 
-        return buffer_[index_++];
+        return buffer_.front()[index_++];
     }
+
+    void operator()(std::size_t n, result_type *r) { generate_buffer(n, r); }
 
     void discard(result_type nskip)
     {
@@ -417,7 +419,7 @@ class PhiloxEngine
     }
 
     private:
-    std::array<ResultType, K> buffer_;
+    std::array<std::array<ResultType, K>, 1> buffer_;
     key_type key_;
     ctr_type ctr_;
     std::size_t index_;
@@ -425,25 +427,83 @@ class PhiloxEngine
     void generate_buffer()
     {
         internal::increment(ctr_);
-        buffer_ = ctr_;
+        buffer_.front() = ctr_;
         key_type par = key_;
-        generate_buffer<0>(par, std::true_type());
+        generate_buffer<0>(buffer_, par, std::true_type());
     }
 
-    template <std::size_t>
-    void generate_buffer(key_type &, std::false_type)
+    void generate_buffer(std::size_t n, result_type *r)
+    {
+        if (n * sizeof(result_type) <= 32) {
+            for (std::size_t i = 0; i != n; ++i)
+                r[i] = operator()();
+            return;
+        }
+
+        std::size_t p = 32 -
+            static_cast<std::size_t>(reinterpret_cast<std::uintptr_t>(r) % 32);
+        if (p % sizeof(result_type) == 0) {
+            p /= sizeof(result_type);
+            for (std::size_t i = 0; i != p; ++i)
+                r[i] = operator()();
+            n -= p;
+            r += p;
+        }
+
+        const std::size_t Blocks = 8;
+        const std::size_t M = K * Blocks;
+        const std::size_t m = n / M;
+        internal::increment(m, ctr_, reinterpret_cast<ctr_type *>(r));
+        std::array<ctr_type, Blocks> *s =
+            reinterpret_cast<std::array<ctr_type, Blocks> *>(r);
+        for (std::size_t i = 0; i != m; ++i) {
+            key_type par = key_;
+            generate_buffer<0>(s[i], par, std::true_type());
+        }
+        n -= m * M;
+        r += m * M;
+
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = operator()();
+    }
+
+    template <std::size_t, std::size_t Blocks>
+    void generate_buffer(
+        std::array<ctr_type, Blocks> &, key_type &, std::false_type)
     {
     }
 
-    template <std::size_t N>
-    void generate_buffer(key_type &par, std::true_type)
+    template <std::size_t N, std::size_t Blocks>
+    void generate_buffer(
+        std::array<ctr_type, Blocks> &state, key_type &par, std::true_type)
     {
         internal::PhiloxBumpKey<ResultType, K, N>::eval(par);
-        internal::PhiloxRound<ResultType, K, N>::eval(buffer_, par);
+        round<N, 0>(state, par, std::true_type());
         generate_buffer<N + 1>(
-            par, std::integral_constant < bool, N<Rounds>());
+            state, par, std::integral_constant < bool, N<Rounds>());
+    }
+
+    template <std::size_t, std::size_t, std::size_t Blocks>
+    void round(std::array<ctr_type, Blocks> &, key_type &, std::false_type)
+    {
+    }
+
+    template <std::size_t N, std::size_t B, std::size_t Blocks>
+    void round(
+        std::array<ctr_type, Blocks> &state, key_type &par, std::true_type)
+    {
+        internal::PhiloxRound<ResultType, K, N>::eval(std::get<B>(state), par);
+        round<N, B + 1>(
+            state, par, std::integral_constant<bool, B + 1 < Blocks>());
     }
 }; // class PhiloxEngine
+
+template <typename ResultType, std::size_t K, std::size_t Rounds>
+inline void rng_rand(
+    PhiloxEngine<ResultType, K, Rounds> &rng, std::size_t n, ResultType *r)
+{
+    rng(n, r);
+}
 
 /// \brief Philox2x32 RNG engine
 /// \ingroup Philox
