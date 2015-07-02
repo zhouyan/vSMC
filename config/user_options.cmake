@@ -46,16 +46,9 @@ IF (MSVC)
         CACHE PATH "OpenCL lib path")
 ENDIF (MSVC)
 
-IF (NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
-    IF (APPLE)
-        SET (VSMC_LINK_LIBRARIES ${VSMC_LINK_LIBRARIES}
-            /opt/intel/lib/libimf.a)
-        SET (VSMC_LINK_LIBRARIES ${VSMC_LINK_LIBRARIES}
-            /opt/intel/lib/libintlc.dylib)
-    ELSEIF (UNIX)
-        SET (VSMC_LINK_LIBRARIES ${VSMC_LINK_LIBRARIES}
-            /opt/intel/lib/intel64/libimf.a)
-        SET (VSMC_LINK_LIBRARIES ${VSMC_LINK_LIBRARIES}
-            /opt/intel/lib/intel64/libintlc.so)
-    ENDIF (APPLE)
-ENDIF (NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
+IF (UNIX AND NOT APPLE AND NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
+    SET (VSMC_LINK_LIBRARIES ${VSMC_LINK_LIBRARIES}
+        /opt/intel/lib/intel64/libimf.a)
+    SET (VSMC_LINK_LIBRARIES ${VSMC_LINK_LIBRARIES}
+        /opt/intel/lib/intel64/libintlc.so)
+ENDIF (UNIX AND NOT APPLE AND NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
