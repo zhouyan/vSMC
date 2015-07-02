@@ -45,6 +45,7 @@ ENDIF (VSMC_ENABLE_LIBRARY)
 FUNCTION (ADD_RNG_TEST name)
     ADD_VSMC_EXECUTABLE (rng_${name}
         ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp)
+    TARGET_LINK_LIBRARIES (rng_${name} libvsmc)
     ADD_DEPENDENCIES (rng rng_${name})
 ENDFUNCTION (ADD_RNG_TEST)
 

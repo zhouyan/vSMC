@@ -99,13 +99,13 @@ inline T vmath_inv(T a)
 }
 
 template <typename T>
-inline T vmath_inv_sqrt(T a)
+inline T vmath_invsqrt(T a)
 {
     return static_cast<T>(1) / std::sqrt(a);
 }
 
 template <typename T>
-inline T vmath_inv_cbrt(T a)
+inline T vmath_invcbrt(T a)
 {
     return static_cast<T>(1) / std::cbrt(a);
 }
@@ -127,28 +127,34 @@ inline T vmath_pow3o2(T a)
 }
 
 template <typename T>
-inline T vmath_cdf_norm(T a)
+inline T vmath_exp10(T a)
+{
+    return std::exp(a * const_ln_10<T>());
+}
+
+template <typename T>
+inline T vmath_cdfnorm(T a)
 {
     return static_cast<T>(0.5) +
         static_cast<T>(0.5) * std::erf(a * const_sqrt_1by2<T>());
 }
 
 template <typename T>
-inline T vmath_erf_inv(T a)
+inline T vmath_erfinv(T a)
 {
     return static_cast<T>(1) / std::erf(a);
 }
 
 template <typename T>
-inline T vmath_erfc_inv(T a)
+inline T vmath_erfcinv(T a)
 {
-    return vmath_erf_inv(static_cast<T>(1) - a);
+    return vmath_erfinv(static_cast<T>(1) - a);
 }
 
 template <typename T>
-inline T vmath_cdf_norm_inv(T a)
+inline T vmath_cdfnorminv(T a)
 {
-    return static_cast<T>(1) / vmath_cdf_norm(a);
+    return static_cast<T>(1) / vmath_cdfnorm(a);
 }
 
 } // namespace vsmc::internal
@@ -251,13 +257,13 @@ VSMC_DEFINE_MATH_VMATH_SV(/, div)
 VSMC_DEFINE_MATH_VMATH_1(std::sqrt, sqrt)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 1 / \sqrt{a_i}\f$
-VSMC_DEFINE_MATH_VMATH_1(internal::vmath_inv_sqrt, inv_sqrt)
+VSMC_DEFINE_MATH_VMATH_1(internal::vmath_invsqrt, invsqrt)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt[3]{a_i}\f$
 VSMC_DEFINE_MATH_VMATH_1(std::cbrt, cbrt)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 1 / \sqrt[3]{a_i}\f$
-VSMC_DEFINE_MATH_VMATH_1(internal::vmath_inv_cbrt, inv_cbrt)
+VSMC_DEFINE_MATH_VMATH_1(internal::vmath_invcbrt, invcbrt)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{2/3}\f$
 VSMC_DEFINE_MATH_VMATH_1(internal::vmath_pow2o3, pow2o3)
@@ -291,6 +297,9 @@ VSMC_DEFINE_MATH_VMATH_1(std::exp, exp)
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 2^{a_i}\f$
 VSMC_DEFINE_MATH_VMATH_1(std::exp2, exp2)
 
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 10^{a_i}\f$
+VSMC_DEFINE_MATH_VMATH_1(internal::vmath_exp10, exp10)
+
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = e^{a_i} - 1\f$
 VSMC_DEFINE_MATH_VMATH_1(std::expm1, expm1)
 
@@ -320,7 +329,7 @@ VSMC_DEFINE_MATH_VMATH_1(std::sin, sin)
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = \sin(a_i), z_i = \cos(a_i)\f$
 template <typename T>
-inline void sin_cos(std::size_t n, const T *a, T *y, T *z)
+inline void sincos(std::size_t n, const T *a, T *y, T *z)
 {
     sin(n, a, y);
     sqr(n, y, z);
@@ -383,19 +392,19 @@ VSMC_DEFINE_MATH_VMATH_1(std::erfc, erfc)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = 1 - \mathrm{Erfc}(a_i / \sqrt{2}) / 2\f$, the standard Normal CDF
-VSMC_DEFINE_MATH_VMATH_1(internal::vmath_cdf_norm, cdf_norm)
+VSMC_DEFINE_MATH_VMATH_1(internal::vmath_cdfnorm, cdfnorm)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{Erf}^{-1}(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(internal::vmath_erf_inv, erf_inv)
+VSMC_DEFINE_MATH_VMATH_1(internal::vmath_erfinv, erfinv)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = \mathrm{Erf}^{-1}(1 - a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(internal::vmath_erfc_inv, erfc_inv)
+VSMC_DEFINE_MATH_VMATH_1(internal::vmath_erfcinv, erfcinv)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = \sqrt{2}\mathrm{Erf}^{-1}(2a_i - 1)\f$, inverse of the standard
 /// Nomral CDF
-VSMC_DEFINE_MATH_VMATH_1(internal::vmath_cdf_norm_inv, cdf_norm_inv)
+VSMC_DEFINE_MATH_VMATH_1(internal::vmath_cdfnorminv, cdfnorminv)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \ln\Gamma(a_i)\f$,
 /// logarithm of the Gamma function
@@ -455,9 +464,9 @@ inline void linear_frac(std::size_t n, const double *a, const double *b,
 VSMC_DEFINE_MATH_VMATH_VML_1(Inv, inv)
 VSMC_DEFINE_MATH_VMATH_VML_2(Div, div)
 VSMC_DEFINE_MATH_VMATH_VML_1(Sqrt, sqrt)
-VSMC_DEFINE_MATH_VMATH_VML_1(InvSqrt, inv_sqrt)
+VSMC_DEFINE_MATH_VMATH_VML_1(InvSqrt, invsqrt)
 VSMC_DEFINE_MATH_VMATH_VML_1(Cbrt, cbrt)
-VSMC_DEFINE_MATH_VMATH_VML_1(InvCbrt, inv_cbrt)
+VSMC_DEFINE_MATH_VMATH_VML_1(InvCbrt, invcbrt)
 VSMC_DEFINE_MATH_VMATH_VML_1(Pow2o3, pow2o3)
 VSMC_DEFINE_MATH_VMATH_VML_1(Pow3o2, pow3o2)
 VSMC_DEFINE_MATH_VMATH_VML_2(Pow, pow)
@@ -479,11 +488,11 @@ VSMC_DEFINE_MATH_VMATH_VML_1(Log1p, log1p)
 
 VSMC_DEFINE_MATH_VMATH_VML_1(Cos, cos)
 VSMC_DEFINE_MATH_VMATH_VML_1(Sin, sin)
-inline void sin_cos(std::size_t n, const float *a, float *y, float *z)
+inline void sincos(std::size_t n, const float *a, float *y, float *z)
 {
     ::vsSinCos(static_cast<MKL_INT>(n), a, y, z);
 }
-inline void sin_cos(std::size_t n, const double *a, double *y, double *z)
+inline void sincos(std::size_t n, const double *a, double *y, double *z)
 {
     ::vdSinCos(static_cast<MKL_INT>(n), a, y, z);
 }
@@ -502,10 +511,10 @@ VSMC_DEFINE_MATH_VMATH_VML_1(Atanh, atanh)
 
 VSMC_DEFINE_MATH_VMATH_VML_1(Erf, erf)
 VSMC_DEFINE_MATH_VMATH_VML_1(Erfc, erfc)
-VSMC_DEFINE_MATH_VMATH_VML_1(CdfNorm, cdf_norm)
-VSMC_DEFINE_MATH_VMATH_VML_1(ErfInv, erf_inv)
-VSMC_DEFINE_MATH_VMATH_VML_1(ErfcInv, erfc_inv)
-VSMC_DEFINE_MATH_VMATH_VML_1(CdfNormInv, cdf_norm_inv)
+VSMC_DEFINE_MATH_VMATH_VML_1(CdfNorm, cdfnorm)
+VSMC_DEFINE_MATH_VMATH_VML_1(ErfInv, erfinv)
+VSMC_DEFINE_MATH_VMATH_VML_1(ErfcInv, erfcinv)
+VSMC_DEFINE_MATH_VMATH_VML_1(CdfNormInv, cdfnorminv)
 VSMC_DEFINE_MATH_VMATH_VML_1(LGamma, lgamma)
 VSMC_DEFINE_MATH_VMATH_VML_1(TGamma, tgamm)
 
