@@ -571,6 +571,36 @@ inline bool operator==(const M128 &a, const M128 &b)
 
 inline bool operator!=(const M128 &a, const M128 &b) { return !(a == b); }
 
+template <typename CharT, typename Traits>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const M128 &a)
+{
+    if (!os.good())
+        return os;
+
+    std::array<float, 4> sa;
+    a.store_u(sa.data());
+    os << sa;
+
+    return os;
+}
+
+template <typename CharT, typename Traits>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, M128 &a)
+{
+    if (!is.good())
+        return is;
+
+    std::array<float, 4> sa;
+    is >> sa;
+
+    if (is.good())
+        a.load_u(sa.data());
+
+    return is;
+}
+
 inline M128 operator+(const M128 &a, const M128 &b)
 {
     return M128(_mm_add_ps(a.value(), b.value()));
@@ -672,6 +702,36 @@ inline bool operator==(const M128D &a, const M128D &b)
 }
 
 inline bool operator!=(const M128D &a, const M128D &b) { return !(a == b); }
+
+template <typename CharT, typename Traits>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const M128D &a)
+{
+    if (!os.good())
+        return os;
+
+    std::array<double, 2> sa;
+    a.store_u(sa.data());
+    os << sa;
+
+    return os;
+}
+
+template <typename CharT, typename Traits>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, M128D &a)
+{
+    if (!is.good())
+        return is;
+
+    std::array<double, 2> sa;
+    is >> sa;
+
+    if (is.good())
+        a.load_u(sa.data());
+
+    return is;
+}
 
 inline M128D operator+(const M128D &a, const M128D &b)
 {
@@ -1218,6 +1278,36 @@ inline bool operator==(const M256 &a, const M256 &b)
 
 inline bool operator!=(const M256 &a, const M256 &b) { return !(a == b); }
 
+template <typename CharT, typename Traits>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const M256 &a)
+{
+    if (!os.good())
+        return os;
+
+    std::array<float, 8> sa;
+    a.store_u(sa.data());
+    os << sa;
+
+    return os;
+}
+
+template <typename CharT, typename Traits>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, M256 &a)
+{
+    if (!is.good())
+        return is;
+
+    std::array<float, 8> sa;
+    is >> sa;
+
+    if (is.good())
+        a.load_u(sa.data());
+
+    return is;
+}
+
 inline M256 operator+(const M256 &a, const M256 &b)
 {
     return M256(_mm256_add_ps(a.value(), b.value()));
@@ -1322,6 +1412,36 @@ inline bool operator==(const M256D &a, const M256D &b)
 }
 
 inline bool operator!=(const M256D &a, const M256D &b) { return !(a == b); }
+
+template <typename CharT, typename Traits>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const M256D &a)
+{
+    if (!os.good())
+        return os;
+
+    std::array<double, 4> sa;
+    a.store_u(sa.data());
+    os << sa;
+
+    return os;
+}
+
+template <typename CharT, typename Traits>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, M256D &a)
+{
+    if (!is.good())
+        return is;
+
+    std::array<double, 4> sa;
+    is >> sa;
+
+    if (is.good())
+        a.load_u(sa.data());
+
+    return is;
+}
 
 inline M256D operator+(const M256D &a, const M256D &b)
 {
