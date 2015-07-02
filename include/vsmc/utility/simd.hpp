@@ -372,16 +372,6 @@ inline M128I<T> m128i_srli(
 
 } // namespace internal
 
-inline bool operator==(const M128I<> &a, const M128I<> &b)
-{
-    std::array<std::uint64_t, 2> sa;
-    std::array<std::uint64_t, 2> sb;
-    a.store_u(sa.data());
-    b.store_u(sb.data());
-
-    return sa == sb;
-}
-
 template <typename T>
 inline bool operator==(const M128I<T> &a, const M128I<T> &b)
 {
@@ -399,21 +389,6 @@ inline bool operator!=(const M128I<T> &a, const M128I<T> &b)
     return !(a == b);
 }
 
-template <typename CharT, typename Traits>
-inline std::basic_ostream<CharT, Traits> &operator<<(
-    std::basic_ostream<CharT, Traits> &os, const __m128i &a)
-{
-    if (!os.good())
-        return os;
-
-    std::array<std::uint64_t, 2> sa;
-    M128I<> ma(a);
-    ma.store_u(sa.data());
-    os << sa;
-
-    return os;
-}
-
 template <typename CharT, typename Traits, typename T>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const M128I<T> &a)
@@ -426,25 +401,6 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
     os << sa;
 
     return os;
-}
-
-template <typename CharT, typename Traits>
-inline std::basic_istream<CharT, Traits> &operator>>(
-    std::basic_istream<CharT, Traits> &is, __m128i &a)
-{
-    if (!is.good())
-        return is;
-
-    std::array<std::uint64_t, 2> sa;
-    is >> sa;
-
-    if (is.good()) {
-        M128I<> ma;
-        ma.load_u(sa.data());
-        a = ma.value();
-    }
-
-    return is;
 }
 
 template <typename CharT, typename Traits, typename T>
@@ -544,6 +500,8 @@ class M128
 
     M128(const __m128 &value) : value_(value) {}
 
+    static constexpr std::size_t size() { return 4; }
+
     __m128 &value() { return value_; }
     const __m128 &value() const { return value_; }
 
@@ -601,6 +559,18 @@ class M128
     __m128 value_;
 }; // class M128
 
+inline bool operator==(const M128 &a, const M128 &b)
+{
+    std::array<float, 4> sa;
+    std::array<float, 4> sb;
+    a.store_u(sa.data());
+    b.store_u(sb.data());
+
+    return sa == sb;
+}
+
+inline bool operator!=(const M128 &a, const M128 &b) { return !(a == b); }
+
 inline M128 operator+(const M128 &a, const M128 &b)
 {
     return M128(_mm_add_ps(a.value(), b.value()));
@@ -634,6 +604,8 @@ class M128D
     M128D() = default;
 
     M128D(const __m128d &value) : value_(value) {}
+
+    static constexpr std::size_t size() { return 2; }
 
     __m128d &value() { return value_; }
     const __m128d &value() const { return value_; }
@@ -689,6 +661,18 @@ class M128D
     __m128d value_;
 }; // class M128D
 
+inline bool operator==(const M128D &a, const M128D &b)
+{
+    std::array<double, 2> sa;
+    std::array<double, 2> sb;
+    a.store_u(sa.data());
+    b.store_u(sb.data());
+
+    return sa == sb;
+}
+
+inline bool operator!=(const M128D &a, const M128D &b) { return !(a == b); }
+
 inline M128D operator+(const M128D &a, const M128D &b)
 {
     return M128D(_mm_add_pd(a.value(), b.value()));
@@ -717,6 +701,33 @@ VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(
     M128D, double, *, operator*, operator*=)
 VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(
     M128D, double, /, operator/, operator/=)
+
+namespace internal
+{
+
+template <typename RealType>
+class M128TypeTrait;
+
+template <>
+class M128TypeTrait<float>
+{
+    public:
+    using type = M128;
+};
+
+template <>
+class M128TypeTrait<double>
+{
+    public:
+    using type = M128D;
+};
+
+} // namespace vsmc::internal
+
+/// \brief floating point SSE2 type
+template <typename T>
+using M128Type = typename std::conditional<std::is_integral<T>::value,
+    M128I<T>, typename internal::M128TypeTrait<T>::type>::type;
 
 #endif // VSMC_HAS_SSE2
 
@@ -1007,7 +1018,8 @@ inline M256I<T> m256i_srli(
 
 } // namespace vsmc::internal
 
-inline bool operator==(const M256I<> &a, const M256I<> &b)
+template <typename T>
+inline bool operator==(const M256I<T> &a, const M256I<T> &b)
 {
     std::array<std::uint64_t, 4> sa;
     std::array<std::uint64_t, 4> sb;
@@ -1017,19 +1029,10 @@ inline bool operator==(const M256I<> &a, const M256I<> &b)
     return sa == sb;
 }
 
-template <typename CharT, typename Traits>
-inline std::basic_ostream<CharT, Traits> &operator<<(
-    std::basic_ostream<CharT, Traits> &os, const __m256i &a)
+template <typename T>
+inline bool operator!=(const M256I<T> &a, const M256I<T> &b)
 {
-    if (!os.good())
-        return os;
-
-    std::array<std::uint64_t, 4> sa;
-    M256I<> ma(a);
-    ma.store_u(sa.data());
-    os << sa;
-
-    return os;
+    return !(a == b);
 }
 
 template <typename CharT, typename Traits, typename T>
@@ -1044,25 +1047,6 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
     os << sa;
 
     return os;
-}
-
-template <typename CharT, typename Traits>
-inline std::basic_istream<CharT, Traits> &operator>>(
-    std::basic_istream<CharT, Traits> &is, __m256i &a)
-{
-    if (!is.good())
-        return is;
-
-    std::array<std::uint64_t, 4> sa;
-    is >> sa;
-
-    if (is.good()) {
-        M256I<> ma;
-        ma.load_u(sa.data());
-        a = ma.value();
-    }
-
-    return is;
 }
 
 template <typename CharT, typename Traits, typename T>
@@ -1162,6 +1146,8 @@ class M256
 
     M256(const __m256 &value) : value_(value) {}
 
+    static constexpr std::size_t size() { return 8; }
+
     __m256 &value() { return value_; }
     const __m256 &value() const { return value_; }
 
@@ -1220,6 +1206,18 @@ class M256
     __m256 value_;
 }; // class M256
 
+inline bool operator==(const M256 &a, const M256 &b)
+{
+    std::array<float, 8> sa;
+    std::array<float, 8> sb;
+    a.store_u(sa.data());
+    b.store_u(sb.data());
+
+    return sa == sb;
+}
+
+inline bool operator!=(const M256 &a, const M256 &b) { return !(a == b); }
+
 inline M256 operator+(const M256 &a, const M256 &b)
 {
     return M256(_mm256_add_ps(a.value(), b.value()));
@@ -1253,6 +1251,8 @@ class M256D
     M256D() = default;
 
     M256D(const __m256d &value) : value_(value) {}
+
+    static constexpr std::size_t size() { return 4; }
 
     __m256d &value() { return value_; }
     const __m256d &value() const { return value_; }
@@ -1311,6 +1311,18 @@ class M256D
     __m256d value_;
 }; // class M256D
 
+inline bool operator==(const M256D &a, const M256D &b)
+{
+    std::array<double, 4> sa;
+    std::array<double, 4> sb;
+    a.store_u(sa.data());
+    b.store_u(sb.data());
+
+    return sa == sb;
+}
+
+inline bool operator!=(const M256D &a, const M256D &b) { return !(a == b); }
+
 inline M256D operator+(const M256D &a, const M256D &b)
 {
     return M256D(_mm256_add_pd(a.value(), b.value()));
@@ -1339,6 +1351,33 @@ VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(
     M256D, double, *, operator*, operator*=)
 VSMC_DEFINE_UTILITY_SIMD_REAL_BINARY_OP(
     M256D, double, /, operator/, operator/=)
+
+namespace internal
+{
+
+template <typename RealType>
+class M256TypeTrait;
+
+template <>
+class M256TypeTrait<float>
+{
+    public:
+    using type = M256;
+};
+
+template <>
+class M256TypeTrait<double>
+{
+    public:
+    using type = M256D;
+};
+
+} // namespace vsmc::internal
+
+/// \brief floating point SSE2 type
+template <typename T>
+using M256Type = typename std::conditional<std::is_integral<T>::value,
+    M256I<T>, typename internal::M256TypeTrait<T>::type>::type;
 
 #endif // VSMC_HAS_AVX2
 
