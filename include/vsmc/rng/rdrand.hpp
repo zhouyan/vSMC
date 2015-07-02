@@ -144,11 +144,12 @@ class RDRANDEngine
             operator()();
     }
 
-    static constexpr result_type _Min = 0;
-    static constexpr result_type _Max = VSMC_MAX_UINT(result_type);
+    static constexpr result_type min VSMC_MNE() { return 0; }
 
-    static constexpr result_type min VSMC_MNE() { return _Min; }
-    static constexpr result_type max VSMC_MNE() { return _Max; }
+    static constexpr result_type max VSMC_MNE()
+    {
+        return VSMC_MAX_UINT(result_type);
+    }
 
     friend bool operator==(const RDRANDEngine<ResultType, NTrialMax> &,
         const RDRANDEngine<ResultType, NTrialMax> &)

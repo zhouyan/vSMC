@@ -434,11 +434,12 @@ class ThreefryEngine
         index_ = n % K;
     }
 
-    static constexpr result_type _Min = 0;
-    static constexpr result_type _Max = VSMC_MAX_UINT(result_type);
+    static constexpr result_type min VSMC_MNE() { return 0; }
 
-    static constexpr result_type min VSMC_MNE() { return _Min; }
-    static constexpr result_type max VSMC_MNE() { return _Max; }
+    static constexpr result_type max VSMC_MNE()
+    {
+        return VSMC_MAX_UINT(result_type);
+    }
 
     friend bool operator==(const ThreefryEngine<ResultType, K, Rounds> &eng1,
         const ThreefryEngine<ResultType, K, Rounds> &eng2)
@@ -750,11 +751,12 @@ class ThreefryEngineSSE2
         index_ = n % M_;
     }
 
-    static constexpr result_type _Min = 0;
-    static constexpr result_type _Max = VSMC_MAX_UINT(result_type);
+    static constexpr result_type min VSMC_MNE() { return 0; }
 
-    static constexpr result_type min VSMC_MNE() { return _Min; }
-    static constexpr result_type max VSMC_MNE() { return _Max; }
+    static constexpr result_type max VSMC_MNE()
+    {
+        return VSMC_MAX_UINT(result_type);
+    }
 
     friend bool operator==(
         const ThreefryEngineSSE2<ResultType, K, Rounds> &eng1,
@@ -1090,11 +1092,12 @@ class ThreefryEngineAVX2
         index_ = n % M_;
     }
 
-    static constexpr result_type _Min = 0;
-    static constexpr result_type _Max = VSMC_MAX_UINT(result_type);
+    static constexpr result_type min VSMC_MNE() { return 0; }
 
-    static constexpr result_type min VSMC_MNE() { return _Min; }
-    static constexpr result_type max VSMC_MNE() { return _Max; }
+    static constexpr result_type max VSMC_MNE()
+    {
+        return VSMC_MAX_UINT(result_type);
+    }
 
     friend bool operator==(
         const ThreefryEngineAVX2<ResultType, K, Rounds> &eng1,
