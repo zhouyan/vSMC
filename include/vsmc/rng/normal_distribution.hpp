@@ -233,7 +233,7 @@ class NormalDistribution
         result_type s = param_.stddev_ * std::sqrt(-2 * std::log(u));
         v = std::sin(const_pi_2<result_type>() * v);
         u = std::sqrt(1 - v * v);
-        param_.v_ = param_.mean_ * v * s;
+        param_.v_ = param_.mean_ + v * s;
         param_.saved_ = true;
 
         return param_.mean_ + u * s;
