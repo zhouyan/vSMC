@@ -216,8 +216,8 @@ class DiscreteDistribution
     {
     }
 
-    result_type min VSMC_MNE() const { return 0; }
-    result_type max VSMC_MNE() const
+    result_type min () const { return 0; }
+    result_type max () const
     {
         return param_.size() == 0 ? 0 : param_.size() - 1;
     }

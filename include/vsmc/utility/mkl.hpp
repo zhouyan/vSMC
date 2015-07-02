@@ -63,7 +63,7 @@
         "**MKLDFTask** USED WITH A ResultType OTHER THAN float OR double")
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_MKL_VSL_OFFSET(offset)                    \
-    VSMC_RUNTIME_ASSERT((offset < max VSMC_MNE()),                            \
+    VSMC_RUNTIME_ASSERT((offset < max()),                                     \
         "**MKLOffsetDynamic** "                                               \
         "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS")
 
@@ -612,7 +612,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
 
     /// \brief `viRngUniform`
     int uniform(MKL_INT n, int *r, int a = 0,
-        int b = std::numeric_limits<int>::max VSMC_MNE(),
+        int b = std::numeric_limits<int>::max(),
         MKL_INT method = VSL_RNG_METHOD_UNIFORM_STD)
     {
         int status = ::viRngUniform(method, this->get(), n, r, a, b);

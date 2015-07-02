@@ -356,11 +356,14 @@ class PhiloxEngine
         index_ = n % K;
     }
 
-    static constexpr result_type min VSMC_MNE() { return 0; }
-
-    static constexpr result_type max VSMC_MNE()
+    static constexpr result_type min ()
     {
-        return VSMC_MAX_UINT(result_type);
+        return std::numeric_limits<result_type>::min ();
+    }
+
+    static constexpr result_type max ()
+    {
+        return std::numeric_limits<result_type>::max ();
     }
 
     friend bool operator==(const PhiloxEngine<ResultType, K, Rounds> &eng1,

@@ -35,10 +35,6 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/simd.hpp>
 
-#ifndef UINT64_C
-#error __STDC_CONSTANT_MACROS not defined before #<stdint.h>
-#endif
-
 #define VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS                                \
     param_type param() const { return param_; }                               \
     void param(const param_type &par) { param_ = par; }                       \
@@ -47,20 +43,20 @@
     friend bool operator==(                                                   \
         const distribution_type &dist1, const distribution_type &dist2)       \
     {                                                                         \
-        return dist1.param() == dist2.param();                                \
+        return dist1.param_ == dist2.param_;                                  \
     }                                                                         \
                                                                               \
     friend bool operator!=(                                                   \
         const distribution_type &dist1, const distribution_type &dist2)       \
     {                                                                         \
-        return dist1.param() != dist2.param();                                \
+        return dist1.param_ != dist2.param_;                                  \
     }                                                                         \
                                                                               \
     template <typename CharT, typename Traits>                                \
     friend std::basic_ostream<CharT, Traits> &operator<<(                     \
         std::basic_ostream<CharT, Traits> &os, const distribution_type &dist) \
     {                                                                         \
-        os << dist.param();                                                   \
+        os << dist.param_;                                                    \
                                                                               \
         return os;                                                            \
     }                                                                         \
@@ -69,10 +65,7 @@
     friend std::basic_istream<CharT, Traits> &operator>>(                     \
         std::basic_istream<CharT, Traits> &is, distribution_type &dist)       \
     {                                                                         \
-        param_type param;                                                     \
-        is >> param;                                                          \
-        if (is.good())                                                        \
-            dist.param(std::move(param));                                     \
+        is >> dist.param_;                                                    \
                                                                               \
         return is;                                                            \
     }
@@ -85,8 +78,20 @@ namespace internal
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
 
-template <typename RealType>
-bool is_equal(RealType a, RealType b)
+template <typename T>
+inline bool is_equal(const T &a, const T &b)
+{
+    return a == b;
+}
+
+inline bool is_equal(float a, float b)
+{
+    if (a > b || a < b)
+        return false;
+    return true;
+}
+
+inline bool is_equal(double a, double b)
 {
     if (a > b || a < b)
         return false;
@@ -97,14 +102,14 @@ template <int N>
 class RNGBitsNMax
 {
     public:
-    static constexpr std::uint64_t value = VSMC_MAX_UINT(std::uint64_t) >>
-        (64 - N);
+    static constexpr std::uint64_t
+        value = std::numeric_limits<std::uint64_t>::max() >> (64 - N);
 }; // class RNGBitsNMax
 
 template <typename RNGType, int N>
 class RNGBitsN
 {
-    static constexpr std::uint64_t umax = RNGType::max VSMC_MNE();
+    static constexpr std::uint64_t umax = RNGType::max();
     static constexpr std::uint64_t bmax = RNGBitsNMax<N>::value;
 
     public:
@@ -131,9 +136,9 @@ class is_seed_seq
               !std::is_convertible<SeedSeq, V>::value &&
               !std::is_convertible<SeedSeq, W>::value &&
               !std::is_same<typename std::remove_cv<SeedSeq>::type,
-                  U>::value &&
+                                        U>::value &&
               !std::is_same<typename std::remove_cv<SeedSeq>::type,
-                  V>::value &&
+                                        V>::value &&
               !std::is_same<typename std::remove_cv<SeedSeq>::type, W>::value>
 {
 }; // class is_seed_seq
@@ -161,7 +166,7 @@ inline void increment(std::array<T, K> &ctr)
 template <typename T, std::size_t K, T NSkip>
 inline void increment(std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
 {
-    if (ctr.front() < std::numeric_limits<T>::max VSMC_MNE() - NSkip)
+    if (ctr.front() < std::numeric_limits<T>::max() - NSkip)
         ctr.front() += NSkip;
     else
         increment_single<0>(ctr, std::true_type());
@@ -170,7 +175,7 @@ inline void increment(std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
 template <typename T, std::size_t K>
 inline void increment(std::array<T, K> &ctr, T nskip)
 {
-    if (ctr.front() < std::numeric_limits<T>::max VSMC_MNE() - nskip)
+    if (ctr.front() < std::numeric_limits<T>::max() - nskip)
         ctr.front() += nskip;
     else
         increment_single<0>(ctr, std::true_type());
@@ -212,8 +217,7 @@ template <typename T, std::size_t K, std::size_t Blocks>
 inline void increment(
     std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
 {
-    const T limit =
-        std::numeric_limits<T>::max VSMC_MNE() - static_cast<T>(Blocks);
+    const T limit = std::numeric_limits<T>::max() - static_cast<T>(Blocks);
     if (ctr.front() < limit)
         increment_block_safe<0>(ctr, ctr_block, std::true_type());
     else
@@ -300,7 +304,7 @@ inline void increment(
         return;
 
     const std::uint64_t m =
-        static_cast<std::uint64_t>(std::numeric_limits<T>::max VSMC_MNE());
+        static_cast<std::uint64_t>(std::numeric_limits<T>::max());
     const std::uint64_t l = static_cast<std::uint64_t>(ctr.front());
     const std::uint64_t k = static_cast<std::uint64_t>(n);
     if (k < m && l < m - k) {

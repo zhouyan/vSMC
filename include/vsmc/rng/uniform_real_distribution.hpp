@@ -227,8 +227,8 @@ class UniformRealDistribution
     result_type a() const { return param_.a_; }
     result_type b() const { return param_.b_; }
 
-    result_type min VSMC_MNE() const { return param_.a_; }
-    result_type max VSMC_MNE() const { return param_.b_; }
+    result_type min() const { return param_.a_; }
+    result_type max() const { return param_.b_; }
 
     template <typename RNGType>
     result_type operator()(RNGType &rng) const

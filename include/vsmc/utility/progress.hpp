@@ -117,7 +117,7 @@ class Progress
 
     private:
     static constexpr std::size_t max_val_ =
-        std::numeric_limits<std::size_t>::max VSMC_MNE();
+        std::numeric_limits<std::size_t>::max();
 
     StopWatch watch_;
     std::thread *thread_ptr_;
@@ -192,13 +192,10 @@ class Progress
             static_cast<std::size_t>(ptr->watch_.seconds());
 
         std::size_t iter = ptr->iter_;
-
-        std::size_t display_iter = std::min VSMC_MNE(iter, ptr->total_);
-
+        std::size_t display_iter = std::min(iter, ptr->total_);
         std::size_t num_equal = (ptr->length_ == 0 || ptr->total_ == 0) ?
             0 :
             ptr->length_ * display_iter / ptr->total_;
-
         std::size_t percent =
             ptr->total_ == 0 ? 100 : 100 * display_iter / ptr->total_;
 

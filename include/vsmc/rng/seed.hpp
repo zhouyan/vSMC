@@ -153,7 +153,7 @@ class SeedGenerator
 
         divisor_ = div;
         remainder_ = rem;
-        seed_max_ = VSMC_MAX_UINT(skip_type);
+        seed_max_ = std::numeric_limits<skip_type>::max ();
         seed_max_ -= seed_max_ % divisor_;
         seed_max_ /= divisor_;
 
@@ -326,7 +326,7 @@ class SeedGenerator<ID, std::array<T, K>>
 
         divisor_ = div;
         remainder_ = rem;
-        seed_max_.fill(VSMC_MAX_UINT(skip_type));
+        seed_max_.fill(std::numeric_limits<skip_type>::max ());
 
         set(seed_);
     }

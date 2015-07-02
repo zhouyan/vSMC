@@ -316,12 +316,12 @@ class StableDistribution
     result_type location() const { return param_.location_; }
     result_type scale() const { return param_.scale_; }
 
-    result_type min VSMC_MNE() const
+    result_type min() const
     {
         return -std::numeric_limits<result_type>::infinity();
     }
 
-    result_type max VSMC_MNE() const
+    result_type max() const
     {
         return std::numeric_limits<result_type>::infinity();
     }

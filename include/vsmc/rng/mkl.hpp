@@ -44,8 +44,8 @@ namespace internal
 class MKLOffsetZero
 {
     public:
-    static constexpr MKL_INT min VSMC_MNE() { return 0; }
-    static constexpr MKL_INT max VSMC_MNE() { return 0; }
+    static constexpr MKL_INT min () { return 0; }
+    static constexpr MKL_INT max () { return 0; }
     static void set(MKL_INT) {}
     static constexpr MKL_INT get() { return 0; }
 }; // class OffsetZero
@@ -56,8 +56,8 @@ class MKLOffsetDynamic
     public:
     MKLOffsetDynamic() : offset_(0) {}
 
-    static constexpr MKL_INT min VSMC_MNE() { return 0; }
-    static constexpr MKL_INT max VSMC_MNE() { return MaxOffset; }
+    static constexpr MKL_INT min () { return 0; }
+    static constexpr MKL_INT max () { return MaxOffset; }
 
     void set(MKL_INT n)
     {
@@ -83,7 +83,7 @@ class MKLOffset<Dynamic>
 {
     public:
     using type =
-        MKLOffsetDynamic<std::numeric_limits<MKL_INT>::max VSMC_MNE()>;
+        MKLOffsetDynamic<std::numeric_limits<MKL_INT>::max ()>;
 }; // class MKLOffset
 
 template <>
@@ -260,11 +260,14 @@ class MKLEngine
         index_ = M_;
     }
 
-    static constexpr result_type min VSMC_MNE() { return 0; }
-
-    static constexpr result_type max VSMC_MNE()
+    static constexpr result_type min ()
     {
-        return VSMC_MAX_UINT(result_type);
+        return std::numeric_limits<result_type>::min ();
+    }
+
+    static constexpr result_type max ()
+    {
+        return std::numeric_limits<result_type>::max ();
     }
 
     MKLStream &stream() { return stream_; }

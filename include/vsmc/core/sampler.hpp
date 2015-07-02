@@ -231,8 +231,7 @@ class Sampler
     /// \brief Force resample
     Sampler<T> &resample()
     {
-        particle_.resample(
-            resample_op_, std::numeric_limits<double>::max VSMC_MNE());
+        particle_.resample(resample_op_, std::numeric_limits<double>::max());
 
         return *this;
     }

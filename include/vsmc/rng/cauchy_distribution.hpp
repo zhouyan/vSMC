@@ -171,12 +171,12 @@ class CauchyDistribution
     result_type a() const { return param_.a_; }
     result_type b() const { return param_.b_; }
 
-    result_type min VSMC_MNE() const
+    result_type min () const
     {
         return -std::numeric_limits<result_type>::infinity();
     }
 
-    result_type max VSMC_MNE() const
+    result_type max () const
     {
         return std::numeric_limits<result_type>::infinity();
     }

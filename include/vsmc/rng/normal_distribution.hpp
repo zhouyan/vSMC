@@ -208,12 +208,12 @@ class NormalDistribution
     result_type mean() const { return param_.mean_; }
     result_type stddev() const { return param_.stddev_; }
 
-    result_type min VSMC_MNE() const
+    result_type min() const
     {
         return -std::numeric_limits<result_type>::infinity();
     }
 
-    result_type max VSMC_MNE() const
+    result_type max() const
     {
         return std::numeric_limits<result_type>::infinity();
     }
