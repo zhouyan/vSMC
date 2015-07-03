@@ -121,9 +121,8 @@ class RDRANDEngine
     void seed(result_type) {}
 
     template <typename SeedSeq>
-    void seed(SeedSeq &,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
-            RDRANDEngine<ResultType, NTrialMax>>::value>::type * = nullptr)
+    void seed(SeedSeq &, typename std::enable_if<internal::is_seed_seq<SeedSeq,
+                             result_type>::value>::type * = nullptr)
     {
     }
 
@@ -138,20 +137,16 @@ class RDRANDEngine
         return r;
     }
 
-    void discard(std::size_t nskip)
+    void discard(std::size_t) {}
+
+    static constexpr result_type min()
     {
-        for (std::size_t i = 0; i != nskip; ++i)
-            operator()();
+        return std::numeric_limits<result_type>::min();
     }
 
-    static constexpr result_type min ()
+    static constexpr result_type max()
     {
-        return std::numeric_limits<result_type>::min ();
-    }
-
-    static constexpr result_type max ()
-    {
-        return std::numeric_limits<result_type>::max ();
+        return std::numeric_limits<result_type>::max();
     }
 
     friend bool operator==(const RDRANDEngine<ResultType, NTrialMax> &,

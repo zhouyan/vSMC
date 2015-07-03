@@ -89,69 +89,19 @@ class ARSKeySeq
     public:
     using key_type = std::array<T, M128I<T>::size()>;
 
-    void key(const key_type &k) { key_.load(k.data()); }
-
-    key_type key() const
-    {
-        key_type k;
-        key_.store(k.data());
-
-        return k;
-    }
+    void reset(const key_type &) {}
 
     template <std::size_t Rp1>
-    void generate(std::array<M128I<>, Rp1> &rk) const
+    void operator()(const key_type &key, std::array<M128I<>, Rp1> &rk) const
     {
         M128I<std::uint64_t> weyl;
         weyl.set(
             ARSWeylConstantTrait<1>::value, ARSWeylConstantTrait<0>::value);
-        std::get<0>(rk).value() = key_.value();
+        std::get<0>(rk).load(key.data());
         generate<1>(rk, weyl, std::integral_constant<bool, 1 < Rp1>());
     }
 
-    friend bool operator==(const ARSKeySeq<T> &ks1, const ARSKeySeq<T> &ks2)
-    {
-        if (ks1.key_ != ks2.key_)
-            return false;
-        return true;
-    }
-
-    friend bool operator!=(const ARSKeySeq<T> &ks1, const ARSKeySeq<T> &ks2)
-    {
-        return !(ks1 == ks2);
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os, const ARSKeySeq<T> &ks)
-    {
-        if (!os.good())
-            return os;
-
-        os << ks.key_;
-
-        return os;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is, ARSKeySeq<T> &ks)
-    {
-        if (!is.good())
-            return is;
-
-        ARSKeySeq<T> ks_tmp;
-        is >> std::ws >> ks_tmp.key_;
-
-        if (is.good())
-            ks = std::move(ks_tmp);
-
-        return is;
-    }
-
     private:
-    M128I<std::uint64_t> key_;
-
     template <std::size_t, std::size_t Rp1>
     void generate(std::array<M128I<>, Rp1> &, const M128I<std::uint64_t> &,
         std::false_type) const

@@ -319,6 +319,217 @@ inline void increment(
 
 } // namespace vsmc::internal
 
+/// \brief Counter based RNG engine
+/// \ingroup RNG
+template <typename Generator>
+class CounterEngine
+{
+    public:
+    using result_type = typename Generator::result_type;
+    using ctr_type = typename Generator::ctr_type;
+    using key_type = typename Generator::key_type;
+
+    explicit CounterEngine(result_type s = 0) : index_(M_) { seed(s); }
+
+    template <typename SeedSeq>
+    explicit CounterEngine(SeedSeq &seq,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
+            key_type, CounterEngine<Generator>>::value>::type * = nullptr)
+        : index_(M_)
+    {
+        seed(seq);
+    }
+
+    explicit CounterEngine(const key_type &k) : index_(M_) { seed(k); }
+
+    void seed(result_type s)
+    {
+        key_.fill(0);
+        key_.front() = s;
+        reset();
+    }
+
+    template <typename SeedSeq>
+    void seed(
+        SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
+                          result_type, key_type>::value>::type * = nullptr)
+    {
+        seq.generator(key_.begin(), key_.end());
+        reset();
+    }
+
+    void seed(const key_type &k)
+    {
+        key_ = k;
+        reset();
+    }
+
+    const ctr_type &ctr() const { return ctr_; }
+
+    const key_type &key() const { return key_; }
+
+    void ctr(const ctr_type &c)
+    {
+        ctr_ = c;
+        index_ = M_;
+    }
+
+    void key(const key_type &k)
+    {
+        key_ = k;
+        reset();
+    }
+
+    result_type operator()()
+    {
+        if (index_ == M_) {
+            generator_(ctr_, key_, buffer_);
+            index_ = 0;
+        }
+
+        return buffer_[index_++];
+    }
+
+    void operator()(std::size_t n, result_type *r)
+    {
+        if (n * sizeof(result_type) <= 32) {
+            for (std::size_t i = 0; i != n; ++i)
+                r[i] = operator()();
+            return;
+        }
+
+        std::size_t p = 32 -
+            static_cast<std::size_t>(reinterpret_cast<std::uintptr_t>(r) % 32);
+        if (p % sizeof(result_type) == 0) {
+            p /= sizeof(result_type);
+            for (std::size_t i = 0; i != p; ++i)
+                r[i] = operator()();
+            n -= p;
+            r += p;
+        }
+
+        const std::size_t q = generator_(ctr_, key_, n, r);
+        n -= q;
+        r += q;
+
+        const std::size_t m = n / M_;
+        std::array<result_type, M_> *s =
+            reinterpret_cast<std::array<result_type, M_> *>(r);
+        for (std::size_t i = 0; i != m; ++i)
+            generator_(ctr_, key_, s[i]);
+        n -= m * M_;
+        r += m * M_;
+
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = operator()();
+    }
+
+    void discard(result_type nskip)
+    {
+        std::size_t n = static_cast<std::size_t>(nskip);
+        if (index_ + n <= M_) {
+            index_ += n;
+            return;
+        }
+
+        n -= M_ - index_;
+        if (n <= M_) {
+            index_ = M_;
+            operator()();
+            index_ = n;
+            return;
+        }
+
+        internal::increment(ctr_, static_cast<result_type>(n / M_));
+        index_ = M_;
+        operator()();
+        index_ = n % M_;
+    }
+
+    static constexpr result_type min()
+    {
+        return std::numeric_limits<result_type>::min();
+    }
+
+    static constexpr result_type max()
+    {
+        return std::numeric_limits<result_type>::max();
+    }
+
+    friend bool operator==(const CounterEngine<Generator> &eng1,
+        const CounterEngine<Generator> &eng2)
+    {
+        if (eng1.buffer_ != eng2.buffer_)
+            return false;
+        if (eng1.ctr_ != eng2.ctr_)
+            return false;
+        if (eng1.key_ != eng2.key_)
+            return false;
+        if (eng1.index_ != eng2.index_)
+            return false;
+        return true;
+    }
+
+    friend bool operator!=(const CounterEngine<Generator> &eng1,
+        const CounterEngine<Generator> &eng2)
+    {
+        return !(eng1 == eng2);
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const CounterEngine<Generator> &eng)
+    {
+        if (!os.good())
+            return os;
+
+        os << eng.buffer_ << ' ';
+        os << eng.ctr_ << ' ';
+        os << eng.key_ << ' ';
+        os << eng.index_;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is, CounterEngine<Generator> &eng)
+    {
+        if (!is.good())
+            return is;
+
+        CounterEngine<Generator> eng_tmp;
+        is >> std::ws >> eng_tmp.buffer_;
+        is >> std::ws >> eng_tmp.ctr_;
+        is >> std::ws >> eng_tmp.key_;
+        is >> std::ws >> eng_tmp.index_;
+
+        if (is.good()) {
+            eng_tmp.generator_.reset(eng_tmp.key_);
+            eng = std::move(eng_tmp);
+        }
+
+        return is;
+    }
+
+    private:
+    static constexpr std::size_t M_ = Generator::size();
+
+    alignas(32) std::array<result_type, M_> buffer_;
+    ctr_type ctr_;
+    key_type key_;
+    Generator generator_;
+    std::size_t index_;
+
+    void reset()
+    {
+        ctr_.fill(0);
+        generator_.reset(key_);
+        index_ = M_;
+    }
+}; // class CounterEngine
+
 /// \brief Generate random bits
 /// \ingroup RNG
 template <typename RNGType>
@@ -326,6 +537,13 @@ void rng_rand(RNGType &rng, std::size_t n, typename RNGType::result_type *r)
 {
     for (std::size_t i = 0; i != n; ++i)
         r[i] = rng();
+}
+
+template <typename Generator>
+inline void rng_rand(CounterEngine<Generator> &rng, std::size_t n,
+    typename CounterEngine<Generator>::result_type *r)
+{
+    rng(n, r);
 }
 
 } // namespace vsmc

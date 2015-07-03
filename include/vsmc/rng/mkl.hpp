@@ -44,8 +44,8 @@ namespace internal
 class MKLOffsetZero
 {
     public:
-    static constexpr MKL_INT min () { return 0; }
-    static constexpr MKL_INT max () { return 0; }
+    static constexpr MKL_INT min() { return 0; }
+    static constexpr MKL_INT max() { return 0; }
     static void set(MKL_INT) {}
     static constexpr MKL_INT get() { return 0; }
 }; // class OffsetZero
@@ -56,8 +56,8 @@ class MKLOffsetDynamic
     public:
     MKLOffsetDynamic() : offset_(0) {}
 
-    static constexpr MKL_INT min () { return 0; }
-    static constexpr MKL_INT max () { return MaxOffset; }
+    static constexpr MKL_INT min() { return 0; }
+    static constexpr MKL_INT max() { return MaxOffset; }
 
     void set(MKL_INT n)
     {
@@ -82,8 +82,7 @@ template <>
 class MKLOffset<Dynamic>
 {
     public:
-    using type =
-        MKLOffsetDynamic<std::numeric_limits<MKL_INT>::max ()>;
+    using type = MKLOffsetDynamic<std::numeric_limits<MKL_INT>::max()>;
 }; // class MKLOffset
 
 template <>
@@ -227,8 +226,8 @@ class MKLEngine
 
     template <typename SeedSeq>
     void seed(SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
-            MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
+        typename std::enable_if<
+            internal::is_seed_seq<SeedSeq, MKL_UINT>::value>::type * = nullptr)
     {
         MKL_UINT s;
         seq.generate(&s, &s + 1);
@@ -254,20 +253,26 @@ class MKLEngine
         return buffer_[index_++];
     }
 
+    void operator()(std::size_t n, result_type *r)
+    {
+        internal::MKLUniformBits<Bits>::eval(
+            stream_, static_cast<MKL_INT>(n), r);
+    }
+
     void discard(long long nskip)
     {
         internal::MKLDiscard<BRNG, Bits>::eval(stream_, nskip);
         index_ = M_;
     }
 
-    static constexpr result_type min ()
+    static constexpr result_type min()
     {
-        return std::numeric_limits<result_type>::min ();
+        return std::numeric_limits<result_type>::min();
     }
 
-    static constexpr result_type max ()
+    static constexpr result_type max()
     {
-        return std::numeric_limits<result_type>::max ();
+        return std::numeric_limits<result_type>::max();
     }
 
     MKLStream &stream() { return stream_; }
@@ -349,8 +354,7 @@ template <MKL_INT BRNG, std::size_t Bits, typename RealType>
 inline void rng_rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     typename MKLEngine<BRNG, Bits>::result_type *r)
 {
-    internal::MKLUniformBits<Bits>::eval(
-        rng.stream(), static_cast<MKL_INT>(n), r);
+    rng(n, r);
 }
 
 template <MKL_INT BRNG, std::size_t Bits, typename RealType>

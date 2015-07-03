@@ -349,68 +349,20 @@ class AESKeySeq
     public:
     using key_type = typename KeySeqGenerator::key_type;
 
-    void key(const key_type &k)
+    void reset(const key_type &key)
     {
-        KeySeqGenerator gen;
-        gen(k, key_seq_);
-        key_ = k;
+        KeySeqGenerator generator;
+        generator(key, key_seq_);
     }
 
-    key_type key() const { return key_; }
-
-    void generate(std::array<M128I<>, Rounds + 1> &rk) const { rk = key_seq_; }
-
-    friend bool operator==(const AESKeySeq<T, Rounds, KeySeqGenerator> &ks1,
-        const AESKeySeq<T, Rounds, KeySeqGenerator> &ks2)
+    void operator()(
+        const key_type &, std::array<M128I<>, Rounds + 1> &rk) const
     {
-        if (ks1.key_seq_ != ks2.key_seq_)
-            return false;
-        if (ks1.key_ != ks2.key_)
-            return false;
-        return true;
-    }
-
-    friend bool operator!=(const AESKeySeq<T, Rounds, KeySeqGenerator> &ks1,
-        const AESKeySeq<T, Rounds, KeySeqGenerator> &ks2)
-    {
-        return !(ks1 == ks2);
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os,
-        const AESKeySeq<T, Rounds, KeySeqGenerator> &ks)
-    {
-        if (!os.good())
-            return os;
-
-        os << ks.key_eq_ << ' ';
-        os << ks.key_ << ' ';
-
-        return os;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is,
-        AESKeySeq<T, Rounds, KeySeqGenerator> &ks)
-    {
-        if (!is.good())
-            return is;
-
-        AESKeySeq<T, Rounds, KeySeqGenerator> ks_tmp;
-        is >> std::ws >> ks_tmp.key_seq_;
-        is >> std::ws >> ks_tmp.key_;
-
-        if (is.good())
-            ks = std::move(ks_tmp);
-
-        return is;
+        rk = key_seq_;
     }
 
     private:
     std::array<M128I<>, Rounds + 1> key_seq_;
-    key_type key_;
 }; // class AESKeySeq
 
 template <typename T>

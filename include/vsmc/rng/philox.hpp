@@ -41,12 +41,12 @@
 #define VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType)                 \
     VSMC_STATIC_ASSERT((std::is_same<ResultType, std::uint32_t>::value ||     \
                            std::is_same<ResultType, std::uint64_t>::value),   \
-        "**PhiloxEngine** USED WITH ResultType OTHER THAN std::uint32_t OR "  \
-        "std::uint64_t")
+        "**PhiloxGenerator** USED WITH ResultType OTHER THAN std::uint32_t "  \
+        "OR std::uint64_t")
 
 #define VSMC_STATIC_ASSERT_RNG_PHILOX_SIZE(K)                                 \
     VSMC_STATIC_ASSERT((K == 2 || K == 4),                                    \
-        "**PhiloxEngine** USED WITH SIZE OTHER THAN 2 OR 4")
+        "**PhiloxGenerator** USED WITH SIZE OTHER THAN 2 OR 4")
 
 #define VSMC_STATIC_ASSERT_RNG_PHILOX                                         \
     VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType);                    \
@@ -65,13 +65,13 @@
     {                                                                         \
     }; // PhiloxRoundConstant
 
-/// \brief PhiloxEngine default rounds
+/// \brief PhiloxGenerator default rounds
 /// \ingroup Config
 #ifndef VSMC_RNG_PHILOX_ROUNDS
 #define VSMC_RNG_PHILOX_ROUNDS 10
 #endif
 
-/// \brief PhiloxEngine default vector length
+/// \brief PhiloxGenerator default vector length
 /// \ingroup Config
 #ifndef VSMC_RNG_PHILOX_VECTOR_LENGTH
 #define VSMC_RNG_PHILOX_VECTOR_LENGTH 4
@@ -246,268 +246,93 @@ class PhiloxRound<T, 4, N, true>
 
 } // namespace vsmc::internal
 
-/// \brief Philox RNG engine
+/// \brief Philox RNG generator
 /// \ingroup Philox
 template <typename ResultType, std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
-class PhiloxEngine
+class PhiloxGenerator
 {
     public:
     using result_type = ResultType;
-    using key_type = std::array<ResultType, K / 2>;
     using ctr_type = std::array<ResultType, K>;
+    using key_type = std::array<ResultType, K / 2>;
 
-    explicit PhiloxEngine(result_type s = 0) : index_(K)
+    PhiloxGenerator() { VSMC_STATIC_ASSERT_RNG_PHILOX; }
+
+    static constexpr std::size_t size() { return K; }
+
+    void reset(const key_type &) {}
+
+    void operator()(ctr_type &ctr, const key_type &key,
+        std::array<result_type, size()> &buffer) const
     {
-        VSMC_STATIC_ASSERT_RNG_PHILOX;
-        seed(s);
+        union {
+            std::array<ctr_type, 1> state;
+            std::array<result_type, size()> result;
+        } buf;
+
+        internal::increment(ctr);
+        buf.state.front() = ctr;
+        key_type par = key;
+        generate<0>(buf.state, par, std::true_type());
+        buffer = buf.result;
     }
 
-    template <typename SeedSeq>
-    explicit PhiloxEngine(SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
-            key_type, PhiloxEngine<ResultType, K, Rounds>>::value>::type * =
-            nullptr)
-        : index_(K)
+    std::size_t operator()(ctr_type &ctr, const key_type &key, std::size_t n,
+        result_type *r) const
     {
-        VSMC_STATIC_ASSERT_RNG_PHILOX;
-        seed(seq);
-    }
-
-    PhiloxEngine(const key_type &k) : index_(K)
-    {
-        VSMC_STATIC_ASSERT_RNG_PHILOX;
-        seed(k);
-    }
-
-    void seed(result_type s)
-    {
-        ctr_.fill(0);
-        key_.fill(0);
-        key_.front() = s;
-        index_ = K;
-    }
-
-    template <typename SeedSeq>
-    void seed(SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
-            key_type, PhiloxEngine<ResultType, K, Rounds>>::value>::type * =
-            nullptr)
-    {
-        ctr_.fill(0);
-        seq.generate(key_.begin(), key_.end());
-        index_ = K;
-    }
-
-    void seed(const key_type &k)
-    {
-        ctr_.fill(0);
-        key_ = k;
-        index_ = K;
-    }
-
-    ctr_type ctr() const { return ctr_; }
-
-    key_type key() const { return key_; }
-
-    void ctr(const ctr_type &c)
-    {
-        ctr_ = c;
-        index_ = K;
-    }
-
-    void key(const key_type &k)
-    {
-        key_ = k;
-        index_ = K;
-    }
-
-    result_type operator()()
-    {
-        if (index_ == K) {
-            generate_buffer();
-            index_ = 0;
-        }
-
-        return buffer_.front()[index_++];
-    }
-
-    void operator()(std::size_t n, result_type *r) { generate_buffer(n, r); }
-
-    void discard(result_type nskip)
-    {
-        std::size_t n = static_cast<std::size_t>(nskip);
-        if (index_ + n <= K) {
-            index_ += n;
-            return;
-        }
-
-        n -= K - index_;
-        if (n <= K) {
-            index_ = K;
-            operator()();
-            index_ = n;
-            return;
-        }
-
-        internal::increment(ctr_, static_cast<result_type>(n / K));
-        index_ = K;
-        operator()();
-        index_ = n % K;
-    }
-
-    static constexpr result_type min ()
-    {
-        return std::numeric_limits<result_type>::min ();
-    }
-
-    static constexpr result_type max ()
-    {
-        return std::numeric_limits<result_type>::max ();
-    }
-
-    friend bool operator==(const PhiloxEngine<ResultType, K, Rounds> &eng1,
-        const PhiloxEngine<ResultType, K, Rounds> &eng2)
-    {
-        if (eng1.buffer_ != eng2.buffer_)
-            return false;
-        if (eng1.key_ != eng2.key_)
-            return false;
-        if (eng1.ctr_ != eng2.ctr_)
-            return false;
-        if (eng1.index_ != eng2.index_)
-            return false;
-        return true;
-    }
-
-    friend bool operator!=(const PhiloxEngine<ResultType, K, Rounds> &eng1,
-        const PhiloxEngine<ResultType, K, Rounds> &eng2)
-    {
-        return !(eng1 == eng2);
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os,
-        const PhiloxEngine<ResultType, K, Rounds> &eng)
-    {
-        if (!os.good())
-            return os;
-
-        os << eng.buffer_ << ' ';
-        os << eng.key_ << ' ';
-        os << eng.ctr_ << ' ';
-        os << eng.index_;
-
-        return os;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is,
-        PhiloxEngine<ResultType, K, Rounds> &eng)
-    {
-        if (!is.good())
-            return is;
-
-        PhiloxEngine<ResultType, K, Rounds> eng_tmp;
-        is >> std::ws >> eng_tmp.buffer_;
-        is >> std::ws >> eng_tmp.key_;
-        is >> std::ws >> eng_tmp.ctr_;
-        is >> std::ws >> eng_tmp.index_;
-
-        if (is.good())
-            eng = std::move(eng_tmp);
-
-        return is;
-    }
-
-    private:
-    std::array<std::array<ResultType, K>, 1> buffer_;
-    key_type key_;
-    ctr_type ctr_;
-    std::size_t index_;
-
-    void generate_buffer()
-    {
-        internal::increment(ctr_);
-        buffer_.front() = ctr_;
-        key_type par = key_;
-        generate_buffer<0>(buffer_, par, std::true_type());
-    }
-
-    void generate_buffer(std::size_t n, result_type *r)
-    {
-        if (n * sizeof(result_type) <= 32) {
-            for (std::size_t i = 0; i != n; ++i)
-                r[i] = operator()();
-            return;
-        }
-
-        std::size_t p = 32 -
-            static_cast<std::size_t>(reinterpret_cast<std::uintptr_t>(r) % 32);
-        if (p % sizeof(result_type) == 0) {
-            p /= sizeof(result_type);
-            for (std::size_t i = 0; i != p; ++i)
-                r[i] = operator()();
-            n -= p;
-            r += p;
-        }
-
         const std::size_t Blocks = 8;
-        const std::size_t M = K * Blocks;
+        const std::size_t M = size() * Blocks;
         const std::size_t m = n / M;
-        internal::increment(m, ctr_, reinterpret_cast<ctr_type *>(r));
+        internal::increment(m, ctr, reinterpret_cast<ctr_type *>(r));
         std::array<ctr_type, Blocks> *s =
             reinterpret_cast<std::array<ctr_type, Blocks> *>(r);
         for (std::size_t i = 0; i != m; ++i) {
-            key_type par = key_;
-            generate_buffer<0>(s[i], par, std::true_type());
+            key_type par = key;
+            generate<0>(s[i], par, std::true_type());
         }
-        n -= m * M;
-        r += m * M;
 
-        for (std::size_t i = 0; i != n; ++i)
-            r[i] = operator()();
+        return m * M;
     }
 
+    private:
     template <std::size_t, std::size_t Blocks>
-    void generate_buffer(
-        std::array<ctr_type, Blocks> &, key_type &, std::false_type)
+    void generate(
+        std::array<ctr_type, Blocks> &, key_type &, std::false_type) const
     {
     }
 
     template <std::size_t N, std::size_t Blocks>
-    void generate_buffer(
-        std::array<ctr_type, Blocks> &state, key_type &par, std::true_type)
+    void generate(std::array<ctr_type, Blocks> &state, key_type &par,
+        std::true_type) const
     {
         internal::PhiloxBumpKey<ResultType, K, N>::eval(par);
         round<N, 0>(state, par, std::true_type());
-        generate_buffer<N + 1>(
+        generate<N + 1>(
             state, par, std::integral_constant < bool, N<Rounds>());
     }
 
     template <std::size_t, std::size_t, std::size_t Blocks>
-    void round(std::array<ctr_type, Blocks> &, key_type &, std::false_type)
+    void round(
+        std::array<ctr_type, Blocks> &, key_type &, std::false_type) const
     {
     }
 
     template <std::size_t N, std::size_t B, std::size_t Blocks>
-    void round(
-        std::array<ctr_type, Blocks> &state, key_type &par, std::true_type)
+    void round(std::array<ctr_type, Blocks> &state, key_type &par,
+        std::true_type) const
     {
         internal::PhiloxRound<ResultType, K, N>::eval(std::get<B>(state), par);
         round<N, B + 1>(
             state, par, std::integral_constant<bool, B + 1 < Blocks>());
     }
-}; // class PhiloxEngine
+}; // class PhiloxGenerator
 
-template <typename ResultType, std::size_t K, std::size_t Rounds>
-inline void rng_rand(
-    PhiloxEngine<ResultType, K, Rounds> &rng, std::size_t n, ResultType *r)
-{
-    rng(n, r);
-}
+/// \brief Philox RNG engine
+/// \ingroup Philox
+template <typename ResultType, std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
+    std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
+using PhiloxEngine = CounterEngine<PhiloxGenerator<ResultType, K, Rounds>>;
 
 /// \brief Philox2x32 RNG engine
 /// \ingroup Philox
