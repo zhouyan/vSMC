@@ -33,8 +33,7 @@
 #define VSMC_RNG_THREEFRY_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/u01.hpp>
-#include <vsmc/utility/simd.hpp>
+#include <vsmc/rng/counter.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType, SIMD)         \
     VSMC_STATIC_ASSERT((std::is_same<ResultType, std::uint32_t>::value ||     \

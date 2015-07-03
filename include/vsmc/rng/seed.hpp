@@ -33,6 +33,7 @@
 #define VSMC_RNG_SEED_HPP
 
 #include <vsmc/rng/internal/common.hpp>
+#include <vsmc/rng/counter.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(T)                  \
     VSMC_STATIC_ASSERT((std::is_unsigned<T>::value),                          \

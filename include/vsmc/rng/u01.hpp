@@ -34,7 +34,6 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rngc/u01.h>
-#include <vsmc/utility/simd.hpp>
 
 #define VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                            \
     UBits, FBits, RealType, Left, Right, left, right)                         \

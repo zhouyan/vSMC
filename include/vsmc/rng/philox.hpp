@@ -33,6 +33,7 @@
 #define VSMC_RNG_PHILOX_HPP
 
 #include <vsmc/rng/internal/common.hpp>
+#include <vsmc/rng/counter.hpp>
 
 #ifdef VSMC_MSVC
 #include <intrin.h>
