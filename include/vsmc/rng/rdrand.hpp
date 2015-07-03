@@ -36,7 +36,7 @@
 #include <immintrin.h>
 
 #ifndef VSMC_RDRAND_NTRIAL_MAX
-#define VSMC_RDRAND_NTRIAL_MAX 10
+#define VSMC_RDRAND_NTRIAL_MAX 0
 #endif
 
 #define VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE_RESULT_TYPE(ResultType)          \
@@ -128,13 +128,7 @@ class RDRANDEngine
 
     result_type operator()()
     {
-        result_type r;
-        std::size_t ntrial = 0;
-        while (!rdrand<result_type>(&r) && ntrial != NTrialMax)
-            ++ntrial;
-        VSMC_RUNTIME_WARNING_RNG_RDRAND_ENGINE_NTRIAL(ntrial, NTrialMax);
-
-        return r;
+        return generate(std::integral_constant<bool, NTrialMax != 0>());
     }
 
     void discard(std::size_t) {}
@@ -175,6 +169,27 @@ class RDRANDEngine
         RDRANDEngine<ResultType, NTrialMax> &)
     {
         return is;
+    }
+
+    private:
+    result_type generate(std::true_type)
+    {
+        result_type r;
+        std::size_t ntrial = 0;
+        while (!rdrand<result_type>(&r) && ntrial != NTrialMax)
+            ++ntrial;
+        VSMC_RUNTIME_WARNING_RNG_RDRAND_ENGINE_NTRIAL(ntrial, NTrialMax);
+
+        return r;
+    }
+
+    result_type generate(std::false_type)
+    {
+        result_type r;
+        while (!rdrand<result_type>(&r))
+            ;
+
+        return r;
     }
 }; // class RDRANDEngine
 
