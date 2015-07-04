@@ -122,144 +122,112 @@ inline void increment(
     ctr = ctr_block.back();
 }
 
+template <std::size_t, typename T, std::size_t K, std::size_t B>
+inline void increment_safe_set(const std::array<T, K> &,
+    std::array<std::array<T, K>, B> &, std::false_type)
+{
+}
+
+template <std::size_t N, typename T, std::size_t K, std::size_t B>
+inline void increment_safe_set(const std::array<T, K> &ctr,
+    std::array<std::array<T, K>, B> &cb, std::true_type)
+{
+    std::get<N>(cb) = ctr;
+    increment_safe_set<N + 1>(
+        ctr, cb, std::integral_constant<bool, N + 1 < B>());
+}
+
+template <typename T, std::size_t K>
+inline void increment_safe_set(std::size_t n, const std::array<T, K> &ctr,
+    std::array<T, K> *ctr_block, std::false_type)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        ctr_block[i] = ctr;
+}
+
 #if VSMC_HAS_AVX2
 
-inline void increment_safe_set(
-    const std::array<std::uint32_t, 2> &ctr, M256I<> &c)
+template <typename T, std::size_t K>
+inline void increment_safe_set(std::size_t n, const std::array<T, K> &ctr,
+    std::array<T, K> *ctr_block, std::true_type)
 {
-    c.set(std::get<1>(ctr), std::get<0>(ctr), std::get<1>(ctr),
-        std::get<0>(ctr), std::get<1>(ctr), std::get<0>(ctr), std::get<1>(ctr),
-        std::get<0>(ctr));
-}
-
-inline void increment_safe_set(
-    const std::array<std::uint32_t, 4> &ctr, M256I<> &c)
-{
-    c.set(std::get<3>(ctr), std::get<2>(ctr), std::get<1>(ctr),
-        std::get<0>(ctr), std::get<3>(ctr), std::get<2>(ctr), std::get<1>(ctr),
-        std::get<0>(ctr));
-}
-
-inline void increment_safe_set(
-    const std::array<std::uint64_t, 2> &ctr, M256I<> &c)
-{
-    c.set(std::get<1>(ctr), std::get<0>(ctr), std::get<1>(ctr),
-        std::get<0>(ctr));
-}
-
-inline void increment_safe_set(
-    const std::array<std::uint64_t, 4> &ctr, M256I<> &c)
-{
-    c.load_u(ctr.data());
+    const std::size_t B = M256I<T>::size() / K;
+    const std::size_t m = n / B;
+    const std::size_t l = n % B;
+    M256I<> c;
+    std::array<std::array<T, K>, B> cb;
+    increment_safe_set<0>(ctr, cb, std::integral_constant<bool, 0 < B>());
+    c.load(cb.data());
+    if (reinterpret_cast<std::uintptr_t>(ctr_block) % 32 == 0) {
+        for (std::size_t i = 0; i != m; ++i, ctr_block += B)
+            c.store_a(ctr_block);
+    } else {
+        for (std::size_t i = 0; i != m; ++i, ctr_block += B)
+            c.store_u(ctr_block);
+    }
+    for (std::size_t i = 0; i != l; ++i)
+        ctr_block[i] = ctr;
 }
 
 template <typename T, std::size_t K>
 inline void increment_safe_set(
-    T n, std::array<T, K> &ctr, std::array<T, K> *ctr_block)
+    std::size_t n, const std::array<T, K> &ctr, std::array<T, K> *ctr_block)
 {
-    const T k = static_cast<T>(M256I<T>::size() / K);
-    const T m = n / k;
-    const T l = n % k;
-
-    M256I<> c;
-    increment_safe_set(ctr, c);
-    if (reinterpret_cast<std::uintptr_t>(ctr_block) % 16 == 0) {
-        for (T i = 0; i != m; ++i) {
-            c.store_a(ctr_block);
-            ctr_block += k;
-        }
-    } else {
-        for (T i = 0; i != m; ++i) {
-            c.store_u(ctr_block);
-            ctr_block += k;
-        }
-    }
-    for (T i = 0; i != l; ++i)
-        ctr_block[i] = ctr;
+    increment_safe_set(n, ctr, ctr_block,
+        std::integral_constant<bool, M256I<T>::size() % K == 0>());
 }
 
 #elif VSMC_HAS_SSE2
 
-inline void increment_safe_set(
-    const std::array<std::uint32_t, 2> &ctr, M128I<> &c1, M128I<> &c2)
+template <typename T, std::size_t K>
+inline void increment_safe_set(std::size_t n, const std::array<T, K> &ctr,
+    std::array<T, K> *ctr_block, std::true_type)
 {
-    c1.set(std::get<1>(ctr), std::get<0>(ctr), std::get<1>(ctr),
-        std::get<0>(ctr));
-    c2 = c1;
-}
-
-inline void increment_safe_set(
-    const std::array<std::uint32_t, 4> &ctr, M128I<> &c1, M128I<> &c2)
-{
-    c1.set(std::get<3>(ctr), std::get<2>(ctr), std::get<1>(ctr),
-        std::get<0>(ctr));
-    c2 = c1;
-}
-
-inline void increment_safe_set(
-    const std::array<std::uint64_t, 2> &ctr, M128I<> &c1, M128I<> &c2)
-{
-    c1.set(std::get<1>(ctr), std::get<0>(ctr));
-    c2 = c1;
-}
-
-inline void increment_safe_set(
-    const std::array<std::uint64_t, 4> &ctr, M128I<> &c1, M128I<> &c2)
-{
-    c1.set(std::get<3>(ctr), std::get<2>(ctr));
-    c2.set(std::get<1>(ctr), std::get<0>(ctr));
+    const std::size_t B = M128I<T>::size() / K;
+    const std::size_t m = n / B;
+    const std::size_t l = n % B;
+    M128I<> c;
+    std::array<std::array<T, K>, B> cb;
+    increment_safe_set<0>(ctr, cb, std::integral_constant<bool, 0 < B>());
+    c.load(cb.data());
+    if (reinterpret_cast<std::uintptr_t>(ctr_block) % 16 == 0) {
+        for (std::size_t i = 0; i != m; ++i, ctr_block += B)
+            c.store_a(ctr_block);
+    } else {
+        for (std::size_t i = 0; i != m; ++i, ctr_block += B)
+            c.store_u(ctr_block);
+    }
+    for (std::size_t i = 0; i != l; ++i)
+        ctr_block[i] = ctr;
 }
 
 template <typename T, std::size_t K>
 inline void increment_safe_set(
-    T n, std::array<T, K> &ctr, std::array<T, K> *ctr_block)
+    std::size_t n, const std::array<T, K> &ctr, std::array<T, K> *ctr_block)
 {
-    const T k = static_cast<T>(M128I<T>::size() / K);
-    const T m = n / (k * 2);
-    const T l = n % (k * 2);
-
-    M128I<> c1;
-    M128I<> c2;
-    increment_safe_set(ctr, c1, c2);
-    if (reinterpret_cast<std::uintptr_t>(ctr_block) % 16 == 0) {
-        for (T i = 0; i != m; ++i) {
-            c1.store_a(ctr_block);
-            ctr_block += k;
-            c2.store_a(ctr_block);
-            ctr_block += k;
-        }
-    } else {
-        for (T i = 0; i != m; ++i, ctr_block += k) {
-            c1.store_u(ctr_block);
-            ctr_block += k;
-            c2.store_u(ctr_block);
-            ctr_block += k;
-        }
-    }
-    for (T i = 0; i != l; ++i)
-        ctr_block[i] = ctr;
+    increment_safe_set(n, ctr, ctr_block,
+        std::integral_constant<bool, M128I<T>::size() % K == 0>());
 }
 
 #else // VSMC_HAS_AVX2
 
 template <typename T, std::size_t K>
 inline void increment_safe_set(
-    T n, std::array<T, K> &ctr, std::array<T, K> *ctr_block)
+    std::size_t n, const std::array<T, K> &ctr, std::array<T, K> *ctr_block)
 {
-    for (T i = 0; i != n; ++i)
-        ctr_block[i] = ctr;
+    increment_safe_set(n, ctr, ctr_block, std::false_type());
 }
 
 #endif // VSMC_HAS_AVX2
 
 template <typename T, std::size_t K>
 inline void increment_safe(
-    T n, std::array<T, K> &ctr, std::array<T, K> *ctr_block)
+    std::size_t n, std::array<T, K> &ctr, std::array<T, K> *ctr_block)
 {
     increment(ctr);
     increment_safe_set(n, ctr, ctr_block);
     T *c = ctr_block[0].data();
-    for (T i = 0; i != n; ++i, c += K)
+    for (std::size_t i = 0; i != n; ++i, c += K)
         *c += i;
     ctr = ctr_block[n - 1];
 }
@@ -276,7 +244,7 @@ inline void increment(
     const std::uint64_t l = static_cast<std::uint64_t>(ctr.front());
     const std::uint64_t k = static_cast<std::uint64_t>(n);
     if (k < m && l < m - k) {
-        increment_safe(static_cast<T>(n), ctr, ctr_block);
+        increment_safe(n, ctr, ctr_block);
     } else {
         for (std::size_t i = 0; i != n; ++i) {
             increment(ctr);
