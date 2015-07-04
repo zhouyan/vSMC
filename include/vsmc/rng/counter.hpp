@@ -163,9 +163,16 @@ inline void increment_safe_set(
 
     M256I<> c;
     increment_safe_set(ctr, c);
-    for (T i = 0; i != m; ++i) {
-        c.store_u(ctr_block);
-        ctr_block += k;
+    if (reinterpret_cast<std::uintptr_t>(ctr_block) % 16 == 0) {
+        for (T i = 0; i != m; ++i) {
+            c.store_a(ctr_block);
+            ctr_block += k;
+        }
+    } else {
+        for (T i = 0; i != m; ++i) {
+            c.store_u(ctr_block);
+            ctr_block += k;
+        }
     }
     for (T i = 0; i != l; ++i)
         ctr_block[i] = ctr;
@@ -174,7 +181,7 @@ inline void increment_safe_set(
 #elif VSMC_HAS_SSE2
 
 inline void increment_safe_set(
-    const std::array<std::uint32_t, 2> &ctr, M128I<> &c1 M128I<> &c2)
+    const std::array<std::uint32_t, 2> &ctr, M128I<> &c1, M128I<> &c2)
 {
     c1.set(std::get<1>(ctr), std::get<0>(ctr), std::get<1>(ctr),
         std::get<0>(ctr));
@@ -205,7 +212,7 @@ inline void increment_safe_set(
 
 template <typename T, std::size_t K>
 inline void increment_safe_set(
-        T n, std::array<T, K> &ctr, std::array<T, K> *ctr_block)
+    T n, std::array<T, K> &ctr, std::array<T, K> *ctr_block)
 {
     const T k = static_cast<T>(M128I<T>::size() / K);
     const T m = n / (k * 2);
@@ -214,7 +221,7 @@ inline void increment_safe_set(
     M128I<> c1;
     M128I<> c2;
     increment_safe_set(ctr, c1, c2);
-    if (reinterpret_cast<std::uintptr_t>(ctr_block) %= 16 == 0) {
+    if (reinterpret_cast<std::uintptr_t>(ctr_block) % 16 == 0) {
         for (T i = 0; i != m; ++i) {
             c1.store_a(ctr_block);
             ctr_block += k;
