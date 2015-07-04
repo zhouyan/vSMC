@@ -278,6 +278,96 @@ class MKLEngine
     MKLStream &stream() { return stream_; }
     const MKLStream &stream() const { return stream_; }
 
+    friend bool operator==(
+        const MKLEngine<BRNG, Bits> &eng1, const MKLEngine<BRNG, Bits> &eng2)
+    {
+        if (eng1.stream_.get_brng() != eng2.stream_.get_brng())
+            return false;
+        std::size_t n = static_cast<std::size_t>(eng1.stream_.get_size());
+        Vector<char> s1(n);
+        Vector<char> s2(n);
+        eng1.stream_.save_m(s1.data());
+        eng2.stream_.save_m(s2.data());
+        if (s1 != s2)
+            return false;
+        if (eng1.buffer_ != eng2.buffer_)
+            return false;
+        if (eng1.index_ != eng2.index_)
+            return false;
+        return true;
+    }
+
+    friend bool operator!=(
+        const MKLEngine<BRNG, Bits> &eng1, const MKLEngine<BRNG, Bits> &eng2)
+    {
+        return !(eng1 == eng2);
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const MKLEngine<BRNG, Bits> &eng)
+    {
+        if (!os.good())
+            return os;
+
+        os << eng.stream_.get_brng() << ' ';
+        std::size_t n = static_cast<std::size_t>(eng.stream_.get_size());
+        if (n % sizeof(std::uint64_t) != 0)
+            n += sizeof(std::uint64_t) - n % sizeof(std::uint64_t);
+        n /= sizeof(std::uint64_t);
+        Vector<std::uint64_t> s(n);
+        eng.stream_.save_m(reinterpret_cast<char *>(s.data()));
+        for (std::size_t i = 0; i != n; ++i)
+            os << s[i] << ' ';
+        os << eng.buffer_ << ' ';
+        os << eng.index_;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is, MKLEngine<BRNG, Bits> &eng)
+    {
+        if (!is.good())
+            return is;
+
+        MKL_INT brng = 0;
+        MKLStream stream(BRNG, 1);
+        std::array<result_type, M_> buffer;
+        std::size_t index = 0;
+
+        is >> std::ws >> brng;
+        if (is.good())
+            stream.reset(brng, 1);
+        else
+            return is;
+
+        std::size_t n = static_cast<std::size_t>(eng.stream_.get_size());
+        if (n % sizeof(std::uint64_t) != 0)
+            n += sizeof(std::uint64_t) - n % sizeof(std::uint64_t);
+        n /= sizeof(std::uint64_t);
+        Vector<std::uint64_t> s(n);
+        for (std::size_t i = 0; i != n; ++i)
+            is >> std::ws >> s[i];
+        if (is.good())
+            stream.load_m(reinterpret_cast<const char *>(s.data()));
+        else
+            return is;
+
+        is >> std::ws >> buffer;
+        is >> std::ws >> index;
+
+        if (is.good()) {
+            eng.stream_ = stream;
+            eng.buffer_ = buffer;
+            eng.index_ = index;
+        }
+
+        return is;
+    }
+
     private:
     static constexpr std::size_t M_ = 1000;
 
