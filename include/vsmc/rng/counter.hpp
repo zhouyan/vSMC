@@ -157,15 +157,79 @@ template <typename T, std::size_t K>
 inline void increment_safe_set(
     T n, std::array<T, K> &ctr, std::array<T, K> *ctr_block)
 {
-    const std::size_t k = M256I<T>::size() / K;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
+    const T k = static_cast<T>(M256I<T>::size() / K);
+    const T m = n / k;
+    const T l = n % k;
 
     M256I<> c;
     increment_safe_set(ctr, c);
-    for (T i = 0; i != m; ++i, ctr_block += k)
+    for (T i = 0; i != m; ++i) {
         c.store_u(ctr_block);
-    for (std::size_t i = 0; i != l; ++i)
+        ctr_block += k;
+    }
+    for (T i = 0; i != l; ++i)
+        ctr_block[i] = ctr;
+}
+
+#elif VSMC_HAS_SSE2
+
+inline void increment_safe_set(
+    const std::array<std::uint32_t, 2> &ctr, M128I<> &c1 M128I<> &c2)
+{
+    c1.set(std::get<1>(ctr), std::get<0>(ctr), std::get<1>(ctr),
+        std::get<0>(ctr));
+    c2 = c1;
+}
+
+inline void increment_safe_set(
+    const std::array<std::uint32_t, 4> &ctr, M128I<> &c1, M128I<> &c2)
+{
+    c1.set(std::get<3>(ctr), std::get<2>(ctr), std::get<1>(ctr),
+        std::get<0>(ctr));
+    c2 = c1;
+}
+
+inline void increment_safe_set(
+    const std::array<std::uint64_t, 2> &ctr, M128I<> &c1, M128I<> &c2)
+{
+    c1.set(std::get<1>(ctr), std::get<0>(ctr));
+    c2 = c1;
+}
+
+inline void increment_safe_set(
+    const std::array<std::uint64_t, 4> &ctr, M128I<> &c1, M128I<> &c2)
+{
+    c1.set(std::get<3>(ctr), std::get<2>(ctr));
+    c2.set(std::get<1>(ctr), std::get<0>(ctr));
+}
+
+template <typename T, std::size_t K>
+inline void increment_safe_set(
+        T n, std::array<T, K> &ctr, std::array<T, K> *ctr_block)
+{
+    const T k = static_cast<T>(M128I<T>::size() / K);
+    const T m = n / (k * 2);
+    const T l = n % (k * 2);
+
+    M128I<> c1;
+    M128I<> c2;
+    increment_safe_set(ctr, c1, c2);
+    if (reinterpret_cast<std::uintptr_t>(ctr_block) %= 16 == 0) {
+        for (T i = 0; i != m; ++i) {
+            c1.store_a(ctr_block);
+            ctr_block += k;
+            c2.store_a(ctr_block);
+            ctr_block += k;
+        }
+    } else {
+        for (T i = 0; i != m; ++i, ctr_block += k) {
+            c1.store_u(ctr_block);
+            ctr_block += k;
+            c2.store_u(ctr_block);
+            ctr_block += k;
+        }
+    }
+    for (T i = 0; i != l; ++i)
         ctr_block[i] = ctr;
 }
 
