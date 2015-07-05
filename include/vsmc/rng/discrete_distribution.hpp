@@ -240,20 +240,14 @@ class DiscreteDistribution
     /// \param normalized If the weights are already normalized
     ///
     /// \details
-    /// Given weights \f$(W_1,\dots,W_N)\f$, it is possible to draw the
-    /// index
-    /// \f$i\f$ using the `std::discrete_distribuiton` template. However,
-    /// there
-    /// are two drawbacks with this approach. First, if the weights are
-    /// already
-    /// normalized, this template does uncessary extra work to normalized
-    /// the
-    /// weights. Second, whenever the weights change, a new distribution
-    /// need
+    /// Given weights \f$(W_1,\dots,W_N)\f$, it is possible to draw the index
+    /// \f$i\f$ using the `std::discrete_distribuiton` template. However, there
+    /// are two drawbacks with this approach. First, if the weights are already
+    /// normalized, this template does uncessary extra work to normalized the
+    /// weights. Second, whenever the weights change, a new distribution need
     /// to be constructed (the `param_type` of the distribution is
     /// implementation defined and cannot be used to write portable code),
-    /// which will lead to uncessary dynamic memory allocation. This
-    /// function
+    /// which will lead to uncessary dynamic memory allocation. This function
     /// does not use dynamic memory and improve performance for normalized
     /// weights.
     template <typename RNGType, typename InputIter>
