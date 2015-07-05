@@ -79,6 +79,21 @@ inline void increment(std::array<T, K> &ctr, T nskip)
 }
 
 template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
+inline void increment_block_set(const std::array<T, K> &,
+    std::array<std::array<T, K>, Blocks> &, std::false_type)
+{
+}
+
+template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
+inline void increment_block_set(const std::array<T, K> &ctr,
+    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
+{
+    std::get<B>(ctr_block) = ctr;
+    increment_block_set<B + 1>(
+        ctr, ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
+}
+
+template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
 inline void increment_block(std::array<T, K> &,
     std::array<std::array<T, K>, Blocks> &, std::false_type)
 {
@@ -88,7 +103,6 @@ template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
 inline void increment_block(std::array<T, K> &ctr,
     std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
 {
-    std::get<B>(ctr_block) = ctr;
     increment(std::get<B>(ctr_block), std::integral_constant<T, B + 1>());
     increment_block<B + 1>(
         ctr, ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
@@ -104,9 +118,8 @@ template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
 inline void increment_block_safe(std::array<T, K> &ctr,
     std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
 {
-    std::get<B>(ctr_block) = ctr;
-    ++std::get<B>(ctr_block).front();
-    increment_block<B + 1>(
+    std::get<B>(ctr_block).front() += B + 1;
+    increment_block_safe<B + 1>(
         ctr, ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
 }
 
@@ -114,8 +127,9 @@ template <typename T, std::size_t K, std::size_t Blocks>
 inline void increment(
     std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
 {
-    const T limit = std::numeric_limits<T>::max() - static_cast<T>(Blocks);
-    if (ctr.front() < limit)
+    increment_block_set<0>(
+        ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
+    if (ctr.front() < std::numeric_limits<T>::max() - static_cast<T>(Blocks))
         increment_block_safe<0>(ctr, ctr_block, std::true_type());
     else
         increment_block<0>(ctr, ctr_block, std::true_type());
