@@ -132,9 +132,9 @@ class LognormalDistribution
     result_type m() const { return param_.m_; }
     result_type s() const { return param_.s_; }
 
-    result_type min () const { return 0; }
+    result_type min() const { return 0; }
 
-    result_type max () const
+    result_type max() const
     {
         return std::numeric_limits<result_type>::infinity();
     }

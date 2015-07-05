@@ -200,8 +200,8 @@ class U01Distribution
 
     explicit U01Distribution(const param_type &param) : param_(param) {}
 
-    result_type min () const { return 0; }
-    result_type max () const { return 1; }
+    result_type min() const { return 0; }
+    result_type max() const { return 1; }
 
     template <typename RNGType>
     result_type operator()(RNGType &rng) const

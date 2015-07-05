@@ -138,7 +138,7 @@ class AlignedMemorySTD
     static void aligned_free(void *ptr)
     {
         std::free(*reinterpret_cast<void **>(
-                      reinterpret_cast<uintptr_t>(ptr) - sizeof(void *)));
+            reinterpret_cast<uintptr_t>(ptr) - sizeof(void *)));
     }
 }; // class AlignedMemmorySTD
 

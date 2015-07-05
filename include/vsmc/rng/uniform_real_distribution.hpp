@@ -47,65 +47,11 @@ namespace internal
 {
 
 template <typename RealType, typename RNGType>
-inline void uniform_real_distribution_impl(RNGType &rng, std::size_t n,
-    RealType *r, RealType a, RealType b, std::false_type, std::false_type)
+inline void uniform_real_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    std::uniform_real_distribution<RealType> runif(a, b);
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = runif(rng);
-}
-
-template <typename RealType, typename RNGType>
-inline void uniform_real_distribution_impl_u32(RNGType &rng, std::size_t n,
-    RealType *r, RealType a, RealType b, typename RNGType::result_type *s)
-{
-    rng_rand(rng, n, s);
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = U01<std::uint32_t, RealType, Closed, Open>::eval(s[i]);
-    RealType d = b - a;
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = a + d * r[i];
-}
-
-template <typename RealType, typename RNGType>
-inline void uniform_real_distribution_impl_u64(RNGType &rng, std::size_t n,
-    RealType *r, RealType a, RealType b, typename RNGType::result_type *s)
-{
-    rng_rand(rng, n / 2, s);
-    std::uint32_t *u = reinterpret_cast<std::uint32_t *>(s);
-    if (n % 2 != 0)
-        u[n - 1] = static_cast<std::uint32_t>(rng());
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = U01<std::uint32_t, RealType, Closed, Open>::eval(u[i]);
-    RealType d = b - a;
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = a + d * r[i];
-}
-
-template <typename RealType, typename RNGType>
-inline void uniform_real_distribution_impl(RNGType &rng, std::size_t n,
-    RealType *r, RealType a, RealType b, std::true_type, std::false_type)
-{
-    const std::size_t k = 1000;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    typename RNGType::result_type s[k];
-    for (std::size_t i = 0; i != m; ++i)
-        uniform_real_distribution_impl_u32(rng, k, r + i * k, a, b, s);
-    uniform_real_distribution_impl_u32(rng, l, r + m * k, a, b, s);
-}
-
-template <typename RealType, typename RNGType>
-inline void uniform_real_distribution_impl(RNGType &rng, std::size_t n,
-    RealType *r, RealType a, RealType b, std::true_type, std::true_type)
-{
-    const std::size_t k = 1000;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    typename RNGType::result_type s[k / 2 + 1];
-    for (std::size_t i = 0; i != m; ++i)
-        uniform_real_distribution_impl_u64(rng, k, r + i * k, a, b, s);
-    uniform_real_distribution_impl_u64(rng, l, r + m * k, a, b, s);
+    u01_distribution(rng, n, r);
+    fma(n, a, (b - a), r, r);
 }
 
 } // namespace vsmc::internal
@@ -115,11 +61,12 @@ template <typename RealType, typename RNGType>
 inline void uniform_real_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1)
 {
-    internal::uniform_real_distribution_impl(
-        rng, n, r, a, b, std::integral_constant<bool,
-                             internal::RNGBits<RNGType>::value >= 32>(),
-        std::integral_constant<bool,
-            internal::RNGBits<RNGType>::value >= 64>());
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i)
+        internal::uniform_real_distribution_impl(rng, k, r + i * k, a, b);
+    internal::uniform_real_distribution_impl(rng, l, r + m * k, a, b);
 }
 
 /// \brief Uniform real distribution with open/closed variants
