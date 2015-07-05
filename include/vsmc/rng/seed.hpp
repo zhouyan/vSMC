@@ -154,7 +154,7 @@ class SeedGenerator
 
         divisor_ = div;
         remainder_ = rem;
-        seed_max_ = std::numeric_limits<skip_type>::max ();
+        seed_max_ = std::numeric_limits<skip_type>::max();
         seed_max_ -= seed_max_ % divisor_;
         seed_max_ /= divisor_;
 
@@ -327,14 +327,14 @@ class SeedGenerator<ID, std::array<T, K>>
 
         divisor_ = div;
         remainder_ = rem;
-        seed_max_.fill(std::numeric_limits<skip_type>::max ());
+        seed_max_.fill(std::numeric_limits<skip_type>::max());
 
         set(seed_);
     }
 
-    void skip(skip_type steps) { internal::increment(seed_, steps); }
+    void skip(skip_type steps) { increment(seed_, steps); }
 
-    void skip() { internal::increment(seed_); }
+    void skip() { increment(seed_); }
 
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(

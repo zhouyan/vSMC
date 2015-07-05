@@ -336,7 +336,7 @@ class ThreefryGenerator
     {
         std::array<result_type, K + 1> par;
         internal::ThreefryInitPar<ResultType, K>::eval(key, par);
-        internal::increment(ctr);
+        increment(ctr);
         buffer = ctr;
         generate<0>(buffer, par, std::true_type());
     }
@@ -348,7 +348,7 @@ class ThreefryGenerator
         std::array<result_type, K + 1> par;
         internal::ThreefryInitPar<ResultType, K>::eval(key, par);
         ctr_type *s = reinterpret_cast<ctr_type *>(r);
-        internal::increment(m, ctr, s);
+        increment(ctr, m, s);
         for (std::size_t i = 0; i != m; ++i)
             generate<0>(s[i], par, std::true_type());
 

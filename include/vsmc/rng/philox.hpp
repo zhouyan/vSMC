@@ -272,7 +272,7 @@ class PhiloxGenerator
             std::array<result_type, size()> result;
         } buf;
 
-        internal::increment(ctr);
+        increment(ctr);
         buf.state.front() = ctr;
         key_type par = key;
         generate<0>(buf.state, par, std::true_type());
@@ -285,7 +285,7 @@ class PhiloxGenerator
         const std::size_t Blocks = 8;
         const std::size_t M = size() * Blocks;
         const std::size_t m = n / M;
-        internal::increment(m, ctr, reinterpret_cast<ctr_type *>(r));
+        increment(ctr, m, reinterpret_cast<ctr_type *>(r));
         std::array<ctr_type, Blocks> *s =
             reinterpret_cast<std::array<ctr_type, Blocks> *>(r);
         for (std::size_t i = 0; i != m; ++i) {

@@ -82,7 +82,7 @@ class AESNIGenerator
 
         std::array<M128I<>, Rounds + 1> rk;
         key_seq_(key, rk);
-        internal::increment(ctr, buf.ctr_block);
+        increment(ctr, buf.ctr_block);
         enc_first(buf.state, rk);
         enc_round<1>(
             buf.state, rk, std::integral_constant<bool, 1 < Rounds>());
@@ -98,7 +98,7 @@ class AESNIGenerator
         const std::size_t m = n / M;
         std::array<M128I<>, Rounds + 1> rk;
         key_seq_(key, rk);
-        internal::increment(m * K, ctr, reinterpret_cast<ctr_type *>(r));
+        increment(ctr, m * K, reinterpret_cast<ctr_type *>(r));
         std::array<M128I<>, K> *s =
             reinterpret_cast<std::array<M128I<>, K> *>(r);
         for (std::size_t i = 0; i != m; ++i) {
