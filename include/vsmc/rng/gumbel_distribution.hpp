@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/laplace_distribution.hpp
+// vSMC/include/vsmc/rng/gumbel_distribution.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,14 +29,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_LAPLACE_DISTRIBUTION_HPP
-#define VSMC_RNG_LAPLACE_DISTRIBUTION_HPP
+#ifndef VSMC_RNG_GUMBEL_DISTRIBUTION_HPP
+#define VSMC_RNG_GUMBEL_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_LAPLACE_DISTRIBUTION_PARAM_CHECK(scale)       \
-    VSMC_RUNTIME_ASSERT((scale > 0), "**LaplaceDistribution** CONSTRUCTED "   \
+#define VSMC_RUNTIME_ASSERT_RNG_GUMBEL_DISTRIBUTION_PARAM_CHECK(scale)        \
+    VSMC_RUNTIME_ASSERT((scale > 0), "**GumbelDistribution** CONSTRUCTED "    \
                                      "WITH INVALID SCALE PARAMETER VALUE")
 
 namespace vsmc
@@ -46,57 +46,46 @@ namespace internal
 {
 
 template <typename RealType, typename RNGType>
-inline void laplace_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
-    RealType location, RealType scale, RealType *s)
+inline void gumbel_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
+    RealType location, RealType scale)
 {
     u01_distribution(rng, n, r);
-    for (std::size_t i = 0; i != n; ++i) {
-        r[i] -= 0.5;
-        if (r[i] > 0) {
-            r[i] *= 2;
-            s[i] = -scale;
-        } else {
-            r[i] *= -2;
-            s[i] = scale;
-        }
-    }
-    log1p(n, r, r);
-    fma(n, location, s, r, r);
+    log(n, r, r);
+    mul(n, static_cast<RealType>(-1), r, r);
+    log(n, r, r);
+    fma(n, location, -scale, r, r);
 }
 
 } // namespace vsmc::internal
 
-/// \brief Generating laplace random variates
+/// \brief Generating gumbel random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void laplace_distribution(RNGType &rng, std::size_t n, RealType *r,
+inline void gumbel_distribution(RNGType &rng, std::size_t n, RealType *r,
     RealType location = 0, RealType scale = 1)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    RealType s[k];
-    for (std::size_t i = 0; i != m; ++i) {
-        internal::laplace_distribution_impl(
-            rng, k, r + i * k, location, scale, s);
-    }
-    internal::laplace_distribution_impl(rng, l, r + m * k, location, scale, s);
+    for (std::size_t i = 0; i != m; ++i)
+        internal::gumbel_distribution_impl(rng, k, r + i * k, location, scale);
+    internal::gumbel_distribution_impl(rng, l, r + m * k, location, scale);
 }
 
-/// \brief Laplace distribution
+/// \brief Gumbel distribution
 /// \ingroup Distribution
 template <typename RealType>
-class LaplaceDistribution
+class GumbelDistribution
 {
     public:
     using result_type = RealType;
-    using distribution_type = LaplaceDistribution<RealType>;
+    using distribution_type = GumbelDistribution<RealType>;
 
     class param_type
     {
         public:
         using result_type = RealType;
-        using distribution_type = LaplaceDistribution<RealType>;
+        using distribution_type = GumbelDistribution<RealType>;
 
         explicit param_type(result_type location = 0, result_type scale = 1)
             : location_(location), scale_(scale)
@@ -166,19 +155,19 @@ class LaplaceDistribution
 
         void invariant()
         {
-            VSMC_RUNTIME_ASSERT_RNG_LAPLACE_DISTRIBUTION_PARAM_CHECK(scale_);
+            VSMC_RUNTIME_ASSERT_RNG_GUMBEL_DISTRIBUTION_PARAM_CHECK(scale_);
         }
 
         void reset() {}
     }; // class param_type
 
-    explicit LaplaceDistribution(
+    explicit GumbelDistribution(
         result_type location = 0, result_type scale = 1)
         : param_(location, scale)
     {
     }
 
-    explicit LaplaceDistribution(const param_type &param) : param_(param) {}
+    explicit GumbelDistribution(const param_type &param) : param_(param) {}
 
     result_type location() const { return param_.location_; }
     result_type scale() const { return param_.scale_; }
@@ -197,18 +186,18 @@ class LaplaceDistribution
     result_type operator()(RNGType &rng)
     {
         U01DistributionType<RNGType, RealType> runif;
-        result_type u = runif(rng) - 0.5;
 
-        return u > 0 ? param_.location_ - param_.scale_ * std::log1p(2 * u) :
-                       param_.location_ + param_.scale_ * std::log1p(-2 * u);
+        return param_.location_ -
+            param_.scale_ * std::log(-std::log(runif(rng)));
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
     param_type param_;
-}; // class LaplaceDistribution
+}; // class GumbelDistribution
 
 } // namespace vsmc
 
-#endif // VSMC_RNG_LAPLACE_DISTRIBUTION_HPP
+#endif // VSMC_RNG_GUMBEL_DISTRIBUTION_HPP
+

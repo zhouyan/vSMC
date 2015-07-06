@@ -132,7 +132,7 @@ class AESNIGenerator
     void enc_first(std::array<M128I<>, K> &state,
         const std::array<M128I<>, Rounds + 1> &rk, std::true_type) const
     {
-        std::get<B>(state) &= std::get<0>(rk);
+        std::get<B>(state) ^= std::get<0>(rk);
         enc_first<B + 1>(state, rk, std::integral_constant<bool, B + 1 < K>());
     }
 

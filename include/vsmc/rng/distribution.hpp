@@ -36,6 +36,7 @@
 #include <vsmc/rng/cauchy_distribution.hpp>
 #include <vsmc/rng/discrete_distribution.hpp>
 #include <vsmc/rng/exponential_distribution.hpp>
+#include <vsmc/rng/gumbel_distribution.hpp>
 #include <vsmc/rng/laplace_distribution.hpp>
 #include <vsmc/rng/lognormal_distribution.hpp>
 #include <vsmc/rng/normal_distribution.hpp>

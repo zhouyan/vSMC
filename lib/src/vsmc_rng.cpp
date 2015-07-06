@@ -250,6 +250,14 @@ void vsmc_rng_student_t(vsmc_rng *rng_ptr, int n, double *r, double df)
     VSMC_DEFINE_RNG_RANDOM_DIST;
 }
 
+void vsmc_rng_gumbel(
+    vsmc_rng *rng_ptr, int n, double *r, double location, double scale)
+{
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    ::vsmc::gumbel_distribution<double>(
+        rng, static_cast<std::size_t>(n), r, location, scale);
+}
+
 void vsmc_rng_laplace(
     vsmc_rng *rng_ptr, int n, double *r, double location, double scale)
 {
