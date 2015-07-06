@@ -91,8 +91,8 @@ class ARSKeySeq
 
     void reset(const key_type &) {}
 
-    template <std::size_t Rp1>
-    void operator()(const key_type &key, std::array<M128I<>, Rp1> &rk) const
+    template <typename U, std::size_t Rp1>
+    void operator()(const key_type &key, std::array<M128I<U>, Rp1> &rk) const
     {
         M128I<std::uint64_t> weyl;
         weyl.set(
@@ -102,14 +102,14 @@ class ARSKeySeq
     }
 
     private:
-    template <std::size_t, std::size_t Rp1>
-    void generate(std::array<M128I<>, Rp1> &, const M128I<std::uint64_t> &,
+    template <std::size_t, typename U, std::size_t Rp1>
+    void generate(std::array<M128I<U>, Rp1> &, const M128I<std::uint64_t> &,
         std::false_type) const
     {
     }
 
-    template <std::size_t N, std::size_t Rp1>
-    void generate(std::array<M128I<>, Rp1> &rk,
+    template <std::size_t N, typename U, std::size_t Rp1>
+    void generate(std::array<M128I<U>, Rp1> &rk,
         const M128I<std::uint64_t> &weyl, std::true_type) const
     {
         std::get<N>(rk) =

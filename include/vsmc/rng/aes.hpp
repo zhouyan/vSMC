@@ -355,8 +355,9 @@ class AESKeySeq
         generator(key, key_seq_);
     }
 
+    template <typename U>
     void operator()(
-        const key_type &, std::array<M128I<>, Rounds + 1> &rk) const
+        const key_type &, std::array<M128I<U>, Rounds + 1> &rk) const
     {
         rk = key_seq_;
     }
