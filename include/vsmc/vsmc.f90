@@ -359,6 +359,18 @@ module vsmc
     end interface
 
     interface
+        subroutine vsmc_rng_gumbel(rng, n, r, location, scal) bind(c)
+            use, intrinsic :: iso_c_binding
+            import :: vsmc_rng
+            type(vsmc_rng) :: rng
+            integer(kind = c_int), value :: n
+            real(kind = c_double), dimension(*) :: r
+            real(kind = c_double), value :: location
+            real(kind = c_double), value :: scal
+        end subroutine vsmc_rng_gumbel
+    end interface
+
+    interface
         subroutine vsmc_rng_laplace(rng, n, r, location, scal) bind(c)
             use, intrinsic :: iso_c_binding
             import :: vsmc_rng
