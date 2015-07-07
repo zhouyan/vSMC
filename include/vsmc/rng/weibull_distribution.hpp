@@ -150,10 +150,7 @@ class WeibullDistribution
     result_type a() const { return param_.a_; }
     result_type b() const { return param_.b_; }
 
-    result_type min() const
-    {
-        return -std::numeric_limits<result_type>::infinity();
-    }
+    result_type min() const { return 0; }
 
     result_type max() const
     {

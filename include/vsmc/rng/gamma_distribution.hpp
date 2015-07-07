@@ -163,10 +163,7 @@ class GammaDistribution
     result_type alpha() const { return param_.alpha_; }
     result_type beta() const { return param_.beta_; }
 
-    result_type min() const
-    {
-        return -std::numeric_limits<result_type>::infinity();
-    }
+    result_type min() const { return 0; }
 
     result_type max() const
     {
