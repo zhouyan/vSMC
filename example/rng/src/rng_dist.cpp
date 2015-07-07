@@ -36,6 +36,8 @@ int main(int argc, char **argv)
     VSMC_RNG_DIST_2(vsmc::LognormalDistribution<double>, lognormal, 0, 1);
     VSMC_RNG_DIST_1(std::chi_squared_distribution<double>, chi_squared, 1);
     VSMC_RNG_DIST_1(std::chi_squared_distribution<double>, chi_squared, 100);
+    VSMC_RNG_DIST_1(vsmc::ChiSquaredDistribution<double>, chi_squared, 1);
+    VSMC_RNG_DIST_1(vsmc::ChiSquaredDistribution<double>, chi_squared, 100);
     VSMC_RNG_DIST_2(std::cauchy_distribution<double>, cauchy, 0, 1);
     VSMC_RNG_DIST_2(vsmc::CauchyDistribution<double>, cauchy, 0, 1);
     VSMC_RNG_DIST_2(std::fisher_f_distribution<double>, fisher_f, 1, 1);

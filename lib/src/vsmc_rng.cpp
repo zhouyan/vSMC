@@ -213,12 +213,6 @@ void vsmc_rng_extreme_value(
     VSMC_DEFINE_RNG_DIST;
 }
 
-void vsmc_rng_chi_squared(vsmc_rng *rng_ptr, int n, double *r, double df)
-{
-    std::chi_squared_distribution<double> dist(df);
-    VSMC_DEFINE_RNG_DIST;
-}
-
 void vsmc_rng_fisher_f(
     vsmc_rng *rng_ptr, int n, double *r, double df1, double df2)
 {
@@ -245,6 +239,7 @@ void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,
 }
 
 VSMC_DEFINE_RNG_DIST_1(exponential, lambda)
+VSMC_DEFINE_RNG_DIST_1(chi_squared, df)
 VSMC_DEFINE_RNG_DIST_2(gamma, alpha, beta)
 VSMC_DEFINE_RNG_DIST_2(weibull, a, b)
 VSMC_DEFINE_RNG_DIST_2(normal, mean, stddev)

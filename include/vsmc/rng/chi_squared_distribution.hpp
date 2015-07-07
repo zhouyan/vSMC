@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/lognormal_distribution.hpp
+// vSMC/include/vsmc/rng/chi_squared_distribution.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,43 +29,42 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_LOGNORMAL_DISTRIBUTION_HPP
-#define VSMC_RNG_LOGNORMAL_DISTRIBUTION_HPP
+#ifndef VSMC_RNG_CHI_SQUARED_DISTRIBUTION_HPP
+#define VSMC_RNG_CHI_SQUARED_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/normal_distribution.hpp>
+#include <vsmc/rng/gamma_distribution.hpp>
 
 namespace vsmc
 {
 
-/// \brief Lognormal distribution
+/// \brief ChiSquared distribution
 /// \ingroup Distribution
 template <typename RealType>
-class LognormalDistribution
+class ChiSquaredDistribution
 {
+
     public:
     using result_type = RealType;
-    using distribution_type = LognormalDistribution<RealType>;
+    using distribution_type = ChiSquaredDistribution<RealType>;
 
     class param_type
     {
         public:
         using result_type = RealType;
-        using distribution_type = LognormalDistribution<RealType>;
+        using distribution_type = ChiSquaredDistribution<RealType>;
 
-        explicit param_type(result_type m = 0, result_type s = 1)
-            : normal_(m, s)
+        explicit param_type(result_type n = 1)
+            : gamma_(0.5 * n, static_cast<result_type>(0.5))
         {
-            invariant();
         }
 
-        result_type m() const { return normal_.mean(); }
-        result_type s() const { return normal_.stddev(); }
+        result_type n() const { return gamma_.alpha() * 2; }
 
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
-            return param1.normal_ == param2.normal_;
+            return param1.gamma_ == param2.gamma_;
         }
 
         friend bool operator!=(
@@ -81,7 +80,7 @@ class LognormalDistribution
             if (!os.good())
                 return os;
 
-            os << param.normal_;
+            os << param.gamma_;
 
             return os;
         }
@@ -93,34 +92,30 @@ class LognormalDistribution
             if (!is.good())
                 return is;
 
-            NormalDistribution<RealType> normal;
-            is >> std::ws >> normal;
+            GammaDistribution<RealType> gamma;
+            is >> std::ws >> gamma;
 
             if (is.good())
-                param.normal_ = std::move(normal);
+                param.gamma_ = gamma;
 
             return is;
         }
 
         private:
-        NormalDistribution<RealType> normal_;
+        GammaDistribution<RealType> gamma_;
 
         friend distribution_type;
 
         void invariant() {}
 
-        void reset() { normal_.reset(); }
+        void reset() { gamma_.reset(); }
     }; // class param_type
 
-    explicit LognormalDistribution(result_type m = 0, result_type s = 1)
-        : param_(m, s)
-    {
-    }
+    explicit ChiSquaredDistribution(result_type n = 1) : param_(n) {}
 
-    explicit LognormalDistribution(const param_type &param) : param_(param) {}
+    explicit ChiSquaredDistribution(const param_type &param) : param_(param) {}
 
-    result_type m() const { return param_.m_; }
-    result_type s() const { return param_.s_; }
+    result_type n() const { return param_.n_; }
 
     result_type min() const { return 0; }
 
@@ -132,25 +127,24 @@ class LognormalDistribution
     template <typename RNGType>
     result_type operator()(RNGType &rng)
     {
-        return std::exp(param_.normal_(rng));
+        return param_.gamma_(rng);
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
     param_type param_;
-}; // class LognormalDistribution
+}; // class ChiSquaredDistribution
 
-/// \brief Generating log-normal random variates
+/// \brief Generating chi_squared random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void lognormal_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType m = 0, RealType s = 1)
+inline void chi_squared_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType df = 1)
 {
-    normal_distribution(rng, n, r, m, s);
-    exp(n, r, r);
+    gamma_distribution(rng, n, r, 0.5 * df, static_cast<RealType>(0.5));
 }
 
 } // namespace vsmc
 
-#endif // VSMC_RNG_LOGNORMAL_DISTRIBUTION_HPP
+#endif // VSMC_RNG_CHI_SQUARED_DISTRIBUTION_HPP
