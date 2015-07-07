@@ -53,117 +53,6 @@
 namespace vsmc
 {
 
-namespace internal
-{
-
-template <typename RealType, typename RNGType>
-inline void stable_distribution_impl_a(RNGType &rng, std::size_t n,
-    RealType *r, RealType stability, RealType, RealType location,
-    RealType scale, RealType *w, RealType *u, RealType a, RealType *b,
-    RealType *c, RealType *d, RealType xi)
-{
-    U01DistributionType<RNGType, RealType> runif;
-    for (std::size_t i = 0; i != n; ++i)
-        w[i] = -runif(rng);
-    for (std::size_t i = 0; i != n; ++i)
-        u[i] = runif(rng) - 0.5;
-    log1p(n, w, w);
-    for (std::size_t i = 0; i != n; ++i)
-        w[i] = -w[i];
-    mul(n, const_pi<RealType>(), u, u);
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = u[i] + xi;
-    mul(n, stability, r, r);
-    sin(n, r, b);
-    cos(n, u, c);
-    log(n, c, c);
-    mul(n, 1 / stability, c, c);
-    sub(n, u, r, d);
-    cos(n, d, d);
-    div(n, d, w, d);
-    log(n, d, d);
-    mul(n, (1 - stability) / stability, d, d);
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = a - c[i];
-    add(n, r, d, r);
-    exp(n, r, r);
-    mul(n, b, r, r);
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = location + scale * r[i];
-}
-
-template <typename RealType, typename RNGType>
-inline void stable_distribution_impl_1(RNGType &rng, std::size_t n,
-    RealType *r, RealType, RealType skewness, RealType location,
-    RealType scale, RealType *w, RealType *u, RealType *a, RealType *b,
-    RealType *c)
-{
-    U01DistributionType<RNGType, RealType> runif;
-    for (std::size_t i = 0; i != n; ++i)
-        w[i] = -runif(rng);
-    for (std::size_t i = 0; i != n; ++i)
-        u[i] = runif(rng) - 0.5;
-    log1p(n, w, w);
-    mul(n, -const_pi_by2<RealType>(), w, w);
-    mul(n, const_pi<RealType>(), u, u);
-    tan(n, u, a);
-    for (std::size_t i = 0; i != n; ++i)
-        c[i] = skewness * u[i];
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = const_pi_by2<RealType>() + c[i];
-    mul(n, a, r, a);
-    cos(n, u, b);
-    mul(n, w, b, b);
-    log(n, b, b);
-    log(n, r, c);
-    sub(n, b, c, r);
-    mul(n, skewness, r, r);
-    sub(n, a, r, r);
-    RealType offset = location +
-        2 * const_pi_inv<RealType>() * skewness * scale * std::log(scale);
-    RealType coeff = scale / const_pi_by2<RealType>();
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = offset + coeff * r[i];
-}
-
-} // namespace vsmc::internal
-
-/// \brief Generating stable random variates
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void stable_distribution(RNGType &rng, std::size_t n, RealType *r,
-    RealType stability = 1, RealType skewness = 0, RealType location = 0,
-    RealType scale = 1)
-{
-    const std::size_t k = 1000;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    RealType w[k];
-    RealType u[k];
-    RealType x[k];
-    RealType y[k];
-    RealType z[k];
-    if (stability < 1 || stability > 1) {
-        RealType zeta =
-            -skewness * std::tan(const_pi_by2<RealType>() * stability);
-        RealType xi = 1 / stability * std::atan(-zeta);
-        RealType a = 0.5 * std::log(1 + zeta * zeta) / stability;
-        for (std::size_t i = 0; i != m; ++i) {
-            internal::stable_distribution_impl_a(rng, k, r + i * k, stability,
-                skewness, location, scale, w, u, a, x, y, z, xi);
-        }
-        internal::stable_distribution_impl_a(rng, l, r + m * k, stability,
-            skewness, location, scale, w, u, a, x, y, z, xi);
-    } else {
-        for (std::size_t i = 0; i != m; ++i) {
-            internal::stable_distribution_impl_1(rng, k, r + i * k, stability,
-                skewness, location, scale, w, u, x, y, z);
-        }
-        internal::stable_distribution_impl_1(rng, l, r + m * k, stability,
-            skewness, location, scale, w, u, x, y, z);
-    }
-}
-
 /// \brief Stable distribution
 /// \ingroup Distribution
 template <typename RealType = double>
@@ -386,6 +275,117 @@ class StableDistribution
         return param_.scale_ * x + param_.location_;
     }
 }; // class StableDistributionBase
+
+namespace internal
+{
+
+template <typename RealType, typename RNGType>
+inline void stable_distribution_impl_a(RNGType &rng, std::size_t n,
+    RealType *r, RealType stability, RealType, RealType location,
+    RealType scale, RealType *w, RealType *u, RealType a, RealType *b,
+    RealType *c, RealType *d, RealType xi)
+{
+    U01DistributionType<RNGType, RealType> runif;
+    for (std::size_t i = 0; i != n; ++i)
+        w[i] = -runif(rng);
+    for (std::size_t i = 0; i != n; ++i)
+        u[i] = runif(rng) - 0.5;
+    log1p(n, w, w);
+    for (std::size_t i = 0; i != n; ++i)
+        w[i] = -w[i];
+    mul(n, const_pi<RealType>(), u, u);
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = u[i] + xi;
+    mul(n, stability, r, r);
+    sin(n, r, b);
+    cos(n, u, c);
+    log(n, c, c);
+    mul(n, 1 / stability, c, c);
+    sub(n, u, r, d);
+    cos(n, d, d);
+    div(n, d, w, d);
+    log(n, d, d);
+    mul(n, (1 - stability) / stability, d, d);
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = a - c[i];
+    add(n, r, d, r);
+    exp(n, r, r);
+    mul(n, b, r, r);
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = location + scale * r[i];
+}
+
+template <typename RealType, typename RNGType>
+inline void stable_distribution_impl_1(RNGType &rng, std::size_t n,
+    RealType *r, RealType, RealType skewness, RealType location,
+    RealType scale, RealType *w, RealType *u, RealType *a, RealType *b,
+    RealType *c)
+{
+    U01DistributionType<RNGType, RealType> runif;
+    for (std::size_t i = 0; i != n; ++i)
+        w[i] = -runif(rng);
+    for (std::size_t i = 0; i != n; ++i)
+        u[i] = runif(rng) - 0.5;
+    log1p(n, w, w);
+    mul(n, -const_pi_by2<RealType>(), w, w);
+    mul(n, const_pi<RealType>(), u, u);
+    tan(n, u, a);
+    for (std::size_t i = 0; i != n; ++i)
+        c[i] = skewness * u[i];
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = const_pi_by2<RealType>() + c[i];
+    mul(n, a, r, a);
+    cos(n, u, b);
+    mul(n, w, b, b);
+    log(n, b, b);
+    log(n, r, c);
+    sub(n, b, c, r);
+    mul(n, skewness, r, r);
+    sub(n, a, r, r);
+    RealType offset = location +
+        2 * const_pi_inv<RealType>() * skewness * scale * std::log(scale);
+    RealType coeff = scale / const_pi_by2<RealType>();
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = offset + coeff * r[i];
+}
+
+} // namespace vsmc::internal
+
+/// \brief Generating stable random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void stable_distribution(RNGType &rng, std::size_t n, RealType *r,
+    RealType stability = 1, RealType skewness = 0, RealType location = 0,
+    RealType scale = 1)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    RealType w[k];
+    RealType u[k];
+    RealType x[k];
+    RealType y[k];
+    RealType z[k];
+    if (stability < 1 || stability > 1) {
+        RealType zeta =
+            -skewness * std::tan(const_pi_by2<RealType>() * stability);
+        RealType xi = 1 / stability * std::atan(-zeta);
+        RealType a = 0.5 * std::log(1 + zeta * zeta) / stability;
+        for (std::size_t i = 0; i != m; ++i) {
+            internal::stable_distribution_impl_a(rng, k, r + i * k, stability,
+                skewness, location, scale, w, u, a, x, y, z, xi);
+        }
+        internal::stable_distribution_impl_a(rng, l, r + m * k, stability,
+            skewness, location, scale, w, u, a, x, y, z, xi);
+    } else {
+        for (std::size_t i = 0; i != m; ++i) {
+            internal::stable_distribution_impl_1(rng, k, r + i * k, stability,
+                skewness, location, scale, w, u, x, y, z);
+        }
+        internal::stable_distribution_impl_1(rng, l, r + m * k, stability,
+            skewness, location, scale, w, u, x, y, z);
+    }
+}
 
 } // namespace vsmc
 

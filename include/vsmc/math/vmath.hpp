@@ -332,9 +332,7 @@ template <typename T>
 inline void sincos(std::size_t n, const T *a, T *y, T *z)
 {
     sin(n, a, y);
-    sqr(n, y, z);
-    sub(n, static_cast<T>(1), z, z);
-    sqrt(n, z, z);
+    cos(n, a, z);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \tan(a_i)\f$

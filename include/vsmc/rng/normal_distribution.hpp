@@ -44,53 +44,6 @@
 namespace vsmc
 {
 
-namespace internal
-{
-
-template <typename RealType, typename RNGType>
-inline void normal_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
-    RealType mean, RealType stddev, RealType *s)
-{
-    const std::size_t nu = n / 2;
-    RealType *const u1 = r;
-    RealType *const u2 = r + nu;
-    u01_distribution(rng, n, r);
-    sub(n, static_cast<RealType>(1), r, r);
-    log(nu, u1, s);
-    mul(nu, static_cast<RealType>(-2), s, s);
-    sqrt(nu, s, s);
-    mul(nu, const_pi_2<RealType>(), u2, u2);
-    sincos(nu, u2, u1, u2);
-    mul(nu, stddev, s, s);
-    fma(nu, mean, s, u1, u1);
-    fma(nu, mean, s, u2, u2);
-}
-
-} // namespace vsmc::internal
-
-/// \brief Generating normal random variates
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
-    RealType mean = 0, RealType stddev = 1)
-{
-    const std::size_t k = 1000;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    RealType s[k / 2];
-    for (std::size_t i = 0; i != m; ++i)
-        internal::normal_distribution_impl(rng, k, r + i * k, mean, stddev, s);
-    internal::normal_distribution_impl(rng, l, r + m * k, mean, stddev, s);
-    if (n % 2 != 0) {
-        U01DistributionType<RNGType, RealType> runif;
-        RealType v1 = runif(rng);
-        RealType v2 = runif(rng);
-        r[n - 1] = mean +
-            stddev * std::sqrt(-2 * std::log(v1)) *
-                std::cos(const_pi_2<RealType>() * v2);
-    }
-}
-
 /// \brief Normal distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -263,6 +216,53 @@ class NormalDistribution
         v = U01<std::uint32_t, RealType, Open, Closed>::eval(r >> 32);
     }
 }; // class NormalDistribution
+
+namespace internal
+{
+
+template <typename RealType, typename RNGType>
+inline void normal_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
+    RealType mean, RealType stddev, RealType *s)
+{
+    const std::size_t nu = n / 2;
+    RealType *const u1 = r;
+    RealType *const u2 = r + nu;
+    u01_distribution(rng, n, r);
+    sub(n, static_cast<RealType>(1), r, r);
+    log(nu, u1, s);
+    mul(nu, static_cast<RealType>(-2), s, s);
+    sqrt(nu, s, s);
+    mul(nu, const_pi_2<RealType>(), u2, u2);
+    sincos(nu, u2, u1, u2);
+    mul(nu, stddev, s, s);
+    fma(nu, mean, s, u1, u1);
+    fma(nu, mean, s, u2, u2);
+}
+
+} // namespace vsmc::internal
+
+/// \brief Generating normal random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
+    RealType mean = 0, RealType stddev = 1)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    RealType s[k / 2];
+    for (std::size_t i = 0; i != m; ++i)
+        internal::normal_distribution_impl(rng, k, r + i * k, mean, stddev, s);
+    internal::normal_distribution_impl(rng, l, r + m * k, mean, stddev, s);
+    if (n % 2 != 0) {
+        U01DistributionType<RNGType, RealType> runif;
+        RealType v1 = runif(rng);
+        RealType v2 = runif(rng);
+        r[n - 1] = mean +
+            stddev * std::sqrt(-2 * std::log(v1)) *
+                std::cos(const_pi_2<RealType>() * v2);
+    }
+}
 
 } // namespace vsmc
 

@@ -51,37 +51,6 @@
 namespace vsmc
 {
 
-namespace internal
-{
-
-template <typename RealType, typename RNGType>
-inline void weibull_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    u01_distribution(rng, n, r);
-    sub(n, static_cast<RealType>(1), r, r);
-    log(n, r, r);
-    mul(n, static_cast<RealType>(-1), r, r);
-    pow(n, r, 1 / a, r);
-    mul(n, b, r, r);
-}
-
-} // namespace vsmc::internal
-
-/// \brief Generating weibull random variates
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void weibull_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1)
-{
-    const std::size_t k = 1000;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::weibull_distribution_impl(rng, k, r + i * k, a, b);
-    internal::weibull_distribution_impl(rng, l, r + m * k, a, b);
-}
-
 /// \brief Weibull distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -148,7 +117,7 @@ class WeibullDistribution
             is >> std::ws >> b;
 
             if (is.good()) {
-                if (b > 0)
+                if (a > 0 && b > 0)
                     param = param_type(a, b);
                 else
                     is.setstate(std::ios_base::failbit);
@@ -204,6 +173,37 @@ class WeibullDistribution
     private:
     param_type param_;
 }; // class WeibullDistribution
+
+namespace internal
+{
+
+template <typename RealType, typename RNGType>
+inline void weibull_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+{
+    u01_distribution(rng, n, r);
+    sub(n, static_cast<RealType>(1), r, r);
+    log(n, r, r);
+    mul(n, static_cast<RealType>(-1), r, r);
+    pow(n, r, 1 / a, r);
+    mul(n, b, r, r);
+}
+
+} // namespace vsmc::internal
+
+/// \brief Generating weibull random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void weibull_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i)
+        internal::weibull_distribution_impl(rng, k, r + i * k, a, b);
+    internal::weibull_distribution_impl(rng, l, r + m * k, a, b);
+}
 
 } // namespace vsmc
 

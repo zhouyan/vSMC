@@ -206,17 +206,6 @@ void vsmc_rng_poisson(vsmc_rng *rng_ptr, int n, int *r, double mean)
     VSMC_DEFINE_RNG_DIST;
 }
 
-VSMC_DEFINE_RNG_DIST_1(exponential, lambda)
-
-void vsmc_rng_gamma(
-    vsmc_rng *rng_ptr, int n, double *r, double alpha, double beta)
-{
-    std::gamma_distribution<double> dist(alpha, beta);
-    VSMC_DEFINE_RNG_DIST;
-}
-
-VSMC_DEFINE_RNG_DIST_2(weibull, a, b)
-
 void vsmc_rng_extreme_value(
     vsmc_rng *rng_ptr, int n, double *r, double location, double scale)
 {
@@ -224,16 +213,11 @@ void vsmc_rng_extreme_value(
     VSMC_DEFINE_RNG_DIST;
 }
 
-VSMC_DEFINE_RNG_DIST_2(normal, mean, stddev)
-VSMC_DEFINE_RNG_DIST_2(lognormal, m, s)
-
 void vsmc_rng_chi_squared(vsmc_rng *rng_ptr, int n, double *r, double df)
 {
     std::chi_squared_distribution<double> dist(df);
     VSMC_DEFINE_RNG_DIST;
 }
-
-VSMC_DEFINE_RNG_DIST_2(cauchy, a, b);
 
 void vsmc_rng_fisher_f(
     vsmc_rng *rng_ptr, int n, double *r, double df1, double df2)
@@ -248,10 +232,6 @@ void vsmc_rng_student_t(vsmc_rng *rng_ptr, int n, double *r, double df)
     VSMC_DEFINE_RNG_DIST;
 }
 
-VSMC_DEFINE_RNG_DIST_2(gumbel, location, scale)
-VSMC_DEFINE_RNG_DIST_2(laplace, location, scale)
-VSMC_DEFINE_RNG_DIST_4(stable, stability, skewness, location, scale)
-
 void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,
     const double *weight, int normalized)
 {
@@ -263,6 +243,16 @@ void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,
     for (int i = 0; i != n; ++i)
         r[i] = dist(rng, first, last, norm);
 }
+
+VSMC_DEFINE_RNG_DIST_1(exponential, lambda)
+VSMC_DEFINE_RNG_DIST_2(gamma, alpha, beta)
+VSMC_DEFINE_RNG_DIST_2(weibull, a, b)
+VSMC_DEFINE_RNG_DIST_2(normal, mean, stddev)
+VSMC_DEFINE_RNG_DIST_2(lognormal, m, s)
+VSMC_DEFINE_RNG_DIST_2(cauchy, a, b);
+VSMC_DEFINE_RNG_DIST_2(gumbel, location, scale)
+VSMC_DEFINE_RNG_DIST_2(laplace, location, scale)
+VSMC_DEFINE_RNG_DIST_4(stable, stability, skewness, location, scale)
 
 void vsmc_rng_u01_sorted(int n, const double *u01, double *u01seq)
 {

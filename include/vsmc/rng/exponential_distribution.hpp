@@ -43,35 +43,6 @@
 namespace vsmc
 {
 
-namespace internal
-{
-
-template <typename RealType, typename RNGType>
-inline void exponential_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType lambda)
-{
-    u01_distribution(rng, n, r);
-    sub(n, static_cast<RealType>(1), r, r);
-    log(n, r, r);
-    mul(n, -1 / lambda, r, r);
-}
-
-} // namespace vsmc::internal
-
-/// \brief Generating exponential random variates
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void exponential_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType lambda = 1)
-{
-    const std::size_t k = 1000;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::exponential_distribution_impl(rng, k, r + i * k, lambda);
-    internal::exponential_distribution_impl(rng, l, r + m * k, lambda);
-}
-
 /// \brief Exponential distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -185,6 +156,35 @@ class ExponentialDistribution
     private:
     param_type param_;
 }; // class ExponentialDistribution
+
+namespace internal
+{
+
+template <typename RealType, typename RNGType>
+inline void exponential_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType lambda)
+{
+    u01_distribution(rng, n, r);
+    sub(n, static_cast<RealType>(1), r, r);
+    log(n, r, r);
+    mul(n, -1 / lambda, r, r);
+}
+
+} // namespace vsmc::internal
+
+/// \brief Generating exponential random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void exponential_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType lambda = 1)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i)
+        internal::exponential_distribution_impl(rng, k, r + i * k, lambda);
+    internal::exponential_distribution_impl(rng, l, r + m * k, lambda);
+}
 
 } // namespace vsmc
 

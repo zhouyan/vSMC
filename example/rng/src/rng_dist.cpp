@@ -8,14 +8,6 @@ int main(int argc, char **argv)
         std::uniform_int_distribution<int>, uniform_int, -100, 100);
     VSMC_RNG_DIST_2(
         std::uniform_real_distribution<double>, uniform_real, 0, 1);
-    VSMC_RNG_DIST_2(
-        vsmc::UniformRealCCDistribution<double>, uniform_real_cc, 0, 1);
-    VSMC_RNG_DIST_2(
-        vsmc::UniformRealCODistribution<double>, uniform_real_co, 0, 1);
-    VSMC_RNG_DIST_2(
-        vsmc::UniformRealOCDistribution<double>, uniform_real_oc, 0, 1);
-    VSMC_RNG_DIST_2(
-        vsmc::UniformRealOODistribution<double>, uniform_real_oo, 0, 1);
     VSMC_RNG_DIST_1(std::bernoulli_distribution, bernoulli, 0.5);
     VSMC_RNG_DIST_2(std::binomial_distribution<int>, binomial, 100, 0.5);
     VSMC_RNG_DIST_2(
@@ -26,10 +18,14 @@ int main(int argc, char **argv)
     VSMC_RNG_DIST_1(std::poisson_distribution<int>, poisson, 100);
     VSMC_RNG_DIST_1(std::exponential_distribution<double>, exponential, 1);
     VSMC_RNG_DIST_1(vsmc::ExponentialDistribution<double>, exponential, 1);
-    VSMC_RNG_DIST_2(std::gamma_distribution<double>, gamma, 0.01, 1);
+    VSMC_RNG_DIST_2(std::gamma_distribution<double>, gamma, 0.1, 1);
     VSMC_RNG_DIST_2(std::gamma_distribution<double>, gamma, 0.9, 1);
     VSMC_RNG_DIST_2(std::gamma_distribution<double>, gamma, 1, 1);
     VSMC_RNG_DIST_2(std::gamma_distribution<double>, gamma, 100, 1);
+    VSMC_RNG_DIST_2(vsmc::GammaDistribution<double>, gamma, 0.1, 1);
+    VSMC_RNG_DIST_2(vsmc::GammaDistribution<double>, gamma, 0.9, 1);
+    VSMC_RNG_DIST_2(vsmc::GammaDistribution<double>, gamma, 1, 1);
+    VSMC_RNG_DIST_2(vsmc::GammaDistribution<double>, gamma, 100, 1);
     VSMC_RNG_DIST_2(std::weibull_distribution<double>, weibull, 1, 1);
     VSMC_RNG_DIST_2(vsmc::WeibullDistribution<double>, weibull, 1, 1);
     VSMC_RNG_DIST_2(
