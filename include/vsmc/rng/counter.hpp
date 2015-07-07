@@ -480,7 +480,7 @@ class CounterEngine
     private:
     static constexpr std::size_t M_ = Generator::size();
 
-    alignas(32) std::array<result_type, M_> buffer_;
+    std::array<result_type, M_> buffer_;
     ctr_type ctr_;
     key_type key_;
     Generator generator_;
