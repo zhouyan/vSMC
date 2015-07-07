@@ -131,6 +131,7 @@ class GammaDistribution
         result_type beta_;
         result_type d_;
         result_type c_;
+        int range_;
 
         friend distribution_type;
 
@@ -141,12 +142,15 @@ class GammaDistribution
             if (alpha_ < 0.6) {
                 d_ = 1 - alpha_;
                 c_ = 1 / alpha_;
+                range_ = 1;
             } else if (alpha_ < 1) {
                 d_ = std::pow(alpha_, alpha_ / (1 - alpha_)) * (1 - alpha_);
                 c_ = 1 / alpha_;
+                range_ = 2;
             } else if (alpha_ > 1) {
                 d_ = alpha_ - static_cast<result_type>(1) / 3;
                 c_ = 1 / (3 * std::sqrt(d_));
+                range_ = 3;
             }
         }
 
@@ -173,15 +177,12 @@ class GammaDistribution
     template <typename RNGType>
     result_type operator()(RNGType &rng)
     {
-        result_type r = 0;
-        if (param_.alpha_ < 0.6)
-            r = generate_t(rng);
-        else if (param_.alpha_ < 1)
-            r = generate_w(rng);
-        else if (param_.alpha_ > 1)
-            r = generate_n(rng);
-        else
-            r = generate_e(rng);
+        switch (param_.range_) {
+            case 1: r = generate_t(rng); break;
+            case 2: r = generate_w(rng); break;
+            case 3: r = generate_n(rng); break;
+            default: r = generate_e(rng);
+        }
 
         return param_.beta_ * r;
     }
