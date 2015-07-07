@@ -248,7 +248,7 @@ module vsmc
             type(vsmc_rng) :: rng
             integer(kind = c_int), value :: n
             real(kind = c_double), dimension(*) :: r
-            real(kind = c_double), value :: rate
+            real(kind = c_double), value :: lambda
         end subroutine vsmc_rng_exponential
     end interface
 

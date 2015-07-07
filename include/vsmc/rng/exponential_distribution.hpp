@@ -154,7 +154,7 @@ class ExponentialDistribution
         void reset() {}
     }; // class param_type
 
-    explicit ExponentialDistribution(result_type lambda = 0) : param_(lambda)
+    explicit ExponentialDistribution(result_type lambda = 1) : param_(lambda)
     {
     }
 
@@ -176,7 +176,7 @@ class ExponentialDistribution
     {
         U01DistributionType<RNGType, RealType> runif;
 
-        return std::log(runif(rng)) / param_.lambda_;
+        return -std::log(runif(rng)) / param_.lambda_;
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
