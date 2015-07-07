@@ -59,7 +59,7 @@ enum GammaDistributionAlgorithm {
     GammaDistributionAlgorithmW,
     GammaDistributionAlgorithmN,
     GammaDistributionAlgorithmE
-}; // enum GammaDistributionDispatch
+}; // enum GammaDistributionAlgorithm
 
 template <typename RealType>
 GammaDistributionAlgorithm gamma_distribution_algorithm(RealType alpha)
@@ -308,7 +308,8 @@ namespace internal
 
 template <typename RealType, typename RNGType>
 inline void gamma_distribution_impl_t(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha, RealType beta, RealType *s)
+    RealType alpha, RealType beta, RealType *s,
+    GammaDistribution<RealType> &dist)
 {
     const RealType d = 1 - alpha;
     const RealType c = 1 / alpha;
@@ -329,7 +330,6 @@ inline void gamma_distribution_impl_t(RNGType &rng, std::size_t n, RealType *r,
 
     abs(n, r, u);
     mul(n, beta, r, r);
-    GammaDistribution<RealType> dist(alpha, beta);
     for (std::size_t i = 0; i != n; ++i)
         if (u[i] > e[i])
             r[i] = dist(rng);
@@ -337,7 +337,8 @@ inline void gamma_distribution_impl_t(RNGType &rng, std::size_t n, RealType *r,
 
 template <typename RealType, typename RNGType>
 inline void gamma_distribution_impl_w(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha, RealType beta, RealType *s)
+    RealType alpha, RealType beta, RealType *s,
+    GammaDistribution<RealType> &dist)
 {
     const RealType d = std::pow(alpha, alpha / (1 - alpha)) * (1 - alpha);
     const RealType c = 1 / alpha;
@@ -352,7 +353,6 @@ inline void gamma_distribution_impl_w(RNGType &rng, std::size_t n, RealType *r,
     add(n, d, r, e);
     mul(n, beta, r, r);
 
-    GammaDistribution<RealType> dist(alpha, beta);
     for (std::size_t i = 0; i != n; ++i)
         if (u[i] < e[i])
             r[i] = dist(rng);
@@ -360,7 +360,8 @@ inline void gamma_distribution_impl_w(RNGType &rng, std::size_t n, RealType *r,
 
 template <typename RealType, typename RNGType>
 inline void gamma_distribution_impl_n(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha, RealType beta, RealType *s)
+    RealType alpha, RealType beta, RealType *s,
+    GammaDistribution<RealType> &dist)
 {
     const RealType d = alpha - static_cast<RealType>(1) / 3;
     const RealType c = 1 / (3 * std::sqrt(d));
@@ -380,7 +381,6 @@ inline void gamma_distribution_impl_n(RNGType &rng, std::size_t n, RealType *r,
     mul(n, x, x, e);
     mul(n, x, x, x);
     fma(n, static_cast<RealType>(1), -static_cast<RealType>(0.0331), x, e);
-    GammaDistribution<RealType> dist(alpha, beta);
     for (std::size_t i = 0; i != n; ++i)
         if (v[i] <= 0 || u[i] > e[i])
             r[i] = dist(rng);
@@ -388,7 +388,7 @@ inline void gamma_distribution_impl_n(RNGType &rng, std::size_t n, RealType *r,
 
 template <typename RealType, typename RNGType>
 inline void gamma_distribution_impl_e(RNGType &rng, std::size_t n, RealType *r,
-    RealType, RealType beta, RealType *)
+    RealType, RealType beta, RealType *, GammaDistribution<RealType> &)
 {
     u01_distribution(rng, n, r);
     sub(n, static_cast<RealType>(1), r, r);
@@ -398,21 +398,21 @@ inline void gamma_distribution_impl_e(RNGType &rng, std::size_t n, RealType *r,
 
 template <typename RealType, typename RNGType>
 inline void gamma_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha, RealType beta, RealType *s)
+    RealType alpha, RealType beta, RealType *s,
+    GammaDistribution<RealType> &dist)
 {
-    GammaDistributionAlgorithm algorithm = gamma_distribution_algorithm(alpha);
-    switch (algorithm) {
+    switch (gamma_distribution_algorithm(alpha)) {
         case GammaDistributionAlgorithmT:
-            gamma_distribution_impl_t(rng, n, r, alpha, beta, s);
+            gamma_distribution_impl_t(rng, n, r, alpha, beta, s, dist);
             break;
         case GammaDistributionAlgorithmW:
-            gamma_distribution_impl_w(rng, n, r, alpha, beta, s);
+            gamma_distribution_impl_w(rng, n, r, alpha, beta, s, dist);
             break;
         case GammaDistributionAlgorithmN:
-            gamma_distribution_impl_n(rng, n, r, alpha, beta, s);
+            gamma_distribution_impl_n(rng, n, r, alpha, beta, s, dist);
             break;
         case GammaDistributionAlgorithmE:
-            gamma_distribution_impl_e(rng, n, r, alpha, beta, s);
+            gamma_distribution_impl_e(rng, n, r, alpha, beta, s, dist);
             break;
     }
 }
@@ -429,9 +429,12 @@ inline void gamma_distribution(RNGType &rng, std::size_t n, RealType *r,
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     RealType s[k * 4];
-    for (std::size_t i = 0; i != m; ++i)
-        internal::gamma_distribution_impl(rng, k, r + i * k, alpha, beta, s);
-    internal::gamma_distribution_impl(rng, l, r + m * k, alpha, beta, s);
+    GammaDistribution<RealType> dist(alpha, beta);
+    for (std::size_t i = 0; i != m; ++i) {
+        internal::gamma_distribution_impl(
+            rng, k, r + i * k, alpha, beta, s, dist);
+    }
+    internal::gamma_distribution_impl(rng, l, r + m * k, alpha, beta, s, dist);
 }
 
 } // namespace vsmc
