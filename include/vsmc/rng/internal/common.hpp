@@ -98,6 +98,13 @@ inline bool is_equal(double a, double b)
     return true;
 }
 
+inline bool is_equal(long double a, long double b)
+{
+    if (a > b || a < b)
+        return false;
+    return true;
+}
+
 template <int N>
 class RNGBitsNMax
 {
