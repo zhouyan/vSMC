@@ -231,8 +231,9 @@ class NormalDistribution
         generate_uv(rng, u, v, std::integral_constant<bool,
                                    internal::RNGBits<RNGType>::value >= 64>());
         result_type s = param_.stddev_ * std::sqrt(-2 * std::log(u));
-        v = std::sin(const_pi_2<result_type>() * v);
-        u = std::sqrt(1 - v * v);
+        v *= const_pi_2<result_type>();
+        u = std::cos(v);
+        v = std::sin(v);
         param_.v_ = param_.mean_ + v * s;
         param_.saved_ = true;
 
