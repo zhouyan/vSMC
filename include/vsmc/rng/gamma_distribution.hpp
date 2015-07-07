@@ -160,8 +160,8 @@ class GammaDistribution
 
     explicit GammaDistribution(const param_type &param) : param_(param) {}
 
-    result_type alpha() const { return param_.alpha_; }
-    result_type beta() const { return param_.beta_; }
+    result_type alpha() const { return param_.alpha(); }
+    result_type beta() const { return param_.beta(); }
 
     result_type min() const { return 0; }
 
@@ -327,7 +327,8 @@ inline void gamma_distribution_impl_n(RNGType &rng, std::size_t n, RealType *r,
     RealType *const v = s + n * 3;
     u01_distribution(rng, n, u);
     sub(n, static_cast<RealType>(1), u, u);
-    normal_distribution<RealType>(rng, n, x, 0, 1);
+    normal_distribution(
+        rng, n, x, static_cast<RealType>(0), static_cast<RealType>(1));
     fma(n, static_cast<RealType>(1), c, x, v);
     mul(n, v, v, e);
     mul(n, v, e, v);

@@ -138,8 +138,8 @@ class CauchyDistribution
 
     explicit CauchyDistribution(const param_type &param) : param_(param) {}
 
-    result_type a() const { return param_.a_; }
-    result_type b() const { return param_.b_; }
+    result_type a() const { return param_.a(); }
+    result_type b() const { return param_.b(); }
 
     result_type min() const
     {

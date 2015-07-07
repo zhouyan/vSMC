@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/chi_squared_distribution.hpp
+// vSMC/include/vsmc/rng/fisher_f_distribution.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,42 +29,46 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_CHI_SQUARED_DISTRIBUTION_HPP
-#define VSMC_RNG_CHI_SQUARED_DISTRIBUTION_HPP
+#ifndef VSMC_RNG_FISHER_F_DISTRIBUTION_HPP
+#define VSMC_RNG_FISHER_F_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/gamma_distribution.hpp>
+#include <vsmc/rng/chi_squared_distribution.hpp>
 
 namespace vsmc
 {
 
-/// \brief The \f$\chi^2\f$ distribution
+/// \brief Fisher-F distribution
 /// \ingroup Distribution
 template <typename RealType>
-class ChiSquaredDistribution
+class FisherFDistribution
 {
-
     public:
     using result_type = RealType;
-    using distribution_type = ChiSquaredDistribution<RealType>;
+    using distribution_type = FisherFDistribution<RealType>;
 
     class param_type
     {
         public:
         using result_type = RealType;
-        using distribution_type = ChiSquaredDistribution<RealType>;
+        using distribution_type = FisherFDistribution<RealType>;
 
-        explicit param_type(result_type n = 1)
-            : gamma_(0.5 * n, static_cast<result_type>(0.5))
+        explicit param_type(result_type m = 1, result_type n = 1)
+            : chi_squared_m_(m), chi_squared_n_(n)
         {
         }
 
-        result_type n() const { return gamma_.alpha() * 2; }
+        result_type m() const { return chi_squared_m_.n(); }
+        result_type n() const { return chi_squared_n_.n(); }
 
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
-            return param1.gamma_ == param2.gamma_;
+            if (param1.chi_squared_m_ != param2.chi_squared_m_)
+                return false;
+            if (param1.chi_squared_n_ != param2.chi_squared_n_)
+                return false;
+            return true;
         }
 
         friend bool operator!=(
@@ -80,7 +84,8 @@ class ChiSquaredDistribution
             if (!os.good())
                 return os;
 
-            os << param.gamma_;
+            os << param.chi_squared_m_ << ' ';
+            os << param.chi_squared_n_ << ' ';
 
             return os;
         }
@@ -92,29 +97,42 @@ class ChiSquaredDistribution
             if (!is.good())
                 return is;
 
-            GammaDistribution<RealType> gamma;
-            is >> std::ws >> gamma;
+            ChiSquaredDistribution<RealType> chi_squared_m;
+            ChiSquaredDistribution<RealType> chi_squared_n;
+            is >> std::ws >> chi_squared_m;
+            is >> std::ws >> chi_squared_n;
 
-            if (is.good())
-                param.gamma_ = gamma;
+            if (is.good()) {
+                param.chi_squared_m_ = std::move(chi_squared_m);
+                param.chi_squared_n_ = std::move(chi_squared_n);
+            }
 
             return is;
         }
 
         private:
-        GammaDistribution<RealType> gamma_;
+        ChiSquaredDistribution<RealType> chi_squared_m_;
+        ChiSquaredDistribution<RealType> chi_squared_n_;
 
         friend distribution_type;
 
         void invariant() {}
 
-        void reset() { gamma_.reset(); }
+        void reset()
+        {
+            chi_squared_m_.reset();
+            chi_squared_n_.reset();
+        }
     }; // class param_type
 
-    explicit ChiSquaredDistribution(result_type n = 1) : param_(n) {}
+    explicit FisherFDistribution(result_type m = 1, result_type n = 1)
+        : param_(m, n)
+    {
+    }
 
-    explicit ChiSquaredDistribution(const param_type &param) : param_(param) {}
+    explicit FisherFDistribution(const param_type &param) : param_(param) {}
 
+    result_type m() const { return param_.m(); }
     result_type n() const { return param_.n(); }
 
     result_type min() const { return 0; }
@@ -127,24 +145,47 @@ class ChiSquaredDistribution
     template <typename RNGType>
     result_type operator()(RNGType &rng)
     {
-        return param_.gamma_(rng);
+        return (param_.chi_squared_m_(rng) / m()) /
+            (param_.chi_squared_n_(rng) / n());
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
     param_type param_;
-}; // class ChiSquaredDistribution
+}; // class FisherFDistribution
 
-/// \brief Generating \f$\chi^2\f$ random variates
+namespace internal
+{
+
+template <typename RealType, typename RNGType>
+inline void fisher_f_distribution_impl(RNGType &rng, std::size_t n,
+    RealType *r, RealType df1, RealType df2, RealType *s)
+{
+    chi_squared_distribution(rng, n, s, df1);
+    chi_squared_distribution(rng, n, r, df2);
+    mul(n, 1 / df1, s, s);
+    mul(n, 1 / df2, r, r);
+    div(n, s, r, r);
+}
+
+} // namespace vsmc::internal
+
+/// \brief Generating Fisher-F random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void chi_squared_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType df = 1)
+inline void fisher_f_distribution(RNGType &rng, std::size_t n, RealType *r,
+    RealType df1 = 1, RealType df2 = 1)
 {
-    gamma_distribution(rng, n, r, 0.5 * df, static_cast<RealType>(0.5));
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    RealType s[k];
+    for (std::size_t i = 0; i != m; ++i)
+        internal::fisher_f_distribution_impl(rng, k, r + i * k, df1, df2, s);
+    internal::fisher_f_distribution_impl(rng, l, r + m * k, df1, df2, s);
 }
 
 } // namespace vsmc
 
-#endif // VSMC_RNG_CHI_SQUARED_DISTRIBUTION_HPP
+#endif // VSMC_RNG_FISHER_F_DISTRIBUTION_HPP

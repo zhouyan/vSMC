@@ -139,8 +139,8 @@ class GumbelDistribution
 
     explicit GumbelDistribution(const param_type &param) : param_(param) {}
 
-    result_type location() const { return param_.location_; }
-    result_type scale() const { return param_.scale_; }
+    result_type location() const { return param_.location(); }
+    result_type scale() const { return param_.scale(); }
 
     result_type min() const
     {
@@ -175,6 +175,7 @@ inline void gumbel_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
     RealType location, RealType scale)
 {
     u01_distribution(rng, n, r);
+    sub(n, static_cast<RealType>(1), r, r);
     log(n, r, r);
     mul(n, static_cast<RealType>(-1), r, r);
     log(n, r, r);

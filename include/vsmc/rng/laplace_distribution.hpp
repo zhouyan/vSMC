@@ -139,8 +139,8 @@ class LaplaceDistribution
 
     explicit LaplaceDistribution(const param_type &param) : param_(param) {}
 
-    result_type location() const { return param_.location_; }
-    result_type scale() const { return param_.scale_; }
+    result_type location() const { return param_.location(); }
+    result_type scale() const { return param_.scale(); }
 
     result_type min() const
     {

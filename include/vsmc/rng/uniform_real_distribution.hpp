@@ -145,11 +145,11 @@ class UniformRealDistribution
     {
     }
 
-    result_type a() const { return param_.a_; }
-    result_type b() const { return param_.b_; }
+    result_type a() const { return param_.a(); }
+    result_type b() const { return param_.b(); }
 
-    result_type min() const { return param_.a_; }
-    result_type max() const { return param_.b_; }
+    result_type min() const { return param_.a(); }
+    result_type max() const { return param_.b(); }
 
     template <typename RNGType>
     result_type operator()(RNGType &rng) const
@@ -169,7 +169,9 @@ namespace internal
 {
 
 template <typename RNGType, typename RealType,
-    bool = RNGBits<RNGType>::value >= 32>
+    bool = RNGBits<RNGType>::value >= 32 &&
+        (std::is_same<RealType, float>::value ||
+               std::is_same<RealType, double>::value)>
 class UniformRealDistributionTypeTraitImpl
 {
     public:

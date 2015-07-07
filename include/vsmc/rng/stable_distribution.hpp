@@ -200,10 +200,10 @@ class StableDistribution
 
     explicit StableDistribution(const param_type &param) : param_(param) {}
 
-    result_type stability() const { return param_.stability_; }
-    result_type skewness() const { return param_.skewness_; }
-    result_type location() const { return param_.location_; }
-    result_type scale() const { return param_.scale_; }
+    result_type stability() const { return param_.stability(); }
+    result_type skewness() const { return param_.skewness(); }
+    result_type location() const { return param_.location(); }
+    result_type scale() const { return param_.scale(); }
 
     result_type min() const
     {

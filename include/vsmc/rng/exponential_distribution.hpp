@@ -134,7 +134,7 @@ class ExponentialDistribution
     {
     }
 
-    result_type lambda() const { return param_.lambda_; }
+    result_type lambda() const { return param_.lambda(); }
 
     result_type min() const { return 0; }
 

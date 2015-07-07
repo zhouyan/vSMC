@@ -150,7 +150,9 @@ namespace internal
 {
 
 template <typename RNGType, typename RealType,
-    bool = RNGBits<RNGType>::value >= 32>
+    bool = RNGBits<RNGType>::value >= 32 &&
+        (std::is_same<RealType, float>::value ||
+               std::is_same<RealType, double>::value)>
 class U01DistributionTypeTraitImpl
 {
     public:
@@ -280,11 +282,12 @@ inline void u01_distribution_impl(
 template <typename RealType, typename RNGType>
 inline void u01_distribution(RNGType &rng, std::size_t n, RealType *r)
 {
-    internal::u01_distribution_impl(
-        rng, n, r, std::integral_constant<bool,
-                       internal::RNGBits<RNGType>::value >= 32>(),
-        std::integral_constant<bool,
-            internal::RNGBits<RNGType>::value >= 64>());
+    internal::u01_distribution_impl(rng, n, r, std::integral_constant < bool,
+        internal::RNGBits<RNGType>::value >= 32 &&
+            (std::is_same<RealType, float>::value ||
+                std::is_same<RealType, double>::value) > (),
+        std::integral_constant<bool, internal::RNGBits<RNGType>::value >=
+                                            64>());
 }
 
 } // namespace vsmc

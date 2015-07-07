@@ -119,8 +119,8 @@ class LognormalDistribution
 
     explicit LognormalDistribution(const param_type &param) : param_(param) {}
 
-    result_type m() const { return param_.m_; }
-    result_type s() const { return param_.s_; }
+    result_type m() const { return param_.m(); }
+    result_type s() const { return param_.s(); }
 
     result_type min() const { return 0; }
 
@@ -141,7 +141,7 @@ class LognormalDistribution
     param_type param_;
 }; // class LognormalDistribution
 
-/// \brief Generating log-normal random variates
+/// \brief Generating lognormal random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void lognormal_distribution(

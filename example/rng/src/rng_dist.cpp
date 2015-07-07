@@ -42,8 +42,12 @@ int main(int argc, char **argv)
     VSMC_RNG_DIST_2(vsmc::CauchyDistribution<double>, cauchy, 0, 1);
     VSMC_RNG_DIST_2(std::fisher_f_distribution<double>, fisher_f, 1, 1);
     VSMC_RNG_DIST_2(std::fisher_f_distribution<double>, fisher_f, 100, 100);
+    VSMC_RNG_DIST_2(vsmc::FisherFDistribution<double>, fisher_f, 1, 1);
+    VSMC_RNG_DIST_2(vsmc::FisherFDistribution<double>, fisher_f, 100, 100);
     VSMC_RNG_DIST_1(std::student_t_distribution<double>, student_t, 1);
     VSMC_RNG_DIST_1(std::student_t_distribution<double>, student_t, 100);
+    VSMC_RNG_DIST_1(vsmc::StudentTDistribution<double>, student_t, 1);
+    VSMC_RNG_DIST_1(vsmc::StudentTDistribution<double>, student_t, 100);
     VSMC_RNG_DIST_2(vsmc::GumbelDistribution<double>, gumbel, 0, 1);
     VSMC_RNG_DIST_2(vsmc::LaplaceDistribution<double>, laplace, 0, 1);
     VSMC_RNG_DIST_4(vsmc::StableDistribution<double>, stable, 1, 0, 0, 1);

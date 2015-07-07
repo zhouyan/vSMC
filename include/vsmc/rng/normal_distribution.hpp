@@ -158,8 +158,8 @@ class NormalDistribution
 
     explicit NormalDistribution(const param_type &param) : param_(param) {}
 
-    result_type mean() const { return param_.mean_; }
-    result_type stddev() const { return param_.stddev_; }
+    result_type mean() const { return param_.mean(); }
+    result_type stddev() const { return param_.stddev(); }
 
     result_type min() const
     {
