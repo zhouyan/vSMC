@@ -51,6 +51,31 @@
 namespace vsmc
 {
 
+namespace internal
+{
+
+enum GammaDistributionAlgorithm {
+    GammaDistributionAlgorithmT,
+    GammaDistributionAlgorithmW,
+    GammaDistributionAlgorithmN,
+    GammaDistributionAlgorithmE
+}; // enum GammaDistributionDispatch
+
+template <typename RealType>
+GammaDistributionAlgorithm gamma_distribution_algorithm(RealType alpha)
+{
+    if (alpha < 0.6)
+        return GammaDistributionAlgorithmT;
+    else if (alpha < 1)
+        return GammaDistributionAlgorithmW;
+    else if (alpha > 1)
+        return GammaDistributionAlgorithmN;
+    else
+        return GammaDistributionAlgorithmE;
+}
+
+} // namespace internal
+
 /// \brief Gamma distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -67,7 +92,11 @@ class GammaDistribution
         using distribution_type = GammaDistribution<RealType>;
 
         explicit param_type(result_type alpha = 1, result_type beta = 1)
-            : alpha_(alpha), beta_(beta), d_(0), c_(0)
+            : alpha_(alpha)
+            , beta_(beta)
+            , d_(0)
+            , c_(0)
+            , algorithm_(internal::gamma_distribution_algorithm(alpha_))
         {
             invariant();
         }
@@ -131,6 +160,7 @@ class GammaDistribution
         result_type beta_;
         result_type d_;
         result_type c_;
+        internal::GammaDistributionAlgorithm algorithm_;
 
         friend distribution_type;
 
@@ -138,15 +168,22 @@ class GammaDistribution
         {
             VSMC_RUNTIME_ASSERT_RNG_GAMMA_DISTRIBUTION_PARAM_CHECK(
                 alpha_, beta_);
-            if (alpha_ < 0.6) {
-                d_ = 1 - alpha_;
-                c_ = 1 / alpha_;
-            } else if (alpha_ < 1) {
-                d_ = std::pow(alpha_, alpha_ / (1 - alpha_)) * (1 - alpha_);
-                c_ = 1 / alpha_;
-            } else if (alpha_ > 1) {
-                d_ = alpha_ - static_cast<result_type>(1) / 3;
-                c_ = 1 / (3 * std::sqrt(d_));
+
+            switch (algorithm_) {
+                case internal::GammaDistributionAlgorithmT:
+                    d_ = 1 - alpha_;
+                    c_ = 1 / alpha_;
+                    break;
+                case internal::GammaDistributionAlgorithmW:
+                    d_ =
+                        std::pow(alpha_, alpha_ / (1 - alpha_)) * (1 - alpha_);
+                    c_ = 1 / alpha_;
+                    break;
+                case internal::GammaDistributionAlgorithmN:
+                    d_ = alpha_ - static_cast<result_type>(1) / 3;
+                    c_ = 1 / (3 * std::sqrt(d_));
+                    break;
+                case internal::GammaDistributionAlgorithmE: break;
             }
         }
 
@@ -174,14 +211,20 @@ class GammaDistribution
     result_type operator()(RNGType &rng)
     {
         result_type r = 0;
-        if (param_.alpha_ < 0.6)
-            r = generate_t(rng);
-        else if (param_.alpha_ < 1)
-            r = generate_w(rng);
-        else if (param_.alpha_ > 1)
-            r = generate_n(rng);
-        else
-            r = generate_e(rng);
+        switch (param_.algorithm_) {
+            case internal::GammaDistributionAlgorithmT:
+                r = generate_t(rng);
+                break;
+            case internal::GammaDistributionAlgorithmW:
+                r = generate_w(rng);
+                break;
+            case internal::GammaDistributionAlgorithmN:
+                r = generate_n(rng);
+                break;
+            case internal::GammaDistributionAlgorithmE:
+                r = generate_e(rng);
+                break;
+        }
 
         return param_.beta_ * r;
     }
@@ -357,14 +400,21 @@ template <typename RealType, typename RNGType>
 inline void gamma_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
     RealType alpha, RealType beta, RealType *s)
 {
-    if (alpha < 0.6)
-        gamma_distribution_impl_t(rng, n, r, alpha, beta, s);
-    else if (alpha < 1)
-        gamma_distribution_impl_w(rng, n, r, alpha, beta, s);
-    else if (alpha > 1)
-        gamma_distribution_impl_n(rng, n, r, alpha, beta, s);
-    else
-        gamma_distribution_impl_e(rng, n, r, alpha, beta, s);
+    GammaDistributionAlgorithm algorithm = gamma_distribution_algorithm(alpha);
+    switch (algorithm) {
+        case GammaDistributionAlgorithmT:
+            gamma_distribution_impl_t(rng, n, r, alpha, beta, s);
+            break;
+        case GammaDistributionAlgorithmW:
+            gamma_distribution_impl_w(rng, n, r, alpha, beta, s);
+            break;
+        case GammaDistributionAlgorithmN:
+            gamma_distribution_impl_n(rng, n, r, alpha, beta, s);
+            break;
+        case GammaDistributionAlgorithmE:
+            gamma_distribution_impl_e(rng, n, r, alpha, beta, s);
+            break;
+    }
 }
 
 } // namespace vsmc::internal

@@ -35,10 +35,10 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_EXPONENTIAL_DISTRIBUTION_PARAM_CHECK(lambda)  \
-    VSMC_RUNTIME_ASSERT((lambda > 0), "**ExponentialDistribution** "          \
-                                      "CONSTRUCTED WITH INVALID RATE "        \
-                                      "PARAMETER VALUE")
+#define VSMC_RUNTIME_ASSERT_RNG_EXPONENTIAL_DISTRIBUTION_PARAM_CHECK(coeff)   \
+    VSMC_RUNTIME_ASSERT((coeff < 0), "**ExponentialDistribution** "           \
+                                     "CONSTRUCTED WITH INVALID RATE "         \
+                                     "PARAMETER VALUE")
 
 namespace vsmc
 {
@@ -59,19 +59,17 @@ class ExponentialDistribution
         using result_type = RealType;
         using distribution_type = ExponentialDistribution<RealType>;
 
-        explicit param_type(result_type lambda = 1) : lambda_(lambda)
+        explicit param_type(result_type lambda = 1) : coeff_(-1 / lambda)
         {
             invariant();
         }
 
-        result_type lambda() const { return lambda_; }
+        result_type lambda() const { return -1 / coeff_; }
 
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
-            if (!internal::is_equal(param1.lambda_, param2.lambda_))
-                return false;
-            return true;
+            return internal::is_equal(param1.coeff_, param2.coeff_);
         }
 
         friend bool operator!=(
@@ -87,7 +85,7 @@ class ExponentialDistribution
             if (!os.good())
                 return os;
 
-            os << param.lambda_;
+            os << param.coeff_;
 
             return os;
         }
@@ -99,12 +97,12 @@ class ExponentialDistribution
             if (!is.good())
                 return is;
 
-            result_type lambda = 0;
-            is >> std::ws >> lambda;
+            result_type coeff = 0;
+            is >> std::ws >> coeff;
 
             if (is.good()) {
-                if (lambda > 0)
-                    param = param_type(lambda);
+                if (coeff < 0)
+                    param.coeff_ = coeff;
                 else
                     is.setstate(std::ios_base::failbit);
             }
@@ -113,14 +111,14 @@ class ExponentialDistribution
         }
 
         private:
-        result_type lambda_;
+        result_type coeff_;
 
         friend distribution_type;
 
         void invariant()
         {
             VSMC_RUNTIME_ASSERT_RNG_EXPONENTIAL_DISTRIBUTION_PARAM_CHECK(
-                lambda_);
+                coeff_);
         }
 
         void reset() {}
@@ -148,7 +146,7 @@ class ExponentialDistribution
     {
         U01DistributionType<RNGType, RealType> runif;
 
-        return -std::log(1 - runif(rng)) / param_.lambda_;
+        return param_.coeff_ * std::log(1 - runif(rng));
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS

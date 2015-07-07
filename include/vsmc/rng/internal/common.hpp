@@ -78,32 +78,20 @@ namespace internal
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
 
+#ifdef VSMC_CLANG
+#pragma clang diagnostic push
+// #pragma clang diagnostic ignored "-Wfloat-point-equal"
+#endif
+
 template <typename T>
 inline bool is_equal(const T &a, const T &b)
 {
     return a == b;
 }
 
-inline bool is_equal(float a, float b)
-{
-    if (a > b || a < b)
-        return false;
-    return true;
-}
-
-inline bool is_equal(double a, double b)
-{
-    if (a > b || a < b)
-        return false;
-    return true;
-}
-
-inline bool is_equal(long double a, long double b)
-{
-    if (a > b || a < b)
-        return false;
-    return true;
-}
+#ifdef VSMC_CLANG
+#pragma clang diagnostic pop
+#endif
 
 template <int N>
 class RNGBitsNMax
