@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/gumbel_distribution.hpp
+// vSMC/include/vsmc/rng/extreme_value_distribution.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,49 +29,50 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_GUMBEL_DISTRIBUTION_HPP
-#define VSMC_RNG_GUMBEL_DISTRIBUTION_HPP
+#ifndef VSMC_RNG_EXTREME_VALUE_DISTRIBUTION_HPP
+#define VSMC_RNG_EXTREME_VALUE_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_GUMBEL_DISTRIBUTION_PARAM_CHECK(scale)        \
-    VSMC_RUNTIME_ASSERT((scale > 0), "**GumbelDistribution** CONSTRUCTED "    \
-                                     "WITH INVALID SCALE PARAMETER VALUE")
+#define VSMC_RUNTIME_ASSERT_RNG_EXTREME_VALUE_DISTRIBUTION_PARAM_CHECK(b)     \
+    VSMC_RUNTIME_ASSERT((b > 0), "**ExtremeValueDistribution** "              \
+                                 "CONSTRUCTED WITH INVALID b "                \
+                                 "PARAMETER VALUE")
 
 namespace vsmc
 {
 
-/// \brief Gumbel distribution
+/// \brief ExtremeValue distribution
 /// \ingroup Distribution
 template <typename RealType>
-class GumbelDistribution
+class ExtremeValueDistribution
 {
     public:
     using result_type = RealType;
-    using distribution_type = GumbelDistribution<RealType>;
+    using distribution_type = ExtremeValueDistribution<RealType>;
 
     class param_type
     {
         public:
         using result_type = RealType;
-        using distribution_type = GumbelDistribution<RealType>;
+        using distribution_type = ExtremeValueDistribution<RealType>;
 
-        explicit param_type(result_type location = 0, result_type scale = 1)
-            : location_(location), scale_(scale)
+        explicit param_type(result_type a = 0, result_type b = 1)
+            : a_(a), b_(b)
         {
             invariant();
         }
 
-        result_type location() const { return location_; }
-        result_type scale() const { return scale_; }
+        result_type a() const { return a_; }
+        result_type b() const { return b_; }
 
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
-            if (!internal::is_equal(param1.location_, param2.location_))
+            if (!internal::is_equal(param1.a_, param2.a_))
                 return false;
-            if (!internal::is_equal(param1.scale_, param2.scale_))
+            if (!internal::is_equal(param1.b_, param2.b_))
                 return false;
             return true;
         }
@@ -89,8 +90,8 @@ class GumbelDistribution
             if (!os.good())
                 return os;
 
-            os << param.location_ << ' ';
-            os << param.scale_;
+            os << param.a_ << ' ';
+            os << param.b_;
 
             return os;
         }
@@ -102,14 +103,14 @@ class GumbelDistribution
             if (!is.good())
                 return is;
 
-            result_type location = 0;
-            result_type scale = 0;
-            is >> std::ws >> location;
-            is >> std::ws >> scale;
+            result_type a = 0;
+            result_type b = 0;
+            is >> std::ws >> a;
+            is >> std::ws >> b;
 
             if (is.good()) {
-                if (scale > 0)
-                    param = param_type(location, scale);
+                if (b > 0)
+                    param = param_type(a, b);
                 else
                     is.setstate(std::ios_base::failbit);
             }
@@ -118,29 +119,30 @@ class GumbelDistribution
         }
 
         private:
-        result_type location_;
-        result_type scale_;
+        result_type a_;
+        result_type b_;
 
         friend distribution_type;
 
         void invariant()
         {
-            VSMC_RUNTIME_ASSERT_RNG_GUMBEL_DISTRIBUTION_PARAM_CHECK(scale_);
+            VSMC_RUNTIME_ASSERT_RNG_EXTREME_VALUE_DISTRIBUTION_PARAM_CHECK(b_);
         }
 
         void reset() {}
     }; // class param_type
 
-    explicit GumbelDistribution(
-        result_type location = 0, result_type scale = 1)
-        : param_(location, scale)
+    explicit ExtremeValueDistribution(result_type a = 0, result_type b = 1)
+        : param_(a, b)
     {
     }
 
-    explicit GumbelDistribution(const param_type &param) : param_(param) {}
+    explicit ExtremeValueDistribution(const param_type &param) : param_(param)
+    {
+    }
 
-    result_type location() const { return param_.location(); }
-    result_type scale() const { return param_.scale(); }
+    result_type a() const { return param_.a(); }
+    result_type b() const { return param_.b(); }
 
     result_type min() const
     {
@@ -157,48 +159,46 @@ class GumbelDistribution
     {
         U01DistributionType<RNGType, RealType> runif;
 
-        return param_.location_ -
-            param_.scale_ * std::log(-std::log(runif(rng)));
+        return param_.a_ - param_.b_ * std::log(-std::log(runif(rng)));
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
     param_type param_;
-}; // class GumbelDistribution
+}; // class ExtremeValueDistribution
 
 namespace internal
 {
 
 template <typename RealType, typename RNGType>
-inline void gumbel_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
-    RealType location, RealType scale)
+inline void extreme_value_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     u01_distribution(rng, n, r);
     sub(n, static_cast<RealType>(1), r, r);
     log(n, r, r);
     mul(n, static_cast<RealType>(-1), r, r);
     log(n, r, r);
-    fma(n, location, -scale, r, r);
+    fma(n, a, -b, r, r);
 }
 
 } // namespace vsmc::internal
 
-/// \brief Generating gumbel random variates
+/// \brief Generating extreme_value random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void gumbel_distribution(RNGType &rng, std::size_t n, RealType *r,
-    RealType location = 0, RealType scale = 1)
+inline void extreme_value_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i)
-        internal::gumbel_distribution_impl(rng, k, r + i * k, location, scale);
-    internal::gumbel_distribution_impl(rng, l, r + m * k, location, scale);
+        internal::extreme_value_distribution_impl(rng, k, r + i * k, a, b);
+    internal::extreme_value_distribution_impl(rng, l, r + m * k, a, b);
 }
 
 } // namespace vsmc
 
-#endif // VSMC_RNG_GUMBEL_DISTRIBUTION_HPP
-
+#endif // VSMC_RNG_EXTREME_VALUE_DISTRIBUTION_HPP

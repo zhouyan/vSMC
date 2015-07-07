@@ -30,6 +30,8 @@ int main(int argc, char **argv)
     VSMC_RNG_DIST_2(vsmc::WeibullDistribution<double>, weibull, 1, 1);
     VSMC_RNG_DIST_2(
         std::extreme_value_distribution<double>, extreme_value, 0, 1);
+    VSMC_RNG_DIST_2(
+        vsmc::ExtremeValueDistribution<double>, extreme_value, 0, 1);
     VSMC_RNG_DIST_2(std::normal_distribution<double>, normal, 0, 1);
     VSMC_RNG_DIST_2(vsmc::NormalDistribution<double>, normal, 0, 1);
     VSMC_RNG_DIST_2(std::lognormal_distribution<double>, lognormal, 0, 1);
@@ -48,7 +50,6 @@ int main(int argc, char **argv)
     VSMC_RNG_DIST_1(std::student_t_distribution<double>, student_t, 100);
     VSMC_RNG_DIST_1(vsmc::StudentTDistribution<double>, student_t, 1);
     VSMC_RNG_DIST_1(vsmc::StudentTDistribution<double>, student_t, 100);
-    VSMC_RNG_DIST_2(vsmc::GumbelDistribution<double>, gumbel, 0, 1);
     VSMC_RNG_DIST_2(vsmc::LaplaceDistribution<double>, laplace, 0, 1);
     VSMC_RNG_DIST_4(vsmc::StableDistribution<double>, stable, 1, 0, 0, 1);
     VSMC_RNG_DIST_4(vsmc::StableDistribution<double>, stable, 0.1, 0, 0, 1);

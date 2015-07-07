@@ -37,16 +37,15 @@
 #include <vsmc/rng/chi_squared_distribution.hpp>
 #include <vsmc/rng/discrete_distribution.hpp>
 #include <vsmc/rng/exponential_distribution.hpp>
+#include <vsmc/rng/extreme_value_distribution.hpp>
 #include <vsmc/rng/fisher_f_distribution.hpp>
 #include <vsmc/rng/gamma_distribution.hpp>
-#include <vsmc/rng/gumbel_distribution.hpp>
 #include <vsmc/rng/laplace_distribution.hpp>
 #include <vsmc/rng/lognormal_distribution.hpp>
 #include <vsmc/rng/normal_distribution.hpp>
 #include <vsmc/rng/stable_distribution.hpp>
 #include <vsmc/rng/student_t_distribution.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
-#include <vsmc/rng/u01_sequence.hpp>
 #include <vsmc/rng/uniform_real_distribution.hpp>
 #include <vsmc/rng/weibull_distribution.hpp>
 
