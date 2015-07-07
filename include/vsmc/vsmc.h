@@ -117,11 +117,10 @@ void vsmc_rng_exponential(vsmc_rng *rng_ptr, int n, double *r, double lambda);
 
 /// \brief `std::gamma_distribution<double>`
 void vsmc_rng_gamma(
-    vsmc_rng *rng_ptr, int n, double *r, double shape, double scale);
+    vsmc_rng *rng_ptr, int n, double *r, double alpha, double beta);
 
 /// \brief `std::weibull_distribution<double>`
-void vsmc_rng_weibull(
-    vsmc_rng *rng_ptr, int n, double *r, double shape, double scale);
+void vsmc_rng_weibull(vsmc_rng *rng_ptr, int n, double *r, double a, double b);
 
 /// \brief `std::extreme_value_distribution<double>`
 void vsmc_rng_extreme_value(

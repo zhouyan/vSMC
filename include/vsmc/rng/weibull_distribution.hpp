@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/exponential_distribution.hpp
+// vSMC/include/vsmc/rng/weibull_distribution.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,16 +29,24 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_EXPONENTIAL_DISTRIBUTION_HPP
-#define VSMC_RNG_EXPONENTIAL_DISTRIBUTION_HPP
+#ifndef VSMC_RNG_WEIBULL_DISTRIBUTION_HPP
+#define VSMC_RNG_WEIBULL_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
+#include <vsmc/rng/normal_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_EXPONENTIAL_DISTRIBUTION_PARAM_CHECK(lambda)  \
-    VSMC_RUNTIME_ASSERT((lambda > 0), "**ExponentialDistribution** "          \
-                                      "CONSTRUCTED WITH INVALID RATE "        \
-                                      "PARAMETER VALUE")
+#define VSMC_RUNTIME_ASSERT_RNG_WEIBULL_DISTRIBUTION_PARAM_A_CHECK(a)         \
+    VSMC_RUNTIME_ASSERT((a > 0), "**WeibullDistribution** CONSTRUCTED "       \
+                                 "WITH INVALID SHAPE PARAMETER VALUE")
+
+#define VSMC_RUNTIME_ASSERT_RNG_WEIBULL_DISTRIBUTION_PARAM_B_CHECK(b)         \
+    VSMC_RUNTIME_ASSERT((b > 0), "**WeibullDistribution** CONSTRUCTED "       \
+                                 "WITH INVALID SCALE PARAMETER VALUE")
+
+#define VSMC_RUNTIME_ASSERT_RNG_WEIBULL_DISTRIBUTION_PARAM_CHECK(a, b)        \
+    VSMC_RUNTIME_ASSERT_RNG_WEIBULL_DISTRIBUTION_PARAM_A_CHECK(a);            \
+    VSMC_RUNTIME_ASSERT_RNG_WEIBULL_DISTRIBUTION_PARAM_B_CHECK(b);
 
 namespace vsmc
 {
@@ -47,58 +55,63 @@ namespace internal
 {
 
 template <typename RealType, typename RNGType>
-inline void exponential_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType lambda)
+inline void weibull_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     u01_distribution(rng, n, r);
     sub(n, static_cast<RealType>(1), r, r);
     log(n, r, r);
-    mul(n, -1 / lambda, r, r);
+    mul(n, static_cast<RealType>(-1), r, r);
+    pow(n, r, 1 / a, r);
+    mul(n, b, r, r);
 }
 
 } // namespace vsmc::internal
 
-/// \brief Generating exponential random variates
+/// \brief Generating weibull random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void exponential_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType lambda = 1)
+inline void weibull_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i)
-        internal::exponential_distribution_impl(rng, k, r + i * k, lambda);
-    internal::exponential_distribution_impl(rng, l, r + m * k, lambda);
+        internal::weibull_distribution_impl(rng, k, r + i * k, a, b);
+    internal::weibull_distribution_impl(rng, l, r + m * k, a, b);
 }
 
-/// \brief Exponential distribution
+/// \brief Weibull distribution
 /// \ingroup Distribution
 template <typename RealType>
-class ExponentialDistribution
+class WeibullDistribution
 {
-
     public:
     using result_type = RealType;
-    using distribution_type = ExponentialDistribution<RealType>;
+    using distribution_type = WeibullDistribution<RealType>;
 
     class param_type
     {
         public:
         using result_type = RealType;
-        using distribution_type = ExponentialDistribution<RealType>;
+        using distribution_type = WeibullDistribution<RealType>;
 
-        explicit param_type(result_type lambda = 1) : lambda_(lambda)
+        explicit param_type(result_type a = 1, result_type b = 1)
+            : a_(a), b_(b)
         {
             invariant();
         }
 
-        result_type lambda() const { return lambda_; }
+        result_type a() const { return a_; }
+        result_type b() const { return b_; }
 
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
-            if (!internal::is_equal(param1.lambda_, param2.lambda_))
+            if (!internal::is_equal(param1.a_, param2.a_))
+                return false;
+            if (!internal::is_equal(param1.b_, param2.b_))
                 return false;
             return true;
         }
@@ -116,7 +129,8 @@ class ExponentialDistribution
             if (!os.good())
                 return os;
 
-            os << param.lambda_;
+            os << param.a_ << ' ';
+            os << param.b_;
 
             return os;
         }
@@ -128,12 +142,14 @@ class ExponentialDistribution
             if (!is.good())
                 return is;
 
-            result_type lambda = 0;
-            is >> std::ws >> lambda;
+            result_type a = 0;
+            result_type b = 0;
+            is >> std::ws >> a;
+            is >> std::ws >> b;
 
             if (is.good()) {
-                if (lambda > 0)
-                    param = param_type(lambda);
+                if (b > 0)
+                    param = param_type(a, b);
                 else
                     is.setstate(std::ios_base::failbit);
             }
@@ -142,30 +158,33 @@ class ExponentialDistribution
         }
 
         private:
-        result_type lambda_;
+        result_type a_;
+        result_type b_;
 
         friend distribution_type;
 
         void invariant()
         {
-            VSMC_RUNTIME_ASSERT_RNG_EXPONENTIAL_DISTRIBUTION_PARAM_CHECK(
-                lambda_);
+            VSMC_RUNTIME_ASSERT_RNG_WEIBULL_DISTRIBUTION_PARAM_CHECK(a_, b_);
         }
 
         void reset() {}
     }; // class param_type
 
-    explicit ExponentialDistribution(result_type lambda = 1) : param_(lambda)
+    explicit WeibullDistribution(result_type a = 1, result_type b = 1)
+        : param_(a, b)
     {
     }
 
-    explicit ExponentialDistribution(const param_type &param) : param_(param)
+    explicit WeibullDistribution(const param_type &param) : param_(param) {}
+
+    result_type a() const { return param_.a_; }
+    result_type b() const { return param_.b_; }
+
+    result_type min() const
     {
+        return -std::numeric_limits<result_type>::infinity();
     }
-
-    result_type lambda() const { return param_.lambda_; }
-
-    result_type min() const { return 0; }
 
     result_type max() const
     {
@@ -177,15 +196,15 @@ class ExponentialDistribution
     {
         U01DistributionType<RNGType, RealType> runif;
 
-        return -std::log(1 - runif(rng)) / param_.lambda_;
+        return param_.b_ * std::pow(-std::log(1 - runif(rng)), 1 / param_.a_);
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
     param_type param_;
-}; // class ExponentialDistribution
+}; // class WeibullDistribution
 
 } // namespace vsmc
 
-#endif // VSMC_RNG_EXPONENTIAL_DISTRIBUTION_HPP
+#endif // VSMC_RNG_WEIBULL_DISTRIBUTION_HPP

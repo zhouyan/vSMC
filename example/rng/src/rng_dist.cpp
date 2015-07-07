@@ -26,11 +26,12 @@ int main(int argc, char **argv)
     VSMC_RNG_DIST_1(std::poisson_distribution<int>, poisson, 100);
     VSMC_RNG_DIST_1(std::exponential_distribution<double>, exponential, 1);
     VSMC_RNG_DIST_1(vsmc::ExponentialDistribution<double>, exponential, 1);
-    VSMC_RNG_DIST_2(std::gamma_distribution<double>, gamma, 1, 1);
-    VSMC_RNG_DIST_2(std::gamma_distribution<double>, gamma, 0.5, 2);
     VSMC_RNG_DIST_2(std::gamma_distribution<double>, gamma, 0.01, 1);
+    VSMC_RNG_DIST_2(std::gamma_distribution<double>, gamma, 0.9, 1);
+    VSMC_RNG_DIST_2(std::gamma_distribution<double>, gamma, 1, 1);
     VSMC_RNG_DIST_2(std::gamma_distribution<double>, gamma, 100, 1);
     VSMC_RNG_DIST_2(std::weibull_distribution<double>, weibull, 1, 1);
+    VSMC_RNG_DIST_2(vsmc::WeibullDistribution<double>, weibull, 1, 1);
     VSMC_RNG_DIST_2(
         std::extreme_value_distribution<double>, extreme_value, 0, 1);
     VSMC_RNG_DIST_2(std::normal_distribution<double>, normal, 0, 1);

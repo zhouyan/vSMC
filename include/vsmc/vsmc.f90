@@ -253,26 +253,26 @@ module vsmc
     end interface
 
     interface
-        subroutine vsmc_rng_gamma(rng, n, r, shap, scal) bind(c)
+        subroutine vsmc_rng_gamma(rng, n, r, alpha, beta) bind(c)
             use, intrinsic :: iso_c_binding
             import :: vsmc_rng
             type(vsmc_rng) :: rng
             integer(kind = c_int), value :: n
             real(kind = c_double), dimension(*) :: r
-            real(kind = c_double), value :: shap
-            real(kind = c_double), value :: scal
+            real(kind = c_double), value :: alpha
+            real(kind = c_double), value :: beta
         end subroutine vsmc_rng_gamma
     end interface
 
     interface
-        subroutine vsmc_rng_weibull(rng, n, r, shap, scal) bind(c)
+        subroutine vsmc_rng_weibull(rng, n, r, a, b) bind(c)
             use, intrinsic :: iso_c_binding
             import :: vsmc_rng
             type(vsmc_rng) :: rng
             integer(kind = c_int), value :: n
             real(kind = c_double), dimension(*) :: r
-            real(kind = c_double), value :: shap
-            real(kind = c_double), value :: scal
+            real(kind = c_double), value :: a
+            real(kind = c_double), value :: b
         end subroutine vsmc_rng_weibull
     end interface
 
