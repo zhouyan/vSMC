@@ -161,8 +161,8 @@ class LaplaceDistribution
         U01DistributionType<RNGType, RealType> runif;
         result_type u = runif(rng) - 0.5;
 
-        return u > 0 ? param_.a_ - param_.b_ * std::log1p(2 * u) :
-                       param_.a_ + param_.b_ * std::log1p(-2 * u);
+        return u > 0 ? param_.a_ - param_.b_ * std::log(1 + 2 * u) :
+                       param_.a_ + param_.b_ * std::log(1 - 2 * u);
     }
 
     template <typename RNGType>
@@ -186,17 +186,17 @@ inline void laplace_distribution_impl(
 {
     RealType s[K];
     u01_distribution(rng, n, r);
+    sub(n, r, 0.5, r);
     for (std::size_t i = 0; i != n; ++i) {
-        r[i] -= 0.5;
         if (r[i] > 0) {
-            r[i] *= 2;
+            r[i] = 1 + 2 * r[i];
             s[i] = -b;
         } else {
-            r[i] *= -2;
+            r[i] = 1 - 2 * r[i];
             s[i] = b;
         }
     }
-    log1p(n, r, r);
+    log(n, r, r);
     fma(n, a, s, r, r);
 }
 
