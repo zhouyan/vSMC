@@ -192,7 +192,7 @@ inline void weibull_distribution_impl(
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void weibull_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1)
+    RNGType &rng, std::size_t n, RealType *r, RealType a = 1, RealType b = 1)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;
