@@ -76,7 +76,7 @@ inline void rng_test(std::size_t N, const std::string &name,
     vsmc::Vector<double> r(N);
     vsmc::Vector<typename RNGType::result_type> u(N);
     MKL_INT n = static_cast<MKL_INT>(N);
-    MKL_INT m = 1000;
+    MKL_INT m = n / 1000;
 
 #if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
 #if VSMC_RNG_TEST_MKL
@@ -88,9 +88,6 @@ inline void rng_test(std::size_t N, const std::string &name,
 #endif
 
     std::uniform_real_distribution<double> runif_std(0, 1);
-    for (std::size_t i = 0; i != N; ++i)
-        r[i] = runif_std(rng);
-    result += std::accumulate(r.begin(), r.end(), 0.0);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
@@ -100,9 +97,6 @@ inline void rng_test(std::size_t N, const std::string &name,
     sw.push_back(watch);
 
     vsmc::UniformRealDistributionType<RNGType, double> runif_vsmc(0, 1);
-    for (std::size_t i = 0; i != N; ++i)
-        r[i] = runif_vsmc(rng);
-    result += std::accumulate(r.begin(), r.end(), 0.0);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
@@ -111,8 +105,7 @@ inline void rng_test(std::size_t N, const std::string &name,
     result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);
 
-    vsmc::uniform_real_distribution(rng, N, r.data(), 0.0, 1.0);
-    result += std::accumulate(r.begin(), r.end(), 0.0);
+    vsmc::uniform_real_distribution(rng, N / 1000, r.data(), 0.0, 1.0);
     watch.reset();
     watch.start();
     vsmc::uniform_real_distribution(rng, N, r.data(), 0.0, 1.0);
@@ -122,7 +115,6 @@ inline void rng_test(std::size_t N, const std::string &name,
 
 #if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
     vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream.get(), m, r.data(), 0, 1);
-    result += std::accumulate(r.begin(), r.end(), 0.0);
     watch.reset();
     watch.start();
     vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream.get(), n, r.data(), 0, 1);
@@ -132,9 +124,6 @@ inline void rng_test(std::size_t N, const std::string &name,
 #endif
 
     std::normal_distribution<double> rnorm_std(0, 1);
-    for (std::size_t i = 0; i != N; ++i)
-        r[i] = rnorm_std(rng);
-    result += std::accumulate(r.begin(), r.end(), 0.0);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
@@ -144,9 +133,6 @@ inline void rng_test(std::size_t N, const std::string &name,
     sw.push_back(watch);
 
     vsmc::NormalDistribution<double> rnorm_vsmc(0, 1);
-    for (std::size_t i = 0; i != N; ++i)
-        r[i] = rnorm_vsmc(rng);
-    result += std::accumulate(r.begin(), r.end(), 0.0);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
@@ -155,8 +141,7 @@ inline void rng_test(std::size_t N, const std::string &name,
     result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);
 
-    vsmc::normal_distribution(rng, N, r.data(), 0.0, 1.0);
-    result += std::accumulate(r.begin(), r.end(), 0.0);
+    vsmc::normal_distribution(rng, N / 1000, r.data(), 0.0, 1.0);
     watch.reset();
     watch.start();
     vsmc::normal_distribution(rng, N, r.data(), 0.0, 1.0);
@@ -167,7 +152,6 @@ inline void rng_test(std::size_t N, const std::string &name,
 #if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
     vdRngGaussian(
         VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream.get(), m, r.data(), 0, 1);
-    result += std::accumulate(r.begin(), r.end(), 0.0);
     watch.reset();
     watch.start();
     vdRngGaussian(
