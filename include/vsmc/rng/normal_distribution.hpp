@@ -44,6 +44,12 @@
 namespace vsmc
 {
 
+/// \brief Generating normal random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
+    RealType mean = 0, RealType stddev = 1);
+
 /// \brief Normal distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -194,6 +200,12 @@ class NormalDistribution
         return param_.mean_ + u * s;
     }
 
+    template <typename RNGType>
+    void operator()(RNGType &rng, std::size_t n, result_type *r)
+    {
+	normal_distribution(rng, n, r, mean(), stddev());
+    }
+
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
@@ -243,11 +255,9 @@ inline void normal_distribution_impl(
 
 } // namespace vsmc::internal
 
-/// \brief Generating normal random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
-    RealType mean = 0, RealType stddev = 1)
+inline void normal_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType mean, RealType stddev)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;

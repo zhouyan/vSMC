@@ -80,7 +80,7 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
 
 #ifdef VSMC_CLANG
 #pragma clang diagnostic push
-// #pragma clang diagnostic ignored "-Wfloat-point-equal"
+#pragma clang diagnostic ignored "-Wfloat-equal"
 #endif
 
 template <typename T>

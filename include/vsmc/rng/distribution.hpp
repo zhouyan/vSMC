@@ -33,6 +33,8 @@
 #define VSMC_RNG_DISTRIBUTION_HPP
 
 #include <vsmc/internal/config.h>
+#include <vsmc/rng/beta_distribution.hpp>
+#include <vsmc/rng/cauchy_distribution.hpp>
 #include <vsmc/rng/cauchy_distribution.hpp>
 #include <vsmc/rng/chi_squared_distribution.hpp>
 #include <vsmc/rng/discrete_distribution.hpp>

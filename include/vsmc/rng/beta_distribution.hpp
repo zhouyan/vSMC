@@ -66,7 +66,7 @@ enum BetaDistributionAlgorithm {
 }; // enum BetaDistributionAlgorithm
 
 template <typename RealType>
-BetaDistributionAlgorithm beta_distribution_algorithm(
+inline BetaDistributionAlgorithm beta_distribution_algorithm(
     RealType alpha, RealType beta)
 {
     const RealType K = static_cast<RealType>(0.852);
@@ -88,6 +88,7 @@ BetaDistributionAlgorithm beta_distribution_algorithm(
         return BetaDistributionAlgorithmA2;
     else if (alpha > 1 && beta < 1)
         return BetaDistributionAlgorithmA3;
+    return BetaDistributionAlgorithmC;
 }
 
 template <typename RealType>
@@ -149,6 +150,12 @@ class BetaDistributionConstant
 }; // class BetaDistributionConstant
 
 } // namespace internal
+
+/// \brief Generating beta random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void beta_distribution(RNGType &rng, std::size_t n, RealType *r,
+    RealType alpha = 1, RealType beta = 1);
 
 /// \brief beta distribution
 /// \ingroup Distribution
@@ -283,6 +290,12 @@ class BetaDistribution
                 return generate_a3(rng);
                 break;
         }
+    }
+
+    template <typename RNGType>
+    void operator()(RNGType &rng, std::size_t n, result_type *r)
+    {
+        beta_distribution(rng, n, r, alpha(), beta());
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
@@ -498,7 +511,7 @@ inline void beta_distribution_impl_c(RNGType &rng, std::size_t n, RealType *r,
 
 template <std::size_t K, typename RealType, typename RNGType>
 inline void beta_distribution_impl_j(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha, RealType beta, BetaDistribution<RealType> &dist,
+    RealType, RealType, BetaDistribution<RealType> &dist,
     const BetaDistributionConstant<RealType> &constant)
 {
     const RealType a = constant.a;
@@ -520,7 +533,7 @@ inline void beta_distribution_impl_j(RNGType &rng, std::size_t n, RealType *r,
 
 template <std::size_t, typename RealType, typename RNGType>
 inline void beta_distribution_impl_a1(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha, RealType beta, BetaDistribution<RealType> &dist,
+    RealType, RealType, BetaDistribution<RealType> &dist,
     const BetaDistributionConstant<RealType> &)
 {
     for (std::size_t i = 0; i != n; ++i)
@@ -529,7 +542,7 @@ inline void beta_distribution_impl_a1(RNGType &rng, std::size_t n, RealType *r,
 
 template <std::size_t, typename RealType, typename RNGType>
 inline void beta_distribution_impl_a2(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha, RealType beta, BetaDistribution<RealType> &dist,
+    RealType, RealType, BetaDistribution<RealType> &dist,
     const BetaDistributionConstant<RealType> &)
 {
     for (std::size_t i = 0; i != n; ++i)
@@ -538,7 +551,7 @@ inline void beta_distribution_impl_a2(RNGType &rng, std::size_t n, RealType *r,
 
 template <std::size_t, typename RealType, typename RNGType>
 inline void beta_distribution_impl_a3(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha, RealType beta, BetaDistribution<RealType> &dist,
+    RealType, RealType, BetaDistribution<RealType> &dist,
     const BetaDistributionConstant<RealType> &)
 {
     for (std::size_t i = 0; i != n; ++i)
@@ -588,11 +601,9 @@ inline void beta_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
 
 } // namespace vsmc::internal
 
-/// \brief Generating beta random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void beta_distribution(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha = 0, RealType beta = 1)
+inline void beta_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType alpha, RealType beta)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;

@@ -32,130 +32,148 @@
 #ifndef VSMC_EXAMPLE_RNG_DIST_HPP
 #define VSMC_EXAMPLE_RNG_DIST_HPP
 
-#include "rng_test.hpp"
+#include <vsmc/rng/rng.hpp>
+#include <vsmc/utility/stop_watch.hpp>
 
-#define VSMC_RNG_DIST_C_PRE(Dist, name)                                       \
-    vsmc::Vector<DistResultType<Dist>> r(N);                                  \
-    vsmc::StopWatch watch;                                                    \
-    vsmc_rng rng;                                                             \
-    vsmc_rng_init(&rng, 1);
+#define VSMC_RNG_DIST_1(Name, STD, p1)                                        \
+    param1[0] = p1;                                                           \
+    rng_dist<STD<double>, vsmc::Name##Distribution<double>>(                  \
+        N, param1, #Name, names, size, sw);
 
-#define VSMC_RNG_DIST_C_POST(Dist, name)                                      \
-    sw.push_back(watch);                                                      \
-    std::ofstream rnd("rnd");                                                 \
-    rnd << r.back() << std::endl;                                             \
-    rnd.close();
+#define VSMC_RNG_DIST_2(Name, STD, p1, p2)                                    \
+    param2[0] = p1;                                                           \
+    param2[1] = p2;                                                           \
+    rng_dist<STD<double>, vsmc::Name##Distribution<double>>(                  \
+        N, param2, #Name, names, size, sw);
 
-#define VSMC_RNG_DIST_1_C(Dist, name, p1)                                     \
-    {                                                                         \
-        std::string dname(#name "(" #p1 ")");                                 \
-        VSMC_RNG_DIST_C_PRE(Dist, name);                                      \
-        vsmc_rng_##name(&rng, static_cast<int>(N), r.data(), p1);             \
-        watch.start();                                                        \
-        vsmc_rng_##name(&rng, static_cast<int>(N), r.data(), p1);             \
-        watch.stop();                                                         \
-        VSMC_RNG_DIST_C_POST(Dist, name);                                     \
-    }
-
-#define VSMC_RNG_DIST_2_C(Dist, name, p1, p2)                                 \
-    {                                                                         \
-        std::string dname(#name "(" #p1 "," #p2 ")");                         \
-        VSMC_RNG_DIST_C_PRE(Dist, name);                                      \
-        vsmc_rng_##name(&rng, static_cast<int>(N), r.data(), p1, p2);         \
-        watch.start();                                                        \
-        vsmc_rng_##name(&rng, static_cast<int>(N), r.data(), p1, p2);         \
-        watch.stop();                                                         \
-        VSMC_RNG_DIST_C_POST(Dist, name);                                     \
-    }
-
-#define VSMC_RNG_DIST_4_C(Dist, name, p1, p2, p3, p4)                         \
-    {                                                                         \
-        std::string dname(#name "(" #p1 "," #p2 "," #p3 "," #p4 ")");         \
-        VSMC_RNG_DIST_C_PRE(Dist, name);                                      \
-        vsmc_rng_##name(&rng, static_cast<int>(N), r.data(), p1, p2, p3, p4); \
-        watch.start();                                                        \
-        vsmc_rng_##name(&rng, static_cast<int>(N), r.data(), p1, p2, p3, p4); \
-        watch.stop();                                                         \
-        VSMC_RNG_DIST_C_POST(Dist, name);                                     \
-    }
-
-#define VSMC_RNG_DIST_1_CPP(Dist, name, p1)                                   \
-    {                                                                         \
-        Dist dist(p1);                                                        \
-        std::string dname(#Dist "(" #p1 ")");                                 \
-        rng_dist(N, dist, dname, names, size, sw);                            \
-    }
-
-#define VSMC_RNG_DIST_2_CPP(Dist, name, p1, p2)                               \
-    {                                                                         \
-        Dist dist(p1, p2);                                                    \
-        std::string dname(#Dist "(" #p1 "," #p2 ")");                         \
-        rng_dist(N, dist, dname, names, size, sw);                            \
-    }
-
-#define VSMC_RNG_DIST_4_CPP(Dist, name, p1, p2, p3, p4)                       \
-    {                                                                         \
-        Dist dist(p1, p2, p3, p4);                                            \
-        std::string dname(#Dist "(" #p1 "," #p2 "," #p3 "," #p4 ")");         \
-        rng_dist(N, dist, dname, names, size, sw);                            \
-    }
-
-#if VSMC_RNG_TEST_C_API
-#define VSMC_RNG_DIST_1(Dist, name, p1)                                       \
-    VSMC_RNG_DIST_1_CPP(Dist, name, p1);                                      \
-    VSMC_RNG_DIST_1_C(Dist, name, p1);
-#define VSMC_RNG_DIST_2(Dist, name, p1, p2)                                   \
-    VSMC_RNG_DIST_2_CPP(Dist, name, p1, p2);                                  \
-    VSMC_RNG_DIST_2_C(Dist, name, p1, p2);
-#define VSMC_RNG_DIST_4(Dist, name, p1, p2, p3, p4)                           \
-    VSMC_RNG_DIST_4_CPP(Dist, name, p1, p2, p3, p4);                          \
-    VSMC_RNG_DIST_4_C(Dist, name, p1, p2, p3, p4);
-#else
-#define VSMC_RNG_DIST_1 VSMC_RNG_DIST_1_CPP
-#define VSMC_RNG_DIST_2 VSMC_RNG_DIST_2_CPP
-#define VSMC_RNG_DIST_4 VSMC_RNG_DIST_4_CPP
-#endif
-
-template <typename Dist>
-class DistResultTypeTrait
+template <std::size_t K>
+inline std::string rng_dist_name(
+    const std::string &name, const std::array<double, K> &param)
 {
-    public:
-    using type = typename Dist::result_type;
-};
+    std::stringstream ss;
+    ss << name;
+    if (K > 0)
+        ss << "(" << param[0];
+    for (std::size_t k = 1; k < K; ++k)
+        ss << "," << param[k];
+    if (K > 0)
+        ss << ")";
 
-template <>
-class DistResultTypeTrait<std::bernoulli_distribution>
+    return ss.str();
+}
+
+template <typename DistType>
+inline DistType rng_dist_init(const std::array<double, 1> &param)
 {
-    public:
-    using type = int;
-};
+    return DistType(param[0]);
+}
 
-template <typename Dist>
-using DistResultType = typename DistResultTypeTrait<Dist>::type;
-
-template <typename Dist>
-inline void rng_dist(std::size_t N, Dist &dist, const std::string &name,
-    vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
-    vsmc::Vector<vsmc::StopWatch> &sw)
+template <typename DistType>
+inline DistType rng_dist_init(const std::array<double, 2> &param)
 {
+    return DistType(param[0], param[1]);
+}
+
+template <typename STDDistType, typename vSMCDistType, std::size_t K>
+inline void rng_dist(std::size_t N, const std::array<double, K> &param,
+    const std::string &name, vsmc::Vector<std::string> &names,
+    vsmc::Vector<std::size_t> &size, vsmc::Vector<vsmc::StopWatch> &sw)
+{
+    names.push_back(rng_dist_name(name, param));
+
+    double result = 0;
+    vsmc::Vector<double> r(N);
     vsmc::StopWatch watch;
     vsmc::RNG rng;
 
-    DistResultType<Dist> result = 0;
+    STDDistType dist_std(rng_dist_init<STDDistType>(param));
     for (std::size_t i = 0; i != N; ++i)
-        result += dist(rng);
+        r[i] = dist_std(rng);
+    result += std::accumulate(r.begin(), r.end(), 0.0);
+    watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        result += dist(rng);
+        r[i] = dist_std(rng);
     watch.stop();
-
-    names.push_back(name);
-    size.push_back(sizeof(Dist));
+    result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);
+    size.push_back(sizeof(STDDistType));
+
+    vSMCDistType dist_vsmc(rng_dist_init<vSMCDistType>(param));
+    for (std::size_t i = 0; i != N; ++i)
+        r[i] = dist_vsmc(rng);
+    result += std::accumulate(r.begin(), r.end(), 0.0);
+    watch.reset();
+    watch.start();
+    for (std::size_t i = 0; i != N; ++i)
+        r[i] = dist_vsmc(rng);
+    watch.stop();
+    result += std::accumulate(r.begin(), r.end(), 0.0);
+    sw.push_back(watch);
+    size.push_back(sizeof(vSMCDistType));
+
+    dist_vsmc(rng, N, r.data());
+    result += std::accumulate(r.begin(), r.end(), 0.0);
+    watch.reset();
+    watch.start();
+    dist_vsmc(rng, N, r.data());
+    watch.stop();
+    result += std::accumulate(r.begin(), r.end(), 0.0);
+    sw.push_back(watch);
+
+#if VSMC_HAS_MKL
+    vsmc::MKL_SFMT19937 rng_mkl;
+    dist_vsmc(rng_mkl, N, r.data());
+    result += std::accumulate(r.begin(), r.end(), 0.0);
+    watch.reset();
+    watch.start();
+    dist_vsmc(rng_mkl, N, r.data());
+    watch.stop();
+    result += std::accumulate(r.begin(), r.end(), 0.0);
+    sw.push_back(watch);
+#endif
 
     std::ofstream rnd("rnd");
     rnd << result << std::endl;
     rnd.close();
+}
+
+inline void rng_dist_output_sw(const vsmc::Vector<std::string> &names,
+    const vsmc::Vector<std::size_t> &size,
+    const vsmc::Vector<vsmc::StopWatch> &sw)
+{
+    std::size_t N = names.size();
+    std::size_t R = sw.size() / N;
+    std::size_t lwid = 165;
+    int twid = 15;
+    int swid = 15;
+    int Twid = twid * static_cast<int>(R);
+    int nwid = static_cast<int>(lwid) - swid * 2 - Twid;
+
+    std::cout << std::string(lwid, '=') << std::endl;
+    std::cout << std::left << std::setw(nwid) << "Distribution";
+    std::cout << std::right << std::setw(swid) << "Size (STD)";
+    std::cout << std::right << std::setw(swid) << "Size (vSMC)";
+    std::cout << std::right << std::setw(twid) << "Time (STD)";
+    std::cout << std::right << std::setw(twid) << "Time (vSMC)";
+    std::cout << std::right << std::setw(twid) << "Time (Batch)";
+#if VSMC_HAS_MKL
+    std::cout << std::right << std::setw(twid) << "Time (MKL)";
+#endif
+    std::cout << std::endl;
+
+    std::cout << std::string(lwid, '-') << std::endl;
+    for (std::size_t i = 0; i != N; ++i) {
+        std::cout << std::left << std::setw(nwid) << names[i];
+        std::cout << std::right << std::setw(swid) << size[i * 2];
+        std::cout << std::right << std::setw(swid) << size[i * 2 + 1];
+        for (std::size_t r = 0; r != R; ++r) {
+            double time = sw[i * R + r].milliseconds();
+            std::cout << std::right << std::setw(twid) << std::fixed << time;
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::string(lwid, '=') << std::endl;
 }
 
 #endif // VSMC_EXAMPLE_RNG_DIST_HPP

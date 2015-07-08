@@ -2,60 +2,45 @@
 
 int main(int argc, char **argv)
 {
-    VSMC_RNG_TEST_PRE(rng_dist);
+    std::size_t N = 1000000;
+    if (argc > 1)
+        N = static_cast<std::size_t>(std::atoi(argv[1]));
+    vsmc::Vector<std::string> names;
+    vsmc::Vector<std::size_t> size;
+    vsmc::Vector<vsmc::StopWatch> sw;
+    std::array<double, 1> param1;
+    std::array<double, 2> param2;
 
-    VSMC_RNG_DIST_2(
-        std::uniform_int_distribution<int>, uniform_int, -100, 100);
-    VSMC_RNG_DIST_2(
-        std::uniform_real_distribution<double>, uniform_real, 0, 1);
-    VSMC_RNG_DIST_1(std::bernoulli_distribution, bernoulli, 0.5);
-    VSMC_RNG_DIST_2(std::binomial_distribution<int>, binomial, 100, 0.5);
-    VSMC_RNG_DIST_2(
-        std::negative_binomial_distribution<int>, negative_binomial, 100, 0.5);
-    VSMC_RNG_DIST_1(std::geometric_distribution<int>, geometric, 0.5);
-    VSMC_RNG_DIST_1(std::poisson_distribution<int>, poisson, 1);
-    VSMC_RNG_DIST_1(std::poisson_distribution<int>, poisson, 0.01);
-    VSMC_RNG_DIST_1(std::poisson_distribution<int>, poisson, 100);
-    VSMC_RNG_DIST_1(std::exponential_distribution<double>, exponential, 1);
-    VSMC_RNG_DIST_1(vsmc::ExponentialDistribution<double>, exponential, 1);
-    VSMC_RNG_DIST_2(std::gamma_distribution<double>, gamma, 0.1, 1);
-    VSMC_RNG_DIST_2(std::gamma_distribution<double>, gamma, 0.9, 1);
-    VSMC_RNG_DIST_2(std::gamma_distribution<double>, gamma, 1, 1);
-    VSMC_RNG_DIST_2(std::gamma_distribution<double>, gamma, 100, 1);
-    VSMC_RNG_DIST_2(vsmc::GammaDistribution<double>, gamma, 0.1, 1);
-    VSMC_RNG_DIST_2(vsmc::GammaDistribution<double>, gamma, 0.9, 1);
-    VSMC_RNG_DIST_2(vsmc::GammaDistribution<double>, gamma, 1, 1);
-    VSMC_RNG_DIST_2(vsmc::GammaDistribution<double>, gamma, 100, 1);
-    VSMC_RNG_DIST_2(std::weibull_distribution<double>, weibull, 1, 1);
-    VSMC_RNG_DIST_2(vsmc::WeibullDistribution<double>, weibull, 1, 1);
-    VSMC_RNG_DIST_2(
-        std::extreme_value_distribution<double>, extreme_value, 0, 1);
-    VSMC_RNG_DIST_2(
-        vsmc::ExtremeValueDistribution<double>, extreme_value, 0, 1);
-    VSMC_RNG_DIST_2(std::normal_distribution<double>, normal, 0, 1);
-    VSMC_RNG_DIST_2(vsmc::NormalDistribution<double>, normal, 0, 1);
-    VSMC_RNG_DIST_2(std::lognormal_distribution<double>, lognormal, 0, 1);
-    VSMC_RNG_DIST_2(vsmc::LognormalDistribution<double>, lognormal, 0, 1);
-    VSMC_RNG_DIST_1(std::chi_squared_distribution<double>, chi_squared, 1);
-    VSMC_RNG_DIST_1(std::chi_squared_distribution<double>, chi_squared, 100);
-    VSMC_RNG_DIST_1(vsmc::ChiSquaredDistribution<double>, chi_squared, 1);
-    VSMC_RNG_DIST_1(vsmc::ChiSquaredDistribution<double>, chi_squared, 100);
-    VSMC_RNG_DIST_2(std::cauchy_distribution<double>, cauchy, 0, 1);
-    VSMC_RNG_DIST_2(vsmc::CauchyDistribution<double>, cauchy, 0, 1);
-    VSMC_RNG_DIST_2(std::fisher_f_distribution<double>, fisher_f, 1, 1);
-    VSMC_RNG_DIST_2(std::fisher_f_distribution<double>, fisher_f, 100, 100);
-    VSMC_RNG_DIST_2(vsmc::FisherFDistribution<double>, fisher_f, 1, 1);
-    VSMC_RNG_DIST_2(vsmc::FisherFDistribution<double>, fisher_f, 100, 100);
-    VSMC_RNG_DIST_1(std::student_t_distribution<double>, student_t, 1);
-    VSMC_RNG_DIST_1(std::student_t_distribution<double>, student_t, 100);
-    VSMC_RNG_DIST_1(vsmc::StudentTDistribution<double>, student_t, 1);
-    VSMC_RNG_DIST_1(vsmc::StudentTDistribution<double>, student_t, 100);
-    VSMC_RNG_DIST_2(vsmc::LaplaceDistribution<double>, laplace, 0, 1);
-    VSMC_RNG_DIST_4(vsmc::StableDistribution<double>, stable, 1, 0, 0, 1);
-    VSMC_RNG_DIST_4(vsmc::StableDistribution<double>, stable, 0.1, 0, 0, 1);
-    VSMC_RNG_DIST_4(vsmc::StableDistribution<double>, stable, 1.5, 0, 0, 1);
+    VSMC_RNG_DIST_2(UniformReal, std::uniform_real_distribution, 0, 1);
+    VSMC_RNG_DIST_2(Normal, std::normal_distribution, 0, 1);
+    VSMC_RNG_DIST_2(Lognormal, std::lognormal_distribution, 0, 1);
+    VSMC_RNG_DIST_2(Cauchy, std::cauchy_distribution, 0, 1);
+    VSMC_RNG_DIST_2(ExtremeValue, std::extreme_value_distribution, 0, 1);
+    VSMC_RNG_DIST_2(Laplace, vsmc::LaplaceDistribution, 0, 1);
+    VSMC_RNG_DIST_1(Exponential, std::exponential_distribution, 1);
+    VSMC_RNG_DIST_1(Exponential, std::exponential_distribution, 0.1);
+    VSMC_RNG_DIST_1(Exponential, std::exponential_distribution, 10);
+    VSMC_RNG_DIST_2(Weibull, std::weibull_distribution, 1, 1);
+    VSMC_RNG_DIST_2(Weibull, std::weibull_distribution, 0.1, 1);
+    VSMC_RNG_DIST_2(Weibull, std::weibull_distribution, 10, 1);
+    VSMC_RNG_DIST_2(Gamma, std::gamma_distribution, 1, 1);
+    VSMC_RNG_DIST_2(Gamma, std::gamma_distribution, 0.1, 1);
+    VSMC_RNG_DIST_2(Gamma, std::gamma_distribution, 0.5, 1);
+    VSMC_RNG_DIST_2(Gamma, std::gamma_distribution, 0.7, 1);
+    VSMC_RNG_DIST_2(Gamma, std::gamma_distribution, 0.9, 1);
+    VSMC_RNG_DIST_2(Gamma, std::gamma_distribution, 1.5, 1);
+    VSMC_RNG_DIST_2(Beta, vsmc::BetaDistribution, 1, 1);
+    VSMC_RNG_DIST_2(Beta, vsmc::BetaDistribution, 1, 0.5);
+    VSMC_RNG_DIST_2(Beta, vsmc::BetaDistribution, 1, 1.5);
+    VSMC_RNG_DIST_2(Beta, vsmc::BetaDistribution, 0.5, 1);
+    VSMC_RNG_DIST_2(Beta, vsmc::BetaDistribution, 1.5, 1);
+    VSMC_RNG_DIST_2(Beta, vsmc::BetaDistribution, 0.5, 0.5);
+    VSMC_RNG_DIST_2(Beta, vsmc::BetaDistribution, 0.9, 0.9);
+    VSMC_RNG_DIST_2(Beta, vsmc::BetaDistribution, 1.5, 1.5);
+    VSMC_RNG_DIST_2(Beta, vsmc::BetaDistribution, 1.5, 0.5);
+    VSMC_RNG_DIST_2(Beta, vsmc::BetaDistribution, 0.5, 1.5);
 
-    VSMC_RNG_TEST_POST;
+    rng_dist_output_sw(names, size, sw);
 
     return 0;
 }

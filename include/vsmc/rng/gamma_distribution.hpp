@@ -105,6 +105,12 @@ class GammaDistributionConstant
 
 } // namespace internal
 
+/// \brief Generating gamma random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void gamma_distribution(RNGType &rng, std::size_t n, RealType *r,
+    RealType alpha = 1, RealType beta = 1);
+
 /// \brief Gamma distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -235,6 +241,12 @@ class GammaDistribution
         }
 
         return param_.beta_ * r;
+    }
+
+    template <typename RNGType>
+    void operator()(RNGType &rng, std::size_t n, result_type *r)
+    {
+        gamma_distribution(rng, n, r, alpha(), beta());
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
@@ -436,11 +448,9 @@ inline void gamma_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
 
 } // namespace vsmc::internal
 
-/// \brief Generating gamma random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void gamma_distribution(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha = 0, RealType beta = 1)
+inline void gamma_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType alpha, RealType beta)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;

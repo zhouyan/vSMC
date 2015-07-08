@@ -43,6 +43,12 @@
 namespace vsmc
 {
 
+/// \brief Generating exponential random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void exponential_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType lambda = 1);
+
 /// \brief Exponential distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -149,6 +155,12 @@ class ExponentialDistribution
         return param_.coeff_ * std::log(1 - runif(rng));
     }
 
+    template <typename RNGType>
+    void operator()(RNGType &rng, std::size_t n, result_type *r)
+    {
+        exponential_distribution(rng, n, r, lambda());
+    }
+
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
@@ -170,11 +182,9 @@ inline void exponential_distribution_impl(
 
 } // namespace vsmc::internal
 
-/// \brief Generating exponential random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void exponential_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType lambda = 1)
+    RNGType &rng, std::size_t n, RealType *r, RealType lambda)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;

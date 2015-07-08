@@ -35,12 +35,18 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_LAPLACE_DISTRIBUTION_PARAM_CHECK(scale)       \
-    VSMC_RUNTIME_ASSERT((scale > 0), "**LaplaceDistribution** CONSTRUCTED "   \
-                                     "WITH INVALID SCALE PARAMETER VALUE")
+#define VSMC_RUNTIME_ASSERT_RNG_LAPLACE_DISTRIBUTION_PARAM_CHECK(b)           \
+    VSMC_RUNTIME_ASSERT((b > 0), "**LaplaceDistribution** CONSTRUCTED "       \
+                                 "WITH INVALID SCALE PARAMETER VALUE")
 
 namespace vsmc
 {
+
+/// \brief Generating laplace random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void laplace_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1);
 
 /// \brief Laplace distribution
 /// \ingroup Distribution
@@ -57,21 +63,21 @@ class LaplaceDistribution
         using result_type = RealType;
         using distribution_type = LaplaceDistribution<RealType>;
 
-        explicit param_type(result_type location = 0, result_type scale = 1)
-            : location_(location), scale_(scale)
+        explicit param_type(result_type a = 0, result_type b = 1)
+            : a_(a), b_(b)
         {
             invariant();
         }
 
-        result_type location() const { return location_; }
-        result_type scale() const { return scale_; }
+        result_type a() const { return a_; }
+        result_type b() const { return b_; }
 
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
-            if (!internal::is_equal(param1.location_, param2.location_))
+            if (!internal::is_equal(param1.a_, param2.a_))
                 return false;
-            if (!internal::is_equal(param1.scale_, param2.scale_))
+            if (!internal::is_equal(param1.b_, param2.b_))
                 return false;
             return true;
         }
@@ -89,8 +95,8 @@ class LaplaceDistribution
             if (!os.good())
                 return os;
 
-            os << param.location_ << ' ';
-            os << param.scale_;
+            os << param.a_ << ' ';
+            os << param.b_;
 
             return os;
         }
@@ -102,14 +108,14 @@ class LaplaceDistribution
             if (!is.good())
                 return is;
 
-            result_type location = 0;
-            result_type scale = 0;
-            is >> std::ws >> location;
-            is >> std::ws >> scale;
+            result_type a = 0;
+            result_type b = 0;
+            is >> std::ws >> a;
+            is >> std::ws >> b;
 
             if (is.good()) {
-                if (scale > 0)
-                    param = param_type(location, scale);
+                if (b > 0)
+                    param = param_type(a, b);
                 else
                     is.setstate(std::ios_base::failbit);
             }
@@ -118,29 +124,28 @@ class LaplaceDistribution
         }
 
         private:
-        result_type location_;
-        result_type scale_;
+        result_type a_;
+        result_type b_;
 
         friend distribution_type;
 
         void invariant()
         {
-            VSMC_RUNTIME_ASSERT_RNG_LAPLACE_DISTRIBUTION_PARAM_CHECK(scale_);
+            VSMC_RUNTIME_ASSERT_RNG_LAPLACE_DISTRIBUTION_PARAM_CHECK(b_);
         }
 
         void reset() {}
     }; // class param_type
 
-    explicit LaplaceDistribution(
-        result_type location = 0, result_type scale = 1)
-        : param_(location, scale)
+    explicit LaplaceDistribution(result_type a = 0, result_type b = 1)
+        : param_(a, b)
     {
     }
 
     explicit LaplaceDistribution(const param_type &param) : param_(param) {}
 
-    result_type location() const { return param_.location(); }
-    result_type scale() const { return param_.scale(); }
+    result_type a() const { return param_.a(); }
+    result_type b() const { return param_.b(); }
 
     result_type min() const
     {
@@ -158,8 +163,14 @@ class LaplaceDistribution
         U01DistributionType<RNGType, RealType> runif;
         result_type u = runif(rng) - 0.5;
 
-        return u > 0 ? param_.location_ - param_.scale_ * std::log1p(2 * u) :
-                       param_.location_ + param_.scale_ * std::log1p(-2 * u);
+        return u > 0 ? param_.a_ - param_.b_ * std::log1p(2 * u) :
+                       param_.a_ + param_.b_ * std::log1p(-2 * u);
+    }
+
+    template <typename RNGType>
+    void operator()(RNGType &rng, std::size_t n, result_type *r)
+    {
+        laplace_distribution(rng, n, r, a(), b());
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
@@ -172,8 +183,8 @@ namespace internal
 {
 
 template <std::size_t K, typename RealType, typename RNGType>
-inline void laplace_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
-    RealType location, RealType scale)
+inline void laplace_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     RealType s[K];
     u01_distribution(rng, n, r);
@@ -181,32 +192,29 @@ inline void laplace_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
         r[i] -= 0.5;
         if (r[i] > 0) {
             r[i] *= 2;
-            s[i] = -scale;
+            s[i] = -b;
         } else {
             r[i] *= -2;
-            s[i] = scale;
+            s[i] = b;
         }
     }
     log1p(n, r, r);
-    fma(n, location, s, r, r);
+    fma(n, a, s, r, r);
 }
 
 } // namespace vsmc::internal
 
-/// \brief Generating laplace random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void laplace_distribution(RNGType &rng, std::size_t n, RealType *r,
-    RealType location = 0, RealType scale = 1)
+inline void laplace_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i) {
-        internal::laplace_distribution_impl<k>(
-            rng, k, r + i * k, location, scale);
+        internal::laplace_distribution_impl<k>(rng, k, r + i * k, a, b);
     }
-    internal::laplace_distribution_impl<k>(rng, l, r + m * k, location, scale);
+    internal::laplace_distribution_impl<k>(rng, l, r + m * k, a, b);
 }
 
 } // namespace vsmc

@@ -38,6 +38,12 @@
 namespace vsmc
 {
 
+/// \brief Generating lognormal random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void lognormal_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType m = 0, RealType s = 1);
+
 /// \brief Lognormal distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -135,17 +141,21 @@ class LognormalDistribution
         return std::exp(param_.normal_(rng));
     }
 
+    template <typename RNGType>
+    void operator()(RNGType &rng, std::size_t n, result_type *r)
+    {
+	lognormal_distribution(rng, n, r, m(), s());
+    }
+
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
     param_type param_;
 }; // class LognormalDistribution
 
-/// \brief Generating lognormal random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void lognormal_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType m = 0, RealType s = 1)
+    RNGType &rng, std::size_t n, RealType *r, RealType m, RealType s)
 {
     normal_distribution(rng, n, r, m, s);
     exp(n, r, r);

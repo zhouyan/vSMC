@@ -43,6 +43,12 @@
 namespace vsmc
 {
 
+/// \brief Generating extreme_value random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void extreme_value_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1);
+
 /// \brief ExtremeValue distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -162,6 +168,12 @@ class ExtremeValueDistribution
         return param_.a_ - param_.b_ * std::log(-std::log(1 - runif(rng)));
     }
 
+    template <typename RNGType>
+    void operator()(RNGType &rng, std::size_t n, result_type *r)
+    {
+	extreme_value_distribution(rng, n, r, a(), b());
+    }
+
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
@@ -185,11 +197,9 @@ inline void extreme_value_distribution_impl(
 
 } // namespace vsmc::internal
 
-/// \brief Generating extreme_value random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void extreme_value_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1)
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;

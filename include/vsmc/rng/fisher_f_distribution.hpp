@@ -38,6 +38,12 @@
 namespace vsmc
 {
 
+/// \brief Generating Fisher-F random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void fisher_f_distribution(RNGType &rng, std::size_t n, RealType *r,
+    RealType df1 = 1, RealType df2 = 1);
+
 /// \brief Fisher-F distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -149,6 +155,12 @@ class FisherFDistribution
             (param_.chi_squared_n_(rng) / n());
     }
 
+    template <typename RNGType>
+    void operator()(RNGType &rng, std::size_t n, result_type *r)
+    {
+        fisher_f_distribution(rng, n, r, m(), this->n());
+    }
+
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
@@ -172,11 +184,9 @@ inline void fisher_f_distribution_impl(
 
 } // namespace vsmc::internal
 
-/// \brief Generating Fisher-F random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void fisher_f_distribution(RNGType &rng, std::size_t n, RealType *r,
-    RealType df1 = 1, RealType df2 = 1)
+inline void fisher_f_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType df1, RealType df2)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;

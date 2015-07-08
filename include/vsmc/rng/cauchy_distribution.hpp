@@ -42,6 +42,12 @@
 namespace vsmc
 {
 
+/// \brief Generating cauchy random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void cauchy_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1);
+
 /// \brief Cauchy distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -160,6 +166,12 @@ class CauchyDistribution
             param_.b_ * std::tan(const_pi<result_type>() * runif(rng));
     }
 
+    template <typename RNGType>
+    void operator()(RNGType &rng, std::size_t n, result_type *r)
+    {
+	cauchy_distribution(rng, n, r, a(), b());
+    }
+
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
@@ -182,11 +194,9 @@ inline void cauchy_distribution_impl(
 
 } // namespace vsmc::internal
 
-/// \brief Generating cauchy random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void cauchy_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1)
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;

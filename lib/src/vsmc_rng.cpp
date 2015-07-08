@@ -217,6 +217,7 @@ void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,
         r[i] = dist(rng, first, last, norm);
 }
 
+VSMC_DEFINE_RNG_DIST_2(beta, alpha, beta)
 VSMC_DEFINE_RNG_DIST_1(chi_squared, df)
 VSMC_DEFINE_RNG_DIST_1(exponential, lambda)
 VSMC_DEFINE_RNG_DIST_1(student_t, df)
@@ -224,7 +225,7 @@ VSMC_DEFINE_RNG_DIST_2(cauchy, a, b);
 VSMC_DEFINE_RNG_DIST_2(extreme_value, a, b)
 VSMC_DEFINE_RNG_DIST_2(fisher_f, df1, df2);
 VSMC_DEFINE_RNG_DIST_2(gamma, alpha, beta)
-VSMC_DEFINE_RNG_DIST_2(laplace, location, scale)
+VSMC_DEFINE_RNG_DIST_2(laplace, a, b)
 VSMC_DEFINE_RNG_DIST_2(lognormal, m, s)
 VSMC_DEFINE_RNG_DIST_2(normal, mean, stddev)
 VSMC_DEFINE_RNG_DIST_2(weibull, a, b)

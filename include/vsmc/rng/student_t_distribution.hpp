@@ -39,6 +39,12 @@
 namespace vsmc
 {
 
+/// \brief Generating student-t random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void student_t_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType df = 1);
+
 /// \brief Student-t distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -147,6 +153,12 @@ class StudentTDistribution
         return param_.normal_(rng) / std::sqrt(param_.chi_squared_(rng) / n());
     }
 
+    template <typename RNGType>
+    void operator()(RNGType &rng, std::size_t n, result_type *r)
+    {
+        student_t_distribution(rng, n, r, this->n());
+    }
+
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
@@ -171,11 +183,9 @@ inline void student_t_distribution_impl(
 
 } // namespace vsmc::internal
 
-/// \brief Generating student-t random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void student_t_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType df = 1)
+    RNGType &rng, std::size_t n, RealType *r, RealType df)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;
