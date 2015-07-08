@@ -35,7 +35,7 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rngc/u01.h>
 
-#define VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                            \
+#define VSMC_DEFINE_RNG_U01_IMPL(                                             \
     UBits, FBits, RealType, Left, Right, left, right)                         \
     template <>                                                               \
     class U01Impl<sizeof(std::uint##UBits##_t), sizeof(RealType), Left,       \
@@ -50,15 +50,14 @@
         }                                                                     \
     }; // class U01Impl
 
-#define VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(UBits, FBits, RealType)          \
-    VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                                \
+#define VSMC_DEFINE_RNG_U01(UBits, FBits, RealType)                           \
+    VSMC_DEFINE_RNG_U01_IMPL(                                                 \
         UBits, FBits, RealType, Closed, Closed, closed, closed)               \
-    VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                                \
+    VSMC_DEFINE_RNG_U01_IMPL(                                                 \
         UBits, FBits, RealType, Closed, Open, closed, open)                   \
-    VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                                \
+    VSMC_DEFINE_RNG_U01_IMPL(                                                 \
         UBits, FBits, RealType, Open, Closed, open, closed)                   \
-    VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01_IMPL(                                \
-        UBits, FBits, RealType, Open, Open, open, open)
+    VSMC_DEFINE_RNG_U01_IMPL(UBits, FBits, RealType, Open, Open, open, open)
 
 namespace vsmc
 {
@@ -77,15 +76,14 @@ namespace internal
 template <std::size_t, std::size_t, typename, typename>
 class U01Impl;
 
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(32, 32, float)
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(32, 64, double)
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(64, 32, float)
-VSMC_DEFINE_RNG_U01_DISTRIBUTION_U01(64, 64, double)
+VSMC_DEFINE_RNG_U01(32, 32, float)
+VSMC_DEFINE_RNG_U01(32, 64, double)
+VSMC_DEFINE_RNG_U01(64, 32, float)
+VSMC_DEFINE_RNG_U01(64, 64, double)
 
 } // namespace vsmc::internal
 
-template <typename UIntType = std::uint32_t, typename RealType = double,
-    typename Left = Closed, typename Right = Open>
+template <typename UIntType, typename RealType, typename Left, typename Right>
 class U01
     : public internal::U01Impl<sizeof(UIntType), sizeof(RealType), Left, Right>
 {

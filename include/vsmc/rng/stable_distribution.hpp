@@ -243,8 +243,8 @@ class StableDistribution
     template <typename RNGType>
     result_type standard_1(RNGType &rng) const
     {
-        U01DistributionType<RNGType, RealType> runif;
-        result_type w = -std::log(1 - runif(rng));
+        U01OCDistribution<RealType> runif;
+        result_type w = -std::log(runif(rng));
         result_type u = (runif(rng) - 0.5) * const_pi<result_type>();
         result_type a =
             (const_pi_by2<result_type>() + param_.skewness_ * u) * std::tan(u);
@@ -260,8 +260,8 @@ class StableDistribution
     template <typename RNGType>
     result_type standard_a(RNGType &rng) const
     {
-        U01DistributionType<RNGType, RealType> runif;
-        result_type w = -std::log(1 - runif(rng));
+        U01OCDistribution<RealType> runif;
+        result_type w = -std::log(runif(rng));
         result_type u = (runif(rng) - 0.5) * const_pi<result_type>();
         result_type a = 0.5 * std::log(1 + param_.zeta_ * param_.zeta_) /
             param_.stability_;
@@ -296,7 +296,7 @@ inline void stable_distribution_impl_a(RNGType &rng, std::size_t n,
     RealType scale, RealType *w, RealType *u, RealType a, RealType *b,
     RealType *c, RealType *d, RealType xi)
 {
-    U01DistributionType<RNGType, RealType> runif;
+    U01OCDistribution<RealType> runif;
     for (std::size_t i = 0; i != n; ++i)
         w[i] = -runif(rng);
     for (std::size_t i = 0; i != n; ++i)
@@ -332,7 +332,7 @@ inline void stable_distribution_impl_1(RNGType &rng, std::size_t n,
     RealType scale, RealType *w, RealType *u, RealType *a, RealType *b,
     RealType *c)
 {
-    U01DistributionType<RNGType, RealType> runif;
+    U01OCDistribution<RealType> runif;
     for (std::size_t i = 0; i != n; ++i)
         w[i] = -runif(rng);
     for (std::size_t i = 0; i != n; ++i)

@@ -87,11 +87,11 @@ inline void rng_test(std::size_t N, const std::string &name,
     vsmc::MKLStream stream(brng, 1);
 #endif
 
-    vsmc::UniformRealDistributionType<RNGType, double> runif_vsmc(0, 1);
+    vsmc::UniformRealDistribution<double> runif(0, 1);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        r[i] = runif_vsmc(rng);
+        r[i] = runif(rng);
     watch.stop();
     result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);

@@ -73,28 +73,21 @@ void vsmc_rng_set_ctr(vsmc_rng *rng_ptr, int n, const int *ctr);
 /// \brief `vsmc::RNG::operator()`
 void vsmc_rng_rand(vsmc_rng *rng_ptr, int n, int *r);
 
+/// \brief `vsmc::u01_sorted`
+void vsmc_rng_u01_sorted(int n, const double *u01, double *u01seq);
+
+/// \brief `vsmc::u01_stratifed`
+void vsmc_rng_u01_stratified(int n, const double *u01, double *u01seq);
+
+/// \brief `vsmc::u01_systematic`
+void vsmc_rng_u01_systematic(int n, double u01, double *u01seq);
+
+/// \brief `vsmc::DiscreteDistribution<int>`
+void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,
+    const double *weight, int normalized);
+
 /// \brief `std::uniform_int_distribution<int>`
 void vsmc_rng_uniform_int(vsmc_rng *rng_ptr, int n, int *r, int a, int b);
-
-/// \brief `vsmc::uniform_real_distribution<double>`
-void vsmc_rng_uniform_real(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
-
-/// \brief `vsmc::uniformRealDistribution<double, Closed, Closed>`
-void vsmc_rng_uniform_real_cc(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
-
-/// \brief `vsmc::UniformRealDistribution<double, Closed, Open>`
-void vsmc_rng_uniform_real_co(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
-
-/// \brief `vsmc::UniformRealDistribution<double, Open, Closed>`
-void vsmc_rng_uniform_real_oc(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
-
-/// \brief `vsmc::UniformRealDistribution<double, Open, Open>`
-void vsmc_rng_uniform_real_oo(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
 
 /// \brief `std::bernoulli_distribution`
 void vsmc_rng_bernoulli(vsmc_rng *rng_ptr, int n, int *r, double p);
@@ -112,68 +105,89 @@ void vsmc_rng_geometric(vsmc_rng *rng_ptr, int n, int *r, double p);
 /// \brief `std::poisson_distribution<int>`
 void vsmc_rng_poisson(vsmc_rng *rng_ptr, int n, int *r, double mean);
 
-/// \brief `vsmc::exponential_distribution<double>`
-void vsmc_rng_exponential(vsmc_rng *rng_ptr, int n, double *r, double lambda);
-
-/// \brief `vsmc::gamma_distribution<double>`
-void vsmc_rng_gamma(
-    vsmc_rng *rng_ptr, int n, double *r, double alpha, double beta);
-
-/// \brief `vsmc::beta_distribution<double>`
+/// \brief `vsmc::BetaDistribution<double>`
 void vsmc_rng_beta(
     vsmc_rng *rng_ptr, int n, double *r, double alpha, double beta);
 
-/// \brief `vsmc::weibull_distribution<double>`
-void vsmc_rng_weibull(vsmc_rng *rng_ptr, int n, double *r, double a, double b);
+/// \brief `vsmc::CachyDistribution<double>`
+void vsmc_rng_cauchy(vsmc_rng *rng_ptr, int n, double *r, double a, double b);
 
-/// \brief `vsmc::extreme_value_distribution<double>`
+/// \brief `vsmc::ChiSquaredDistribution<double>`
+void vsmc_rng_chi_squared(vsmc_rng *rng_ptr, int n, double *r, double df);
+
+/// \brief `vsmc::ExponentialDistribution<double>`
+void vsmc_rng_exponential(vsmc_rng *rng_ptr, int n, double *r, double lambda);
+
+/// \brief `vsmc::ExtremeValueDistribution<double>`
 void vsmc_rng_extreme_value(
     vsmc_rng *rng_ptr, int n, double *r, double location, double scale);
 
-/// \brief `vsmc::normal_distribution<double>`
-void vsmc_rng_normal(
-    vsmc_rng *rng_ptr, int n, double *r, double mean, double stddev);
-
-/// \brief `vsmc::lognormal_distribution<double>`
-void vsmc_rng_lognormal(
-    vsmc_rng *rng_ptr, int n, double *r, double m, double s);
-
-/// \brief `vsmc::chi_squared_distribution<double>`
-void vsmc_rng_chi_squared(vsmc_rng *rng_ptr, int n, double *r, double df);
-
-/// \brief `vsmc::cachy_distribution<double>`
-void vsmc_rng_cauchy(vsmc_rng *rng_ptr, int n, double *r, double a, double b);
-
-/// \brief `vsmc::fisher_f_distribution<double>`
+/// \brief `vsmc::FisherFDistribution<double>`
 void vsmc_rng_fisher_f(
     vsmc_rng *rng_ptr, int n, double *r, double df1, double df2);
 
-/// \brief `vsmc::student_t_distribution<double>`
-void vsmc_rng_student_t(vsmc_rng *rng_ptr, int n, double *r, double df);
+/// \brief `vsmc::GammaDistribution<double>`
+void vsmc_rng_gamma(
+    vsmc_rng *rng_ptr, int n, double *r, double alpha, double beta);
 
-/// \brief `vsmc::extreme_value_distribution<double>`
-void vsmc_rng_extreme_value(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
-
-/// \brief `vsmc::laplace_distribution<double>`
+/// \brief `vsmc::LaplaceDistribution<double>`
 void vsmc_rng_laplace(vsmc_rng *rng_ptr, int n, double *r, double a, double b);
 
-/// \brief `vsmc::stable_distribution<double>`
+/// \brief `vsmc::LognormalDistribution<double>`
+void vsmc_rng_lognormal(
+    vsmc_rng *rng_ptr, int n, double *r, double m, double s);
+
+/// \brief `vsmc::NormalDistribution<double>`
+void vsmc_rng_normal(
+    vsmc_rng *rng_ptr, int n, double *r, double mean, double stddev);
+
+/// \brief `vsmc::RayleighDistribution<double>`
+void vsmc_rng_rayleigh(vsmc_rng *rng_ptr, int n, double *r, double b);
+
+/// \brief `vsmc::StableDistribution<double>`
 void vsmc_rng_stable(vsmc_rng *rng_ptr, int n, double *r, double stability,
     double skewness, double location, double scale);
 
-/// \brief `vsmc::DiscreteDistribution<int>`
-void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,
-    const double *weight, int normalized);
+/// \brief `vsmc::StudentTDistribution<double>`
+void vsmc_rng_student_t(vsmc_rng *rng_ptr, int n, double *r, double df);
 
-/// \brief `vsmc::u01_sorted`
-void vsmc_rng_u01_sorted(int n, const double *u01, double *u01seq);
+/// \brief `vsmc::U01Distribution<double>`
+void vsmc_rng_u01(vsmc_rng *rng_ptr, int n, double *r);
 
-/// \brief `vsmc::u01_stratifed`
-void vsmc_rng_u01_stratified(int n, const double *u01, double *u01seq);
+/// \brief `vsmc::U01CCDistribution<double>`
+void vsmc_rng_u01_cc(vsmc_rng *rng_ptr, int n, double *r);
 
-/// \brief `vsmc::u01_systematic`
-void vsmc_rng_u01_systematic(int n, double u01, double *u01seq);
+/// \brief `vsmc::U01CODistribution<double>`
+void vsmc_rng_u01_co(vsmc_rng *rng_ptr, int n, double *r);
+
+/// \brief `vsmc::U01OCDistribution<double>`
+void vsmc_rng_u01_oc(vsmc_rng *rng_ptr, int n, double *r);
+
+/// \brief `vsmc::U01OODistribution<double>`
+void vsmc_rng_u01_oo(vsmc_rng *rng_ptr, int n, double *r);
+
+/// \brief `vsmc::UniformRealDistribution<double>`
+void vsmc_rng_uniform_real(
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
+
+/// \brief `vsmc::UniformRealCCDistribution<double>`
+void vsmc_rng_uniform_real_cc(
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
+
+/// \brief `vsmc::UniformRealCODistribution<double>`
+void vsmc_rng_uniform_real_co(
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
+
+/// \brief `vsmc::UniformRealOCDistribution<double>`
+void vsmc_rng_uniform_real_oc(
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
+
+/// \brief `vsmc::UniformRealOODistribution<double>`
+void vsmc_rng_uniform_real_oo(
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
+
+/// \brief `vsmc::WeibullDistribution<double>`
+void vsmc_rng_weibull(vsmc_rng *rng_ptr, int n, double *r, double a, double b);
 
 /// @}
 

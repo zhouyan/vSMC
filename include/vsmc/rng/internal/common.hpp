@@ -120,15 +120,23 @@ class RNGBitsN<UMax, 0>
 
 template <typename RNGType>
 class RNGMinBits
-    : public RNGBitsN<static_cast<std::uint64_t>(RNGType::min()), 64>
+    : public std::integral_constant<int,
+          RNGBitsN<static_cast<std::uint64_t>(RNGType::min()), 64>::value>
 {
 }; // class RNGMinBits
 
 template <typename RNGType>
 class RNGMaxBits
-    : public RNGBitsN<static_cast<std::uint64_t>(RNGType::max()), 64>
+    : public std::integral_constant<int,
+          RNGBitsN<static_cast<std::uint64_t>(RNGType::max()), 64>::value>
 {
 }; // class RNGMaxBits
+
+template <typename RNGType>
+class RNGBits : public std::integral_constant<int,
+                    RNGMaxBits<RNGType>::value - RNGMinBits<RNGType>::value>
+{
+}; // class RNGBits
 
 template <typename SeedSeq, typename U, typename V = U, typename W = V>
 class is_seed_seq

@@ -158,7 +158,7 @@ class LaplaceDistribution
     template <typename RNGType>
     result_type operator()(RNGType &rng)
     {
-        U01DistributionType<RNGType, RealType> runif;
+        U01CODistribution<RealType> runif;
         result_type u = runif(rng) - 0.5;
 
         return u > 0 ? param_.a_ - param_.b_ * std::log(1 + 2 * u) :
@@ -185,7 +185,7 @@ inline void laplace_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     RealType s[K];
-    u01_distribution(rng, n, r);
+    u01_co_distribution(rng, n, r);
     sub(n, r, 0.5, r);
     for (std::size_t i = 0; i != n; ++i) {
         if (r[i] > 0) {

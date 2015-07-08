@@ -43,26 +43,26 @@
 namespace vsmc
 {
 
-template <typename RealType, typename RNGType>
-inline void uniform_real_distribution(
+template <typename RealType, typename Left, typename Right, typename RNGType>
+inline void uniform_real_lr_distribution(
     RNGType &, std::size_t, RealType *, RealType, RealType);
 
 /// \brief Uniform real distribution with open/closed variants
 /// \ingroup Distribution
 template <typename RealType = double, typename Left = Closed,
     typename Right = Open>
-class UniformRealDistribution
+class UniformRealLRDistribution
 {
     public:
     using result_type = RealType;
-    using distribution_type = UniformRealDistribution<RealType, Left, Right>;
+    using distribution_type = UniformRealLRDistribution<RealType, Left, Right>;
 
     class param_type
     {
         public:
         using result_type = RealType;
         using distribution_type =
-            UniformRealDistribution<RealType, Left, Right>;
+            UniformRealLRDistribution<RealType, Left, Right>;
 
         explicit param_type(result_type a = 0, result_type b = 1)
             : a_(a), b_(b)
@@ -139,116 +139,135 @@ class UniformRealDistribution
         void reset() {}
     }; // class param_type
 
-    explicit UniformRealDistribution(result_type a = 0, result_type b = 1)
+    explicit UniformRealLRDistribution(result_type a = 0, result_type b = 1)
         : param_(a, b)
     {
     }
 
-    explicit UniformRealDistribution(const param_type &param) : param_(param)
+    explicit UniformRealLRDistribution(const param_type &param) : param_(param)
     {
     }
 
     result_type a() const { return param_.a(); }
     result_type b() const { return param_.b(); }
 
-    result_type min() const { return param_.a(); }
-    result_type max() const { return param_.b(); }
+    result_type min() const { return a(); }
+    result_type max() const { return b(); }
 
     template <typename RNGType>
     result_type operator()(RNGType &rng) const
     {
-        U01Distribution<RealType, Left, Right> u01;
+        U01LRDistribution<RealType, Left, Right> u01;
 
-        return u01(rng) * (param_.b_ - param_.a_) + param_.a_;
+        return param_.a_ + (param_.b_ - param_.a_) * u01(rng);
     }
 
     template <typename RNGType>
     void operator()(RNGType &rng, std::size_t n, result_type *r) const
     {
-        uniform_real_distribution(rng, n, r, a(), b());
+        uniform_real_lr_distribution<RealType, Left, Right>(
+            rng, n, r, a(), b());
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
     param_type param_;
-}; // class UniformRealDistribution
-
-namespace internal
-{
-
-template <typename RNGType, typename RealType,
-    bool = RNGMaxBits<RNGType>::value >= 32 &&
-        (std::is_same<RealType, float>::value ||
-               std::is_same<RealType, double>::value)>
-class UniformRealDistributionTypeTraitImpl
-{
-    public:
-    using type = UniformRealDistribution<RealType, Closed, Open>;
-}; // class UniformrealDistributionTypeTraitImpl
-
-template <typename RNGType, typename RealType>
-class UniformRealDistributionTypeTraitImpl<RNGType, RealType, false>
-{
-    public:
-    using type = std::uniform_real_distribution<RealType>;
-}; // class UniformrealDistributionTypeTraitImpl
-
-} // namespace vsmc::internal
-
-/// \brief Uniform real distribution type trait
-/// \ingroup Distribution
-template <typename RNGType, typename RealType = double>
-class UniformRealDistributionTypeTrait
-{
-    public:
-    using type =
-        typename internal::UniformRealDistributionTypeTraitImpl<RNGType,
-            RealType>::type;
-}; // class UniformRealDistributionTypeTrait
-
-/// \brief Uniform real distribution type
-/// \ingroup Distribution
-template <typename RNGType, typename RealType = double>
-using UniformRealDistributionType =
-    typename UniformRealDistributionTypeTrait<RNGType, RealType>::type;
+}; // class UniformRealLRDistribution
 
 /// \brief Uniform real distribution on cloed-closed interval
 /// \ingroup Distribution
 template <typename RealType = double>
 using UniformRealCCDistribution =
-    UniformRealDistribution<RealType, Closed, Closed>;
+    UniformRealLRDistribution<RealType, Closed, Closed>;
 
 /// \brief Uniform real distribution on cloed-open interval
 /// \ingroup Distribution
 template <typename RealType = double>
 using UniformRealOODistribution =
-    UniformRealDistribution<RealType, Open, Open>;
+    UniformRealLRDistribution<RealType, Open, Open>;
 
 /// \brief Uniform real distribution on open-closed interval
 /// \ingroup Distribution
 template <typename RealType = double>
 using UniformRealCODistribution =
-    UniformRealDistribution<RealType, Closed, Open>;
+    UniformRealLRDistribution<RealType, Closed, Open>;
 
 /// \brief Uniform real distribution on open-open interval
 /// \ingroup Distribution
 template <typename RealType = double>
 using UniformRealOCDistribution =
-    UniformRealDistribution<RealType, Open, Closed>;
+    UniformRealLRDistribution<RealType, Open, Closed>;
+
+/// \brief Uniform real distribution
+template <typename RealType = double>
+using UniformRealDistribution = UniformRealCODistribution<RealType>;
 
 namespace internal
 {
 
-template <typename RealType, typename RNGType>
-inline void uniform_real_distribution_impl(
+template <typename RealType, typename Left, typename Right, typename RNGType>
+inline void uniform_real_lr_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    u01_distribution(rng, n, r);
+    u01_lr_distribution<RealType, Left, Right>(rng, n, r);
     fma(n, a, (b - a), r, r);
 }
 
 } // namespace vsmc::internal
+
+/// \brief Generate uniform real random variates with open/closed variants
+/// \ingroup Distribution
+template <typename RealType, typename Left, typename Right, typename RNGType>
+inline void uniform_real_lr_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i) {
+        internal::uniform_real_lr_distribution_impl<RealType, Left, Right>(
+            rng, k, r + i * k, a, b);
+    }
+    internal::uniform_real_lr_distribution_impl<RealType, Left, Right>(
+        rng, l, r + m * k, a, b);
+}
+
+/// \brief Generate uniform real random variates on closed-closed interval
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void uniform_real_cc_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+{
+    uniform_real_lr_distribution<RealType, Closed, Closed>(rng, n, r, a, b);
+}
+
+/// \brief Generate uniform real random variates on closed-open interval
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void uniform_real_co_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+{
+    uniform_real_lr_distribution<RealType, Closed, Open>(rng, n, r, a, b);
+}
+
+/// \brief Generate uniform real random variates on open-closed interval
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void uniform_real_oc_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+{
+    uniform_real_lr_distribution<RealType, Open, Closed>(rng, n, r, a, b);
+}
+
+/// \brief Generate uniform real random variates on open-open interval
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void uniform_real_oo_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+{
+    uniform_real_lr_distribution<RealType, Open, Open>(rng, n, r, a, b);
+}
 
 /// \brief Generate uniform real random variates
 /// \ingroup Distribution
@@ -256,12 +275,7 @@ template <typename RealType, typename RNGType>
 inline void uniform_real_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    const std::size_t k = 1000;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::uniform_real_distribution_impl(rng, k, r + i * k, a, b);
-    internal::uniform_real_distribution_impl(rng, l, r + m * k, a, b);
+    uniform_real_co_distribution(rng, n, r, a, b);
 }
 
 } // namespace vsmc

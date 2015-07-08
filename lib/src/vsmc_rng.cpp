@@ -38,7 +38,15 @@
     for (int i = 0; i != n; ++i)                                              \
         r[i] = dist(rng);
 
-#define VSMC_DEFINE_RNG_DIST_1(name, p1)                                      \
+#define VSMC_DEFINE_RNG_DIST_0(name)                                          \
+    void vsmc_rng_##name(vsmc_rng *rng_ptr, int n, double *r)                 \
+    {                                                                         \
+        ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);               \
+        ::vsmc::name##_distribution<double>(                                  \
+            rng, static_cast<std::size_t>(n), r);                             \
+    }
+
+#define VSMC_DEFINE_RNG_DIST_1(name)                                          \
     void vsmc_rng_##name(vsmc_rng *rng_ptr, int n, double *r, double p1)      \
     {                                                                         \
         ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);               \
@@ -46,7 +54,7 @@
             rng, static_cast<std::size_t>(n), r, p1);                         \
     }
 
-#define VSMC_DEFINE_RNG_DIST_2(name, p1, p2)                                  \
+#define VSMC_DEFINE_RNG_DIST_2(name)                                          \
     void vsmc_rng_##name(                                                     \
         vsmc_rng *rng_ptr, int n, double *r, double p1, double p2)            \
     {                                                                         \
@@ -55,7 +63,7 @@
             rng, static_cast<std::size_t>(n), r, p1, p2);                     \
     }
 
-#define VSMC_DEFINE_RNG_DIST_4(name, p1, p2, p3, p4)                          \
+#define VSMC_DEFINE_RNG_DIST_4(name)                                          \
     void vsmc_rng_##name(vsmc_rng *rng_ptr, int n, double *r, double p1,      \
         double p2, double p3, double p4)                                      \
     {                                                                         \
@@ -129,48 +137,36 @@ void vsmc_rng_rand(vsmc_rng *rng_ptr, int n, int *r)
         reinterpret_cast<::vsmc::RNG::result_type *>(r));
 }
 
+void vsmc_rng_u01_sorted(int n, const double *u01, double *u01seq)
+{
+    ::vsmc::u01_sorted(static_cast<std::size_t>(n), u01, u01seq);
+}
+
+void vsmc_rng_u01_stratified(int n, const double *u01, double *u01seq)
+{
+    ::vsmc::u01_stratified(static_cast<std::size_t>(n), u01, u01seq);
+}
+
+void vsmc_rng_u01_systematic(int n, double u01, double *u01seq)
+{
+    ::vsmc::u01_systematic(static_cast<std::size_t>(n), u01, u01seq);
+}
+
+void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,
+    const double *weight, int normalized)
+{
+    ::vsmc::DiscreteDistribution<int> dist;
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    bool norm = normalized != 0;
+    const double *first = weight;
+    const double *last = weight + m;
+    for (int i = 0; i != n; ++i)
+        r[i] = dist(rng, first, last, norm);
+}
+
 void vsmc_rng_uniform_int(vsmc_rng *rng_ptr, int n, int *r, int a, int b)
 {
     std::uniform_int_distribution<int> dist(a, b);
-    VSMC_DEFINE_RNG_DIST;
-}
-
-void vsmc_rng_uniform_real(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b)
-{
-    ::vsmc::UniformRealDistributionType<::vsmc::RNG, double> dist(a, b);
-    VSMC_DEFINE_RNG_DIST;
-}
-
-void vsmc_rng_uniform_real_cc(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b)
-{
-    vsmc::UniformRealDistribution<double, ::vsmc::Closed, ::vsmc::Closed> dist(
-        a, b);
-    VSMC_DEFINE_RNG_DIST;
-}
-
-void vsmc_rng_uniform_real_co(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b)
-{
-    vsmc::UniformRealDistribution<double, ::vsmc::Closed, ::vsmc::Open> dist(
-        a, b);
-    VSMC_DEFINE_RNG_DIST;
-}
-
-void vsmc_rng_uniform_real_oc(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b)
-{
-    vsmc::UniformRealDistribution<double, ::vsmc::Open, ::vsmc::Closed> dist(
-        a, b);
-    VSMC_DEFINE_RNG_DIST;
-}
-
-void vsmc_rng_uniform_real_oo(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b)
-{
-    vsmc::UniformRealDistribution<double, ::vsmc::Open, ::vsmc::Open> dist(
-        a, b);
     VSMC_DEFINE_RNG_DIST;
 }
 
@@ -205,45 +201,29 @@ void vsmc_rng_poisson(vsmc_rng *rng_ptr, int n, int *r, double mean)
     VSMC_DEFINE_RNG_DIST;
 }
 
-void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,
-    const double *weight, int normalized)
-{
-    ::vsmc::DiscreteDistribution<int> dist;
-    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
-    bool norm = normalized != 0;
-    const double *first = weight;
-    const double *last = weight + m;
-    for (int i = 0; i != n; ++i)
-        r[i] = dist(rng, first, last, norm);
-}
-
-VSMC_DEFINE_RNG_DIST_2(beta, alpha, beta)
-VSMC_DEFINE_RNG_DIST_1(chi_squared, df)
-VSMC_DEFINE_RNG_DIST_1(exponential, lambda)
-VSMC_DEFINE_RNG_DIST_1(student_t, df)
-VSMC_DEFINE_RNG_DIST_2(cauchy, a, b);
-VSMC_DEFINE_RNG_DIST_2(extreme_value, a, b)
-VSMC_DEFINE_RNG_DIST_2(fisher_f, df1, df2);
-VSMC_DEFINE_RNG_DIST_2(gamma, alpha, beta)
-VSMC_DEFINE_RNG_DIST_2(laplace, a, b)
-VSMC_DEFINE_RNG_DIST_2(lognormal, m, s)
-VSMC_DEFINE_RNG_DIST_2(normal, mean, stddev)
-VSMC_DEFINE_RNG_DIST_2(weibull, a, b)
-VSMC_DEFINE_RNG_DIST_4(stable, stability, skewness, location, scale)
-
-void vsmc_rng_u01_sorted(int n, const double *u01, double *u01seq)
-{
-    ::vsmc::u01_sorted(static_cast<std::size_t>(n), u01, u01seq);
-}
-
-void vsmc_rng_u01_stratified(int n, const double *u01, double *u01seq)
-{
-    ::vsmc::u01_stratified(static_cast<std::size_t>(n), u01, u01seq);
-}
-
-void vsmc_rng_u01_systematic(int n, double u01, double *u01seq)
-{
-    ::vsmc::u01_systematic(static_cast<std::size_t>(n), u01, u01seq);
-}
+VSMC_DEFINE_RNG_DIST_2(beta)
+VSMC_DEFINE_RNG_DIST_2(cauchy)
+VSMC_DEFINE_RNG_DIST_1(chi_squared)
+VSMC_DEFINE_RNG_DIST_1(exponential)
+VSMC_DEFINE_RNG_DIST_2(extreme_value)
+VSMC_DEFINE_RNG_DIST_2(fisher_f)
+VSMC_DEFINE_RNG_DIST_2(gamma)
+VSMC_DEFINE_RNG_DIST_2(laplace)
+VSMC_DEFINE_RNG_DIST_2(lognormal)
+VSMC_DEFINE_RNG_DIST_2(normal)
+VSMC_DEFINE_RNG_DIST_1(rayleigh)
+VSMC_DEFINE_RNG_DIST_4(stable)
+VSMC_DEFINE_RNG_DIST_1(student_t)
+VSMC_DEFINE_RNG_DIST_0(u01)
+VSMC_DEFINE_RNG_DIST_0(u01_cc)
+VSMC_DEFINE_RNG_DIST_0(u01_co)
+VSMC_DEFINE_RNG_DIST_0(u01_oc)
+VSMC_DEFINE_RNG_DIST_0(u01_oo)
+VSMC_DEFINE_RNG_DIST_2(uniform_real)
+VSMC_DEFINE_RNG_DIST_2(uniform_real_cc)
+VSMC_DEFINE_RNG_DIST_2(uniform_real_co)
+VSMC_DEFINE_RNG_DIST_2(uniform_real_oc)
+VSMC_DEFINE_RNG_DIST_2(uniform_real_oo)
+VSMC_DEFINE_RNG_DIST_2(weibull)
 
 } // extern "C"

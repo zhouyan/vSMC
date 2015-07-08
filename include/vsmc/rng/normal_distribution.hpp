@@ -213,9 +213,9 @@ class NormalDistribution
     void generate_uv(
         RNGType &rng, result_type &u, result_type &v, std::false_type)
     {
-        U01DistributionType<RNGType, RealType> runif;
-        u = 1 - runif(rng);
-        v = 1 - runif(rng);
+        U01OCDistribution<RealType> runif;
+        u = runif(rng);
+        v = runif(rng);
     }
 
     template <typename RNGType>
@@ -239,8 +239,7 @@ inline void normal_distribution_impl(
     const std::size_t nu = n / 2;
     RealType *const u1 = r;
     RealType *const u2 = r + nu;
-    u01_distribution(rng, n, r);
-    sub(n, static_cast<RealType>(1), r, r);
+    u01_oc_distribution(rng, n, r);
     log(nu, u1, s);
     mul(nu, static_cast<RealType>(-2), s, s);
     sqrt(nu, s, s);
@@ -266,7 +265,7 @@ inline void normal_distribution(
         internal::normal_distribution_impl<k>(rng, k, r + i * k, mean, stddev);
     internal::normal_distribution_impl<k>(rng, l, r + m * k, mean, stddev);
     if (n % 2 != 0) {
-        U01DistributionType<RNGType, RealType> runif;
+        U01OCDistribution<RealType> runif;
         RealType v1 = runif(rng);
         RealType v2 = runif(rng);
         r[n - 1] = mean +
