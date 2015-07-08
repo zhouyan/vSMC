@@ -38,11 +38,9 @@
 namespace vsmc
 {
 
-/// \brief Generating Fisher-F random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void fisher_f_distribution(RNGType &rng, std::size_t n, RealType *r,
-    RealType df1 = 1, RealType df2 = 1);
+inline void fisher_f_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
 
 /// \brief Fisher-F distribution
 /// \ingroup Distribution
@@ -184,6 +182,8 @@ inline void fisher_f_distribution_impl(
 
 } // namespace vsmc::internal
 
+/// \brief Generating Fisher-F random variates
+/// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void fisher_f_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType df1, RealType df2)

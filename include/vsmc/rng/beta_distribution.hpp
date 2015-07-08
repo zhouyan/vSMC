@@ -151,11 +151,9 @@ class BetaDistributionConstant
 
 } // namespace internal
 
-/// \brief Generating beta random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void beta_distribution(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha = 1, RealType beta = 1);
+inline void beta_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
 
 /// \brief beta distribution
 /// \ingroup Distribution
@@ -604,6 +602,8 @@ inline void beta_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
 
 } // namespace vsmc::internal
 
+/// \brief Generating beta random variates
+/// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void beta_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType alpha, RealType beta)

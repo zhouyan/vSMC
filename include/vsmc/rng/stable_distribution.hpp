@@ -53,12 +53,9 @@
 namespace vsmc
 {
 
-/// \brief Generating stable random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void stable_distribution(RNGType &rng, std::size_t n, RealType *r,
-    RealType stability = 1, RealType skenewss = 0, RealType location = 0,
-    RealType scale = 1);
+inline void stable_distribution(RNGType &, std::size_t, RealType *, RealType,
+    RealType, RealType, RealType);
 
 /// \brief Stable distribution
 /// \ingroup Distribution
@@ -365,6 +362,8 @@ inline void stable_distribution_impl_1(RNGType &rng, std::size_t n,
 
 } // namespace vsmc::internal
 
+/// \brief Generating stable random variates
+/// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void stable_distribution(RNGType &rng, std::size_t n, RealType *r,
     RealType stability, RealType skewness, RealType location, RealType scale)

@@ -70,10 +70,8 @@ using U01DistributionIntType =
 
 } // namespace vsmc::internal
 
-/// \brief Generate standard uniform random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void u01_distribution(RNGType &rng, std::size_t n, RealType *r);
+inline void u01_distribution(RNGType &, std::size_t, RealType *);
 
 /// \brief Standard uniform distribution with open/closed variants
 /// \ingroup Distribution
@@ -289,6 +287,8 @@ inline void u01_distribution_impl(
 
 } // namespace vsmc::internal
 
+/// \brief Generate standard uniform random variates
+/// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void u01_distribution(RNGType &rng, std::size_t n, RealType *r)
 {

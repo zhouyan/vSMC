@@ -38,11 +38,9 @@
 namespace vsmc
 {
 
-/// \brief Generating \f$\chi^2\f$ random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void chi_squared_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType df = 1);
+    RNGType &, std::size_t, RealType *, RealType);
 
 /// \brief The \f$\chi^2\f$ distribution
 /// \ingroup Distribution
@@ -148,6 +146,8 @@ class ChiSquaredDistribution
     param_type param_;
 }; // class ChiSquaredDistribution
 
+/// \brief Generating \f$\chi^2\f$ random variates
+/// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void chi_squared_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType df)

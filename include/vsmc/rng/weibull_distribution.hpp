@@ -51,11 +51,9 @@
 namespace vsmc
 {
 
-/// \brief Generating weibull random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void weibull_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a = 1, RealType b = 1);
+    RNGType &, std::size_t, RealType *, RealType, RealType);
 
 /// \brief Weibull distribution
 /// \ingroup Distribution
@@ -174,7 +172,7 @@ class WeibullDistribution
     template <typename RNGType>
     void operator()(RNGType &rng, std::size_t n, result_type *r)
     {
-	weibull_distribution(rng, n, r, a(), b());
+        weibull_distribution(rng, n, r, a(), b());
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
@@ -200,6 +198,8 @@ inline void weibull_distribution_impl(
 
 } // namespace vsmc::internal
 
+/// \brief Generating weibull random variates
+/// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void weibull_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)

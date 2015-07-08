@@ -43,11 +43,9 @@
 namespace vsmc
 {
 
-/// \brief Generate uniform real random variates
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void uniform_real_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a = 0, RealType b = 1);
+    RNGType &, std::size_t, RealType *, RealType, RealType);
 
 /// \brief Uniform real distribution with open/closed variants
 /// \ingroup Distribution
@@ -252,6 +250,8 @@ inline void uniform_real_distribution_impl(
 
 } // namespace vsmc::internal
 
+/// \brief Generate uniform real random variates
+/// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void uniform_real_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
