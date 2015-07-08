@@ -207,7 +207,7 @@ inline void increment_block_set(
 #elif VSMC_HAS_SSE2
 
 template <typename T, std::size_t K>
-inline void increment_safe_set(const std::array<T, K> &ctr, std::size_t n,
+inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
     std::array<T, K> *ctr_block, std::true_type)
 {
     const std::size_t Blocks = M128I<T>::size() / K;
