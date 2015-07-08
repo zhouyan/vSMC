@@ -15,6 +15,8 @@ int main(int argc, char **argv)
     VSMC_RNG_DIST_1(Exponential, std::exponential_distribution, 1);
     VSMC_RNG_DIST_2(Laplace, vsmc::LaplaceDistribution, 0, 1);
     VSMC_RNG_DIST_2(Weibull, std::weibull_distribution, 1, 1);
+    VSMC_RNG_DIST_2(Weibull, std::weibull_distribution, 0.1, 1);
+    VSMC_RNG_DIST_2(Weibull, std::weibull_distribution, 10, 1);
     VSMC_RNG_DIST_2(Cauchy, std::cauchy_distribution, 0, 1);
     VSMC_RNG_DIST_1(Rayleigh, vsmc::RayleighDistribution, 1);
     VSMC_RNG_DIST_2(Lognormal, std::lognormal_distribution, 0, 1);

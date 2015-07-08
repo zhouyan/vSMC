@@ -192,11 +192,15 @@ inline void weibull_distribution_impl(
     u01_distribution(rng, n, r);
     sub(n, static_cast<RealType>(1), r, r);
     log(n, r, r);
-    mul(n, static_cast<RealType>(-1), r, r);
-    log(n, r, r);
-    mul(n, 1 / a, r, r);
-    exp(n, r, r);
-    mul(n, b, r, r);
+    if (is_equal<RealType>(a, 1)) {
+        mul(n, -b, r, r);
+    } else {
+        mul(n, static_cast<RealType>(-1), r, r);
+        log(n, r, r);
+        mul(n, 1 / a, r, r);
+        exp(n, r, r);
+        mul(n, b, r, r);
+    }
 }
 
 } // namespace vsmc::internal

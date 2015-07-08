@@ -264,7 +264,7 @@ class GammaDistribution
                 e += u;
                 u = param_.constant_.d + param_.alpha_ * u;
             }
-            result_type r = std::pow(u, param_.constant_.c);
+            result_type r = std::exp(param_.constant_.c * std::log(u));
             if (std::abs(r) < e)
                 return r;
         }
@@ -280,7 +280,7 @@ class GammaDistribution
         do {
             u = -std::log(1 - runif(rng));
             e = -std::log(1 - runif(rng));
-            r = std::pow(u, param_.constant_.c);
+            r = std::exp(param_.constant_.c * std::log(u));
         } while (u + e < param_.constant_.d + r);
 
         return r;
@@ -346,7 +346,9 @@ inline void gamma_distribution_impl_t(RNGType &rng, std::size_t n, RealType *r,
             u[i] = d + alpha * u[i];
         }
     }
-    pow(n, u, c, r);
+    log(n, r, r);
+    mul(n, c, r, r);
+    exp(n, r, r);
 
     abs(n, r, u);
     mul(n, beta, r, r);
@@ -369,7 +371,9 @@ inline void gamma_distribution_impl_w(RNGType &rng, std::size_t n, RealType *r,
     sub(n * 2, static_cast<RealType>(1), s, s);
     log(n * 2, s, s);
     mul(n * 2, static_cast<RealType>(-1), s, s);
-    pow(n, s, c, r);
+    log(n, s, r);
+    mul(n, c, r, r);
+    exp(n, r, r);
     add(n, u, e, u);
     add(n, d, r, e);
     mul(n, beta, r, r);
