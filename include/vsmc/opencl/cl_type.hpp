@@ -64,7 +64,7 @@ class CLBase
 
     CLBase() : ptr_(nullptr, [](pointer p) { Derived::release(p); }) {}
 
-    void reset(pointer ptr = nullptr)
+    void reset(pointer ptr)
     {
         if (ptr != ptr_.get())
             ptr_.reset(ptr, [](pointer p) { Derived::release(p); });

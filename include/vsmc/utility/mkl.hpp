@@ -124,7 +124,7 @@ class MKLBase
 
     int release() { return Derived::release(ptr_.get()); }
 
-    void reset(pointer ptr = nullptr)
+    void reset(pointer ptr)
     {
         if (ptr != ptr_.get())
             ptr_.reset(ptr);
@@ -140,7 +140,7 @@ class MKLBase
     explicit operator bool() const { return bool(ptr_); }
 
     protected:
-    void reset_ptr(pointer ptr = nullptr) { reset(ptr); }
+    void reset_ptr(pointer ptr) { reset(ptr); }
 
     private:
     std::unique_ptr<element_type, deleter_type> ptr_;
@@ -343,7 +343,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vsRngUniform`
-    int uniform(MKL_INT n, float *r, float a = 0, float b = 1,
+    int uniform(MKL_INT n, float *r, float a, float b,
         MKL_INT method = VSL_RNG_METHOD_UNIFORM_STD)
     {
         int status = ::vsRngUniform(method, this->get(), n, r, a, b);
@@ -354,7 +354,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vdRngUniform`
-    int uniform(MKL_INT n, double *r, double a = 0, double b = 1,
+    int uniform(MKL_INT n, double *r, double a, double b,
         MKL_INT method = VSL_RNG_METHOD_UNIFORM_STD)
     {
         int status = ::vdRngUniform(method, this->get(), n, r, a, b);
@@ -365,7 +365,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vsRngGaussian`
-    int gaussian(MKL_INT n, float *r, float a = 0, float sigma = 1,
+    int gaussian(MKL_INT n, float *r, float a, float sigma,
         MKL_INT method = VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2)
     {
         int status = ::vsRngGaussian(method, this->get(), n, r, a, sigma);
@@ -376,7 +376,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vdRngGaussian`
-    int gaussian(MKL_INT n, double *r, double a = 0, double sigma = 1,
+    int gaussian(MKL_INT n, double *r, double a, double sigma,
         MKL_INT method = VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2)
     {
         int status = ::vdRngGaussian(method, this->get(), n, r, a, sigma);
@@ -413,7 +413,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vsRngExponential`
-    int exponential(MKL_INT n, float *r, float a = 0, float beta = 1,
+    int exponential(MKL_INT n, float *r, float a, float beta,
         MKL_INT method = VSL_RNG_METHOD_EXPONENTIAL_ICDF)
     {
         int status = ::vsRngExponential(method, this->get(), n, r, a, beta);
@@ -424,7 +424,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vdRngExponential`
-    int exponential(MKL_INT n, double *r, double a = 0, double beta = 1,
+    int exponential(MKL_INT n, double *r, double a, double beta,
         MKL_INT method = VSL_RNG_METHOD_EXPONENTIAL_ICDF)
     {
         int status = ::vdRngExponential(method, this->get(), n, r, a, beta);
@@ -435,7 +435,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vsRngLaplace`
-    int laplace(MKL_INT n, float *r, float a = 0, float beta = 1,
+    int laplace(MKL_INT n, float *r, float a, float beta,
         MKL_INT method = VSL_RNG_METHOD_LAPLACE_ICDF)
     {
         int status = ::vsRngLaplace(method, this->get(), n, r, a, beta);
@@ -446,7 +446,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vdRngLaplace`
-    int laplace(MKL_INT n, double *r, double a = 0, double beta = 1,
+    int laplace(MKL_INT n, double *r, double a, double beta,
         MKL_INT method = VSL_RNG_METHOD_LAPLACE_ICDF)
     {
         int status = ::vdRngLaplace(method, this->get(), n, r, a, beta);
@@ -457,8 +457,8 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vsRngWeibull`
-    int weibull(MKL_INT n, float *r, float alpha = 1, float a = 0,
-        float beta = 1, MKL_INT method = VSL_RNG_METHOD_WEIBULL_ICDF)
+    int weibull(MKL_INT n, float *r, float alpha, float a, float beta,
+        MKL_INT method = VSL_RNG_METHOD_WEIBULL_ICDF)
     {
         int status = ::vsRngWeibull(method, this->get(), n, r, alpha, a, beta);
         internal::mkl_error_check(
@@ -468,8 +468,8 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vdRngWeibull`
-    int weibull(MKL_INT n, double *r, double alpha = 1, double a = 0,
-        double beta = 1, MKL_INT method = VSL_RNG_METHOD_WEIBULL_ICDF)
+    int weibull(MKL_INT n, double *r, double alpha, double a, double beta,
+        MKL_INT method = VSL_RNG_METHOD_WEIBULL_ICDF)
     {
         int status = ::vdRngWeibull(method, this->get(), n, r, alpha, a, beta);
         internal::mkl_error_check(
@@ -479,7 +479,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vsRngCauchy`
-    int cauchy(MKL_INT n, float *r, float a = 0, float beta = 1,
+    int cauchy(MKL_INT n, float *r, float a, float beta,
         MKL_INT method = VSL_RNG_METHOD_CAUCHY_ICDF)
     {
         int status = ::vsRngCauchy(method, this->get(), n, r, a, beta);
@@ -490,7 +490,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vdRngCauchy`
-    int cauchy(MKL_INT n, double *r, double a = 0, double beta = 1,
+    int cauchy(MKL_INT n, double *r, double a, double beta,
         MKL_INT method = VSL_RNG_METHOD_CAUCHY_ICDF)
     {
         int status = ::vdRngCauchy(method, this->get(), n, r, a, beta);
@@ -501,7 +501,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vsRngRayleigh`
-    int rayleigh(MKL_INT n, float *r, float a = 0, float beta = 1,
+    int rayleigh(MKL_INT n, float *r, float a, float beta,
         MKL_INT method = VSL_RNG_METHOD_RAYLEIGH_ICDF)
     {
         int status = ::vsRngRayleigh(method, this->get(), n, r, a, beta);
@@ -512,7 +512,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vdRngRayleigh`
-    int rayleigh(MKL_INT n, double *r, double a = 0, double beta = 1,
+    int rayleigh(MKL_INT n, double *r, double a, double beta,
         MKL_INT method = VSL_RNG_METHOD_RAYLEIGH_ICDF)
     {
         int status = ::vdRngRayleigh(method, this->get(), n, r, a, beta);
@@ -523,9 +523,8 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vsRngLognormal`
-    int lognormal(MKL_INT n, float *r, float a = 0, float sigma = 1,
-        float b = 0, float beta = 1,
-        MKL_INT method = VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2)
+    int lognormal(MKL_INT n, float *r, float a, float sigma, float b,
+        float beta, MKL_INT method = VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2)
     {
         int status =
             ::vsRngLognormal(method, this->get(), n, r, a, sigma, b, beta);
@@ -536,9 +535,8 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vdRngLognormal`
-    int lognormal(MKL_INT n, double *r, double a = 0, double sigma = 1,
-        double b = 0, double beta = 1,
-        MKL_INT method = VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2)
+    int lognormal(MKL_INT n, double *r, double a, double sigma, double b,
+        double beta, MKL_INT method = VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2)
     {
         int status =
             ::vdRngLognormal(method, this->get(), n, r, a, sigma, b, beta);
@@ -549,7 +547,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vsRngGumbel`
-    int gumbel(MKL_INT n, float *r, float a = 0, float beta = 1,
+    int gumbel(MKL_INT n, float *r, float a, float beta,
         MKL_INT method = VSL_RNG_METHOD_GUMBEL_ICDF)
     {
         int status = ::vsRngGumbel(method, this->get(), n, r, a, beta);
@@ -560,7 +558,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vdRngGumbel`
-    int gumbel(MKL_INT n, double *r, double a = 0, double beta = 1,
+    int gumbel(MKL_INT n, double *r, double a, double beta,
         MKL_INT method = VSL_RNG_METHOD_GUMBEL_ICDF)
     {
         int status = ::vdRngGumbel(method, this->get(), n, r, a, beta);
@@ -571,8 +569,8 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vsRngGamma`
-    int gamma(MKL_INT n, float *r, float alpha = 1, float a = 0,
-        float beta = 1, MKL_INT method = VSL_RNG_METHOD_GAMMA_GNORM)
+    int gamma(MKL_INT n, float *r, float alpha, float a, float beta,
+        MKL_INT method = VSL_RNG_METHOD_GAMMA_GNORM)
     {
         int status = ::vsRngGamma(method, this->get(), n, r, alpha, a, beta);
         internal::mkl_error_check(status, "MKLStream::gamma", "::vsRngGamma");
@@ -581,8 +579,8 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vdRngGamma`
-    int gamma(MKL_INT n, double *r, double alpha = 1, double a = 0,
-        double beta = 1, MKL_INT method = VSL_RNG_METHOD_GAMMA_GNORM)
+    int gamma(MKL_INT n, double *r, double alpha, double a, double beta,
+        MKL_INT method = VSL_RNG_METHOD_GAMMA_GNORM)
     {
         int status = ::vdRngGamma(method, this->get(), n, r, alpha, a, beta);
         internal::mkl_error_check(status, "MKLStream::gamma", "::vdRngGamma");
@@ -591,8 +589,8 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vsRngBeta`
-    int beta(MKL_INT n, float *r, float p = 1, float q = 1, float a = 0,
-        float beta = 1, MKL_INT method = VSL_RNG_METHOD_BETA_CJA)
+    int beta(MKL_INT n, float *r, float p, float q, float a, float beta,
+        MKL_INT method = VSL_RNG_METHOD_BETA_CJA)
     {
         int status = ::vsRngBeta(method, this->get(), n, r, p, q, a, beta);
         internal::mkl_error_check(status, "MKLStream::beta", "::vsRngBeta");
@@ -601,8 +599,8 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `vdRngBeta`
-    int beta(MKL_INT n, double *r, double p = 1, double q = 1, double a = 0,
-        double beta = 1, MKL_INT method = VSL_RNG_METHOD_BETA_CJA)
+    int beta(MKL_INT n, double *r, double p, double q, double a, double beta,
+        MKL_INT method = VSL_RNG_METHOD_BETA_CJA)
     {
         int status = ::vdRngBeta(method, this->get(), n, r, p, q, a, beta);
         internal::mkl_error_check(status, "MKLStream::beta", "::vdRngBeta");
@@ -611,8 +609,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `viRngUniform`
-    int uniform(MKL_INT n, int *r, int a = 0,
-        int b = std::numeric_limits<int>::max(),
+    int uniform(MKL_INT n, int *r, int a, int b,
         MKL_INT method = VSL_RNG_METHOD_UNIFORM_STD)
     {
         int status = ::viRngUniform(method, this->get(), n, r, a, b);
@@ -656,7 +653,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `viRngBernoulli`
-    int bernoulli(MKL_INT n, int *r, double p = 0.5,
+    int bernoulli(MKL_INT n, int *r, double p,
         MKL_INT method = VSL_RNG_METHOD_BERNOULLI_ICDF)
     {
         int status = ::viRngBernoulli(method, this->get(), n, r, p);
@@ -667,7 +664,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `viRngGeometric`
-    int geometric(MKL_INT n, int *r, double p = 0.5,
+    int geometric(MKL_INT n, int *r, double p,
         MKL_INT method = VSL_RNG_METHOD_GEOMETRIC_ICDF)
     {
         int status = ::viRngGeometric(method, this->get(), n, r, p);
@@ -678,7 +675,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `viRngBinomial`
-    int binomial(MKL_INT n, int *r, int ntrial = 1, double p = 0.5,
+    int binomial(MKL_INT n, int *r, int ntrial, double p,
         MKL_INT method = VSL_RNG_METHOD_BINOMIAL_BTPE)
     {
         int status = ::viRngBinomial(method, this->get(), n, r, ntrial, p);
@@ -700,7 +697,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `viRngPoisson`
-    int poisson(MKL_INT n, int *r, double lambda = 1,
+    int poisson(MKL_INT n, int *r, double lambda,
         MKL_INT method = VSL_RNG_METHOD_POISSON_PTPE)
     {
         int status = ::viRngPoisson(method, this->get(), n, r, lambda);
@@ -722,7 +719,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 
     /// \brief `viRngNegbinomial`
-    int neg_binomial(MKL_INT n, int *r, double a = 1, double p = 0.5,
+    int neg_binomial(MKL_INT n, int *r, double a, double p,
         MKL_INT method = VSL_RNG_METHOD_NEGBINOMIAL_NBAR)
     {
         int status = ::viRngNegbinomial(method, this->get(), n, r, a, p);
@@ -748,8 +745,7 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<ResultType>>
 
     /// \brief `vslSSNewTask`
     MKLSSTask(const MKL_INT *p, const MKL_INT *n, const MKL_INT *xstorage,
-        const result_type *x, const result_type *w = nullptr,
-        const MKL_INT *indices = nullptr)
+        const result_type *x, const result_type *w, const MKL_INT *indices)
     {
         VSMC_STATIC_ASSERT_UTILITY_MKL_SS_TASK_RESULT_TYPE(ResultType);
         reset(p, n, xstorage, x, w, indices);
@@ -757,8 +753,7 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<ResultType>>
 
     /// \brief `vslSSNewTask`
     int reset(const MKL_INT *p, const MKL_INT *n, const MKL_INT *xstorage,
-        const result_type *x, const result_type *w = nullptr,
-        const MKL_INT *indices = nullptr)
+        const result_type *x, const result_type *w, const MKL_INT *indices)
     {
         return reset_dispatch(p, n, xstorage, x, w, indices);
     }

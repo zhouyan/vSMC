@@ -448,6 +448,13 @@ inline void rng_rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
 }
 
 template <MKL_INT BRNG, std::size_t Bits>
+inline void beta_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    float *r, float alpha, float beta)
+{
+    rng.stream().beta(static_cast<MKL_INT>(n), r, alpha, beta, 0, 1);
+}
+
+template <MKL_INT BRNG, std::size_t Bits>
 inline void cauchy_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
@@ -515,6 +522,13 @@ inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
     rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
+}
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void beta_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    double *r, double alpha, double beta)
+{
+    rng.stream().beta(static_cast<MKL_INT>(n), r, alpha, beta, 0, 1);
 }
 
 template <MKL_INT BRNG, std::size_t Bits>
