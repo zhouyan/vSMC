@@ -159,7 +159,7 @@ class ExtremeValueDistribution
     {
         U01DistributionType<RNGType, RealType> runif;
 
-        return param_.a_ - param_.b_ * std::log(-std::log(runif(rng)));
+        return param_.a_ - param_.b_ * std::log(-std::log(1 - runif(rng)));
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
