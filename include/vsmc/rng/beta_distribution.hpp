@@ -580,7 +580,7 @@ inline void beta_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
                 rng, n, r, alpha, beta, dist, constant);
             break;
         case BetaDistributionAlgorithmX1:
-            beta_distribution_impl_a1<K>(
+            beta_distribution_impl_x1<K>(
                 rng, n, r, alpha, beta, dist, constant);
             break;
         case BetaDistributionAlgorithmC:
