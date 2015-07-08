@@ -317,7 +317,7 @@ class BetaDistribution
     {
         U01DistributionType<RNGType, RealType> runif;
 
-        return 1 - std::pow(runif(rng), param_.constant_.b);
+        return 1 - std::exp(param_.constant_.b * std::log(1 - runif(rng)));
     }
 
     template <typename RNGType>
@@ -325,7 +325,7 @@ class BetaDistribution
     {
         U01DistributionType<RNGType, RealType> runif;
 
-        return std::pow(runif(rng), param_.constant_.a);
+        return std::exp(param_.constant_.a * std::log(1 - runif(rng)));
     }
 
     template <typename RNGType>
@@ -455,21 +455,27 @@ inline void beta_distribution_impl_11(RNGType &rng, std::size_t n, RealType *r,
 
 template <std::size_t, typename RealType, typename RNGType>
 inline void beta_distribution_impl_1x(RNGType &rng, std::size_t n, RealType *r,
-    RealType, RealType beta, BetaDistribution<RealType> &,
-    const BetaDistributionConstant<RealType> &)
+    RealType, RealType, BetaDistribution<RealType> &,
+    const BetaDistributionConstant<RealType> &constant)
 {
     u01_distribution(rng, n, r);
-    pow(n, r, 1 / beta, r);
+    sub(n, static_cast<RealType>(1), r, r);
+    log(n, r, r);
+    mul(n, constant.b, r, r);
+    exp(n, r, r);
     sub(n, static_cast<RealType>(1), r, r);
 }
 
 template <std::size_t, typename RealType, typename RNGType>
 inline void beta_distribution_impl_x1(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha, RealType, BetaDistribution<RealType> &,
-    const BetaDistributionConstant<RealType> &)
+    RealType, RealType, BetaDistribution<RealType> &,
+    const BetaDistributionConstant<RealType> &constant)
 {
     u01_distribution(rng, n, r);
-    pow(n, r, 1 / alpha, r);
+    sub(n, static_cast<RealType>(1), r, r);
+    log(n, r, r);
+    mul(n, constant.a, r, r);
+    exp(n, r, r);
 }
 
 template <std::size_t K, typename RealType, typename RNGType>

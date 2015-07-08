@@ -87,15 +87,6 @@ inline void rng_test(std::size_t N, const std::string &name,
     vsmc::MKLStream stream(brng, 1);
 #endif
 
-    std::uniform_real_distribution<double> runif_std(0, 1);
-    watch.reset();
-    watch.start();
-    for (std::size_t i = 0; i != N; ++i)
-        r[i] = runif_std(rng);
-    watch.stop();
-    result += std::accumulate(r.begin(), r.end(), 0.0);
-    sw.push_back(watch);
-
     vsmc::UniformRealDistributionType<RNGType, double> runif_vsmc(0, 1);
     watch.reset();
     watch.start();
@@ -123,44 +114,6 @@ inline void rng_test(std::size_t N, const std::string &name,
     sw.push_back(watch);
 #endif
 
-    std::normal_distribution<double> rnorm_std(0, 1);
-    watch.reset();
-    watch.start();
-    for (std::size_t i = 0; i != N; ++i)
-        r[i] = rnorm_std(rng);
-    watch.stop();
-    result += std::accumulate(r.begin(), r.end(), 0.0);
-    sw.push_back(watch);
-
-    vsmc::NormalDistribution<double> rnorm_vsmc(0, 1);
-    watch.reset();
-    watch.start();
-    for (std::size_t i = 0; i != N; ++i)
-        r[i] = rnorm_vsmc(rng);
-    watch.stop();
-    result += std::accumulate(r.begin(), r.end(), 0.0);
-    sw.push_back(watch);
-
-    vsmc::normal_distribution(rng, N / 1000, r.data(), 0.0, 1.0);
-    watch.reset();
-    watch.start();
-    vsmc::normal_distribution(rng, N, r.data(), 0.0, 1.0);
-    watch.stop();
-    result += std::accumulate(r.begin(), r.end(), 0.0);
-    sw.push_back(watch);
-
-#if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
-    vdRngGaussian(
-        VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream.get(), m, r.data(), 0, 1);
-    watch.reset();
-    watch.start();
-    vdRngGaussian(
-        VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, stream.get(), n, r.data(), 0, 1);
-    watch.stop();
-    result += std::accumulate(r.begin(), r.end(), 0.0);
-    sw.push_back(watch);
-#endif
-
     std::ofstream rnd("rnd");
     rnd << result << std::endl;
     rnd.close();
@@ -173,7 +126,7 @@ inline void rng_output_sw(const std::string &prog_name,
 {
     std::size_t N = names.size();
     std::size_t R = sw.size() / N;
-    std::size_t lwid = 165;
+    std::size_t lwid = 80;
     int twid = 15;
     int swid = 5;
     int Twid = twid * static_cast<int>(R);
@@ -182,17 +135,10 @@ inline void rng_output_sw(const std::string &prog_name,
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::left << std::setw(nwid) << prog_name;
     std::cout << std::right << std::setw(swid) << "Size";
-    std::cout << std::right << std::setw(twid) << "U01 (STD)";
-    std::cout << std::right << std::setw(twid) << "U01 (vSMC)";
-    std::cout << std::right << std::setw(twid) << "U01 (Batch)";
+    std::cout << std::right << std::setw(twid) << "Time (U01)";
+    std::cout << std::right << std::setw(twid) << "Time (Batch)";
 #if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
-    std::cout << std::right << std::setw(twid) << "U01 (MKL)";
-#endif
-    std::cout << std::right << std::setw(twid) << "Normal (STD)";
-    std::cout << std::right << std::setw(twid) << "Normal (vSMC)";
-    std::cout << std::right << std::setw(twid) << "Normal (Batch)";
-#if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
-    std::cout << std::right << std::setw(twid) << "Normal (MKL)";
+    std::cout << std::right << std::setw(twid) << "Time (MKL)";
 #endif
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;

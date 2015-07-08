@@ -49,8 +49,6 @@ FUNCTION (ADD_RNG_TEST name)
     ADD_DEPENDENCIES (rng rng_${name})
 ENDFUNCTION (ADD_RNG_TEST)
 
-ADD_RNG_TEST(dist)
-
 ADD_RNG_TEST(std)
 ADD_RNG_TEST(philox)
 ADD_RNG_TEST(threefry)
@@ -67,6 +65,9 @@ ENDIF (RDRAND_FOUND)
 IF (MKL_FOUND)
     ADD_RNG_TEST(mkl)
 ENDIF (MKL_FOUND)
+
+ADD_VSMC_EXECUTABLE (rng_dist ${PROJECT_SOURCE_DIR}/src/rng_dist.cpp)
+ADD_DEPENDENCIES (rng rng_dist)
 
 IF (OPENCL_FOUND)
     COPY_FILE (rng rng_cl.cl)

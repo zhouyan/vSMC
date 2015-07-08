@@ -38,13 +38,13 @@
 #define VSMC_RNG_DIST_1(Name, STD, p1)                                        \
     param1[0] = p1;                                                           \
     rng_dist<STD<double>, vsmc::Name##Distribution<double>>(                  \
-        N, param1, #Name, names, size, sw);
+        N, param1, #Name, names, sw);
 
 #define VSMC_RNG_DIST_2(Name, STD, p1, p2)                                    \
     param2[0] = p1;                                                           \
     param2[1] = p2;                                                           \
     rng_dist<STD<double>, vsmc::Name##Distribution<double>>(                  \
-        N, param2, #Name, names, size, sw);
+        N, param2, #Name, names, sw);
 
 template <std::size_t K>
 inline std::string rng_dist_name(
@@ -77,7 +77,7 @@ inline DistType rng_dist_init(const std::array<double, 2> &param)
 template <typename STDDistType, typename vSMCDistType, std::size_t K>
 inline void rng_dist(std::size_t N, const std::array<double, K> &param,
     const std::string &name, vsmc::Vector<std::string> &names,
-    vsmc::Vector<std::size_t> &size, vsmc::Vector<vsmc::StopWatch> &sw)
+    vsmc::Vector<vsmc::StopWatch> &sw)
 {
     names.push_back(rng_dist_name(name, param));
 
@@ -94,7 +94,6 @@ inline void rng_dist(std::size_t N, const std::array<double, K> &param,
     watch.stop();
     result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);
-    size.push_back(sizeof(STDDistType));
 
     vSMCDistType dist_vsmc(rng_dist_init<vSMCDistType>(param));
     watch.reset();
@@ -104,7 +103,6 @@ inline void rng_dist(std::size_t N, const std::array<double, K> &param,
     watch.stop();
     result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);
-    size.push_back(sizeof(vSMCDistType));
 
     dist_vsmc(rng, 1000, r.data());
     watch.reset();
@@ -131,21 +129,17 @@ inline void rng_dist(std::size_t N, const std::array<double, K> &param,
 }
 
 inline void rng_dist_output_sw(const vsmc::Vector<std::string> &names,
-    const vsmc::Vector<std::size_t> &size,
     const vsmc::Vector<vsmc::StopWatch> &sw)
 {
     std::size_t N = names.size();
     std::size_t R = sw.size() / N;
-    std::size_t lwid = 165;
+    std::size_t lwid = 80;
     int twid = 15;
-    int swid = 15;
     int Twid = twid * static_cast<int>(R);
-    int nwid = static_cast<int>(lwid) - swid * 2 - Twid;
+    int nwid = static_cast<int>(lwid) - Twid;
 
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::left << std::setw(nwid) << "Distribution";
-    std::cout << std::right << std::setw(swid) << "Size (STD)";
-    std::cout << std::right << std::setw(swid) << "Size (vSMC)";
     std::cout << std::right << std::setw(twid) << "Time (STD)";
     std::cout << std::right << std::setw(twid) << "Time (vSMC)";
     std::cout << std::right << std::setw(twid) << "Time (Batch)";
@@ -157,8 +151,6 @@ inline void rng_dist_output_sw(const vsmc::Vector<std::string> &names,
     std::cout << std::string(lwid, '-') << std::endl;
     for (std::size_t i = 0; i != N; ++i) {
         std::cout << std::left << std::setw(nwid) << names[i];
-        std::cout << std::right << std::setw(swid) << size[i * 2];
-        std::cout << std::right << std::setw(swid) << size[i * 2 + 1];
         for (std::size_t r = 0; r != R; ++r) {
             double time = sw[i * R + r].milliseconds();
             std::cout << std::right << std::setw(twid) << std::fixed << time;
