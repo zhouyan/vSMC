@@ -171,10 +171,11 @@ class LaplaceDistribution
 namespace internal
 {
 
-template <typename RealType, typename RNGType>
+template <std::size_t K, typename RealType, typename RNGType>
 inline void laplace_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
-    RealType location, RealType scale, RealType *s)
+    RealType location, RealType scale)
 {
+    RealType s[K];
     u01_distribution(rng, n, r);
     for (std::size_t i = 0; i != n; ++i) {
         r[i] -= 0.5;
@@ -201,12 +202,11 @@ inline void laplace_distribution(RNGType &rng, std::size_t n, RealType *r,
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    RealType s[k];
     for (std::size_t i = 0; i != m; ++i) {
-        internal::laplace_distribution_impl(
-            rng, k, r + i * k, location, scale, s);
+        internal::laplace_distribution_impl<k>(
+            rng, k, r + i * k, location, scale);
     }
-    internal::laplace_distribution_impl(rng, l, r + m * k, location, scale, s);
+    internal::laplace_distribution_impl<k>(rng, l, r + m * k, location, scale);
 }
 
 } // namespace vsmc

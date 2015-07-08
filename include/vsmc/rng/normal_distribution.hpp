@@ -220,10 +220,11 @@ class NormalDistribution
 namespace internal
 {
 
-template <typename RealType, typename RNGType>
-inline void normal_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
-    RealType mean, RealType stddev, RealType *s)
+template <std::size_t K, typename RealType, typename RNGType>
+inline void normal_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType mean, RealType stddev)
 {
+    RealType s[K / 2];
     const std::size_t nu = n / 2;
     RealType *const u1 = r;
     RealType *const u2 = r + nu;
@@ -250,10 +251,9 @@ inline void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    RealType s[k / 2];
     for (std::size_t i = 0; i != m; ++i)
-        internal::normal_distribution_impl(rng, k, r + i * k, mean, stddev, s);
-    internal::normal_distribution_impl(rng, l, r + m * k, mean, stddev, s);
+        internal::normal_distribution_impl<k>(rng, k, r + i * k, mean, stddev);
+    internal::normal_distribution_impl<k>(rng, l, r + m * k, mean, stddev);
     if (n % 2 != 0) {
         U01DistributionType<RNGType, RealType> runif;
         RealType v1 = runif(rng);

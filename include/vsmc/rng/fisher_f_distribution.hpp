@@ -158,10 +158,11 @@ class FisherFDistribution
 namespace internal
 {
 
-template <typename RealType, typename RNGType>
-inline void fisher_f_distribution_impl(RNGType &rng, std::size_t n,
-    RealType *r, RealType df1, RealType df2, RealType *s)
+template <std::size_t K, typename RealType, typename RNGType>
+inline void fisher_f_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType df1, RealType df2)
 {
+    RealType s[K];
     chi_squared_distribution(rng, n, s, df1);
     chi_squared_distribution(rng, n, r, df2);
     mul(n, 1 / df1, s, s);
@@ -180,10 +181,9 @@ inline void fisher_f_distribution(RNGType &rng, std::size_t n, RealType *r,
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    RealType s[k];
     for (std::size_t i = 0; i != m; ++i)
-        internal::fisher_f_distribution_impl(rng, k, r + i * k, df1, df2, s);
-    internal::fisher_f_distribution_impl(rng, l, r + m * k, df1, df2, s);
+        internal::fisher_f_distribution_impl<k>(rng, k, r + i * k, df1, df2);
+    internal::fisher_f_distribution_impl<k>(rng, l, r + m * k, df1, df2);
 }
 
 } // namespace vsmc

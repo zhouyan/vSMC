@@ -156,10 +156,11 @@ class StudentTDistribution
 namespace internal
 {
 
-template <typename RealType, typename RNGType>
+template <std::size_t K, typename RealType, typename RNGType>
 inline void student_t_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType df, RealType *s)
+    RNGType &rng, std::size_t n, RealType *r, RealType df)
 {
+    RealType s[K];
     chi_squared_distribution(rng, n, r, df);
     mul(n, 1 / df, r, r);
     sqrt(n, r, r);
@@ -179,10 +180,9 @@ inline void student_t_distribution(
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    RealType s[k];
     for (std::size_t i = 0; i != m; ++i)
-        internal::student_t_distribution_impl(rng, k, r + i * k, df, s);
-    internal::student_t_distribution_impl(rng, l, r + m * k, df, s);
+        internal::student_t_distribution_impl<k>(rng, k, r + i * k, df);
+    internal::student_t_distribution_impl<k>(rng, l, r + m * k, df);
 }
 
 } // namespace vsmc
