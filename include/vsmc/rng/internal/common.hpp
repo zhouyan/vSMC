@@ -94,33 +94,39 @@ inline bool is_equal(const T &a, const T &b)
 #endif
 
 template <int N>
-class RNGMaxBitsNMax
+class RNGBitsNMax
 {
     public:
     static constexpr std::uint64_t
         value = std::numeric_limits<std::uint64_t>::max() >> (64 - N);
-}; // class RNGMaxBitsNMax
+}; // class RNGBitsNMax
 
-template <typename RNGType, int N>
-class RNGMaxBitsN
+template <std::uint64_t UMax, int N>
+class RNGBitsN
 {
-    static constexpr std::uint64_t umax = RNGType::max();
-    static constexpr std::uint64_t bmax = RNGMaxBitsNMax<N>::value;
+    static constexpr std::uint64_t bmax = RNGBitsNMax<N>::value;
 
     public:
     static constexpr int value =
-        umax < bmax ? RNGMaxBitsN<RNGType, N - 1>::value : N;
+        UMax < bmax ? RNGBitsN<UMax, N - 1>::value : N;
 }; // class RNGMaxBitsN
 
-template <typename RNGType>
-class RNGMaxBitsN<RNGType, 0>
+template <std::uint64_t UMax>
+class RNGBitsN<UMax, 0>
 {
     public:
     static constexpr int value = 0;
 }; // class RNGMaxBitsN
 
 template <typename RNGType>
-class RNGMaxBits : public RNGMaxBitsN<RNGType, 64>
+class RNGMinBits
+    : public RNGBitsN<static_cast<std::uint64_t>(RNGType::min()), 64>
+{
+}; // class RNGMinBits
+
+template <typename RNGType>
+class RNGMaxBits
+    : public RNGBitsN<static_cast<std::uint64_t>(RNGType::max()), 64>
 {
 }; // class RNGMaxBits
 

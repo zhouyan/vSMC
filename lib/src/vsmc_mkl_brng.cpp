@@ -72,7 +72,7 @@
         properties.NSeeds = 1;                                                \
         properties.IncludesZero = RNGType::min() == 0 ? 1 : 0;                \
         properties.WordSize = sizeof(typename RNGType::result_type);          \
-        properties.NBits = ::vsmc::internal::RNGBits<RNGType>::value;         \
+        properties.NBits = ::vsmc::internal::RNGMaxBits<RNGType>::value;      \
         properties.InitStream = vsmc_mkl_init_##name;                         \
         properties.sBRng = vsmc_mkl_sbrng_##name;                             \
         properties.dBRng = vsmc_mkl_dbrng_##name;                             \
