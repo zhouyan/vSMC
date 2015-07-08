@@ -264,32 +264,35 @@ class BetaDistribution
     template <typename RNGType>
     result_type operator()(RNGType &rng)
     {
+        result_type r = 0;
         switch (param_.constant_.algorithm) {
             case internal::BetaDistributionAlgorithm11:
-                return generate_11(rng);
+                r = generate_11(rng);
                 break;
             case internal::BetaDistributionAlgorithm1X:
-                return generate_1x(rng);
+                r = generate_1x(rng);
                 break;
             case internal::BetaDistributionAlgorithmX1:
-                return generate_x1(rng);
+                r = generate_x1(rng);
                 break;
             case internal::BetaDistributionAlgorithmC:
-                return generate_c(rng);
+                r = generate_c(rng);
                 break;
             case internal::BetaDistributionAlgorithmJ:
-                return generate_j(rng);
+                r = generate_j(rng);
                 break;
             case internal::BetaDistributionAlgorithmA1:
-                return generate_a1(rng);
+                r = generate_a1(rng);
                 break;
             case internal::BetaDistributionAlgorithmA2:
-                return generate_a2(rng);
+                r = generate_a2(rng);
                 break;
             case internal::BetaDistributionAlgorithmA3:
-                return generate_a3(rng);
+                r = generate_a3(rng);
                 break;
         }
+
+        return r;
     }
 
     template <typename RNGType>

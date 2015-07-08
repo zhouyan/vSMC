@@ -87,9 +87,6 @@ inline void rng_dist(std::size_t N, const std::array<double, K> &param,
     vsmc::RNG rng;
 
     STDDistType dist_std(rng_dist_init<STDDistType>(param));
-    for (std::size_t i = 0; i != N; ++i)
-        r[i] = dist_std(rng);
-    result += std::accumulate(r.begin(), r.end(), 0.0);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
@@ -100,9 +97,6 @@ inline void rng_dist(std::size_t N, const std::array<double, K> &param,
     size.push_back(sizeof(STDDistType));
 
     vSMCDistType dist_vsmc(rng_dist_init<vSMCDistType>(param));
-    for (std::size_t i = 0; i != N; ++i)
-        r[i] = dist_vsmc(rng);
-    result += std::accumulate(r.begin(), r.end(), 0.0);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
@@ -112,8 +106,7 @@ inline void rng_dist(std::size_t N, const std::array<double, K> &param,
     sw.push_back(watch);
     size.push_back(sizeof(vSMCDistType));
 
-    dist_vsmc(rng, N, r.data());
-    result += std::accumulate(r.begin(), r.end(), 0.0);
+    dist_vsmc(rng, 1000, r.data());
     watch.reset();
     watch.start();
     dist_vsmc(rng, N, r.data());
@@ -123,8 +116,7 @@ inline void rng_dist(std::size_t N, const std::array<double, K> &param,
 
 #if VSMC_HAS_MKL
     vsmc::MKL_SFMT19937 rng_mkl;
-    dist_vsmc(rng_mkl, N, r.data());
-    result += std::accumulate(r.begin(), r.end(), 0.0);
+    dist_vsmc(rng_mkl, 1000, r.data());
     watch.reset();
     watch.start();
     dist_vsmc(rng_mkl, N, r.data());
