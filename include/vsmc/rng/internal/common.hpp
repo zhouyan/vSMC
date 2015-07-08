@@ -94,35 +94,35 @@ inline bool is_equal(const T &a, const T &b)
 #endif
 
 template <int N>
-class RNGBitsNMax
+class RNGMaxBitsNMax
 {
     public:
     static constexpr std::uint64_t
         value = std::numeric_limits<std::uint64_t>::max() >> (64 - N);
-}; // class RNGBitsNMax
+}; // class RNGMaxBitsNMax
 
 template <typename RNGType, int N>
-class RNGBitsN
+class RNGMaxBitsN
 {
     static constexpr std::uint64_t umax = RNGType::max();
-    static constexpr std::uint64_t bmax = RNGBitsNMax<N>::value;
+    static constexpr std::uint64_t bmax = RNGMaxBitsNMax<N>::value;
 
     public:
     static constexpr int value =
-        umax < bmax ? RNGBitsN<RNGType, N - 1>::value : N;
-}; // class RNGBitsN
+        umax < bmax ? RNGMaxBitsN<RNGType, N - 1>::value : N;
+}; // class RNGMaxBitsN
 
 template <typename RNGType>
-class RNGBitsN<RNGType, 0>
+class RNGMaxBitsN<RNGType, 0>
 {
     public:
     static constexpr int value = 0;
-}; // class RNGBitsN
+}; // class RNGMaxBitsN
 
 template <typename RNGType>
-class RNGBits : public RNGBitsN<RNGType, 64>
+class RNGMaxBits : public RNGMaxBitsN<RNGType, 64>
 {
-}; // class RNGBits
+}; // class RNGMaxBits
 
 template <typename SeedSeq, typename U, typename V = U, typename W = V>
 class is_seed_seq

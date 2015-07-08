@@ -60,7 +60,7 @@ class U01DistributionIntTypeTraitImpl<Bits, true, true>
 
 template <typename RNGType>
 class U01DistributionIntTypeTrait
-    : public U01DistributionIntTypeTraitImpl<RNGBits<RNGType>::value>
+    : public U01DistributionIntTypeTraitImpl<RNGMaxBits<RNGType>::value>
 {
 }; // class U01TypeDistributionIntTypeTrait
 
@@ -150,7 +150,7 @@ namespace internal
 {
 
 template <typename RNGType, typename RealType,
-    bool = RNGBits<RNGType>::value >= 32 &&
+    bool = RNGMaxBits<RNGType>::value >= 32 &&
         (std::is_same<RealType, float>::value ||
                std::is_same<RealType, double>::value)>
 class U01DistributionTypeTraitImpl
@@ -283,10 +283,10 @@ template <typename RealType, typename RNGType>
 inline void u01_distribution(RNGType &rng, std::size_t n, RealType *r)
 {
     internal::u01_distribution_impl(rng, n, r, std::integral_constant < bool,
-        internal::RNGBits<RNGType>::value >= 32 &&
+        internal::RNGMaxBits<RNGType>::value >= 32 &&
             (std::is_same<RealType, float>::value ||
                 std::is_same<RealType, double>::value) > (),
-        std::integral_constant<bool, internal::RNGBits<RNGType>::value >=
+        std::integral_constant<bool, internal::RNGMaxBits<RNGType>::value >=
                                             64>());
 }
 

@@ -169,7 +169,7 @@ namespace internal
 {
 
 template <typename RNGType, typename RealType,
-    bool = RNGBits<RNGType>::value >= 32 &&
+    bool = RNGMaxBits<RNGType>::value >= 32 &&
         (std::is_same<RealType, float>::value ||
                std::is_same<RealType, double>::value)>
 class UniformRealDistributionTypeTraitImpl

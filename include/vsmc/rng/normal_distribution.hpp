@@ -181,8 +181,9 @@ class NormalDistribution
 
         result_type u = 0;
         result_type v = 0;
-        generate_uv(rng, u, v, std::integral_constant<bool,
-                                   internal::RNGBits<RNGType>::value >= 64>());
+        generate_uv(
+            rng, u, v, std::integral_constant<bool,
+                           internal::RNGMaxBits<RNGType>::value >= 64>());
         result_type s = param_.stddev_ * std::sqrt(-2 * std::log(u));
         v *= const_pi_2<result_type>();
         u = std::cos(v);
