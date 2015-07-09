@@ -29,37 +29,37 @@
 # POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT (vSMCExample C CXX)
+PROJECT(vSMCExample C CXX)
 
-INCLUDE (vSMCExampleFunctions)
-ADD_DEFINITIONS (${EXAMPLE_DEFINITIONS})
+INCLUDE(vSMCExampleFunctions)
+ADD_DEFINITIONS(${EXAMPLE_DEFINITIONS})
 
 ##############################################################################
 # Check examples
 ##############################################################################
 
-ADD_CUSTOM_TARGET (example-files)
-ADD_DEPENDENCIES (example example-files)
+ADD_CUSTOM_TARGET(example-files)
+ADD_DEPENDENCIES(example example-files)
 
-SET (EXAMPLES ${EXAMPLES} "vsmc")
-ADD_SUBDIRECTORY (vsmc)
+SET(EXAMPLES ${EXAMPLES} "vsmc")
+ADD_SUBDIRECTORY(vsmc)
 
-SET (EXAMPLES ${EXAMPLES} "gmm")
-ADD_SUBDIRECTORY (gmm)
+SET(EXAMPLES ${EXAMPLES} "gmm")
+ADD_SUBDIRECTORY(gmm)
 
-SET (EXAMPLES ${EXAMPLES} "pf")
-ADD_SUBDIRECTORY (pf)
+SET(EXAMPLES ${EXAMPLES} "pf")
+ADD_SUBDIRECTORY(pf)
 
-SET (EXAMPLES ${EXAMPLES} "rng")
-ADD_SUBDIRECTORY (rng)
+SET(EXAMPLES ${EXAMPLES} "rng")
+ADD_SUBDIRECTORY(rng)
 
 ##############################################################################
 # Enable examples
 ##############################################################################
 
-MESSAGE (STATUS "=================== Enable examples ===================")
+MESSAGE(STATUS "=================== Enable examples ===================")
 FOREACH (example ${EXAMPLES})
-    MESSAGE (STATUS ${example})
+    MESSAGE(STATUS ${example})
 ENDFOREACH (example ${EXAMPLES})
 
-MESSAGE (STATUS "=======================================================")
+MESSAGE(STATUS "=======================================================")

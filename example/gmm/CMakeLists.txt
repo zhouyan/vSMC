@@ -29,15 +29,15 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT (vSMCExample-gmm CXX)
-INCLUDE_DIRECTORIES (${PROJECT_BINARY_DIR}/include)
-INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
+PROJECT(vSMCExample-gmm CXX)
+INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/include)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
-SET (GMM smp)
+SET(GMM smp)
 IF (VSMC_MPI_FOUND)
-    SET (GMM ${GMM}; mpi)
+    SET(GMM ${GMM}; mpi)
 ENDIF (VSMC_MPI_FOUND)
 
-ADD_SMP_EXAMPLE (gmm "${GMM}")
+ADD_SMP_EXAMPLE(gmm "${GMM}")
 
-COPY_FILE (gmm gmm.data)
+COPY_FILE(gmm gmm.data)

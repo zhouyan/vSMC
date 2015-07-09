@@ -29,8 +29,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#define VSMC_RNG_TEST_MKL 1
-
 #include "rng_test.hpp"
 #include <vsmc/rng/mkl.hpp>
 

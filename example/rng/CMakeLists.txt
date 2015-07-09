@@ -29,29 +29,28 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT (vSMCExample-rng CXX)
-INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
+PROJECT(vSMCExample-rng CXX)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
-ADD_CUSTOM_TARGET (rng)
-ADD_DEPENDENCIES (example rng)
+ADD_CUSTOM_TARGET(rng)
+ADD_DEPENDENCIES(example rng)
 
-ADD_CUSTOM_TARGET (rng-files)
-ADD_DEPENDENCIES (example-files rng-files)
+ADD_CUSTOM_TARGET(rng-files)
+ADD_DEPENDENCIES(example-files rng-files)
 
 IF (VSMC_ENABLE_LIBRARY)
-    ADD_DEFINITIONS (-DVSMC_RNG_TEST_C_API=1)
+    ADD_DEFINITIONS(-DVSMC_RNG_TEST_C_API=1)
 ENDIF (VSMC_ENABLE_LIBRARY)
 
-FUNCTION (ADD_RNG_TEST name)
-    ADD_VSMC_EXECUTABLE (rng_${name}
-        ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp)
-    TARGET_LINK_LIBRARIES (rng_${name} libvsmc)
-    ADD_DEPENDENCIES (rng rng_${name})
-ENDFUNCTION (ADD_RNG_TEST)
+FUNCTION(ADD_RNG_TEST name)
+    ADD_VSMC_EXECUTABLE(rng_${name} ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp)
+    ADD_DEPENDENCIES(rng rng_${name})
+ENDFUNCTION(ADD_RNG_TEST)
 
 ADD_RNG_TEST(std)
 ADD_RNG_TEST(philox)
 ADD_RNG_TEST(threefry)
+ADD_RNG_TEST(dist)
 
 IF (AESNI_FOUND)
     ADD_RNG_TEST(aes)
@@ -66,14 +65,11 @@ IF (MKL_FOUND)
     ADD_RNG_TEST(mkl)
 ENDIF (MKL_FOUND)
 
-ADD_VSMC_EXECUTABLE (rng_dist ${PROJECT_SOURCE_DIR}/src/rng_dist.cpp)
-ADD_DEPENDENCIES (rng rng_dist)
-
 IF (OPENCL_FOUND)
-    COPY_FILE (rng rng_cl.cl)
-    COPY_FILE (rng rng_cl.R)
-    ADD_VSMC_EXECUTABLE (rng_cl
+    COPY_FILE(rng rng_cl.cl)
+    COPY_FILE(rng rng_cl.R)
+    ADD_VSMC_EXECUTABLE(rng_cl
         ${PROJECT_SOURCE_DIR}/src/rng_cl.cpp "OCL" "HDF5")
-    ADD_DEPENDENCIES (rng rng_cl)
-    ADD_DEPENDENCIES (example_cl rng_cl)
+    ADD_DEPENDENCIES(rng rng_cl)
+    ADD_DEPENDENCIES(example_cl rng_cl)
 ENDIF (OPENCL_FOUND)

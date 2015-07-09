@@ -29,10 +29,10 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT (vSMCExample-vsmc CXX)
+PROJECT(vSMCExample-vsmc CXX)
 
-ADD_CUSTOM_TARGET (vsmc)
-ADD_DEPENDENCIES (example vsmc)
+ADD_CUSTOM_TARGET(vsmc)
+ADD_DEPENDENCIES(example vsmc)
 
 ADD_HEADER_EXECUTABLE(vsmc/core/core TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/core/monitor         TRUE)

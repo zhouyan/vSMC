@@ -32,22 +32,8 @@
 #ifndef VSMC_EXAMPLE_RNG_TEST_HPP
 #define VSMC_EXAMPLE_RNG_TEST_HPP
 
-#ifndef VSMC_RNG_TEST_C_API
-#define VSMC_RNG_TEST_C_API 0
-#endif
-
-#ifndef VSMC_RNG_TEST_MKL
-#define VSMC_RNG_TEST_MKL 0
-#endif
-
 #include <vsmc/rng/rng.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#if VSMC_RNG_TEST_C_API
-#include <vsmc/vsmc.h>
-#if VSMC_HAS_MKL
-#include <vsmc/rng/mkl_brng.hpp>
-#endif
-#endif
 
 #define VSMC_RNG_TEST_PRE(prog)                                               \
     std::size_t N = 1000000;                                                  \
@@ -78,41 +64,31 @@ inline void rng_test(std::size_t N, const std::string &name,
     MKL_INT n = static_cast<MKL_INT>(N);
     MKL_INT m = n / 1000;
 
-#if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
-#if VSMC_RNG_TEST_MKL
-    MKL_INT brng = rng.stream().get_brng();
-#else
-    MKL_INT brng = vsmc::mkl_brng<RNGType>();
-#endif
-    vsmc::MKLStream stream(brng, 1);
-#endif
-
-    vsmc::UniformRealDistribution<double> runif(0, 1);
+    std::uniform_real_distribution<double> runif_std(0, 1);
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != N; ++i)
-        r[i] = runif(rng);
+        r[i] = runif_std(rng);
     watch.stop();
     result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);
 
-    vsmc::uniform_real_distribution(rng, N / 1000, r.data(), 0.0, 1.0);
+    vsmc::UniformRealDistribution<double> runif_vsmc(0, 1);
     watch.reset();
     watch.start();
-    vsmc::uniform_real_distribution(rng, N, r.data(), 0.0, 1.0);
+    for (std::size_t i = 0; i != N; ++i)
+        r[i] = runif_vsmc(rng);
     watch.stop();
     result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);
 
-#if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
-    vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream.get(), m, r.data(), 0, 1);
+    runif_vsmc(rng, N / 1000, r.data());
     watch.reset();
     watch.start();
-    vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream.get(), n, r.data(), 0, 1);
+    runif_vsmc(rng, N, r.data());
     watch.stop();
     result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);
-#endif
 
     std::ofstream rnd("rnd");
     rnd << result << std::endl;
@@ -135,11 +111,9 @@ inline void rng_output_sw(const std::string &prog_name,
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::left << std::setw(nwid) << prog_name;
     std::cout << std::right << std::setw(swid) << "Size";
-    std::cout << std::right << std::setw(twid) << "Time (U01)";
+    std::cout << std::right << std::setw(twid) << "Time (STD)";
+    std::cout << std::right << std::setw(twid) << "Time (vSMC)";
     std::cout << std::right << std::setw(twid) << "Time (Batch)";
-#if VSMC_RNG_TEST_C_API && VSMC_HAS_MKL
-    std::cout << std::right << std::setw(twid) << "Time (MKL)";
-#endif
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
 
