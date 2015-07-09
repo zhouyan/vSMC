@@ -97,6 +97,10 @@ class BetaDistributionConstant
     public:
     BetaDistributionConstant(RealType alpha, RealType beta)
         : algorithm(beta_distribution_algorithm(alpha, beta))
+        , a(0)
+        , b(0)
+        , t(0)
+        , p(0)
     {
         switch (algorithm) {
             case BetaDistributionAlgorithm11: break;

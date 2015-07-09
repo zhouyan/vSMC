@@ -227,6 +227,15 @@ inline void fma(std::size_t n, T a, const T *b, const T *x, T *y)
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = a_i + b * x_i\f$.
+template <typename T>
+inline void fma(std::size_t n, const T *a, T b, const T *x, T *y)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = a[i] + b * x[i];
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = a + b * x_i\f$.
 template <typename T>
 inline void fma(std::size_t n, T a, T b, const T *x, T *y)

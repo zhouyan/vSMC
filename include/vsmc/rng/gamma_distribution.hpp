@@ -78,12 +78,8 @@ template <typename RealType>
 class GammaDistributionConstant
 {
     public:
-    GammaDistributionAlgorithm algorithm;
-    RealType d;
-    RealType c;
-
     GammaDistributionConstant(RealType alpha)
-        : algorithm(gamma_distribution_algorithm(alpha))
+        : algorithm(gamma_distribution_algorithm(alpha)), d(0), c(0)
     {
         switch (algorithm) {
             case GammaDistributionAlgorithmT:
@@ -101,6 +97,10 @@ class GammaDistributionConstant
             case GammaDistributionAlgorithmE: break;
         }
     }
+
+    GammaDistributionAlgorithm algorithm;
+    RealType d;
+    RealType c;
 }; // class GammaDistributionConstant
 
 } // namespace internal
