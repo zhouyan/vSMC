@@ -140,7 +140,7 @@ class RayleighDistribution
     template <typename RNGType>
     result_type operator()(RNGType &rng)
     {
-        U01OODistribution<RealType> runif;
+        U01OCDistribution<RealType> runif;
 
         return param_.b_ * std::sqrt(-2 * std::log(runif(rng)));
     }
@@ -164,7 +164,7 @@ template <typename RealType, typename RNGType>
 inline void rayleigh_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType b)
 {
-    u01_oo_distribution(rng, n, r);
+    u01_oc_distribution(rng, n, r);
     log(n, r, r);
     mul(n, -2 * b * b, r, r);
     sqrt(n, r, r);

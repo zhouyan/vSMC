@@ -183,11 +183,9 @@ class NormalDistribution
             return param_.v_;
         }
 
-        result_type u = 0;
-        result_type v = 0;
-        generate_uv(
-            rng, u, v, std::integral_constant<bool,
-                           internal::RNGMaxBits<RNGType>::value >= 64>());
+        U01OCDistribution<RealType> runif;
+        result_type u = runif(rng);
+        result_type v = runif(rng);
         result_type s = param_.stddev_ * std::sqrt(-2 * std::log(u));
         v *= const_pi_2<result_type>();
         u = std::cos(v);
@@ -208,24 +206,6 @@ class NormalDistribution
 
     private:
     param_type param_;
-
-    template <typename RNGType>
-    void generate_uv(
-        RNGType &rng, result_type &u, result_type &v, std::false_type)
-    {
-        U01OCDistribution<RealType> runif;
-        u = runif(rng);
-        v = runif(rng);
-    }
-
-    template <typename RNGType>
-    void generate_uv(
-        RNGType &rng, result_type &u, result_type &v, std::true_type)
-    {
-        std::uint64_t r = static_cast<std::uint64_t>(rng());
-        u = U01<std::uint32_t, RealType, Open, Closed>::eval(r);
-        v = U01<std::uint32_t, RealType, Open, Closed>::eval(r >> 32);
-    }
 }; // class NormalDistribution
 
 namespace internal
@@ -266,11 +246,11 @@ inline void normal_distribution(
     internal::normal_distribution_impl<k>(rng, l, r + m * k, mean, stddev);
     if (n % 2 != 0) {
         U01OCDistribution<RealType> runif;
-        RealType v1 = runif(rng);
-        RealType v2 = runif(rng);
+        RealType u = runif(rng);
+        RealType v = runif(rng);
         r[n - 1] = mean +
-            stddev * std::sqrt(-2 * std::log(v1)) *
-                std::cos(const_pi_2<RealType>() * v2);
+            stddev * std::sqrt(-2 * std::log(u)) *
+                std::cos(const_pi_2<RealType>() * v);
     }
 }
 

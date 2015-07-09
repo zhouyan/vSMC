@@ -331,7 +331,7 @@ class BetaDistribution
     template <typename RNGType>
     result_type generate_c(RNGType &rng)
     {
-        U01OODistribution<RealType> runif;
+        U01CODistribution<RealType> runif;
         const result_type ln_4 = 2 * const_ln_2<result_type>();
         result_type y = 0;
         result_type z = 0;
@@ -354,7 +354,7 @@ class BetaDistribution
     template <typename RNGType>
     result_type generate_j(RNGType &rng)
     {
-        U01OODistribution<RealType> runif;
+        U01CODistribution<RealType> runif;
         result_type x = 0;
         result_type y = 0;
         do {
@@ -368,7 +368,7 @@ class BetaDistribution
     template <typename RNGType>
     result_type generate_a1(RNGType &rng)
     {
-        U01OODistribution<RealType> runif;
+        U01CODistribution<RealType> runif;
         while (true) {
             result_type u = runif(rng);
             result_type e = -std::log(runif(rng));
@@ -394,7 +394,7 @@ class BetaDistribution
     template <typename RNGType>
     result_type generate_a2(RNGType &rng)
     {
-        U01OODistribution<RealType> runif;
+        U01CODistribution<RealType> runif;
         while (true) {
             result_type u = runif(rng);
             result_type e = -std::log(runif(rng));
@@ -419,7 +419,7 @@ class BetaDistribution
     template <typename RNGType>
     result_type generate_a3(RNGType &rng)
     {
-        U01OODistribution<RealType> runif;
+        U01CODistribution<RealType> runif;
         while (true) {
             result_type u = runif(rng);
             result_type e = -std::log(runif(rng));
@@ -492,7 +492,7 @@ inline void beta_distribution_impl_c(RNGType &rng, std::size_t n, RealType *r,
     RealType *const v = s + n * 2;
     RealType *const y = s + n * 3;
     RealType *const z = s + n * 4;
-    u01_oo_distribution(rng, n * 2, s);
+    u01_co_distribution(rng, n * 2, s);
     div(n, u1, v, v);
     log(n, v, v);
     mul(n, b, v, v);
@@ -524,7 +524,7 @@ inline void beta_distribution_impl_j(RNGType &rng, std::size_t n, RealType *r,
     RealType *const x = s;
     RealType *const y = s + n;
     RealType *const u = s + n * 2;
-    u01_oo_distribution(rng, n * 2, s);
+    u01_co_distribution(rng, n * 2, s);
     pow(n, x, a, x);
     pow(n, y, b, y);
     add(n, x, y, u);
