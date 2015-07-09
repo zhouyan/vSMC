@@ -61,8 +61,6 @@ inline void rng_test(std::size_t N, const std::string &name,
     double result = 0;
     vsmc::Vector<double> r(N);
     vsmc::Vector<typename RNGType::result_type> u(N);
-    MKL_INT n = static_cast<MKL_INT>(N);
-    MKL_INT m = n / 1000;
 
     std::uniform_real_distribution<double> runif_std(0, 1);
     watch.reset();
