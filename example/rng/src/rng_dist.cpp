@@ -94,7 +94,7 @@ int main(int argc, char **argv)
     VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 3, 3);
     VSMC_RNG_DIST_1(Stable, vsmc::StableDistribution, 1);
     VSMC_RNG_DIST_1(Stable, vsmc::StableDistribution, 0.1);
-    VSMC_RNG_DIST_1(Stable, vsmc::StableDistribution, 10);
+    VSMC_RNG_DIST_1(Stable, vsmc::StableDistribution, 2);
 
     rng_dist_output_sw(names, sw);
 
