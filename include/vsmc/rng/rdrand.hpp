@@ -43,7 +43,7 @@
     VSMC_STATIC_ASSERT(((sizeof(ResultType) == sizeof(std::uint16_t) &&       \
                             std::is_unsigned<ResultType>::value) ||           \
                            (sizeof(ResultType) == sizeof(std::uint32_t) &&    \
-                               std::is_unsigned<ResutlType>::value) ||        \
+                               std::is_unsigned<ResultType>::value) ||        \
                            (sizeof(ResultType) == sizeof(std::uint64_t) &&    \
                                std::is_unsigned<ResultType>::value)),         \
         "**RDRANDEngine** USED WITH ResultType OTHER THAN UNSIGNED 16/32/64 " \
