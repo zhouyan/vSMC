@@ -34,14 +34,25 @@
 
 #include <vsmc/internal/config.h>
 
-#define VSMC_RNGC_U01_31F (1.0f / 2147483648.0f)        // 2^{-31}
-#define VSMC_RNGC_U01_24F (1.0f / 16777216.0f)          // 2^{-24}
-#define VSMC_RNGC_U01_23F (1.0f / 8388608.0f)           // 2^{-23}
-#define VSMC_RNGC_U01_33D (1.0 / 8589934592.0)          // 2^{-33}
-#define VSMC_RNGC_U01_32D (1.0 / 4294967296.0)          // 2^{-32}
-#define VSMC_RNGC_U01_63D (1.0 / 9223372036854775808.0) // 2^{-63}
-#define VSMC_RNGC_U01_53D (1.0 / 9007199254740992.0)    // 2^{-53}
-#define VSMC_RNGC_U01_52D (1.0 / 4503599627370496.0)    // 2^{-52}
+#ifdef VSMC_OPENCL
+#define VSMC_RNGC_U01_31F (1.0f / 2147483648.0f)
+#define VSMC_RNGC_U01_24F (1.0f / 16777216.0f)
+#define VSMC_RNGC_U01_23F (1.0f / 8388608.0f)
+#define VSMC_RNGC_U01_33D (1.0 / 8589934592.0)
+#define VSMC_RNGC_U01_32D (1.0 / 4294967296.0)
+#define VSMC_RNGC_U01_63D (1.0 / 9223372036854775808.0)
+#define VSMC_RNGC_U01_53D (1.0 / 9007199254740992.0)
+#define VSMC_RNGC_U01_52D (1.0 / 4503599627370496.0)
+#else  // VSMC_OPENCL
+static const float VSMC_RNGC_U01_31F = 1.0f / 2147483648.0f;
+static const float VSMC_RNGC_U01_24F = 1.0f / 16777216.0f;
+static const float VSMC_RNGC_U01_23F = 1.0f / 8388608.0f;
+static const double VSMC_RNGC_U01_33D = 1.0 / 8589934592.0;
+static const double VSMC_RNGC_U01_32D = 1.0 / 4294967296.0;
+static const double VSMC_RNGC_U01_63D = 1.0 / 9223372036854775808.0;
+static const double VSMC_RNGC_U01_53D = 1.0 / 9007199254740992.0;
+static const double VSMC_RNGC_U01_52D = 1.0 / 4503599627370496.0;
+#endif // VSMC_OPENCL
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1]\f$
 /// \ingroup U01C
