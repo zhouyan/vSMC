@@ -231,25 +231,28 @@ class M128I
     __m128i value_;
 
     template <typename T>
-    __m128i set1(T n, std::integral_constant<std::size_t, 1>)
+    __m128i set1(T n, std::integral_constant<std::size_t, sizeof(std::int8_t)>)
     {
         return _mm_set1_epi8(static_cast<char>(n));
     }
 
     template <typename T>
-    __m128i set1(T n, std::integral_constant<std::size_t, 2>)
+    __m128i set1(
+        T n, std::integral_constant<std::size_t, sizeof(std::int16_t)>)
     {
         return _mm_set1_epi16(static_cast<short>(n));
     }
 
     template <typename T>
-    __m128i set1(T n, std::integral_constant<std::size_t, 4>)
+    __m128i set1(
+        T n, std::integral_constant<std::size_t, sizeof(std::int32_t)>)
     {
         return _mm_set1_epi32(static_cast<int>(n));
     }
 
     template <typename T>
-    __m128i set1(T n, std::integral_constant<std::size_t, 8>)
+    __m128i set1(
+        T n, std::integral_constant<std::size_t, sizeof(std::int64_t)>)
     {
         return _mm_set1_epi64x(static_cast<VSMC_INT64>(n));
     }
@@ -260,112 +263,112 @@ namespace internal
 
 template <typename T>
 inline M128I<T> m128i_add(const M128I<T> &a, const M128I<T> &b,
-    std::integral_constant<std::size_t, 1>)
+    std::integral_constant<std::size_t, sizeof(std::int8_t)>)
 {
     return M128I<T>(_mm_add_epi8(a.value(), b.value()));
 }
 
 template <typename T>
 inline M128I<T> m128i_add(const M128I<T> &a, const M128I<T> &b,
-    std::integral_constant<std::size_t, 2>)
+    std::integral_constant<std::size_t, sizeof(std::int16_t)>)
 {
     return M128I<T>(_mm_add_epi16(a.value(), b.value()));
 }
 
 template <typename T>
 inline M128I<T> m128i_add(const M128I<T> &a, const M128I<T> &b,
-    std::integral_constant<std::size_t, 4>)
+    std::integral_constant<std::size_t, sizeof(std::int32_t)>)
 {
     return M128I<T>(_mm_add_epi32(a.value(), b.value()));
 }
 
 template <typename T>
 inline M128I<T> m128i_add(const M128I<T> &a, const M128I<T> &b,
-    std::integral_constant<std::size_t, 8>)
+    std::integral_constant<std::size_t, sizeof(std::int64_t)>)
 {
     return M128I<T>(_mm_add_epi64(a.value(), b.value()));
 }
 
 template <typename T>
 inline M128I<T> m128i_sub(const M128I<T> &a, const M128I<T> &b,
-    std::integral_constant<std::size_t, 1>)
+    std::integral_constant<std::size_t, sizeof(std::int8_t)>)
 {
     return M128I<T>(_mm_sub_epi8(a.value(), b.value()));
 }
 
 template <typename T>
 inline M128I<T> m128i_sub(const M128I<T> &a, const M128I<T> &b,
-    std::integral_constant<std::size_t, 2>)
+    std::integral_constant<std::size_t, sizeof(std::int16_t)>)
 {
     return M128I<T>(_mm_sub_epi16(a.value(), b.value()));
 }
 
 template <typename T>
 inline M128I<T> m128i_sub(const M128I<T> &a, const M128I<T> &b,
-    std::integral_constant<std::size_t, 4>)
+    std::integral_constant<std::size_t, sizeof(std::int32_t)>)
 {
     return M128I<T>(_mm_sub_epi32(a.value(), b.value()));
 }
 
 template <typename T>
 inline M128I<T> m128i_sub(const M128I<T> &a, const M128I<T> &b,
-    std::integral_constant<std::size_t, 8>)
+    std::integral_constant<std::size_t, sizeof(std::int64_t)>)
 {
     return M128I<T>(_mm_sub_epi64(a.value(), b.value()));
 }
 
 template <typename T>
-inline M128I<T> m128i_slli(
-    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 1>)
+inline M128I<T> m128i_slli(const M128I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int8_t)>)
 {
     return M128I<T>(_mm_slli_epi8(a.value(), imm8));
 }
 
 template <typename T>
-inline M128I<T> m128i_slli(
-    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 2>)
+inline M128I<T> m128i_slli(const M128I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int16_t)>)
 {
     return M128I<T>(_mm_slli_epi16(a.value(), imm8));
 }
 
 template <typename T>
-inline M128I<T> m128i_slli(
-    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 4>)
+inline M128I<T> m128i_slli(const M128I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int32_t)>)
 {
     return M128I<T>(_mm_slli_epi32(a.value(), imm8));
 }
 
 template <typename T>
-inline M128I<T> m128i_slli(
-    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 8>)
+inline M128I<T> m128i_slli(const M128I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int64_t)>)
 {
     return M128I<T>(_mm_slli_epi64(a.value(), imm8));
 }
 
 template <typename T>
-inline M128I<T> m128i_srli(
-    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 1>)
+inline M128I<T> m128i_srli(const M128I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int8_t)>)
 {
     return M128I<T>(_mm_srli_epi8(a.value(), imm8));
 }
 
 template <typename T>
-inline M128I<T> m128i_srli(
-    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 2>)
+inline M128I<T> m128i_srli(const M128I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int16_t)>)
 {
     return M128I<T>(_mm_srli_epi16(a.value(), imm8));
 }
 
 template <typename T>
-inline M128I<T> m128i_srli(
-    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 4>)
+inline M128I<T> m128i_srli(const M128I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int32_t)>)
 {
     return M128I<T>(_mm_srli_epi32(a.value(), imm8));
 }
 
 template <typename T>
-inline M128I<T> m128i_srli(
-    const M128I<T> &a, int imm8, std::integral_constant<std::size_t, 8>)
+inline M128I<T> m128i_srli(const M128I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int64_t)>)
 {
     return M128I<T>(_mm_srli_epi64(a.value(), imm8));
 }
@@ -937,25 +940,28 @@ class M256I
     __m256i value_;
 
     template <typename T>
-    __m256i set1(T n, std::integral_constant<std::size_t, 1>)
+    __m256i set1(T n, std::integral_constant<std::size_t, sizeof(std::int8_t)>)
     {
         return _mm256_set1_epi8(static_cast<char>(n));
     }
 
     template <typename T>
-    __m256i set1(T n, std::integral_constant<std::size_t, 2>)
+    __m256i set1(
+        T n, std::integral_constant<std::size_t, sizeof(std::int16_t)>)
     {
         return _mm256_set1_epi16(static_cast<short>(n));
     }
 
     template <typename T>
-    __m256i set1(T n, std::integral_constant<std::size_t, 4>)
+    __m256i set1(
+        T n, std::integral_constant<std::size_t, sizeof(std::int32_t)>)
     {
         return _mm256_set1_epi32(static_cast<int>(n));
     }
 
     template <typename T>
-    __m256i set1(T n, std::integral_constant<std::size_t, 8>)
+    __m256i set1(
+        T n, std::integral_constant<std::size_t, sizeof(std::int64_t)>)
     {
         return _mm256_set1_epi64x(static_cast<long long>(n));
     }
@@ -966,112 +972,112 @@ namespace internal
 
 template <typename T>
 inline M256I<T> m256i_add(const M256I<T> &a, const M256I<T> &b,
-    std::integral_constant<std::size_t, 1>)
+    std::integral_constant<std::size_t, sizeof(std::int8_t)>)
 {
     return M256I<T>(_mm256_add_epi8(a.value(), b.value()));
 }
 
 template <typename T>
 inline M256I<T> m256i_add(const M256I<T> &a, const M256I<T> &b,
-    std::integral_constant<std::size_t, 2>)
+    std::integral_constant<std::size_t, sizeof(std::int16_t)>)
 {
     return M256I<T>(_mm256_add_epi16(a.value(), b.value()));
 }
 
 template <typename T>
 inline M256I<T> m256i_add(const M256I<T> &a, const M256I<T> &b,
-    std::integral_constant<std::size_t, 4>)
+    std::integral_constant<std::size_t, sizeof(std::int32_t)>)
 {
     return M256I<T>(_mm256_add_epi32(a.value(), b.value()));
 }
 
 template <typename T>
 inline M256I<T> m256i_add(const M256I<T> &a, const M256I<T> &b,
-    std::integral_constant<std::size_t, 8>)
+    std::integral_constant<std::size_t, sizeof(std::int64_t)>)
 {
     return M256I<T>(_mm256_add_epi64(a.value(), b.value()));
 }
 
 template <typename T>
 inline M256I<T> m256i_sub(const M256I<T> &a, const M256I<T> &b,
-    std::integral_constant<std::size_t, 1>)
+    std::integral_constant<std::size_t, sizeof(std::int8_t)>)
 {
     return M256I<T>(_mm256_sub_epi8(a.value(), b.value()));
 }
 
 template <typename T>
 inline M256I<T> m256i_sub(const M256I<T> &a, const M256I<T> &b,
-    std::integral_constant<std::size_t, 2>)
+    std::integral_constant<std::size_t, sizeof(std::int16_t)>)
 {
     return M256I<T>(_mm256_sub_epi16(a.value(), b.value()));
 }
 
 template <typename T>
 inline M256I<T> m256i_sub(const M256I<T> &a, const M256I<T> &b,
-    std::integral_constant<std::size_t, 4>)
+    std::integral_constant<std::size_t, sizeof(std::int32_t)>)
 {
     return M256I<T>(_mm256_sub_epi32(a.value(), b.value()));
 }
 
 template <typename T>
 inline M256I<T> m256i_sub(const M256I<T> &a, const M256I<T> &b,
-    std::integral_constant<std::size_t, 8>)
+    std::integral_constant<std::size_t, sizeof(std::int64_t)>)
 {
     return M256I<T>(_mm256_sub_epi64(a.value(), b.value()));
 }
 
 template <typename T>
-inline M256I<T> m256i_slli(
-    const M256I<T> &a, int imm8, std::integral_constant<std::size_t, 1>)
+inline M256I<T> m256i_slli(const M256I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int8_t)>)
 {
     return M256I<T>(_mm256_slli_epi8(a.value(), imm8));
 }
 
 template <typename T>
-inline M256I<T> m256i_slli(
-    const M256I<T> &a, int imm8, std::integral_constant<std::size_t, 2>)
+inline M256I<T> m256i_slli(const M256I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int16_t)>)
 {
     return M256I<T>(_mm256_slli_epi16(a.value(), imm8));
 }
 
 template <typename T>
-inline M256I<T> m256i_slli(
-    const M256I<T> &a, int imm8, std::integral_constant<std::size_t, 4>)
+inline M256I<T> m256i_slli(const M256I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int32_t)>)
 {
     return M256I<T>(_mm256_slli_epi32(a.value(), imm8));
 }
 
 template <typename T>
-inline M256I<T> m256i_slli(
-    const M256I<T> &a, int imm8, std::integral_constant<std::size_t, 8>)
+inline M256I<T> m256i_slli(const M256I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int64_t)>)
 {
     return M256I<T>(_mm256_slli_epi64(a.value(), imm8));
 }
 
 template <typename T>
-inline M256I<T> m256i_srli(
-    const M256I<T> &a, int imm8, std::integral_constant<std::size_t, 1>)
+inline M256I<T> m256i_srli(const M256I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int8_t)>)
 {
     return M256I<T>(_mm256_srli_epi8(a.value(), imm8));
 }
 
 template <typename T>
-inline M256I<T> m256i_srli(
-    const M256I<T> &a, int imm8, std::integral_constant<std::size_t, 2>)
+inline M256I<T> m256i_srli(const M256I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int16_t)>)
 {
     return M256I<T>(_mm256_srli_epi16(a.value(), imm8));
 }
 
 template <typename T>
-inline M256I<T> m256i_srli(
-    const M256I<T> &a, int imm8, std::integral_constant<std::size_t, 4>)
+inline M256I<T> m256i_srli(const M256I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int32_t)>)
 {
     return M256I<T>(_mm256_srli_epi32(a.value(), imm8));
 }
 
 template <typename T>
-inline M256I<T> m256i_srli(
-    const M256I<T> &a, int imm8, std::integral_constant<std::size_t, 8>)
+inline M256I<T> m256i_srli(const M256I<T> &a, int imm8,
+    std::integral_constant<std::size_t, sizeof(std::int64_t)>)
 {
     return M256I<T>(_mm256_srli_epi64(a.value(), imm8));
 }

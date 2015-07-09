@@ -40,11 +40,16 @@
 #endif
 
 #define VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE_RESULT_TYPE(ResultType)          \
-    VSMC_STATIC_ASSERT((std::is_same<ResultType, uint16_t>::value ||          \
-                           std::is_same<ResultType, std::uint32_t>::value ||  \
-                           std::is_same<ResultType, std::uint64_t>::value),   \
-        "**RDRANDEngine** USED WITH ResultType OTHER THAN "                   \
-        "std::uint16_t, std::uint32_t OR std::uint64_t")
+    VSMC_STATIC_ASSERT((                                                      \
+        (sizeof(ResultType) == sizeof(std::uint16_t) &&                       \
+            std::is_unsigned<ResultType>::value) ||                           \
+        (sizeof(ResultType) == sizeof(std::uint32_t) &&                       \
+            std::is_unsigned<ResutlType>::value) ||                           \
+        (sizeof(ResultType) == sizeof(std::uint64_t) &&                       \
+            std::is_unsigned<ResultType>::value)) "**RDRANDEngine** USED "    \
+                                                  "WITH ResultType OTHER "    \
+                                                  "THAN UNSIGNED 16/32/64 "   \
+                                                  "BITS INTEGER")
 
 #define VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE                                  \
     VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE_RESULT_TYPE(ResultType);
@@ -58,41 +63,44 @@ namespace vsmc
 
 /// \brief Invoke the RDRAND instruction and return the carry flag
 /// \ingroup RDRAND
-template <typename UIntType>
-inline bool rdrand(UIntType *);
+template <typename UIntType, std::size_t W>
+inline bool rdrand(UIntType *, std::integral_constant<std::size_t, W>);
 
 /// \brief Invoke the 16-bits RDRAND instruction and return the carry flag
 /// \ingroup RDRAND
-template <>
-inline bool rdrand<std::uint16_t>(std::uint16_t *rand)
+template <typename UIntType>
+inline bool rdrand(
+    UIntType *rand, std::integral_constant<std::size_t, sizeof(std::uint16_t)>)
 {
     unsigned short r;
     int cf = _rdrand16_step(&r);
-    *rand = static_cast<std::uint16_t>(r);
+    *rand = static_cast<UIntType>(r);
 
     return cf != 0;
 }
 
 /// \brief Invoke the 32-bits RDRAND instruction and return the carry flag
 /// \ingroup RDRAND
-template <>
-inline bool rdrand<std::uint32_t>(std::uint32_t *rand)
+template <typename UIntType>
+inline bool rdrand(
+    UIntType *rand, std::integral_constant<std::size_t, sizeof(std::uint32_t)>)
 {
     unsigned r;
     int cf = _rdrand32_step(&r);
-    *rand = static_cast<std::uint32_t>(r);
+    *rand = static_cast<UIntType>(r);
 
     return cf != 0;
 }
 
 /// \brief Invoke the 64-bits RDRAND instruction and return the carry flag
 /// \ingroup RDRAND
-template <>
-inline bool rdrand<std::uint64_t>(std::uint64_t *rand)
+template <typename UIntType>
+inline bool rdrand(
+    UIntType *rand, std::integral_constant<std::size_t, sizeof(std::uint64_t)>)
 {
     unsigned VSMC_INT64 r;
     int cf = _rdrand64_step(&r);
-    *rand = static_cast<std::uint64_t>(r);
+    *rand = static_cast<UIntType>(r);
 
     return cf != 0;
 }
@@ -102,6 +110,7 @@ inline bool rdrand<std::uint64_t>(std::uint64_t *rand)
 template <typename ResultType, std::size_t NTrialMax = VSMC_RDRAND_NTRIAL_MAX>
 class RDRANDEngine
 {
+
     public:
     using result_type = ResultType;
 
@@ -176,8 +185,13 @@ class RDRANDEngine
     {
         result_type r;
         std::size_t ntrial = 0;
-        while (!rdrand<result_type>(&r) && ntrial != NTrialMax)
+        while (true) {
             ++ntrial;
+            bool success = rdrand<result_type>(&r,
+                std::integral_constant<std::size_t, sizeof(result_type)>());
+            if (success || ntrial > NTrialMax)
+                break;
+        }
         VSMC_RUNTIME_WARNING_RNG_RDRAND_ENGINE_NTRIAL(ntrial, NTrialMax);
 
         return r;
@@ -186,8 +200,12 @@ class RDRANDEngine
     result_type generate(std::false_type)
     {
         result_type r;
-        while (!rdrand<result_type>(&r))
-            ;
+        while (true) {
+            bool success = rdrand<result_type>(&r,
+                std::integral_constant<std::size_t, sizeof(result_type)>());
+            if (success)
+                break;
+        }
 
         return r;
     }
