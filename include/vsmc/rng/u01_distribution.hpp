@@ -171,10 +171,10 @@ class U01LRDistribution
             typename std::conditional<internal::RNGBits<RNGType>::value >= 64,
                 std::integral_constant<int, 64>,
                 std::integral_constant<int, 32>>::type;
-        using flt_type =
-            typename std::conditional<std::is_same<result_type, float> ||
-                    std::is_same<result_type, double>,
-                result_type, double>::type;
+        using flt_type = typename std::conditional<
+            std::is_same<result_type, float>::value ||
+                std::is_same<result_type, double>::value,
+            result_type, double>::type;
 
         return U01<uint_type, flt_type, Left, Right>::eval(
             internal::U01LRDistributionBits<uint_type, bits_type::value>::eval(

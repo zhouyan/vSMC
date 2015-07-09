@@ -36,14 +36,12 @@
 #include <vsmc/rng/counter.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType, SIMD)         \
-    VSMC_STATIC_ASSERT((                                                      \
-        (sizeof(ResultType) == sizeof(std::uint32_t) &&                       \
-            std::is_unsigned<ResultType>::value) ||                           \
-        (sizeof(ResultType) == sizeof(std::uint64_t) &&                       \
-            std::is_unsigned<ResultType>::value)) "**ThreefryGenerator" #SIMD \
-                                                  "** USED WITH ResultType "  \
-                                                  "OTHER THAN UNSIGNED "      \
-                                                  "32/64 BITS INTEGER")
+    VSMC_STATIC_ASSERT(((sizeof(ResultType) == sizeof(std::uint32_t) &&       \
+                            std::is_unsigned<ResultType>::value) ||           \
+                           (sizeof(ResultType) == sizeof(std::uint64_t) &&    \
+                               std::is_unsigned<ResultType>::value)),         \
+        "**ThreefryGenerator" #SIMD                                           \
+        "** USED WITH ResultType OTHER THAN UNSIGNED 32/64 BITS INTEGER")
 
 #define VSMC_STATIC_ASSERT_RNG_THREEFRY_SIZE(K, SIMD)                         \
     VSMC_STATIC_ASSERT((K == 2 || K == 4),                                    \

@@ -40,16 +40,14 @@
 #endif
 
 #define VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE_RESULT_TYPE(ResultType)          \
-    VSMC_STATIC_ASSERT((                                                      \
-        (sizeof(ResultType) == sizeof(std::uint16_t) &&                       \
-            std::is_unsigned<ResultType>::value) ||                           \
-        (sizeof(ResultType) == sizeof(std::uint32_t) &&                       \
-            std::is_unsigned<ResutlType>::value) ||                           \
-        (sizeof(ResultType) == sizeof(std::uint64_t) &&                       \
-            std::is_unsigned<ResultType>::value)) "**RDRANDEngine** USED "    \
-                                                  "WITH ResultType OTHER "    \
-                                                  "THAN UNSIGNED 16/32/64 "   \
-                                                  "BITS INTEGER")
+    VSMC_STATIC_ASSERT(((sizeof(ResultType) == sizeof(std::uint16_t) &&       \
+                            std::is_unsigned<ResultType>::value) ||           \
+                           (sizeof(ResultType) == sizeof(std::uint32_t) &&    \
+                               std::is_unsigned<ResutlType>::value) ||        \
+                           (sizeof(ResultType) == sizeof(std::uint64_t) &&    \
+                               std::is_unsigned<ResultType>::value)),         \
+        "**RDRANDEngine** USED WITH ResultType OTHER THAN UNSIGNED 16/32/64 " \
+        "BITS INTEGER")
 
 #define VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE                                  \
     VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE_RESULT_TYPE(ResultType);
