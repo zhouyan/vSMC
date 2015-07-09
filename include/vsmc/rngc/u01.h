@@ -32,37 +32,16 @@
 #ifndef VSMC_RNGC_U01_H
 #define VSMC_RNGC_U01_H
 
-#include <vsmc/rngc/internal/common.h>
+#include <vsmc/internal/config.h>
 
-#if VSMC_HAS_RNGC_DOUBLE
-
-#define vsmc_u01_closed_closed_u32 vsmc_u01_closed_closed_u32_f64
-#define vsmc_u01_closed_open_u32 vsmc_u01_closed_open_u32_f64
-#define vsmc_u01_open_closed_u32 vsmc_u01_open_closed_u32_f64
-#define vsmc_u01_open_open_u32 vsmc_u01_open_open_u32_f64
-
-#define vsmc_u01_closed_closed_u64 vsmc_u01_closed_closed_u64_f64
-#define vsmc_u01_closed_open_u64 vsmc_u01_closed_open_u64_f64
-#define vsmc_u01_open_closed_u64 vsmc_u01_open_closed_u64_f64
-#define vsmc_u01_open_open_u64 vsmc_u01_open_open_u64_f64
-
-#else // VSMC_HAS_RNGC_DOUBLE
-
-#define vsmc_u01_closed_closed_u32 vsmc_u01_closed_closed_u32_f32
-#define vsmc_u01_closed_open_u32 vsmc_u01_closed_open_u32_f32
-#define vsmc_u01_open_closed_u32 vsmc_u01_open_closed_u32_f32
-#define vsmc_u01_open_open_u32 vsmc_u01_open_open_u32_f32
-
-#endif // VSMC_HAS_RNGC_DOUBLE
-
-static const float VSMC_RNGC_U01_31F = 1.0f / 2147483648.0f;         // 2^{-31}
-static const float VSMC_RNGC_U01_24F = 1.0f / 16777216.0f;           // 2^{-24}
-static const float VSMC_RNGC_U01_23F = 1.0f / 8388608.0f;            // 2^{-23}
-static const double VSMC_RNGC_U01_33D = 1.0 / 8589934592.0;          // 2^{-33}
-static const double VSMC_RNGC_U01_32D = 1.0 / 4294967296.0;          // 2^{-32}
-static const double VSMC_RNGC_U01_63D = 1.0 / 9223372036854775808.0; // 2^{-63}
-static const double VSMC_RNGC_U01_53D = 1.0 / 9007199254740992.0;    // 2^{-53}
-static const double VSMC_RNGC_U01_52D = 1.0 / 4503599627370496.0;    // 2^{-52}
+#define VSMC_RNGC_U01_31F (1.0f / 2147483648.0f)        // 2^{-31}
+#define VSMC_RNGC_U01_24F (1.0f / 16777216.0f)          // 2^{-24}
+#define VSMC_RNGC_U01_23F (1.0f / 8388608.0f)           // 2^{-23}
+#define VSMC_RNGC_U01_33D (1.0 / 8589934592.0)          // 2^{-33}
+#define VSMC_RNGC_U01_32D (1.0 / 4294967296.0)          // 2^{-32}
+#define VSMC_RNGC_U01_63D (1.0 / 9223372036854775808.0) // 2^{-63}
+#define VSMC_RNGC_U01_53D (1.0 / 9007199254740992.0)    // 2^{-53}
+#define VSMC_RNGC_U01_52D (1.0 / 4503599627370496.0)    // 2^{-52}
 
 /// \brief Converting 32-bits unsigned to single precision uniform \f$[0,1]\f$
 /// \ingroup U01C

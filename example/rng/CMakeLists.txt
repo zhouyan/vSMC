@@ -64,12 +64,3 @@ ENDIF (RDRAND_FOUND)
 IF (MKL_FOUND)
     ADD_RNG_TEST(mkl)
 ENDIF (MKL_FOUND)
-
-IF (OPENCL_FOUND)
-    COPY_FILE(rng rng_cl.cl)
-    COPY_FILE(rng rng_cl.R)
-    ADD_VSMC_EXECUTABLE(rng_cl
-        ${PROJECT_SOURCE_DIR}/src/rng_cl.cpp "OCL" "HDF5")
-    ADD_DEPENDENCIES(rng rng_cl)
-    ADD_DEPENDENCIES(example_cl rng_cl)
-ENDIF (OPENCL_FOUND)

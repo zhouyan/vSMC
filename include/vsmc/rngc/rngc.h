@@ -35,8 +35,6 @@
 #include <vsmc/internal/config.h>
 #include <vsmc/rngc/philox.h>
 #include <vsmc/rngc/threefry.h>
-#include <vsmc/rngc/gammak1.h>
-#include <vsmc/rngc/normal01.h>
 #include <vsmc/rngc/u01.h>
 
 #endif // VSMC_RNGC_RNGC_H

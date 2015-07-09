@@ -32,7 +32,7 @@
 #ifndef VSMC_RNGC_PHILOX_H
 #define VSMC_RNGC_PHILOX_H
 
-#include <vsmc/rngc/internal/common.h>
+#include <vsmc/internal/config.h>
 
 /// \brief Philox2x32 counter type
 /// \ingroup PhiloxC

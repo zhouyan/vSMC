@@ -32,7 +32,7 @@
 #ifndef VSMC_RNGC_THREEFRY_H
 #define VSMC_RNGC_THREEFRY_H
 
-#include <vsmc/rngc/internal/common.h>
+#include <vsmc/internal/config.h>
 
 /// \brief Threefry2x32 counter type
 /// \ingroup ThreefryC

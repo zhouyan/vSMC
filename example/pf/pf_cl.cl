@@ -32,25 +32,41 @@
 #include <vsmc/rngc/rngc.h>
 
 typedef struct {
-    fp_type pos_x;
-    fp_type pos_y;
-    fp_type vel_x;
-    fp_type vel_y;
+    float pos_x;
+    float pos_y;
+    float vel_x;
+    float vel_y;
 } cv;
 
 typedef struct {
-    fp_type pos_x;
-    fp_type pos_y;
+    float pos_x;
+    float pos_y;
 } cv_pos;
 
-VSMC_STATIC_INLINE fp_type log_likelihood(
-    const cv *sp, fp_type obs_x, fp_type obs_y)
+VSMC_STATIC_INLINE float4 normal01(vsmc_philox4x32 *rng)
 {
-    const fp_type scale = 10;
-    const fp_type nu = 10;
+    vsmc_philox4x32_gen(&rng->ctr, &rng->key, &rng->state);
+    float u1 = sqrt(-2 * vsmc_u01_open_closed_u32_f32(rng->state.v[0]));
+    float u2 = sqrt(-2 * vsmc_u01_open_closed_u32_f32(rng->state.v[1]));
+    float v1 = 6.283185 *vsmc_u01_open_closed_u32_f32(rng->state.v[2]);
+    float v2 = 6.283185 *vsmc_u01_open_closed_u32_f32(rng->state.v[3]);
+    float4 r;
+    r.x = u1 * cos(v1);
+    r.y = u1 * sin(v1);
+    r.z = u2 * cos(v2);
+    r.w = u2 * sin(v2);
 
-    fp_type llh_x = scale * (sp->pos_x - obs_x);
-    fp_type llh_y = scale * (sp->pos_y - obs_y);
+    return r;
+}
+
+VSMC_STATIC_INLINE float log_likelihood(
+        const cv *sp, float obs_x, float obs_y)
+{
+    const float scale = 10;
+    const float nu = 10;
+
+    float llh_x = scale * (sp->pos_x - obs_x);
+    float llh_y = scale * (sp->pos_y - obs_y);
 
     llh_x = log1p(llh_x * llh_x / nu);
     llh_y = log1p(llh_y * llh_y / nu);
@@ -59,27 +75,26 @@ VSMC_STATIC_INLINE fp_type log_likelihood(
 }
 
 __kernel void cv_init(__global cv *state, __global ulong *accept,
-    __global fp_type *log_weight, __global fp_type *obs_x,
-    __global fp_type *obs_y)
+        __global float *log_weight, __global float *obs_x,
+        __global float *obs_y)
 {
     ulong i = get_global_id(0);
     if (i >= SIZE)
         return;
 
-    const fp_type sd_pos0 = 2;
-    const fp_type sd_vel0 = 1;
+    const float sd_pos0 = 2;
+    const float sd_vel0 = 1;
     cv sp = state[i];
 
-    vsmc_crng rng;
-    vsmc_crng_init(&rng, SEED + i);
+    vsmc_philox4x32 rng;
+    vsmc_philox4x32_init(&rng, SEED + i);
     rng.ctr.v[1] = i;
-    vsmc_normal01 rnorm;
-    vsmc_normal01_init(&rnorm, &rng);
 
-    sp.pos_x = vsmc_normal01_rand(&rnorm, &rng) * sd_pos0;
-    sp.pos_y = vsmc_normal01_rand(&rnorm, &rng) * sd_pos0;
-    sp.vel_x = vsmc_normal01_rand(&rnorm, &rng) * sd_vel0;
-    sp.vel_y = vsmc_normal01_rand(&rnorm, &rng) * sd_vel0;
+    float4 r = normal01(&rng);
+    sp.pos_x = r.x * sd_pos0;
+    sp.pos_y = r.y * sd_pos0;
+    sp.vel_x = r.z * sd_vel0;
+    sp.vel_y = r.w * sd_vel0;
 
     state[i] = sp;
     accept[i] = 1;
@@ -87,30 +102,29 @@ __kernel void cv_init(__global cv *state, __global ulong *accept,
 }
 
 __kernel void cv_move(ulong iter, __global cv *state, __global ulong *accept,
-    __global fp_type *inc_weight, __global fp_type *obs_x,
-    __global fp_type *obs_y)
+        __global float *inc_weight, __global float *obs_x,
+        __global float *obs_y)
 {
     ulong i = get_global_id(0);
     if (i >= SIZE)
         return;
 
-    const fp_type var_pos = 0.02F;
-    const fp_type var_vel = 0.001F;
-    const fp_type sd_pos = sqrt(var_pos);
-    const fp_type sd_vel = sqrt(var_vel);
-    const fp_type delta = 0.1F;
+    const float var_pos = 0.02F;
+    const float var_vel = 0.001F;
+    const float sd_pos = sqrt(var_pos);
+    const float sd_vel = sqrt(var_vel);
+    const float delta = 0.1F;
     cv sp = state[i];
 
-    vsmc_crng rng;
-    vsmc_crng_init(&rng, SEED + i);
+    vsmc_philox4x32 rng;
+    vsmc_philox4x32_init(&rng, SEED + i);
     rng.ctr.v[1] = i;
-    vsmc_normal01 rnorm;
-    vsmc_normal01_init(&rnorm, &rng);
 
-    sp.pos_x += vsmc_normal01_rand(&rnorm, &rng) * sd_pos + delta * sp.vel_x;
-    sp.pos_y += vsmc_normal01_rand(&rnorm, &rng) * sd_pos + delta * sp.vel_y;
-    sp.vel_x += vsmc_normal01_rand(&rnorm, &rng) * sd_vel;
-    sp.vel_y += vsmc_normal01_rand(&rnorm, &rng) * sd_vel;
+    float4 r = normal01(&rng);
+    sp.pos_x += r.x * sd_pos + delta * sp.vel_x;
+    sp.pos_y += r.y * sd_pos + delta * sp.vel_y;
+    sp.vel_x += r.z * sd_vel;
+    sp.vel_y += r.w * sd_vel;
 
     state[i] = sp;
     accept[i] = 1;
@@ -118,7 +132,7 @@ __kernel void cv_move(ulong iter, __global cv *state, __global ulong *accept,
 }
 
 __kernel void cv_est(
-    ulong iter, ulong dim, __global cv *state, __global cv_pos *est)
+        ulong iter, ulong dim, __global cv *state, __global cv_pos *est)
 {
     ulong i = get_global_id(0);
     if (i >= SIZE)
