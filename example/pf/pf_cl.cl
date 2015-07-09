@@ -46,10 +46,10 @@ typedef struct {
 VSMC_STATIC_INLINE float4 normal01(vsmc_philox4x32 *rng)
 {
     vsmc_philox4x32_gen(&rng->ctr, &rng->key, &rng->state);
-    float u1 = sqrt(-2 * vsmc_u01_open_closed_u32_f32(rng->state.v[0]));
-    float u2 = sqrt(-2 * vsmc_u01_open_closed_u32_f32(rng->state.v[1]));
-    float v1 = 6.283185 *vsmc_u01_open_closed_u32_f32(rng->state.v[2]);
-    float v2 = 6.283185 *vsmc_u01_open_closed_u32_f32(rng->state.v[3]);
+    float u1 = sqrt(-2 * log(vsmc_u01_open_closed_u32_f32(rng->state.v[0])));
+    float u2 = sqrt(-2 * log(vsmc_u01_open_closed_u32_f32(rng->state.v[1])));
+    float v1 = 6.283185 * vsmc_u01_open_closed_u32_f32(rng->state.v[2]);
+    float v2 = 6.283185 * vsmc_u01_open_closed_u32_f32(rng->state.v[3]);
     float4 r;
     r.x = u1 * cos(v1);
     r.y = u1 * sin(v1);
@@ -59,8 +59,7 @@ VSMC_STATIC_INLINE float4 normal01(vsmc_philox4x32 *rng)
     return r;
 }
 
-VSMC_STATIC_INLINE float log_likelihood(
-        const cv *sp, float obs_x, float obs_y)
+VSMC_STATIC_INLINE float log_likelihood(const cv *sp, float obs_x, float obs_y)
 {
     const float scale = 10;
     const float nu = 10;
@@ -75,8 +74,7 @@ VSMC_STATIC_INLINE float log_likelihood(
 }
 
 __kernel void cv_init(__global cv *state, __global ulong *accept,
-        __global float *log_weight, __global float *obs_x,
-        __global float *obs_y)
+    __global float *log_weight, __global float *obs_x, __global float *obs_y)
 {
     ulong i = get_global_id(0);
     if (i >= SIZE)
@@ -102,8 +100,7 @@ __kernel void cv_init(__global cv *state, __global ulong *accept,
 }
 
 __kernel void cv_move(ulong iter, __global cv *state, __global ulong *accept,
-        __global float *inc_weight, __global float *obs_x,
-        __global float *obs_y)
+    __global float *inc_weight, __global float *obs_x, __global float *obs_y)
 {
     ulong i = get_global_id(0);
     if (i >= SIZE)
@@ -132,7 +129,7 @@ __kernel void cv_move(ulong iter, __global cv *state, __global ulong *accept,
 }
 
 __kernel void cv_est(
-        ulong iter, ulong dim, __global cv *state, __global cv_pos *est)
+    ulong iter, ulong dim, __global cv *state, __global cv_pos *est)
 {
     ulong i = get_global_id(0);
     if (i >= SIZE)
