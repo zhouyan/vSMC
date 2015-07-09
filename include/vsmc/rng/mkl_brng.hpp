@@ -35,13 +35,12 @@
 #include <vsmc/vsmc.h>
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/engine.hpp>
-#include <vsmc/utility/mkl.hpp>
 
 #define VSMC_DEFINE_RNG_MKL_BRNG(RNGType, name)                               \
     template <>                                                               \
-    inline MKL_INT mkl_brng<RNGType>()                                        \
+    inline int mkl_brng<RNGType>()                                            \
     {                                                                         \
-        return static_cast<MKL_INT>(::vsmc_mkl_brng_##name());                \
+        return ::vsmc_mkl_brng_##name();                                      \
     }
 
 namespace vsmc
@@ -50,7 +49,7 @@ namespace vsmc
 /// \brief Register a C++11 RNG engine for use as a MKL BRNG
 /// \ingroup MKL
 template <typename RNGType>
-MKL_INT mkl_brng();
+int mkl_brng();
 
 #include <vsmc/rng/internal/mkl_brng_defines.hpp>
 
