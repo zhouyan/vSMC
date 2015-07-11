@@ -294,19 +294,19 @@ class GammaDistribution
         while (true) {
             result_type u = runif(rng);
             result_type e = 0;
-            result_type x = 0;
+            result_type r = 0;
             result_type v = 0;
             do {
-                x = rnorm(rng);
-                v = 1 + param_.constant_.c * x;
+                r = rnorm(rng);
+                v = 1 + param_.constant_.c * r;
             } while (v <= 0);
             v = v * v * v;
 
-            e = 1 - static_cast<result_type>(0.0331) * (x * x) * (x * x);
+            e = 1 - static_cast<result_type>(0.0331) * (r * r) * (r * r);
             if (u < e)
                 return param_.constant_.d * v;
 
-            e = static_cast<result_type>(0.5) * x * x +
+            e = static_cast<result_type>(0.5) * r * r +
                 param_.constant_.d * (1 - v + std::log(v));
             if (std::log(u) < e)
                 return param_.constant_.d * v;
@@ -326,15 +326,17 @@ namespace internal
 {
 
 template <std::size_t K, typename RealType, typename RNGType>
-inline void gamma_distribution_impl_t(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha, RealType beta, GammaDistribution<RealType> &dist,
+inline std::size_t gamma_distribution_impl_t(RNGType &rng, std::size_t n,
+    RealType *r, RealType alpha, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
     const RealType d = constant.d;
     const RealType c = constant.c;
-    RealType s[K * 2];
+    RealType s[K * 3];
     RealType *const u = s;
     RealType *const e = s + n;
+    RealType *const x = s + n * 2;
+
     u01_co_distribution(rng, n * 2, s);
     log(n, e, e);
     mul(n, static_cast<RealType>(-1), e, e);
@@ -345,45 +347,53 @@ inline void gamma_distribution_impl_t(RNGType &rng, std::size_t n, RealType *r,
             u[i] = d + alpha * u[i];
         }
     }
-    log(n, r, r);
-    mul(n, c, r, r);
-    exp(n, r, r);
+    log(n, u, x);
+    mul(n, c, x, x);
+    exp(n, x, x);
+    abs(n, x, u);
+    mul(n, beta, x, x);
 
-    abs(n, r, u);
-    mul(n, beta, r, r);
+    std::size_t m = 0;
     for (std::size_t i = 0; i != n; ++i)
-        if (u[i] > e[i])
-            r[i] = dist(rng);
+        if (u[i] < e[i])
+            r[m++] = x[i];
+
+    return m;
 }
 
 template <std::size_t K, typename RealType, typename RNGType>
-inline void gamma_distribution_impl_w(RNGType &rng, std::size_t n, RealType *r,
-    RealType, RealType beta, GammaDistribution<RealType> &dist,
+inline std::size_t gamma_distribution_impl_w(RNGType &rng, std::size_t n,
+    RealType *r, RealType, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
     const RealType d = constant.d;
     const RealType c = constant.c;
-    RealType s[K * 2];
+    RealType s[K * 3];
     RealType *const u = s;
     RealType *const e = s + n;
+    RealType *const x = s + n * 2;
+
     u01_co_distribution(rng, n * 2, s);
     log(n * 2, s, s);
     mul(n * 2, static_cast<RealType>(-1), s, s);
-    log(n, s, r);
-    mul(n, c, r, r);
-    exp(n, r, r);
+    log(n, s, x);
+    mul(n, c, x, x);
+    exp(n, x, x);
     add(n, u, e, u);
-    add(n, d, r, e);
-    mul(n, beta, r, r);
+    add(n, d, x, e);
+    mul(n, beta, x, x);
 
+    std::size_t m = 0;
     for (std::size_t i = 0; i != n; ++i)
-        if (u[i] < e[i])
-            r[i] = dist(rng);
+        if (u[i] > e[i])
+            r[m++] = x[i];
+
+    return m;
 }
 
 template <std::size_t K, typename RealType, typename RNGType>
-inline void gamma_distribution_impl_n(RNGType &rng, std::size_t n, RealType *r,
-    RealType, RealType beta, GammaDistribution<RealType> &dist,
+inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
+    RealType *r, RealType, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
     const RealType d = constant.d;
@@ -391,57 +401,70 @@ inline void gamma_distribution_impl_n(RNGType &rng, std::size_t n, RealType *r,
     RealType s[K * 4];
     RealType *const u = s;
     RealType *const e = s + n;
-    RealType *const x = s + n * 2;
-    RealType *const v = s + n * 3;
+    RealType *const v = s + n * 2;
+    RealType *const x = s + n * 3;
+
     u01_co_distribution(rng, n, u);
     normal_distribution(
-        rng, n, x, static_cast<RealType>(0), static_cast<RealType>(1));
-    fma(n, static_cast<RealType>(1), c, x, v);
-    mul(n, v, v, e);
+        rng, n, r, static_cast<RealType>(0), static_cast<RealType>(1));
+    fma(n, static_cast<RealType>(1), c, r, v);
+    sqr(n, v, e);
     mul(n, v, e, v);
-    mul(n, d * beta, v, r);
+    sqr(n, r, e);
+    sqr(n, e, e);
+    fma(n, static_cast<RealType>(1), -static_cast<RealType>(0.0331), e, e);
+    mul(n, d * beta, v, x);
 
-    mul(n, x, x, e);
-    mul(n, x, x, x);
-    fma(n, static_cast<RealType>(1), -static_cast<RealType>(0.0331), x, e);
-    for (std::size_t i = 0; i != n; ++i)
-        if (v[i] <= 0 || u[i] > e[i])
-            r[i] = dist(rng);
+    std::size_t m = 0;
+    for (std::size_t i = 0; i != n; ++i) {
+        if (v[i] > 0) {
+            if (u[i] < e[i]) {
+                r[m++] = x[i];
+            } else {
+                RealType w = static_cast<RealType>(0.5) * r[i] * r[i] +
+                    d * (1 - v[i] * std::log(v[i]));
+                if (std::log(u[i]) < w)
+                    r[m++] = x[i];
+            }
+        }
+    }
+
+    return m;
 }
 
 template <std::size_t, typename RealType, typename RNGType>
-inline void gamma_distribution_impl_e(RNGType &rng, std::size_t n, RealType *r,
-    RealType, RealType beta, GammaDistribution<RealType> &,
+inline std::size_t gamma_distribution_impl_e(RNGType &rng, std::size_t n,
+    RealType *r, RealType, RealType beta,
     const GammaDistributionConstant<RealType> &)
 {
     u01_co_distribution(rng, n, r);
     log(n, r, r);
     mul(n, -beta, r, r);
+
+    return n;
 }
 
 template <std::size_t K, typename RealType, typename RNGType>
-inline void gamma_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha, RealType beta, GammaDistribution<RealType> &dist,
+inline std::size_t gamma_distribution_impl(RNGType &rng, std::size_t n,
+    RealType *r, RealType alpha, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
     switch (gamma_distribution_algorithm(alpha)) {
         case GammaDistributionAlgorithmT:
-            gamma_distribution_impl_t<K>(
-                rng, n, r, alpha, beta, dist, constant);
-            break;
+            return gamma_distribution_impl_t<K>(
+                rng, n, r, alpha, beta, constant);
         case GammaDistributionAlgorithmW:
-            gamma_distribution_impl_w<K>(
-                rng, n, r, alpha, beta, dist, constant);
-            break;
+            return gamma_distribution_impl_w<K>(
+                rng, n, r, alpha, beta, constant);
         case GammaDistributionAlgorithmN:
-            gamma_distribution_impl_n<K>(
-                rng, n, r, alpha, beta, dist, constant);
-            break;
+            return gamma_distribution_impl_n<K>(
+                rng, n, r, alpha, beta, constant);
         case GammaDistributionAlgorithmE:
-            gamma_distribution_impl_e<K>(
-                rng, n, r, alpha, beta, dist, constant);
-            break;
+            return gamma_distribution_impl_e<K>(
+                rng, n, r, alpha, beta, constant);
     }
+
+    return 0;
 }
 
 } // namespace vsmc::internal
@@ -453,16 +476,22 @@ inline void gamma_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType alpha, RealType beta)
 {
     const std::size_t k = 1000;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    GammaDistribution<RealType> dist(alpha, beta);
     const internal::GammaDistributionConstant<RealType> constant(alpha);
-    for (std::size_t i = 0; i != m; ++i) {
-        internal::gamma_distribution_impl<k>(
-            rng, k, r + i * k, alpha, beta, dist, constant);
+    while (n > k) {
+        std::size_t m = internal::gamma_distribution_impl<k>(
+            rng, k, r, alpha, beta, constant);
+        n -= m;
+        r += m;
     }
-    internal::gamma_distribution_impl<k>(
-        rng, l, r + m * k, alpha, beta, dist, constant);
+    std::size_t m =
+        internal::gamma_distribution_impl<k>(rng, n, r, alpha, beta, constant);
+    n -= m;
+    r += m;
+    if (n > 0) {
+        GammaDistribution<RealType> dist(alpha, beta);
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = dist(rng);
+    }
 }
 
 } // namespace vsmc

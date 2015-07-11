@@ -504,7 +504,6 @@ inline void beta_distribution_impl_c(RNGType &rng, std::size_t n, RealType *r,
     mul(n, alpha, y, y);
     add(n, beta, y, z);
     div(n, y, z, r);
-
     sqr(n, u1, u1);
     mul(n, u1, u2, u2);
     log(n, u2, u2);
@@ -512,6 +511,7 @@ inline void beta_distribution_impl_c(RNGType &rng, std::size_t n, RealType *r,
     fma(n, p, -a, u1, u1);
     fma(n, -ln_4, t, v, v);
     add(n, v, u1, u1);
+
     for (std::size_t i = 0; i != n; ++i)
         if (u1[i] < u2[i])
             r[i] = dist(rng);
