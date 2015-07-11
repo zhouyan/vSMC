@@ -35,18 +35,18 @@
 #include <vsmc/rng/rng.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
+#define VSMC_RNG_TEST(RNGType) rng_test<RNGType>(N, #RNGType, names, size, sw);
+
 #define VSMC_RNG_TEST_PRE(prog)                                               \
     std::size_t N = 1000000;                                                  \
-    std::string prog_name(#prog);                                             \
     if (argc > 1)                                                             \
         N = static_cast<std::size_t>(std::atoi(argv[1]));                     \
+    std::string prog_name(#prog);                                             \
     vsmc::Vector<std::string> names;                                          \
     vsmc::Vector<std::size_t> size;                                           \
     vsmc::Vector<vsmc::StopWatch> sw;
 
-#define VSMC_RNG_TEST(RNGType) rng_test<RNGType>(N, #RNGType, names, size, sw);
-
-#define VSMC_RNG_TEST_POST rng_output_sw(prog_name, names, size, sw);
+#define VSMC_RNG_TEST_POST rng_test_output(prog_name, names, size, sw);
 
 template <typename RNGType>
 inline void rng_test(std::size_t n, const std::string &name,
@@ -93,7 +93,7 @@ inline void rng_test(std::size_t n, const std::string &name,
     rnd.close();
 }
 
-inline void rng_output_sw(const std::string &prog_name,
+inline void rng_test_output(const std::string &prog_name,
     const vsmc::Vector<std::string> &names,
     const vsmc::Vector<std::size_t> &size,
     const vsmc::Vector<vsmc::StopWatch> &sw)

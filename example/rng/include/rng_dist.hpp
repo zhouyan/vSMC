@@ -82,11 +82,12 @@ inline void rng_dist(std::size_t n, const std::array<double, K> &param,
     names.push_back(rng_dist_name(name, param));
 
     double result = 0;
-    vsmc::Vector<double> r(n);
     vsmc::StopWatch watch;
+    vsmc::Vector<double> r(n);
     vsmc::RNG rng;
-
     STDDistType dist_std(rng_dist_init<STDDistType>(param));
+    vSMCDistType dist_vsmc(rng_dist_init<vSMCDistType>(param));
+
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != n; ++i)
@@ -95,7 +96,6 @@ inline void rng_dist(std::size_t n, const std::array<double, K> &param,
     result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);
 
-    vSMCDistType dist_vsmc(rng_dist_init<vSMCDistType>(param));
     watch.reset();
     watch.start();
     for (std::size_t i = 0; i != n; ++i)
@@ -128,7 +128,7 @@ inline void rng_dist(std::size_t n, const std::array<double, K> &param,
     rnd.close();
 }
 
-inline void rng_dist_output_sw(const vsmc::Vector<std::string> &names,
+inline void rng_dist_output(const vsmc::Vector<std::string> &names,
     const vsmc::Vector<vsmc::StopWatch> &sw)
 {
     std::size_t N = names.size();

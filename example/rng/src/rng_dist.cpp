@@ -36,10 +36,10 @@ int main(int argc, char **argv)
     std::size_t N = 10000;
     if (argc > 1)
         N = static_cast<std::size_t>(std::atoi(argv[1]));
-    vsmc::Vector<std::string> names;
-    vsmc::Vector<vsmc::StopWatch> sw;
     std::array<double, 1> param1;
     std::array<double, 2> param2;
+    vsmc::Vector<std::string> names;
+    vsmc::Vector<vsmc::StopWatch> sw;
 
     VSMC_RNG_DIST_2(UniformReal, std::uniform_real_distribution, 0, 1);
     VSMC_RNG_DIST_2(Normal, std::normal_distribution, 0, 1);
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
     VSMC_RNG_DIST_1(Stable, vsmc::StableDistribution, 0.1);
     VSMC_RNG_DIST_1(Stable, vsmc::StableDistribution, 2);
 
-    rng_dist_output_sw(names, sw);
+    rng_dist_output(names, sw);
 
     return 0;
 }

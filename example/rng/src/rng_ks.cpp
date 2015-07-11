@@ -36,14 +36,15 @@ int main(int argc, char **argv)
     std::size_t N = 10000;
     if (argc > 1)
         N = static_cast<std::size_t>(std::atoi(argv[1]));
-    std::cout << std::string(80, '=') << std::endl;
-    std::cout << std::setw(20) << std::left << "Distribution";
-    std::cout << std::setw(15) << std::right << "A^2 (Single)";
-    std::cout << std::setw(15) << std::right << "Test (Single)";
-    std::cout << std::setw(15) << std::right << "A^2 (Batch)";
-    std::cout << std::setw(15) << std::right << "Test (Batch)";
-    std::cout << std::endl;
-    std::cout << std::string(80, '-') << std::endl;
-    VSMC_RNG_KS_2(Normal, 0, 1);
-    std::cout << std::string(80, '=') << std::endl;
+    std::array<double, 1> param1;
+    std::array<double, 2> param2;
+    vsmc::Vector<std::string> names;
+    vsmc::Vector<double> stat;
+    vsmc::Vector<double> pval;
+
+    VSMC_RNG_KS_2(Normal, std::normal_distribution, 0, 1);
+
+    rng_ks_output(names, stat, pval);
+
+    return 0;
 }
