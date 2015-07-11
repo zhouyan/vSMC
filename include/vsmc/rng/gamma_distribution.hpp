@@ -306,8 +306,7 @@ class GammaDistribution
             if (u < e)
                 return param_.constant_.d * v;
 
-            e = static_cast<result_type>(0.5) * r * r +
-                param_.constant_.d * (1 - v + std::log(v));
+            e = r * r / 2 + param_.constant_.d * (1 - v + std::log(v));
             if (std::log(u) < e)
                 return param_.constant_.d * v;
         }
@@ -421,8 +420,7 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
             if (u[i] < e[i]) {
                 r[m++] = x[i];
             } else {
-                RealType w = static_cast<RealType>(0.5) * r[i] * r[i] +
-                    d * (1 - v[i] * std::log(v[i]));
+                RealType w = r[i] * r[i] / 2 + d * (1 - v[i] * std::log(v[i]));
                 if (std::log(u[i]) < w)
                     r[m++] = x[i];
             }

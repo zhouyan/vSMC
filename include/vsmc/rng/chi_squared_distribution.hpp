@@ -59,7 +59,7 @@ class ChiSquaredDistribution
         using distribution_type = ChiSquaredDistribution<RealType>;
 
         explicit param_type(result_type n = 1)
-            : gamma_(0.5 * n, static_cast<result_type>(0.5))
+            : gamma_(n / 2, static_cast<result_type>(0.5))
         {
         }
 
@@ -152,7 +152,7 @@ template <typename RealType, typename RNGType>
 inline void chi_squared_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType df)
 {
-    gamma_distribution(rng, n, r, 0.5 * df, static_cast<RealType>(0.5));
+    gamma_distribution(rng, n, r, df / 2, static_cast<RealType>(0.5));
 }
 
 } // namespace vsmc
