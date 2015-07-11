@@ -75,21 +75,21 @@ inline DistType rng_dist_init(const std::array<double, 2> &param)
 }
 
 template <typename STDDistType, typename vSMCDistType, std::size_t K>
-inline void rng_dist(std::size_t N, const std::array<double, K> &param,
+inline void rng_dist(std::size_t n, const std::array<double, K> &param,
     const std::string &name, vsmc::Vector<std::string> &names,
     vsmc::Vector<vsmc::StopWatch> &sw)
 {
     names.push_back(rng_dist_name(name, param));
 
     double result = 0;
-    vsmc::Vector<double> r(N);
+    vsmc::Vector<double> r(n);
     vsmc::StopWatch watch;
     vsmc::RNG rng;
 
     STDDistType dist_std(rng_dist_init<STDDistType>(param));
     watch.reset();
     watch.start();
-    for (std::size_t i = 0; i != N; ++i)
+    for (std::size_t i = 0; i != n; ++i)
         r[i] = dist_std(rng);
     watch.stop();
     result += std::accumulate(r.begin(), r.end(), 0.0);
@@ -98,7 +98,7 @@ inline void rng_dist(std::size_t N, const std::array<double, K> &param,
     vSMCDistType dist_vsmc(rng_dist_init<vSMCDistType>(param));
     watch.reset();
     watch.start();
-    for (std::size_t i = 0; i != N; ++i)
+    for (std::size_t i = 0; i != n; ++i)
         r[i] = dist_vsmc(rng);
     watch.stop();
     result += std::accumulate(r.begin(), r.end(), 0.0);
@@ -107,7 +107,7 @@ inline void rng_dist(std::size_t N, const std::array<double, K> &param,
     dist_vsmc(rng, 1000, r.data());
     watch.reset();
     watch.start();
-    dist_vsmc(rng, N, r.data());
+    dist_vsmc(rng, n, r.data());
     watch.stop();
     result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);
@@ -117,7 +117,7 @@ inline void rng_dist(std::size_t N, const std::array<double, K> &param,
     dist_vsmc(rng_mkl, 1000, r.data());
     watch.reset();
     watch.start();
-    dist_vsmc(rng_mkl, N, r.data());
+    dist_vsmc(rng_mkl, n, r.data());
     watch.stop();
     result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);

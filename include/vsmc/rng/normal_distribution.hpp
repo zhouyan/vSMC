@@ -50,11 +50,11 @@ inline void normal_distribution(
 
 template <typename RealType>
 inline void normal_distribution_pdf(
-    std::size_t, RealType *, RealType, RealType);
+    std::size_t, const RealType *, RealType *, RealType, RealType);
 
 template <typename RealType>
 inline void normal_distribution_cdf(
-    std::size_t, RealType *, RealType, RealType);
+    std::size_t, const RealType *, RealType *, RealType, RealType);
 
 /// \brief Normal distribution
 /// \ingroup Distribution
@@ -218,11 +218,21 @@ class NormalDistribution
             std::exp(-(r * r) / 2);
     }
 
+    void pdf(std::size_t n, const result_type *x, result_type *r) const
+    {
+        normal_distribution_pdf(n, x, r, mean(), stddev());
+    }
+
     result_type cdf(result_type x) const
     {
         result_type r = (x - param_.mean_) / param_.stddev_;
 
         return (1 + std::erf(r / const_sqrt_2<result_type>())) / 2;
+    }
+
+    void cdf(std::size_t n, const result_type *x, result_type *r) const
+    {
+        normal_distribution_cdf(n, x, r, mean(), stddev());
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
@@ -253,6 +263,27 @@ inline void normal_distribution_impl(
     fma(nu, mean, s, u2, u2);
 }
 
+template <typename RealType>
+inline void normal_distribution_pdf_impl(std::size_t n, const RealType *x,
+    RealType *r, RealType mean, RealType stddev)
+{
+    sub(n, x, mean, r);
+    mul(n, 1 / stddev, r, r);
+    sqr(n, r, r);
+    mul(n, static_cast<RealType>(-0.5), r, r);
+    exp(n, r, r);
+    mul(n, 1 / (stddev * const_sqrt_pi_2<RealType>()), r, r);
+}
+
+template <typename RealType>
+inline void normal_distribution_cdf_impl(std::size_t n, const RealType *x,
+    RealType *r, RealType mean, RealType stddev)
+{
+    sub(n, x, mean, r);
+    mul(n, 1 / stddev, r, r);
+    cdfnorm(n, r, r);
+}
+
 } // namespace vsmc::internal
 
 /// \brief Generating normal random variates
@@ -264,14 +295,14 @@ inline void normal_distribution(
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::normal_distribution_impl<k>(rng, k, r + i * k, mean, stddev);
-    internal::normal_distribution_impl<k>(rng, l, r + m * k, mean, stddev);
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::normal_distribution_impl<k>(rng, k, r, mean, stddev);
+    internal::normal_distribution_impl<k>(rng, l, r, mean, stddev);
     if (n % 2 != 0) {
         U01OCDistribution<RealType> runif;
         RealType u = runif(rng);
         RealType v = runif(rng);
-        r[n - 1] = mean +
+        r[l - 1] = mean +
             stddev * std::sqrt(-2 * std::log(u)) *
                 std::cos(const_pi_2<RealType>() * v);
     }
@@ -283,12 +314,12 @@ template <typename RealType>
 inline void normal_distribution_pdf(std::size_t n, const RealType *x,
     RealType *r, RealType mean, RealType stddev)
 {
-    sub(n, x, mean, r);
-    mul(n, 1 / stddev, r, r);
-    sqr(n, r, r);
-    mul(n, static_cast<RealType>(-0.5), r, r);
-    exp(n, r, r);
-    mul(n, 1 / (stddev * const_sqrt_pi_2<RealType>()), r, r);
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, x += k, r += k)
+        internal::normal_distribution_pdf_impl(k, x, r, mean, stddev);
+    internal::normal_distribution_pdf_impl(l, x, r, mean, stddev);
 }
 
 /// \brief Compute normal distribuiton CDF
@@ -297,9 +328,12 @@ template <typename RealType>
 inline void normal_distribution_cdf(std::size_t n, const RealType *x,
     RealType *r, RealType mean, RealType stddev)
 {
-    sub(n, x, mean, r);
-    mul(n, 1 / stddev, r, r);
-    cdfnorm(n, r, r);
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, x += k, r += k)
+        internal::normal_distribution_cdf_impl(k, x, r, mean, stddev);
+    internal::normal_distribution_cdf_impl(l, x, r, mean, stddev);
 }
 
 } // namespace vsmc

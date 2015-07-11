@@ -49,7 +49,7 @@
 #define VSMC_RNG_TEST_POST rng_output_sw(prog_name, names, size, sw);
 
 template <typename RNGType>
-inline void rng_test(std::size_t N, const std::string &name,
+inline void rng_test(std::size_t n, const std::string &name,
     vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
     vsmc::Vector<vsmc::StopWatch> &sw)
 {
@@ -59,13 +59,13 @@ inline void rng_test(std::size_t N, const std::string &name,
     RNGType rng;
     vsmc::StopWatch watch;
     double result = 0;
-    vsmc::Vector<double> r(N);
-    vsmc::Vector<typename RNGType::result_type> u(N);
+    vsmc::Vector<double> r(n);
+    vsmc::Vector<typename RNGType::result_type> u(n);
 
     std::uniform_real_distribution<double> runif_std(0, 1);
     watch.reset();
     watch.start();
-    for (std::size_t i = 0; i != N; ++i)
+    for (std::size_t i = 0; i != n; ++i)
         r[i] = runif_std(rng);
     watch.stop();
     result += std::accumulate(r.begin(), r.end(), 0.0);
@@ -74,16 +74,16 @@ inline void rng_test(std::size_t N, const std::string &name,
     vsmc::UniformRealDistribution<double> runif_vsmc(0, 1);
     watch.reset();
     watch.start();
-    for (std::size_t i = 0; i != N; ++i)
+    for (std::size_t i = 0; i != n; ++i)
         r[i] = runif_vsmc(rng);
     watch.stop();
     result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);
 
-    runif_vsmc(rng, N / 1000, r.data());
+    runif_vsmc(rng, n / 1000, r.data());
     watch.reset();
     watch.start();
-    runif_vsmc(rng, N, r.data());
+    runif_vsmc(rng, n, r.data());
     watch.stop();
     result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);
