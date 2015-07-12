@@ -41,10 +41,6 @@ int main(int argc, char **argv)
     vsmc::Vector<std::string> names;
     vsmc::Vector<vsmc::StopWatch> sw;
     VSMC_RNG_DIST_ALL(DIST);
-    VSMC_RNG_DIST_1(Stable, vsmc::StableDistribution, 1);
-    VSMC_RNG_DIST_1(Stable, vsmc::StableDistribution, 0.1);
-    VSMC_RNG_DIST_1(Stable, vsmc::StableDistribution, 2);
-
     rng_dist_output(names, sw);
 
     return 0;

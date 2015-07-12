@@ -63,15 +63,6 @@
             rng, static_cast<std::size_t>(n), r, p1, p2);                     \
     }
 
-#define VSMC_DEFINE_RNG_DIST_4(name)                                          \
-    void vsmc_rng_##name(vsmc_rng *rng_ptr, int n, double *r, double p1,      \
-        double p2, double p3, double p4)                                      \
-    {                                                                         \
-        ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);               \
-        ::vsmc::name##_distribution<double>(                                  \
-            rng, static_cast<std::size_t>(n), r, p1, p2, p3, p4);             \
-    }
-
 extern "C" {
 
 int vsmc_rng_size() { return sizeof(::vsmc::RNG) + 4; }
@@ -212,7 +203,6 @@ VSMC_DEFINE_RNG_DIST_2(laplace)
 VSMC_DEFINE_RNG_DIST_2(lognormal)
 VSMC_DEFINE_RNG_DIST_2(normal)
 VSMC_DEFINE_RNG_DIST_1(rayleigh)
-VSMC_DEFINE_RNG_DIST_4(stable)
 VSMC_DEFINE_RNG_DIST_1(student_t)
 VSMC_DEFINE_RNG_DIST_0(u01)
 VSMC_DEFINE_RNG_DIST_0(u01_cc)

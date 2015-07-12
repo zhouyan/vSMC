@@ -144,10 +144,6 @@ void vsmc_rng_normal(
 /// \brief `vsmc::RayleighDistribution<double>`
 void vsmc_rng_rayleigh(vsmc_rng *rng_ptr, int n, double *r, double b);
 
-/// \brief `vsmc::StableDistribution<double>`
-void vsmc_rng_stable(vsmc_rng *rng_ptr, int n, double *r, double stability,
-    double skewness, double location, double scale);
-
 /// \brief `vsmc::StudentTDistribution<double>`
 void vsmc_rng_student_t(vsmc_rng *rng_ptr, int n, double *r, double df);
 
