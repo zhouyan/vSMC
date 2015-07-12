@@ -63,7 +63,7 @@ class StudentTDistribution
         {
         }
 
-        result_type n() const { return chi_squared_.n() * 2; }
+        result_type n() const { return chi_squared_.n(); }
 
         friend bool operator==(
             const param_type &param1, const param_type &param2)
