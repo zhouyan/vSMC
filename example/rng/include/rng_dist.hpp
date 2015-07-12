@@ -54,6 +54,7 @@
     VSMC_RNG_##TEST##_2(Cauchy, std::cauchy_distribution, 0, 1);              \
     VSMC_RNG_##TEST##_2(ExtremeValue, std::extreme_value_distribution, 0, 1); \
     VSMC_RNG_##TEST##_2(Laplace, boost::random::laplace_distribution, 0, 1);  \
+    VSMC_RNG_##TEST##_2(Levy, vsmc::LevyDistribution, 0, 1);                  \
     VSMC_RNG_##TEST##_2(Logistic, vsmc::LogisticDistribution, 0, 1);          \
     VSMC_RNG_##TEST##_2(Lognormal, std::lognormal_distribution, 0, 1);        \
     VSMC_RNG_##TEST##_2(Normal, std::normal_distribution, 0, 1);              \

@@ -42,6 +42,7 @@
 #include <vsmc/rng/fisher_f_distribution.hpp>
 #include <vsmc/rng/gamma_distribution.hpp>
 #include <vsmc/rng/laplace_distribution.hpp>
+#include <vsmc/rng/levy_distribution.hpp>
 #include <vsmc/rng/logistic_distribution.hpp>
 #include <vsmc/rng/lognormal_distribution.hpp>
 #include <vsmc/rng/normal_distribution.hpp>

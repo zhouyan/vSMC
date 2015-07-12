@@ -46,9 +46,9 @@
     rng_gof<STD<double>, vsmc::Name##Distribution<double>>(                   \
         N, M, param2, #Name, names, pval);
 
-template <typename BoostDistType>
-inline vsmc::Vector<double> rng_gof_partition(
-    std::size_t n, const BoostDistType &dist)
+template <typename QuantileType>
+inline vsmc::Vector<double> rng_gof_partition_quantile(
+    std::size_t n, const QuantileType &quantile)
 {
     std::size_t k = n / 100;
     double h = 1.0 / k;
@@ -57,114 +57,135 @@ inline vsmc::Vector<double> rng_gof_partition(
         double p = h * (i + 1);
         p = std::max(p, 0.0);
         p = std::min(p, 1.0);
-        partition.push_back(boost::math::quantile(dist, p));
+        partition.push_back(quantile(p));
     }
 
     return partition;
 }
 
+template <typename BoostDistType>
+inline vsmc::Vector<double> rng_gof_partition_boost(
+    std::size_t n, const BoostDistType &dist)
+{
+    auto quantile = [&](double p) { return boost::math::quantile(dist, p); };
+
+    return rng_gof_partition_quantile(n, quantile);
+}
+
 inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::UniformRealDistribution<double> &dist)
 {
-    return rng_gof_partition(
+    return rng_gof_partition_boost(
         n, boost::math::uniform_distribution<double>(dist.a(), dist.b()));
 }
 
 inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::NormalDistribution<double> &dist)
 {
-    return rng_gof_partition(n,
+    return rng_gof_partition_boost(n,
         boost::math::normal_distribution<double>(dist.mean(), dist.stddev()));
 }
 
 inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::ExponentialDistribution<double> &dist)
 {
-    return rng_gof_partition(
+    return rng_gof_partition_boost(
         n, boost::math::exponential_distribution<double>(dist.lambda()));
 }
 
 inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::LaplaceDistribution<double> &dist)
 {
-    return rng_gof_partition(
+    return rng_gof_partition_boost(
         n, boost::math::laplace_distribution<double>(dist.a(), dist.b()));
+}
+
+inline vsmc::Vector<double> rng_gof_partition(
+    std::size_t n, const vsmc::LevyDistribution<double> &dist)
+{
+    boost::math::normal_distribution<double> normal(0, 1);
+    auto quantile = [&](double p) {
+        double q = boost::math::quantile(normal, 1 - 0.5 * p);
+
+        return dist.a() + dist.b() / (q * q);
+    };
+    return rng_gof_partition_quantile(n, quantile);
+}
+
+inline vsmc::Vector<double> rng_gof_partition(
+    std::size_t n, const vsmc::LogisticDistribution<double> &dist)
+{
+    return rng_gof_partition_boost(
+        n, boost::math::logistic_distribution<double>(dist.a(), dist.b()));
 }
 
 inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::WeibullDistribution<double> &dist)
 {
-    return rng_gof_partition(
+    return rng_gof_partition_boost(
         n, boost::math::weibull_distribution<double>(dist.a(), dist.b()));
 }
 
 inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::CauchyDistribution<double> &dist)
 {
-    return rng_gof_partition(
+    return rng_gof_partition_boost(
         n, boost::math::cauchy_distribution<double>(dist.a(), dist.b()));
 }
 
 inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::RayleighDistribution<double> &dist)
 {
-    return rng_gof_partition(
+    return rng_gof_partition_boost(
         n, boost::math::rayleigh_distribution<double>(dist.sigma()));
 }
 
 inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::LognormalDistribution<double> &dist)
 {
-    return rng_gof_partition(
+    return rng_gof_partition_boost(
         n, boost::math::lognormal_distribution<double>(dist.m(), dist.s()));
 }
 
 inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::ExtremeValueDistribution<double> &dist)
 {
-    return rng_gof_partition(n,
+    return rng_gof_partition_boost(n,
         boost::math::extreme_value_distribution<double>(dist.a(), dist.b()));
 }
 
 inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::GammaDistribution<double> &dist)
 {
-    return rng_gof_partition(
+    return rng_gof_partition_boost(
         n, boost::math::gamma_distribution<double>(dist.alpha(), dist.beta()));
 }
 
 inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::BetaDistribution<double> &dist)
 {
-    return rng_gof_partition(
+    return rng_gof_partition_boost(
         n, boost::math::beta_distribution<double>(dist.alpha(), dist.beta()));
-}
-
-inline vsmc::Vector<double> rng_gof_partition(
-    std::size_t n, const vsmc::LogisticDistribution<double> &dist)
-{
-    return rng_gof_partition(
-        n, boost::math::logistic_distribution<double>(dist.a(), dist.b()));
 }
 
 inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::ChiSquaredDistribution<double> &dist)
 {
-    return rng_gof_partition(
+    return rng_gof_partition_boost(
         n, boost::math::chi_squared_distribution<double>(dist.n()));
 }
 
 inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::StudentTDistribution<double> &dist)
 {
-    return rng_gof_partition(
+    return rng_gof_partition_boost(
         n, boost::math::students_t_distribution<double>(dist.n()));
 }
 
 inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::FisherFDistribution<double> &dist)
 {
-    return rng_gof_partition(
+    return rng_gof_partition_boost(
         n, boost::math::fisher_f_distribution<double>(dist.m(), dist.n()));
 }
 
