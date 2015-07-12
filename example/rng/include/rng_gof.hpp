@@ -141,6 +141,13 @@ inline vsmc::Vector<double> rng_gof_partition(
 }
 
 inline vsmc::Vector<double> rng_gof_partition(
+    std::size_t n, const vsmc::LogisticDistribution<double> &dist)
+{
+    return rng_gof_partition(
+        n, boost::math::logistic_distribution<double>(dist.a(), dist.b()));
+}
+
+inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::ChiSquaredDistribution<double> &dist)
 {
     return rng_gof_partition(

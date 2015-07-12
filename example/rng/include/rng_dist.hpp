@@ -49,17 +49,16 @@
         N, param2, #Name, names, sw);
 
 #define VSMC_RNG_DIST_ALL(TEST)                                               \
-    VSMC_RNG_##TEST##_2(UniformReal, std::uniform_real_distribution, 0, 1);   \
-    VSMC_RNG_##TEST##_2(Normal, std::normal_distribution, 0, 1);              \
     VSMC_RNG_##TEST##_1(Exponential, std::exponential_distribution, 1);       \
-    VSMC_RNG_##TEST##_2(Laplace, boost::random::laplace_distribution, 0, 1);  \
-    VSMC_RNG_##TEST##_2(Weibull, std::weibull_distribution, 1, 1);            \
-    VSMC_RNG_##TEST##_2(Weibull, std::weibull_distribution, 0.1, 1);          \
-    VSMC_RNG_##TEST##_2(Weibull, std::weibull_distribution, 10, 1);           \
-    VSMC_RNG_##TEST##_2(Cauchy, std::cauchy_distribution, 0, 1);              \
     VSMC_RNG_##TEST##_1(Rayleigh, vsmc::RayleighDistribution, 1);             \
-    VSMC_RNG_##TEST##_2(Lognormal, std::lognormal_distribution, 0, 1);        \
+    VSMC_RNG_##TEST##_2(Cauchy, std::cauchy_distribution, 0, 1);              \
     VSMC_RNG_##TEST##_2(ExtremeValue, std::extreme_value_distribution, 0, 1); \
+    VSMC_RNG_##TEST##_2(Laplace, boost::random::laplace_distribution, 0, 1);  \
+    VSMC_RNG_##TEST##_2(Logistic, vsmc::LogisticDistribution, 0, 1);          \
+    VSMC_RNG_##TEST##_2(Lognormal, std::lognormal_distribution, 0, 1);        \
+    VSMC_RNG_##TEST##_2(Normal, std::normal_distribution, 0, 1);              \
+    VSMC_RNG_##TEST##_2(UniformReal, std::uniform_real_distribution, 0, 1);   \
+    VSMC_RNG_##TEST##_2(Weibull, std::weibull_distribution, 1, 1);            \
     VSMC_RNG_##TEST##_2(Gamma, std::gamma_distribution, 1, 1);                \
     VSMC_RNG_##TEST##_2(Gamma, std::gamma_distribution, 0.1, 1);              \
     VSMC_RNG_##TEST##_2(Gamma, std::gamma_distribution, 0.5, 1);              \
