@@ -170,13 +170,6 @@ ELSE (VSMC_MPI_FOUND)
     SET(VSMC_MPI_FOUND FALSE CACHE BOOL "NOT Found MPI")
 ENDIF (VSMC_MPI_FOUND)
 
-# Boost
-INCLUDE(FindBoost)
-IF (Boost_FOUND)
-    SET(FEATURES ${FEATURES} "Boost")
-    INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIRS})
-ENDIF (Boost_FOUND)
-
 # SMP executables
 FOREACH (smp ${SMP_EXECUTABLES})
     ADD_CUSTOM_TARGET(example_${smp})
@@ -187,6 +180,13 @@ ENDFOREACH (smp)
 ##############################################################################
 
 SET(FEATURES)
+
+# Boost
+INCLUDE(FindBoost)
+IF (Boost_FOUND)
+    SET(FEATURES ${FEATURES} "Boost")
+    INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIRS})
+ENDIF (Boost_FOUND)
 
 # 128-bits integer type
 INCLUDE(FindInt128)
