@@ -50,6 +50,12 @@ inline void normal_distribution(
 
 /// \brief Normal distribution
 /// \ingroup Distribution
+///
+/// \details
+/// - \f$f(x) = \frac{1}{\sigma\sqrt{2\pi}}\exp\Bigl\{-\frac{(x -
+/// \mu)^2}{2\sigma^2}\Bigr\}\f$
+/// - \f$\mu\f$: `mean`
+/// - \f$\sigma\f$: `stddev`
 template <typename RealType>
 class NormalDistribution
 {
