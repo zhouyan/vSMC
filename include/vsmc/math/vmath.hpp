@@ -428,54 +428,6 @@ inline void cdfnorm(std::size_t n, const T *a, T *y)
     fma(l, static_cast<T>(0.5), static_cast<T>(0.5), y, y);
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{Erf}^{-1}(a_i)\f$
-template <typename T>
-inline void erfinv(std::size_t n, const T *a, T *y)
-{
-    const std::size_t k = 1000;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        erf(k, a, y);
-        inv(k, y, y);
-    }
-    erf(l, a, y);
-    inv(l, y, y);
-}
-
-/// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = \mathrm{Erf}^{-1}(1 - a_i)\f$
-template <typename T>
-inline void erfcinv(std::size_t n, const T *a, T *y)
-{
-    const std::size_t k = 1000;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        sub(k, static_cast<T>(1), a, y);
-        erfinv(k, y, y);
-    }
-    sub(l, static_cast<T>(1), a, y);
-    erfinv(l, y, y);
-}
-
-/// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = \sqrt{2}\mathrm{Erf}^{-1}(2a_i - 1)\f$, inverse of the standard
-/// Nomral CDF
-template <typename T>
-inline void cdfnorminv(std::size_t n, const T *a, T *y)
-{
-    const std::size_t k = 1000;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        cdfnorm(k, a, y);
-        inv(k, y, y);
-    }
-    cdfnorm(l, a, y);
-    inv(l, y, y);
-}
-
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \ln\Gamma(a_i)\f$,
 /// logarithm of the Gamma function
 VSMC_DEFINE_MATH_VMATH_1(std::lgamma, lgamma)
