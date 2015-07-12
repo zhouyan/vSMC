@@ -53,10 +53,10 @@ inline vsmc::Vector<double> rng_gof_partition(
     std::size_t k = n / 100;
     double h = 1.0 / k;
     vsmc::Vector<double> partition;
-    for (std::size_t i = 0; i != k; ++i) {
+    for (std::size_t i = 0; i != k - 1; ++i) {
         double p = h * (i + 1);
         p = std::max(p, 0.0);
-        p = std::min(p, 1.0 - 1e-16);
+        p = std::min(p, 1.0);
         partition.push_back(boost::math::quantile(dist, p));
     }
 
@@ -164,7 +164,7 @@ inline vsmc::Vector<double> rng_gof_partition(
 inline double rng_gof_chi2(
     const vsmc::Vector<double> &r, const vsmc::Vector<double> &partition)
 {
-    vsmc::Vector<std::size_t> count(partition.size());
+    vsmc::Vector<std::size_t> count(partition.size() + 1);
     vsmc::Vector<double> rval(r);
     std::sort(rval.begin(), rval.end());
     std::size_t j = 0;
@@ -176,6 +176,7 @@ inline double rng_gof_chi2(
         }
         count[i] = n;
     }
+    count.back() = rval.size() - j;
     double e = 1.0 / partition.size() * rval.size();
     double p = 0;
     for (std::size_t i = 0; i != partition.size(); ++i)

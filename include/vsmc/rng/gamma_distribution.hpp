@@ -294,19 +294,19 @@ class GammaDistribution
         while (true) {
             result_type u = runif(rng);
             result_type e = 0;
-            result_type r = 0;
             result_type v = 0;
+            result_type w = 0;
             do {
-                r = rnorm(rng);
-                v = 1 + param_.constant_.c * r;
+                w = rnorm(rng);
+                v = 1 + param_.constant_.c * w;
             } while (v <= 0);
             v = v * v * v;
 
-            e = 1 - static_cast<result_type>(0.0331) * (r * r) * (r * r);
+            e = 1 - static_cast<result_type>(0.0331) * (w * w) * (w * w);
             if (u < e)
                 return param_.constant_.d * v;
 
-            e = r * r / 2 + param_.constant_.d * (1 - v + std::log(v));
+            e = w * w / 2 + param_.constant_.d * (1 - v + std::log(v));
             if (std::log(u) < e)
                 return param_.constant_.d * v;
         }
@@ -397,33 +397,41 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
 {
     const RealType d = constant.d;
     const RealType c = constant.c;
-    RealType s[K * 4];
+    RealType s[K * 5];
     RealType *const u = s;
     RealType *const e = s + n;
     RealType *const v = s + n * 2;
-    RealType *const x = s + n * 3;
+    RealType *const w = s + n * 3;
+    RealType *const x = s + n * 4;
 
     u01_co_distribution(rng, n, u);
     normal_distribution(
-        rng, n, r, static_cast<RealType>(0), static_cast<RealType>(1));
-    fma(n, static_cast<RealType>(1), c, r, v);
+        rng, n, w, static_cast<RealType>(0), static_cast<RealType>(1));
+    fma(n, static_cast<RealType>(1), c, w, v);
+    NormalDistribution<RealType> rnorm(0, 1);
+    for (std::size_t i = 0; i != n; ++i) {
+        if (v[i] <= 0) {
+            do {
+                w[i] = rnorm(rng);
+                v[i] = 1 + c * w[i];
+            } while (v[i] <= 0);
+        }
+    }
     sqr(n, v, e);
     mul(n, v, e, v);
-    sqr(n, r, e);
+    sqr(n, w, e);
     sqr(n, e, e);
     fma(n, static_cast<RealType>(1), -static_cast<RealType>(0.0331), e, e);
     mul(n, d * beta, v, x);
 
     std::size_t m = 0;
     for (std::size_t i = 0; i != n; ++i) {
-        if (v[i] > 0) {
-            if (u[i] < e[i]) {
+        if (u[i] < e[i]) {
+            r[m++] = x[i];
+        } else {
+            e[i] = w[i] * w[i] / 2 + d * (1 - v[i] + std::log(v[i]));
+            if (std::log(u[i]) < e[i])
                 r[m++] = x[i];
-            } else {
-                RealType w = r[i] * r[i] / 2 + d * (1 - v[i] * std::log(v[i]));
-                if (std::log(u[i]) < w)
-                    r[m++] = x[i];
-            }
         }
     }
 
