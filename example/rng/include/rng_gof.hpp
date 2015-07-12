@@ -113,6 +113,14 @@ inline vsmc::Vector<double> rng_gof_partition(
 }
 
 inline vsmc::Vector<double> rng_gof_partition(
+    std::size_t n, const vsmc::ParetoDistribution<double> &dist)
+{
+    auto quantile = [&](
+        double p) { return dist.b() / std::exp(std::log(1 - p) / dist.a()); };
+    return rng_gof_partition_quantile(n, quantile);
+}
+
+inline vsmc::Vector<double> rng_gof_partition(
     std::size_t n, const vsmc::LogisticDistribution<double> &dist)
 {
     return rng_gof_partition_boost(

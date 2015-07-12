@@ -46,6 +46,7 @@
 #include <vsmc/rng/logistic_distribution.hpp>
 #include <vsmc/rng/lognormal_distribution.hpp>
 #include <vsmc/rng/normal_distribution.hpp>
+#include <vsmc/rng/pareto_distribution.hpp>
 #include <vsmc/rng/rayleigh_distribution.hpp>
 #include <vsmc/rng/student_t_distribution.hpp>
 #include <vsmc/rng/u01_distribution.hpp>

@@ -58,6 +58,7 @@
     VSMC_RNG_##TEST##_2(Logistic, vsmc::LogisticDistribution, 0, 1);          \
     VSMC_RNG_##TEST##_2(Lognormal, std::lognormal_distribution, 0, 1);        \
     VSMC_RNG_##TEST##_2(Normal, std::normal_distribution, 0, 1);              \
+    VSMC_RNG_##TEST##_2(Pareto, vsmc::ParetoDistribution, 1, 1);              \
     VSMC_RNG_##TEST##_2(UniformReal, std::uniform_real_distribution, 0, 1);   \
     VSMC_RNG_##TEST##_2(Weibull, std::weibull_distribution, 1, 1);            \
     VSMC_RNG_##TEST##_2(Gamma, std::gamma_distribution, 1, 1);                \

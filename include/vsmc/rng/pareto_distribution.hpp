@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/levy_distribution.hpp
+// vSMC/include/vsmc/rng/pareto_distribution.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,53 +29,61 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_LEVY_DISTRIBUTION_HPP
-#define VSMC_RNG_LEVY_DISTRIBUTION_HPP
+#ifndef VSMC_RNG_PARETO_DISTRIBUTION_HPP
+#define VSMC_RNG_PARETO_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/normal_distribution.hpp>
+#include <vsmc/rng/exponential_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_LEVY_DISTRIBUTION_PARAM_CHECK(b)              \
-    VSMC_RUNTIME_ASSERT((b > 0), "**LevyDistribution** CONSTRUCTED "          \
+#define VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_A_CHECK(a)          \
+    VSMC_RUNTIME_ASSERT((a > 0), "**ParetoDistribution** CONSTRUCTED "        \
+                                 "WITH INVALID SHAPE PARAMETER VALUE")
+
+#define VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_B_CHECK(b)          \
+    VSMC_RUNTIME_ASSERT((b > 0), "**ParetoDistribution** CONSTRUCTED "        \
                                  "WITH INVALID SCALE PARAMETER VALUE")
+
+#define VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_CHECK(a, b)         \
+    VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_A_CHECK(a);             \
+    VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_B_CHECK(b);
 
 namespace vsmc
 {
 
 template <typename RealType, typename RNGType>
-inline void levy_distribution(
+inline void pareto_distribution(
     RNGType &, std::size_t, RealType *, RealType, RealType);
 
-/// \brief Levy distribution
+/// \brief Pareto distribution
 /// \ingroup Distribution
 template <typename RealType>
-class LevyDistribution
+class ParetoDistribution
 {
     public:
     using result_type = RealType;
-    using distribution_type = LevyDistribution<RealType>;
+    using distribution_type = ParetoDistribution<RealType>;
 
     class param_type
     {
         public:
         using result_type = RealType;
-        using distribution_type = LevyDistribution<RealType>;
+        using distribution_type = ParetoDistribution<RealType>;
 
-        explicit param_type(result_type a = 0, result_type b = 1)
-            : a_(a), b_(b), normal_(0, 1)
+        explicit param_type(result_type a = 1, result_type b = 1)
+            : b_(b), exponential_(a)
         {
             invariant();
         }
 
-        result_type a() const { return a_; }
+        result_type a() const { return exponential_.lambda(); }
         result_type b() const { return b_; }
 
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
-            if (!internal::is_equal(param1.a_, param2.a_))
-                return false;
             if (!internal::is_equal(param1.b_, param2.b_))
+                return false;
+            if (param1.exponential_ != param2.exponential_)
                 return false;
             return true;
         }
@@ -93,8 +101,8 @@ class LevyDistribution
             if (!os.good())
                 return os;
 
-            os << param.a_ << ' ';
-            os << param.b_;
+            os << param.b_ << ' ';
+            os << param.exponential_;
 
             return os;
         }
@@ -106,42 +114,43 @@ class LevyDistribution
             if (!is.good())
                 return is;
 
-            result_type a = 0;
             result_type b = 0;
-            is >> std::ws >> a;
+            ExponentialDistribution<RealType> exponential;
             is >> std::ws >> b;
+            is >> std::ws >> exponential;
 
             if (is.good()) {
-                if (b > 0)
-                    param = param_type(a, b);
-                else
+                if (b > 0) {
+                    param.b_ = b;
+                    param.exponential_ = exponential;
+                } else {
                     is.setstate(std::ios_base::failbit);
+                }
             }
 
             return is;
         }
 
         private:
-        result_type a_;
         result_type b_;
-        NormalDistribution<RealType> normal_;
+        ExponentialDistribution<RealType> exponential_;
 
         friend distribution_type;
 
         void invariant()
         {
-            VSMC_RUNTIME_ASSERT_RNG_LEVY_DISTRIBUTION_PARAM_CHECK(b_);
+            VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_CHECK(a_, b_);
         }
 
         void reset() {}
     }; // class param_type
 
-    explicit LevyDistribution(result_type a = 0, result_type b = 1)
+    explicit ParetoDistribution(result_type a = 0, result_type b = 1)
         : param_(a, b)
     {
     }
 
-    explicit LevyDistribution(const param_type &param) : param_(param) {}
+    explicit ParetoDistribution(const param_type &param) : param_(param) {}
 
     result_type a() const { return param_.a(); }
     result_type b() const { return param_.b(); }
@@ -156,53 +165,49 @@ class LevyDistribution
     template <typename RNGType>
     result_type operator()(RNGType &rng)
     {
-        result_type r = param_.normal_(rng);
-
-        return param_.a_ + param_.b_ / (r * r);
+        return param_.b_ * std::exp(param_.exponential_(rng));
     }
 
     template <typename RNGType>
     void operator()(RNGType &rng, std::size_t n, result_type *r)
     {
-        levy_distribution(rng, n, r, a(), b());
+        pareto_distribution(rng, n, r, a(), b());
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
     param_type param_;
-}; // class LevyDistribution
+}; // class ParetoDistribution
 
 namespace internal
 {
 
 template <std::size_t K, typename RealType, typename RNGType>
-inline void levy_distribution_impl(
+inline void pareto_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    normal_distribution(
-        rng, n, r, static_cast<RealType>(0), static_cast<RealType>(1));
-    sqr(n, r, r);
-    inv(n, r, r);
-    fma(n, a, b, r, r);
+    exponential_distribution(rng, n, r, a);
+    exp(n, r, r);
+    mul(n, b, r, r);
 }
 
 } // namespace vsmc::internal
 
-/// \brief Generating levy random variates
+/// \brief Generating pareto random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void levy_distribution(
+inline void pareto_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i)
-        internal::levy_distribution_impl<k>(rng, k, r + i * k, a, b);
-    internal::levy_distribution_impl<k>(rng, l, r + m * k, a, b);
+        internal::pareto_distribution_impl<k>(rng, k, r + i * k, a, b);
+    internal::pareto_distribution_impl<k>(rng, l, r + m * k, a, b);
 }
 
 } // namespace vsmc
 
-#endif // VSMC_RNG_LEVY_DISTRIBUTION_HPP
+#endif // VSMC_RNG_PARETO_DISTRIBUTION_HPP
