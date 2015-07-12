@@ -337,22 +337,22 @@ class BetaDistribution
     {
         U01CODistribution<RealType> runif;
         const result_type ln_4 = 2 * const_ln_2<result_type>();
+        result_type x = 0;
         result_type y = 0;
-        result_type z = 0;
         result_type left = 0;
         result_type right = 0;
         do {
             result_type u1 = runif(rng);
             result_type u2 = runif(rng);
             result_type v = param_.constant_.b * std::log(u1 / (1 - u1));
-            y = param_.alpha_ * std::exp(v);
-            z = param_.beta_ + y;
-            left = (param_.constant_.p - param_.constant_.a * std::log(z)) +
+            x = param_.alpha_ * std::exp(v);
+            y = param_.beta_ + x;
+            left = (param_.constant_.p - param_.constant_.a * std::log(y)) +
                 (param_.constant_.t * v - ln_4);
             right = std::log(u1 * u1 * u2);
         } while (left < right);
 
-        return y / z;
+        return x / y;
     }
 
     template <typename RNGType>
@@ -450,16 +450,18 @@ namespace internal
 {
 
 template <std::size_t, typename RealType, typename RNGType>
-inline void beta_distribution_impl_11(RNGType &rng, std::size_t n, RealType *r,
-    RealType, RealType, BetaDistribution<RealType> &,
+inline std::size_t beta_distribution_impl_11(RNGType &rng, std::size_t n,
+    RealType *r, RealType, RealType,
     const BetaDistributionConstant<RealType> &)
 {
     u01_oo_distribution(rng, n, r);
+
+    return n;
 }
 
 template <std::size_t, typename RealType, typename RNGType>
-inline void beta_distribution_impl_1x(RNGType &rng, std::size_t n, RealType *r,
-    RealType, RealType, BetaDistribution<RealType> &,
+inline std::size_t beta_distribution_impl_1x(RNGType &rng, std::size_t n,
+    RealType *r, RealType, RealType,
     const BetaDistributionConstant<RealType> &constant)
 {
     u01_oo_distribution(rng, n, r);
@@ -467,22 +469,26 @@ inline void beta_distribution_impl_1x(RNGType &rng, std::size_t n, RealType *r,
     mul(n, constant.b, r, r);
     exp(n, r, r);
     sub(n, static_cast<RealType>(1), r, r);
+
+    return n;
 }
 
 template <std::size_t, typename RealType, typename RNGType>
-inline void beta_distribution_impl_x1(RNGType &rng, std::size_t n, RealType *r,
-    RealType, RealType, BetaDistribution<RealType> &,
+inline std::size_t beta_distribution_impl_x1(RNGType &rng, std::size_t n,
+    RealType *r, RealType, RealType,
     const BetaDistributionConstant<RealType> &constant)
 {
     u01_oo_distribution(rng, n, r);
     log(n, r, r);
     mul(n, constant.a, r, r);
     exp(n, r, r);
+
+    return n;
 }
 
 template <std::size_t K, typename RealType, typename RNGType>
-inline void beta_distribution_impl_c(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha, RealType beta, BetaDistribution<RealType> &dist,
+inline std::size_t beta_distribution_impl_c(RNGType &rng, std::size_t n,
+    RealType *r, RealType alpha, RealType beta,
     const BetaDistributionConstant<RealType> &constant)
 {
     const RealType a = constant.a;
@@ -494,33 +500,36 @@ inline void beta_distribution_impl_c(RNGType &rng, std::size_t n, RealType *r,
     RealType *const u1 = s;
     RealType *const u2 = s + n;
     RealType *const v = s + n * 2;
-    RealType *const y = s + n * 3;
-    RealType *const z = s + n * 4;
+    RealType *const x = s + n * 3;
+    RealType *const y = s + n * 4;
     u01_co_distribution(rng, n * 2, s);
     sub(n, static_cast<RealType>(1), u1, v);
     div(n, u1, v, v);
     log(n, v, v);
     mul(n, b, v, v);
-    exp(n, v, y);
-    mul(n, alpha, y, y);
-    add(n, beta, y, z);
-    div(n, y, z, r);
+    exp(n, v, x);
+    mul(n, alpha, x, x);
+    add(n, beta, x, y);
+    div(n, x, y, x);
     sqr(n, u1, u1);
     mul(n, u1, u2, u2);
     log(n, u2, u2);
-    log(n, z, u1);
+    log(n, y, u1);
     fma(n, p, -a, u1, u1);
     fma(n, -ln_4, t, v, v);
     add(n, v, u1, u1);
 
+    std::size_t m = 0;
     for (std::size_t i = 0; i != n; ++i)
-        if (u1[i] < u2[i])
-            r[i] = dist(rng);
+        if (u1[i] > u2[i])
+            r[m++] = x[i];
+
+    return m;
 }
 
 template <std::size_t K, typename RealType, typename RNGType>
-inline void beta_distribution_impl_j(RNGType &rng, std::size_t n, RealType *r,
-    RealType, RealType, BetaDistribution<RealType> &dist,
+inline std::size_t beta_distribution_impl_j(RNGType &rng, std::size_t n,
+    RealType *r, RealType, RealType,
     const BetaDistributionConstant<RealType> &constant)
 {
     const RealType a = constant.a;
@@ -533,79 +542,69 @@ inline void beta_distribution_impl_j(RNGType &rng, std::size_t n, RealType *r,
     pow(n, x, a, x);
     pow(n, y, b, y);
     add(n, x, y, u);
-    div(n, x, u, r);
+    div(n, x, u, x);
 
+    std::size_t m = 0;
     for (std::size_t i = 0; i != n; ++i)
-        if (u[i] > 1)
-            r[i] = dist(rng);
+        if (u[i] < 1)
+            r[m++] = x[i];
+
+    return m;
 }
 
 template <std::size_t, typename RealType, typename RNGType>
-inline void beta_distribution_impl_a1(RNGType &rng, std::size_t n, RealType *r,
-    RealType, RealType, BetaDistribution<RealType> &dist,
-    const BetaDistributionConstant<RealType> &)
+inline std::size_t beta_distribution_impl_a1(RNGType &, std::size_t,
+    RealType *, RealType, RealType, const BetaDistributionConstant<RealType> &)
 {
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = dist(rng);
+    return 0;
 }
 
 template <std::size_t, typename RealType, typename RNGType>
-inline void beta_distribution_impl_a2(RNGType &rng, std::size_t n, RealType *r,
-    RealType, RealType, BetaDistribution<RealType> &dist,
-    const BetaDistributionConstant<RealType> &)
+inline std::size_t beta_distribution_impl_a2(RNGType &, std::size_t,
+    RealType *, RealType, RealType, const BetaDistributionConstant<RealType> &)
 {
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = dist(rng);
+    return 0;
 }
 
 template <std::size_t, typename RealType, typename RNGType>
-inline void beta_distribution_impl_a3(RNGType &rng, std::size_t n, RealType *r,
-    RealType, RealType, BetaDistribution<RealType> &dist,
-    const BetaDistributionConstant<RealType> &)
+inline std::size_t beta_distribution_impl_a3(RNGType &, std::size_t,
+    RealType *, RealType, RealType, const BetaDistributionConstant<RealType> &)
 {
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = dist(rng);
+    return 0;
 }
 
 template <std::size_t K, typename RealType, typename RNGType>
-inline void beta_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha, RealType beta, BetaDistribution<RealType> &dist,
+inline std::size_t beta_distribution_impl(RNGType &rng, std::size_t n,
+    RealType *r, RealType alpha, RealType beta,
     const BetaDistributionConstant<RealType> &constant)
 {
     switch (beta_distribution_algorithm(alpha, beta)) {
         case BetaDistributionAlgorithm11:
-            beta_distribution_impl_11<K>(
-                rng, n, r, alpha, beta, dist, constant);
-            break;
+            return beta_distribution_impl_11<K>(
+                rng, n, r, alpha, beta, constant);
         case BetaDistributionAlgorithm1X:
-            beta_distribution_impl_1x<K>(
-                rng, n, r, alpha, beta, dist, constant);
-            break;
+            return beta_distribution_impl_1x<K>(
+                rng, n, r, alpha, beta, constant);
         case BetaDistributionAlgorithmX1:
-            beta_distribution_impl_x1<K>(
-                rng, n, r, alpha, beta, dist, constant);
-            break;
+            return beta_distribution_impl_x1<K>(
+                rng, n, r, alpha, beta, constant);
         case BetaDistributionAlgorithmC:
-            beta_distribution_impl_c<K>(
-                rng, n, r, alpha, beta, dist, constant);
-            break;
+            return beta_distribution_impl_c<K>(
+                rng, n, r, alpha, beta, constant);
         case BetaDistributionAlgorithmJ:
-            beta_distribution_impl_j<K>(
-                rng, n, r, alpha, beta, dist, constant);
-            break;
+            return beta_distribution_impl_j<K>(
+                rng, n, r, alpha, beta, constant);
         case BetaDistributionAlgorithmA1:
-            beta_distribution_impl_a1<K>(
-                rng, n, r, alpha, beta, dist, constant);
-            break;
+            return beta_distribution_impl_a1<K>(
+                rng, n, r, alpha, beta, constant);
         case BetaDistributionAlgorithmA2:
-            beta_distribution_impl_a2<K>(
-                rng, n, r, alpha, beta, dist, constant);
-            break;
+            return beta_distribution_impl_a2<K>(
+                rng, n, r, alpha, beta, constant);
         case BetaDistributionAlgorithmA3:
-            beta_distribution_impl_a3<K>(
-                rng, n, r, alpha, beta, dist, constant);
-            break;
+            return beta_distribution_impl_a3<K>(
+                rng, n, r, alpha, beta, constant);
     }
+    return 0;
 }
 
 } // namespace vsmc::internal
@@ -617,16 +616,24 @@ inline void beta_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType alpha, RealType beta)
 {
     const std::size_t k = 1000;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    BetaDistribution<RealType> dist(alpha, beta);
     const internal::BetaDistributionConstant<RealType> constant(alpha, beta);
-    for (std::size_t i = 0; i != m; ++i) {
-        internal::beta_distribution_impl<k>(
-            rng, k, r + i * k, alpha, beta, dist, constant);
+    while (n > k) {
+        std::size_t m = internal::beta_distribution_impl<k>(
+            rng, k, r, alpha, beta, constant);
+        if (m == 0)
+            break;
+        n -= m;
+        r += m;
     }
-    internal::beta_distribution_impl<k>(
-        rng, l, r + m * k, alpha, beta, dist, constant);
+    std::size_t m =
+        internal::beta_distribution_impl<k>(rng, n, r, alpha, beta, constant);
+    n -= m;
+    r += m;
+    if (n > 0) {
+        BetaDistribution<RealType> dist(alpha, beta);
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = dist(rng);
+    }
 }
 
 } // namespace vsmc

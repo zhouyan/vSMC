@@ -469,7 +469,6 @@ inline std::size_t gamma_distribution_impl(RNGType &rng, std::size_t n,
             return gamma_distribution_impl_e<K>(
                 rng, n, r, alpha, beta, constant);
     }
-
     return 0;
 }
 
@@ -486,6 +485,8 @@ inline void gamma_distribution(
     while (n > k) {
         std::size_t m = internal::gamma_distribution_impl<k>(
             rng, k, r, alpha, beta, constant);
+        if (m == 0)
+            break;
         n -= m;
         r += m;
     }
