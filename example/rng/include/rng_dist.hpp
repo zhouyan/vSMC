@@ -71,9 +71,9 @@
     VSMC_RNG_##TEST##_2(Beta, boost::random::beta_distribution, 1, 1.5);      \
     VSMC_RNG_##TEST##_2(Beta, boost::random::beta_distribution, 0.5, 1);      \
     VSMC_RNG_##TEST##_2(Beta, boost::random::beta_distribution, 1.5, 1);      \
+    VSMC_RNG_##TEST##_2(Beta, boost::random::beta_distribution, 1.5, 1.5);    \
     VSMC_RNG_##TEST##_2(Beta, boost::random::beta_distribution, 0.5, 0.5);    \
     VSMC_RNG_##TEST##_2(Beta, boost::random::beta_distribution, 0.9, 0.9);    \
-    VSMC_RNG_##TEST##_2(Beta, boost::random::beta_distribution, 1.5, 1.5);    \
     VSMC_RNG_##TEST##_2(Beta, boost::random::beta_distribution, 1.5, 0.5);    \
     VSMC_RNG_##TEST##_2(Beta, boost::random::beta_distribution, 0.5, 1.5);    \
     VSMC_RNG_##TEST##_1(ChiSquared, std::chi_squared_distribution, 0.2);      \
