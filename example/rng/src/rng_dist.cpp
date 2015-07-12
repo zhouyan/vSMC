@@ -84,10 +84,6 @@ int main(int argc, char **argv)
     VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 1, 1);
     VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 1, 1.5);
     VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 1, 3);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 1, 0.2);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 1, 1);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 1, 1.5);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 1, 3);
     VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 3, 0.2);
     VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 3, 1);
     VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 3, 1.5);

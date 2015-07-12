@@ -34,8 +34,11 @@
 int main(int argc, char **argv)
 {
     std::size_t N = 10000;
+    std::size_t M = 10;
     if (argc > 1)
         N = static_cast<std::size_t>(std::atoi(argv[1]));
+    if (argc > 2)
+        M = static_cast<std::size_t>(std::atoi(argv[2]));
     std::array<double, 1> param1;
     std::array<double, 2> param2;
     vsmc::Vector<std::string> names;
@@ -80,10 +83,6 @@ int main(int argc, char **argv)
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 0.2, 1);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 0.2, 1.5);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 0.2, 3);
-    VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 1, 0.2);
-    VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 1, 1);
-    VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 1, 1.5);
-    VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 1, 3);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 1, 0.2);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 1, 1);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 1, 1.5);

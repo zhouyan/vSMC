@@ -38,13 +38,13 @@
 #define VSMC_RNG_GOF_1(Name, STD, p1)                                         \
     param1[0] = p1;                                                           \
     rng_gof<STD<double>, vsmc::Name##Distribution<double>>(                   \
-        N, param1, #Name, names, pval);
+        N, M, param1, #Name, names, pval);
 
 #define VSMC_RNG_GOF_2(Name, STD, p1, p2)                                     \
     param2[0] = p1;                                                           \
     param2[1] = p2;                                                           \
     rng_gof<STD<double>, vsmc::Name##Distribution<double>>(                   \
-        N, param2, #Name, names, pval);
+        N, M, param2, #Name, names, pval);
 
 template <typename BoostDistType>
 inline vsmc::Vector<double> rng_gof_partition(
@@ -188,31 +188,85 @@ inline double rng_gof_chi2(
 inline double rng_gof_ksad(
     const vsmc::Vector<double> &r, const vsmc::Vector<double> &partition)
 {
-    const std::size_t m = 100;
-    vsmc::Vector<double> rval(r.size() / m);
-    vsmc::Vector<double> pval(m);
-    vsmc::Vector<double> head(m);
-    vsmc::Vector<double> tail(m);
-    for (std::size_t i = 0; i != m; ++i) {
+    const std::size_t n = 100;
+    const std::size_t m = r.size() / n;
+    vsmc::Vector<double> rval(m);
+    vsmc::Vector<double> pval(n);
+    vsmc::Vector<double> head(n);
+    vsmc::Vector<double> tail(n);
+    for (std::size_t i = 0; i != n; ++i) {
         std::copy(r.data() + i * m, r.data() + i * m + m, rval.data());
         pval[i] = rng_gof_chi2(rval, partition);
     }
     std::sort(pval.begin(), pval.end());
-    vsmc::log(m, pval.data(), head.data());
+    vsmc::log(n, pval.data(), head.data());
     std::reverse(pval.begin(), pval.end());
-    vsmc::sub(m, 1.0, pval.data(), pval.data());
-    vsmc::log(m, pval.data(), tail.data());
-    vsmc::add(m, head.data(), tail.data(), pval.data());
-    for (std::size_t i = 0; i != m; ++i)
+    vsmc::sub(n, 1.0, pval.data(), pval.data());
+    vsmc::log(n, pval.data(), tail.data());
+    vsmc::add(n, head.data(), tail.data(), pval.data());
+    for (std::size_t i = 0; i != n; ++i)
         pval[i] *= 2 * (i + 1) - 1.0;
 
-    return -(m + std::accumulate(pval.begin(), pval.end(), 0.0) / m);
+    return -(n + std::accumulate(pval.begin(), pval.end(), 0.0) / n);
+}
+
+inline double rng_gof_pval_mean(const vsmc::Vector<double> &val)
+{
+    return std::accumulate(val.begin(), val.end(), 0.0) / val.size();
+}
+
+inline double rng_gof_pval_stddev(const vsmc::Vector<double> &val, double mean)
+{
+    return std::sqrt(
+        vsmc::dot(val.size(), val.data(), 1, val.data(), 1) / val.size() -
+        mean * mean);
+}
+
+inline void rng_gof_pval(const vsmc::Vector<double> &chi2,
+    const vsmc::Vector<double> &ksad, vsmc::Vector<double> &pval1,
+    vsmc::Vector<double> &pval2)
+{
+    std::size_t alpha1;
+    std::size_t alpha5;
+    std::size_t alpha10;
+
+    alpha1 = alpha5 = alpha10 = 0;
+    for (std::size_t i = 0; i != chi2.size(); ++i) {
+        if (chi2[i] > 0.01 && chi2[i] < 0.99)
+            ++alpha1;
+        if (chi2[i] > 0.05 && chi2[i] < 0.95)
+            ++alpha5;
+        if (chi2[i] > 0.1 && chi2[i] < 0.9)
+            ++alpha10;
+    }
+    double nchi2 = static_cast<double>(chi2.size());
+    pval1.push_back(rng_gof_pval_mean(chi2));
+    pval1.push_back(rng_gof_pval_stddev(chi2, pval1.back()));
+    pval1.push_back(100.0 * alpha1 / nchi2);
+    pval1.push_back(100.0 * alpha5 / nchi2);
+    pval1.push_back(100.0 * alpha10 / nchi2);
+
+    alpha1 = alpha5 = alpha10 = 0;
+    for (std::size_t i = 0; i != ksad.size(); ++i) {
+        if (ksad[i] < 3.857)
+            ++alpha1;
+        if (ksad[i] < 2.492)
+            ++alpha5;
+        if (ksad[i] < 1.933)
+            ++alpha10;
+    }
+    double nksad = static_cast<double>(ksad.size());
+    pval2.push_back(rng_gof_pval_mean(ksad));
+    pval2.push_back(rng_gof_pval_stddev(ksad, pval2.back()));
+    pval2.push_back(100.0 * alpha1 / nksad);
+    pval2.push_back(100.0 * alpha5 / nksad);
+    pval2.push_back(100.0 * alpha10 / nksad);
 }
 
 template <typename STDDistType, typename vSMCDistType, std::size_t K>
-inline void rng_gof(std::size_t n, const std::array<double, K> &param,
-    const std::string &name, vsmc::Vector<std::string> &names,
-    vsmc::Vector<double> &pval)
+inline void rng_gof(std::size_t n, std::size_t m,
+    const std::array<double, K> &param, const std::string &name,
+    vsmc::Vector<std::string> &names, vsmc::Vector<double> &pval)
 {
     names.push_back(rng_dist_name(name, param));
 
@@ -220,80 +274,111 @@ inline void rng_gof(std::size_t n, const std::array<double, K> &param,
     STDDistType dist_std(rng_dist_init<STDDistType>(param));
     vSMCDistType dist_vsmc(rng_dist_init<vSMCDistType>(param));
     vsmc::Vector<double> r(n);
+    vsmc::Vector<double> chi2;
+    vsmc::Vector<double> ksad;
+    vsmc::Vector<double> pval1;
+    vsmc::Vector<double> pval2;
     vsmc::Vector<double> partition(rng_gof_partition(n, dist_vsmc));
 
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = dist_std(rng);
-    pval.push_back(rng_gof_chi2(r, partition));
-    pval.push_back(rng_gof_ksad(r, partition));
+    chi2.clear();
+    ksad.clear();
+    for (std::size_t i = 0; i != m; ++i) {
+        for (std::size_t j = 0; j != n; ++j)
+            r[j] = dist_std(rng);
+        chi2.push_back(rng_gof_chi2(r, partition));
+        ksad.push_back(rng_gof_ksad(r, partition));
+    }
+    rng_gof_pval(chi2, ksad, pval1, pval2);
 
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = dist_vsmc(rng);
-    pval.push_back(rng_gof_chi2(r, partition));
-    pval.push_back(rng_gof_ksad(r, partition));
+    chi2.clear();
+    ksad.clear();
+    for (std::size_t i = 0; i != m; ++i) {
+        for (std::size_t j = 0; j != n; ++j)
+            r[j] = dist_vsmc(rng);
+        chi2.push_back(rng_gof_chi2(r, partition));
+        ksad.push_back(rng_gof_ksad(r, partition));
+    }
+    rng_gof_pval(chi2, ksad, pval1, pval2);
 
-    dist_vsmc(rng, n, r.data());
-    pval.push_back(rng_gof_chi2(r, partition));
-    pval.push_back(rng_gof_ksad(r, partition));
+    chi2.clear();
+    ksad.clear();
+    for (std::size_t i = 0; i != m; ++i) {
+        dist_vsmc(rng, n, r.data());
+        chi2.push_back(rng_gof_chi2(r, partition));
+        ksad.push_back(rng_gof_ksad(r, partition));
+    }
+    rng_gof_pval(chi2, ksad, pval1, pval2);
 
 #if VSMC_HAS_MKL
+    chi2.clear();
+    ksad.clear();
     vsmc::MKL_SFMT19937 rng_mkl;
-    dist_vsmc(rng_mkl, n, r.data());
-    pval.push_back(rng_gof_chi2(r, partition));
-    pval.push_back(rng_gof_ksad(r, partition));
+    for (std::size_t i = 0; i != m; ++i) {
+        dist_vsmc(rng_mkl, n, r.data());
+        chi2.push_back(rng_gof_chi2(r, partition));
+        ksad.push_back(rng_gof_ksad(r, partition));
+    }
+    rng_gof_pval(chi2, ksad, pval1, pval2);
 #endif
+
+    for (std::size_t i = 0; i != pval1.size(); ++i)
+        pval.push_back(pval1[i]);
+    for (std::size_t i = 0; i != pval2.size(); ++i)
+        pval.push_back(pval2[i]);
 }
 
 inline void rng_gof_output(
     const vsmc::Vector<std::string> &names, const vsmc::Vector<double> &pval)
 {
     std::size_t N = names.size();
-    std::size_t R = pval.size() / N / 2;
+    std::size_t R = pval.size() / N / 10;
     std::size_t lwid = 80;
+    int pwid = 10;
     int twid = 15;
-    int Twid = twid * static_cast<int>(R);
-    int nwid = static_cast<int>(lwid) - Twid;
+    int nwid = static_cast<int>(lwid) - pwid * 3 - twid * 2;
 
-    std::cout << std::string(lwid, '=') << std::endl;
-    std::cout << std::left << std::setw(nwid) << "Distribution";
-    std::cout << std::right << std::setw(twid) << "Test (STD)";
-    std::cout << std::right << std::setw(twid) << "Test (vSMC)";
-    std::cout << std::right << std::setw(twid) << "Test (Batch)";
+    vsmc::Vector<std::string> tests;
+    tests.push_back("Test 1 (STD)");
+    tests.push_back("Test 1 (vSMC)");
+    tests.push_back("Test 1 (Batch)");
 #if VSMC_HAS_MKL
-    std::cout << std::right << std::setw(twid) << "Test (MKL)";
+    tests.push_back("Test 1 (MKL)");
 #endif
-    std::cout << std::endl;
-
-    std::cout << std::string(lwid, '-') << std::endl;
+    tests.push_back("Test 2 (STD)");
+    tests.push_back("Test 2 (vSMC)");
+    tests.push_back("Test 2 (Batch)");
+#if VSMC_HAS_MKL
+    tests.push_back("Test 2 (MKL)");
+#endif
+    std::size_t j = 0;
     for (std::size_t i = 0; i != N; ++i) {
+        std::cout << std::string(lwid, '=') << std::endl;
         std::cout << std::left << std::setw(nwid) << names[i];
-        for (std::size_t r = 0; r != R * 2; r += 2) {
-            double chi2 = pval[i * R * 2 + r];
-            std::stringstream ss;
-            if (chi2 < 0.10 || chi2 > 0.90)
-                ss << '*';
-            if (chi2 < 0.05 || chi2 > 0.95)
-                ss << '*';
-            if (chi2 < 0.01 || chi2 > 0.99)
-                ss << '*';
-            ss << std::fixed << chi2;
-            std::cout << std::right << std::setw(twid) << ss.str();
-        }
+        std::cout << std::right << std::setw(twid) << "Mean";
+        std::cout << std::right << std::setw(twid) << "StdDev";
+        std::cout << std::right << std::setw(pwid) << "0.01";
+        std::cout << std::right << std::setw(pwid) << "0.05";
+        std::cout << std::right << std::setw(pwid) << "0.1";
         std::cout << std::endl;
-        std::cout << std::left << std::setw(nwid) << ' ';
-        for (std::size_t r = 0; r != R * 2; r += 2) {
-            double ksad = pval[i * R * 2 + r + 1];
-            std::stringstream ss;
-            if (ksad > 1.933)
-                ss << '*';
-            if (ksad > 2.492)
-                ss << '*';
-            if (ksad > 3.857)
-                ss << '*';
-            ss << std::fixed << ksad;
-            std::cout << std::right << std::setw(twid) << ss.str();
+        std::cout << std::string(lwid, '-') << std::endl;
+        for (std::size_t r = 0; r != R * 2; ++r) {
+            std::cout << std::left << std::setw(nwid) << tests[r];
+            std::cout << std::right << std::setw(twid) << std::fixed
+                      << pval[j++];
+            std::cout << std::right << std::setw(twid) << std::fixed
+                      << pval[j++];
+            for (std::size_t k = 0; k != 3; ++k) {
+                std::stringstream ss;
+                double p = pval[j++];
+                if (p < 50)
+                    ss << '*';
+                ss << p << '%';
+                std::cout << std::right << std::setw(pwid) << ss.str();
+            }
+            std::cout << std::endl;
+            if (r + 1 == R)
+                std::cout << std::string(lwid, '-') << std::endl;
         }
-        std::cout << std::endl;
     }
     std::cout << std::string(lwid, '=') << std::endl;
 }

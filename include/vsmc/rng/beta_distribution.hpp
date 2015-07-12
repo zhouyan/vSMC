@@ -497,6 +497,7 @@ inline void beta_distribution_impl_c(RNGType &rng, std::size_t n, RealType *r,
     RealType *const y = s + n * 3;
     RealType *const z = s + n * 4;
     u01_co_distribution(rng, n * 2, s);
+    sub(n, static_cast<RealType>(1), u1, v);
     div(n, u1, v, v);
     log(n, v, v);
     mul(n, b, v, v);

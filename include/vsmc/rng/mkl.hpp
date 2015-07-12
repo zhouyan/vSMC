@@ -547,16 +547,18 @@ inline void cauchy_distribution(
 
 template <MKL_INT BRNG, std::size_t Bits>
 inline void rayleigh_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float b)
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float sigma)
 {
-    rng.stream().rayleigh(static_cast<MKL_INT>(n), r, 0, b);
+    rng.stream().rayleigh(
+        static_cast<MKL_INT>(n), r, 0, const_sqrt_2<float>() * sigma);
 }
 
 template <MKL_INT BRNG, std::size_t Bits>
 inline void rayleigh_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double b)
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double sigma)
 {
-    rng.stream().rayleigh(static_cast<MKL_INT>(n), r, 0, b);
+    rng.stream().rayleigh(
+        static_cast<MKL_INT>(n), r, 0, const_sqrt_2<double>() * sigma);
 }
 
 template <MKL_INT BRNG, std::size_t Bits>
