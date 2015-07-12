@@ -34,6 +34,8 @@
 
 #include <vsmc/rng/rng.hpp>
 #include <vsmc/utility/stop_watch.hpp>
+#include <boost/random/laplace_distribution.hpp>
+#include <boost/random/beta_distribution.hpp>
 
 #define VSMC_RNG_DIST_1(Name, STD, p1)                                        \
     param1[0] = p1;                                                           \
@@ -81,12 +83,12 @@ inline void rng_dist(std::size_t n, const std::array<double, K> &param,
 {
     names.push_back(rng_dist_name(name, param));
 
-    double result = 0;
-    vsmc::StopWatch watch;
-    vsmc::Vector<double> r(n);
     vsmc::RNG rng;
     STDDistType dist_std(rng_dist_init<STDDistType>(param));
     vSMCDistType dist_vsmc(rng_dist_init<vSMCDistType>(param));
+    vsmc::Vector<double> r(n);
+    double result = 0;
+    vsmc::StopWatch watch;
 
     watch.reset();
     watch.start();

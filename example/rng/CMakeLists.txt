@@ -47,11 +47,14 @@ FUNCTION(ADD_RNG_TEST name)
     ADD_DEPENDENCIES(rng rng_${name})
 ENDFUNCTION(ADD_RNG_TEST)
 
-ADD_RNG_TEST(dist)
-ADD_RNG_TEST(ks)
 ADD_RNG_TEST(std)
 ADD_RNG_TEST(philox)
 ADD_RNG_TEST(threefry)
+
+IF (Boost_FOUND)
+    ADD_RNG_TEST(dist)
+    ADD_RNG_TEST(gof)
+ENDIF (Boost_FOUND)
 
 IF (AESNI_FOUND)
     ADD_RNG_TEST(aes)

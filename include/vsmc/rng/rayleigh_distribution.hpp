@@ -35,10 +35,10 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_RAYLEIGH_DISTRIBUTION_PARAM_CHECK(b)          \
-    VSMC_RUNTIME_ASSERT((b > 0), "**RayleighDistribution** "                  \
-                                 "CONSTRUCTED WITH INVALID SCALE "            \
-                                 "PARAMETER VALUE")
+#define VSMC_RUNTIME_ASSERT_RNG_RAYLEIGH_DISTRIBUTION_PARAM_CHECK(sigma)      \
+    VSMC_RUNTIME_ASSERT((sigma > 0), "**RayleighDistribution** "              \
+                                     "CONSTRUCTED WITH INVALID SCALE "        \
+                                     "PARAMETER VALUE")
 
 namespace vsmc
 {
@@ -63,14 +63,17 @@ class RayleighDistribution
         using result_type = RealType;
         using distribution_type = RayleighDistribution<RealType>;
 
-        explicit param_type(result_type b = 1) : b_(b) { invariant(); }
+        explicit param_type(result_type sigma = 1) : sigma_(sigma)
+        {
+            invariant();
+        }
 
-        result_type b() const { return b_; }
+        result_type sigma() const { return sigma_; }
 
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
-            return internal::is_equal(param1.b_, param2.b_);
+            return internal::is_equal(param1.sigma_, param2.sigma_);
         }
 
         friend bool operator!=(
@@ -86,7 +89,7 @@ class RayleighDistribution
             if (!os.good())
                 return os;
 
-            os << param.b_;
+            os << param.sigma_;
 
             return os;
         }
@@ -98,12 +101,12 @@ class RayleighDistribution
             if (!is.good())
                 return is;
 
-            result_type b = 0;
-            is >> std::ws >> b;
+            result_type sigma = 0;
+            is >> std::ws >> sigma;
 
             if (is.good()) {
-                if (b > 0)
-                    param.b_ = b;
+                if (sigma > 0)
+                    param.sigma_ = sigma;
                 else
                     is.setstate(std::ios_base::failbit);
             }
@@ -112,13 +115,13 @@ class RayleighDistribution
         }
 
         private:
-        result_type b_;
+        result_type sigma_;
 
         friend distribution_type;
 
         void invariant()
         {
-            VSMC_RUNTIME_ASSERT_RNG_RAYLEIGH_DISTRIBUTION_PARAM_CHECK(b_);
+            VSMC_RUNTIME_ASSERT_RNG_RAYLEIGH_DISTRIBUTION_PARAM_CHECK(sigma_);
         }
 
         void reset() {}
@@ -128,7 +131,7 @@ class RayleighDistribution
 
     explicit RayleighDistribution(const param_type &param) : param_(param) {}
 
-    result_type b() const { return param_.b(); }
+    result_type sigma() const { return param_.sigma(); }
 
     result_type min() const { return 0; }
 
@@ -142,13 +145,13 @@ class RayleighDistribution
     {
         U01OCDistribution<RealType> runif;
 
-        return param_.b_ * std::sqrt(-2 * std::log(runif(rng)));
+        return param_.sigma_ * std::sqrt(-2 * std::log(runif(rng)));
     }
 
     template <typename RNGType>
     void operator()(RNGType &rng, std::size_t n, result_type *r)
     {
-        rayleigh_distribution(rng, n, r, b());
+        rayleigh_distribution(rng, n, r, sigma());
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
@@ -162,11 +165,11 @@ namespace internal
 
 template <typename RealType, typename RNGType>
 inline void rayleigh_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType b)
+    RNGType &rng, std::size_t n, RealType *r, RealType sigma)
 {
     u01_oc_distribution(rng, n, r);
     log(n, r, r);
-    mul(n, -2 * b * b, r, r);
+    mul(n, -2 * sigma * sigma, r, r);
     sqrt(n, r, r);
 }
 
@@ -176,14 +179,14 @@ inline void rayleigh_distribution_impl(
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void rayleigh_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType b)
+    RNGType &rng, std::size_t n, RealType *r, RealType sigma)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i)
-        internal::rayleigh_distribution_impl(rng, k, r + i * k, b);
-    internal::rayleigh_distribution_impl(rng, l, r + m * k, b);
+        internal::rayleigh_distribution_impl(rng, k, r + i * k, sigma);
+    internal::rayleigh_distribution_impl(rng, l, r + m * k, sigma);
 }
 
 } // namespace vsmc

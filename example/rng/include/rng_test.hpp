@@ -57,10 +57,10 @@ inline void rng_test(std::size_t n, const std::string &name,
     size.push_back(sizeof(RNGType));
 
     RNGType rng;
-    vsmc::StopWatch watch;
-    double result = 0;
     vsmc::Vector<double> r(n);
     vsmc::Vector<typename RNGType::result_type> u(n);
+    double result = 0;
+    vsmc::StopWatch watch;
 
     std::uniform_real_distribution<double> runif_std(0, 1);
     watch.reset();
