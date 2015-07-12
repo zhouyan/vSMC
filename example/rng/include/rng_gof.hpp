@@ -162,26 +162,51 @@ inline vsmc::Vector<double> rng_gof_partition(
 }
 
 inline double rng_gof_chi2(
-    vsmc::Vector<double> &r, const vsmc::Vector<double> &partition)
+    const vsmc::Vector<double> &r, const vsmc::Vector<double> &partition)
 {
     vsmc::Vector<std::size_t> count(partition.size());
-    std::sort(r.begin(), r.end());
+    vsmc::Vector<double> rval(r);
+    std::sort(rval.begin(), rval.end());
     std::size_t j = 0;
     for (std::size_t i = 0; i != partition.size(); ++i) {
         std::size_t n = 0;
-        while (j != r.size() && r[j] <= partition[i]) {
+        while (j != rval.size() && rval[j] <= partition[i]) {
             ++n;
             ++j;
         }
         count[i] = n;
     }
-    double e = 1.0 / partition.size() * r.size();
+    double e = 1.0 / partition.size() * rval.size();
     double p = 0;
     for (std::size_t i = 0; i != partition.size(); ++i)
         p += (count[i] - e) * (count[i] - e) / e;
     boost::math::chi_squared_distribution<double> chi2(partition.size() - 1);
 
     return boost::math::cdf(chi2, p);
+}
+
+inline double rng_gof_ksad(
+    const vsmc::Vector<double> &r, const vsmc::Vector<double> &partition)
+{
+    const std::size_t m = 100;
+    vsmc::Vector<double> rval(r.size() / m);
+    vsmc::Vector<double> pval(m);
+    vsmc::Vector<double> head(m);
+    vsmc::Vector<double> tail(m);
+    for (std::size_t i = 0; i != m; ++i) {
+        std::copy(r.data() + i * m, r.data() + i * m + m, rval.data());
+        pval[i] = rng_gof_chi2(rval, partition);
+    }
+    std::sort(pval.begin(), pval.end());
+    vsmc::log(m, pval.data(), head.data());
+    std::reverse(pval.begin(), pval.end());
+    vsmc::sub(m, 1.0, pval.data(), pval.data());
+    vsmc::log(m, pval.data(), tail.data());
+    vsmc::add(m, head.data(), tail.data(), pval.data());
+    for (std::size_t i = 0; i != m; ++i)
+        pval[i] *= 2 * (i + 1) - 1.0;
+
+    return -(m + std::accumulate(pval.begin(), pval.end(), 0.0) / m);
 }
 
 template <typename STDDistType, typename vSMCDistType, std::size_t K>
@@ -200,18 +225,22 @@ inline void rng_gof(std::size_t n, const std::array<double, K> &param,
     for (std::size_t i = 0; i != n; ++i)
         r[i] = dist_std(rng);
     pval.push_back(rng_gof_chi2(r, partition));
+    pval.push_back(rng_gof_ksad(r, partition));
 
     for (std::size_t i = 0; i != n; ++i)
         r[i] = dist_vsmc(rng);
     pval.push_back(rng_gof_chi2(r, partition));
+    pval.push_back(rng_gof_ksad(r, partition));
 
     dist_vsmc(rng, n, r.data());
     pval.push_back(rng_gof_chi2(r, partition));
+    pval.push_back(rng_gof_ksad(r, partition));
 
 #if VSMC_HAS_MKL
     vsmc::MKL_SFMT19937 rng_mkl;
     dist_vsmc(rng_mkl, n, r.data());
     pval.push_back(rng_gof_chi2(r, partition));
+    pval.push_back(rng_gof_ksad(r, partition));
 #endif
 }
 
@@ -219,7 +248,7 @@ inline void rng_gof_output(
     const vsmc::Vector<std::string> &names, const vsmc::Vector<double> &pval)
 {
     std::size_t N = names.size();
-    std::size_t R = pval.size() / N;
+    std::size_t R = pval.size() / N / 2;
     std::size_t lwid = 80;
     int twid = 15;
     int Twid = twid * static_cast<int>(R);
@@ -238,16 +267,30 @@ inline void rng_gof_output(
     std::cout << std::string(lwid, '-') << std::endl;
     for (std::size_t i = 0; i != N; ++i) {
         std::cout << std::left << std::setw(nwid) << names[i];
-        for (std::size_t r = 0; r != R; ++r) {
-            double value = pval[i * R + r];
+        for (std::size_t r = 0; r != R * 2; r += 2) {
+            double chi2 = pval[i * R * 2 + r];
             std::stringstream ss;
-            if (value < 0.1 || value > 0.9)
-                ss << "*";
-            if (value < 0.01 || value > 0.99)
-                ss << "*";
-            if (value < 0.001 || value > 0.999)
-                ss << "*";
-            ss << std::fixed << value;
+            if (chi2 < 0.10 || chi2 > 0.90)
+                ss << '*';
+            if (chi2 < 0.05 || chi2 > 0.95)
+                ss << '*';
+            if (chi2 < 0.01 || chi2 > 0.99)
+                ss << '*';
+            ss << std::fixed << chi2;
+            std::cout << std::right << std::setw(twid) << ss.str();
+        }
+        std::cout << std::endl;
+        std::cout << std::left << std::setw(nwid) << ' ';
+        for (std::size_t r = 0; r != R * 2; r += 2) {
+            double ksad = pval[i * R * 2 + r + 1];
+            std::stringstream ss;
+            if (ksad > 1.933)
+                ss << '*';
+            if (ksad > 2.492)
+                ss << '*';
+            if (ksad > 3.857)
+                ss << '*';
+            ss << std::fixed << ksad;
             std::cout << std::right << std::setw(twid) << ss.str();
         }
         std::cout << std::endl;
