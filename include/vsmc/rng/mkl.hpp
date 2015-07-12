@@ -580,6 +580,7 @@ inline void extreme_value_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
     rng.stream().gumbel(static_cast<MKL_INT>(n), r, a, b);
+    sub(n, 2 * a, r, r);
 }
 
 template <MKL_INT BRNG, std::size_t Bits>
@@ -587,6 +588,7 @@ inline void extreme_value_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
     rng.stream().gumbel(static_cast<MKL_INT>(n), r, a, b);
+    sub(n, 2 * a, r, r);
 }
 
 template <MKL_INT BRNG, std::size_t Bits>

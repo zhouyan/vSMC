@@ -75,25 +75,32 @@ int main(int argc, char **argv)
     VSMC_RNG_GOF_1(ChiSquared, std::chi_squared_distribution, 1);
     VSMC_RNG_GOF_1(ChiSquared, std::chi_squared_distribution, 1.5);
     VSMC_RNG_GOF_1(ChiSquared, std::chi_squared_distribution, 2);
+    VSMC_RNG_GOF_1(ChiSquared, std::chi_squared_distribution, 3);
     VSMC_RNG_GOF_1(StudentT, std::student_t_distribution, 0.2);
     VSMC_RNG_GOF_1(StudentT, std::student_t_distribution, 1);
     VSMC_RNG_GOF_1(StudentT, std::student_t_distribution, 1.5);
     VSMC_RNG_GOF_1(StudentT, std::student_t_distribution, 2);
+    VSMC_RNG_GOF_1(StudentT, std::student_t_distribution, 3);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 0.2, 0.2);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 0.2, 1);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 0.2, 1.5);
+    VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 0.2, 2);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 0.2, 3);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 1, 0.2);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 1, 1);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 1, 1.5);
+    VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 1, 2);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 1, 3);
+    VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 2, 0.2);
+    VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 2, 1);
+    VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 2, 1.5);
+    VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 2, 2);
+    VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 2, 3);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 3, 0.2);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 3, 1);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 3, 1.5);
+    VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 3, 2);
     VSMC_RNG_GOF_2(FisherF, std::fisher_f_distribution, 3, 3);
-    // VSMC_RNG_GOF_1(Stable, vsmc::StableDistribution, 1);
-    // VSMC_RNG_GOF_1(Stable, vsmc::StableDistribution, 0.1);
-    // VSMC_RNG_GOF_1(Stable, vsmc::StableDistribution, 2);
 
     rng_gof_output(names, pval);
 
