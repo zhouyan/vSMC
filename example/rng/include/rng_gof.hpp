@@ -233,11 +233,11 @@ inline void rng_gof_pval(const vsmc::Vector<double> &chi2,
 
     alpha1 = alpha5 = alpha10 = 0;
     for (std::size_t i = 0; i != chi2.size(); ++i) {
-        if (chi2[i] > 0.01 && chi2[i] < 0.99)
+        if (chi2[i] > 0.005 && chi2[i] < 1 - 0.005)
             ++alpha1;
-        if (chi2[i] > 0.05 && chi2[i] < 0.95)
+        if (chi2[i] > 0.025 && chi2[i] < 1 - 0.025)
             ++alpha5;
-        if (chi2[i] > 0.1 && chi2[i] < 0.9)
+        if (chi2[i] > 0.05 && chi2[i] < 1 - 0.05)
             ++alpha10;
     }
     double nchi2 = static_cast<double>(chi2.size());
