@@ -149,8 +149,10 @@ class FisherFDistribution
     template <typename RNGType>
     result_type operator()(RNGType &rng)
     {
-        return (param_.chi_squared_m_(rng) / m()) /
-            (param_.chi_squared_n_(rng) / n());
+        result_type u1 = param_.chi_squared_m_(rng) / m();
+        result_type u2 = param_.chi_squared_n_(rng) / n();
+
+        return u1 / u2;
     }
 
     template <typename RNGType>

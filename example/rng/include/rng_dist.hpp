@@ -81,11 +81,13 @@
     VSMC_RNG_##TEST##_1(ChiSquared, std::chi_squared_distribution, 1.5);      \
     VSMC_RNG_##TEST##_1(ChiSquared, std::chi_squared_distribution, 2);        \
     VSMC_RNG_##TEST##_1(ChiSquared, std::chi_squared_distribution, 3);        \
+    VSMC_RNG_##TEST##_1(ChiSquared, std::chi_squared_distribution, 30);       \
     VSMC_RNG_##TEST##_1(StudentT, std::student_t_distribution, 0.2);          \
     VSMC_RNG_##TEST##_1(StudentT, std::student_t_distribution, 1);            \
     VSMC_RNG_##TEST##_1(StudentT, std::student_t_distribution, 1.5);          \
     VSMC_RNG_##TEST##_1(StudentT, std::student_t_distribution, 2);            \
     VSMC_RNG_##TEST##_1(StudentT, std::student_t_distribution, 3);            \
+    VSMC_RNG_##TEST##_1(StudentT, std::student_t_distribution, 30);           \
     VSMC_RNG_##TEST##_2(FisherF, std::fisher_f_distribution, 0.2, 0.2);       \
     VSMC_RNG_##TEST##_2(FisherF, std::fisher_f_distribution, 0.2, 1);         \
     VSMC_RNG_##TEST##_2(FisherF, std::fisher_f_distribution, 0.2, 1.5);       \

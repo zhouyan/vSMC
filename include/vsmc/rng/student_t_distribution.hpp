@@ -148,7 +148,10 @@ class StudentTDistribution
     template <typename RNGType>
     result_type operator()(RNGType &rng)
     {
-        return param_.normal_(rng) / std::sqrt(param_.chi_squared_(rng) / n());
+        result_type z = param_.normal_(rng);
+        result_type u = n() / param_.chi_squared_(rng);
+
+        return z * std::sqrt(u);
     }
 
     template <typename RNGType>

@@ -34,7 +34,7 @@
 int main(int argc, char **argv)
 {
     std::size_t N = 10000;
-    std::size_t M = 10;
+    std::size_t M = 100;
     if (argc > 1)
         N = static_cast<std::size_t>(std::atoi(argv[1]));
     if (argc > 2)
