@@ -35,17 +35,9 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/exponential_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_A_CHECK(a)          \
-    VSMC_RUNTIME_ASSERT((a > 0), "**ParetoDistribution** CONSTRUCTED "        \
-                                 "WITH INVALID SHAPE PARAMETER VALUE")
-
-#define VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_B_CHECK(b)          \
+#define VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_CHECK(b)            \
     VSMC_RUNTIME_ASSERT((b > 0), "**ParetoDistribution** CONSTRUCTED "        \
                                  "WITH INVALID SCALE PARAMETER VALUE")
-
-#define VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_CHECK(a, b)         \
-    VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_A_CHECK(a);             \
-    VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_B_CHECK(b);
 
 namespace vsmc
 {
@@ -139,7 +131,7 @@ class ParetoDistribution
 
         void invariant()
         {
-            VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_CHECK(a_, b_);
+            VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_CHECK(b_);
         }
 
         void reset() {}
