@@ -42,10 +42,6 @@
 namespace vsmc
 {
 
-template <typename RealType, typename RNGType>
-inline void laplace_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
 /// \brief Laplace distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -220,7 +216,7 @@ template <typename RealType, typename RNGType>
 inline void rng_rand(RNGType &rng, LaplaceDistribution<RealType> &dist,
     std::size_t n, RealType *r)
 {
-    laplace_distribution(rng, n, r, dist.a(), dist.b());
+    dist(rng, n, r);
 }
 
 } // namespace vsmc

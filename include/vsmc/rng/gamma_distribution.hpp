@@ -105,10 +105,6 @@ class GammaDistributionConstant
 
 } // namespace internal
 
-template <typename RealType, typename RNGType>
-inline void gamma_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
 /// \brief Gamma distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -505,7 +501,7 @@ template <typename RealType, typename RNGType>
 inline void rng_rand(RNGType &rng, GammaDistribution<RealType> &dist,
     std::size_t n, RealType *r)
 {
-    gamma_distribution(rng, n, r, dist.alpha(), dist.beta());
+    dist(rng, n, r);
 }
 
 } // namespace vsmc

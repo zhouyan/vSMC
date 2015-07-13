@@ -34,6 +34,9 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/simd.hpp>
+#if VSMC_HAS_MKL
+#include <vsmc/utility/mkl.hpp>
+#endif
 
 #define VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS                                \
     param_type param() const { return param_; }                               \
@@ -172,6 +175,330 @@ void rng_rand(RNGType &rng, DistributionType &dist, std::size_t n,
     for (std::size_t i = 0; i != n; ++i)
         r[i] = dist(rng);
 }
+
+template <typename>
+class CounterEngine;
+
+template <typename Generator>
+inline void rng_rand(CounterEngine<Generator> &, std::size_t,
+    typename CounterEngine<Generator>::result_type *);
+
+template <typename = double>
+class BetaDistribution;
+
+template <typename = double>
+class CauchyDistribution;
+
+template <typename = double>
+class ChiSquaredDistribution;
+
+template <typename = double>
+class DiscreteDistribution;
+
+template <typename = double>
+class ExponentialDistribution;
+
+template <typename = double>
+class ExtremeValueDistribution;
+
+template <typename = double>
+class FisherFDistribution;
+
+template <typename = double>
+class GammaDistribution;
+
+template <typename = double>
+class LaplaceDistribution;
+
+template <typename = double>
+class LevyDistribution;
+
+template <typename = double>
+class LogisticDistribution;
+
+template <typename = double>
+class LognormalDistribution;
+
+template <typename = double>
+class NormalDistribution;
+
+template <typename = double>
+class ParetoDistribution;
+
+template <typename = double>
+class RayleighDistribution;
+
+template <typename = double>
+class StudentTDistribution;
+
+template <typename, typename, typename>
+class U01LRDistribution;
+
+template <typename, typename, typename>
+class UniformRealLRDistribution;
+
+template <typename = double>
+class WeibullDistribution;
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, BetaDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, CauchyDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, ChiSquaredDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, DiscreteDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, ExponentialDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, ExtremeValueDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, FisherFDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, GammaDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, LaplaceDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, LevyDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, LogisticDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, LognormalDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, NormalDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, ParetoDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, RayleighDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, StudentTDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType, typename Left, typename Right>
+inline void rng_rand(RNGType &, U01LRDistribution<RealType, Left, Right> &,
+    std::size_t, RealType *);
+
+template <typename RealType, typename RNGType, typename Left, typename Right>
+inline void rng_rand(RNGType &,
+    UniformRealLRDistribution<RealType, Left, Right> &, std::size_t,
+    RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, WeibullDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void beta_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
+
+template <typename RealType, typename RNGType>
+inline void cauchy_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
+
+template <typename RealType, typename RNGType>
+inline void chi_squared_distribution(
+    RNGType &, std::size_t, RealType *, RealType);
+
+template <typename RealType, typename RNGType>
+inline void exponential_distribution(
+    RNGType &, std::size_t, RealType *, RealType);
+
+template <typename RealType, typename RNGType>
+inline void extreme_value_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
+
+template <typename RealType, typename RNGType>
+inline void fisher_f_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
+
+template <typename RealType, typename RNGType>
+inline void gamma_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
+
+template <typename RealType, typename RNGType>
+inline void laplace_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
+
+template <typename RealType, typename RNGType>
+inline void levy_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
+
+template <typename RealType, typename RNGType>
+inline void logistic_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
+
+template <typename RealType, typename RNGType>
+inline void lognormal_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
+
+template <typename RealType, typename RNGType>
+inline void normal_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
+
+template <typename RealType, typename RNGType>
+inline void pareto_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
+
+template <typename RealType, typename RNGType>
+inline void rayleigh_distribution(
+    RNGType &, std::size_t, RealType *, RealType);
+
+template <typename RealType, typename RNGType>
+inline void student_t_distribution(
+    RNGType &, std::size_t, RealType *, RealType);
+
+template <typename RealType, typename RNGType>
+inline void u01_distribution(RNGType &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void u01_lr_distribution(RNGType &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void uniform_real_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
+
+template <typename RealType, typename RNGType>
+inline void uniform_real_lr_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
+
+template <typename RealType, typename RNGType>
+inline void weibull_distribution(
+    RNGType &, std::size_t, RealType *, RealType, RealType);
+
+#if VSMC_HAS_MKL
+
+template <MKL_INT, std::size_t>
+class MKLEngine;
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void rng_rand(MKLEngine<BRNG, Bits> &, std::size_t,
+    typename MKLEngine<BRNG, Bits>::result_type *);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void uniform_real_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void uniform_real_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void u01_distribution(MKLEngine<BRNG, Bits> &, std::size_t, float *);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void u01_distribution(MKLEngine<BRNG, Bits> &, std::size_t, double *);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void normal_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *r, float, float);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void normal_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *r, double, double);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void exponential_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void exponential_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void laplace_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void laplace_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void weibull_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void weibull_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void cauchy_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void cauchy_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void rayleigh_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void rayleigh_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void lognormal_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void lognormal_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void extreme_value_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void extreme_value_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void gamma_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void gamma_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void beta_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
+
+template <MKL_INT BRNG, std::size_t Bits>
+inline void beta_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+
+#endif // VSMC_HAS_MKL
 
 } // namespace vsmc
 

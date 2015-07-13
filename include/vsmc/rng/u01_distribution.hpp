@@ -97,9 +97,6 @@ class U01LRDistributionBits
 
 } // namespace vsmc::internal
 
-template <typename RealType, typename Left, typename Right, typename RNGType>
-inline void u01_lr_distribution(RNGType &, std::size_t, RealType *);
-
 /// \brief Standard uniform distribution with open/closed variants
 /// \ingroup Distribution
 ///
@@ -341,7 +338,7 @@ template <typename RealType, typename RNGType, typename Left, typename Right>
 inline void rng_rand(RNGType &rng, U01LRDistribution<RealType, Left, Right> &,
     std::size_t n, RealType *r)
 {
-    u01_lr_distribution<RealType, Left, Right>(rng, n, r);
+    dist(rng, n, r);
 }
 
 } // namespace vsmc

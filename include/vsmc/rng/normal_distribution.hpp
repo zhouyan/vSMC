@@ -44,10 +44,6 @@
 namespace vsmc
 {
 
-template <typename RealType, typename RNGType>
-inline void normal_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
 /// \brief Normal distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -279,7 +275,7 @@ template <typename RealType, typename RNGType>
 inline void rng_rand(RNGType &rng, NormalDistribution<RealType> &dist,
     std::size_t n, RealType *r)
 {
-    normal_distribution(rng, n, r, dist.mean(), dist.stddev());
+    dist(rng, n, r);
 }
 
 } // namespace vsmc

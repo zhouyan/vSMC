@@ -42,10 +42,6 @@
 namespace vsmc
 {
 
-template <typename RealType, typename RNGType>
-inline void logistic_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
 /// \brief Logistic distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -211,7 +207,7 @@ template <typename RealType, typename RNGType>
 inline void rng_rand(RNGType &rng, LogisticDistribution<RealType> &dist,
     std::size_t n, RealType *r)
 {
-    logistic_distribution(rng, n, r, dist.a(), dist.b());
+    dist(rng, n, r);
 }
 
 } // namespace vsmc

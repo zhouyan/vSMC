@@ -43,10 +43,6 @@
 namespace vsmc
 {
 
-template <typename RealType, typename RNGType>
-inline void exponential_distribution(
-    RNGType &, std::size_t, RealType *, RealType);
-
 /// \brief Exponential distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -197,7 +193,7 @@ template <typename RealType, typename RNGType>
 inline void rng_rand(RNGType &rng, ExponentialDistribution<RealType> &dist,
     std::size_t n, RealType *r)
 {
-    exponential_distribution(rng, n, r, dist.lambda());
+    dist(rng, n, r);
 }
 
 } // namespace vsmc

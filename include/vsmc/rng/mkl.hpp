@@ -33,7 +33,6 @@
 #define VSMC_RNG_MKL_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/utility/mkl.hpp>
 
 namespace vsmc
 {

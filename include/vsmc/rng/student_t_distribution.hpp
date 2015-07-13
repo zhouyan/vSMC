@@ -39,10 +39,6 @@
 namespace vsmc
 {
 
-template <typename RealType, typename RNGType>
-inline void student_t_distribution(
-    RNGType &, std::size_t, RealType *, RealType);
-
 /// \brief Student-t distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -202,7 +198,7 @@ template <typename RealType, typename RNGType>
 inline void rng_rand(RNGType &rng, StudentTDistribution<RealType> &dist,
     std::size_t n, RealType *r)
 {
-    student_t_distribution(rng, n, r, dist.n());
+    dist(rng, n, r);
 }
 
 } // namespace vsmc

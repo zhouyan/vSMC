@@ -38,10 +38,6 @@
 namespace vsmc
 {
 
-template <typename RealType, typename RNGType>
-inline void fisher_f_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
 /// \brief Fisher-F distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -202,7 +198,7 @@ template <typename RealType, typename RNGType>
 inline void rng_rand(RNGType &rng, FisherFDistribution<RealType> &dist,
     std::size_t n, RealType *r)
 {
-    fisher_f_distribution(rng, n, r, dist.m(), dist.n());
+    dist(rng, n, r);
 }
 
 } // namespace vsmc

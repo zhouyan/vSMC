@@ -33,7 +33,6 @@
 #define VSMC_EXAMPLE_RNG_DIST_HPP
 
 #include <vsmc/rng/engine.hpp>
-#include <vsmc/rng/uniform_real_distribution.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 #include <boost/math/distributions/chi_squared.hpp>
 

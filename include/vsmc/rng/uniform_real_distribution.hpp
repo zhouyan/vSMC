@@ -43,10 +43,6 @@
 namespace vsmc
 {
 
-template <typename RealType, typename Left, typename Right, typename RNGType>
-inline void uniform_real_lr_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
 /// \brief Uniform real distribution with open/closed variants
 /// \ingroup Distribution
 ///
@@ -287,8 +283,7 @@ inline void rng_rand(RNGType &rng,
     UniformRealLRDistribution<RealType, Left, Right> &dist, std::size_t n,
     RealType *r)
 {
-    uniform_real_lr_distribution<RealType, Left, Right>(
-        rng, n, r, dist.a(), dist.b());
+    dist(rng, n, r);
 }
 
 } // namespace vsmc

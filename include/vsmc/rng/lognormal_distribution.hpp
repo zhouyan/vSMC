@@ -38,10 +38,6 @@
 namespace vsmc
 {
 
-template <typename RealType, typename RNGType>
-inline void lognormal_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
 /// \brief Lognormal distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -182,7 +178,7 @@ template <typename RealType, typename RNGType>
 inline void rng_rand(RNGType &rng, LognormalDistribution<RealType> &dist,
     std::size_t n, RealType *r)
 {
-    lognormal_distribution(rng, n, r, dist.m(), dist.s());
+    dist(rng, n, r);
 }
 
 } // namespace vsmc

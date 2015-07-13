@@ -43,10 +43,6 @@
 namespace vsmc
 {
 
-template <typename RealType, typename RNGType>
-inline void rayleigh_distribution(
-    RNGType &, std::size_t, RealType *, RealType);
-
 /// \brief Rayleigh distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -193,7 +189,7 @@ template <typename RealType, typename RNGType>
 inline void rng_rand(RNGType &rng, RayleighDistribution<RealType> &dist,
     std::size_t n, RealType *r)
 {
-    rayleigh_distribution(rng, n, r, dist.sigma());
+    dist(rng, n, r);
 }
 
 } // namespace vsmc
