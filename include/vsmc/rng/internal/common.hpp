@@ -377,7 +377,7 @@ template <typename RealType, typename RNGType>
 inline void student_t_distribution(
     RNGType &, std::size_t, RealType *, RealType);
 
-template <typename RealType, typename RNGType>
+template <typename RealType, typename Left, typename Right, typename RNGType>
 inline void u01_distribution(RNGType &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
@@ -387,7 +387,7 @@ template <typename RealType, typename RNGType>
 inline void uniform_real_distribution(
     RNGType &, std::size_t, RealType *, RealType, RealType);
 
-template <typename RealType, typename RNGType>
+template <typename RealType, typename Left, typename Right, typename RNGType>
 inline void uniform_real_lr_distribution(
     RNGType &, std::size_t, RealType *, RealType, RealType);
 
