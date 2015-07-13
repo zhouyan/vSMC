@@ -183,6 +183,9 @@ template <typename Generator>
 inline void rng_rand(CounterEngine<Generator> &, std::size_t,
     typename CounterEngine<Generator>::result_type *);
 
+template <typename = int>
+class DiscreteDistribution;
+
 template <typename = double>
 class BetaDistribution;
 
@@ -191,9 +194,6 @@ class CauchyDistribution;
 
 template <typename = double>
 class ChiSquaredDistribution;
-
-template <typename = double>
-class DiscreteDistribution;
 
 template <typename = double>
 class ExponentialDistribution;

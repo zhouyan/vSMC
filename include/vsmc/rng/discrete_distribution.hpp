@@ -45,7 +45,7 @@ namespace vsmc
 
 /// \brief Draw a single sample given weights
 /// \ingroup Distribution
-template <typename IntType = int>
+template <typename IntType>
 class DiscreteDistribution
 {
     public:
