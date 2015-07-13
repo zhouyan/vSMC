@@ -45,13 +45,14 @@ inline vsmc::Vector<double> rng_dist_partition<vsmc::BetaDistribution<double>>(
 int main(int argc, char **argv)
 {
     VSMC_RNG_DIST_PRE(2);
+    VSMC_RNG_DIST_2(Beta, boost::random::beta_distribution, 0.5, 0.5);
     VSMC_RNG_DIST_2(Beta, boost::random::beta_distribution, 1, 1);
     VSMC_RNG_DIST_2(Beta, boost::random::beta_distribution, 1, 0.5);
     VSMC_RNG_DIST_2(Beta, boost::random::beta_distribution, 1, 1.5);
     VSMC_RNG_DIST_2(Beta, boost::random::beta_distribution, 0.5, 1);
     VSMC_RNG_DIST_2(Beta, boost::random::beta_distribution, 1.5, 1);
     VSMC_RNG_DIST_2(Beta, boost::random::beta_distribution, 1.5, 1.5);
-    VSMC_RNG_DIST_2(Beta, boost::random::beta_distribution, 0.5, 0.5);
+    VSMC_RNG_DIST_2(Beta, boost::random::beta_distribution, 0.3, 0.3);
     VSMC_RNG_DIST_2(Beta, boost::random::beta_distribution, 0.9, 0.9);
     VSMC_RNG_DIST_2(Beta, boost::random::beta_distribution, 1.5, 0.5);
     VSMC_RNG_DIST_2(Beta, boost::random::beta_distribution, 0.5, 1.5);

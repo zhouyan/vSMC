@@ -55,6 +55,7 @@ namespace internal
 {
 
 enum BetaDistributionAlgorithm {
+    BetaDistributionAlgorithmAS,
     BetaDistributionAlgorithm11,
     BetaDistributionAlgorithm1X,
     BetaDistributionAlgorithmX1,
@@ -72,7 +73,9 @@ inline BetaDistributionAlgorithm beta_distribution_algorithm(
     const RealType K = static_cast<RealType>(0.852);
     const RealType C = static_cast<RealType>(-0.956);
     const RealType D = beta + K * alpha * alpha + C;
-    if (is_equal<RealType>(alpha, 1) && is_equal<RealType>(beta, 1))
+    if (is_equal<RealType>(alpha, 0.5) && is_equal<RealType>(beta, 0.5))
+        return BetaDistributionAlgorithmAS;
+    else if (is_equal<RealType>(alpha, 1) && is_equal<RealType>(beta, 1))
         return BetaDistributionAlgorithm11;
     else if (is_equal<RealType>(alpha, 1))
         return BetaDistributionAlgorithm1X;
@@ -103,6 +106,7 @@ class BetaDistributionConstant
         , p(0)
     {
         switch (algorithm) {
+            case BetaDistributionAlgorithmAS: break;
             case BetaDistributionAlgorithm11: break;
             case BetaDistributionAlgorithm1X: b = 1 / beta; break;
             case BetaDistributionAlgorithmX1: a = 1 / alpha; break;
@@ -264,6 +268,9 @@ class BetaDistribution
     {
         result_type r = 0;
         switch (param_.constant_.algorithm) {
+            case internal::BetaDistributionAlgorithmAS:
+                r = generate_as(rng);
+                break;
             case internal::BetaDistributionAlgorithm11:
                 r = generate_11(rng);
                 break;
@@ -303,6 +310,18 @@ class BetaDistribution
 
     private:
     param_type param_;
+
+    template <typename RNGType>
+    result_type generate_as(RNGType &rng)
+    {
+        U01CODistribution<RealType> runif;
+        result_type u = runif(rng);
+        u = std::sin(
+            -const_pi_by2<result_type>() + const_pi<result_type>() * u);
+
+        return static_cast<result_type>(0.5) +
+            static_cast<result_type>(0.5) * u;
+    }
 
     template <typename RNGType>
     result_type generate_11(RNGType &rng)
@@ -446,6 +465,19 @@ namespace internal
 {
 
 template <std::size_t, typename RealType, typename RNGType>
+inline std::size_t beta_distribution_impl_as(RNGType &rng, std::size_t n,
+    RealType *r, RealType, RealType,
+    const BetaDistributionConstant<RealType> &)
+{
+    u01_oo_distribution(rng, n, r);
+    fma(n, -const_pi_by2<RealType>(), const_pi<RealType>(), r, r);
+    sin(n, r, r);
+    fma(n, static_cast<RealType>(0.5), static_cast<RealType>(0.5), r, r);
+
+    return n;
+}
+
+template <std::size_t, typename RealType, typename RNGType>
 inline std::size_t beta_distribution_impl_11(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType,
     const BetaDistributionConstant<RealType> &)
@@ -575,6 +607,9 @@ inline std::size_t beta_distribution_impl(RNGType &rng, std::size_t n,
     const BetaDistributionConstant<RealType> &constant)
 {
     switch (beta_distribution_algorithm(alpha, beta)) {
+        case BetaDistributionAlgorithmAS:
+            return beta_distribution_impl_as<K>(
+                rng, n, r, alpha, beta, constant);
         case BetaDistributionAlgorithm11:
             return beta_distribution_impl_11<K>(
                 rng, n, r, alpha, beta, constant);
