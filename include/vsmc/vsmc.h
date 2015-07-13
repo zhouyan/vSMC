@@ -120,7 +120,7 @@ void vsmc_rng_exponential(vsmc_rng *rng_ptr, int n, double *r, double lambda);
 
 /// \brief `vsmc::ExtremeValueDistribution<double>`
 void vsmc_rng_extreme_value(
-    vsmc_rng *rng_ptr, int n, double *r, double location, double scale);
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
 
 /// \brief `vsmc::FisherFDistribution<double>`
 void vsmc_rng_fisher_f(
@@ -133,6 +133,13 @@ void vsmc_rng_gamma(
 /// \brief `vsmc::LaplaceDistribution<double>`
 void vsmc_rng_laplace(vsmc_rng *rng_ptr, int n, double *r, double a, double b);
 
+/// \brief `vsmc::LevyDistribution<double>`
+void vsmc_rng_levy(vsmc_rng *rng_ptr, int n, double *r, double a, double b);
+
+/// \brief `vsmc::LogisticDistribution<double>`
+void vsmc_rng_logistic(
+    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
+
 /// \brief `vsmc::LognormalDistribution<double>`
 void vsmc_rng_lognormal(
     vsmc_rng *rng_ptr, int n, double *r, double m, double s);
@@ -140,6 +147,9 @@ void vsmc_rng_lognormal(
 /// \brief `vsmc::NormalDistribution<double>`
 void vsmc_rng_normal(
     vsmc_rng *rng_ptr, int n, double *r, double mean, double stddev);
+
+/// \brief `vsmc::ParetoDistribution<double>`
+void vsmc_rng_pareto(vsmc_rng *rng_ptr, int n, double *r, double a, double b);
 
 /// \brief `vsmc::RayleighDistribution<double>`
 void vsmc_rng_rayleigh(vsmc_rng *rng_ptr, int n, double *r, double b);
