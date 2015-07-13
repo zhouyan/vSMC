@@ -32,7 +32,7 @@
 #ifndef VSMC_EXAMPLE_RNG_TEST_HPP
 #define VSMC_EXAMPLE_RNG_TEST_HPP
 
-#include <vsmc/rng/rng.hpp>
+#include <vsmc/rng/uniform_real_distribution.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
 #define VSMC_RNG_TEST(RNGType) rng_test<RNGType>(N, #RNGType, names, size, sw);
@@ -80,10 +80,10 @@ inline void rng_test(std::size_t n, const std::string &name,
     result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);
 
-    runif_vsmc(rng, n / 1000, r.data());
+    rng_rand(rng, runif_vsmc, 1000, r.data());
     watch.reset();
     watch.start();
-    runif_vsmc(rng, n, r.data());
+    rng_rand(rng, runif_vsmc, n, r.data());
     watch.stop();
     result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);
@@ -109,9 +109,9 @@ inline void rng_test_output(const std::string &prog_name,
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::left << std::setw(nwid) << prog_name;
     std::cout << std::right << std::setw(swid) << "Size";
-    std::cout << std::right << std::setw(twid) << "Time (ms, STD)";
-    std::cout << std::right << std::setw(twid) << "Time (ms, vSMC)";
-    std::cout << std::right << std::setw(twid) << "Time (ms, Batch)";
+    std::cout << std::right << std::setw(twid) << "Time (STD)";
+    std::cout << std::right << std::setw(twid) << "Time (vSMC)";
+    std::cout << std::right << std::setw(twid) << "Time (Batch)";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
 

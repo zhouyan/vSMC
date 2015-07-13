@@ -332,7 +332,7 @@ inline void rng_dist_output(const vsmc::Vector<std::string> &names,
 #endif
         std::cout << std::endl;
         std::cout << std::string(lwid, '-') << std::endl;
-        std::cout << std::left << std::setw(nwid) << "Time (ms)";
+        std::cout << std::left << std::setw(nwid) << "Time";
         for (std::size_t r = 0; r != R; ++r) {
             double time = sw[i * R + r].milliseconds();
             std::cout << std::right << std::setw(twid) << time;
@@ -350,7 +350,7 @@ inline void rng_dist_output(const vsmc::Vector<std::string> &names,
             std::cout << std::right << std::setw(twid) << v;
         }
         std::cout << std::endl;
-        std::cout << std::left << std::setw(nwid) << "Test 1 Pass Rate";
+        std::cout << std::left << std::setw(nwid) << "Single level test";
         for (std::size_t r = 0; r != R; ++r) {
             double p = pval1[i * R + r];
             std::stringstream ss;
@@ -360,7 +360,7 @@ inline void rng_dist_output(const vsmc::Vector<std::string> &names,
             std::cout << std::right << std::setw(twid) << ss.str();
         }
         std::cout << std::endl;
-        std::cout << std::left << std::setw(nwid) << "Test 2 Pass Rate";
+        std::cout << std::left << std::setw(nwid) << "Two level Test";
         for (std::size_t r = 0; r != R; ++r) {
             double p = pval2[i * R + r];
             std::stringstream ss;
