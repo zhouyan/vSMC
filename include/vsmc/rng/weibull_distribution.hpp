@@ -218,6 +218,13 @@ inline void weibull_distribution(
     internal::weibull_distribution_impl(rng, l, r + m * k, a, b);
 }
 
+template <typename RealType, typename RNGType>
+inline void rng_rand(RNGType &rng, WeibullDistribution<RealType> &dist,
+    std::size_t n, RealType *r)
+{
+    weibull_distribution(rng, n, r, dist.a(), dist.b());
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_WEIBULL_DISTRIBUTION_HPP

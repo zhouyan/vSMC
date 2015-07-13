@@ -282,6 +282,15 @@ inline void uniform_real_distribution(
     uniform_real_co_distribution(rng, n, r, a, b);
 }
 
+template <typename RealType, typename RNGType, typename Left, typename Right>
+inline void rng_rand(RNGType &rng,
+    UniformRealLRDistribution<RealType, Left, Right> &dist, std::size_t n,
+    RealType *r)
+{
+    uniform_real_lr_distribution<RealType, Left, Right>(
+        rng, n, r, dist.a(), dist.b());
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_UNIFORM_REAL_DISTRIBUTION_HPP

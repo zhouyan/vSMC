@@ -198,6 +198,13 @@ inline void fisher_f_distribution(
     internal::fisher_f_distribution_impl<k>(rng, l, r + m * k, df1, df2);
 }
 
+template <typename RealType, typename RNGType>
+inline void rng_rand(RNGType &rng, FisherFDistribution<RealType> &dist,
+    std::size_t n, RealType *r)
+{
+    fisher_f_distribution(rng, n, r, dist.m(), dist.n());
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_FISHER_F_DISTRIBUTION_HPP

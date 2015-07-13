@@ -151,14 +151,38 @@ class LognormalDistribution
     param_type param_;
 }; // class LognormalDistribution
 
-/// \brief Generating lognormal random variates
-/// \ingroup Distribution
+namespace internal
+{
+
 template <typename RealType, typename RNGType>
-inline void lognormal_distribution(
+inline void lognormal_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType m, RealType s)
 {
     normal_distribution(rng, n, r, m, s);
     exp(n, r, r);
+}
+
+} // namespace vsmc::internal
+
+/// \brief Generating lognormal random variates
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void lognormal_distribution(RNGType &rng, std::size_t n, RealType *r,
+    RealType logmean, RealType logstddev)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::lognormal_distribution_impl(rng, k, r, logmean, logstddev);
+    internal::lognormal_distribution_impl(rng, l, r, logmean, logstddev);
+}
+
+template <typename RealType, typename RNGType>
+inline void rng_rand(RNGType &rng, LognormalDistribution<RealType> &dist,
+    std::size_t n, RealType *r)
+{
+    lognormal_distribution(rng, n, r, dist.m(), dist.s());
 }
 
 } // namespace vsmc

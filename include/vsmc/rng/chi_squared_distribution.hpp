@@ -152,6 +152,13 @@ inline void chi_squared_distribution(
     gamma_distribution(rng, n, r, df / 2, static_cast<RealType>(2));
 }
 
+template <typename RealType, typename RNGType>
+inline void rng_rand(RNGType &rng, ChiSquaredDistribution<RealType> &dist,
+    std::size_t n, RealType *r)
+{
+    chi_squared_distribution(rng, n, r, dist.n());
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_CHI_SQUARED_DISTRIBUTION_HPP

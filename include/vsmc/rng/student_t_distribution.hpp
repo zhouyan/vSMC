@@ -198,6 +198,13 @@ inline void student_t_distribution(
     internal::student_t_distribution_impl<k>(rng, l, r + m * k, df);
 }
 
+template <typename RealType, typename RNGType>
+inline void rng_rand(RNGType &rng, StudentTDistribution<RealType> &dist,
+    std::size_t n, RealType *r)
+{
+    student_t_distribution(rng, n, r, dist.n());
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_STUDENT_T_DISTRIBUTION_HPP

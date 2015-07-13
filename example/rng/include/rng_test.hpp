@@ -109,9 +109,9 @@ inline void rng_test_output(const std::string &prog_name,
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::left << std::setw(nwid) << prog_name;
     std::cout << std::right << std::setw(swid) << "Size";
-    std::cout << std::right << std::setw(twid) << "Time (STD)";
-    std::cout << std::right << std::setw(twid) << "Time (vSMC)";
-    std::cout << std::right << std::setw(twid) << "Time (Batch)";
+    std::cout << std::right << std::setw(twid) << "Time (ms, STD)";
+    std::cout << std::right << std::setw(twid) << "Time (ms, vSMC)";
+    std::cout << std::right << std::setw(twid) << "Time (ms, Batch)";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
 

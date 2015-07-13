@@ -636,6 +636,13 @@ inline void beta_distribution(
     }
 }
 
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &rng, BetaDistribution<RealType> &dist, std::size_t n, RealType *r)
+{
+    beta_distribution(rng, n, r, dist.alpha(), dist.beta());
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_BETA_DISTRIBUTION_HPP

@@ -216,6 +216,13 @@ inline void laplace_distribution(
     internal::laplace_distribution_impl<k>(rng, l, r + m * k, a, b);
 }
 
+template <typename RealType, typename RNGType>
+inline void rng_rand(RNGType &rng, LaplaceDistribution<RealType> &dist,
+    std::size_t n, RealType *r)
+{
+    laplace_distribution(rng, n, r, dist.a(), dist.b());
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_LAPLACE_DISTRIBUTION_HPP

@@ -501,6 +501,13 @@ inline void gamma_distribution(
     }
 }
 
+template <typename RealType, typename RNGType>
+inline void rng_rand(RNGType &rng, GammaDistribution<RealType> &dist,
+    std::size_t n, RealType *r)
+{
+    gamma_distribution(rng, n, r, dist.alpha(), dist.beta());
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_GAMMA_DISTRIBUTION_HPP

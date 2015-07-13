@@ -193,6 +193,13 @@ inline void exponential_distribution(
     internal::exponential_distribution_impl(rng, l, r + m * k, lambda);
 }
 
+template <typename RealType, typename RNGType>
+inline void rng_rand(RNGType &rng, ExponentialDistribution<RealType> &dist,
+    std::size_t n, RealType *r)
+{
+    exponential_distribution(rng, n, r, dist.lambda());
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_EXPONENTIAL_DISTRIBUTION_HPP

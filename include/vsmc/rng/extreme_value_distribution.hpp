@@ -208,6 +208,14 @@ inline void extreme_value_distribution(
     internal::extreme_value_distribution_impl(rng, l, r + m * k, a, b);
 }
 
+template <typename RealType, typename RNGType>
+inline void rng_rand(RNGType &rng, ExtremeValueDistribution<RealType> &dist,
+    std::size_t n, RealType *r)
+{
+    extreme_value_distribution(rng, n, r, dist.a(), dist.b());
+}
+
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_EXTREME_VALUE_DISTRIBUTION_HPP

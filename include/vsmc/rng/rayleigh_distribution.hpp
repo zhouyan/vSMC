@@ -189,6 +189,13 @@ inline void rayleigh_distribution(
     internal::rayleigh_distribution_impl(rng, l, r + m * k, sigma);
 }
 
+template <typename RealType, typename RNGType>
+inline void rng_rand(RNGType &rng, RayleighDistribution<RealType> &dist,
+    std::size_t n, RealType *r)
+{
+    rayleigh_distribution(rng, n, r, dist.sigma());
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_RAYLEIGH_DISTRIBUTION_HPP

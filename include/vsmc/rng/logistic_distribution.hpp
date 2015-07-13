@@ -207,6 +207,13 @@ inline void logistic_distribution(
     internal::logistic_distribution_impl<k>(rng, l, r + m * k, a, b);
 }
 
+template <typename RealType, typename RNGType>
+inline void rng_rand(RNGType &rng, LogisticDistribution<RealType> &dist,
+    std::size_t n, RealType *r)
+{
+    logistic_distribution(rng, n, r, dist.a(), dist.b());
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_LOGISTIC_DISTRIBUTION_HPP

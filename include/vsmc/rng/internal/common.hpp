@@ -163,6 +163,16 @@ void rng_rand(RNGType &rng, std::size_t n, typename RNGType::result_type *r)
         r[i] = rng();
 }
 
+/// \brief Generate random distribution variates
+/// \ingroup RNG
+template <typename RNGType, typename DistributionType>
+void rng_rand(RNGType &rng, DistributionType &dist, std::size_t n,
+    typename DistributionType::result_type *r)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = dist(rng);
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_INTERNAL_COMMON_HPP

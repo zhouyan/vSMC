@@ -208,6 +208,13 @@ inline void pareto_distribution(
     internal::pareto_distribution_impl<k>(rng, l, r + m * k, a, b);
 }
 
+template <typename RealType, typename RNGType>
+inline void rng_rand(RNGType &rng, ParetoDistribution<RealType> &dist,
+    std::size_t n, RealType *r)
+{
+    pareto_distribution(rng, n, r, dist.a(), dist.b());
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_PARETO_DISTRIBUTION_HPP

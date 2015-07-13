@@ -275,6 +275,13 @@ inline void normal_distribution(
     }
 }
 
+template <typename RealType, typename RNGType>
+inline void rng_rand(RNGType &rng, NormalDistribution<RealType> &dist,
+    std::size_t n, RealType *r)
+{
+    normal_distribution(rng, n, r, dist.mean(), dist.stddev());
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_NORMAL_DISTRIBUTION_HPP

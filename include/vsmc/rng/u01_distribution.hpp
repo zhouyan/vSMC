@@ -337,6 +337,13 @@ inline void u01_distribution(RNGType &rng, std::size_t n, RealType *r)
     u01_co_distribution(rng, n, r);
 }
 
+template <typename RealType, typename RNGType, typename Left, typename Right>
+inline void rng_rand(RNGType &rng, U01LRDistribution<RealType, Left, Right> &,
+    std::size_t n, RealType *r)
+{
+    u01_lr_distribution<RealType, Left, Right>(rng, n, r);
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_U01_HPP

@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/rng/src/rng_gof.cpp
+// vSMC/example/rng/src/rng_extreme_value.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,22 +29,24 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "rng_gof.hpp"
+#include "rng_dist.hpp"
+#include <vsmc/rng/extreme_value_distribution.hpp>
+
+template <>
+inline vsmc::Vector<double>
+    rng_dist_partition<vsmc::ExtremeValueDistribution<double>>(
+        std::size_t n, vsmc::ExtremeValueDistribution<double> &dist)
+{
+    return rng_dist_partition_quantile(n, [&](double p) {
+        return dist.a() - dist.b() * std::log(-std::log(p));
+    });
+}
 
 int main(int argc, char **argv)
 {
-    std::size_t N = 10000;
-    std::size_t M = 100;
-    if (argc > 1)
-        N = static_cast<std::size_t>(std::atoi(argv[1]));
-    if (argc > 2)
-        M = static_cast<std::size_t>(std::atoi(argv[2]));
-    std::array<double, 1> param1;
-    std::array<double, 2> param2;
-    vsmc::Vector<std::string> names;
-    vsmc::Vector<double> pval;
-    VSMC_RNG_DIST_ALL(GOF);
-    rng_gof_output(names, pval);
+    VSMC_RNG_DIST_PRE(2);
+    VSMC_RNG_DIST_2(ExtremeValue, std::extreme_value_distribution, 0, 1);
+    VSMC_RNG_DIST_POST;
 
     return 0;
 }

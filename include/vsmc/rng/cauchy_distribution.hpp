@@ -206,6 +206,13 @@ inline void cauchy_distribution(
     internal::cauchy_distribution_impl(rng, l, r + m * k, a, b);
 }
 
+template <typename RealType, typename RNGType>
+inline void rng_rand(RNGType &rng, CauchyDistribution<RealType> &dist,
+    std::size_t n, RealType *r)
+{
+    cauchy_distribution(rng, n, r, dist.a(), dist.b());
+}
+
 } // namespace vsmc
 
 #endif // VSMC_RNG_CAUCHY_DISTRIBUTION_HPP
