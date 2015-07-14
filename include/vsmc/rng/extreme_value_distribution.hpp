@@ -211,7 +211,6 @@ inline void rng_rand(RNGType &rng, ExtremeValueDistribution<RealType> &dist,
     dist(rng, n, r);
 }
 
-
 } // namespace vsmc
 
 #endif // VSMC_RNG_EXTREME_VALUE_DISTRIBUTION_HPP

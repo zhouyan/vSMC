@@ -200,8 +200,8 @@ inline void levy_distribution(
 }
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, LevyDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
+inline void rng_rand(
+    RNGType &rng, LevyDistribution<RealType> &dist, std::size_t n, RealType *r)
 {
     dist(rng, n, r);
 }
