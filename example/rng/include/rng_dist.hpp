@@ -254,7 +254,7 @@ inline void rng_dist(std::size_t n, std::size_t m,
     for (std::size_t i = 0; i != m; ++i) {
         watch.start();
         for (std::size_t j = 0; j != n; ++j)
-            r[i] = dist_dist(rng);
+            r[i] = dist_std(rng);
         watch.stop();
         chi2.push_back(rng_dist_chi2(r, partition));
         ksad.push_back(rng_dist_ksad(r, partition));
