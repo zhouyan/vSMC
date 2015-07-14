@@ -35,138 +35,40 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/normal_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_LEVY_DISTRIBUTION_PARAM_CHECK(b)              \
-    VSMC_RUNTIME_ASSERT((b > 0), "**LevyDistribution** CONSTRUCTED "          \
-                                 "WITH INVALID SCALE PARAMETER VALUE")
-
 namespace vsmc
 {
+
+namespace internal
+{
+
+inline bool levy_distribution_check_param(double, double b) { return b > 0; }
+
+} // namespace vsmc::internal
 
 /// \brief Levy distribution
 /// \ingroup Distribution
 template <typename RealType>
 class LevyDistribution
 {
-    public:
-    using result_type = RealType;
-    using distribution_type = LevyDistribution<RealType>;
-
-    class param_type
-    {
-        public:
-        using result_type = RealType;
-        using distribution_type = LevyDistribution<RealType>;
-
-        explicit param_type(result_type a = 0, result_type b = 1)
-            : a_(a), b_(b), normal_(0, 1)
-        {
-            invariant();
-        }
-
-        result_type a() const { return a_; }
-        result_type b() const { return b_; }
-
-        friend bool operator==(
-            const param_type &param1, const param_type &param2)
-        {
-            if (!internal::is_equal(param1.a_, param2.a_))
-                return false;
-            if (!internal::is_equal(param1.b_, param2.b_))
-                return false;
-            return true;
-        }
-
-        friend bool operator!=(
-            const param_type &param1, const param_type &param2)
-        {
-            return !(param1 == param2);
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_ostream<CharT, Traits> &operator<<(
-            std::basic_ostream<CharT, Traits> &os, const param_type &param)
-        {
-            if (!os.good())
-                return os;
-
-            os << param.a_ << ' ';
-            os << param.b_;
-
-            return os;
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, param_type &param)
-        {
-            if (!is.good())
-                return is;
-
-            result_type a = 0;
-            result_type b = 0;
-            is >> std::ws >> a;
-            is >> std::ws >> b;
-
-            if (is.good()) {
-                if (b > 0)
-                    param = param_type(a, b);
-                else
-                    is.setstate(std::ios_base::failbit);
-            }
-
-            return is;
-        }
-
-        private:
-        result_type a_;
-        result_type b_;
-        NormalDistribution<RealType> normal_;
-
-        friend distribution_type;
-
-        void invariant()
-        {
-            VSMC_RUNTIME_ASSERT_RNG_LEVY_DISTRIBUTION_PARAM_CHECK(b_);
-        }
-
-        void reset() {}
-    }; // class param_type
-
-    explicit LevyDistribution(result_type a = 0, result_type b = 1)
-        : param_(a, b)
-    {
-    }
-
-    explicit LevyDistribution(const param_type &param) : param_(param) {}
-
-    result_type a() const { return param_.a(); }
-    result_type b() const { return param_.b(); }
-
-    result_type min() const { return a(); }
-
-    result_type max() const
-    {
-        return std::numeric_limits<result_type>::infinity();
-    }
-
-    template <typename RNGType>
-    result_type operator()(RNGType &rng)
-    {
-        result_type r = param_.normal_(rng);
-
-        return param_.a_ + param_.b_ / (r * r);
-    }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
-    {
-        levy_distribution(rng, n, r, a(), b());
-    }
-
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Levy, levy, RealType, a, 0, b, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
+    public:
+    result_type min() const { return a(); }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
+
+    void reset() { normal_ = NormalDistribution<RealType>(0, 1); }
+
     private:
-    param_type param_;
+    NormalDistribution<RealType> normal_;
+
+    template <typename RNGType>
+    result_type generate(RNGType &rng, const param_type &param)
+    {
+        result_type r = normal_(rng);
+
+        return param.a() + param.b() / (r * r);
+    }
 }; // class LevyDistribution
 
 namespace internal

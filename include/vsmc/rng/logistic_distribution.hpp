@@ -35,141 +35,42 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_LOGISTIC_DISTRIBUTION_PARAM_CHECK(b)          \
-    VSMC_RUNTIME_ASSERT((b > 0), "**LogisticDistribution** CONSTRUCTED "      \
-                                 "WITH INVALID SCALE PARAMETER VALUE")
-
 namespace vsmc
 {
+
+namespace internal
+{
+
+inline bool logistic_distribution_check_param(double, double b)
+{
+    return b > 0;
+}
+
+} // namespace vsmc::internal
 
 /// \brief Logistic distribution
 /// \ingroup Distribution
 template <typename RealType>
 class LogisticDistribution
 {
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Logistic, logistic, RealType, a, 0, b, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+
     public:
-    using result_type = RealType;
-    using distribution_type = LogisticDistribution<RealType>;
+    result_type min() const { return -max(); }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
-    class param_type
-    {
-        public:
-        using result_type = RealType;
-        using distribution_type = LogisticDistribution<RealType>;
+    void reset() {}
 
-        explicit param_type(result_type a = 0, result_type b = 1)
-            : a_(a), b_(b)
-        {
-            invariant();
-        }
-
-        result_type a() const { return a_; }
-        result_type b() const { return b_; }
-
-        friend bool operator==(
-            const param_type &param1, const param_type &param2)
-        {
-            if (!internal::is_equal(param1.a_, param2.a_))
-                return false;
-            if (!internal::is_equal(param1.b_, param2.b_))
-                return false;
-            return true;
-        }
-
-        friend bool operator!=(
-            const param_type &param1, const param_type &param2)
-        {
-            return !(param1 == param2);
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_ostream<CharT, Traits> &operator<<(
-            std::basic_ostream<CharT, Traits> &os, const param_type &param)
-        {
-            if (!os.good())
-                return os;
-
-            os << param.a_ << ' ';
-            os << param.b_;
-
-            return os;
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, param_type &param)
-        {
-            if (!is.good())
-                return is;
-
-            result_type a = 0;
-            result_type b = 0;
-            is >> std::ws >> a;
-            is >> std::ws >> b;
-
-            if (is.good()) {
-                if (b > 0)
-                    param = param_type(a, b);
-                else
-                    is.setstate(std::ios_base::failbit);
-            }
-
-            return is;
-        }
-
-        private:
-        result_type a_;
-        result_type b_;
-
-        friend distribution_type;
-
-        void invariant()
-        {
-            VSMC_RUNTIME_ASSERT_RNG_LOGISTIC_DISTRIBUTION_PARAM_CHECK(b_);
-        }
-
-        void reset() {}
-    }; // class param_type
-
-    explicit LogisticDistribution(result_type a = 0, result_type b = 1)
-        : param_(a, b)
-    {
-    }
-
-    explicit LogisticDistribution(const param_type &param) : param_(param) {}
-
-    result_type a() const { return param_.a(); }
-    result_type b() const { return param_.b(); }
-
-    result_type min() const
-    {
-        return -std::numeric_limits<result_type>::infinity();
-    }
-
-    result_type max() const
-    {
-        return std::numeric_limits<result_type>::infinity();
-    }
-
+    private:
     template <typename RNGType>
-    result_type operator()(RNGType &rng)
+    result_type generate(RNGType &rng, const param_type &param)
     {
         U01OODistribution<RealType> runif;
         result_type u = runif(rng);
 
-        return param_.a_ + param_.b_ * std::log(u / (1 - u));
+        return param.a() + param.b() * std::log(u / (1 - u));
     }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
-    {
-        logistic_distribution(rng, n, r, a(), b());
-    }
-
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
-
-    private:
-    param_type param_;
 }; // class LogisticDistribution
 
 namespace internal

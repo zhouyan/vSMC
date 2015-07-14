@@ -38,129 +38,50 @@
 namespace vsmc
 {
 
+namespace internal
+{
+
+inline bool fisher_f_distribution_check_param(double m, double n)
+{
+    return m > 0 && n > 0;
+}
+
+} // namespace vsmc::internal
+
 /// \brief Fisher-F distribution
 /// \ingroup Distribution
 template <typename RealType>
 class FisherFDistribution
 {
-    public:
-    using result_type = RealType;
-    using distribution_type = FisherFDistribution<RealType>;
-
-    class param_type
-    {
-        public:
-        using result_type = RealType;
-        using distribution_type = FisherFDistribution<RealType>;
-
-        explicit param_type(result_type m = 1, result_type n = 1)
-            : chi_squared_m_(m), chi_squared_n_(n)
-        {
-        }
-
-        result_type m() const { return chi_squared_m_.n(); }
-        result_type n() const { return chi_squared_n_.n(); }
-
-        friend bool operator==(
-            const param_type &param1, const param_type &param2)
-        {
-            if (param1.chi_squared_m_ != param2.chi_squared_m_)
-                return false;
-            if (param1.chi_squared_n_ != param2.chi_squared_n_)
-                return false;
-            return true;
-        }
-
-        friend bool operator!=(
-            const param_type &param1, const param_type &param2)
-        {
-            return !(param1 == param2);
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_ostream<CharT, Traits> &operator<<(
-            std::basic_ostream<CharT, Traits> &os, const param_type &param)
-        {
-            if (!os.good())
-                return os;
-
-            os << param.chi_squared_m_ << ' ';
-            os << param.chi_squared_n_ << ' ';
-
-            return os;
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, param_type &param)
-        {
-            if (!is.good())
-                return is;
-
-            ChiSquaredDistribution<RealType> chi_squared_m;
-            ChiSquaredDistribution<RealType> chi_squared_n;
-            is >> std::ws >> chi_squared_m;
-            is >> std::ws >> chi_squared_n;
-
-            if (is.good()) {
-                param.chi_squared_m_ = std::move(chi_squared_m);
-                param.chi_squared_n_ = std::move(chi_squared_n);
-            }
-
-            return is;
-        }
-
-        private:
-        ChiSquaredDistribution<RealType> chi_squared_m_;
-        ChiSquaredDistribution<RealType> chi_squared_n_;
-
-        friend distribution_type;
-
-        void invariant() {}
-
-        void reset()
-        {
-            chi_squared_m_.reset();
-            chi_squared_n_.reset();
-        }
-    }; // class param_type
-
-    explicit FisherFDistribution(result_type m = 1, result_type n = 1)
-        : param_(m, n)
-    {
-    }
-
-    explicit FisherFDistribution(const param_type &param) : param_(param) {}
-
-    result_type m() const { return param_.m(); }
-    result_type n() const { return param_.n(); }
-
-    result_type min() const { return 0; }
-
-    result_type max() const
-    {
-        return std::numeric_limits<result_type>::infinity();
-    }
-
-    template <typename RNGType>
-    result_type operator()(RNGType &rng)
-    {
-        result_type u1 = param_.chi_squared_m_(rng) / m();
-        result_type u2 = param_.chi_squared_n_(rng) / n();
-
-        return u1 / u2;
-    }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
-    {
-        fisher_f_distribution(rng, n, r, m(), this->n());
-    }
-
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(FisherF, fisher_f, RealType, m, 1, n, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
+    public:
+    result_type min() const { return 0; }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
+
+    void reset()
+    {
+        chi_squared_m_ = ChiSquaredDistribution<RealType>(m());
+        chi_squared_n_ = ChiSquaredDistribution<RealType>(n());
+    }
+
     private:
-    param_type param_;
+    ChiSquaredDistribution<RealType> chi_squared_m_;
+    ChiSquaredDistribution<RealType> chi_squared_n_;
+
+    template <typename RNGType>
+    result_type generate(RNGType &rng, const param_type &param)
+    {
+        if (param == param_)
+            return (chi_squared_m_(rng) / m()) / (chi_squared_n_(rng) / n());
+
+        ChiSquaredDistribution<RealType> chi_squared_m(param.m());
+        ChiSquaredDistribution<RealType> chi_squared_n(param.n());
+
+        return (chi_squared_m(rng) / param.m()) /
+            (chi_squared_n(rng) / param.n());
+    }
 }; // class FisherFDistribution
 
 namespace internal

@@ -38,105 +38,40 @@
 namespace vsmc
 {
 
+namespace internal
+{
+
+inline bool chi_squared_distribution_check_param(double n) { return n > 0; }
+
+} // namespace vsmc::internal
+
 /// \brief The \f$\chi^2\f$ distribution
 /// \ingroup Distribution
 template <typename RealType>
 class ChiSquaredDistribution
 {
-
-    public:
-    using result_type = RealType;
-    using distribution_type = ChiSquaredDistribution<RealType>;
-
-    class param_type
-    {
-        public:
-        using result_type = RealType;
-        using distribution_type = ChiSquaredDistribution<RealType>;
-
-        explicit param_type(result_type n = 1) : gamma_(n / 2, 2) {}
-
-        result_type n() const { return gamma_.alpha() * 2; }
-
-        friend bool operator==(
-            const param_type &param1, const param_type &param2)
-        {
-            return param1.gamma_ == param2.gamma_;
-        }
-
-        friend bool operator!=(
-            const param_type &param1, const param_type &param2)
-        {
-            return !(param1 == param2);
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_ostream<CharT, Traits> &operator<<(
-            std::basic_ostream<CharT, Traits> &os, const param_type &param)
-        {
-            if (!os.good())
-                return os;
-
-            os << param.gamma_;
-
-            return os;
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, param_type &param)
-        {
-            if (!is.good())
-                return is;
-
-            GammaDistribution<RealType> gamma;
-            is >> std::ws >> gamma;
-
-            if (is.good())
-                param.gamma_ = gamma;
-
-            return is;
-        }
-
-        private:
-        GammaDistribution<RealType> gamma_;
-
-        friend distribution_type;
-
-        void invariant() {}
-
-        void reset() { gamma_.reset(); }
-    }; // class param_type
-
-    explicit ChiSquaredDistribution(result_type n = 1) : param_(n) {}
-
-    explicit ChiSquaredDistribution(const param_type &param) : param_(param) {}
-
-    result_type n() const { return param_.n(); }
-
-    result_type min() const { return 0; }
-
-    result_type max() const
-    {
-        return std::numeric_limits<result_type>::infinity();
-    }
-
-    template <typename RNGType>
-    result_type operator()(RNGType &rng)
-    {
-        return param_.gamma_(rng);
-    }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
-    {
-        chi_squared_distribution(rng, n, r, this->n());
-    }
-
+    VSMC_DEFINE_RNG_DISTRIBUTION_1(ChiSquared, chi_squared, RealType, n, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
+    public:
+    result_type min() const { return 0; }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
+
+    void reset() { gamma_ = GammaDistribution<RealType>(n() / 2, 2); }
+
     private:
-    param_type param_;
+    GammaDistribution<RealType> gamma_;
+
+    template <typename RNGType>
+    result_type generate(RNGType &rng, const param_type &param)
+    {
+        if (param == param_)
+            return gamma_(rng);
+
+        GammaDistribution<RealType> gamma(param.n() / 2, 2);
+
+        return gamma(rng);
+    }
 }; // class ChiSquaredDistribution
 
 /// \brief Generating \f$\chi^2\f$ random variates

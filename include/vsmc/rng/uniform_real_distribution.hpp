@@ -64,8 +64,7 @@ class UniformRealLRDistribution
         using distribution_type =
             UniformRealLRDistribution<RealType, Left, Right>;
 
-        explicit param_type(result_type a = 0, result_type b = 1)
-            : a_(a), b_(b)
+        param_type(result_type a, result_type b) : a_(a), b_(b)
         {
             invariant();
         }
@@ -154,19 +153,34 @@ class UniformRealLRDistribution
     result_type min() const { return a(); }
     result_type max() const { return b(); }
 
-    template <typename RNGType>
-    result_type operator()(RNGType &rng) const
-    {
-        U01LRDistribution<RealType, Left, Right> u01;
+    void reset() {}
 
-        return param_.a_ + (param_.b_ - param_.a_) * u01(rng);
+    template <typename RNGType>
+    result_type operator()(RNGType &rng)
+    {
+        return operator()(rng, param_);
     }
 
     template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r) const
+    result_type operator()(RNGType &rng, const param_type &param)
+    {
+        U01LRDistribution<RealType, Left, Right> u01;
+
+        return param.a() + (param.b() - param.a()) * u01(rng);
+    }
+
+    template <typename RNGType>
+    void operator()(RNGType &rng, std::size_t n, result_type *r)
+    {
+        return operator()(rng, n, r, param_);
+    }
+
+    template <typename RNGType>
+    void operator()(
+        RNGType &rng, std::size_t n, result_type *r, const param_type &param)
     {
         uniform_real_lr_distribution<RealType, Left, Right>(
-            rng, n, r, a(), b());
+            rng, n, r, param.a(), param.b());
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS

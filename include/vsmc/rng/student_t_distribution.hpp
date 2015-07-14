@@ -39,127 +39,49 @@
 namespace vsmc
 {
 
+namespace internal
+{
+
+inline bool student_t_distribution_check_param(double n) { return n > 0; }
+
+} // namespace vsmc::internal
+
 /// \brief Student-t distribution
 /// \ingroup Distribution
 template <typename RealType>
 class StudentTDistribution
 {
+    VSMC_DEFINE_RNG_DISTRIBUTION_1(StudentT, student_t, RealType, n, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:
-    using result_type = RealType;
-    using distribution_type = StudentTDistribution<RealType>;
+    result_type min() const { return -max(); }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
-    class param_type
+    void reset()
     {
-        public:
-        using result_type = RealType;
-        using distribution_type = StudentTDistribution<RealType>;
-
-        explicit param_type(result_type n = 1) : chi_squared_(n), normal_(0, 1)
-        {
-        }
-
-        result_type n() const { return chi_squared_.n(); }
-
-        friend bool operator==(
-            const param_type &param1, const param_type &param2)
-        {
-            if (param1.chi_squared_ != param2.chi_squared_)
-                return false;
-            if (param1.normal_ != param2.normal_)
-                return false;
-            return true;
-        }
-
-        friend bool operator!=(
-            const param_type &param1, const param_type &param2)
-        {
-            return !(param1 == param2);
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_ostream<CharT, Traits> &operator<<(
-            std::basic_ostream<CharT, Traits> &os, const param_type &param)
-        {
-            if (!os.good())
-                return os;
-
-            os << param.chi_squared << ' ';
-            os << param.normal_;
-
-            return os;
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, param_type &param)
-        {
-            if (!is.good())
-                return is;
-
-            ChiSquaredDistribution<RealType> chi_squared;
-            NormalDistribution<RealType> normal;
-            is >> std::ws >> chi_squared;
-            is >> std::ws >> normal;
-
-            if (is.good()) {
-                param.chi_squared = chi_squared;
-                param.normal_ = normal;
-            }
-
-            return is;
-        }
-
-        private:
-        ChiSquaredDistribution<RealType> chi_squared_;
-        NormalDistribution<RealType> normal_;
-
-        friend distribution_type;
-
-        void invariant() {}
-
-        void reset()
-        {
-            chi_squared_.reset();
-            normal_.reset();
-        }
-    }; // class param_type
-
-    explicit StudentTDistribution(result_type n = 1) : param_(n) {}
-
-    explicit StudentTDistribution(const param_type &param) : param_(param) {}
-
-    result_type n() const { return param_.n(); }
-
-    result_type min() const
-    {
-        return -std::numeric_limits<result_type>::infinity();
+        chi_squared_ = ChiSquaredDistribution<RealType>(n());
+        normal_ = NormalDistribution<RealType>(0, 1);
     }
 
-    result_type max() const
-    {
-        return std::numeric_limits<result_type>::infinity();
-    }
+    private:
+    ChiSquaredDistribution<RealType> chi_squared_;
+    NormalDistribution<RealType> normal_;
 
     template <typename RNGType>
-    result_type operator()(RNGType &rng)
+    result_type generate(RNGType &rng, const param_type &param)
     {
-        result_type z = param_.normal_(rng);
-        result_type u = n() / param_.chi_squared_(rng);
+        result_type z = normal_(rng);
+        result_type u = 0;
+        if (param == param_) {
+            u = n() / chi_squared_(rng);
+        } else {
+            ChiSquaredDistribution<RealType> chi_squared(param.n());
+            u = param.n() / chi_squared(rng);
+        }
 
         return z * std::sqrt(u);
     }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
-    {
-        student_t_distribution(rng, n, r, this->n());
-    }
-
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
-
-    private:
-    param_type param_;
 }; // class StudentTDistribution
 
 namespace internal

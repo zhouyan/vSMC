@@ -35,141 +35,38 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_CAUCHY_DISTRIBUTION_PARAM_CHECK(b)            \
-    VSMC_RUNTIME_ASSERT((b > 0), "**CauchyDistribution** CONSTRUCTED WITH "   \
-                                 "INVALID SCALE PARAMETER VALUE")
-
 namespace vsmc
 {
+
+namespace internal
+{
+
+inline bool cauchy_distribution_check_param(double, double b) { return b > 0; }
+
+} // namespace vsmc::internal
 
 /// \brief Cauchy distribution
 /// \ingroup Distribution
 template <typename RealType>
 class CauchyDistribution
 {
-    public:
-    using result_type = RealType;
-    using distribution_type = CauchyDistribution<RealType>;
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Cauchy, cauchy, RealType, a, 0, b, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
-    class param_type
-    {
-        public:
-        using result_type = RealType;
-        using distribution_type = CauchyDistribution<RealType>;
+    result_type min() const { return -max(); }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
-        explicit param_type(result_type a = 0, result_type b = 1)
-            : a_(a), b_(b)
-        {
-            invariant();
-        }
+    void reset() {}
 
-        result_type a() const { return a_; }
-        result_type b() const { return b_; }
-
-        friend bool operator==(
-            const param_type &param1, const param_type &param2)
-        {
-            if (!internal::is_equal(param1.a_, param2.a_))
-                return false;
-            if (!internal::is_equal(param1.b_, param2.b_))
-                return false;
-            return true;
-        }
-
-        friend bool operator!=(
-            const param_type &param1, const param_type &param2)
-        {
-            return !(param1 == param2);
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_ostream<CharT, Traits> &operator<<(
-            std::basic_ostream<CharT, Traits> &os, const param_type &param)
-        {
-            if (!os.good())
-                return os;
-
-            os << param.a_ << ' ';
-            os << param.b_;
-
-            return os;
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, param_type &param)
-        {
-            if (!is.good())
-                return is;
-
-            result_type a = 0;
-            result_type b = 0;
-            is >> std::ws >> a;
-            is >> std::ws >> b;
-
-            if (is.good()) {
-                if (b > 0)
-                    param = param_type(a, b);
-                else
-                    is.setstate(std::ios_base::failbit);
-            }
-
-            return is;
-        }
-
-        private:
-        result_type a_;
-        result_type b_;
-
-        friend distribution_type;
-
-        void invariant()
-        {
-            VSMC_RUNTIME_ASSERT_RNG_CAUCHY_DISTRIBUTION_PARAM_CHECK(b_);
-        }
-
-        void reset() {}
-    }; // class param_type
-
-    explicit CauchyDistribution(result_type a = 0, result_type b = 1)
-        : param_(a, b)
-    {
-    }
-
-    explicit CauchyDistribution(const param_type &param) : param_(param) {}
-
-    result_type a() const { return param_.a(); }
-    result_type b() const { return param_.b(); }
-
-    result_type min() const
-    {
-        return -std::numeric_limits<result_type>::infinity();
-    }
-
-    result_type max() const
-    {
-        return std::numeric_limits<result_type>::infinity();
-    }
-
+    private:
     template <typename RNGType>
-    result_type operator()(RNGType &rng)
+    result_type generate(RNGType &rng, const param_type &param)
     {
         U01CODistribution<RealType> runif;
 
-        return param_.a_ +
-            param_.b_ * std::tan(const_pi<result_type>() * runif(rng));
+        return param.a() +
+            param.b() * std::tan(const_pi<result_type>() * runif(rng));
     }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
-    {
-        cauchy_distribution(rng, n, r, a(), b());
-    }
-
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
-
-    private:
-    param_type param_;
 }; // class CauchyDistribution
 
 namespace internal

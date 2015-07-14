@@ -35,130 +35,42 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_EXPONENTIAL_DISTRIBUTION_PARAM_CHECK(coeff)   \
-    VSMC_RUNTIME_ASSERT((coeff < 0), "**ExponentialDistribution** "           \
-                                     "CONSTRUCTED WITH INVALID RATE "         \
-                                     "PARAMETER VALUE")
-
 namespace vsmc
 {
+
+namespace internal
+{
+
+inline bool exponential_distribution_check_param(double lambda)
+{
+    return lambda > 0;
+}
+
+} // namespace vsmc::internal
 
 /// \brief Exponential distribution
 /// \ingroup Distribution
 template <typename RealType>
 class ExponentialDistribution
 {
+    VSMC_DEFINE_RNG_DISTRIBUTION_1(
+        Exponential, exponential, RealType, lambda, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:
-    using result_type = RealType;
-    using distribution_type = ExponentialDistribution<RealType>;
-
-    class param_type
-    {
-        public:
-        using result_type = RealType;
-        using distribution_type = ExponentialDistribution<RealType>;
-
-        explicit param_type(result_type lambda = 1) : coeff_(-1 / lambda)
-        {
-            invariant();
-        }
-
-        result_type lambda() const { return -1 / coeff_; }
-
-        friend bool operator==(
-            const param_type &param1, const param_type &param2)
-        {
-            return internal::is_equal(param1.coeff_, param2.coeff_);
-        }
-
-        friend bool operator!=(
-            const param_type &param1, const param_type &param2)
-        {
-            return !(param1 == param2);
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_ostream<CharT, Traits> &operator<<(
-            std::basic_ostream<CharT, Traits> &os, const param_type &param)
-        {
-            if (!os.good())
-                return os;
-
-            os << param.coeff_;
-
-            return os;
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, param_type &param)
-        {
-            if (!is.good())
-                return is;
-
-            result_type coeff = 0;
-            is >> std::ws >> coeff;
-
-            if (is.good()) {
-                if (coeff < 0)
-                    param.coeff_ = coeff;
-                else
-                    is.setstate(std::ios_base::failbit);
-            }
-
-            return is;
-        }
-
-        private:
-        result_type coeff_;
-
-        friend distribution_type;
-
-        void invariant()
-        {
-            VSMC_RUNTIME_ASSERT_RNG_EXPONENTIAL_DISTRIBUTION_PARAM_CHECK(
-                coeff_);
-        }
-
-        void reset() {}
-    }; // class param_type
-
-    explicit ExponentialDistribution(result_type lambda = 1) : param_(lambda)
-    {
-    }
-
-    explicit ExponentialDistribution(const param_type &param) : param_(param)
-    {
-    }
-
-    result_type lambda() const { return param_.lambda(); }
-
     result_type min() const { return 0; }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
-    result_type max() const
-    {
-        return std::numeric_limits<result_type>::infinity();
-    }
+    void reset() {}
 
+    private:
     template <typename RNGType>
-    result_type operator()(RNGType &rng)
+    result_type generate(RNGType &rng, const param_type &param)
     {
         U01OCDistribution<RealType> runif;
 
-        return param_.coeff_ * std::log(runif(rng));
+        return -std::log(runif(rng)) / param.lambda();
     }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
-    {
-        exponential_distribution(rng, n, r, lambda());
-    }
-
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
-
-    private:
-    param_type param_;
 }; // class ExponentialDistribution
 
 namespace internal

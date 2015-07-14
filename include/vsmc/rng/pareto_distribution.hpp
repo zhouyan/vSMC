@@ -35,137 +35,41 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/exponential_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_CHECK(b)            \
-    VSMC_RUNTIME_ASSERT((b > 0), "**ParetoDistribution** CONSTRUCTED "        \
-                                 "WITH INVALID SCALE PARAMETER VALUE")
-
 namespace vsmc
 {
+
+namespace internal
+{
+
+inline bool pareto_distribution_check_param(double a, double b)
+{
+    return a > 0 && b > 0;
+}
+
+} // namespace vsmc::internal
 
 /// \brief Pareto distribution
 /// \ingroup Distribution
 template <typename RealType>
 class ParetoDistribution
 {
-    public:
-    using result_type = RealType;
-    using distribution_type = ParetoDistribution<RealType>;
-
-    class param_type
-    {
-        public:
-        using result_type = RealType;
-        using distribution_type = ParetoDistribution<RealType>;
-
-        explicit param_type(result_type a = 1, result_type b = 1)
-            : b_(b), exponential_(a)
-        {
-            invariant();
-        }
-
-        result_type a() const { return exponential_.lambda(); }
-        result_type b() const { return b_; }
-
-        friend bool operator==(
-            const param_type &param1, const param_type &param2)
-        {
-            if (!internal::is_equal(param1.b_, param2.b_))
-                return false;
-            if (param1.exponential_ != param2.exponential_)
-                return false;
-            return true;
-        }
-
-        friend bool operator!=(
-            const param_type &param1, const param_type &param2)
-        {
-            return !(param1 == param2);
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_ostream<CharT, Traits> &operator<<(
-            std::basic_ostream<CharT, Traits> &os, const param_type &param)
-        {
-            if (!os.good())
-                return os;
-
-            os << param.b_ << ' ';
-            os << param.exponential_;
-
-            return os;
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, param_type &param)
-        {
-            if (!is.good())
-                return is;
-
-            result_type b = 0;
-            ExponentialDistribution<RealType> exponential;
-            is >> std::ws >> b;
-            is >> std::ws >> exponential;
-
-            if (is.good()) {
-                if (b > 0) {
-                    param.b_ = b;
-                    param.exponential_ = exponential;
-                } else {
-                    is.setstate(std::ios_base::failbit);
-                }
-            }
-
-            return is;
-        }
-
-        private:
-        result_type b_;
-        ExponentialDistribution<RealType> exponential_;
-
-        friend distribution_type;
-
-        void invariant()
-        {
-            VSMC_RUNTIME_ASSERT_RNG_PARETO_DISTRIBUTION_PARAM_CHECK(b_);
-        }
-
-        void reset() {}
-    }; // class param_type
-
-    explicit ParetoDistribution(result_type a = 0, result_type b = 1)
-        : param_(a, b)
-    {
-    }
-
-    explicit ParetoDistribution(const param_type &param) : param_(param) {}
-
-    result_type a() const { return param_.a(); }
-    result_type b() const { return param_.b(); }
-
-    result_type min() const { return a(); }
-
-    result_type max() const
-    {
-        return std::numeric_limits<result_type>::infinity();
-    }
-
-    template <typename RNGType>
-    result_type operator()(RNGType &rng)
-    {
-        return param_.b_ * std::exp(param_.exponential_(rng));
-    }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
-    {
-        pareto_distribution(rng, n, r, a(), b());
-    }
-
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Pareto, pareto, RealType, a, 1, b, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
+    public:
+    result_type min() const { return a(); }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
+
+    void reset() {}
+
     private:
-    param_type param_;
+    template <typename RNGType>
+    result_type generate(RNGType &rng, const param_type &param)
+    {
+        U01OCDistribution<RealType> runif;
+
+        return param.b() * std::exp(-std::log(runif(rng)) / param.a());
+    }
 }; // class ParetoDistribution
 
 namespace internal

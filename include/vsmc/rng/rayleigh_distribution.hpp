@@ -35,125 +35,41 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_RAYLEIGH_DISTRIBUTION_PARAM_CHECK(sigma)      \
-    VSMC_RUNTIME_ASSERT((sigma > 0), "**RayleighDistribution** "              \
-                                     "CONSTRUCTED WITH INVALID SCALE "        \
-                                     "PARAMETER VALUE")
-
 namespace vsmc
 {
+
+namespace internal
+{
+
+inline bool rayleigh_distribution_check_param(double sigma)
+{
+    return sigma > 0;
+}
+
+} // namespace vsmc::internal
 
 /// \brief Rayleigh distribution
 /// \ingroup Distribution
 template <typename RealType>
 class RayleighDistribution
 {
+    VSMC_DEFINE_RNG_DISTRIBUTION_1(Rayleigh, rayleigh, RealType, sigma, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:
-    using result_type = RealType;
-    using distribution_type = RayleighDistribution<RealType>;
-
-    class param_type
-    {
-        public:
-        using result_type = RealType;
-        using distribution_type = RayleighDistribution<RealType>;
-
-        explicit param_type(result_type sigma = 1) : sigma_(sigma)
-        {
-            invariant();
-        }
-
-        result_type sigma() const { return sigma_; }
-
-        friend bool operator==(
-            const param_type &param1, const param_type &param2)
-        {
-            return internal::is_equal(param1.sigma_, param2.sigma_);
-        }
-
-        friend bool operator!=(
-            const param_type &param1, const param_type &param2)
-        {
-            return !(param1 == param2);
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_ostream<CharT, Traits> &operator<<(
-            std::basic_ostream<CharT, Traits> &os, const param_type &param)
-        {
-            if (!os.good())
-                return os;
-
-            os << param.sigma_;
-
-            return os;
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, param_type &param)
-        {
-            if (!is.good())
-                return is;
-
-            result_type sigma = 0;
-            is >> std::ws >> sigma;
-
-            if (is.good()) {
-                if (sigma > 0)
-                    param.sigma_ = sigma;
-                else
-                    is.setstate(std::ios_base::failbit);
-            }
-
-            return is;
-        }
-
-        private:
-        result_type sigma_;
-
-        friend distribution_type;
-
-        void invariant()
-        {
-            VSMC_RUNTIME_ASSERT_RNG_RAYLEIGH_DISTRIBUTION_PARAM_CHECK(sigma_);
-        }
-
-        void reset() {}
-    }; // class param_type
-
-    explicit RayleighDistribution(result_type b = 1) : param_(b) {}
-
-    explicit RayleighDistribution(const param_type &param) : param_(param) {}
-
-    result_type sigma() const { return param_.sigma(); }
-
     result_type min() const { return 0; }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
-    result_type max() const
-    {
-        return std::numeric_limits<result_type>::infinity();
-    }
+    void reset() {}
 
+    private:
     template <typename RNGType>
-    result_type operator()(RNGType &rng)
+    result_type generate(RNGType &rng, const param_type &param)
     {
         U01OCDistribution<RealType> runif;
 
-        return param_.sigma_ * std::sqrt(-2 * std::log(runif(rng)));
+        return param.sigma() * std::sqrt(-2 * std::log(runif(rng)));
     }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
-    {
-        rayleigh_distribution(rng, n, r, sigma());
-    }
-
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
-
-    private:
-    param_type param_;
 }; // class RayleighDistribution
 
 namespace internal

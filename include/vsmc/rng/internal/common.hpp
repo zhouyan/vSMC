@@ -38,11 +38,259 @@
 #include <vsmc/utility/mkl.hpp>
 #endif
 
-#define VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS                                \
-    param_type param() const { return param_; }                               \
-    void param(const param_type &par) { param_ = par; }                       \
-    void reset() { param_.reset(); }                                          \
+#define VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(flag, Name)                \
+    VSMC_RUNTIME_ASSERT((flag),                                               \
+        "**" #Name "Distribution** CONSTRUCTED WITH INVALID PARAMETERS")
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_1(Name, name, ResultType, p1, v1)        \
+    public:                                                                   \
+    using result_type = ResultType;                                           \
+    using distribution_type = Name##Distribution<ResultType>;                 \
                                                                               \
+    class param_type                                                          \
+    {                                                                         \
+        public:                                                               \
+        using result_type = ResultType;                                       \
+        using distribution_type = Name##Distribution<ResultType>;             \
+                                                                              \
+        explicit param_type(result_type p1 = v1) : p1##_(p1)                  \
+        {                                                                     \
+            bool flag = internal::name##_distribution_check_param(p1);        \
+            VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(flag, Name);           \
+        }                                                                     \
+                                                                              \
+        result_type p1() const { return p1##_; }                              \
+                                                                              \
+        friend bool operator==(                                               \
+            const param_type &param1, const param_type &param2)               \
+        {                                                                     \
+            if (!internal::is_equal(param1.p1##_, param2.p1##_))              \
+                return false;                                                 \
+            return true;                                                      \
+        }                                                                     \
+                                                                              \
+        friend bool operator!=(                                               \
+            const param_type &param1, const param_type &param2)               \
+        {                                                                     \
+            return !(param1 == param2);                                       \
+        }                                                                     \
+                                                                              \
+        template <typename CharT, typename Traits>                            \
+        friend std::basic_ostream<CharT, Traits> &operator<<(                 \
+            std::basic_ostream<CharT, Traits> &os, const param_type &param)   \
+        {                                                                     \
+            if (!os.good())                                                   \
+                return os;                                                    \
+                                                                              \
+            os << param.p1##_;                                                \
+                                                                              \
+            return os;                                                        \
+        }                                                                     \
+                                                                              \
+        template <typename CharT, typename Traits>                            \
+        friend std::basic_istream<CharT, Traits> &operator>>(                 \
+            std::basic_istream<CharT, Traits> &is, param_type &param)         \
+        {                                                                     \
+            if (!is.good())                                                   \
+                return is;                                                    \
+                                                                              \
+            result_type p1 = 0;                                               \
+            is >> std::ws >> p1;                                              \
+                                                                              \
+            if (is.good()) {                                                  \
+                if (internal::name##_distribution_check_param(p1))            \
+                    param.p1##_ = p1;                                         \
+                else                                                          \
+                    is.setstate(std::ios_base::failbit);                      \
+            }                                                                 \
+                                                                              \
+            return is;                                                        \
+        }                                                                     \
+                                                                              \
+        private:                                                              \
+        result_type p1##_;                                                    \
+    };                                                                        \
+                                                                              \
+    explicit Name##Distribution(result_type p1 = v1) : param_(p1)             \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    explicit Name##Distribution(const param_type &param) : param_(param)      \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    result_type p1() const { return param_.p1(); }                            \
+                                                                              \
+    param_type param() const { return param_; }                               \
+                                                                              \
+    void param(const param_type &parm)                                        \
+    {                                                                         \
+        param_ = parm;                                                        \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    template <typename RNGType>                                               \
+    result_type operator()(RNGType & rng)                                     \
+    {                                                                         \
+        return operator()(rng, param_);                                       \
+    }                                                                         \
+                                                                              \
+    template <typename RNGType>                                               \
+    result_type operator()(RNGType & rng, const param_type &param)            \
+    {                                                                         \
+        return generate(rng, param);                                          \
+    }                                                                         \
+                                                                              \
+    template <typename RNGType>                                               \
+    void operator()(RNGType & rng, std::size_t n, result_type * r)            \
+    {                                                                         \
+        operator()(rng, n, r, param_);                                        \
+    }                                                                         \
+                                                                              \
+    template <typename RNGType>                                               \
+    void operator()(RNGType & rng, std::size_t n, result_type * r,            \
+        const param_type &param)                                              \
+    {                                                                         \
+        name##_distribution(rng, n, r, param.p1());                           \
+    }                                                                         \
+                                                                              \
+    private:                                                                  \
+    param_type param_;
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_2(                                       \
+    Name, name, ResultType, p1, v1, p2, v2)                                   \
+    public:                                                                   \
+    using result_type = ResultType;                                           \
+    using distribution_type = Name##Distribution<ResultType>;                 \
+                                                                              \
+    class param_type                                                          \
+    {                                                                         \
+        public:                                                               \
+        using result_type = ResultType;                                       \
+        using distribution_type = Name##Distribution<ResultType>;             \
+                                                                              \
+        explicit param_type(result_type p1 = v1, result_type p2 = v2)         \
+            : p1##_(p1), p2##_(p2)                                            \
+        {                                                                     \
+            bool flag = internal::name##_distribution_check_param(p1, p2);    \
+            VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(flag, Name);           \
+        }                                                                     \
+                                                                              \
+        result_type p1() const { return p1##_; }                              \
+        result_type p2() const { return p2##_; }                              \
+                                                                              \
+        friend bool operator==(                                               \
+            const param_type &param1, const param_type &param2)               \
+        {                                                                     \
+            if (!internal::is_equal(param1.p1##_, param2.p1##_))              \
+                return false;                                                 \
+            if (!internal::is_equal(param1.p2##_, param2.p2##_))              \
+                return false;                                                 \
+            return true;                                                      \
+        }                                                                     \
+                                                                              \
+        friend bool operator!=(                                               \
+            const param_type &param1, const param_type &param2)               \
+        {                                                                     \
+            return !(param1 == param2);                                       \
+        }                                                                     \
+                                                                              \
+        template <typename CharT, typename Traits>                            \
+        friend std::basic_ostream<CharT, Traits> &operator<<(                 \
+            std::basic_ostream<CharT, Traits> &os, const param_type &param)   \
+        {                                                                     \
+            if (!os.good())                                                   \
+                return os;                                                    \
+                                                                              \
+            os << param.p1##_ << ' ';                                         \
+            os << param.p2##_;                                                \
+                                                                              \
+            return os;                                                        \
+        }                                                                     \
+                                                                              \
+        template <typename CharT, typename Traits>                            \
+        friend std::basic_istream<CharT, Traits> &operator>>(                 \
+            std::basic_istream<CharT, Traits> &is, param_type &param)         \
+        {                                                                     \
+            if (!is.good())                                                   \
+                return is;                                                    \
+                                                                              \
+            result_type p1 = 0;                                               \
+            result_type p2 = 0;                                               \
+            is >> std::ws >> p1;                                              \
+            is >> std::ws >> p2;                                              \
+                                                                              \
+            if (is.good()) {                                                  \
+                if (internal::name##_distribution_check_param(p1, p2)) {      \
+                    param.p1##_ = p1;                                         \
+                    param.p2##_ = p2;                                         \
+                } else {                                                      \
+                    is.setstate(std::ios_base::failbit);                      \
+                }                                                             \
+            }                                                                 \
+                                                                              \
+            return is;                                                        \
+        }                                                                     \
+                                                                              \
+        private:                                                              \
+        result_type p1##_;                                                    \
+        result_type p2##_;                                                    \
+    };                                                                        \
+                                                                              \
+    explicit Name##Distribution(result_type p1 = v1, result_type p2 = v2)     \
+        : param_(p1, p2)                                                      \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    explicit Name##Distribution(const param_type &param) : param_(param)      \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    result_type p1() const { return param_.p1(); }                            \
+    result_type p2() const { return param_.p2(); }                            \
+                                                                              \
+    param_type param() const { return param_; }                               \
+                                                                              \
+    void param(const param_type &parm)                                        \
+    {                                                                         \
+        param_ = parm;                                                        \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    template <typename RNGType>                                               \
+    result_type operator()(RNGType & rng)                                     \
+    {                                                                         \
+        return operator()(rng, param_);                                       \
+    }                                                                         \
+                                                                              \
+    template <typename RNGType>                                               \
+    result_type operator()(RNGType & rng, const param_type &param)            \
+    {                                                                         \
+        return generate(rng, param);                                          \
+    }                                                                         \
+                                                                              \
+    template <typename RNGType>                                               \
+    void operator()(RNGType & rng, std::size_t n, result_type * r)            \
+    {                                                                         \
+        operator()(rng, n, r, param_);                                        \
+    }                                                                         \
+                                                                              \
+    template <typename RNGType>                                               \
+    void operator()(RNGType & rng, std::size_t n, result_type * r,            \
+        const param_type &param)                                              \
+    {                                                                         \
+        name##_distribution(rng, n, r, param.p1(), param.p2());               \
+    }                                                                         \
+                                                                              \
+    private:                                                                  \
+    param_type param_;
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS                                \
+    public:                                                                   \
     friend bool operator==(                                                   \
         const distribution_type &dist1, const distribution_type &dist2)       \
     {                                                                         \
@@ -68,7 +316,8 @@
     friend std::basic_istream<CharT, Traits> &operator>>(                     \
         std::basic_istream<CharT, Traits> &is, distribution_type &dist)       \
     {                                                                         \
-        is >> dist.param_;                                                    \
+        is >> std::ws >> dist.param_;                                         \
+        dist.reset();                                                         \
                                                                               \
         return is;                                                            \
     }
@@ -182,6 +431,8 @@ class CounterEngine;
 template <typename Generator>
 inline void rng_rand(CounterEngine<Generator> &, std::size_t,
     typename CounterEngine<Generator>::result_type *);
+
+class BernoulliDistribution;
 
 template <typename = int>
 class DiscreteDistribution;

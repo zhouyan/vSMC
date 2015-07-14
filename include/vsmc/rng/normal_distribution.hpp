@@ -36,172 +36,105 @@
 #include <vsmc/rng/u01_distribution.hpp>
 #include <vsmc/rng/uniform_real_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_NORMAL_DISTRIBUTION_PARAM_CHECK(stddev)       \
-    VSMC_RUNTIME_ASSERT((stddev > 0), "**NormalDistribution** CONSTRUCTED "   \
-                                      "WITH INVALID STANDARD DEVIATION "      \
-                                      "PARAMETER VALUE")
-
 namespace vsmc
 {
+
+namespace internal
+{
+
+inline bool normal_distribution_check_param(double, double stddev)
+{
+    return stddev > 0;
+}
+
+} // namespace vsmc::internal
 
 /// \brief Normal distribution
 /// \ingroup Distribution
 template <typename RealType>
 class NormalDistribution
 {
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(
+        Normal, normal, RealType, mean, 0, stddev, 1)
+
     public:
-    using result_type = RealType;
-    using distribution_type = NormalDistribution<RealType>;
+    result_type min() const { return -max(); }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
-    class param_type
+    void reset() { saved_ = false; }
+
+    friend bool operator==(
+        const distribution_type &dist1, const distribution_type &dist2)
     {
-        public:
-        using result_type = RealType;
-        using distribution_type = NormalDistribution<RealType>;
-
-        explicit param_type(result_type mean = 0, result_type stddev = 1)
-            : mean_(mean), stddev_(stddev), v_(0), saved_(false)
-        {
-            invariant();
-        }
-
-        result_type mean() const { return mean_; }
-        result_type stddev() const { return stddev_; }
-
-        friend bool operator==(
-            const param_type &param1, const param_type &param2)
-        {
-            if (!internal::is_equal(param1.mean_, param2.mean_))
-                return false;
-            if (!internal::is_equal(param1.stddev_, param2.stddev_))
-                return false;
-            if (!internal::is_equal(param1.v_, param2.v_))
-                return false;
-            if (param1.saved_ && !param2.saved)
-                return false;
-            if (!param1.saved_ && param2.saved)
-                return false;
-            return true;
-        }
-
-        friend bool operator!=(
-            const param_type &param1, const param_type &param2)
-        {
-            return !(param1 == param2);
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_ostream<CharT, Traits> &operator<<(
-            std::basic_ostream<CharT, Traits> &os, const param_type &param)
-        {
-            if (!os.good())
-                return os;
-
-            os << param.mean_ << ' ';
-            os << param.stddev_ << ' ';
-            os << param.v_ << ' ';
-            os << param.saved_;
-
-            return os;
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, param_type &param)
-        {
-            if (!is.good())
-                return is;
-
-            result_type mean = 0;
-            result_type stddev = 0;
-            result_type v = 0;
-            bool saved = false;
-            is >> std::ws >> mean;
-            is >> std::ws >> stddev;
-            is >> std::ws >> v;
-            is >> std::ws >> saved;
-
-            if (is.good()) {
-                if (stddev > 0) {
-                    param = param_type(mean, stddev);
-                    param.v_ = v;
-                    param.saved_ = saved;
-                } else {
-                    is.setstate(std::ios_base::failbit);
-                }
-            }
-
-            return is;
-        }
-
-        private:
-        result_type mean_;
-        result_type stddev_;
-        result_type v_;
-        bool saved_;
-
-        friend distribution_type;
-
-        void invariant()
-        {
-            VSMC_RUNTIME_ASSERT_RNG_NORMAL_DISTRIBUTION_PARAM_CHECK(stddev_);
-            saved_ = false;
-        }
-
-        void reset() { saved_ = false; }
-    }; // class param_type
-
-    explicit NormalDistribution(result_type mean = 0, result_type stddev = 1)
-        : param_(mean, stddev)
-    {
+        if (dist1.param_ != dist2.param_)
+            return false;
+        if (!internal::is_equal(dist1.v_, dist2.v_))
+            return false;
+        if (dist1.saved_ && !dist2.saved_)
+            return false;
+        if (!dist1.saved_ && dist2.saved_)
+            return false;
+        return true;
     }
 
-    explicit NormalDistribution(const param_type &param) : param_(param) {}
-
-    result_type mean() const { return param_.mean(); }
-    result_type stddev() const { return param_.stddev(); }
-
-    result_type min() const
+    friend bool operator!=(
+        const distribution_type &dist1, const distribution_type &dist2)
     {
-        return -std::numeric_limits<result_type>::infinity();
+        return dist1.param_ != dist2.param_;
     }
 
-    result_type max() const
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os, const distribution_type &dist)
     {
-        return std::numeric_limits<result_type>::infinity();
+        os << dist.param_ << ' ';
+        os << dist.v_ << ' ';
+        os << dist.saved_;
+
+        return os;
     }
 
-    template <typename RNGType>
-    result_type operator()(RNGType &rng)
+    template <typename CharT, typename Traits>
+    friend std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is, distribution_type &dist)
     {
-        if (param_.saved_) {
-            param_.saved_ = false;
-            return param_.v_;
+        param_type param;
+        result_type v;
+        bool saved;
+        is >> std::ws >> param;
+        is >> std::ws >> v;
+        is >> std::ws >> saved;
+        if (is.good()) {
+            dist.param_ = param;
+            dist.v_ = v;
+            dist.saved_ = saved;
         }
 
-        U01OCDistribution<RealType> runif;
-        result_type u = runif(rng);
-        result_type v = runif(rng);
-        result_type s = param_.stddev_ * std::sqrt(-2 * std::log(u));
-        v *= const_pi_2<result_type>();
-        u = std::cos(v);
-        v = std::sin(v);
-        param_.v_ = param_.mean_ + v * s;
-        param_.saved_ = true;
-
-        return param_.mean_ + u * s;
+        return is;
     }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
-    {
-        normal_distribution(rng, n, r, mean(), stddev());
-    }
-
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
-    param_type param_;
+    result_type v_;
+    bool saved_;
+
+    template <typename RNGType>
+    result_type generate(RNGType &rng, const param_type &param)
+    {
+        result_type z = 0;
+        if (saved_) {
+            z = v_;
+            saved_ = false;
+        } else {
+            U01OCDistribution<RealType> runif;
+            result_type u1 = std::sqrt(-2 * std::log(runif(rng)));
+            result_type u2 = const_pi_2<result_type>() * runif(rng);
+            z = u1 * std::cos(u2);
+            v_ = u1 * std::sin(u2);
+            saved_ = true;
+        }
+
+        return param.mean() + param.stddev() * z;
+    }
 }; // class NormalDistribution
 
 namespace internal

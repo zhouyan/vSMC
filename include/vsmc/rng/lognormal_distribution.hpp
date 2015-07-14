@@ -38,113 +38,38 @@
 namespace vsmc
 {
 
+namespace internal
+{
+
+inline bool lognormal_distribution_check_param(double, double s)
+{
+    return s > 0;
+}
+
+} // namespace vsmc::internal
+
 /// \brief Lognormal distribution
 /// \ingroup Distribution
 template <typename RealType>
 class LognormalDistribution
 {
-    public:
-    using result_type = RealType;
-    using distribution_type = LognormalDistribution<RealType>;
-
-    class param_type
-    {
-        public:
-        using result_type = RealType;
-        using distribution_type = LognormalDistribution<RealType>;
-
-        explicit param_type(result_type m = 0, result_type s = 1)
-            : normal_(m, s)
-        {
-            invariant();
-        }
-
-        result_type m() const { return normal_.mean(); }
-        result_type s() const { return normal_.stddev(); }
-
-        friend bool operator==(
-            const param_type &param1, const param_type &param2)
-        {
-            return param1.normal_ == param2.normal_;
-        }
-
-        friend bool operator!=(
-            const param_type &param1, const param_type &param2)
-        {
-            return !(param1 == param2);
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_ostream<CharT, Traits> &operator<<(
-            std::basic_ostream<CharT, Traits> &os, const param_type &param)
-        {
-            if (!os.good())
-                return os;
-
-            os << param.normal_;
-
-            return os;
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, param_type &param)
-        {
-            if (!is.good())
-                return is;
-
-            NormalDistribution<RealType> normal;
-            is >> std::ws >> normal;
-
-            if (is.good())
-                param.normal_ = std::move(normal);
-
-            return is;
-        }
-
-        private:
-        NormalDistribution<RealType> normal_;
-
-        friend distribution_type;
-
-        void invariant() {}
-
-        void reset() { normal_.reset(); }
-    }; // class param_type
-
-    explicit LognormalDistribution(result_type m = 0, result_type s = 1)
-        : param_(m, s)
-    {
-    }
-
-    explicit LognormalDistribution(const param_type &param) : param_(param) {}
-
-    result_type m() const { return param_.m(); }
-    result_type s() const { return param_.s(); }
-
-    result_type min() const { return 0; }
-
-    result_type max() const
-    {
-        return std::numeric_limits<result_type>::infinity();
-    }
-
-    template <typename RNGType>
-    result_type operator()(RNGType &rng)
-    {
-        return std::exp(param_.normal_(rng));
-    }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
-    {
-        lognormal_distribution(rng, n, r, m(), s());
-    }
-
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Lognormal, lognormal, RealType, m, 0, s, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
+    public:
+    result_type min() const { return 0; }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
+
+    void reset() { normal_ = NormalDistribution<RealType>(0, 1); }
+
     private:
-    param_type param_;
+    NormalDistribution<RealType> normal_;
+
+    template <typename RNGType>
+    result_type generate(RNGType &rng, const param_type &param)
+    {
+        return std::exp(param.m() + param.s() * normal_(rng));
+    }
 }; // class LognormalDistribution
 
 namespace internal

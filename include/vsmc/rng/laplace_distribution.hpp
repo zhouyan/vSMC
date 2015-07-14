@@ -42,135 +42,40 @@
 namespace vsmc
 {
 
+namespace internal
+{
+
+inline bool laplace_distribution_check_param(double, double b)
+{
+    return b > 0;
+}
+
+} // namespace vsmc::internal
+
 /// \brief Laplace distribution
 /// \ingroup Distribution
 template <typename RealType>
 class LaplaceDistribution
 {
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Laplace, laplace, RealType, a, 0, b, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+
     public:
-    using result_type = RealType;
-    using distribution_type = LaplaceDistribution<RealType>;
+    result_type min() const { return -max(); }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
-    class param_type
-    {
-        public:
-        using result_type = RealType;
-        using distribution_type = LaplaceDistribution<RealType>;
+    void reset() {}
 
-        explicit param_type(result_type a = 0, result_type b = 1)
-            : a_(a), b_(b)
-        {
-            invariant();
-        }
-
-        result_type a() const { return a_; }
-        result_type b() const { return b_; }
-
-        friend bool operator==(
-            const param_type &param1, const param_type &param2)
-        {
-            if (!internal::is_equal(param1.a_, param2.a_))
-                return false;
-            if (!internal::is_equal(param1.b_, param2.b_))
-                return false;
-            return true;
-        }
-
-        friend bool operator!=(
-            const param_type &param1, const param_type &param2)
-        {
-            return !(param1 == param2);
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_ostream<CharT, Traits> &operator<<(
-            std::basic_ostream<CharT, Traits> &os, const param_type &param)
-        {
-            if (!os.good())
-                return os;
-
-            os << param.a_ << ' ';
-            os << param.b_;
-
-            return os;
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, param_type &param)
-        {
-            if (!is.good())
-                return is;
-
-            result_type a = 0;
-            result_type b = 0;
-            is >> std::ws >> a;
-            is >> std::ws >> b;
-
-            if (is.good()) {
-                if (b > 0)
-                    param = param_type(a, b);
-                else
-                    is.setstate(std::ios_base::failbit);
-            }
-
-            return is;
-        }
-
-        private:
-        result_type a_;
-        result_type b_;
-
-        friend distribution_type;
-
-        void invariant()
-        {
-            VSMC_RUNTIME_ASSERT_RNG_LAPLACE_DISTRIBUTION_PARAM_CHECK(b_);
-        }
-
-        void reset() {}
-    }; // class param_type
-
-    explicit LaplaceDistribution(result_type a = 0, result_type b = 1)
-        : param_(a, b)
-    {
-    }
-
-    explicit LaplaceDistribution(const param_type &param) : param_(param) {}
-
-    result_type a() const { return param_.a(); }
-    result_type b() const { return param_.b(); }
-
-    result_type min() const
-    {
-        return -std::numeric_limits<result_type>::infinity();
-    }
-
-    result_type max() const
-    {
-        return std::numeric_limits<result_type>::infinity();
-    }
-
+    private:
     template <typename RNGType>
-    result_type operator()(RNGType &rng)
+    result_type generate(RNGType &rng, const param_type &param)
     {
         U01OCDistribution<RealType> runif;
         result_type u = runif(rng) - static_cast<result_type>(0.5);
 
-        return u > 0 ? param_.a_ - param_.b_ * std::log(1 - 2 * u) :
-                       param_.a_ + param_.b_ * std::log(1 + 2 * u);
+        return u > 0 ? param.a() - param.b() * std::log(1 - 2 * u) :
+                       param.a() + param.b() * std::log(1 + 2 * u);
     }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
-    {
-        laplace_distribution(rng, n, r, a(), b());
-    }
-
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
-
-    private:
-    param_type param_;
 }; // class LaplaceDistribution
 
 namespace internal

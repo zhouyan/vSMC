@@ -36,23 +36,16 @@
 #include <vsmc/rng/u01_distribution.hpp>
 #include <vsmc/rng/normal_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_GAMMA_DISTRIBUTION_PARAM_ALPHA_CHECK(alpha)   \
-    VSMC_RUNTIME_ASSERT((alpha > 0), "**GammaDistribution** CONSTRUCTED "     \
-                                     "WITH INVALID SHAPE PARAMETER VALUE")
-
-#define VSMC_RUNTIME_ASSERT_RNG_GAMMA_DISTRIBUTION_PARAM_BETA_CHECK(beta)     \
-    VSMC_RUNTIME_ASSERT((beta > 0), "**GammaDistribution** CONSTRUCTED "      \
-                                    "WITH INVALID SCALE PARAMETER VALUE")
-
-#define VSMC_RUNTIME_ASSERT_RNG_GAMMA_DISTRIBUTION_PARAM_CHECK(alpha, beta)   \
-    VSMC_RUNTIME_ASSERT_RNG_GAMMA_DISTRIBUTION_PARAM_ALPHA_CHECK(alpha);      \
-    VSMC_RUNTIME_ASSERT_RNG_GAMMA_DISTRIBUTION_PARAM_BETA_CHECK(beta);
-
 namespace vsmc
 {
 
 namespace internal
 {
+
+inline bool gamma_distribution_check_param(double alpha, double beta)
+{
+    return alpha > 0 && beta > 0;
+}
 
 enum GammaDistributionAlgorithm {
     GammaDistributionAlgorithmT,
@@ -62,25 +55,25 @@ enum GammaDistributionAlgorithm {
 }; // enum GammaDistributionAlgorithm
 
 template <typename RealType>
-GammaDistributionAlgorithm gamma_distribution_algorithm(RealType alpha)
-{
-    if (alpha < 0.6)
-        return GammaDistributionAlgorithmT;
-    else if (alpha < 1)
-        return GammaDistributionAlgorithmW;
-    else if (alpha > 1)
-        return GammaDistributionAlgorithmN;
-    else
-        return GammaDistributionAlgorithmE;
-}
-
-template <typename RealType>
 class GammaDistributionConstant
 {
     public:
-    GammaDistributionConstant(RealType alpha)
-        : algorithm(gamma_distribution_algorithm(alpha)), d(0), c(0)
+    GammaDistributionConstant(RealType alpha = 1, RealType beta = 1)
     {
+        reset(alpha, beta);
+    }
+
+    void reset(RealType alpha, RealType)
+    {
+        if (alpha < 0.6)
+            algorithm = GammaDistributionAlgorithmT;
+        else if (alpha < 1)
+            algorithm = GammaDistributionAlgorithmW;
+        else if (alpha > 1)
+            algorithm = GammaDistributionAlgorithmN;
+        else
+            algorithm = GammaDistributionAlgorithmE;
+
         switch (algorithm) {
             case GammaDistributionAlgorithmT:
                 d = 1 - alpha;
@@ -110,164 +103,75 @@ class GammaDistributionConstant
 template <typename RealType>
 class GammaDistribution
 {
-    public:
-    using result_type = RealType;
-    using distribution_type = GammaDistribution<RealType>;
-
-    class param_type
-    {
-        public:
-        using result_type = RealType;
-        using distribution_type = GammaDistribution<RealType>;
-
-        explicit param_type(result_type alpha = 1, result_type beta = 1)
-            : alpha_(alpha), beta_(beta), d_(0), c_(0), constant_(alpha_)
-        {
-            invariant();
-        }
-
-        result_type alpha() const { return alpha_; }
-        result_type beta() const { return beta_; }
-
-        friend bool operator==(
-            const param_type &param1, const param_type &param2)
-        {
-            if (!internal::is_equal(param1.alpha_, param2.alpha_))
-                return false;
-            if (!internal::is_equal(param1.beta_, param2.beta_))
-                return false;
-            return true;
-        }
-
-        friend bool operator!=(
-            const param_type &param1, const param_type &param2)
-        {
-            return !(param1 == param2);
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_ostream<CharT, Traits> &operator<<(
-            std::basic_ostream<CharT, Traits> &os, const param_type &param)
-        {
-            if (!os.good())
-                return os;
-
-            os << param.alpha_ << ' ';
-            os << param.beta_;
-
-            return os;
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, param_type &param)
-        {
-            if (!is.good())
-                return is;
-
-            result_type alpha = 0;
-            result_type beta = 0;
-            is >> std::ws >> alpha;
-            is >> std::ws >> beta;
-
-            if (is.good()) {
-                if (alpha > 0 && beta > 0)
-                    param = param_type(alpha, beta);
-                else
-                    is.setstate(std::ios_base::failbit);
-            }
-
-            return is;
-        }
-
-        private:
-        result_type alpha_;
-        result_type beta_;
-        result_type d_;
-        result_type c_;
-        const internal::GammaDistributionConstant<RealType> constant_;
-
-        friend distribution_type;
-
-        void invariant()
-        {
-            VSMC_RUNTIME_ASSERT_RNG_GAMMA_DISTRIBUTION_PARAM_CHECK(
-                alpha_, beta_);
-        }
-
-        void reset() {}
-    }; // class param_type
-
-    explicit GammaDistribution(result_type alpha = 1, result_type beta = 1)
-        : param_(alpha, beta)
-    {
-    }
-
-    explicit GammaDistribution(const param_type &param) : param_(param) {}
-
-    result_type alpha() const { return param_.alpha(); }
-    result_type beta() const { return param_.beta(); }
-
-    result_type min() const { return 0; }
-
-    result_type max() const
-    {
-        return std::numeric_limits<result_type>::infinity();
-    }
-
-    template <typename RNGType>
-    result_type operator()(RNGType &rng)
-    {
-        result_type r = 0;
-        switch (param_.constant_.algorithm) {
-            case internal::GammaDistributionAlgorithmT:
-                r = generate_t(rng);
-                break;
-            case internal::GammaDistributionAlgorithmW:
-                r = generate_w(rng);
-                break;
-            case internal::GammaDistributionAlgorithmN:
-                r = generate_n(rng);
-                break;
-            case internal::GammaDistributionAlgorithmE:
-                r = generate_e(rng);
-                break;
-        }
-
-        return param_.beta_ * r;
-    }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
-    {
-        gamma_distribution(rng, n, r, alpha(), beta());
-    }
-
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Gamma, gamma, RealType, alpha, 1, beta, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
+    public:
+    result_type min() const { return 0; }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
+
+    void reset() { constant_.reset(alpha(), beta()); }
+
     private:
-    param_type param_;
+    internal::GammaDistributionConstant<RealType> constant_;
 
     template <typename RNGType>
-    result_type generate_t(RNGType &rng)
+    result_type generate(RNGType &rng, const param_type &param)
+    {
+        if (param == param_)
+            return generate(rng, param_, constant_);
+
+        internal::GammaDistributionConstant<RealType> constant(
+            param.alpha(), param.beta());
+
+        return generate(rng, param, constant);
+    }
+
+    template <typename RNGType>
+    result_type generate(RNGType &rng, const param_type &param,
+        const internal::GammaDistributionConstant<RealType> &constant)
+    {
+        result_type r = 0;
+        switch (constant.algorithm) {
+            case internal::GammaDistributionAlgorithmT:
+                r = generate_t(rng, param, constant);
+                break;
+            case internal::GammaDistributionAlgorithmW:
+                r = generate_w(rng, param, constant);
+                break;
+            case internal::GammaDistributionAlgorithmN:
+                r = generate_n(rng, param, constant);
+                break;
+            case internal::GammaDistributionAlgorithmE:
+                r = generate_e(rng, param, constant);
+                break;
+        }
+
+        return param.beta() * r;
+    }
+
+    template <typename RNGType>
+    result_type generate_t(RNGType &rng, const param_type &param,
+        const internal::GammaDistributionConstant<RealType> &constant)
     {
         U01CODistribution<RealType> runif;
         while (true) {
             result_type u = runif(rng);
             result_type e = -std::log(runif(rng));
-            if (u > param_.constant_.d) {
-                u = -std::log(param_.constant_.c * (1 - u));
+            if (u > constant.d) {
+                u = -std::log(constant.c * (1 - u));
                 e += u;
-                u = param_.constant_.d + param_.alpha_ * u;
+                u = constant.d + param.alpha() * u;
             }
-            result_type r = std::exp(param_.constant_.c * std::log(u));
+            result_type r = std::exp(constant.c * std::log(u));
             if (std::abs(r) < e)
                 return r;
         }
     }
 
     template <typename RNGType>
-    result_type generate_w(RNGType &rng)
+    result_type generate_w(RNGType &rng, const param_type &,
+        const internal::GammaDistributionConstant<RealType> &constant)
     {
         U01CODistribution<RealType> runif;
         result_type u = 0;
@@ -276,14 +180,15 @@ class GammaDistribution
         do {
             u = -std::log(runif(rng));
             e = -std::log(runif(rng));
-            r = std::exp(param_.constant_.c * std::log(u));
-        } while (u + e < param_.constant_.d + r);
+            r = std::exp(constant.c * std::log(u));
+        } while (u + e < constant.d + r);
 
         return r;
     }
 
     template <typename RNGType>
-    result_type generate_n(RNGType &rng)
+    result_type generate_n(RNGType &rng, const param_type &,
+        const internal::GammaDistributionConstant<RealType> &constant)
     {
         U01CODistribution<RealType> runif;
         NormalDistribution<RealType> rnorm(0, 1);
@@ -294,22 +199,23 @@ class GammaDistribution
             result_type w = 0;
             do {
                 w = rnorm(rng);
-                v = 1 + param_.constant_.c * w;
+                v = 1 + constant.c * w;
             } while (v <= 0);
             v = v * v * v;
 
             e = 1 - static_cast<result_type>(0.0331) * (w * w) * (w * w);
             if (u < e)
-                return param_.constant_.d * v;
+                return constant.d * v;
 
-            e = w * w / 2 + param_.constant_.d * (1 - v + std::log(v));
+            e = w * w / 2 + constant.d * (1 - v + std::log(v));
             if (std::log(u) < e)
-                return param_.constant_.d * v;
+                return constant.d * v;
         }
     }
 
     template <typename RNGType>
-    result_type generate_e(RNGType &rng)
+    result_type generate_e(RNGType &rng, const param_type &,
+        const internal::GammaDistributionConstant<RealType> &)
     {
         U01CODistribution<RealType> runif;
 
@@ -451,7 +357,7 @@ inline std::size_t gamma_distribution_impl(RNGType &rng, std::size_t n,
     RealType *r, RealType alpha, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
-    switch (gamma_distribution_algorithm(alpha)) {
+    switch (constant.algorithm) {
         case GammaDistributionAlgorithmT:
             return gamma_distribution_impl_t<K>(
                 rng, n, r, alpha, beta, constant);

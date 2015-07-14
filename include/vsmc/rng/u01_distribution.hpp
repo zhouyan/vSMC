@@ -158,8 +158,10 @@ class U01LRDistribution
     result_type min() const { return 0; }
     result_type max() const { return 1; }
 
+    void reset() {}
+
     template <typename RNGType>
-    result_type operator()(RNGType &rng) const
+    result_type operator()(RNGType &rng)
     {
         using uint_type =
             typename std::conditional<internal::RNGBits<RNGType>::value >= 64,
@@ -179,7 +181,20 @@ class U01LRDistribution
     }
 
     template <typename RNGType>
+    result_type operator()(RNGType &rng, const param_type &)
+    {
+        return operator()(rng);
+    }
+
+    template <typename RNGType>
     void operator()(RNGType &rng, std::size_t n, result_type *r)
+    {
+        u01_lr_distribution<RealType, Left, Right>(rng, n, r);
+    }
+
+    template <typename RNGType>
+    void operator()(
+        RNGType &rng, std::size_t n, result_type *r, const param_type &)
     {
         u01_lr_distribution<RealType, Left, Right>(rng, n, r);
     }
