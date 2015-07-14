@@ -152,7 +152,7 @@ template <typename T>
 inline void fma(std::size_t n, const T *a, const T *b, const T *c, T *y)
 {
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a[i], b[i], c[i]);
+        y[i] = a[i] * b[i] + c[i];
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
@@ -161,7 +161,7 @@ template <typename T>
 inline void fma(std::size_t n, const T *a, const T *b, T c, T *y)
 {
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a[i], b[i], c);
+        y[i] = a[i] * b[i] + c;
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
@@ -170,7 +170,7 @@ template <typename T>
 inline void fma(std::size_t n, const T *a, T b, const T *c, T *y)
 {
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a[i], b, c[i]);
+        y[i] = a[i] * b + c[i];
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
@@ -179,7 +179,7 @@ template <typename T>
 inline void fma(std::size_t n, const T *a, T b, T c, T *y)
 {
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a[i], b, c);
+        y[i] = a[i] * b + c;
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
@@ -188,7 +188,7 @@ template <typename T>
 inline void fma(std::size_t n, T a, const T *b, const T *c, T *y)
 {
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a, b[i], c[i]);
+        y[i] = a * b[i] + c[i];
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
@@ -197,7 +197,7 @@ template <typename T>
 inline void fma(std::size_t n, T a, const T *b, T c, T *y)
 {
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a, b[i], c);
+        y[i] = a * b[i] + c;
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
