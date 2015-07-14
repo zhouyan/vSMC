@@ -74,6 +74,7 @@ class GammaDistributionConstant
         else
             algorithm = GammaDistributionAlgorithmE;
 
+        d = c = 0;
         switch (algorithm) {
             case GammaDistributionAlgorithmT:
                 d = 1 - alpha;

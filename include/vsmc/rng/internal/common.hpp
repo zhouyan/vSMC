@@ -55,8 +55,8 @@
                                                                               \
         explicit param_type(result_type p1 = v1) : p1##_(p1)                  \
         {                                                                     \
-            bool flag = internal::name##_distribution_check_param(p1);        \
-            VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(flag, Name);           \
+            VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(                       \
+                internal::name##_distribution_check_param(p1), Name);         \
         }                                                                     \
                                                                               \
         result_type p1() const { return p1##_; }                              \
@@ -174,8 +174,8 @@
         explicit param_type(result_type p1 = v1, result_type p2 = v2)         \
             : p1##_(p1), p2##_(p2)                                            \
         {                                                                     \
-            bool flag = internal::name##_distribution_check_param(p1, p2);    \
-            VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(flag, Name);           \
+            VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(                       \
+                internal::name##_distribution_check_param(p1, p2), Name);     \
         }                                                                     \
                                                                               \
         result_type p1() const { return p1##_; }                              \

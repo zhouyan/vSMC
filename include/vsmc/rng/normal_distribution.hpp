@@ -61,7 +61,11 @@ class NormalDistribution
     result_type min() const { return -max(); }
     result_type max() const { return std::numeric_limits<result_type>::max(); }
 
-    void reset() { saved_ = false; }
+    void reset()
+    {
+        v_ = 0;
+        saved_ = false;
+    }
 
     friend bool operator==(
         const distribution_type &dist1, const distribution_type &dist2)

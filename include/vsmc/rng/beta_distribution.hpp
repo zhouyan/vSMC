@@ -94,6 +94,7 @@ class BetaDistributionConstant
         else
             algorithm = BetaDistributionAlgorithmC;
 
+        a = b = t = p = 0;
         switch (algorithm) {
             case BetaDistributionAlgorithmAS: break;
             case BetaDistributionAlgorithm11: break;
