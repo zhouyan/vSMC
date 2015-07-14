@@ -38,8 +38,8 @@ inline vsmc::Vector<double>
     rng_dist_partition<vsmc::LognormalDistribution<double>>(
         std::size_t n, vsmc::LognormalDistribution<double> &dist)
 {
-    return rng_dist_partition_boost(n,
-        boost::math::lognormal_distribution<double>(dist.m(), dist.s()));
+    return rng_dist_partition_boost(
+        n, boost::math::lognormal_distribution<double>(dist.m(), dist.s()));
 }
 
 int main(int argc, char **argv)

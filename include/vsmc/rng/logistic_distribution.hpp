@@ -184,7 +184,7 @@ inline void logistic_distribution_impl(
     sub(n, static_cast<RealType>(1), r, s);
     div(n, r, s, r);
     log(n, r, r);
-    fma(n, a, b, r, r);
+    fma(n, b, r, a, r);
 }
 
 } // namespace vsmc::internal

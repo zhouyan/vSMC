@@ -180,7 +180,7 @@ inline void levy_distribution_impl(
         rng, n, r, static_cast<RealType>(0), static_cast<RealType>(1));
     sqr(n, r, r);
     inv(n, r, r);
-    fma(n, a, b, r, r);
+    fma(n, b, r, a, r);
 }
 
 } // namespace vsmc::internal
@@ -200,8 +200,8 @@ inline void levy_distribution(
 }
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, LevyDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
+inline void rng_rand(
+    RNGType &rng, LevyDistribution<RealType> &dist, std::size_t n, RealType *r)
 {
     dist(rng, n, r);
 }

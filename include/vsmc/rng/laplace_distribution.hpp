@@ -193,7 +193,7 @@ inline void laplace_distribution_impl(
         }
     }
     log(n, r, r);
-    fma(n, a, s, r, r);
+    fma(n, s, r, a, r);
 }
 
 } // namespace vsmc::internal

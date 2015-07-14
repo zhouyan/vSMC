@@ -470,9 +470,9 @@ inline std::size_t beta_distribution_impl_as(RNGType &rng, std::size_t n,
     const BetaDistributionConstant<RealType> &)
 {
     u01_oo_distribution(rng, n, r);
-    fma(n, -const_pi_by2<RealType>(), const_pi<RealType>(), r, r);
+    fma(n, const_pi<RealType>(), r, -const_pi_by2<RealType>(), r);
     sin(n, r, r);
-    fma(n, static_cast<RealType>(0.5), static_cast<RealType>(0.5), r, r);
+    fma(n, static_cast<RealType>(0.5), r, static_cast<RealType>(0.5), r);
 
     return n;
 }
@@ -543,8 +543,8 @@ inline std::size_t beta_distribution_impl_c(RNGType &rng, std::size_t n,
     mul(n, u1, u2, u2);
     log(n, u2, u2);
     log(n, y, u1);
-    fma(n, p, -a, u1, u1);
-    fma(n, -ln_4, t, v, v);
+    fma(n, -a, u1, p, u1);
+    fma(n, t, v, -ln_4, v);
     add(n, v, u1, u1);
 
     std::size_t m = 0;

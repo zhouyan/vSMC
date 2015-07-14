@@ -222,8 +222,8 @@ inline void normal_distribution_impl(
     mul(nu, const_pi_2<RealType>(), u2, u2);
     sincos(nu, u2, u1, u2);
     mul(nu, stddev, s, s);
-    fma(nu, mean, s, u1, u1);
-    fma(nu, mean, s, u2, u2);
+    fma(nu, s, u1, mean, u1);
+    fma(nu, s, u2, mean, u2);
 }
 
 template <typename RealType>

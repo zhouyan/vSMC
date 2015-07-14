@@ -403,7 +403,7 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
     u01_co_distribution(rng, n, u);
     normal_distribution(
         rng, n, w, static_cast<RealType>(0), static_cast<RealType>(1));
-    fma(n, static_cast<RealType>(1), c, w, v);
+    fma(n, c, w, static_cast<RealType>(1), v);
     NormalDistribution<RealType> rnorm(0, 1);
     for (std::size_t i = 0; i != n; ++i) {
         if (v[i] <= 0) {
@@ -417,7 +417,7 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
     mul(n, v, e, v);
     sqr(n, w, e);
     sqr(n, e, e);
-    fma(n, static_cast<RealType>(1), -static_cast<RealType>(0.0331), e, e);
+    fma(n, -static_cast<RealType>(0.0331), e, static_cast<RealType>(1), e);
     mul(n, d * beta, v, x);
 
     std::size_t m = 0;

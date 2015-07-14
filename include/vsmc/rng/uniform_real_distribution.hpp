@@ -211,7 +211,7 @@ inline void uniform_real_lr_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     u01_lr_distribution<RealType, Left, Right>(rng, n, r);
-    fma(n, a, (b - a), r, r);
+    fma(n, (b - a), r, a, r);
 }
 
 } // namespace vsmc::internal

@@ -147,39 +147,65 @@ inline void linear_frac(std::size_t n, const T *a, const T *b, T beta_a,
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = a_i + b_i * x_i\f$.
+/// \f$y_i = a_i * b_i + c_i\f$.
 template <typename T>
-inline void fma(std::size_t n, const T *a, const T *b, const T *x, T *y)
+inline void fma(std::size_t n, const T *a, const T *b, const T *c, T *y)
 {
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = a[i] + b[i] * x[i];
+        y[i] = std::fma(a[i], b[i], c[i]);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = a + b_i * x_i\f$.
+/// \f$y_i = a_i * b_i + c\f$.
 template <typename T>
-inline void fma(std::size_t n, T a, const T *b, const T *x, T *y)
+inline void fma(std::size_t n, const T *a, const T *b, T c, T *y)
 {
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = a + b[i] * x[i];
+        y[i] = std::fma(a[i], b[i], c);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = a_i + b * x_i\f$.
+/// \f$y_i = a_i * b + c_i\f$.
 template <typename T>
-inline void fma(std::size_t n, const T *a, T b, const T *x, T *y)
+inline void fma(std::size_t n, const T *a, T b, const T *c, T *y)
 {
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = a[i] + b * x[i];
+        y[i] = std::fma(a[i], b, c[i]);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = a + b * x_i\f$.
+/// \f$y_i = a_i * b + c\f$.
 template <typename T>
-inline void fma(std::size_t n, T a, T b, const T *x, T *y)
+inline void fma(std::size_t n, const T *a, T b, T c, T *y)
 {
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = a + b * x[i];
+        y[i] = std::fma(a[i], b, c);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = a * b_i + c_i\f$.
+template <typename T>
+inline void fma(std::size_t n, T a, const T *b, const T *c, T *y)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = std::fma(a, b[i], c[i]);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = a * b_i + c\f$.
+template <typename T>
+inline void fma(std::size_t n, T a, const T *b, T c, T *y)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = std::fma(a, b[i], c);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = a * b + c_i\f$.
+template <typename T>
+inline void fma(std::size_t n, T a, T b, const T *c, T *y)
+{
+    add(n, a * b, c, y);
 }
 
 /// @}

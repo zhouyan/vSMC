@@ -185,7 +185,7 @@ inline void extreme_value_distribution_impl(
     log(n, r, r);
     mul(n, static_cast<RealType>(-1), r, r);
     log(n, r, r);
-    fma(n, a, -b, r, r);
+    fma(n, -b, r, a, r);
 }
 
 } // namespace vsmc::internal
@@ -210,7 +210,6 @@ inline void rng_rand(RNGType &rng, ExtremeValueDistribution<RealType> &dist,
 {
     dist(rng, n, r);
 }
-
 
 } // namespace vsmc
 
