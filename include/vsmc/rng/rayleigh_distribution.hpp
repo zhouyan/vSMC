@@ -41,7 +41,8 @@ namespace vsmc
 namespace internal
 {
 
-inline bool rayleigh_distribution_check_param(double sigma)
+template <typename RealType>
+inline bool rayleigh_distribution_check_param(RealType sigma)
 {
     return sigma > 0;
 }
@@ -53,7 +54,8 @@ inline bool rayleigh_distribution_check_param(double sigma)
 template <typename RealType>
 class RayleighDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_1(Rayleigh, rayleigh, RealType, sigma, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_1(
+        Rayleigh, rayleigh, RealType, result_type, sigma, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:

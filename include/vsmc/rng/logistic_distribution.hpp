@@ -41,7 +41,8 @@ namespace vsmc
 namespace internal
 {
 
-inline bool logistic_distribution_check_param(double, double b)
+template <typename RealType>
+inline bool logistic_distribution_check_param(RealType, RealType b)
 {
     return b > 0;
 }
@@ -53,7 +54,8 @@ inline bool logistic_distribution_check_param(double, double b)
 template <typename RealType>
 class LogisticDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(Logistic, logistic, RealType, a, 0, b, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(
+        Logistic, logistic, RealType, result_type, a, 0, result_type, b, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:

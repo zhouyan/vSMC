@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/lognormal_distribution.hpp
+// vSMC/include/vsmc/rng/bernoulli_distribution.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,11 +29,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_LOGNORMAL_DISTRIBUTION_HPP
-#define VSMC_RNG_LOGNORMAL_DISTRIBUTION_HPP
+#ifndef VSMC_RNG_BERNOULLI_DISTRIBUTION_HPP
+#define VSMC_RNG_BERNOULLI_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/normal_distribution.hpp>
+#include <vsmc/rng/u01_distribution.hpp>
 
 namespace vsmc
 {
@@ -41,73 +41,85 @@ namespace vsmc
 namespace internal
 {
 
-template <typename RealType>
-inline bool lognormal_distribution_check_param(RealType, RealType s)
+inline bool bernoulli_distribution_check_param(double p)
 {
-    return s > 0;
+    return p >= 0 && p <= 1;
 }
 
 } // namespace vsmc::internal
 
-/// \brief Lognormal distribution
+/// \brief Bernoulli distribution
 /// \ingroup Distribution
-template <typename RealType>
-class LognormalDistribution
+template <typename IntType>
+class BernoulliDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        Lognormal, lognormal, RealType, result_type, m, 0, result_type, s, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_1(
+        Bernoulli, bernoulli, IntType, double, p, 0.5)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:
-    result_type min() const { return 0; }
-    result_type max() const { return std::numeric_limits<result_type>::max(); }
+    result_type min() const { return static_cast<result_type>(0); }
+    result_type max() const { return static_cast<result_type>(1); }
 
-    void reset() { normal_ = NormalDistribution<RealType>(0, 1); }
+    void reset() {}
 
     private:
-    NormalDistribution<RealType> normal_;
-
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        return std::exp(param.m() + param.s() * normal_(rng));
+        U01CODistribution<double> runif;
+        double u = runif(rng);
+
+        return generate(u, param.p(), static_cast<result_type *>(nullptr));
     }
-}; // class LognormalDistribution
+
+    static bool generate(double u, double p, bool *) { return u < p; }
+
+    template <typename U>
+    static U generate(double u, double p, U *)
+    {
+        return u < p ? 1 : 0;
+    }
+}; // class BernoulliDistribution
 
 namespace internal
 {
 
-template <typename RealType, typename RNGType>
-inline void lognormal_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType m, RealType s)
+template <std::size_t K, typename IntType, typename RNGType>
+inline void bernoulli_distribution_impl(
+    RNGType &rng, std::size_t n, IntType *r, double p)
 {
-    normal_distribution(rng, n, r, m, s);
-    exp(n, r, r);
+    double u[K];
+    u01_co_distribution(rng, n, u);
+    std::memset(r, 0, sizeof(IntType) * n);
+    for (std::size_t i = 0; i != n; ++i)
+        if (u[i] < p)
+            r[i] = 1;
 }
 
 } // namespace vsmc::internal
 
-/// \brief Generating lognormal random variates
+/// \brief Generating bernoulli random variates
 /// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void lognormal_distribution(RNGType &rng, std::size_t n, RealType *r,
-    RealType logmean, RealType logstddev)
+template <typename IntType, typename RNGType>
+inline void bernoulli_distribution(
+    RNGType &rng, std::size_t n, IntType *r, IntType p)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
-        internal::lognormal_distribution_impl(rng, k, r, logmean, logstddev);
-    internal::lognormal_distribution_impl(rng, l, r, logmean, logstddev);
+    for (std::size_t i = 0; i != m; ++i)
+        internal::bernoulli_distribution_impl<k>(rng, k, r + i * k, p);
+    internal::bernoulli_distribution_impl<k>(rng, l, r + m * k, p);
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, LognormalDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
+template <typename IntType, typename RNGType>
+inline void rng_rand(RNGType &rng, BernoulliDistribution<IntType> &dist,
+    std::size_t n, IntType *r)
 {
     dist(rng, n, r);
 }
 
 } // namespace vsmc
 
-#endif // VSMC_RNG_LOGNORMAL_DISTRIBUTION_HPP
+#endif // VSMC_RNG_BERNOULLI_DISTRIBUTION_HPP

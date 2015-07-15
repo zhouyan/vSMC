@@ -42,24 +42,24 @@
     VSMC_RUNTIME_ASSERT((flag),                                               \
         "**" #Name "Distribution** CONSTRUCTED WITH INVALID PARAMETERS")
 
-#define VSMC_DEFINE_RNG_DISTRIBUTION_1(Name, name, ResultType, p1, v1)        \
+#define VSMC_DEFINE_RNG_DISTRIBUTION_1(Name, name, T, T1, p1, v1)             \
     public:                                                                   \
-    using result_type = ResultType;                                           \
-    using distribution_type = Name##Distribution<ResultType>;                 \
+    using result_type = T;                                                    \
+    using distribution_type = Name##Distribution<T>;                          \
                                                                               \
     class param_type                                                          \
     {                                                                         \
         public:                                                               \
-        using result_type = ResultType;                                       \
-        using distribution_type = Name##Distribution<ResultType>;             \
+        using result_type = T;                                                \
+        using distribution_type = Name##Distribution<T>;                      \
                                                                               \
-        explicit param_type(result_type p1 = v1) : p1##_(p1)                  \
+        explicit param_type(T1 p1 = v1) : p1##_(p1)                           \
         {                                                                     \
             VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(                       \
                 internal::name##_distribution_check_param(p1), Name);         \
         }                                                                     \
                                                                               \
-        result_type p1() const { return p1##_; }                              \
+        T1 p1() const { return p1##_; }                                       \
                                                                               \
         friend bool operator==(                                               \
             const param_type &param1, const param_type &param2)               \
@@ -94,7 +94,7 @@
             if (!is.good())                                                   \
                 return is;                                                    \
                                                                               \
-            result_type p1 = 0;                                               \
+            T1 p1 = 0;                                                        \
             is >> std::ws >> p1;                                              \
                                                                               \
             if (is.good()) {                                                  \
@@ -108,20 +108,17 @@
         }                                                                     \
                                                                               \
         private:                                                              \
-        result_type p1##_;                                                    \
+        T1 p1##_;                                                             \
     };                                                                        \
                                                                               \
-    explicit Name##Distribution(result_type p1 = v1) : param_(p1)             \
-    {                                                                         \
-        reset();                                                              \
-    }                                                                         \
+    explicit Name##Distribution(T1 p1 = v1) : param_(p1) { reset(); }         \
                                                                               \
     explicit Name##Distribution(const param_type &param) : param_(param)      \
     {                                                                         \
         reset();                                                              \
     }                                                                         \
                                                                               \
-    result_type p1() const { return param_.p1(); }                            \
+    T1 p1() const { return param_.p1(); }                                     \
                                                                               \
     param_type param() const { return param_; }                               \
                                                                               \
@@ -159,27 +156,25 @@
     private:                                                                  \
     param_type param_;
 
-#define VSMC_DEFINE_RNG_DISTRIBUTION_2(                                       \
-    Name, name, ResultType, p1, v1, p2, v2)                                   \
+#define VSMC_DEFINE_RNG_DISTRIBUTION_2(Name, name, T, T1, p1, v1, T2, p2, v2) \
     public:                                                                   \
-    using result_type = ResultType;                                           \
-    using distribution_type = Name##Distribution<ResultType>;                 \
+    using result_type = T;                                                    \
+    using distribution_type = Name##Distribution<T>;                          \
                                                                               \
     class param_type                                                          \
     {                                                                         \
         public:                                                               \
-        using result_type = ResultType;                                       \
-        using distribution_type = Name##Distribution<ResultType>;             \
+        using result_type = T;                                                \
+        using distribution_type = Name##Distribution<T>;                      \
                                                                               \
-        explicit param_type(result_type p1 = v1, result_type p2 = v2)         \
-            : p1##_(p1), p2##_(p2)                                            \
+        explicit param_type(T1 p1 = v1, T2 p2 = v2) : p1##_(p1), p2##_(p2)    \
         {                                                                     \
             VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(                       \
                 internal::name##_distribution_check_param(p1, p2), Name);     \
         }                                                                     \
                                                                               \
-        result_type p1() const { return p1##_; }                              \
-        result_type p2() const { return p2##_; }                              \
+        T1 p1() const { return p1##_; }                                       \
+        T2 p2() const { return p2##_; }                                       \
                                                                               \
         friend bool operator==(                                               \
             const param_type &param1, const param_type &param2)               \
@@ -217,8 +212,8 @@
             if (!is.good())                                                   \
                 return is;                                                    \
                                                                               \
-            result_type p1 = 0;                                               \
-            result_type p2 = 0;                                               \
+            T1 p1 = 0;                                                        \
+            T2 p2 = 0;                                                        \
             is >> std::ws >> p1;                                              \
             is >> std::ws >> p2;                                              \
                                                                               \
@@ -235,12 +230,11 @@
         }                                                                     \
                                                                               \
         private:                                                              \
-        result_type p1##_;                                                    \
-        result_type p2##_;                                                    \
+        T1 p1##_;                                                             \
+        T2 p2##_;                                                             \
     };                                                                        \
                                                                               \
-    explicit Name##Distribution(result_type p1 = v1, result_type p2 = v2)     \
-        : param_(p1, p2)                                                      \
+    explicit Name##Distribution(T1 p1 = v1, T2 p2 = v2) : param_(p1, p2)      \
     {                                                                         \
         reset();                                                              \
     }                                                                         \
@@ -250,8 +244,8 @@
         reset();                                                              \
     }                                                                         \
                                                                               \
-    result_type p1() const { return param_.p1(); }                            \
-    result_type p2() const { return param_.p2(); }                            \
+    T1 p1() const { return param_.p1(); }                                     \
+    T2 p2() const { return param_.p2(); }                                     \
                                                                               \
     param_type param() const { return param_; }                               \
                                                                               \
@@ -406,6 +400,14 @@ class is_seed_seq
 
 } // namespace vsmc::internal
 
+/// \brief Parameter type for open interval
+/// \ingroup RNG
+class Open;
+
+/// \brief Parameter type for closed interval
+/// \ingroup RNG
+class Closed;
+
 /// \brief Generate random bits
 /// \ingroup RNG
 template <typename RNGType>
@@ -432,7 +434,8 @@ template <typename Generator>
 inline void rng_rand(CounterEngine<Generator> &, std::size_t,
     typename CounterEngine<Generator>::result_type *);
 
-class BernoulliDistribution;
+template <typename = int>
+class BernoulliIntDistribution;
 
 template <typename = int>
 class DiscreteDistribution;
@@ -482,14 +485,18 @@ class RayleighDistribution;
 template <typename = double>
 class StudentTDistribution;
 
-template <typename, typename, typename>
+template <typename = double, typename = Closed, typename = Open>
 class U01LRDistribution;
 
-template <typename, typename, typename>
+template <typename = double, typename = Closed, typename = Open>
 class UniformRealLRDistribution;
 
 template <typename = double>
 class WeibullDistribution;
+
+template <typename IntType, typename RNGType>
+inline void rng_rand(
+    RNGType &, BernoulliIntDistribution<IntType> &, std::size_t, IntType *);
 
 template <typename RealType, typename RNGType>
 inline void rng_rand(
@@ -567,6 +574,9 @@ inline void rng_rand(RNGType &,
 template <typename RealType, typename RNGType>
 inline void rng_rand(
     RNGType &, WeibullDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename IntType, typename RNGType>
+inline void bernoulli_distribution(RNGType &, std::size_t, IntType *, double);
 
 template <typename RealType, typename RNGType>
 inline void beta_distribution(
@@ -648,104 +658,108 @@ inline void weibull_distribution(
 
 #if VSMC_HAS_MKL
 
-template <MKL_INT, std::size_t>
+template <MKL_INT, int>
 class MKLEngine;
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void rng_rand(MKLEngine<BRNG, Bits> &, std::size_t,
     typename MKLEngine<BRNG, Bits>::result_type *);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
+inline void bernoulli_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, MKL_INT *, double);
+
+template <MKL_INT BRNG, int Bits>
 inline void uniform_real_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void uniform_real_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void u01_distribution(MKLEngine<BRNG, Bits> &, std::size_t, float *);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void u01_distribution(MKLEngine<BRNG, Bits> &, std::size_t, double *);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void normal_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, float *r, float, float);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void normal_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *r, double, double);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void exponential_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, float *, float);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void exponential_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void laplace_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void laplace_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void cauchy_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void cauchy_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void rayleigh_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, float *, float);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void rayleigh_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void lognormal_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void lognormal_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void extreme_value_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void extreme_value_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void gamma_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void gamma_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
 

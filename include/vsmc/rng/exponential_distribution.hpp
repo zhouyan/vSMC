@@ -41,7 +41,8 @@ namespace vsmc
 namespace internal
 {
 
-inline bool exponential_distribution_check_param(double lambda)
+template <typename RealType>
+inline bool exponential_distribution_check_param(RealType lambda)
 {
     return lambda > 0;
 }
@@ -54,7 +55,7 @@ template <typename RealType>
 class ExponentialDistribution
 {
     VSMC_DEFINE_RNG_DISTRIBUTION_1(
-        Exponential, exponential, RealType, lambda, 1)
+        Exponential, exponential, RealType, result_type, lambda, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:

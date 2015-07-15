@@ -41,7 +41,11 @@ namespace vsmc
 namespace internal
 {
 
-inline bool cauchy_distribution_check_param(double, double b) { return b > 0; }
+template <typename RealType>
+inline bool cauchy_distribution_check_param(RealType, RealType b)
+{
+    return b > 0;
+}
 
 } // namespace vsmc::internal
 
@@ -50,7 +54,8 @@ inline bool cauchy_distribution_check_param(double, double b) { return b > 0; }
 template <typename RealType>
 class CauchyDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(Cauchy, cauchy, RealType, a, 0, b, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(
+        Cauchy, cauchy, RealType, result_type, a, 0, result_type, b, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     result_type min() const { return -max(); }

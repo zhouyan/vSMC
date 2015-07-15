@@ -103,8 +103,7 @@ class U01LRDistributionBits
 /// \tparam RealType The floating points type of results
 /// \tparam Left Shall the left side of the interval be Open or Closed
 /// \tparam Right Shall the right side of the interval be Open or Closed
-template <typename RealType = double, typename Left = Closed,
-    typename Right = Open>
+template <typename RealType, typename Left, typename Right>
 class U01LRDistribution
 {
     public:

@@ -62,14 +62,6 @@
 namespace vsmc
 {
 
-/// \brief Parameter type for open interval
-/// \ingroup Distribution
-class Open;
-
-/// \brief Parameter type for closed interval
-/// \ingroup Distribution
-class Closed;
-
 namespace internal
 {
 

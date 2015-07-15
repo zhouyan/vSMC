@@ -41,7 +41,8 @@ namespace vsmc
 namespace internal
 {
 
-inline bool pareto_distribution_check_param(double a, double b)
+template <typename RealType>
+inline bool pareto_distribution_check_param(RealType a, RealType b)
 {
     return a > 0 && b > 0;
 }
@@ -53,7 +54,8 @@ inline bool pareto_distribution_check_param(double a, double b)
 template <typename RealType>
 class ParetoDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(Pareto, pareto, RealType, a, 1, b, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(
+        Pareto, pareto, RealType, result_type, a, 1, result_type, b, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:

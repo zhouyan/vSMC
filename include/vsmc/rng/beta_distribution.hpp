@@ -42,7 +42,8 @@ namespace vsmc
 namespace internal
 {
 
-inline bool beta_distribution_check_param(double alpha, double beta)
+template <typename RealType>
+inline bool beta_distribution_check_param(RealType alpha, RealType beta)
 {
     return alpha > 0 && beta > 0;
 }
@@ -154,7 +155,8 @@ class BetaDistributionConstant
 template <typename RealType>
 class BetaDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(Beta, beta, RealType, alpha, 1, beta, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(
+        Beta, beta, RealType, result_type, alpha, 1, result_type, beta, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:

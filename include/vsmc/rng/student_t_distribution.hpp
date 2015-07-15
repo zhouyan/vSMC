@@ -42,7 +42,11 @@ namespace vsmc
 namespace internal
 {
 
-inline bool student_t_distribution_check_param(double n) { return n > 0; }
+template <typename RealType>
+inline bool student_t_distribution_check_param(RealType n)
+{
+    return n > 0;
+}
 
 } // namespace vsmc::internal
 
@@ -51,7 +55,8 @@ inline bool student_t_distribution_check_param(double n) { return n > 0; }
 template <typename RealType>
 class StudentTDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_1(StudentT, student_t, RealType, n, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_1(
+        StudentT, student_t, RealType, result_type, n, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:

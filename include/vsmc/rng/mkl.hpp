@@ -98,7 +98,7 @@ class MKLOffset<VSL_BRNG_WH>
     using type = MKLOffsetDynamic<273>;
 }; // class MKLOffset
 
-template <std::size_t>
+template <int>
 class MKLResultTypeTrait;
 
 template <>
@@ -115,10 +115,10 @@ class MKLResultTypeTrait<64>
     using type = unsigned MKL_INT64;
 }; // class MKLResultTypeTrait
 
-template <std::size_t Bits>
+template <int Bits>
 using MKLResultType = typename MKLResultTypeTrait<Bits>::type;
 
-template <std::size_t>
+template <int>
 class MKLUniformBits;
 
 template <>
@@ -150,7 +150,7 @@ class MKLDiscardSkipAhead
     }
 }; // class DiscardSkipAhead
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 class MKLDiscardGeneral
 {
     public:
@@ -170,28 +170,28 @@ class MKLDiscardGeneral
     }
 }; // class DiscardGeneral
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 class MKLDiscard
 {
     public:
     using type = MKLDiscardGeneral<BRNG, Bits>;
 }; // clas MKLDiscard
 
-template <std::size_t Bits>
+template <int Bits>
 class MKLDiscard<VSL_BRNG_MCG59, Bits>
 {
     public:
     using type = MKLDiscardSkipAhead;
 }; // clas MKLDiscard
 
-template <std::size_t Bits>
+template <int Bits>
 class MKLDiscard<VSL_BRNG_MT19937, Bits>
 {
     public:
     using type = MKLDiscardSkipAhead;
 }; // clas MKLDiscard
 
-template <std::size_t Bits>
+template <int Bits>
 class MKLDiscard<VSL_BRNG_SFMT19937, Bits>
 {
     public:
@@ -202,7 +202,7 @@ class MKLDiscard<VSL_BRNG_SFMT19937, Bits>
 
 /// \brief MKL RNG C++11 engine
 /// \ingroup MKLRNG
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 class MKLEngine
 {
     public:
@@ -439,112 +439,119 @@ using MKL_PHILOX4X32X10_64 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 64>;
 
 #endif // INTEL_MKL_VERSION >= 110300
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void rng_rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     typename MKLEngine<BRNG, Bits>::result_type *r)
 {
     rng(n, r);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
+inline void bernoulli_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, int *r, double p)
+{
+    rng.stream().bernoulli(static_cast<MKL_INT>(n), r, p);
+}
+
+template <MKL_INT BRNG, int Bits>
 inline void uniform_real_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
     rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void uniform_real_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
     rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void u01_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r)
 {
     rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void u01_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r)
 {
     rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float mean, float stddev)
 {
     rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double mean, double stddev)
 {
     rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void exponential_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float lambda)
 {
     rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void exponential_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double lambda)
 {
     rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void laplace_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float location, float scale)
 {
     rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void laplace_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double location, double scale)
 {
     rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
     rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
     rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void cauchy_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
     rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void cauchy_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
     rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void rayleigh_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float sigma)
 {
@@ -552,7 +559,7 @@ inline void rayleigh_distribution(
         static_cast<MKL_INT>(n), r, 0, const_sqrt_2<float>() * sigma);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void rayleigh_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double sigma)
 {
@@ -560,21 +567,21 @@ inline void rayleigh_distribution(
         static_cast<MKL_INT>(n), r, 0, const_sqrt_2<double>() * sigma);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void lognormal_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float m, float s)
 {
     rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void lognormal_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double m, double s)
 {
     rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void extreme_value_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
@@ -582,7 +589,7 @@ inline void extreme_value_distribution(
     sub(n, 2 * a, r, r);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void extreme_value_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
@@ -590,28 +597,28 @@ inline void extreme_value_distribution(
     sub(n, 2 * a, r, r);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void gamma_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float alpha, float beta)
 {
     rng.stream().gamma(static_cast<MKL_INT>(n), r, alpha, 0, beta);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void gamma_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double alpha, double beta)
 {
     rng.stream().gamma(static_cast<MKL_INT>(n), r, alpha, 0, beta);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float alpha, float beta)
 {
     rng.stream().beta(static_cast<MKL_INT>(n), r, alpha, beta, 0, 1);
 }
 
-template <MKL_INT BRNG, std::size_t Bits>
+template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double alpha, double beta)
 {

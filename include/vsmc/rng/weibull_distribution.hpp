@@ -42,7 +42,8 @@ namespace vsmc
 namespace internal
 {
 
-inline bool weibull_distribution_check_param(double a, double b)
+template <typename RealType>
+inline bool weibull_distribution_check_param(RealType a, RealType b)
 {
     return a > 0 && b > 0;
 }
@@ -54,7 +55,8 @@ inline bool weibull_distribution_check_param(double a, double b)
 template <typename RealType>
 class WeibullDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(Weibull, weibull, RealType, a, 1, b, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(
+        Weibull, weibull, RealType, result_type, a, 1, result_type, b, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:

@@ -45,7 +45,8 @@ namespace vsmc
 namespace internal
 {
 
-inline bool laplace_distribution_check_param(double, double b)
+template <typename RealType>
+inline bool laplace_distribution_check_param(RealType, RealType b)
 {
     return b > 0;
 }
@@ -57,7 +58,8 @@ inline bool laplace_distribution_check_param(double, double b)
 template <typename RealType>
 class LaplaceDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(Laplace, laplace, RealType, a, 0, b, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(
+        Laplace, laplace, RealType, result_type, a, 0, result_type, b, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:

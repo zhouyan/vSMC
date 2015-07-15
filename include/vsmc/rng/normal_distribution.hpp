@@ -42,7 +42,8 @@ namespace vsmc
 namespace internal
 {
 
-inline bool normal_distribution_check_param(double, double stddev)
+template <typename RealType>
+inline bool normal_distribution_check_param(RealType, RealType stddev)
 {
     return stddev > 0;
 }
@@ -55,7 +56,7 @@ template <typename RealType>
 class NormalDistribution
 {
     VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        Normal, normal, RealType, mean, 0, stddev, 1)
+        Normal, normal, RealType, result_type, mean, 0, result_type, stddev, 1)
 
     public:
     result_type min() const { return -max(); }

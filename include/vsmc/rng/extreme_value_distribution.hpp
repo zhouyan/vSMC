@@ -41,7 +41,8 @@ namespace vsmc
 namespace internal
 {
 
-inline bool extreme_value_distribution_check_param(double, double b)
+template <typename RealType>
+inline bool extreme_value_distribution_check_param(RealType, RealType b)
 {
     return b > 0;
 }
@@ -53,8 +54,8 @@ inline bool extreme_value_distribution_check_param(double, double b)
 template <typename RealType>
 class ExtremeValueDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        ExtremeValue, extreme_value, RealType, a, 0, b, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(ExtremeValue, extreme_value, RealType,
+        result_type, a, 0, result_type, b, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:

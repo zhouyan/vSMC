@@ -41,7 +41,11 @@ namespace vsmc
 namespace internal
 {
 
-inline bool chi_squared_distribution_check_param(double n) { return n > 0; }
+template <typename RealType>
+inline bool chi_squared_distribution_check_param(RealType n)
+{
+    return n > 0;
+}
 
 } // namespace vsmc::internal
 
@@ -50,7 +54,8 @@ inline bool chi_squared_distribution_check_param(double n) { return n > 0; }
 template <typename RealType>
 class ChiSquaredDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_1(ChiSquared, chi_squared, RealType, n, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_1(
+        ChiSquared, chi_squared, RealType, result_type, n, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:

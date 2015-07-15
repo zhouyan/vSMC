@@ -41,7 +41,8 @@ namespace vsmc
 namespace internal
 {
 
-inline bool fisher_f_distribution_check_param(double m, double n)
+template <typename RealType>
+inline bool fisher_f_distribution_check_param(RealType m, RealType n)
 {
     return m > 0 && n > 0;
 }
@@ -53,7 +54,8 @@ inline bool fisher_f_distribution_check_param(double m, double n)
 template <typename RealType>
 class FisherFDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(FisherF, fisher_f, RealType, m, 1, n, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(
+        FisherF, fisher_f, RealType, result_type, m, 1, result_type, n, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:
