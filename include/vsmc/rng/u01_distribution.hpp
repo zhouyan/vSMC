@@ -200,7 +200,7 @@ inline void u01_lr_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
 template <typename RealType, typename Left, typename Right, typename RNGType>
 inline void u01_lr_distribution(RNGType &rng, std::size_t n, RealType *r)
 {
-    const std::size_t k = 2000;
+    const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, r += k) {
