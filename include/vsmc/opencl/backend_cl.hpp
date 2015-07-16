@@ -642,7 +642,7 @@ class MoveCL
 /// ~~~{.cpp}
 /// __kernel
 /// void kern (ulong iter, ulong dim, __global state_type *state,
-///            __global fp_type *res);
+///            __global fp_type *r);
 /// ~~~
 template <typename T>
 class MonitorEvalCL
@@ -658,7 +658,7 @@ class MonitorEvalCL
     static constexpr ::cl_uint kernel_args_offset() { return 4; }
 
     void operator()(
-        std::size_t iter, std::size_t dim, Particle<T> &particle, double *res)
+        std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
     {
         set_kernel(iter, dim, particle);
         if (kernel_name_.empty())
@@ -669,7 +669,7 @@ class MonitorEvalCL
         particle.value().manager().run_kernel(
             kernel_, particle.size(), configure_.local_size());
         particle.value().manager().template read_buffer<typename T::fp_type>(
-            buffer_.data(), particle.value().size() * dim, res);
+            buffer_.data(), particle.value().size() * dim, r);
         eval_post(iter, particle);
     }
 
@@ -717,7 +717,7 @@ class MonitorEvalCL
 /// ~~~{.cpp}
 /// __kernel
 /// void kern (ulong iter, __global state_type *state,
-///            __global state_type *res);
+///            __global state_type *r);
 /// ~~~
 template <typename T>
 class PathEvalCL
@@ -732,7 +732,7 @@ class PathEvalCL
     /// `kernel_args_offset`
     static constexpr ::cl_uint kernel_args_offset() { return 3; }
 
-    double operator()(std::size_t iter, Particle<T> &particle, double *res)
+    double operator()(std::size_t iter, Particle<T> &particle, double *r)
     {
         set_kernel(iter, particle);
         if (kernel_name_.empty())
@@ -743,7 +743,7 @@ class PathEvalCL
         particle.value().manager().run_kernel(
             kernel_, particle.size(), configure_.local_size());
         particle.value().manager().template read_buffer<typename T::fp_type>(
-            buffer_.data(), particle.value().size(), res);
+            buffer_.data(), particle.value().size(), r);
         eval_post(iter, particle);
 
         return this->eval_grid(iter, particle);

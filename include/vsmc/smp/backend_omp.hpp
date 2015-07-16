@@ -115,7 +115,7 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 {
     public:
     void operator()(
-        std::size_t iter, std::size_t dim, Particle<T> &particle, double *res)
+        std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
     {
         using size_type = typename Particle<T>::size_type;
         const size_type N = particle.size();
@@ -123,7 +123,7 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 #pragma omp parallel for default(shared)
         for (size_type i = 0; i < N; ++i) {
             this->eval_sp(iter, dim, SingleParticle<T>(i, &particle),
-                res + static_cast<std::size_t>(i) * dim);
+                r + static_cast<std::size_t>(i) * dim);
         }
         this->eval_post(iter, particle);
     }
@@ -138,14 +138,14 @@ template <typename T, typename Derived>
 class PathEvalOMP : public PathEvalBase<T, Derived>
 {
     public:
-    double operator()(std::size_t iter, Particle<T> &particle, double *res)
+    double operator()(std::size_t iter, Particle<T> &particle, double *r)
     {
         using size_type = typename Particle<T>::size_type;
         const size_type N = particle.size();
         this->eval_pre(iter, particle);
 #pragma omp parallel for default(shared)
         for (size_type i = 0; i < N; ++i)
-            res[i] = this->eval_sp(iter, SingleParticle<T>(i, &particle));
+            r[i] = this->eval_sp(iter, SingleParticle<T>(i, &particle));
         this->eval_post(iter, particle);
 
         return this->eval_grid(iter, particle);

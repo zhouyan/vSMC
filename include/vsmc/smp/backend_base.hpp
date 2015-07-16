@@ -371,9 +371,9 @@ class MonitorEvalBase
 {
     public:
     void eval_sp(
-        std::size_t iter, std::size_t dim, SingleParticle<T> sp, double *res)
+        std::size_t iter, std::size_t dim, SingleParticle<T> sp, double *r)
     {
-        eval_sp_dispatch(iter, dim, sp, res, &Derived::eval_sp);
+        eval_sp_dispatch(iter, dim, sp, r, &Derived::eval_sp);
     }
 
     void eval_pre(std::size_t iter, Particle<T> &particle)
@@ -394,10 +394,10 @@ class MonitorEvalBase
 
     template <typename D>
     void eval_sp_dispatch(std::size_t iter, std::size_t dim,
-        SingleParticle<T> sp, double *res,
+        SingleParticle<T> sp, double *r,
         void (D::*)(std::size_t, std::size_t, SingleParticle<T>, double *))
     {
-        static_cast<Derived *>(this)->eval_sp(iter, dim, sp, res);
+        static_cast<Derived *>(this)->eval_sp(iter, dim, sp, r);
     }
 
     template <typename D>
@@ -418,11 +418,11 @@ class MonitorEvalBase
 
     template <typename D>
     void eval_sp_dispatch(std::size_t iter, std::size_t dim,
-        SingleParticle<T> sp, double *res,
+        SingleParticle<T> sp, double *r,
         void (D::*)(std::size_t, std::size_t, SingleParticle<T>, double *)
             const)
     {
-        static_cast<Derived *>(this)->eval_sp(iter, dim, sp, res);
+        static_cast<Derived *>(this)->eval_sp(iter, dim, sp, r);
     }
 
     template <typename D>
@@ -442,10 +442,10 @@ class MonitorEvalBase
     // static
 
     void eval_sp_dispatch(std::size_t iter, std::size_t dim,
-        SingleParticle<T> sp, double *res,
+        SingleParticle<T> sp, double *r,
         void (*)(std::size_t, std::size_t, SingleParticle<T>, double *))
     {
-        Derived::eval_sp(iter, dim, sp, res);
+        Derived::eval_sp(iter, dim, sp, r);
     }
 
     void eval_pre_dispatch(std::size_t iter, Particle<T> &particle,

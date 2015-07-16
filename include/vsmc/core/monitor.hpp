@@ -67,50 +67,6 @@ class Monitor
     using eval_type =
         std::function<void(std::size_t, std::size_t, Particle<T> &, double *)>;
 
-    /// \brief Construct a Monitor with an evaluation object
-    ///
-    /// \param dim The dimension of the Monitor, i.e., the number of variables
-    /// \param eval The evaluation object of type Monitor::eval_type
-    /// \param record_only The Monitor only records results instead of
-    /// calculating them itself
-    /// \param stage The stage of the Monitor. A Monitor may be evaluated
-    /// after
-    /// all steps that move the particles but before any resampling
-    /// (`MonitorMove`), or the possible resampling step but before any MCMC
-    /// steps (`MonitorResample`), all after all MCMC steps (`MonitorMCMC`).
-    /// If
-    /// a Monitor is present during initialization, then the initialization
-    /// are
-    /// taken as the step that moves particles, and both `MonitorResample` and
-    /// `MonitorMCMC` are considered after the possible resampling.
-    ///
-    /// The evaluation object has the signature
-    /// ~~~{.cpp}
-    /// void eval (std::size_t iter, std::size_t dim, Particle<T> &particle,
-    /// double *result)
-    /// ~~~
-    /// where the first three arguments are passed in by the Sampler at the
-    /// end of each iteration. The evaluation occurs after the possible MCMC
-    /// moves. The output parameter `result` shall contain the results of the
-    /// evaluation.
-    ///
-    /// If `record_only` is true, then the monitor only records the values
-    /// stored in `result`. Otherwise, the behavior is explained below
-    ///
-    /// The array `result` is of length `particle.size() * dim`, and it
-    /// represents a row major matrix of dimension `particle.size()` by `dim`,
-    /// say \f$R\f$. Let \f$W\f$ be the vector of the normalized weights. The
-    /// Monitor will be respoinsible to compute the importance sampling
-    /// estimate \f$r = R^TW\f$ and record it. For example, say the purpose of
-    /// the Monitor is to record the importance sampling estimates of
-    /// \f$E[h(X)]\f$ where \f$h(X) = (h_1(X),\dots,h_d(X))\f$. Then `result`
-    /// shall contain the evaluation of \f$h(X_i)\f$ for each \f$i\f$ from `0`
-    /// to `particle.size() - 1` in the order
-    /// \f$(h_1(X_0), \dots, h_d(X_0), h_1(X_1), \dots, h_d(X_1), \dots)\f$.
-    ///
-    /// After each evaluation, the iteration number `iter` and the imporatance
-    /// sampling estimates are recorded and can be retrived by `index()` and
-    /// `record()`.
     explicit Monitor(std::size_t dim, const eval_type &eval,
         bool record_only = false, MonitorStage stage = MonitorMCMC)
         : dim_(dim)
@@ -132,12 +88,6 @@ class Monitor
     MonitorStage stage() const { return stage_; }
 
     /// \brief The number of iterations has been recorded
-    ///
-    /// \details
-    /// This is not necessarily the same as Sampler<T>::iter_size. For
-    /// example, a Monitor can be added only after a certain time point of the
-    /// sampler's iterations. Also the Monitor can be turned off for a period
-    /// during the iterations.
     std::size_t iter_size() const { return index_.size(); }
 
     /// \brief Reserve space for a specified number of iterations
@@ -289,13 +239,6 @@ class Monitor
 
     /// \brief Perform the evaluation for a given iteration and a Particle<T>
     /// object.
-    ///
-    /// \details
-    /// This function is called by a Sampler at the end of each
-    /// iteration. It does nothing if `recording()` returns `false`. Otherwise
-    /// it use the user defined evaluation object to compute results. When a
-    /// Monitor is constructed, `recording()` always returns `true`. It can be
-    /// turned off by `turn_off()` and turned on later by `turn_on()`.
     void eval(std::size_t iter, Particle<T> &particle, MonitorStage stage)
     {
         if (!recording_)
