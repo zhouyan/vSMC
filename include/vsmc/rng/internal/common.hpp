@@ -384,6 +384,34 @@ class RNGBits : public std::integral_constant<int,
 {
 }; // class RNGBits
 
+template <std::size_t>
+class IntBitsN;
+
+template <>
+class IntBitsN<sizeof(int8_t)> : public std::integral_constant<int, 8>
+{
+}; // class IntBitsN
+
+template <>
+class IntBitsN<sizeof(int16_t)> : public std::integral_constant<int, 16>
+{
+}; // class IntBitsN
+
+template <>
+class IntBitsN<sizeof(int32_t)> : public std::integral_constant<int, 32>
+{
+}; // class IntBitsN
+
+template <>
+class IntBitsN<sizeof(int64_t)> : public std::integral_constant<int, 64>
+{
+}; // class IntBitsN
+
+template <typename IntType>
+class IntBits : public IntBitsN<sizeof(IntType)>
+{
+}; // class IntBits
+
 template <typename SeedSeq, typename U, typename V = U, typename W = V>
 class is_seed_seq
     : public std::integral_constant<bool,
@@ -434,11 +462,11 @@ template <typename Generator>
 inline void rng_rand(CounterEngine<Generator> &, std::size_t,
     typename CounterEngine<Generator>::result_type *);
 
-template <typename = unsigned>
-class UniformBitsDistribution;
-
 template <typename = int>
 class BernoulliIntDistribution;
+
+template <typename = unsigned>
+class UniformBitsDistribution;
 
 template <typename = int>
 class DiscreteDistribution;
@@ -497,13 +525,13 @@ class UniformRealLRDistribution;
 template <typename = double>
 class WeibullDistribution;
 
-template <typename UIntType, typename RNGType>
-inline void rng_rand(
-    RNGType &, UniformBitsDistribution<UIntType> &, std::size_t, UIntType *);
-
 template <typename IntType, typename RNGType>
 inline void rng_rand(
     RNGType &, BernoulliIntDistribution<IntType> &, std::size_t, IntType *);
+
+template <typename UIntType, typename RNGType>
+inline void rng_rand(
+    RNGType &, UniformBitsDistribution<UIntType> &, std::size_t, UIntType *);
 
 template <typename RealType, typename RNGType>
 inline void rng_rand(
@@ -582,11 +610,11 @@ template <typename RealType, typename RNGType>
 inline void rng_rand(
     RNGType &, WeibullDistribution<RealType> &, std::size_t, RealType *);
 
-template <typename UIntType, typename RNGType>
-inline void uniform_bits_distribution(RNGType &, std::size_t, UIntType *);
-
 template <typename IntType, typename RNGType>
 inline void bernoulli_distribution(RNGType &, std::size_t, IntType *, double);
+
+template <typename UIntType, typename RNGType>
+inline void uniform_bits_distribution(RNGType &, std::size_t, UIntType *);
 
 template <typename RealType, typename RNGType>
 inline void beta_distribution(

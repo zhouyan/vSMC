@@ -91,6 +91,7 @@ ADD_HEADER_EXECUTABLE(vsmc/rng/internal/common TRUE)
 
 ADD_HEADER_EXECUTABLE(vsmc/rng/distribution TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/bernoulli_distribution     TRUE)
+ADD_HEADER_EXECUTABLE(vsmc/rng/uniform_bits_distribution  TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/beta_distribution          TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/cauchy_distribution        TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/chi_squared_distribution   TRUE)

@@ -34,68 +34,10 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01.hpp>
+#include <vsmc/rng/uniform_bits_distribution.hpp>
 
 namespace vsmc
 {
-
-namespace internal
-{
-
-template <typename UIntType, int Bits>
-class U01LRDistributionBits
-{
-    public:
-    template <typename RNGType>
-    static UIntType eval(RNGType &rng)
-    {
-        return eval(rng,
-            std::integral_constant<bool, RNGMinBits<RNGType>::value == 0>(),
-            std::integral_constant<bool, RNGBits<RNGType>::value >= Bits>());
-    }
-
-    private:
-    template <typename RNGType>
-    static UIntType eval(RNGType &rng, std::true_type, std::true_type)
-    {
-        return static_cast<UIntType>(rng());
-    }
-
-    template <typename RNGType>
-    static UIntType eval(RNGType &rng, std::false_type, std::true_type)
-    {
-        return static_cast<UIntType>(rng() >> RNGMinBits<RNGType>::value);
-    }
-
-    template <typename RNGType>
-    static UIntType eval(RNGType &rng, std::true_type, std::false_type)
-    {
-        return static_cast<UIntType>(
-            patch<0, RNGBits<RNGType>::value, RNGMinBits<RNGType>::value>(
-                rng, std::true_type()));
-    }
-
-    template <typename RNGType>
-    static UIntType eval(RNGType &rng, std::false_type, std::false_type)
-    {
-        return eval(rng, std::true_type(), std::false_type());
-    }
-
-    template <int, int, int, typename RNGType>
-    static UIntType patch(RNGType &, std::false_type)
-    {
-        return 0;
-    }
-
-    template <int N, int B, int R, typename RNGType>
-    static UIntType patch(RNGType &rng, std::true_type)
-    {
-        return static_cast<UIntType>((rng() >> R) << (B * N)) +
-            patch<N + 1, B, R>(
-                   rng, std::integral_constant<bool, (N * B + B) < Bits>());
-    }
-}; // class U01DistributionBits
-
-} // namespace vsmc::internal
 
 /// \brief Standard uniform distribution with open/closed variants
 /// \ingroup Distribution
@@ -155,18 +97,14 @@ class U01LRDistribution
         using uint_type =
             typename std::conditional<internal::RNGBits<RNGType>::value >= 64,
                 std::uint64_t, std::uint32_t>::type;
-        using bits_type =
-            typename std::conditional<internal::RNGBits<RNGType>::value >= 64,
-                std::integral_constant<int, 64>,
-                std::integral_constant<int, 32>>::type;
         using flt_type = typename std::conditional<
             std::is_same<result_type, float>::value ||
                 std::is_same<result_type, double>::value,
             result_type, double>::type;
 
-        return U01<uint_type, flt_type, Left, Right>::eval(
-            internal::U01LRDistributionBits<uint_type, bits_type::value>::eval(
-                rng));
+        UniformBitsDistribution<uint_type> rbits;
+
+        return U01<uint_type, flt_type, Left, Right>::eval(rbits(rng));
     }
 
     template <typename RNGType>
@@ -245,64 +183,14 @@ using U01Distribution = U01CODistribution<RealType>;
 namespace internal
 {
 
-template <typename RealType, typename Left, typename Right, typename RNGType>
-inline void u01_lr_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, std::false_type, std::false_type)
+template <std::size_t K, typename RealType, typename Left, typename Right,
+    typename RNGType>
+inline void u01_lr_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
 {
-    U01LRDistribution<RealType, Left, Right> runif;
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = runif(rng);
-}
-
-template <typename RealType, typename Left, typename Right, typename RNGType>
-inline void u01_lr_distribution_impl_u32(
-    RNGType &rng, std::size_t n, RealType *r, typename RNGType::result_type *s)
-{
-    rng_rand(rng, n, s);
+    uint32_t s[K];
+    uniform_bits_distribution(rng, n, s);
     for (std::size_t i = 0; i != n; ++i)
         r[i] = U01<std::uint32_t, RealType, Left, Right>::eval(s[i]);
-}
-
-template <typename RealType, typename Left, typename Right, typename RNGType>
-inline void u01_lr_distribution_impl_u64(
-    RNGType &rng, std::size_t n, RealType *r, typename RNGType::result_type *s)
-{
-    rng_rand(rng, n / 2, s);
-    std::uint32_t *u = reinterpret_cast<std::uint32_t *>(s);
-    if (n % 2 != 0)
-        u[n - 1] = static_cast<std::uint32_t>(rng());
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = U01<std::uint32_t, RealType, Left, Right>::eval(u[i]);
-}
-
-template <typename RealType, typename Left, typename Right, typename RNGType>
-inline void u01_lr_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, std::true_type, std::false_type)
-{
-    const std::size_t k = 1000;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    typename RNGType::result_type s[k];
-    for (std::size_t i = 0; i != m; ++i) {
-        u01_lr_distribution_impl_u32<RealType, Left, Right>(
-            rng, k, r + i * k, s);
-    }
-    u01_lr_distribution_impl_u32<RealType, Left, Right>(rng, l, r + m * k, s);
-}
-
-template <typename RealType, typename Left, typename Right, typename RNGType>
-inline void u01_lr_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, std::true_type, std::true_type)
-{
-    const std::size_t k = 2000;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    typename RNGType::result_type s[k / 2];
-    for (std::size_t i = 0; i != m; ++i) {
-        u01_lr_distribution_impl_u64<RealType, Left, Right>(
-            rng, k, r + i * k, s);
-    }
-    u01_lr_distribution_impl_u64<RealType, Left, Right>(rng, l, r + m * k, s);
 }
 
 } // namespace vsmc::internal
@@ -312,13 +200,14 @@ inline void u01_lr_distribution_impl(
 template <typename RealType, typename Left, typename Right, typename RNGType>
 inline void u01_lr_distribution(RNGType &rng, std::size_t n, RealType *r)
 {
-    internal::u01_lr_distribution_impl<RealType, Left, Right>(rng, n, r,
-        std::integral_constant < bool,
-        internal::RNGMinBits<RNGType>::value == 0 &&
-            internal::RNGMaxBits<RNGType>::value >= 32 > (),
-        std::integral_constant < bool,
-        internal::RNGMinBits<RNGType>::value == 0 &&
-            internal::RNGMaxBits<RNGType>::value >= 64 > ());
+    const std::size_t k = 2000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, r += k) {
+        internal::u01_lr_distribution_impl<k, RealType, Left, Right>(
+            rng, k, r);
+    }
+    internal::u01_lr_distribution_impl<k, RealType, Left, Right>(rng, l, r);
 }
 
 /// \brief Generate standard uniform random variates on closed-closed interval
