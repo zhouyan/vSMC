@@ -499,7 +499,7 @@ class WeibullDistribution;
 
 template <typename UIntType, typename RNGType>
 inline void rng_rand(
-    RNGType &, UniformBitsDistribution<UIntType> &, std::size_t, IntType *);
+    RNGType &, UniformBitsDistribution<UIntType> &, std::size_t, UIntType *);
 
 template <typename IntType, typename RNGType>
 inline void rng_rand(
