@@ -127,6 +127,8 @@ inline int mkl_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
 {
     RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
     ::vsmc::uniform_bits_distribution(rng, static_cast<std::size_t>(n), r);
+
+    return 0;
 }
 
 } // namespace vsmc::internal
