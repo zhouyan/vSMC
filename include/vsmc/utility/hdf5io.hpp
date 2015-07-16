@@ -599,6 +599,49 @@ inline void hdf5store_list(std::size_t nrow, const std::string &file_name,
         --sptr, std::integral_constant<std::size_t, dim - 1>());
 }
 
+namespace internal
+{
+
+template <typename IntType>
+inline bool hdf5store_int(std::size_t n, IntType *r, std::false_type)
+{
+    if (sizeof(int) > sizeof(IntType))
+        return true;
+
+    bool flag = true;
+    for (std::size_t i = 0; i != n; ++i) {
+        if (r[i] > std::numeric_limits<int>::max()) {
+            flag = false;
+            break;
+        }
+    }
+
+    return flag;
+}
+
+template <typename IntType>
+inline bool hdf5store_int(std::size_t n, IntType *r, std::true_type)
+{
+    if (sizeof(int) > sizeof(IntType))
+        return true;
+
+    bool flag = true;
+    for (std::size_t i = 0; i != n; ++i) {
+        if (r[i] < std::numeric_limits<int>::min()) {
+            flag = false;
+            break;
+        }
+        if (r[i] > std::numeric_limits<int>::max()) {
+            flag = false;
+            break;
+        }
+    }
+
+    return flag;
+}
+
+} // namespace vsmc::internal
+
 /// \brief Store a Sampler in the HDF5 format
 /// \ingroup HDF5IO
 template <typename T>
@@ -612,14 +655,32 @@ inline void hdf5store(const Sampler<T> &sampler, const std::string &file_name,
     if (nrow == 0)
         return;
 
+    hdf5store_list_empty(file_name, data_name, append);
+
     std::size_t ncol_int = sampler.summary_header_size_int();
     Vector<std::string> header_int(ncol_int);
     Vector<size_type> data_int(nrow * ncol_int);
     sampler.summary_header_int(header_int.begin());
     sampler.template summary_data_int<ColMajor>(data_int.begin());
-    Vector<const size_type *> data_ptr_int(ncol_int);
-    for (std::size_t j = 0; j != ncol_int; ++j)
-        data_ptr_int[j] = data_int.data() + j * nrow;
+    bool use_int = internal::hdf5store_int(
+        data_int.size(), data_int.data(), std::is_signed<size_type>());
+    if (use_int) {
+        Vector<int> data_int_small(data_int.size());
+        std::copy(data_int.begin(), data_int.end(), data_int_small.begin());
+        Vector<const int *> data_ptr_int(ncol_int);
+        for (std::size_t j = 0; j != ncol_int; ++j)
+            data_ptr_int[j] = data_int_small.data() + j * nrow;
+        for (std::size_t j = 0; j != ncol_int; ++j)
+            hdf5store_list_insert<int>(
+                nrow, file_name, data_name, data_ptr_int[j], header_int[j]);
+    } else {
+        Vector<const size_type *> data_ptr_int(ncol_int);
+        for (std::size_t j = 0; j != ncol_int; ++j)
+            data_ptr_int[j] = data_int.data() + j * nrow;
+        for (std::size_t j = 0; j != ncol_int; ++j)
+            hdf5store_list_insert<size_type>(
+                nrow, file_name, data_name, data_ptr_int[j], header_int[j]);
+    }
 
     std::size_t ncol = sampler.summary_header_size();
     Vector<std::string> header(ncol);
@@ -629,13 +690,6 @@ inline void hdf5store(const Sampler<T> &sampler, const std::string &file_name,
     Vector<const double *> data_ptr(ncol);
     for (std::size_t j = 0; j != ncol; ++j)
         data_ptr[j] = data.data() + j * nrow;
-
-    hdf5store_list_empty(file_name, data_name, append);
-
-    for (std::size_t j = 0; j != ncol_int; ++j)
-        hdf5store_list_insert<size_type>(
-            nrow, file_name, data_name, data_ptr_int[j], header_int[j]);
-
     for (std::size_t j = 0; j != ncol; ++j)
         hdf5store_list_insert<double>(
             nrow, file_name, data_name, data_ptr[j], header[j]);
