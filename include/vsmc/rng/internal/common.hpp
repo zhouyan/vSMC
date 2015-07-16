@@ -129,26 +129,26 @@
     }                                                                         \
                                                                               \
     template <typename RNGType>                                               \
-    result_type operator()(RNGType & rng)                                     \
+    result_type operator()(RNGType &rng)                                      \
     {                                                                         \
         return operator()(rng, param_);                                       \
     }                                                                         \
                                                                               \
     template <typename RNGType>                                               \
-    result_type operator()(RNGType & rng, const param_type &param)            \
+    result_type operator()(RNGType &rng, const param_type &param)             \
     {                                                                         \
         return generate(rng, param);                                          \
     }                                                                         \
                                                                               \
     template <typename RNGType>                                               \
-    void operator()(RNGType & rng, std::size_t n, result_type * r)            \
+    void operator()(RNGType &rng, std::size_t n, result_type *r)              \
     {                                                                         \
         operator()(rng, n, r, param_);                                        \
     }                                                                         \
                                                                               \
     template <typename RNGType>                                               \
-    void operator()(RNGType & rng, std::size_t n, result_type * r,            \
-        const param_type &param)                                              \
+    void operator()(                                                          \
+        RNGType &rng, std::size_t n, result_type *r, const param_type &param) \
     {                                                                         \
         name##_distribution(rng, n, r, param.p1());                           \
     }                                                                         \
@@ -256,26 +256,26 @@
     }                                                                         \
                                                                               \
     template <typename RNGType>                                               \
-    result_type operator()(RNGType & rng)                                     \
+    result_type operator()(RNGType &rng)                                      \
     {                                                                         \
         return operator()(rng, param_);                                       \
     }                                                                         \
                                                                               \
     template <typename RNGType>                                               \
-    result_type operator()(RNGType & rng, const param_type &param)            \
+    result_type operator()(RNGType &rng, const param_type &param)             \
     {                                                                         \
         return generate(rng, param);                                          \
     }                                                                         \
                                                                               \
     template <typename RNGType>                                               \
-    void operator()(RNGType & rng, std::size_t n, result_type * r)            \
+    void operator()(RNGType &rng, std::size_t n, result_type *r)              \
     {                                                                         \
         operator()(rng, n, r, param_);                                        \
     }                                                                         \
                                                                               \
     template <typename RNGType>                                               \
-    void operator()(RNGType & rng, std::size_t n, result_type * r,            \
-        const param_type &param)                                              \
+    void operator()(                                                          \
+        RNGType &rng, std::size_t n, result_type *r, const param_type &param) \
     {                                                                         \
         name##_distribution(rng, n, r, param.p1(), param.p2());               \
     }                                                                         \
@@ -434,6 +434,9 @@ template <typename Generator>
 inline void rng_rand(CounterEngine<Generator> &, std::size_t,
     typename CounterEngine<Generator>::result_type *);
 
+template <typename = unsigned>
+class UniformBitsDistribution;
+
 template <typename = int>
 class BernoulliIntDistribution;
 
@@ -493,6 +496,10 @@ class UniformRealLRDistribution;
 
 template <typename = double>
 class WeibullDistribution;
+
+template <typename UIntType, typename RNGType>
+inline void rng_rand(
+    RNGType &, UniformBitsDistribution<UIntType> &, std::size_t, IntType *);
 
 template <typename IntType, typename RNGType>
 inline void rng_rand(
@@ -574,6 +581,9 @@ inline void rng_rand(RNGType &,
 template <typename RealType, typename RNGType>
 inline void rng_rand(
     RNGType &, WeibullDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename UIntType, typename RNGType>
+inline void uniform_bits_distribution(RNGType &, std::size_t, UIntType *);
 
 template <typename IntType, typename RNGType>
 inline void bernoulli_distribution(RNGType &, std::size_t, IntType *, double);
