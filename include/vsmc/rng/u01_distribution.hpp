@@ -116,8 +116,6 @@ class U01LRDistribution
         using result_type = RealType;
         using distribution_type = U01LRDistribution<RealType, Left, Right>;
 
-        param_type() { invariant(); }
-
         friend bool operator==(const param_type &, const param_type &)
         {
             return true;
@@ -141,18 +139,10 @@ class U01LRDistribution
         {
             return is;
         }
-
-        private:
-        friend distribution_type;
-
-        void invariant() {}
-
-        void reset() {}
     }; // class param_type
 
     U01LRDistribution() {}
-
-    explicit U01LRDistribution(const param_type &param) : param_(param) {}
+    explicit U01LRDistribution(const param_type &) {}
 
     result_type min() const { return 0; }
     result_type max() const { return 1; }
@@ -198,10 +188,33 @@ class U01LRDistribution
         u01_lr_distribution<RealType, Left, Right>(rng, n, r);
     }
 
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    friend bool operator==(const U01LRDistribution<RealType, Left, Right> &,
+        const U01LRDistribution<RealType, Left, Right> &)
+    {
+        return true;
+    }
 
-    private:
-    param_type param_;
+    friend bool operator!=(const U01LRDistribution<RealType, Left, Right> &,
+        const U01LRDistribution<RealType, Left, Right> &)
+    {
+        return false;
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const U01LRDistribution<RealType, Left, Right> &)
+    {
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        U01LRDistribution<RealType, Left, Right> &)
+    {
+        return is;
+    }
 }; // class U01LRDistribution
 
 /// \brief Standard uniform distribution on cloed-closed interval
