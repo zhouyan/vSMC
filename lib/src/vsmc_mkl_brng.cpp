@@ -70,9 +70,9 @@
         properties.StreamStateSize =                                          \
             sizeof(::vsmc::internal::MKLStreamState<RNGType>);                \
         properties.NSeeds = 1;                                                \
-        properties.IncludesZero = RNGType::min() == 0 ? 1 : 0;                \
-        properties.WordSize = sizeof(typename RNGType::result_type);          \
-        properties.NBits = ::vsmc::internal::RNGMaxBits<RNGType>::value;      \
+        properties.IncludesZero = 1;                                          \
+        properties.WordSize = 4;                                              \
+        properties.NBits = 32;                                                \
         properties.InitStream = vsmc_mkl_init_##name;                         \
         properties.sBRng = vsmc_mkl_sbrng_##name;                             \
         properties.dBRng = vsmc_mkl_dbrng_##name;                             \
@@ -123,36 +123,10 @@ inline int mkl_uniform_real(
 }
 
 template <typename RNGType>
-inline int mkl_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
-    unsigned *r, std::integral_constant<std::size_t, 4>)
-{
-    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
-    for (int i = 0; i != n; ++i)
-        r[i] = static_cast<unsigned>(rng());
-
-    return 0;
-}
-
-template <typename RNGType>
-inline int mkl_uniform_int_dispatch(::VSLStreamStatePtr stream, int n,
-    unsigned *r, std::integral_constant<std::size_t, 8>)
-{
-    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
-    for (int i = 0; i != n; ++i) {
-        typename RNGType::result_type result = rng();
-        *r++ = static_cast<unsigned>(result);
-        *r++ = static_cast<unsigned>(result >> 32);
-    }
-
-    return 0;
-}
-
-template <typename RNGType>
 inline int mkl_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
 {
-    return mkl_uniform_int_dispatch<RNGType>(
-        stream, n, r, std::integral_constant<std::size_t,
-                          sizeof(typename RNGType::result_type)>());
+    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
+    ::vsmc::uniform_bits_distribution(rng, static_cast<std::size_t>(n), r);
 }
 
 } // namespace vsmc::internal
