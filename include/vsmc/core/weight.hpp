@@ -291,7 +291,7 @@ class WeightNull
 
     size_type resample_size() const { return 0; }
 
-    double ess() const { return std::numeric_limits<double>::infinity(); }
+    double ess() const { return std::numeric_limits<double>::quiet_NaN(); }
 
     const double *resample_data() const { return nullptr; }
 
