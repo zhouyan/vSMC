@@ -141,11 +141,11 @@ class BetaDistributionConstant
         }
     }
 
-    BetaDistributionAlgorithm algorithm;
     RealType a;
     RealType b;
     RealType t;
     RealType p;
+    BetaDistributionAlgorithm algorithm;
 }; // class BetaDistributionConstant
 
 } // namespace internal

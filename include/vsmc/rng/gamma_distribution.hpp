@@ -93,9 +93,9 @@ class GammaDistributionConstant
         }
     }
 
-    GammaDistributionAlgorithm algorithm;
     RealType d;
     RealType c;
+    GammaDistributionAlgorithm algorithm;
 }; // class GammaDistributionConstant
 
 } // namespace internal
