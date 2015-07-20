@@ -31,19 +31,12 @@
 
 IF (MSVC)
     SET (BOOST_ROOT "C:/Program Files/Boost" CACHE PATH "Boost ROOT")
-    SET (TBB_ROOT "C:/Program Files/Intel/TBB/4.2")
+    SET (TBB_ROOT "C:/Program Files/TBB")
     SET (TBB_INC_PATH "${TBB_ROOT}/include" CACHE PATH "TBB include")
-    IF (MSVC_VERSION EQUAL 1600)
-        SET (TBB_LIB_PATH "${TBB_ROOT}/lib/intel64/vc10" CACHE PATH "TBB lib")
-    ELSEIF (MSVC_VERSION EQUAL 1700)
-        SET (TBB_LIB_PATH "${TBB_ROOT}/lib/intel64/vc11" CACHE PATH "TBB lib")
-    ELSEIF (MSVC_VERSION EQUAL 1800)
-        SET (TBB_LIB_PATH "${TBB_ROOT}/lib/intel64/vc12" CACHE PATH "TBB lib")
-    ENDIF (MSVC_VERSION EQUAL 1600)
-    SET (OpenCL_INC_PATH "C:/Program Files (x86)/Intel/OpenCL SDK/3.2/include"
-        CACHE PATH "OpenCL include path")
-    SET (OpenCL_LIB_PATH "C:/Program Files (x86)/Intel/OpenCL SDK/3.2/lib/x64"
-        CACHE PATH "OpenCL lib path")
+    SET (TBB_LIB_PATH "${TBB_ROOT}/lib/intel64/vc12" CACHE PATH "TBB lib")
+    SET (VSMC_MPI_FOUND FALSE CACHE "NO MPI")
+    SET (OPENCL_FOUND FALSE CACHE "NO OpenCL")
+    SET (OPENMP_FOUND FALSE CACHE "NO OpenMP")
 ENDIF (MSVC)
 
 IF (UNIX AND NOT APPLE AND NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")
