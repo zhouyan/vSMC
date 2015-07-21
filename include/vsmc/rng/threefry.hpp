@@ -319,21 +319,21 @@ class ThreefryInsertKey<T, 4, N, true>
 /// \ingroup Threefry
 template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
-class ThreefryGenerator
+class ThreefryGeneratorGeneric
 {
     public:
     using result_type = ResultType;
     using ctr_type = std::array<ResultType, K>;
     using key_type = std::array<ResultType, K>;
 
-    ThreefryGenerator() { VSMC_STATIC_ASSERT_RNG_THREEFRY(); }
+    ThreefryGeneratorGeneric() { VSMC_STATIC_ASSERT_RNG_THREEFRY(Generic); }
 
     static constexpr std::size_t size() { return K; }
 
     void reset(const key_type &) {}
 
     void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, size()> &buffer) const
+        std::array<result_type, K> &buffer) const
     {
         std::array<result_type, K + 1> par;
         internal::ThreefryInitPar<ResultType, K>::eval(key, par);
@@ -358,13 +358,13 @@ class ThreefryGenerator
 
     private:
     template <std::size_t>
-    void generate(std::array<result_type, size()> &,
+    void generate(std::array<result_type, K> &,
         const std::array<result_type, K + 1> &, std::false_type) const
     {
     }
 
     template <std::size_t N>
-    void generate(std::array<result_type, size()> &state,
+    void generate(std::array<result_type, K> &state,
         const std::array<result_type, K + 1> &par, std::true_type) const
     {
         internal::ThreefryRotate<ResultType, K, N>::eval(state);
@@ -372,13 +372,14 @@ class ThreefryGenerator
         generate<N + 1>(
             state, par, std::integral_constant < bool, N<Rounds>());
     }
-}; // class ThreefryGenerator
+}; // class ThreefryGeneratorGeneric
 
 /// \brief Threefry RNG engine
 /// \ingroup Threefry
 template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
-using ThreefryEngine = CounterEngine<ThreefryGenerator<ResultType, K, Rounds>>;
+using ThreefryEngine =
+    CounterEngine<ThreefryGeneratorGeneric<ResultType, K, Rounds>>;
 
 /// \brief Threefry2x32 RNG engine
 /// \ingroup Threefry
@@ -513,7 +514,7 @@ class ThreefryGeneratorSSE2
     void reset(const key_type &) {}
 
     void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, size()> &buffer)
+        std::array<result_type, K * M128I<ResultType>::size()> &buffer)
     {
         union {
             std::array<M128I<ResultType>, K> state;
@@ -701,7 +702,7 @@ class ThreefryGeneratorAVX2
     void reset(const key_type &) {}
 
     void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, size()> &buffer)
+        std::array<result_type, K * M256I<ResultType>::size()> &buffer)
     {
         union {
             std::array<M256I<ResultType>, K> state;

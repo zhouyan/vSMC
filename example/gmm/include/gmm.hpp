@@ -239,7 +239,7 @@ using StateBase = StateSMP<vsmc::StateMatrix<vsmc::RowMajor, 1, gmm_param>>;
 class gmm_state : public StateBase
 {
     public:
-    using size_type = typename StateBase::size_type;
+    using size_type = StateBase::size_type;
 
     gmm_state(size_type N)
         : StateBase(N)

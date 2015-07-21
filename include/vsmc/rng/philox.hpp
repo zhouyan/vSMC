@@ -267,7 +267,7 @@ class PhiloxGenerator
     void reset(const key_type &) {}
 
     void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, size()> &buffer) const
+        std::array<result_type, K> &buffer) const
     {
         union {
             std::array<ctr_type, 1> state;
