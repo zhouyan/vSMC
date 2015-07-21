@@ -67,8 +67,7 @@ namespace vsmc
 /// \ingroup RNG
 ///
 /// \details
-/// Let \f$S\f$ be the current internal seed, an integer in the range between
-/// 1
+/// Let \f$S\f$ be the current internal seed, an integer in the range between 1
 /// and \f$S_{\mathrm{max}}\f$ where \f$S_{\mathrm{max}}\f$ is the maximum of
 /// the internal seed. Each time `get()` is called, the internal is first
 /// increased by 1. If it is already equal to \f$S_{\mathrm{max}}\f$, then it
@@ -78,11 +77,9 @@ namespace vsmc
 /// divisor and the remainder can be set through the `modulo(div, rem)` member
 /// function.
 ///
-/// This property is useful when using programming models such as MPI where
-/// one
+/// This property is useful when using programming models such as MPI where one
 /// want to have distinct seeds across nodes. Each process can then configure
-/// the SeedGenerator using the `modulo` member such that \f$D\f$ is the
-/// number
+/// the SeedGenerator using the `modulo` member such that \f$D\f$ is the number
 /// of total nodes and \f$R\f$ is the rank of each node, counting from zero.
 ///
 /// For multithreading programs, the access to this member function shall be
