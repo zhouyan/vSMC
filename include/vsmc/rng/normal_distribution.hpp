@@ -59,8 +59,15 @@ class NormalDistribution
         Normal, normal, RealType, result_type, mean, 0, result_type, stddev, 1)
 
     public:
-    result_type min() const { return -max(); }
-    result_type max() const { return std::numeric_limits<result_type>::max(); }
+    result_type min VSMC_MNE() const
+    {
+        return -std::numeric_limits<result_type>::max VSMC_MNE();
+    }
+
+    result_type max VSMC_MNE() const
+    {
+        return std::numeric_limits<result_type>::max VSMC_MNE();
+    }
 
     void reset()
     {

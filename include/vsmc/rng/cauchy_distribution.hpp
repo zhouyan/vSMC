@@ -58,8 +58,16 @@ class CauchyDistribution
         Cauchy, cauchy, RealType, result_type, a, 0, result_type, b, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
-    result_type min() const { return -max(); }
-    result_type max() const { return std::numeric_limits<result_type>::max(); }
+    public:
+    result_type min VSMC_MNE() const
+    {
+        return -std::numeric_limits<result_type>::max VSMC_MNE();
+    }
+
+    result_type max VSMC_MNE() const
+    {
+        return std::numeric_limits<result_type>::max VSMC_MNE();
+    }
 
     void reset() {}
 

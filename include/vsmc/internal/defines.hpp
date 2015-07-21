@@ -35,6 +35,8 @@
 #include <vsmc/internal/config.h>
 #include <type_traits>
 
+#define VSMC_MNE
+
 namespace vsmc
 {
 

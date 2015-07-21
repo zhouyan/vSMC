@@ -140,14 +140,14 @@ class RDRANDEngine
 
     void discard(std::size_t) {}
 
-    static constexpr result_type min()
+    static constexpr result_type min VSMC_MNE()
     {
-        return std::numeric_limits<result_type>::min();
+        return std::numeric_limits<result_type>::min VSMC_MNE();
     }
 
-    static constexpr result_type max()
+    static constexpr result_type max VSMC_MNE()
     {
-        return std::numeric_limits<result_type>::max();
+        return std::numeric_limits<result_type>::max VSMC_MNE();
     }
 
     friend bool operator==(const RDRANDEngine<ResultType, NTrialMax> &,

@@ -67,7 +67,9 @@ FUNCTION(ADD_VSMC_EXECUTABLE exe src)
 
         IF (${arg} STREQUAL "OMP" AND OPENMP_FOUND)
             SET(compile_flags "${compile_flags} ${OpenMP_CXX_FLAGS}")
-            SET(link_flags "${link_flags} ${OpenMP_CXX_FLAGS}")
+            IF (NOT MSVC)
+                SET(link_flags "${link_flags} ${OpenMP_CXX_FLAGS}")
+            ENDIF (NOT MSVC)
         ENDIF (${arg} STREQUAL "OMP" AND OPENMP_FOUND)
     ENDFOREACH (arg ${ARGN})
 

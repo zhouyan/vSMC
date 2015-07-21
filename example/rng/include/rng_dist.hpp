@@ -155,7 +155,7 @@ inline double rng_dist_chi2(
     for (std::size_t i = 0; i != partition.size(); ++i)
         p += (count[i] - e) * (count[i] - e) / e;
     boost::math::chi_squared_distribution<double> chi2(
-            static_cast<double>(partition.size() - 1));
+        static_cast<double>(partition.size() - 1));
 
     return boost::math::cdf(chi2, p);
 }

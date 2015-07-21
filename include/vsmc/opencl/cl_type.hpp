@@ -34,7 +34,7 @@
 
 #include <vsmc/opencl/internal/common.hpp>
 
-#if defined(VSMC_INTEL)
+#ifdef VSMC_INTEL
 #pragma warning(push)
 #pragma warning(disable : 1478)
 #endif
@@ -1883,7 +1883,7 @@ inline std::vector<CLKernel> CLProgram::get_kernels() const
 
 } // namespace vsmc
 
-#if defined(VSMC_INTEL)
+#ifdef VSMC_INTEL
 #pragma warning(pop)
 #endif
 

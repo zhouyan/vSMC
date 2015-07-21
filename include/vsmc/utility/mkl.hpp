@@ -63,7 +63,7 @@
         "**MKLDFTask** USED WITH A ResultType OTHER THAN float OR double")
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_MKL_VSL_OFFSET(offset)                    \
-    VSMC_RUNTIME_ASSERT((offset < max()),                                     \
+    VSMC_RUNTIME_ASSERT((offset < max VSMC_MNE()),                            \
         "**MKLOffsetDynamic** "                                               \
         "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS")
 

@@ -610,7 +610,7 @@ inline bool hdf5store_int(std::size_t n, IntType *r, std::false_type)
 
     bool flag = true;
     for (std::size_t i = 0; i != n; ++i) {
-        if (r[i] > std::numeric_limits<int>::max()) {
+        if (r[i] > std::numeric_limits<int>::max VSMC_MNE()) {
             flag = false;
             break;
         }
@@ -627,11 +627,11 @@ inline bool hdf5store_int(std::size_t n, IntType *r, std::true_type)
 
     bool flag = true;
     for (std::size_t i = 0; i != n; ++i) {
-        if (r[i] < std::numeric_limits<int>::min()) {
+        if (r[i] < std::numeric_limits<int>::min VSMC_MNE()) {
             flag = false;
             break;
         }
-        if (r[i] > std::numeric_limits<int>::max()) {
+        if (r[i] > std::numeric_limits<int>::max VSMC_MNE()) {
             flag = false;
             break;
         }

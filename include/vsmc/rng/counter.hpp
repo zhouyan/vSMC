@@ -69,7 +69,7 @@ inline void increment(std::array<T, K> &ctr)
 template <typename T, std::size_t K, T NSkip>
 inline void increment(std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
 {
-    if (ctr.front() < std::numeric_limits<T>::max() - NSkip) {
+    if (ctr.front() < std::numeric_limits<T>::max VSMC_MNE() - NSkip) {
         ctr.front() += NSkip;
     } else {
         ctr.front() += NSkip;
@@ -83,7 +83,7 @@ inline void increment(std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
 template <typename T, std::size_t K>
 inline void increment(std::array<T, K> &ctr, T nskip)
 {
-    if (ctr.front() < std::numeric_limits<T>::max() - nskip) {
+    if (ctr.front() < std::numeric_limits<T>::max VSMC_MNE() - nskip) {
         ctr.front() += nskip;
     } else {
         ctr.front() += nskip;
@@ -151,7 +151,8 @@ inline void increment(
 {
     internal::increment_block_set<0>(
         ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
-    if (ctr.front() < std::numeric_limits<T>::max() - static_cast<T>(Blocks)) {
+    if (ctr.front() <
+        std::numeric_limits<T>::max VSMC_MNE() - static_cast<T>(Blocks)) {
         internal::increment_block_safe<0>(
             ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
     } else {
@@ -261,7 +262,7 @@ inline void increment(
 
     increment(ctr);
     const std::uint64_t m =
-        static_cast<std::uint64_t>(std::numeric_limits<T>::max());
+        static_cast<std::uint64_t>(std::numeric_limits<T>::max VSMC_MNE());
     const std::uint64_t l = static_cast<std::uint64_t>(ctr.front());
     const std::uint64_t k = static_cast<std::uint64_t>(n);
     if (k < m && l < m - k) {
@@ -410,14 +411,14 @@ class CounterEngine
         index_ = n % M_;
     }
 
-    static constexpr result_type min()
+    static constexpr result_type min VSMC_MNE()
     {
-        return std::numeric_limits<result_type>::min();
+        return std::numeric_limits<result_type>::min VSMC_MNE();
     }
 
-    static constexpr result_type max()
+    static constexpr result_type max VSMC_MNE()
     {
-        return std::numeric_limits<result_type>::max();
+        return std::numeric_limits<result_type>::max VSMC_MNE();
     }
 
     friend bool operator==(const CounterEngine<Generator> &eng1,
