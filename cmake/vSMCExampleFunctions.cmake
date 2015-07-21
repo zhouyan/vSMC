@@ -47,24 +47,6 @@ FUNCTION(ADD_VSMC_EXECUTABLE exe src)
     ENDIF (NOT link_flags)
 
     FOREACH (arg ${ARGN})
-        IF (${arg} STREQUAL "MPI" AND VSMC_MPI_FOUND)
-            TARGET_LINK_LIBRARIES(${exe} ${VSMC_MPI_LINK_LIBRARIES})
-            SET(compile_flags "${compile_flags} ${MPI_CXX_COMPILE_FLAGS}")
-            SET(link_flags "${link_flags} ${MPI_CXX_LINK_FLAGS}")
-        ENDIF (${arg} STREQUAL "MPI" AND VSMC_MPI_FOUND)
-
-        IF (${arg} STREQUAL "OCL" AND OPENCL_FOUND)
-            TARGET_LINK_LIBRARIES(${exe} ${OpenCL_LINK_LIBRARIES})
-        ENDIF (${arg} STREQUAL "OCL" AND OPENCL_FOUND)
-
-        IF (${arg} STREQUAL "HDF5" AND HDF5_FOUND)
-            TARGET_LINK_LIBRARIES(${exe} ${HDF5_LIBRARIES})
-        ENDIF (${arg} STREQUAL "HDF5" AND HDF5_FOUND)
-
-        IF (${arg} STREQUAL "TBB" AND TBB_FOUND)
-            TARGET_LINK_LIBRARIES(${exe} ${TBB_LINK_LIBRARIES})
-        ENDIF (${arg} STREQUAL "TBB" AND TBB_FOUND)
-
         IF (${arg} STREQUAL "OMP" AND OPENMP_FOUND)
             SET(compile_flags "${compile_flags} ${OpenMP_CXX_FLAGS}")
             IF (NOT MSVC)
@@ -96,33 +78,21 @@ FUNCTION(ADD_SMP_EXECUTABLE base header source smp_name)
     CONFIGURE_FILE(
         ${PROJECT_SOURCE_DIR}/src/${source}.cpp
         ${PROJECT_BINARY_DIR}/src/${source}_${smp}.cpp)
-
-    IF (${source} MATCHES "_mpi")
-        ADD_VSMC_EXECUTABLE(${source}_${smp}
-            ${PROJECT_BINARY_DIR}/src/${source}_${smp}.cpp
-            "${SMP}" "MKL" "RT" "MPI" ${ARGN})
-        ADD_DEPENDENCIES(example_mpi ${source}_${smp})
-    ELSE (${source} MATCHES "_mpi" ${ARGN})
-        ADD_VSMC_EXECUTABLE(${source}_${smp}
-            ${PROJECT_BINARY_DIR}/src/${source}_${smp}.cpp
-            "${SMP}" "MKL" "RT" ${ARGN})
-    ENDIF (${source} MATCHES "_mpi")
+    ADD_VSMC_EXECUTABLE(${source}_${smp}
+        ${PROJECT_BINARY_DIR}/src/${source}_${smp}.cpp "${SMP}" ${ARGN})
     ADD_DEPENDENCIES(${base} ${source}_${smp})
     ADD_DEPENDENCIES(example_${smp} ${source}_${smp})
 ENDFUNCTION(ADD_SMP_EXECUTABLE)
 
-FUNCTION(ADD_SMP_EXAMPLE base algs)
+FUNCTION(ADD_SMP_EXAMPLE base)
     ADD_CUSTOM_TARGET(${base})
     ADD_CUSTOM_TARGET(${base}-files)
     ADD_DEPENDENCIES(${base} ${base}-files)
     ADD_DEPENDENCIES(example ${base})
-    FOREACH (alg ${algs})
-        ADD_CUSTOM_TARGET(${base}_${alg})
-        FOREACH(smp ${SMP_EXECUTABLES})
-            ADD_SMP_EXECUTABLE(${base} ${base} ${base}_${alg} ${smp} ${ARGN})
-            ADD_DEPENDENCIES(${base}_${alg} ${base}_${alg}_${smp})
-        ENDFOREACH (smp)
-    ENDFOREACH (alg)
+    FOREACH(smp ${SMP_EXECUTABLES})
+        ADD_SMP_EXECUTABLE(${base} ${base} ${base} ${smp} ${ARGN})
+        ADD_DEPENDENCIES(${base} ${base}_${smp})
+    ENDFOREACH (smp)
 ENDFUNCTION(ADD_SMP_EXAMPLE)
 
 FUNCTION(COPY_FILE basename filename)

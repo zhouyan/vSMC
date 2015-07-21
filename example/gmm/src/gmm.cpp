@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/mpi/mpi_datatype.hpp
+// vSMC/example/gmm/src/gmm.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,26 +29,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_MPI_MPI_DATATYPE_HPP
-#define VSMC_MPI_MPI_DATATYPE_HPP
+#include "gmm_@smp@.hpp"
 
-#include <vsmc/mpi/internal/common.hpp>
-
-namespace boost
-{
-
-namespace mpi
-{
-
-template <typename T, std::size_t N>
-class is_mpi_datatype<std::array<T, N>>
-    : public std::conditional<std::is_fundamental<T>::value, mpl::true_,
-          mpl::false_>::type
-{
-}; // class is_mpi_datatype
-
-} // namespace boost::mpi
-
-} // namespace boost
-
-#endif // VSMC_MPI_MPI_DATATYPE_HPP
+int main(int argc, char **argv) { gmm_main(argc, argv); }

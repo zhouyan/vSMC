@@ -36,9 +36,7 @@ theme_set(theme_bw())
 
 smp <- c("seq", "omp", "tbb")
 exe <- character()
-exe <- c(exe, paste("pf_smp", smp, sep = "_"))
-exe <- c(exe, paste("pf_mpi", smp, sep = "_"))
-exe <- c(exe, "pf_cl", "pf_cl_mpi")
+exe <- c(exe, paste("pf", smp, sep = "_"))
 res <- c(
     "Multinomial",
     "Stratified",

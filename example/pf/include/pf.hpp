@@ -34,19 +34,12 @@
 #define VSMC_EXAMPLE_PF_@SMP@_HPP
 // clang-format on
 
-#ifndef VSMC_PF_MPI
-#define VSMC_PF_MPI 0
-#endif
-
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/state_matrix.hpp>
 #include <vsmc/smp/backend_@smp@.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 #if VSMC_HAS_HDF5
 #include <vsmc/utility/hdf5io.hpp>
-#endif
-#if VSMC_PF_MPI
-#include <vsmc/mpi/backend_mpi.hpp>
 #endif
 
 // clang-format off
@@ -71,14 +64,8 @@ static const std::size_t VelX = 2;
 static const std::size_t VelY = 3;
 static const std::size_t LogL = 4;
 
-#if VSMC_PF_MPI
-template <vsmc::MatrixOrder Order>
-using StateBase =
-    vsmc::StateMPI<StateSMP<vsmc::StateMatrix<Order, 5, double>>>;
-#else
 template <vsmc::MatrixOrder Order>
 using StateBase = StateSMP<vsmc::StateMatrix<Order, 5, double>>;
-#endif
 
 template <vsmc::MatrixOrder Order>
 class pf_state : public StateBase<Order>
@@ -209,24 +196,9 @@ template <vsmc::MatrixOrder Order>
 inline void pf_run(vsmc::ResampleScheme scheme, const std::string &datafile,
     const std::string &prog, const std::string &name)
 {
-#if VSMC_PF_MPI
-    boost::mpi::communicator world;
-    const bool master = (world.rank() == 0);
-    std::size_t N = ParticleNum / static_cast<std::size_t>(world.size());
-    std::stringstream ss;
-    ss << name << ".r" << world.rank();
-    std::string rname(ss.str());
-    std::string pf_txt(prog + rname + ".txt");
-    std::string pf_h5(prog + rname + ".h5");
-    vsmc::Seed::instance().modulo(
-        static_cast<vsmc::Seed::skip_type>(world.size()),
-        static_cast<vsmc::Seed::skip_type>(world.rank()));
-#else
-    const bool master = true;
     std::size_t N = ParticleNum;
     std::string pf_txt(prog + name + ".txt");
     std::string pf_h5(prog + name + ".h5");
-#endif
 
     vsmc::Seed::instance().set(101);
     vsmc::Sampler<pf_state<Order>> sampler(N, scheme, 0.5);
@@ -241,10 +213,8 @@ inline void pf_run(vsmc::ResampleScheme scheme, const std::string &datafile,
     sampler.initialize(const_cast<char *>(datafile.c_str()));
     sampler.iterate(DataNum - 1);
     watch.stop();
-    if (master) {
-        std::cout << std::setw(40) << std::left << name;
-        std::cout << watch.milliseconds() << std::endl;
-    }
+    std::cout << std::setw(40) << std::left << name;
+    std::cout << watch.milliseconds() << std::endl;
 
     std::ofstream pf_sampler(pf_txt);
     pf_sampler << sampler << std::endl;
@@ -272,10 +242,6 @@ inline void pf_run(vsmc::ResampleScheme scheme, char **argv)
 
 inline int pf_main(int argc, char **argv)
 {
-#if VSMC_PF_MPI
-    vsmc::MPIEnvironment env(argc, argv);
-#endif
-
     if (argc < 3) {
         std::cout << "Usage: " << argv[0] << " <input file>"
                   << " <output file>" << std::endl;

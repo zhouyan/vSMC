@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/pf/src/pf_mpi.cpp
+// vSMC/example/pf/src/pf.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -28,8 +28,6 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
-
-#define VSMC_PF_MPI 1
 
 #include "pf_@smp@.hpp"
 

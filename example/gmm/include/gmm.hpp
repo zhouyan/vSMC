@@ -34,18 +34,11 @@
 #define VSMC_EXAMPLE_GMM_@SMP@_HPP
 // clang-format on
 
-#ifndef VSMC_GMM_MPI
-#define VSMC_GMM_MPI 0
-#endif
-
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/state_matrix.hpp>
 #include <vsmc/smp/backend_@smp@.hpp>
 #include <vsmc/utility/program_option.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#if VSMC_GMM_MPI
-#include <vsmc/mpi/backend_mpi.hpp>
-#endif
 
 // clang-format off
 template <typename T>
@@ -229,12 +222,7 @@ class gmm_param
     vsmc::Vector<double> log_lambda_;
 };
 
-#if VSMC_GMM_MPI
-using StateBase =
-    vsmc::StateMPI<StateSMP<vsmc::StateMatrix<vsmc::RowMajor, 1, gmm_param>>>;
-#else
 using StateBase = StateSMP<vsmc::StateMatrix<vsmc::RowMajor, 1, gmm_param>>;
-#endif
 
 class gmm_state : public StateBase
 {
@@ -586,41 +574,19 @@ class gmm_alpha_prior
 
 inline int gmm_main(int argc, char **argv)
 {
-#if VSMC_GMM_MPI
-    vsmc::MPIEnvironment env(argc, argv);
-    boost::mpi::communicator world;
-    const bool master = (world.rank() == 0);
-    vsmc::Seed::instance().modulo(
-        static_cast<vsmc::Seed::skip_type>(world.size()),
-        static_cast<vsmc::Seed::skip_type>(world.rank()));
-#else
-    const bool master = true;
-#endif
-
     std::size_t N = 1000;
     std::size_t n = 100;
     std::size_t c = 4;
     std::size_t power = 2;
     std::string datafile("gmm.data");
 
-    if (master) {
-        vsmc::ProgramOptionMap option;
-        option.add("N", "Number of particles", &N, 1000)
-            .add("n", "Number of iterations", &n, 100)
-            .add("c", "Number of components", &c, 4)
-            .add("power", "Power of the prior annealing (0 for linear)",
-                &power, 2)
-            .add("datafile", "File name of the data", &datafile, "gmm.data");
-        option.process(argc, argv);
-#if VSMC_GMM_MPI
-        boost::mpi::broadcast(world, N, 0);
-        boost::mpi::broadcast(world, n, 0);
-        boost::mpi::broadcast(world, c, 0);
-        boost::mpi::broadcast(world, power, 0);
-        boost::mpi::broadcast(world, datafile, 0);
-        N = N / static_cast<std::size_t>(world.size());
-#endif
-    }
+    vsmc::ProgramOptionMap option;
+    option.add("N", "Number of particles", &N, 1000)
+        .add("n", "Number of iterations", &n, 100)
+        .add("c", "Number of components", &c, 4)
+        .add("power", "Power of the prior annealing (0 for linear)", &power, 2)
+        .add("datafile", "File name of the data", &datafile, "gmm.data");
+    option.process(argc, argv);
 
     gmm_move_smc::alpha_setter_type alpha_setter;
     if (power == 0)
@@ -642,17 +608,10 @@ inline int gmm_main(int argc, char **argv)
     watch.start();
     sampler.initialize(const_cast<char *>(datafile.c_str())).iterate(n);
     double ps = sampler.path().log_zconst();
-#if VSMC_GMM_MPI
-    double ps_sum = 0;
-    boost::mpi::reduce(world, ps, ps_sum, std::plus<double>(), 0);
-    ps = ps_sum;
-#endif
     watch.stop();
 
-    if (master) {
-        std::cout << "Path sampling estimate: " << ps << std::endl;
-        std::cout << "Wallclock Time: " << watch.seconds() << "s" << std::endl;
-    }
+    std::cout << "Path sampling estimate: " << ps << std::endl;
+    std::cout << "Wallclock Time: " << watch.seconds() << "s" << std::endl;
 
     return 0;
 }

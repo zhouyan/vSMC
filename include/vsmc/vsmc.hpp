@@ -47,12 +47,6 @@
 /// \defgroup Resample Resampling algorithms
 /// \brief Resampling algorithm functor classes
 
-/// \defgroup MPI Message Passing Interface
-/// \brief Parallel samplers using MPI
-
-/// \defgroup OpenCL OpenCL
-/// \brief Parallel sampler using OpenCL
-
 /// \defgroup SMP Symmetric Multiprocessing
 /// \brief Parallel samplers using multi-threading on SMP architecture
 
@@ -184,13 +178,5 @@
 #include <vsmc/rng/rng.hpp>
 #include <vsmc/smp/smp.hpp>
 #include <vsmc/utility/utility.hpp>
-
-#if VSMC_HAS_MPI
-#include <vsmc/mpi/mpi.hpp>
-#endif
-
-#if VSMC_HAS_OPENCL
-#include <vsmc/opencl/opencl.hpp>
-#endif
 
 #endif // VSMC_HPP
