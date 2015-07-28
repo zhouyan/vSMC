@@ -81,9 +81,12 @@ class RNGSetVector
     using rng_type = RNGType;
     using size_type = typename AlignedVector<rng_type>::size_type;
 
-    explicit RNGSetVector(size_type N = 0) : rng_(N, rng_type()) { seed(); }
+    explicit RNGSetVector(size_type N = 0) : size_(N), rng_(size_, rng_type())
+    {
+        seed();
+    }
 
-    size_type size() const { return rng_.size(); }
+    size_type size() const { return size_; }
 
     void resize(std::size_t n)
     {
@@ -107,9 +110,10 @@ class RNGSetVector
             Seed::instance().seed_rng(rng);
     }
 
-    rng_type &operator[](size_type id) { return rng_[id]; }
+    rng_type &operator[](size_type id) { return rng_[id % size_]; }
 
     private:
+    std::size_t size_;
     AlignedVector<rng_type> rng_;
 }; // class RNGSetVector
 
