@@ -77,30 +77,22 @@ class Weight
 
     virtual ~Weight() {}
 
-    /// \brief The number of particles
     size_type size() const { return size_; }
 
-    /// \brief Size of the weight set for the purpose of resampling
     virtual size_type resample_size() const { return size(); }
 
-    /// \brief ESS of the current weights
     double ess() const { return ess_; }
 
-    /// \brief Read only access to the raw data of weight
     const double *data() const { return data_.data(); }
 
-    /// \brief Read only access to the resampling weights
     virtual const double *resample_data() const { return data_.data(); }
 
-    /// \brief Read normalized weights through an output iterator
     template <typename OutputIter>
     void read_weight(OutputIter first) const
     {
         std::copy(data_.begin(), data_.end(), first);
     }
 
-    /// \brief Read normalized weights through a random access iterator with
-    /// (possible non-uniform stride)
     template <typename RandomIter>
     void read_weight(RandomIter first, int stride) const
     {
@@ -108,24 +100,17 @@ class Weight
             *first = data_[i];
     }
 
-    /// \brief Read normalized weights through a pointer for the purpose of
-    /// resampling
     virtual void read_resample_weight(double *first) const
     {
         read_weight(first);
     }
 
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS
-    /// such that each particle has a equal weight
     void set_equal()
     {
-        std::fill(data_.begin(), data_.end(), 1.0);
+        std::fill(data_.begin(), data_.end(), 1.0 / resample_size());
         post_set();
     }
 
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// changing the (possible unnormalized) weights directly through an input
-    /// iterator
     template <typename InputIter>
     void set(InputIter first)
     {
@@ -133,9 +118,6 @@ class Weight
         post_set();
     }
 
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// changing the (possible unnormalized) weights directly through a random
-    /// access iterator with (possible non-uniform) stride
     template <typename RandomIter>
     void set(RandomIter first, int stride)
     {
@@ -144,10 +126,6 @@ class Weight
         post_set();
     }
 
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// multiply the normalized weight with (possible unnormalized)
-    /// incremental
-    /// weights through an input iterator
     template <typename InputIter>
     void mul(InputIter first)
     {
@@ -164,11 +142,6 @@ class Weight
 
     void mul(double *first) { mul(const_cast<const double *>(first)); }
 
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// multiply the normalized weight with (possible unnormalized)
-    /// incremental
-    /// weights through a random access iterator with (possible non-uniform)
-    /// stride
     template <typename RandomIter>
     void mul(RandomIter first, int stride)
     {
@@ -177,10 +150,6 @@ class Weight
         post_set();
     }
 
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// changing the (possible unnormalized) logarithm weights directly
-    /// through
-    /// an input iterator
     template <typename InputIter>
     void set_log(InputIter first)
     {
@@ -188,10 +157,6 @@ class Weight
         post_set_log();
     }
 
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// changing the (possible unnormalized) logarithm weights directly
-    /// through
-    /// a random access iterator with (possible non-uniform) stride
     template <typename RandomIter>
     void set_log(RandomIter first, int stride)
     {
@@ -200,9 +165,6 @@ class Weight
         post_set_log();
     }
 
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// adding to the unnormalized logarithm weights with (possible
-    /// unormalized) logarithm incremental weights through an input iterator
     template <typename InputIter>
     void add_log(InputIter first)
     {
@@ -221,10 +183,6 @@ class Weight
 
     void add_log(double *first) { add_log(const_cast<const double *>(first)); }
 
-    /// \brief Set normalized weight, unnormalized logarithm weight and ESS by
-    /// adding to the unnormalized logarithm weights with (possible
-    /// unormalized) logarithm incremental weights through a ranodm access
-    /// iterator with (possible non-uniform) stride
     template <typename RandomIter>
     void add_log(RandomIter first, int stride)
     {
@@ -234,7 +192,6 @@ class Weight
         post_set_log();
     }
 
-    /// \brief Draw a sample according to the weights
     template <typename URNG>
     size_type draw(URNG &eng) const
     {
@@ -242,7 +199,6 @@ class Weight
     }
 
     protected:
-    /// \brief Write access to the raw data of weight
     double *mutable_data() { return data_.data(); }
 
     private:
