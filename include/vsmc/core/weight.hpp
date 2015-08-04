@@ -49,7 +49,7 @@ inline double weight_ess(std::size_t N, const double *first)
 /// \ingroup Core
 static void weight_normalize(std::size_t N, double *first)
 {
-    ::vsmc::mul(N, 1 / std::accumulate(first, first + N, 0.0), first, first);
+    mul(N, 1 / std::accumulate(first, first + N, 0.0), first, first);
 }
 
 /// \brief Normalize logarithm weights such that the maximum is zero
@@ -68,9 +68,9 @@ class Weight
     public:
     using size_type = std::size_t;
 
-    explicit Weight(size_type N) : size_(N), ess_(0), data_(N) {}
+    explicit Weight(size_type N) : ess_(0), data_(N) {}
 
-    size_type size() const { return size_; }
+    size_type size() const { return data_.size(); }
 
     size_type resample_size() const { return size(); }
 
@@ -89,14 +89,11 @@ class Weight
     template <typename RandomIter>
     void read_weight(RandomIter first, int stride) const
     {
-        for (size_type i = 0; i != size_; ++i, first += stride)
+        for (size_type i = 0; i != size(); ++i, first += stride)
             *first = data_[i];
     }
 
-    void read_resample_weight(double *first) const
-    {
-        read_weight(first);
-    }
+    void read_resample_weight(double *first) const { read_weight(first); }
 
     void set_equal()
     {
@@ -107,14 +104,14 @@ class Weight
     template <typename InputIter>
     void set(InputIter first)
     {
-        std::copy_n(first, size_, data_.begin());
+        std::copy_n(first, size(), data_.begin());
         post_set();
     }
 
     template <typename RandomIter>
     void set(RandomIter first, int stride)
     {
-        for (size_type i = 0; i != size_; ++i, first += stride)
+        for (size_type i = 0; i != size(); ++i, first += stride)
             data_[i] = *first;
         post_set();
     }
@@ -122,14 +119,14 @@ class Weight
     template <typename InputIter>
     void mul(InputIter first)
     {
-        for (size_type i = 0; i != size_; ++i, ++first)
+        for (size_type i = 0; i != size(); ++i, ++first)
             data_[i] *= *first;
         post_set();
     }
 
     void mul(const double *first)
     {
-        ::vsmc::mul(size_, data_.data(), first, data_.data());
+        ::vsmc::mul(size(), data_.data(), first, data_.data());
         post_set();
     }
 
@@ -138,7 +135,7 @@ class Weight
     template <typename RandomIter>
     void mul(RandomIter first, int stride)
     {
-        for (size_type i = 0; i != size_; ++i, first += stride)
+        for (size_type i = 0; i != size(); ++i, first += stride)
             data_[i] *= *first;
         post_set();
     }
@@ -146,14 +143,14 @@ class Weight
     template <typename InputIter>
     void set_log(InputIter first)
     {
-        std::copy_n(first, size_, data_.begin());
+        std::copy_n(first, size(), data_.begin());
         post_set_log();
     }
 
     template <typename RandomIter>
     void set_log(RandomIter first, int stride)
     {
-        for (size_type i = 0; i != size_; ++i, first += stride)
+        for (size_type i = 0; i != size(); ++i, first += stride)
             data_[i] = *first;
         post_set_log();
     }
@@ -161,16 +158,16 @@ class Weight
     template <typename InputIter>
     void add_log(InputIter first)
     {
-        log(size_, data_.data(), data_.data());
-        for (size_type i = 0; i != size_; ++i, ++first)
+        log(size(), data_.data(), data_.data());
+        for (size_type i = 0; i != size(); ++i, ++first)
             data_[i] += *first;
         post_set_log();
     }
 
     void add_log(const double *first)
     {
-        log(size_, data_.data(), data_.data());
-        add(size_, data_.data(), first, data_.data());
+        log(size(), data_.data(), data_.data());
+        add(size(), data_.data(), first, data_.data());
         post_set_log();
     }
 
@@ -179,8 +176,8 @@ class Weight
     template <typename RandomIter>
     void add_log(RandomIter first, int stride)
     {
-        log(size_, data_.data(), data_.data());
-        for (size_type i = 0; i != size_; ++i, first += stride)
+        log(size(), data_.data(), data_.data());
+        for (size_type i = 0; i != size(); ++i, first += stride)
             data_[i] += *first;
         post_set_log();
     }
@@ -195,29 +192,42 @@ class Weight
     double *mutable_data() { return data_.data(); }
 
     private:
-    size_type size_;
     double ess_;
     Vector<double> data_;
     DiscreteDistribution<size_type> draw_;
 
-    void post_set()
-    {
-        normalize();
-        ess_ = get_ess();
-    }
+    void post_set() { ess_ = normalize(false); }
 
     void post_set_log()
     {
-        normalize_log();
-        exp(size_, data_.data(), data_.data());
-        post_set();
+        weight_normalize_log(size(), data_.data());
+        ess_ = normalize(true);
     }
 
-    double get_ess() const { return weight_ess(size_, data_.data()); }
+    double normalize(bool use_log)
+    {
+        double *w = data_.data();
+        double accw = 0;
+        double essd = 0;
+        const std::size_t k = 1000;
+        const std::size_t m = size() / k;
+        const std::size_t l = size() / k;
+        for (std::size_t i = 0; i != m; ++i, w += k)
+            normalize_eval(k, w, accw, essd, use_log);
+        normalize_eval(l, w, accw, essd, use_log);
+        ::vsmc::mul(size(), 1 / accw, data_.data(), data_.data());
 
-    void normalize() { weight_normalize(size_, data_.data()); }
+        return 1 / essd;
+    }
 
-    void normalize_log() { weight_normalize_log(size_, data_.data()); }
+    void normalize_eval(
+        std::size_t n, double *w, double &accw, double &essd, bool use_log)
+    {
+        if (use_log)
+            exp(n, w, w);
+        accw = std::accumulate(w, w + n, accw);
+        essd += dot(n, w, 1, w, 1);
+    }
 }; // class Weight
 
 /// \brief An empty weight set class
