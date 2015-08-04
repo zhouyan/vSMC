@@ -171,27 +171,6 @@ inline void normal_distribution_impl(
     fma(nu, s, u2, mean, u2);
 }
 
-template <typename RealType>
-inline void normal_distribution_pdf_impl(std::size_t n, const RealType *x,
-    RealType *r, RealType mean, RealType stddev)
-{
-    sub(n, x, mean, r);
-    mul(n, 1 / stddev, r, r);
-    sqr(n, r, r);
-    mul(n, static_cast<RealType>(-0.5), r, r);
-    exp(n, r, r);
-    mul(n, 1 / (stddev * const_sqrt_pi_2<RealType>()), r, r);
-}
-
-template <typename RealType>
-inline void normal_distribution_cdf_impl(std::size_t n, const RealType *x,
-    RealType *r, RealType mean, RealType stddev)
-{
-    sub(n, x, mean, r);
-    mul(n, 1 / stddev, r, r);
-    cdfnorm(n, r, r);
-}
-
 } // namespace vsmc::internal
 
 /// \brief Generating normal random variates
