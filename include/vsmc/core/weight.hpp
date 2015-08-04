@@ -70,22 +70,15 @@ class Weight
 
     explicit Weight(size_type N) : size_(N), ess_(0), data_(N) {}
 
-    Weight(const Weight &) = default;
-    Weight &operator=(const Weight &) = default;
-    Weight(Weight &&) = default;
-    Weight &operator=(Weight &&) = default;
-
-    virtual ~Weight() {}
-
     size_type size() const { return size_; }
 
-    virtual size_type resample_size() const { return size(); }
+    size_type resample_size() const { return size(); }
 
     double ess() const { return ess_; }
 
     const double *data() const { return data_.data(); }
 
-    virtual const double *resample_data() const { return data_.data(); }
+    const double *resample_data() const { return data_.data(); }
 
     template <typename OutputIter>
     void read_weight(OutputIter first) const
@@ -100,7 +93,7 @@ class Weight
             *first = data_[i];
     }
 
-    virtual void read_resample_weight(double *first) const
+    void read_resample_weight(double *first) const
     {
         read_weight(first);
     }
@@ -220,11 +213,11 @@ class Weight
         post_set();
     }
 
-    virtual double get_ess() const { return weight_ess(size_, data_.data()); }
+    double get_ess() const { return weight_ess(size_, data_.data()); }
 
-    virtual void normalize() { weight_normalize(size_, data_.data()); }
+    void normalize() { weight_normalize(size_, data_.data()); }
 
-    virtual void normalize_log() { weight_normalize_log(size_, data_.data()); }
+    void normalize_log() { weight_normalize_log(size_, data_.data()); }
 }; // class Weight
 
 /// \brief An empty weight set class
