@@ -211,7 +211,7 @@ class Weight
         double essd = 0;
         const std::size_t k = 1000;
         const std::size_t m = size() / k;
-        const std::size_t l = size() / k;
+        const std::size_t l = size() % k;
         for (std::size_t i = 0; i != m; ++i, w += k)
             normalize_eval(k, w, accw, essd, use_log);
         normalize_eval(l, w, accw, essd, use_log);
