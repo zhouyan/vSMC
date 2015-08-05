@@ -613,7 +613,8 @@ class Sampler
         if (iter_size() == 0)
             return 0;
 
-        std::size_t header_size = 1;
+        std::size_t header_size =
+            std::is_same<WeightType<T>, WeightNull>::value ? 0 : 1;
         if (path_.iter_size() > 0)
             header_size += 2;
         for (const auto &m : monitor_)
@@ -632,6 +633,15 @@ class Sampler
 
         *first++ = std::string("Size");
         *first++ = std::string("Resampled");
+
+        if (accept_history_.size() == 0)
+            return;
+
+        if (accept_history_.size() == 1) {
+            *first++ = std::string("Accept");
+            return;
+        }
+
         for (std::size_t i = 0; i != accept_history_.size(); ++i)
             *first++ = "Accept." + internal::itos(i);
     }
@@ -643,7 +653,8 @@ class Sampler
         if (summary_header_size() == 0)
             return;
 
-        *first++ = std::string("ESS");
+        if (!std::is_same<WeightType<T>, WeightNull>::value)
+            *first++ = std::string("ESS");
 
         if (path_.iter_size() > 0) {
             *first++ = std::string("Path.Integrand");
@@ -653,6 +664,12 @@ class Sampler
         for (const auto &m : monitor_) {
             if (m.second.iter_size() > 0) {
                 unsigned md = static_cast<unsigned>(m.second.dim());
+                if (md == 0)
+                    continue;
+                if (md == 1 && m.second.name(0).empty()) {
+                    *first++ = m.first;
+                    continue;
+                }
                 for (unsigned d = 0; d != md; ++d) {
                     if (m.second.name(d).empty())
                         *first++ = m.first + "." + internal::itos(d);
@@ -888,7 +905,8 @@ class Sampler
                 miter.push_back(std::make_pair(0, &m.second));
 
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-            *first++ = ess_history_[iter];
+            if (!std::is_same<WeightType<T>, WeightNull>::value)
+                *first++ = ess_history_[iter];
 
             if (path_.iter_size() > 0) {
                 if (piter != path_.iter_size() && iter == path_.index(piter)) {
@@ -919,7 +937,8 @@ class Sampler
     {
         double missing_data = std::numeric_limits<double>::quiet_NaN();
 
-        first = std::copy(ess_history_.begin(), ess_history_.end(), first);
+        if (!std::is_same<WeightType<T>, WeightNull>::value)
+            first = std::copy(ess_history_.begin(), ess_history_.end(), first);
 
         if (path_.iter_size() > 0) {
             std::size_t piter;
