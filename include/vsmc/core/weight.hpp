@@ -126,7 +126,7 @@ class Weight
 
     void mul(const double *first)
     {
-        ::vsmc::mul(size(), data_.data(), first, data_.data());
+        ::vsmc::mul(size(), first, data_.data(), data_.data());
         post_set();
     }
 
