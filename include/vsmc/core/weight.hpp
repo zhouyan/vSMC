@@ -208,25 +208,22 @@ class Weight
     {
         double *w = data_.data();
         double accw = 0;
-        double essd = 0;
         const std::size_t k = 1000;
         const std::size_t m = size() / k;
         const std::size_t l = size() % k;
         for (std::size_t i = 0; i != m; ++i, w += k)
-            normalize_eval(k, w, accw, essd, use_log);
-        normalize_eval(l, w, accw, essd, use_log);
+            normalize_eval(k, w, accw, use_log);
+        normalize_eval(l, w, accw, use_log);
         ::vsmc::mul(size(), 1 / accw, data_.data(), data_.data());
 
-        return 1 / essd;
+        return 1 / dot(size(), data_.data(), 1, data_.data(), 1);
     }
 
-    void normalize_eval(
-        std::size_t n, double *w, double &accw, double &essd, bool use_log)
+    void normalize_eval(std::size_t n, double *w, double &accw, bool use_log)
     {
         if (use_log)
             exp(n, w, w);
         accw = std::accumulate(w, w + n, accw);
-        essd += dot(n, w, 1, w, 1);
     }
 }; // class Weight
 
@@ -315,7 +312,7 @@ class WeightNull
     {
         return 0;
     }
-}; // class WeightEmtpy
+}; // class WeightNull
 
 /// \brief Particle::weight_type trait
 /// \ingroup Traits
