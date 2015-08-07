@@ -138,7 +138,6 @@ class Sampler
     Sampler<T> clone(bool new_rng) const
     {
         Sampler<T> sampler(*this);
-
         if (new_rng) {
             sampler.particle().rng_set().seed();
             Seed::instance().seed_rng(sampler.particle().resample_rng());
@@ -156,15 +155,12 @@ class Sampler
     {
         if (this != &other) {
             particle_.clone(other.particle_, retain_rng);
-
             init_by_iter_ = other.init_by_iter_;
             init_ = other.init_;
             move_queue_ = other.move_queue_;
             mcmc_queue_ = other.mcmc_queue_;
-
             resample_op_ = other.resample_op_;
             resample_threshold_ = other.resample_threshold_;
-
             iter_num_ = other.iter_num_;
             size_history_ = other.size_history_;
             ess_history_ = other.ess_history_;
@@ -179,15 +175,12 @@ class Sampler
     {
         if (this != &other) {
             particle_.clone(std::move(other.particle_), retain_rng);
-
             init_by_iter_ = other.init_by_iter_;
             init_ = std::move(other.init_);
             move_queue_ = std::move(other.move_queue_);
             mcmc_queue_ = std::move(other.mcmc_queue_);
-
             resample_op_ = std::move(other.resample_op_);
             resample_threshold_ = other.resample_threshold_;
-
             iter_num_ = other.iter_num_;
             size_history_ = std::move(other.size_history_);
             ess_history_ = std::move(other.ess_history_);
@@ -220,12 +213,6 @@ class Sampler
     std::size_t iter_size() const { return size_history_.size(); }
 
     /// \brief Current iteration number (initialization count as zero)
-    ///
-    /// \details
-    /// The value of `iter_size() - iter_num()` is always 1. `iter_size`
-    /// emphasize that it returns the total number of iterations. `iter_num`
-    /// is
-    /// more of an index of the sampler, starting from zero.
     std::size_t iter_num() const { return iter_num_; }
 
     /// \brief Force resample
@@ -240,6 +227,7 @@ class Sampler
     Sampler<T> &resample_scheme(const resample_type &res_op)
     {
         resample_op_ = res_op;
+
         return *this;
     }
 
@@ -287,8 +275,8 @@ class Sampler
         return std::numeric_limits<double>::infinity();
     }
 
-    /// \brief Get sampler size of a given iteration, initialization count as
-    /// iter 0
+    /// \brief Get sampler size of a given iteration (initialization count as
+    /// iteration zero)
     double size_history(std::size_t iter) const { return size_history_[iter]; }
 
     /// \brief Read sampler size history through an output iterator
@@ -365,21 +353,8 @@ class Sampler
     {
         VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_init, init_by_move, MOVE);
 
-        class init_op
-        {
-            public:
-            init_op(const move_type &new_move) : move_(new_move) {}
-
-            std::size_t operator()(Particle<T> &particle, void *)
-            {
-                return move_(0, particle);
-            }
-
-            private:
-            move_type move_;
-        }; // class init_op
-
-        init_ = init_op(new_init);
+        init_ = init_op([new_init](
+            Particle<T> &particle, void *) { new_init(0, particle); });
 
         return *this;
     }
@@ -428,6 +403,7 @@ class Sampler
     Sampler<T> &mcmc_queue_clear()
     {
         mcmc_queue_.clear();
+
         return *this;
     }
 
@@ -518,6 +494,7 @@ class Sampler
         const typename Path<T>::eval_type &eval, bool record_only = false)
     {
         path_.set_eval(eval, record_only);
+
         return *this;
     }
 
@@ -533,6 +510,7 @@ class Sampler
     Sampler<T> &monitor(const std::string &name, const Monitor<T> &mon)
     {
         monitor_.insert(std::make_pair(name, mon));
+
         return *this;
     }
 
@@ -595,6 +573,7 @@ class Sampler
     Sampler<T> &clear_monitor()
     {
         monitor_.clear();
+
         return *this;
     }
 
@@ -632,7 +611,6 @@ class Sampler
 
         *first++ = std::string("Size");
         *first++ = std::string("Resampled");
-
         for (std::size_t i = 0; i != accept_history_.size(); ++i)
             *first++ = "Accept." + internal::itos(i);
     }
@@ -645,12 +623,10 @@ class Sampler
             return;
 
         *first++ = std::string("ESS");
-
         if (path_.iter_size() > 0) {
             *first++ = std::string("Path.Integrand");
             *first++ = std::string("Path.Grid");
         }
-
         for (const auto &m : monitor_) {
             if (m.second.iter_size() > 0) {
                 unsigned md = static_cast<unsigned>(m.second.dim());
@@ -685,7 +661,6 @@ class Sampler
 
         if (Order == RowMajor)
             summary_data_row_int(first);
-
         if (Order == ColMajor)
             summary_data_col_int(first);
     }
@@ -699,7 +674,6 @@ class Sampler
 
         if (Order == RowMajor)
             summary_data_row(first);
-
         if (Order == ColMajor)
             summary_data_col(first);
     }
@@ -772,7 +746,6 @@ class Sampler
     {
         if (accept_history_.empty())
             accept_history_.push_back(Vector<std::size_t>());
-
         std::size_t acc_size = move_queue_.size() + mcmc_queue_.size();
         if (accept_history_.size() < acc_size) {
             std::size_t diff = acc_size - accept_history_.size();
@@ -792,7 +765,6 @@ class Sampler
         path_.clear();
         for (auto &m : monitor_)
             m.second.clear();
-
         iter_num_ = 0;
         particle_.weight().set_equal();
     }
@@ -890,7 +862,6 @@ class Sampler
 
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
             *first++ = ess_history_[iter];
-
             if (path_.iter_size() > 0) {
                 if (piter != path_.iter_size() && iter == path_.index(piter)) {
                     *first++ = path_.integrand(piter);
@@ -901,7 +872,6 @@ class Sampler
                     *first++ = missing_data;
                 }
             }
-
             for (auto &m : miter) {
                 std::size_t md = m.second->dim();
                 if (m.first != m.second->iter_size() &&
@@ -921,18 +891,14 @@ class Sampler
         double missing_data = std::numeric_limits<double>::quiet_NaN();
 
         first = std::copy(ess_history_.begin(), ess_history_.end(), first);
-
         if (path_.iter_size() > 0) {
-            std::size_t piter;
-
-            piter = 0;
+            std::size_t piter = 0;
             for (std::size_t iter = 0; iter != iter_size(); ++iter) {
                 if (piter != path_.iter_size() || iter == path_.index(piter))
                     *first++ = path_.integrand(piter++);
                 else
                     *first = missing_data;
             }
-
             piter = 0;
             for (std::size_t iter = 0; iter != iter_size(); ++iter) {
                 if (piter != path_.iter_size() || iter == path_.index(piter))
@@ -941,7 +907,6 @@ class Sampler
                     *first = missing_data;
             }
         }
-
         for (const auto &m : monitor_) {
             if (m.second.iter_size() > 0) {
                 for (std::size_t d = 0; d != m.second.dim(); ++d) {
