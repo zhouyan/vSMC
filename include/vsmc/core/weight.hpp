@@ -47,14 +47,14 @@ inline double weight_ess(std::size_t N, const double *first)
 
 /// \brief Normalize weights such that the summation is one
 /// \ingroup Core
-static void weight_normalize(std::size_t N, double *first)
+inline void weight_normalize(std::size_t N, double *first)
 {
     mul(N, 1 / std::accumulate(first, first + N, 0.0), first, first);
 }
 
 /// \brief Normalize logarithm weights such that the maximum is zero
 /// \ingroup Core
-static void weight_normalize_log(std::size_t N, double *first)
+inline void weight_normalize_log(std::size_t N, double *first)
 {
     double wmax = *(std::max_element(first, first + N));
     for (std::size_t i = 0; i != N; ++i)
