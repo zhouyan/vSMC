@@ -125,9 +125,9 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
 
     size_type size() const { return size_; }
 
-    T *data() { return data_.data(); }
+    state_type *data() { return data_.data(); }
 
-    const T *data() const { return data_.data(); }
+    const state_type *data() const { return data_.data(); }
 
     void swap(StateMatrixBase<Order, Dim, T> &other)
     {
@@ -215,6 +215,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     public:
     using state_matrix_base_type = StateMatrixBase<RowMajor, Dim, T>;
     using size_type = typename state_matrix_base_type::size_type;
+    using state_type = typename state_matrix_base_type::state_type;
     using state_pack_type = typename state_matrix_base_type::state_pack_type;
 
     explicit StateMatrix(size_type N) : state_matrix_base_type(N) {}
@@ -231,13 +232,16 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     using state_matrix_base_type::data;
 
-    T *data(size_type id) { return row_data(id); }
+    state_type *data(size_type id) { return row_data(id); }
 
-    const T *data(size_type id) const { return row_data(id); }
+    const state_type *data(size_type id) const { return row_data(id); }
 
-    T *row_data(size_type id) { return this->data() + id * this->dim(); }
+    state_type *row_data(size_type id)
+    {
+        return this->data() + id * this->dim();
+    }
 
-    const T *row_data(size_type id) const
+    const state_type *row_data(size_type id) const
     {
         return this->data() + id * this->dim();
     }
@@ -273,7 +277,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
             pack.size(), this->dim());
 
-        const T *ptr = pack.data();
+        const state_type *ptr = pack.data();
         std::copy(ptr, ptr + this->dim(), row_data(id));
     }
 
@@ -282,7 +286,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
             pack.size(), this->dim());
 
-        const T *ptr = pack.data();
+        const state_type *ptr = pack.data();
         std::move(ptr, ptr + this->dim(), row_data(id));
     }
 
@@ -299,12 +303,13 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     }
 
     template <std::size_t D>
-    void copy_particle_pos(const T *, T *, std::false_type)
+    void copy_particle_pos(const state_type *, state_type *, std::false_type)
     {
     }
 
     template <std::size_t D>
-    void copy_particle_pos(const T *src, T *dst, std::true_type)
+    void copy_particle_pos(
+        const state_type *src, state_type *dst, std::true_type)
     {
         dst[D] = src[D];
         copy_particle_pos<D + 1>(
@@ -320,6 +325,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     public:
     using state_matrix_base_type = StateMatrixBase<ColMajor, Dim, T>;
     using size_type = typename state_matrix_base_type::size_type;
+    using state_type = typename state_matrix_base_type::state_type;
     using state_pack_type = typename state_matrix_base_type::state_pack_type;
 
     explicit StateMatrix(size_type N) : state_matrix_base_type(N) {}
@@ -336,13 +342,16 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     using state_matrix_base_type::data;
 
-    T *data(size_type pos) { return col_data(pos); }
+    state_type *data(size_type pos) { return col_data(pos); }
 
-    const T *data(size_type pos) const { return col_data(pos); }
+    const state_type *data(size_type pos) const { return col_data(pos); }
 
-    T *col_data(std::size_t pos) { return this->data() + pos * this->size(); }
+    state_type *col_data(std::size_t pos)
+    {
+        return this->data() + pos * this->size();
+    }
 
-    const T *col_data(std::size_t pos) const
+    const state_type *col_data(std::size_t pos) const
     {
         return this->data() + pos * this->size();
     }
@@ -352,9 +361,16 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     {
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH;
 
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            for (size_type dst = 0; dst != N; ++dst)
-                state(dst, d) = state(static_cast<size_type>(src_idx[dst]), d);
+        const size_type k = 1000;
+        const size_type m = N / k;
+        const size_type l = N % k;
+        const state_type *dst = data(0);
+        for (size_type i = 0; i != m; ++i) {
+            copy_eval(k, dst, src_idx);
+            dst += k;
+            src_idx += k;
+        }
+        copy_eval(l, dst, src_idx);
     }
 
     void copy_particle(size_type src, size_type dst)
@@ -394,6 +410,16 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     }
 
     private:
+    template <typename IntType>
+    void copy_eval(size_type n, state_type *dst, const IntType *src_idx)
+    {
+        for (std::size_t d = 0; d != this->dim(); ++d) {
+            for (size_type i = 0; i != n; ++i)
+                dst[i] = dst[src_idx[i]];
+            dst += this->size();
+        }
+    }
+
     void copy_particle_dispatch(size_type src, size_type dst, std::true_type)
     {
         for (std::size_t d = 0; d != this->dim(); ++d)
@@ -407,12 +433,13 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     }
 
     template <std::size_t D>
-    void copy_particle_pos(const T *, T *, std::false_type)
+    void copy_particle_pos(const state_type *, state_type *, std::false_type)
     {
     }
 
     template <std::size_t D>
-    void copy_particle_pos(const T *src, T *dst, std::true_type)
+    void copy_particle_pos(
+        const state_type *src, state_type *dst, std::true_type)
     {
         dst[D * this->size()] = src[D * this->size()];
         copy_particle_pos<D + 1>(
