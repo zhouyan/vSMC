@@ -364,7 +364,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         const size_type k = 1000;
         const size_type m = N / k;
         const size_type l = N % k;
-        const state_type *dst = data(0);
+        state_type *dst = data(0);
         for (size_type i = 0; i != m; ++i) {
             copy_eval(k, dst, src_idx);
             dst += k;
