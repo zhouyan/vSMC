@@ -35,7 +35,7 @@ int main()
 {
     unsigned short r16;
     unsigned r32;
-#if defined(_MSC_VER) || defined(__INTEL_COMPILER)
+#if defined(_MSC_VER) || (defined(__INTEL_COMPILER) && INTEL_COMPILER < 1600)
     unsigned __int64 r64;
 #else
     unsigned long long r64;
