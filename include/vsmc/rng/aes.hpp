@@ -35,21 +35,26 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/aes_ni.hpp>
 
-#define VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(N, val) \
-    template <> struct AESRoundConstantValue< N > :                          \
-        public cxx11::integral_constant<int, val > {};
+#define VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(N, val)                            \
+    template <>                                                               \
+    class AESRoundConstant<N> : public std::integral_constant<int, val>       \
+    {                                                                         \
+    }; // class AESRoundConstant
 
 /// \brief AESEngine default blocks
 /// \ingroup Config
 #ifndef VSMC_RNG_AES_BLOCKS
-#define VSMC_RNG_AES_BLOCKS 1
+#define VSMC_RNG_AES_BLOCKS 4
 #endif
 
-namespace vsmc {
+namespace vsmc
+{
 
-namespace internal {
+namespace internal
+{
 
-template <std::size_t N> struct AESRoundConstantValue;
+template <std::size_t N>
+class AESRoundConstant;
 
 VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0x00, 0x8D)
 VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0x01, 0x01)
@@ -308,195 +313,138 @@ VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0xFD, 0xE8)
 VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0xFE, 0xCB)
 VSMC_DEFINE_RNG_AES_ROUND_CONSTANT(0xFF, 0x8D)
 
-struct AESKeyInit
+class AESKeyInit
 {
-    template <std::size_t Offset, std::size_t N,
-             typename T, std::size_t KeySize, std::size_t Rp1>
-    static void key_init (const Array<T, KeySize> &key,
-            Array<__m128i, Rp1> &key_seq, __m128i &xmm)
+    public:
+    template <std::size_t Offset, std::size_t N, typename T,
+        std::size_t KeySize, std::size_t Rp1>
+    static void eval(const std::array<T, KeySize> &key,
+        std::array<__m128i, Rp1> &ks, __m128i &xmm)
     {
-        key_init_xmm<Offset, N>(key, key_seq, xmm,
-                cxx11::integral_constant<bool, N < Rp1>());
+        init<Offset, N>(key, ks, xmm, std::integral_constant < bool, N<Rp1>());
     }
 
-    private :
-
-    template <std::size_t, std::size_t,
-             typename T, std::size_t KeySize, std::size_t Rp1>
-    static void key_init_xmm (const Array<T, KeySize> &,
-            Array<__m128i, Rp1> &, __m128i &, cxx11::false_type) {}
-
-    template <std::size_t Offset, std::size_t N,
-             typename T, std::size_t KeySize,
-             std::size_t Rp1>
-    static void key_init_xmm (const Array<T, KeySize> &key,
-            Array<__m128i, Rp1> &key_seq, __m128i &xmm, cxx11::true_type)
+    private:
+    template <std::size_t, std::size_t, typename T, std::size_t KeySize,
+        std::size_t Rp1>
+    static void init(const std::array<T, KeySize> &,
+        std::array<__m128i, Rp1> &, __m128i &, std::false_type)
     {
-        m128i_pack<Offset>(key, xmm);
-        key_seq[Position<N>()] = xmm;
     }
-}; // struct AESKeyInit
 
-} // namespace vsmc::internal
+    template <std::size_t Offset, std::size_t N, typename T,
+        std::size_t KeySize, std::size_t Rp1>
+    static void init(const std::array<T, KeySize> &key,
+        std::array<__m128i, Rp1> &ks, __m128i &xmm, std::true_type)
+    {
+        M128I<> tmp;
+        tmp.load(key.data());
+        std::get<N>(ks) = xmm = tmp.value();
+    }
+}; // class AESKeyInit
 
-/// \brief AES128Engine key sequence generator
-/// \ingroup AESNIRNG
-template <typename ResultType>
-class AES128KeySeq
+template <typename T, std::size_t Rounds, typename KeySeqGenerator>
+class AESKeySeq
 {
-    public :
+    public:
+    using key_type = typename KeySeqGenerator::key_type;
 
-    typedef Array<ResultType, 16 / sizeof(ResultType)> key_type;
+    void reset(const key_type &key)
+    {
+        KeySeqGenerator generator;
+        generator(key, key_seq_);
+    }
+
+    template <typename U>
+    void operator()(
+        const key_type &, std::array<M128I<U>, Rounds + 1> &rk) const
+    {
+        rk = key_seq_;
+    }
+
+    private:
+    std::array<M128I<>, Rounds + 1> key_seq_;
+}; // class AESKeySeq
+
+template <typename T>
+class AES128KeySeqGenerator
+{
+    public:
+    using key_type = std::array<T, 16 / sizeof(T)>;
 
     template <std::size_t Rp1>
-    void generate (const key_type &key, Array<__m128i, Rp1> &key_seq)
+    void operator()(const key_type &key, std::array<M128I<>, Rp1> &key_seq)
     {
-        internal::AESKeyInit::key_init<0, 0>(key, key_seq, xmm1_);
-        generate_seq<1>(key_seq, cxx11::integral_constant<bool, 1 < Rp1>());
+        std::array<__m128i, Rp1> ks;
+        AESKeyInit::eval<0, 0>(key, ks, xmm1_);
+        generate_seq<1>(ks, std::integral_constant<bool, 1 < Rp1>());
+        std::memcpy(key_seq.data(), ks.data(), sizeof(__m128i) * Rp1);
     }
 
-    private :
-
+    private:
     __m128i xmm1_;
     __m128i xmm2_;
     __m128i xmm3_;
 
     template <std::size_t, std::size_t Rp1>
-    void generate_seq (Array<__m128i, Rp1> &, cxx11::false_type) {}
-
-    template <std::size_t N, std::size_t Rp1>
-    void generate_seq (Array<__m128i, Rp1> &key_seq, cxx11::true_type)
+    void generate_seq(std::array<__m128i, Rp1> &, std::false_type)
     {
-        xmm2_ = _mm_aeskeygenassist_si128(xmm1_,
-                internal::AESRoundConstantValue<N>::value);
-        expand_key();
-        key_seq[Position<N>()] = xmm1_;
-        generate_seq<N + 1>(key_seq,
-                cxx11::integral_constant<bool, N + 1 < Rp1>());
     }
 
-    void expand_key ()
+    template <std::size_t N, std::size_t Rp1>
+    void generate_seq(std::array<__m128i, Rp1> &ks, std::true_type)
     {
-        xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF);  // pshufd xmm2, xmm2, 0xFF
-        xmm3_ = _mm_slli_si128   (xmm1_, 0x04);  // pshufb xmm3, xmm5
-        xmm1_ = _mm_xor_si128    (xmm1_, xmm3_); // pxor   xmm1, xmm3
-        xmm3_ = _mm_slli_si128   (xmm3_, 0x04);  // pslldq xmm3, 0x04
-        xmm1_ = _mm_xor_si128    (xmm1_, xmm3_); // pxor   xmm1, xmm3
-        xmm3_ = _mm_slli_si128   (xmm3_, 0x04);  // pslldq xmm3, 0x04
-        xmm1_ = _mm_xor_si128    (xmm1_, xmm3_); // pxor   xmm1, xmm3
-        xmm1_ = _mm_xor_si128    (xmm1_, xmm2_); // pxor   xmm1, xmm2
+        xmm2_ = _mm_aeskeygenassist_si128(xmm1_, AESRoundConstant<N>::value);
+        expand_key();
+        std::get<N>(ks) = xmm1_;
+        generate_seq<N + 1>(ks, std::integral_constant<bool, N + 1 < Rp1>());
+    }
+
+    void expand_key()
+    {
+        xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF); // pshufd xmm2, xmm2, 0xFF
+        xmm3_ = _mm_slli_si128(xmm1_, 0x04);    // pshufb xmm3, xmm5
+        xmm1_ = _mm_xor_si128(xmm1_, xmm3_);    // pxor   xmm1, xmm3
+        xmm3_ = _mm_slli_si128(xmm3_, 0x04);    // pslldq xmm3, 0x04
+        xmm1_ = _mm_xor_si128(xmm1_, xmm3_);    // pxor   xmm1, xmm3
+        xmm3_ = _mm_slli_si128(xmm3_, 0x04);    // pslldq xmm3, 0x04
+        xmm1_ = _mm_xor_si128(xmm1_, xmm3_);    // pxor   xmm1, xmm3
+        xmm1_ = _mm_xor_si128(xmm1_, xmm2_);    // pxor   xmm1, xmm2
     }
 }; // class AES128KeySeq
 
-/// \brief AES-128 RNG engine
-/// \ingroup AESNIRNG
-///
-/// \details
-/// This is a reimplementation of the algorithm AESNI engine as described in
-/// [Parallel Random Numbers: As Easy as 1, 2, 3][r123paper] and implemented in
-/// [Random123][r123lib].
-///
-/// [r123paper]:http://sc11.supercomputing.org/schedule/event_detail.php?evid=pap274
-/// [r123lib]: https://www.deshawresearch.com/resources_random123.html
-///
-/// \sa AES128KeySeq
-/// \sa AESNIEngine
-template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-class AES128Engine :
-    public AESNIEngine<ResultType, AES128KeySeq<ResultType>, true, 10, Blocks>
+template <typename T>
+class AES192KeySeqGenerator
 {
-
-    public :
-
-    typedef AESNIEngine<ResultType, AES128KeySeq<ResultType>, true, 10, Blocks>
-        base_eng_type;
-
-    explicit AES128Engine (ResultType s = 0) : base_eng_type(s) {}
-
-    template <typename SeedSeq>
-    explicit AES128Engine (SeedSeq &seq, typename cxx11::enable_if<
-            internal::is_seed_seq<SeedSeq,
-            typename base_eng_type::result_type,
-            typename base_eng_type::key_type,
-            AES128Engine<ResultType, Blocks>
-            >::value>::type * = VSMC_NULLPTR) : base_eng_type(seq) {}
-
-    AES128Engine (const typename base_eng_type::key_type &k) :
-        base_eng_type(k) {}
-}; // class AES128Engine
-
-/// \brief AES-128 RNG engine with 32-bits integers output and default blocks
-/// \ingroup AESNIRNG
-typedef AES128Engine<uint32_t> AES128_32;
-
-/// \brief AES-128 RNG engine with 32-bits integers output and 1 block
-/// \ingroup AESNIRNG
-typedef AES128Engine<uint32_t, 1> AES128_1x32;
-
-/// \brief AES-128 RNG engine with 32-bits integers output and 2 blocks
-/// \ingroup AESNIRNG
-typedef AES128Engine<uint32_t, 2> AES128_2x32;
-
-/// \brief AES-128 RNG engine with 32-bits integers output and 4 blocks
-/// \ingroup AESNIRNG
-typedef AES128Engine<uint32_t, 4> AES128_4x32;
-
-/// \brief AES-128 RNG engine with 32-bits integers output and 8 blocks
-/// \ingroup AESNIRNG
-typedef AES128Engine<uint32_t, 8> AES128_8x32;
-
-/// \brief AES-128 RNG engine with 64-bits integers output and default blocks
-/// \ingroup AESNIRNG
-typedef AES128Engine<uint64_t> AES128_64;
-
-/// \brief AES-128 RNG engine with 64-bits integers output and 1 block
-/// \ingroup AESNIRNG
-typedef AES128Engine<uint64_t, 1> AES128_1x64;
-
-/// \brief AES-128 RNG engine with 64-bits integers output and 2 blocks
-/// \ingroup AESNIRNG
-typedef AES128Engine<uint64_t, 2> AES128_2x64;
-
-/// \brief AES-128 RNG engine with 64-bits integers output and 4 blocks
-/// \ingroup AESNIRNG
-typedef AES128Engine<uint64_t, 4> AES128_4x64;
-
-/// \brief AES-128 RNG engine with 64-bits integers output and 8 blocks
-/// \ingroup AESNIRNG
-typedef AES128Engine<uint64_t, 8> AES128_8x64;
-
-/// \brief AES192Engine key sequence generator
-/// \ingroup AESNIRNG
-template <typename ResultType>
-class AES192KeySeq
-{
-    public :
-
-    typedef Array<ResultType, 24 / sizeof(ResultType)> key_type;
+    public:
+    using key_type = std::array<T, 24 / sizeof(T)>;
 
     template <std::size_t Rp1>
-    void generate (const key_type &key, Array<__m128i, Rp1> &key_seq)
+    void operator()(const key_type &key, std::array<M128I<>, Rp1> &key_seq)
     {
-        Array<uint64_t, 3> key_tmp;
+        std::array<__m128i, Rp1> ks;
+
+        std::array<std::uint64_t, 3> key_tmp;
         std::memcpy(key_tmp.data(), key.data(), 24);
-        internal::AESKeyInit::key_init<0, 0>(key_tmp, key_seq, xmm1_);
-        key_tmp.at<0>() = key_tmp.at<2>();
-        key_tmp.at<1>() = 0;
-        internal::AESKeyInit::key_init<0, 1>(key_tmp, key_seq, xmm7_);
+        AESKeyInit::eval<0, 0>(key_tmp, ks, xmm1_);
+        std::get<0>(key_tmp) = std::get<2>(key_tmp);
+        std::get<1>(key_tmp) = 0;
+        AESKeyInit::eval<0, 1>(key_tmp, ks, xmm7_);
 
         xmm3_ = _mm_setzero_si128();
         xmm6_ = _mm_setzero_si128();
-        xmm4_ = _mm_shuffle_epi32(xmm7_, 0x4F);  // pshufd xmm4, xmm7, 0x4F
+        xmm4_ = _mm_shuffle_epi32(xmm7_, 0x4F); // pshufd xmm4, xmm7, 0x4F
 
-        Array<unsigned char, Rp1 * 16 + 16> ks_tmp;
-        generate_seq<1, Rp1>(ks_tmp.data(),
-                cxx11::integral_constant<bool, 24 < Rp1 * 16>());
-        copy_key(key_seq, ks_tmp.data(),
-                cxx11::integral_constant<bool, 24 < Rp1 * 16>());
+        std::array<unsigned char, Rp1 * 16 + 16> ks_tmp;
+        generate_seq<1, Rp1>(
+            ks_tmp.data(), std::integral_constant<bool, 24 < Rp1 * 16>());
+        copy_key(
+            ks, ks_tmp.data(), std::integral_constant<bool, 24 < Rp1 * 16>());
+
+        std::memcpy(key_seq.data(), ks.data(), sizeof(__m128i) * Rp1);
     }
 
-    private :
-
+    private:
     __m128i xmm1_;
     __m128i xmm2_;
     __m128i xmm3_;
@@ -506,299 +454,318 @@ class AES192KeySeq
     __m128i xmm7_;
 
     template <std::size_t, std::size_t>
-    void generate_seq (unsigned char *, cxx11::false_type) {}
+    void generate_seq(unsigned char *, std::false_type)
+    {
+    }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq (unsigned char *ks_ptr, cxx11::true_type)
+    void generate_seq(unsigned char *ks_ptr, std::true_type)
     {
         generate_key<N>(ks_ptr);
-        complete_key<N>(ks_ptr,
-                cxx11::integral_constant<bool, N * 24 + 16 < Rp1 * 16>());
-        generate_seq<N + 1, Rp1>(ks_ptr,
-                cxx11::integral_constant<bool, N * 24 + 24 < Rp1 * 16>());
+        complete_key<N>(
+            ks_ptr, std::integral_constant<bool, N * 24 + 16 < Rp1 * 16>());
+        generate_seq<N + 1, Rp1>(
+            ks_ptr, std::integral_constant<bool, N * 24 + 24 < Rp1 * 16>());
     }
 
     template <std::size_t N>
-    void generate_key (unsigned char *ks_ptr)
+    void generate_key(unsigned char *ks_ptr)
     {
         // In entry, N * 24 < Rp1 * 16
         // Required Storage: N * 24 + 16;
 
-        xmm2_ = _mm_aeskeygenassist_si128(xmm4_,
-                internal::AESRoundConstantValue<N>::value);
+        xmm2_ = _mm_aeskeygenassist_si128(xmm4_, AESRoundConstant<N>::value);
         generate_key_expansion();
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(
-                    ks_ptr + N * 24), xmm1_);
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(ks_ptr + N * 24), xmm1_);
     }
 
     template <std::size_t>
-    void complete_key (unsigned char *, cxx11::false_type) {}
+    void complete_key(unsigned char *, std::false_type)
+    {
+    }
 
     template <std::size_t N>
-    void complete_key (unsigned char *ks_ptr, cxx11::true_type)
+    void complete_key(unsigned char *ks_ptr, std::true_type)
     {
         // In entry, N * 24 + 16 < Rp1 * 16
         // Required storage: N * 24 + 32
 
         complete_key_expansion();
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(
-                    ks_ptr + N * 24 + 16), xmm7_);
+        _mm_storeu_si128(
+            reinterpret_cast<__m128i *>(ks_ptr + N * 24 + 16), xmm7_);
     }
 
-    void generate_key_expansion ()
+    void generate_key_expansion()
     {
-        xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF);        // pshufd xmm2, xmm2, 0xFF
-        xmm3_ = _mm_castps_si128 (_mm_shuffle_ps(      // shufps xmm3, xmm1, 0x10
-                    _mm_castsi128_ps(xmm3_),
-                    _mm_castsi128_ps(xmm1_), 0x10));
-        xmm1_ = _mm_xor_si128    (xmm1_, xmm3_);       // pxor   xmm1, xmm3
-        xmm3_ = _mm_castps_si128(_mm_shuffle_ps(       // shufps xmm3, xmm1, 0x10
-                    _mm_castsi128_ps(xmm3_),
-                    _mm_castsi128_ps(xmm1_), 0x8C));
-        xmm1_ = _mm_xor_si128    (xmm1_, xmm3_);       // pxor   xmm1, xmm3
-        xmm1_ = _mm_xor_si128    (xmm1_, xmm2_);       // pxor   xmm1, xmm2
+        xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF);  // pshufd xmm2, xmm2, 0xFF
+        xmm3_ = _mm_castps_si128(_mm_shuffle_ps( // shufps xmm3, xmm1, 0x10
+            _mm_castsi128_ps(xmm3_), _mm_castsi128_ps(xmm1_), 0x10));
+        xmm1_ = _mm_xor_si128(xmm1_, xmm3_);     // pxor   xmm1, xmm3
+        xmm3_ = _mm_castps_si128(_mm_shuffle_ps( // shufps xmm3, xmm1, 0x10
+            _mm_castsi128_ps(xmm3_), _mm_castsi128_ps(xmm1_), 0x8C));
+        xmm1_ = _mm_xor_si128(xmm1_, xmm3_); // pxor   xmm1, xmm3
+        xmm1_ = _mm_xor_si128(xmm1_, xmm2_); // pxor   xmm1, xmm2
     }
 
-    void complete_key_expansion ()
+    void complete_key_expansion()
     {
-        xmm5_ = _mm_load_si128   (&xmm4_);             // movdqa xmm5, xmm4
-        xmm5_ = _mm_slli_si128   (xmm5_, 0x04);        // pslldq xmm5, 0x04
-        xmm6_ = _mm_castps_si128 (_mm_shuffle_ps(      // shufps xmm6, xmm1, 0x10
-                    _mm_castsi128_ps(xmm6_),
-                    _mm_castsi128_ps(xmm1_), 0xF0));
-        xmm6_ = _mm_xor_si128    (xmm6_, xmm5_);       // pxor   xmm6, xmm5
-        xmm4_ = _mm_xor_si128    (xmm4_, xmm6_);       // pxor   xmm4, xmm6
-        xmm7_ = _mm_shuffle_epi32(xmm4_, 0x0E);        // pshufd xmm7, xmm4, 0x0E
+        xmm5_ = _mm_load_si128(&xmm4_);          // movdqa xmm5, xmm4
+        xmm5_ = _mm_slli_si128(xmm5_, 0x04);     // pslldq xmm5, 0x04
+        xmm6_ = _mm_castps_si128(_mm_shuffle_ps( // shufps xmm6, xmm1, 0x10
+            _mm_castsi128_ps(xmm6_), _mm_castsi128_ps(xmm1_), 0xF0));
+        xmm6_ = _mm_xor_si128(xmm6_, xmm5_);    // pxor   xmm6, xmm5
+        xmm4_ = _mm_xor_si128(xmm4_, xmm6_);    // pxor   xmm4, xmm6
+        xmm7_ = _mm_shuffle_epi32(xmm4_, 0x0E); // pshufd xmm7, xmm4, 0x0E
     }
 
     template <std::size_t Rp1>
-    void copy_key (Array<__m128i, Rp1> &,
-            const unsigned char *, cxx11::false_type) {}
+    void copy_key(
+        std::array<__m128i, Rp1> &, const unsigned char *, std::false_type)
+    {
+    }
 
     template <std::size_t Rp1>
-    void copy_key (Array<__m128i, Rp1> &key_seq,
-            const unsigned char *ks_ptr, cxx11::true_type)
+    void copy_key(std::array<__m128i, Rp1> &ks, const unsigned char *ks_ptr,
+        std::true_type)
     {
-        unsigned char *dst = reinterpret_cast<unsigned char *>(key_seq.data());
+        unsigned char *dst = reinterpret_cast<unsigned char *>(ks.data());
         std::memcpy(dst + 24, ks_ptr + 24, Rp1 * 16 - 24);
     }
 }; // class AES192KeySeq
 
-/// \brief AES-192 RNG engine
-/// \ingroup AESNIRNG
-///
-/// \sa AES192KeySeq
-/// \sa AESNIEngine
-template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-class AES192Engine :
-    public AESNIEngine<ResultType, AES192KeySeq<ResultType>, true, 12, Blocks>
+template <typename T>
+class AES256KeySeqGenerator
 {
-
-    public :
-
-    typedef AESNIEngine<ResultType, AES192KeySeq<ResultType>, true, 12, Blocks>
-        base_eng_type;
-
-    explicit AES192Engine (ResultType s = 0) : base_eng_type(s) {}
-
-    template <typename SeedSeq>
-    explicit AES192Engine (SeedSeq &seq, typename cxx11::enable_if<
-            internal::is_seed_seq<SeedSeq,
-            typename base_eng_type::result_type,
-            typename base_eng_type::key_type,
-            AES192Engine<ResultType, Blocks>
-            >::value>::type * = VSMC_NULLPTR) : base_eng_type(seq) {}
-
-    AES192Engine (const typename base_eng_type::key_type &k) :
-        base_eng_type(k) {}
-}; // class AES192Engine
-
-/// \brief AES-192 RNG engine with 32-bits integers output and default blocks
-/// \ingroup AESNIRNG
-typedef AES192Engine<uint32_t> AES192_32;
-
-/// \brief AES-192 RNG engine with 32-bits integers output and 1 block
-/// \ingroup AESNIRNG
-typedef AES192Engine<uint32_t, 1> AES192_1x32;
-
-/// \brief AES-192 RNG engine with 32-bits integers output and 2 blocks
-/// \ingroup AESNIRNG
-typedef AES192Engine<uint32_t, 2> AES192_2x32;
-
-/// \brief AES-192 RNG engine with 32-bits integers output and 4 blocks
-/// \ingroup AESNIRNG
-typedef AES192Engine<uint32_t, 4> AES192_4x32;
-
-/// \brief AES-192 RNG engine with 32-bits integers output and 8 blocks
-/// \ingroup AESNIRNG
-typedef AES192Engine<uint32_t, 8> AES192_8x32;
-
-/// \brief AES-192 RNG engine with 64-bits integers output and default blocks
-/// \ingroup AESNIRNG
-typedef AES192Engine<uint64_t> AES192_64;
-
-/// \brief AES-192 RNG engine with 64-bits integers output and 1 block
-/// \ingroup AESNIRNG
-typedef AES192Engine<uint64_t, 1> AES192_1x64;
-
-/// \brief AES-192 RNG engine with 64-bits integers output and 2 blocks
-/// \ingroup AESNIRNG
-typedef AES192Engine<uint64_t, 2> AES192_2x64;
-
-/// \brief AES-192 RNG engine with 64-bits integers output and 4 blocks
-/// \ingroup AESNIRNG
-typedef AES192Engine<uint64_t, 4> AES192_4x64;
-
-/// \brief AES-192 RNG engine with 64-bits integers output and 8 blocks
-/// \ingroup AESNIRNG
-typedef AES192Engine<uint64_t, 8> AES192_8x64;
-
-/// \brief AES256Engine key sequence generator
-/// \ingroup AESNIRNG
-template <typename ResultType>
-class AES256KeySeq
-{
-    public :
-
-    typedef Array<ResultType, 32 / sizeof(ResultType)> key_type;
+    public:
+    using key_type = std::array<T, 32 / sizeof(T)>;
 
     template <std::size_t Rp1>
-    void generate (const key_type &key, Array<__m128i, Rp1> &key_seq)
+    void operator()(const key_type &key, std::array<M128I<>, Rp1> &key_seq)
     {
-        internal::AESKeyInit::key_init<0, 0>(key, key_seq, xmm1_);
-        internal::AESKeyInit::key_init<16 / sizeof(ResultType), 1>(
-                key, key_seq, xmm3_);
-        generate_seq<2>(key_seq, cxx11::integral_constant<bool, 2 < Rp1>());
+        std::array<__m128i, Rp1> ks;
+        AESKeyInit::eval<0, 0>(key, ks, xmm1_);
+        AESKeyInit::eval<16 / sizeof(T), 1>(key, ks, xmm3_);
+        generate_seq<2>(ks, std::integral_constant<bool, 2 < Rp1>());
+        std::memcpy(key_seq.data(), ks.data(), sizeof(__m128i) * Rp1);
     }
 
-    private :
-
+    private:
     __m128i xmm1_;
     __m128i xmm2_;
     __m128i xmm3_;
     __m128i xmm4_;
 
     template <std::size_t, std::size_t Rp1>
-    void generate_seq (Array<__m128i, Rp1> &, cxx11::false_type) {}
-
-    template <std::size_t N, std::size_t Rp1>
-    void generate_seq (Array<__m128i, Rp1> &key_seq, cxx11::true_type)
+    void generate_seq(std::array<__m128i, Rp1> &, std::false_type)
     {
-        generate_key<N>(key_seq, cxx11::integral_constant<bool, N % 2 == 0>());
-        generate_seq<N + 1>(key_seq,
-                cxx11::integral_constant<bool, N + 1 < Rp1>());
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_key (Array<__m128i, Rp1> &key_seq, cxx11::true_type)
+    void generate_seq(std::array<__m128i, Rp1> &ks, std::true_type)
     {
-        xmm2_ = _mm_aeskeygenassist_si128(xmm3_,
-                internal::AESRoundConstantValue<N / 2>::value);
-        expand_key(cxx11::true_type());
-        key_seq[Position<N>()] = xmm1_;
+        generate_key<N>(ks, std::integral_constant<bool, N % 2 == 0>());
+        generate_seq<N + 1>(ks, std::integral_constant<bool, N + 1 < Rp1>());
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_key (Array<__m128i, Rp1> &key_seq, cxx11::false_type)
+    void generate_key(std::array<__m128i, Rp1> &ks, std::true_type)
+    {
+        xmm2_ =
+            _mm_aeskeygenassist_si128(xmm3_, AESRoundConstant<N / 2>::value);
+        expand_key(std::true_type());
+        std::get<N>(ks) = xmm1_;
+    }
+
+    template <std::size_t N, std::size_t Rp1>
+    void generate_key(std::array<__m128i, Rp1> &ks, std::false_type)
     {
         xmm4_ = _mm_aeskeygenassist_si128(xmm1_, 0);
-        expand_key(cxx11::false_type());
-        key_seq[Position<N>()] = xmm3_;
+        expand_key(std::false_type());
+        std::get<N>(ks) = xmm3_;
     }
 
-    void expand_key (cxx11::true_type)
+    void expand_key(std::true_type)
     {
-        xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF);  // pshufd xmm2, xmm2, 0xFF
-        xmm4_ = _mm_slli_si128   (xmm1_, 0x04);  // pshufb xmm4, xmm5
-        xmm1_ = _mm_xor_si128    (xmm1_, xmm4_); // pxor   xmm1, xmm4
-        xmm4_ = _mm_slli_si128   (xmm4_, 0x04);  // pslldq xmm4, 0x04
-        xmm1_ = _mm_xor_si128    (xmm1_, xmm4_); // pxor   xmm1, xmm4
-        xmm4_ = _mm_slli_si128   (xmm4_, 0x04);  // pslldq xmm4, 0x04
-        xmm1_ = _mm_xor_si128    (xmm1_, xmm4_); // pxor   xmm1, xmm4
-        xmm1_ = _mm_xor_si128    (xmm1_, xmm2_); // pxor   xmm1, xmm2
+        xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF); // pshufd xmm2, xmm2, 0xFF
+        xmm4_ = _mm_slli_si128(xmm1_, 0x04);    // pshufb xmm4, xmm5
+        xmm1_ = _mm_xor_si128(xmm1_, xmm4_);    // pxor   xmm1, xmm4
+        xmm4_ = _mm_slli_si128(xmm4_, 0x04);    // pslldq xmm4, 0x04
+        xmm1_ = _mm_xor_si128(xmm1_, xmm4_);    // pxor   xmm1, xmm4
+        xmm4_ = _mm_slli_si128(xmm4_, 0x04);    // pslldq xmm4, 0x04
+        xmm1_ = _mm_xor_si128(xmm1_, xmm4_);    // pxor   xmm1, xmm4
+        xmm1_ = _mm_xor_si128(xmm1_, xmm2_);    // pxor   xmm1, xmm2
     }
 
-    void expand_key (cxx11::false_type)
+    void expand_key(std::false_type)
     {
-        xmm2_ = _mm_shuffle_epi32(xmm4_, 0xAA);  // pshufd xmm2, xmm4, 0xAA
-        xmm4_ = _mm_slli_si128   (xmm3_, 0x04);  // pshufb xmm4, xmm5
-        xmm3_ = _mm_xor_si128    (xmm3_, xmm4_); // pxor   xmm3, xmm4
-        xmm4_ = _mm_slli_si128   (xmm4_, 0x04);  // pslldq xmm4, 0x04
-        xmm3_ = _mm_xor_si128    (xmm3_, xmm4_); // pxor   xmm3, xmm4
-        xmm4_ = _mm_slli_si128   (xmm4_, 0x04);  // pslldq xmm4, 0x04
-        xmm3_ = _mm_xor_si128    (xmm3_, xmm4_); // pxor   xmm3, xmm4
-        xmm3_ = _mm_xor_si128    (xmm3_, xmm2_); // pxor   xmm1, xmm2
+        xmm2_ = _mm_shuffle_epi32(xmm4_, 0xAA); // pshufd xmm2, xmm4, 0xAA
+        xmm4_ = _mm_slli_si128(xmm3_, 0x04);    // pshufb xmm4, xmm5
+        xmm3_ = _mm_xor_si128(xmm3_, xmm4_);    // pxor   xmm3, xmm4
+        xmm4_ = _mm_slli_si128(xmm4_, 0x04);    // pslldq xmm4, 0x04
+        xmm3_ = _mm_xor_si128(xmm3_, xmm4_);    // pxor   xmm3, xmm4
+        xmm4_ = _mm_slli_si128(xmm4_, 0x04);    // pslldq xmm4, 0x04
+        xmm3_ = _mm_xor_si128(xmm3_, xmm4_);    // pxor   xmm3, xmm4
+        xmm3_ = _mm_xor_si128(xmm3_, xmm2_);    // pxor   xmm1, xmm2
     }
 }; // class AESKey256
 
+} // namespace vsmc::internal
+
+/// \brief AES128Engine key sequence generator
+/// \ingroup AESNIRNG
+template <typename ResultType, std::size_t Rounds>
+using AES128KeySeq = internal::AESKeySeq<ResultType, Rounds,
+    internal::AES128KeySeqGenerator<ResultType>>;
+
+/// \brief AES192Engine key sequence generator
+/// \ingroup AESNIRNG
+template <typename ResultType, std::size_t Rounds>
+using AES192KeySeq = internal::AESKeySeq<ResultType, Rounds,
+    internal::AES192KeySeqGenerator<ResultType>>;
+
+/// \brief AES256Engine key sequence generator
+/// \ingroup AESNIRNG
+template <typename ResultType, std::size_t Rounds>
+using AES256KeySeq = internal::AESKeySeq<ResultType, Rounds,
+    internal::AES256KeySeqGenerator<ResultType>>;
+
+/// \brief AES-128 RNG engine
+/// \ingroup AESNIRNG
+template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
+using AES128Engine =
+    AESNIEngine<ResultType, AES128KeySeq<ResultType, 10>, 10, Blocks>;
+
+/// \brief AES-192 RNG engine
+/// \ingroup AESNIRNG
+template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
+using AES192Engine =
+    AESNIEngine<ResultType, AES192KeySeq<ResultType, 12>, 12, Blocks>;
+
 /// \brief AES-256 RNG engine
 /// \ingroup AESNIRNG
-///
-/// \sa AES256KeySeq
-/// \sa AESNIEngine
 template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-class AES256Engine :
-    public AESNIEngine<ResultType, AES256KeySeq<ResultType>, true, 14, Blocks>
-{
+using AES256Engine =
+    AESNIEngine<ResultType, AES256KeySeq<ResultType, 14>, 14, Blocks>;
 
-    public :
-
-    typedef AESNIEngine<ResultType, AES256KeySeq<ResultType>, true, 14, Blocks>
-        base_eng_type;
-
-    explicit AES256Engine (ResultType s = 0) : base_eng_type(s) {}
-
-    template <typename SeedSeq>
-    explicit AES256Engine (SeedSeq &seq, typename cxx11::enable_if<
-            internal::is_seed_seq<SeedSeq,
-            typename base_eng_type::result_type,
-            typename base_eng_type::key_type,
-            AES256Engine<ResultType, Blocks>
-            >::value>::type * = VSMC_NULLPTR) : base_eng_type(seq) {}
-
-    AES256Engine (const typename base_eng_type::key_type &k) :
-        base_eng_type(k) {}
-}; // class AES256Engine
-
-/// \brief AES-256 RNG engine with 32-bits integers output and default blocks
+/// \brief AES-128 RNG engine with 32-bits integers output and 1 block
 /// \ingroup AESNIRNG
-typedef AES256Engine<uint32_t> AES256_32;
+using AES128_1x32 = AES128Engine<std::uint32_t, 1>;
+
+/// \brief AES-128 RNG engine with 32-bits integers output and 2 blocks
+/// \ingroup AESNIRNG
+using AES128_2x32 = AES128Engine<std::uint32_t, 2>;
+
+/// \brief AES-128 RNG engine with 32-bits integers output and 4 blocks
+/// \ingroup AESNIRNG
+using AES128_4x32 = AES128Engine<std::uint32_t, 4>;
+
+/// \brief AES-128 RNG engine with 32-bits integers output and 8 blocks
+/// \ingroup AESNIRNG
+using AES128_8x32 = AES128Engine<std::uint32_t, 8>;
+
+/// \brief AES-128 RNG engine with 64-bits integers output and 1 block
+/// \ingroup AESNIRNG
+using AES128_1x64 = AES128Engine<std::uint64_t, 1>;
+
+/// \brief AES-128 RNG engine with 64-bits integers output and 2 blocks
+/// \ingroup AESNIRNG
+using AES128_2x64 = AES128Engine<std::uint64_t, 2>;
+
+/// \brief AES-128 RNG engine with 64-bits integers output and 4 blocks
+/// \ingroup AESNIRNG
+using AES128_4x64 = AES128Engine<std::uint64_t, 4>;
+
+/// \brief AES-128 RNG engine with 64-bits integers output and 8 blocks
+/// \ingroup AESNIRNG
+using AES128_8x64 = AES128Engine<std::uint64_t, 8>;
+
+/// \brief AES-128 RNG engine with 32-bits integers output and default blocks
+/// \ingroup AESNIRNG
+using AES128 = AES128Engine<std::uint32_t>;
+
+/// \brief AES-128 RNG engine with 64-bits integers output and default blocks
+/// \ingroup AESNIRNG
+using AES128_64 = AES128Engine<std::uint64_t>;
+
+/// \brief AES-192 RNG engine with 32-bits integers output and 1 block
+/// \ingroup AESNIRNG
+using AES192_1x32 = AES192Engine<std::uint32_t, 1>;
+
+/// \brief AES-192 RNG engine with 32-bits integers output and 2 blocks
+/// \ingroup AESNIRNG
+using AES192_2x32 = AES192Engine<std::uint32_t, 2>;
+
+/// \brief AES-192 RNG engine with 32-bits integers output and 4 blocks
+/// \ingroup AESNIRNG
+using AES192_4x32 = AES192Engine<std::uint32_t, 4>;
+
+/// \brief AES-192 RNG engine with 32-bits integers output and 8 blocks
+/// \ingroup AESNIRNG
+using AES192_8x32 = AES192Engine<std::uint32_t, 8>;
+
+/// \brief AES-192 RNG engine with 64-bits integers output and 1 block
+/// \ingroup AESNIRNG
+using AES192_1x64 = AES192Engine<std::uint64_t, 1>;
+
+/// \brief AES-192 RNG engine with 64-bits integers output and 2 blocks
+/// \ingroup AESNIRNG
+using AES192_2x64 = AES192Engine<std::uint64_t, 2>;
+
+/// \brief AES-192 RNG engine with 64-bits integers output and 4 blocks
+/// \ingroup AESNIRNG
+using AES192_4x64 = AES192Engine<std::uint64_t, 4>;
+
+/// \brief AES-192 RNG engine with 64-bits integers output and 8 blocks
+/// \ingroup AESNIRNG
+using AES192_8x64 = AES192Engine<std::uint64_t, 8>;
+
+/// \brief AES-192 RNG engine with 32-bits integers output and default blocks
+/// \ingroup AESNIRNG
+using AES192 = AES192Engine<std::uint32_t>;
+
+/// \brief AES-192 RNG engine with 64-bits integers output and default blocks
+/// \ingroup AESNIRNG
+using AES192_64 = AES192Engine<std::uint64_t>;
 
 /// \brief AES-256 RNG engine with 32-bits integers output and 1 block
 /// \ingroup AESNIRNG
-typedef AES256Engine<uint32_t, 1> AES256_1x32;
+using AES256_1x32 = AES256Engine<std::uint32_t, 1>;
 
 /// \brief AES-256 RNG engine with 32-bits integers output and 2 blocks
 /// \ingroup AESNIRNG
-typedef AES256Engine<uint32_t, 2> AES256_2x32;
+using AES256_2x32 = AES256Engine<std::uint32_t, 2>;
 
 /// \brief AES-256 RNG engine with 32-bits integers output and 4 blocks
 /// \ingroup AESNIRNG
-typedef AES256Engine<uint32_t, 4> AES256_4x32;
+using AES256_4x32 = AES256Engine<std::uint32_t, 4>;
 
 /// \brief AES-256 RNG engine with 32-bits integers output and 8 blocks
 /// \ingroup AESNIRNG
-typedef AES256Engine<uint32_t, 8> AES256_8x32;
-
-/// \brief AES-256 RNG engine with 64-bits integers output and default blocks
-/// \ingroup AESNIRNG
-typedef AES256Engine<uint64_t> AES256_64;
+using AES256_8x32 = AES256Engine<std::uint32_t, 8>;
 
 /// \brief AES-256 RNG engine with 64-bits integers output and 1 block
 /// \ingroup AESNIRNG
-typedef AES256Engine<uint64_t, 1> AES256_1x64;
+using AES256_1x64 = AES256Engine<std::uint64_t, 1>;
 
 /// \brief AES-256 RNG engine with 64-bits integers output and 2 blocks
 /// \ingroup AESNIRNG
-typedef AES256Engine<uint64_t, 2> AES256_2x64;
+using AES256_2x64 = AES256Engine<std::uint64_t, 2>;
 
 /// \brief AES-256 RNG engine with 64-bits integers output and 4 blocks
 /// \ingroup AESNIRNG
-typedef AES256Engine<uint64_t, 4> AES256_4x64;
+using AES256_4x64 = AES256Engine<std::uint64_t, 4>;
 
 /// \brief AES-256 RNG engine with 64-bits integers output and 8 blocks
 /// \ingroup AESNIRNG
-typedef AES256Engine<uint64_t, 8> AES256_8x64;
+using AES256_8x64 = AES256Engine<std::uint64_t, 8>;
+
+/// \brief AES-256 RNG engine with 32-bits integers output and default blocks
+/// \ingroup AESNIRNG
+using AES256 = AES256Engine<std::uint32_t>;
+
+/// \brief AES-256 RNG engine with 64-bits integers output and default blocks
+/// \ingroup AESNIRNG
+using AES256_64 = AES256Engine<std::uint64_t>;
 
 } // namespace vsmc
 

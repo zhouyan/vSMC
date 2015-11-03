@@ -29,13 +29,8 @@ To make the documentations one need [Doxygen][Doxygen] 1.8.3 or later.
 ~~~sh
 make docs
 ~~~
-The documentation of the [master][vSMCDocMaster] and
-[develop][vSMCDocDevelop] branches can be found online.
-
-A [tutorial][vSMCTutorial] is also available. However, it describes an earlier
-version of the library.  There are a few incompatibilities with the current
-version. It is still highly relevant. Users shall use the Doxygen generated
-documentations when things do not work exactly the same way as in the tutorial.
+The documentation of the [master][vSMCDocMaster] and [develop][vSMCDocDevelop]
+branches can be found online.
 
 # Examples
 
@@ -53,15 +48,9 @@ references.
 # Parallelization backends
 
 The library support various backends for multi-thread parallelization, unified
-under a uniform interface. One is C++11 concurrency. For a full C++11
-implementation, this means no third-party dependency is required to write a
-parallel SMC sampler. Other third-party parallelization include, [Intel Cilk
-Plus][Intel Cilk Plus], [Intel TBB][Intel TBB] and [OpenMP][OpenMP]. [Apple
-Grand Central Dispatch][Apple GCD] is also supported on Mac OS X. [Microsoft
-Parallel Patterns Library][MS PPL] is supported on Windows when compiled with
-[Microsoft Visual C++][MSVC] 2012 or later. In addition, this library also
-support using [OpenCL][OpenCL] for GPGPU computing, though the interface is
-different than others.
+under a uniform interface. The primary backends are [OpenMP][OpenMP] and [Intel
+TBB][Intel TBB]. Other backends are available in the [vSMC Extra][vSMC Extra]
+repository, including MPI and [OpenCL][OpenCL].
 
 # Third-party dependencies
 
@@ -109,4 +98,4 @@ in the `LICENSE` file distributed with the source.
 [icpc]: http://software.intel.com/en-us/intel-compilers
 [vSMCDocMaster]: http://zhouyan.github.io/vSMCDoc/master
 [vSMCDocDevelop]: http://zhouyan.github.io/vSMCDoc/develop
-[vSMCTutorial]: http://zhouyan.github.io/vSMCDoc/tutorial.pdf
+[vSMC Extra]: https://github.com/zhouyan/vSMCExtra.git

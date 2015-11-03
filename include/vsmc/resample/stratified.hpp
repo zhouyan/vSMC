@@ -32,32 +32,34 @@
 #ifndef VSMC_RESAMPLE_STRATIFIED_HPP
 #define VSMC_RESAMPLE_STRATIFIED_HPP
 
-#include <vsmc/resample/common.hpp>
+#include <vsmc/resample/internal/common.hpp>
+#include <vsmc/resample/transform.hpp>
 
-namespace vsmc {
-
-namespace internal {
-
-typedef cxx11::integral_constant<ResampleScheme, Stratified>
-    ResampleStratified;
-
-} // namespace vsmc::internal
+namespace vsmc
+{
 
 /// \brief Stratified resampling
 /// \ingroup Resample
-template <>
-class Resample<internal::ResampleStratified>
+class ResampleStratified
 {
-    public :
-
-    template <typename IntType, typename RngType>
-    void operator() (std::size_t M, std::size_t N, RngType &rng,
-            const double *weight, IntType *replication)
+    public:
+    template <typename IntType, typename RNGType>
+    void operator()(std::size_t M, std::size_t N, RNGType &rng,
+        const double *weight, IntType *replication)
     {
-        U01SequenceStratified<RngType> u01seq(N, rng);
-        internal::inversion(M, N, weight, u01seq, replication);
+        U01SequenceStratified<RNGType, double> u01seq(N, rng);
+        resample_trans_u01_rep(M, N, weight, u01seq, replication);
     }
-}; // Stratified resampling
+}; // ResampleStratified
+
+/// \brief Type trait of Stratified scheme
+/// \ingroup Resample
+template <>
+class ResampleTypeTrait<Stratified>
+{
+    public:
+    using type = ResampleStratified;
+}; // class ResampleTypeTrait
 
 } // namespace vsmc
 

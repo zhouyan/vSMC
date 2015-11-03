@@ -29,104 +29,57 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT (vSMCExample-rng CXX)
-INCLUDE_DIRECTORIES (${PROJECT_SOURCE_DIR}/include)
+PROJECT(vSMCExample-rng CXX)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
-ADD_CUSTOM_TARGET (rng)
-ADD_DEPENDENCIES (example rng)
+ADD_CUSTOM_TARGET(rng)
+ADD_DEPENDENCIES(example rng)
 
-ADD_CUSTOM_TARGET (rng-files)
-ADD_DEPENDENCIES (rng rng-files)
+ADD_CUSTOM_TARGET(rng-files)
+ADD_DEPENDENCIES(example-files rng-files)
 
-ADD_CUSTOM_TARGET (rng-check)
-ADD_DEPENDENCIES (check rng-check)
+IF (VSMC_ENABLE_LIBRARY)
+    ADD_DEFINITIONS(-DVSMC_RNG_TEST_C_API=1)
+ENDIF (VSMC_ENABLE_LIBRARY)
 
-ADD_CUSTOM_TARGET (rng-pdf)
-ADD_DEPENDENCIES (pdf rng-pdf)
-
-FUNCTION (ADD_RNG_TEST name)
-    ADD_VSMC_EXECUTABLE (rng_${name}
-        ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp ${ARGN})
-    ADD_DEPENDENCIES (rng rng_${name})
-    ADD_CUSTOM_TARGET (rng_${name}-check
-        COMMAND rng_${name} ">>rng.out"
-        DEPENDS rng_${name}
-        COMMENT "Running rng_${name}"
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-    ADD_DEPENDENCIES (rng-check rng_${name}-check)
-ENDFUNCTION (ADD_RNG_TEST)
-
-FUNCTION (ADD_U01_TEST name)
-    IF (TESTU01_FOUND)
-        ADD_VSMC_EXECUTABLE (rng_${name}_testu01
-            ${PROJECT_SOURCE_DIR}/src/rng_${name}_testu01.cpp "U01" ${ARGN})
-        ADD_DEPENDENCIES (rng rng_${name}_testu01)
-    ENDIF (TESTU01_FOUND)
-ENDFUNCTION (ADD_U01_TEST)
-
-ADD_RNG_TEST(dist)
+FUNCTION(ADD_RNG_TEST name)
+    ADD_VSMC_EXECUTABLE(rng_${name} ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp)
+    ADD_DEPENDENCIES(rng rng_${name})
+ENDFUNCTION(ADD_RNG_TEST)
 
 ADD_RNG_TEST(std)
-ADD_U01_TEST(std)
-
 ADD_RNG_TEST(philox)
-ADD_U01_TEST(philox)
-
 ADD_RNG_TEST(threefry)
-ADD_U01_TEST(threefry)
 
-ADD_RNG_TEST(xorshift)
-ADD_U01_TEST(xorshift)
+IF (Boost_FOUND)
+    ADD_RNG_TEST(beta)
+    ADD_RNG_TEST(cauchy)
+    ADD_RNG_TEST(chi_squared)
+    ADD_RNG_TEST(exponential)
+    ADD_RNG_TEST(extreme_value)
+    ADD_RNG_TEST(fisher_f)
+    ADD_RNG_TEST(gamma)
+    ADD_RNG_TEST(laplace)
+    ADD_RNG_TEST(levy)
+    ADD_RNG_TEST(logistic)
+    ADD_RNG_TEST(lognormal)
+    ADD_RNG_TEST(normal)
+    ADD_RNG_TEST(pareto)
+    ADD_RNG_TEST(rayleigh)
+    ADD_RNG_TEST(student_t)
+    ADD_RNG_TEST(uniform_real)
+    ADD_RNG_TEST(weibull)
+ENDIF (Boost_FOUND)
 
 IF (AESNI_FOUND)
     ADD_RNG_TEST(aes)
-    ADD_U01_TEST(aes)
     ADD_RNG_TEST(ars)
-    ADD_U01_TEST(ars)
-    ADD_VSMC_EXECUTABLE (rng_aes_validation
-        ${PROJECT_SOURCE_DIR}/src/rng_aes_validation.cpp)
-    ADD_DEPENDENCIES (rng rng_aes_validation)
 ENDIF (AESNI_FOUND)
 
 IF (RDRAND_FOUND)
     ADD_RNG_TEST(rdrand)
-    ADD_U01_TEST(rdrand)
 ENDIF (RDRAND_FOUND)
 
-IF (VSMC_RANDOM123_FOUND)
-    ADD_RNG_TEST(r123)
-    ADD_U01_TEST(r123)
-ENDIF (VSMC_RANDOM123_FOUND)
-
-IF (GSL_FOUND)
-    ADD_RNG_TEST(gsl "GSL")
-    ADD_U01_TEST(gsl "GSL")
-ENDIF (GSL_FOUND)
-
 IF (MKL_FOUND)
-    ADD_RNG_TEST(mkl "MKL")
-    ADD_U01_TEST(mkl "MKL")
+    ADD_RNG_TEST(mkl)
 ENDIF (MKL_FOUND)
-
-IF (OPENCL_FOUND AND RANDOM123_FOUND)
-    COPY_FILE (rng rng_cl.cl)
-    COPY_FILE (rng rng_cl.R)
-    ADD_VSMC_EXECUTABLE (rng_cl
-        ${PROJECT_SOURCE_DIR}/src/rng_cl.cpp "OCL" "HDF5")
-    ADD_DEPENDENCIES (rng rng_cl)
-    ADD_DEPENDENCIES (example_cl rng_cl)
-    ADD_CUSTOM_TARGET (rng_cl-check
-        DEPENDS rng_cl rng-files
-        COMMAND rng_cl
-        "vSMCOpenCLDefault" "vSMCOpenCLDefault" "vSMCOpenCLDefault"
-        "float" "10000"
-        "-I ${VSMC_INCLUDE_DIR} -I ${Random123_INCLUDE_DIR}" ">>rng_cl.out"
-        COMMENT "Running rng_cl"
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-    ADD_CUSTOM_TARGET (rng_cl-pdf
-        DEPENDS rng_cl-check
-        COMMAND Rscript "${PROJECT_BINARY_DIR}/rng_cl.R" ">>rng_cl.out"
-        COMMENT "Plotting rng_cl-check results"
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-    ADD_DEPENDENCIES (rng-pdf rng_cl-pdf)
-ENDIF (OPENCL_FOUND AND RANDOM123_FOUND)

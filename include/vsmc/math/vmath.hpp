@@ -32,123 +32,285 @@
 #ifndef VSMC_MATH_VMATH_HPP
 #define VSMC_MATH_VMATH_HPP
 
-#include <vsmc/internal/config.hpp>
-#include <vsmc/cxx11/cmath.hpp>
+#include <vsmc/internal/config.h>
 #include <vsmc/math/constants.hpp>
+#include <cmath>
 
 #if VSMC_USE_MKL_VML
 #include <mkl.h>
-#elif VSMC_USE_ACCELERATE_VFORCE
-#include <Accelerate/Accelerate.h>
 #endif
 
-#define VSMC_DEFINE_MATH_VMATH_1(ns, func, name) \
-template <typename T>                                                        \
-inline void v##name (std::size_t n, const T *a, T *y)                        \
-{                                                                            \
-    using ns::func;                                                          \
-    for (std::size_t i = 0; i != n; ++i)                                     \
-        y[i] = func(a[i]);                                                   \
-}
+#define VSMC_DEFINE_MATH_VMATH_1(func, name)                                  \
+    template <typename T>                                                     \
+    inline void name(std::size_t n, const T *a, T *y)                         \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = func(a[i]);                                                \
+    }
 
-#define VSMC_DEFINE_MATH_VMATH_2(ns, func, name) \
-template <typename T>                                                        \
-inline void v##name (std::size_t n, const T *a, const T *b, T *y)            \
-{                                                                            \
-    using ns::func;                                                          \
-    for (std::size_t i = 0; i != n; ++i)                                     \
-        y[i] = func(a[i], b[i]);                                             \
-}
+#define VSMC_DEFINE_MATH_VMATH_2(func, name)                                  \
+    template <typename T>                                                     \
+    inline void name(std::size_t n, const T *a, const T *b, T *y)             \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = func(a[i], b[i]);                                          \
+    }
 
-#define VSMC_DEFINE_MATH_VMATH_B(op, vname) \
-template <typename T>                                                        \
-inline void v##vname (std::size_t n, const T *a, const T *b, T *y)           \
-{                                                                            \
-    for (std::size_t i = 0; i != n; ++i)                                     \
-        y[i] = a[i] op b[i];                                                 \
-}
+#define VSMC_DEFINE_MATH_VMATH_B(op, name)                                    \
+    template <typename T>                                                     \
+    inline void name(std::size_t n, const T *a, const T *b, T *y)             \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = a[i] op b[i];                                              \
+    }
 
-namespace vsmc {
+#define VSMC_DEFINE_MATH_VMATH_VS(op, name)                                   \
+    template <typename T>                                                     \
+    inline void name(std::size_t n, const T *a, T b, T *y)                    \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = a[i] op b;                                                 \
+    }
 
-namespace math {
+#define VSMC_DEFINE_MATH_VMATH_SV(op, name)                                   \
+    template <typename T>                                                     \
+    inline void name(std::size_t n, T a, const T *b, T *y)                    \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = a op b[i];                                                 \
+    }
 
-namespace internal {
+#if VSMC_USE_MKL_VML
 
-template <typename T>
-inline T vmath_sqr (T a)
-{return a * a;}
+#define VSMC_DEFINE_MATH_VMATH_VML_1(func, name)                              \
+    inline void name(std::size_t n, const float *a, float *y)                 \
+    {                                                                         \
+        ::vs##func(static_cast<MKL_INT>(n), a, y);                            \
+    }                                                                         \
+    inline void name(std::size_t n, const double *a, double *y)               \
+    {                                                                         \
+        ::vd##func(static_cast<MKL_INT>(n), a, y);                            \
+    }
 
-template <typename T>
-inline T vmath_inv (T a)
-{return static_cast<T>(1) / a;}
+#define VSMC_DEFINE_MATH_VMATH_VML_2(func, name)                              \
+    inline void name(std::size_t n, const float *a, const float *b, float *y) \
+    {                                                                         \
+        ::vs##func(static_cast<MKL_INT>(n), a, b, y);                         \
+    }                                                                         \
+    inline void name(                                                         \
+        std::size_t n, const double *a, const double *b, double *y)           \
+    {                                                                         \
+        ::vd##func(static_cast<MKL_INT>(n), a, b, y);                         \
+    }
 
-template <typename T>
-inline T vmath_invsqrt (T a)
-{using std::sqrt; return static_cast<T>(1) / sqrt(a);}
-
-template <typename T>
-inline T vmath_invcbrt (T a)
-{using cxx11::cbrt; return static_cast<T>(1) / cbrt(a);}
-
-template <typename T>
-inline T vmath_pow2o3 (T a)
-{using cxx11::cbrt; a = cbrt(a); return a * a;}
-
-template <typename T>
-inline T vmath_pow3o2 (T a)
-{using std::sqrt; a = sqrt(a); return a * a * a;}
-
-template <typename T>
-inline T vmath_cdfnorm (T a)
+namespace vsmc
 {
-    using cxx11::erf;
-    return static_cast<T>(0.5) + static_cast<T>(0.5) * erf(
-            a *  sqrt_1by2<T>());
+
+VSMC_DEFINE_MATH_VMATH_VML_2(Add, add)
+VSMC_DEFINE_MATH_VMATH_VML_2(Sub, sub)
+VSMC_DEFINE_MATH_VMATH_VML_1(Sqr, sqr)
+VSMC_DEFINE_MATH_VMATH_VML_2(Mul, mul)
+VSMC_DEFINE_MATH_VMATH_VML_1(Abs, abs)
+inline void linear_frac(std::size_t n, const float *a, const float *b,
+    float beta_a, float beta_b, float mu_a, float mu_b, float *y)
+{
+    ::vsLinearFrac(
+        static_cast<MKL_INT>(n), a, b, beta_a, beta_b, mu_a, mu_b, y);
+}
+inline void linear_frac(std::size_t n, const double *a, const double *b,
+    double beta_a, double beta_b, double mu_a, double mu_b, double *y)
+{
+    ::vdLinearFrac(
+        static_cast<MKL_INT>(n), a, b, beta_a, beta_b, mu_a, mu_b, y);
 }
 
-template <typename T>
-inline T vmath_erfinv (T a)
-{using cxx11::erf; return static_cast<T>(1) / erf(a);}
+VSMC_DEFINE_MATH_VMATH_VML_1(Inv, inv)
+VSMC_DEFINE_MATH_VMATH_VML_2(Div, div)
+VSMC_DEFINE_MATH_VMATH_VML_1(Sqrt, sqrt)
+VSMC_DEFINE_MATH_VMATH_VML_1(InvSqrt, invsqrt)
+VSMC_DEFINE_MATH_VMATH_VML_1(Cbrt, cbrt)
+VSMC_DEFINE_MATH_VMATH_VML_1(InvCbrt, invcbrt)
+VSMC_DEFINE_MATH_VMATH_VML_1(Pow2o3, pow2o3)
+VSMC_DEFINE_MATH_VMATH_VML_1(Pow3o2, pow3o2)
+VSMC_DEFINE_MATH_VMATH_VML_2(Pow, pow)
+inline void pow(std::size_t n, const float *a, float b, float *y)
+{
+    ::vsPowx(static_cast<MKL_INT>(n), a, b, y);
+}
+inline void pow(std::size_t n, const double *a, double b, double *y)
+{
+    ::vdPowx(static_cast<MKL_INT>(n), a, b, y);
+}
+VSMC_DEFINE_MATH_VMATH_VML_2(Hypot, hypot)
 
-template <typename T>
-inline T vmath_erfcinv (T a)
-{return vmath_erfinv(static_cast<T>(1) - a);}
+VSMC_DEFINE_MATH_VMATH_VML_1(Exp, exp)
+VSMC_DEFINE_MATH_VMATH_VML_1(Expm1, expm1)
+VSMC_DEFINE_MATH_VMATH_VML_1(Ln, log)
+VSMC_DEFINE_MATH_VMATH_VML_1(Log10, log10)
+VSMC_DEFINE_MATH_VMATH_VML_1(Log1p, log1p)
 
-template <typename T>
-inline T vmath_cdfnorminv (T a)
-{return static_cast<T>(1) / vmath_cdfnorm(a);}
+VSMC_DEFINE_MATH_VMATH_VML_1(Cos, cos)
+VSMC_DEFINE_MATH_VMATH_VML_1(Sin, sin)
+inline void sincos(std::size_t n, const float *a, float *y, float *z)
+{
+    ::vsSinCos(static_cast<MKL_INT>(n), a, y, z);
+}
+inline void sincos(std::size_t n, const double *a, double *y, double *z)
+{
+    ::vdSinCos(static_cast<MKL_INT>(n), a, y, z);
+}
+VSMC_DEFINE_MATH_VMATH_VML_1(Tan, tan)
+VSMC_DEFINE_MATH_VMATH_VML_1(Acos, acos)
+VSMC_DEFINE_MATH_VMATH_VML_1(Asin, asin)
+VSMC_DEFINE_MATH_VMATH_VML_1(Atan, atan)
+VSMC_DEFINE_MATH_VMATH_VML_2(Atan2, atan2)
 
-} // namespace vsmc::math::internal
+VSMC_DEFINE_MATH_VMATH_VML_1(Cosh, cosh)
+VSMC_DEFINE_MATH_VMATH_VML_1(Sinh, sinh)
+VSMC_DEFINE_MATH_VMATH_VML_1(Tanh, tanh)
+VSMC_DEFINE_MATH_VMATH_VML_1(Acosh, acosh)
+VSMC_DEFINE_MATH_VMATH_VML_1(Asinh, asinh)
+VSMC_DEFINE_MATH_VMATH_VML_1(Atanh, atanh)
+
+VSMC_DEFINE_MATH_VMATH_VML_1(Erf, erf)
+VSMC_DEFINE_MATH_VMATH_VML_1(Erfc, erfc)
+VSMC_DEFINE_MATH_VMATH_VML_1(CdfNorm, cdfnorm)
+VSMC_DEFINE_MATH_VMATH_VML_1(ErfInv, erfinv)
+VSMC_DEFINE_MATH_VMATH_VML_1(ErfcInv, erfcinv)
+VSMC_DEFINE_MATH_VMATH_VML_1(CdfNormInv, cdfnorminv)
+VSMC_DEFINE_MATH_VMATH_VML_1(LGamma, lgamma)
+VSMC_DEFINE_MATH_VMATH_VML_1(TGamma, tgamm)
+
+} // namespace vsmc
+
+#endif // VSMC_USE_MKL_VML
+
+namespace vsmc
+{
 
 /// \defgroup vArithmetic Arithmetic functions
 /// \ingroup vMath
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i + b_i\f$
-VSMC_DEFINE_MATH_VMATH_B(+, Add)
+VSMC_DEFINE_MATH_VMATH_B(+, add)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i + b\f$
+VSMC_DEFINE_MATH_VMATH_VS(+, add)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a + b_i\f$
+VSMC_DEFINE_MATH_VMATH_SV(+, add)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i - b_i\f$
-VSMC_DEFINE_MATH_VMATH_B(-, Sub)
+VSMC_DEFINE_MATH_VMATH_B(-, sub)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i - b\f$
+VSMC_DEFINE_MATH_VMATH_VS(-, sub)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a - b_i\f$
+VSMC_DEFINE_MATH_VMATH_SV(-, sub)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^2\f$
-VSMC_DEFINE_MATH_VMATH_1(internal, vmath_sqr, Sqr)
+template <typename T>
+inline void sqr(std::size_t n, const T *a, T *y)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = a[i] * a[i];
+}
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b_i\f$
-VSMC_DEFINE_MATH_VMATH_B(*, Mul)
+VSMC_DEFINE_MATH_VMATH_B(*, mul)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b\f$
+VSMC_DEFINE_MATH_VMATH_VS(*, mul)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i\f$
+VSMC_DEFINE_MATH_VMATH_SV(*, mul)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = |a_i|\f$
-VSMC_DEFINE_MATH_VMATH_1(std, fabs, Abs)
+VSMC_DEFINE_MATH_VMATH_1(std::abs, abs)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = (\beta_a a_i + \mu_a) / (\beta_b b_i + \mu_b)\f$
 template <typename T>
-inline void vLinearFrac (std::size_t n, const T *a, const T *b,
-        T beta_a, T beta_b, T mu_a, T mu_b, T *y)
+inline void linear_frac(std::size_t n, const T *a, const T *b, T beta_a,
+    T beta_b, T mu_a, T mu_b, T *y)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        for (std::size_t j = 0; j != k; ++j)
+            y[j] = beta_a * a[j] + mu_a;
+        for (std::size_t j = 0; j != k; ++j)
+            y[j] /= beta_b * b[j] + mu_b;
+    }
+    for (std::size_t i = 0; i != l; ++i)
+        y[i] = beta_a * a[i] + mu_a;
+    for (std::size_t i = 0; i != l; ++i)
+        y[i] /= beta_b * b[i] + mu_b;
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = a_i * b_i + c_i\f$.
+template <typename T>
+inline void fma(std::size_t n, const T *a, const T *b, const T *c, T *y)
 {
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = beta_a * a[i] + mu_a;
+        y[i] = a[i] * b[i] + c[i];
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = a_i * b_i + c\f$.
+template <typename T>
+inline void fma(std::size_t n, const T *a, const T *b, T c, T *y)
+{
     for (std::size_t i = 0; i != n; ++i)
-        y[i] /= beta_b * b[i] + mu_b;
+        y[i] = a[i] * b[i] + c;
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = a_i * b + c_i\f$.
+template <typename T>
+inline void fma(std::size_t n, const T *a, T b, const T *c, T *y)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = a[i] * b + c[i];
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = a_i * b + c\f$.
+template <typename T>
+inline void fma(std::size_t n, const T *a, T b, T c, T *y)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = a[i] * b + c;
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = a * b_i + c_i\f$.
+template <typename T>
+inline void fma(std::size_t n, T a, const T *b, const T *c, T *y)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = a * b[i] + c[i];
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = a * b_i + c\f$.
+template <typename T>
+inline void fma(std::size_t n, T a, const T *b, T c, T *y)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = a * b[i] + c;
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = a * b + c_i\f$.
+template <typename T>
+inline void fma(std::size_t n, T a, T b, const T *c, T *y)
+{
+    add(n, a * b, c, y);
 }
 
 /// @}
@@ -158,43 +320,104 @@ inline void vLinearFrac (std::size_t n, const T *a, const T *b,
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{-1}\f$
-VSMC_DEFINE_MATH_VMATH_1(internal, vmath_inv, Inv)
+template <typename T>
+inline void inv(std::size_t n, const T *a, T *y)
+{
+    const T one = static_cast<T>(1);
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = one / a[i];
+}
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i / b_i\f$
-VSMC_DEFINE_MATH_VMATH_B(/, Div)
+VSMC_DEFINE_MATH_VMATH_B(/, div)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i / b\f$
+VSMC_DEFINE_MATH_VMATH_VS(/, div)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a / b_i\f$
+VSMC_DEFINE_MATH_VMATH_SV(/, div)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt{a_i}\f$
-VSMC_DEFINE_MATH_VMATH_1(std, sqrt, Sqrt)
+VSMC_DEFINE_MATH_VMATH_1(std::sqrt, sqrt)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 1 / \sqrt{a_i}\f$
-VSMC_DEFINE_MATH_VMATH_1(internal, vmath_invsqrt, InvSqrt)
+template <typename T>
+inline void invsqrt(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        sqrt(k, a, y);
+        inv(k, y, y);
+    }
+    sqrt(l, a, y);
+    inv(l, y, y);
+}
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt[3]{a_i}\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, cbrt, Cbrt)
+VSMC_DEFINE_MATH_VMATH_1(std::cbrt, cbrt)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 1 / \sqrt[3]{a_i}\f$
-VSMC_DEFINE_MATH_VMATH_1(internal, vmath_invcbrt, InvCbrt)
+template <typename T>
+inline void invcbrt(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        cbrt(k, a, y);
+        inv(k, y, y);
+    }
+    cbrt(l, a, y);
+    inv(l, y, y);
+}
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{2/3}\f$
-VSMC_DEFINE_MATH_VMATH_1(internal, vmath_pow2o3, Pow2o3)
+template <typename T>
+inline void pow2o3(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        cbrt(k, a, y);
+        sqr(k, y, y);
+    }
+    cbrt(l, a, y);
+    sqr(l, y, y);
+}
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{3/2}\f$
-VSMC_DEFINE_MATH_VMATH_1(internal, vmath_pow3o2, Pow3o2)
+template <typename T>
+inline void pow3o2(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        sqrt(k, a, y);
+        for (std::size_t j = 0; j != k; ++j)
+            y[j] = y[j] * y[j] * y[j];
+    }
+    sqrt(l, a, y);
+    for (std::size_t i = 0; i != l; ++i)
+        y[i] = y[i] * y[i] * y[i];
+}
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{b_i}\f$
-VSMC_DEFINE_MATH_VMATH_2(std, pow, Pow)
+VSMC_DEFINE_MATH_VMATH_2(std::pow, pow)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^b\f$
 template <typename T>
-inline void vPowx (std::size_t n, const T *a, T b, T *y)
+inline void pow(std::size_t n, const T *a, T b, T *y)
 {
-    using std::pow;
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = pow(a[i], b);
+        y[i] = std::pow(a[i], b);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt{a_i^2 + b_i^2}\f$
-VSMC_DEFINE_MATH_VMATH_2(cxx11, hypot, Hypot)
+VSMC_DEFINE_MATH_VMATH_2(std::hypot, hypot)
 
 /// @}
 
@@ -203,19 +426,40 @@ VSMC_DEFINE_MATH_VMATH_2(cxx11, hypot, Hypot)
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = e^{a_i}\f$
-VSMC_DEFINE_MATH_VMATH_1(std, exp, Exp)
+VSMC_DEFINE_MATH_VMATH_1(std::exp, exp)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 2^{a_i}\f$
+VSMC_DEFINE_MATH_VMATH_1(std::exp2, exp2)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 10^{a_i}\f$
+template <typename T>
+inline void exp10(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        mul(k, const_ln_10<T>(), a, y);
+        exp(k, y, y);
+    }
+    mul(l, const_ln_10<T>(), a, y);
+    exp(l, y, y);
+}
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = e^{a_i} - 1\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, expm1, Expm1)
+VSMC_DEFINE_MATH_VMATH_1(std::expm1, expm1)
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \ln(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(std, log, Ln)
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \log(a_i)\f$
+VSMC_DEFINE_MATH_VMATH_1(std::log, log)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \log_2(a_i)\f$
+VSMC_DEFINE_MATH_VMATH_1(std::log2, log2)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \log_{10}(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(std, log10, Log10)
+VSMC_DEFINE_MATH_VMATH_1(std::log10, log10)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \log(a_i + 1)\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, log1p, Log1p)
+VSMC_DEFINE_MATH_VMATH_1(std::log1p, log1p)
 /// @}
 
 /// \defgroup vTrigonometric Trigonometric functions
@@ -223,39 +467,42 @@ VSMC_DEFINE_MATH_VMATH_1(cxx11, log1p, Log1p)
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sin(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(std, cos, Cos)
+VSMC_DEFINE_MATH_VMATH_1(std::cos, cos)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \cos(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(std, sin, Sin)
+VSMC_DEFINE_MATH_VMATH_1(std::sin, sin)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = \sin(a_i), z_i = \cos(a_i)\f$
 template <typename T>
-inline void vSinCos (std::size_t n, const T *a, T *y, T *z)
+inline void sincos(std::size_t n, const T *a, T *y, T *z)
 {
-    using std::sin;
-    using std::cos;
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = sin(a[i]);
-    for (std::size_t i = 0; i != n; ++i)
-        z[i] = cos(a[i]);
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        sin(k, a, y);
+        cos(k, a, z);
+    }
+    sin(l, a, y);
+    cos(l, a, z);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \tan(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(std, tan, Tan)
+VSMC_DEFINE_MATH_VMATH_1(std::tan, tan)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arccos(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(std, acos, Acos)
+VSMC_DEFINE_MATH_VMATH_1(std::acos, acos)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arcsin(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(std, asin, Asin)
+VSMC_DEFINE_MATH_VMATH_1(std::asin, asin)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(std, atan, Atan)
+VSMC_DEFINE_MATH_VMATH_1(std::atan, atan)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a_i / b_i)\f$ with
 /// signs to determine the quadrant
-VSMC_DEFINE_MATH_VMATH_2(std, atan2, Atan2)
+VSMC_DEFINE_MATH_VMATH_2(std::atan2, atan2)
 
 /// @}
 
@@ -264,22 +511,22 @@ VSMC_DEFINE_MATH_VMATH_2(std, atan2, Atan2)
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \cosh(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(std, cosh, Cosh)
+VSMC_DEFINE_MATH_VMATH_1(std::cosh, cosh)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sinh(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(std, sinh, Sinh)
+VSMC_DEFINE_MATH_VMATH_1(std::sinh, sinh)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \tanh(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(std, tanh, Tanh)
+VSMC_DEFINE_MATH_VMATH_1(std::tanh, tanh)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{arc}\cosh(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, acosh, Acosh)
+VSMC_DEFINE_MATH_VMATH_1(std::acosh, acosh)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{arc}\sinh(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, asinh, Asinh)
+VSMC_DEFINE_MATH_VMATH_1(std::asinh, asinh)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{arc}\tanh(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, atanh, Atanh)
+VSMC_DEFINE_MATH_VMATH_1(std::atanh, atanh)
 
 /// @}
 
@@ -288,184 +535,39 @@ VSMC_DEFINE_MATH_VMATH_1(cxx11, atanh, Atanh)
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{Erf}(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, erf, Erf)
+VSMC_DEFINE_MATH_VMATH_1(std::erf, erf)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = \mathrm{Erfc}(a_i) = \mathrm{Erf}(1 - a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(cxx11, erfc, Erfc)
+VSMC_DEFINE_MATH_VMATH_1(std::erfc, erfc)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = 1 - \mathrm{Erfc}(a_i / \sqrt{2}) / 2\f$, the standard Normal CDF
-VSMC_DEFINE_MATH_VMATH_1(internal, vmath_cdfnorm, CdfNorm)
-
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{Erf}^{-1}(a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(internal, vmath_erfinv, ErfInv)
-
-/// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = \mathrm{Erf}^{-1}(1 - a_i)\f$
-VSMC_DEFINE_MATH_VMATH_1(internal, vmath_erfcinv, ErfcInv)
-
-/// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = \sqrt{2}\mathrm{Erf}^{-1}(2a_i - 1)\f$, inverse of the standard
-/// Nomral CDF
-VSMC_DEFINE_MATH_VMATH_1(internal, vmath_cdfnorminv, CdfNormInv)
+template <typename T>
+inline void cdfnorm(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1000;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        mul(k, 1 / const_sqrt_2<T>(), a, y);
+        erf(k, y, y);
+        fma(k, static_cast<T>(0.5), static_cast<T>(0.5), y, y);
+    }
+    mul(l, 1 / const_sqrt_2<T>(), a, y);
+    erf(l, y, y);
+    fma(l, static_cast<T>(0.5), static_cast<T>(0.5), y, y);
+}
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \ln\Gamma(a_i)\f$,
 /// logarithm of the Gamma function
-VSMC_DEFINE_MATH_VMATH_1(cxx11, lgamma, LGamma)
+VSMC_DEFINE_MATH_VMATH_1(std::lgamma, lgamma)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \Gamma(a_i)\f$, the Gamma
 /// function
-VSMC_DEFINE_MATH_VMATH_1(cxx11, tgamma, TGamma)
+VSMC_DEFINE_MATH_VMATH_1(std::tgamma, tgamma)
 /// @}
 
-} // namespace vsmc::math
-
 } // namespace vsmc
-
-#if VSMC_USE_MKL_VML
-
-#define VSMC_DEFINE_MATH_VMATH_VML_1(name) \
-inline void v##name                                                          \
-(std::size_t n, const float *a, float *y)                                    \
-{::vs##name(static_cast<MKL_INT>(n), a, y);}                                 \
-inline void v##name                                                          \
-(std::size_t n, const double *a, double *y)                                  \
-{::vd##name(static_cast<MKL_INT>(n), a, y);}
-
-#define VSMC_DEFINE_MATH_VMATH_VML_2(name) \
-inline void v##name                                                          \
-(std::size_t n, const float *a, const float *b, float *y)                    \
-{::vs##name(static_cast<MKL_INT>(n), a, b, y);}                              \
-inline void v##name                                                          \
-(std::size_t n, const double *a, const double *b, double *y)                 \
-{::vd##name(static_cast<MKL_INT>(n), a, b, y);}
-
-namespace vsmc {
-
-namespace math {
-
-VSMC_DEFINE_MATH_VMATH_VML_2(Add)
-VSMC_DEFINE_MATH_VMATH_VML_2(Sub)
-VSMC_DEFINE_MATH_VMATH_VML_1(Sqr)
-VSMC_DEFINE_MATH_VMATH_VML_2(Mul)
-VSMC_DEFINE_MATH_VMATH_VML_1(Abs)
-inline void vLinearFrac (std::size_t n, const float *a, const float *b,
-        float beta_a, float beta_b, float mu_a, float mu_b, float *y)
-{::vsLinearFrac(static_cast<MKL_INT>(n), a, b, beta_a, beta_b, mu_a, mu_b, y);}
-inline void vLinearFrac (std::size_t n, const double *a, const double *b,
-        double beta_a, double beta_b, double mu_a, double mu_b, double *y)
-{::vdLinearFrac(static_cast<MKL_INT>(n), a, b, beta_a, beta_b, mu_a, mu_b, y);}
-
-VSMC_DEFINE_MATH_VMATH_VML_1(Inv)
-VSMC_DEFINE_MATH_VMATH_VML_2(Div)
-VSMC_DEFINE_MATH_VMATH_VML_1(Sqrt)
-VSMC_DEFINE_MATH_VMATH_VML_1(InvSqrt)
-VSMC_DEFINE_MATH_VMATH_VML_1(Cbrt)
-VSMC_DEFINE_MATH_VMATH_VML_1(InvCbrt)
-VSMC_DEFINE_MATH_VMATH_VML_1(Pow2o3)
-VSMC_DEFINE_MATH_VMATH_VML_1(Pow3o2)
-VSMC_DEFINE_MATH_VMATH_VML_2(Pow)
-inline void vPowx (std::size_t n, const float *a, float b, float *y)
-{::vsPowx(static_cast<MKL_INT>(n), a, b, y);}
-inline void vPowx (std::size_t n, const double *a, double b, double *y)
-{::vdPowx(static_cast<MKL_INT>(n), a, b, y);}
-VSMC_DEFINE_MATH_VMATH_VML_2(Hypot)
-
-VSMC_DEFINE_MATH_VMATH_VML_1(Exp)
-VSMC_DEFINE_MATH_VMATH_VML_1(Expm1)
-VSMC_DEFINE_MATH_VMATH_VML_1(Ln)
-VSMC_DEFINE_MATH_VMATH_VML_1(Log10)
-VSMC_DEFINE_MATH_VMATH_VML_1(Log1p)
-
-VSMC_DEFINE_MATH_VMATH_VML_1(Cos)
-VSMC_DEFINE_MATH_VMATH_VML_1(Sin)
-inline void vSinCos (std::size_t n, const float *a, float *y, float *z)
-{::vsSinCos(static_cast<MKL_INT>(n), a, y, z);}
-inline void vSinCos (std::size_t n, const double *a, double *y, double *z)
-{::vdSinCos(static_cast<MKL_INT>(n), a, y, z);}
-VSMC_DEFINE_MATH_VMATH_VML_1(Tan)
-VSMC_DEFINE_MATH_VMATH_VML_1(Acos)
-VSMC_DEFINE_MATH_VMATH_VML_1(Asin)
-VSMC_DEFINE_MATH_VMATH_VML_1(Atan)
-VSMC_DEFINE_MATH_VMATH_VML_2(Atan2)
-
-VSMC_DEFINE_MATH_VMATH_VML_1(Cosh)
-VSMC_DEFINE_MATH_VMATH_VML_1(Sinh)
-VSMC_DEFINE_MATH_VMATH_VML_1(Tanh)
-VSMC_DEFINE_MATH_VMATH_VML_1(Acosh)
-VSMC_DEFINE_MATH_VMATH_VML_1(Asinh)
-VSMC_DEFINE_MATH_VMATH_VML_1(Atanh)
-
-VSMC_DEFINE_MATH_VMATH_VML_1(Erf)
-VSMC_DEFINE_MATH_VMATH_VML_1(Erfc)
-VSMC_DEFINE_MATH_VMATH_VML_1(CdfNorm)
-VSMC_DEFINE_MATH_VMATH_VML_1(ErfInv)
-VSMC_DEFINE_MATH_VMATH_VML_1(ErfcInv)
-VSMC_DEFINE_MATH_VMATH_VML_1(CdfNormInv)
-VSMC_DEFINE_MATH_VMATH_VML_1(LGamma)
-VSMC_DEFINE_MATH_VMATH_VML_1(TGamma)
-
-} // namespace vsmc::math
-
-} // namespace vsmc
-
-#elif VSMC_USE_ACCELERATE_VFORCE
-
-#define VSMC_DEFINE_MATH_VMATH_VFORCE_1(func, name) \
-inline void v##name                                                          \
-(std::size_t n, const float *a, float *y)                                    \
-{const int in = static_cast<int>(n); ::vv##func##f(y, a, &in);}              \
-inline void v##name                                                          \
-(std::size_t n, const double *a, double *y)                                  \
-{const int in = static_cast<int>(n); ::vv##func(y, a, &in);}
-
-#define VSMC_DEFINE_MATH_VMATH_VFORCE_2(func, name) \
-inline void v##name                                                          \
-(std::size_t n, const float *a, const float *b, float *y)                    \
-{const int in = static_cast<int>(n); ::vv##func##f(y, a, b, &in);}           \
-inline void v##name                                                          \
-(std::size_t n, const double *a, const double *b, double *y)                 \
-{const int in = static_cast<int>(n); ::vv##func(y, a, b, &in);}
-
-namespace vsmc {
-
-namespace math {
-
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(rec,   Inv)
-VSMC_DEFINE_MATH_VMATH_VFORCE_2(div,   Div)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(sqrt,  Sqrt)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(rsqrt, InvSqrt)
-VSMC_DEFINE_MATH_VMATH_VFORCE_2(pow,   Pow)
-
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(exp,   Exp)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(log,   Ln)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(log10, Log10)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(log1p, Log1p)
-
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(cos, Cos)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(sin, Sin)
-inline void vSinCos (std::size_t n, const float *a, float *y, float *z)
-{int in = static_cast<int>(n); ::vvsincosf(z, y, a, &in);}
-inline void vSinCos (std::size_t n, const double *a, double *y, double *z)
-{int in = static_cast<int>(n); ::vvsincos(z, y, a, &in);}
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(tan,   Tan)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(acos,  Acos)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(asin,  Asin)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(atan,  Atan)
-VSMC_DEFINE_MATH_VMATH_VFORCE_2(atan2, Atan2)
-
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(cosh,  Cosh)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(sinh,  Sinh)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(tanh,  Tanh)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(acosh,  Acosh)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(asinh,  Asinh)
-VSMC_DEFINE_MATH_VMATH_VFORCE_1(atanh,  Atanh)
-
-} // namespace vsmc::math
-
-} // namespace vsmc
-
-#endif // VSMC_USE_MKL_VML
 
 #endif // VSMC_MATH_VMATH_HPP

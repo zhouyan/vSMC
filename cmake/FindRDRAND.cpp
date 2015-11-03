@@ -31,18 +31,12 @@
 
 #include <immintrin.h>
 
-int main ()
+int main()
 {
     unsigned short r16;
     unsigned r32;
-#if defined(_MSC_VER) || defined(__INTEL_COMPILER)
-    unsigned __int64 r64;
-#else
-    unsigned long long r64;
-#endif
     _rdrand16_step(&r16);
     _rdrand32_step(&r32);
-    _rdrand64_step(&r64);
 
     return 0;
 }

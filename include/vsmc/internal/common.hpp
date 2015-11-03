@@ -32,33 +32,33 @@
 #ifndef VSMC_INTERNAL_COMMON_HPP
 #define VSMC_INTERNAL_COMMON_HPP
 
-#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/config.h>
 #include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
 
-#include <vsmc/cxx11/cmath.hpp>
-#include <vsmc/cxx11/functional.hpp>
-#include <vsmc/cxx11/random.hpp>
-#include <vsmc/cxx11/type_traits.hpp>
-
 #include <vsmc/math/cblas.hpp>
 #include <vsmc/math/constants.hpp>
 #include <vsmc/math/vmath.hpp>
 
-#include <stdint.h>
+#include <vsmc/utility/aligned_memory.hpp>
 
+#include <algorithm>
+#include <array>
+#include <atomic>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-
-#include <algorithm>
 #include <exception>
 #include <fstream>
+#include <functional>
+#include <future>
+#include <initializer_list>
 #include <iomanip>
 #include <iostream>
 #include <iterator>
@@ -66,10 +66,92 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <mutex>
+#include <new>
 #include <numeric>
+#include <random>
 #include <sstream>
+#include <stdexcept>
 #include <string>
+#include <thread>
+#include <tuple>
+#include <type_traits>
 #include <utility>
 #include <vector>
+
+namespace vsmc
+{
+
+namespace internal
+{
+
+template <typename UIntType>
+inline std::string itos(UIntType i, std::true_type)
+{
+    if (i == 0)
+        return std::string("0");
+
+    char str[24] = {0};
+    std::size_t n = 0;
+    while (i > 0) {
+        str[n++] = '0' + i % 10;
+        i /= 10;
+    }
+    std::reverse(str, str + n);
+
+    return std::string(str);
+}
+
+template <typename IntType>
+inline std::string itos(IntType i, std::false_type)
+{
+    using uint_type = typename std::make_unsigned<IntType>::type;
+
+    if (i < 0)
+        return "-" + itos(static_cast<uint_type>(-i), std::true_type());
+
+    return itos(static_cast<uint_type>(i), std::true_type());
+}
+
+template <typename IntType>
+inline std::string itos(IntType i)
+{
+    return itos(i, std::is_unsigned<IntType>());
+}
+
+} // namespace vsmc::internal
+
+template <typename CharT, typename Traits, typename T, std::size_t N>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
+{
+    if (!os.good())
+        return os;
+
+    for (std::size_t i = 0; i < N - 1; ++i)
+        os << ary[i] << ' ';
+    os << ary[N - 1];
+
+    return os;
+}
+
+template <typename CharT, typename Traits, typename T, std::size_t N>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, std::array<T, N> &ary)
+{
+    if (!is.good())
+        return is;
+
+    std::array<T, N> ary_tmp;
+    for (std::size_t i = 0; i != N; ++i)
+        is >> std::ws >> ary_tmp[i];
+
+    if (is.good())
+        ary = std::move(ary_tmp);
+
+    return is;
+}
+
+} // namespace vsmc
 
 #endif // VSMC_INTERNAL_COMMON_HPP

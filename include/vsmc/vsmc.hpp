@@ -44,50 +44,19 @@
 /// \defgroup Core Core
 /// \brief Constructing samplers with operations on the whole particle set
 
-/// \defgroup Dispatch Grand Central Dispatch
-/// \brief C++ wrapper of Apple GCD
-
 /// \defgroup Resample Resampling algorithms
 /// \brief Resampling algorithm functor classes
 
-/// \defgroup Adapter Adapter
-/// \brief Adapter class templates for constructing concrete objects
-
-/// \defgroup Integrate Integration
-/// \brief Numerical integration
-
-/// \defgroup MPI Message Passing Interface
-/// \brief Parallel samplers using MPI
-
-/// \defgroup OpenCL OpenCL
-/// \brief Parallel sampler using OpenCL
-
 /// \defgroup SMP Symmetric Multiprocessing
 /// \brief Parallel samplers using multi-threading on SMP architecture
-
-/// \defgroup CILK Intel Cilk Plus
-/// \ingroup SMP
-/// \brief Parallel samplers using Intel Cilk Plus
-
-/// \defgroup GCD Grand Central Dispatch
-/// \ingroup SMP
-/// \brief Parallel samplers using Apple GCD
 
 /// \defgroup OMP OpenMP
 /// \ingroup SMP
 /// \brief Parallel samplers using OpenMP
 
-/// \defgroup PPL Parallel Pattern Library
-/// \ingroup SMP
-/// \brief Parallel samplers using Microsoft PPL
-
 /// \defgroup SEQ Sequential
 /// \ingroup SMP
 /// \brief Sequential samplers
-
-/// \defgroup STD C++11 concurrency
-/// \ingroup SMP
-/// \brief Parallel samplers using C++11 concurrency
 
 /// \defgroup TBB Intel Threading Building Blocks
 /// \ingroup SMP
@@ -106,7 +75,7 @@
 
 /// \defgroup vMath Vector math functions
 /// \ingroup Math
-/// \brief Math functions on vectors (optional optimization through Intel MKL)
+/// \brief Math functions on vectors
 
 /// \defgroup RNG Random number generating
 /// \brief Random number generating engines and utilities
@@ -115,44 +84,60 @@
 /// \ingroup RNG
 /// \brief Random number generating using AES-NI
 
-/// \defgroup CLRNG OpenCL
-/// \ingroup RNG
-/// \brief Random number generating in OpenCL kernels
-
 /// \defgroup Distribution Distribution
 /// \ingroup RNG
 /// \brief Distribution random varaites
 
-/// \defgroup GSLRNG GSL
-/// \ingroup RNG
-/// \brief Random number generating using GSL RNG
-
-/// \defgroup MKLRNG MKL
+/// \defgroup MKLRNG Intel Math Kernel Library
 /// \ingroup RNG
 /// \brief Random number generating using MKL RNG
 
-/// \defgroup R123RNG Random123
+/// \defgroup Philox Philox
 /// \ingroup RNG
-/// \brief Random number generating using Random123 RNG
+/// \brief Random number generating using Random123 Philox RNG
 
-/// \defgroup RDRNG Intel DRNG
+/// \defgroup Threefry Threefry
+/// \ingroup RNG
+/// \brief Random number generating using Random123 Threefry RNG
+
+/// \defgroup RDRAND Intel DRNG
 /// \ingroup RNG
 /// \brief Random number generating using Intel RDRAND instructions
 
-/// \defgroup RNGAdapter Adapter
-/// \ingroup RNG
-/// \brief C++11 RNG engines that adapt other RNG generators
-
 /// \defgroup U01 U01
 /// \ingroup RNG
-/// \brief Convert random integers to random floating points
+/// \brief Converting random integers to uniform floating points
+
+/// \defgroup U01Sequence U01 Sequence
+/// \ingroup RNG
+/// \brief Generating ordered uniform random sequence
 
 /// \defgroup Xorshift Xorshift
 /// \ingroup RNG
 /// \brief Random number generating using the Xorshift algorithm
 
-/// \defgroup Thread Thread
-/// \brief C++11 threading support
+/// \defgroup RNGC Random number generating in C and OpenCL
+/// \brief Random number generating in C and OpenCL
+
+/// \defgroup GammaK1C GammaK1
+/// \ingroup RNGC
+/// \brief Generating Gamma(k, 1) random numbers
+
+/// \defgroup Normal01C Normal01
+/// \ingroup RNGC
+/// \brief Generating Normal(0, 1) random numbers
+
+/// \defgroup PhiloxC Philox
+/// \ingroup RNGC
+/// \brief Random number generating using Random123 Philox RNG
+
+/// \defgroup ThreefryC Threefry
+/// \ingroup RNGC
+/// \brief Random number generating using Random123 Threefry RNG
+
+/// \defgroup U01C U01
+/// \ingroup RNGC
+/// \brief Converting random integers to uniform floating points
 
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library
@@ -161,25 +146,13 @@
 /// \ingroup Utility
 /// \brief Memory allocation with alignment requirement
 
-/// \defgroup Array Array
-/// \ingroup Utility
-/// \brief Container with static size
-
-/// \defgroup CPUID CPUID
-/// \ingroup Utility
-/// \brief Query CPUID information
-
-/// \defgroup Counter Counter
-/// \ingroup Utility
-/// \brief Use Array of unsinged integers as counters
-
-/// \defgroup CString CString
-/// \ingroup Utility
-/// \brief Optimized `<cstring>` functions
-
 /// \defgroup HDF5IO HDF5 objects IO
 /// \ingroup Utility
 /// \brief Load and store objects in the HDF5 format
+
+/// \defgroup MKL Intel Math Kernel Library
+/// \ingroup Utility
+/// \brief Resource management for Intel Math Kernel Library
 
 /// \defgroup Option Program option
 /// \ingroup Utility
@@ -189,38 +162,21 @@
 /// \ingroup Utility
 /// \brief Display progress while algorithms proceed
 
-/// \defgroup RDTSC RDTSC
+/// \defgroup SIMD SIMD
 /// \ingroup Utility
-/// \brief CPU clock cycles count using RDTSC and RDTSCP
+/// \brief SIMD
 
 /// \defgroup StopWatch Stop watch
 /// \ingroup Utility
 /// \brief Time measurement
 
-#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/config.h>
 
 #include <vsmc/core/core.hpp>
-#include <vsmc/integrate/integrate.hpp>
 #include <vsmc/math/math.hpp>
 #include <vsmc/resample/resample.hpp>
 #include <vsmc/rng/rng.hpp>
 #include <vsmc/smp/smp.hpp>
 #include <vsmc/utility/utility.hpp>
-
-#if VSMC_HAS_GCD
-#include <vsmc/gcd/gcd.hpp>
-#endif
-
-#if VSMC_HAS_MPI
-#include <vsmc/mpi/mpi.hpp>
-#endif
-
-#if VSMC_HAS_OPENCL
-#include <vsmc/opencl/opencl.hpp>
-#endif
-
-#if VSMC_HAS_CXX11LIB_THREAD
-#include <vsmc/thread/thread.hpp>
-#endif
 
 #endif // VSMC_HPP

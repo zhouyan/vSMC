@@ -32,7 +32,7 @@
 #include <wmmintrin.h>
 #include <iostream>
 
-int main ()
+int main()
 {
     __m128i m = _mm_setzero_si128();
     char a[32];

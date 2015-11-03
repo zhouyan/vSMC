@@ -32,134 +32,237 @@
 #ifndef VSMC_RNG_DISCRETE_DISTRIBUTION_HPP
 #define VSMC_RNG_DISCRETE_DISTRIBUTION_HPP
 
-#include <vsmc/internal/common.hpp>
+#include <vsmc/rng/internal/common.hpp>
+#include <vsmc/rng/u01_distribution.hpp>
 #include <vsmc/math/cblas.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param) \
-    VSMC_RUNTIME_ASSERT(is_positive(param),                                  \
-            ("**DiscreteDistribution** WEIGHTS ARE NOT NON-NEGATIVE"));
+#define VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(flag)          \
+    VSMC_RUNTIME_ASSERT(                                                      \
+        (flag), "**DiscreteDistribution** WEIGHTS ARE NOT NON-NEGATIVE")
 
-namespace vsmc {
+namespace vsmc
+{
 
 /// \brief Draw a single sample given weights
 /// \ingroup Distribution
-template <typename IntType = int>
+template <typename IntType>
 class DiscreteDistribution
 {
-    public :
+    public:
+    using result_type = IntType;
+    using distribution_type = DiscreteDistribution<IntType>;
 
-    typedef IntType result_type;
-    typedef std::vector<double> param_type;
+    class param_type
+    {
+        public:
+        using result_type = IntType;
+        using distribution_type = DiscreteDistribution<IntType>;
 
-    DiscreteDistribution () {}
+        param_type() {}
+
+        template <typename InputIter>
+        param_type(InputIter first, InputIter last)
+            : probability_(first, last)
+        {
+            invariant();
+        }
+
+        param_type(std::initializer_list<double> weights)
+            : probability_(weights.begin(), weights.end())
+        {
+            invariant();
+        }
+
+        template <typename UnaryOperation>
+        param_type(std::size_t count, double xmin, double xmax,
+            UnaryOperation unary_op)
+        {
+            probability_.reserve(count);
+            double delta = (xmax - xmin) / static_cast<double>(count);
+            xmin += 0.5 * delta;
+            for (std::size_t i = 0; i != count; ++i)
+                probability_.push_back(
+                    unary_op(xmin + static_cast<double>(i) * delta));
+            invariant();
+        }
+
+        Vector<double> probability() const { return probability_; }
+
+        friend bool operator==(
+            const param_type &param1, const param_type &param2)
+        {
+            if (param1.probability_.size() != param2.probability_.size())
+                return false;
+
+            for (std::size_t i = 0; i != param1.probability_.size(); ++i)
+                if (!internal::is_equal(
+                        param1.probability_[i], param2.probability_[i]))
+                    return false;
+
+            return true;
+        }
+
+        friend bool operator!=(
+            const param_type &param1, const param_type &param2)
+        {
+            return !(param1 == param2);
+        }
+
+        template <typename CharT, typename Traits>
+        friend std::basic_ostream<CharT, Traits> &operator<<(
+            std::basic_ostream<CharT, Traits> &os, const param_type &param)
+        {
+            if (!os.good())
+                return os;
+
+            os << param.probability_.size() << ' ';
+            for (std::size_t i = 0; i != param.probability_.size(); ++i)
+                os << param.probability_[i] << ' ';
+
+            return os;
+        }
+
+        template <typename CharT, typename Traits>
+        friend std::basic_istream<CharT, Traits> &operator>>(
+            std::basic_istream<CharT, Traits> &is, param_type &param)
+        {
+            if (!is.good())
+                return is;
+
+            std::size_t n = 0;
+            is >> std::ws >> n;
+            if (!is.good())
+                return is;
+
+            Vector<double> probability(n);
+            for (std::size_t i = 0; i != n; ++i)
+                is >> std::ws >> probability[i];
+
+            if (is.good()) {
+                double sum = 0;
+                if (is_positive(probability, sum)) {
+                    mul(probability.size(), 1 / sum, probability.data(),
+                        probability.data());
+                    param.probability_ = std::move(probability);
+                } else {
+                    is.setstate(std::ios_base::failbit);
+                }
+            }
+
+            return is;
+        }
+
+        private:
+        Vector<double> probability_;
+
+        friend distribution_type;
+
+        void invariant()
+        {
+            if (probability_.size() == 0)
+                return;
+
+            double sum = 0;
+#ifndef NDEBUG
+            bool flag = is_positive(probability_, sum);
+            VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(flag);
+#else
+            is_positive(probability_, sum);
+#endif
+            mul(probability_.size(), 1 / sum, probability_.data(),
+                probability_.data());
+        }
+
+        void reset() {}
+
+        static bool is_positive(const Vector<double> &probability, double &sum)
+        {
+            sum = 0;
+            bool flag = true;
+            for (std::size_t i = 0; i != probability.size(); ++i) {
+                sum += probability[i];
+                if (probability[i] < 0)
+                    flag = false;
+            }
+
+            return flag && sum > 0;
+        }
+    }; // class param_type
+
+    DiscreteDistribution() {}
 
     template <typename InputIter>
-    DiscreteDistribution (InputIter first, InputIter last) :
-        param_(first, last)
+    DiscreteDistribution(InputIter first, InputIter last)
+        : param_(first, last)
     {
-        VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param_);
-        normalize();
     }
 
-#if VSMC_HAS_CXX11LIB_INITIALIZER_LIST
-    DiscreteDistribution (std::initializer_list<double> weights) :
-        param_(weights.begin(), weights.end())
+    DiscreteDistribution(std::initializer_list<double> weights)
+        : param_(weights)
     {
-        VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param_);
-        normalize();
     }
-#endif
 
     template <typename UnaryOperation>
-    DiscreteDistribution (std::size_t count, double xmin, double xmax,
-            UnaryOperation unary_op)
+    DiscreteDistribution(
+        std::size_t count, double xmin, double xmax, UnaryOperation &&unary_op)
+        : param_type(count, xmin, xmax, std::forward<UnaryOperation>(unary_op))
     {
-        param_.reserve(count);
-        double delta = (xmax - xmin) / static_cast<double>(count);
-        xmin += 0.5 * delta;
-        for (std::size_t i = 0; i != count; ++i)
-            param_.push_back(unary_op(xmin + static_cast<double>(i) * delta));
-        VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param_);
-        normalize();
     }
 
-    explicit DiscreteDistribution (const param_type &param)
+    explicit DiscreteDistribution(const param_type &param) : param_(param) {}
+
+    explicit DiscreteDistribution(param_type &&param)
+        : param_(std::move(param))
     {
-        VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param);
-        param_ = param;
-        normalize();
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    explicit DiscreteDistribution (param_type &&param)
-    {
-        VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param);
-        param_ = cxx11::move(param);
-        normalize();
-    }
-#endif
+    result_type min VSMC_MNE() const { return 0; }
 
-    param_type param () const {return param_;}
-
-    void param (const param_type &param)
+    result_type max VSMC_MNE() const
     {
-        VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param);
-        param_ = param;
-        normalize();
+        return param_.size() == 0 ? 0 : param_.size() - 1;
     }
 
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    void param (param_type &&param)
+    Vector<double> probability() const { return param_.probability_; }
+
+    template <typename RNGType>
+    result_type operator()(RNGType &rng) const
     {
-        VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(param);
-        param_ = cxx11::move(param);
-        normalize();
+        return operator()(
+            rng, param_.probability_.begin(), param_.probability_.end(), true);
     }
-#endif
-
-    void reset () {}
-
-    result_type min VSMC_MNE () const {return 0;}
-    result_type max VSMC_MNE () const
-    {return param_.size() == 0 ? 0 : param_.size() - 1;}
-
-    std::vector<double> probability () const {return param_;}
-
-    template <typename URNG>
-    result_type operator() (URNG &eng) const
-    {return operator()(eng, param_.begin(), param_.end(), true);}
 
     /// \brief Draw sample with external probabilities
     ///
-    /// \param eng A uniform random number generator
+    /// \param rng A uniform random number generator
     /// \param first The first iterator of the weights sequence.
     /// \param last The one past the end iterator of the weights sequence.
     /// \param normalized If the weights are already normalized
     ///
     /// \details
-    /// Given weights \f$(W_1,\dots,\W_N)\f$, it is possible to draw the index
+    /// Given weights \f$(W_1,\dots,W_N)\f$, it is possible to draw the index
     /// \f$i\f$ using the `std::discrete_distribuiton` template. However, there
-    /// are two drawbacks with this approach. First, if the weights are
-    /// already normalized, this template does uncessary extra work to
-    /// normalized the weights. Second, whenever the weights change, a new
-    /// distribution need to be constructed (the `param_type` of the
-    /// distribution is implementation defined and cannot be used to write
-    /// portable code), which will lead to uncessary
-    /// dynamic memory allocation. This function does not use dynamic memory
-    /// and improve performance for normalized weights.
-    template <typename URNG, typename InputIter>
-    result_type operator() (URNG &eng, InputIter first, InputIter last,
-            bool normalized = false) const
+    /// are two drawbacks with this approach. First, if the weights are already
+    /// normalized, this template does uncessary extra work to normalized the
+    /// weights. Second, whenever the weights change, a new distribution need
+    /// to be constructed (the `param_type` of the distribution is
+    /// implementation defined and cannot be used to write portable code),
+    /// which will lead to uncessary dynamic memory allocation. This function
+    /// does not use dynamic memory and improve performance for normalized
+    /// weights.
+    template <typename RNGType, typename InputIter>
+    result_type operator()(RNGType &rng, InputIter first, InputIter last,
+        bool normalized = false) const
     {
-        typedef typename  std::iterator_traits<InputIter>::value_type
-            value_type;
+        using value_type =
+            typename std::iterator_traits<InputIter>::value_type;
 
-        cxx11::uniform_real_distribution<value_type> runif(0, 1);
-        value_type u = runif(eng);
+        U01CODistribution<value_type> runif;
+        value_type u = runif(rng);
 
         if (!normalized) {
-            value_type mulw = 1 / std::accumulate(first, last,
-                    static_cast<value_type>(0));
+            value_type mulw =
+                1 / std::accumulate(first, last, static_cast<value_type>(0));
             value_type accw = 0;
             result_type index = 0;
             while (first != last) {
@@ -186,95 +289,10 @@ class DiscreteDistribution
         return index - 1;
     }
 
-    friend inline bool operator== (
-            const DiscreteDistribution<IntType> &rdisc1,
-            const DiscreteDistribution<IntType> &rdisc2)
-    {return rdisc1.param_ == rdisc2.param_;}
+    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
-    friend inline bool operator!= (
-            const DiscreteDistribution<IntType> &rdisc1,
-            const DiscreteDistribution<IntType> &rdisc2)
-    {return rdisc1.param_ != rdisc2.param_;}
-
-    template <typename CharT, typename Traits>
-    friend inline std::basic_ostream<CharT, Traits> &operator<< (
-            std::basic_ostream<CharT, Traits> &os,
-            const DiscreteDistribution<IntType> &rdisc)
-    {
-        if (!os.good())
-            return os;
-
-        os << rdisc.param_.size() << ' ';
-
-        if (rdisc.param_.size() == 0)
-            return os;
-
-        if (rdisc.param_.size() == 1) {
-            os << rdisc.param_[0];
-            return os;
-        }
-
-        for (std::size_t i = 0; i != rdisc.param_.size() - 1; ++i)
-            os << rdisc.param_[i] << ' ';
-        os << rdisc.param_.back();
-
-        return os;
-    }
-
-    template <typename CharT, typename Traits>
-    friend inline std::basic_istream<CharT, Traits> &operator>> (
-            std::basic_istream<CharT, Traits> &is,
-            DiscreteDistribution<IntType> &rdisc)
-    {
-        if (!is.good())
-            return is;
-
-        std::size_t n;
-        is >> std::ws >> n;
-
-        std::vector<double> param(n);
-        for (std::size_t i = 0; i != n; ++i)
-            is >> std::ws >> param[i];
-
-        if (is.good()) {
-            if (rdisc.is_positive(param)) {
-                std::swap(rdisc.param_, param);
-                rdisc.normalize();
-            } else {
-                is.setstate(std::ios_base::failbit);
-            }
-        }
-
-        return is;
-    }
-
-    private :
-
+    private:
     param_type param_;
-
-    void normalize ()
-    {
-        if (param_.size() == 0)
-            return;
-
-        double sumw = std::accumulate(param_.begin(), param_.end(), 0.0);
-        math::scal(param_.size(), 1 / sumw, &param_[0]);
-    }
-
-    bool is_positive (const param_type &param)
-    {
-        for (std::size_t i = 0; i != param.size(); ++i)
-            if (param[i] < 0)
-                return false;
-
-        if (param.size() == 0)
-            return true;
-
-        if (std::accumulate(param.begin(), param.end(), 0.0) <= 0)
-            return false;
-
-        return true;
-    }
 }; // class DiscreteDistribution
 
 } // namespace vsmc

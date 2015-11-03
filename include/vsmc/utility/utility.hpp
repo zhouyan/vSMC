@@ -32,23 +32,18 @@
 #ifndef VSMC_UTILITY_UTILITY_HPP
 #define VSMC_UTILITY_UTILITY_HPP
 
-#include <vsmc/internal/config.hpp>
-
+#include <vsmc/internal/config.h>
 #include <vsmc/utility/aligned_memory.hpp>
-#include <vsmc/utility/array.hpp>
-#include <vsmc/utility/counter.hpp>
-#include <vsmc/utility/cstring.hpp>
 #include <vsmc/utility/program_option.hpp>
 #include <vsmc/utility/progress.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
-#if VSMC_HAS_X86
-#include <vsmc/utility/cpuid.hpp>
-#include <vsmc/utility/rdtsc.hpp>
-#endif
-
 #if VSMC_HAS_HDF5
 #include <vsmc/utility/hdf5io.hpp>
+#endif
+
+#if VSMC_HAS_MKL
+#include <vsmc/utility/mkl.hpp>
 #endif
 
 #endif // VSMC_UTILITY_UTILITY_HPP

@@ -32,32 +32,34 @@
 #ifndef VSMC_RESAMPLE_SYSTEMATIC_HPP
 #define VSMC_RESAMPLE_SYSTEMATIC_HPP
 
-#include <vsmc/resample/common.hpp>
+#include <vsmc/resample/internal/common.hpp>
+#include <vsmc/resample/transform.hpp>
 
-namespace vsmc {
-
-namespace internal {
-
-typedef cxx11::integral_constant<ResampleScheme, Systematic>
-    ResampleSystematic;
-
-} // namespace vsmc::internal
+namespace vsmc
+{
 
 /// \brief Systematic resampling
 /// \ingroup Resample
-template <>
-class Resample<internal::ResampleSystematic>
+class ResampleSystematic
 {
-    public :
-
-    template <typename IntType, typename RngType>
-    void operator() (std::size_t M, std::size_t N, RngType &rng,
-            const double *weight, IntType *replication)
+    public:
+    template <typename IntType, typename RNGType>
+    void operator()(std::size_t M, std::size_t N, RNGType &rng,
+        const double *weight, IntType *replication)
     {
-        U01SequenceSystematic<RngType> u01seq(N, rng);
-        internal::inversion(M, N, weight, u01seq, replication);
+        U01SequenceSystematic<RNGType, double> u01seq(N, rng);
+        resample_trans_u01_rep(M, N, weight, u01seq, replication);
     }
-}; // Systematic resampling
+}; // ResampleSystematic
+
+/// \brief Type trait of Systematic scheme
+/// \ingroup Resample
+template <>
+class ResampleTypeTrait<Systematic>
+{
+    public:
+    using type = ResampleSystematic;
+}; // class ResampleTypeTrait
 
 } // namespace vsmc
 

@@ -32,97 +32,99 @@
 #ifndef VSMC_EXAMPLE_RNG_TEST_HPP
 #define VSMC_EXAMPLE_RNG_TEST_HPP
 
-#include <vsmc/utility/rdtsc.hpp>
+#include <vsmc/rng/uniform_real_distribution.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#include <cstdlib>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <string>
-#include <vector>
 
-#define VSMC_RNG_TEST_PRE(prog) \
-    std::size_t N = 1000000;                                                 \
-    std::string prog_name(#prog);                                            \
-    if (argc > 1) N = static_cast<std::size_t>(std::atoi(argv[1]));          \
-    std::vector<std::string> names;                                          \
-    std::vector<std::size_t> size;                                           \
-    std::vector<vsmc::StopWatch> sw;                                         \
-    std::vector<std::size_t> bytes;                                          \
-    std::vector<uint64_t> cycles;
+#define VSMC_RNG_TEST(RNGType) rng_test<RNGType>(N, #RNGType, names, size, sw);
 
-#define VSMC_RNG_TEST(Engine) \
-    rng_test<Engine>(N, #Engine, names, size, sw, bytes, cycles);
+#define VSMC_RNG_TEST_PRE(prog)                                               \
+    std::size_t N = 1000000;                                                  \
+    if (argc > 1)                                                             \
+        N = static_cast<std::size_t>(std::atoi(argv[1]));                     \
+    std::string prog_name(#prog);                                             \
+    vsmc::Vector<std::string> names;                                          \
+    vsmc::Vector<std::size_t> size;                                           \
+    vsmc::Vector<vsmc::StopWatch> sw;
 
-#define VSMC_RNG_TEST_POST \
-    rng_output_sw(prog_name, names, size, sw, bytes, cycles);
+#define VSMC_RNG_TEST_POST rng_test_output(prog_name, names, size, sw);
 
-template <typename Eng>
-inline void rng_test (std::size_t N, const std::string &name,
-        std::vector<std::string> &names,
-        std::vector<std::size_t> &size,
-        std::vector<vsmc::StopWatch> &sw,
-        std::vector<std::size_t> &bytes,
-        std::vector<uint64_t> &cycles)
+template <typename RNGType>
+inline void rng_test(std::size_t n, const std::string &name,
+    vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
+    vsmc::Vector<vsmc::StopWatch> &sw)
 {
-    Eng eng;
-    vsmc::StopWatch watch;
-#if VSMC_HAS_RDTSCP
-    vsmc::RDTSCPCounter counter;
-#else
-    vsmc::RDTSCCounter counter;
-#endif
-
-    watch.start();
-    counter.start();
-    for (std::size_t i = 0; i != N; ++i) eng();
-    counter.stop();
-    watch.stop();
-    std::ofstream rnd("rnd");
-    rnd << eng() << std::endl;
-    rnd.close();
-
     names.push_back(name);
-    size.push_back(sizeof(Eng));
+    size.push_back(sizeof(RNGType));
+
+    RNGType rng;
+    vsmc::Vector<double> r(n);
+    vsmc::Vector<typename RNGType::result_type> u(n);
+    double result = 0;
+    vsmc::StopWatch watch;
+
+    std::uniform_real_distribution<double> runif_std(0, 1);
+    watch.reset();
+    watch.start();
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = runif_std(rng);
+    watch.stop();
+    result += std::accumulate(r.begin(), r.end(), 0.0);
     sw.push_back(watch);
-    bytes.push_back(N * sizeof(typename Eng::result_type));
-    cycles.push_back(counter.cycles());
+
+    vsmc::UniformRealDistribution<double> runif_vsmc(0, 1);
+    watch.reset();
+    watch.start();
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = runif_vsmc(rng);
+    watch.stop();
+    result += std::accumulate(r.begin(), r.end(), 0.0);
+    sw.push_back(watch);
+
+    rng_rand(rng, runif_vsmc, 1000, r.data());
+    watch.reset();
+    watch.start();
+    rng_rand(rng, runif_vsmc, n, r.data());
+    watch.stop();
+    result += std::accumulate(r.begin(), r.end(), 0.0);
+    sw.push_back(watch);
+
+    std::ofstream rnd("rnd");
+    rnd << result << std::endl;
+    rnd.close();
 }
 
-inline void rng_output_sw (const std::string &prog_name,
-        const std::vector<std::string> &names,
-        std::vector<std::size_t> &size,
-        const std::vector<vsmc::StopWatch> &sw,
-        const std::vector<std::size_t> &bytes,
-        std::vector<uint64_t> &cycles)
+inline void rng_test_output(const std::string &prog_name,
+    const vsmc::Vector<std::string> &names,
+    const vsmc::Vector<std::size_t> &size,
+    const vsmc::Vector<vsmc::StopWatch> &sw)
 {
-    std::size_t M = names.size();
-    if (M == 0) return;
-    if (sw.size() != M) return;
+    std::size_t N = names.size();
+    std::size_t R = sw.size() / N;
+    std::size_t lwid = 80;
+    int twid = 15;
+    int swid = 5;
+    int Twid = twid * static_cast<int>(R);
+    int nwid = static_cast<int>(lwid) - swid - Twid;
 
-    std::cout << std::string(90, '=') << std::endl;
-    std::cout << std::left  << std::setw(40) << prog_name;
-    std::cout << std::right << std::setw( 5) << "Size";
-    std::cout << std::right << std::setw(15) << "Time (ms)";
-    std::cout << std::right << std::setw(15) << "GB/s";
-    std::cout << std::right << std::setw(15) << "cpB";
+    std::cout << std::string(lwid, '=') << std::endl;
+    std::cout << std::left << std::setw(nwid) << prog_name;
+    std::cout << std::right << std::setw(swid) << "Size";
+    std::cout << std::right << std::setw(twid) << "Time (STD)";
+    std::cout << std::right << std::setw(twid) << "Time (vSMC)";
+    std::cout << std::right << std::setw(twid) << "Time (Batch)";
     std::cout << std::endl;
-    std::cout << std::string(90, '-') << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
 
-    for (std::size_t i = 0; i != M; ++i) {
-        double time = sw[i].milliseconds();
-        double b = static_cast<double>(bytes[i]);
-        double c = static_cast<double>(cycles[i]);
-        double gbps = b / time * 1e-6;
-        double cpB = c / b;
-        std::cout << std::left  << std::setw(40) << names[i];
-        std::cout << std::right << std::setw( 5) << size[i];
-        std::cout << std::right << std::setw(15) << std::fixed << time;
-        std::cout << std::right << std::setw(15) << std::fixed << gbps;
-        std::cout << std::right << std::setw(15) << std::fixed << cpB;
+    for (std::size_t i = 0; i != N; ++i) {
+        std::cout << std::left << std::setw(nwid) << names[i];
+        std::cout << std::right << std::setw(swid) << size[i];
+        for (std::size_t r = 0; r != R; ++r) {
+            double time = sw[i * R + r].milliseconds();
+            std::cout << std::right << std::setw(twid) << std::fixed << time;
+        }
         std::cout << std::endl;
     }
-    std::cout << std::string(90, '=') << std::endl;
+    std::cout << std::string(lwid, '=') << std::endl;
 }
 
 #endif // VSMC_EXAMPLE_RNG_TEST_HPP

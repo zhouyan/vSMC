@@ -32,8 +32,7 @@
 #ifndef VSMC_MATH_MATH_HPP
 #define VSMC_MATH_MATH_HPP
 
-#include <vsmc/internal/config.hpp>
-
+#include <vsmc/internal/config.h>
 #include <vsmc/math/cblas.hpp>
 #include <vsmc/math/constants.hpp>
 #include <vsmc/math/vmath.hpp>

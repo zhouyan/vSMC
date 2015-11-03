@@ -33,1229 +33,598 @@
 #define VSMC_RNG_MKL_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <mkl.h>
 
-#define VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Dist) \
-    VSMC_STATIC_ASSERT(                                                      \
-            (cxx11::is_same<FPType, float>::value ||                         \
-             cxx11::is_same<FPType, double>::value),                         \
-            USE_MKL##Dist##Distribution_##WITH_A_RESULT_TYPE_OTHER_THAN_float_OR_double)
-
-#define VSMC_RUNTIME_ASSERT_RNG_MKL_VSL_OFFSET(offset) \
-    VSMC_RUNTIME_ASSERT((offset < max VSMC_MNE ()),                          \
-            ("**MKLOffsetDynamic** "                                         \
-             "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS"))
-
-#ifndef VSMC_RNG_MKL_VSL_BUFFER_SIZE
-#define VSMC_RNG_MKL_VSL_BUFFER_SIZE 1024
-#endif
-
-#define VSMC_DEFINE_RNG_MKL_VSL_BRNG(BRNG) case BRNG : return #BRNG
-
-#define VSMC_DEFINE_RNG_MKL_VSL_ERR(STATUS) case STATUS : return #STATUS
-
-namespace vsmc {
-
-template <MKL_INT>            class MKLStream;
-template <typename, typename> class MKLDistribution;
-template <MKL_INT, typename>  class MKLEngine;
-
-class MKLUniformBits32Distribution;
-class MKLUniformBits64Distribution;
-
-template <typename, MKL_INT = VSL_RNG_METHOD_UNIFORM_STD>
-class MKLUniformDistribution;
-
-template <MKL_INT = VSL_RNG_METHOD_BERNOULLI_ICDF>
-class MKLBernoulliDistribution;
-template <MKL_INT = VSL_RNG_METHOD_GEOMETRIC_ICDF>
-class MKLGeometricDistribution;
-template <MKL_INT = VSL_RNG_METHOD_BINOMIAL_BTPE>
-class MKLBinomialDistribution;
-template <MKL_INT = VSL_RNG_METHOD_HYPERGEOMETRIC_H2PE>
-class MKLHypergeometricDistribution;
-template <MKL_INT = VSL_RNG_METHOD_POISSON_PTPE>
-class MKLPoissonDistribution;
-template <MKL_INT = VSL_RNG_METHOD_NEGBINOMIAL_NBAR>
-class MKLNegBinomialDistribution;
-template <typename = double, MKL_INT = VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2>
-class MKLGaussianDistribution;
-template <typename = double, MKL_INT = VSL_RNG_METHOD_EXPONENTIAL_ICDF>
-class MKLExponentialDistribution;
-template <typename = double, MKL_INT = VSL_RNG_METHOD_LAPLACE_ICDF>
-class MKLLaplaceDistribution;
-template <typename = double, MKL_INT = VSL_RNG_METHOD_WEIBULL_ICDF>
-class MKLWeibullDistribution;
-template <typename = double, MKL_INT = VSL_RNG_METHOD_CAUCHY_ICDF>
-class MKLCauchyDistribution;
-template <typename = double, MKL_INT = VSL_RNG_METHOD_RAYLEIGH_ICDF>
-class MKLRayleighDistribution;
-template <typename = double, MKL_INT = VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2>
-class MKLLognormalDistribution;
-template <typename = double, MKL_INT = VSL_RNG_METHOD_GUMBEL_ICDF>
-class MKLGumbelDistribution;
-template <typename = double, MKL_INT = VSL_RNG_METHOD_GAMMA_GNORM>
-class MKLGammaDistribution;
-template <typename = double, MKL_INT = VSL_RNG_METHOD_BETA_CJA>
-class MKLBetaDistribution;
-
-namespace internal {
-
-inline std::string mkl_vsl_brng_str (MKL_INT BRNG)
+namespace vsmc
 {
-    switch (BRNG) {
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_MCG31);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_R250);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_MRG32K3A);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_WH);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_MCG59);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_MT19937);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_MT2203);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_SFMT19937);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_SOBOL);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_NIEDERR);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_IABSTRACT);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_DABSTRACT);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_SABSTRACT);
-        VSMC_DEFINE_RNG_MKL_VSL_BRNG(VSL_BRNG_NONDETERM);
-        default : return "Unknown";
-    }
-}
 
-inline std::string mkl_vsl_error_str (int status)
+namespace internal
 {
-    switch (status) {
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_OK);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_BADARGS);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_CPU_NOT_SUPPORTED);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_FEATURE_NOT_IMPLEMENTED);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_MEM_FAILURE);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_NULL_PTR);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_ERROR_UNKNOWN);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_FILE_FORMAT);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_MEM_FORMAT);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_NBITS);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_NSEEDS);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_STREAM);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_STREAM_STATE_SIZE);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_UPDATE);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BAD_WORD_SIZE);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BRNG_NOT_SUPPORTED);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BRNG_TABLE_FULL);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_BRNGS_INCOMPATIBLE);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_FILE_CLOSE);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_FILE_OPEN);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_FILE_READ);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_FILE_WRITE);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_INVALID_ABSTRACT_STREAM);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_INVALID_BRNG_INDEX);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_NO_NUMBERS);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_QRNG_PERIOD_ELAPSED);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_SKIPAHEAD_UNSUPPORTED);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_UNSUPPORTED_FILE_VER);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_NONDETERM_NOT_SUPPORTED);
-        VSMC_DEFINE_RNG_MKL_VSL_ERR(VSL_RNG_ERROR_NONDETERM_NRETRIES_EXCEEDED);
-        default : return "UNKNOWN";
-    }
-}
 
-#if VSMC_NO_RUNTIME_ASSERT
-inline void mkl_vsl_error_check (MKL_INT, int, const char *, const char *) {}
-#else
-inline void mkl_vsl_error_check (MKL_INT BRNG, int status,
-        const char *func, const char *mklf)
+class MKLOffsetZero
 {
-    if (status == VSL_ERROR_OK)
-        return;
-
-    std::string msg("**vsmc::");
-    msg += func;
-    msg += " failure";
-    msg += "; MKL function: ";
-    msg += mklf;
-
-    msg += "; BRNG: ";
-    msg += mkl_vsl_brng_str(BRNG);
-    msg += "; Error code: ";
-    msg += mkl_vsl_error_str(status);
-
-    VSMC_RUNTIME_ASSERT((status == VSL_ERROR_OK), msg.c_str());
-} // error_check
-#endif
-
-} // namespace vsmc::internal
-
-namespace traits {
-
-/// \brief MKLEngine uniform bits trait
-/// \ingroup Traits
-///
-/// \details
-/// To use MKLEngine with those MKL BRNG that has not been typedefed by vSMC,
-/// one need to specialize this trait, which has member type `type`, and this
-/// type has member
-/// `operator() (MKLStream<BRNG> &, MKL_INT, ResultType *)` such that given the
-/// stream object, it is able to generate uniform integers.
-///
-/// This traits also need to have two static constant member data, `min` and
-/// `max`
-template <MKL_INT, typename> struct MKLUniformBitsTrait;
-
-/// \brief Default uniform bits generator for MKLEngine with `unsigned` output
-/// \ingroup Traits
-template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned>
-{
-    typedef MKLUniformBits32Distribution type;
-    static VSMC_CONSTEXPR const unsigned min VSMC_MNE = 0;
-    static VSMC_CONSTEXPR const unsigned max VSMC_MNE =
-        static_cast<unsigned>(~(static_cast<unsigned>(0)));
-}; // struct MKLUniformBitsTrait
-
-/// \brief Default uniform bits generator for MKLEngine with
-/// `unsigned MKL_INT64` output
-/// \ingroup Traits
-template <MKL_INT BRNG> struct MKLUniformBitsTrait<BRNG, unsigned MKL_INT64>
-{
-    typedef MKLUniformBits64Distribution type;
-    static VSMC_CONSTEXPR const unsigned MKL_INT64 min VSMC_MNE = 0;
-    static VSMC_CONSTEXPR const unsigned MKL_INT64 max VSMC_MNE =
-        static_cast<unsigned MKL_INT64>(~(static_cast<unsigned MKL_INT64>(0)));
-}; // struct MKLUniformBitsTrait
-
-/// \brief Default seed for MKL RNG
-/// \ingroup Traits
-template <MKL_INT> struct MKLSeedTrait :
-    public cxx11::integral_constant<MKL_UINT, 101> {};
-
-/// \brief Default seed for MKL Sobol quasi-RNG
-template <> struct MKLSeedTrait<VSL_BRNG_SOBOL> :
-    public cxx11::integral_constant<MKL_UINT, 10> {};
-
-/// \brief Default seed for MKL Niederr quasi-RNG
-template <> struct MKLSeedTrait<VSL_BRNG_NIEDERR> :
-    public cxx11::integral_constant<MKL_UINT, 10> {};
-
-} // namespace traits
-
-namespace internal {
-
-struct MKLOffsetZero
-{
-    static VSMC_CONSTEXPR MKL_INT min VSMC_MNE () {return 0;}
-    static VSMC_CONSTEXPR MKL_INT max VSMC_MNE () {return 0;}
-    static void offset (MKL_INT) {}
-    static VSMC_CONSTEXPR MKL_INT offset () {return 0;}
-}; // struct OffsetZero
+    public:
+    static constexpr MKL_INT min VSMC_MNE() { return 0; }
+    static constexpr MKL_INT max VSMC_MNE() { return 0; }
+    static void set(MKL_INT) {}
+    static constexpr MKL_INT get() { return 0; }
+}; // class OffsetZero
 
 template <MKL_INT MaxOffset>
-struct MKLOffsetDynamic
+class MKLOffsetDynamic
 {
-    MKLOffsetDynamic () : offset_(0) {}
+    public:
+    MKLOffsetDynamic() : offset_(0) {}
 
-    static VSMC_CONSTEXPR MKL_INT min VSMC_MNE () {return 0;}
-    static VSMC_CONSTEXPR MKL_INT max VSMC_MNE () {return MaxOffset;}
+    static constexpr MKL_INT min VSMC_MNE() { return 0; }
+    static constexpr MKL_INT max VSMC_MNE() { return MaxOffset; }
 
-    void offset (MKL_INT n)
+    void set(MKL_INT n)
     {
-        VSMC_RUNTIME_ASSERT_RNG_MKL_VSL_OFFSET(n);
-        offset_ = n;
+        VSMC_RUNTIME_ASSERT_UTILITY_MKL_VSL_OFFSET(n);
+        offset_ = n % MaxOffset;
     }
 
-    MKL_INT offset () const {return offset_;}
+    MKL_INT get() const { return offset_; }
 
-    private :
-
+    private:
     MKL_INT offset_;
-}; // struct OffsetDynamic
+}; // class OffsetDynamic
 
-template <MKL_INT> struct MKLOffset {typedef MKLOffsetZero type;};
-
-template <>
-struct MKLOffset<VSL_BRNG_MT2203> {typedef MKLOffsetDynamic<6024> type;};
-
-template <>
-struct MKLOffset<VSL_BRNG_WH> {typedef MKLOffsetDynamic<273> type;};
-
-struct MKLSkipAheadVSL
+template <MKL_INT>
+class MKLOffset
 {
-    typedef long long size_type;
+    public:
+    using type = MKLOffsetZero;
+}; // class MKLOffset
 
-    template <MKL_INT BRNG>
-    void operator() (MKLStream<BRNG> &stream, size_type nskip)
+template <>
+class MKLOffset<Dynamic>
+{
+    public:
+    using type =
+        MKLOffsetDynamic<std::numeric_limits<MKL_INT>::max VSMC_MNE()>;
+}; // class MKLOffset
+
+template <>
+class MKLOffset<VSL_BRNG_MT2203>
+{
+    public:
+    using type = MKLOffsetDynamic<6024>;
+}; // class MKLOffset
+
+template <>
+class MKLOffset<VSL_BRNG_WH>
+{
+    public:
+    using type = MKLOffsetDynamic<273>;
+}; // class MKLOffset
+
+template <int>
+class MKLResultTypeTrait;
+
+template <>
+class MKLResultTypeTrait<32>
+{
+    public:
+    using type = unsigned;
+}; // class MKLResultTypeTrait
+
+template <>
+class MKLResultTypeTrait<64>
+{
+    public:
+    using type = unsigned MKL_INT64;
+}; // class MKLResultTypeTrait
+
+template <int Bits>
+using MKLResultType = typename MKLResultTypeTrait<Bits>::type;
+
+template <int>
+class MKLUniformBits;
+
+template <>
+class MKLUniformBits<32>
+{
+    public:
+    static void eval(MKLStream &stream, MKL_INT n, unsigned *r)
     {
-        if (nskip == 0)
-            return;
-
-        int status = ::vslSkipAheadStream(stream.ptr(), nskip);
-        internal::mkl_vsl_error_check(BRNG, status,
-                "MKLSkipAheadVSL::skip", "::vslSkipAheadStream");
+        stream.uniform_bits32(n, r);
     }
+}; // class MKLUniformBits
 
-    static void buffer_size (MKL_INT) {}
-    static MKL_INT buffer_size () {return 0;}
-}; // struct SkipAheadVSL
-
-template <MKL_INT BRNG, typename ResultType>
-struct MKLSkipAheadForce
+template <>
+class MKLUniformBits<64>
 {
-    typedef MKL_INT size_type;
+    public:
+    static void eval(MKLStream &stream, MKL_INT n, unsigned MKL_INT64 *r)
+    {
+        stream.uniform_bits64(n, r);
+    }
+}; // class MKLUniformBits
 
-    MKLSkipAheadForce () : buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE) {}
+class MKLDiscardSkipAhead
+{
+    public:
+    static void eval(MKLStream &stream, long long nskip)
+    {
+        stream.skip_ahead(nskip);
+    }
+}; // class DiscardSkipAhead
 
-    void operator() (MKLStream<BRNG> &stream, size_type nskip)
+template <MKL_INT BRNG, int Bits>
+class MKLDiscardGeneral
+{
+    public:
+    static void eval(MKLStream &stream, long long nskip)
     {
         if (nskip == 0)
             return;
 
-        if (nskip < buffer_size_) {
-            if (buffer_.size() < nskip)
-                buffer_.resize(nskip);
-            uniform_bits_(stream, nskip, &buffer_[0]);
-        } else {
-            buffer_.resize(buffer_size_);
-            size_type repeat = nskip / buffer_size_;
-            size_type remain = nskip - repeat * buffer_size_;
-            for (size_type r = 1; r != repeat + 1; ++r) {
-                size_type n = r * buffer_size_;
-                uniform_bits_(stream, n, &buffer_[0]);
-            }
-            uniform_bits_(stream, remain, &buffer_[0]);
+        std::array<MKLResultType<Bits>, 1000> buffer;
+        const MKL_INT k = static_cast<MKL_INT>(buffer.size());
+        while (nskip > k) {
+            MKLUniformBits<Bits>::eval(stream, k, buffer.data());
+            nskip -= k;
         }
+        MKLUniformBits<Bits>::eval(
+            stream, static_cast<MKL_INT>(nskip), buffer.data());
     }
+}; // class DiscardGeneral
 
-    void buffer_size (MKL_INT size)
-    {buffer_size_ = size > 0 ? size : VSMC_RNG_MKL_VSL_BUFFER_SIZE;}
+template <MKL_INT BRNG, int Bits>
+class MKLDiscard
+{
+    public:
+    using type = MKLDiscardGeneral<BRNG, Bits>;
+}; // clas MKLDiscard
 
-    MKL_INT buffer_size () {return buffer_size_;}
+template <int Bits>
+class MKLDiscard<VSL_BRNG_MCG59, Bits>
+{
+    public:
+    using type = MKLDiscardSkipAhead;
+}; // clas MKLDiscard
 
-    private :
+template <int Bits>
+class MKLDiscard<VSL_BRNG_MT19937, Bits>
+{
+    public:
+    using type = MKLDiscardSkipAhead;
+}; // clas MKLDiscard
 
-    std::vector<ResultType, AlignedAllocator<ResultType> > buffer_;
-    typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
-    MKL_INT buffer_size_;
-}; // strut SkipAheadForce
-
-template <MKL_INT BRNG, typename ResultType>
-struct MKLSkipAhead
-{typedef MKLSkipAheadForce<BRNG, ResultType> type;};
-
-template <typename ResultType>
-struct MKLSkipAhead<VSL_BRNG_MCG31, ResultType>
-{typedef MKLSkipAheadVSL type;};
-
-template <typename ResultType>
-struct MKLSkipAhead<VSL_BRNG_MCG59, ResultType>
-{typedef MKLSkipAheadVSL type;};
-
-template <typename ResultType>
-struct MKLSkipAhead<VSL_BRNG_MRG32K3A, ResultType>
-{typedef MKLSkipAheadVSL type;};
-
-template <typename ResultType>
-struct MKLSkipAhead<VSL_BRNG_SOBOL, ResultType>
-{typedef MKLSkipAheadVSL type;};
-
-template <typename ResultType>
-struct MKLSkipAhead<VSL_BRNG_NIEDERR, ResultType>
-{typedef MKLSkipAheadVSL type;};
+template <int Bits>
+class MKLDiscard<VSL_BRNG_SFMT19937, Bits>
+{
+    public:
+    using type = MKLDiscardSkipAhead;
+}; // clas MKLDiscard
 
 } // namespace vsmc::internal
-
-/// \brief MKL RNG C++11 engine stream
-/// \ingroup MKLRNG
-template <MKL_INT BRNG>
-class MKLStream : public internal::MKLOffset<BRNG>::type
-{
-    public :
-
-    explicit MKLStream (MKL_UINT s = traits::MKLSeedTrait<BRNG>::value,
-            MKL_INT offset = 0) :
-        seed_(s), stream_ptr_(VSMC_NULLPTR), property_()
-    {
-        this->offset(offset);
-        int status = VSL_ERROR_OK;
-
-        status = ::vslNewStream(&stream_ptr_, BRNG + this->offset(), seed_);
-        internal::mkl_vsl_error_check(BRNG, status,
-                "MKLStream::Stream", "::vslNewStream");
-
-        status = ::vslGetBrngProperties(BRNG, &property_);
-        internal::mkl_vsl_error_check(BRNG, status,
-                "MKLStream::Stream", "::vslGetBrngProperties");
-    }
-
-    template <typename SeedSeq>
-    explicit MKLStream (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
-            MKL_UINT, MKLStream<BRNG> >::value>::type * = VSMC_NULLPTR) :
-        seed_(0), stream_ptr_(VSMC_NULLPTR), property_()
-    {
-        seq.generate(&seed_, &seed_ + 1);
-        int status = VSL_ERROR_OK;
-
-        status = ::vslNewStream(&stream_ptr_, BRNG + this->offset(), seed_);
-        internal::mkl_vsl_error_check(BRNG, status,
-                "MKLStream::Stream", "::vslNewStream");
-
-        status = ::vslGetBrngProperties(BRNG, &property_);
-        internal::mkl_vsl_error_check(BRNG, status,
-                "MKLStream::Stream", "::vslGetBrngProperties");
-    }
-
-    MKLStream (const MKLStream<BRNG> &other) :
-        internal::MKLOffset<BRNG>::type(other),
-        seed_(other.seed_), property_(other.property_)
-    {
-        int status = ::vslCopyStream(&stream_ptr_, other.stream_ptr_);
-        internal::mkl_vsl_error_check(BRNG, status,
-                "MKLStream::Stream", "::vslCopyStream");
-    }
-
-    MKLStream<BRNG> &operator= (const MKLStream<BRNG> &other)
-    {
-        if (this != &other) {
-            internal::MKLOffset<BRNG>::type::operator=(other);
-            int status = ::vslCopyStreamState(stream_ptr_, other.stream_ptr_);
-            internal::mkl_vsl_error_check(BRNG, status,
-                    "MKLStream::operator=", "::vslCopyStreamState");
-            property_ = other.property_;
-        }
-
-        return *this;
-    }
-
-#if VSMC_HAS_CXX11_RVALUE_REFERENCES
-    MKLStream (MKLStream<BRNG> &&other) :
-        internal::MKLOffset<BRNG>::type(cxx11::move(other)),
-        seed_(other.seed_), stream_ptr_(other.stream_ptr_),
-        property_(other.property_) {other.stream_ptr_ = VSMC_NULLPTR;}
-
-    MKLStream<BRNG> &operator= (MKLStream<BRNG> &&other)
-    {
-        using std::swap;
-
-        if (this != other) {
-            internal::MKLOffset<BRNG>::type::operator=(cxx11::move(other));
-            swap(seed_, other.seed_);
-            swap(stream_ptr_, other.stream_ptr_);
-            swap(property_, other.property_);
-        }
-
-        return *this;
-    }
-#endif
-
-    ~MKLStream ()
-    {
-        if (stream_ptr_ != VSMC_NULLPTR)
-            ::vslDeleteStream(&stream_ptr_);
-    }
-
-    void seed (MKL_UINT s)
-    {
-        seed_ = s;
-        int status = VSL_ERROR_OK;
-
-        if (stream_ptr_ == VSMC_NULLPTR) {
-            status = ::vslNewStream(&stream_ptr_, BRNG + this->offset(), s);
-            internal::mkl_vsl_error_check(BRNG, status,
-                    "MKLStream::seed", "::vslNewStream");
-        } else {
-            VSLStreamStatePtr new_stream_ptr;
-
-            status = ::vslNewStream(&new_stream_ptr, BRNG + this->offset(), s);
-            internal::mkl_vsl_error_check(BRNG, status,
-                    "MKLStream::seed", "::vslNewStream");
-
-            status = ::vslCopyStreamState(stream_ptr_, new_stream_ptr);
-            internal::mkl_vsl_error_check(BRNG, status,
-                    "MKLStream::seed", "::vslCopyStreamState");
-
-            status = ::vslDeleteStream(&new_stream_ptr);
-            internal::mkl_vsl_error_check(BRNG, status,
-                    "MKLStream::seed", "::vslDeleteStream");
-        }
-
-    }
-
-    template <typename SeedSeq>
-    void seed (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
-            MKL_UINT, MKLStream<BRNG> >::value>::type * = VSMC_NULLPTR)
-    {
-        seq.generate(&seed_, &seed_ + 1);
-        seed(seed_);
-    }
-
-    VSLStreamStatePtr ptr () const {return stream_ptr_;}
-
-    const VSLBRngProperties &property () const {return property_;}
-
-    private :
-
-    MKL_UINT seed_;
-    VSLStreamStatePtr stream_ptr_;
-    VSLBRngProperties property_;
-}; // class MKLStream
 
 /// \brief MKL RNG C++11 engine
 /// \ingroup MKLRNG
-template <MKL_INT BRNG, typename ResultType>
+template <MKL_INT BRNG, int Bits>
 class MKLEngine
 {
-    public :
+    public:
+    using result_type = internal::MKLResultType<Bits>;
 
-    typedef ResultType result_type;
-    typedef MKLStream<BRNG> stream_type;
-
-    explicit MKLEngine (MKL_UINT s = traits::MKLSeedTrait<BRNG>::value,
-            MKL_INT offset = 0) :
-        stream_(s, offset), buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE),
-        index_(buffer_size_) {}
+    explicit MKLEngine(MKL_UINT s = 1) : index_(M_) { seed(s); }
 
     template <typename SeedSeq>
-    explicit MKLEngine (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
-            MKL_UINT, MKLEngine<BRNG, ResultType>
-            >::value>::type * = VSMC_NULLPTR) :
-        stream_(seq), buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE),
-        index_(buffer_size_) {}
+    explicit MKLEngine(SeedSeq &seq,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
+            MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
+        : index_(M_)
+    {
+        seed(seq);
+    }
 
-    void seed (MKL_UINT s) {stream_.seed(s);}
+    MKLEngine(MKL_UINT s, MKL_INT offset) { seed(s, offset); }
+
+    void seed(MKL_UINT s) { seed(s, 0); }
 
     template <typename SeedSeq>
-    void seed (SeedSeq &seq,
-            typename cxx11::enable_if<internal::is_seed_seq<SeedSeq,
-            MKL_UINT, MKLEngine<BRNG, ResultType>
-            >::value>::type * = VSMC_NULLPTR)
-    {stream_.seed(seq);}
-
-    result_type operator() ()
+    void seed(SeedSeq &seq,
+        typename std::enable_if<
+            internal::is_seed_seq<SeedSeq, MKL_UINT>::value>::type * = nullptr)
     {
-        if (index_ == buffer_size_) {
-            buffer_.resize(static_cast<std::size_t>(buffer_size_));
-            uniform_bits_(stream_, buffer_size_, &buffer_[0]);
-            index_ = 0;
-        }
-
-        return buffer_[static_cast<std::size_t>(index_++)];
+        MKL_UINT s;
+        seq.generate(&s, &s + 1);
+        seed(s, 0);
     }
 
-    /// \brief Discard results
-    ///
-    /// \details
-    /// The the behavior is slightly different from that in C++11 standard.
-    /// Calling `discard(nskip)` is not equivalent to call `operator()` `nskip`
-    /// times. Instead, it ensures that at least `nskip` results are discarded.
-    /// There may be a few more than `nskip` also discarded.
-    void discard (std::size_t nskip)
+    void seed(MKL_UINT s, MKL_INT offset)
     {
-        skip_ahead_(stream_, static_cast<typename
-                internal::MKLSkipAhead<BRNG, ResultType>::type::size_type
-                >(nskip));
-        index_ = buffer_size_;
+        typename internal::MKLOffset<BRNG>::type off;
+        off.set(offset);
+        stream_.reset(BRNG + off.get(), s);
+        index_ = M_;
     }
 
-    static VSMC_CONSTEXPR const result_type _Min =
-        traits::MKLUniformBitsTrait<BRNG, ResultType>::min VSMC_MNE;
-    static VSMC_CONSTEXPR const result_type _Max =
-        traits::MKLUniformBitsTrait<BRNG, ResultType>::max VSMC_MNE;
-
-    static VSMC_CONSTEXPR result_type min VSMC_MNE () {return _Min;}
-    static VSMC_CONSTEXPR result_type max VSMC_MNE () {return _Max;}
-
-    stream_type &stream () {return stream_;}
-    const stream_type &stream () const {return stream_;}
-
-    /// \brief Set the buffer size, zero or negative value restore the default
-    void buffer_size (MKL_INT size)
-    {buffer_size_ = size > 0 ? size : VSMC_RNG_MKL_VSL_BUFFER_SIZE;}
-
-    MKL_INT buffer_size () {return buffer_size_;}
-
-    private :
-
-    stream_type stream_;
-    typename internal::MKLSkipAhead<BRNG, ResultType>::type skip_ahead_;
-    typename traits::MKLUniformBitsTrait<BRNG, ResultType>::type uniform_bits_;
-    std::vector<result_type, AlignedAllocator<result_type> > buffer_;
-    MKL_INT buffer_size_;
-    MKL_INT index_;
-}; // class MKLEngine
-
-/// \brief A 59-bits multiplicative congruential generator
-/// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_MCG59, unsigned> MKL_MCG59;
-
-/// \brief A Mersenne-Twister pseudoranom number genertor
-/// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_MT19937, unsigned> MKL_MT19937;
-
-/// \brief A Mersenne-Twister pseudoranom number genertor (64-bits)
-/// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_MT19937, unsigned MKL_INT64> MKL_MT19937_64;
-
-/// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor
-/// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_MT2203, unsigned> MKL_MT2203;
-
-/// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor (64-bits)
-/// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_MT2203, unsigned MKL_INT64>MKL_MT2203_64;
-
-/// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number genertor
-/// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_SFMT19937, unsigned> MKL_SFMT19937;
-
-/// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number genertor
-/// (64-bits)
-/// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_SFMT19937, unsigned MKL_INT64> MKL_SFMT19937_64;
-
-/// \brief A non-determinstic random number generator
-/// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_NONDETERM, unsigned> MKL_NONDETERM;
-
-/// \brief A non-determinstic random number generator (64-bits)
-/// \ingroup MKLRNG
-typedef MKLEngine<VSL_BRNG_NONDETERM, unsigned MKL_INT64> MKL_NONDETERM_64;
-
-/// \brief Base class of MKL distribution
-/// \ingroup MKLRNG
-template <typename ResultType, typename Derived>
-class MKLDistribution
-{
-    public :
-
-    typedef ResultType result_type;
-
-    MKLDistribution () :
-        buffer_size_(VSMC_RNG_MKL_VSL_BUFFER_SIZE), index_(buffer_size_) {}
-
-    template <MKL_INT BRNG>
-    result_type operator() (MKLStream<BRNG> &stream)
+    result_type operator()()
     {
-        if (index_ == buffer_size_) {
-            buffer_.resize(static_cast<std::size_t>(buffer_size_));
-            static_cast<Derived *>(this)->generate(stream, buffer_size_,
-                    &buffer_[0]);
+        if (index_ == M_) {
+            internal::MKLUniformBits<Bits>::eval(
+                stream_, static_cast<MKL_INT>(M_), buffer_.data());
             index_ = 0;
         }
 
         return buffer_[index_++];
     }
 
-    template <MKL_INT BRNG>
-    void operator() (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {static_cast<Derived *>(this)->generate(stream, n, r);}
-
-    void reset () {index_ = buffer_size_;}
-
-    /// \brief Set the buffer size, zero or negative value restore the default
-    void buffer_size (MKL_INT size)
-    {buffer_size_ = size > 0 ? size : VSMC_RNG_MKL_VSL_BUFFER_SIZE;}
-
-    MKL_INT buffer_size () const {return buffer_size_;}
-
-    protected :
-
-    template <MKL_INT BRNG>
-    void generate_error_check (int status, const char *name)
+    void operator()(std::size_t n, result_type *r)
     {
-        if (status == VSL_ERROR_OK)
-            return;
-
-        std::string dist_name(name);
-        dist_name = "MKL" + dist_name + "Distribution::generate";
-        std::string mkl_vsl_name(mkl_vsl_name_prefix(
-                    static_cast<result_type>(0)));
-        mkl_vsl_name += "Rng";
-        mkl_vsl_name += name;
-        internal::mkl_vsl_error_check(BRNG, status,
-                dist_name.c_str(), mkl_vsl_name.c_str());
+        internal::MKLUniformBits<Bits>::eval(
+            stream_, static_cast<MKL_INT>(n), r);
     }
 
-    private :
+    void discard(long long nskip)
+    {
+        internal::MKLDiscard<BRNG, Bits>::eval(stream_, nskip);
+        index_ = M_;
+    }
 
-    std::vector<result_type, AlignedAllocator<result_type> > buffer_;
-    MKL_INT buffer_size_;
-    MKL_INT index_;
+    static constexpr result_type min VSMC_MNE()
+    {
+        return std::numeric_limits<result_type>::min VSMC_MNE();
+    }
 
-    std::string mkl_vsl_name_prefix (MKL_INT)            {return "vi";}
-    std::string mkl_vsl_name_prefix (unsigned)           {return "vi";}
-    std::string mkl_vsl_name_prefix (unsigned MKL_INT64) {return "vi";}
-    std::string mkl_vsl_name_prefix (float)              {return "vs";}
-    std::string mkl_vsl_name_prefix (double)             {return "vd";}
-}; // class MKLDistribution
+    static constexpr result_type max VSMC_MNE()
+    {
+        return std::numeric_limits<result_type>::max VSMC_MNE();
+    }
 
-/// \brief MKL uniform bits distribution (32-bits)
+    MKLStream &stream() { return stream_; }
+    const MKLStream &stream() const { return stream_; }
+
+    friend bool operator==(
+        const MKLEngine<BRNG, Bits> &eng1, const MKLEngine<BRNG, Bits> &eng2)
+    {
+        if (eng1.stream_.get_brng() != eng2.stream_.get_brng())
+            return false;
+        std::size_t n = static_cast<std::size_t>(eng1.stream_.get_size());
+        Vector<char> s1(n);
+        Vector<char> s2(n);
+        eng1.stream_.save_m(s1.data());
+        eng2.stream_.save_m(s2.data());
+        if (s1 != s2)
+            return false;
+        if (eng1.buffer_ != eng2.buffer_)
+            return false;
+        if (eng1.index_ != eng2.index_)
+            return false;
+        return true;
+    }
+
+    friend bool operator!=(
+        const MKLEngine<BRNG, Bits> &eng1, const MKLEngine<BRNG, Bits> &eng2)
+    {
+        return !(eng1 == eng2);
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const MKLEngine<BRNG, Bits> &eng)
+    {
+        if (!os.good())
+            return os;
+
+        os << eng.stream_.get_brng() << ' ';
+        std::size_t n = static_cast<std::size_t>(eng.stream_.get_size());
+        if (n % sizeof(std::uint64_t) != 0)
+            n += sizeof(std::uint64_t) - n % sizeof(std::uint64_t);
+        n /= sizeof(std::uint64_t);
+        Vector<std::uint64_t> s(n);
+        eng.stream_.save_m(reinterpret_cast<char *>(s.data()));
+        for (std::size_t i = 0; i != n; ++i)
+            os << s[i] << ' ';
+        os << eng.buffer_ << ' ';
+        os << eng.index_;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is, MKLEngine<BRNG, Bits> &eng)
+    {
+        if (!is.good())
+            return is;
+
+        MKL_INT brng = 0;
+        MKLStream stream(BRNG, 1);
+        std::array<result_type, M_> buffer;
+        std::size_t index = 0;
+
+        is >> std::ws >> brng;
+        if (is.good())
+            stream.reset(brng, 1);
+        else
+            return is;
+
+        std::size_t n = static_cast<std::size_t>(eng.stream_.get_size());
+        if (n % sizeof(std::uint64_t) != 0)
+            n += sizeof(std::uint64_t) - n % sizeof(std::uint64_t);
+        n /= sizeof(std::uint64_t);
+        Vector<std::uint64_t> s(n);
+        for (std::size_t i = 0; i != n; ++i)
+            is >> std::ws >> s[i];
+        if (is.good())
+            stream.load_m(reinterpret_cast<const char *>(s.data()));
+        else
+            return is;
+
+        is >> std::ws >> buffer;
+        is >> std::ws >> index;
+
+        if (is.good()) {
+            eng.stream_ = stream;
+            eng.buffer_ = buffer;
+            eng.index_ = index;
+        }
+
+        return is;
+    }
+
+    private:
+    static constexpr std::size_t M_ = 1000;
+
+    MKLStream stream_;
+    std::array<result_type, M_> buffer_;
+    std::size_t index_;
+}; // class MKLEngine
+
+/// \brief A 59-bits multiplicative congruential generator
 /// \ingroup MKLRNG
-class MKLUniformBits32Distribution :
-    public MKLDistribution<unsigned, MKLUniformBits32Distribution>
-{
-    public :
+using MKL_MCG59 = MKLEngine<VSL_BRNG_MCG59, 32>;
 
-    typedef unsigned result_type;
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = ::viRngUniformBits32(VSL_RNG_METHOD_UNIFORMBITS32_STD,
-                stream.ptr(), n, r);
-        this->template generate_error_check<BRNG>(status, "UniformBits32");
-    }
-}; // class MKLUniformBits32Distribution
-
-/// \brief MKL uniform bits distribution (64-bits)
+/// \brief A 59-bits multiplicative congruential generator (64-bits)
 /// \ingroup MKLRNG
-class MKLUniformBits64Distribution :
-    public MKLDistribution<unsigned MKL_INT64, MKLUniformBits64Distribution>
-{
-    public :
+using MKL_MCG59_64 = MKLEngine<VSL_BRNG_MCG59, 64>;
 
-    typedef unsigned MKL_INT64 result_type;
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = ::viRngUniformBits64(VSL_RNG_METHOD_UNIFORMBITS64_STD,
-                stream.ptr(), n, r);
-        this->template generate_error_check<BRNG>(status, "UniformBits64");
-    }
-}; // class MKLUniformBits64Distribution
-
-/// \brief MKL Uniform distribution
+/// \brief A Mersenne-Twister pseudoranom number genertor
 /// \ingroup MKLRNG
-template <typename ResultType, MKL_INT Method>
-class MKLUniformDistribution :
-    public MKLDistribution<ResultType,
-    MKLUniformDistribution<ResultType, Method> >
-{
-    public :
+using MKL_MT19937 = MKLEngine<VSL_BRNG_MT19937, 32>;
 
-    typedef ResultType result_type;
-
-    explicit MKLUniformDistribution (result_type a = 0, result_type b = 1) :
-        a_(a), b_(b) {}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = generate(stream.ptr(), n, r);
-        this->template generate_error_check<BRNG>(status, "Uniform");
-    }
-
-    private :
-
-    result_type a_;
-    result_type b_;
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, MKL_INT *r)
-    {return ::viRngUniform(Method, ptr, n, r, a_, b_);}
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, float *r)
-    {return ::vsRngUniform(Method, ptr, n, r, a_, b_);}
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, double *r)
-    {return ::vdRngUniform(Method, ptr, n, r, a_, b_);}
-}; // class MKLUniformDistribution
-
-/// \brief MKL Bernoulli distribution
+/// \brief A Mersenne-Twister pseudoranom number genertor (64-bits)
 /// \ingroup MKLRNG
-template <MKL_INT Method>
-class MKLBernoulliDistribution :
-    public MKLDistribution<MKL_INT, MKLBernoulliDistribution<Method> >
-{
-    public :
+using MKL_MT19937_64 = MKLEngine<VSL_BRNG_MT19937, 64>;
 
-    typedef MKL_INT result_type;
-
-    explicit MKLBernoulliDistribution (double p = 0.5) : p_(p) {}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = ::viRngBernoulli(Method, stream.ptr(), n, r, p_);
-        this->template generate_error_check<BRNG>(status, "Bernoulli");
-    }
-
-    private :
-
-    double p_;
-}; // class MKLBernoulliDistribution
-
-/// \brief MKL Geometric distribution
+/// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor
 /// \ingroup MKLRNG
-template <MKL_INT Method>
-class MKLGeometricDistribution :
-    public MKLDistribution<MKL_INT, MKLGeometricDistribution<Method> >
-{
-    public :
+using MKL_MT2203 = MKLEngine<VSL_BRNG_MT2203, 32>;
 
-    typedef MKL_INT result_type;
-
-    explicit MKLGeometricDistribution (double p = 0.5) : p_(p) {}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = ::viRngGeometric(Method, stream.ptr(), n, r, p_);
-        this->template generate_error_check<BRNG>(status, "Geometric");
-    }
-
-    private :
-
-    double p_;
-}; // class MKLGeometricDistribution
-
-/// \brief MKL Binomial distribution
+/// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor
+/// (64-bits)
 /// \ingroup MKLRNG
-template <MKL_INT Method>
-class MKLBinomialDistribution :
-    public MKLDistribution<MKL_INT, MKLBinomialDistribution<Method> >
-{
-    public :
+using MKL_MT2203_64 = MKLEngine<VSL_BRNG_MT2203, 64>;
 
-    typedef MKL_INT result_type;
-
-    explicit MKLBinomialDistribution (result_type ntrial = 1, double p = 0.5) :
-        ntrial_(ntrial), p_(p) {}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = ::viRngBinomial(Method, stream.ptr(), n, r, ntrial_, p_);
-        this->template generate_error_check<BRNG>(status, "Binomial");
-    }
-
-    private :
-
-    result_type ntrial_;
-    double p_;
-}; // class MKLBinomialDistribution
-
-/// \brief MKL Hypergeometric distribution
+/// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number
+/// genertor
 /// \ingroup MKLRNG
-template <MKL_INT Method>
-class MKLHypergeometricDistribution :
-    public MKLDistribution<MKL_INT, MKLHypergeometricDistribution<Method> >
-{
-    public :
+using MKL_SFMT19937 = MKLEngine<VSL_BRNG_SFMT19937, 32>;
 
-    typedef MKL_INT result_type;
-
-    MKLHypergeometricDistribution (result_type population, result_type sample,
-            result_type mask) :
-        l_(population), s_(sample), m_(mask) {}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = ::viRngHypergeometric(Method, stream.ptr(),
-                n, r, l_, s_, m_);
-        this->template generate_error_check<BRNG>(status, "Hypergeometric");
-    }
-
-    private :
-
-    result_type l_;
-    result_type s_;
-    result_type m_;
-}; // class MKLHypergeometricDistribution
-
-/// \brief MKL Poisson distribution
+/// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number
+/// genertor
+/// (64-bits)
 /// \ingroup MKLRNG
-template <MKL_INT Method>
-class MKLPoissonDistribution :
-    public MKLDistribution<MKL_INT, MKLPoissonDistribution<Method> >
-{
-    public :
+using MKL_SFMT19937_64 = MKLEngine<VSL_BRNG_SFMT19937, 64>;
 
-    typedef MKL_INT result_type;
-
-    explicit MKLPoissonDistribution (double lambda = 1) : lambda_(lambda) {}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = ::viRngPoisson(Method, stream.ptr(), n, r, lambda_);
-        this->template generate_error_check<BRNG>(status, "Poisson");
-    }
-
-    private :
-
-    double lambda_;
-}; // class MKLPoissonDistribution
-
-/// \brief MKL NegBinomial distribution
+/// \brief A non-determinstic random number generator
 /// \ingroup MKLRNG
-template <MKL_INT Method>
-class MKLNegBinomialDistribution :
-    public MKLDistribution<MKL_INT, MKLNegBinomialDistribution<Method> >
-{
-    public :
+using MKL_NONDETERM = MKLEngine<VSL_BRNG_NONDETERM, 32>;
 
-    typedef MKL_INT result_type;
-
-    explicit MKLNegBinomialDistribution (double ntrial = 1, double p = 0.5) :
-        ntrial_(ntrial), p_(p) {}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = ::viRngNegBinomial(Method, stream.ptr(),
-                n, r, ntrial_, p_);
-        this->template generate_error_check<BRNG>(status, "NegBinomial");
-    }
-
-    private :
-
-    double ntrial_;
-    double p_;
-}; // class MKLNegBinomialDistribution
-
-/// \brief MKL Gaussian distribution
+/// \brief A non-determinstic random number generator (64-bits)
 /// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
-class MKLGaussianDistribution :
-    public MKLDistribution<FPType, MKLGaussianDistribution<FPType, Method> >
-{
-    public :
+using MKL_NONDETERM_64 = MKLEngine<VSL_BRNG_NONDETERM, 64>;
 
-    typedef FPType result_type;
+#if INTEL_MKL_VERSION >= 110300
 
-    explicit MKLGaussianDistribution (result_type mean = 0,
-            result_type sd = 1) : mean_(mean), sd_(sd)
-    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Gaussian);}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = generate(stream.ptr(), n, r);
-        this->template generate_error_check<BRNG>(status, "Gaussian");
-    }
-
-    private :
-
-    result_type mean_;
-    result_type sd_;
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, float *r)
-    {return ::vsRngGaussian(Method, ptr, n, r, mean_, sd_);}
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, double *r)
-    {return ::vdRngGaussian(Method, ptr, n, r, mean_, sd_);}
-}; // class MKLGaussianDistribution
-
-/// \brief MKL Exponential distribution
+/// \brief A counter-based random number generator
 /// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
-class MKLExponentialDistribution :
-    public MKLDistribution<FPType, MKLExponentialDistribution<FPType, Method> >
-{
-    public :
+using MKL_ARS5 = MKLEngine<VSL_BRNG_ARS5, 32>;
 
-    typedef FPType result_type;
-
-    explicit MKLExponentialDistribution (result_type displacement = 0,
-            result_type scale = 1) : disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Exponential);}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = generate(stream.ptr(), n, r);
-        this->template generate_error_check<BRNG>(status, "Exponential");
-    }
-
-    private :
-
-    result_type disp_;
-    result_type scale_;
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, float *r)
-    {return ::vsRngExponential(Method, ptr, n, r, disp_, scale_);}
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, double *r)
-    {return ::vdRngExponential(Method, ptr, n, r, disp_, scale_);}
-}; // class MKLExponentialDistribution
-
-/// \brief MKL Laplace distribution
+/// \brief A counter-based random number generator (64-bits)
 /// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
-class MKLLaplaceDistribution :
-    public MKLDistribution<FPType, MKLLaplaceDistribution<FPType, Method> >
-{
-    public :
+using MKL_ARS5_64 = MKLEngine<VSL_BRNG_ARS5, 64>;
 
-    typedef FPType result_type;
-
-    explicit MKLLaplaceDistribution (result_type mean = 0,
-            result_type scale = 1) : mean_(mean), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Laplace);}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = generate(stream.ptr(), n, r);
-        this->template generate_error_check<BRNG>(status, "Laplace");
-    }
-
-    private :
-
-    result_type mean_;
-    result_type scale_;
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, float *r)
-    {return ::vsRngLaplace(Method, ptr, n, r, mean_, scale_);}
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, double *r)
-    {return ::vdRngLaplace(Method, ptr, n, r, mean_, scale_);}
-}; // class MKLLaplaceDistribution
-
-/// \brief MKL Weibull distribution
+/// \brief A counter-based random number generator
 /// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
-class MKLWeibullDistribution :
-    public MKLDistribution<FPType, MKLWeibullDistribution<FPType, Method> >
-{
-    public :
+using MKL_PHILOX4X32X10 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 32>;
 
-    typedef FPType result_type;
-
-    explicit MKLWeibullDistribution (result_type shape = 1,
-            result_type displacement = 0, result_type scale = 1) :
-        shape_(shape), disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Weibull);}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = generate(stream.ptr(), n, r);
-        this->template generate_error_check<BRNG>(status, "Weibull");
-    }
-
-    private :
-
-    result_type shape_;
-    result_type disp_;
-    result_type scale_;
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, float *r)
-    {return ::vsRngWeibull(Method, ptr, n, r, shape_, disp_, scale_);}
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, double *r)
-    {return ::vdRngWeibull(Method, ptr, n, r, shape_, disp_, scale_);}
-}; // class MKLWeibullDistribution
-
-/// \brief MKL Cauchy distribution
+/// \brief A counter-based random number generator (64-bits)
 /// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
-class MKLCauchyDistribution :
-    public MKLDistribution<FPType, MKLCauchyDistribution<FPType, Method> >
+using MKL_PHILOX4X32X10_64 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 64>;
+
+#endif // INTEL_MKL_VERSION >= 110300
+
+template <MKL_INT BRNG, int Bits>
+inline void rng_rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    typename MKLEngine<BRNG, Bits>::result_type *r)
 {
-    public :
+    rng(n, r);
+}
 
-    typedef FPType result_type;
-
-    explicit MKLCauchyDistribution (result_type displacement = 0,
-            result_type scale = 1) : disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Cauchy);}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = generate(stream.ptr(), n, r);
-        this->template generate_error_check<BRNG>(status, "Cauchy");
-    }
-
-    private :
-
-    result_type disp_;
-    result_type scale_;
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, float *r)
-    {return ::vsRngCauchy(Method, ptr, n, r, disp_, scale_);}
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, double *r)
-    {return ::vdRngCauchy(Method, ptr, n, r, disp_, scale_);}
-}; // class MKLCauchyDistribution
-
-/// \brief MKL Rayleigh distribution
-/// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
-class MKLRayleighDistribution :
-    public MKLDistribution<FPType, MKLRayleighDistribution<FPType, Method> >
+template <MKL_INT BRNG, int Bits>
+inline void bernoulli_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, int *r, double p)
 {
-    public :
+    rng.stream().bernoulli(static_cast<MKL_INT>(n), r, p);
+}
 
-    typedef FPType result_type;
-
-    explicit MKLRayleighDistribution (result_type displacement = 0,
-            result_type scale = 1) : disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Rayleigh);}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = generate(stream.ptr(), n, r);
-        this->template generate_error_check<BRNG>(status, "Rayleigh");
-    }
-
-    private :
-
-    result_type disp_;
-    result_type scale_;
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, float *r)
-    {return ::vsRngRayleigh(Method, ptr, n, r, disp_, scale_);}
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, double *r)
-    {return ::vdRngRayleigh(Method, ptr, n, r, disp_, scale_);}
-}; // class MKLRayleighDistribution
-
-/// \brief MKL Lognormal distribution
-/// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
-class MKLLognormalDistribution :
-    public MKLDistribution<FPType, MKLLognormalDistribution<FPType, Method> >
+template <MKL_INT BRNG, int Bits>
+inline void uniform_real_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
-    public :
+    rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
+}
 
-    typedef FPType result_type;
-
-    explicit MKLLognormalDistribution (
-            result_type mean = 0, result_type sd = 1,
-            result_type displacement = 0, result_type scale = 1) :
-        mean_(mean), sd_(sd), disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Lognormal);}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = generate(stream.ptr(), n, r);
-        this->template generate_error_check<BRNG>(status, "Lognormal");
-    }
-
-    private :
-
-    result_type mean_;
-    result_type sd_;
-    result_type disp_;
-    result_type scale_;
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, float *r)
-    {return ::vsRngLognormal(Method, ptr, n, r, mean_, sd_, disp_, scale_);}
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, double *r)
-    {return ::vdRngLognormal(Method, ptr, n, r, mean_, sd_, disp_, scale_);}
-}; // class MKLLognormalDistribution
-
-/// \brief MKL Gumbel distribution
-/// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
-class MKLGumbelDistribution :
-    public MKLDistribution<FPType, MKLGumbelDistribution<FPType, Method> >
+template <MKL_INT BRNG, int Bits>
+inline void uniform_real_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
-    public :
+    rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
+}
 
-    typedef FPType result_type;
-
-    explicit MKLGumbelDistribution (result_type displacement = 0,
-            result_type scale = 1) : disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Gumbel);}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = generate(stream.ptr(), n, r);
-        this->template generate_error_check<BRNG>(status, "Gumbel");
-    }
-
-    private :
-
-    result_type disp_;
-    result_type scale_;
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, float *r)
-    {return ::vsRngGumbel(Method, ptr, n, r, disp_, scale_);}
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, double *r)
-    {return ::vdRngGumbel(Method, ptr, n, r, disp_, scale_);}
-}; // class MKLGumbelDistribution
-
-/// \brief MKL Gamma distribution
-/// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
-class MKLGammaDistribution :
-    public MKLDistribution<FPType, MKLGammaDistribution<FPType, Method> >
+template <MKL_INT BRNG, int Bits>
+inline void u01_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r)
 {
-    public :
+    rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
+}
 
-    typedef FPType result_type;
-
-    explicit MKLGammaDistribution (result_type shape = 1,
-            result_type displacement = 0, result_type scale = 1) :
-        shape_(shape), disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Gamma);}
-
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = generate(stream.ptr(), n, r);
-        this->template generate_error_check<BRNG>(status, "Gamma");
-    }
-
-    private :
-
-    result_type shape_;
-    result_type disp_;
-    result_type scale_;
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, float *r)
-    {return ::vsRngGamma(Method, ptr, n, r, shape_, disp_, scale_);}
-
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, double *r)
-    {return ::vdRngGamma(Method, ptr, n, r, shape_, disp_, scale_);}
-}; // class MKLGammaDistribution
-
-/// \brief MKL Beta distribution
-/// \ingroup MKLRNG
-template <typename FPType, MKL_INT Method>
-class MKLBetaDistribution :
-    public MKLDistribution<FPType, MKLBetaDistribution<FPType, Method> >
+template <MKL_INT BRNG, int Bits>
+inline void u01_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r)
 {
-    public :
+    rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
+}
 
-    typedef FPType result_type;
+template <MKL_INT BRNG, int Bits>
+inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    float *r, float mean, float stddev)
+{
+    rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
+}
 
-    explicit MKLBetaDistribution (
-            result_type shape1 = 1, result_type shape2 = 1,
-            result_type displacement = 0, result_type scale = 1) :
-        shape1_(shape1), shape2_(shape2), disp_(displacement), scale_(scale)
-    {VSMC_STATIC_ASSERT_RNG_MKL_VSL_DISTRIBUTION_FP_TYPE(FPType, Beta);}
+template <MKL_INT BRNG, int Bits>
+inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    double *r, double mean, double stddev)
+{
+    rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
+}
 
-    template <MKL_INT BRNG>
-    void generate (MKLStream<BRNG> &stream, MKL_INT n, result_type *r)
-    {
-        int status = generate(stream.ptr(), n, r);
-        this->template generate_error_check<BRNG>(status, "Beta");
-    }
+template <MKL_INT BRNG, int Bits>
+inline void exponential_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float lambda)
+{
+    rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
+}
 
-    private :
+template <MKL_INT BRNG, int Bits>
+inline void exponential_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double lambda)
+{
+    rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
+}
 
-    result_type shape1_;
-    result_type shape2_;
-    result_type disp_;
-    result_type scale_;
+template <MKL_INT BRNG, int Bits>
+inline void laplace_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    float *r, float location, float scale)
+{
+    rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
+}
 
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, float *r)
-    {return ::vsRngBeta(Method, ptr, n, r, shape1_, shape2_, disp_, scale_);}
+template <MKL_INT BRNG, int Bits>
+inline void laplace_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    double *r, double location, double scale)
+{
+    rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
+}
 
-    int generate (VSLStreamStatePtr ptr, MKL_INT n, double *r)
-    {return ::vdRngBeta(Method, ptr, n, r, shape1_, shape2_, disp_, scale_);}
-}; // class MKLBetaDistribution
+template <MKL_INT BRNG, int Bits>
+inline void weibull_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
+{
+    rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void weibull_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
+{
+    rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void cauchy_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
+{
+    rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void cauchy_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
+{
+    rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void rayleigh_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float sigma)
+{
+    rng.stream().rayleigh(
+        static_cast<MKL_INT>(n), r, 0, const_sqrt_2<float>() * sigma);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void rayleigh_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double sigma)
+{
+    rng.stream().rayleigh(
+        static_cast<MKL_INT>(n), r, 0, const_sqrt_2<double>() * sigma);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void lognormal_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float m, float s)
+{
+    rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void lognormal_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double m, double s)
+{
+    rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void extreme_value_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
+{
+    rng.stream().gumbel(static_cast<MKL_INT>(n), r, a, b);
+    sub(n, 2 * a, r, r);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void extreme_value_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
+{
+    rng.stream().gumbel(static_cast<MKL_INT>(n), r, a, b);
+    sub(n, 2 * a, r, r);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void gamma_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    float *r, float alpha, float beta)
+{
+    rng.stream().gamma(static_cast<MKL_INT>(n), r, alpha, 0, beta);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void gamma_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    double *r, double alpha, double beta)
+{
+    rng.stream().gamma(static_cast<MKL_INT>(n), r, alpha, 0, beta);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void beta_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    float *r, float alpha, float beta)
+{
+    rng.stream().beta(static_cast<MKL_INT>(n), r, alpha, beta, 0, 1);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void beta_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    double *r, double alpha, double beta)
+{
+    rng.stream().beta(static_cast<MKL_INT>(n), r, alpha, beta, 0, 1);
+}
 
 } // namespace vsmc
 

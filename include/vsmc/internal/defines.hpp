@@ -32,124 +32,46 @@
 #ifndef VSMC_INTERNAL_DEFINES_HPP
 #define VSMC_INTERNAL_DEFINES_HPP
 
-#include <vsmc/internal/config.hpp>
+#include <vsmc/internal/config.h>
+#include <type_traits>
 
-/// \brief Avoid MSVC stupid behavior: MNE = Macro No Expansion
 #define VSMC_MNE
 
-/// \brief CRTP style base classes (virtual) destructor
-/// \ingroup Definitions
-///
-/// \details
-/// This macro is defined to `virtual` if compiled in when
-/// `VSMC_NO_RUNTIME_ASSERT` is enabled; otherwise it is empty.
-#if VSMC_NO_RUNTIME_ASSERT
-#define VSMC_CRTP_DESTRUCTOR_PREFIX
-#else
-#define VSMC_CRTP_DESTRUCTOR_PREFIX virtual
-#endif
+namespace vsmc
+{
 
-/// \brief constexpr
-/// \ingroup Definitions
-#if VSMC_HAS_CXX11_CONSTEXPR
-#define VSMC_CONSTEXPR constexpr
-#else
-#define VSMC_CONSTEXPR
-#endif
-
-/// \brief Explicit operator
-/// \ingroup Definitions
-#if VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS
-#define VSMC_EXPLICIT_OPERATOR explicit
-#else
-#define VSMC_EXPLICIT_OPERATOR
-#endif
-
-/// \brief noexcept
-/// \ingroup Definitions
-#if VSMC_HAS_CXX11_NOEXCEPT
-#define VSMC_NOEXCEPT noexcept
-#else
-#define VSMC_NOEXCEPT throw()
-#endif
-
-/// \brief nullptr
-/// \ingroup Definitions
-#if VSMC_HAS_CXX11_NULLPTR && VSMC_HAS_CXX11LIB_FUNCTIONAL
-#define VSMC_NULLPTR nullptr
-#else
-#define VSMC_NULLPTR 0
-#endif
-
-namespace vsmc {
-
-/// \brief SIMD instructions
-/// \ingroup Definitions
-///
-/// \details
-/// These constants are used when template functions are specialized for SIMD
-/// intructions, such as those in the CString module.
-enum SIMD {SSE2, SSE3, SSSE3, SSE4_1, SSE4_2, AVX, AVX2};
+class NullType;
 
 /// \brief Dynamic dimension
 /// \ingroup Definitions
 enum {
     Dynamic = 0 ///< Used to specify a dimension template parameter is dynamic
-}; // enum Dynamic
+};              // enum
 
 /// \brief Matrix order
 /// \ingroup Definitions
 enum MatrixOrder {
     RowMajor = 101, ///< Data are stored row by row in memory
     ColMajor = 102  ///< Data are stored column by column in memory
-}; // enum MatrixOrder
+};                  // enum MatrixOrder
 
-/// \brief Monitor stage
+/// \brief Matrix Transpose
 /// \ingroup Definitions
-enum MonitorStage {
-    MonitorMove,     ///< Monitor evaluated after moves
-    MonitorResample, ///< Monitor evaluated after resampling
-    MonitorMCMC      ///< Monitor evaluated after MCMC moves
-}; // enum MonitorStage
+enum MatrixTrans {
+    NoTrans = 111, ///< The matrix shall not be transposed
+    Trans = 112    ///< The matrix shall be transposed
+};                 // enum MatrixTrans
 
-/// \brief Class template argument used for scalar variant
+/// \brief Resampling schemes
 /// \ingroup Definitions
-struct Scalar
-{
-    static VSMC_CONSTEXPR const bool is_scalar = true;
-    static VSMC_CONSTEXPR const bool is_vector = false;
-    static VSMC_CONSTEXPR const bool is_thread_local = false;
-}; // struct Scalar
-
-/// \brief Class template argument used for vector variant
-/// \ingroup Definitions
-struct Vector
-{
-    static VSMC_CONSTEXPR const bool is_scalar = false;
-    static VSMC_CONSTEXPR const bool is_vector = true;
-    static VSMC_CONSTEXPR const bool is_thread_local = false;
-}; // struct Vector
-
-/// \brief Class template argument used for thread local storage variant
-/// \ingroup Definitions
-struct ThreadLocal
-{
-    static VSMC_CONSTEXPR const bool is_scalar = false;
-    static VSMC_CONSTEXPR const bool is_vector = false;
-    static VSMC_CONSTEXPR const bool is_thread_local = true;
-}; // struct ThreadLocal
-
-/// \brief Function template argument used for position
-/// \ingroup Definitions
-template <std::size_t N>
-struct Position
-{
-    typedef std::size_t size_type;
-    typedef Position<N> type;
-    static VSMC_CONSTEXPR const size_type value = N;
-    VSMC_CONSTEXPR operator size_type () const {return value;}
-    VSMC_CONSTEXPR size_type operator() () const {return value;}
-}; // struct Position
+enum ResampleScheme {
+    Multinomial,        ///< Multinomial resampling
+    Stratified,         ///< Stratified resampling
+    Systematic,         ///< Systematic resampling
+    Residual,           ///< Residual resampling
+    ResidualStratified, ///< Stratified resampling on residuals
+    ResidualSystematic  ///< Systematic resampling on residuals
+};                      // enum ResampleScheme
 
 } // namespace vsmc
 

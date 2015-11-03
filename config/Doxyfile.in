@@ -784,6 +784,7 @@ FILE_PATTERNS          = *.h \
                          *.c \
                          *.cpp \
                          *.cl \
+                         *.f90 \
                          *.md
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
@@ -1990,87 +1991,11 @@ INCLUDE_FILE_PATTERNS  = *.h \
 # recursively expanded use the := operator instead of the = operator.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
-PREDEFINED             = VSMC_DOXYGEN \
-                         VSMC_HAS_CXX11_LONG_LONG \
-                         VSMC_HAS_CXX11_ACCESS_CONTROL_SFINAE \
-                         VSMC_HAS_CXX11_ALIAS_TEMPLATES \
-                         VSMC_HAS_CXX11_ALIGNAS \
-                         VSMC_HAS_CXX11_ATTRIBUTES \
-                         VSMC_HAS_CXX11_AUTO_TYPE \
-                         VSMC_HAS_CXX11_CONSTEXPR \
-                         VSMC_HAS_CXX11_DECLTYPE \
-                         VSMC_HAS_CXX11_DEFAULT_FUNCTION_TEMPLATE_ARGS \
-                         VSMC_HAS_CXX11_DEFAULTED_FUNCTIONS \
-                         VSMC_HAS_CXX11_DELEGATING_CONSTRUCTORS \
-                         VSMC_HAS_CXX11_DELETED_FUNCTIONS \
-                         VSMC_HAS_CXX11_EXPLICIT_CONVERSIONS \
-                         VSMC_HAS_CXX11_GENERALIZED_INITIALIZERS \
-                         VSMC_HAS_CXX11_IMPLICIT_MOVES \
-                         VSMC_HAS_CXX11_INHERITING_CONSTRUCTORS \
-                         VSMC_HAS_CXX11_INLINE_NAMESPACES \
-                         VSMC_HAS_CXX11_LAMBDAS \
-                         VSMC_HAS_CXX11_LOCAL_TYPE_TEMPLATE_ARGS \
-                         VSMC_HAS_CXX11_NOEXCEPT \
-                         VSMC_HAS_CXX11_NONSTATIC_MEMBER_INIT \
-                         VSMC_HAS_CXX11_NULLPTR \
-                         VSMC_HAS_CXX11_OVERRIDE_CONTROL \
-                         VSMC_HAS_CXX11_RANGE_FOR \
-                         VSMC_HAS_CXX11_RAW_STRING_LITERALS \
-                         VSMC_HAS_CXX11_REFERENCE_QUALIFIED_FUNCTIONS \
-                         VSMC_HAS_CXX11_RVALUE_REFERENCES \
-                         VSMC_HAS_CXX11_STATIC_ASSERT \
-                         VSMC_HAS_CXX11_STRONG_ENUMS \
-                         VSMC_HAS_CXX11_THREAD_LOCAL \
-                         VSMC_HAS_CXX11_TRAILING_RETURN \
-                         VSMC_HAS_CXX11_UNICODE_LITERALS \
-                         VSMC_HAS_CXX11_UNRESTRICTED_UNIONS \
-                         VSMC_HAS_CXX11_USER_LITERALS \
-                         VSMC_HAS_CXX11_VARIADIC_TEMPLATES \
-                         VSMC_HAS_CXX11LIB_CHRONO \
-                         VSMC_HAS_CXX11LIB_CMATH \
-                         VSMC_HAS_CXX11LIB_FUNCTIONAL \
-                         VSMC_HAS_CXX11LIB_FUTURE \
-                         VSMC_HAS_CXX11LIB_MUTEX \
-                         VSMC_HAS_CXX11LIB_RANDOM \
-                         VSMC_HAS_CXX11LIB_THREAD \
-                         VSMC_HAS_CXX11LIB_TUPLE \
-                         VSMC_HAS_C99LIB_MATH \
-                         VSMC_HAS_INT128 \
-                         VSMC_HAS_OPENCL_DOUBLE \
-                         VSMC_HAS_AES_NI \
-                         VSMC_HAS_RDRAND \
-                         VSMC_HAS_MPI \
-                         VSMC_HAS_OPENCL \
-                         VSMC_HAS_CILK \
-                         VSMC_HAS_GCD \
-                         VSMC_HAS_GCD_LION \
-                         VSMC_HAS_OMP \
-                         VSMC_HAS_PPL \
-                         VSMC_HAS_TBB \
+PREDEFINED             = __TBB_TASK_GROUP_CONTEXT \
                          VSMC_HAS_MKL \
-                         VSMC_HAS_HDF5 \
-                         __APPLE__ \
-                         __AVX__ \
-                         __AVX2__ \
-                         __SSE__ \
-                         __SSE2__ \
-                         __SSE3__ \
-                         __SSSE3__ \
-                         __SSE4_1__ \
-                         __SSE4_2__ \
-                         __MAC_OS_X_VERSION_MIN_REQUIRED=1090 \
-                         __MAC_10_0=1000 \
-                         __MAC_10_1=1010 \
-                         __MAC_10_2=1020 \
-                         __MAC_10_3=1030 \
-                         __MAC_10_4=1040 \
-                         __MAC_10_5=1050 \
-                         __MAC_10_6=1060 \
-                         __MAC_10_7=1070 \
-                         __MAC_10_8=1080 \
-                         __MAC_10_9=1090 \
-                         __BLOCKS__ \
-                         __TBB_TASK_GROUP_CONTEXT
+                         VSMC_HAS_OMP \
+                         VSMC_HAS_POSIX \
+                         VSMC_HAS_TBB
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

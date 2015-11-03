@@ -1,4 +1,89 @@
-# Changes since v1.1.1
+#Changes since v1.2.0
+
+## Important changes
+
+The library is now C++11 only. GCC 4.8.1, Clang 3.4, Intel C++ 2015 all
+provides full C++11 support. MSVC is the only one lagging behind. At the
+moment, MSVC 2015 support is considered to be the minimum.
+
+Most changes are internal. The API remain unchanged (in C++11 mode with
+supported compilers). The following are backward compatibility breaking
+changes.
+
+* Everything in the namespace `vsmc::cxx11` is gone. Replace `vsmc::cxx11` with
+  `std` shall solve any issues.
+* `Progress` is no longer a class template.
+* `vsmc::Array` is replaced by `std::array`
+* The `RngSet` class template is replaced by `RngSetScalar` and `RngSetVector`,
+  and the structures `Scalar` and `Vector` are removed.
+* The OpenCL module has gone through a complete rework. The library now has
+  its own C++ wrapper based on `std::shared_ptr` instead of the official
+  (outdated) C++ wrapper.
+* The index type `Position` is renamed to `Index`, and it is now a template
+  alias to `std::integral_constant`
+* The structure `ConstSingleParticle` is removed. All of its occurrence shall
+  be replaced by `SingleParticle`. In addition, in most places, where the API
+  previously accept `const Particle<T> &` shall now accept `Particle<T> &`
+  instead.
+* Member functions of SMP bases classes are renamed to use a more consistent
+  pattern
+  - `pre_processor` -> `eval_pre`
+  - `post_processor` -> `eval_post`
+  - `initialize_param` -> `eval_param`
+  - `initialize_state` -> `eval_sp`
+  - `move_state` -> `eval_sp`
+  - `monitor_state` -> `eval_sp`
+  - `path_state` -> `eval_sp`
+  - `path_grid` -> `eval_grid`
+* Member function in base value classes `StateMPI` and `StateCL` are renamed
+  - `copy_pre_processor` -> `copy_pre`
+  - `copy_post_processor` -> `copy_pre`
+* Weight classes are renamed
+  - `WeightSet` -> `Weight`
+  - `WeightSetMPI` -> `WeightMPI`
+  The header file `weight_set.hpp` is also renamed to `weight`
+* `Weight` (formerly `WeightSet`)'s interface has been overhauled
+  - `set_weight` -> `set`
+  - `set_log_weight` -> `set_log`
+  - `mul_weight` -> `mul`
+  - `add_log_weight` -> `add_log`
+  - `weight_data` -> `data`
+* `Particle::weight_set` renamed to `Particle::weight`
+* `weight_set_type` renamed to `weight_type`
+* All occurrence of `Rng` are renamed to `RNG`
+
+## Removed features
+
+* Modules removed
+  - Thread
+  - GCD
+  - Integrate
+  - Core/Adapter
+  - Core/StateTuple
+  - SMP/Adapter
+  - RNG/GSL
+  - SMP/CILK
+  - SMP/GCD
+  - SMP/PPL
+  - SMP/STD
+  - OpenCL/Adapter
+  - Utility/Array
+  - Utility/Counter
+  - Utility/CString
+
+## New features
+
+* `Monitor::record_data` gets an overload version that return the row pointer.
+* `std::unique_ptr` alike wrappers for [Intel MKL][MKL] `VSLStreamStatePtr`,
+  `VSLSSTaskPtr`, `VSLConvTaskPtr`, `VSLCorrTaskPtr`, `DFTaskPtr`.
+
+## Bug fixes
+
+* The default resampling threshold when a user defined resampling algorithm is
+  provided in `Sampler`'s constructor is fixed to be always resampling, the
+  same as for the built-in schemes.
+
+#Changes since v1.1.1
 
 ## New features
 
@@ -38,7 +123,7 @@
 * Fix Residual and related resampling algorithms in situations where the new
   system has number of particles unequal to the old system.
 
-# Changes since v1.1.0
+#Changes since v1.1.0
 
 ## Changed behaviors
 
@@ -53,7 +138,7 @@
 
 * `Sampler` now correctly clear size history during initialization
 
-# Changes since v1.0.0
+#Changes since v1.0.0
 
 ## New features
 
@@ -78,5 +163,6 @@
   (`Sampler::init_by_iter(true)`).
 
 [HDF5]: http://www.hdfgroup.org/HDF5/
+[MKL]: https://software.intel.com/en-us/intel-mkl/
 [TBB]: https://www.threadingbuildingblocks.org
 [jemalloc]: http://www.canonware.com/jemalloc/

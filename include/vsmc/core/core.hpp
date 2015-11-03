@@ -32,18 +32,13 @@
 #ifndef VSMC_CORE_CORE_HPP
 #define VSMC_CORE_CORE_HPP
 
-#include <vsmc/core/adapter.hpp>
+#include <vsmc/internal/config.h>
 #include <vsmc/core/monitor.hpp>
 #include <vsmc/core/particle.hpp>
 #include <vsmc/core/path.hpp>
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/single_particle.hpp>
-#include <vsmc/core/weight_set.hpp>
-
 #include <vsmc/core/state_matrix.hpp>
-
-#if VSMC_HAS_CXX11LIB_TUPLE
-#include <vsmc/core/state_tuple.hpp>
-#endif
+#include <vsmc/core/weight.hpp>
 
 #endif // VSMC_CORE_CORE_HPP

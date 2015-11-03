@@ -32,11 +32,12 @@
 #include "rng_test.hpp"
 #include <vsmc/rng/mkl.hpp>
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
     VSMC_RNG_TEST_PRE(rng_mkl);
 
     VSMC_RNG_TEST(vsmc::MKL_MCG59);
+    VSMC_RNG_TEST(vsmc::MKL_MCG59_64);
     VSMC_RNG_TEST(vsmc::MKL_MT19937);
     VSMC_RNG_TEST(vsmc::MKL_MT19937_64);
     VSMC_RNG_TEST(vsmc::MKL_MT2203);
@@ -46,6 +47,14 @@ int main (int argc, char **argv)
 #if VSMC_HAS_RDRAND
     VSMC_RNG_TEST(vsmc::MKL_NONDETERM);
     VSMC_RNG_TEST(vsmc::MKL_NONDETERM_64);
+#endif
+#if INTEL_MKL_VERSION >= 110300
+#if VSMC_HAS_AES_NI
+    VSMC_RNG_TEST(vsmc::MKL_ARS5);
+    VSMC_RNG_TEST(vsmc::MKL_ARS5_64);
+#endif
+    VSMC_RNG_TEST(vsmc::MKL_PHILOX4X32X10);
+    VSMC_RNG_TEST(vsmc::MKL_PHILOX4X32X10_64);
 #endif
 
     VSMC_RNG_TEST_POST;

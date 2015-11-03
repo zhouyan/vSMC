@@ -32,55 +32,39 @@
 #ifndef VSMC_RESAMPLE_RESIDUAL_SYSTEMATIC_HPP
 #define VSMC_RESAMPLE_RESIDUAL_SYSTEMATIC_HPP
 
-#include <vsmc/resample/common.hpp>
+#include <vsmc/resample/internal/common.hpp>
+#include <vsmc/resample/transform.hpp>
 
-namespace vsmc {
-
-namespace internal {
-
-typedef cxx11::integral_constant<ResampleScheme, ResidualSystematic>
-    ResampleResidualSystematic;
-
-} // namespace vsmc::internal
+namespace vsmc
+{
 
 /// \brief Residual systematic resampling
 /// \ingroup Resample
-template <>
-class Resample<internal::ResampleResidualSystematic>
+class ResampleResidualSystematic
 {
-    public :
-
-    template <typename IntType, typename RngType>
-    void operator() (std::size_t M, std::size_t N, RngType &rng,
-            const double *weight, IntType *replication)
+    public:
+    template <typename IntType, typename RNGType>
+    void operator()(std::size_t M, std::size_t N, RNGType &rng,
+        const double *weight, IntType *replication)
     {
-        using std::modf;
-
-        residual_.resize(M);
-        integral_.resize(M);
-        double *const rptr = &residual_[0];
-        double *const iptr = &integral_[0];
-        for (std::size_t i = 0; i != M; ++i)
-            rptr[i] = modf(N * weight[i], iptr + i);
-        double coeff = 1 / math::asum(M, rptr);
-        math::scal(M, coeff, rptr);
-
-        IntType R = 0;
-        for (std::size_t i = 0; i != M; ++i)
-            R += static_cast<IntType>(iptr[i]);
-        std::size_t NN = N - static_cast<std::size_t>(R);
-        U01SequenceSystematic<RngType> u01seq(NN, rng);
-        internal::inversion(M, NN, rptr, u01seq, replication);
-
-        for (std::size_t i = 0; i != M; ++i)
-            replication[i] += static_cast<IntType>(iptr[i]);
+        Vector<IntType> integ(M);
+        Vector<double> resid(M);
+        std::size_t R =
+            resample_trans_residual(M, N, weight, resid.data(), integ.data());
+        U01SequenceSystematic<RNGType, double> u01seq(R, rng);
+        resample_trans_u01_rep(M, R, resid.data(), u01seq, replication);
+        add(M, replication, integ.data(), replication);
     }
+}; // ResampleResidualSystematic
 
-    private :
-
-    std::vector<double, AlignedAllocator<double> > residual_;
-    std::vector<double, AlignedAllocator<double> > integral_;
-}; // Residual systematic resampling
+/// \brief Type trait of ResidualSystematic scheme
+/// \ingroup Resample
+template <>
+class ResampleTypeTrait<ResidualSystematic>
+{
+    public:
+    using type = ResampleResidualSystematic;
+}; // class ResampleTypeTrait
 
 } // namespace vsmc
 

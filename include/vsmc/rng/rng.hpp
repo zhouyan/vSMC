@@ -32,43 +32,12 @@
 #ifndef VSMC_RNG_RNG_HPP
 #define VSMC_RNG_RNG_HPP
 
-#include <vsmc/internal/config.hpp>
-
+#include <vsmc/internal/config.h>
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
-
-#include <vsmc/rng/generator_wrapper.hpp>
-
-#include <vsmc/rng/xor_combine_engine.hpp>
-#include <vsmc/rng/xorshift.hpp>
-
-#include <vsmc/rng/philox.hpp>
-#include <vsmc/rng/threefry.hpp>
-
-#if VSMC_HAS_AES_NI
-#include <vsmc/rng/aes.hpp>
-#include <vsmc/rng/aes_ni.hpp>
-#include <vsmc/rng/ars.hpp>
-#endif
-
-#if VSMC_HAS_GSL
-#include <vsmc/rng/gsl.hpp>
-#endif
-
-#if VSMC_HAS_MKL
-#include <vsmc/rng/mkl.hpp>
-#endif
-
-#if VSMC_HAS_RDRAND
-#include <vsmc/rng/rdrand.hpp>
-#endif
-
-#include <vsmc/rng/stable_distribution.hpp>
 #include <vsmc/rng/u01.hpp>
-#include <vsmc/rng/uniform_real_distribution.hpp>
-
-#if VSMC_HAS_SSE2
-#include <vsmc/rng/m128i.hpp>
-#endif
+#include <vsmc/rng/u01_sequence.hpp>
+#include <vsmc/rng/distribution.hpp>
+#include <vsmc/rng/engine.hpp>
 
 #endif // VSMC_RNG_RNG_HPP

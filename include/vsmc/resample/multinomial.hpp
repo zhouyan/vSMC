@@ -32,32 +32,34 @@
 #ifndef VSMC_RESAMPLE_MULTINOMIAL_HPP
 #define VSMC_RESAMPLE_MULTINOMIAL_HPP
 
-#include <vsmc/resample/common.hpp>
+#include <vsmc/resample/internal/common.hpp>
+#include <vsmc/resample/transform.hpp>
 
-namespace vsmc {
-
-namespace internal {
-
-typedef cxx11::integral_constant<ResampleScheme, Multinomial>
-    ResampleMultinomial;
-
-} // namespace vsmc::internal
+namespace vsmc
+{
 
 /// \brief Multinomial resampling
 /// \ingroup Resample
-template <>
-class Resample<internal::ResampleMultinomial>
+class ResampleMultinomial
 {
-    public :
-
-    template <typename IntType, typename RngType>
-    void operator() (std::size_t M, std::size_t N, RngType &rng,
-            const double *weight, IntType *replication)
+    public:
+    template <typename IntType, typename RNGType>
+    void operator()(std::size_t M, std::size_t N, RNGType &rng,
+        const double *weight, IntType *replication)
     {
-        U01SequenceSorted<RngType> u01seq(N, rng);
-        internal::inversion(M, N, weight, u01seq, replication);
+        U01SequenceSorted<RNGType, double> u01seq(N, rng);
+        resample_trans_u01_rep(M, N, weight, u01seq, replication);
     }
-}; // Mulitnomial resampling
+}; // ResampleMultinomial
+
+/// \brief Type trait of Multinomial scheme
+/// \ingroup Resample
+template <>
+class ResampleTypeTrait<Multinomial>
+{
+    public:
+    using type = ResampleMultinomial;
+}; // class ResampleTypeTrait
 
 } // namespace vsmc
 
