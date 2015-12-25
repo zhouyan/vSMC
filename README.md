@@ -66,14 +66,12 @@ can be changed explicitly through configuration macros.
 # Compiler support
 
 This library makes heavy use of some template metaprogramming techniques. It
-requires a standard conforming compiler. Fortunately, most commonly used
-modern compilers, at least in C++98 mode, is able to compile the examples
-distributed with the library, provided that they can compile the Boost library.
+requires a C++11 standard conforming compiler.
 
 This library has been regularly tested with recent [Clang][Clang], [GCC][GCC]
-and [Intel C++ Compiler][icpc], in both C++98 and C++11 modes.
+and [Intel C++ Compiler][icpc] in C++11 mode.
 
-[Microsoft Visual C++][MSVC] 2012 or later are also supported. However, this
+[Microsoft Visual C++][MSVC] 2015 or later are also supported. However, this
 compiler is tested less regularly.
 
 Other compilers might work but are not tested.
