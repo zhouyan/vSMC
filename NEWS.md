@@ -1,4 +1,6 @@
-#Changes since v1.2.0
+# Changes since v2.0.0
+
+# Changes since v1.2.0
 
 ## Important changes
 
@@ -83,7 +85,7 @@ changes.
   provided in `Sampler`'s constructor is fixed to be always resampling, the
   same as for the built-in schemes.
 
-#Changes since v1.1.1
+# Changes since v1.1.1
 
 ## New features
 
@@ -123,7 +125,7 @@ changes.
 * Fix Residual and related resampling algorithms in situations where the new
   system has number of particles unequal to the old system.
 
-#Changes since v1.1.0
+# Changes since v1.1.0
 
 ## Changed behaviors
 
@@ -138,7 +140,7 @@ changes.
 
 * `Sampler` now correctly clear size history during initialization
 
-#Changes since v1.0.0
+# Changes since v1.0.0
 
 ## New features
 
