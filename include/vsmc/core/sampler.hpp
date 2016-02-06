@@ -776,17 +776,17 @@ class Sampler
         do_monitor(MonitorMove);
         do_resample();
         do_monitor(MonitorResample);
+        do_mcmc(1);
         do_monitor(MonitorMCMC);
     }
 
     void do_iter()
     {
-        std::size_t ia = 0;
-        ia = do_move(ia);
+        std::size_t ia = do_move(0);
         do_monitor(MonitorMove);
         do_resample();
         do_monitor(MonitorResample);
-        ia = do_mcmc(ia);
+        do_mcmc(ia);
         do_monitor(MonitorMCMC);
     }
 
