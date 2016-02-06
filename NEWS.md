@@ -1,5 +1,10 @@
 # Changes since v2.0.0
 
+## Important changes
+
+The mutation (MCMC) steps are now performed after the resampling of
+initialization step.
+
 # Changes since v1.2.0
 
 ## Important changes
