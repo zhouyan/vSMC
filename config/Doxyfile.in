@@ -2033,6 +2033,8 @@ PREDEFINED             = __TBB_TASK_GROUP_CONTEXT \
                          VSMC_HAS_MKL \
                          VSMC_HAS_OMP \
                          VSMC_HAS_POSIX \
+                         VSMC_HAS_SSE2 \
+                         VSMC_HAS_AVX2 \
                          VSMC_HAS_TBB
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this

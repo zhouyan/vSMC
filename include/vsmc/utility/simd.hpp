@@ -788,6 +788,7 @@ class M128TypeTrait<double>
 } // namespace vsmc::internal
 
 /// \brief floating point SSE2 type
+/// \ingroup SIMD
 template <typename T>
 using M128Type = typename std::conditional<std::is_integral<T>::value,
     M128I<T>, typename internal::M128TypeTrait<T>::type>::type;
@@ -1501,6 +1502,7 @@ class M256TypeTrait<double>
 } // namespace vsmc::internal
 
 /// \brief floating point SSE2 type
+/// \ingroup SIMD
 template <typename T>
 using M256Type = typename std::conditional<std::is_integral<T>::value,
     M256I<T>, typename internal::M256TypeTrait<T>::type>::type;
