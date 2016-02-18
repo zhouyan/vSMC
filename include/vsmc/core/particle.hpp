@@ -32,9 +32,9 @@
 #ifndef VSMC_CORE_PARTICLE_HPP
 #define VSMC_CORE_PARTICLE_HPP
 
-#include <vsmc/internal/common.hpp>
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/core/weight.hpp>
+#include <vsmc/internal/common.hpp>
 #include <vsmc/resample/resample.hpp>
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
@@ -144,6 +144,9 @@ class Particle
 
     /// \brief Get the (sequential) RNG used stream for resampling
     resample_rng_type &resample_rng() { return resample_rng_; }
+
+    /// \brief Get a SingleParticle object
+    SingleParticle<T> sp(size_type id) { return SingleParticle<T>(id, this); }
 
     /// \brief Performing resampling if ESS/N < threshold
     ///

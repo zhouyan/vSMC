@@ -32,8 +32,8 @@
 #ifndef VSMC_SMP_BACKEND_OMP_HPP
 #define VSMC_SMP_BACKEND_OMP_HPP
 
-#include <vsmc/smp/backend_base.hpp>
 #include <omp.h>
+#include <vsmc/smp/backend_base.hpp>
 
 namespace vsmc
 {
@@ -53,19 +53,9 @@ class StateOMP : public StateBase
     template <typename IntType>
     void copy(size_type N, const IntType *src_idx)
     {
-#if _OPENMP < 200805
-        using stype = typename std::make_signed<size_type>::type;
-        stype n = static_cast<stype>(N);
-#pragma omp parallel for default(shared)
-        for (stype i = 0; i < n; ++i) {
-            this->copy_particle(
-                static_cast<size_type>(src_idx[i]), static_cast<size_type>(i));
-        }
-#else // _OPENMP < 200805
 #pragma omp parallel for default(shared)
         for (size_type i = 0; i < N; ++i)
             this->copy_particle(static_cast<size_type>(src_idx[i]), i);
-#endif // _OPENMP < 200805
     }
 }; // class StateOMP
 
@@ -82,19 +72,9 @@ class InitializeOMP : public InitializeBase<T, Derived>
         this->eval_param(particle, param);
         this->eval_pre(particle);
         std::size_t accept = 0;
-#if _OPENMP < 200805
-        using stype = typename std::make_signed<size_type>::type;
-        stype n = static_cast<stype>(N);
-#pragma omp parallel for reduction(+ : accept) default(shared)
-        for (stype i = 0; i < n; ++i) {
-            accept += this->eval_sp(
-                SingleParticle<T>(static_cast<size_type>(i), &particle));
-        }
-#else // _OPENMP < 200805
 #pragma omp parallel for reduction(+ : accept) default(shared)
         for (size_type i = 0; i < N; ++i)
-            accept += this->eval_sp(SingleParticle<T>(i, &particle));
-#endif // _OPENMP < 200805
+            accept += this->eval_sp(particle.sp(i));
         this->eval_post(particle);
 
         return accept;
@@ -116,19 +96,9 @@ class MoveOMP : public MoveBase<T, Derived>
         const size_type N = particle.size();
         this->eval_pre(iter, particle);
         std::size_t accept = 0;
-#if _OPENMP < 200805
-        using stype = typename std::make_signed<size_type>::type;
-        stype n = static_cast<stype>(N);
-#pragma omp parallel for reduction(+ : accept) default(shared)
-        for (stype i = 0; i < n; ++i) {
-            accept += this->eval_sp(
-                iter, SingleParticle<T>(static_cast<size_type>(i), &particle));
-        }
-#else // _OPENMP < 200805
 #pragma omp parallel for reduction(+ : accept) default(shared)
         for (size_type i = 0; i < N; ++i)
-            accept += this->eval_sp(iter, SingleParticle<T>(i, &particle));
-#endif // _OPENMP < 200805
+            accept += this->eval_sp(iter, particle.sp(i));
         this->eval_post(iter, particle);
 
         return accept;
@@ -150,22 +120,11 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
         using size_type = typename Particle<T>::size_type;
         const size_type N = particle.size();
         this->eval_pre(iter, particle);
-#if _OPENMP < 200805
-        using stype = typename std::make_signed<size_type>::type;
-        stype n = static_cast<stype>(N);
-#pragma omp parallel for default(shared)
-        for (stype i = 0; i < n; ++i) {
-            this->eval_sp(iter, dim,
-                SingleParticle<T>(static_cast<size_type>(i), &particle),
-                r + static_cast<std::size_t>(i) * dim);
-        }
-#else // _OPENMP < 200805
 #pragma omp parallel for default(shared)
         for (size_type i = 0; i < N; ++i) {
-            this->eval_sp(iter, dim, SingleParticle<T>(i, &particle),
+            this->eval_sp(iter, dim, particle.sp(i),
                 r + static_cast<std::size_t>(i) * dim);
         }
-#endif // _OPENMP < 200805
         this->eval_post(iter, particle);
     }
 
@@ -184,19 +143,9 @@ class PathEvalOMP : public PathEvalBase<T, Derived>
         using size_type = typename Particle<T>::size_type;
         const size_type N = particle.size();
         this->eval_pre(iter, particle);
-#if _OPENMP < 200805
-        using stype = typename std::make_signed<size_type>::type;
-        stype n = static_cast<stype>(N);
-#pragma omp parallel for default(shared)
-        for (stype i = 0; i < n; ++i) {
-            r[i] = this->eval_sp(
-                iter, SingleParticle<T>(static_cast<size_type>(i), &particle));
-        }
-#else // _OPENMP < 200805
 #pragma omp parallel for default(shared)
         for (size_type i = 0; i < N; ++i)
-            r[i] = this->eval_sp(iter, SingleParticle<T>(i, &particle));
-#endif // _OPENMP < 200805
+            r[i] = this->eval_sp(iter, particle.sp(i));
         this->eval_post(iter, particle);
 
         return this->eval_grid(iter, particle);

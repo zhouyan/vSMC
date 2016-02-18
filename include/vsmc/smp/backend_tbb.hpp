@@ -32,8 +32,8 @@
 #ifndef VSMC_SMP_BACKEND_TBB_HPP
 #define VSMC_SMP_BACKEND_TBB_HPP
 
-#include <vsmc/smp/backend_base.hpp>
 #include <tbb/tbb.h>
+#include <vsmc/smp/backend_base.hpp>
 
 #define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_INITIALIZE(args)             \
     this->eval_param(particle, param);                                        \
@@ -207,7 +207,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
         void operator()(const ::tbb::blocked_range<size_type> &range)
         {
             for (size_type i = range.begin(); i != range.end(); ++i)
-                accept_ += wptr_->eval_sp(SingleParticle<T>(i, pptr_));
+                accept_ += wptr_->eval_sp(pptr_->sp(i));
         }
 
         void join(const work_type &other) { accept_ += other.accept_; }
@@ -318,7 +318,7 @@ class MoveTBB : public MoveBase<T, Derived>
         void operator()(const ::tbb::blocked_range<size_type> &range)
         {
             for (size_type i = range.begin(); i != range.end(); ++i)
-                accept_ += wptr_->eval_sp(iter_, SingleParticle<T>(i, pptr_));
+                accept_ += wptr_->eval_sp(iter_, pptr_->sp(i));
         }
 
         void join(const work_type &other) { accept_ += other.accept_; }
@@ -423,7 +423,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         void operator()(const ::tbb::blocked_range<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i) {
-                wptr_->eval_sp(iter_, dim_, SingleParticle<T>(i, pptr_),
+                wptr_->eval_sp(iter_, dim_, pptr_->sp(i),
                     r_ + static_cast<std::size_t>(i) * dim_);
             }
         }
@@ -533,7 +533,7 @@ class PathEvalTBB : public PathEvalBase<T, Derived>
         void operator()(const ::tbb::blocked_range<size_type> &range) const
         {
             for (size_type i = range.begin(); i != range.end(); ++i)
-                r_[i] = wptr_->eval_sp(iter_, SingleParticle<T>(i, pptr_));
+                r_[i] = wptr_->eval_sp(iter_, pptr_->sp(i));
         }
 
         private:

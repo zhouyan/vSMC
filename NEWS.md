@@ -1,3 +1,9 @@
+# Changes since v2.1.0
+
+## New features
+
+`Particle` now has a new `sp` member that return `SingleParticle` objects.
+
 # Changes since v2.0.0
 
 ## Important changes
