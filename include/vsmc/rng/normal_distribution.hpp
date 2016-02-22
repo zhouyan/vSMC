@@ -92,7 +92,7 @@ class NormalDistribution
     friend bool operator!=(
         const distribution_type &dist1, const distribution_type &dist2)
     {
-        return dist1.param_ != dist2.param_;
+        return !(dist1 == dist2);
     }
 
     template <typename CharT, typename Traits>
