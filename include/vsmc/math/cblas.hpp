@@ -82,6 +82,11 @@ template <typename T>
 inline void copy(
     std::size_t n, const T *x, std::size_t incx, T *y, std::size_t incy)
 {
+    if (incx == 1 && incy == 1) {
+        std::copy_n(x, n, y);
+        return;
+    }
+
     std::size_t j = 0;
     std::size_t k = 0;
     for (std::size_t i = 0; i != n; ++i, j += incx, k += incy)
