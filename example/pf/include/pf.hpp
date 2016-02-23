@@ -64,16 +64,16 @@ static const std::size_t VelX = 2;
 static const std::size_t VelY = 3;
 static const std::size_t LogL = 4;
 
-template <vsmc::MatrixOrder Order>
-using StateBase = StateSMP<vsmc::StateMatrix<Order, 5, double>>;
+template <vsmc::MatrixLayout Layout>
+using StateBase = StateSMP<vsmc::StateMatrix<Layout, 5, double>>;
 
-template <vsmc::MatrixOrder Order>
-class pf_state : public StateBase<Order>
+template <vsmc::MatrixLayout Layout>
+class pf_state : public StateBase<Layout>
 {
     public:
-    using size_type = typename StateBase<Order>::size_type;
+    using size_type = typename StateBase<Layout>::size_type;
 
-    pf_state(size_type N) : StateBase<Order>(N) {}
+    pf_state(size_type N) : StateBase<Layout>(N) {}
 
     double &obs_x(std::size_t iter) { return obs_x_[iter]; }
     double &obs_y(std::size_t iter) { return obs_y_[iter]; }
@@ -110,11 +110,11 @@ class pf_state : public StateBase<Order>
     vsmc::Vector<double> obs_y_;
 };
 
-template <vsmc::MatrixOrder Order>
-class pf_init : public InitializeSMP<pf_state<Order>, pf_init<Order>>
+template <vsmc::MatrixLayout Layout>
+class pf_init : public InitializeSMP<pf_state<Layout>, pf_init<Layout>>
 {
     public:
-    std::size_t eval_sp(vsmc::SingleParticle<pf_state<Order>> sp) const
+    std::size_t eval_sp(vsmc::SingleParticle<pf_state<Layout>> sp) const
     {
         const double sd_pos0 = 2;
         const double sd_vel0 = 1;
@@ -131,12 +131,12 @@ class pf_init : public InitializeSMP<pf_state<Order>, pf_init<Order>>
     }
 
     void eval_param(
-        vsmc::Particle<pf_state<Order>> &particle, void *file) const
+        vsmc::Particle<pf_state<Layout>> &particle, void *file) const
     {
         particle.value().read_data(static_cast<const char *>(file));
     }
 
-    void eval_post(vsmc::Particle<pf_state<Order>> &particle)
+    void eval_post(vsmc::Particle<pf_state<Layout>> &particle)
     {
         w_.resize(particle.size());
         particle.value().read_state(LogL, w_.data());
@@ -147,12 +147,12 @@ class pf_init : public InitializeSMP<pf_state<Order>, pf_init<Order>>
     vsmc::Vector<double> w_;
 };
 
-template <vsmc::MatrixOrder Order>
-class pf_move : public MoveSMP<pf_state<Order>, pf_move<Order>>
+template <vsmc::MatrixLayout Layout>
+class pf_move : public MoveSMP<pf_state<Layout>, pf_move<Layout>>
 {
     public:
     std::size_t eval_sp(
-        std::size_t iter, vsmc::SingleParticle<pf_state<Order>> sp) const
+        std::size_t iter, vsmc::SingleParticle<pf_state<Layout>> sp) const
     {
         const double sd_pos = std::sqrt(0.02);
         const double sd_vel = std::sqrt(0.001);
@@ -169,7 +169,7 @@ class pf_move : public MoveSMP<pf_state<Order>, pf_move<Order>>
         return 1;
     }
 
-    void eval_post(std::size_t, vsmc::Particle<pf_state<Order>> &particle)
+    void eval_post(std::size_t, vsmc::Particle<pf_state<Layout>> &particle)
     {
         w_.resize(particle.size());
         particle.value().read_state(LogL, w_.data());
@@ -180,19 +180,19 @@ class pf_move : public MoveSMP<pf_state<Order>, pf_move<Order>>
     vsmc::Vector<double> w_;
 };
 
-template <vsmc::MatrixOrder Order>
-class pf_meval : public MonitorEvalSMP<pf_state<Order>, pf_meval<Order>>
+template <vsmc::MatrixLayout Layout>
+class pf_meval : public MonitorEvalSMP<pf_state<Layout>, pf_meval<Layout>>
 {
     public:
     void eval_sp(std::size_t, std::size_t,
-        vsmc::SingleParticle<pf_state<Order>> sp, double *res)
+        vsmc::SingleParticle<pf_state<Layout>> sp, double *res)
     {
         res[0] = sp.state(PosX);
         res[1] = sp.state(PosY);
     }
 };
 
-template <vsmc::MatrixOrder Order>
+template <vsmc::MatrixLayout Layout>
 inline void pf_run(vsmc::ResampleScheme scheme, const std::string &datafile,
     const std::string &prog, const std::string &name)
 {
@@ -201,10 +201,10 @@ inline void pf_run(vsmc::ResampleScheme scheme, const std::string &datafile,
     std::string pf_h5(prog + name + ".h5");
 
     vsmc::Seed::instance().set(101);
-    vsmc::Sampler<pf_state<Order>> sampler(N, scheme, 0.5);
-    sampler.init(pf_init<Order>());
-    sampler.move(pf_move<Order>(), false);
-    sampler.monitor("pos", 2, pf_meval<Order>());
+    vsmc::Sampler<pf_state<Layout>> sampler(N, scheme, 0.5);
+    sampler.init(pf_init<Layout>());
+    sampler.move(pf_move<Layout>(), false);
+    sampler.monitor("pos", 2, pf_meval<Layout>());
     sampler.monitor("pos").name(0) = "pos.x";
     sampler.monitor("pos").name(1) = "pos.y";
 

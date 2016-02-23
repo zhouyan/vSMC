@@ -29,10 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "rng_dist.hpp"
-#include <vsmc/rng/beta_distribution.hpp>
 #include <boost/math/distributions/beta.hpp>
 #include <boost/random/beta_distribution.hpp>
+#include <vsmc/rng/beta_distribution.hpp>
+#include "rng_dist.hpp"
 
 template <>
 inline vsmc::Vector<double> rng_dist_partition<vsmc::BetaDistribution<double>>(

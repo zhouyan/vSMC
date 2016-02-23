@@ -29,9 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "rng_dist.hpp"
-#include <vsmc/rng/student_t_distribution.hpp>
 #include <boost/math/distributions/students_t.hpp>
+#include <vsmc/rng/student_t_distribution.hpp>
+#include "rng_dist.hpp"
 
 template <>
 inline vsmc::Vector<double>

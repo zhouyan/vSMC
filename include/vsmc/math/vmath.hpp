@@ -33,8 +33,8 @@
 #define VSMC_MATH_VMATH_HPP
 
 #include <vsmc/internal/config.h>
-#include <vsmc/math/constants.hpp>
 #include <cmath>
+#include <vsmc/math/constants.hpp>
 
 #if VSMC_USE_MKL_VML
 #include <mkl.h>

@@ -33,8 +33,8 @@
 #define VSMC_RNG_WEIBULL_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/u01_distribution.hpp>
 #include <vsmc/rng/normal_distribution.hpp>
+#include <vsmc/rng/u01_distribution.hpp>
 
 namespace vsmc
 {

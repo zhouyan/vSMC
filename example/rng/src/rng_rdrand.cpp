@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "rng_test.hpp"
 #include <vsmc/rng/rdrand.hpp>
+#include "rng_test.hpp"
 
 int main(int argc, char **argv)
 {

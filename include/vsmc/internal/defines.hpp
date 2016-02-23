@@ -48,14 +48,14 @@ enum {
     Dynamic = 0 ///< Used to specify a dimension template parameter is dynamic
 };              // enum
 
-/// \brief Matrix order
+/// \brief Matrix layout
 /// \ingroup Definitions
-enum MatrixOrder {
+enum MatrixLayout {
     RowMajor = 101, ///< Data are stored row by row in memory
     ColMajor = 102  ///< Data are stored column by column in memory
-};                  // enum MatrixOrder
+};                  // enum MatrixLayout
 
-/// \brief Matrix Transpose
+/// \brief Matrix transpose
 /// \ingroup Definitions
 enum MatrixTrans {
     NoTrans = 111, ///< The matrix shall not be transposed

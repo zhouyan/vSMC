@@ -126,7 +126,7 @@ inline void scal(std::size_t n, T a, T *x, std::size_t incx)
 
 /// \brief Computes a matrix-vector product using a general matrix
 template <typename T>
-inline void gemv(MatrixOrder order, MatrixTrans trans, std::size_t m,
+inline void gemv(MatrixLayout layout, MatrixTrans trans, std::size_t m,
     std::size_t n, T alpha, const T *A, std::size_t lda, const T *x,
     std::size_t incx, T beta, T *y, std::size_t incy)
 {
@@ -135,8 +135,8 @@ inline void gemv(MatrixOrder order, MatrixTrans trans, std::size_t m,
 
     scal(nrow, beta, y, incy);
 
-    if ((order == RowMajor && trans == NoTrans) ||
-        (order == ColMajor && trans == Trans)) {
+    if ((layout == RowMajor && trans == NoTrans) ||
+        (layout == ColMajor && trans == Trans)) {
         std::size_t k = 0;
         for (std::size_t r = 0; r != nrow; ++r, k += incy)
             y[k] += alpha * dot<T>(ncol, x, incx, A + r * lda, 1);
@@ -245,11 +245,11 @@ inline void scal(std::size_t n, double a, double *x, std::size_t incx)
         static_cast<VSMC_CBLAS_INT>(incx));
 }
 
-inline void gemv(MatrixOrder order, MatrixTrans trans, std::size_t m,
+inline void gemv(MatrixLayout layout, MatrixTrans trans, std::size_t m,
     std::size_t n, float alpha, const float *A, std::size_t lda,
     const float *x, std::size_t incx, float beta, float *y, std::size_t incy)
 {
-    ::cblas_sgemv((order == RowMajor ? ::CblasRowMajor : ::CblasColMajor),
+    ::cblas_sgemv((layout == RowMajor ? ::CblasRowMajor : ::CblasColMajor),
         (trans == NoTrans ? ::CblasNoTrans : ::CblasTrans),
         static_cast<VSMC_CBLAS_INT>(m), static_cast<VSMC_CBLAS_INT>(n), alpha,
         A, static_cast<VSMC_CBLAS_INT>(lda), x,
@@ -257,12 +257,12 @@ inline void gemv(MatrixOrder order, MatrixTrans trans, std::size_t m,
         static_cast<VSMC_CBLAS_INT>(incy));
 }
 
-inline void gemv(MatrixOrder order, MatrixTrans trans, std::size_t m,
+inline void gemv(MatrixLayout layout, MatrixTrans trans, std::size_t m,
     std::size_t n, double alpha, const double *A, std::size_t lda,
     const double *x, std::size_t incx, double beta, double *y,
     std::size_t incy)
 {
-    ::cblas_dgemv((order == RowMajor ? ::CblasRowMajor : ::CblasColMajor),
+    ::cblas_dgemv((layout == RowMajor ? ::CblasRowMajor : ::CblasColMajor),
         (trans == NoTrans ? ::CblasNoTrans : ::CblasTrans),
         static_cast<VSMC_CBLAS_INT>(m), static_cast<VSMC_CBLAS_INT>(n), alpha,
         A, static_cast<VSMC_CBLAS_INT>(lda), x,

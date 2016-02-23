@@ -88,7 +88,7 @@ class StateMatrixDim<Dynamic>
 
 /// \brief Base type of StateMatrix
 /// \ingroup Core
-template <MatrixOrder Order, std::size_t Dim, typename T>
+template <MatrixLayout Layout, std::size_t Dim, typename T>
 class StateMatrixBase : public internal::StateMatrixDim<Dim>
 {
     public:
@@ -129,7 +129,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
 
     const state_type *data() const { return data_.data(); }
 
-    void swap(StateMatrixBase<Order, Dim, T> &other)
+    void swap(StateMatrixBase<Layout, Dim, T> &other)
     {
         internal::StateMatrixDim<Dim>::swap(other);
         std::swap(size_, other.size_);
@@ -139,8 +139,8 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     template <typename OutputIter>
     void read_state(std::size_t pos, OutputIter first) const
     {
-        const StateMatrix<Order, Dim, T> *sptr =
-            static_cast<const StateMatrix<Order, Dim, T> *>(this);
+        const StateMatrix<Layout, Dim, T> *sptr =
+            static_cast<const StateMatrix<Layout, Dim, T> *>(this);
         for (size_type i = 0; i != size_; ++i, ++first)
             *first = sptr->state(i, pos);
     }
@@ -152,19 +152,19 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
             read_state(d, *first);
     }
 
-    template <MatrixOrder ROrder, typename OutputIter>
+    template <MatrixLayout RLayout, typename OutputIter>
     void read_state_matrix(OutputIter first) const
     {
-        if (ROrder == Order) {
+        if (RLayout == Layout) {
             std::copy(data_.begin(), data_.end(), first);
         } else {
-            const StateMatrix<Order, Dim, T> *sptr =
-                static_cast<const StateMatrix<Order, Dim, T> *>(this);
-            if (ROrder == RowMajor) {
+            const StateMatrix<Layout, Dim, T> *sptr =
+                static_cast<const StateMatrix<Layout, Dim, T> *>(this);
+            if (RLayout == RowMajor) {
                 for (size_type i = 0; i != size_; ++i)
                     for (std::size_t d = 0; d != this->dim(); ++d)
                         *first++ = sptr->state(i, d);
-            } else if (ROrder == ColMajor) {
+            } else if (RLayout == ColMajor) {
                 for (std::size_t d = 0; d != this->dim(); ++d)
                     for (size_type i = 0; i != size_; ++i)
                         *first++ = sptr->state(i, d);
@@ -179,8 +179,8 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         if (this->dim() == 0 || size_ == 0 || !os.good())
             return os;
 
-        const StateMatrix<Order, Dim, T> *sptr =
-            static_cast<const StateMatrix<Order, Dim, T> *>(this);
+        const StateMatrix<Layout, Dim, T> *sptr =
+            static_cast<const StateMatrix<Layout, Dim, T> *>(this);
         for (size_type i = 0; i != size_; ++i) {
             for (std::size_t d = 0; d != this->dim() - 1; ++d)
                 os << sptr->state(i, d) << sepchar;
@@ -198,11 +198,11 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     Vector<T> data_;
 }; // class StateMatrixBase
 
-template <typename CharT, typename Traits, MatrixOrder Order, std::size_t Dim,
-    typename T>
+template <typename CharT, typename Traits, MatrixLayout Layout,
+    std::size_t Dim, typename T>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os,
-    const StateMatrixBase<Order, Dim, T> &smatrix)
+    const StateMatrixBase<Layout, Dim, T> &smatrix)
 {
     return smatrix.print(os);
 }

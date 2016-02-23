@@ -653,28 +653,28 @@ class Sampler
     }
 
     /// \brief Sampler summary data (integer data)
-    template <MatrixOrder Order, typename OutputIter>
+    template <MatrixLayout Layout, typename OutputIter>
     void summary_data_int(OutputIter first) const
     {
         if (summary_data_size_int() == 0)
             return;
 
-        if (Order == RowMajor)
+        if (Layout == RowMajor)
             summary_data_row_int(first);
-        if (Order == ColMajor)
+        if (Layout == ColMajor)
             summary_data_col_int(first);
     }
 
     /// \brief Sampler summary data (floating point data)
-    template <MatrixOrder Order, typename OutputIter>
+    template <MatrixLayout Layout, typename OutputIter>
     void summary_data(OutputIter first) const
     {
         if (summary_data_size() == 0)
             return;
 
-        if (Order == RowMajor)
+        if (Layout == RowMajor)
             summary_data_row(first);
-        if (Order == ColMajor)
+        if (Layout == ColMajor)
             summary_data_col(first);
     }
 

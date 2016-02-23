@@ -133,17 +133,17 @@ class ResampleIndex
         return idx;
     }
 
-    template <MatrixOrder Order>
+    template <MatrixLayout Layout>
     Vector<index_type> index_matrix() const
     {
         return index_matrix_dispatch(
-            std::integral_constant<MatrixOrder, Order>());
+            std::integral_constant<MatrixLayout, Layout>());
     }
 
-    template <MatrixOrder Order, typename OutputIter>
+    template <MatrixLayout Layout, typename OutputIter>
     void read_index_matrix(OutputIter first) const
     {
-        Vector<index_type> idxmat(index_matrix<Order>());
+        Vector<index_type> idxmat(index_matrix<Layout>());
         std::copy(idxmat.begin(), idxmat.end(), first);
     }
 
@@ -154,7 +154,7 @@ class ResampleIndex
     Vector<Vector<index_type>> index_;
 
     Vector<index_type> index_matrix_dispatch(
-        std::integral_constant<MatrixOrder, RowMajor>) const
+        std::integral_constant<MatrixLayout, RowMajor>) const
     {
         Vector<index_type> idxmat(size_ * iter_size_);
         if (size_ * iter_size_ == 0)
@@ -181,7 +181,7 @@ class ResampleIndex
     }
 
     Vector<index_type> index_matrix_dispatch(
-        std::integral_constant<MatrixOrder, ColMajor>) const
+        std::integral_constant<MatrixLayout, ColMajor>) const
     {
         Vector<index_type> idxmat(size_ * iter_size_);
         if (size_ * iter_size_ == 0)

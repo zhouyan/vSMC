@@ -33,8 +33,8 @@
 #define VSMC_RNG_DISCRETE_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/u01_distribution.hpp>
 #include <vsmc/math/cblas.hpp>
+#include <vsmc/rng/u01_distribution.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(flag)          \
     VSMC_RUNTIME_ASSERT(                                                      \
@@ -61,8 +61,7 @@ class DiscreteDistribution
         param_type() {}
 
         template <typename InputIter>
-        param_type(InputIter first, InputIter last)
-            : probability_(first, last)
+        param_type(InputIter first, InputIter last) : probability_(first, last)
         {
             invariant();
         }
@@ -192,8 +191,7 @@ class DiscreteDistribution
     DiscreteDistribution() {}
 
     template <typename InputIter>
-    DiscreteDistribution(InputIter first, InputIter last)
-        : param_(first, last)
+    DiscreteDistribution(InputIter first, InputIter last) : param_(first, last)
     {
     }
 

@@ -58,7 +58,7 @@ class SingleParticleBase;
 
 class Weight;
 
-template <MatrixOrder, std::size_t, typename>
+template <MatrixLayout, std::size_t, typename>
 class StateMatrix;
 
 template <std::size_t, typename, typename>

@@ -32,9 +32,9 @@
 #ifndef VSMC_EXAMPLE_RNG_DIST_HPP
 #define VSMC_EXAMPLE_RNG_DIST_HPP
 
+#include <boost/math/distributions/chi_squared.hpp>
 #include <vsmc/rng/engine.hpp>
 #include <vsmc/utility/stop_watch.hpp>
-#include <boost/math/distributions/chi_squared.hpp>
 
 #define VSMC_RNG_DIST_1(Name, STD, p1)                                        \
     param[0] = p1;                                                            \

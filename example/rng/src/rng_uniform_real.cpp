@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "rng_dist.hpp"
 #include <vsmc/rng/uniform_real_distribution.hpp>
+#include "rng_dist.hpp"
 
 int main(int argc, char **argv)
 {

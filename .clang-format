@@ -33,6 +33,17 @@ DerivePointerAlignment                         : true
 DisableFormat                                  : false
 # ExperimentalAutoDetectBinPacking               :
 # ForEachMacros                                  :
+IncludeCategories                              :
+  - Regex:           '^<vsmc/internal'
+    Priority:        1
+  - Regex:           '^<vsmc/.*/internal'
+    Priority:        2
+  - Regex:           '^<vsmc/internal'
+    Priority:        3
+  - Regex:           '^<'
+    Priority:        4
+  - Regex:           '.\*'
+    Priority:        5
 IndentCaseLabels                               : true
 IndentWidth                                    : 4
 IndentWrappedFunctionNames                     : true

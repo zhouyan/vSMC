@@ -75,15 +75,15 @@
 
 #ifndef VSMC_OPENCL
 #ifdef __cplusplus
-#include <cstdlib>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include <cmath>
+#include <cstdlib>
 #else
-#include <stdlib.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <math.h>
+#include <stdlib.h>
 #endif
 #endif
 

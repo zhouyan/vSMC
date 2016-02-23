@@ -213,16 +213,16 @@ class Monitor
     ///
     /// \param first The output iterator
     ///
-    /// For example, say `first` is of type `double *`, then if `order ==
+    /// For example, say `first` is of type `double *`, then if `layout ==
     /// ColMajor`, then, `first[j * iter_size() + i] == record(i, j)`.
-    /// Otherwise, if `order == RowMajor`, then `first[i * dim() + j] ==
+    /// Otherwise, if `layout == RowMajor`, then `first[i * dim() + j] ==
     /// record(i, j)`. That is, the output is an `iter_size()` by `dim()`
-    /// matrix, with the usual meaning of column or row major order.
-    template <MatrixOrder Order, typename OutputIter>
+    /// matrix, with the usual meaning of column or row major layout.
+    template <MatrixLayout Layout, typename OutputIter>
     void read_record_matrix(OutputIter first) const
     {
         const std::size_t N = iter_size();
-        if (Order == ColMajor) {
+        if (Layout == ColMajor) {
             for (std::size_t d = 0; d != dim_; ++d) {
                 const double *riter = record_.data() + d;
                 for (std::size_t i = 0; i != N; ++i, ++first, riter += dim_)
@@ -230,7 +230,7 @@ class Monitor
             }
         }
 
-        if (Order == RowMajor)
+        if (Layout == RowMajor)
             std::copy(record_.begin(), record_.end(), first);
     }
 

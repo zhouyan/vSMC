@@ -33,8 +33,8 @@
 #define VSMC_RNG_RNG_SET_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/seed.hpp>
 #include <vsmc/rng/engine.hpp>
+#include <vsmc/rng/seed.hpp>
 #if VSMC_HAS_TBB
 #include <tbb/tbb.h>
 #endif
