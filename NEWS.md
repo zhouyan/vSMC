@@ -2,7 +2,11 @@
 
 ## Changed behaviors
 
-* `MatrixOrder` is renamed to `MatrixLayout`
+* `MatrixOrder` is now an alias to `MatrixLayout`
+* Enumerator `MatrixUPLO`, `MatrixDiag`, `MatrixSide` are now defined,
+  corresponding to their CBLAS definitions.
+* Enumerator `MatrixStorage` is defined for full, band, packed, and rectangular
+  full packed (RFP) storage schemes.
 
 ## New features
 

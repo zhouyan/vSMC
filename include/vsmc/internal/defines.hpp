@@ -44,23 +44,35 @@ class NullType;
 
 /// \brief Dynamic dimension
 /// \ingroup Definitions
-enum {
-    Dynamic = 0 ///< Used to specify a dimension template parameter is dynamic
-};              // enum
+enum { Dynamic = 0 };
 
 /// \brief Matrix layout
 /// \ingroup Definitions
-enum MatrixLayout {
-    RowMajor = 101, ///< Data are stored row by row in memory
-    ColMajor = 102  ///< Data are stored column by column in memory
-};                  // enum MatrixLayout
+enum MatrixLayout { RowMajor = 101, ColMajor = 102 };
+
+/// \brief Alias to MatrixOrder
+/// \ingroup Definitions
+using MatrixOrder = MatrixLayout;
 
 /// \brief Matrix transpose
 /// \ingroup Definitions
-enum MatrixTrans {
-    NoTrans = 111, ///< The matrix shall not be transposed
-    Trans = 112    ///< The matrix shall be transposed
-};                 // enum MatrixTrans
+enum MatrixTrans { NoTrans = 111, Trans = 112, ConjTrans = 113 };
+
+/// \brief Matrix lower/upper
+/// \ingroup Definitions
+enum MatrixUPLO { Upper = 121, Lower = 122 };
+
+/// \brief Matrix unit-diagonal
+/// \ingroup Definitions
+enum MatrixDiag { NonUnit = 131, Unit = 132 };
+
+/// \brief MatrixSide
+/// \ingroup Definitions
+enum MatrixSide { Left = 141, Right = 141 };
+
+/// \brief Matrix storage
+/// \ingroup Definitions
+enum MatrixStorage { Full, Band, Packed, RFP };
 
 /// \brief Resampling schemes
 /// \ingroup Definitions
