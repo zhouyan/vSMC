@@ -67,8 +67,8 @@ class Monitor
     using eval_type =
         std::function<void(std::size_t, std::size_t, Particle<T> &, double *)>;
 
-    explicit Monitor(std::size_t dim, const eval_type &eval,
-        bool record_only = false, MonitorStage stage = MonitorMCMC)
+    Monitor(std::size_t dim, const eval_type &eval, bool record_only = false,
+        MonitorStage stage = MonitorMCMC)
         : dim_(dim)
         , eval_(eval)
         , recording_(true)
