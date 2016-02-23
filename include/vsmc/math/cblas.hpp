@@ -34,6 +34,7 @@
 
 #include <vsmc/internal/config.h>
 #include <vsmc/internal/defines.hpp>
+#include <algorithm>
 #include <cmath>
 #include <numeric>
 
