@@ -2,9 +2,7 @@
 
 ## New features
 
-* `Particle` has a new member `sp` that return `SingleParticle` objects.
-* `Monitor` has a new member `name` that automatically name the variables
-  sequentially.
+`Particle` now has a new `sp` member that return `SingleParticle` objects.
 
 # Changes since v2.0.0
 
