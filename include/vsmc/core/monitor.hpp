@@ -67,8 +67,8 @@ class Monitor
     using eval_type =
         std::function<void(std::size_t, std::size_t, Particle<T> &, double *)>;
 
-    explicit Monitor(std::size_t dim, const eval_type &eval,
-        bool record_only = false, MonitorStage stage = MonitorMCMC)
+    Monitor(std::size_t dim, const eval_type &eval, bool record_only = false,
+        MonitorStage stage = MonitorMCMC)
         : dim_(dim)
         , eval_(eval)
         , recording_(true)
@@ -120,6 +120,16 @@ class Monitor
         VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(name);
 
         return name_[id];
+    }
+
+    /// \brief Automatically name each variable
+    ///
+    /// \param var The base name of the variable. Each variable will be named
+    /// `var.0`, `var.1`,...
+    void name(const std::string &var)
+    {
+        for (std::size_t i = 0; i != name_.size(); ++i)
+            name_[i] = var + "." + internal::itos(i);
     }
 
     /// \brief Get the iteration index of the sampler of a given Monitor
