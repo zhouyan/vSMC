@@ -58,22 +58,6 @@ using MatrixOrder = MatrixLayout;
 /// \ingroup Definitions
 enum MatrixTrans { NoTrans = 111, Trans = 112, ConjTrans = 113 };
 
-/// \brief Matrix lower/upper
-/// \ingroup Definitions
-enum MatrixUPLO { Upper = 121, Lower = 122 };
-
-/// \brief Matrix unit-diagonal
-/// \ingroup Definitions
-enum MatrixDiag { NonUnit = 131, Unit = 132 };
-
-/// \brief MatrixSide
-/// \ingroup Definitions
-enum MatrixSide { Left = 141, Right = 141 };
-
-/// \brief Matrix storage
-/// \ingroup Definitions
-enum MatrixStorage { Full, Band, Packed, RFP };
-
 /// \brief Resampling schemes
 /// \ingroup Definitions
 enum ResampleScheme {
