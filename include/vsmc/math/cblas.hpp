@@ -56,10 +56,10 @@ namespace vsmc
 /// @{
 
 /// \brief Computes the sum of magnitudes of the vector elements
-template <typename T>
-inline T asum(std::size_t n, const T *x, std::size_t incx)
+template <typename RealType>
+inline RealType asum(std::size_t n, const RealType *x, std::size_t incx)
 {
-    T sum = 0;
+    RealType sum = 0;
     std::size_t j = 0;
     for (std::size_t i = 0; i != n; ++i, j += incx)
         sum += std::fabs(x[j]);
@@ -68,9 +68,9 @@ inline T asum(std::size_t n, const T *x, std::size_t incx)
 }
 
 /// \brief Computes a vector-scalar product and adds the result to a vector
-template <typename T>
-inline void axpy(
-    std::size_t n, T a, const T *x, std::size_t incx, T *y, std::size_t incy)
+template <typename RealType>
+inline void axpy(std::size_t n, RealType a, const RealType *x,
+    std::size_t incx, RealType *y, std::size_t incy)
 {
     std::size_t j = 0;
     std::size_t k = 0;
@@ -79,9 +79,9 @@ inline void axpy(
 }
 
 /// \brief Copies vector to another vector
-template <typename T>
-inline void copy(
-    std::size_t n, const T *x, std::size_t incx, T *y, std::size_t incy)
+template <typename RealType>
+inline void copy(std::size_t n, const RealType *x, std::size_t incx,
+    RealType *y, std::size_t incy)
 {
     if (incx == 1 && incy == 1) {
         std::copy_n(x, n, y);
@@ -95,11 +95,11 @@ inline void copy(
 }
 
 /// \brief Computes a vector-vector dot product
-template <typename T>
-inline T dot(
-    std::size_t n, const T *x, std::size_t incx, const T *y, std::size_t incy)
+template <typename RealType>
+inline RealType dot(std::size_t n, const RealType *x, std::size_t incx,
+    const RealType *y, std::size_t incy)
 {
-    T sum = 0;
+    RealType sum = 0;
     std::size_t j = 0;
     std::size_t k = 0;
     for (std::size_t i = 0; i != n; ++i, j += incx, k += incy)
@@ -109,19 +109,66 @@ inline T dot(
 }
 
 /// \brief Computes the Euclidean norm of a vector
-template <typename T>
-inline T nrm2(std::size_t n, const T *x, std::size_t incx)
+template <typename RealType>
+inline RealType nrm2(std::size_t n, const RealType *x, std::size_t incx)
 {
     return std::sqrt(dot(n, x, incx, x, incx));
 }
 
 /// \brief Computes the product of a vector by a scalar
-template <typename T>
-inline void scal(std::size_t n, T a, T *x, std::size_t incx)
+template <typename RealType>
+inline void scal(std::size_t n, RealType a, RealType *x, std::size_t incx)
 {
     std::size_t j = 0;
     for (std::size_t i = 0; i != n; ++i, j += incx)
         x[j] *= a;
+}
+
+/// \brief Swaps a vector with another vector
+template <typename RealType>
+inline void swap(std::size_t n, RealType *x, std::size_t incx, RealType *y,
+    std::size_t incy)
+{
+    std::size_t j = 0;
+    std::size_t k = 0;
+    for (std::size_t i = 0; i != n; ++i, j += incx, k += incy)
+        std::swap(x[j], y[k]);
+}
+
+/// \brief Finds the index of the element with maximum absolute value
+template <typename RealType>
+inline std::size_t iamax(std::size_t n, const RealType *x, std::size_t incx)
+{
+    std::size_t j = 0;
+    std::size_t k = 0;
+    RealType val = std::abs(x[0]);
+    for (std::size_t i = 0; i != n; ++i, j += incx) {
+        RealType v = std::abs(x[j]);
+        if (val < v) {
+            val = v;
+            k = j;
+        }
+    }
+
+    return k;
+}
+
+/// \brief Finds the index of the element with minimum absolute value
+template <typename RealType>
+inline std::size_t iamin(std::size_t n, const RealType *x, std::size_t incx)
+{
+    std::size_t j = 0;
+    std::size_t k = 0;
+    RealType val = std::abs(x[0]);
+    for (std::size_t i = 0; i != n; ++i, j += incx) {
+        RealType v = std::abs(x[j]);
+        if (val > v) {
+            val = v;
+            k = j;
+        }
+    }
+
+    return k;
 }
 
 /// @}
@@ -131,10 +178,11 @@ inline void scal(std::size_t n, T a, T *x, std::size_t incx)
 /// @{
 
 /// \brief Computes a matrix-vector product using a general matrix
-template <typename T>
+template <typename RealType>
 inline void gemv(MatrixLayout layout, MatrixTrans trans, std::size_t m,
-    std::size_t n, T alpha, const T *A, std::size_t lda, const T *x,
-    std::size_t incx, T beta, T *y, std::size_t incy)
+    std::size_t n, RealType alpha, const RealType *A, std::size_t lda,
+    const RealType *x, std::size_t incx, RealType beta, RealType *y,
+    std::size_t incy)
 {
     std::size_t nrow = trans == NoTrans ? m : n;
     std::size_t ncol = trans == NoTrans ? n : m;
@@ -145,7 +193,7 @@ inline void gemv(MatrixLayout layout, MatrixTrans trans, std::size_t m,
         (layout == ColMajor && trans == Trans)) {
         std::size_t k = 0;
         for (std::size_t r = 0; r != nrow; ++r, k += incy)
-            y[k] += alpha * dot<T>(ncol, x, incx, A + r * lda, 1);
+            y[k] += alpha * dot<RealType>(ncol, x, incx, A + r * lda, 1);
     } else {
         std::size_t j = 0;
         for (std::size_t c = 0; c != ncol; ++c, j += incx) {
@@ -249,6 +297,46 @@ inline void scal(std::size_t n, double a, double *x, std::size_t incx)
 {
     ::cblas_dscal(static_cast<VSMC_CBLAS_INT>(n), a, x,
         static_cast<VSMC_CBLAS_INT>(incx));
+}
+
+inline void swap(
+    std::size_t n, float *x, std::size_t incx, float *y, std::size_t incy)
+{
+    ::cblas_sswap(static_cast<VSMC_CBLAS_INT>(n), x,
+        static_cast<VSMC_CBLAS_INT>(incx), y,
+        static_cast<VSMC_CBLAS_INT>(incy));
+}
+
+inline void swap(
+    std::size_t n, double *x, std::size_t incx, double *y, std::size_t incy)
+{
+    ::cblas_dswap(static_cast<VSMC_CBLAS_INT>(n), x,
+        static_cast<VSMC_CBLAS_INT>(incx), y,
+        static_cast<VSMC_CBLAS_INT>(incy));
+}
+
+inline std::size_t iamax(std::size_t n, const float *x, std::size_t incx)
+{
+    return static_cast<std::size_t>(::cblas_isamax(
+        static_cast<VSMC_CBLAS_INT>(n), x, static_cast<VSMC_CBLAS_INT>(incx)));
+}
+
+inline std::size_t iamax(std::size_t n, const double *x, std::size_t incx)
+{
+    return static_cast<std::size_t>(::cblas_idamax(
+        static_cast<VSMC_CBLAS_INT>(n), x, static_cast<VSMC_CBLAS_INT>(incx)));
+}
+
+inline std::size_t iamin(std::size_t n, const float *x, std::size_t incx)
+{
+    return static_cast<std::size_t>(::cblas_isamin(
+        static_cast<VSMC_CBLAS_INT>(n), x, static_cast<VSMC_CBLAS_INT>(incx)));
+}
+
+inline std::size_t iamin(std::size_t n, const double *x, std::size_t incx)
+{
+    return static_cast<std::size_t>(::cblas_idamin(
+        static_cast<VSMC_CBLAS_INT>(n), x, static_cast<VSMC_CBLAS_INT>(incx)));
 }
 
 inline void gemv(MatrixLayout layout, MatrixTrans trans, std::size_t m,
