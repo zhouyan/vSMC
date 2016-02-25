@@ -51,7 +51,6 @@ ADD_HEADER_EXECUTABLE(vsmc/internal/traits   TRUE)
 
 ADD_HEADER_EXECUTABLE(vsmc/math/math TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/math/constants TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/math/cblas     TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/math/vmath     TRUE)
 
 ADD_HEADER_EXECUTABLE(vsmc/resample/resample TRUE)

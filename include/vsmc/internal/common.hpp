@@ -37,11 +37,7 @@
 #include <vsmc/internal/defines.hpp>
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
-
-#include <vsmc/math/cblas.hpp>
-#include <vsmc/math/constants.hpp>
-#include <vsmc/math/vmath.hpp>
-
+#include <vsmc/math/math.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 
 #include <algorithm>

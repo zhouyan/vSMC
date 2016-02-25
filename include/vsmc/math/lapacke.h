@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/math/math.hpp
+// vSMC/include/vsmc/math/lapacke.h
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,13 +29,15 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_MATH_MATH_HPP
-#define VSMC_MATH_MATH_HPP
+#ifndef VSMC_MATH_LAPACKE_H
+#define VSMC_MATH_LAPACKE_H
 
 #include <vsmc/internal/config.h>
-#include <vsmc/math/cblas.h>
-#include <vsmc/math/constants.hpp>
-#include <vsmc/math/lapacke.h>
-#include <vsmc/math/vmath.hpp>
 
-#endif // VSMC_MATH_MATH_HPP
+#if VSMC_HAS_MKL
+#include <mkl_lapacke.h>
+#else
+#include <lapacke.h>
+#endif
+
+#endif // VSMC_MATH_LAPACKE_H

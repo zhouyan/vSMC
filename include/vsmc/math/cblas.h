@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/math/cblas.hpp
+// vSMC/include/vsmc/math/cblas.h
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,13 +29,13 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_MATH_CBLAS_HPP
-#define VSMC_MATH_CBLAS_HPP
+#ifndef VSMC_MATH_CBLAS_H
+#define VSMC_MATH_CBLAS_H
 
 #include <vsmc/internal/config.h>
 
 #if VSMC_HAS_MKL
-#include <mkl.h>
+#include <mkl_cblas.h>
 #define VSMC_CBLAS_INT MKL_INT
 #else
 #include <cblas.h>
@@ -44,4 +44,4 @@
 #endif
 #endif
 
-#endif // VSMC_MATH_CBLAS_HPP
+#endif // VSMC_MATH_CBLAS_H

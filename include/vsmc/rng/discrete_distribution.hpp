@@ -33,7 +33,6 @@
 #define VSMC_RNG_DISCRETE_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/math/cblas.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(flag)          \
