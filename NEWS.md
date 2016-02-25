@@ -2,7 +2,8 @@
 
 ## Changed behaviors
 
-* `MatrixOrder` is now an alias to `MatrixLayout`
+* `MatrixOrder` is now an alias to `MatrixLayout`.
+* CBLAS is now a required dependency.
 
 ## New features
 
