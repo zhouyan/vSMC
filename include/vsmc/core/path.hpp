@@ -203,8 +203,8 @@ class Path
         const std::size_t N = static_cast<std::size_t>(particle.size());
         buffer_.resize(N);
         double grid = eval_(iter, particle, buffer_.data());
-        double integrand =
-            dot(N, particle.weight().data(), 1, buffer_.data(), 1);
+        double integrand = ::cblas_ddot(static_cast<VSMC_CBLAS_INT>(N),
+            particle.weight().data(), 1, buffer_.data(), 1);
         push_back(iter, grid, integrand);
     }
 

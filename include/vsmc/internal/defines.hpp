@@ -54,10 +54,6 @@ enum MatrixLayout { RowMajor = 101, ColMajor = 102 };
 /// \ingroup Definitions
 using MatrixOrder = MatrixLayout;
 
-/// \brief Matrix transpose
-/// \ingroup Definitions
-enum MatrixTrans { NoTrans = 111, Trans = 112, ConjTrans = 113 };
-
 /// \brief Resampling schemes
 /// \ingroup Definitions
 enum ResampleScheme {

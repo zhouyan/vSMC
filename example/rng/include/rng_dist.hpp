@@ -189,8 +189,9 @@ inline void rng_dist_moments(const vsmc::Vector<double> &r,
     vsmc::Vector<double> &mean, vsmc::Vector<double> &variance)
 {
     mean.push_back(std::accumulate(r.begin(), r.end(), 0.0) / r.size());
-    variance.push_back(
-        vsmc::dot(r.size(), r.data(), 1, r.data(), 1) / r.size() -
+    variance.push_back(cblas_ddot(static_cast<VSMC_CBLAS_INT>(r.size()),
+                           r.data(), 1, r.data(), 1) /
+            r.size() -
         mean.back() * mean.back());
 }
 

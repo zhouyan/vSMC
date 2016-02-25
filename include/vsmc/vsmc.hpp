@@ -65,10 +65,6 @@
 /// \defgroup Math Mathematics
 /// \brief Mathematical utilities
 
-/// \defgroup CBLAS C BLAS
-/// \ingroup Math
-/// \brief Selected C BLAS like routines
-
 /// \defgroup Constants Constants
 /// \ingroup Math
 /// \brief Mathematical constants

@@ -110,20 +110,12 @@
 
 // Optional libraries
 
-#ifndef VSMC_HAS_CBLAS
-#define VSMC_HAS_CBLAS 0
-#endif
-
 #ifndef VSMC_HAS_HDF5
 #define VSMC_HAS_HDF5 0
 #endif
 
 #ifndef VSMC_HAS_MKL
 #define VSMC_HAS_MKL 0
-#endif
-
-#ifndef VSMC_USE_MKL_CBLAS
-#define VSMC_USE_MKL_CBLAS VSMC_HAS_MKL
 #endif
 
 #ifndef VSMC_USE_MKL_VML
