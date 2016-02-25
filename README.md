@@ -54,8 +54,11 @@ repository, including MPI and [OpenCL][OpenCL].
 
 # Third-party dependencies
 
-This library has no dependences other than C++ standard libraries (C++11). Any
-C++11 language features are optional.
+This library requires a working BLAS/LAPACK implementation, with the standard C
+interface headers (`cblas.h` and `lapacke.h`).
+
+This library has no other dependencies other than C++ standard libraries
+(C++11). Any C++11 language features are optional.
 
 In particular, the library use the `<functional>` and `<random>` headers, which
 are parts of the C++11 standard libraries. Equivalences can be found in recent
