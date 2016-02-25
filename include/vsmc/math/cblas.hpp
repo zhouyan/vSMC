@@ -33,10 +33,6 @@
 #define VSMC_MATH_CBLAS_HPP
 
 #include <vsmc/internal/config.h>
-#include <vsmc/internal/defines.hpp>
-#include <algorithm>
-#include <cmath>
-#include <numeric>
 
 #if VSMC_HAS_MKL
 #include <mkl.h>
