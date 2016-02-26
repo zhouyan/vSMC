@@ -179,7 +179,7 @@ inline void normal_distribution_impl(
 
 } // namespace vsmc::internal
 
-/// \brief Generating normal random variates
+/// \brief Generating Normal random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void normal_distribution(

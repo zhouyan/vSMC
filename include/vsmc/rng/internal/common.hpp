@@ -500,6 +500,9 @@ class LognormalDistribution;
 template <typename = double>
 class NormalDistribution;
 
+template <typename = double, std::size_t = Dynamic>
+class NormalMVDistribution;
+
 template <typename = double>
 class ParetoDistribution;
 
@@ -577,6 +580,10 @@ inline void rng_rand(
 template <typename RealType, typename RNGType>
 inline void rng_rand(
     RNGType &, NormalDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, std::size_t Dim, typename RNGType>
+inline void rng_rand(
+    RNGType &, NormalMVDistribution<RealType, Dim> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
 inline void rng_rand(
@@ -656,6 +663,10 @@ inline void lognormal_distribution(
 template <typename RealType, typename RNGType>
 inline void normal_distribution(
     RNGType &, std::size_t, RealType *, RealType, RealType);
+
+template <typename RealType, typename RNGType>
+inline void normal_mv_distribution(RNGType &, std::size_t, RealType *,
+    std::size_t, const RealType *, const RealType *);
 
 template <typename RealType, typename RNGType>
 inline void pareto_distribution(

@@ -497,6 +497,22 @@ inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
 }
 
 template <MKL_INT BRNG, int Bits>
+inline void normal_mv_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    float *r, std::size_t m, const float *mean, const float *chol)
+{
+    rng.stream().gaussian_mv(static_cast<MKL_INT>(n), r,
+        static_cast<MKL_INT>(m), VSL_MATRIX_STORAGE_PACKED, mean, chol);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void normal_mv_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+    double *r, std::size_t m, const double *mean, const double *chol)
+{
+    rng.stream().gaussian_mv(static_cast<MKL_INT>(n), r,
+        static_cast<MKL_INT>(m), VSL_MATRIX_STORAGE_PACKED, mean, chol);
+}
+
+template <MKL_INT BRNG, int Bits>
 inline void exponential_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float lambda)
 {
