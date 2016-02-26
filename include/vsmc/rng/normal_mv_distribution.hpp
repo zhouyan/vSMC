@@ -99,9 +99,9 @@ class NormalMVDistribution
             init(mean, chol);
         }
 
-        explicit param_type(std::size_t m = 0, const RealType *mean = nullptr,
-            const RealType *chol = nullptr)
-            : mean_(m), chol_(m * (m + 1) / 2)
+        explicit param_type(std::size_t dim = 1,
+            const RealType *mean = nullptr, const RealType *chol = nullptr)
+            : mean_(dim), chol_(dim * (dim + 1) / 2)
         {
             VSMC_STATIC_ASSERT_RNG_NORMAL_MV_DISTRIBUTION_DYNAMIC_DIM(Dim);
 
@@ -135,7 +135,7 @@ class NormalMVDistribution
             if (!os.good())
                 return os;
 
-            os << param.mean_.size() << ' ';
+            os << param.dim() << ' ';
             os << param.mean_ << ' ';
             os << param.chol_;
 
@@ -149,15 +149,15 @@ class NormalMVDistribution
             if (!is.good())
                 return is;
 
-            std::size_t m = 0;
-            is >> std::ws >> m;
+            std::size_t dim = 0;
+            is >> std::ws >> dim;
             if (!is.good())
                 return is;
 
             result_type mean;
             matrix_type chol;
-            resize(mean, m);
-            resize(chol, m * (m + 1) / 2);
+            resize(mean, dim);
+            resize(chol, dim * (dim + 1) / 2);
             is >> std::ws >> mean;
             is >> std::ws >> chol;
 
@@ -202,9 +202,9 @@ class NormalMVDistribution
         reset();
     }
 
-    explicit NormalMVDistribution(std::size_t m = 0,
+    explicit NormalMVDistribution(std::size_t dim = 1,
         const RealType *mean = nullptr, const RealType *chol = nullptr)
-        : param_(m, mean, chol), rnorm_(0, 1)
+        : param_(dim, mean, chol), rnorm_(0, 1)
     {
         reset();
     }
@@ -349,7 +349,7 @@ class NormalMVDistribution
 namespace internal
 {
 
-inline void normal_mv_mulcol(
+inline void normal_mv_distribution_mulchol(
     std::size_t n, float *r, std::size_t m, const float *chol)
 {
     ::cblas_strmm(::CblasRowMajor, ::CblasRight, ::CblasLower, ::CblasTrans,
@@ -358,7 +358,7 @@ inline void normal_mv_mulcol(
         static_cast<VSMC_CBLAS_INT>(m), r, static_cast<VSMC_CBLAS_INT>(m));
 }
 
-inline void normal_mv_mulcol(
+inline void normal_mv_distribution_mulchol(
     std::size_t n, double *r, std::size_t m, const double *chol)
 {
     ::cblas_dtrmm(::CblasRowMajor, ::CblasRight, ::CblasLower, ::CblasTrans,
@@ -373,16 +373,16 @@ inline void normal_mv_mulcol(
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
-    std::size_t m, const RealType *mean, const RealType *chol)
+    std::size_t dim, const RealType *mean, const RealType *chol)
 {
-    Vector<RealType> cholf(m * m);
-    for (std::size_t i = 0; i != m; ++i)
+    Vector<RealType> cholf(dim * dim);
+    for (std::size_t i = 0; i != dim; ++i)
         for (std::size_t j = 0; j <= i; ++j)
-            cholf[i * m + j] = *chol++;
-    normal_distribution(rng, n * m, r, 0.0, 1.0);
-    internal::normal_mv_mulcol(n, r, m, cholf.data());
-    for (std::size_t i = 0; i != n; ++i, r += m)
-        add(m, mean, r, r);
+            cholf[i * dim + j] = *chol++;
+    normal_distribution(rng, n * dim, r, 0.0, 1.0);
+    internal::normal_mv_distribution_mulchol(n, r, dim, cholf.data());
+    for (std::size_t i = 0; i != n; ++i, r += dim)
+        add(dim, mean, r, r);
 }
 
 template <typename RealType, std::size_t Dim, typename RNGType>
