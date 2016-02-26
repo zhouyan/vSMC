@@ -326,8 +326,7 @@ class NormalMVDistribution
     {
         result_type r;
         resize(r, dim());
-        for (std::size_t i = 0; i != dim(); ++i)
-            r[i] = rnorm_(rng);
+        rnorm_(rng, dim(), r.data());
         mulchol(r.data());
         add(dim(), mean(), r.data(), r.data());
 

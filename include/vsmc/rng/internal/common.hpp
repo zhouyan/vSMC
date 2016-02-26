@@ -150,7 +150,12 @@
     void operator()(                                                          \
         RNGType &rng, std::size_t n, result_type *r, const param_type &param) \
     {                                                                         \
-        name##_distribution(rng, n, r, param.p1());                           \
+        if (n < 100) {                                                        \
+            for (std::size_t i = 0; i != n; ++i)                              \
+                r[i] = operator()(rng, param);                                \
+        } else {                                                              \
+            name##_distribution(rng, n, r, param.p1());                       \
+        }                                                                     \
     }                                                                         \
                                                                               \
     private:                                                                  \
@@ -277,7 +282,12 @@
     void operator()(                                                          \
         RNGType &rng, std::size_t n, result_type *r, const param_type &param) \
     {                                                                         \
-        name##_distribution(rng, n, r, param.p1(), param.p2());               \
+        if (n < 100) {                                                        \
+            for (std::size_t i = 0; i != n; ++i)                              \
+                r[i] = operator()(rng, param);                                \
+        } else {                                                              \
+            name##_distribution(rng, n, r, param.p1(), param.p2());           \
+        }                                                                     \
     }                                                                         \
                                                                               \
     private:                                                                  \
