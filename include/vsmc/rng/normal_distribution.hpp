@@ -99,6 +99,9 @@ class NormalDistribution
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os, const distribution_type &dist)
     {
+        if (!os.good())
+            return os;
+
         os << dist.param_ << ' ';
         os << dist.v_ << ' ';
         os << dist.saved_;
@@ -110,6 +113,9 @@ class NormalDistribution
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is, distribution_type &dist)
     {
+        if (!is.good())
+            return is;
+
         param_type param;
         result_type v;
         bool saved;

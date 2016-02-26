@@ -294,7 +294,7 @@
     friend bool operator!=(                                                   \
         const distribution_type &dist1, const distribution_type &dist2)       \
     {                                                                         \
-        return dist1.param_ != dist2.param_;                                  \
+        return !(dist1 == dist2);                                             \
     }                                                                         \
                                                                               \
     template <typename CharT, typename Traits>                                \
@@ -311,7 +311,8 @@
         std::basic_istream<CharT, Traits> &is, distribution_type &dist)       \
     {                                                                         \
         is >> std::ws >> dist.param_;                                         \
-        dist.reset();                                                         \
+        if (is.good())                                                        \
+            dist.reset();                                                     \
                                                                               \
         return is;                                                            \
     }

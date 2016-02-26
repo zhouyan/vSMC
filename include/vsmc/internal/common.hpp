@@ -121,7 +121,7 @@ template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
 {
-    if (!os.good())
+    if (!os.good() || N == 0)
         return os;
 
     for (std::size_t i = 0; i < N - 1; ++i)
@@ -144,6 +144,37 @@ inline std::basic_istream<CharT, Traits> &operator>>(
 
     if (is.good())
         ary = std::move(ary_tmp);
+
+    return is;
+}
+
+template <typename CharT, typename Traits, typename T, std::size_t N>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const Vector<T> &vec)
+{
+    if (!os.good() || vec.size() == 0)
+        return os;
+
+    for (std::size_t i = 0; i < vec.size() - 1; ++i)
+        os << vec[i] << ' ';
+    os << vec[N - 1];
+
+    return os;
+}
+
+template <typename CharT, typename Traits, typename T, std::size_t N>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, Vector<T> &vec)
+{
+    if (!is.good())
+        return is;
+
+    Vector<T> vec_tmp(vec.size());
+    for (std::size_t i = 0; i != N; ++i)
+        is >> std::ws >> vec_tmp[i];
+
+    if (is.good())
+        vec = std::move(vec_tmp);
 
     return is;
 }
