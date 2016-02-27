@@ -60,6 +60,16 @@ inline bool normal_mv_distribution_check_param(
 
 /// \brief Multivariate Normal distribution
 /// \ingroup Distribution
+///
+/// \details
+/// The distribution is parameterized by its mean vector and the lower
+/// triangular elements of the Cholesky decomposition of the covaraince matrix,
+/// packed row by row.
+///
+/// \tparam RealType Only `float` and `double` are supported.
+/// \tparam Dim If `Dim > 0`, then the distribution has a static size and does
+/// not use dynamic memory. If `Dim == Dynamic`, then the dimension of the
+/// distribution is specified at runtime.
 template <typename RealType, std::size_t Dim>
 class NormalMVDistribution
 {
@@ -195,6 +205,7 @@ class NormalMVDistribution
         }
     }; // class param_type
 
+    /// \brief Only usable when `Dim > 0`
     explicit NormalMVDistribution(
         const RealType *mean = nullptr, const RealType *chol = nullptr)
         : param_(mean, chol), rnorm_(0, 1)
@@ -202,6 +213,7 @@ class NormalMVDistribution
         reset();
     }
 
+    /// \brief Only usable when `Dim == Dynamic`
     explicit NormalMVDistribution(std::size_t dim = 1,
         const RealType *mean = nullptr, const RealType *chol = nullptr)
         : param_(dim, mean, chol), rnorm_(0, 1)
@@ -315,6 +327,79 @@ class NormalMVDistribution
         }
 
         return is;
+    }
+
+    /// \brief Compute Cholesky decomposition of the covariance matrix
+    ///
+    /// \param dim The number of rows of the covariance matrix
+    /// \param cov The covariance matrix
+    /// \param chol The output lower triangular elements of the Cholesky
+    /// decomposition, packed row by row. This can be directly used as the
+    /// input parameter of the NormalMVDistribution constructors.
+    /// \param layout The storage layout of the covariance matrix
+    /// \param upper If `true`, the upper triangular of the covariance matrix
+    /// shall be used. Otherwise the lower triangular shall be used.
+    /// \param packed If the upper or lower triangular of covariance matrix is
+    /// packed, row by row if `layout == RowMajor`, or column by column if
+    /// `layout == ColMajor`.
+    ///
+    /// \return
+    /// - `0` If successful
+    /// - Positive value `i` if the `i`th minor of the covariance matrix is not
+    /// psotive-definite.
+    static int cov_chol(std::size_t dim, const RealType *cov, RealType *chol,
+        MatrixLayout layout = RowMajor, bool upper = false,
+        bool packed = false)
+    {
+        unsigned l = layout == RowMajor ? 0 : 1;
+        unsigned u = upper ? 1 : 0;
+        unsigned p = packed ? 1 : 0;
+        unsigned c = (l << 2) + (u << 1) + p;
+        std::size_t k = 0;
+        switch (c) {
+            case 0: // Row, Lower, Full
+                for (std::size_t i = 0; i != dim; ++i)
+                    for (std::size_t j = 0; j <= i; ++j)
+                        *chol++ = cov[i * dim + j];
+                break;
+            case 1: // Row, Lower, Pack
+                break;
+            case 2: // Row, Upper, Full
+                for (std::size_t i = 0; i != dim; ++i)
+                    for (std::size_t j = 0; j <= i; ++j)
+                        *chol++ = cov[j * dim + i];
+                break;
+            case 3: // Row, Upper, Pack
+                k = 0;
+                for (std::size_t i = 0; i != dim; ++i)
+                    for (std::size_t j = 0; j <= i; ++j)
+                        chol[k++] = cov[dim * j - j * (j + 1) / 2 + i];
+                break;
+            case 4: // Col, Lower, Full
+                k = 0;
+                for (std::size_t i = 0; i != dim; ++i)
+                    for (std::size_t j = 0; j <= i; ++j)
+                        chol[k++] = cov[j * dim + i];
+                break;
+            case 5: // Col, Lower, Pack
+                k = 0;
+                for (std::size_t i = 0; i != dim; ++i)
+                    for (std::size_t j = 0; j <= i; ++j)
+                        chol[k++] = cov[dim * j - j * (j + 1) / 2 + i];
+                break;
+            case 6: // Col, Upper, Full
+                for (std::size_t j = 0; j != dim; ++j)
+                    for (std::size_t i = 0; i <= j; ++i)
+                        *chol++ = cov[j * dim + i];
+                break;
+            case 7: // Col, Upper, Pack
+                std::copy_n(cov, dim * (dim + 1) / 2, chol);
+                break;
+            default: break;
+        }
+
+        return static_cast<int>(LAPACKE_dpptrf(
+            LAPACK_ROW_MAJOR, 'L', static_cast<lapack_int>(dim), chol));
     }
 
     private:
