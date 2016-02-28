@@ -351,16 +351,19 @@ class NormalMVDistribution
         std::size_t k = 0;
         switch (c) {
             case 0: // Row, Lower, Full
+                k = 0;
                 for (std::size_t i = 0; i != dim; ++i)
                     for (std::size_t j = 0; j <= i; ++j)
-                        *chol++ = cov[i * dim + j];
+                        chol[k++] = cov[i * dim + j];
                 break;
             case 1: // Row, Lower, Pack
+                std::copy_n(cov, dim * (dim + 1) / 2, chol);
                 break;
             case 2: // Row, Upper, Full
+                k = 0;
                 for (std::size_t i = 0; i != dim; ++i)
                     for (std::size_t j = 0; j <= i; ++j)
-                        *chol++ = cov[j * dim + i];
+                        chol[k++] = cov[j * dim + i];
                 break;
             case 3: // Row, Upper, Pack
                 k = 0;
@@ -381,9 +384,10 @@ class NormalMVDistribution
                         chol[k++] = cov[dim * j - j * (j + 1) / 2 + i];
                 break;
             case 6: // Col, Upper, Full
+                k = 0;
                 for (std::size_t j = 0; j != dim; ++j)
                     for (std::size_t i = 0; i <= j; ++i)
-                        *chol++ = cov[j * dim + i];
+                        chol[k++] = cov[j * dim + i];
                 break;
             case 7: // Col, Upper, Pack
                 std::copy_n(cov, dim * (dim + 1) / 2, chol);
