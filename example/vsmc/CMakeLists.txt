@@ -65,6 +65,7 @@ ADD_HEADER_EXECUTABLE(vsmc/resample/transform           TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/resample/internal/common     TRUE)
 
 ADD_HEADER_EXECUTABLE(vsmc/rng/rng TRUE "MKL")
+ADD_HEADER_EXECUTABLE(vsmc/rng/random_walk     TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/rng_set         TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/seed            TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/u01             TRUE)

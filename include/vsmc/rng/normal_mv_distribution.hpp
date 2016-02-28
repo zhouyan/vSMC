@@ -51,7 +51,7 @@ namespace internal
 
 template <typename ResultType, typename MatrixType>
 inline bool normal_mv_distribution_check_param(
-    const ResultType &mean, const MatrixType &chol)
+    const ResultType &, const MatrixType &)
 {
     return true;
 }
@@ -190,12 +190,12 @@ class NormalMVDistribution
         void init(const RealType *mean, const RealType *chol)
         {
             if (mean == nullptr)
-                std::fill(mean_.begin(), mean_.end(), 0.0);
+                std::fill(mean_.begin(), mean_.end(), 0);
             else
                 std::copy_n(mean, mean_.size(), mean_.begin());
 
             if (chol == nullptr)
-                std::fill(chol_.begin(), chol_.end(), 0.0);
+                std::fill(chol_.begin(), chol_.end(), 0);
             else
                 std::copy_n(chol, chol_.size(), chol_.begin());
 
@@ -410,24 +410,26 @@ class NormalMVDistribution
     result_type generate(RNGType &rng, const param_type &param)
     {
         result_type r;
-        resize(r, dim());
-        rnorm_(rng, dim(), r.data());
+        resize(r, param.dim());
+        rnorm_(rng, param.dim(), r.data());
         mulchol(r.data());
-        add(dim(), mean(), r.data(), r.data());
+        add(dim(), param.mean(), r.data(), r.data());
 
         return r;
     }
 
-    void mulchol(float *r)
+    void mulchol(float *r, const param_type &param)
     {
         ::cblas_stpmv(::CblasRowMajor, ::CblasLower, ::CblasNoTrans,
-            ::CblasNonUnit, static_cast<VSMC_CBLAS_INT>(dim()), chol(), r, 1);
+            ::CblasNonUnit, static_cast<VSMC_CBLAS_INT>(dim()), param.chol(),
+            r, 1);
     }
 
-    void mulchol(double *r)
+    void mulchol(double *r, const param_type &param)
     {
         ::cblas_dtpmv(::CblasRowMajor, ::CblasLower, ::CblasNoTrans,
-            ::CblasNonUnit, static_cast<VSMC_CBLAS_INT>(dim()), chol(), r, 1);
+            ::CblasNonUnit, static_cast<VSMC_CBLAS_INT>(dim()), param.chol(),
+            r, 1);
     }
 }; // class NormalMVDistribution
 

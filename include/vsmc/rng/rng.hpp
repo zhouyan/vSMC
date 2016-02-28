@@ -35,6 +35,7 @@
 #include <vsmc/internal/config.h>
 #include <vsmc/rng/distribution.hpp>
 #include <vsmc/rng/engine.hpp>
+#include <vsmc/rng/random_walk.hpp>
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
 #include <vsmc/rng/u01.hpp>
