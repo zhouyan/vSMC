@@ -222,7 +222,7 @@ class RandomWalkNormalMV
         rnorm_(rng, y);
         result_type q = 0;
         for (std::size_t i = 0; i != dim(); ++i) {
-            switch (flag_) {
+            switch (flag_[i]) {
                 case 0:
                     q += internal::random_walk_normal_q0(x[i], y[i], y[i]);
                     break;

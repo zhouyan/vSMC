@@ -250,26 +250,26 @@ class NormalMVDistribution
     }
 
     template <typename RNGType>
-    void operator()(RNGType &rng, result_type *r)
+    void operator()(RNGType &rng, RealType *r)
     {
         operator()(rng, r, param_);
     }
 
     template <typename RNGType>
-    void operator()(RNGType &rng, result_type *r, const param_type &param)
+    void operator()(RNGType &rng, RealType *r, const param_type &param)
     {
         generate(rng, r, param);
     }
 
     template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
+    void operator()(RNGType &rng, std::size_t n, RealType *r)
     {
         operator()(rng, n, r, param_);
     }
 
     template <typename RNGType>
     void operator()(
-        RNGType &rng, std::size_t n, result_type *r, const param_type &param)
+        RNGType &rng, std::size_t n, RealType *r, const param_type &param)
     {
         normal_mv_distribution(
             rng, n, r, param.dim(), param.mean(), param.chol());
@@ -423,13 +423,11 @@ class NormalMVDistribution
     NormalDistribution<RealType> rnorm_;
 
     template <typename RNGType>
-    void generate(RNGType &rng, result_type *r, const param_type &param)
+    void generate(RNGType &rng, RealType *r, const param_type &param)
     {
         rnorm_(rng, param.dim(), r);
         mulchol(r, param);
         add(param.dim(), param.mean(), r, r);
-
-        return r;
     }
 
     void mulchol(float *r, const param_type &param)

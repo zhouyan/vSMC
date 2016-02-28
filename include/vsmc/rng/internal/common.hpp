@@ -461,6 +461,15 @@ void rng_rand(RNGType &rng, std::size_t n, typename RNGType::result_type *r)
 template <typename>
 class CounterEngine;
 
+template <typename = double>
+class RandomWalkMCMC;
+
+template <typename = double>
+class RandomWalkNormal;
+
+template <typename = double, std::size_t = Dynamic>
+class RandomWalkNormalMV;
+
 template <typename Generator>
 inline void rng_rand(CounterEngine<Generator> &, std::size_t,
     typename CounterEngine<Generator>::result_type *);
