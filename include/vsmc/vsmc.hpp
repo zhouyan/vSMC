@@ -96,6 +96,10 @@
 /// \ingroup RNG
 /// \brief Random number generating using Random123 Threefry RNG
 
+/// \defgroup RandomWalk Random walk
+/// \ingroup RNG
+/// \brief Random walk MCMC kernels
+
 /// \defgroup RDRAND Intel DRNG
 /// \ingroup RNG
 /// \brief Random number generating using Intel RDRAND instructions

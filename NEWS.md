@@ -3,11 +3,14 @@
 ## Changed behaviors
 
 * `MatrixOrder` is now an alias to `MatrixLayout`.
-* CBLAS is now a required dependency.
+* CBLAS and LAPACK are now required dependency.
 
 ## New features
 
 * `Particle` now has a new `sp` member that return `SingleParticle` objects.
+* New classes `RandomWalkMCMC` and `RandomWalkNoraml`. The first implements a
+  complete MCMC step and the second implement a Normal distribution based
+  proposal.
 
 # Changes since v2.0.0
 
