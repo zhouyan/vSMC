@@ -198,7 +198,7 @@ class NormalMVDistribution
                 std::copy_n(chol, chol_.size(), chol_.begin());
 
             if (chol == nullptr)
-                for (std::size_t i = 0; i != chol_.size(); ++i)
+                for (std::size_t i = 0; i != mean_.size(); ++i)
                     chol_[i * (i + 1) / 2 + i] = 1;
 
             VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(
