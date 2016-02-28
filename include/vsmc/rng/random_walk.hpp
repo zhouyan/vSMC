@@ -110,20 +110,26 @@ class RandomWalkMCMC
 
     template <typename RNGType, typename LogTargetType,
         typename RandomWalkType>
-    result_type operator()(RNGType &rng, result_type x,
+    bool operator()(RNGType &rng, result_type x, result_type &y,
         LogTargetType &&log_target, RandomWalkType &&random_walk)
     {
-        result_type y = 0;
-        result_type q = random_walk(rng, x, y);
-        result_type p = log_target(y) - log_target(x) + q;
+        result_type r = 0;
+        result_type q = random_walk(rng, x, r);
+        result_type p = log_target(r) - log_target(x) + q;
         result_type u = std::log(runif_(rng));
 
-        return u < p ? y : x;
+        if (u < p) {
+            y = r;
+            return true;
+        } else {
+            y = x;
+            return false;
+        }
     }
 
     template <typename RNGType, typename LogTargetType,
         typename RandomWalkType>
-    void operator()(RNGType &rng, std::size_t dim, const result_type *x,
+    bool operator()(RNGType &rng, std::size_t dim, const result_type *x,
         result_type *y, LogTargetType &&log_target,
         RandomWalkType &&random_walk)
     {
@@ -131,10 +137,14 @@ class RandomWalkMCMC
         result_type q = random_walk(rng, dim, x, r.data());
         result_type p = log_target(dim, r.data()) - log_target(dim, x) + q;
         result_type u = std::log(runif_(rng));
-        if (u < p)
+
+        if (u < p) {
             std::copy(r.begin(), r.end(), y);
-        else
+            return true;
+        } else {
             std::copy_n(x, dim, y);
+            return false;
+        }
     }
 
     private:
