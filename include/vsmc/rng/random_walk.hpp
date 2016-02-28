@@ -118,7 +118,23 @@ class RandomWalkMCMC
         result_type p = log_target(y) - log_target(x) + q;
         result_type u = std::log(runif_(rng));
 
-        return u > p ? x : y;
+        return u < p ? y : x;
+    }
+
+    template <typename RNGType, typename LogTargetType,
+        typename RandomWalkType>
+    void operator()(RNGType &rng, std::size_t dim, const result_type *x,
+        result_type *y, LogTargetType &&log_target,
+        RandomWalkType &&random_walk)
+    {
+        Vector<result_type> r(dim);
+        result_type q = random_walk(rng, dim, x, r.data());
+        result_type p = log_target(dim, r.data()) - log_target(dim, x) + q;
+        result_type u = std::log(runif_(rng));
+        if (u < p)
+            std::copy(r.begin(), r.end(), y);
+        else
+            std::copy_n(x, dim, y);
     }
 
     private:
@@ -188,7 +204,7 @@ class RandomWalkNormalMV
     explicit RandomWalkNormalMV(std::size_t dim = 1,
         const result_type *chol = nullptr, const result_type *a = nullptr,
         const result_type *b = nullptr)
-        : rnorm_(dim, nullptr, chol), a_(dim), b_(dim), z_(dim), flag_(dim)
+        : rnorm_(dim, nullptr, chol), a_(dim), b_(dim), flag_(dim)
     {
         init(dim, a, b);
         std::copy_n(a, dim, a_.begin());
@@ -200,26 +216,27 @@ class RandomWalkNormalMV
     }
 
     template <typename RNGType>
-    result_type operator()(RNGType &rng, const result_type *x, result_type *y)
+    result_type operator()(
+        RNGType &rng, std::size_t, const result_type *x, result_type *y)
     {
-        z_ = rnorm_(rng);
+        rnorm_(rng, y);
         result_type q = 0;
         for (std::size_t i = 0; i != dim(); ++i) {
             switch (flag_) {
                 case 0:
-                    q += internal::random_walk_normal_q0(x[i], y[i], z_[i]);
+                    q += internal::random_walk_normal_q0(x[i], y[i], y[i]);
                     break;
                 case 1:
                     q += internal::random_walk_normal_qb(
-                        x[i], y[i], z_[i], b_[i]);
+                        x[i], y[i], y[i], b_[i]);
                     break;
                 case 2:
                     q += internal::random_walk_normal_qa(
-                        x[i], y[i], z_[i], a_[i]);
+                        x[i], y[i], y[i], a_[i]);
                     break;
                 case 3:
                     q += internal::random_walk_normal_qab(
-                        x[i], y[i], z_[i], a_[i], b_[i]);
+                        x[i], y[i], y[i], a_[i], b_[i]);
                     break;
                 default: break;
             }
@@ -238,7 +255,6 @@ class RandomWalkNormalMV
     NormalMVDistribution<RealType, Dim> rnorm_;
     vtype<RealType> a_;
     vtype<RealType> b_;
-    vtype<RealType> z_;
     vtype<unsigned> flag_;
 
     void init(std::size_t dim, const result_type *a, const result_type *b)
