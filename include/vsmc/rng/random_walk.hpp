@@ -37,35 +37,144 @@
 #include <vsmc/rng/normal_mv_distribution.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_RANDOM_WALK_PARAM(flag, Name)                 \
+#define VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_MV_FIXED_DIM(Dim, Name)            \
+    VSMC_STATIC_ASSERT((Dim != Dynamic),                                      \
+        "**" #Name "** OBJECT DECLARED WITH DYNAMIC DIMENSION")
+
+#define VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_MV_DYNAMIC_DIM(Dim, Name)          \
+    VSMC_STATIC_ASSERT((Dim == Dynamic),                                      \
+        "**" #Name "** OBJECT DECLARED WITH FIXED DIMENSION")
+
+#define VSMC_RUNTIME_ASSERT_RNG_RANDOM_WALK_PROPOSAL_PARAM(flag, Name)        \
     VSMC_RUNTIME_ASSERT(                                                      \
-        (flag), "**RandomWal" #Name "** CONSTRUCTED WITH INVALID PARAMETERS")
+        (flag), "**" #Name "Proposal** CONSTRUCTED WITH INVALID PARAMETERS")
 
 namespace vsmc
 {
+
+/// \brief Random walk MCMC
+/// \ingroup RandomWalk
+template <typename RealType>
+class RandomWalk
+{
+    public:
+    using result_type = RealType;
+
+    template <typename RNGType, typename LogTargetType, typename ProposalType>
+    std::size_t operator()(RNGType &rng, result_type x, result_type &y,
+        LogTargetType &&log_target, ProposalType &&proposal)
+    {
+        result_type r = 0;
+        result_type q = proposal(rng, x, r);
+        result_type p = log_target(r) - log_target(x) + q;
+        result_type u = std::log(runif_(rng));
+
+        if (u < p) {
+            y = r;
+            return 1;
+        } else {
+            y = x;
+            return 0;
+        }
+    }
+
+    template <typename RNGType, typename LogTargetType, typename ProposalType>
+    std::size_t operator()(std::size_t n, RNGType &rng, result_type x,
+        result_type &y, LogTargetType &&log_target, ProposalType &&proposal)
+    {
+        std::size_t acc = 0;
+        y = x;
+        for (std::size_t i = 0; i != n; ++i) {
+            acc += operator()(rng, y, y,
+                std::forward<LogTargetType>(log_target),
+                std::forward<ProposalType>(proposal));
+        }
+
+        return acc;
+    }
+
+    private:
+    U01Distribution<RealType> runif_;
+}; // class RandomWalk
+
+template <typename RealType, std::size_t Dim>
+class RandomWalkMV
+{
+    public:
+    using result_type = RealType;
+
+    RandomWalkMV()
+    {
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_MV_FIXED_DIM(Dim, RandomWalkMV);
+    }
+
+    RandomWalkMV(std::size_t dim) : r_(dim)
+    {
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_MV_DYNAMIC_DIM(Dim, RandomWalkMV);
+    }
+
+    std::size_t dim() const { return r_.size(); }
+
+    template <typename RNGType, typename LogTargetType, typename ProposalType>
+    std::size_t operator()(RNGType &rng, const result_type *x, result_type *y,
+        LogTargetType &&log_target, ProposalType &&proposal)
+    {
+        result_type q = proposal(rng, dim(), x, r_.data());
+        result_type p =
+            log_target(dim(), r_.data()) - log_target(dim(), x) + q;
+        result_type u = std::log(runif_(rng));
+
+        if (u < p) {
+            std::copy(r_.begin(), r_.end(), y);
+            return 1;
+        } else {
+            std::copy_n(x, dim(), y);
+            return 0;
+        }
+    }
+
+    template <typename RNGType, typename LogTargetType, typename ProposalType>
+    std::size_t operator()(std::size_t n, RNGType &rng, const result_type *x,
+        result_type *y, LogTargetType &&log_target, ProposalType &&proposal)
+    {
+        std::size_t acc = 0;
+        std::copy_n(x, dim(), y);
+        for (std::size_t i = 0; i != n; ++i) {
+            acc += operator()(rng, y, y,
+                std::forward<LogTargetType>(log_target),
+                std::forward<ProposalType>(proposal));
+        }
+
+        return acc;
+    }
+
+    private:
+    U01Distribution<RealType> runif_;
+    typename std::conditional<Dim == Dynamic, Vector<RealType>,
+        std::array<RealType, Dim>>::type r_;
+}; // class RandomwWalkMV
 
 namespace internal
 {
 
 template <typename RealType>
-inline bool random_walk_normal_check_param(
-    RealType stddev, RealType a, RealType b)
+inline bool proposal_normal_check_param(RealType a, RealType b)
 {
-    return (stddev > 0) && (a < b);
+    return a < b;
 }
 
 template <typename RealType>
-inline bool random_walk_normal_mv_check_param(std::size_t dim,
-    const RealType *, const std::size_t *a, const std::size_t *b)
+inline bool proposal_normal_mv_check_param(
+    std::size_t dim, const RealType *a, const RealType *b)
 {
     for (std::size_t i = 0; i != dim; ++i)
-        if (a[i] > b[i])
+        if (a[i] >= b[i])
             return false;
     return true;
 }
 
 template <typename RealType>
-RealType random_walk_normal_q0(RealType x, RealType &y, RealType z)
+RealType proposal_normal_q(RealType x, RealType &y, RealType z)
 {
     y = x + z;
 
@@ -73,7 +182,7 @@ RealType random_walk_normal_q0(RealType x, RealType &y, RealType z)
 }
 
 template <typename RealType>
-RealType random_walk_normal_qa(RealType x, RealType &y, RealType z, RealType a)
+RealType proposal_normal_qa(RealType x, RealType &y, RealType z, RealType a)
 {
     y = a + (x - a) * std::exp(z);
 
@@ -81,7 +190,7 @@ RealType random_walk_normal_qa(RealType x, RealType &y, RealType z, RealType a)
 }
 
 template <typename RealType>
-RealType random_walk_normal_qb(RealType x, RealType &y, RealType z, RealType b)
+RealType proposal_normal_qb(RealType x, RealType &y, RealType z, RealType b)
 {
     y = b - (b - x) * std::exp(z);
 
@@ -89,7 +198,7 @@ RealType random_walk_normal_qb(RealType x, RealType &y, RealType z, RealType b)
 }
 
 template <typename RealType>
-RealType random_walk_normal_qab(
+RealType proposal_normal_qab(
     RealType x, RealType &y, RealType z, RealType a, RealType b)
 {
     RealType r = std::exp(z) * (x - a) / (b - x);
@@ -100,87 +209,38 @@ RealType random_walk_normal_qab(
 
 } // namespace vsmc::internal
 
-/// \brief Random walk MCMC
-/// \ingroup RandomWalk
-template <typename RealType>
-class RandomWalkMCMC
-{
-    public:
-    using result_type = RealType;
-
-    template <typename RNGType, typename LogTargetType,
-        typename RandomWalkType>
-    bool operator()(RNGType &rng, result_type x, result_type &y,
-        LogTargetType &&log_target, RandomWalkType &&random_walk)
-    {
-        result_type r = 0;
-        result_type q = random_walk(rng, x, r);
-        result_type p = log_target(r) - log_target(x) + q;
-        result_type u = std::log(runif_(rng));
-
-        if (u < p) {
-            y = r;
-            return true;
-        } else {
-            y = x;
-            return false;
-        }
-    }
-
-    template <typename RNGType, typename LogTargetType,
-        typename RandomWalkType>
-    bool operator()(RNGType &rng, std::size_t dim, const result_type *x,
-        result_type *y, LogTargetType &&log_target,
-        RandomWalkType &&random_walk)
-    {
-        Vector<result_type> r(dim);
-        result_type q = random_walk(rng, dim, x, r.data());
-        result_type p = log_target(dim, r.data()) - log_target(dim, x) + q;
-        result_type u = std::log(runif_(rng));
-
-        if (u < p) {
-            std::copy(r.begin(), r.end(), y);
-            return true;
-        } else {
-            std::copy_n(x, dim, y);
-            return false;
-        }
-    }
-
-    private:
-    U01Distribution<RealType> runif_;
-}; // class MCMC
-
 /// \brief Normal random walk proposal
 /// \ingroup RandomWalk
 template <typename RealType>
-class RandomWalkNormal
+class NormalProposal
 {
     public:
     using result_type = RealType;
 
-    explicit RandomWalkNormal(result_type stddev = 1,
+    explicit NormalProposal(result_type stddev = 1,
         result_type a = -std::numeric_limits<result_type>::infinity(),
         result_type b = std::numeric_limits<result_type>::infinity())
         : rnorm_(0, stddev), a_(a), b_(b), flag_(0)
     {
-        VSMC_RUNTIME_ASSERT_RNG_RANDOM_WALK_PARAM(
-            internal::random_walk_normal_check_param(stddev, a, b), Normal);
-
         unsigned lower = std::isfinite(a) ? 1 : 0;
         unsigned upper = std::isfinite(b) ? 1 : 0;
         flag_ = (lower << 1) + upper;
+        VSMC_RUNTIME_ASSERT_RNG_RANDOM_WALK_PROPOSAL_PARAM(
+            internal::proposal_normal_check_param(a, b), Normal);
     }
+
+    result_type a() const { return a_; }
+    result_type b() const { return b_; }
 
     template <typename RNGType>
     result_type operator()(RNGType &rng, result_type x, result_type &y)
     {
         result_type z = rnorm_(rng);
         switch (flag_) {
-            case 0: return internal::random_walk_normal_q0(x, y, z);
-            case 1: return internal::random_walk_normal_qb(x, y, z, b_);
-            case 2: return internal::random_walk_normal_qa(x, y, z, a_);
-            case 3: return internal::random_walk_normal_qab(x, y, z, a_, b_);
+            case 0: return internal::proposal_normal_q(x, y, z);
+            case 1: return internal::proposal_normal_qb(x, y, z, b_);
+            case 2: return internal::proposal_normal_qa(x, y, z, a_);
+            case 3: return internal::proposal_normal_qab(x, y, z, a_, b_);
             default: return 0;
         }
     }
@@ -190,40 +250,37 @@ class RandomWalkNormal
     result_type a_;
     result_type b_;
     unsigned flag_;
-}; // class RandomWalkNormal
+}; // class NormalProposal
 
 /// \brief Multivariate Normal random walk proposal
 /// \ingroup RandomWalk
 template <typename RealType, std::size_t Dim>
-class RandomWalkNormalMV
+class NormalMVProposal
 {
     public:
     using result_type = RealType;
 
-    explicit RandomWalkNormalMV(const result_type *chol = nullptr,
+    explicit NormalMVProposal(const result_type *chol = nullptr,
         const result_type *a = nullptr, const result_type *b = nullptr)
         : rnorm_(nullptr, chol)
     {
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_MV_FIXED_DIM(Dim, NormalMVProposal);
         init(Dim, a, b);
-        VSMC_RUNTIME_ASSERT_RNG_RANDOM_WALK_PARAM(
-            internal::random_walk_normal_mv_check_param(
-                Dim, chol, a_.data(), b_.data()),
-            NormalMV);
     }
 
-    explicit RandomWalkNormalMV(std::size_t dim = 1,
+    explicit NormalMVProposal(std::size_t dim,
         const result_type *chol = nullptr, const result_type *a = nullptr,
         const result_type *b = nullptr)
         : rnorm_(dim, nullptr, chol), a_(dim), b_(dim), flag_(dim)
     {
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_MV_DYNAMIC_DIM(
+            Dim, NormalMVProposal);
         init(dim, a, b);
-        std::copy_n(a, dim, a_.begin());
-        std::copy_n(b, dim, b_.begin());
-        VSMC_RUNTIME_ASSERT_RNG_RANDOM_WALK_PARAM(
-            internal::random_walk_normal_check_param(
-                dim, chol, a_.data(), b_.data()),
-            NormalMV);
     }
+
+    std::size_t dim() const { return rnorm_.dim(); }
+    const result_type *a() const { return a_.data(); }
+    const result_type *b() const { return b_.data(); }
 
     template <typename RNGType>
     result_type operator()(
@@ -234,18 +291,16 @@ class RandomWalkNormalMV
         for (std::size_t i = 0; i != dim(); ++i) {
             switch (flag_[i]) {
                 case 0:
-                    q += internal::random_walk_normal_q0(x[i], y[i], y[i]);
+                    q += internal::proposal_normal_q(x[i], y[i], y[i]);
                     break;
                 case 1:
-                    q += internal::random_walk_normal_qb(
-                        x[i], y[i], y[i], b_[i]);
+                    q += internal::proposal_normal_qb(x[i], y[i], y[i], b_[i]);
                     break;
                 case 2:
-                    q += internal::random_walk_normal_qa(
-                        x[i], y[i], y[i], a_[i]);
+                    q += internal::proposal_normal_qa(x[i], y[i], y[i], a_[i]);
                     break;
                 case 3:
-                    q += internal::random_walk_normal_qab(
+                    q += internal::proposal_normal_qab(
                         x[i], y[i], y[i], a_[i], b_[i]);
                     break;
                 default: break;
@@ -255,17 +310,15 @@ class RandomWalkNormalMV
         return q;
     }
 
-    std::size_t dim() const { return rnorm_.dim(); }
-
     private:
     template <typename T>
-    using vtype = typename std::conditional<Dim == Dynamic, vsmc::Vector<T>,
-        std::array<T, Dim>>::type;
+    using vector_type = typename std::conditional<Dim == Dynamic,
+        vsmc::Vector<T>, std::array<T, Dim>>::type;
 
     NormalMVDistribution<RealType, Dim> rnorm_;
-    vtype<RealType> a_;
-    vtype<RealType> b_;
-    vtype<unsigned> flag_;
+    vector_type<RealType> a_;
+    vector_type<RealType> b_;
+    vector_type<unsigned> flag_;
 
     void init(std::size_t dim, const result_type *a, const result_type *b)
     {
@@ -284,8 +337,13 @@ class RandomWalkNormalMV
             unsigned upper = std::isfinite(b_[i]) ? 1 : 0;
             flag_[i] = (lower << 1) + upper;
         }
+
+        VSMC_RUNTIME_ASSERT_RNG_RANDOM_WALK_PROPOSAL_PARAM(
+            internal::proposal_normal_mv_check_param(
+                dim, a_.data(), b_.data()),
+            NormalMV);
     }
-}; // class RandomWalkNormalMV
+}; // class NormalMVProposal
 
 } // namespace vsmc
 

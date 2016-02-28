@@ -49,9 +49,8 @@ namespace vsmc
 namespace internal
 {
 
-template <typename ResultType, typename MatrixType>
-inline bool normal_mv_distribution_check_param(
-    const ResultType &, const MatrixType &)
+template <typename MatrixType>
+inline bool normal_mv_distribution_check_param(const MatrixType &)
 {
     return true;
 }
@@ -74,6 +73,11 @@ template <typename RealType, std::size_t Dim>
 class NormalMVDistribution
 {
     private:
+    using vector_type = typename std::conditional<Dim == Dynamic,
+        Vector<RealType>, std::array<RealType, Dim>>::type;
+    using matrix_type = typename std::conditional<Dim == Dynamic,
+        Vector<RealType>, std::array<RealType, Dim *(Dim + 1) / 2>>::type;
+
     template <typename T, std::size_t N>
     static void resize(std::array<T, N> &, std::size_t)
     {
@@ -86,31 +90,25 @@ class NormalMVDistribution
     }
 
     public:
-    using result_type = typename std::conditional<Dim == Dynamic,
-        Vector<RealType>, std::array<RealType, Dim>>::type;
-    using matrix_type = typename std::conditional<Dim == Dynamic,
-        Vector<RealType>, std::array<RealType, Dim *(Dim + 1) / 2>>::type;
+    using result_type = RealType;
     using distribution_type = NormalMVDistribution<RealType, Dim>;
 
     class param_type
     {
         public:
-        using result_type = typename std::conditional<Dim == Dynamic,
-            Vector<RealType>, std::array<RealType, Dim>>::type;
-        using matrix_type = typename std::conditional<Dim == Dynamic,
-            Vector<RealType>, std::array<RealType, Dim *(Dim + 1) / 2>>::type;
+        using result_type = RealType;
         using distribution_type = NormalMVDistribution<RealType, Dim>;
 
-        explicit param_type(
-            const RealType *mean = nullptr, const RealType *chol = nullptr)
+        explicit param_type(const result_type *mean = nullptr,
+            const result_type *chol = nullptr)
         {
             VSMC_STATIC_ASSERT_RNG_NORMAL_MV_DISTRIBUTION_FIXED_DIM(Dim);
 
             init(mean, chol);
         }
 
-        explicit param_type(std::size_t dim = 1,
-            const RealType *mean = nullptr, const RealType *chol = nullptr)
+        explicit param_type(std::size_t dim, const result_type *mean = nullptr,
+            const result_type *chol = nullptr)
             : mean_(dim), chol_(dim * (dim + 1) / 2)
         {
             VSMC_STATIC_ASSERT_RNG_NORMAL_MV_DISTRIBUTION_DYNAMIC_DIM(Dim);
@@ -119,8 +117,8 @@ class NormalMVDistribution
         }
 
         std::size_t dim() const { return mean_.size(); }
-        const RealType *mean() const { return mean_.data(); }
-        const RealType *chol() const { return chol_.data(); }
+        const result_type *mean() const { return mean_.data(); }
+        const result_type *chol() const { return chol_.data(); }
 
         friend bool operator==(
             const param_type &param1, const param_type &param2)
@@ -164,7 +162,7 @@ class NormalMVDistribution
             if (!is.good())
                 return is;
 
-            result_type mean;
+            vector_type mean;
             matrix_type chol;
             resize(mean, dim);
             resize(chol, dim * (dim + 1) / 2);
@@ -184,10 +182,10 @@ class NormalMVDistribution
         }
 
         private:
-        result_type mean_;
+        vector_type mean_;
         matrix_type chol_;
 
-        void init(const RealType *mean, const RealType *chol)
+        void init(const result_type *mean, const result_type *chol)
         {
             if (mean == nullptr)
                 std::fill(mean_.begin(), mean_.end(), 0);
@@ -202,28 +200,31 @@ class NormalMVDistribution
             if (chol == nullptr)
                 for (std::size_t i = 0; i != chol_.size(); ++i)
                     chol_[i * (i + 1) / 2 + i] = 1;
+
+            VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(
+                internal::normal_mv_distribution_check_param(chol_), NormalMV);
         }
     }; // class param_type
 
     /// \brief Only usable when `Dim > 0`
     explicit NormalMVDistribution(
-        const RealType *mean = nullptr, const RealType *chol = nullptr)
+        const result_type *mean = nullptr, const result_type *chol = nullptr)
         : param_(mean, chol), rnorm_(0, 1)
     {
         reset();
     }
 
     /// \brief Only usable when `Dim == Dynamic`
-    explicit NormalMVDistribution(std::size_t dim = 1,
-        const RealType *mean = nullptr, const RealType *chol = nullptr)
+    explicit NormalMVDistribution(std::size_t dim,
+        const result_type *mean = nullptr, const result_type *chol = nullptr)
         : param_(dim, mean, chol), rnorm_(0, 1)
     {
         reset();
     }
 
     std::size_t dim() const { return param_.dim(); }
-    const RealType *mean() const { return param_.mean(); }
-    const RealType *chol() const { return param_.chol(); }
+    const result_type *mean() const { return param_.mean(); }
+    const result_type *chol() const { return param_.chol(); }
 
     param_type param() const { return param_; }
 
@@ -234,65 +235,41 @@ class NormalMVDistribution
     }
 
     template <typename RNGType>
-    result_type operator()(RNGType &rng)
-    {
-        return operator()(rng, param_);
-    }
-
-    template <typename RNGType>
-    result_type operator()(RNGType &rng, const param_type &param)
-    {
-        result_type r;
-        resize(r, param.dim());
-        operator()(rng, r.data(), param);
-
-        return r;
-    }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, RealType *r)
+    void operator()(RNGType &rng, result_type *r)
     {
         operator()(rng, r, param_);
     }
 
     template <typename RNGType>
-    void operator()(RNGType &rng, RealType *r, const param_type &param)
+    void operator()(RNGType &rng, result_type *r, const param_type &param)
     {
         generate(rng, r, param);
     }
 
     template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, RealType *r)
+    void operator()(RNGType &rng, std::size_t n, result_type *r)
     {
         operator()(rng, n, r, param_);
     }
 
     template <typename RNGType>
     void operator()(
-        RNGType &rng, std::size_t n, RealType *r, const param_type &param)
+        RNGType &rng, std::size_t n, result_type *r, const param_type &param)
     {
         normal_mv_distribution(
             rng, n, r, param.dim(), param.mean(), param.chol());
     }
 
-    result_type min VSMC_MNE() const
+    void min VSMC_MNE(result_type *x) const
     {
-        result_type m;
-        resize(m, dim());
-        std::fill(m.begin(), m.end(),
-            -std::numeric_limits<result_type>::max VSMC_MNE());
-
-        return m;
+        std::fill_n(
+            x, dim(), -std::numeric_limits<result_type>::max VSMC_MNE());
     }
 
-    result_type max VSMC_MNE() const
+    void max VSMC_MNE(result_type *x) const
     {
-        result_type m;
-        resize(m, dim());
-        std::fill(m.begin(), m.end(),
-            std::numeric_limits<result_type>::max VSMC_MNE());
-
-        return m;
+        std::fill_n(
+            x, dim(), std::numeric_limits<result_type>::max VSMC_MNE());
     }
 
     void reset() { rnorm_.reset(); }
@@ -363,8 +340,8 @@ class NormalMVDistribution
     /// - `0` If successful
     /// - Positive value `i` if the `i`th minor of the covariance matrix is not
     /// psotive-definite.
-    static int cov_chol(std::size_t dim, const RealType *cov, RealType *chol,
-        MatrixLayout layout = RowMajor, bool upper = false,
+    static int cov_chol(std::size_t dim, const result_type *cov,
+        result_type *chol, MatrixLayout layout = RowMajor, bool upper = false,
         bool packed = false)
     {
         unsigned l = layout == RowMajor ? 0 : 1;
@@ -423,7 +400,7 @@ class NormalMVDistribution
     NormalDistribution<RealType> rnorm_;
 
     template <typename RNGType>
-    void generate(RNGType &rng, RealType *r, const param_type &param)
+    void generate(RNGType &rng, result_type *r, const param_type &param)
     {
         rnorm_(rng, param.dim(), r);
         mulchol(r, param);
