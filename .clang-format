@@ -34,11 +34,11 @@ DisableFormat                                  : false
 # ExperimentalAutoDetectBinPacking               :
 # ForEachMacros                                  :
 IncludeCategories                              :
-  - Regex:           '^<vsmc/internal'
-    Priority:        1
   - Regex:           '^<vsmc/.*/internal'
-    Priority:        2
+    Priority:        1
   - Regex:           '^<vsmc/internal'
+    Priority:        2
+  - Regex:           '^<vsmc/'
     Priority:        3
   - Regex:           '^<'
     Priority:        4
