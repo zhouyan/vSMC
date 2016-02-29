@@ -207,9 +207,18 @@ class NormalMVDistribution
     }; // class param_type
 
     /// \brief Only usable when `Dim > 0`
+    ///
+    /// \param mean Mean vector, if it is a null pointer, then the mean is a
+    /// zero vector
+    /// \param chol The lower triangular elements of the Cholesky decomposition
+    /// of the covaraince matrix, packed row by row. If it is a nullpointer,
+    /// then the covariance is the identicy matrix \f$I\f$
     explicit NormalMVDistribution(
         const result_type *mean = nullptr, const result_type *chol = nullptr)
-        : param_(mean, chol), rnorm_(0, 1)
+        : param_(mean, chol)
+        , rnorm_(0, 1)
+        , mean_(mean != nullptr)
+        , chol_(chol != nullptr)
     {
         reset();
     }
@@ -217,7 +226,10 @@ class NormalMVDistribution
     /// \brief Only usable when `Dim == Dynamic`
     explicit NormalMVDistribution(std::size_t dim,
         const result_type *mean = nullptr, const result_type *chol = nullptr)
-        : param_(dim, mean, chol), rnorm_(0, 1)
+        : param_(dim, mean, chol)
+        , rnorm_(0, 1)
+        , mean_(mean != nullptr)
+        , chol_(chol != nullptr)
     {
         reset();
     }
@@ -256,8 +268,9 @@ class NormalMVDistribution
     void operator()(
         RNGType &rng, std::size_t n, result_type *r, const param_type &param)
     {
-        normal_mv_distribution(
-            rng, n, r, param.dim(), param.mean(), param.chol());
+        normal_mv_distribution(rng, n, r, param.dim(),
+            (mean_ ? param.mean() : nullptr),
+            (chol_ ? param.chol() : nullptr));
     }
 
     void min VSMC_MNE(result_type *x) const
@@ -402,13 +415,17 @@ class NormalMVDistribution
     private:
     param_type param_;
     NormalDistribution<RealType> rnorm_;
+    bool mean_;
+    bool chol_;
 
     template <typename RNGType>
     void generate(RNGType &rng, result_type *r, const param_type &param)
     {
         rnorm_(rng, param.dim(), r);
-        mulchol(r, param);
-        add(param.dim(), param.mean(), r, r);
+        if (chol_)
+            mulchol(r, param);
+        if (mean_)
+            add(param.dim(), param.mean(), r, r);
     }
 
     void mulchol(float *r, const param_type &param)
@@ -455,14 +472,17 @@ template <typename RealType, typename RNGType>
 inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, const RealType *mean, const RealType *chol)
 {
-    Vector<RealType> cholf(dim * dim);
-    for (std::size_t i = 0; i != dim; ++i)
-        for (std::size_t j = 0; j <= i; ++j)
-            cholf[i * dim + j] = *chol++;
     normal_distribution(rng, n * dim, r, 0.0, 1.0);
-    internal::normal_mv_distribution_mulchol(n, r, dim, cholf.data());
-    for (std::size_t i = 0; i != n; ++i, r += dim)
-        add(dim, mean, r, r);
+    if (chol != nullptr) {
+        Vector<RealType> cholf(dim * dim);
+        for (std::size_t i = 0; i != dim; ++i)
+            for (std::size_t j = 0; j <= i; ++j)
+                cholf[i * dim + j] = *chol++;
+        internal::normal_mv_distribution_mulchol(n, r, dim, cholf.data());
+    }
+    if (mean != nullptr)
+        for (std::size_t i = 0; i != n; ++i, r += dim)
+            add(dim, mean, r, r);
 }
 
 template <typename RealType, std::size_t Dim, typename RNGType>
