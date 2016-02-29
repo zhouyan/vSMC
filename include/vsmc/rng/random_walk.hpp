@@ -54,10 +54,12 @@ namespace vsmc
 
 /// \brief Random walk MCMC
 /// \ingroup RandomWalk
-template <typename RealType, typename StateType>
+template <typename RealType>
 class RandomWalk
 {
     public:
+    using result_type = RealType;
+
     /// \brief One-step random walk update
     ///
     /// \param rng RNG engine
@@ -69,25 +71,25 @@ class RandomWalk
     /// \f$\log\gamma(x)\f$ between updates if it is expensive to calculate.
     /// \param log_target The log-target fucntion
     /// ~~~{.cpp}
-    /// RealType log_target(const StateType &x);
+    /// result_type log_target(result_type x);
     /// ~~~
     /// and return the value of \f$\log\gamma(x)\f$.
     /// \param proposal The proposal function. It takes the form,
     /// ~~~{.cpp}
-    /// RealType proposal(RNGType &rng, const StateType &x, StateType &y);
+    /// result_type proposal(RNGType &rng, result_type x, result_type &y);
     /// ~~~
     /// After the call, the function return the proposed value in `y` and
     /// return the value \f$\log(q(y, x) / q(x, y))\f$.
     template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(RNGType &rng, StateType &x, RealType *ltx,
+    std::size_t operator()(RNGType &rng, result_type &x, result_type *ltx,
         LogTargetType &&log_target, ProposalType &&proposal)
     {
-        StateType r;
-        RealType q = proposal(rng, x, r);
-        RealType s = ltx == nullptr ? log_target(x) : *ltx;
-        RealType t = log_target(r);
-        RealType p = t - s + q;
-        RealType u = std::log(runif_(rng));
+        result_type r;
+        result_type q = proposal(rng, x, r);
+        result_type s = ltx == nullptr ? log_target(x) : *ltx;
+        result_type t = log_target(r);
+        result_type p = t - s + q;
+        result_type u = std::log(runif_(rng));
 
         if (u < p) {
             x = r;
@@ -109,17 +111,17 @@ class RandomWalk
     /// \param proposal The proposal function
     template <typename RNGType, typename LogTargetType, typename ProposalType>
     std::size_t operator()(RNGType &rng, std::size_t m, std::size_t idx,
-        StateType *x, RealType *ltx, LogTargetType &&log_target,
+        result_type *x, result_type *ltx, LogTargetType &&log_target,
         ProposalType &&proposal)
     {
-        StateType xi = x[idx];
-        StateType r;
-        RealType q = proposal(rng, x[idx], r);
-        RealType s = ltx == nullptr ? log_target(m, x) : *ltx;
+        result_type xi = x[idx];
+        result_type r;
+        result_type q = proposal(rng, x[idx], r);
+        result_type s = ltx == nullptr ? log_target(m, x) : *ltx;
         x[idx] = r;
-        RealType t = log_target(m, x);
-        RealType p = t - s + q;
-        RealType u = std::log(runif_(rng));
+        result_type t = log_target(m, x);
+        result_type p = t - s + q;
+        result_type u = std::log(runif_(rng));
 
         if (u < p) {
             if (ltx != nullptr)
@@ -133,11 +135,11 @@ class RandomWalk
 
     /// \brief Multi-step random walk update
     template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(std::size_t n, RNGType &rng, StateType &x,
-        RealType *ltx, LogTargetType &&log_target, ProposalType &&proposal)
+    std::size_t operator()(std::size_t n, RNGType &rng, result_type &x,
+        result_type *ltx, LogTargetType &&log_target, ProposalType &&proposal)
     {
         std::size_t acc = 0;
-        RealType s = ltx == nullptr ? log_target(x) : *ltx;
+        result_type s = ltx == nullptr ? log_target(x) : *ltx;
         for (std::size_t i = 0; i != n; ++i) {
             acc += operator()(rng, x, &s,
                 std::forward<LogTargetType>(log_target),
@@ -153,11 +155,11 @@ class RandomWalk
     /// state
     template <typename RNGType, typename LogTargetType, typename ProposalType>
     std::size_t operator()(std::size_t n, RNGType &rng, std::size_t m,
-        std::size_t index, StateType *x, RealType *ltx,
+        std::size_t index, result_type *x, result_type *ltx,
         LogTargetType &&log_target, ProposalType &&proposal)
     {
         std::size_t acc = 0;
-        RealType s = ltx == nullptr ? log_target(m, x) : *ltx;
+        result_type s = ltx == nullptr ? log_target(m, x) : *ltx;
         for (std::size_t i = 0; i != n; ++i) {
             acc += operator()(rng, m, index, x, &s,
                 std::forward<LogTargetType>(log_target),
@@ -175,10 +177,12 @@ class RandomWalk
 
 /// \brief Multivariate random walk MCMC
 /// \ingroup RandomWalk
-template <typename RealType, typename StateType, std::size_t Dim>
+template <typename RealType, std::size_t Dim>
 class RandomWalkMV
 {
     public:
+    using result_type = RealType;
+
     /// \brief Only usable when `Dim > 0`
     RandomWalkMV()
     {
@@ -204,27 +208,27 @@ class RandomWalkMV
     /// \f$\log\gamma(x)\f$ between updates if it is expensive to calculate.
     /// \param log_target The log-target fucntion
     /// ~~~{.cpp}
-    /// RealType log_target(std::size_t dim, const StateType *x);
+    /// result_type log_target(std::size_t dim, const result_type *x);
     /// ~~~
     /// and return the value of \f$\log\gamma(x)\f$.
     /// \param proposal The proposal function. It takes the form,
     /// ~~~{.cpp}
-    /// RealType proposal(
-    ///     RNGType &rng, std::size_t dim, const StateType *x, StateType *y);
+    /// result_type proposal(RNGType &rng, std::size_t dim,
+    ///     const result_type *x, result_type *y);
     /// ~~~
     /// After the call, the function return the proposed value in `y` and
     /// return the value \f$\log(q(y, x) / q(x, y))\f$.
     ///
     /// \return Acceptance count
     template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(RNGType &rng, StateType *x, RealType *ltx,
+    std::size_t operator()(RNGType &rng, result_type *x, result_type *ltx,
         LogTargetType &&log_target, ProposalType &&proposal)
     {
-        RealType q = proposal(rng, dim(), x, r_.data());
-        RealType s = ltx == nullptr ? log_target(dim(), x) : *ltx;
-        RealType t = log_target(dim(), r_.data());
-        RealType p = t - s + q;
-        RealType u = std::log(runif_(rng));
+        result_type q = proposal(rng, dim(), x, r_.data());
+        result_type s = ltx == nullptr ? log_target(dim(), x) : *ltx;
+        result_type t = log_target(dim(), r_.data());
+        result_type p = t - s + q;
+        result_type u = std::log(runif_(rng));
 
         if (u < p) {
             std::copy(r_.begin(), r_.end(), x);
@@ -248,16 +252,16 @@ class RandomWalkMV
     /// \param proposal The proposal function
     template <typename RNGType, typename LogTargetType, typename ProposalType>
     std::size_t operator()(RNGType &rng, std::size_t m, std::size_t idx,
-        StateType *x, RealType *ltx, LogTargetType &&log_target,
+        result_type *x, result_type *ltx, LogTargetType &&log_target,
         ProposalType &&proposal)
     {
         std::copy_n(x + idx, dim(), xi_.begin());
-        RealType q = proposal(rng, dim(), xi_.data(), r_.data());
-        RealType s = ltx == nullptr ? log_target(m, x) : *ltx;
+        result_type q = proposal(rng, dim(), xi_.data(), r_.data());
+        result_type s = ltx == nullptr ? log_target(m, x) : *ltx;
         std::copy(r_.begin(), r_.end(), x + idx);
-        RealType t = log_target(m, x);
-        RealType p = t - s + q;
-        RealType u = std::log(runif_(rng));
+        result_type t = log_target(m, x);
+        result_type p = t - s + q;
+        result_type u = std::log(runif_(rng));
         if (u < p) {
             if (ltx != nullptr)
                 *ltx = t;
@@ -270,11 +274,11 @@ class RandomWalkMV
 
     /// \brief Multi-step random walk update
     template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(std::size_t n, RNGType &rng, StateType *x,
-        RealType *ltx, LogTargetType &&log_target, ProposalType &&proposal)
+    std::size_t operator()(std::size_t n, RNGType &rng, result_type *x,
+        result_type *ltx, LogTargetType &&log_target, ProposalType &&proposal)
     {
         std::size_t acc = 0;
-        RealType s = ltx == nullptr ? log_target(dim(), x) : *ltx;
+        result_type s = ltx == nullptr ? log_target(dim(), x) : *ltx;
         for (std::size_t i = 0; i != n; ++i) {
             acc += operator()(rng, x, &s,
                 std::forward<LogTargetType>(log_target),
@@ -290,11 +294,11 @@ class RandomWalkMV
     /// vector state
     template <typename RNGType, typename LogTargetType, typename ProposalType>
     std::size_t operator()(std::size_t n, RNGType &rng, std::size_t m,
-        std::size_t idx, StateType *x, RealType *ltx,
+        std::size_t idx, result_type *x, result_type *ltx,
         LogTargetType &&log_target, ProposalType &&proposal)
     {
         std::size_t acc = 0;
-        RealType s = ltx == nullptr ? log_target(m, x) : *ltx;
+        result_type s = ltx == nullptr ? log_target(m, x) : *ltx;
         for (std::size_t i = 0; i != n; ++i) {
             acc += operator()(rng, m, idx, x, &s,
                 std::forward<LogTargetType>(log_target),

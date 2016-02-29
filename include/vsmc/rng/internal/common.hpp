@@ -555,10 +555,10 @@ int cov_chol(std::size_t dim, const RealType *cov, RealType *chol,
 template <typename>
 class CounterEngine;
 
-template <typename = double, typename = double>
+template <typename = double>
 class RandomWalk;
 
-template <typename = double, typename = double, std::size_t = Dynamic>
+template <typename = double, std::size_t = Dynamic>
 class RandomWalkMV;
 
 template <typename = double>
