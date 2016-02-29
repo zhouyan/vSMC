@@ -58,8 +58,7 @@ template <typename RealType, typename StateType>
 class RandomWalk
 {
     public:
-    /// \brief One-step random walk update, given log-target function
-    /// \f$\gamma\f$ and proposal \f$q\f$
+    /// \brief One-step random walk update
     ///
     /// \param rng RNG engine
     /// \param x The current state value. It will be updated to the new value
@@ -100,17 +99,25 @@ class RandomWalk
     }
 
     /// \brief One-step random walk update of one element within a vector state
+    ///
+    /// \param rng RNG engine
+    /// \param m The length of state vector x
+    /// \param idx The index of the element to be updated
+    /// \param x The current state value
+    /// \param ltx The current value of \f$\log\gamma(x)\f$
+    /// \param log_target The log-target fucntion
+    /// \param proposal The proposal function
     template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(RNGType &rng, std::size_t dim, std::size_t index,
+    std::size_t operator()(RNGType &rng, std::size_t m, std::size_t idx,
         StateType *x, RealType *ltx, LogTargetType &&log_target,
         ProposalType &&proposal)
     {
-        StateType xi = x[index];
+        StateType xi = x[idx];
         StateType r;
-        RealType q = proposal(rng, x[index], r);
-        RealType s = ltx == nullptr ? log_target(dim, x) : *ltx;
-        x[index] = r;
-        RealType t = log_target(dim, x);
+        RealType q = proposal(rng, x[idx], r);
+        RealType s = ltx == nullptr ? log_target(m, x) : *ltx;
+        x[idx] = r;
+        RealType t = log_target(m, x);
         RealType p = t - s + q;
         RealType u = std::log(runif_(rng));
 
@@ -119,7 +126,7 @@ class RandomWalk
                 *ltx = t;
             return 1;
         }
-        x[index] = xi;
+        x[idx] = xi;
 
         return 0;
     }
@@ -145,14 +152,14 @@ class RandomWalk
     /// \brief Multi-step random walk update of one element within a vector
     /// state
     template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(std::size_t n, RNGType &rng, std::size_t dim,
+    std::size_t operator()(std::size_t n, RNGType &rng, std::size_t m,
         std::size_t index, StateType *x, RealType *ltx,
         LogTargetType &&log_target, ProposalType &&proposal)
     {
         std::size_t acc = 0;
-        RealType s = ltx == nullptr ? log_target(dim, x) : *ltx;
+        RealType s = ltx == nullptr ? log_target(m, x) : *ltx;
         for (std::size_t i = 0; i != n; ++i) {
-            acc += operator()(rng, dim, index, x, &s,
+            acc += operator()(rng, m, index, x, &s,
                 std::forward<LogTargetType>(log_target),
                 std::forward<ProposalType>(proposal));
         }
@@ -186,8 +193,7 @@ class RandomWalkMV
 
     std::size_t dim() const { return r_.size(); }
 
-    /// \brief Perform one-step random walk update, given log-target function
-    /// \f$\gamma\f$ and proposal \f$q\f$
+    /// \brief One-step random walk update
     ///
     /// \param rng RNG engine
     /// \param x The current state value. It will be updated to the new value
@@ -229,7 +235,40 @@ class RandomWalkMV
         return 0;
     }
 
-    /// \brief Perform multi-step random walk update
+    /// \brief One-step random walk update of a block of element within a
+    /// vector state
+    ///
+    /// \param rng RNG engine
+    /// \param m The length of state vector x
+    /// \param idx The index of the first element within the block. The block
+    /// length is `dim()`, the dimension of this RandomWalMV object
+    /// \param x The current state value
+    /// \param ltx The current value of \f$\log\gamma(x)\f$
+    /// \param log_target The log-target fucntion
+    /// \param proposal The proposal function
+    template <typename RNGType, typename LogTargetType, typename ProposalType>
+    std::size_t operator()(RNGType &rng, std::size_t m, std::size_t idx,
+        StateType *x, RealType *ltx, LogTargetType &&log_target,
+        ProposalType &&proposal)
+    {
+        std::copy_n(x + idx, dim(), xi_.begin());
+        RealType q = proposal(rng, dim(), xi_.data(), r_.data());
+        RealType s = ltx == nullptr ? log_target(m, x) : *ltx;
+        std::copy(r_.begin(), r_.end(), x + idx);
+        RealType t = log_target(m, x);
+        RealType p = t - s + q;
+        RealType u = std::log(runif_(rng));
+        if (u < p) {
+            if (ltx != nullptr)
+                *ltx = t;
+            return 1;
+        }
+        std::copy(xi_.begin(), xi_.end(), x + idx);
+
+        return 0;
+    }
+
+    /// \brief Multi-step random walk update
     template <typename RNGType, typename LogTargetType, typename ProposalType>
     std::size_t operator()(std::size_t n, RNGType &rng, StateType *x,
         RealType *ltx, LogTargetType &&log_target, ProposalType &&proposal)
@@ -247,10 +286,33 @@ class RandomWalkMV
         return acc;
     }
 
+    /// \brief Multi-step random walk update of a block of element within a
+    /// vector state
+    template <typename RNGType, typename LogTargetType, typename ProposalType>
+    std::size_t operator()(std::size_t n, RNGType &rng, std::size_t m,
+        std::size_t idx, StateType *x, RealType *ltx,
+        LogTargetType &&log_target, ProposalType &&proposal)
+    {
+        std::size_t acc = 0;
+        RealType s = ltx == nullptr ? log_target(m, x) : *ltx;
+        for (std::size_t i = 0; i != n; ++i) {
+            acc += operator()(rng, m, idx, x, &s,
+                std::forward<LogTargetType>(log_target),
+                std::forward<ProposalType>(proposal));
+        }
+        if (ltx != nullptr)
+            *ltx = s;
+
+        return acc;
+    }
+
     private:
+    using vector_type = typename std::conditional<Dim == Dynamic,
+        Vector<RealType>, std::array<RealType, Dim>>::type;
+
     U01Distribution<RealType> runif_;
-    typename std::conditional<Dim == Dynamic, Vector<StateType>,
-        std::array<StateType, Dim>>::type r_;
+    vector_type r_;
+    vector_type xi_;
 }; // class RandomwWalkMV
 
 namespace internal
