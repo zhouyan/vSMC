@@ -8,9 +8,9 @@
 ## New features
 
 * `Particle` now has a new `sp` member that return `SingleParticle` objects.
-* New classes `RandomWalkMCMC` and `RandomWalkNoraml`. The first implements a
-  complete MCMC step and the second implement a Normal distribution based
-  proposal.
+* New module "Random Walk" that implements generic random walk MCMC kernels and
+  Normal distribution based proposals. Both scalar and multivariate cases are
+  supported.
 
 # Changes since v2.0.0
 
@@ -33,6 +33,8 @@ changes.
 
 * Everything in the namespace `vsmc::cxx11` is gone. Replace `vsmc::cxx11` with
   `std` shall solve any issues.
+* OpenCL and MPI modules are moved to
+ [vSMCExtra](https://github.com/zhouyan/vSMCExtra).
 * `Progress` is no longer a class template.
 * `vsmc::Array` is replaced by `std::array`
 * The `RngSet` class template is replaced by `RngSetScalar` and `RngSetVector`,

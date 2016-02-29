@@ -64,11 +64,10 @@ class RandomWalk
     /// \param rng RNG engine
     /// \param x The current state value. It will be updated to the new value
     /// after the MCMC move.
-    /// \param ltx If it is a non-null pointer, then it points to the
-    /// value of the \f$\log\gamma(x)\f$. It will be updated to the updated
-    /// value.  If it is a null pointer, then it is ignored. Use this pointer
-    /// to save \f$\log\gamma(x)\f$ if between updates if it is expensive to
-    /// calculate.
+    /// \param ltx If it is a non-null pointer, then it points to the value of
+    /// the \f$\log\gamma(x)\f$. It will be updated to the updated value.  If
+    /// it is a null pointer, then it is ignored. Use this pointer to save
+    /// \f$\log\gamma(x)\f$ between updates if it is expensive to calculate.
     /// \param log_target The log-target fucntion
     /// ~~~{.cpp}
     /// RealType log_target(const StateType &x);
@@ -147,11 +146,10 @@ class RandomWalkMV
     /// \param rng RNG engine
     /// \param x The current state value. It will be updated to the new value
     /// after the MCMC move.
-    /// \param ltx If it is a non-null pointer, then it points to the
-    /// value of the \f$\log\gamma(x)\f$. It will be updated to the updated
-    /// value.  If it is a null pointer, then it is ignored. Use this pointer
-    /// to save \f$\log\gamma(x)\f$ if between updates if it is expensive to
-    /// calculate.
+    /// \param ltx If it is a non-null pointer, then it points to the value of
+    /// the \f$\log\gamma(x)\f$. It will be updated to the updated value.  If
+    /// it is a null pointer, then it is ignored. Use this pointer to save
+    /// \f$\log\gamma(x)\f$ between updates if it is expensive to calculate.
     /// \param log_target The log-target fucntion
     /// ~~~{.cpp}
     /// RealType log_target(std::size_t dim, const StateType *x);
