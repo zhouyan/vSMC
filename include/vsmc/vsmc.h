@@ -148,6 +148,10 @@ void vsmc_rng_lognormal(
 void vsmc_rng_normal(
     vsmc_rng *rng_ptr, int n, double *r, double mean, double stddev);
 
+/// \brief `vsmc::NormalMVDistribution<double>`
+void vsmc_rng_normal_mv(vsmc_rng *rng_ptr, int n, double *r, int dim,
+    const double *mean, const double *chol);
+
 /// \brief `vsmc::ParetoDistribution<double>`
 void vsmc_rng_pareto(vsmc_rng *rng_ptr, int n, double *r, double a, double b);
 

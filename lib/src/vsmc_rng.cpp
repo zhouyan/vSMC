@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/vsmc.h>
 #include <vsmc/rng/rng.hpp>
+#include <vsmc/vsmc.h>
 #include "vsmc_rng_cast.hpp"
 
 #define VSMC_DEFINE_RNG_DIST                                                  \
@@ -190,6 +190,14 @@ void vsmc_rng_poisson(vsmc_rng *rng_ptr, int n, int *r, double mean)
 {
     std::poisson_distribution<int> dist(mean);
     VSMC_DEFINE_RNG_DIST;
+}
+
+void vsmc_rng_normal_mv(vsmc_rng *rng_ptr, int n, double *r, int dim,
+    const double *mean, const double *chol)
+{
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    ::vsmc::normal_mv_distribution<double>(rng, static_cast<std::size_t>(n), r,
+        static_cast<std::size_t>(dim), mean, chol);
 }
 
 VSMC_DEFINE_RNG_DIST_0(u01)
