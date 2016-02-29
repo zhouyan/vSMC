@@ -555,17 +555,17 @@ int cov_chol(std::size_t dim, const RealType *cov, RealType *chol,
 template <typename>
 class CounterEngine;
 
-template <typename = double>
+template <typename = double, std::size_t = Dynamic>
 class RandomWalk;
 
-template <typename = double, std::size_t = Dynamic>
-class RandomWalkMV;
+template <typename = double, std::size_t = Dynamic, std::size_t = Dynamic>
+class RandomWalkG;
 
 template <typename = double>
-class ProposalNormal;
+class NormalProposal;
 
 template <typename = double, std::size_t = Dynamic>
-class ProposalNormalMV;
+class NormalMVProposal;
 
 template <typename Generator>
 inline void rng_rand(CounterEngine<Generator> &, std::size_t,
