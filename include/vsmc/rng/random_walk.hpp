@@ -99,6 +99,7 @@ class RandomWalk
         return 0;
     }
 
+    /// \brief Perform multi-step random walk update
     template <typename RNGType, typename LogTargetType, typename ProposalType>
     std::size_t operator()(std::size_t n, RNGType &rng, StateType &x,
         RealType *ltx, LogTargetType &&log_target, ProposalType &&proposal)
@@ -162,6 +163,8 @@ class RandomWalkMV
     /// ~~~
     /// After the call, the function return the proposed value in `y` and
     /// return the value \f$\log(q(y, x) / q(x, y))\f$.
+    ///
+    /// \return Acceptance count
     template <typename RNGType, typename LogTargetType, typename ProposalType>
     std::size_t operator()(RNGType &rng, StateType *x, RealType *ltx,
         LogTargetType &&log_target, ProposalType &&proposal)
@@ -181,6 +184,7 @@ class RandomWalkMV
         return 0;
     }
 
+    /// \brief Perform multi-step random walk update
     template <typename RNGType, typename LogTargetType, typename ProposalType>
     std::size_t operator()(std::size_t n, RNGType &rng, StateType *x,
         RealType *ltx, LogTargetType &&log_target, ProposalType &&proposal)
@@ -267,6 +271,11 @@ class NormalProposal
     public:
     using result_type = RealType;
 
+    /// \brief Construct a Normal random walk proposal
+    ///
+    /// \param stddev The standard deviation (scale) of the proposal
+    /// \param a The lower bound of the support of the target distribution
+    /// \param b The upper bound of the support of the target distribution
     explicit NormalProposal(result_type stddev = 1,
         result_type a = -std::numeric_limits<result_type>::infinity(),
         result_type b = std::numeric_limits<result_type>::infinity())
@@ -282,6 +291,7 @@ class NormalProposal
     result_type a() const { return a_; }
     result_type b() const { return b_; }
 
+    /// \brief Propose new value `y` and return \f$\log(q(y, x) / q(x, y))\f$.
     template <typename RNGType>
     result_type operator()(RNGType &rng, result_type x, result_type &y)
     {
@@ -310,6 +320,21 @@ class NormalMVProposal
     public:
     using result_type = RealType;
 
+    /// \brief Only usable when `Dim > 0`
+    ///
+    /// \details
+    ///
+    /// \param chol The lower triangular elements of the Cholesky decomposition
+    /// of the covaraince matrix, packed row by row. If it is a nullpointer,
+    /// then the covariance is the identicy matrix \f$I\f$
+    /// \param a The lower bound of the support of the target distribuiton. It
+    /// is assumed that the support is \f$\prod_{p=1}^d E_p \subset
+    /// \mathbb{R}^d\f$ where \f$E_p \subset \mathbb{R}\f$.
+    /// \param b The upper bound of the support of the target distribution.
+    ///
+    /// If the geometry of the support is more complex than above, then one may
+    /// find a superset of the support that takes the required form, and reject
+    /// proposals that lay outside the support manually.
     explicit NormalMVProposal(const result_type *chol = nullptr,
         const result_type *a = nullptr, const result_type *b = nullptr)
         : rnorm_(nullptr, chol)
