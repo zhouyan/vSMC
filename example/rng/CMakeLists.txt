@@ -38,10 +38,6 @@ ADD_DEPENDENCIES(example rng)
 ADD_CUSTOM_TARGET(rng-files)
 ADD_DEPENDENCIES(example-files rng-files)
 
-IF (VSMC_ENABLE_LIBRARY)
-    ADD_DEFINITIONS(-DVSMC_RNG_TEST_C_API=1)
-ENDIF (VSMC_ENABLE_LIBRARY)
-
 FUNCTION(ADD_RNG_TEST name)
     ADD_VSMC_EXECUTABLE(rng_${name} ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp)
     ADD_DEPENDENCIES(rng rng_${name})
@@ -69,6 +65,7 @@ IF (Boost_FOUND)
     ADD_RNG_TEST(student_t)
     ADD_RNG_TEST(uniform_real)
     ADD_RNG_TEST(weibull)
+    ADD_RNG_TEST(random_walk)
 ENDIF (Boost_FOUND)
 
 IF (AESNI_FOUND)

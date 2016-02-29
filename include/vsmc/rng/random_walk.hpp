@@ -429,8 +429,6 @@ class NormalMVProposal
 
     /// \brief Only usable when `Dim > 0`
     ///
-    /// \details
-    ///
     /// \param chol The lower triangular elements of the Cholesky decomposition
     /// of the covaraince matrix, packed row by row. If it is a nullpointer,
     /// then the covariance is the identicy matrix \f$I\f$
@@ -439,6 +437,7 @@ class NormalMVProposal
     /// \mathbb{R}^d\f$ where \f$E_p \subset \mathbb{R}\f$.
     /// \param b The upper bound of the support of the target distribution.
     ///
+    /// \details
     /// If the geometry of the support is more complex than above, then one may
     /// find a superset of the support that takes the required form, and reject
     /// proposals that lay outside the support manually.
