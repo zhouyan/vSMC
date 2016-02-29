@@ -58,7 +58,7 @@ template <typename RealType, typename StateType>
 class RandomWalk
 {
     public:
-    /// \brief Perform one-step random walk update, given log-target function
+    /// \brief One-step random walk update, given log-target function
     /// \f$\gamma\f$ and proposal \f$q\f$
     ///
     /// \param rng RNG engine
@@ -99,7 +99,32 @@ class RandomWalk
         return 0;
     }
 
-    /// \brief Perform multi-step random walk update
+    /// \brief One-step random walk update of one element within a vector state
+    template <typename RNGType, typename LogTargetType, typename ProposalType>
+    std::size_t operator()(RNGType &rng, std::size_t dim, std::size_t index,
+        StateType *x, RealType *ltx, LogTargetType &&log_target,
+        ProposalType &&proposal)
+    {
+        StateType xi = x[index];
+        StateType r;
+        RealType q = proposal(rng, x[index], r);
+        RealType s = ltx == nullptr ? log_target(dim, x) : *ltx;
+        x[index] = r;
+        RealType t = log_target(dim, x);
+        RealType p = t - s + q;
+        RealType u = std::log(runif_(rng));
+
+        if (u < p) {
+            if (ltx != nullptr)
+                *ltx = t;
+            return 1;
+        }
+        x[index] = xi;
+
+        return 0;
+    }
+
+    /// \brief Multi-step random walk update
     template <typename RNGType, typename LogTargetType, typename ProposalType>
     std::size_t operator()(std::size_t n, RNGType &rng, StateType &x,
         RealType *ltx, LogTargetType &&log_target, ProposalType &&proposal)
@@ -108,6 +133,26 @@ class RandomWalk
         RealType s = ltx == nullptr ? log_target(x) : *ltx;
         for (std::size_t i = 0; i != n; ++i) {
             acc += operator()(rng, x, &s,
+                std::forward<LogTargetType>(log_target),
+                std::forward<ProposalType>(proposal));
+        }
+        if (ltx != nullptr)
+            *ltx = s;
+
+        return acc;
+    }
+
+    /// \brief Multi-step random walk update of one element within a vector
+    /// state
+    template <typename RNGType, typename LogTargetType, typename ProposalType>
+    std::size_t operator()(std::size_t n, RNGType &rng, std::size_t dim,
+        std::size_t index, StateType *x, RealType *ltx,
+        LogTargetType &&log_target, ProposalType &&proposal)
+    {
+        std::size_t acc = 0;
+        RealType s = ltx == nullptr ? log_target(dim, x) : *ltx;
+        for (std::size_t i = 0; i != n; ++i) {
+            acc += operator()(rng, dim, index, x, &s,
                 std::forward<LogTargetType>(log_target),
                 std::forward<ProposalType>(proposal));
         }
