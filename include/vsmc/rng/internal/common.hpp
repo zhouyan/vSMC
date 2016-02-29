@@ -463,13 +463,13 @@ namespace internal
 
 inline int cov_chol(std::size_t dim, float *chol)
 {
-    return static_cast<int>(LAPACKE_spptrf(
+    return static_cast<int>(::LAPACKE_spptrf(
         LAPACK_ROW_MAJOR, 'L', static_cast<lapack_int>(dim), chol));
 }
 
 inline int cov_chol(std::size_t dim, double *chol)
 {
-    return static_cast<int>(LAPACKE_dpptrf(
+    return static_cast<int>(::LAPACKE_dpptrf(
         LAPACK_ROW_MAJOR, 'L', static_cast<lapack_int>(dim), chol));
 }
 
