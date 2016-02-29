@@ -46,17 +46,6 @@
 namespace vsmc
 {
 
-namespace internal
-{
-
-template <typename MatrixType>
-inline bool normal_mv_distribution_check_param(const MatrixType &)
-{
-    return true;
-}
-
-} // namespace vsmc::internal
-
 /// \brief Multivariate Normal distribution
 /// \ingroup Distribution
 ///
@@ -103,7 +92,6 @@ class NormalMVDistribution
             const result_type *chol = nullptr)
         {
             VSMC_STATIC_ASSERT_RNG_NORMAL_MV_DISTRIBUTION_FIXED_DIM(Dim);
-
             init(mean, chol);
         }
 
@@ -112,7 +100,6 @@ class NormalMVDistribution
             : mean_(dim), chol_(dim * (dim + 1) / 2)
         {
             VSMC_STATIC_ASSERT_RNG_NORMAL_MV_DISTRIBUTION_DYNAMIC_DIM(Dim);
-
             init(mean, chol);
         }
 
@@ -170,12 +157,10 @@ class NormalMVDistribution
             is >> std::ws >> chol;
 
             if (is.good()) {
-                if (internal::normal_mv_distribution_check_param(mean, chol)) {
-                    param.mean_ = std::move(mean);
-                    param.chol_ = std::move(chol);
-                } else {
-                    is.setstate(std::ios_base::failbit);
-                }
+                param.mean_ = std::move(mean);
+                param.chol_ = std::move(chol);
+            } else {
+                is.setstate(std::ios_base::failbit);
             }
 
             return is;
@@ -200,9 +185,6 @@ class NormalMVDistribution
             if (chol == nullptr)
                 for (std::size_t i = 0; i != mean_.size(); ++i)
                     chol_[i * (i + 1) / 2 + i] = 1;
-
-            VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(
-                internal::normal_mv_distribution_check_param(chol_), NormalMV);
         }
     }; // class param_type
 
