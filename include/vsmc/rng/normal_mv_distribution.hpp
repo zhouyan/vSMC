@@ -61,23 +61,6 @@ namespace vsmc
 template <typename RealType, std::size_t Dim>
 class NormalMVDistribution
 {
-    private:
-    using vector_type = typename std::conditional<Dim == Dynamic,
-        Vector<RealType>, std::array<RealType, Dim>>::type;
-    using matrix_type = typename std::conditional<Dim == Dynamic,
-        Vector<RealType>, std::array<RealType, Dim *(Dim + 1) / 2>>::type;
-
-    template <typename T, std::size_t N>
-    static void resize(std::array<T, N> &, std::size_t)
-    {
-    }
-
-    template <typename T>
-    static void resize(Vector<T> &vec, std::size_t n)
-    {
-        vec.resize(n);
-    }
-
     public:
     using result_type = RealType;
     using distribution_type = NormalMVDistribution<RealType, Dim>;
@@ -149,10 +132,10 @@ class NormalMVDistribution
             if (!is.good())
                 return is;
 
-            vector_type mean;
-            matrix_type chol;
-            resize(mean, dim);
-            resize(chol, dim * (dim + 1) / 2);
+            internal::Array<result_type, Dim> mean;
+            internal::Array<result_type, Dim *(Dim + 1) / 2> chol;
+            internal::resize(mean, dim);
+            internal::resize(chol, dim * (dim + 1) / 2);
             is >> std::ws >> mean;
             is >> std::ws >> chol;
 
@@ -167,8 +150,8 @@ class NormalMVDistribution
         }
 
         private:
-        vector_type mean_;
-        matrix_type chol_;
+        internal::Array<result_type, Dim> mean_;
+        internal::Array<result_type, Dim *(Dim + 1) / 2> chol_;
 
         void init(const result_type *mean, const result_type *chol)
         {

@@ -115,6 +115,21 @@ inline std::string itos(IntType i)
     return itos(i, std::is_unsigned<IntType>());
 }
 
+template <typename T, std::size_t Dim>
+using Array = typename std::conditional<Dim == Dynamic, Vector<T>,
+    std::array<T, Dim>>::type;
+
+template <typename T, std::size_t N>
+inline void resize(std::array<T, N> &, std::size_t)
+{
+}
+
+template <typename T>
+inline void resize(Vector<T> &vec, std::size_t n)
+{
+    vec.resize(n);
+}
+
 } // namespace vsmc::internal
 
 template <typename CharT, typename Traits, typename T, std::size_t N>
