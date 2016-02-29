@@ -65,7 +65,6 @@ IF (Boost_FOUND)
     ADD_RNG_TEST(student_t)
     ADD_RNG_TEST(uniform_real)
     ADD_RNG_TEST(weibull)
-    ADD_RNG_TEST(random_walk)
 ENDIF (Boost_FOUND)
 
 IF (AESNI_FOUND)
