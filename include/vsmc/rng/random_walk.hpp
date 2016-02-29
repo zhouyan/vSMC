@@ -54,41 +54,65 @@ namespace vsmc
 
 /// \brief Random walk MCMC
 /// \ingroup RandomWalk
-template <typename RealType>
+template <typename RealType, typename StateType>
 class RandomWalk
 {
     public:
-    using result_type = RealType;
-
+    /// \brief Perform one-step random walk update, given log-target function
+    /// \f$\gamma\f$ and proposal \f$q\f$
+    ///
+    /// \param rng RNG engine
+    /// \param x The current state value. It will be updated to the new value
+    /// after the MCMC move.
+    /// \param ltx If it is a non-null pointer, then it points to the
+    /// value of the \f$\log\gamma(x)\f$. It will be updated to the updated
+    /// value.  If it is a null pointer, then it is ignored. Use this pointer
+    /// to save \f$\log\gamma(x)\f$ if between updates if it is expensive to
+    /// calculate.
+    /// \param log_target The log-target fucntion
+    /// ~~~{.cpp}
+    /// RealType log_target(const StateType &x);
+    /// ~~~
+    /// and return the value of \f$\log\gamma(x)\f$.
+    /// \param proposal The proposal function. It takes the form,
+    /// ~~~{.cpp}
+    /// RealType proposal(RNGType &rng, const StateType &x, StateType &y);
+    /// ~~~
+    /// After the call, the function return the proposed value in `y` and
+    /// return the value \f$\log(q(y, x) / q(x, y))\f$.
     template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(RNGType &rng, result_type x, result_type &y,
+    std::size_t operator()(RNGType &rng, StateType &x, RealType *ltx,
         LogTargetType &&log_target, ProposalType &&proposal)
     {
-        result_type r = 0;
-        result_type q = proposal(rng, x, r);
-        result_type p = log_target(r) - log_target(x) + q;
-        result_type u = std::log(runif_(rng));
+        StateType r;
+        RealType q = proposal(rng, x, r);
+        RealType s = ltx == nullptr ? log_target(x) : *ltx;
+        RealType t = log_target(r);
+        RealType p = t - s + q;
+        RealType u = std::log(runif_(rng));
 
         if (u < p) {
-            y = r;
+            x = r;
+            if (ltx != nullptr)
+                *ltx = t;
             return 1;
-        } else {
-            y = x;
-            return 0;
         }
+        return 0;
     }
 
     template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(std::size_t n, RNGType &rng, result_type x,
-        result_type &y, LogTargetType &&log_target, ProposalType &&proposal)
+    std::size_t operator()(std::size_t n, RNGType &rng, StateType &x,
+        RealType *ltx, LogTargetType &&log_target, ProposalType &&proposal)
     {
         std::size_t acc = 0;
-        y = x;
+        RealType s = ltx == nullptr ? log_target(x) : *ltx;
         for (std::size_t i = 0; i != n; ++i) {
-            acc += operator()(rng, y, y,
+            acc += operator()(rng, x, &s,
                 std::forward<LogTargetType>(log_target),
                 std::forward<ProposalType>(proposal));
         }
+        if (ltx != nullptr)
+            *ltx = s;
 
         return acc;
     }
@@ -97,17 +121,19 @@ class RandomWalk
     U01Distribution<RealType> runif_;
 }; // class RandomWalk
 
-template <typename RealType, std::size_t Dim>
+/// \brief Multivariate random walk MCMC
+/// \ingroup RandomWalk
+template <typename RealType, typename StateType, std::size_t Dim>
 class RandomWalkMV
 {
     public:
-    using result_type = RealType;
-
+    /// \brief Only usable when `Dim > 0`
     RandomWalkMV()
     {
         VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_MV_FIXED_DIM(Dim, RandomWalkMV);
     }
 
+    /// \brief Only usable when `Dim == Dynamic`
     RandomWalkMV(std::size_t dim) : r_(dim)
     {
         VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_MV_DYNAMIC_DIM(Dim, RandomWalkMV);
@@ -115,43 +141,69 @@ class RandomWalkMV
 
     std::size_t dim() const { return r_.size(); }
 
+    /// \brief Perform one-step random walk update, given log-target function
+    /// \f$\gamma\f$ and proposal \f$q\f$
+    ///
+    /// \param rng RNG engine
+    /// \param x The current state value. It will be updated to the new value
+    /// after the MCMC move.
+    /// \param ltx If it is a non-null pointer, then it points to the
+    /// value of the \f$\log\gamma(x)\f$. It will be updated to the updated
+    /// value.  If it is a null pointer, then it is ignored. Use this pointer
+    /// to save \f$\log\gamma(x)\f$ if between updates if it is expensive to
+    /// calculate.
+    /// \param log_target The log-target fucntion
+    /// ~~~{.cpp}
+    /// RealType log_target(std::size_t dim, const StateType *x);
+    /// ~~~
+    /// and return the value of \f$\log\gamma(x)\f$.
+    /// \param proposal The proposal function. It takes the form,
+    /// ~~~{.cpp}
+    /// RealType proposal(
+    ///     RNGType &rng, std::size_t dim, const StateType *x, StateType *y);
+    /// ~~~
+    /// After the call, the function return the proposed value in `y` and
+    /// return the value \f$\log(q(y, x) / q(x, y))\f$.
     template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(RNGType &rng, const result_type *x, result_type *y,
+    std::size_t operator()(RNGType &rng, StateType *x, RealType *ltx,
         LogTargetType &&log_target, ProposalType &&proposal)
     {
-        result_type q = proposal(rng, dim(), x, r_.data());
-        result_type p =
-            log_target(dim(), r_.data()) - log_target(dim(), x) + q;
-        result_type u = std::log(runif_(rng));
+        RealType q = proposal(rng, dim(), x, r_.data());
+        RealType s = ltx == nullptr ? log_target(dim(), x) : *ltx;
+        RealType t = log_target(dim(), r_.data());
+        RealType p = t - s + q;
+        RealType u = std::log(runif_(rng));
 
         if (u < p) {
-            std::copy(r_.begin(), r_.end(), y);
+            std::copy(r_.begin(), r_.end(), x);
+            if (ltx != nullptr)
+                *ltx = t;
             return 1;
-        } else {
-            std::copy_n(x, dim(), y);
-            return 0;
         }
+        return 0;
     }
 
     template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(std::size_t n, RNGType &rng, const result_type *x,
-        result_type *y, LogTargetType &&log_target, ProposalType &&proposal)
+    std::size_t operator()(std::size_t n, RNGType &rng, StateType *x,
+        RealType *ltx, LogTargetType &&log_target, ProposalType &&proposal)
     {
         std::size_t acc = 0;
-        std::copy_n(x, dim(), y);
+        RealType s = ltx == nullptr ? log_target(dim(), x) : *ltx;
         for (std::size_t i = 0; i != n; ++i) {
-            acc += operator()(rng, y, y,
+            acc += operator()(rng, x, &s,
                 std::forward<LogTargetType>(log_target),
                 std::forward<ProposalType>(proposal));
         }
+        if (ltx != nullptr)
+            *ltx = s;
 
         return acc;
     }
 
     private:
     U01Distribution<RealType> runif_;
-    typename std::conditional<Dim == Dynamic, Vector<RealType>,
-        std::array<RealType, Dim>>::type r_;
+    typename std::conditional<Dim == Dynamic, Vector<StateType>,
+        std::array<StateType, Dim>>::type r_;
 }; // class RandomwWalkMV
 
 namespace internal
@@ -271,7 +323,7 @@ class NormalMVProposal
     explicit NormalMVProposal(std::size_t dim,
         const result_type *chol = nullptr, const result_type *a = nullptr,
         const result_type *b = nullptr)
-        : rnorm_(dim, nullptr, chol), a_(dim), b_(dim), flag_(dim)
+        : rnorm_(dim, nullptr, chol), a_(dim), b_(dim), z_(dim), flag_(dim)
     {
         VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_MV_DYNAMIC_DIM(
             Dim, NormalMVProposal);
@@ -286,22 +338,24 @@ class NormalMVProposal
     result_type operator()(
         RNGType &rng, std::size_t, const result_type *x, result_type *y)
     {
-        rnorm_(rng, y);
+        rnorm_(rng, z_.data());
         result_type q = 0;
         for (std::size_t i = 0; i != dim(); ++i) {
             switch (flag_[i]) {
                 case 0:
-                    q += internal::proposal_normal_q(x[i], y[i], y[i]);
+                    q += internal::proposal_normal_q(x[i], y[i], z_[i]);
                     break;
                 case 1:
-                    q += internal::proposal_normal_qb(x[i], y[i], y[i], b_[i]);
+                    q +=
+                        internal::proposal_normal_qb(x[i], y[i], z_[i], b_[i]);
                     break;
                 case 2:
-                    q += internal::proposal_normal_qa(x[i], y[i], y[i], a_[i]);
+                    q +=
+                        internal::proposal_normal_qa(x[i], y[i], z_[i], a_[i]);
                     break;
                 case 3:
                     q += internal::proposal_normal_qab(
-                        x[i], y[i], y[i], a_[i], b_[i]);
+                        x[i], y[i], z_[i], a_[i], b_[i]);
                     break;
                 default: break;
             }
@@ -318,19 +372,24 @@ class NormalMVProposal
     NormalMVDistribution<RealType, Dim> rnorm_;
     vector_type<RealType> a_;
     vector_type<RealType> b_;
+    vector_type<RealType> z_;
     vector_type<unsigned> flag_;
 
     void init(std::size_t dim, const result_type *a, const result_type *b)
     {
-        if (a == nullptr)
-            std::fill(a_.begin(), a_.end(), 0);
-        else
+        if (a == nullptr) {
+            std::fill(a_.begin(), a_.end(),
+                -std::numeric_limits<result_type>::infinity());
+        } else {
             std::copy_n(a, dim, a_.begin());
+        }
 
-        if (b == nullptr)
-            std::fill(b_.begin(), b_.end(), 0);
-        else
+        if (b == nullptr) {
+            std::fill(b_.begin(), b_.end(),
+                std::numeric_limits<result_type>::infinity());
+        } else {
             std::copy_n(b, dim, b_.begin());
+        }
 
         for (std::size_t i = 0; i != dim; ++i) {
             unsigned lower = std::isfinite(a_[i]) ? 1 : 0;
