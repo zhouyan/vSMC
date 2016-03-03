@@ -34,7 +34,7 @@
 
 #include <vsmc/internal/config.h>
 
-#if VSMC_HAS_MKL
+#if VSMC_USE_MKL_CBLAS
 #include <mkl_cblas.h>
 #define VSMC_CBLAS_INT MKL_INT
 #else
