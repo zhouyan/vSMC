@@ -34,7 +34,7 @@
 
 #include <vsmc/internal/config.h>
 
-#if VSMC_HAS_MKL
+#if VSMC_USE_MKL_LAPACKE
 #include <mkl_lapacke.h>
 #else
 #include <lapacke.h>
