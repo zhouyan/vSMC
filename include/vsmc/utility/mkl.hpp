@@ -1283,10 +1283,8 @@ class MKLCovTask
 
     void operator()(MatrixLayout layout, std::size_t N, std::size_t dim,
         const result_type *x, const result_type *w, result_type *mean,
-        result_type *cov, result_type *cor, MatrixLayout cov_layout = RowMajor,
-        bool cov_upper = false, bool cov_packed = false,
-        MatrixLayout cor_layout = RowMajor, bool cor_upper = false,
-        bool cor_packed = false)
+        result_type *cov, MatrixLayout cov_layout = RowMajor,
+        bool cov_upper = false, bool cov_packed = false)
     {
         if (N * dim == 0)
             return;
@@ -1299,19 +1297,15 @@ class MKLCovTask
         MKL_INT xstorage = layout == RowMajor ? VSL_SS_MATRIX_STORAGE_COLS :
                                                 VSL_SS_MATRIX_STORAGE_ROWS;
         MKL_INT cov_storage = storage(cov_layout, cov_upper, cov_packed);
-        MKL_INT cor_storage = storage(cor_layout, cor_upper, cor_packed);
         unsigned MKL_INT64 estimates = 0;
         if (mean != nullptr)
             estimates |= VSL_SS_MEAN;
         if (cov != nullptr)
             estimates |= VSL_SS_COV;
-        if (cor != nullptr)
-            estimates |= VSL_SS_COR;
 
         MKLSSTask<result_type> task(&p, &n, &xstorage, x, w, nullptr);
-        task.reset(&p, &n, &xstorage, x, w, nullptr);
-        task.edit_cov_cor(mean, cov, &cov_storage, cor, &cor_storage);
-        vsldSSCompute(task.get(), estimates, VSL_SS_METHOD_FAST);
+        task.edit_cov_cor(mean, cov, &cov_storage, nullptr, nullptr);
+        task.compute(estimates, VSL_SS_METHOD_FAST);
     }
 
     private:
