@@ -895,7 +895,7 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<ResultType>>
     int compute(unsigned MKL_INT64 estimates, MKL_INT method)
     {
         return compute_dispatch(
-            estimates, method, static_cast<float *>(nullptr));
+            estimates, method, static_cast<result_type *>(nullptr));
     }
 
     private:
@@ -1282,63 +1282,50 @@ class MKLCovTask
     using result_type = ResultType;
 
     void operator()(MatrixLayout layout, std::size_t N, std::size_t dim,
-        const result_type *x, const result_type *w, const int *indices,
-        result_type *mean, result_type *cov, result_type *cor,
-        MatrixLaoyout cov_layout = RowMajor, bool cov_upper = false,
-        bool cov_packed = false, MatrixLayout cor_layout = RowMajor,
-        bool cor_upper = false, bool cor_packed = false)
+        const result_type *x, const result_type *w, result_type *mean,
+        result_type *cov, result_type *cor, MatrixLayout cov_layout = RowMajor,
+        bool cov_upper = false, bool cov_packed = false,
+        MatrixLayout cor_layout = RowMajor, bool cor_upper = false,
+        bool cor_packed = false)
     {
-        if (n * dim == 0)
+        if (N * dim == 0)
             return;
 
         if (x == nullptr)
             return;
 
         MKL_INT p = static_cast<MKL_INT>(dim);
-        MKL_INT n = static_cast<MKL_INT>(n);
+        MKL_INT n = static_cast<MKL_INT>(N);
         MKL_INT xstorage = layout == RowMajor ? VSL_SS_MATRIX_STORAGE_COLS :
                                                 VSL_SS_MATRIX_STORAGE_ROWS;
-
-        if (bool(task_)) {
-            task_.edit_task(VSL_SS_ED_DIMEN, &p);
-            task_.edit_task(VSL_SS_ED_OBSERV_N, &n);
-            task_.edit_task(VSL_SS_ED_OBSERV_STORAGE, &xstorage);
-            task_.edit_task(VSL_SS_ED_OBSERV, x);
-            task_.edit_task(VSL_SS_ED_WEIGHTS, w);
-            task_.edit_task(VSL_SS_ED_INDC, indices);
-        } else {
-            task_.reset(&p, &n, &xstorage, x, w, indices);
-        }
-
         MKL_INT cov_storage = storage(cov_layout, cov_upper, cov_packed);
         MKL_INT cor_storage = storage(cor_layout, cor_upper, cor_packed);
-        task_.edit_cov_corr(mean, cov, &cov_storage, cor, &cor_storage);
-
-        MKL_INT64 estimates = 0;
+        unsigned MKL_INT64 estimates = 0;
         if (mean != nullptr)
             estimates |= VSL_SS_MEAN;
         if (cov != nullptr)
             estimates |= VSL_SS_COV;
         if (cor != nullptr)
             estimates |= VSL_SS_COR;
-        task_.compute(estimates, VSL_SS_METHOD_FAST);
+
+        MKLSSTask<result_type> task(&p, &n, &xstorage, x, w, nullptr);
+        task.reset(&p, &n, &xstorage, x, w, nullptr);
+        task.edit_cov_cor(mean, cov, &cov_storage, cor, &cor_storage);
+        vsldSSCompute(task.get(), estimates, VSL_SS_METHOD_FAST);
     }
 
     private:
-    MKLSSTask<ResultType> task_;
-
     MKL_INT storage(MatrixLayout layout, bool upper, bool packed)
     {
         if (!packed)
             return VSL_SS_MATRIX_STORAGE_FULL;
 
         if (layout == RowMajor)
-            return upper ? VSL_SS_MATRIX_STORAGE_L_PACKED :
-                           VSL_SS_MATRIX_STORAGE_U_PACKED;
-
-        if (layout == ColMajor)
             return upper ? VSL_SS_MATRIX_STORAGE_U_PACKED :
                            VSL_SS_MATRIX_STORAGE_L_PACKED;
+
+        return upper ? VSL_SS_MATRIX_STORAGE_L_PACKED :
+                       VSL_SS_MATRIX_STORAGE_U_PACKED;
     }
 }; // class MKLCovTask
 
