@@ -132,29 +132,6 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
     VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, MonitorEval)
 }; // class MonitorEvalOMP
 
-/// \brief Path<T>::eval_type subtype using OpenMP
-/// \ingroup OMP
-template <typename T, typename Derived>
-class PathEvalOMP : public PathEvalBase<T, Derived>
-{
-    public:
-    double operator()(std::size_t iter, Particle<T> &particle, double *r)
-    {
-        using size_type = typename Particle<T>::size_type;
-        const size_type N = particle.size();
-        this->eval_pre(iter, particle);
-#pragma omp parallel for default(shared)
-        for (size_type i = 0; i < N; ++i)
-            r[i] = this->eval_sp(iter, particle.sp(i));
-        this->eval_post(iter, particle);
-
-        return this->eval_grid(iter, particle);
-    }
-
-    protected:
-    VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, PathEval)
-}; // class PathEvalOMP
-
 } // namespace vsmc
 
 #endif // VSMC_SMP_BACKEND_OMP_HPP

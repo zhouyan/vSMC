@@ -51,7 +51,7 @@ template <typename T, typename Derived>
 using MoveSMP = vsmc::Move@SMP@<T, Derived>;
 
 template <typename T, typename Derived>
-using PathEvalSMP = vsmc::PathEval@SMP@<T, Derived>;
+using MonitorEvalSMP = vsmc::MonitorEval@SMP@<T, Derived>;
 // clang-format on
 
 class gmm_param
@@ -520,17 +520,23 @@ class gmm_move_weight : public MoveSMP<gmm_state, gmm_move_weight>
     }
 };
 
-class gmm_path : public PathEvalSMP<gmm_state, gmm_path>
+class gmm_path_integrand : public MonitorEvalSMP<gmm_state, gmm_path_integrand>
 {
     public:
-    double eval_sp(std::size_t, vsmc::SingleParticle<gmm_state> sp)
+    void eval_sp(std::size_t, std::size_t, vsmc::SingleParticle<gmm_state> sp,
+        double *res)
     {
-        return sp.state(0).log_likelihood();
+        *res = sp.state(0).log_likelihood();
     }
+};
 
-    double eval_grid(std::size_t, vsmc::Particle<gmm_state> &particle)
+class gmm_path_grid
+{
+    public:
+    void operator()(std::size_t, std::size_t,
+        vsmc::Particle<gmm_state> &particle, double *res)
     {
-        return particle.value().alpha();
+        *res = particle.value().alpha();
     }
 };
 
@@ -602,12 +608,20 @@ inline int gmm_main(int argc, char **argv)
         .mcmc(gmm_move_mu(), false)
         .mcmc(gmm_move_lambda(), true)
         .mcmc(gmm_move_weight(), true)
-        .path_sampling(gmm_path());
+        .monitor("path_integrand", 1, gmm_path_integrand())
+        .monitor("path_grid", 1, gmm_path_grid(), true);
 
     vsmc::StopWatch watch;
     watch.start();
     sampler.initialize(const_cast<char *>(datafile.c_str())).iterate(n);
-    double ps = sampler.path().log_zconst();
+    double ps = 0;
+    auto ps_integrand = sampler.monitor("path_integrand");
+    auto ps_grid = sampler.monitor("path_grid");
+    for (std::size_t iter = 1; iter < sampler.iter_size(); ++iter) {
+        ps += 0.5 *
+            (ps_integrand.record(0, iter) + ps_integrand.record(0, iter - 1)) *
+            (ps_grid.record(0, iter) - ps_grid.record(0, iter - 1));
+    }
     watch.stop();
 
     std::cout << "Path sampling estimate: " << ps << std::endl;

@@ -48,9 +48,6 @@ template <typename>
 class Monitor;
 
 template <typename>
-class Path;
-
-template <typename>
 class SingleParticle;
 
 template <typename>

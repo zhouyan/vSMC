@@ -4,6 +4,8 @@
 
 * `MatrixOrder` is now an alias to `MatrixLayout`.
 * CBLAS and LAPACK are now required dependency.
+* Path sampling support is removed. It can be easily done through the more
+  general `Monitor`. See the GMM example.
 
 ## New features
 
