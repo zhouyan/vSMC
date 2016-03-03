@@ -1273,56 +1273,6 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<ResultType>>
     }
 }; // class MKLSSTask
 
-/// \brief Compute covariance matrix using `MKLSSTask`
-/// \ingroup MKL
-template <typename ResultType = double>
-class MKLCovTask
-{
-    public:
-    using result_type = ResultType;
-
-    void operator()(MatrixLayout layout, std::size_t N, std::size_t dim,
-        const result_type *x, const result_type *w, result_type *mean,
-        result_type *cov, MatrixLayout cov_layout = RowMajor,
-        bool cov_upper = false, bool cov_packed = false)
-    {
-        if (N * dim == 0)
-            return;
-
-        if (x == nullptr)
-            return;
-
-        MKL_INT p = static_cast<MKL_INT>(dim);
-        MKL_INT n = static_cast<MKL_INT>(N);
-        MKL_INT xstorage = layout == RowMajor ? VSL_SS_MATRIX_STORAGE_COLS :
-                                                VSL_SS_MATRIX_STORAGE_ROWS;
-        MKL_INT cov_storage = storage(cov_layout, cov_upper, cov_packed);
-        unsigned MKL_INT64 estimates = 0;
-        if (mean != nullptr)
-            estimates |= VSL_SS_MEAN;
-        if (cov != nullptr)
-            estimates |= VSL_SS_COV;
-
-        MKLSSTask<result_type> task(&p, &n, &xstorage, x, w, nullptr);
-        task.edit_cov_cor(mean, cov, &cov_storage, nullptr, nullptr);
-        task.compute(estimates, VSL_SS_METHOD_FAST);
-    }
-
-    private:
-    MKL_INT storage(MatrixLayout layout, bool upper, bool packed)
-    {
-        if (!packed)
-            return VSL_SS_MATRIX_STORAGE_FULL;
-
-        if (layout == RowMajor)
-            return upper ? VSL_SS_MATRIX_STORAGE_U_PACKED :
-                           VSL_SS_MATRIX_STORAGE_L_PACKED;
-
-        return upper ? VSL_SS_MATRIX_STORAGE_L_PACKED :
-                       VSL_SS_MATRIX_STORAGE_U_PACKED;
-    }
-}; // class MKLCovTask
-
 /// \brief MKL `VSLConvTaskPtr`
 /// \ingroup MKL
 template <typename ResultType = double>
