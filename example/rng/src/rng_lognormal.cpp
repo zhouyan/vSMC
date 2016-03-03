@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <boost/math/distributions/lognormal.hpp>
 #include <vsmc/rng/lognormal_distribution.hpp>
+#include <boost/math/distributions/lognormal.hpp>
 #include "rng_dist.hpp"
 
 template <>

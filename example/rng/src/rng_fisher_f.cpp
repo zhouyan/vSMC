@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <boost/math/distributions/fisher_f.hpp>
 #include <vsmc/rng/fisher_f_distribution.hpp>
+#include <boost/math/distributions/fisher_f.hpp>
 #include "rng_dist.hpp"
 
 template <>

@@ -32,8 +32,8 @@
 #ifndef VSMC_SMP_BACKEND_OMP_HPP
 #define VSMC_SMP_BACKEND_OMP_HPP
 
-#include <omp.h>
 #include <vsmc/smp/backend_base.hpp>
+#include <omp.h>
 
 namespace vsmc
 {

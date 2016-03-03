@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <boost/math/distributions/normal.hpp>
 #include <vsmc/rng/normal_distribution.hpp>
+#include <boost/math/distributions/normal.hpp>
 #include "rng_dist.hpp"
 
 template <>

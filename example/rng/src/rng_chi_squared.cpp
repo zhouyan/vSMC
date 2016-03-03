@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <boost/math/distributions/chi_squared.hpp>
 #include <vsmc/rng/chi_squared_distribution.hpp>
+#include <boost/math/distributions/chi_squared.hpp>
 #include "rng_dist.hpp"
 
 template <>

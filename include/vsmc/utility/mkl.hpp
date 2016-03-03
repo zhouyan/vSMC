@@ -32,8 +32,8 @@
 #ifndef VSMC_UTILITY_MKL_HPP
 #define VSMC_UTILITY_MKL_HPP
 
-#include <vsmc/internal/common.hpp>
 #include <vsmc/rng/internal/common.hpp>
+#include <vsmc/internal/common.hpp>
 #include <mkl.h>
 
 #define VSMC_STATIC_ASSERT_UTILITY_MKL_SS_TASK_RESULT_TYPE(ResultType)        \

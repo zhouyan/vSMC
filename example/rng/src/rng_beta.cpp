@@ -29,9 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <vsmc/rng/beta_distribution.hpp>
 #include <boost/math/distributions/beta.hpp>
 #include <boost/random/beta_distribution.hpp>
-#include <vsmc/rng/beta_distribution.hpp>
 #include "rng_dist.hpp"
 
 template <>

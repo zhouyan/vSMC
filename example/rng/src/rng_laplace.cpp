@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <boost/random/laplace_distribution.hpp>
 #include <vsmc/rng/laplace_distribution.hpp>
+#include <boost/random/laplace_distribution.hpp>
 #include "rng_dist.hpp"
 
 template <>

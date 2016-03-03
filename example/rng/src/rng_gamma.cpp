@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <boost/math/distributions/gamma.hpp>
 #include <vsmc/rng/gamma_distribution.hpp>
+#include <boost/math/distributions/gamma.hpp>
 #include "rng_dist.hpp"
 
 template <>
