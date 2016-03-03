@@ -118,16 +118,20 @@
 #define VSMC_HAS_MKL 0
 #endif
 
-#ifndef VSMC_USE_MKL_VML
-#define VSMC_USE_MKL_VML VSMC_HAS_MKL
-#endif
-
 #ifndef VSMC_USE_MKL_CBLAS
 #define VSMC_USE_MKL_CBLAS VSMC_HAS_MKL
 #endif
 
 #ifndef VSMC_USE_MKL_LAPACKE
 #define VSMC_USE_MKL_LAPACKE VSMC_HAS_MKL
+#endif
+
+#ifndef VSMC_USE_MKL_VML
+#define VSMC_USE_MKL_VML VSMC_HAS_MKL
+#endif
+
+#ifndef VSMC_USE_MKL_VSL
+#define VSMC_USE_MKL_VSL VSMC_HAS_MKL
 #endif
 
 #endif // VSMC_INTERNAL_CONFIG_H
