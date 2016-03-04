@@ -480,7 +480,7 @@ inline void sincos(std::size_t n, const T *a, T *y, T *z)
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k, z += k) {
         sin(k, a, y);
         cos(k, a, z);
     }
