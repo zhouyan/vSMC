@@ -146,6 +146,10 @@
 /// \ingroup Utility
 /// \brief Memory allocation with alignment requirement
 
+/// \defgroup Covariance Covariance
+/// \ingroup Utility
+/// \brief Covariance matrix estimation and manipulation
+
 /// \defgroup HDF5IO HDF5 objects IO
 /// \ingroup Utility
 /// \brief Load and store objects in the HDF5 format

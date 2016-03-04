@@ -332,46 +332,34 @@ class Covariance
                 for (std::size_t j = 0; j != i; ++j)
                     cov_[i * dim + j] = cov_[j * dim + i];
 
+        if (!cov_packed) {
+            std::copy(cov_.begin(), cov_.end(), cov);
+            return;
+        }
+
         unsigned l = cov_layout == RowMajor ? 0 : 1;
         unsigned u = cov_upper ? 1 : 0;
-        unsigned p = cov_packed ? 1 : 0;
-        unsigned c = (l << 2) + (u << 1) + p;
+        unsigned c = (l << 1) + u;
         switch (c) {
-            case 0: // Row, Lower, Full
-                std::copy(cov_.begin(), cov_.end(), cov);
-                break;
-            case 1: // Row, Lower, Pack
+            case 0: // Row, Lower, Pack
                 for (size_t i = 0; i != dim; ++i)
                     for (std::size_t j = 0; j <= i; ++j)
                         *cov++ = cov_[i * dim + j];
                 break;
-            case 2: // Row, Upper, Full
+            case 1: // Row, Upper, Pack
                 for (std::size_t i = 0; i != dim; ++i)
                     for (std::size_t j = i; j != dim; ++j)
-                        cov[i * dim + j] = cov_[j * dim + i];
+                        *cov++ = cov_[i * dim + j];
                 break;
-            case 3: // Row, Upper, Pack
-                for (std::size_t i = 0; i != dim; ++i)
-                    for (std::size_t j = i; j != dim; ++j)
-                        *cov++ = cov_[j * dim + i];
-                break;
-            case 4: // Col, Lower, Full
-                std::copy(cov_.begin(), cov_.end(), cov);
-                break;
-            case 5: // Col, Lower, Pack
+            case 2: // Col, Lower, Pack
                 for (std::size_t j = 0; j != dim; ++j)
                     for (std::size_t i = j; i != dim; ++i)
                         *cov++ = cov_[j * dim + i];
                 break;
-            case 6: // Col, Upper, Full
+            case 3: // Col, Upper, Pack
                 for (std::size_t j = 0; j != dim; ++j)
                     for (std::size_t i = 0; i <= j; ++i)
-                        cov[j * dim + i] = cov_[i * dim + j];
-                break;
-            case 7: // Col, Upper, Pack
-                for (std::size_t j = 0; j != dim; ++j)
-                    for (std::size_t i = 0; i <= j; ++i)
-                        *cov++ = cov_[i * dim + j];
+                        *cov++ = cov_[j * dim + i];
                 break;
             default: break;
         }
