@@ -34,6 +34,7 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/normal_distribution.hpp>
+#include <vsmc/utility/covariance.hpp>
 
 #define VSMC_STATIC_ASSERT_RNG_NORMAL_MV_DISTRIBUTION_FIXED_DIM(Dim)          \
     VSMC_STATIC_ASSERT((Dim != Dynamic),                                      \

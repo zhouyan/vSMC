@@ -115,6 +115,7 @@ ADD_HEADER_EXECUTABLE(vsmc/smp/backend_tbb  ${TBB_FOUND} "TBB")
 
 ADD_HEADER_EXECUTABLE(vsmc/utility/utility TRUE "HDF5")
 ADD_HEADER_EXECUTABLE(vsmc/utility/aligned_memory TRUE)
+ADD_HEADER_EXECUTABLE(vsmc/utility/covariance     TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/utility/hdf5io         ${HDF5_FOUND} "HDF5")
 ADD_HEADER_EXECUTABLE(vsmc/utility/mkl            ${MKL_FOUND} "MKL")
 ADD_HEADER_EXECUTABLE(vsmc/utility/program_option TRUE)

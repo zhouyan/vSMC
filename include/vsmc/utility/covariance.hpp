@@ -33,6 +33,9 @@
 #define VSMC_UTILITY_COVARIANCE_HPP
 
 #include <vsmc/internal/common.hpp>
+#if VSMC_USE_MKL_VSL
+#include <vsmc/utility/mkl.hpp>
+#endif
 
 namespace vsmc
 {
