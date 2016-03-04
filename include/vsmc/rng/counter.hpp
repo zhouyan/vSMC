@@ -34,6 +34,12 @@
 
 #include <vsmc/rng/internal/common.hpp>
 
+/// \brief Make all counter RNG reproducible
+/// \ingroup Config
+#ifndef VSMC_RNG_COUNTER_REPRODUCIBLE
+#define VSMC_RNG_COUNTER_REPRODUCIBLE 0
+#endif
+
 namespace vsmc
 {
 
@@ -363,6 +369,7 @@ class CounterEngine
             return;
         }
 
+#if !VSMC_RNG_COUNTER_REPRODUCIBLE
         std::size_t p = 32 -
             static_cast<std::size_t>(reinterpret_cast<std::uintptr_t>(r) % 32);
         if (p % sizeof(result_type) == 0) {
@@ -372,6 +379,7 @@ class CounterEngine
             n -= p;
             r += p;
         }
+#endif
 
         const std::size_t q = generator_(ctr_, key_, n, r);
         n -= q;

@@ -258,7 +258,7 @@ inline void uniform_bits_distribution_impl(RNGType &rng, std::size_t n,
         r[i] = UniformBits<UIntType, IntBits<UIntType>::value>::eval(rng);
 }
 
-} // namespace vsmc::rng_type
+} // namespace vsmc::internal
 
 template <typename UIntType, typename RNGType>
 inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
