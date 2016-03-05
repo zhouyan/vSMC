@@ -42,7 +42,11 @@
 /// \brief Default RNG set type
 /// \ingroup Config
 #ifndef VSMC_RNG_SET_TYPE
+#if VSMC_HAS_TBB
+#define VSMC_RNG_SET_TYPE ::vsmc::RNGSetTBB<::vsmc::RNG>
+#else
 #define VSMC_RNG_SET_TYPE ::vsmc::RNGSetVector<::vsmc::RNG>
+#endif
 #endif
 
 namespace vsmc
@@ -116,6 +120,42 @@ class RNGSetVector
     std::size_t size_;
     AlignedVector<rng_type> rng_;
 }; // class RNGSetVector
+
+#if VSMC_HAS_TBB
+
+/// \brief Thread-local storage RNG set using tbb::combinable
+/// \ingroup RNG
+template <typename RNGType>
+class RNGSetTBB
+{
+    public:
+    using rng_type = RNGType;
+    using size_type = std::size_t;
+
+    explicit RNGSet(size_type N = 0)
+        : size_(N), rng_([]() {
+            rng_type rng;
+            Seed::instance().seed_rng(rng);
+            return rng;
+        })
+    {
+        seed();
+    }
+
+    size_type size() const { return size_; }
+
+    void resize(std::size_t) {}
+
+    void seed() { rng_.clear() }
+
+    rng_type &operator[](size_type) { return rng_.local(); }
+
+    private:
+    std::size_t size_;
+    ::tbb::combinable<std::pair<bool, rng_type>> rng_;
+}; // class RNGSetTBB
+
+#endif // VSMC_HAS_TBB
 
 using RNGSet = VSMC_RNG_SET_TYPE;
 
