@@ -36,7 +36,7 @@
 #include <vsmc/rng/engine.hpp>
 #include <vsmc/rng/seed.hpp>
 #if VSMC_HAS_TBB
-#include <tbb/tbb.h>
+#include <tbb/combinable.h>
 #endif
 
 /// \brief Default RNG set type
