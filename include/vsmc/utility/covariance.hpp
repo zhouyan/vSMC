@@ -128,6 +128,7 @@ template <typename RealType>
 inline int cov_chol(std::size_t dim, const RealType *cov, RealType *chol,
     MatrixLayout layout = RowMajor, bool upper = false, bool packed = false)
 {
+    VSMC_STATIC_ASSERT_TEMPLATE_TYPE_2(cov_chol, RealType, float, double);
     internal::cov_pack(dim, cov, chol, layout, upper, packed);
     return internal::cov_chol(dim, chol);
 }
@@ -139,6 +140,12 @@ class Covariance
 {
     public:
     using result_type = RealType;
+
+    Covariance()
+    {
+        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_2(
+            Covariance, RealType, float, double);
+    }
 
     /// \brief Compute the sample covariance matrix
     ///

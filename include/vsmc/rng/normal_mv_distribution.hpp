@@ -186,6 +186,8 @@ class NormalMVDistribution
         , mean_(mean != nullptr)
         , chol_(chol != nullptr)
     {
+        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_2(
+            NormalMVDistribution, RealType, float, double);
         reset();
     }
 
@@ -197,6 +199,8 @@ class NormalMVDistribution
         , mean_(mean != nullptr)
         , chol_(chol != nullptr)
     {
+        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_2(
+            NormalMVDistribution, RealType, float, double);
         reset();
     }
 
@@ -361,6 +365,9 @@ template <typename RealType, typename RNGType>
 inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, const RealType *mean, const RealType *chol)
 {
+    VSMC_STATIC_ASSERT_TEMPLATE_TYPE_2(
+        normal_mv_distribution, RealType, float, double);
+
     normal_distribution(rng, n * dim, r, 0.0, 1.0);
     if (chol != nullptr) {
         Vector<RealType> cholf(dim * dim);
