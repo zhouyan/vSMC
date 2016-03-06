@@ -271,18 +271,19 @@ int vsmc_mkl_brng_rdrand64(void);
 /// @{
 
 /// \brief `vsmc::RandomWalk<double>`
-int vsmc_random_walk(vsmc_rng *rng_ptr, double *x, double *ltx,
-    double (*log_target)(double),
-    double (*proposal)(vsmc_rng *, double, double *));
-
-/// \brief `vsmc::RandomWalkMV<double>`
-int vsmc_random_walk_mv(vsmc_rng *rng_ptr, int dim, double *x, double *ltx,
+int vsmc_random_walk(vsmc_rng *rng_ptr, int dim, double *x, double *ltx,
     double (*log_target)(int, const double *),
     double (*proposal)(vsmc_rng *, int, const double *, double *));
 
+/// \brief `vsmc::RandomWalkG<double>`
+int vsmc_random_walk_g(vsmc_rng *rng_ptr, int dim_x, int dim_g, double *x,
+    double *ltx, double *g,
+    double (*log_target)(int, int, const double *, double *),
+    double (*proposal)(vsmc_rng *, int, const double *, double *));
+
 /// \brief `vsmc::NormalProposal<double>`
-double vsmc_normal_proposal(
-    vsmc_rng *rng_ptr, double x, double *y, double stddev, double a, double b);
+double vsmc_normal_proposal(vsmc_rng *rng_ptr, int, const double *x, double *y,
+    double stddev, double a, double b);
 
 /// \brief `vsmc::NormalProposalMV<double, vsmc::Dynamic>`
 double vsmc_normal_mv_proposal(vsmc_rng *rng_ptr, int dim, const double *x,
