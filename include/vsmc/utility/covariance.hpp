@@ -219,7 +219,7 @@ class Covariance
             return;
 
         result_type sw2 =
-            w == nullptr ? static_cast<result_type>(n) : sw2 = swsqr(n, w);
+            w == nullptr ? static_cast<result_type>(n) : swsqr(n, w);
         result_type B = sw / (sw * sw - sw2);
         result_type BW = B * sw;
         cov_.resize(dim * dim);
