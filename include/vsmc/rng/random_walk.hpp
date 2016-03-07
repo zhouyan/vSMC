@@ -60,7 +60,7 @@ class RandomWalk
     public:
     using result_type = RealType;
 
-    /// \brief Only usable when `Dim > 0`
+    /// \brief Only usable when `Dim != Dynamic`
     RandomWalk()
     {
         VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(Dim, RandomWalk);
@@ -203,11 +203,31 @@ class RandomWalkG
     public:
     using result_type = RealType;
 
-    /// \brief Only usable when `DimX > 0` and `DimG > 0`
+    /// \brief Only usable when `DimX != Dynamic` and `DimG != Dynamic`
     RandomWalkG()
     {
         VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(DimX, RandomWalkG);
         VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(DimG, RandomWalkG);
+    }
+
+    /// \brief Only usable when `DimX == Dynamic` and `DimG != Dynamic`
+    RandomWalkG(std::size_t dim_x,
+        typename std::enable_if<DimX == Dynamic && DimG != Dynamic, void>::type
+            * = nullptr)
+        : x_(dim_x), y_(dim_x)
+    {
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_DYNAMIC_DIM(DimX, RandomWalkG);
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(DimG, RandomWalkG);
+    }
+
+    /// \brief Only usable when `DimX != Dynamic` and `DimG == Dynamic`
+    RandomWalkG(std::size_t dim_g,
+        typename std::enable_if<DimX != Dynamic && DimG == Dynamic, void>::type
+            * = nullptr)
+        : g_(dim_g)
+    {
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(DimX, RandomWalkG);
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_DYNAMIC_DIM(DimG, RandomWalkG);
     }
 
     /// \brief Only usable when `DimX == Dynamic` and `DimG == Dynamic`
@@ -473,7 +493,7 @@ class NormalMVProposal
     public:
     using result_type = RealType;
 
-    /// \brief Only usable when `Dim > 0`
+    /// \brief Only usable when `Dim != Dynamic`
     ///
     /// \param chol The lower triangular elements of the Cholesky decomposition
     /// of the covaraince matrix, packed row by row. If it is a nullpointer,
