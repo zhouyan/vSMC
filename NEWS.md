@@ -10,9 +10,16 @@
 ## New features
 
 * `Particle` now has a new `sp` member that return `SingleParticle` objects.
+* `NormalMVDistribution` and related functions for generating multivariate
+  Normal distribution random variate. 
 * New module "Random Walk" that implements generic random walk MCMC kernels and
   Normal distribution based proposals. Both scalar and multivariate cases are
   supported.
+* `Covariance` is a new class that can compute the covariance matrix from
+  (weighted) samples, and output the matrix in variance formats.
+* `cov_chol` transform a covariance matrix, stored in various formats, into the
+  lower triangular part of its Cholesky decomposition, stored as a packed row
+  major matrix
 
 # Changes since v2.0.0
 
