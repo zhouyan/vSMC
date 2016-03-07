@@ -36,6 +36,14 @@
 #include <vsmc/rng/normal_distribution.hpp>
 #include <vsmc/utility/covariance.hpp>
 
+#define VSMC_STATIC_ASSERT_RNG_NORMAL_MV_DISTRIBUTION_FIXED_DIM(Dim)          \
+    VSMC_STATIC_ASSERT((Dim != Dynamic),                                      \
+        "**NormalMVDistribution** OBJECT DECLARED WITH DYNAMIC DIMENSION")
+
+#define VSMC_STATIC_ASSERT_RNG_NORMAL_MV_DISTRIBUTION_DYNAMIC_DIM(Dim)        \
+    VSMC_STATIC_ASSERT((Dim == Dynamic),                                      \
+        "**NormalMVDistribution** OBJECT DECLARED WITH FIXED DIMENSION")
+
 namespace vsmc
 {
 
@@ -69,17 +77,17 @@ class NormalMVDistribution
         using distribution_type = NormalMVDistribution<RealType, Dim>;
 
         explicit param_type(const result_type *mean = nullptr,
-            const result_type *chol = nullptr,
-            typename std::enable_if<Dim != Dynamic, void>::type * = nullptr)
+            const result_type *chol = nullptr)
         {
+            VSMC_STATIC_ASSERT_RNG_NORMAL_MV_DISTRIBUTION_FIXED_DIM(Dim);
             init(mean, chol);
         }
 
         explicit param_type(std::size_t dim, const result_type *mean = nullptr,
-            const result_type *chol = nullptr,
-            typename std::enable_if<Dim == Dynamic, void>::type * = nullptr)
+            const result_type *chol = nullptr)
             : mean_(dim), chol_(dim * (dim + 1) / 2)
         {
+            VSMC_STATIC_ASSERT_RNG_NORMAL_MV_DISTRIBUTION_DYNAMIC_DIM(Dim);
             init(mean, chol);
         }
 
@@ -168,7 +176,7 @@ class NormalMVDistribution
         }
     }; // class param_type
 
-    /// \brief Only usable when `Dim != Dynamic`
+    /// \brief Only usable when `Dim > 0`
     ///
     /// \param mean Mean vector, if it is a null pointer, then the mean is a
     /// zero vector

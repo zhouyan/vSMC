@@ -37,6 +37,14 @@
 #include <vsmc/rng/normal_mv_distribution.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
+#define VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(Dim, Name)               \
+    VSMC_STATIC_ASSERT((Dim != Dynamic),                                      \
+        "**" #Name "** OBJECT DECLARED WITH DYNAMIC DIMENSION")
+
+#define VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_DYNAMIC_DIM(Dim, Name)             \
+    VSMC_STATIC_ASSERT((Dim == Dynamic),                                      \
+        "**" #Name "** OBJECT DECLARED WITH FIXED DIMENSION")
+
 #define VSMC_RUNTIME_ASSERT_RNG_RANDOM_WALK_PROPOSAL_PARAM(flag, Name)        \
     VSMC_RUNTIME_ASSERT(                                                      \
         (flag), "**" #Name "Proposal** CONSTRUCTED WITH INVALID PARAMETERS")
@@ -52,16 +60,16 @@ class RandomWalk
     public:
     using result_type = RealType;
 
-    /// \brief Only usable when `Dim != Dynamic`
-    RandomWalk(typename std::enable_if<Dim != Dynamic, void>::type * = nullptr)
+    /// \brief Only usable when `Dim > 0`
+    RandomWalk()
     {
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(Dim, RandomWalk);
     }
 
     /// \brief Only usable when `Dim == Dynamic`
-    RandomWalk(std::size_t dim,
-        typename std::enable_if<Dim == Dynamic, void>::type * = nullptr)
-        : x_(dim), y_(dim)
+    RandomWalk(std::size_t dim) : x_(dim), y_(dim)
     {
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_DYNAMIC_DIM(Dim, RandomWalk);
     }
 
     std::size_t dim() const { return x_.size(); }
@@ -195,35 +203,19 @@ class RandomWalkG
     public:
     using result_type = RealType;
 
-    /// \brief Only usable when `DimX != Dynamic` and `DimG != Dynamic`
-    RandomWalkG(
-        typename std::enable_if<DimX != Dynamic, void>::type * = nullptr,
-        typename std::enable_if<DimG != Dynamic, void>::type * = nullptr)
+    /// \brief Only usable when `DimX > 0` and `DimG > 0`
+    RandomWalkG()
     {
-    }
-
-    /// \brief Only usable when `DimX != Dynamic` and `DimG == Dynamic`
-    RandomWalkG(std::size_t dim_g,
-        typename std::enable_if<DimX != Dynamic, void>::type * = nullptr,
-        typename std::enable_if<DimG == Dynamic, void>::type * = nullptr)
-        : g_(dim_g)
-    {
-    }
-
-    /// \brief Only usable when `DimX == Dynamic` and `DimG != Dynamic`
-    RandomWalkG(std::size_t dim_x,
-        typename std::enable_if<DimX == Dynamic, void>::type * = nullptr,
-        typename std::enable_if<DimG != Dynamic, void>::type * = nullptr)
-        : x_(dim_x), y_(dim_x)
-    {
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(DimX, RandomWalkG);
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(DimG, RandomWalkG);
     }
 
     /// \brief Only usable when `DimX == Dynamic` and `DimG == Dynamic`
-    RandomWalkG(std::size_t dim_x, std::size_t dim_g,
-        typename std::enable_if<DimX == Dynamic, void>::type * = nullptr,
-        typename std::enable_if<DimG == Dynamic, void>::type * = nullptr)
+    RandomWalkG(std::size_t dim_x, std::size_t dim_g)
         : x_(dim_x), y_(dim_x), g_(dim_g)
     {
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_DYNAMIC_DIM(DimX, RandomWalkG);
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_DYNAMIC_DIM(DimG, RandomWalkG);
     }
 
     std::size_t dim_x() const { return x_.size(); }
@@ -481,7 +473,7 @@ class NormalMVProposal
     public:
     using result_type = RealType;
 
-    /// \brief Only usable when `Dim != Dynamic`
+    /// \brief Only usable when `Dim > 0`
     ///
     /// \param chol The lower triangular elements of the Cholesky decomposition
     /// of the covaraince matrix, packed row by row. If it is a nullpointer,
@@ -496,20 +488,19 @@ class NormalMVProposal
     /// find a superset of the support that takes the required form, and reject
     /// proposals that lay outside the support manually.
     explicit NormalMVProposal(const result_type *chol = nullptr,
-        const result_type *a = nullptr, const result_type *b = nullptr,
-        typename std::enable_if<Dim != Dynamic, void>::type * = nullptr)
+        const result_type *a = nullptr, const result_type *b = nullptr)
         : rnorm_(nullptr, chol)
     {
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(Dim, NormalMVProposal);
         init(Dim, a, b);
     }
 
-    /// \brief Only usable when `Dim == Dynamic`
     explicit NormalMVProposal(std::size_t dim,
         const result_type *chol = nullptr, const result_type *a = nullptr,
-        const result_type *b = nullptr,
-        typename std::enable_if<Dim == Dynamic, void>::type * = nullptr)
+        const result_type *b = nullptr)
         : rnorm_(dim, nullptr, chol), a_(dim), b_(dim), z_(dim), flag_(dim)
     {
+        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_DYNAMIC_DIM(Dim, NormalMVProposal);
         init(dim, a, b);
     }
 
