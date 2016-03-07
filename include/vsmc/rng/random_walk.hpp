@@ -210,26 +210,6 @@ class RandomWalkG
         VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(DimG, RandomWalkG);
     }
 
-    /// \brief Only usable when `DimX == Dynamic` and `DimG != Dynamic`
-    RandomWalkG(std::size_t dim_x,
-        typename std::enable_if<DimX == Dynamic && DimG != Dynamic, void>::type
-            * = nullptr)
-        : x_(dim_x), y_(dim_x)
-    {
-        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_DYNAMIC_DIM(DimX, RandomWalkG);
-        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(DimG, RandomWalkG);
-    }
-
-    /// \brief Only usable when `DimX != Dynamic` and `DimG == Dynamic`
-    RandomWalkG(std::size_t dim_g,
-        typename std::enable_if<DimX != Dynamic && DimG == Dynamic, void>::type
-            * = nullptr)
-        : g_(dim_g)
-    {
-        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(DimX, RandomWalkG);
-        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_DYNAMIC_DIM(DimG, RandomWalkG);
-    }
-
     /// \brief Only usable when `DimX == Dynamic` and `DimG == Dynamic`
     RandomWalkG(std::size_t dim_x, std::size_t dim_g)
         : x_(dim_x), y_(dim_x), g_(dim_g)
