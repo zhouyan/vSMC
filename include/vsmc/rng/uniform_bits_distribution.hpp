@@ -155,7 +155,7 @@ class UniformBitsDistribution
     result_type operator()(RNGType &rng)
     {
         return internal::UniformBits<UIntType,
-            internal::IntBits<UIntType>::value>::eval(rng);
+            std::numeric_limits<UIntType>::digits>::eval(rng);
     }
 
     template <typename RNGType>
@@ -215,7 +215,9 @@ inline void uniform_bits_distribution_impl(RNGType &rng, std::size_t n,
     std::integral_constant<bool, B2>)
 {
     for (std::size_t i = 0; i != n; ++i)
-        r[i] = UniformBits<UIntType, IntBits<UIntType>::value>::eval(rng);
+        r[i] =
+            UniformBits<UIntType, std::numeric_limits<UIntType>::digits>::eval(
+                rng);
 }
 
 template <typename UIntType, typename RNGType>
@@ -237,7 +239,9 @@ inline void uniform_bits_distribution_impl(RNGType &rng, std::size_t n,
     n -= m * k;
     r += m * k;
     for (std::size_t i = 0; i != l; ++i)
-        r[i] = UniformBits<UIntType, IntBits<UIntType>::value>::eval(rng);
+        r[i] =
+            UniformBits<UIntType, std::numeric_limits<UIntType>::digits>::eval(
+                rng);
 }
 
 template <typename UIntType, typename RNGType>
@@ -255,7 +259,9 @@ inline void uniform_bits_distribution_impl(RNGType &rng, std::size_t n,
     UIntType *r, std::true_type, std::false_type, std::false_type)
 {
     for (std::size_t i = 0; i != n; ++i)
-        r[i] = UniformBits<UIntType, IntBits<UIntType>::value>::eval(rng);
+        r[i] =
+            UniformBits<UIntType, std::numeric_limits<UIntType>::digits>::eval(
+                rng);
 }
 
 } // namespace vsmc::internal
@@ -265,7 +271,7 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
 {
     const int mbits = internal::RNGMinBits<RNGType>::value;
     const int rbits = internal::RNGBits<RNGType>::value;
-    const int ubits = internal::IntBits<UIntType>::value;
+    const int ubits = std::numeric_limits<UIntType>::digits;
     internal::uniform_bits_distribution_impl(rng, n, r,
         std::integral_constant<bool, mbits == 0>(),
         std::integral_constant < bool,

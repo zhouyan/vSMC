@@ -358,18 +358,17 @@ class RNGBitsNMax
         value = std::numeric_limits<std::uint64_t>::max VSMC_MNE() >> (64 - N);
 }; // class RNGBitsNMax
 
-template <std::uint64_t UMax, int N>
+template <std::uint64_t U, int N>
 class RNGBitsN
 {
     static constexpr std::uint64_t bmax = RNGBitsNMax<N>::value;
 
     public:
-    static constexpr int value =
-        UMax < bmax ? RNGBitsN<UMax, N - 1>::value : N;
+    static constexpr int value = U < bmax ? RNGBitsN<U, N - 1>::value : N;
 }; // class RNGMaxBitsN
 
-template <std::uint64_t UMax>
-class RNGBitsN<UMax, 0>
+template <std::uint64_t U>
+class RNGBitsN<U, 0>
 {
     public:
     static constexpr int value = 0;
@@ -396,34 +395,6 @@ class RNGBits : public std::integral_constant<int,
                     RNGMaxBits<RNGType>::value - RNGMinBits<RNGType>::value>
 {
 }; // class RNGBits
-
-template <std::size_t>
-class IntBitsN;
-
-template <>
-class IntBitsN<sizeof(int8_t)> : public std::integral_constant<int, 8>
-{
-}; // class IntBitsN
-
-template <>
-class IntBitsN<sizeof(int16_t)> : public std::integral_constant<int, 16>
-{
-}; // class IntBitsN
-
-template <>
-class IntBitsN<sizeof(int32_t)> : public std::integral_constant<int, 32>
-{
-}; // class IntBitsN
-
-template <>
-class IntBitsN<sizeof(int64_t)> : public std::integral_constant<int, 64>
-{
-}; // class IntBitsN
-
-template <typename IntType>
-class IntBits : public IntBitsN<sizeof(IntType)>
-{
-}; // class IntBits
 
 } // namespace vsmc::internal
 
