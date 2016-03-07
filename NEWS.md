@@ -21,6 +21,11 @@
   lower triangular part of its Cholesky decomposition, stored as a packed row
   major matrix
 
+## Changed behaviors
+
+* `AlignedAllocator` template parameter `Memory` now requires its member
+  functions to be static and the class stateless.
+
 # Changes since v2.0.0
 
 ## Important changes
