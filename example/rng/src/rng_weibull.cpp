@@ -32,21 +32,11 @@
 #include <vsmc/rng/weibull_distribution.hpp>
 #include "rng_dist.hpp"
 
-template <>
-inline vsmc::Vector<double>
-    rng_dist_partition<vsmc::WeibullDistribution<double>>(
-        std::size_t n, vsmc::WeibullDistribution<double> &dist)
-{
-    return rng_dist_partition_quantile(n, [&](double p) {
-        return dist.b() * std::pow(-std::log(1 - p), 1 / dist.a());
-    });
-}
-
 int main(int argc, char **argv)
 {
-    VSMC_RNG_DIST_PRE(2);
-    VSMC_RNG_DIST_2(Weibull, std::weibull_distribution, 1, 1);
-    VSMC_RNG_DIST_POST;
+    vsmc::Vector<std::array<double, 2>> params;
+    params.push_back({{1.0, 1.0}});
+    VSMC_RNG_DIST_TEST(2, Weibull, std::weibull_distribution);
 
     return 0;
 }

@@ -30,28 +30,18 @@
 //============================================================================
 
 #include <vsmc/rng/gamma_distribution.hpp>
-#include <boost/math/distributions/gamma.hpp>
 #include "rng_dist.hpp"
-
-template <>
-inline vsmc::Vector<double>
-    rng_dist_partition<vsmc::GammaDistribution<double>>(
-        std::size_t n, vsmc::GammaDistribution<double> &dist)
-{
-    return rng_dist_partition_boost(
-        n, boost::math::gamma_distribution<double>(dist.alpha(), dist.beta()));
-}
 
 int main(int argc, char **argv)
 {
-    VSMC_RNG_DIST_PRE(2);
-    VSMC_RNG_DIST_2(Gamma, std::gamma_distribution, 1, 1);
-    VSMC_RNG_DIST_2(Gamma, std::gamma_distribution, 0.1, 1);
-    VSMC_RNG_DIST_2(Gamma, std::gamma_distribution, 0.5, 1);
-    VSMC_RNG_DIST_2(Gamma, std::gamma_distribution, 0.7, 1);
-    VSMC_RNG_DIST_2(Gamma, std::gamma_distribution, 0.9, 1);
-    VSMC_RNG_DIST_2(Gamma, std::gamma_distribution, 1.5, 1);
-    VSMC_RNG_DIST_POST;
+    vsmc::Vector<std::array<double, 2>> params;
+    params.push_back({{1.0, 1.0}});
+    params.push_back({{0.1, 1.0}});
+    params.push_back({{0.5, 1.0}});
+    params.push_back({{0.7, 1.0}});
+    params.push_back({{0.9, 1.0}});
+    params.push_back({{1.5, 1.0}});
+    VSMC_RNG_DIST_TEST(2, Gamma, std::gamma_distribution);
 
     return 0;
 }

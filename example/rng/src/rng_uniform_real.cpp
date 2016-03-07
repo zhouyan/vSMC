@@ -34,13 +34,13 @@
 
 int main(int argc, char **argv)
 {
-    VSMC_RNG_DIST_PRE(2);
-    VSMC_RNG_DIST_2(UniformReal, std::uniform_real_distribution, 0, 1);
-    VSMC_RNG_DIST_2(UniformRealCC, vsmc::UniformRealCCDistribution, 0, 1);
-    VSMC_RNG_DIST_2(UniformRealCO, vsmc::UniformRealCODistribution, 0, 1);
-    VSMC_RNG_DIST_2(UniformRealOC, vsmc::UniformRealOCDistribution, 0, 1);
-    VSMC_RNG_DIST_2(UniformRealOO, vsmc::UniformRealOODistribution, 0, 1);
-    VSMC_RNG_DIST_POST;
+    vsmc::Vector<std::array<double, 2>> params;
+    params.push_back({{0.0, 1.0}});
+    VSMC_RNG_DIST_TEST(2, UniformReal, std::uniform_real_distribution);
+    VSMC_RNG_DIST_TEST(2, UniformRealCC, vsmc::UniformRealCCDistribution);
+    VSMC_RNG_DIST_TEST(2, UniformRealCO, vsmc::UniformRealCODistribution);
+    VSMC_RNG_DIST_TEST(2, UniformRealOC, vsmc::UniformRealOCDistribution);
+    VSMC_RNG_DIST_TEST(2, UniformRealOO, vsmc::UniformRealOODistribution);
 
     return 0;
 }

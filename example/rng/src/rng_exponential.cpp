@@ -32,20 +32,11 @@
 #include <vsmc/rng/exponential_distribution.hpp>
 #include "rng_dist.hpp"
 
-template <>
-inline vsmc::Vector<double>
-    rng_dist_partition<vsmc::ExponentialDistribution<double>>(
-        std::size_t n, vsmc::ExponentialDistribution<double> &dist)
-{
-    return rng_dist_partition_quantile(
-        n, [&](double p) { return -std::log(1 - p) / dist.lambda(); });
-}
-
 int main(int argc, char **argv)
 {
-    VSMC_RNG_DIST_PRE(1);
-    VSMC_RNG_DIST_1(Exponential, std::exponential_distribution, 1);
-    VSMC_RNG_DIST_POST;
+    vsmc::Vector<std::array<double, 1>> params;
+    params.push_back({{1.0}});
+    VSMC_RNG_DIST_TEST(1, Exponential, std::exponential_distribution);
 
     return 0;
 }

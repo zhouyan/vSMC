@@ -30,23 +30,13 @@
 //============================================================================
 
 #include <vsmc/rng/normal_distribution.hpp>
-#include <boost/math/distributions/normal.hpp>
 #include "rng_dist.hpp"
-
-template <>
-inline vsmc::Vector<double>
-    rng_dist_partition<vsmc::NormalDistribution<double>>(
-        std::size_t n, vsmc::NormalDistribution<double> &dist)
-{
-    return rng_dist_partition_boost(n,
-        boost::math::normal_distribution<double>(dist.mean(), dist.stddev()));
-}
 
 int main(int argc, char **argv)
 {
-    VSMC_RNG_DIST_PRE(2);
-    VSMC_RNG_DIST_2(Normal, std::normal_distribution, 0, 1);
-    VSMC_RNG_DIST_POST;
+    vsmc::Vector<std::array<double, 2>> params;
+    params.push_back({{0.0, 1.0}});
+    VSMC_RNG_DIST_TEST(2, Normal, std::normal_distribution);
 
     return 0;
 }

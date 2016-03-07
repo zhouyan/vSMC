@@ -66,7 +66,7 @@ class GammaDistributionConstant
 
     void reset(RealType alpha, RealType)
     {
-        if (alpha < 0.6)
+        if (alpha < static_cast<RealType>(0.6L))
             algorithm = GammaDistributionAlgorithmT;
         else if (alpha < 1)
             algorithm = GammaDistributionAlgorithmW;
