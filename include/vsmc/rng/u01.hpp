@@ -72,6 +72,10 @@ VSMC_DEFINE_RNG_U01(32, 32, float)
 VSMC_DEFINE_RNG_U01(32, 64, double)
 VSMC_DEFINE_RNG_U01(64, 32, float)
 VSMC_DEFINE_RNG_U01(64, 64, double)
+#if VSMC_HAS_X86
+VSMC_DEFINE_RNG_U01(32, 80, long double)
+VSMC_DEFINE_RNG_U01(64, 80, long double)
+#endif
 
 } // namespace vsmc::internal
 
