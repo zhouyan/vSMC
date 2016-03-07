@@ -36,18 +36,6 @@
 #include <vsmc/rng/counter.hpp>
 #include <wmmintrin.h>
 
-#define VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks)                          \
-    VSMC_STATIC_ASSERT(                                                       \
-        (Blocks > 0), "**AESNIGenerator** USED WITH ZERO BLOCKS")
-
-#define VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType)                 \
-    VSMC_STATIC_ASSERT((std::is_unsigned<ResultType>::value),                 \
-        "**AESNIGenerator USED WITH ResultType NOT AN UNSIGNED INTEGER")
-
-#define VSMC_STATIC_ASSERT_RNG_AES_NI                                         \
-    VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks);                             \
-    VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType);
-
 namespace vsmc
 {
 
@@ -57,12 +45,17 @@ template <typename ResultType, typename KeySeqType, std::size_t Rounds,
     std::size_t Blocks>
 class AESNIGenerator
 {
+    static_assert(std::is_unsigned<ResultType>::value,
+        "**AESNIGenerator** USED WITH ResultType OTHER THAN UNSIGNED INTEGER "
+        "TYPES");
+
+    static_assert(
+        Blocks != 0, "**AESNIGenerator** USED WITH Blocks EQUAL TO ZERO");
+
     public:
     using result_type = ResultType;
     using ctr_type = std::array<ResultType, M128I<ResultType>::size()>;
     using key_type = typename KeySeqType::key_type;
-
-    AESNIGenerator() { VSMC_STATIC_ASSERT_RNG_AES_NI; }
 
     static constexpr std::size_t size()
     {

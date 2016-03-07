@@ -39,19 +39,6 @@
 #define VSMC_RDRAND_NTRIAL_MAX 0
 #endif
 
-#define VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE_RESULT_TYPE(ResultType)          \
-    VSMC_STATIC_ASSERT(((sizeof(ResultType) == sizeof(std::uint16_t) &&       \
-                            std::is_unsigned<ResultType>::value) ||           \
-                           (sizeof(ResultType) == sizeof(std::uint32_t) &&    \
-                               std::is_unsigned<ResultType>::value) ||        \
-                           (sizeof(ResultType) == sizeof(std::uint64_t) &&    \
-                               std::is_unsigned<ResultType>::value)),         \
-        "**RDRANDEngine** USED WITH ResultType OTHER THAN UNSIGNED 16/32/64 " \
-        "BITS INTEGER")
-
-#define VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE                                  \
-    VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE_RESULT_TYPE(ResultType);
-
 #define VSMC_RUNTIME_WARNING_RNG_RDRAND_ENGINE_NTRIAL(ntrial, NTrialMax)      \
     VSMC_RUNTIME_WARNING((ntrial < NTrialMax),                                \
         "**RDRAND::generate** MAXIMUM NUMBER OF TRIALS EXCEEDED")
@@ -112,21 +99,26 @@ inline bool rdrand(
 template <typename ResultType, std::size_t NTrialMax = VSMC_RDRAND_NTRIAL_MAX>
 class RDRANDEngine
 {
+    static_assert(std::is_unsigned<ResultType>::value,
+        "**RDRANDEngine** USED WITH ResultType OTHER THAN UNSIGNED INTEGER "
+        "TYPES");
+
+    static_assert(sizeof(ResultType) == sizeof(std::uint16_t) ||
+            sizeof(ResultType) == sizeof(std::uint32_t) ||
+            sizeof(ResultType) == sizeof(std::uint64_t),
+        "**RDRANDEngine** USED WITH ResultType OF SIZE OTHER THAN 16, 32 OR "
+        "64 BITS");
 
     public:
     using result_type = ResultType;
 
-    explicit RDRANDEngine(result_type = 0)
-    {
-        VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE;
-    }
+    explicit RDRANDEngine(result_type = 0) {}
 
     template <typename SeedSeq>
     explicit RDRANDEngine(SeedSeq &,
         typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
             RDRANDEngine<ResultType, NTrialMax>>::value>::type * = nullptr)
     {
-        VSMC_STATIC_ASSERT_RNG_RDRAND_ENGINE;
     }
 
     void seed(result_type) {}

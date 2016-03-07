@@ -226,6 +226,20 @@ class is_one_of<T, T1>
 {
 }; // class is_one_of
 
+template <typename T, typename T1, typename... Types>
+class is_seed_seq
+    : public std::integral_constant<bool,
+          is_seed_seq<T, T1>::value && is_seed_seq<T, Types...>::value>
+{
+};
+
+template <typename T, typename T1>
+class is_seed_seq<T, T1>
+    : public std::integral_constant<bool, !std::is_convertible<T, T1>::value &&
+              !std::is_same<typename std::remove_cv<T>::type, T1>::value>
+{
+}; // class is_seed_seq
+
 } // namespace vsmc::internal
 
 } // namespace vsmc

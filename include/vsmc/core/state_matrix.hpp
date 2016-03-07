@@ -35,10 +35,6 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/single_particle.hpp>
 
-#define VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim)          \
-    VSMC_STATIC_ASSERT((Dim == Dynamic),                                      \
-        "**StateMatrix::resize_dim** USED WITH A FIXED DIMENSION OBJECT")
-
 #define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH              \
     VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),          \
         "**StateMatrix::copy** SIZE MISMATCH")
@@ -116,7 +112,8 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
 
     void resize_dim(std::size_t dim)
     {
-        VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim);
+        static_assert(Dim == Dynamic,
+            "**StateMatrix** OBJECT DECLARED WITH A FIXED DIMENSION");
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_DIM_SIZE(dim);
 
         internal::StateMatrixDim<Dim>::resize_dim(dim);

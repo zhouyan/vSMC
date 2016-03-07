@@ -35,22 +35,6 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/counter.hpp>
 
-#define VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType, SIMD)         \
-    VSMC_STATIC_ASSERT(((sizeof(ResultType) == sizeof(std::uint32_t) &&       \
-                            std::is_unsigned<ResultType>::value) ||           \
-                           (sizeof(ResultType) == sizeof(std::uint64_t) &&    \
-                               std::is_unsigned<ResultType>::value)),         \
-        "**ThreefryGenerator" #SIMD                                           \
-        "** USED WITH ResultType OTHER THAN UNSIGNED 32/64 BITS INTEGER")
-
-#define VSMC_STATIC_ASSERT_RNG_THREEFRY_SIZE(K, SIMD)                         \
-    VSMC_STATIC_ASSERT((K == 2 || K == 4),                                    \
-        "**Threefry" #SIMD "** USED WITH SIZE OTHER THAN 2 OR 4")
-
-#define VSMC_STATIC_ASSERT_RNG_THREEFRY(SIMD)                                 \
-    VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType, SIMD);            \
-    VSMC_STATIC_ASSERT_RNG_THREEFRY_SIZE(K, SIMD);
-
 #define VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(T, K, N, I, val)             \
     template <>                                                               \
     class ThreefryRotateConstant<T, K, N, I>                                  \
@@ -321,12 +305,22 @@ template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
 class ThreefryGeneratorGeneric
 {
+    static_assert(std::is_unsigned<ResultType>::value,
+        "**ThreefryGeneratorGeneric** USED WITH ResultType OTHER THAN "
+        "UNSIGNED INTEGER TYPES");
+
+    static_assert(sizeof(ResultType) == sizeof(std::uint32_t) ||
+            sizeof(ResultType) == sizeof(std::uint64_t),
+        "**ThreefryGeneratorGeneric** USED WITH ResultType OF SIZE OTHER THAN "
+        "32 OR 64 BITS");
+
+    static_assert(K == 2 || K == 4,
+        "**ThreefryGeneratorGeneric** USED WITH K OTHER THAN 2 OR 4");
+
     public:
     using result_type = ResultType;
     using ctr_type = std::array<ResultType, K>;
     using key_type = std::array<ResultType, K>;
-
-    ThreefryGeneratorGeneric() { VSMC_STATIC_ASSERT_RNG_THREEFRY(Generic); }
 
     static constexpr std::size_t size() { return K; }
 
@@ -499,12 +493,22 @@ template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
 class ThreefryGeneratorSSE2
 {
+    static_assert(std::is_unsigned<ResultType>::value,
+        "**ThreefryGeneratorSSE2** USED WITH ResultType OTHER THAN UNSIGNED "
+        "INTEGER TYPES");
+
+    static_assert(sizeof(ResultType) == sizeof(std::uint32_t) ||
+            sizeof(ResultType) == sizeof(std::uint64_t),
+        "**ThreefryGeneratorSSE2** USED WITH ResultType OF SIZE OTHER THAN "
+        "32 OR 64 BITS");
+
+    static_assert(K == 2 || K == 4,
+        "**ThreefryGeneratorSSE2** USED WITH K OTHER THAN 2 OR 4");
+
     public:
     using result_type = ResultType;
     using ctr_type = std::array<ResultType, K>;
     using key_type = std::array<ResultType, K>;
-
-    ThreefryGeneratorSSE2() { VSMC_STATIC_ASSERT_RNG_THREEFRY(SSE2); }
 
     static constexpr std::size_t size()
     {
@@ -687,12 +691,22 @@ template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
 class ThreefryGeneratorAVX2
 {
+    static_assert(std::is_unsigned<ResultType>::value,
+        "**ThreefryGeneratorAVX2** USED WITH ResultType OTHER THAN UNSIGNED "
+        "INTEGER TYPES");
+
+    static_assert(sizeof(ResultType) == sizeof(std::uint32_t) ||
+            sizeof(ResultType) == sizeof(std::uint64_t),
+        "**ThreefryGeneratorAVX2** USED WITH ResultType OF SIZE OTHER THAN "
+        "32 OR 64 BITS");
+
+    static_assert(K == 2 || K == 4,
+        "**ThreefryGeneratorAVX2** USED WITH K OTHER THAN 2 OR 4");
+
     public:
     using result_type = ResultType;
     using ctr_type = std::array<ResultType, K>;
     using key_type = std::array<ResultType, K>;
-
-    ThreefryGeneratorAVX2() { VSMC_STATIC_ASSERT_RNG_THREEFRY(AVX2); }
 
     static constexpr std::size_t size()
     {

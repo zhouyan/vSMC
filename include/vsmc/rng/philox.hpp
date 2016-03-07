@@ -39,22 +39,6 @@
 #include <intrin.h>
 #endif
 
-#define VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType)                 \
-    VSMC_STATIC_ASSERT(((sizeof(ResultType) == sizeof(std::uint32_t) &&       \
-                            std::is_unsigned<ResultType>::value) ||           \
-                           (sizeof(ResultType) == sizeof(std::uint64_t) &&    \
-                               std::is_unsigned<ResultType>::value)),         \
-        "**PhiloxGenerator** USED WITH ResultType OTHER THAN UNSIGNED 32/64 " \
-        "BITS INTEGER")
-
-#define VSMC_STATIC_ASSERT_RNG_PHILOX_SIZE(K)                                 \
-    VSMC_STATIC_ASSERT((K == 2 || K == 4),                                    \
-        "**PhiloxGenerator** USED WITH SIZE OTHER THAN 2 OR 4")
-
-#define VSMC_STATIC_ASSERT_RNG_PHILOX                                         \
-    VSMC_STATIC_ASSERT_RNG_PHILOX_RESULT_TYPE(ResultType);                    \
-    VSMC_STATIC_ASSERT_RNG_PHILOX_SIZE(K);
-
 #define VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(T, I, val)                       \
     template <>                                                               \
     class PhiloxWeylConstant<T, I> : public std::integral_constant<T, val>    \
@@ -255,12 +239,22 @@ template <typename ResultType, std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
 class PhiloxGenerator
 {
+    static_assert(std::is_unsigned<ResultType>::value,
+        "**PhiloxGenerator** USED WITH ResultType OTHER THAN UNSIGNED INTEGER "
+        "TYPES");
+
+    static_assert(sizeof(ResultType) == sizeof(std::uint32_t) ||
+            sizeof(ResultType) == sizeof(std::uint64_t),
+        "**PhiloxGenerator** USED WITH ResultType OF SIZE OTHER THAN 32 OR 64 "
+        "BITS");
+
+    static_assert(
+        K == 2 || K == 4, "**PhiloxGenerator** USED WITH K OTHER THAN 2 OR 4");
+
     public:
     using result_type = ResultType;
     using ctr_type = std::array<ResultType, K>;
     using key_type = std::array<ResultType, K / 2>;
-
-    PhiloxGenerator() { VSMC_STATIC_ASSERT_RNG_PHILOX; }
 
     static constexpr std::size_t size() { return K; }
 

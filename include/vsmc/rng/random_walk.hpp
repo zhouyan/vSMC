@@ -37,14 +37,6 @@
 #include <vsmc/rng/normal_mv_distribution.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(Dim, Name)               \
-    VSMC_STATIC_ASSERT((Dim != Dynamic),                                      \
-        "**" #Name "** OBJECT DECLARED WITH DYNAMIC DIMENSION")
-
-#define VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_DYNAMIC_DIM(Dim, Name)             \
-    VSMC_STATIC_ASSERT((Dim == Dynamic),                                      \
-        "**" #Name "** OBJECT DECLARED WITH FIXED DIMENSION")
-
 #define VSMC_RUNTIME_ASSERT_RNG_RANDOM_WALK_PROPOSAL_PARAM(flag, Name)        \
     VSMC_RUNTIME_ASSERT(                                                      \
         (flag), "**" #Name "Proposal** CONSTRUCTED WITH INVALID PARAMETERS")
@@ -63,13 +55,15 @@ class RandomWalk
     /// \brief Only usable when `Dim != Dynamic`
     RandomWalk()
     {
-        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(Dim, RandomWalk);
+        static_assert(Dim != Dynamic,
+            "**RandomWalk** OBJECT DECLARED WITH DYNAMIC DIMENSION");
     }
 
     /// \brief Only usable when `Dim == Dynamic`
     RandomWalk(std::size_t dim) : x_(dim), y_(dim)
     {
-        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_DYNAMIC_DIM(Dim, RandomWalk);
+        static_assert(Dim == Dynamic,
+            "**RandomWalk** OBJECT DECLARED WITH FIXED DIMENSION");
     }
 
     std::size_t dim() const { return x_.size(); }
@@ -206,16 +200,16 @@ class RandomWalkG
     /// \brief Only usable when `DimX != Dynamic` and `DimG != Dynamic`
     RandomWalkG()
     {
-        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(DimX, RandomWalkG);
-        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(DimG, RandomWalkG);
+        static_assert(DimX != Dynamic && DimG != Dynamic,
+            "**RandomWalk** OBJECT DECLARED WITH DYNAMIC DIMENSION");
     }
 
     /// \brief Only usable when `DimX == Dynamic` and `DimG == Dynamic`
     RandomWalkG(std::size_t dim_x, std::size_t dim_g)
         : x_(dim_x), y_(dim_x), g_(dim_g)
     {
-        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_DYNAMIC_DIM(DimX, RandomWalkG);
-        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_DYNAMIC_DIM(DimG, RandomWalkG);
+        static_assert(DimX == Dynamic && DimG == Dynamic,
+            "**RandomWalk** OBJECT DECLARED WITH FIXED DIMENSION");
     }
 
     std::size_t dim_x() const { return x_.size(); }
@@ -491,7 +485,8 @@ class NormalMVProposal
         const result_type *a = nullptr, const result_type *b = nullptr)
         : rnorm_(nullptr, chol)
     {
-        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_FIXED_DIM(Dim, NormalMVProposal);
+        static_assert(Dim != Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
         init(Dim, a, b);
     }
 
@@ -500,7 +495,8 @@ class NormalMVProposal
         const result_type *b = nullptr)
         : rnorm_(dim, nullptr, chol), a_(dim), b_(dim), z_(dim), flag_(dim)
     {
-        VSMC_STATIC_ASSERT_RNG_RANDOM_WALK_DYNAMIC_DIM(Dim, NormalMVProposal);
+        static_assert(Dim == Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
         init(dim, a, b);
     }
 
