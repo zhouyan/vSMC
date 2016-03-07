@@ -38,7 +38,6 @@
 #include <cstdio>
 #include <stdexcept>
 #include <string>
-#include <type_traits>
 
 #define VSMC_STATIC_ASSERT(cond, msg) static_assert(cond, msg)
 
@@ -86,29 +85,6 @@
     }
 #endif // VSMC_RUNTIME_WARNING_AS_EXCEPTION
 #endif // VSMC_NO_RUNTIME_WARNING
-
-#define VSMC_STATIC_ASSERT_TEMPLATE_TYPE_1(Temp, T, T1)                       \
-    VSMC_STATIC_ASSERT((std::is_same<T, T1>::value),                          \
-        "**" #Temp "** USED WITH " #T " OTHER THAN " #T1)
-
-#define VSMC_STATIC_ASSERT_TEMPLATE_TYPE_2(Temp, T, T1, T2)                   \
-    VSMC_STATIC_ASSERT(                                                       \
-        (std::is_same<T, T1>::value || std::is_same<T, T2>::value),           \
-        "**" #Temp "** USED WITH " #T " OTHER THAN " #T1 " OR " #T2)
-
-#define VSMC_STATIC_ASSERT_TEMPLATE_TYPE_3(Temp, T, T1, T2, T3)               \
-    VSMC_STATIC_ASSERT(                                                       \
-        (std::is_same<T, T1>::value || std::is_same<T, T2>::value ||          \
-            std::is_same<T, T3>::value),                                      \
-        "**" #Temp "** USED WITH " #T " OTHER THAN " #T1 " OR " #T2           \
-        " OR " #T3)
-
-#define VSMC_STATIC_ASSERT_TEMPLATE_TYPE_4(Temp, T, T1, T2, T3, T4)           \
-    VSMC_STATIC_ASSERT(                                                       \
-        (std::is_same<T, T1>::value || std::is_same<T, T2>::value ||          \
-            std::is_same<T, T3>::value || std::is_same<T, T4>::value),        \
-        "**" #Temp "** USED WITH " #T " OTHER THAN " #T1 " OR " #T2           \
-        " OR " #T3 " OR " #T4)
 
 namespace vsmc
 {

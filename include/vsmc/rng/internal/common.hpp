@@ -425,17 +425,17 @@ class IntBits : public IntBitsN<sizeof(IntType)>
 {
 }; // class IntBits
 
-template <typename SeedSeq, typename U, typename V = U, typename W = V>
+template <typename T, typename T1, typename... Types>
 class is_seed_seq
     : public std::integral_constant<bool,
-          !std::is_convertible<SeedSeq, U>::value &&
-              !std::is_convertible<SeedSeq, V>::value &&
-              !std::is_convertible<SeedSeq, W>::value &&
-              !std::is_same<typename std::remove_cv<SeedSeq>::type,
-                                        U>::value &&
-              !std::is_same<typename std::remove_cv<SeedSeq>::type,
-                                        V>::value &&
-              !std::is_same<typename std::remove_cv<SeedSeq>::type, W>::value>
+          is_seed_seq<T, T1>::value && is_seed_seq<T, Types...>::value>
+{
+};
+
+template <typename T, typename T1>
+class is_seed_seq<T, T1>
+    : public std::integral_constant<bool, !std::is_convertible<T, T1>::value &&
+              !std::is_same<typename std::remove_cv<T>::type, T1>::value>
 {
 }; // class is_seed_seq
 

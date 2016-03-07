@@ -211,6 +211,23 @@ namespace vsmc
 /// \ingroup Traits
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
 
+namespace internal
+{
+
+template <typename T, typename T1, typename... Types>
+class is_one_of : public std::integral_constant<bool,
+                      is_one_of<T, T1>::value || is_one_of<T, Types...>::value>
+{
+}; // class is_one_of
+
+template <typename T, typename T1>
+class is_one_of<T, T1>
+    : public std::integral_constant<bool, std::is_same<T, T1>::value>
+{
+}; // class is_one_of
+
+} // namespace vsmc::internal
+
 } // namespace vsmc
 
 #endif // VSMC_INTERNAL_TRAITS_HPP

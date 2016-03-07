@@ -709,19 +709,18 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
 template <typename RealType = double>
 class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
 {
+    static_assert(internal::is_one_of<RealType, float, double>::value,
+        "**MKLSSTask** USED WITH RealType OTHER THAN float or double");
+
     public:
     using result_type = RealType;
 
-    MKLSSTask()
-    {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_2(MKLSSTask, RealType, float, double);
-    }
+    MKLSSTask() = default;
 
     /// \brief `vslSSNewTask`
     MKLSSTask(const MKL_INT *p, const MKL_INT *n, const MKL_INT *xstorage,
         const result_type *x, const result_type *w, const MKL_INT *indices)
     {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_2(MKLSSTask, RealType, float, double);
         reset(p, n, xstorage, x, w, indices);
     }
 
@@ -1252,21 +1251,20 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
 template <typename ResultType = double>
 class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
 {
+    static_assert(internal::is_one_of<ResultType, float, double, MKL_Complex8,
+                      MKL_Complex16>::value,
+        "**MKLConvTask** USED WITH ResultType OTHER THAN float, double, "
+        "MKL_Complex8 OR MKL_Complex16");
+
     public:
     using result_type = ResultType;
 
-    MKLConvTask()
-    {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_4(MKLConvTask, ResultType, float,
-            double, MKL_Complex8, MKL_Complex16);
-    }
+    MKLConvTask() = default;
 
     /// \brief `vslConvNewTask`
     MKLConvTask(MKL_INT mode, MKL_INT dims, const MKL_INT *xshape,
         const MKL_INT *yshape, const MKL_INT *zshape)
     {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_4(MKLConvTask, ResultType, float,
-            double, MKL_Complex8, MKL_Complex16);
         reset(mode, dims, xshape, yshape, zshape);
     }
 
@@ -1274,8 +1272,6 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
     MKLConvTask(
         MKL_INT mode, const MKL_INT xshape, MKL_INT yshape, MKL_INT zshape)
     {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_4(MKLConvTask, ResultType, float,
-            double, MKL_Complex8, MKL_Complex16);
         reset(mode, xshape, yshape, zshape);
     }
 
@@ -1284,8 +1280,6 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT *yshape, const MKL_INT *zshape, const result_type *x,
         const MKL_INT *xstride)
     {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_4(MKLConvTask, ResultType, float,
-            double, MKL_Complex8, MKL_Complex16);
         reset(mode, dims, xshape, yshape, zshape, x, xstride);
     }
 
@@ -1293,17 +1287,12 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
     MKLConvTask(MKL_INT mode, MKL_INT xshape, MKL_INT yshape, MKL_INT zshape,
         const result_type *x, const MKL_INT xstride)
     {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_4(MKLConvTask, ResultType, float,
-            double, MKL_Complex8, MKL_Complex16);
         reset(mode, xshape, yshape, zshape, x, xstride);
     }
 
     /// \brief `vslConvCopyTask`
     MKLConvTask(const MKLConvTask<ResultType> &other)
     {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_4(MKLConvTask, ResultType, float,
-            double, MKL_Complex8, MKL_Complex16);
-
         ::VSLConvTaskPtr ptr = nullptr;
         internal::mkl_error_check(::vslConvCopyTask(&ptr, other.get()),
             "MKLConvTask::MKLConvTask", "::vslConvCopyTask");
@@ -1587,21 +1576,20 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
 template <typename ResultType = double>
 class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
 {
+    static_assert(internal::is_one_of<ResultType, float, double, MKL_Complex8,
+                      MKL_Complex16>::value,
+        "**MKLCorrTask** USED WITH ResultType OTHER THAN float, double, "
+        "MKL_Complex8 OR MKL_Complex16");
+
     public:
     using result_type = ResultType;
 
-    MKLCorrTask()
-    {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_4(MKLCorrTask, ResultType, float,
-            double, MKL_Complex8, MKL_Complex16);
-    }
+    MKLCorrTask() = default;
 
     /// \brief `vslCorrNewTask`
     MKLCorrTask(MKL_INT mode, MKL_INT dims, const MKL_INT *xshape,
         const MKL_INT *yshape, const MKL_INT *zshape)
     {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_4(MKLCorrTask, ResultType, float,
-            double, MKL_Complex8, MKL_Complex16);
         reset(mode, dims, xshape, yshape, zshape);
     }
 
@@ -1609,8 +1597,6 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     MKLCorrTask(
         MKL_INT mode, const MKL_INT xshape, MKL_INT yshape, MKL_INT zshape)
     {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_4(MKLCorrTask, ResultType, float,
-            double, MKL_Complex8, MKL_Complex16);
         reset(mode, xshape, yshape, zshape);
     }
 
@@ -1619,8 +1605,6 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT *yshape, const MKL_INT *zshape, const result_type *x,
         const MKL_INT *xstride)
     {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_4(MKLCorrTask, ResultType, float,
-            double, MKL_Complex8, MKL_Complex16);
         reset(mode, dims, xshape, yshape, zshape, x, xstride);
     }
 
@@ -1628,17 +1612,12 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     MKLCorrTask(MKL_INT mode, MKL_INT xshape, MKL_INT yshape, MKL_INT zshape,
         const result_type *x, const MKL_INT xstride)
     {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_4(MKLCorrTask, ResultType, float,
-            double, MKL_Complex8, MKL_Complex16);
         reset(mode, xshape, yshape, zshape, x, xstride);
     }
 
     /// \brief `vslCorrCopyTask`
     MKLCorrTask(const MKLCorrTask<ResultType> &other)
     {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_4(MKLCorrTask, ResultType, float,
-            double, MKL_Complex8, MKL_Complex16);
-
         ::VSLCorrTaskPtr ptr = nullptr;
         internal::mkl_error_check(::vslCorrCopyTask(&ptr, other.get()),
             "MKLCorrTask::MKLCorrTask", "::vslCorrCopyTask");
@@ -1922,18 +1901,17 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
 template <typename RealType = double>
 class MKLDFTask
 {
+    static_assert(internal::is_one_of<RealType, float, double>::value,
+        "**MKLDFTask** USED WITH RealType OTHER THAN float OR double");
+
     public:
     using result_type = RealType;
 
-    MKLDFTask()
-    {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_2(MKLDFTask, RealType, float, double);
-    }
+    MKLDFTask() = default;
 
     MKLDFTask(MKL_INT nx, const result_type *x, MKL_INT xhint, MKL_INT ny,
         const result_type *y, MKL_INT yhint)
     {
-        VSMC_STATIC_ASSERT_TEMPLATE_TYPE_2(MKLDFTask, RealType, float, double);
         reset(nx, x, xhint, ny, y, yhint);
     }
 
