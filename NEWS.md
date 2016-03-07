@@ -88,6 +88,8 @@ changes.
 * `Particle::weight_set` renamed to `Particle::weight`
 * `weight_set_type` renamed to `weight_type`
 * All occurrence of `Rng` are renamed to `RNG`
+* `AlignedMemory` and `AlignedAllocator` no longer support
+  [jemalloc][jemalloc].
 
 ## Removed features
 
