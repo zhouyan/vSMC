@@ -58,9 +58,9 @@ class BernoulliDistribution
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:
-    result_type min () const { return static_cast<result_type>(0); }
+    result_type min() const { return 0; }
 
-    result_type max () const { return static_cast<result_type>(1); }
+    result_type max() const { return 1; }
 
     void reset() {}
 

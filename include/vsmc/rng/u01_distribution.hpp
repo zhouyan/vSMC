@@ -86,9 +86,9 @@ class U01LRDistribution
     U01LRDistribution() {}
     explicit U01LRDistribution(const param_type &) {}
 
-    result_type min () const { return 0; }
+    result_type min() const { return 0; }
 
-    result_type max () const { return 1; }
+    result_type max() const { return 1; }
 
     void reset() {}
 
