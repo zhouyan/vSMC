@@ -97,14 +97,9 @@ class U01LRDistribution
         using uint_type =
             typename std::conditional<internal::RNGBits<RNGType>::value >= 64,
                 std::uint64_t, std::uint32_t>::type;
-        using flt_type = typename std::conditional<
-            std::is_same<result_type, float>::value ||
-                std::is_same<result_type, double>::value,
-            result_type, double>::type;
-
         UniformBitsDistribution<uint_type> rbits;
 
-        return U01<uint_type, flt_type, Left, Right>::eval(rbits(rng));
+        return U01<uint_type, result_type, Left, Right>::eval(rbits(rng));
     }
 
     template <typename RNGType>
