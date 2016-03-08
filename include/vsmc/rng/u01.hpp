@@ -40,36 +40,43 @@ namespace vsmc
 namespace internal
 {
 
-template <typename UIntType, typename RealType, int Bits,
-    int RBits = (std::numeric_limits<UIntType>::digits <
-                            std::numeric_limits<RealType>::digits ?
-                        std::numeric_limits<UIntType>::digits :
-                        std::numeric_limits<RealType>::digits) -
+template <int Bits,
+    int RBits = (std::numeric_limits<unsigned long long>::digits <
+                            std::numeric_limits<long double>::digits ?
+                        std::numeric_limits<unsigned long long>::digits :
+                        std::numeric_limits<long double>::digits) -
         1,
     bool = (RBits < Bits)>
-class U01ImplPow2Bits
+class U01ImplPow2BitsL
 {
     public:
-    static constexpr RealType value =
-        static_cast<RealType>(static_cast<UIntType>(1) << RBits) *
-        U01ImplPow2Bits<UIntType, RealType, Bits - RBits>::value;
-}; // class U01ImplPow2BitsInv
+    static constexpr long double value =
+        static_cast<long double>(1ULL << RBits) *
+        U01ImplPow2BitsL<Bits - RBits>::value;
+}; // class U01ImplPow2BitsL
 
-template <typename UIntType, typename RealType, int Bits, int RBits>
-class U01ImplPow2Bits<UIntType, RealType, Bits, RBits, false>
+template <int Bits, int RBits>
+class U01ImplPow2BitsL<Bits, RBits, false>
 {
     public:
-    static constexpr RealType value =
-        static_cast<RealType>(static_cast<UIntType>(1) << Bits);
-}; // class U01ImplPow2Bits
+    static constexpr long double value =
+        static_cast<long double>(1ULL << Bits);
+}; // class U01ImplPow2BitsL
 
-template <typename UIntType, typename RealType, int Bits>
+template <int Bits>
+class U01ImplPow2BitsInvL
+{
+    public:
+    static constexpr long double value = 1.0L / U01ImplPow2BitsL<Bits>::value;
+}; // class U01ImplPow2BitsInvL
+
+template <typename RealType, int Bits>
 class U01ImplPow2BitsInv
 {
     public:
-    static constexpr RealType value = static_cast<RealType>(1) /
-        U01ImplPow2Bits<UIntType, RealType, Bits>::value;
-}; // class U01ImplPow2BitsInvInv
+    static constexpr RealType value =
+        static_cast<RealType>(U01ImplPow2BitsInvL<Bits>::value);
+}; // class U01ImplPow2BitsInv
 
 template <typename UIntType, typename RealType, typename, typename, int UBits,
     int FBits, bool = UBits <= FBits>
@@ -84,7 +91,7 @@ class U01Impl<UIntType, RealType, Closed, Closed, UBits, FBits, false>
         u >>= UBits - FBits;
 
         return static_cast<RealType>((u & 1) + u) *
-            U01ImplPow2BitsInv<UIntType, RealType, FBits>::value;
+            U01ImplPow2BitsInv<RealType, FBits>::value;
     }
 }; // class U01Impl
 
@@ -95,7 +102,7 @@ class U01Impl<UIntType, RealType, Closed, Open, UBits, FBits, false>
     static RealType eval(UIntType u)
     {
         return static_cast<RealType>(u >> (UBits - FBits)) *
-            U01ImplPow2BitsInv<UIntType, RealType, FBits>::value;
+            U01ImplPow2BitsInv<RealType, FBits>::value;
     }
 }; // class U01Impl
 
@@ -106,8 +113,8 @@ class U01Impl<UIntType, RealType, Open, Closed, UBits, FBits, false>
     static RealType eval(UIntType u)
     {
         return static_cast<RealType>(u >> (UBits - FBits)) *
-            U01ImplPow2BitsInv<UIntType, RealType, FBits>::value +
-            U01ImplPow2BitsInv<UIntType, RealType, FBits>::value;
+            U01ImplPow2BitsInv<RealType, FBits>::value +
+            U01ImplPow2BitsInv<RealType, FBits>::value;
     }
 }; // class U01Impl
 
@@ -118,8 +125,8 @@ class U01Impl<UIntType, RealType, Open, Open, UBits, FBits, false>
     static RealType eval(UIntType u)
     {
         return static_cast<RealType>(u >> (UBits - (FBits - 1))) *
-            U01ImplPow2BitsInv<UIntType, RealType, FBits - 1>::value +
-            U01ImplPow2BitsInv<UIntType, RealType, FBits>::value;
+            U01ImplPow2BitsInv<RealType, FBits - 1>::value +
+            U01ImplPow2BitsInv<RealType, FBits>::value;
     }
 }; // class U01Impl
 
@@ -130,7 +137,7 @@ class U01Impl<UIntType, RealType, Closed, Closed, UBits, FBits, true>
     static RealType eval(UIntType u)
     {
         return (static_cast<RealType>(u & 1) + u) *
-            U01ImplPow2BitsInv<UIntType, RealType, UBits>::value;
+            U01ImplPow2BitsInv<RealType, UBits>::value;
     }
 }; // class U01Impl
 
@@ -141,7 +148,7 @@ class U01Impl<UIntType, RealType, Closed, Open, UBits, FBits, true>
     static RealType eval(UIntType u)
     {
         return static_cast<RealType>(u) *
-            U01ImplPow2BitsInv<UIntType, RealType, UBits>::value;
+            U01ImplPow2BitsInv<RealType, UBits>::value;
     }
 }; // class U01Impl
 
@@ -152,8 +159,8 @@ class U01Impl<UIntType, RealType, Open, Closed, UBits, FBits, true>
     static RealType eval(UIntType u)
     {
         return static_cast<RealType>(u) *
-            U01ImplPow2BitsInv<UIntType, RealType, UBits>::value +
-            U01ImplPow2BitsInv<UIntType, RealType, UBits>::value;
+            U01ImplPow2BitsInv<RealType, UBits>::value +
+            U01ImplPow2BitsInv<RealType, UBits>::value;
     }
 }; // class U01Impl
 
@@ -164,8 +171,8 @@ class U01Impl<UIntType, RealType, Open, Open, UBits, FBits, true>
     static RealType eval(UIntType u)
     {
         return static_cast<RealType>(u) *
-            U01ImplPow2BitsInv<UIntType, RealType, UBits>::value +
-            U01ImplPow2BitsInv<UIntType, RealType, UBits + 1>::value;
+            U01ImplPow2BitsInv<RealType, UBits>::value +
+            U01ImplPow2BitsInv<RealType, UBits + 1>::value;
     }
 }; // class U01Impl
 
