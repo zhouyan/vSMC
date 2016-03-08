@@ -36,11 +36,6 @@
 #include <vsmc/internal/common.hpp>
 #include <mkl.h>
 
-#define VSMC_RUNTIME_ASSERT_UTILITY_MKL_VSL_OFFSET(offset)                    \
-    VSMC_RUNTIME_ASSERT((offset < max VSMC_MNE()),                            \
-        "**MKLOffsetDynamic** "                                               \
-        "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS")
-
 namespace vsmc
 {
 

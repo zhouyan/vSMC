@@ -160,8 +160,10 @@ class BetaDistribution
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:
-    result_type min VSMC_MNE() const { return 0; }
-    result_type max VSMC_MNE() const { return 1; }
+    result_type min() const { return 0; }
+
+    result_type max() const { return 1; }
+
     void reset() { constant_.reset(alpha(), beta()); }
 
     private:

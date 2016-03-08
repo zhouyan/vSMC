@@ -236,16 +236,14 @@ class NormalMVDistribution
             (chol_ ? param.chol() : nullptr));
     }
 
-    void min VSMC_MNE(result_type *x) const
+    void min(result_type *x) const
     {
-        std::fill_n(
-            x, dim(), -std::numeric_limits<result_type>::max VSMC_MNE());
+        std::fill_n(x, dim(), -std::numeric_limits<result_type>::max());
     }
 
-    void max VSMC_MNE(result_type *x) const
+    void max(result_type *x) const
     {
-        std::fill_n(
-            x, dim(), std::numeric_limits<result_type>::max VSMC_MNE());
+        std::fill_n(x, dim(), std::numeric_limits<result_type>::max());
     }
 
     void reset() { rnorm_.reset(); }

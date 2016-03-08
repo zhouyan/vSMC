@@ -147,10 +147,12 @@ class UniformRealLRDistribution
     }
 
     result_type a() const { return param_.a(); }
+
     result_type b() const { return param_.b(); }
 
-    result_type min VSMC_MNE() const { return a(); }
-    result_type max VSMC_MNE() const { return b(); }
+    result_type min() const { return a(); }
+
+    result_type max() const { return b(); }
 
     void reset() {}
 

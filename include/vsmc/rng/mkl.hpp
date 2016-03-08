@@ -34,6 +34,11 @@
 
 #include <vsmc/rng/internal/common.hpp>
 
+#define VSMC_RUNTIME_ASSERT_RNG_MKL_OFFSET(offset)                            \
+    VSMC_RUNTIME_ASSERT((offset < max()),                                     \
+        "**MKLOffsetDynamic** "                                               \
+        "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS")
+
 namespace vsmc
 {
 
@@ -43,8 +48,8 @@ namespace internal
 class MKLOffsetZero
 {
     public:
-    static constexpr MKL_INT min VSMC_MNE() { return 0; }
-    static constexpr MKL_INT max VSMC_MNE() { return 0; }
+    static constexpr MKL_INT min() { return 0; }
+    static constexpr MKL_INT max() { return 0; }
     static void set(MKL_INT) {}
     static constexpr MKL_INT get() { return 0; }
 }; // class OffsetZero
@@ -55,12 +60,12 @@ class MKLOffsetDynamic
     public:
     MKLOffsetDynamic() : offset_(0) {}
 
-    static constexpr MKL_INT min VSMC_MNE() { return 0; }
-    static constexpr MKL_INT max VSMC_MNE() { return MaxOffset; }
+    static constexpr MKL_INT min() { return 0; }
+    static constexpr MKL_INT max() { return MaxOffset; }
 
     void set(MKL_INT n)
     {
-        VSMC_RUNTIME_ASSERT_UTILITY_MKL_VSL_OFFSET(n);
+        VSMC_RUNTIME_ASSERT_RNG_MKL_OFFSET(n);
         offset_ = n % MaxOffset;
     }
 
@@ -81,8 +86,7 @@ template <>
 class MKLOffset<Dynamic>
 {
     public:
-    using type =
-        MKLOffsetDynamic<std::numeric_limits<MKL_INT>::max VSMC_MNE()>;
+    using type = MKLOffsetDynamic<std::numeric_limits<MKL_INT>::max()>;
 }; // class MKLOffset
 
 template <>
@@ -265,14 +269,14 @@ class MKLEngine
         index_ = M_;
     }
 
-    static constexpr result_type min VSMC_MNE()
+    static constexpr result_type min()
     {
-        return std::numeric_limits<result_type>::min VSMC_MNE();
+        return std::numeric_limits<result_type>::min();
     }
 
-    static constexpr result_type max VSMC_MNE()
+    static constexpr result_type max()
     {
-        return std::numeric_limits<result_type>::max VSMC_MNE();
+        return std::numeric_limits<result_type>::max();
     }
 
     MKLStream &stream() { return stream_; }

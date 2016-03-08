@@ -59,12 +59,9 @@ class LevyDistribution
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     public:
-    result_type min VSMC_MNE() const { return a(); }
+    result_type min() const { return a(); }
 
-    result_type max VSMC_MNE() const
-    {
-        return std::numeric_limits<result_type>::max VSMC_MNE();
-    }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
     void reset() { normal_ = NormalDistribution<RealType>(0, 1); }
 

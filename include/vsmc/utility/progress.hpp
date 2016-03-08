@@ -117,7 +117,7 @@ class Progress
 
     private:
     static constexpr std::size_t max_val_ =
-        std::numeric_limits<std::size_t>::max VSMC_MNE();
+        std::numeric_limits<std::size_t>::max();
 
     StopWatch watch_;
     std::thread *thread_ptr_;

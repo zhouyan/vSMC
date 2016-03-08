@@ -139,15 +139,9 @@ class UniformBitsDistribution
     UniformBitsDistribution() {}
     explicit UniformBitsDistribution(const param_type &) {}
 
-    result_type min VSMC_MNE() const
-    {
-        return std::numeric_limits<result_type>::min VSMC_MNE();
-    }
+    result_type min() const { return std::numeric_limits<result_type>::min(); }
 
-    result_type max VSMC_MNE() const
-    {
-        return std::numeric_limits<result_type>::max VSMC_MNE();
-    }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
     void reset() {}
 

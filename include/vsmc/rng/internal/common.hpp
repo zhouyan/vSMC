@@ -355,7 +355,7 @@ class RNGBitsNMax
 {
     public:
     static constexpr std::uint64_t
-        value = std::numeric_limits<std::uint64_t>::max VSMC_MNE() >> (64 - N);
+        value = std::numeric_limits<std::uint64_t>::max() >> (64 - N);
 }; // class RNGBitsNMax
 
 template <std::uint64_t U, int N>
@@ -377,16 +377,14 @@ class RNGBitsN<U, 0>
 template <typename RNGType>
 class RNGMinBits
     : public std::integral_constant<int,
-          RNGBitsN<static_cast<std::uint64_t>(RNGType::min VSMC_MNE()),
-                                        64>::value>
+          RNGBitsN<static_cast<std::uint64_t>(RNGType::min()), 64>::value>
 {
 }; // class RNGMinBits
 
 template <typename RNGType>
 class RNGMaxBits
     : public std::integral_constant<int,
-          RNGBitsN<static_cast<std::uint64_t>(RNGType::max VSMC_MNE()),
-                                        64>::value>
+          RNGBitsN<static_cast<std::uint64_t>(RNGType::max()), 64>::value>
 {
 }; // class RNGMaxBits
 
