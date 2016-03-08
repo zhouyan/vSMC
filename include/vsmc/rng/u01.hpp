@@ -33,31 +33,6 @@
 #define VSMC_RNG_U01_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rngc/u01.h>
-
-#define VSMC_DEFINE_RNG_U01_IMPL(                                             \
-    UBits, FBits, RealType, Left, Right, left, right)                         \
-    template <>                                                               \
-    class U01Impl<sizeof(std::uint##UBits##_t), sizeof(RealType), Left,       \
-        Right>                                                                \
-    {                                                                         \
-        public:                                                               \
-        template <typename UIntType>                                          \
-        static RealType eval(UIntType u)                                      \
-        {                                                                     \
-            return ::vsmc_u01_##left##_##right##_u##UBits##_f##FBits(         \
-                static_cast<uint##UBits##_t>(u));                             \
-        }                                                                     \
-    }; // class U01Impl
-
-#define VSMC_DEFINE_RNG_U01(UBits, FBits, RealType)                           \
-    VSMC_DEFINE_RNG_U01_IMPL(                                                 \
-        UBits, FBits, RealType, Closed, Closed, closed, closed)               \
-    VSMC_DEFINE_RNG_U01_IMPL(                                                 \
-        UBits, FBits, RealType, Closed, Open, closed, open)                   \
-    VSMC_DEFINE_RNG_U01_IMPL(                                                 \
-        UBits, FBits, RealType, Open, Closed, open, closed)                   \
-    VSMC_DEFINE_RNG_U01_IMPL(UBits, FBits, RealType, Open, Open, open, open)
 
 namespace vsmc
 {
@@ -65,24 +40,146 @@ namespace vsmc
 namespace internal
 {
 
-template <std::size_t, std::size_t, typename, typename>
+template <typename UIntType, typename RealType, int Bits,
+    int RBits = (std::numeric_limits<UIntType>::digits <
+                            std::numeric_limits<RealType>::digits ?
+                        std::numeric_limits<UIntType>::digits :
+                        std::numeric_limits<RealType>::digits) -
+        1,
+    bool = (RBits < Bits)>
+class U01ImplPow2Bits
+{
+    public:
+    static constexpr RealType value =
+        static_cast<RealType>(static_cast<UIntType>(1) << RBits) *
+        U01ImplPow2Bits<UIntType, RealType, Bits - RBits>::value;
+}; // class U01ImplPow2BitsInv
+
+template <typename UIntType, typename RealType, int Bits, int RBits>
+class U01ImplPow2Bits<UIntType, RealType, Bits, RBits, false>
+{
+    public:
+    static constexpr RealType value =
+        static_cast<RealType>(static_cast<UIntType>(1) << Bits);
+}; // class U01ImplPow2Bits
+
+template <typename UIntType, typename RealType, int Bits>
+class U01ImplPow2BitsInv
+{
+    public:
+    static constexpr RealType value = static_cast<RealType>(1) /
+        U01ImplPow2Bits<UIntType, RealType, Bits>::value;
+}; // class U01ImplPow2BitsInvInv
+
+template <typename UIntType, typename RealType, typename, typename, int UBits,
+    int FBits, bool = UBits <= FBits>
 class U01Impl;
 
-VSMC_DEFINE_RNG_U01(32, 32, float)
-VSMC_DEFINE_RNG_U01(32, 64, double)
-VSMC_DEFINE_RNG_U01(64, 32, float)
-VSMC_DEFINE_RNG_U01(64, 64, double)
-#if VSMC_HAS_X86
-VSMC_DEFINE_RNG_U01(32, 80, long double)
-VSMC_DEFINE_RNG_U01(64, 80, long double)
-#endif
+template <typename UIntType, typename RealType, int UBits, int FBits>
+class U01Impl<UIntType, RealType, Closed, Closed, UBits, FBits, false>
+{
+    public:
+    static RealType eval(UIntType u)
+    {
+        u >>= UBits - FBits;
+
+        return static_cast<RealType>((u & 1) + u) *
+            U01ImplPow2BitsInv<UIntType, RealType, FBits>::value;
+    }
+}; // class U01Impl
+
+template <typename UIntType, typename RealType, int UBits, int FBits>
+class U01Impl<UIntType, RealType, Closed, Open, UBits, FBits, false>
+{
+    public:
+    static RealType eval(UIntType u)
+    {
+        return static_cast<RealType>(u >> (UBits - FBits)) *
+            U01ImplPow2BitsInv<UIntType, RealType, FBits>::value;
+    }
+}; // class U01Impl
+
+template <typename UIntType, typename RealType, int UBits, int FBits>
+class U01Impl<UIntType, RealType, Open, Closed, UBits, FBits, false>
+{
+    public:
+    static RealType eval(UIntType u)
+    {
+        return static_cast<RealType>(u >> (UBits - FBits)) *
+            U01ImplPow2BitsInv<UIntType, RealType, FBits>::value +
+            U01ImplPow2BitsInv<UIntType, RealType, FBits>::value;
+    }
+}; // class U01Impl
+
+template <typename UIntType, typename RealType, int UBits, int FBits>
+class U01Impl<UIntType, RealType, Open, Open, UBits, FBits, false>
+{
+    public:
+    static RealType eval(UIntType u)
+    {
+        return static_cast<RealType>(u >> (UBits - (FBits - 1))) *
+            U01ImplPow2BitsInv<UIntType, RealType, FBits - 1>::value +
+            U01ImplPow2BitsInv<UIntType, RealType, FBits>::value;
+    }
+}; // class U01Impl
+
+template <typename UIntType, typename RealType, int UBits, int FBits>
+class U01Impl<UIntType, RealType, Closed, Closed, UBits, FBits, true>
+{
+    public:
+    static RealType eval(UIntType u)
+    {
+        return (static_cast<RealType>(u & 1) + u) *
+            U01ImplPow2BitsInv<UIntType, RealType, UBits>::value;
+    }
+}; // class U01Impl
+
+template <typename UIntType, typename RealType, int UBits, int FBits>
+class U01Impl<UIntType, RealType, Closed, Open, UBits, FBits, true>
+{
+    public:
+    static RealType eval(UIntType u)
+    {
+        return static_cast<RealType>(u) *
+            U01ImplPow2BitsInv<UIntType, RealType, UBits>::value;
+    }
+}; // class U01Impl
+
+template <typename UIntType, typename RealType, int UBits, int FBits>
+class U01Impl<UIntType, RealType, Open, Closed, UBits, FBits, true>
+{
+    public:
+    static RealType eval(UIntType u)
+    {
+        return static_cast<RealType>(u) *
+            U01ImplPow2BitsInv<UIntType, RealType, UBits>::value +
+            U01ImplPow2BitsInv<UIntType, RealType, UBits>::value;
+    }
+}; // class U01Impl
+
+template <typename UIntType, typename RealType, int UBits, int FBits>
+class U01Impl<UIntType, RealType, Open, Open, UBits, FBits, true>
+{
+    public:
+    static RealType eval(UIntType u)
+    {
+        return static_cast<RealType>(u) *
+            U01ImplPow2BitsInv<UIntType, RealType, UBits>::value +
+            U01ImplPow2BitsInv<UIntType, RealType, UBits + 1>::value;
+    }
+}; // class U01Impl
 
 } // namespace vsmc::internal
 
 template <typename UIntType, typename RealType, typename Left, typename Right>
-class U01
-    : public internal::U01Impl<sizeof(UIntType), sizeof(RealType), Left, Right>
+class U01 : public internal::U01Impl<UIntType, RealType, Left, Right,
+                std::numeric_limits<UIntType>::digits,
+                std::numeric_limits<RealType>::digits>
 {
+    static_assert(std::is_unsigned<UIntType>::value,
+        "**U01** USED WITH UIntType OTHER THAN UNSIGNED INTEGER TYPES");
+    static_assert(std::is_floating_point<RealType>::value,
+        "**U01** USED WITH RealType OTHER THAN FLOATING POINT TYPES");
 }; // class U01
 
 } // namespace vsmc
