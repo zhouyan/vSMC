@@ -58,8 +58,8 @@ ADD_SUBDIRECTORY(rng)
 ##############################################################################
 
 MESSAGE(STATUS "=================== Enable examples ===================")
-FOREACH (example ${EXAMPLES})
+FOREACH(example ${EXAMPLES})
     MESSAGE(STATUS ${example})
-ENDFOREACH (example ${EXAMPLES})
+ENDFOREACH(example ${EXAMPLES})
 
 MESSAGE(STATUS "=======================================================")

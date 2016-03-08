@@ -37,7 +37,6 @@
 #include <boost/math/distributions.hpp>
 #include <boost/random.hpp>
 
-#if VSMC_HAS_X86
 #define VSMC_RNG_DIST_TEST(K, Name, STD)                                      \
     rng_dist_test<float, K, STD<float>, vsmc::Name##Distribution<float>>(     \
         argc, argv, #Name, params);                                           \
@@ -45,13 +44,6 @@
         argc, argv, #Name, params);                                           \
     rng_dist_test<long double, K, STD<long double>,                           \
         vsmc::Name##Distribution<long double>>(argc, argv, #Name, params);
-#else
-#define VSMC_RNG_DIST_TEST(K, Name, STD)                                      \
-    rng_dist_test<float, K, STD<float>, vsmc::Name##Distribution<float>>(     \
-        argc, argv, #Name, params);                                           \
-    rng_dist_test<double, K, STD<double>, vsmc::Name##Distribution<double>>(  \
-        argc, argv, #Name, params);
-#endif
 
 template <typename RealType, std::size_t K>
 inline std::string rng_dist_name(

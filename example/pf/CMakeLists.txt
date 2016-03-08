@@ -50,9 +50,9 @@ COPY_FILE(pf pf.R)
 ADD_CUSTOM_TARGET(pf-check)
 ADD_DEPENDENCIES(check pf-check)
 
-FOREACH (backend ${SMP_EXECUTABLES})
+FOREACH(backend ${SMP_EXECUTABLES})
     ADD_PF_SMP_CHECK(${backend})
-ENDFOREACH (backend ${SMP_EXECUTABLES})
+ENDFOREACH(backend ${SMP_EXECUTABLES})
 
 ADD_CUSTOM_TARGET(pf-pdf
     DEPENDS pf-files pf-check

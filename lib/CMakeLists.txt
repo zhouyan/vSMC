@@ -34,13 +34,12 @@ PROJECT(vSMCLib C CXX)
 SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
     ${PROJECT_SOURCE_DIR}/src/vsmc_memory.cpp
     ${PROJECT_SOURCE_DIR}/src/vsmc_resample.cpp
-    ${PROJECT_SOURCE_DIR}/src/vsmc_rng.cpp
-    )
+    ${PROJECT_SOURCE_DIR}/src/vsmc_rng.cpp)
 
-IF (MKL_FOUND)
+IF(MKL_FOUND)
     SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
         ${PROJECT_SOURCE_DIR}/src/vsmc_mkl_brng.cpp)
-ENDIF (MKL_FOUND)
+ENDIF(MKL_FOUND)
 
 ADD_LIBRARY(libvsmc ${VSMC_LIB_SOURCE})
 SET_TARGET_PROPERTIES(libvsmc PROPERTIES OUTPUT_NAME vsmc)
