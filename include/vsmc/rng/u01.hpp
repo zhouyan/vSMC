@@ -40,148 +40,117 @@ namespace vsmc
 namespace internal
 {
 
-template <int Bits,
-    int RBits = (std::numeric_limits<unsigned long long>::digits <
-                            std::numeric_limits<long double>::digits ?
-                        std::numeric_limits<unsigned long long>::digits :
-                        std::numeric_limits<long double>::digits) -
+template <int P,
+    int Q = (std::numeric_limits<unsigned long long>::digits <
+                        std::numeric_limits<long double>::digits ?
+                    std::numeric_limits<unsigned long long>::digits :
+                    std::numeric_limits<long double>::digits) -
         1,
-    bool = (RBits < Bits)>
-class U01ImplPow2BitsL
+    bool = (Q < P)>
+class U01ImplPow2L
 {
     public:
     static constexpr long double value =
-        static_cast<long double>(1ULL << RBits) *
-        U01ImplPow2BitsL<Bits - RBits>::value;
-}; // class U01ImplPow2BitsL
+        static_cast<long double>(1ULL << Q) * U01ImplPow2L<P - Q>::value;
+}; // class U01ImplPow2L
 
-template <int Bits, int RBits>
-class U01ImplPow2BitsL<Bits, RBits, false>
+template <int P, int Q>
+class U01ImplPow2L<P, Q, false>
 {
     public:
-    static constexpr long double value =
-        static_cast<long double>(1ULL << Bits);
-}; // class U01ImplPow2BitsL
+    static constexpr long double value = static_cast<long double>(1ULL << P);
+}; // class U01ImplPow2L
 
-template <int Bits>
-class U01ImplPow2BitsInvL
+template <int P>
+class U01ImplPow2InvL
 {
     public:
-    static constexpr long double value = 1.0L / U01ImplPow2BitsL<Bits>::value;
-}; // class U01ImplPow2BitsInvL
+    static constexpr long double value = 1.0L / U01ImplPow2L<P>::value;
+}; // class U01ImplPow2InvL
 
-template <typename RealType, int Bits>
-class U01ImplPow2BitsInv
+template <typename RealType, int P>
+class U01ImplPow2Inv
 {
     public:
     static constexpr RealType value =
-        static_cast<RealType>(U01ImplPow2BitsInvL<Bits>::value);
-}; // class U01ImplPow2BitsInv
+        static_cast<RealType>(U01ImplPow2InvL<P>::value);
+}; // class U01ImplPow2Inv
 
-template <typename UIntType, typename RealType, typename, typename, int UBits,
-    int FBits, bool = UBits <= FBits>
+template <typename, typename, typename, typename>
 class U01Impl;
 
-template <typename UIntType, typename RealType, int UBits, int FBits>
-class U01Impl<UIntType, RealType, Closed, Closed, UBits, FBits, false>
+template <typename UIntType, typename RealType>
+class U01Impl<UIntType, RealType, Closed, Closed>
 {
     public:
     static RealType eval(UIntType u)
     {
-        u >>= UBits - FBits;
+        static constexpr int w = std::numeric_limits<UIntType>::digits;
+        static constexpr int m = std::numeric_limits<RealType>::digits;
+        static constexpr int p = w - 1 < m ? w - 1 : m;
+        static constexpr int r = w - 1 - p;
 
-        return static_cast<RealType>((u & 1) + u) *
-            U01ImplPow2BitsInv<RealType, FBits>::value;
+        u >>= r;
+
+        return (static_cast<RealType>(u & 1) + static_cast<RealType>(u)) *
+            U01ImplPow2Inv<RealType, p + 1>::value;
     }
 }; // class U01Impl
 
-template <typename UIntType, typename RealType, int UBits, int FBits>
-class U01Impl<UIntType, RealType, Closed, Open, UBits, FBits, false>
+template <typename UIntType, typename RealType>
+class U01Impl<UIntType, RealType, Closed, Open>
 {
     public:
     static RealType eval(UIntType u)
     {
-        return static_cast<RealType>(u >> (UBits - FBits)) *
-            U01ImplPow2BitsInv<RealType, FBits>::value;
+        static constexpr int w = std::numeric_limits<UIntType>::digits;
+        static constexpr int m = std::numeric_limits<RealType>::digits;
+        static constexpr int p = w < m ? w : m;
+        static constexpr int r = w - p;
+
+        return static_cast<RealType>(u >> r) *
+            U01ImplPow2Inv<RealType, p>::value;
     }
 }; // class U01Impl
 
-template <typename UIntType, typename RealType, int UBits, int FBits>
-class U01Impl<UIntType, RealType, Open, Closed, UBits, FBits, false>
+template <typename UIntType, typename RealType>
+class U01Impl<UIntType, RealType, Open, Closed>
 {
     public:
     static RealType eval(UIntType u)
     {
-        return static_cast<RealType>(u >> (UBits - FBits)) *
-            U01ImplPow2BitsInv<RealType, FBits>::value +
-            U01ImplPow2BitsInv<RealType, FBits>::value;
+        static constexpr int w = std::numeric_limits<UIntType>::digits;
+        static constexpr int m = std::numeric_limits<RealType>::digits;
+        static constexpr int p = w < m ? w : m;
+        static constexpr int r = w - p;
+
+        return static_cast<RealType>(u >> r) *
+            U01ImplPow2Inv<RealType, p>::value +
+            U01ImplPow2Inv<RealType, p>::value;
     }
 }; // class U01Impl
 
-template <typename UIntType, typename RealType, int UBits, int FBits>
-class U01Impl<UIntType, RealType, Open, Open, UBits, FBits, false>
+template <typename UIntType, typename RealType>
+class U01Impl<UIntType, RealType, Open, Open>
 {
     public:
     static RealType eval(UIntType u)
     {
-        return static_cast<RealType>(u >> (UBits - (FBits - 1))) *
-            U01ImplPow2BitsInv<RealType, FBits - 1>::value +
-            U01ImplPow2BitsInv<RealType, FBits>::value;
-    }
-}; // class U01Impl
+        static constexpr int w = std::numeric_limits<UIntType>::digits;
+        static constexpr int m = std::numeric_limits<RealType>::digits;
+        static constexpr int p = w + 1 < m ? w + 1 : m;
+        static constexpr int r = w + 1 - p;
 
-template <typename UIntType, typename RealType, int UBits, int FBits>
-class U01Impl<UIntType, RealType, Closed, Closed, UBits, FBits, true>
-{
-    public:
-    static RealType eval(UIntType u)
-    {
-        return (static_cast<RealType>(u & 1) + u) *
-            U01ImplPow2BitsInv<RealType, UBits>::value;
-    }
-}; // class U01Impl
-
-template <typename UIntType, typename RealType, int UBits, int FBits>
-class U01Impl<UIntType, RealType, Closed, Open, UBits, FBits, true>
-{
-    public:
-    static RealType eval(UIntType u)
-    {
-        return static_cast<RealType>(u) *
-            U01ImplPow2BitsInv<RealType, UBits>::value;
-    }
-}; // class U01Impl
-
-template <typename UIntType, typename RealType, int UBits, int FBits>
-class U01Impl<UIntType, RealType, Open, Closed, UBits, FBits, true>
-{
-    public:
-    static RealType eval(UIntType u)
-    {
-        return static_cast<RealType>(u) *
-            U01ImplPow2BitsInv<RealType, UBits>::value +
-            U01ImplPow2BitsInv<RealType, UBits>::value;
-    }
-}; // class U01Impl
-
-template <typename UIntType, typename RealType, int UBits, int FBits>
-class U01Impl<UIntType, RealType, Open, Open, UBits, FBits, true>
-{
-    public:
-    static RealType eval(UIntType u)
-    {
-        return static_cast<RealType>(u) *
-            U01ImplPow2BitsInv<RealType, UBits>::value +
-            U01ImplPow2BitsInv<RealType, UBits + 1>::value;
+        return static_cast<RealType>(u >> r) *
+            U01ImplPow2Inv<RealType, p - 1>::value +
+            U01ImplPow2Inv<RealType, p>::value;
     }
 }; // class U01Impl
 
 } // namespace vsmc::internal
 
 template <typename UIntType, typename RealType, typename Left, typename Right>
-class U01 : public internal::U01Impl<UIntType, RealType, Left, Right,
-                std::numeric_limits<UIntType>::digits,
-                std::numeric_limits<RealType>::digits>
+class U01 : public internal::U01Impl<UIntType, RealType, Left, Right>
 {
     static_assert(std::is_unsigned<UIntType>::value,
         "**U01** USED WITH UIntType OTHER THAN UNSIGNED INTEGER TYPES");
