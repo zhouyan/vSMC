@@ -42,31 +42,31 @@ int main()
     VSMC_RNG_U01_TEST(32, long double);
     VSMC_RNG_U01_TEST(64, long double);
 
-    // std::cout << std::string(80, '=') << std::endl;
+    std::cout << std::string(80, '=') << std::endl;
 
-    // VSMC_RNG_U01_FIXED_POINT_TEST(
-    //     32, 32, float, Closed, Closed, closed, closed);
-    // VSMC_RNG_U01_FIXED_POINT_TEST(32, 32, float, Closed, Open, closed, open);
-    // VSMC_RNG_U01_FIXED_POINT_TEST(32, 32, float, Open, Closed, open, closed);
-    // VSMC_RNG_U01_FIXED_POINT_TEST(32, 32, float, Open, Open, open, open);
+    VSMC_RNG_U01_FIXED_POINT_TEST(
+        32, 32, float, Closed, Closed, closed, closed);
+    VSMC_RNG_U01_FIXED_POINT_TEST(32, 32, float, Closed, Open, closed, open);
+    VSMC_RNG_U01_FIXED_POINT_TEST(32, 32, float, Open, Closed, open, closed);
+    VSMC_RNG_U01_FIXED_POINT_TEST(32, 32, float, Open, Open, open, open);
 
-    // VSMC_RNG_U01_FIXED_POINT_TEST(
-    //     64, 32, float, Closed, Closed, closed, closed);
-    // VSMC_RNG_U01_FIXED_POINT_TEST(64, 32, float, Closed, Open, closed, open);
-    // VSMC_RNG_U01_FIXED_POINT_TEST(64, 32, float, Open, Closed, open, closed);
-    // VSMC_RNG_U01_FIXED_POINT_TEST(64, 32, float, Open, Open, open, open);
+    VSMC_RNG_U01_FIXED_POINT_TEST(
+        64, 32, float, Closed, Closed, closed, closed);
+    VSMC_RNG_U01_FIXED_POINT_TEST(64, 32, float, Closed, Open, closed, open);
+    VSMC_RNG_U01_FIXED_POINT_TEST(64, 32, float, Open, Closed, open, closed);
+    VSMC_RNG_U01_FIXED_POINT_TEST(64, 32, float, Open, Open, open, open);
 
-    // VSMC_RNG_U01_FIXED_POINT_TEST(
-    //     32, 64, double, Closed, Closed, closed, closed);
-    // VSMC_RNG_U01_FIXED_POINT_TEST(32, 64, double, Closed, Open, closed, open);
-    // VSMC_RNG_U01_FIXED_POINT_TEST(32, 64, double, Open, Closed, open, closed);
-    // VSMC_RNG_U01_FIXED_POINT_TEST(32, 64, double, Open, Open, open, open);
+    VSMC_RNG_U01_FIXED_POINT_TEST(
+        32, 64, double, Closed, Closed, closed, closed);
+    VSMC_RNG_U01_FIXED_POINT_TEST(32, 64, double, Closed, Open, closed, open);
+    VSMC_RNG_U01_FIXED_POINT_TEST(32, 64, double, Open, Closed, open, closed);
+    VSMC_RNG_U01_FIXED_POINT_TEST(32, 64, double, Open, Open, open, open);
 
-    // VSMC_RNG_U01_FIXED_POINT_TEST(
-    //     64, 64, double, Closed, Closed, closed, closed);
-    // VSMC_RNG_U01_FIXED_POINT_TEST(64, 64, double, Closed, Open, closed, open);
-    // VSMC_RNG_U01_FIXED_POINT_TEST(64, 64, double, Open, Closed, open, closed);
-    // VSMC_RNG_U01_FIXED_POINT_TEST(64, 64, double, Open, Open, open, open);
+    VSMC_RNG_U01_FIXED_POINT_TEST(
+        64, 64, double, Closed, Closed, closed, closed);
+    VSMC_RNG_U01_FIXED_POINT_TEST(64, 64, double, Closed, Open, closed, open);
+    VSMC_RNG_U01_FIXED_POINT_TEST(64, 64, double, Open, Closed, open, closed);
+    VSMC_RNG_U01_FIXED_POINT_TEST(64, 64, double, Open, Open, open, open);
 
     return 0;
 }

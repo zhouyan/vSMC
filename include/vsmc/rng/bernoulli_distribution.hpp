@@ -68,7 +68,7 @@ class BernoulliDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01CODistribution<double> runif;
+        U01Distribution<double> runif;
         double u = runif(rng);
 
         return generate(u, param.p(), static_cast<result_type *>(nullptr));
@@ -91,7 +91,7 @@ inline void bernoulli_distribution_impl(
     RNGType &rng, std::size_t n, IntType *r, double p)
 {
     double u[K];
-    u01_co_distribution(rng, n, u);
+    u01_distribution(rng, n, u);
     std::memset(r, 0, sizeof(IntType) * n);
     for (std::size_t i = 0; i != n; ++i)
         if (u[i] < p)

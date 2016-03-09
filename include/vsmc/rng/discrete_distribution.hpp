@@ -254,7 +254,7 @@ class DiscreteDistribution
         using value_type =
             typename std::iterator_traits<InputIter>::value_type;
 
-        U01CODistribution<value_type> runif;
+        U01Distribution<value_type> runif;
         value_type u = runif(rng);
 
         if (!normalized) {

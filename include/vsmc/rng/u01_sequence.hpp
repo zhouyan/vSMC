@@ -160,7 +160,7 @@ class U01SequenceSorted
     result_type u_;
     result_type lmax_;
     RNGType &rng_;
-    U01OODistribution<double> runif_;
+    U01Distribution<double> runif_;
 }; // U01SequenceSorted
 
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
@@ -209,7 +209,7 @@ class U01SequenceStratified
     result_type u_;
     result_type delta_;
     RNGType &rng_;
-    U01CODistribution<double> runif_;
+    U01Distribution<double> runif_;
 }; // class U01SequenceStratified
 
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
@@ -231,7 +231,7 @@ class U01SequenceSystematic
     U01SequenceSystematic(std::size_t N, RNGType &rng)
         : N_(N), n_(N), u_(0), u0_(0), delta_(1 / static_cast<result_type>(N))
     {
-        U01CODistribution<double> runif;
+        U01Distribution<double> runif;
         u0_ = runif(rng) * delta_;
     }
 
