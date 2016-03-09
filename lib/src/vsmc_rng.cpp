@@ -201,10 +201,6 @@ void vsmc_rng_normal_mv(vsmc_rng *rng_ptr, int n, double *r, int dim,
 }
 
 VSMC_DEFINE_RNG_DIST_0(u01)
-VSMC_DEFINE_RNG_DIST_0(u01_cc)
-VSMC_DEFINE_RNG_DIST_0(u01_co)
-VSMC_DEFINE_RNG_DIST_0(u01_oc)
-VSMC_DEFINE_RNG_DIST_0(u01_oo)
 VSMC_DEFINE_RNG_DIST_1(chi_squared)
 VSMC_DEFINE_RNG_DIST_1(exponential)
 VSMC_DEFINE_RNG_DIST_1(rayleigh)
@@ -221,10 +217,6 @@ VSMC_DEFINE_RNG_DIST_2(lognormal)
 VSMC_DEFINE_RNG_DIST_2(normal)
 VSMC_DEFINE_RNG_DIST_2(pareto)
 VSMC_DEFINE_RNG_DIST_2(uniform_real)
-VSMC_DEFINE_RNG_DIST_2(uniform_real_cc)
-VSMC_DEFINE_RNG_DIST_2(uniform_real_co)
-VSMC_DEFINE_RNG_DIST_2(uniform_real_oc)
-VSMC_DEFINE_RNG_DIST_2(uniform_real_oo)
 VSMC_DEFINE_RNG_DIST_2(weibull)
 
 int vsmc_random_walk(vsmc_rng *rng_ptr, int dim, double *x, double *ltx,

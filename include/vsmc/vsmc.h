@@ -164,36 +164,8 @@ void vsmc_rng_student_t(vsmc_rng *rng_ptr, int n, double *r, double df);
 /// \brief `vsmc::U01Distribution<double>`
 void vsmc_rng_u01(vsmc_rng *rng_ptr, int n, double *r);
 
-/// \brief `vsmc::U01CCDistribution<double>`
-void vsmc_rng_u01_cc(vsmc_rng *rng_ptr, int n, double *r);
-
-/// \brief `vsmc::U01CODistribution<double>`
-void vsmc_rng_u01_co(vsmc_rng *rng_ptr, int n, double *r);
-
-/// \brief `vsmc::U01OCDistribution<double>`
-void vsmc_rng_u01_oc(vsmc_rng *rng_ptr, int n, double *r);
-
-/// \brief `vsmc::U01OODistribution<double>`
-void vsmc_rng_u01_oo(vsmc_rng *rng_ptr, int n, double *r);
-
 /// \brief `vsmc::UniformRealDistribution<double>`
 void vsmc_rng_uniform_real(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
-
-/// \brief `vsmc::UniformRealCCDistribution<double>`
-void vsmc_rng_uniform_real_cc(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
-
-/// \brief `vsmc::UniformRealCODistribution<double>`
-void vsmc_rng_uniform_real_co(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
-
-/// \brief `vsmc::UniformRealOCDistribution<double>`
-void vsmc_rng_uniform_real_oc(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
-
-/// \brief `vsmc::UniformRealOODistribution<double>`
-void vsmc_rng_uniform_real_oo(
     vsmc_rng *rng_ptr, int n, double *r, double a, double b);
 
 /// \brief `vsmc::WeibullDistribution<double>`
