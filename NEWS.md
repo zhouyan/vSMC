@@ -25,6 +25,16 @@
 
 * `AlignedAllocator` template parameter `Memory` now requires its member
   functions to be static and the class stateless.
+* `U01Distribution` now produce random numbers in interval (0, 1] if the
+  unsigned integer results from the RNG has more bits than the significant bits
+  of the floating point types. Otherwise it produce random numbers in (0, 1).
+  This behavior affect all distributions. But it shall not be visible within
+  user program.
+* `U01CCDistribution`, `UniformRealCCDistributions`, etc., are removed. The
+  functionally of generating fixed point random numbers within interval [0, 1]
+  is preserved through `U01FixedPoint`, which convert a random unsigned integer
+  to floating points numbers within desired ranges. It is extended to support
+  all unsigned integer types and floating points types.
 
 # Changes since v2.0.0
 
