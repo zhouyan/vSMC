@@ -33,6 +33,8 @@
 
 int main()
 {
+    std::cout << std::string(80, '=') << std::endl;
+
     VSMC_RNG_U01_TEST(32, 32, float, Closed, Closed, closed, closed, false);
     VSMC_RNG_U01_TEST(32, 32, float, Closed, Open, closed, open, true);
     VSMC_RNG_U01_TEST(32, 32, float, Open, Closed, open, closed, true);

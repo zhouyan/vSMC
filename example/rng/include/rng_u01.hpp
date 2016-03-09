@@ -51,12 +51,67 @@
                 break;                                                        \
             }                                                                 \
         }                                                                     \
-        std::cout << std::left << std::setw(40)                               \
+        std::cout << std::left << std::setw(47)                               \
                   << "U01<uint" #ubits "_t, " #RealType ", " #L ", " #R ">";  \
         std::cout << (test ? "Passed" : "Failed");                            \
         if (!test && !pass)                                                   \
             std::cout << " (expected)";                                       \
         std::cout << std::endl;                                               \
+        rng_u01_bounds<std::uint##ubits##_t, RealType, vsmc::L, vsmc::R>();   \
     }
+
+template <typename UIntType, typename RealType, typename Left, typename Right>
+inline void rng_u01_bounds()
+{
+    std::cout.precision(16);
+
+    RealType x = vsmc::U01<UIntType, RealType, Left, Right>::eval(
+        std::numeric_limits<UIntType>::max() / 2);
+    RealType y = vsmc::U01<UIntType, RealType, Left, Right>::eval(
+        std::numeric_limits<UIntType>::max() / 2 + 1);
+    std::cout << "Interval: " << std::setw(37) << std::left << (y - x)
+              << (!vsmc::internal::is_equal(x, y) ? "Passed" : "Failed")
+              << std::endl;
+
+    RealType l = vsmc::U01<UIntType, RealType, Left, Right>::eval(
+        std::numeric_limits<UIntType>::min());
+    bool lpass = false;
+    std::string lb;
+    if (l < static_cast<RealType>(0)) {
+        lb = "< 0";
+    } else if (l > static_cast<RealType>(0)) {
+        lb = "Open";
+        if (std::is_same<Left, vsmc::Open>::value)
+            lpass = true;
+    } else {
+        lb = "Closed";
+        if (std::is_same<Left, vsmc::Closed>::value)
+            lpass = true;
+    }
+    std::cout << (lpass ? "Passed" : "Failed")
+              << "; Left bound:  " << std::setw(25) << std::left << l << ' '
+              << lb << std::endl;
+
+    RealType r = vsmc::U01<UIntType, RealType, Left, Right>::eval(
+        std::numeric_limits<UIntType>::max());
+    bool rpass = false;
+    std::string rb;
+    if (r > static_cast<RealType>(1)) {
+        rb = "> 1";
+    } else if (r < static_cast<RealType>(1)) {
+        rb = "Open";
+        if (std::is_same<Right, vsmc::Open>::value)
+            rpass = true;
+    } else {
+        rb = "Closed";
+        if (std::is_same<Right, vsmc::Closed>::value)
+            rpass = true;
+    }
+    std::cout << (rpass ? "Passed" : "Failed")
+              << "; Right bound: " << std::setw(25) << std::left << r << ' '
+              << rb << std::endl;
+
+    std::cout << std::string(80, '-') << std::endl;
+}
 
 #endif // VSMC_EXAMPLE_RNG_U01_HPP
