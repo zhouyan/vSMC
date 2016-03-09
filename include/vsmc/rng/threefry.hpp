@@ -303,19 +303,19 @@ class ThreefryInsertKey<T, 4, N, true>
 /// \ingroup Threefry
 template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
-class ThreefryGeneratorGeneric
+class ThreefryGenerator
 {
     static_assert(std::is_unsigned<ResultType>::value,
-        "**ThreefryGeneratorGeneric** USED WITH ResultType OTHER THAN "
-        "UNSIGNED INTEGER TYPES");
+        "**ThreefryGenerator** USED WITH ResultType OTHER THAN UNSIGNED "
+        "INTEGER TYPES");
 
     static_assert(sizeof(ResultType) == sizeof(std::uint32_t) ||
             sizeof(ResultType) == sizeof(std::uint64_t),
-        "**ThreefryGeneratorGeneric** USED WITH ResultType OF SIZE OTHER THAN "
-        "32 OR 64 BITS");
+        "**ThreefryGenerator** USED WITH ResultType OF SIZE OTHER THAN 32 OR "
+        "64 BITS");
 
     static_assert(K == 2 || K == 4,
-        "**ThreefryGeneratorGeneric** USED WITH K OTHER THAN 2 OR 4");
+        "**ThreefryGenerator** USED WITH K OTHER THAN 2 OR 4");
 
     public:
     using result_type = ResultType;
@@ -366,14 +366,13 @@ class ThreefryGeneratorGeneric
         generate<N + 1>(
             state, par, std::integral_constant < bool, N<Rounds>());
     }
-}; // class ThreefryGeneratorGeneric
+}; // class ThreefryGenerator
 
 /// \brief Threefry RNG engine
 /// \ingroup Threefry
 template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
-using ThreefryEngine =
-    CounterEngine<ThreefryGeneratorGeneric<ResultType, K, Rounds>>;
+using ThreefryEngine = CounterEngine<ThreefryGenerator<ResultType, K, Rounds>>;
 
 /// \brief Threefry2x32 RNG engine
 /// \ingroup Threefry
