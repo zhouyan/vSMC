@@ -88,12 +88,24 @@ class U01Impl<UIntType, RealType, Closed, Closed>
         static constexpr int w = std::numeric_limits<UIntType>::digits;
         static constexpr int m = std::numeric_limits<RealType>::digits;
         static constexpr int p = w - 1 < m ? w - 1 : m;
-        static constexpr int r = w - 1 - p;
+        static constexpr int v = p + 1;
+        static constexpr int l = v < w ? 1 : 0;
+        static constexpr int r = v < w ? w - 1 - v : 0;
 
-        u >>= r;
-
-        return (static_cast<RealType>(u & 1) + static_cast<RealType>(u)) *
+        return trans((u << l) >> (r + l),
+                   std::integral_constant<bool, (v < w)>()) *
             U01ImplPow2Inv<RealType, p + 1>::value;
+    }
+
+    private:
+    static RealType trans(UIntType u, std::true_type)
+    {
+        return static_cast<RealType>((u & 1) + u);
+    }
+
+    static RealType trans(UIntType u, std::false_type)
+    {
+        return static_cast<RealType>(u & 1) + static_cast<RealType>(u);
     }
 }; // class U01Impl
 

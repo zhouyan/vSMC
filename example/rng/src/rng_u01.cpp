@@ -35,25 +35,25 @@ int main()
 {
     std::cout << std::string(80, '=') << std::endl;
 
-    VSMC_RNG_U01_TEST(32, 32, float, Closed, Closed, closed, closed, false);
-    VSMC_RNG_U01_TEST(32, 32, float, Closed, Open, closed, open, true);
-    VSMC_RNG_U01_TEST(32, 32, float, Open, Closed, open, closed, true);
-    VSMC_RNG_U01_TEST(32, 32, float, Open, Open, open, open, true);
+    VSMC_RNG_U01_TEST(32, 32, float, Closed, Closed, closed, closed);
+    // VSMC_RNG_U01_TEST(32, 32, float, Closed, Open, closed, open);
+    // VSMC_RNG_U01_TEST(32, 32, float, Open, Closed, open, closed);
+    // VSMC_RNG_U01_TEST(32, 32, float, Open, Open, open, open);
 
-    VSMC_RNG_U01_TEST(64, 32, float, Closed, Closed, closed, closed, false);
-    VSMC_RNG_U01_TEST(64, 32, float, Closed, Open, closed, open, true);
-    VSMC_RNG_U01_TEST(64, 32, float, Open, Closed, open, closed, true);
-    VSMC_RNG_U01_TEST(64, 32, float, Open, Open, open, open, true);
+    VSMC_RNG_U01_TEST(64, 32, float, Closed, Closed, closed, closed);
+    // VSMC_RNG_U01_TEST(64, 32, float, Closed, Open, closed, open);
+    // VSMC_RNG_U01_TEST(64, 32, float, Open, Closed, open, closed);
+    // VSMC_RNG_U01_TEST(64, 32, float, Open, Open, open, open);
 
-    VSMC_RNG_U01_TEST(32, 64, double, Closed, Closed, closed, closed, true);
-    VSMC_RNG_U01_TEST(32, 64, double, Closed, Open, closed, open, true);
-    VSMC_RNG_U01_TEST(32, 64, double, Open, Closed, open, closed, true);
-    VSMC_RNG_U01_TEST(32, 64, double, Open, Open, open, open, true);
+    VSMC_RNG_U01_TEST(32, 64, double, Closed, Closed, closed, closed);
+    // VSMC_RNG_U01_TEST(32, 64, double, Closed, Open, closed, open);
+    // VSMC_RNG_U01_TEST(32, 64, double, Open, Closed, open, closed);
+    // VSMC_RNG_U01_TEST(32, 64, double, Open, Open, open, open);
 
-    VSMC_RNG_U01_TEST(64, 64, double, Closed, Closed, closed, closed, false);
-    VSMC_RNG_U01_TEST(64, 64, double, Closed, Open, closed, open, true);
-    VSMC_RNG_U01_TEST(64, 64, double, Open, Closed, open, closed, true);
-    VSMC_RNG_U01_TEST(64, 64, double, Open, Open, open, open, true);
+    VSMC_RNG_U01_TEST(64, 64, double, Closed, Closed, closed, closed);
+    // VSMC_RNG_U01_TEST(64, 64, double, Closed, Open, closed, open);
+    // VSMC_RNG_U01_TEST(64, 64, double, Open, Closed, open, closed);
+    // VSMC_RNG_U01_TEST(64, 64, double, Open, Open, open, open);
 
     return 0;
 }
