@@ -76,6 +76,30 @@ class U01ImplPow2Inv
         static_cast<RealType>(U01ImplPow2InvL<P>::value);
 }; // class U01ImplPow2Inv
 
+} // namespace vsmc::internal
+
+template <typename UIntType, typename RealType>
+class U01
+{
+    static_assert(std::is_unsigned<UIntType>::value,
+        "**U01** USED WITH UIntType OTHER THAN UNSIGNED INTEGER TYPES");
+    static_assert(std::is_floating_point<RealType>::value,
+        "**U01** USED WITH RealType OTHER THAN FLOATING POINT TYPES");
+
+    public:
+    static RealType eval(UIntType u)
+    {
+        static constexpr int p = std::numeric_limits<UIntType>::digits;
+
+        return static_cast<RealType>(u) *
+            internal::U01ImplPow2Inv<RealType, p>::value +
+            internal::U01ImplPow2Inv<RealType, p + 1>::value;
+    }
+}; // class U01
+
+namespace internal
+{
+
 template <typename, typename, typename, typename>
 class U01FixedPointImpl;
 
@@ -172,25 +196,6 @@ class U01FixedPoint
         "**U01FixedPoint** USED WITH RealType OTHER THAN FLOATING POINT "
         "TYPES");
 }; // class U01FixedPoint
-
-template <typename UIntType, typename RealType>
-class U01
-{
-    static_assert(std::is_unsigned<UIntType>::value,
-        "**U01** USED WITH UIntType OTHER THAN UNSIGNED INTEGER TYPES");
-    static_assert(std::is_floating_point<RealType>::value,
-        "**U01** USED WITH RealType OTHER THAN FLOATING POINT TYPES");
-
-    public:
-    static RealType eval(UIntType u)
-    {
-        static constexpr int p = std::numeric_limits<UIntType>::digits;
-
-        return static_cast<RealType>(u) *
-            internal::U01ImplPow2Inv<RealType, p>::value +
-            internal::U01ImplPow2Inv<RealType, p + 1>::value;
-    }
-}; // class U01
 
 } // namespace vsmc
 

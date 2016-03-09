@@ -36,6 +36,12 @@
 #include <vsmc/rng/u01.hpp>
 #include <vsmc/rngc/u01.h>
 
+#define VSMC_RNG_U01_TEST(ubits, RealType)                                    \
+    {                                                                         \
+        std::cout << "U01<uint" #ubits "_t, " #RealType ">" << std::endl;     \
+        rng_u01<std::uint##ubits##_t, RealType>();                            \
+    }
+
 #define VSMC_RNG_U01_FIXED_POINT_TEST(ubits, fbits, RealType, L, R, l, r)     \
     {                                                                         \
         const std::size_t n = 100000000;                                      \
@@ -56,12 +62,42 @@
                      ", " #R ">";                                             \
         std::cout << (pass ? "Passed" : "Failed");                            \
         std::cout << std::endl;                                               \
-        rng_u01_fixed_point_bounds<std::uint##ubits##_t, RealType, vsmc::L,   \
+        rng_u01_fixed_point<std::uint##ubits##_t, RealType, vsmc::L,          \
             vsmc::R>();                                                       \
     }
 
+template <typename UIntType, typename RealType>
+inline void rng_u01()
+{
+    RealType l = vsmc::U01<UIntType, RealType>::eval(
+        std::numeric_limits<UIntType>::min());
+    std::string lb;
+    if (l < static_cast<RealType>(0))
+        lb = "< 0";
+    else if (l > static_cast<RealType>(0))
+        lb = "Open";
+    else
+        lb = "Closed";
+    std::cout << "Left bound:  " << std::setw(25) << std::left << l << ' '
+              << lb << std::endl;
+
+    RealType r = vsmc::U01<UIntType, RealType>::eval(
+        std::numeric_limits<UIntType>::max());
+    std::string rb;
+    if (r > static_cast<RealType>(1))
+        rb = "> 1";
+    else if (r < static_cast<RealType>(1))
+        rb = "Open";
+    else
+        rb = "Closed";
+    std::cout << "Right bound: " << std::setw(25) << std::left << r << ' '
+              << rb << std::endl;
+
+    std::cout << std::string(80, '-') << std::endl;
+}
+
 template <typename UIntType, typename RealType, typename Left, typename Right>
-inline void rng_u01_fixed_point_bounds()
+inline void rng_u01_fixed_point()
 {
     std::cout.precision(16);
 
