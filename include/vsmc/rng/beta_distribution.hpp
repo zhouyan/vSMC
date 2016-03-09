@@ -224,7 +224,7 @@ class BetaDistribution
     result_type generate_as(RNGType &rng, const param_type &,
         const internal::BetaDistributionConstant<RealType> &)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
         result_type u = runif(rng);
         u = std::sin(
             -const_pi_by2<result_type>() + const_pi<result_type>() * u);
@@ -237,7 +237,7 @@ class BetaDistribution
     result_type generate_11(RNGType &rng, const param_type &,
         const internal::BetaDistributionConstant<RealType> &)
     {
-        U01OODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
 
         return runif(rng);
     }
@@ -246,7 +246,7 @@ class BetaDistribution
     result_type generate_1x(RNGType &rng, const param_type &,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01OODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
 
         return 1 - std::exp(constant.b * std::log(runif(rng)));
     }
@@ -255,7 +255,7 @@ class BetaDistribution
     result_type generate_x1(RNGType &rng, const param_type &,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01OODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
 
         return std::exp(constant.a * std::log(runif(rng)));
     }
@@ -264,7 +264,7 @@ class BetaDistribution
     result_type generate_c(RNGType &rng, const param_type &param,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
         const result_type ln_4 = 2 * const_ln_2<result_type>();
         result_type x = 0;
         result_type y = 0;
@@ -288,7 +288,7 @@ class BetaDistribution
     result_type generate_j(RNGType &rng, const param_type &,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
         result_type x = 0;
         result_type y = 0;
         do {
@@ -303,7 +303,7 @@ class BetaDistribution
     result_type generate_a1(RNGType &rng, const param_type &param,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
         while (true) {
             result_type u = runif(rng);
             result_type e = -std::log(runif(rng));
@@ -327,7 +327,7 @@ class BetaDistribution
     result_type generate_a2(RNGType &rng, const param_type &param,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
         while (true) {
             result_type u = runif(rng);
             result_type e = -std::log(runif(rng));
@@ -351,7 +351,7 @@ class BetaDistribution
     result_type generate_a3(RNGType &rng, const param_type &param,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
         while (true) {
             result_type u = runif(rng);
             result_type e = -std::log(runif(rng));
@@ -380,7 +380,7 @@ inline std::size_t beta_distribution_impl_as(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType,
     const BetaDistributionConstant<RealType> &)
 {
-    u01_oo_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     fma(n, const_pi<RealType>(), r, -const_pi_by2<RealType>(), r);
     sin(n, r, r);
     fma(n, static_cast<RealType>(0.5), r, static_cast<RealType>(0.5), r);
@@ -393,7 +393,7 @@ inline std::size_t beta_distribution_impl_11(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType,
     const BetaDistributionConstant<RealType> &)
 {
-    u01_oo_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
 
     return n;
 }
@@ -403,7 +403,7 @@ inline std::size_t beta_distribution_impl_1x(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType,
     const BetaDistributionConstant<RealType> &constant)
 {
-    u01_oo_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     log(n, r, r);
     mul(n, constant.b, r, r);
     exp(n, r, r);
@@ -417,7 +417,7 @@ inline std::size_t beta_distribution_impl_x1(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType,
     const BetaDistributionConstant<RealType> &constant)
 {
-    u01_oo_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     log(n, r, r);
     mul(n, constant.a, r, r);
     exp(n, r, r);
@@ -441,7 +441,7 @@ inline std::size_t beta_distribution_impl_c(RNGType &rng, std::size_t n,
     RealType *const v = s + n * 2;
     RealType *const x = s + n * 3;
     RealType *const y = s + n * 4;
-    u01_co_distribution(rng, n * 2, s);
+    u01_distribution(rng, n * 2, s);
     sub(n, static_cast<RealType>(1), u1, v);
     div(n, u1, v, v);
     log(n, v, v);
@@ -477,7 +477,7 @@ inline std::size_t beta_distribution_impl_j(RNGType &rng, std::size_t n,
     RealType *const x = s;
     RealType *const y = s + n;
     RealType *const u = s + n * 2;
-    u01_co_distribution(rng, n * 2, s);
+    u01_distribution(rng, n * 2, s);
     pow(n, x, a, x);
     pow(n, y, b, y);
     add(n, x, y, u);

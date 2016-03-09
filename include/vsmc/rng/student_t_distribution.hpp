@@ -62,7 +62,7 @@ class StudentTDistribution
     public:
     result_type min() const
     {
-        return -std::numeric_limits<result_type>::max();
+        return std::numeric_limits<result_type>::lowest();
     }
 
     result_type max() const { return std::numeric_limits<result_type>::max(); }

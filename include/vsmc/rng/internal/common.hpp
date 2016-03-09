@@ -489,11 +489,11 @@ class RayleighDistribution;
 template <typename = double>
 class StudentTDistribution;
 
-template <typename = double, typename = Closed, typename = Open>
-class U01LRDistribution;
+template <typename = double>
+class U01Distribution;
 
-template <typename = double, typename = Closed, typename = Open>
-class UniformRealLRDistribution;
+template <typename = double>
+class UniformRealDistribution;
 
 template <typename = double>
 class WeibullDistribution;
@@ -574,14 +574,13 @@ template <typename RealType, typename RNGType>
 inline void rng_rand(
     RNGType &, StudentTDistribution<RealType> &, std::size_t, RealType *);
 
-template <typename RealType, typename RNGType, typename Left, typename Right>
-inline void rng_rand(RNGType &, U01LRDistribution<RealType, Left, Right> &,
-    std::size_t, RealType *);
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, U01Distribution<RealType> &, std::size_t, RealType *);
 
-template <typename RealType, typename RNGType, typename Left, typename Right>
-inline void rng_rand(RNGType &,
-    UniformRealLRDistribution<RealType, Left, Right> &, std::size_t,
-    RealType *);
+template <typename RealType, typename RNGType>
+inline void rng_rand(
+    RNGType &, UniformRealDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
 inline void rng_rand(
@@ -661,14 +660,14 @@ template <typename RealType, typename Left, typename Right, typename RNGType>
 inline void u01_distribution(RNGType &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void u01_lr_distribution(RNGType &, std::size_t, RealType *);
+inline void u01_distribution(RNGType &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
 inline void uniform_real_distribution(
     RNGType &, std::size_t, RealType *, RealType, RealType);
 
 template <typename RealType, typename Left, typename Right, typename RNGType>
-inline void uniform_real_lr_distribution(
+inline void uniform_real_distribution(
     RNGType &, std::size_t, RealType *, RealType, RealType);
 
 template <typename RealType, typename RNGType>

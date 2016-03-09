@@ -61,7 +61,7 @@ class NormalDistribution
     public:
     result_type min() const
     {
-        return -std::numeric_limits<result_type>::max();
+        return std::numeric_limits<result_type>::lowest();
     }
 
     result_type max() const { return std::numeric_limits<result_type>::max(); }
@@ -140,7 +140,7 @@ class NormalDistribution
             z = v_;
             saved_ = false;
         } else {
-            U01OCDistribution<RealType> runif;
+            U01Distribution<RealType> runif;
             result_type u1 = std::sqrt(-2 * std::log(runif(rng)));
             result_type u2 = const_pi_2<result_type>() * runif(rng);
             z = u1 * std::cos(u2);
@@ -163,7 +163,7 @@ inline void normal_distribution_impl(
     const std::size_t nu = n / 2;
     RealType *const u1 = r;
     RealType *const u2 = r + nu;
-    u01_oc_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     log(nu, u1, s);
     mul(nu, static_cast<RealType>(-2), s, s);
     sqrt(nu, s, s);
@@ -189,7 +189,7 @@ inline void normal_distribution(
         internal::normal_distribution_impl<k>(rng, k, r, mean, stddev);
     internal::normal_distribution_impl<k>(rng, l, r, mean, stddev);
     if (n % 2 != 0) {
-        U01OCDistribution<RealType> runif;
+        U01Distribution<RealType> runif;
         RealType u = runif(rng);
         RealType v = runif(rng);
         r[l - 1] = mean +

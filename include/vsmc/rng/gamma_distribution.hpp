@@ -158,7 +158,7 @@ class GammaDistribution
     result_type generate_t(RNGType &rng, const param_type &param,
         const internal::GammaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
         while (true) {
             result_type u = runif(rng);
             result_type e = -std::log(runif(rng));
@@ -177,7 +177,7 @@ class GammaDistribution
     result_type generate_w(RNGType &rng, const param_type &,
         const internal::GammaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
         result_type u = 0;
         result_type e = 0;
         result_type r = 0;
@@ -194,7 +194,7 @@ class GammaDistribution
     result_type generate_n(RNGType &rng, const param_type &,
         const internal::GammaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
         NormalDistribution<RealType> rnorm(0, 1);
         while (true) {
             result_type u = runif(rng);
@@ -221,7 +221,7 @@ class GammaDistribution
     result_type generate_e(RNGType &rng, const param_type &,
         const internal::GammaDistributionConstant<RealType> &)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
 
         return -std::log(runif(rng));
     }
@@ -242,7 +242,7 @@ inline std::size_t gamma_distribution_impl_t(RNGType &rng, std::size_t n,
     RealType *const e = s + n;
     RealType *const x = s + n * 2;
 
-    u01_co_distribution(rng, n * 2, s);
+    u01_distribution(rng, n * 2, s);
     log(n, e, e);
     mul(n, static_cast<RealType>(-1), e, e);
     for (std::size_t i = 0; i != n; ++i) {
@@ -278,7 +278,7 @@ inline std::size_t gamma_distribution_impl_w(RNGType &rng, std::size_t n,
     RealType *const e = s + n;
     RealType *const x = s + n * 2;
 
-    u01_co_distribution(rng, n * 2, s);
+    u01_distribution(rng, n * 2, s);
     log(n * 2, s, s);
     mul(n * 2, static_cast<RealType>(-1), s, s);
     log(n, s, x);
@@ -310,7 +310,7 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
     RealType *const w = s + n * 3;
     RealType *const x = s + n * 4;
 
-    u01_co_distribution(rng, n, u);
+    u01_distribution(rng, n, u);
     normal_distribution(
         rng, n, w, static_cast<RealType>(0), static_cast<RealType>(1));
     fma(n, c, w, static_cast<RealType>(1), v);
@@ -349,7 +349,7 @@ inline std::size_t gamma_distribution_impl_e(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType beta,
     const GammaDistributionConstant<RealType> &)
 {
-    u01_co_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     log(n, r, r);
     mul(n, -beta, r, r);
 

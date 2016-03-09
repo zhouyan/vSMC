@@ -69,7 +69,7 @@ class ParetoDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01OCDistribution<RealType> runif;
+        U01Distribution<RealType> runif;
 
         return param.b() * std::exp(-std::log(runif(rng)) / param.a());
     }

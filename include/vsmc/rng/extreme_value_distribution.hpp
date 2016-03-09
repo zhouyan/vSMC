@@ -61,7 +61,7 @@ class ExtremeValueDistribution
     public:
     result_type min() const
     {
-        return -std::numeric_limits<result_type>::max();
+        return std::numeric_limits<result_type>::lowest();
     }
 
     result_type max() const { return std::numeric_limits<result_type>::max(); }
@@ -72,7 +72,7 @@ class ExtremeValueDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01OODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
 
         return param.a() - param.b() * std::log(-std::log(runif(rng)));
     }
@@ -85,7 +85,7 @@ template <typename RealType, typename RNGType>
 inline void extreme_value_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    u01_oo_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     log(n, r, r);
     mul(n, static_cast<RealType>(-1), r, r);
     log(n, r, r);

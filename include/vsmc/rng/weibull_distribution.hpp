@@ -70,7 +70,7 @@ class WeibullDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01OODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
 
         return param.b() *
             std::exp((1 / param.a()) * std::log(-std::log(runif(rng))));
@@ -84,7 +84,7 @@ template <typename RealType, typename RNGType>
 inline void weibull_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    u01_oo_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     log(n, r, r);
     if (is_equal<RealType>(a, 1)) {
         mul(n, -b, r, r);

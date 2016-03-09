@@ -69,7 +69,7 @@ class ExponentialDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01OCDistribution<RealType> runif;
+        U01Distribution<RealType> runif;
 
         return -std::log(runif(rng)) / param.lambda();
     }
@@ -82,7 +82,7 @@ template <typename RealType, typename RNGType>
 inline void exponential_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType lambda)
 {
-    u01_oc_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     log(n, r, r);
     mul(n, -1 / lambda, r, r);
 }

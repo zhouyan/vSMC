@@ -37,10 +37,6 @@ int main(int argc, char **argv)
     vsmc::Vector<std::array<double, 2>> params;
     params.push_back({{0.0, 1.0}});
     VSMC_RNG_DIST_TEST(2, UniformReal, std::uniform_real_distribution);
-    VSMC_RNG_DIST_TEST(2, UniformRealCC, vsmc::UniformRealCCDistribution);
-    VSMC_RNG_DIST_TEST(2, UniformRealCO, vsmc::UniformRealCODistribution);
-    VSMC_RNG_DIST_TEST(2, UniformRealOC, vsmc::UniformRealOCDistribution);
-    VSMC_RNG_DIST_TEST(2, UniformRealOO, vsmc::UniformRealOODistribution);
 
     return 0;
 }

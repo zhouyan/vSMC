@@ -61,7 +61,7 @@ class LogisticDistribution
     public:
     result_type min() const
     {
-        return -std::numeric_limits<result_type>::max();
+        return std::numeric_limits<result_type>::lowest();
     }
 
     result_type max() const { return std::numeric_limits<result_type>::max(); }
@@ -72,7 +72,7 @@ class LogisticDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01OODistribution<RealType> runif;
+        U01Distribution<RealType> runif;
         result_type u = runif(rng);
 
         return param.a() + param.b() * std::log(u / (1 - u));
@@ -87,7 +87,7 @@ inline void logistic_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     RealType s[K];
-    u01_oo_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     sub(n, static_cast<RealType>(1), r, s);
     div(n, r, s, r);
     log(n, r, r);

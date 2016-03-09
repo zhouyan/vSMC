@@ -43,25 +43,20 @@
 namespace vsmc
 {
 
-/// \brief Uniform real distribution with open/closed variants
+/// \brief Uniform real distribution
 /// \ingroup Distribution
-///
-/// \tparam RealType The floating points type of results
-/// \tparam Left Shall the left side of the interval be Open or Closed
-/// \tparam Right Shall the right side of the interval be Open or Closed
-template <typename RealType, typename Left, typename Right>
-class UniformRealLRDistribution
+template <typename RealType>
+class UniformRealDistribution
 {
     public:
     using result_type = RealType;
-    using distribution_type = UniformRealLRDistribution<RealType, Left, Right>;
+    using distribution_type = UniformRealDistribution<RealType>;
 
     class param_type
     {
         public:
         using result_type = RealType;
-        using distribution_type =
-            UniformRealLRDistribution<RealType, Left, Right>;
+        using distribution_type = UniformRealDistribution<RealType>;
 
         param_type(result_type a, result_type b) : a_(a), b_(b)
         {
@@ -137,12 +132,12 @@ class UniformRealLRDistribution
         void reset() {}
     }; // class param_type
 
-    explicit UniformRealLRDistribution(result_type a = 0, result_type b = 1)
+    explicit UniformRealDistribution(result_type a = 0, result_type b = 1)
         : param_(a, b)
     {
     }
 
-    explicit UniformRealLRDistribution(const param_type &param) : param_(param)
+    explicit UniformRealDistribution(const param_type &param) : param_(param)
     {
     }
 
@@ -165,7 +160,7 @@ class UniformRealLRDistribution
     template <typename RNGType>
     result_type operator()(RNGType &rng, const param_type &param)
     {
-        U01LRDistribution<RealType, Left, Right> u01;
+        U01Distribution<RealType> u01;
 
         return param.a() + (param.b() - param.a()) * u01(rng);
     }
@@ -180,52 +175,23 @@ class UniformRealLRDistribution
     void operator()(
         RNGType &rng, std::size_t n, result_type *r, const param_type &param)
     {
-        uniform_real_lr_distribution<RealType, Left, Right>(
-            rng, n, r, param.a(), param.b());
+        uniform_real_distribution<RealType>(rng, n, r, param.a(), param.b());
     }
 
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
 
     private:
     param_type param_;
-}; // class UniformRealLRDistribution
-
-/// \brief Uniform real distribution on cloed-closed interval
-/// \ingroup Distribution
-template <typename RealType = double>
-using UniformRealCCDistribution =
-    UniformRealLRDistribution<RealType, Closed, Closed>;
-
-/// \brief Uniform real distribution on cloed-open interval
-/// \ingroup Distribution
-template <typename RealType = double>
-using UniformRealOODistribution =
-    UniformRealLRDistribution<RealType, Open, Open>;
-
-/// \brief Uniform real distribution on open-closed interval
-/// \ingroup Distribution
-template <typename RealType = double>
-using UniformRealCODistribution =
-    UniformRealLRDistribution<RealType, Closed, Open>;
-
-/// \brief Uniform real distribution on open-open interval
-/// \ingroup Distribution
-template <typename RealType = double>
-using UniformRealOCDistribution =
-    UniformRealLRDistribution<RealType, Open, Closed>;
-
-/// \brief Uniform real distribution
-template <typename RealType = double>
-using UniformRealDistribution = UniformRealCODistribution<RealType>;
+}; // class UniformRealDistribution
 
 namespace internal
 {
 
-template <typename RealType, typename Left, typename Right, typename RNGType>
-inline void uniform_real_lr_distribution_impl(
+template <typename RealType, typename RNGType>
+inline void uniform_real_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    u01_lr_distribution<RealType, Left, Right>(rng, n, r);
+    u01_distribution<RealType>(rng, n, r);
     fma(n, (b - a), r, a, r);
 }
 
@@ -233,70 +199,24 @@ inline void uniform_real_lr_distribution_impl(
 
 /// \brief Generate uniform real random variates with open/closed variants
 /// \ingroup Distribution
-template <typename RealType, typename Left, typename Right, typename RNGType>
-inline void uniform_real_lr_distribution(
+template <typename RealType, typename RNGType>
+inline void uniform_real_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i) {
-        internal::uniform_real_lr_distribution_impl<RealType, Left, Right>(
+        internal::uniform_real_distribution_impl<RealType>(
             rng, k, r + i * k, a, b);
     }
-    internal::uniform_real_lr_distribution_impl<RealType, Left, Right>(
+    internal::uniform_real_distribution_impl<RealType>(
         rng, l, r + m * k, a, b);
 }
 
-/// \brief Generate uniform real random variates on closed-closed interval
-/// \ingroup Distribution
 template <typename RealType, typename RNGType>
-inline void uniform_real_cc_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    uniform_real_lr_distribution<RealType, Closed, Closed>(rng, n, r, a, b);
-}
-
-/// \brief Generate uniform real random variates on closed-open interval
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void uniform_real_co_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    uniform_real_lr_distribution<RealType, Closed, Open>(rng, n, r, a, b);
-}
-
-/// \brief Generate uniform real random variates on open-closed interval
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void uniform_real_oc_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    uniform_real_lr_distribution<RealType, Open, Closed>(rng, n, r, a, b);
-}
-
-/// \brief Generate uniform real random variates on open-open interval
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void uniform_real_oo_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    uniform_real_lr_distribution<RealType, Open, Open>(rng, n, r, a, b);
-}
-
-/// \brief Generate uniform real random variates
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void uniform_real_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    uniform_real_co_distribution(rng, n, r, a, b);
-}
-
-template <typename RealType, typename RNGType, typename Left, typename Right>
-inline void rng_rand(RNGType &rng,
-    UniformRealLRDistribution<RealType, Left, Right> &dist, std::size_t n,
-    RealType *r)
+inline void rng_rand(RNGType &rng, UniformRealDistribution<RealType> &dist,
+    std::size_t n, RealType *r)
 {
     dist(rng, n, r);
 }

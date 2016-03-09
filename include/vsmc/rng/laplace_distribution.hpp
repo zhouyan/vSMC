@@ -65,7 +65,7 @@ class LaplaceDistribution
     public:
     result_type min() const
     {
-        return -std::numeric_limits<result_type>::max();
+        return std::numeric_limits<result_type>::lowest();
     }
 
     result_type max() const { return std::numeric_limits<result_type>::max(); }
@@ -76,7 +76,7 @@ class LaplaceDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01OCDistribution<RealType> runif;
+        U01Distribution<RealType> runif;
         result_type u = runif(rng) - static_cast<result_type>(0.5);
 
         return u > 0 ? param.a() - param.b() * std::log(1 - 2 * u) :
@@ -92,7 +92,7 @@ inline void laplace_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     RealType s[K];
-    u01_oc_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     sub(n, r, static_cast<RealType>(0.5), r);
     for (std::size_t i = 0; i != n; ++i) {
         if (r[i] > 0) {

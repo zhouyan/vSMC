@@ -238,7 +238,7 @@ class NormalMVDistribution
 
     void min(result_type *x) const
     {
-        std::fill_n(x, dim(), -std::numeric_limits<result_type>::max());
+        std::fill_n(x, dim(), std::numeric_limits<result_type>::lowest());
     }
 
     void max(result_type *x) const

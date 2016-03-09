@@ -102,14 +102,6 @@ inline vsmc::Vector<RealType> rng_dist_partition_boost(
 template <typename RealType, typename DistType>
 inline vsmc::Vector<RealType> rng_dist_partition(std::size_t, DistType &);
 
-template <typename RealType, typename Left, typename Right>
-inline vsmc::Vector<RealType> rng_dist_partition(std::size_t n,
-    vsmc::UniformRealLRDistribution<RealType, Left, Right> &dist)
-{
-    return rng_dist_partition_quantile<RealType>(
-        n, [&](RealType p) { return dist.a() + p * (dist.b() - dist.a()); });
-}
-
 template <typename RealType>
 inline vsmc::Vector<RealType> rng_dist_partition(
     std::size_t n, vsmc::BetaDistribution<RealType> &dist)
@@ -242,6 +234,14 @@ inline vsmc::Vector<RealType> rng_dist_partition(
 {
     return rng_dist_partition_boost<RealType>(
         n, boost::math::students_t_distribution<RealType>(dist.n()));
+}
+
+template <typename RealType>
+inline vsmc::Vector<RealType> rng_dist_partition(
+    std::size_t n, vsmc::UniformRealDistribution<RealType> &dist)
+{
+    return rng_dist_partition_quantile<RealType>(
+        n, [&](RealType p) { return dist.a() + p * (dist.b() - dist.a()); });
 }
 
 template <typename RealType>
