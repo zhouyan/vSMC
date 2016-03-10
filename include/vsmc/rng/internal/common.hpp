@@ -492,6 +492,9 @@ class StudentTDistribution;
 template <typename = double>
 class U01Distribution;
 
+template <typename = double, typename = Open, typename = Closed>
+class U01LRDistribution;
+
 template <typename = double>
 class UniformRealDistribution;
 
@@ -578,6 +581,10 @@ template <typename RealType, typename RNGType>
 inline void rng_rand(
     RNGType &, U01Distribution<RealType> &, std::size_t, RealType *);
 
+template <typename RealType, typename RNGType, typename Left, typename Right>
+inline void rng_rand(RNGType &, U01LRDistribution<RealType, Left, Right> &,
+    std::size_t, RealType *);
+
 template <typename RealType, typename RNGType>
 inline void rng_rand(
     RNGType &, UniformRealDistribution<RealType> &, std::size_t, RealType *);
@@ -656,11 +663,11 @@ template <typename RealType, typename RNGType>
 inline void student_t_distribution(
     RNGType &, std::size_t, RealType *, RealType);
 
-template <typename RealType, typename Left, typename Right, typename RNGType>
-inline void u01_distribution(RNGType &, std::size_t, RealType *);
-
 template <typename RealType, typename RNGType>
 inline void u01_distribution(RNGType &, std::size_t, RealType *);
+
+template <typename, typename, typename RealType, typename RNGType>
+inline void u01_lr_distribution(RNGType &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
 inline void uniform_real_distribution(
