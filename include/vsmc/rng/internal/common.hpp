@@ -673,10 +673,6 @@ template <typename RealType, typename RNGType>
 inline void uniform_real_distribution(
     RNGType &, std::size_t, RealType *, RealType, RealType);
 
-template <typename RealType, typename Left, typename Right, typename RNGType>
-inline void uniform_real_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
 template <typename RealType, typename RNGType>
 inline void weibull_distribution(
     RNGType &, std::size_t, RealType *, RealType, RealType);
