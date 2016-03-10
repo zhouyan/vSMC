@@ -213,18 +213,24 @@ class MKLEngine
     public:
     using result_type = internal::MKLResultType<Bits>;
 
-    explicit MKLEngine(MKL_UINT s = 1) : index_(M_) { seed(s); }
+    explicit MKLEngine(MKL_UINT s = 1) : stream_(BRNG, 0), index_(M_)
+    {
+        seed(s);
+    }
 
     template <typename SeedSeq>
     explicit MKLEngine(SeedSeq &seq,
         typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
             MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
-        : index_(M_)
+        : stream_(BRNG, 0), index_(M_)
     {
         seed(seq);
     }
 
-    MKLEngine(MKL_UINT s, MKL_INT offset) { seed(s, offset); }
+    MKLEngine(MKL_UINT s, MKL_INT offset) : stream_(BRNG, 0), index_(M_)
+    {
+        seed(s, offset);
+    }
 
     void seed(MKL_UINT s) { seed(s, 0); }
 

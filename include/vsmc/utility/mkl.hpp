@@ -147,8 +147,6 @@ inline void swap(
 class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
 {
     public:
-    MKLStream() = default;
-
     /// \brief `vslNewStream`
     MKLStream(MKL_INT brng, MKL_UINT seed) { reset(brng, seed); }
 
@@ -710,8 +708,6 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
     public:
     using result_type = RealType;
 
-    MKLSSTask() = default;
-
     /// \brief `vslSSNewTask`
     MKLSSTask(const MKL_INT *p, const MKL_INT *n, const MKL_INT *xstorage,
         const result_type *x, const result_type *w, const MKL_INT *indices)
@@ -1254,8 +1250,6 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
     public:
     using result_type = ResultType;
 
-    MKLConvTask() = default;
-
     /// \brief `vslConvNewTask`
     MKLConvTask(MKL_INT mode, MKL_INT dims, const MKL_INT *xshape,
         const MKL_INT *yshape, const MKL_INT *zshape)
@@ -1579,8 +1573,6 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     public:
     using result_type = ResultType;
 
-    MKLCorrTask() = default;
-
     /// \brief `vslCorrNewTask`
     MKLCorrTask(MKL_INT mode, MKL_INT dims, const MKL_INT *xshape,
         const MKL_INT *yshape, const MKL_INT *zshape)
@@ -1901,8 +1893,6 @@ class MKLDFTask
 
     public:
     using result_type = RealType;
-
-    MKLDFTask() = default;
 
     MKLDFTask(MKL_INT nx, const result_type *x, MKL_INT xhint, MKL_INT ny,
         const result_type *y, MKL_INT yhint)
