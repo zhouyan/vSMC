@@ -78,6 +78,8 @@ class U01ImplPow2Inv
 
 } // namespace vsmc::internal
 
+/// \brief Convert uniform unsigned integers to floating points withinin [0, 1]
+/// \ingroup RNG
 template <typename UIntType, typename RealType>
 class U01
 {
@@ -96,6 +98,14 @@ class U01
             internal::U01ImplPow2Inv<RealType, p + 1>::value;
     }
 }; // class U01
+
+/// \brief Convert uniform unsigned integers to floating points withinin [0, 1]
+/// \ingroup RNG
+template <typename UIntType, typename RealType>
+RealType u01(UIntType u)
+{
+    return U01<UIntType, RealType>::eval(u);
+}
 
 namespace internal
 {
@@ -185,6 +195,8 @@ class U01FixedPointImpl<UIntType, RealType, Open, Open>
 
 } // namespace vsmc::internal
 
+/// \brief Convert uniform unsigned integers to floating points withinin [0, 1]
+/// \ingroup RNG
 template <typename UIntType, typename RealType, typename Left, typename Right>
 class U01FixedPoint
     : public internal::U01FixedPointImpl<UIntType, RealType, Left, Right>
@@ -196,6 +208,38 @@ class U01FixedPoint
         "**U01FixedPoint** USED WITH RealType OTHER THAN FLOATING POINT "
         "TYPES");
 }; // class U01FixedPoint
+
+/// \brief Convert uniform unsigned integers to floating points withinin [0, 1]
+/// \ingroup RNG
+template <typename UIntType, typename RealType>
+RealType u01_cc(UIntType)
+{
+    return U01FixedPoint<UIntType, RealType, Closed, Closed>::eval(u);
+}
+
+/// \brief Convert uniform unsigned integers to floating points withinin [0, 1)
+/// \ingroup RNG
+template <typename UIntType, typename RealType>
+RealType u01_co(UIntType)
+{
+    return U01FixedPoint<UIntType, RealType, Closed, Open>::eval(u);
+}
+
+/// \brief Convert uniform unsigned integers to floating points withinin (0, 1]
+/// \ingroup RNG
+template <typename UIntType, typename RealType>
+RealType u01_oc(UIntType)
+{
+    return U01FixedPoint<UIntType, RealType, Open, Closed>::eval(u);
+}
+
+/// \brief Convert uniform unsigned integers to floating points withinin (0, 1)
+/// \ingroup RNG
+template <typename UIntType, typename RealType>
+RealType u01_oo(UIntType)
+{
+    return U01FixedPoint<UIntType, RealType, Open, Open>::eval(u);
+}
 
 } // namespace vsmc
 
