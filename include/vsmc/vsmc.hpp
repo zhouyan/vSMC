@@ -119,14 +119,6 @@
 /// \defgroup RNGC Random number generating in C and OpenCL
 /// \brief Random number generating in C and OpenCL
 
-/// \defgroup GammaK1C GammaK1
-/// \ingroup RNGC
-/// \brief Generating Gamma(k, 1) random numbers
-
-/// \defgroup Normal01C Normal01
-/// \ingroup RNGC
-/// \brief Generating Normal(0, 1) random numbers
-
 /// \defgroup PhiloxC Philox
 /// \ingroup RNGC
 /// \brief Random number generating using Random123 Philox RNG
