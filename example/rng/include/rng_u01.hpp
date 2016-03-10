@@ -177,7 +177,7 @@ inline void rng_u01()
         vsmc::u01<UIntType, RealType>(std::numeric_limits<UIntType>::max()));
 
     bool pass = true;
-    std::size_t n = 1000000;
+    std::size_t n = 100000000;
     vsmc::ThreefryEngine<UIntType, 4> rng;
     for (std::size_t i = 0; i != n; ++i) {
         UIntType u = rng();
@@ -207,7 +207,7 @@ inline void rng_u01_lr()
         std::numeric_limits<UIntType>::max()));
 
     bool pass = true;
-    std::size_t n = 1000000;
+    std::size_t n = 100000000;
     vsmc::ThreefryEngine<UIntType, 4> rng;
     for (std::size_t i = 0; i != n; ++i) {
         UIntType u = rng();
