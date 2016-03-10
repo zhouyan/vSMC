@@ -78,7 +78,7 @@ class U01ImplPow2Inv
 
 } // namespace vsmc::internal
 
-/// \brief Convert uniform unsigned integers to floating points withinin [0, 1]
+/// \brief Convert uniform unsigned integers to floating points within [0, 1]
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
 RealType u01(UIntType u)
@@ -183,7 +183,7 @@ class U01LRImpl<UIntType, RealType, Open, Open>
 
 } // namespace vsmc::internal
 
-/// \brief Convert uniform unsigned integers to floating points withinin [0, 1]
+/// \brief Convert uniform unsigned integers to floating points within [0, 1]
 /// \ingroup RNG
 template <typename UIntType, typename RealType, typename Left, typename Right>
 RealType u01_lr(UIntType u)
@@ -198,7 +198,7 @@ RealType u01_lr(UIntType u)
     return internal::U01LRImpl<UIntType, RealType, Left, Right>::eval(u);
 }
 
-/// \brief Convert uniform unsigned integers to floating points withinin [0, 1]
+/// \brief Convert uniform unsigned integers to floating points on [0, 1]
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
 RealType u01_cc(UIntType u)
@@ -206,7 +206,7 @@ RealType u01_cc(UIntType u)
     return u01_lr<UIntType, RealType, Closed, Closed>(u);
 }
 
-/// \brief Convert uniform unsigned integers to floating points withinin [0, 1)
+/// \brief Convert uniform unsigned integers to floating points on [0, 1)
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
 RealType u01_co(UIntType u)
@@ -214,7 +214,7 @@ RealType u01_co(UIntType u)
     return u01_lr<UIntType, RealType, Closed, Open>(u);
 }
 
-/// \brief Convert uniform unsigned integers to floating points withinin (0, 1]
+/// \brief Convert uniform unsigned integers to floating points on (0, 1]
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
 RealType u01_oc(UIntType u)
@@ -222,7 +222,7 @@ RealType u01_oc(UIntType u)
     return u01_lr<UIntType, RealType, Open, Closed>(u);
 }
 
-/// \brief Convert uniform unsigned integers to floating points withinin (0, 1)
+/// \brief Convert uniform unsigned integers to floating points on (0, 1)
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
 RealType u01_oo(UIntType u)
