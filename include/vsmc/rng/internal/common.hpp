@@ -413,18 +413,8 @@ class NormalProposal;
 template <typename = double, std::size_t = Dynamic>
 class NormalMVProposal;
 
-template <typename Generator>
-inline void rng_rand(CounterEngine<Generator> &, std::size_t,
-    typename CounterEngine<Generator>::result_type *);
-
 template <typename = int>
 class BernoulliIntDistribution;
-
-template <typename = unsigned>
-class UniformBitsDistribution;
-
-template <typename = int>
-class DiscreteDistribution;
 
 template <typename = double>
 class BetaDistribution;
@@ -434,6 +424,9 @@ class CauchyDistribution;
 
 template <typename = double>
 class ChiSquaredDistribution;
+
+template <typename = int>
+class DiscreteDistribution;
 
 template <typename = double>
 class ExponentialDistribution;
@@ -480,19 +473,22 @@ class U01Distribution;
 template <typename = double, typename = Open, typename = Closed>
 class U01LRDistribution;
 
+template <typename = unsigned>
+class UniformBitsDistribution;
+
 template <typename = double>
 class UniformRealDistribution;
 
 template <typename = double>
 class WeibullDistribution;
 
+template <typename Generator>
+inline void rng_rand(CounterEngine<Generator> &, std::size_t,
+    typename CounterEngine<Generator>::result_type *);
+
 template <typename IntType, typename RNGType>
 inline void rng_rand(
     RNGType &, BernoulliIntDistribution<IntType> &, std::size_t, IntType *);
-
-template <typename UIntType, typename RNGType>
-inline void rng_rand(
-    RNGType &, UniformBitsDistribution<UIntType> &, std::size_t, UIntType *);
 
 template <typename RealType, typename RNGType>
 inline void rng_rand(
@@ -570,6 +566,10 @@ template <typename RealType, typename RNGType, typename Left, typename Right>
 inline void rng_rand(RNGType &, U01LRDistribution<RealType, Left, Right> &,
     std::size_t, RealType *);
 
+template <typename UIntType, typename RNGType>
+inline void rng_rand(
+    RNGType &, UniformBitsDistribution<UIntType> &, std::size_t, UIntType *);
+
 template <typename RealType, typename RNGType>
 inline void rng_rand(
     RNGType &, UniformRealDistribution<RealType> &, std::size_t, RealType *);
@@ -580,9 +580,6 @@ inline void rng_rand(
 
 template <typename IntType, typename RNGType>
 inline void bernoulli_distribution(RNGType &, std::size_t, IntType *, double);
-
-template <typename UIntType, typename RNGType>
-inline void uniform_bits_distribution(RNGType &, std::size_t, UIntType *);
 
 template <typename RealType, typename RNGType>
 inline void beta_distribution(
@@ -654,6 +651,9 @@ inline void u01_distribution(RNGType &, std::size_t, RealType *);
 template <typename, typename, typename RealType, typename RNGType>
 inline void u01_lr_distribution(RNGType &, std::size_t, RealType *);
 
+template <typename UIntType, typename RNGType>
+inline void uniform_bits_distribution(RNGType &, std::size_t, UIntType *);
+
 template <typename RealType, typename RNGType>
 inline void uniform_real_distribution(
     RNGType &, std::size_t, RealType *, RealType, RealType);
@@ -676,18 +676,60 @@ inline void bernoulli_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, MKL_INT *, double);
 
 template <MKL_INT BRNG, int Bits>
-inline void uniform_real_distribution(
+inline void beta_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
 
 template <MKL_INT BRNG, int Bits>
-inline void uniform_real_distribution(
+inline void beta_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
 
 template <MKL_INT BRNG, int Bits>
-inline void u01_distribution(MKLEngine<BRNG, Bits> &, std::size_t, float *);
+inline void cauchy_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
 
 template <MKL_INT BRNG, int Bits>
-inline void u01_distribution(MKLEngine<BRNG, Bits> &, std::size_t, double *);
+inline void cauchy_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+
+template <MKL_INT BRNG, int Bits>
+inline void exponential_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float);
+
+template <MKL_INT BRNG, int Bits>
+inline void exponential_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double);
+
+template <MKL_INT BRNG, int Bits>
+inline void extreme_value_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
+
+template <MKL_INT BRNG, int Bits>
+inline void extreme_value_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+
+template <MKL_INT BRNG, int Bits>
+inline void gamma_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
+
+template <MKL_INT BRNG, int Bits>
+inline void gamma_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+
+template <MKL_INT BRNG, int Bits>
+inline void laplace_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
+
+template <MKL_INT BRNG, int Bits>
+inline void laplace_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+
+template <MKL_INT BRNG, int Bits>
+inline void lognormal_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
+
+template <MKL_INT BRNG, int Bits>
+inline void lognormal_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
 
 template <MKL_INT BRNG, int Bits>
 inline void normal_distribution(
@@ -698,36 +740,12 @@ inline void normal_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *r, double, double);
 
 template <MKL_INT BRNG, int Bits>
-inline void exponential_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float);
+inline void normal_mv_distribution(MKLEngine<BRNG, Bits> &, std::size_t,
+    float *, std::size_t, const float *, const float *);
 
 template <MKL_INT BRNG, int Bits>
-inline void exponential_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void laplace_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void laplace_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void weibull_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void weibull_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void cauchy_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void cauchy_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+inline void normal_mv_distribution(MKLEngine<BRNG, Bits> &, std::size_t,
+    double *, std::size_t, const double *, const double *);
 
 template <MKL_INT BRNG, int Bits>
 inline void rayleigh_distribution(
@@ -738,35 +756,25 @@ inline void rayleigh_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double);
 
 template <MKL_INT BRNG, int Bits>
-inline void lognormal_distribution(
+inline void u01_distribution(MKLEngine<BRNG, Bits> &, std::size_t, float *);
+
+template <MKL_INT BRNG, int Bits>
+inline void u01_distribution(MKLEngine<BRNG, Bits> &, std::size_t, double *);
+
+template <MKL_INT BRNG, int Bits>
+inline void uniform_real_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
 
 template <MKL_INT BRNG, int Bits>
-inline void lognormal_distribution(
+inline void uniform_real_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
 
 template <MKL_INT BRNG, int Bits>
-inline void extreme_value_distribution(
+inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
 
 template <MKL_INT BRNG, int Bits>
-inline void extreme_value_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void gamma_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void gamma_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void beta_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void beta_distribution(
+inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
 
 #endif // VSMC_HAS_MKL

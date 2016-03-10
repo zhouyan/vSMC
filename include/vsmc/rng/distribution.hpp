@@ -52,6 +52,7 @@
 #include <vsmc/rng/rayleigh_distribution.hpp>
 #include <vsmc/rng/student_t_distribution.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
+#include <vsmc/rng/uniform_bits_distribution.hpp>
 #include <vsmc/rng/uniform_real_distribution.hpp>
 #include <vsmc/rng/weibull_distribution.hpp>
 
