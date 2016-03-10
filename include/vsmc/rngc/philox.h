@@ -84,7 +84,7 @@ typedef struct {
     uint32_t index;
 } vsmc_philox4x32;
 
-VSMC_STATIC_INLINE void vsmc_philox2x32_inc(vsmc_philox2x32_ctr_t *ctr)
+static inline void vsmc_philox2x32_inc(vsmc_philox2x32_ctr_t *ctr)
 {
     if (++ctr->v[0] != 0)
         return;
@@ -92,7 +92,7 @@ VSMC_STATIC_INLINE void vsmc_philox2x32_inc(vsmc_philox2x32_ctr_t *ctr)
         return;
 }
 
-VSMC_STATIC_INLINE void vsmc_philox4x32_inc(vsmc_philox4x32_ctr_t *ctr)
+static inline void vsmc_philox4x32_inc(vsmc_philox4x32_ctr_t *ctr)
 {
     if (++ctr->v[0] != 0)
         return;
@@ -104,31 +104,31 @@ VSMC_STATIC_INLINE void vsmc_philox4x32_inc(vsmc_philox4x32_ctr_t *ctr)
         return;
 }
 
-VSMC_STATIC_INLINE void vsmc_philox2x32_initpar(
+static inline void vsmc_philox2x32_initpar(
     const vsmc_philox2x32_key_t *key, vsmc_philox2x32_par_t *par)
 {
     par->v[0] = key->v[0];
 }
 
-VSMC_STATIC_INLINE void vsmc_philox4x32_initpar(
+static inline void vsmc_philox4x32_initpar(
     const vsmc_philox4x32_key_t *key, vsmc_philox4x32_par_t *par)
 {
     par->v[0] = key->v[0];
     par->v[1] = key->v[1];
 }
 
-VSMC_STATIC_INLINE void vsmc_philox2x32_bumpkey(vsmc_philox2x32_par_t *par)
+static inline void vsmc_philox2x32_bumpkey(vsmc_philox2x32_par_t *par)
 {
     par->v[0] += UINT32_C(0x9E3779B9);
 }
 
-VSMC_STATIC_INLINE void vsmc_philox4x32_bumpkey(vsmc_philox4x32_par_t *par)
+static inline void vsmc_philox4x32_bumpkey(vsmc_philox4x32_par_t *par)
 {
     par->v[0] += UINT32_C(0x9E3779B9);
     par->v[1] += UINT32_C(0xBB67AE85);
 }
 
-VSMC_STATIC_INLINE void vsmc_philox2x32_round(
+static inline void vsmc_philox2x32_round(
     vsmc_philox2x32_ctr_t *state, const vsmc_philox2x32_par_t *par)
 {
 #ifdef __cplusplus
@@ -145,7 +145,7 @@ VSMC_STATIC_INLINE void vsmc_philox2x32_round(
     state->v[1] = lo;
 }
 
-VSMC_STATIC_INLINE void vsmc_philox4x32_round(
+static inline void vsmc_philox4x32_round(
     vsmc_philox4x32_ctr_t *state, const vsmc_philox4x32_par_t *par)
 {
 #ifdef __cplusplus
@@ -173,7 +173,7 @@ VSMC_STATIC_INLINE void vsmc_philox4x32_round(
 
 /// \brief Generate Philox2x32 RNG state
 /// \ingroup PhiloxC
-VSMC_STATIC_INLINE void vsmc_philox2x32_gen(const vsmc_philox2x32_ctr_t *ctr,
+static inline void vsmc_philox2x32_gen(const vsmc_philox2x32_ctr_t *ctr,
     const vsmc_philox2x32_key_t *key, vsmc_philox2x32_ctr_t *state)
 {
     *state = *ctr;
@@ -203,7 +203,7 @@ VSMC_STATIC_INLINE void vsmc_philox2x32_gen(const vsmc_philox2x32_ctr_t *ctr,
 
 /// \brief Generate Philox4x32 RNG state
 /// \ingroup PhiloxC
-VSMC_STATIC_INLINE void vsmc_philox4x32_gen(const vsmc_philox4x32_ctr_t *ctr,
+static inline void vsmc_philox4x32_gen(const vsmc_philox4x32_ctr_t *ctr,
     const vsmc_philox4x32_key_t *key, vsmc_philox4x32_ctr_t *state)
 {
     *state = *ctr;
@@ -233,8 +233,7 @@ VSMC_STATIC_INLINE void vsmc_philox4x32_gen(const vsmc_philox4x32_ctr_t *ctr,
 
 /// \brief Initialize Philox2x32 RNG state
 /// \ingroup PhiloxC
-VSMC_STATIC_INLINE void vsmc_philox2x32_init(
-    vsmc_philox2x32 *rng, uint32_t seed)
+static inline void vsmc_philox2x32_init(vsmc_philox2x32 *rng, uint32_t seed)
 {
     rng->ctr.v[0] = 0;
     rng->ctr.v[1] = 0;
@@ -244,8 +243,7 @@ VSMC_STATIC_INLINE void vsmc_philox2x32_init(
 
 /// \brief Initialize Philox4x32 RNG state
 /// \ingroup PhiloxC
-VSMC_STATIC_INLINE void vsmc_philox4x32_init(
-    vsmc_philox4x32 *rng, uint32_t seed)
+static inline void vsmc_philox4x32_init(vsmc_philox4x32 *rng, uint32_t seed)
 {
     rng->ctr.v[0] = 0;
     rng->ctr.v[1] = 0;
@@ -258,7 +256,7 @@ VSMC_STATIC_INLINE void vsmc_philox4x32_init(
 
 /// \brief Generate random 32-bits integers from Philox2x32 RNG
 /// \ingroup PhiloxC
-VSMC_STATIC_INLINE uint32_t vsmc_philox2x32_rand(vsmc_philox2x32 *rng)
+static inline uint32_t vsmc_philox2x32_rand(vsmc_philox2x32 *rng)
 {
     if (rng->index == 2) {
         vsmc_philox2x32_inc(&rng->ctr);
@@ -271,7 +269,7 @@ VSMC_STATIC_INLINE uint32_t vsmc_philox2x32_rand(vsmc_philox2x32 *rng)
 
 /// \brief Generate random 32-bits integers from Philox4x32 RNG
 /// \ingroup PhiloxC
-VSMC_STATIC_INLINE uint32_t vsmc_philox4x32_rand(vsmc_philox4x32 *rng)
+static inline uint32_t vsmc_philox4x32_rand(vsmc_philox4x32 *rng)
 {
     if (rng->index == 4) {
         vsmc_philox4x32_inc(&rng->ctr);

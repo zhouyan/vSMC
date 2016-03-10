@@ -32,21 +32,13 @@
 #ifndef VSMC_INTERNAL_COMPILER_OPENCL_H
 #define VSMC_INTERNAL_COMPILER_OPENCL_H
 
-#ifndef VSMC_HAS_RNGC_DOUBLE
-#define VSMC_HAS_RNGC_DOUBLE 0
+#ifndef VSMC_HAS_OPENCL_DOUBLE
+#define VSMC_HAS_OPENCL_DOUBLE 0
 #endif
 
 typedef uint uint32_t;
 typedef ulong uint64_t;
 #define UINT32_C(x) ((uint32_t)(x##U))
 #define UINT64_C(x) ((uint64_t)(x##UL))
-
-#ifndef VSMC_STATIC_INLINE
-#if defined(__OPENCL_C_VERSION__) && __OPENCL_C_VERSION__ >= 120
-#define VSMC_STATIC_INLINE static inline
-#else
-#define VSMC_STATIC_INLINE inline
-#endif
-#endif
 
 #endif // VSMC_INTERNAL_COMPILER_OPENCL_H

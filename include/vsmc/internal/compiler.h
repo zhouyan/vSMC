@@ -91,22 +91,6 @@
 #error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
 #endif
 
-#ifndef VSMC_HAS_RNGC_DOUBLE
-#define VSMC_HAS_RNGC_DOUBLE 1
-#endif
-
-#ifndef VSMC_STATIC_INLINE
-#ifdef __cplusplus
-#define VSMC_STATIC_INLINE inline
-#else
-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-#define VSMC_STATIC_INLINE static inline
-#else
-#define VSMC_STATIC_INLINE static
-#endif
-#endif
-#endif
-
 #ifndef VSMC_INT64
 #define VSMC_INT64 long long
 #endif
