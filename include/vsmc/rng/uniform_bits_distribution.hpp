@@ -208,10 +208,11 @@ inline void uniform_bits_distribution_impl(RNGType &rng, std::size_t n,
     UIntType *r, std::false_type, std::integral_constant<bool, B1>,
     std::integral_constant<bool, B2>)
 {
-    for (std::size_t i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i) {
         r[i] =
             UniformBits<UIntType, std::numeric_limits<UIntType>::digits>::eval(
                 rng);
+    }
 }
 
 template <typename UIntType, typename RNGType>
@@ -232,10 +233,11 @@ inline void uniform_bits_distribution_impl(RNGType &rng, std::size_t n,
     rng_rand(rng, m, reinterpret_cast<typename RNGType::result_type *>(r));
     n -= m * k;
     r += m * k;
-    for (std::size_t i = 0; i != l; ++i)
+    for (std::size_t i = 0; i != l; ++i) {
         r[i] =
             UniformBits<UIntType, std::numeric_limits<UIntType>::digits>::eval(
                 rng);
+    }
 }
 
 template <typename UIntType, typename RNGType>
@@ -252,10 +254,11 @@ template <typename UIntType, typename RNGType>
 inline void uniform_bits_distribution_impl(RNGType &rng, std::size_t n,
     UIntType *r, std::true_type, std::false_type, std::false_type)
 {
-    for (std::size_t i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i) {
         r[i] =
             UniformBits<UIntType, std::numeric_limits<UIntType>::digits>::eval(
                 rng);
+    }
 }
 
 } // namespace vsmc::internal
@@ -263,9 +266,9 @@ inline void uniform_bits_distribution_impl(RNGType &rng, std::size_t n,
 template <typename UIntType, typename RNGType>
 inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
 {
-    const int mbits = internal::RNGMinBits<RNGType>::value;
-    const int rbits = internal::RNGBits<RNGType>::value;
-    const int ubits = std::numeric_limits<UIntType>::digits;
+    static constexpr int mbits = internal::RNGMinBits<RNGType>::value;
+    static constexpr int rbits = internal::RNGBits<RNGType>::value;
+    static constexpr int ubits = std::numeric_limits<UIntType>::digits;
     internal::uniform_bits_distribution_impl(rng, n, r,
         std::integral_constant<bool, mbits == 0>(),
         std::integral_constant < bool,
