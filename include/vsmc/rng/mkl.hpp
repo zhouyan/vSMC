@@ -458,13 +458,6 @@ inline void rng_rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
 }
 
 template <MKL_INT BRNG, int Bits>
-inline void bernoulli_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, int *r, double p)
-{
-    rng.stream().bernoulli(static_cast<MKL_INT>(n), r, p);
-}
-
-template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float alpha, float beta)
 {

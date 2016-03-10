@@ -413,9 +413,6 @@ class NormalProposal;
 template <typename = double, std::size_t = Dynamic>
 class NormalMVProposal;
 
-template <typename = int>
-class BernoulliIntDistribution;
-
 template <typename = double>
 class BetaDistribution;
 
@@ -485,10 +482,6 @@ class WeibullDistribution;
 template <typename Generator>
 inline void rng_rand(CounterEngine<Generator> &, std::size_t,
     typename CounterEngine<Generator>::result_type *);
-
-template <typename IntType, typename RNGType>
-inline void rng_rand(
-    RNGType &, BernoulliIntDistribution<IntType> &, std::size_t, IntType *);
 
 template <typename RealType, typename RNGType>
 inline void rng_rand(
@@ -577,9 +570,6 @@ inline void rng_rand(
 template <typename RealType, typename RNGType>
 inline void rng_rand(
     RNGType &, WeibullDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename IntType, typename RNGType>
-inline void bernoulli_distribution(RNGType &, std::size_t, IntType *, double);
 
 template <typename RealType, typename RNGType>
 inline void beta_distribution(
@@ -670,10 +660,6 @@ class MKLEngine;
 template <MKL_INT BRNG, int Bits>
 inline void rng_rand(MKLEngine<BRNG, Bits> &, std::size_t,
     typename MKLEngine<BRNG, Bits>::result_type *);
-
-template <MKL_INT BRNG, int Bits>
-inline void bernoulli_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, MKL_INT *, double);
 
 template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(
