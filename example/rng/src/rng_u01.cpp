@@ -33,56 +33,42 @@
 
 int main()
 {
-    VSMC_RNG_U01_TEST(32, float);
-    VSMC_RNG_U01_TEST(64, float);
-    VSMC_RNG_U01_TEST(32, double);
-    VSMC_RNG_U01_TEST(64, double);
-    VSMC_RNG_U01_TEST(32, long double);
-    VSMC_RNG_U01_TEST(64, long double);
+    rng_u01<std::uint32_t, float>();
+    rng_u01<std::uint64_t, float>();
+    rng_u01<std::uint32_t, double>();
+    rng_u01<std::uint64_t, double>();
+    rng_u01<std::uint32_t, long double>();
+    rng_u01<std::uint64_t, long double>();
 
-    std::cout << std::string(80, '=') << std::endl;
+    rng_u01_lr<std::uint32_t, float, vsmc::Closed, vsmc::Closed>();
+    rng_u01_lr<std::uint64_t, float, vsmc::Closed, vsmc::Closed>();
+    rng_u01_lr<std::uint32_t, double, vsmc::Closed, vsmc::Closed>();
+    rng_u01_lr<std::uint64_t, double, vsmc::Closed, vsmc::Closed>();
+    rng_u01_lr<std::uint32_t, long double, vsmc::Closed, vsmc::Closed>();
+    rng_u01_lr<std::uint64_t, long double, vsmc::Closed, vsmc::Closed>();
 
-    VSMC_RNG_U01_FIXED_POINT_TEST(
-        32, 32, float, Closed, Closed, closed, closed);
-    VSMC_RNG_U01_FIXED_POINT_TEST(32, 32, float, Closed, Open, closed, open);
-    VSMC_RNG_U01_FIXED_POINT_TEST(32, 32, float, Open, Closed, open, closed);
-    VSMC_RNG_U01_FIXED_POINT_TEST(32, 32, float, Open, Open, open, open);
+    rng_u01_lr<std::uint32_t, float, vsmc::Closed, vsmc::Open>();
+    rng_u01_lr<std::uint64_t, float, vsmc::Closed, vsmc::Open>();
+    rng_u01_lr<std::uint32_t, double, vsmc::Closed, vsmc::Open>();
+    rng_u01_lr<std::uint64_t, double, vsmc::Closed, vsmc::Open>();
+    rng_u01_lr<std::uint32_t, long double, vsmc::Closed, vsmc::Open>();
+    rng_u01_lr<std::uint64_t, long double, vsmc::Closed, vsmc::Open>();
 
-    VSMC_RNG_U01_FIXED_POINT_TEST(
-        64, 32, float, Closed, Closed, closed, closed);
-    VSMC_RNG_U01_FIXED_POINT_TEST(64, 32, float, Closed, Open, closed, open);
-    VSMC_RNG_U01_FIXED_POINT_TEST(64, 32, float, Open, Closed, open, closed);
-    VSMC_RNG_U01_FIXED_POINT_TEST(64, 32, float, Open, Open, open, open);
+    rng_u01_lr<std::uint32_t, float, vsmc::Open, vsmc::Closed>();
+    rng_u01_lr<std::uint64_t, float, vsmc::Open, vsmc::Closed>();
+    rng_u01_lr<std::uint32_t, double, vsmc::Open, vsmc::Closed>();
+    rng_u01_lr<std::uint64_t, double, vsmc::Open, vsmc::Closed>();
+    rng_u01_lr<std::uint32_t, long double, vsmc::Open, vsmc::Closed>();
+    rng_u01_lr<std::uint64_t, long double, vsmc::Open, vsmc::Closed>();
 
-    VSMC_RNG_U01_FIXED_POINT_TEST(
-        32, 64, double, Closed, Closed, closed, closed);
-    VSMC_RNG_U01_FIXED_POINT_TEST(32, 64, double, Closed, Open, closed, open);
-    VSMC_RNG_U01_FIXED_POINT_TEST(32, 64, double, Open, Closed, open, closed);
-    VSMC_RNG_U01_FIXED_POINT_TEST(32, 64, double, Open, Open, open, open);
+    rng_u01_lr<std::uint32_t, float, vsmc::Open, vsmc::Open>();
+    rng_u01_lr<std::uint64_t, float, vsmc::Open, vsmc::Open>();
+    rng_u01_lr<std::uint32_t, double, vsmc::Open, vsmc::Open>();
+    rng_u01_lr<std::uint64_t, double, vsmc::Open, vsmc::Open>();
+    rng_u01_lr<std::uint32_t, long double, vsmc::Open, vsmc::Open>();
+    rng_u01_lr<std::uint64_t, long double, vsmc::Open, vsmc::Open>();
 
-    VSMC_RNG_U01_FIXED_POINT_TEST(
-        64, 64, double, Closed, Closed, closed, closed);
-    VSMC_RNG_U01_FIXED_POINT_TEST(64, 64, double, Closed, Open, closed, open);
-    VSMC_RNG_U01_FIXED_POINT_TEST(64, 64, double, Open, Closed, open, closed);
-    VSMC_RNG_U01_FIXED_POINT_TEST(64, 64, double, Open, Open, open, open);
-
-#if VSMC_HAS_X86
-    VSMC_RNG_U01_FIXED_POINT_TEST(
-        32, 80, long double, Closed, Closed, closed, closed);
-    VSMC_RNG_U01_FIXED_POINT_TEST(
-        32, 80, long double, Closed, Open, closed, open);
-    VSMC_RNG_U01_FIXED_POINT_TEST(
-        32, 80, long double, Open, Closed, open, closed);
-    VSMC_RNG_U01_FIXED_POINT_TEST(32, 80, long double, Open, Open, open, open);
-
-    VSMC_RNG_U01_FIXED_POINT_TEST(
-        64, 80, long double, Closed, Closed, closed, closed);
-    VSMC_RNG_U01_FIXED_POINT_TEST(
-        64, 80, long double, Closed, Open, closed, open);
-    VSMC_RNG_U01_FIXED_POINT_TEST(
-        64, 80, long double, Open, Closed, open, closed);
-    VSMC_RNG_U01_FIXED_POINT_TEST(64, 80, long double, Open, Open, open, open);
-#endif // VSMC_HAS_X86
+    std::cout << std::string(50, '=') << std::endl;
 
     return 0;
 }
