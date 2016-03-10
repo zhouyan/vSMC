@@ -32,9 +32,9 @@
   user program.
 * `U01CCDistribution`, `UniformRealCCDistributions`, etc., are removed. The
   functionally of generating fixed point random numbers within interval [0, 1]
-  is preserved through `U01FixedPoint`, which convert a random unsigned integer
-  to floating points numbers within desired ranges. It is extended to support
-  all unsigned integer types and floating points types.
+  is preserved through `u01_lr`, etc., functions which convert a random
+  unsigned integer to floating points numbers within desired ranges. It is
+  extended to support all unsigned integer types and floating points types.
 
 # Changes since v2.0.0
 

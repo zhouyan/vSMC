@@ -97,7 +97,7 @@ class U01Distribution
                 std::uint64_t, std::uint32_t>::type;
         UniformBitsDistribution<uint_type> rbits;
 
-        return U01<uint_type, result_type>::eval(rbits(rng));
+        return u01<uint_type, result_type>(rbits(rng));
     }
 
     template <typename RNGType>
@@ -156,7 +156,7 @@ inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
     std::uint32_t s[K];
     uniform_bits_distribution(rng, n, s);
     for (std::size_t i = 0; i != n; ++i)
-        r[i] = U01<std::uint32_t, RealType>::eval(s[i]);
+        r[i] = u01<std::uint32_t, RealType>(s[i]);
 }
 
 } // namespace vsmc::internal

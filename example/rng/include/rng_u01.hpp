@@ -38,7 +38,7 @@
 
 #define VSMC_RNG_U01_TEST(ubits, RealType)                                    \
     {                                                                         \
-        std::cout << "U01<uint" #ubits "_t, " #RealType ">" << std::endl;     \
+        std::cout << "u01<uint" #ubits "_t, " #RealType ">" << std::endl;     \
         rng_u01<std::uint##ubits##_t, RealType>();                            \
     }
 
@@ -50,16 +50,16 @@
         for (std::size_t i = 0; i != n; ++i) {                                \
             std::uint##ubits##_t u = rng();                                   \
             RealType fc = vsmc_u01_##l##_##r##_u##ubits##_f##fbits(u);        \
-            RealType fcpp = vsmc::U01FixedPoint<std::uint##ubits##_t,         \
-                RealType, vsmc::L, vsmc::R>::eval(u);                         \
+            RealType fcpp = vsmc::u01_lr<std::uint##ubits##_t, RealType,      \
+                vsmc::L, vsmc::R>(u);                                         \
             if (!vsmc::internal::is_equal(fc, fcpp)) {                        \
                 pass = false;                                                 \
                 break;                                                        \
             }                                                                 \
         }                                                                     \
         std::cout << std::left << std::setw(54)                               \
-                  << "U01FixedPoint<uint" #ubits "_t, " #RealType ", " #L     \
-                     ", " #R ">";                                             \
+                  << "u01_lr<uint" #ubits "_t, " #RealType ", " #L ", " #R    \
+                     ">";                                                     \
         std::cout << (pass ? "Passed" : "Failed");                            \
         std::cout << std::endl;                                               \
         rng_u01_fixed_point<std::uint##ubits##_t, RealType, vsmc::L,          \
@@ -69,8 +69,8 @@
 template <typename UIntType, typename RealType>
 inline void rng_u01()
 {
-    RealType l = vsmc::U01<UIntType, RealType>::eval(
-        std::numeric_limits<UIntType>::min());
+    RealType l =
+        vsmc::u01<UIntType, RealType>(std::numeric_limits<UIntType>::min());
     std::string lb;
     if (l < static_cast<RealType>(0))
         lb = "< 0";
@@ -81,8 +81,8 @@ inline void rng_u01()
     std::cout << "Left bound:  " << std::setw(32) << std::left << l << ' '
               << lb << std::endl;
 
-    RealType r = vsmc::U01<UIntType, RealType>::eval(
-        std::numeric_limits<UIntType>::max());
+    RealType r =
+        vsmc::u01<UIntType, RealType>(std::numeric_limits<UIntType>::max());
     std::string rb;
     if (r > static_cast<RealType>(1))
         rb = "> 1";
@@ -101,7 +101,7 @@ inline void rng_u01_fixed_point()
 {
     std::cout.precision(20);
 
-    RealType l = vsmc::U01FixedPoint<UIntType, RealType, Left, Right>::eval(
+    RealType l = vsmc::u01_lr<UIntType, RealType, Left, Right>(
         std::numeric_limits<UIntType>::min());
     bool lpass = false;
     std::string lb;
@@ -120,7 +120,7 @@ inline void rng_u01_fixed_point()
               << "; Left bound:  " << std::setw(32) << std::left << l << ' '
               << lb << std::endl;
 
-    RealType r = vsmc::U01FixedPoint<UIntType, RealType, Left, Right>::eval(
+    RealType r = vsmc::u01_lr<UIntType, RealType, Left, Right>(
         std::numeric_limits<UIntType>::max());
     bool rpass = false;
     std::string rb;

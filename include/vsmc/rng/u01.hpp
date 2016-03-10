@@ -81,40 +81,28 @@ class U01ImplPow2Inv
 /// \brief Convert uniform unsigned integers to floating points withinin [0, 1]
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
-class U01
+RealType u01(UIntType u)
 {
     static_assert(std::is_unsigned<UIntType>::value,
         "**U01** USED WITH UIntType OTHER THAN UNSIGNED INTEGER TYPES");
     static_assert(std::is_floating_point<RealType>::value,
         "**U01** USED WITH RealType OTHER THAN FLOATING POINT TYPES");
 
-    public:
-    static RealType eval(UIntType u)
-    {
-        static constexpr int p = std::numeric_limits<UIntType>::digits;
+    static constexpr int p = std::numeric_limits<UIntType>::digits;
 
-        return static_cast<RealType>(u) *
-            internal::U01ImplPow2Inv<RealType, p>::value +
-            internal::U01ImplPow2Inv<RealType, p + 1>::value;
-    }
-}; // class U01
-
-/// \brief Convert uniform unsigned integers to floating points withinin [0, 1]
-/// \ingroup RNG
-template <typename UIntType, typename RealType>
-RealType u01(UIntType u)
-{
-    return U01<UIntType, RealType>::eval(u);
+    return static_cast<RealType>(u) *
+        internal::U01ImplPow2Inv<RealType, p>::value +
+        internal::U01ImplPow2Inv<RealType, p + 1>::value;
 }
 
 namespace internal
 {
 
 template <typename, typename, typename, typename>
-class U01FixedPointImpl;
+class U01LRImpl;
 
 template <typename UIntType, typename RealType>
-class U01FixedPointImpl<UIntType, RealType, Closed, Closed>
+class U01LRImpl<UIntType, RealType, Closed, Closed>
 {
     public:
     static RealType eval(UIntType u)
@@ -141,10 +129,10 @@ class U01FixedPointImpl<UIntType, RealType, Closed, Closed>
     {
         return static_cast<RealType>(u & 1) + static_cast<RealType>(u);
     }
-}; // class U01FixedPointImpl
+}; // class U01LRImpl
 
 template <typename UIntType, typename RealType>
-class U01FixedPointImpl<UIntType, RealType, Closed, Open>
+class U01LRImpl<UIntType, RealType, Closed, Open>
 {
     public:
     static RealType eval(UIntType u)
@@ -157,10 +145,10 @@ class U01FixedPointImpl<UIntType, RealType, Closed, Open>
         return static_cast<RealType>(u >> r) *
             U01ImplPow2Inv<RealType, p>::value;
     }
-}; // class U01FixedPointImpl
+}; // class U01LRImpl
 
 template <typename UIntType, typename RealType>
-class U01FixedPointImpl<UIntType, RealType, Open, Closed>
+class U01LRImpl<UIntType, RealType, Open, Closed>
 {
     public:
     static RealType eval(UIntType u)
@@ -174,10 +162,10 @@ class U01FixedPointImpl<UIntType, RealType, Open, Closed>
             U01ImplPow2Inv<RealType, p>::value +
             U01ImplPow2Inv<RealType, p>::value;
     }
-}; // class U01FixedPointImpl
+}; // class U01LRImpl
 
 template <typename UIntType, typename RealType>
-class U01FixedPointImpl<UIntType, RealType, Open, Open>
+class U01LRImpl<UIntType, RealType, Open, Open>
 {
     public:
     static RealType eval(UIntType u)
@@ -191,54 +179,55 @@ class U01FixedPointImpl<UIntType, RealType, Open, Open>
             U01ImplPow2Inv<RealType, p - 1>::value +
             U01ImplPow2Inv<RealType, p>::value;
     }
-}; // class U01FixedPointImpl
+}; // class U01LRImpl
 
 } // namespace vsmc::internal
 
 /// \brief Convert uniform unsigned integers to floating points withinin [0, 1]
 /// \ingroup RNG
 template <typename UIntType, typename RealType, typename Left, typename Right>
-class U01FixedPoint
-    : public internal::U01FixedPointImpl<UIntType, RealType, Left, Right>
+RealType u01_lr(UIntType u)
 {
     static_assert(std::is_unsigned<UIntType>::value,
-        "**U01FixedPoint** USED WITH UIntType OTHER THAN UNSIGNED INTEGER "
+        "**u01_lr** USED WITH UIntType OTHER THAN UNSIGNED INTEGER "
         "TYPES");
     static_assert(std::is_floating_point<RealType>::value,
-        "**U01FixedPoint** USED WITH RealType OTHER THAN FLOATING POINT "
+        "**u01_lr** USED WITH RealType OTHER THAN FLOATING POINT "
         "TYPES");
-}; // class U01FixedPoint
+
+    return internal::U01LRImpl<UIntType, RealType, Left, Right>::eval(u);
+}
 
 /// \brief Convert uniform unsigned integers to floating points withinin [0, 1]
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
-RealType u01_cc(UIntType)
+RealType u01_cc(UIntType u)
 {
-    return U01FixedPoint<UIntType, RealType, Closed, Closed>::eval(u);
+    return u01_lr<UIntType, RealType, Closed, Closed>(u);
 }
 
 /// \brief Convert uniform unsigned integers to floating points withinin [0, 1)
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
-RealType u01_co(UIntType)
+RealType u01_co(UIntType u)
 {
-    return U01FixedPoint<UIntType, RealType, Closed, Open>::eval(u);
+    return u01_lr<UIntType, RealType, Closed, Open>(u);
 }
 
 /// \brief Convert uniform unsigned integers to floating points withinin (0, 1]
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
-RealType u01_oc(UIntType)
+RealType u01_oc(UIntType u)
 {
-    return U01FixedPoint<UIntType, RealType, Open, Closed>::eval(u);
+    return u01_lr<UIntType, RealType, Open, Closed>(u);
 }
 
 /// \brief Convert uniform unsigned integers to floating points withinin (0, 1)
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
-RealType u01_oo(UIntType)
+RealType u01_oo(UIntType u)
 {
-    return U01FixedPoint<UIntType, RealType, Open, Open>::eval(u);
+    return u01_lr<UIntType, RealType, Open, Open>(u);
 }
 
 } // namespace vsmc
