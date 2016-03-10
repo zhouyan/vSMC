@@ -75,7 +75,7 @@ class CauchyDistribution
         U01Distribution<RealType> runif;
 
         return param.a() +
-            param.b() * std::tan(const_pi<result_type>() * runif(rng));
+            param.b() * std::tan(const_pi<result_type>() * (1 - runif(rng)));
     }
 }; // class CauchyDistribution
 
@@ -87,6 +87,7 @@ inline void cauchy_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     u01_distribution(rng, n, r);
+    sub(n, static_cast<RealType>(1), r, r);
     mul(n, const_pi<RealType>(), r, r);
     tan(n, r, r);
     for (std::size_t i = 0; i != n; ++i)
