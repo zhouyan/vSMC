@@ -58,9 +58,7 @@ inline bool laplace_distribution_check_param(RealType, RealType b)
 template <typename RealType>
 class LaplaceDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        Laplace, laplace, RealType, result_type, a, 0, result_type, b, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Laplace, laplace, a, 0, b, 1)
 
     public:
     result_type min() const
@@ -115,6 +113,10 @@ template <typename RealType, typename RNGType>
 inline void laplace_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
+    static_assert(std::is_floating_point<RealType>::value,
+        "**laplace_distribution** USED WITH RealType OTHER THAN FLOATING "
+        "POINT TYPES");
+
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
@@ -123,12 +125,7 @@ inline void laplace_distribution(
     internal::laplace_distribution_impl<k>(rng, l, r + m * k, a, b);
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, LaplaceDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Laplace, laplace, a, b)
 
 } // namespace vsmc
 

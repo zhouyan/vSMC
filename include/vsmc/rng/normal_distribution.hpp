@@ -55,10 +55,29 @@ inline bool normal_distribution_check_param(RealType, RealType stddev)
 template <typename RealType>
 class NormalDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        Normal, normal, RealType, result_type, mean, 0, result_type, stddev, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_2(
+        Normal, normal, mean, 0, stddev, 1)
 
     public:
+    using result_type = RealType;
+    using distribution_type = NormalDistribution<RealType>;
+
+    explicit NormalDistribution(result_type mean = 0, result_type stddev = 1)
+        : param_(mean, stddev), v_(0), saved_(false)
+    {
+        reset();
+    }
+
+    explicit NormalDistribution(const param_type &param)
+        : param_(param), v_(0), saved_(false)
+    {
+        reset();
+    }
+
+    result_type mean() const { return param_.mean(); }
+
+    result_type stddev() const { return param_.stddev(); }
+
     result_type min() const
     {
         return std::numeric_limits<result_type>::lowest();
@@ -70,6 +89,50 @@ class NormalDistribution
     {
         v_ = 0;
         saved_ = false;
+    }
+
+    const param_type &param() const { return param_; }
+
+    void param(const param_type &param)
+    {
+        param_ = param;
+        reset();
+    }
+
+    void pram(param_type &&param)
+    {
+        param_ = std::move(param);
+        reset();
+    }
+
+    template <typename RNGType>
+    result_type operator()(RNGType &rng)
+    {
+        return operator()(rng, param_);
+    }
+
+    template <typename RNGType>
+    result_type operator()(RNGType &rng, const param_type &param)
+    {
+        return generate(rng, param);
+    }
+
+    template <typename RNGType>
+    void operator()(RNGType &rng, std::size_t n, result_type *r)
+    {
+        operator()(rng, n, r, param_);
+    }
+
+    template <typename RNGType>
+    void operator()(
+        RNGType &rng, std::size_t n, result_type *r, const param_type &param)
+    {
+        if (n < 100) {
+            for (std::size_t i = 0; i != n; ++i)
+                r[i] = operator()(rng, param);
+        } else {
+            normal_distribution(rng, n, r, param);
+        }
     }
 
     friend bool operator==(
@@ -129,6 +192,7 @@ class NormalDistribution
     }
 
     private:
+    param_type param_;
     result_type v_;
     bool saved_;
 
@@ -182,6 +246,10 @@ template <typename RealType, typename RNGType>
 inline void normal_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType mean, RealType stddev)
 {
+    static_assert(std::is_floating_point<RealType>::value,
+        "**normal_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
@@ -198,12 +266,7 @@ inline void normal_distribution(
     }
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, NormalDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Normal, normal, mean, stddev)
 
 } // namespace vsmc
 

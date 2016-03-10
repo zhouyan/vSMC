@@ -101,102 +101,22 @@ class UniformBits
 template <typename UIntType>
 class UniformBitsDistribution
 {
+    VSMC_DEFINE_RNG_DISTRIBUTION_0(
+        UniformBits, uniform_bits, UIntType, unsigned, UNSIGNED)
+
     public:
-    using result_type = UIntType;
-    using distribution_type = UniformBitsDistribution<UIntType>;
-
-    class param_type
-    {
-        public:
-        using result_type = UIntType;
-        using distribution_type = UniformBitsDistribution<UIntType>;
-
-        friend bool operator==(const param_type &, const param_type &)
-        {
-            return true;
-        }
-
-        friend bool operator!=(const param_type &, const param_type &)
-        {
-            return false;
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_ostream<CharT, Traits> &operator<<(
-            std::basic_ostream<CharT, Traits> &os, const param_type &)
-        {
-            return os;
-        }
-
-        template <typename CharT, typename Traits>
-        friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, param_type &)
-        {
-            return is;
-        }
-    }; // class param_type
-
-    UniformBitsDistribution() {}
-    explicit UniformBitsDistribution(const param_type &) {}
-
     result_type min() const { return std::numeric_limits<result_type>::min(); }
 
     result_type max() const { return std::numeric_limits<result_type>::max(); }
 
     void reset() {}
 
+    private:
     template <typename RNGType>
-    result_type operator()(RNGType &rng)
+    result_type generate(RNGType &rng, const param_type &)
     {
         return internal::UniformBits<UIntType,
             std::numeric_limits<UIntType>::digits>::eval(rng);
-    }
-
-    template <typename RNGType>
-    result_type operator()(RNGType &rng, const param_type &)
-    {
-        return operator()(rng);
-    }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
-    {
-        uniform_bits_distribution(rng, n, r);
-    }
-
-    template <typename RNGType>
-    void operator()(
-        RNGType &rng, std::size_t n, result_type *r, const param_type &)
-    {
-        uniform_bits_distribution(rng, n, r);
-    }
-
-    friend bool operator==(const UniformBitsDistribution<UIntType> &,
-        const UniformBitsDistribution<UIntType> &)
-    {
-        return true;
-    }
-
-    friend bool operator!=(const UniformBitsDistribution<UIntType> &,
-        const UniformBitsDistribution<UIntType> &)
-    {
-        return false;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os,
-        const UniformBitsDistribution<UIntType> &)
-    {
-        return os;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is,
-        UniformBitsDistribution<UIntType> &)
-    {
-        return is;
     }
 }; // class UniformBitsDistribution
 
@@ -266,6 +186,10 @@ inline void uniform_bits_distribution_impl(RNGType &rng, std::size_t n,
 template <typename UIntType, typename RNGType>
 inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
 {
+    static_assert(std::is_unsigned<UIntType>::value,
+        "**uniform_bits_distribution** USED WITH UIntType OTHER THAN UNSIGNED "
+        "TYPES");
+
     static constexpr int mbits = internal::RNGMinBits<RNGType>::value;
     static constexpr int rbits = internal::RNGBits<RNGType>::value;
     static constexpr int ubits = std::numeric_limits<UIntType>::digits;
@@ -277,12 +201,7 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
         ubits >= rbits && ubits % rbits == 0 > ());
 }
 
-template <typename UIntType, typename RNGType>
-inline void rng_rand(RNGType &rng, UniformBitsDistribution<UIntType> &dist,
-    std::size_t n, UIntType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(UniformBits, uniform_bits, UIntType)
 
 } // namespace vsmc
 

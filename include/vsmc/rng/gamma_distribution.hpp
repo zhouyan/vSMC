@@ -105,9 +105,7 @@ class GammaDistributionConstant
 template <typename RealType>
 class GammaDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        Gamma, gamma, RealType, result_type, alpha, 1, result_type, beta, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Gamma, gamma, alpha, 1, beta, 1)
 
     public:
     result_type min() const { return 0; }
@@ -386,6 +384,10 @@ template <typename RealType, typename RNGType>
 inline void gamma_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType alpha, RealType beta)
 {
+    static_assert(std::is_floating_point<RealType>::value,
+        "**gamma_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
     const std::size_t k = 1000;
     const internal::GammaDistributionConstant<RealType> constant(alpha);
     while (n > k) {
@@ -407,12 +409,7 @@ inline void gamma_distribution(
     }
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, GammaDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Gamma, gamma, alpha, beta)
 
 } // namespace vsmc
 

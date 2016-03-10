@@ -54,9 +54,7 @@ inline bool fisher_f_distribution_check_param(RealType m, RealType n)
 template <typename RealType>
 class FisherFDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        FisherF, fisher_f, RealType, result_type, m, 1, result_type, n, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(FisherF, fisher_f, m, 1, n, 1)
 
     public:
     result_type min() const { return 0; }
@@ -110,6 +108,10 @@ template <typename RealType, typename RNGType>
 inline void fisher_f_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType df1, RealType df2)
 {
+    static_assert(std::is_floating_point<RealType>::value,
+        "**fisher_f_distribution** USED WITH RealType OTHER THAN FLOATING "
+        "POINT TYPES");
+
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
@@ -118,12 +120,7 @@ inline void fisher_f_distribution(
     internal::fisher_f_distribution_impl<k>(rng, l, r + m * k, df1, df2);
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, FisherFDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(FisherF, fisher_f, m, n)
 
 } // namespace vsmc
 

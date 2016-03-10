@@ -55,9 +55,7 @@ inline bool student_t_distribution_check_param(RealType n)
 template <typename RealType>
 class StudentTDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_1(
-        StudentT, student_t, RealType, result_type, n, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_1(StudentT, student_t, n, 1)
 
     public:
     result_type min() const
@@ -117,6 +115,10 @@ template <typename RealType, typename RNGType>
 inline void student_t_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType df)
 {
+    static_assert(std::is_floating_point<RealType>::value,
+        "**student_t_distribution** USED WITH RealType OTHER THAN FLOATING "
+        "POINT TYPES");
+
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
@@ -125,12 +127,7 @@ inline void student_t_distribution(
     internal::student_t_distribution_impl<k>(rng, l, r + m * k, df);
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, StudentTDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_1(StudentT, student_t, n)
 
 } // namespace vsmc
 

@@ -156,9 +156,7 @@ class BetaDistributionConstant
 template <typename RealType>
 class BetaDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        Beta, beta, RealType, result_type, alpha, 1, result_type, beta, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Beta, beta, alpha, 1, beta, 1)
 
     public:
     result_type min() const { return 0; }
@@ -557,6 +555,10 @@ template <typename RealType, typename RNGType>
 inline void beta_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType alpha, RealType beta)
 {
+    static_assert(std::is_floating_point<RealType>::value,
+        "**beta_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
     const std::size_t k = 1000;
     const internal::BetaDistributionConstant<RealType> constant(alpha, beta);
     while (n > k) {
@@ -578,12 +580,7 @@ inline void beta_distribution(
     }
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(
-    RNGType &rng, BetaDistribution<RealType> &dist, std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Beta, beta, alpha, beta)
 
 } // namespace vsmc
 

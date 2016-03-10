@@ -42,24 +42,62 @@
     VSMC_RUNTIME_ASSERT((flag),                                               \
         "**" #Name "Distribution** CONSTRUCTED WITH INVALID PARAMETERS")
 
-#define VSMC_DEFINE_RNG_DISTRIBUTION_1(Name, name, T, T1, p1, v1)             \
+#define VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_0(Name, T, t, Type)           \
     public:                                                                   \
-    using result_type = T;                                                    \
-    using distribution_type = Name##Distribution<T>;                          \
-                                                                              \
     class param_type                                                          \
     {                                                                         \
+        static_assert(std::is_##t<T>::value,                                  \
+            "**" #Name "Distribution::param_type** USED WITH " #T             \
+            " OTHER THAN " #Type " INTEGER TYPES");                           \
+                                                                              \
         public:                                                               \
         using result_type = T;                                                \
         using distribution_type = Name##Distribution<T>;                      \
                                                                               \
-        explicit param_type(T1 p1 = v1) : p1##_(p1)                           \
+        friend bool operator==(const param_type &, const param_type &)        \
+        {                                                                     \
+            return true;                                                      \
+        }                                                                     \
+                                                                              \
+        friend bool operator!=(const param_type &, const param_type &)        \
+        {                                                                     \
+            return false;                                                     \
+        }                                                                     \
+                                                                              \
+        template <typename CharT, typename Traits>                            \
+        friend std::basic_ostream<CharT, Traits> &operator<<(                 \
+            std::basic_ostream<CharT, Traits> &os, const param_type &)        \
+        {                                                                     \
+            return os;                                                        \
+        }                                                                     \
+                                                                              \
+        template <typename CharT, typename Traits>                            \
+        friend std::basic_istream<CharT, Traits> &operator>>(                 \
+            std::basic_istream<CharT, Traits> &is, param_type &)              \
+        {                                                                     \
+            return is;                                                        \
+        }                                                                     \
+    }; // class param_type
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_1(Name, name, p1, v1)         \
+    public:                                                                   \
+    class param_type                                                          \
+    {                                                                         \
+        static_assert(std::is_floating_point<RealType>::value,                \
+            "**" #Name "Distribution::param_type** USED WITH RealType OTHER " \
+            "THAN FLOATING POINT TYPES");                                     \
+                                                                              \
+        public:                                                               \
+        using result_type = RealType;                                         \
+        using distribution_type = Name##Distribution<RealType>;               \
+                                                                              \
+        explicit param_type(result_type p1 = v1) : p1##_(p1)                  \
         {                                                                     \
             VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(                       \
                 internal::name##_distribution_check_param(p1), Name);         \
         }                                                                     \
                                                                               \
-        T1 p1() const { return p1##_; }                                       \
+        result_type p1() const { return p1##_; }                              \
                                                                               \
         friend bool operator==(                                               \
             const param_type &param1, const param_type &param2)               \
@@ -94,7 +132,7 @@
             if (!is.good())                                                   \
                 return is;                                                    \
                                                                               \
-            T1 p1 = 0;                                                        \
+            result_type p1 = 0;                                               \
             is >> std::ws >> p1;                                              \
                                                                               \
             if (is.good()) {                                                  \
@@ -108,78 +146,30 @@
         }                                                                     \
                                                                               \
         private:                                                              \
-        T1 p1##_;                                                             \
-    };                                                                        \
-                                                                              \
-    explicit Name##Distribution(T1 p1 = v1) : param_(p1) { reset(); }         \
-                                                                              \
-    explicit Name##Distribution(const param_type &param) : param_(param)      \
-    {                                                                         \
-        reset();                                                              \
-    }                                                                         \
-                                                                              \
-    T1 p1() const { return param_.p1(); }                                     \
-                                                                              \
-    param_type param() const { return param_; }                               \
-                                                                              \
-    void param(const param_type &parm)                                        \
-    {                                                                         \
-        param_ = parm;                                                        \
-        reset();                                                              \
-    }                                                                         \
-                                                                              \
-    template <typename RNGType>                                               \
-    result_type operator()(RNGType &rng)                                      \
-    {                                                                         \
-        return operator()(rng, param_);                                       \
-    }                                                                         \
-                                                                              \
-    template <typename RNGType>                                               \
-    result_type operator()(RNGType &rng, const param_type &param)             \
-    {                                                                         \
-        return generate(rng, param);                                          \
-    }                                                                         \
-                                                                              \
-    template <typename RNGType>                                               \
-    void operator()(RNGType &rng, std::size_t n, result_type *r)              \
-    {                                                                         \
-        operator()(rng, n, r, param_);                                        \
-    }                                                                         \
-                                                                              \
-    template <typename RNGType>                                               \
-    void operator()(                                                          \
-        RNGType &rng, std::size_t n, result_type *r, const param_type &param) \
-    {                                                                         \
-        if (n < 100) {                                                        \
-            for (std::size_t i = 0; i != n; ++i)                              \
-                r[i] = operator()(rng, param);                                \
-        } else {                                                              \
-            name##_distribution(rng, n, r, param.p1());                       \
-        }                                                                     \
-    }                                                                         \
-                                                                              \
-    private:                                                                  \
-    param_type param_;
+        result_type p1##_;                                                    \
+    }; // class param_type
 
-#define VSMC_DEFINE_RNG_DISTRIBUTION_2(Name, name, T, T1, p1, v1, T2, p2, v2) \
+#define VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_2(Name, name, p1, v1, p2, v2) \
     public:                                                                   \
-    using result_type = T;                                                    \
-    using distribution_type = Name##Distribution<T>;                          \
-                                                                              \
     class param_type                                                          \
     {                                                                         \
-        public:                                                               \
-        using result_type = T;                                                \
-        using distribution_type = Name##Distribution<T>;                      \
+        static_assert(std::is_floating_point<RealType>::value,                \
+            "**" #Name "Distribution::param_type** USED WITH RealType OTHER " \
+            "THAN FLOATING POINT TYPES");                                     \
                                                                               \
-        explicit param_type(T1 p1 = v1, T2 p2 = v2) : p1##_(p1), p2##_(p2)    \
+        public:                                                               \
+        using result_type = RealType;                                         \
+        using distribution_type = Name##Distribution<RealType>;               \
+                                                                              \
+        explicit param_type(result_type p1 = v1, result_type p2 = v2)         \
+            : p1##_(p1), p2##_(p2)                                            \
         {                                                                     \
             VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(                       \
                 internal::name##_distribution_check_param(p1, p2), Name);     \
         }                                                                     \
                                                                               \
-        T1 p1() const { return p1##_; }                                       \
-        T2 p2() const { return p2##_; }                                       \
+        result_type p1() const { return p1##_; }                              \
+        result_type p2() const { return p2##_; }                              \
                                                                               \
         friend bool operator==(                                               \
             const param_type &param1, const param_type &param2)               \
@@ -217,8 +207,8 @@
             if (!is.good())                                                   \
                 return is;                                                    \
                                                                               \
-            T1 p1 = 0;                                                        \
-            T2 p2 = 0;                                                        \
+            result_type p1 = 0;                                               \
+            result_type p2 = 0;                                               \
             is >> std::ws >> p1;                                              \
             is >> std::ws >> p2;                                              \
                                                                               \
@@ -235,11 +225,24 @@
         }                                                                     \
                                                                               \
         private:                                                              \
-        T1 p1##_;                                                             \
-        T2 p2##_;                                                             \
-    };                                                                        \
+        result_type p1##_;                                                    \
+        result_type p2##_;                                                    \
+    }; // class param_type
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_0(Name, T)                   \
+    public:                                                                   \
+    using result_type = T;                                                    \
+    using distribution_type = Name##Distribution<T>;                          \
                                                                               \
-    explicit Name##Distribution(T1 p1 = v1, T2 p2 = v2) : param_(p1, p2)      \
+    Name##Distribution() = default;                                           \
+    explicit Name##Distribution(const param_type &) {}
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_1(Name, p1, v1)              \
+    public:                                                                   \
+    using result_type = RealType;                                             \
+    using distribution_type = Name##Distribution<RealType>;                   \
+                                                                              \
+    explicit Name##Distribution(result_type p1 = v1) : param_(p1)             \
     {                                                                         \
         reset();                                                              \
     }                                                                         \
@@ -249,14 +252,40 @@
         reset();                                                              \
     }                                                                         \
                                                                               \
-    T1 p1() const { return param_.p1(); }                                     \
-    T2 p2() const { return param_.p2(); }                                     \
+    result_type p1() const { return param_.p1(); }
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_2(Name, p1, v1, p2, v2)      \
+    public:                                                                   \
+    using result_type = RealType;                                             \
+    using distribution_type = Name##Distribution<RealType>;                   \
                                                                               \
-    param_type param() const { return param_; }                               \
-                                                                              \
-    void param(const param_type &parm)                                        \
+    explicit Name##Distribution(result_type p1 = v1, result_type p2 = v2)     \
+        : param_(p1, p2)                                                      \
     {                                                                         \
-        param_ = parm;                                                        \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    explicit Name##Distribution(const param_type &param) : param_(param)      \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    result_type p1() const { return param_.p1(); }                            \
+    result_type p2() const { return param_.p2(); }
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_OPERATOR(Name, name)                     \
+    public:                                                                   \
+    const param_type &param() const { return param_; }                        \
+                                                                              \
+    void param(const param_type &param)                                       \
+    {                                                                         \
+        param_ = param;                                                       \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    void pram(param_type &&param)                                             \
+    {                                                                         \
+        param_ = std::move(param);                                            \
         reset();                                                              \
     }                                                                         \
                                                                               \
@@ -286,15 +315,10 @@
             for (std::size_t i = 0; i != n; ++i)                              \
                 r[i] = operator()(rng, param);                                \
         } else {                                                              \
-            name##_distribution(rng, n, r, param.p1(), param.p2());           \
+            name##_distribution(rng, n, r, param);                            \
         }                                                                     \
     }                                                                         \
                                                                               \
-    private:                                                                  \
-    param_type param_;
-
-#define VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS                                \
-    public:                                                                   \
     friend bool operator==(                                                   \
         const distribution_type &dist1, const distribution_type &dist2)       \
     {                                                                         \
@@ -325,6 +349,69 @@
             dist.reset();                                                     \
                                                                               \
         return is;                                                            \
+    }                                                                         \
+                                                                              \
+    private:                                                                  \
+    param_type param_;
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_0(Name, name, T, t, Type)                \
+    VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_0(Name, T, t, Type)               \
+    VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_0(Name, T)                       \
+    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATOR(Name, name)
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_1(Name, name, p1, v1)                    \
+    VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_1(Name, name, p1, v1)             \
+    VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_1(Name, p1, v1)                  \
+    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATOR(Name, name)
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_2(Name, name, p1, v1, p2, v2)            \
+    VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_2(Name, name, p1, v1, p2, v2)     \
+    VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_2(Name, p1, v1, p2, v2)          \
+    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATOR(Name, name)
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(Name, name, T)                    \
+    template <typename T, typename RNGType>                                   \
+    inline void name##_distribution(RNGType &rng, std::size_t n, T *r,        \
+        const typename Name##Distribution<T>::param_type &)                   \
+    {                                                                         \
+        name##_distribution(rng, n, r);                                       \
+    }                                                                         \
+                                                                              \
+    template <typename T, typename RNGType>                                   \
+    inline void rng_rand(                                                     \
+        RNGType &rng, Name##Distribution<T> &dist, std::size_t n, T *r)       \
+    {                                                                         \
+        dist(rng, n, r);                                                      \
+    }
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_RAND_1(Name, name, p1)                   \
+    template <typename RealType, typename RNGType>                            \
+    inline void name##_distribution(RNGType &rng, std::size_t n, RealType *r, \
+        const typename Name##Distribution<RealType>::param_type &param)       \
+    {                                                                         \
+        name##_distribution(rng, n, r, param.p1());                           \
+    }                                                                         \
+                                                                              \
+    template <typename RealType, typename RNGType>                            \
+    inline void rng_rand(RNGType &rng, Name##Distribution<RealType> &dist,    \
+        std::size_t n, RealType *r)                                           \
+    {                                                                         \
+        dist(rng, n, r);                                                      \
+    }
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Name, name, p1, p2)               \
+    template <typename RealType, typename RNGType>                            \
+    inline void name##_distribution(RNGType &rng, std::size_t n, RealType *r, \
+        const typename Name##Distribution<RealType>::param_type &param)       \
+    {                                                                         \
+        name##_distribution(rng, n, r, param.p1(), param.p2());               \
+    }                                                                         \
+                                                                              \
+    template <typename RealType, typename RNGType>                            \
+    inline void rng_rand(RNGType &rng, Name##Distribution<RealType> &dist,    \
+        std::size_t n, RealType *r)                                           \
+    {                                                                         \
+        dist(rng, n, r);                                                      \
     }
 
 namespace vsmc

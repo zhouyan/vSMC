@@ -54,9 +54,7 @@ inline bool rayleigh_distribution_check_param(RealType sigma)
 template <typename RealType>
 class RayleighDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_1(
-        Rayleigh, rayleigh, RealType, result_type, sigma, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_1(Rayleigh, rayleigh, sigma, 1)
 
     public:
     result_type min() const { return 0; }
@@ -96,6 +94,10 @@ template <typename RealType, typename RNGType>
 inline void rayleigh_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType sigma)
 {
+    static_assert(std::is_floating_point<RealType>::value,
+        "**rayleigh_distribution** USED WITH RealType OTHER THAN FLOATING "
+        "POINT TYPES");
+
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
@@ -104,12 +106,7 @@ inline void rayleigh_distribution(
     internal::rayleigh_distribution_impl(rng, l, r + m * k, sigma);
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, RayleighDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_1(Rayleigh, rayleigh, sigma)
 
 } // namespace vsmc
 

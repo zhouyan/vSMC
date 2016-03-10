@@ -54,9 +54,7 @@ inline bool cauchy_distribution_check_param(RealType, RealType b)
 template <typename RealType>
 class CauchyDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        Cauchy, cauchy, RealType, result_type, a, 0, result_type, b, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Cauchy, cauchy, a, 0, b, 1)
 
     public:
     result_type min() const
@@ -102,6 +100,10 @@ template <typename RealType, typename RNGType>
 inline void cauchy_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
+    static_assert(std::is_floating_point<RealType>::value,
+        "**cauchy_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
@@ -110,12 +112,7 @@ inline void cauchy_distribution(
     internal::cauchy_distribution_impl(rng, l, r + m * k, a, b);
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, CauchyDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Cauchy, cauchy, a, b)
 
 } // namespace vsmc
 

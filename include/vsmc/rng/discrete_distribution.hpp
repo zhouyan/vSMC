@@ -286,7 +286,37 @@ class DiscreteDistribution
         return index - 1;
     }
 
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    friend bool operator==(
+        const distribution_type &dist1, const distribution_type &dist2)
+    {
+        return dist1.param_ == dist2.param_;
+    }
+
+    friend bool operator!=(
+        const distribution_type &dist1, const distribution_type &dist2)
+    {
+        return !(dist1 == dist2);
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os, const distribution_type &dist)
+    {
+        os << dist.param_;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is, distribution_type &dist)
+    {
+        is >> std::ws >> dist.param_;
+        if (is.good())
+            dist.reset();
+
+        return is;
+    }
 
     private:
     param_type param_;
