@@ -188,6 +188,8 @@ class NormalMVDistribution
         bool null_mean_;
         bool null_chol_;
 
+        friend distribution_type;
+
         void init(const result_type *mean, const result_type *chol)
         {
             if (mean == nullptr)
@@ -334,7 +336,7 @@ class NormalMVDistribution
     template <typename RNGType>
     void generate(RNGType &rng, result_type *r, const param_type &param)
     {
-        rnorm_(rng, param.dim(), r);
+        param_.rnorm_(rng, param.dim(), r);
         if (!param.null_chol_)
             mulchol(r, param);
         if (!param.null_mean_)

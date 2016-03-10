@@ -77,6 +77,9 @@
         {                                                                     \
             return is;                                                        \
         }                                                                     \
+                                                                              \
+        private:                                                              \
+        friend distribution_type;                                             \
     }; // class param_type
 
 #define VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_1(Name, name, p1, v1)         \
@@ -147,6 +150,8 @@
                                                                               \
         private:                                                              \
         result_type p1##_;                                                    \
+                                                                              \
+        friend distribution_type;                                             \
     }; // class param_type
 
 #define VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_2(Name, name, p1, v1, p2, v2) \
@@ -227,6 +232,8 @@
         private:                                                              \
         result_type p1##_;                                                    \
         result_type p2##_;                                                    \
+                                                                              \
+        friend distribution_type;                                             \
     }; // class param_type
 
 #define VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_0(Name, T)                   \
