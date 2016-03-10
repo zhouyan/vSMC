@@ -335,21 +335,6 @@ namespace internal
 
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
 
-#ifdef VSMC_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wfloat-equal"
-#endif
-
-template <typename T>
-inline bool is_equal(const T &a, const T &b)
-{
-    return a == b;
-}
-
-#ifdef VSMC_CLANG
-#pragma clang diagnostic pop
-#endif
-
 template <int N>
 class RNGBitsNMax
 {

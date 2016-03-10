@@ -81,6 +81,21 @@ namespace vsmc
 namespace internal
 {
 
+#ifdef VSMC_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wfloat-equal"
+#endif
+
+template <typename T>
+inline bool is_equal(const T &a, const T &b)
+{
+    return a == b;
+}
+
+#ifdef VSMC_CLANG
+#pragma clang diagnostic pop
+#endif
+
 template <typename UIntType>
 inline std::string itos(UIntType i, std::true_type)
 {
