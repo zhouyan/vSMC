@@ -38,8 +38,6 @@
 #include <cstddef>
 #include <cstdlib>
 #include <memory>
-#include <new>
-#include <type_traits>
 #include <vector>
 
 #if VSMC_HAS_POSIX
@@ -256,6 +254,7 @@ class AlignedAllocator : public std::allocator<T>
     static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,
         "**AlignedAllocator** USED WITH Alignment OTHER THAN A POWER OF TWO "
         "POSITIVE INTEGER");
+
     static_assert(Alignment >= sizeof(void *),
         "**AlignedAllocator** USED WITH Alignment LESS THAN sizeof(void *)");
 

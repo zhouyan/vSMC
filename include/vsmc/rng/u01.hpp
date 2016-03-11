@@ -94,7 +94,7 @@ class U01ImplPow2Inv
 /// of the output is \f$2^{-W}\f$. The maximum is 1 if \f$W \le N\f$ and the
 /// largest floating point number less than 1 otherwise.
 template <typename UIntType, typename RealType>
-RealType u01(UIntType u)
+RealType u01(UIntType u) noexcept
 {
     static_assert(std::is_unsigned<UIntType>::value,
         "**U01** USED WITH UIntType OTHER THAN UNSIGNED INTEGER TYPES");
@@ -118,7 +118,7 @@ template <typename UIntType, typename RealType>
 class U01LRImpl<UIntType, RealType, Closed, Closed>
 {
     public:
-    static RealType eval(UIntType u)
+    static RealType eval(UIntType u) noexcept
     {
         static constexpr int w = std::numeric_limits<UIntType>::digits;
         static constexpr int m = std::numeric_limits<RealType>::digits;
@@ -133,12 +133,12 @@ class U01LRImpl<UIntType, RealType, Closed, Closed>
     }
 
     private:
-    static RealType trans(UIntType u, std::true_type)
+    static RealType trans(UIntType u, std::true_type) noexcept
     {
         return static_cast<RealType>((u & 1) + u);
     }
 
-    static RealType trans(UIntType u, std::false_type)
+    static RealType trans(UIntType u, std::false_type) noexcept
     {
         return static_cast<RealType>(u & 1) + static_cast<RealType>(u);
     }
@@ -148,7 +148,7 @@ template <typename UIntType, typename RealType>
 class U01LRImpl<UIntType, RealType, Closed, Open>
 {
     public:
-    static RealType eval(UIntType u)
+    static RealType eval(UIntType u) noexcept
     {
         static constexpr int w = std::numeric_limits<UIntType>::digits;
         static constexpr int m = std::numeric_limits<RealType>::digits;
@@ -164,7 +164,7 @@ template <typename UIntType, typename RealType>
 class U01LRImpl<UIntType, RealType, Open, Closed>
 {
     public:
-    static RealType eval(UIntType u)
+    static RealType eval(UIntType u) noexcept
     {
         static constexpr int w = std::numeric_limits<UIntType>::digits;
         static constexpr int m = std::numeric_limits<RealType>::digits;
@@ -181,7 +181,7 @@ template <typename UIntType, typename RealType>
 class U01LRImpl<UIntType, RealType, Open, Open>
 {
     public:
-    static RealType eval(UIntType u)
+    static RealType eval(UIntType u) noexcept
     {
         static constexpr int w = std::numeric_limits<UIntType>::digits;
         static constexpr int m = std::numeric_limits<RealType>::digits;
@@ -207,7 +207,7 @@ class U01LRImpl<UIntType, RealType, Open, Open>
 /// \f$[0,1]\f$ or one of its (half-)open interval variant. The exact output
 /// depend on the template parameter `Left` and `Right`.
 template <typename UIntType, typename RealType, typename Left, typename Right>
-RealType u01_lr(UIntType u)
+RealType u01_lr(UIntType u) noexcept
 {
     static_assert(std::is_unsigned<UIntType>::value,
         "**u01_lr** USED WITH UIntType OTHER THAN UNSIGNED INTEGER "
@@ -222,7 +222,7 @@ RealType u01_lr(UIntType u)
 /// \brief Convert uniform unsigned integers to floating points on [0, 1]
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
-RealType u01_cc(UIntType u)
+RealType u01_cc(UIntType u) noexcept
 {
     return u01_lr<UIntType, RealType, Closed, Closed>(u);
 }
@@ -230,7 +230,7 @@ RealType u01_cc(UIntType u)
 /// \brief Convert uniform unsigned integers to floating points on [0, 1)
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
-RealType u01_co(UIntType u)
+RealType u01_co(UIntType u) noexcept
 {
     return u01_lr<UIntType, RealType, Closed, Open>(u);
 }
@@ -238,7 +238,7 @@ RealType u01_co(UIntType u)
 /// \brief Convert uniform unsigned integers to floating points on (0, 1]
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
-RealType u01_oc(UIntType u)
+RealType u01_oc(UIntType u) noexcept
 {
     return u01_lr<UIntType, RealType, Open, Closed>(u);
 }
@@ -246,7 +246,7 @@ RealType u01_oc(UIntType u)
 /// \brief Convert uniform unsigned integers to floating points on (0, 1)
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
-RealType u01_oo(UIntType u)
+RealType u01_oo(UIntType u) noexcept
 {
     return u01_lr<UIntType, RealType, Open, Open>(u);
 }
