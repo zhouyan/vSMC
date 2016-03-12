@@ -155,6 +155,8 @@ class Covariance
     /// computation carried out.
     /// \param x The samples. If it is a null pointer, then no computation is
     /// carried out.
+    /// \param w The weights. If it is a null pointer, then all samples are
+    /// assigned weight 1.
     /// \param mean Output storage of the mean. If it is a null pointer, then
     /// it is ignored.
     /// \param cov Output storage of the covarianc matrix. If it is a null
