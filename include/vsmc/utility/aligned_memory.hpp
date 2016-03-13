@@ -329,20 +329,6 @@ class AlignedAllocator
         alloc.destroy(ptr);
     }
 
-    template <typename T1, typename T2>
-    friend bool operator==(const AlignedAllocator<T1, Alignment, Memory> &,
-        const AlignedAllocator<T2, Alignment, Memory> &) noexcept
-    {
-        return true;
-    }
-
-    template <typename T1, typename T2>
-    friend bool operator!=(const AlignedAllocator<T1, Alignment, Memory> &,
-        const AlignedAllocator<T2, Alignment, Memory> &) noexcept
-    {
-        return false;
-    }
-
     private:
     template <typename U, typename... Args>
     static void construct(std::true_type, U *, Args &&...)
@@ -382,6 +368,20 @@ class AlignedAllocator<const void, Alignment, Memory>
         using other = AlignedAllocator<U, Alignment, Memory>;
     };
 }; // class AlignedAllocator
+
+template <typename T1, typename T2, std::size_t Alignment, typename Memory>
+inline bool operator==(const AlignedAllocator<T1, Alignment, Memory> &,
+    const AlignedAllocator<T2, Alignment, Memory> &) noexcept
+{
+    return true;
+}
+
+template <typename T1, typename T2, std::size_t Alignment, typename Memory>
+inline bool operator!=(const AlignedAllocator<T1, Alignment, Memory> &,
+    const AlignedAllocator<T2, Alignment, Memory> &) noexcept
+{
+    return false;
+}
 
 /// \brief AlignedAllocator for scalar type and `std::allocator` for others
 /// \ingroup AlignedMemory
