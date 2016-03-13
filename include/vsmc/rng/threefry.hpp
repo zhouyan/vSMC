@@ -149,7 +149,8 @@ template <typename T, std::size_t K>
 class ThreefryInitPar
 {
     public:
-    static void eval(const std::array<T, K> &key, std::array<T, K + 1> &par)
+    static void eval(
+        const std::array<T, K> &key, std::array<T, K + 1> &par) noexcept
     {
         par.back() = ThreefryKSConstant<T>::value;
         par_xor<0>(key, par, std::integral_constant<bool, 0 < K>());
@@ -157,14 +158,14 @@ class ThreefryInitPar
 
     private:
     template <std::size_t>
-    static void par_xor(
-        const std::array<T, K> &, std::array<T, K + 1> &, std::false_type)
+    static void par_xor(const std::array<T, K> &, std::array<T, K + 1> &,
+        std::false_type) noexcept
     {
     }
 
     template <std::size_t N>
-    static void par_xor(
-        const std::array<T, K> &key, std::array<T, K + 1> &par, std::true_type)
+    static void par_xor(const std::array<T, K> &key, std::array<T, K + 1> &par,
+        std::true_type) noexcept
     {
         std::get<N>(par) = std::get<N>(key);
         par.back() ^= std::get<N>(key);
@@ -186,7 +187,7 @@ template <typename T, int R>
 class ThreefryRotateImpl
 {
     public:
-    static T eval(const T &x)
+    static T eval(const T &x) noexcept
     {
         return (x << R) | (x >> (ThreefryRotateBits<T>::value - R));
     }
@@ -196,14 +197,14 @@ template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
 class ThreefryRotate
 {
     public:
-    static void eval(std::array<T, K> &) {}
+    static void eval(std::array<T, K> &) noexcept {}
 }; // class ThreefryRotate
 
 template <typename T, std::size_t N>
 class ThreefryRotate<T, 2, N, true>
 {
     public:
-    static void eval(std::array<T, 2> &state)
+    static void eval(std::array<T, 2> &state) noexcept
     {
         std::get<0>(state) += std::get<1>(state);
         std::get<1>(state) =
@@ -220,7 +221,7 @@ template <typename T, std::size_t N>
 class ThreefryRotate<T, 4, N, true>
 {
     public:
-    static void eval(std::array<T, 4> &state)
+    static void eval(std::array<T, 4> &state) noexcept
     {
         std::get<0>(state) += std::get<i0_>(state);
         std::get<i0_>(state) =
@@ -256,14 +257,17 @@ template <typename T, std::size_t K, std::size_t N, bool = (N % 4 == 0)>
 class ThreefryInsertKey
 {
     public:
-    static void eval(std::array<T, K> &, const std::array<T, K + 1> &) {}
+    static void eval(std::array<T, K> &, const std::array<T, K + 1> &) noexcept
+    {
+    }
 }; // class ThreefryInsertKey
 
 template <typename T, std::size_t N>
 class ThreefryInsertKey<T, 2, N, true>
 {
     public:
-    static void eval(std::array<T, 2> &state, const std::array<T, 3> &par)
+    static void eval(
+        std::array<T, 2> &state, const std::array<T, 3> &par) noexcept
     {
         std::get<0>(state) += std::get<i0_>(par);
         std::get<1>(state) += std::get<i1_>(par);
@@ -280,7 +284,8 @@ template <typename T, std::size_t N>
 class ThreefryInsertKey<T, 4, N, true>
 {
     public:
-    static void eval(std::array<T, 4> &state, const std::array<T, 5> &par)
+    static void eval(
+        std::array<T, 4> &state, const std::array<T, 5> &par) noexcept
     {
         std::get<0>(state) += std::get<i0_>(par);
         std::get<1>(state) += std::get<i1_>(par);
@@ -322,12 +327,12 @@ class ThreefryGenerator
     using ctr_type = std::array<ResultType, K>;
     using key_type = std::array<ResultType, K>;
 
-    static constexpr std::size_t size() { return K; }
+    static constexpr std::size_t size() noexcept { return K; }
 
-    void reset(const key_type &) {}
+    void reset(const key_type &) noexcept {}
 
     void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, K> &buffer) const
+        std::array<result_type, K> &buffer) const noexcept
     {
         std::array<result_type, K + 1> par;
         internal::ThreefryInitPar<ResultType, K>::eval(key, par);
@@ -337,7 +342,7 @@ class ThreefryGenerator
     }
 
     std::size_t operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        result_type *r) const
+        result_type *r) const noexcept
     {
         const std::size_t m = n / size();
         std::array<result_type, K + 1> par;
@@ -353,13 +358,14 @@ class ThreefryGenerator
     private:
     template <std::size_t>
     void generate(std::array<result_type, K> &,
-        const std::array<result_type, K + 1> &, std::false_type) const
+        const std::array<result_type, K + 1> &, std::false_type) const noexcept
     {
     }
 
     template <std::size_t N>
     void generate(std::array<result_type, K> &state,
         const std::array<result_type, K + 1> &par, std::true_type) const
+        noexcept
     {
         internal::ThreefryRotate<ResultType, K, N>::eval(state);
         internal::ThreefryInsertKey<ResultType, K, N>::eval(state, par);
@@ -408,7 +414,7 @@ class ThreefryParPackSSE2
 {
     public:
     static void eval(const std::array<ResultType, K + 1> &p,
-        std::array<M128I<ResultType>, K + 1> &par)
+        std::array<M128I<ResultType>, K + 1> &par) noexcept
     {
         pack<0>(p, par, std::integral_constant<bool, 0 < K + 1>());
     }
@@ -416,13 +422,13 @@ class ThreefryParPackSSE2
     private:
     template <std::size_t>
     static void pack(const std::array<ResultType, K + 1> &,
-        std::array<M128I<ResultType>, K + 1> &, std::false_type)
+        std::array<M128I<ResultType>, K + 1> &, std::false_type) noexcept
     {
     }
 
     template <std::size_t N>
     static void pack(const std::array<ResultType, K + 1> &p,
-        std::array<M128I<ResultType>, K + 1> &par, std::true_type)
+        std::array<M128I<ResultType>, K + 1> &par, std::true_type) noexcept
     {
         std::get<N>(par).set1(std::get<N>(p));
         pack<N + 1>(p, par, std::integral_constant<bool, N + 1 < K + 1>());
@@ -434,7 +440,7 @@ class ThreefryCtrPackSSE2
 {
     public:
     static void eval(std::array<ResultType, K> &ctr,
-        std::array<M128I<ResultType>, K> &state)
+        std::array<M128I<ResultType>, K> &state) noexcept
     {
         std::array<std::array<ResultType, K>, M128I<ResultType>::size()>
             ctr_block;
@@ -446,14 +452,14 @@ class ThreefryCtrPackSSE2
     template <std::size_t N>
     static void pack(const std::array<std::array<ResultType, K>,
                          M128I<ResultType>::size()> &,
-        std::array<M128I<ResultType>, K> &, std::false_type)
+        std::array<M128I<ResultType>, K> &, std::false_type) noexcept
     {
     }
 
     template <std::size_t N>
     static void pack(const std::array<std::array<ResultType, K>,
                          M128I<ResultType>::size()> &ctr_block,
-        std::array<M128I<ResultType>, K> &state, std::true_type)
+        std::array<M128I<ResultType>, K> &state, std::true_type) noexcept
     {
         set<N>(ctr_block, state,
             std::integral_constant<std::size_t, sizeof(ResultType)>());
@@ -465,7 +471,7 @@ class ThreefryCtrPackSSE2
     static void set(const std::array<std::array<ResultType, K>,
                         M128I<ResultType>::size()> &ctr_block,
         std::array<M128I<ResultType>, K> &state,
-        std::integral_constant<std::size_t, 4>)
+        std::integral_constant<std::size_t, 4>) noexcept
     {
         std::get<N>(state).set(std::get<N>(std::get<0>(ctr_block)),
             std::get<N>(std::get<1>(ctr_block)),
@@ -477,7 +483,7 @@ class ThreefryCtrPackSSE2
     static void set(const std::array<std::array<ResultType, K>,
                         M128I<ResultType>::size()> &ctr_block,
         std::array<M128I<ResultType>, K> &state,
-        std::integral_constant<std::size_t, 8>)
+        std::integral_constant<std::size_t, 8>) noexcept
     {
         std::get<N>(state).set(std::get<N>(std::get<0>(ctr_block)),
             std::get<N>(std::get<1>(ctr_block)));
@@ -509,15 +515,16 @@ class ThreefryGeneratorSSE2
     using ctr_type = std::array<ResultType, K>;
     using key_type = std::array<ResultType, K>;
 
-    static constexpr std::size_t size()
+    static constexpr std::size_t size() noexcept
     {
         return K * M128I<ResultType>::size();
     }
 
-    void reset(const key_type &) {}
+    void reset(const key_type &) noexcept {}
 
     void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, K * M128I<ResultType>::size()> &buffer)
+        std::array<result_type, K * M128I<ResultType>::size()>
+            &buffer) noexcept
     {
         union {
             std::array<M128I<ResultType>, K> state;
@@ -533,8 +540,8 @@ class ThreefryGeneratorSSE2
         buffer = buf.result;
     }
 
-    std::size_t operator()(
-        ctr_type &, const key_type &, std::size_t, result_type *) const
+    std::size_t operator()(ctr_type &, const key_type &, std::size_t,
+        result_type *) const noexcept
     {
         return 0;
     }
@@ -542,13 +549,14 @@ class ThreefryGeneratorSSE2
     private:
     template <std::size_t>
     void generate(std::array<M128I<ResultType>, K> &,
-        const std::array<M128I<ResultType>, K + 1> &, std::false_type)
+        const std::array<M128I<ResultType>, K + 1> &, std::false_type) noexcept
     {
     }
 
     template <std::size_t N>
     void generate(std::array<M128I<ResultType>, K> &state,
-        const std::array<M128I<ResultType>, K + 1> &par, std::true_type)
+        const std::array<M128I<ResultType>, K + 1> &par,
+        std::true_type) noexcept
     {
         internal::ThreefryRotate<M128I<ResultType>, K, N>::eval(state);
         internal::ThreefryInsertKey<M128I<ResultType>, K, N>::eval(state, par);
@@ -600,7 +608,7 @@ class ThreefryParPackAVX2
 {
     public:
     static void eval(const std::array<ResultType, K + 1> &p,
-        std::array<M256I<ResultType>, K + 1> &par)
+        std::array<M256I<ResultType>, K + 1> &par) noexcept
     {
         pack<0>(p, par, std::integral_constant<bool, 0 < K + 1>());
     }
@@ -608,13 +616,13 @@ class ThreefryParPackAVX2
     private:
     template <std::size_t>
     static void pack(const std::array<ResultType, K + 1> &,
-        std::array<M256I<ResultType>, K + 1> &, std::false_type)
+        std::array<M256I<ResultType>, K + 1> &, std::false_type) noexcept
     {
     }
 
     template <std::size_t N>
     static void pack(const std::array<ResultType, K + 1> &p,
-        std::array<M256I<ResultType>, K + 1> &par, std::true_type)
+        std::array<M256I<ResultType>, K + 1> &par, std::true_type) noexcept
     {
         std::get<N>(par).set1(std::get<N>(p));
         pack<N + 1>(p, par, std::integral_constant<bool, N + 1 < K + 1>());
@@ -626,7 +634,7 @@ class ThreefryCtrPackAVX2
 {
     public:
     static void eval(std::array<ResultType, K> &ctr,
-        std::array<M256I<ResultType>, K> &state)
+        std::array<M256I<ResultType>, K> &state) noexcept
     {
         std::array<std::array<ResultType, K>, M256I<ResultType>::size()>
             ctr_block;
@@ -638,14 +646,14 @@ class ThreefryCtrPackAVX2
     template <std::size_t N>
     static void pack(const std::array<std::array<ResultType, K>,
                          M256I<ResultType>::size()> &,
-        std::array<M256I<ResultType>, K> &, std::false_type)
+        std::array<M256I<ResultType>, K> &, std::false_type) noexcept
     {
     }
 
     template <std::size_t N>
     static void pack(const std::array<std::array<ResultType, K>,
                          M256I<ResultType>::size()> &ctr_block,
-        std::array<M256I<ResultType>, K> &state, std::true_type)
+        std::array<M256I<ResultType>, K> &state, std::true_type) noexcept
     {
         set<N>(ctr_block, state,
             std::integral_constant<std::size_t, sizeof(ResultType)>());
@@ -657,7 +665,7 @@ class ThreefryCtrPackAVX2
     static void set(const std::array<std::array<ResultType, K>,
                         M256I<ResultType>::size()> &ctr_block,
         std::array<M256I<ResultType>, K> &state,
-        std::integral_constant<std::size_t, 4>)
+        std::integral_constant<std::size_t, 4>) noexcept
     {
         std::get<N>(state).set(std::get<N>(std::get<0>(ctr_block)),
             std::get<N>(std::get<1>(ctr_block)),
@@ -673,7 +681,7 @@ class ThreefryCtrPackAVX2
     static void set(const std::array<std::array<ResultType, K>,
                         M256I<ResultType>::size()> &ctr_block,
         std::array<M256I<ResultType>, K> &state,
-        std::integral_constant<std::size_t, 8>)
+        std::integral_constant<std::size_t, 8>) noexcept
     {
         std::get<N>(state).set(std::get<N>(std::get<0>(ctr_block)),
             std::get<N>(std::get<1>(ctr_block)),
@@ -707,15 +715,16 @@ class ThreefryGeneratorAVX2
     using ctr_type = std::array<ResultType, K>;
     using key_type = std::array<ResultType, K>;
 
-    static constexpr std::size_t size()
+    static constexpr std::size_t size() noexcept
     {
         return K * M256I<ResultType>::size();
     }
 
-    void reset(const key_type &) {}
+    void reset(const key_type &) noexcept {}
 
     void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, K * M256I<ResultType>::size()> &buffer)
+        std::array<result_type, K * M256I<ResultType>::size()>
+            &buffer) noexcept
     {
         union {
             std::array<M256I<ResultType>, K> state;
@@ -731,8 +740,8 @@ class ThreefryGeneratorAVX2
         buffer = buf.result;
     }
 
-    std::size_t operator()(
-        ctr_type &, const key_type &, std::size_t, result_type *) const
+    std::size_t operator()(ctr_type &, const key_type &, std::size_t,
+        result_type *) const noexcept
     {
         return 0;
     }
@@ -740,13 +749,14 @@ class ThreefryGeneratorAVX2
     private:
     template <std::size_t>
     void generate(std::array<M256I<ResultType>, K> &,
-        const std::array<M256I<ResultType>, K + 1> &, std::false_type)
+        const std::array<M256I<ResultType>, K + 1> &, std::false_type) noexcept
     {
     }
 
     template <std::size_t N>
     void generate(std::array<M256I<ResultType>, K> &state,
-        const std::array<M256I<ResultType>, K + 1> &par, std::true_type)
+        const std::array<M256I<ResultType>, K + 1> &par,
+        std::true_type) noexcept
     {
         internal::ThreefryRotate<M256I<ResultType>, K, N>::eval(state);
         internal::ThreefryInsertKey<M256I<ResultType>, K, N>::eval(state, par);
