@@ -272,7 +272,7 @@ class AlignedAllocator
     class rebind
     {
         public:
-        using other = AlignedAllocator<U, Alignment, AlignedMemory>;
+        using other = AlignedAllocator<U, Alignment, Memory>;
     }; // class rebind
 
     AlignedAllocator() noexcept {}
