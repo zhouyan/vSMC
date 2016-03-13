@@ -260,12 +260,12 @@ class AlignedAllocator
 
     public:
     using value_type = T;
-    using pointer = T *;
-    using const_pointer = const T *;
-    using reference = T &;
-    using const_reference = const T &;
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
+    using pointer = T *;
+    using const_pointer = const T *;
+    using reference = typename std::add_lvalue_reference<T>::type;
+    using const_reference = typename std::add_lvalue_reference<const T>::type;
     using is_always_equal = std::true_type;
 
     template <typename U>
@@ -275,54 +275,24 @@ class AlignedAllocator
         using other = AlignedAllocator<U, Alignment, AlignedMemory>;
     }; // class rebind
 
-    AlignedAllocator() = default;
+    AlignedAllocator() noexcept {}
 
-    AlignedAllocator(const AlignedAllocator<T, Alignment, Memory> &) = default;
-
-    AlignedAllocator<T, Alignment, Memory> &operator=(
-        const AlignedAllocator<T, Alignment, Memory> &) = default;
-
-    AlignedAllocator(AlignedAllocator<T, Alignment, Memory> &&) = default;
-
-    AlignedAllocator<T, Alignment, Memory> &operator=(
-        AlignedAllocator<T, Alignment, Memory> &&) = default;
-
-    ~AlignedAllocator() = default;
-
-    template <typename U>
-    AlignedAllocator(const AlignedAllocator<U, Alignment, Memory> &other)
-        : std::allocator<T>(static_cast<std::allocator<U>>(other))
+    AlignedAllocator(const AlignedAllocator<T, Alignment, Memory> &) noexcept
     {
     }
 
     template <typename U>
-    AlignedAllocator<U, Alignment, Memory> &operator=(
-        const AlignedAllocator<T, Alignment, Memory> &other)
-    {
-        if (this != &other) {
-            std::allocator<T>::operator=(
-                static_cast<std::allocator<U>>(other));
-        }
-
-        return *this;
-    }
-
-    template <typename U>
-    AlignedAllocator(AlignedAllocator<U, Alignment, Memory> &&other)
-        : std::allocator<T>(static_cast<std::allocator<U>>(std::move(other)))
+    AlignedAllocator(const AlignedAllocator<U, Alignment, Memory> &) noexcept
     {
     }
 
-    template <typename U>
-    AlignedAllocator<U, Alignment, Memory> &operator=(
-        AlignedAllocator<T, Alignment, Memory> &&other)
-    {
-        if (this != &other) {
-            std::allocator<T>::operator=(
-                std::move(static_cast<std::allocator<U>>(other)));
-        }
+    ~AlignedAllocator() noexcept {}
 
-        return *this;
+    static pointer address(reference x) noexcept { return std::addressof(x); }
+
+    static const_pointer address(const_reference x) noexcept
+    {
+        return std::addressof(x);
     }
 
     static pointer allocate(size_type n, const void * = nullptr)
@@ -340,52 +310,72 @@ class AlignedAllocator
             Memory::aligned_free(ptr);
     }
 
-    static constexpr size_type max_size()
+    static constexpr size_type max_size() noexcept
     {
         return std::numeric_limits<size_type>::max();
     }
 
-    static pointer address(reference x) { return std::addressof(x); }
-
-    static const_pointer address(const_reference x)
-    {
-        return std::addressof(x);
-    }
-
-    template <class U, class... Args>
+    template <typename U, typename... Args>
     static void construct(U *ptr, Args &&... args)
     {
-        ::new ((static_cast<void *>(ptr)) U(std::forward<Args>(args)...);
+        construct(std::integral_constant<bool, std::is_scalar<U>::value>(),
+            ptr, std::forward<Args>(args)...);
     }
 
     template <typename U>
     static void destroy(U *ptr)
     {
-        ptr->~U();
+        std::allocator<U> alloc;
+        alloc.destroy(ptr);
     }
 
-    template <class T1, class T2>
-    friend bool operator==(
-        const AlignedAllocator<T1> &alloc1, const AlignedAllocator<T2> &alloc2)
+    template <typename T1, typename T2>
+    friend bool operator==(const AlignedAllocator<T1, Alignment, Memory> &,
+        const AlignedAllocator<T2, Alignment, Memory> &) noexcept
     {
         return true;
     }
 
-    template <class T1, class T2>
-    friend bool operator!=(
-        const AlignedAllocator<T1> &alloc1, const AlignedAllocator<T2> &alloc2)
+    template <typename T1, typename T2>
+    friend bool operator!=(const AlignedAllocator<T1, Alignment, Memory> &,
+        const AlignedAllocator<T2, Alignment, Memory> &) noexcept
     {
         return false;
     }
+
+    private:
+    template <typename U, typename... Args>
+    static void construct(std::true_type, U *, Args &&...)
+    {
+    }
+
+    template <typename U, typename... Args>
+    static void construct(std::false_type, U *ptr, Args &&... args)
+    {
+        std::allocator<U> alloc;
+        alloc.construct(ptr, std::forward<Args>(args)...);
+    }
 }; // class AlignedAllocator
 
-template <std::size_t Alignment = VSMC_ALIGNMENT,
-    typename Memory = AlignedMemory>
+template <std::size_t Alignment, typename Memory>
 class AlignedAllocator<void, Alignment, Memory>
 {
     using value_type = void;
     using pointer = void *;
-    using const_pointer = void *;
+    using const_pointer = const void *;
+
+    template <class U>
+    struct rebind {
+        using other = AlignedAllocator<U, Alignment, Memory>;
+    };
+}; // class AlignedAllocator
+
+template <std::size_t Alignment, typename Memory>
+class AlignedAllocator<const void, Alignment, Memory>
+{
+    using value_type = const void;
+    using pointer = const void *;
+    using const_pointer = const void *;
 
     template <class U>
     struct rebind {
@@ -408,7 +398,7 @@ using AlignedVector = std::vector<T, AlignedAllocator<T>>;
 /// \ingroup AlignedMemory
 template <typename T>
 using Vector = typename std::conditional<std::is_scalar<T>::value,
-    std::vector<T, AlignedAllocator<T>>, std::vector<T>>::type;
+    AlignedVector<T>, std::vector<T>>::type;
 
 } // namespace vsmc
 
