@@ -276,13 +276,9 @@ class AlignedAllocator : public std::allocator<T>
         using other = AlignedAllocator<U, Alignment, Memory>;
     }; // class rebind
 
-    AlignedAllocator() noexcept {}
+    AlignedAllocator() = default;
 
-    AlignedAllocator(
-        const AlignedAllocator<T, Alignment, Memory> &other) noexcept
-        : std::allocator<T>(other)
-    {
-    }
+    AlignedAllocator(const AlignedAllocator<T, Alignment, Memory> &) = default;
 
     template <typename U>
     AlignedAllocator(
@@ -290,8 +286,6 @@ class AlignedAllocator : public std::allocator<T>
         : std::allocator<T>(static_cast<std::allocator<U>>(other))
     {
     }
-
-    ~AlignedAllocator() noexcept {}
 
     static pointer allocate(size_type n, const void * = nullptr)
     {
