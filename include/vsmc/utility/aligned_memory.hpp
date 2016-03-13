@@ -249,7 +249,7 @@ using AlignedMemory = VSMC_ALIGNED_MEMORY_TYPE;
 /// shall behave just like `std::free`.
 template <typename T, std::size_t Alignment = VSMC_ALIGNMENT,
     typename Memory = AlignedMemory>
-class AlignedAllocator : public std::allocator<T>
+class AlignedAllocator
 {
     static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,
         "**AlignedAllocator** USED WITH Alignment OTHER THAN A POWER OF TWO "
@@ -259,14 +259,20 @@ class AlignedAllocator : public std::allocator<T>
         "**AlignedAllocator** USED WITH Alignment LESS THAN sizeof(void *)");
 
     public:
-    using size_type = typename std::allocator<T>::size_type;
-    using pointer = typename std::allocator<T>::pointer;
+    using value_type = T;
+    using pointer = T *;
+    using const_pointer = const T *;
+    using reference = T &;
+    using const_reference = const T &;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
+    using is_always_equal = std::true_type;
 
     template <typename U>
     class rebind
     {
         public:
-        using other = AlignedAllocator<U, Alignment>;
+        using other = AlignedAllocator<U, Alignment, AlignedMemory>;
     }; // class rebind
 
     AlignedAllocator() = default;
@@ -319,7 +325,7 @@ class AlignedAllocator : public std::allocator<T>
         return *this;
     }
 
-    pointer allocate(size_type n, const void * = nullptr)
+    static pointer allocate(size_type n, const void * = nullptr)
     {
         if (n == 0)
             return nullptr;
@@ -328,11 +334,63 @@ class AlignedAllocator : public std::allocator<T>
             Memory::aligned_malloc(sizeof(T) * n, Alignment));
     }
 
-    void deallocate(pointer ptr, size_type)
+    static void deallocate(pointer ptr, size_type)
     {
         if (ptr != nullptr)
             Memory::aligned_free(ptr);
     }
+
+    static constexpr size_type max_size()
+    {
+        return std::numeric_limits<size_type>::max();
+    }
+
+    static pointer address(reference x) { return std::addressof(x); }
+
+    static const_pointer address(const_reference x)
+    {
+        return std::addressof(x);
+    }
+
+    template <class U, class... Args>
+    static void construct(U *ptr, Args &&... args)
+    {
+        ::new ((static_cast<void *>(ptr)) U(std::forward<Args>(args)...);
+    }
+
+    template <typename U>
+    static void destroy(U *ptr)
+    {
+        ptr->~U();
+    }
+
+    template <class T1, class T2>
+    friend bool operator==(
+        const AlignedAllocator<T1> &alloc1, const AlignedAllocator<T2> &alloc2)
+    {
+        return true;
+    }
+
+    template <class T1, class T2>
+    friend bool operator!=(
+        const AlignedAllocator<T1> &alloc1, const AlignedAllocator<T2> &alloc2)
+    {
+        return false;
+    }
+}; // class AlignedAllocator
+
+template <std::size_t Alignment = VSMC_ALIGNMENT,
+    typename Memory = AlignedMemory>
+class AlignedAllocator<void, Alignment, Memory>
+{
+    using value_type = void;
+    using pointer = void *;
+    using const_pointer = void *;
+
+    template <class U>
+    struct rebind {
+        using other = AlignedAllocator<U, Alignment, Memory>;
+    };
 }; // class AlignedAllocator
 
 /// \brief AlignedAllocator for scalar type and `std::allocator` for others
