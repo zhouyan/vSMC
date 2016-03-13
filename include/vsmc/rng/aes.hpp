@@ -37,7 +37,7 @@
 
 #define VSMC_DEFINE_RNG_AES_KEY_GEN_ASSIST(N, val)                            \
     template <>                                                               \
-    inline __m128i AESKeyGenAssist<N>(__m128i xmm) noexcept                   \
+    inline __m128i AESKeyGenAssist<N>(__m128i xmm)                    \
     {                                                                         \
         return _mm_aeskeygenassist_si128(xmm, val);                           \
     }
@@ -55,7 +55,7 @@ namespace internal
 {
 
 template <std::size_t>
-inline __m128i AESKeyGenAssist(__m128i) noexcept;
+inline __m128i AESKeyGenAssist(__m128i) ;
 
 VSMC_DEFINE_RNG_AES_KEY_GEN_ASSIST(0x00, 0x8D)
 VSMC_DEFINE_RNG_AES_KEY_GEN_ASSIST(0x01, 0x01)
@@ -320,7 +320,7 @@ class AESKeyInit
     template <std::size_t Offset, std::size_t N, typename T,
         std::size_t KeySize, std::size_t Rp1>
     static void eval(const std::array<T, KeySize> &key,
-        std::array<__m128i, Rp1> &ks, __m128i &xmm) noexcept
+        std::array<__m128i, Rp1> &ks, __m128i &xmm) 
     {
         init<Offset, N>(key, ks, xmm, std::integral_constant < bool, N<Rp1>());
     }
@@ -329,14 +329,14 @@ class AESKeyInit
     template <std::size_t, std::size_t, typename T, std::size_t KeySize,
         std::size_t Rp1>
     static void init(const std::array<T, KeySize> &,
-        std::array<__m128i, Rp1> &, __m128i &, std::false_type) noexcept
+        std::array<__m128i, Rp1> &, __m128i &, std::false_type) 
     {
     }
 
     template <std::size_t Offset, std::size_t N, typename T,
         std::size_t KeySize, std::size_t Rp1>
     static void init(const std::array<T, KeySize> &key,
-        std::array<__m128i, Rp1> &ks, __m128i &xmm, std::true_type) noexcept
+        std::array<__m128i, Rp1> &ks, __m128i &xmm, std::true_type) 
     {
         M128I<> tmp;
         tmp.load(key.data());
@@ -350,7 +350,7 @@ class AESKeySeq
     public:
     using key_type = typename KeySeqGenerator::key_type;
 
-    void reset(const key_type &key) noexcept
+    void reset(const key_type &key) 
     {
         KeySeqGenerator generator;
         generator(key, key_seq_);
@@ -358,7 +358,7 @@ class AESKeySeq
 
     template <typename U>
     void operator()(
-        const key_type &, std::array<M128I<U>, Rounds + 1> &rk) const noexcept
+        const key_type &, std::array<M128I<U>, Rounds + 1> &rk) const 
     {
         rk = key_seq_;
     }
@@ -375,7 +375,7 @@ class AES128KeySeqGenerator
 
     template <std::size_t Rp1>
     void operator()(
-        const key_type &key, std::array<M128I<>, Rp1> &key_seq) noexcept
+        const key_type &key, std::array<M128I<>, Rp1> &key_seq) 
     {
         std::array<__m128i, Rp1> ks;
         AESKeyInit::eval<0, 0>(key, ks, xmm1_);
@@ -389,12 +389,12 @@ class AES128KeySeqGenerator
     __m128i xmm3_;
 
     template <std::size_t, std::size_t Rp1>
-    void generate_seq(std::array<__m128i, Rp1> &, std::false_type) noexcept
+    void generate_seq(std::array<__m128i, Rp1> &, std::false_type) 
     {
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq(std::array<__m128i, Rp1> &ks, std::true_type) noexcept
+    void generate_seq(std::array<__m128i, Rp1> &ks, std::true_type) 
     {
         xmm2_ = AESKeyGenAssist<N>(xmm1_);
         expand_key();
@@ -402,7 +402,7 @@ class AES128KeySeqGenerator
         generate_seq<N + 1>(ks, std::integral_constant<bool, N + 1 < Rp1>());
     }
 
-    void expand_key() noexcept
+    void expand_key() 
     {
         xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF); // pshufd xmm2, xmm2, 0xFF
         xmm3_ = _mm_slli_si128(xmm1_, 0x04);    // pshufb xmm3, xmm5
@@ -423,7 +423,7 @@ class AES192KeySeqGenerator
 
     template <std::size_t Rp1>
     void operator()(
-        const key_type &key, std::array<M128I<>, Rp1> &key_seq) noexcept
+        const key_type &key, std::array<M128I<>, Rp1> &key_seq) 
     {
         std::array<__m128i, Rp1> ks;
 
@@ -457,12 +457,12 @@ class AES192KeySeqGenerator
     __m128i xmm7_;
 
     template <std::size_t, std::size_t>
-    void generate_seq(unsigned char *, std::false_type) noexcept
+    void generate_seq(unsigned char *, std::false_type) 
     {
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq(unsigned char *ks_ptr, std::true_type) noexcept
+    void generate_seq(unsigned char *ks_ptr, std::true_type) 
     {
         generate_key<N>(ks_ptr);
         complete_key<N>(
@@ -472,7 +472,7 @@ class AES192KeySeqGenerator
     }
 
     template <std::size_t N>
-    void generate_key(unsigned char *ks_ptr) noexcept
+    void generate_key(unsigned char *ks_ptr) 
     {
         // In entry, N * 24 < Rp1 * 16
         // Required Storage: N * 24 + 16;
@@ -483,12 +483,12 @@ class AES192KeySeqGenerator
     }
 
     template <std::size_t>
-    void complete_key(unsigned char *, std::false_type) noexcept
+    void complete_key(unsigned char *, std::false_type) 
     {
     }
 
     template <std::size_t N>
-    void complete_key(unsigned char *ks_ptr, std::true_type) noexcept
+    void complete_key(unsigned char *ks_ptr, std::true_type) 
     {
         // In entry, N * 24 + 16 < Rp1 * 16
         // Required storage: N * 24 + 32
@@ -498,7 +498,7 @@ class AES192KeySeqGenerator
             reinterpret_cast<__m128i *>(ks_ptr + N * 24 + 16), xmm7_);
     }
 
-    void generate_key_expansion() noexcept
+    void generate_key_expansion() 
     {
         xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF);  // pshufd xmm2, xmm2, 0xFF
         xmm3_ = _mm_castps_si128(_mm_shuffle_ps( // shufps xmm3, xmm1, 0x10
@@ -510,7 +510,7 @@ class AES192KeySeqGenerator
         xmm1_ = _mm_xor_si128(xmm1_, xmm2_); // pxor   xmm1, xmm2
     }
 
-    void complete_key_expansion() noexcept
+    void complete_key_expansion() 
     {
         xmm5_ = _mm_load_si128(&xmm4_);          // movdqa xmm5, xmm4
         xmm5_ = _mm_slli_si128(xmm5_, 0x04);     // pslldq xmm5, 0x04
@@ -523,13 +523,13 @@ class AES192KeySeqGenerator
 
     template <std::size_t Rp1>
     void copy_key(std::array<__m128i, Rp1> &, const unsigned char *,
-        std::false_type) noexcept
+        std::false_type) 
     {
     }
 
     template <std::size_t Rp1>
     void copy_key(std::array<__m128i, Rp1> &ks, const unsigned char *ks_ptr,
-        std::true_type) noexcept
+        std::true_type) 
     {
         unsigned char *dst = reinterpret_cast<unsigned char *>(ks.data());
         std::memcpy(dst + 24, ks_ptr + 24, Rp1 * 16 - 24);
@@ -544,7 +544,7 @@ class AES256KeySeqGenerator
 
     template <std::size_t Rp1>
     void operator()(
-        const key_type &key, std::array<M128I<>, Rp1> &key_seq) noexcept
+        const key_type &key, std::array<M128I<>, Rp1> &key_seq) 
     {
         std::array<__m128i, Rp1> ks;
         AESKeyInit::eval<0, 0>(key, ks, xmm1_);
@@ -560,19 +560,19 @@ class AES256KeySeqGenerator
     __m128i xmm4_;
 
     template <std::size_t, std::size_t Rp1>
-    void generate_seq(std::array<__m128i, Rp1> &, std::false_type) noexcept
+    void generate_seq(std::array<__m128i, Rp1> &, std::false_type) 
     {
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq(std::array<__m128i, Rp1> &ks, std::true_type) noexcept
+    void generate_seq(std::array<__m128i, Rp1> &ks, std::true_type) 
     {
         generate_key<N>(ks, std::integral_constant<bool, N % 2 == 0>());
         generate_seq<N + 1>(ks, std::integral_constant<bool, N + 1 < Rp1>());
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_key(std::array<__m128i, Rp1> &ks, std::true_type) noexcept
+    void generate_key(std::array<__m128i, Rp1> &ks, std::true_type) 
     {
         xmm2_ = AESKeyGenAssist<N / 2>(xmm3_);
         expand_key(std::true_type());
@@ -580,14 +580,14 @@ class AES256KeySeqGenerator
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_key(std::array<__m128i, Rp1> &ks, std::false_type) noexcept
+    void generate_key(std::array<__m128i, Rp1> &ks, std::false_type) 
     {
         xmm4_ = _mm_aeskeygenassist_si128(xmm1_, 0);
         expand_key(std::false_type());
         std::get<N>(ks) = xmm3_;
     }
 
-    void expand_key(std::true_type) noexcept
+    void expand_key(std::true_type) 
     {
         xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF); // pshufd xmm2, xmm2, 0xFF
         xmm4_ = _mm_slli_si128(xmm1_, 0x04);    // pshufb xmm4, xmm5
@@ -599,7 +599,7 @@ class AES256KeySeqGenerator
         xmm1_ = _mm_xor_si128(xmm1_, xmm2_);    // pxor   xmm1, xmm2
     }
 
-    void expand_key(std::false_type) noexcept
+    void expand_key(std::false_type) 
     {
         xmm2_ = _mm_shuffle_epi32(xmm4_, 0xAA); // pshufd xmm2, xmm4, 0xAA
         xmm4_ = _mm_slli_si128(xmm3_, 0x04);    // pshufb xmm4, xmm5

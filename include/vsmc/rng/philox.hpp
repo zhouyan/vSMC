@@ -101,8 +101,7 @@ VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
     std::uint64_t, 4, 1, UINT64_C(0xCA5A826395121157))
 
 template <std::size_t K, std::size_t I>
-inline void philox_hilo(
-    std::uint32_t b, std::uint32_t &hi, std::uint32_t &lo) noexcept
+inline void philox_hilo(std::uint32_t b, std::uint32_t &hi, std::uint32_t &lo)
 {
     std::uint64_t prod = static_cast<std::uint64_t>(b) *
         static_cast<std::uint64_t>(
@@ -114,8 +113,7 @@ inline void philox_hilo(
 #if VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
-inline void philox_hilo(
-    std::uint64_t b, std::uint64_t &hi, std::uint64_t &lo) noexcept
+inline void philox_hilo(std::uint64_t b, std::uint64_t &hi, std::uint64_t &lo)
 {
     unsigned VSMC_INT128 prod =
         static_cast<unsigned VSMC_INT128>(b) *
@@ -128,8 +126,7 @@ inline void philox_hilo(
 #elif defined(VSMC_MSVC) // VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
-inline void philox_hilo(
-    std::uint64_t b, std::uint64_t &hi, std::uint64_t &lo) noexcept
+inline void philox_hilo(std::uint64_t b, std::uint64_t &hi, std::uint64_t &lo)
 {
     lo = _umul128(PhiloxRoundConstant<std::uint64_t, K, I>::value, b, &hi);
 }
@@ -137,8 +134,7 @@ inline void philox_hilo(
 #else // VSMC_HAS_INT128
 
 template <std::size_t K, std::size_t I>
-inline void philox_hilo(
-    std::uint64_t b, std::uint64_t &hi, std::uint64_t &lo) noexcept
+inline void philox_hilo(std::uint64_t b, std::uint64_t &hi, std::uint64_t &lo)
 {
     const std::uint64_t a = PhiloxRoundConstant<std::uint64_t, K, I>::value;
     const unsigned whalf = 32;
@@ -167,14 +163,14 @@ template <typename T, std::size_t K, std::size_t N, bool = (N > 1)>
 class PhiloxBumpKey
 {
     public:
-    static void eval(std::array<T, K / 2> &) noexcept {}
+    static void eval(std::array<T, K / 2> &) {}
 }; // class PhiloxBumpKey
 
 template <typename T, std::size_t N>
 class PhiloxBumpKey<T, 2, N, true>
 {
     public:
-    static void eval(std::array<T, 1> &par) noexcept
+    static void eval(std::array<T, 1> &par)
     {
         std::get<0>(par) += PhiloxWeylConstant<T, 0>::value;
     }
@@ -184,7 +180,7 @@ template <typename T, std::size_t N>
 class PhiloxBumpKey<T, 4, N, true>
 {
     public:
-    static void eval(std::array<T, 2> &par) noexcept
+    static void eval(std::array<T, 2> &par)
     {
         std::get<0>(par) += PhiloxWeylConstant<T, 0>::value;
         std::get<1>(par) += PhiloxWeylConstant<T, 1>::value;
@@ -195,17 +191,14 @@ template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
 class PhiloxRound
 {
     public:
-    static void eval(std::array<T, K> &, const std::array<T, K / 2> &) noexcept
-    {
-    }
+    static void eval(std::array<T, K> &, const std::array<T, K / 2> &) {}
 }; // class PhiloxRound
 
 template <typename T, std::size_t N>
 class PhiloxRound<T, 2, N, true>
 {
     public:
-    static void eval(
-        std::array<T, 2> &state, const std::array<T, 1> &par) noexcept
+    static void eval(std::array<T, 2> &state, const std::array<T, 1> &par)
     {
         T hi = 0;
         T lo = 0;
@@ -220,8 +213,7 @@ template <typename T, std::size_t N>
 class PhiloxRound<T, 4, N, true>
 {
     public:
-    static void eval(
-        std::array<T, 4> &state, const std::array<T, 2> &par) noexcept
+    static void eval(std::array<T, 4> &state, const std::array<T, 2> &par)
     {
         T hi0 = 0;
         T lo1 = 0;
@@ -264,12 +256,12 @@ class PhiloxGenerator
     using ctr_type = std::array<ResultType, K>;
     using key_type = std::array<ResultType, K / 2>;
 
-    static constexpr std::size_t size() noexcept { return K; }
+    static constexpr std::size_t size() { return K; }
 
-    void reset(const key_type &) noexcept {}
+    void reset(const key_type &) {}
 
     void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, K> &buffer) const noexcept
+        std::array<result_type, K> &buffer) const
     {
         union {
             std::array<ctr_type, 1> state;
@@ -284,7 +276,7 @@ class PhiloxGenerator
     }
 
     std::size_t operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        result_type *r) const noexcept
+        result_type *r) const
     {
         const std::size_t Blocks = 8;
         const std::size_t M = size() * Blocks;
@@ -302,14 +294,14 @@ class PhiloxGenerator
 
     private:
     template <std::size_t, std::size_t Blocks>
-    void generate(std::array<ctr_type, Blocks> &, key_type &,
-        std::false_type) const noexcept
+    void generate(
+        std::array<ctr_type, Blocks> &, key_type &, std::false_type) const
     {
     }
 
     template <std::size_t N, std::size_t Blocks>
     void generate(std::array<ctr_type, Blocks> &state, key_type &par,
-        std::true_type) const noexcept
+        std::true_type) const
     {
         internal::PhiloxBumpKey<ResultType, K, N>::eval(par);
         round<N, 0>(state, par, std::true_type());
@@ -318,14 +310,14 @@ class PhiloxGenerator
     }
 
     template <std::size_t, std::size_t, std::size_t Blocks>
-    void round(std::array<ctr_type, Blocks> &, key_type &,
-        std::false_type) const noexcept
+    void round(
+        std::array<ctr_type, Blocks> &, key_type &, std::false_type) const
     {
     }
 
     template <std::size_t N, std::size_t B, std::size_t Blocks>
     void round(std::array<ctr_type, Blocks> &state, key_type &par,
-        std::true_type) const noexcept
+        std::true_type) const
     {
         internal::PhiloxRound<ResultType, K, N>::eval(std::get<B>(state), par);
         round<N, B + 1>(

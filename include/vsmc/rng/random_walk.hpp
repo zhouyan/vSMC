@@ -98,11 +98,12 @@ class RandomWalk
     std::size_t operator()(RNGType &rng, result_type *x, result_type *ltx,
         LogTargetType &&log_target, ProposalType &&proposal)
     {
+        U01Distribution<result_type> u01;
         result_type q = proposal(rng, dim(), x, y_.data());
         result_type s = ltx == nullptr ? log_target(dim(), x) : *ltx;
         result_type t = log_target(dim(), y_.data());
         result_type p = t - s + q;
-        result_type u = std::log(runif_(rng));
+        result_type u = std::log(u01(rng));
 
         if (u < p) {
             std::copy(y_.begin(), y_.end(), x);
@@ -127,13 +128,14 @@ class RandomWalk
         result_type *x, result_type *ltx, LogTargetType &&log_target,
         ProposalType &&proposal)
     {
+        U01Distribution<result_type> u01;
         std::copy_n(x + idx, dim(), x_.begin());
         result_type q = proposal(rng, dim(), x_.data(), y_.data());
         result_type s = ltx == nullptr ? log_target(m, x) : *ltx;
         std::copy(y_.begin(), y_.end(), x + idx);
         result_type t = log_target(m, x);
         result_type p = t - s + q;
-        result_type u = std::log(runif_(rng));
+        result_type u = std::log(u01(rng));
 
         if (u < p) {
             if (ltx != nullptr)
@@ -184,7 +186,6 @@ class RandomWalk
     }
 
     private:
-    U01Distribution<RealType> runif_;
     internal::Array<RealType, Dim> x_;
     internal::Array<RealType, Dim> y_;
 }; // class RandomWalk
@@ -251,13 +252,14 @@ class RandomWalkG
     std::size_t operator()(RNGType &rng, result_type *x, result_type *ltx,
         result_type *g, LogTargetType &&log_target, ProposalType &&proposal)
     {
+        U01Distribution<result_type> u01;
         result_type q = proposal(rng, dim_x(), x, y_.data());
         result_type s =
             ltx == nullptr ? log_target(dim_x(), dim_g(), x, nullptr) : *ltx;
         result_type t = log_target(
             dim_x(), dim_g(), y_.data(), (g == nullptr ? nullptr : g_.data()));
         result_type p = t - s + q;
-        result_type u = std::log(runif_(rng));
+        result_type u = std::log(u01(rng));
 
         if (u < p) {
             std::copy(y_.begin(), y_.end(), x);
@@ -284,6 +286,7 @@ class RandomWalkG
         result_type *x, result_type *ltx, result_type *g,
         LogTargetType &&log_target, ProposalType &&proposal)
     {
+        U01Distribution<result_type> u01;
         std::copy_n(x + idx, dim_x(), x_.begin());
         result_type q = proposal(rng, dim_x(), x_.data(), y_.data());
         result_type s =
@@ -292,7 +295,7 @@ class RandomWalkG
         result_type t =
             log_target(m, dim_g(), x, (g == nullptr ? nullptr : g_.data()));
         result_type p = t - s + q;
-        result_type u = std::log(runif_(rng));
+        result_type u = std::log(u01(rng));
 
         if (u < p) {
             if (ltx != nullptr)
@@ -348,7 +351,6 @@ class RandomWalkG
     }
 
     private:
-    U01Distribution<RealType> runif_;
     internal::Array<RealType, DimX> x_;
     internal::Array<RealType, DimX> y_;
     internal::Array<RealType, DimG> g_;

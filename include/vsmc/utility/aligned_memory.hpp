@@ -281,8 +281,7 @@ class AlignedAllocator : public std::allocator<T>
     AlignedAllocator(const AlignedAllocator<T, Alignment, Memory> &) = default;
 
     template <typename U>
-    AlignedAllocator(
-        const AlignedAllocator<U, Alignment, Memory> &other) noexcept
+    AlignedAllocator(const AlignedAllocator<U, Alignment, Memory> &other)
         : std::allocator<T>(static_cast<std::allocator<U>>(other))
     {
     }
@@ -331,14 +330,14 @@ class AlignedAllocator<const void, Alignment, Memory>
 
 template <typename T1, typename T2, std::size_t Alignment, typename Memory>
 inline bool operator==(const AlignedAllocator<T1, Alignment, Memory> &,
-    const AlignedAllocator<T2, Alignment, Memory> &) noexcept
+    const AlignedAllocator<T2, Alignment, Memory> &)
 {
     return true;
 }
 
 template <typename T1, typename T2, std::size_t Alignment, typename Memory>
 inline bool operator!=(const AlignedAllocator<T1, Alignment, Memory> &,
-    const AlignedAllocator<T2, Alignment, Memory> &) noexcept
+    const AlignedAllocator<T2, Alignment, Memory> &)
 {
     return false;
 }

@@ -156,10 +156,10 @@ class GammaDistribution
     result_type generate_t(RNGType &rng, const param_type &param,
         const internal::GammaDistributionConstant<RealType> &constant)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
         while (true) {
-            result_type u = runif(rng);
-            result_type e = -std::log(runif(rng));
+            result_type u = u01(rng);
+            result_type e = -std::log(u01(rng));
             if (u > constant.d) {
                 u = -std::log(constant.c * (1 - u));
                 e += u;
@@ -175,13 +175,13 @@ class GammaDistribution
     result_type generate_w(RNGType &rng, const param_type &,
         const internal::GammaDistributionConstant<RealType> &constant)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
         result_type u = 0;
         result_type e = 0;
         result_type r = 0;
         do {
-            u = -std::log(runif(rng));
-            e = -std::log(runif(rng));
+            u = -std::log(u01(rng));
+            e = -std::log(u01(rng));
             r = std::exp(constant.c * std::log(u));
         } while (u + e < constant.d + r);
 
@@ -192,10 +192,10 @@ class GammaDistribution
     result_type generate_n(RNGType &rng, const param_type &,
         const internal::GammaDistributionConstant<RealType> &constant)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
         NormalDistribution<RealType> rnorm(0, 1);
         while (true) {
-            result_type u = runif(rng);
+            result_type u = u01(rng);
             result_type e = 0;
             result_type v = 0;
             result_type w = 0;
@@ -219,9 +219,9 @@ class GammaDistribution
     result_type generate_e(RNGType &rng, const param_type &,
         const internal::GammaDistributionConstant<RealType> &)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
 
-        return -std::log(runif(rng));
+        return -std::log(u01(rng));
     }
 }; // class GammaDistribution
 

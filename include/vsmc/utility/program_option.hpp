@@ -347,11 +347,9 @@ class ProgramOptionMap
         , option_map_(other.option_map_)
         , option_list_(other.option_list_)
     {
-        for (option_map_type::iterator iter = option_map_.begin();
-             iter != option_map_.end(); ++iter) {
-            if (iter->second.first)
-                iter->second.first = iter->second.first->clone();
-        }
+        for (auto &option : option_map_)
+            if (option.second.first)
+                option.second.first = option.second.first->clone();
     }
 
     ProgramOptionMap &operator=(const ProgramOptionMap &other)
@@ -359,20 +357,14 @@ class ProgramOptionMap
         if (this != &other) {
             silent_ = other.silent_;
             auto_help_ = other.auto_help_;
-            for (option_map_type::iterator iter = option_map_.begin();
-                 iter != option_map_.end(); ++iter) {
-                if (iter->second.first)
-                    delete iter->second.first;
-            }
-
+            for (auto &option : option_map_)
+                if (option.second.first != nullptr)
+                    delete option.second.first;
             option_map_ = other.option_map_;
             option_list_ = other.option_list_;
-
-            for (option_map_type::iterator iter = option_map_.begin();
-                 iter != option_map_.end(); ++iter) {
-                if (iter->second.first)
-                    iter->second.first = iter->second.first->clone();
-            }
+            for (auto &option : option_map_)
+                if (option.second.first)
+                    option.second.first = option.second.first->clone();
         }
 
         return *this;
@@ -385,9 +377,6 @@ class ProgramOptionMap
         , option_map_(std::move(other.option_map_))
         , option_list_(std::move(other.option_list_))
     {
-        other.help_ptr_ = nullptr;
-        other.option_map_.clear();
-        other.option_list_.clear();
     }
 
     ProgramOptionMap &operator=(ProgramOptionMap &&other)
@@ -397,9 +386,6 @@ class ProgramOptionMap
             help_ptr_ = other.help_ptr_;
             option_map_ = std::move(other.option_map_);
             option_list_ = std::move(other.option_list_);
-            other.help_ptr_ = nullptr;
-            other.option_map_.clear();
-            other.option_list_.clear();
         }
 
         return *this;
@@ -407,11 +393,9 @@ class ProgramOptionMap
 
     ~ProgramOptionMap()
     {
-        for (option_map_type::iterator iter = option_map_.begin();
-             iter != option_map_.end(); ++iter) {
-            if (iter->second.first != nullptr)
-                delete iter->second.first;
-        }
+        for (auto &option : option_map_)
+            if (option.second.first != nullptr)
+                delete option.second.first;
     }
 
     /// \brief Add an option with a single value

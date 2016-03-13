@@ -74,8 +74,8 @@ class LaplaceDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01Distribution<RealType> runif;
-        result_type u = runif(rng) - static_cast<result_type>(0.5);
+        U01Distribution<RealType> u01;
+        result_type u = u01(rng) - static_cast<result_type>(0.5);
 
         return u > 0 ? param.a() - param.b() * std::log(1 - 2 * u) :
                        param.a() + param.b() * std::log(1 + 2 * u);

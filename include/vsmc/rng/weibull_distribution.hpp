@@ -68,11 +68,12 @@ class WeibullDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
 
-        if (internal::is_equal<RealType>(param.a(), static_cast<RealType>(1)))
-            return -param.b() * std::log(runif(rng));
-        return param.b() * std::pow(-std::log(runif(rng)), 1 / param.a());
+        return internal::is_equal<RealType>(
+                   param.a(), static_cast<RealType>(1)) ?
+            -param.b() * std::log(u01(rng)) :
+            param.b() * std::pow(-std::log(u01(rng)), 1 / param.a());
     }
 }; // class WeibullDistribution
 

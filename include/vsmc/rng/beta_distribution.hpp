@@ -222,8 +222,8 @@ class BetaDistribution
     result_type generate_as(RNGType &rng, const param_type &,
         const internal::BetaDistributionConstant<RealType> &)
     {
-        U01Distribution<RealType> runif;
-        result_type u = runif(rng);
+        U01Distribution<RealType> u01;
+        result_type u = u01(rng);
         u = std::sin(
             -const_pi_by2<result_type>() + const_pi<result_type>() * u);
 
@@ -235,42 +235,42 @@ class BetaDistribution
     result_type generate_11(RNGType &rng, const param_type &,
         const internal::BetaDistributionConstant<RealType> &)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
 
-        return runif(rng);
+        return u01(rng);
     }
 
     template <typename RNGType>
     result_type generate_1x(RNGType &rng, const param_type &,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
 
-        return 1 - std::exp(constant.b * std::log(runif(rng)));
+        return 1 - std::exp(constant.b * std::log(u01(rng)));
     }
 
     template <typename RNGType>
     result_type generate_x1(RNGType &rng, const param_type &,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
 
-        return std::exp(constant.a * std::log(runif(rng)));
+        return std::exp(constant.a * std::log(u01(rng)));
     }
 
     template <typename RNGType>
     result_type generate_c(RNGType &rng, const param_type &param,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
         const result_type ln_4 = 2 * const_ln_2<result_type>();
         result_type x = 0;
         result_type y = 0;
         result_type left = 0;
         result_type right = 0;
         do {
-            result_type u1 = runif(rng);
-            result_type u2 = runif(rng);
+            result_type u1 = u01(rng);
+            result_type u2 = u01(rng);
             result_type v = constant.b * std::log(u1 / (1 - u1));
             x = param.alpha() * std::exp(v);
             y = param.beta() + x;
@@ -286,12 +286,12 @@ class BetaDistribution
     result_type generate_j(RNGType &rng, const param_type &,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
         result_type x = 0;
         result_type y = 0;
         do {
-            x = std::pow(runif(rng), constant.a);
-            y = std::pow(runif(rng), constant.b);
+            x = std::pow(u01(rng), constant.a);
+            y = std::pow(u01(rng), constant.b);
         } while (x + y > 1);
 
         return x / (x + y);
@@ -301,10 +301,10 @@ class BetaDistribution
     result_type generate_a1(RNGType &rng, const param_type &param,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
         while (true) {
-            result_type u = runif(rng);
-            result_type e = -std::log(runif(rng));
+            result_type u = u01(rng);
+            result_type e = -std::log(u01(rng));
             result_type x = 0;
             result_type v = 0;
             if (u < constant.p) {
@@ -325,10 +325,10 @@ class BetaDistribution
     result_type generate_a2(RNGType &rng, const param_type &param,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
         while (true) {
-            result_type u = runif(rng);
-            result_type e = -std::log(runif(rng));
+            result_type u = u01(rng);
+            result_type e = -std::log(u01(rng));
             result_type x = 0;
             result_type v = 0;
             if (u < constant.p) {
@@ -349,10 +349,10 @@ class BetaDistribution
     result_type generate_a3(RNGType &rng, const param_type &param,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
         while (true) {
-            result_type u = runif(rng);
-            result_type e = -std::log(runif(rng));
+            result_type u = u01(rng);
+            result_type e = -std::log(u01(rng));
             result_type x = 0;
             result_type v = 0;
             if (u < constant.p) {

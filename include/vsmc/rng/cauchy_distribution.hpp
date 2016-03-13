@@ -70,10 +70,10 @@ class CauchyDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
 
         return param.a() +
-            param.b() * std::tan(const_pi<result_type>() * (1 - runif(rng)));
+            param.b() * std::tan(const_pi<result_type>() * (1 - u01(rng)));
     }
 }; // class CauchyDistribution
 

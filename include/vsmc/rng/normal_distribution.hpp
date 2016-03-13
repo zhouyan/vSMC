@@ -204,9 +204,9 @@ class NormalDistribution
             z = v_;
             saved_ = false;
         } else {
-            U01Distribution<RealType> runif;
-            result_type u1 = std::sqrt(-2 * std::log(runif(rng)));
-            result_type u2 = const_pi_2<result_type>() * runif(rng);
+            U01Distribution<RealType> u01;
+            result_type u1 = std::sqrt(-2 * std::log(u01(rng)));
+            result_type u2 = const_pi_2<result_type>() * u01(rng);
             z = u1 * std::cos(u2);
             v_ = u1 * std::sin(u2);
             saved_ = true;
@@ -257,9 +257,9 @@ inline void normal_distribution(
         internal::normal_distribution_impl<k>(rng, k, r, mean, stddev);
     internal::normal_distribution_impl<k>(rng, l, r, mean, stddev);
     if (n % 2 != 0) {
-        U01Distribution<RealType> runif;
-        RealType u = runif(rng);
-        RealType v = runif(rng);
+        U01Distribution<RealType> u01;
+        RealType u = u01(rng);
+        RealType v = u01(rng);
         r[l - 1] = mean +
             stddev * std::sqrt(-2 * std::log(u)) *
                 std::cos(const_pi_2<RealType>() * v);

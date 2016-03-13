@@ -67,9 +67,9 @@ class RayleighDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
 
-        return param.sigma() * std::sqrt(-2 * std::log(runif(rng)));
+        return param.sigma() * std::sqrt(-2 * std::log(u01(rng)));
     }
 }; // class RayleighDistribution
 

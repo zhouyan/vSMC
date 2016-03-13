@@ -47,12 +47,12 @@ namespace internal
 {
 
 template <std::size_t, typename T, std::size_t K>
-inline void increment_single(std::array<T, K> &, std::false_type) noexcept
+inline void increment_single(std::array<T, K> &, std::false_type)
 {
 }
 
 template <std::size_t N, typename T, std::size_t K>
-inline void increment_single(std::array<T, K> &ctr, std::true_type) noexcept
+inline void increment_single(std::array<T, K> &ctr, std::true_type)
 {
     if (++std::get<N>(ctr) != 0)
         return;
@@ -65,7 +65,7 @@ inline void increment_single(std::array<T, K> &ctr, std::true_type) noexcept
 /// \brief Increment a counter by one
 /// \ingroup RNG
 template <typename T, std::size_t K>
-inline void increment(std::array<T, K> &ctr) noexcept
+inline void increment(std::array<T, K> &ctr)
 {
     internal::increment_single<0>(ctr, std::true_type());
 }
@@ -73,8 +73,7 @@ inline void increment(std::array<T, K> &ctr) noexcept
 /// \brief Increment a counter by given steps
 /// \ingroup RNG
 template <typename T, std::size_t K, T NSkip>
-inline void increment(
-    std::array<T, K> &ctr, std::integral_constant<T, NSkip>) noexcept
+inline void increment(std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
 {
     if (ctr.front() < std::numeric_limits<T>::max() - NSkip) {
         ctr.front() += NSkip;
@@ -88,7 +87,7 @@ inline void increment(
 /// \brief Increment a counter by given steps
 /// \ingroup RNG
 template <typename T, std::size_t K>
-inline void increment(std::array<T, K> &ctr, T nskip) noexcept
+inline void increment(std::array<T, K> &ctr, T nskip)
 {
     if (ctr.front() < std::numeric_limits<T>::max() - nskip) {
         ctr.front() += nskip;
@@ -104,13 +103,13 @@ namespace internal
 
 template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
 inline void increment_block_set(const std::array<T, K> &,
-    std::array<std::array<T, K>, Blocks> &, std::false_type) noexcept
+    std::array<std::array<T, K>, Blocks> &, std::false_type)
 {
 }
 
 template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
 inline void increment_block_set(const std::array<T, K> &ctr,
-    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type) noexcept
+    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
 {
     std::get<B>(ctr_block) = ctr;
     increment_block_set<B + 1>(
@@ -119,13 +118,13 @@ inline void increment_block_set(const std::array<T, K> &ctr,
 
 template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
 inline void increment_block(std::array<T, K> &,
-    std::array<std::array<T, K>, Blocks> &, std::false_type) noexcept
+    std::array<std::array<T, K>, Blocks> &, std::false_type)
 {
 }
 
 template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
 inline void increment_block(std::array<T, K> &ctr,
-    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type) noexcept
+    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
 {
     increment(std::get<B>(ctr_block), std::integral_constant<T, B + 1>());
     increment_block<B + 1>(
@@ -134,13 +133,13 @@ inline void increment_block(std::array<T, K> &ctr,
 
 template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
 inline void increment_block_safe(std::array<T, K> &,
-    std::array<std::array<T, K>, Blocks> &, std::false_type) noexcept
+    std::array<std::array<T, K>, Blocks> &, std::false_type)
 {
 }
 
 template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
 inline void increment_block_safe(std::array<T, K> &ctr,
-    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type) noexcept
+    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
 {
     std::get<B>(ctr_block).front() += B + 1;
     increment_block_safe<B + 1>(
@@ -153,8 +152,8 @@ inline void increment_block_safe(std::array<T, K> &ctr,
 /// array of counters
 /// \ingroup RNG
 template <typename T, std::size_t K, std::size_t Blocks>
-inline void increment(std::array<T, K> &ctr,
-    std::array<std::array<T, K>, Blocks> &ctr_block) noexcept
+inline void increment(
+    std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
 {
     internal::increment_block_set<0>(
         ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
@@ -173,7 +172,7 @@ namespace internal
 
 template <typename T, std::size_t K>
 inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
-    std::array<T, K> *ctr_block, std::false_type) noexcept
+    std::array<T, K> *ctr_block, std::false_type)
 {
     for (std::size_t i = 0; i != n; ++i)
         ctr_block[i] = ctr;
@@ -183,7 +182,7 @@ inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
 
 template <typename T, std::size_t K>
 inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
-    std::array<T, K> *ctr_block, std::true_type) noexcept
+    std::array<T, K> *ctr_block, std::true_type)
 {
     const std::size_t Blocks = M256I<T>::size() / K;
     const std::size_t m = n / Blocks;
@@ -204,8 +203,8 @@ inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
 }
 
 template <typename T, std::size_t K>
-inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
-    std::array<T, K> *ctr_block) noexcept
+inline void increment_block_set(
+    const std::array<T, K> &ctr, std::size_t n, std::array<T, K> *ctr_block)
 {
     increment_block_set(ctr, n, ctr_block,
         std::integral_constant<bool, M256I<T>::size() % K == 0>());
@@ -215,7 +214,7 @@ inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
 
 template <typename T, std::size_t K>
 inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
-    std::array<T, K> *ctr_block, std::true_type) noexcept
+    std::array<T, K> *ctr_block, std::true_type)
 {
     const std::size_t Blocks = M128I<T>::size() / K;
     const std::size_t m = n / Blocks;
@@ -236,8 +235,8 @@ inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
 }
 
 template <typename T, std::size_t K>
-inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
-    std::array<T, K> *ctr_block) noexcept
+inline void increment_block_set(
+    const std::array<T, K> &ctr, std::size_t n, std::array<T, K> *ctr_block)
 {
     increment_block_set(ctr, n, ctr_block,
         std::integral_constant<bool, M128I<T>::size() % K == 0>());
@@ -246,8 +245,8 @@ inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
 #else // VSMC_HAS_SSE2
 
 template <typename T, std::size_t K>
-inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
-    std::array<T, K> *ctr_block) noexcept
+inline void increment_block_set(
+    const std::array<T, K> &ctr, std::size_t n, std::array<T, K> *ctr_block)
 {
     increment_block_set(ctr, n, ctr_block, std::false_type());
 }
@@ -261,7 +260,7 @@ inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
 /// \ingroup RNG
 template <typename T, std::size_t K>
 inline void increment(
-    std::array<T, K> &ctr, std::size_t n, std::array<T, K> *ctr_block) noexcept
+    std::array<T, K> &ctr, std::size_t n, std::array<T, K> *ctr_block)
 {
     if (n == 0)
         return;
@@ -300,26 +299,20 @@ class CounterEngine
     using ctr_type = typename Generator::ctr_type;
     using key_type = typename Generator::key_type;
 
-    explicit CounterEngine(result_type s = 0) noexcept : index_(M_)
-    {
-        seed(s);
-    }
+    explicit CounterEngine(result_type s = 0) : index_(M_) { seed(s); }
 
     template <typename SeedSeq>
     explicit CounterEngine(SeedSeq &seq,
         typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
-            key_type, CounterEngine<Generator>>::value>::type * =
-            nullptr) noexcept : index_(M_)
+            key_type, CounterEngine<Generator>>::value>::type * = nullptr)
+        : index_(M_)
     {
         seed(seq);
     }
 
-    explicit CounterEngine(const key_type &k) noexcept : index_(M_)
-    {
-        seed(k);
-    }
+    explicit CounterEngine(const key_type &k) : index_(M_) { seed(k); }
 
-    void seed(result_type s) noexcept
+    void seed(result_type s)
     {
         key_.fill(0);
         key_.front() = s;
@@ -327,37 +320,37 @@ class CounterEngine
     }
 
     template <typename SeedSeq>
-    void seed(SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
-            key_type>::value>::type * = nullptr) noexcept
+    void seed(
+        SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
+                          result_type, key_type>::value>::type * = nullptr)
     {
         seq.generator(key_.begin(), key_.end());
         reset();
     }
 
-    void seed(const key_type &k) noexcept
+    void seed(const key_type &k)
     {
         key_ = k;
         reset();
     }
 
-    const ctr_type &ctr() const noexcept { return ctr_; }
+    const ctr_type &ctr() const { return ctr_; }
 
-    const key_type &key() const noexcept { return key_; }
+    const key_type &key() const { return key_; }
 
-    void ctr(const ctr_type &c) noexcept
+    void ctr(const ctr_type &c)
     {
         ctr_ = c;
         index_ = M_;
     }
 
-    void key(const key_type &k) noexcept
+    void key(const key_type &k)
     {
         key_ = k;
         reset();
     }
 
-    result_type operator()() noexcept
+    result_type operator()()
     {
         if (index_ == M_) {
             generator_(ctr_, key_, buffer_);
@@ -367,7 +360,7 @@ class CounterEngine
         return buffer_[index_++];
     }
 
-    void operator()(std::size_t n, result_type *r) noexcept
+    void operator()(std::size_t n, result_type *r)
     {
         if (n * sizeof(result_type) <= 32) {
             for (std::size_t i = 0; i != n; ++i)
@@ -403,7 +396,7 @@ class CounterEngine
             r[i] = operator()();
     }
 
-    void discard(result_type nskip) noexcept
+    void discard(result_type nskip)
     {
         std::size_t n = static_cast<std::size_t>(nskip);
         if (index_ + n <= M_) {
@@ -425,18 +418,18 @@ class CounterEngine
         index_ = n % M_;
     }
 
-    static constexpr result_type min() noexcept
+    static constexpr result_type min()
     {
         return std::numeric_limits<result_type>::min();
     }
 
-    static constexpr result_type max() noexcept
+    static constexpr result_type max()
     {
         return std::numeric_limits<result_type>::max();
     }
 
     friend bool operator==(const CounterEngine<Generator> &eng1,
-        const CounterEngine<Generator> &eng2) noexcept
+        const CounterEngine<Generator> &eng2)
     {
         if (eng1.buffer_ != eng2.buffer_)
             return false;
@@ -450,7 +443,7 @@ class CounterEngine
     }
 
     friend bool operator!=(const CounterEngine<Generator> &eng1,
-        const CounterEngine<Generator> &eng2) noexcept
+        const CounterEngine<Generator> &eng2)
     {
         return !(eng1 == eng2);
     }
@@ -501,7 +494,7 @@ class CounterEngine
     Generator generator_;
     std::size_t index_;
 
-    void reset() noexcept
+    void reset()
     {
         ctr_.fill(0);
         generator_.reset(key_);

@@ -67,9 +67,9 @@ class ExponentialDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
 
-        return -std::log(runif(rng)) / param.lambda();
+        return -std::log(u01(rng)) / param.lambda();
     }
 }; // class ExponentialDistribution
 

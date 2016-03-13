@@ -87,7 +87,7 @@ namespace internal
 #endif
 
 template <typename T>
-inline bool is_equal(const T &a, const T &b) noexcept
+inline bool is_equal(const T &a, const T &b)
 {
     return a == b;
 }
@@ -135,7 +135,7 @@ using Array = typename std::conditional<Dim == Dynamic, Vector<T>,
     std::array<T, Dim>>::type;
 
 template <typename T, std::size_t N>
-inline void resize(std::array<T, N> &, std::size_t) noexcept
+inline void resize(std::array<T, N> &, std::size_t)
 {
 }
 

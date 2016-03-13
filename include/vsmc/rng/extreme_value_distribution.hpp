@@ -70,9 +70,9 @@ class ExtremeValueDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01Distribution<RealType> runif;
+        U01Distribution<RealType> u01;
 
-        return param.a() - param.b() * std::log(-std::log(runif(rng)));
+        return param.a() - param.b() * std::log(-std::log(u01(rng)));
     }
 }; // class ExtremeValueDistribution
 
