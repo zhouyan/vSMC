@@ -250,7 +250,7 @@ using AlignedMemory = VSMC_ALIGNED_MEMORY_TYPE;
 /// shall behave just like `std::free`.
 template <typename T, std::size_t Alignment = VSMC_ALIGNMENT,
     typename Memory = AlignedMemory>
-class AlignedAllocator
+class AlignedAllocator : public std::allocator<T>
 {
     static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,
         "**AlignedAllocator** USED WITH Alignment OTHER THAN A POWER OF TWO "
@@ -278,23 +278,20 @@ class AlignedAllocator
 
     AlignedAllocator() noexcept {}
 
-    AlignedAllocator(const AlignedAllocator<T, Alignment, Memory> &) noexcept
+    AlignedAllocator(
+        const AlignedAllocator<T, Alignment, Memory> &other) noexcept
+        : std::allocator<T>(other)
     {
     }
 
     template <typename U>
-    AlignedAllocator(const AlignedAllocator<U, Alignment, Memory> &) noexcept
+    AlignedAllocator(
+        const AlignedAllocator<U, Alignment, Memory> &other) noexcept
+        : std::allocator<T>(static_cast<std::allocator<U>>(other))
     {
     }
 
     ~AlignedAllocator() noexcept {}
-
-    static pointer address(reference x) noexcept { return std::addressof(x); }
-
-    static const_pointer address(const_reference x) noexcept
-    {
-        return std::addressof(x);
-    }
 
     static pointer allocate(size_type n, const void * = nullptr)
     {
@@ -309,38 +306,6 @@ class AlignedAllocator
     {
         if (ptr != nullptr)
             Memory::aligned_free(ptr);
-    }
-
-    static constexpr size_type max_size() noexcept
-    {
-        return std::numeric_limits<size_type>::max();
-    }
-
-    template <typename U, typename... Args>
-    static void construct(U *ptr, Args &&... args)
-    {
-        construct(std::integral_constant<bool, std::is_scalar<U>::value>(),
-            ptr, std::forward<Args>(args)...);
-    }
-
-    template <typename U>
-    static void destroy(U *ptr)
-    {
-        std::allocator<U> alloc;
-        alloc.destroy(ptr);
-    }
-
-    private:
-    template <typename U, typename... Args>
-    static void construct(std::true_type, U *, Args &&...)
-    {
-    }
-
-    template <typename U, typename... Args>
-    static void construct(std::false_type, U *ptr, Args &&... args)
-    {
-        std::allocator<U> alloc;
-        alloc.construct(ptr, std::forward<Args>(args)...);
     }
 }; // class AlignedAllocator
 
