@@ -37,6 +37,7 @@
 
 #include <cstddef>
 #include <cstdlib>
+#include <limits>
 #include <memory>
 #include <vector>
 
