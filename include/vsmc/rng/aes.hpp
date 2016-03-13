@@ -55,7 +55,7 @@ namespace internal
 {
 
 template <std::size_t>
-inline __m128i AESKeyGenAssist(__m128i);
+inline __m128i AESKeyGenAssist(__m128i) noexcept;
 
 VSMC_DEFINE_RNG_AES_KEY_GEN_ASSIST(0x00, 0x8D)
 VSMC_DEFINE_RNG_AES_KEY_GEN_ASSIST(0x01, 0x01)

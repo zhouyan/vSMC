@@ -111,22 +111,22 @@ class AESNIGenerator
 
     template <std::size_t K>
     void enc_first(std::array<M128I<>, K> &state,
-        const std::array<M128I<>, Rounds + 1> &rk) noexcept const
+        const std::array<M128I<>, Rounds + 1> &rk) const noexcept
     {
         enc_first<0>(state, rk, std::true_type());
     }
 
     template <std::size_t, std::size_t K>
     void enc_first(std::array<M128I<>, K> &,
-        const std::array<M128I<>, Rounds + 1> &,
-        std::false_type) noexcept const
+        const std::array<M128I<>, Rounds + 1> &, std::false_type) const
+        noexcept
     {
     }
 
     template <std::size_t B, std::size_t K>
     void enc_first(std::array<M128I<>, K> &state,
-        const std::array<M128I<>, Rounds + 1> &rk,
-        std::true_type) noexcept const
+        const std::array<M128I<>, Rounds + 1> &rk, std::true_type) const
+        noexcept
     {
         std::get<B>(state) ^= std::get<0>(rk);
         enc_first<B + 1>(state, rk, std::integral_constant<bool, B + 1 < K>());
@@ -134,15 +134,15 @@ class AESNIGenerator
 
     template <std::size_t, std::size_t K>
     void enc_round(std::array<M128I<>, K> &,
-        const std::array<M128I<>, Rounds + 1> &,
-        std::false_type) noexcept const
+        const std::array<M128I<>, Rounds + 1> &, std::false_type) const
+        noexcept
     {
     }
 
     template <std::size_t N, std::size_t K>
     void enc_round(std::array<M128I<>, K> &state,
-        const std::array<M128I<>, Rounds + 1> &rk,
-        std::true_type) noexcept const
+        const std::array<M128I<>, Rounds + 1> &rk, std::true_type) const
+        noexcept
     {
         enc_round_block<0, N>(state, rk, std::true_type());
         enc_round<N + 1>(
@@ -151,15 +151,15 @@ class AESNIGenerator
 
     template <std::size_t, std::size_t, std::size_t K>
     void enc_round_block(std::array<M128I<>, K> &,
-        const std::array<M128I<>, Rounds + 1> &,
-        std::false_type) noexcept const
+        const std::array<M128I<>, Rounds + 1> &, std::false_type) const
+        noexcept
     {
     }
 
     template <std::size_t B, std::size_t N, std::size_t K>
     void enc_round_block(std::array<M128I<>, K> &state,
-        const std::array<M128I<>, Rounds + 1> &rk,
-        std::true_type) noexcept const
+        const std::array<M128I<>, Rounds + 1> &rk, std::true_type) const
+        noexcept
     {
         std::get<B>(state) = _mm_aesenc_si128(
             std::get<B>(state).value(), std::get<N>(rk).value());
@@ -169,22 +169,22 @@ class AESNIGenerator
 
     template <std::size_t K>
     void enc_last(std::array<M128I<>, K> &state,
-        const std::array<M128I<>, Rounds + 1> &rk) noexcept const
+        const std::array<M128I<>, Rounds + 1> &rk) const noexcept
     {
         enc_last<0>(state, rk, std::true_type());
     }
 
     template <std::size_t, std::size_t K>
     void enc_last(std::array<M128I<>, K> &,
-        const std::array<M128I<>, Rounds + 1> &,
-        std::false_type) noexcept const
+        const std::array<M128I<>, Rounds + 1> &, std::false_type) const
+        noexcept
     {
     }
 
     template <std::size_t B, std::size_t K>
     void enc_last(std::array<M128I<>, K> &state,
-        const std::array<M128I<>, Rounds + 1> &rk,
-        std::true_type) noexcept const
+        const std::array<M128I<>, Rounds + 1> &rk, std::true_type) const
+        noexcept
     {
         std::get<B>(state) = _mm_aesenclast_si128(
             std::get<B>(state).value(), std::get<Rounds>(rk).value());
