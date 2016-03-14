@@ -360,7 +360,7 @@ class ThreefryGenerator
         internal::ThreefryRotate<ResultType, K, N>::eval(state);
         internal::ThreefryInsertKey<ResultType, K, N>::eval(state, par);
         generate<N + 1>(
-            state, par, std::integral_constant < bool, N<Rounds>());
+            state, par, std::integral_constant<bool, (N < Rounds)>());
     }
 }; // class ThreefryGenerator
 
@@ -562,7 +562,7 @@ class ThreefryGeneratorSSE2
         internal::ThreefryRotate<M128I<ResultType>, K, N>::eval(state);
         internal::ThreefryInsertKey<M128I<ResultType>, K, N>::eval(state, par);
         generate<N + 1>(
-            state, par, std::integral_constant < bool, N<Rounds>());
+            state, par, std::integral_constant<bool, (N < Rounds)>());
     }
 }; // class ThreefryGeneratorSSE2
 
@@ -773,7 +773,7 @@ class ThreefryGeneratorAVX2
         internal::ThreefryRotate<M256I<ResultType>, K, N>::eval(state);
         internal::ThreefryInsertKey<M256I<ResultType>, K, N>::eval(state, par);
         generate<N + 1>(
-            state, par, std::integral_constant < bool, N<Rounds>());
+            state, par, std::integral_constant<bool, (N < Rounds)>());
     }
 }; // class ThreefryGeneratorAVX2
 
