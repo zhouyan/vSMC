@@ -67,23 +67,8 @@ class U01Distribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &)
     {
-        return generate(rng,
-            std::integral_constant<bool, RNGBits<RNGType>::value >= 32>());
-    }
-
-    template <typename RNGType>
-    result_type generate(RNGType &rng, std::true_type)
-    {
-        return u01<internal::U01UIntType<RNGType>, result_type>(
+        return u01_co<internal::U01UIntType<RNGType>, result_type>(
             UniformBits<internal::U01UIntType<RNGType>>::eval(rng));
-    }
-
-    template <typename RNGType>
-    result_type generate(RNGType &rng, std::false_type)
-    {
-        std::uniform_real_distribution<RealType> u01;
-
-        return u01(rng);
     }
 }; // class U01Distribution
 
@@ -96,7 +81,7 @@ inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
     U01UIntType<RNGType> s[K];
     uniform_bits_distribution(rng, n, s);
     for (std::size_t i = 0; i != n; ++i)
-        r[i] = u01<U01UIntType<RNGType>, RealType>(s[i]);
+        r[i] = u01_co<U01UIntType<RNGType>, RealType>(s[i]);
 }
 
 } // namespace vsmc::internal
