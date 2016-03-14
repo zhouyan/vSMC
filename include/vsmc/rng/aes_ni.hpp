@@ -57,21 +57,20 @@ class AESNIGenerator
     using ctr_type = std::array<ResultType, M128I<ResultType>::size()>;
     using key_type = typename KeySeqType::key_type;
 
-    static constexpr std::size_t size() 
+    static constexpr std::size_t size()
     {
         return Blocks * M128I<ResultType>::size();
     }
 
-    void reset(const key_type &key)  { key_seq_.reset(key); }
+    void reset(const key_type &key) { key_seq_.reset(key); }
 
     void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, Blocks * M128I<ResultType>::size()>
-            &buffer) 
+        std::array<ResultType, size()> &buffer) const
     {
         union {
             std::array<M128I<>, Blocks> state;
             std::array<ctr_type, Blocks> ctr_block;
-            std::array<result_type, size()> result;
+            std::array<ResultType, size()> result;
         } buf;
 
         std::array<M128I<>, Rounds + 1> rk;
@@ -84,26 +83,25 @@ class AESNIGenerator
         buffer = buf.result;
     }
 
-    std::size_t operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        result_type *r) const 
+    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
+        std::array<ResultType, size()> *buffer) const
     {
-        const std::size_t K = 8;
-        const std::size_t M = K * M128I<ResultType>::size();
-        const std::size_t m = n / M;
+        union {
+            std::array<M128I<>, Blocks> state;
+            std::array<ctr_type, Blocks> ctr_block;
+            std::array<ResultType, size()> result;
+        } buf;
+
         std::array<M128I<>, Rounds + 1> rk;
         key_seq_(key, rk);
-        increment(ctr, m * K, reinterpret_cast<ctr_type *>(r));
-        std::array<M128I<>, K> *s =
-            reinterpret_cast<std::array<M128I<>, K> *>(r);
-        for (std::size_t i = 0; i != m; ++i) {
-            enc_first(s[i], rk);
-            enc_round<1>(s[i], rk, std::integral_constant<bool, 1 < Rounds>());
-            enc_last(s[i], rk);
+        for (std::size_t i = 0; i != n; ++i) {
+            increment(ctr, buf.ctr_block);
+            enc_first(buf.state, rk);
+            enc_round<1>(
+                buf.state, rk, std::integral_constant<bool, 1 < Rounds>());
+            enc_last(buf.state, rk);
+            buffer[i] = buf.result;
         }
-        n -= m * M;
-        r += m * M;
-
-        return m * M;
     }
 
     private:
@@ -111,7 +109,7 @@ class AESNIGenerator
 
     template <std::size_t K>
     void enc_first(std::array<M128I<>, K> &state,
-        const std::array<M128I<>, Rounds + 1> &rk) const 
+        const std::array<M128I<>, Rounds + 1> &rk) const
     {
         enc_first<0>(state, rk, std::true_type());
     }
@@ -119,14 +117,14 @@ class AESNIGenerator
     template <std::size_t, std::size_t K>
     void enc_first(std::array<M128I<>, K> &,
         const std::array<M128I<>, Rounds + 1> &, std::false_type) const
-        
+
     {
     }
 
     template <std::size_t B, std::size_t K>
     void enc_first(std::array<M128I<>, K> &state,
         const std::array<M128I<>, Rounds + 1> &rk, std::true_type) const
-        
+
     {
         std::get<B>(state) ^= std::get<0>(rk);
         enc_first<B + 1>(state, rk, std::integral_constant<bool, B + 1 < K>());
@@ -135,14 +133,14 @@ class AESNIGenerator
     template <std::size_t, std::size_t K>
     void enc_round(std::array<M128I<>, K> &,
         const std::array<M128I<>, Rounds + 1> &, std::false_type) const
-        
+
     {
     }
 
     template <std::size_t N, std::size_t K>
     void enc_round(std::array<M128I<>, K> &state,
         const std::array<M128I<>, Rounds + 1> &rk, std::true_type) const
-        
+
     {
         enc_round_block<0, N>(state, rk, std::true_type());
         enc_round<N + 1>(
@@ -152,14 +150,14 @@ class AESNIGenerator
     template <std::size_t, std::size_t, std::size_t K>
     void enc_round_block(std::array<M128I<>, K> &,
         const std::array<M128I<>, Rounds + 1> &, std::false_type) const
-        
+
     {
     }
 
     template <std::size_t B, std::size_t N, std::size_t K>
     void enc_round_block(std::array<M128I<>, K> &state,
         const std::array<M128I<>, Rounds + 1> &rk, std::true_type) const
-        
+
     {
         std::get<B>(state) = _mm_aesenc_si128(
             std::get<B>(state).value(), std::get<N>(rk).value());
@@ -169,7 +167,7 @@ class AESNIGenerator
 
     template <std::size_t K>
     void enc_last(std::array<M128I<>, K> &state,
-        const std::array<M128I<>, Rounds + 1> &rk) const 
+        const std::array<M128I<>, Rounds + 1> &rk) const
     {
         enc_last<0>(state, rk, std::true_type());
     }
@@ -177,14 +175,14 @@ class AESNIGenerator
     template <std::size_t, std::size_t K>
     void enc_last(std::array<M128I<>, K> &,
         const std::array<M128I<>, Rounds + 1> &, std::false_type) const
-        
+
     {
     }
 
     template <std::size_t B, std::size_t K>
     void enc_last(std::array<M128I<>, K> &state,
         const std::array<M128I<>, Rounds + 1> &rk, std::true_type) const
-        
+
     {
         std::get<B>(state) = _mm_aesenclast_si128(
             std::get<B>(state).value(), std::get<Rounds>(rk).value());

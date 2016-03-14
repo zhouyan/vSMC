@@ -326,40 +326,35 @@ class ThreefryGenerator
 
     void reset(const key_type &) {}
 
-    void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, K> &buffer) const
+    void operator()(ctr_type &ctr, const key_type &key, ctr_type &buffer) const
     {
-        std::array<result_type, K + 1> par;
+        std::array<ResultType, K + 1> par;
         internal::ThreefryInitPar<ResultType, K>::eval(key, par);
         increment(ctr);
         buffer = ctr;
         generate<0>(buffer, par, std::true_type());
     }
 
-    std::size_t operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        result_type *r) const
+    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
+        ctr_type *buffer) const
     {
-        const std::size_t m = n / size();
-        std::array<result_type, K + 1> par;
+        std::array<ResultType, K + 1> par;
         internal::ThreefryInitPar<ResultType, K>::eval(key, par);
-        ctr_type *s = reinterpret_cast<ctr_type *>(r);
-        increment(ctr, m, s);
-        for (std::size_t i = 0; i != m; ++i)
-            generate<0>(s[i], par, std::true_type());
-
-        return m * size();
+        increment(ctr, n, buffer);
+        for (std::size_t i = 0; i != n; ++i)
+            generate<0>(buffer[i], par, std::true_type());
     }
 
     private:
     template <std::size_t>
-    void generate(std::array<result_type, K> &,
-        const std::array<result_type, K + 1> &, std::false_type) const
+    void generate(std::array<ResultType, K> &,
+        const std::array<ResultType, K + 1> &, std::false_type) const
     {
     }
 
     template <std::size_t N>
-    void generate(std::array<result_type, K> &state,
-        const std::array<result_type, K + 1> &par, std::true_type) const
+    void generate(std::array<ResultType, K> &state,
+        const std::array<ResultType, K + 1> &par, std::true_type) const
 
     {
         internal::ThreefryRotate<ResultType, K, N>::eval(state);
@@ -518,14 +513,14 @@ class ThreefryGeneratorSSE2
     void reset(const key_type &) {}
 
     void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, K * M128I<ResultType>::size()> &buffer)
+        std::array<ResultType, size()> &buffer) const
     {
         union {
             std::array<M128I<ResultType>, K> state;
             std::array<ResultType, size()> result;
         } buf;
 
-        std::array<result_type, K + 1> p;
+        std::array<ResultType, K + 1> p;
         std::array<M128I<ResultType>, K + 1> par;
         internal::ThreefryInitPar<ResultType, K>::eval(key, p);
         internal::ThreefryParPackSSE2<ResultType, K>::eval(p, par);
@@ -534,22 +529,35 @@ class ThreefryGeneratorSSE2
         buffer = buf.result;
     }
 
-    std::size_t operator()(
-        ctr_type &, const key_type &, std::size_t, result_type *) const
+    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
+        std::array<ResultType, size()> *buffer) const
     {
-        return 0;
+        union {
+            std::array<M128I<ResultType>, K> state;
+            std::array<ResultType, size()> result;
+        } buf;
+
+        std::array<ResultType, K + 1> p;
+        std::array<M128I<ResultType>, K + 1> par;
+        internal::ThreefryInitPar<ResultType, K>::eval(key, p);
+        internal::ThreefryParPackSSE2<ResultType, K>::eval(p, par);
+        for (std::size_t i = 0; i != n; ++i) {
+            internal::ThreefryCtrPackSSE2<ResultType, K>::eval(ctr, buf.state);
+            generate<0>(buf.state, par, std::true_type());
+            buffer[i] = buf.result;
+        }
     }
 
     private:
     template <std::size_t>
     void generate(std::array<M128I<ResultType>, K> &,
-        const std::array<M128I<ResultType>, K + 1> &, std::false_type)
+        const std::array<M128I<ResultType>, K + 1> &, std::false_type) const
     {
     }
 
     template <std::size_t N>
     void generate(std::array<M128I<ResultType>, K> &state,
-        const std::array<M128I<ResultType>, K + 1> &par, std::true_type)
+        const std::array<M128I<ResultType>, K + 1> &par, std::true_type) const
     {
         internal::ThreefryRotate<M128I<ResultType>, K, N>::eval(state);
         internal::ThreefryInsertKey<M128I<ResultType>, K, N>::eval(state, par);
@@ -716,14 +724,14 @@ class ThreefryGeneratorAVX2
     void reset(const key_type &) {}
 
     void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, K * M256I<ResultType>::size()> &buffer)
+        std::array<ResultType, size()> &buffer) const
     {
         union {
             std::array<M256I<ResultType>, K> state;
             std::array<ResultType, size()> result;
         } buf;
 
-        std::array<result_type, K + 1> p;
+        std::array<ResultType, K + 1> p;
         std::array<M256I<ResultType>, K + 1> par;
         internal::ThreefryInitPar<ResultType, K>::eval(key, p);
         internal::ThreefryParPackAVX2<ResultType, K>::eval(p, par);
@@ -732,22 +740,35 @@ class ThreefryGeneratorAVX2
         buffer = buf.result;
     }
 
-    std::size_t operator()(
-        ctr_type &, const key_type &, std::size_t, result_type *) const
+    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
+        std::array<ResultType, size()> *buffer) const
     {
-        return 0;
+        union {
+            std::array<M256I<ResultType>, K> state;
+            std::array<ResultType, size()> result;
+        } buf;
+
+        std::array<ResultType, K + 1> p;
+        std::array<M256I<ResultType>, K + 1> par;
+        internal::ThreefryInitPar<ResultType, K>::eval(key, p);
+        internal::ThreefryParPackAVX2<ResultType, K>::eval(p, par);
+        for (std::size_t i = 0; i != n; ++i) {
+            internal::ThreefryCtrPackAVX2<ResultType, K>::eval(ctr, buf.state);
+            generate<0>(buf.state, par, std::true_type());
+            buffer[i] = buf.result;
+        }
     }
 
     private:
     template <std::size_t>
     void generate(std::array<M256I<ResultType>, K> &,
-        const std::array<M256I<ResultType>, K + 1> &, std::false_type)
+        const std::array<M256I<ResultType>, K + 1> &, std::false_type) const
     {
     }
 
     template <std::size_t N>
     void generate(std::array<M256I<ResultType>, K> &state,
-        const std::array<M256I<ResultType>, K + 1> &par, std::true_type)
+        const std::array<M256I<ResultType>, K + 1> &par, std::true_type) const
     {
         internal::ThreefryRotate<M256I<ResultType>, K, N>::eval(state);
         internal::ThreefryInsertKey<M256I<ResultType>, K, N>::eval(state, par);

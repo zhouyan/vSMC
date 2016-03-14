@@ -380,19 +380,15 @@ class CounterEngine
         }
 #endif
 
-        const std::size_t q = generator_(ctr_, key_, n, r);
-        n -= q;
-        r += q;
-
-        const std::size_t m = n / M_;
-        std::array<result_type, M_> *s =
+        std::array<result_type, M_> *buffer =
             reinterpret_cast<std::array<result_type, M_> *>(r);
-        for (std::size_t i = 0; i != m; ++i)
-            generator_(ctr_, key_, s[i]);
+        const std::size_t m = n / M_;
+        const std::size_t l = n % M_;
+        generator_(ctr_, key_, n, buffer);
         n -= m * M_;
         r += m * M_;
 
-        for (std::size_t i = 0; i != n; ++i)
+        for (std::size_t i = 0; i != l; ++i)
             r[i] = operator()();
     }
 

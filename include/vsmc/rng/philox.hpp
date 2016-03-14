@@ -260,68 +260,34 @@ class PhiloxGenerator
 
     void reset(const key_type &) {}
 
-    void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, K> &buffer) const
+    void operator()(ctr_type &ctr, const key_type &key, ctr_type &buffer) const
     {
-        union {
-            std::array<ctr_type, 1> state;
-            std::array<result_type, size()> result;
-        } buf;
-
         increment(ctr);
-        buf.state.front() = ctr;
+        buffer = ctr;
         key_type par = key;
-        generate<0>(buf.state, par, std::true_type());
-        buffer = buf.result;
+        generate<0>(buffer, par, std::true_type());
     }
 
-    std::size_t operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        result_type *r) const
+    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
+        std::array<ResultType, size()> *buffer) const
     {
-        const std::size_t Blocks = 8;
-        const std::size_t M = size() * Blocks;
-        const std::size_t m = n / M;
-        increment(ctr, m, reinterpret_cast<ctr_type *>(r));
-        std::array<ctr_type, Blocks> *s =
-            reinterpret_cast<std::array<ctr_type, Blocks> *>(r);
-        for (std::size_t i = 0; i != m; ++i) {
-            key_type par = key;
-            generate<0>(s[i], par, std::true_type());
-        }
-
-        return m * M;
+        for (std::size_t i = 0; i != n; ++i)
+            operator()(ctr, key, buffer[i]);
     }
 
     private:
-    template <std::size_t, std::size_t Blocks>
-    void generate(
-        std::array<ctr_type, Blocks> &, key_type &, std::false_type) const
+    template <std::size_t>
+    void generate(ctr_type &, key_type &, std::false_type) const
     {
     }
 
-    template <std::size_t N, std::size_t Blocks>
-    void generate(std::array<ctr_type, Blocks> &state, key_type &par,
-        std::true_type) const
+    template <std::size_t N>
+    void generate(ctr_type &state, key_type &par, std::true_type) const
     {
         internal::PhiloxBumpKey<ResultType, K, N>::eval(par);
-        round<N, 0>(state, par, std::true_type());
+        internal::PhiloxRound<ResultType, K, N>::eval(state, par);
         generate<N + 1>(
-            state, par, std::integral_constant < bool, N<Rounds>());
-    }
-
-    template <std::size_t, std::size_t, std::size_t Blocks>
-    void round(
-        std::array<ctr_type, Blocks> &, key_type &, std::false_type) const
-    {
-    }
-
-    template <std::size_t N, std::size_t B, std::size_t Blocks>
-    void round(std::array<ctr_type, Blocks> &state, key_type &par,
-        std::true_type) const
-    {
-        internal::PhiloxRound<ResultType, K, N>::eval(std::get<B>(state), par);
-        round<N, B + 1>(
-            state, par, std::integral_constant<bool, B + 1 < Blocks>());
+            state, par, std::integral_constant<bool, (N < Rounds)>());
     }
 }; // class PhiloxGenerator
 
