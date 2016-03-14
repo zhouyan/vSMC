@@ -59,13 +59,12 @@ class U01Distribution
     result_type generate(RNGType &rng, const param_type &)
     {
         using uint_type =
-            typename std::conditional<internal::RNGBits<RNGType>::value >= 64,
+            typename std::conditional<(RNGBits<RNGType>::value > 32),
                 std::uint64_t, std::uint32_t>::type;
         UniformBitsDistribution<uint_type> rbits;
 
         return u01<uint_type, result_type>(rbits(rng));
     }
-
 }; // class U01Distribution
 
 namespace internal

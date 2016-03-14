@@ -370,9 +370,12 @@ inline void rng_dist(std::size_t n, std::size_t m,
 {
     names.push_back(rng_dist_name(name, param));
 
-    vsmc::RNG rng;
+    std::mt19937 rng_std;
     STDDistType dist_std(rng_dist_init<RealType, STDDistType>(param));
+
+    vsmc::RNG rng_vsmc;
     vSMCDistType dist_vsmc(rng_dist_init<RealType, vSMCDistType>(param));
+
     vsmc::Vector<RealType> r(n);
     vsmc::Vector<RealType> chi2;
     vsmc::Vector<RealType> ksad;
@@ -386,7 +389,7 @@ inline void rng_dist(std::size_t n, std::size_t m,
     for (std::size_t i = 0; i != m; ++i) {
         watch.start();
         for (std::size_t j = 0; j != n; ++j)
-            r[j] = dist_std(rng);
+            r[j] = dist_std(rng_std);
         watch.stop();
         chi2.push_back(rng_dist_chi2<RealType>(r, partition));
         ksad.push_back(rng_dist_ksad<RealType>(r, partition));
@@ -401,7 +404,7 @@ inline void rng_dist(std::size_t n, std::size_t m,
     for (std::size_t i = 0; i != m; ++i) {
         watch.start();
         for (std::size_t j = 0; j != n; ++j)
-            r[j] = dist_vsmc(rng);
+            r[j] = dist_vsmc(rng_vsmc);
         watch.stop();
         chi2.push_back(rng_dist_chi2<RealType>(r, partition));
         ksad.push_back(rng_dist_ksad<RealType>(r, partition));
@@ -415,7 +418,7 @@ inline void rng_dist(std::size_t n, std::size_t m,
     ksad.clear();
     for (std::size_t i = 0; i != m; ++i) {
         watch.start();
-        vsmc::rng_rand(rng, dist_vsmc, n, r.data());
+        vsmc::rng_rand(rng_vsmc, dist_vsmc, n, r.data());
         watch.stop();
         chi2.push_back(rng_dist_chi2<RealType>(r, partition));
         ksad.push_back(rng_dist_ksad<RealType>(r, partition));
