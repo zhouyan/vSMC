@@ -383,12 +383,11 @@ class CounterEngine
         std::array<result_type, M_> *buffer =
             reinterpret_cast<std::array<result_type, M_> *>(r);
         const std::size_t m = n / M_;
-        const std::size_t l = n % M_;
-        generator_(ctr_, key_, n, buffer);
+        generator_(ctr_, key_, m, buffer);
         n -= m * M_;
         r += m * M_;
 
-        for (std::size_t i = 0; i != l; ++i)
+        for (std::size_t i = 0; i != n; ++i)
             r[i] = operator()();
     }
 
