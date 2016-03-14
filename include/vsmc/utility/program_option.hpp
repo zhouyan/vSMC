@@ -44,26 +44,26 @@ namespace vsmc
 
 /// \brief Program option warning messages
 /// \ingroup Option
-inline void program_option_warning(const std::string &oname,
+inline void program_option_warning(const std::string &name,
     const std::string &msg, bool silent, std::ostream &os)
 {
     if (silent)
         return;
 
     os << "vSMC Program Option Warning\n";
-    os << "Option: " << oname << '\n';
+    os << "Option: --" << name << '\n';
     os << "Message : " << msg << std::endl;
 }
 
-/// \brief Program option base class
+/// \brief Option base class
 /// \ingroup Option
-class ProgramOption
+class ProgramOptionBase
 {
     public:
-    ProgramOption() {}
-    ProgramOption(const ProgramOption &) {}
-    ProgramOption &operator=(const ProgramOption &) { return *this; }
-    virtual ~ProgramOption() {}
+    ProgramOptionBase() = default;
+    ProgramOptionBase(const ProgramOptionBase &) = default;
+    ProgramOptionBase &operator=(const ProgramOptionBase &) = default;
+    virtual ~ProgramOptionBase() {}
 
     virtual bool is_bool() const = 0;
     virtual bool is_vector() const = 0;
@@ -72,10 +72,9 @@ class ProgramOption
     virtual bool set_default() = 0;
     virtual std::string description() const = 0;
     virtual std::string default_str() const = 0;
-    virtual ProgramOption *clone() const = 0;
 
     protected:
-    bool set_value(const std::string &oname, const std::string &sval,
+    bool set_value(const std::string &name, const std::string &sval,
         bool *dest, bool silent, std::ostream &os)
     {
         const char *const sptr = sval.c_str();
@@ -129,12 +128,12 @@ class ProgramOption
         }
 
         program_option_warning(
-            oname, "Failed to set value: " + sval, silent, os);
+            name, "Failed to set value: " + sval, silent, os);
         return false;
     }
 
     template <typename T>
-    bool set_value(const std::string &oname, const std::string &sval, T *dest,
+    bool set_value(const std::string &name, const std::string &sval, T *dest,
         bool silent, std::ostream &os)
     {
         std::stringstream ss;
@@ -143,7 +142,7 @@ class ProgramOption
         ss >> tval;
         if (ss.fail()) {
             program_option_warning(
-                oname, "Failed to set value: " + sval, silent, os);
+                name, "Failed to set value: " + sval, silent, os);
             ss.clear();
             return false;
         }
@@ -151,11 +150,11 @@ class ProgramOption
 
         return true;
     }
-}; // class ProgramOption
+}; // class ProgramOptionBase
 
 /// \brief Option `--help`
 /// \ingroup Option
-class ProgramOptionHelp : public ProgramOption
+class ProgramOptionHelp : public ProgramOptionBase
 {
     public:
     ProgramOptionHelp() : help_(false) {}
@@ -164,10 +163,10 @@ class ProgramOptionHelp : public ProgramOption
 
     bool is_vector() const { return false; }
 
-    bool set(const std::string &oname, const std::string &sval, bool silent,
+    bool set(const std::string &name, const std::string &sval, bool silent,
         std::ostream &os)
     {
-        return set_value(oname, sval, &help_, silent, os);
+        return set_value(name, sval, &help_, silent, os);
     }
 
     bool set_default() { return false; }
@@ -179,8 +178,6 @@ class ProgramOptionHelp : public ProgramOption
 
     std::string default_str() const { return std::string("(false)"); }
 
-    ProgramOption *clone() const { return new ProgramOptionHelp; }
-
     bool help() const { return help_; }
 
     private:
@@ -190,7 +187,7 @@ class ProgramOptionHelp : public ProgramOption
 /// \brief Option with a default value
 /// \ingroup Option
 template <typename T>
-class ProgramOptionDefault : public ProgramOption
+class ProgramOptionDefault : public ProgramOptionBase
 {
     public:
     ProgramOptionDefault(const std::string &desc)
@@ -261,15 +258,13 @@ class ProgramOptionScalar : public ProgramOptionDefault<T>
 
     bool is_vector() const { return false; }
 
-    bool set(const std::string &oname, const std::string &sval, bool silent,
+    bool set(const std::string &name, const std::string &sval, bool silent,
         std::ostream &os)
     {
-        return this->set_value(oname, sval, ptr_, silent, os);
+        return this->set_value(name, sval, ptr_, silent, os);
     }
 
     bool set_default() { return this->set_value_default(ptr_); }
-
-    ProgramOption *clone() const { return new ProgramOptionScalar<T>(*this); }
 
     private:
     T *const ptr_;
@@ -282,120 +277,52 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
 {
     public:
     ProgramOptionVector(const std::string &desc, std::vector<T> *ptr)
-        : ProgramOptionDefault<T>(desc), val_(T()), ptr_(ptr)
+        : ProgramOptionDefault<T>(desc), ptr_(ptr)
     {
     }
 
     template <typename V>
     ProgramOptionVector(const std::string &desc, std::vector<T> *ptr, V val)
-        : ProgramOptionDefault<T>(desc, val), val_(T()), ptr_(ptr)
+        : ProgramOptionDefault<T>(desc, val), ptr_(ptr)
     {
     }
 
     bool is_vector() const { return true; }
 
-    bool set(const std::string &oname, const std::string &sval, bool silent,
+    bool set(const std::string &name, const std::string &sval, bool silent,
         std::ostream &os)
     {
-        bool success = this->set_value(oname, sval, &val_, silent, os);
-
+        T val;
+        bool success = this->set_value(name, sval, &val, silent, os);
         if (success)
-            ptr_->push_back(val_);
+            ptr_->push_back(val);
 
         return success;
     }
 
     bool set_default()
     {
-        bool success = this->set_value_default(&val_);
-
+        T val;
+        bool success = this->set_value_default(&val);
         if (success)
-            ptr_->push_back(val_);
+            ptr_->push_back(val);
 
         return success;
     }
 
-    ProgramOption *clone() const { return new ProgramOptionVector<T>(*this); }
-
     private:
-    T val_;
     std::vector<T> *const ptr_;
 }; // class ProgramOptionVector
 
-/// \brief A map of ProgramOption
+/// \brief Program options
 /// \ingroup Option
-class ProgramOptionMap
+class ProgramOption
 {
-    using option_map_type =
-        std::map<std::string, std::pair<ProgramOption *, std::size_t>>;
-    using option_list_type =
-        std::list<std::pair<std::string, const ProgramOption *>>;
-
     public:
-    explicit ProgramOptionMap(bool silent = false, bool auto_help = true)
-        : silent_(silent)
-        , auto_help_(auto_help)
-        , help_ptr_(new ProgramOptionHelp)
+    explicit ProgramOption(bool silent = false)
+        : silent_(silent), help_ptr_(std::make_shared<ProgramOptionHelp>())
     {
-        option_map_["--help"] = std::make_pair(help_ptr_, 0);
-        option_list_.push_back(std::make_pair("--help", help_ptr_));
-    }
-
-    ProgramOptionMap(const ProgramOptionMap &other)
-        : silent_(other.silent_)
-        , auto_help_(other.auto_help_)
-        , option_map_(other.option_map_)
-        , option_list_(other.option_list_)
-    {
-        for (auto &option : option_map_)
-            if (option.second.first)
-                option.second.first = option.second.first->clone();
-    }
-
-    ProgramOptionMap &operator=(const ProgramOptionMap &other)
-    {
-        if (this != &other) {
-            silent_ = other.silent_;
-            auto_help_ = other.auto_help_;
-            for (auto &option : option_map_)
-                if (option.second.first != nullptr)
-                    delete option.second.first;
-            option_map_ = other.option_map_;
-            option_list_ = other.option_list_;
-            for (auto &option : option_map_)
-                if (option.second.first)
-                    option.second.first = option.second.first->clone();
-        }
-
-        return *this;
-    }
-
-    ProgramOptionMap(ProgramOptionMap &&other)
-        : silent_(other.silent_)
-        , auto_help_(other.auto_help_)
-        , help_ptr_(other.help_ptr_)
-        , option_map_(std::move(other.option_map_))
-        , option_list_(std::move(other.option_list_))
-    {
-    }
-
-    ProgramOptionMap &operator=(ProgramOptionMap &&other)
-    {
-        if (this != &other) {
-            silent_ = other.silent_;
-            help_ptr_ = other.help_ptr_;
-            option_map_ = std::move(other.option_map_);
-            option_list_ = std::move(other.option_list_);
-        }
-
-        return *this;
-    }
-
-    ~ProgramOptionMap()
-    {
-        for (auto &option : option_map_)
-            if (option.second.first != nullptr)
-                delete option.second.first;
+        add_option("help", help_ptr_);
     }
 
     /// \brief Add an option with a single value
@@ -405,67 +332,53 @@ class ProgramOptionMap
     /// \param desc A descritpion stream of the option
     /// \param ptr The destination that store the option value
     template <typename T>
-    ProgramOptionMap &add(
+    ProgramOption &add(
         const std::string &name, const std::string &desc, T *ptr)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
-        const std::string oname("--" + name);
-        ProgramOption *optr = new ProgramOptionScalar<T>(desc, ptr);
-        add_option(oname, optr);
 
-        return *this;
+        return add_option(
+            name, std::make_shared<ProgramOptionScalar<T>>(desc, ptr));
     }
 
     /// \brief Add an option with a single value, with a default value
     template <typename T, typename V>
-    ProgramOptionMap &add(
+    ProgramOption &add(
         const std::string &name, const std::string &desc, T *ptr, V val)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
-        const std::string oname("--" + name);
-        ProgramOption *optr = new ProgramOptionScalar<T>(desc, ptr, val);
-        add_option(oname, optr);
 
-        return *this;
+        return add_option(
+            name, std::make_shared<ProgramOptionScalar<T>>(desc, ptr, val));
     }
 
     /// \brief Add an option with multiple value
     template <typename T>
-    ProgramOptionMap &add(
+    ProgramOption &add(
         const std::string &name, const std::string &desc, std::vector<T> *ptr)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
-        const std::string oname("--" + name);
-        ProgramOption *optr = new ProgramOptionVector<T>(desc, ptr);
-        add_option(oname, optr);
 
-        return *this;
+        return add_option(
+            name, std::make_shared<ProgramOptionVector<T>>(desc, ptr));
     }
 
     /// \brief Add an option with multiple value, with a default value
     template <typename T, typename V>
-    ProgramOptionMap &add(const std::string &name, const std::string &desc,
+    ProgramOption &add(const std::string &name, const std::string &desc,
         std::vector<T> *ptr, V val)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
-        const std::string oname("--" + name);
-        ProgramOption *optr = new ProgramOptionVector<T>(desc, ptr, val);
-        add_option(oname, optr);
 
-        return *this;
+        return add_option(
+            name, std::make_shared<ProgramOptionVector<T>>(desc, ptr, val));
     }
 
-    ProgramOptionMap &remove(const std::string &name)
+    ProgramOption &remove(const std::string &name)
     {
-        const std::string oname("--" + name);
-        option_map_type::iterator iter = option_map_.find(oname);
-        if (iter != option_map_.end()) {
-            if (iter->second.first != nullptr)
-                delete iter->second.first;
-            option_map_.erase(iter);
-            option_list_type::iterator liter = option_list_find(oname);
-            option_list_.erase(liter);
-        }
+        auto iter = option_find(name);
+        if (iter != option_vec_.end())
+            option_vec_.erase(iter);
 
         return *this;
     }
@@ -478,13 +391,12 @@ class ProgramOptionMap
     ///
     /// \param argc The first argument of the `main` function
     /// \param argv The second argument of the `main` function
-    /// \param os The output stream used to print help information if
-    /// `auto_help` is set to true, and the warning messages if any error
-    /// occurs when processing the options.
+    /// \param os The output stream used to print help information and the
+    /// warning messages if any error occurs when processing the options.
     void process(int argc, const char **argv, std::ostream &os = std::cout)
     {
         std::string arg;
-        std::vector<std::string> arg_vector;
+        Vector<std::string> arg_vector;
         arg_vector.reserve(static_cast<std::size_t>(argc));
         for (int i = 0; i != argc; ++i) {
             arg = process_arg(argv[i]);
@@ -498,7 +410,7 @@ class ProgramOptionMap
     void process(int argc, char **argv, std::ostream &os = std::cout)
     {
         std::string arg;
-        std::vector<std::string> arg_vector;
+        Vector<std::string> arg_vector;
         arg_vector.reserve(static_cast<std::size_t>(argc));
         for (int i = 0; i != argc; ++i) {
             arg = process_arg(argv[i]);
@@ -512,158 +424,146 @@ class ProgramOptionMap
     void print_help(std::ostream &os = std::cout) const
     {
         std::size_t len[2] = {0, 0};
-        std::vector<std::string> vec[3];
-        for (option_list_type::const_iterator liter = option_list_.begin();
-             liter != option_list_.end(); ++liter) {
-            vec[0].push_back(liter->first);
-            vec[1].push_back(liter->second->description());
-            vec[2].push_back(liter->second->default_str());
-            if (len[0] < vec[0].back().size())
-                len[0] = vec[0].back().size();
-            if (len[1] < vec[1].back().size())
-                len[1] = vec[1].back().size();
+        Vector<std::string> str[3];
+        for (const auto &option : option_vec_) {
+            str[0].push_back("--" + std::get<0>(option));
+            str[1].push_back(std::get<1>(option)->description());
+            str[2].push_back(std::get<1>(option)->default_str());
+            len[0] = std::max(len[0], str[0].back().size());
+            len[1] = std::max(len[1], str[1].back().size());
         }
         len[0] += 4;
         len[1] += 4;
-        for (std::size_t i = 0; i != vec[0].size(); ++i) {
-            os << vec[0][i] << std::string(len[0] - vec[0][i].size(), ' ');
-            os << vec[1][i] << std::string(len[1] - vec[1][i].size(), ' ');
-            os << vec[2][i] << std::endl;
+        for (std::size_t i = 0; i != str[0].size(); ++i) {
+            os << str[0][i] << std::string(len[0] - str[0][i].size(), ' ');
+            os << str[1][i] << std::string(len[1] - str[1][i].size(), ' ');
+            os << str[2][i] << std::endl;
         }
     }
 
     /// \brief Count the number of successful processing of an option
     std::size_t count(const std::string &name) const
     {
-        option_map_type::const_iterator iter = option_map_.find("--" + name);
-        if (iter != option_map_.end())
-            return iter->second.second;
-        else
-            return 0;
+        auto iter = option_find(name);
+        if (iter != option_vec_.end())
+            return std::get<2>(*iter);
+        return 0;
     }
 
     /// \brief Get the underlying option object
-    const ProgramOption *option(const std::string &name) const
+    std::shared_ptr<ProgramOptionBase> option(const std::string &name)
     {
-        option_map_type::const_iterator iter = option_map_.find("--" + name);
-        if (iter != option_map_.end())
-            return iter->second.first;
-        else
-            return nullptr;
+        auto iter = option_find(name);
+        if (iter != option_vec_.end())
+            return std::get<1>(*iter);
+        return std::shared_ptr<ProgramOptionBase>(
+            static_cast<ProgramOptionBase *>(nullptr));
     }
 
     /// \brief Get the underlying option object
-    ProgramOption *option(const std::string &name)
+    std::shared_ptr<const ProgramOptionBase> option(
+        const std::string &name) const
     {
-        option_map_type::const_iterator iter = option_map_.find("--" + name);
-        if (iter != option_map_.end())
-            return iter->second.first;
-        else
-            return nullptr;
+        auto iter = option_find(name);
+        if (iter != option_vec_.end())
+            return std::get<1>(*iter);
+        return std::shared_ptr<const ProgramOptionBase>(
+            static_cast<const ProgramOptionBase *>(nullptr));
     }
 
     /// \brief Set the silent flag, if true, no warning messages will be
     /// printed for unknown options etc.,
     void silent(bool flag) { silent_ = flag; }
 
-    /// \brief Set the auto_help flag, if true, help information is printed
-    /// automatically when the `--help` option is processed
-    void auto_help(bool flag) { auto_help_ = flag; }
-
     private:
+    using option_vec_type = Vector<std::tuple<std::string,
+        std::shared_ptr<ProgramOptionBase>, std::size_t>>;
+
     bool silent_;
-    bool auto_help_;
-    ProgramOptionHelp *help_ptr_;
-    option_map_type option_map_;
-    option_list_type option_list_;
+    std::shared_ptr<ProgramOptionHelp> help_ptr_;
+    option_vec_type option_vec_;
 
-    option_list_type::iterator option_list_find(const std::string &oname)
+    option_vec_type::iterator option_find(const std::string &name)
     {
-        option_list_type::iterator liter = option_list_.begin();
-        for (; liter != option_list_.end(); ++liter) {
-            if (liter->first == oname)
+        auto iter = option_vec_.begin();
+        for (; iter != option_vec_.end(); ++iter)
+            if (std::get<0>(*iter) == name)
                 break;
-        }
 
-        return liter;
+        return iter;
     }
 
-    void add_option(const std::string &oname, ProgramOption *optr)
+    option_vec_type::const_iterator option_find(const std::string &name) const
     {
-        std::pair<option_map_type::iterator, bool> insert =
-            option_map_.insert(std::make_pair(oname, std::make_pair(optr, 0)));
-        if (insert.second) {
-            option_list_.push_back(std::make_pair(oname, optr));
-        } else {
-            if (insert.first->second.first != nullptr)
-                delete insert.first->second.first;
-            insert.first->second.first = optr;
-            option_list_type::iterator liter = option_list_find(oname);
-            liter->second = optr;
-        }
+        auto iter = option_vec_.begin();
+        for (; iter != option_vec_.end(); ++iter)
+            if (std::get<0>(*iter) == name)
+                break;
+
+        return iter;
+    }
+
+    ProgramOption &add_option(
+        const std::string &name, std::shared_ptr<ProgramOptionBase> optr)
+    {
+        auto option = std::make_tuple(name, optr, 0);
+        auto iter = option_find(name);
+        if (iter != option_vec_.end())
+            *iter = option;
+        else
+            option_vec_.push_back(option);
+
+        return *this;
     }
 
     void process_arg_vector(
         std::vector<std::string> &arg_vector, std::ostream &os)
     {
-        std::string option_value;
-        const std::vector<std::string> option_value_vec;
-        std::vector<std::pair<std::string, std::vector<std::string>>>
-            option_vector;
-        std::vector<std::string>::iterator aiter = arg_vector.begin();
-        while (aiter != arg_vector.end() && !is_option(*aiter))
-            ++aiter;
-        while (aiter != arg_vector.end()) {
-            option_vector.push_back(std::make_pair(*aiter, option_value_vec));
-            std::vector<std::string> &value = option_vector.back().second;
-            ++aiter;
-            while (aiter != arg_vector.end() && !is_option(*aiter)) {
-                value.push_back(*aiter);
-                ++aiter;
+        Vector<std::pair<std::string, Vector<std::string>>> name_vals;
+        auto arg_iter = arg_vector.begin();
+        while (arg_iter != arg_vector.end() && !is_option(*arg_iter))
+            ++arg_iter;
+        while (arg_iter != arg_vector.end()) {
+            std::string name(arg_iter->begin() + 2, arg_iter->end());
+            ++arg_iter;
+            Vector<std::string> svals;
+            while (arg_iter != arg_vector.end() && !is_option(*arg_iter)) {
+                svals.push_back(*arg_iter);
+                ++arg_iter;
             }
+            name_vals.push_back(std::make_pair(name, svals));
         }
 
         const std::string sval_true("1");
-        for (std::vector<std::pair<std::string,
-                 std::vector<std::string>>>::iterator iter =
-                 option_vector.begin();
-             iter != option_vector.end(); ++iter) {
-            option_map_type::iterator miter = option_map_.find(iter->first);
-            if (miter == option_map_.end()) {
+        for (auto &nv : name_vals) {
+            auto iter = option_find(nv.first);
+            if (iter == option_vec_.end()) {
                 program_option_warning(
-                    iter->first, "Unknown option", silent_, os);
+                    std::get<0>(*iter), "Unknown option", silent_, os);
                 continue;
             }
 
             bool proc = false;
-            const std::size_t vsize = iter->second.size();
-            if (vsize == 0 && miter->second.first->is_bool()) {
-                proc = process_option(miter, sval_true, os);
-            } else if (vsize == 0) {
+            if (nv.second.size() == 0 && std::get<1>(*iter)->is_bool()) {
+                proc = process_option(iter, sval_true, os);
+            } else if (nv.second.size() == 0) {
                 program_option_warning(
-                    miter->first, "Value not found", silent_, os);
-            } else if (!miter->second.first->is_vector()) {
-                option_value.clear();
-                for (std::size_t i = 0; i != vsize - 1; ++i)
-                    option_value += iter->second[i] + ' ';
-                option_value += iter->second[vsize - 1];
-                proc = process_option(miter, option_value, os);
+                    std::get<0>(*iter), "No value found", silent_, os);
+            } else if (std::get<1>(*iter)->is_vector()) {
+                for (const auto &sval : nv.second)
+                    proc = process_option(iter, sval, os);
             } else {
-                for (std::size_t i = 0; i != vsize; ++i)
-                    proc = process_option(miter, iter->second[i], os) || proc;
+                for (const auto &sval : nv.second)
+                    proc = process_option(iter, sval, os) || proc;
             }
-            if (proc)
-                ++miter->second.second;
         }
 
-        for (option_map_type::iterator iter = option_map_.begin();
-             iter != option_map_.end(); ++iter) {
-            if (iter->second.second == 0)
-                if (iter->second.first->set_default())
-                    iter->second.second = 1;
-        }
+        for (auto &option : option_vec_)
+            if (std::get<2>(option) == 0)
+                if (std::get<1>(option)->set_default())
+                    std::get<2>(option) = 1;
 
-        if (auto_help_ && help_ptr_->help())
+        if (help_ptr_->help())
             print_help(os);
     }
 
@@ -677,15 +577,15 @@ class ProgramOptionMap
         return std::string(arg, arg + e);
     }
 
-    bool process_option(option_map_type::iterator iter,
+    bool process_option(option_vec_type::iterator iter,
         const std::string &sval, std::ostream &os)
     {
         if (sval.empty()) {
-            program_option_warning(iter->first, "No value found", silent_, os);
+            program_option_warning(
+                std::get<0>(*iter), "No value found", silent_, os);
             return false;
         }
-
-        return iter->second.first->set(iter->first, sval, silent_, os);
+        return std::get<1>(*iter)->set(std::get<0>(*iter), sval, silent_, os);
     }
 
     bool is_option(const std::string &str) const
@@ -701,7 +601,7 @@ class ProgramOptionMap
 
         return true;
     }
-}; // class ProgramOptionMap
+}; // class ProgramOption
 
 } // namespace vsmc
 
