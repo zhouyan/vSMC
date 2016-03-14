@@ -520,11 +520,11 @@ class Closed;
 
 /// \brief Generate random bits
 /// \ingroup RNG
-template <typename RNGType, typename ResultType>
-void rng_rand(RNGType &rng, std::size_t n, ResultType *r)
+template <typename RNGType>
+void rng_rand(RNGType &rng, std::size_t n, typename RNGType::result_type *r)
 {
     for (std::size_t i = 0; i != n; ++i)
-        r[i] = static_cast<ResultType>(rng());
+        r[i] = rng();
 }
 
 template <typename>
