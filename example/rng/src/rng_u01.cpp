@@ -33,13 +33,6 @@
 
 int main()
 {
-    rng_u01<std::uint32_t, float>();
-    rng_u01<std::uint64_t, float>();
-    rng_u01<std::uint32_t, double>();
-    rng_u01<std::uint64_t, double>();
-    rng_u01<std::uint32_t, long double>();
-    rng_u01<std::uint64_t, long double>();
-
     rng_u01_lr<std::uint32_t, float, vsmc::Closed, vsmc::Closed>();
     rng_u01_lr<std::uint64_t, float, vsmc::Closed, vsmc::Closed>();
     rng_u01_lr<std::uint32_t, double, vsmc::Closed, vsmc::Closed>();

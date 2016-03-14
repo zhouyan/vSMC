@@ -36,14 +36,6 @@
 #include <vsmc/rng/u01.hpp>
 #include <vsmc/rngc/u01.h>
 
-#define VSMC_DEFINE_RNGC_U01_TEST(ubits, fsuffix, RealType)                   \
-    template <>                                                               \
-    inline RealType rng_u01_c<std::uint##ubits##_t, RealType>(                \
-        std::uint##ubits##_t u)                                               \
-    {                                                                         \
-        return vsmc_u01_u##ubits##fsuffix(u);                                 \
-    }
-
 #define VSMC_DEFINE_RNGC_U01_LR_TEST(                                         \
     ubits, fsuffix, lr, Left, Right, RealType)                                \
     template <>                                                               \
@@ -85,16 +77,6 @@ inline std::string rng_u01_type_name<vsmc::Open>()
 {
     return "Open";
 }
-
-template <typename UIntType, typename RealType>
-inline RealType rng_u01_c(UIntType);
-
-VSMC_DEFINE_RNGC_U01_TEST(32, f, float)
-VSMC_DEFINE_RNGC_U01_TEST(64, f, float)
-VSMC_DEFINE_RNGC_U01_TEST(32, d, double)
-VSMC_DEFINE_RNGC_U01_TEST(64, d, double)
-VSMC_DEFINE_RNGC_U01_TEST(32, l, long double)
-VSMC_DEFINE_RNGC_U01_TEST(64, l, long double)
 
 template <typename UIntType, typename RealType, typename, typename>
 inline RealType rng_u01_lr_c(UIntType u);
@@ -161,35 +143,6 @@ inline void rng_u01_rb(RealType x)
     else
         std::cout << "Closed";
     std::cout << std::endl;
-}
-
-template <typename UIntType, typename RealType>
-inline void rng_u01()
-{
-    std::cout << std::string(50, '=') << std::endl;
-    std::cout << "u01<uint" << std::numeric_limits<UIntType>::digits << "_t, "
-              << rng_u01_type_name<RealType>() << ">" << std::endl;
-    std::cout << std::string(50, '-') << std::endl;
-
-    rng_u01_lb(
-        vsmc::u01<UIntType, RealType>(std::numeric_limits<UIntType>::min()));
-    rng_u01_rb(
-        vsmc::u01<UIntType, RealType>(std::numeric_limits<UIntType>::max()));
-
-    bool pass = true;
-    std::size_t n = 100000000;
-    vsmc::ThreefryEngine<UIntType, 4> rng;
-    for (std::size_t i = 0; i != n; ++i) {
-        UIntType u = rng();
-        RealType c = rng_u01_c<UIntType, RealType>(u);
-        RealType cpp = vsmc::u01<UIntType, RealType>(u);
-        if (!vsmc::internal::is_equal(c, cpp)) {
-            pass = false;
-            break;
-        }
-    }
-    std::cout << std::setw(44) << std::left
-              << "C API: " << (pass ? "Passed" : "Failed") << std::endl;
 }
 
 template <typename UIntType, typename RealType, typename Left, typename Right>
