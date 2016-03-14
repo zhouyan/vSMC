@@ -72,8 +72,8 @@ class WeibullDistribution
 
         return internal::is_equal<RealType>(
                    param.a(), static_cast<RealType>(1)) ?
-            -param.b() * std::log(u01(rng)) :
-            param.b() * std::pow(-std::log(u01(rng)), 1 / param.a());
+            -param.b() * std::log(1 - u01(rng)) :
+            param.b() * std::pow(-std::log(1 - u01(rng)), 1 / param.a());
     }
 }; // class WeibullDistribution
 
@@ -85,6 +85,7 @@ inline void weibull_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     u01_distribution(rng, n, r);
+    sub(n, static_cast<RealType>(1), r, r);
     log(n, r, r);
     if (is_equal<RealType>(a, static_cast<RealType>(1))) {
         mul(n, -b, r, r);

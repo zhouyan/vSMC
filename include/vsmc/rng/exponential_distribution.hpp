@@ -69,7 +69,7 @@ class ExponentialDistribution
     {
         U01Distribution<RealType> u01;
 
-        return -std::log(u01(rng)) / param.lambda();
+        return -std::log(1 - u01(rng)) / param.lambda();
     }
 }; // class ExponentialDistribution
 
@@ -81,6 +81,7 @@ inline void exponential_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType lambda)
 {
     u01_distribution(rng, n, r);
+    sub(n, static_cast<RealType>(1), r, r);
     log(n, r, r);
     mul(n, -1 / lambda, r, r);
 }
