@@ -362,6 +362,12 @@ class CounterEngine
             return;
         }
 
+        std::memcpy(
+            r, buffer_.data() + index_, sizeof(result_type) * (M_ - index_));
+        r += M_ - index_;
+        n -= M_ - index_;
+        index_ = M_;
+
         const std::size_t k = 1024 / M_;
         if (k != 0) {
             const std::size_t m = (n / M_) / k;
