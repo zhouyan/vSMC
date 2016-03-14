@@ -86,6 +86,9 @@ class AESNIGenerator
     void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
         std::array<ResultType, size()> *buffer) const
     {
+        if (n == 0)
+            return;
+
         union {
             std::array<M128I<>, Blocks> state;
             std::array<ctr_type, Blocks> ctr_block;

@@ -372,8 +372,7 @@ class CounterEngine
             r += p;
         }
 
-        std::array<result_type, M_> *buffer =
-            reinterpret_cast<std::array<result_type, M_> *>(r);
+        auto buffer = reinterpret_cast<std::array<result_type, M_> *>(r);
         const std::size_t m = n / M_;
         generator_(ctr_, key_, m, buffer);
         n -= m * M_;

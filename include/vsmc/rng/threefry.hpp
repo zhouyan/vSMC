@@ -338,6 +338,9 @@ class ThreefryGenerator
     void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
         ctr_type *buffer) const
     {
+        if (n == 0)
+            return;
+
         std::array<ResultType, K + 1> par;
         internal::ThreefryInitPar<ResultType, K>::eval(key, par);
         increment(ctr, n, buffer);
@@ -532,6 +535,9 @@ class ThreefryGeneratorSSE2
     void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
         std::array<ResultType, size()> *buffer) const
     {
+        if (n == 0)
+            return;
+
         union {
             std::array<M128I<ResultType>, K> state;
             std::array<ResultType, size()> result;
@@ -743,6 +749,9 @@ class ThreefryGeneratorAVX2
     void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
         std::array<ResultType, size()> *buffer) const
     {
+        if (n == 0)
+            return;
+
         union {
             std::array<M256I<ResultType>, K> state;
             std::array<ResultType, size()> result;
