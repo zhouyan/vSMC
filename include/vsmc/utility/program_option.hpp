@@ -529,41 +529,50 @@ class ProgramOptionMap
     void process_arg_vector(
         std::vector<std::string> &arg_vector, std::ostream &os)
     {
-        Vector<std::pair<std::string, Vector<std::string>>> name_vals;
-        auto arg_iter = arg_vector.begin();
-        while (arg_iter != arg_vector.end() && !is_option(*arg_iter))
-            ++arg_iter;
-        while (arg_iter != arg_vector.end()) {
-            std::string name(arg_iter->begin() + 2, arg_iter->end());
-            ++arg_iter;
-            Vector<std::string> svals;
-            while (arg_iter != arg_vector.end() && !is_option(*arg_iter)) {
-                svals.push_back(*arg_iter);
-                ++arg_iter;
+        std::map<std::string, Vector<std::string>> name_svals;
+        Vector<std::string> svals;
+        auto aiter = arg_vector.begin();
+        while (aiter != arg_vector.end() && !is_option(*aiter))
+            ++aiter;
+        while (aiter != arg_vector.end()) {
+            std::string name(aiter->begin() + 2, aiter->end());
+            ++aiter;
+            auto niter = name_svals.find(name);
+            if (niter == name_svals.end()) {
+                svals.clear();
+                while (aiter != arg_vector.end() && !is_option(*aiter)) {
+                    svals.push_back(*aiter);
+                    ++aiter;
+                }
+                name_svals.insert(std::make_pair(name, svals));
+            } else {
+                while (aiter != arg_vector.end() && !is_option(*aiter)) {
+                    niter->second.push_back(*aiter);
+                    ++aiter;
+                }
             }
-            name_vals.push_back(std::make_pair(name, svals));
         }
 
         const std::string sval_true("1");
-        for (auto &nv : name_vals) {
-            auto iter = option_find(nv.first);
+        for (auto &nsv : name_svals) {
+            auto iter = option_find(nsv.first);
             if (iter == option_vec_.end()) {
                 internal::program_option_warning(
-                    nv.first, "Unknown option", silent_, os);
+                    nsv.first, "Unknown option", silent_, os);
                 continue;
             }
 
             bool proc = false;
-            if (nv.second.size() == 0 && std::get<1>(*iter)->is_bool()) {
+            if (nsv.second.size() == 0 && std::get<1>(*iter)->is_bool()) {
                 proc = process_option(iter, sval_true, os);
-            } else if (nv.second.size() == 0) {
+            } else if (nsv.second.size() == 0) {
                 internal::program_option_warning(
-                    nv.first, "No value found", silent_, os);
+                    nsv.first, "No value found", silent_, os);
             } else if (std::get<1>(*iter)->is_vector()) {
-                for (const auto &sval : nv.second)
+                for (const auto &sval : nsv.second)
                     proc = process_option(iter, sval, os);
             } else {
-                proc = process_option(iter, nv.second.back(), os) || proc;
+                proc = process_option(iter, nsv.second.back(), os) || proc;
             }
         }
 
