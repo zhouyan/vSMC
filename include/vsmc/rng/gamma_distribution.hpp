@@ -388,7 +388,7 @@ inline void gamma_distribution(
         "**gamma_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
         "TYPES");
 
-    const std::size_t k = 1000;
+    const std::size_t k = 1024;
     const internal::GammaDistributionConstant<RealType> constant(alpha);
     while (n > k) {
         std::size_t m = internal::gamma_distribution_impl<k>(

@@ -250,7 +250,7 @@ inline void normal_distribution(
         "**normal_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
         "TYPES");
 
-    const std::size_t k = 1000;
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, r += k)

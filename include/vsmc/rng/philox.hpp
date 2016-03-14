@@ -269,10 +269,13 @@ class PhiloxGenerator
     }
 
     void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        std::array<ResultType, size()> *buffer) const
+        ctr_type *buffer) const
     {
-        for (std::size_t i = 0; i != n; ++i)
-            operator()(ctr, key, buffer[i]);
+        increment(ctr, n, buffer);
+        for (std::size_t i = 0; i != n; ++i) {
+            key_type par = key;
+            generate<0>(buffer[i], par, std::true_type());
+        }
     }
 
     private:

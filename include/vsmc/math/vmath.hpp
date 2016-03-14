@@ -236,7 +236,7 @@ template <typename T>
 inline void linear_frac(std::size_t n, const T *a, const T *b, T beta_a,
     T beta_b, T mu_a, T mu_b, T *y)
 {
-    const std::size_t k = 1000;
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
@@ -344,7 +344,7 @@ VSMC_DEFINE_MATH_VMATH_1(std::sqrt, sqrt)
 template <typename T>
 inline void invsqrt(std::size_t n, const T *a, T *y)
 {
-    const std::size_t k = 1000;
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
@@ -362,7 +362,7 @@ VSMC_DEFINE_MATH_VMATH_1(std::cbrt, cbrt)
 template <typename T>
 inline void invcbrt(std::size_t n, const T *a, T *y)
 {
-    const std::size_t k = 1000;
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
@@ -377,7 +377,7 @@ inline void invcbrt(std::size_t n, const T *a, T *y)
 template <typename T>
 inline void pow2o3(std::size_t n, const T *a, T *y)
 {
-    const std::size_t k = 1000;
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
@@ -392,7 +392,7 @@ inline void pow2o3(std::size_t n, const T *a, T *y)
 template <typename T>
 inline void pow3o2(std::size_t n, const T *a, T *y)
 {
-    const std::size_t k = 1000;
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
@@ -435,7 +435,7 @@ VSMC_DEFINE_MATH_VMATH_1(std::exp2, exp2)
 template <typename T>
 inline void exp10(std::size_t n, const T *a, T *y)
 {
-    const std::size_t k = 1000;
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
@@ -477,7 +477,7 @@ VSMC_DEFINE_MATH_VMATH_1(std::sin, sin)
 template <typename T>
 inline void sincos(std::size_t n, const T *a, T *y, T *z)
 {
-    const std::size_t k = 1000;
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k, z += k) {
@@ -546,7 +546,7 @@ VSMC_DEFINE_MATH_VMATH_1(std::erfc, erfc)
 template <typename T>
 inline void cdfnorm(std::size_t n, const T *a, T *y)
 {
-    const std::size_t k = 1000;
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {

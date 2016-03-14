@@ -358,7 +358,6 @@ class ThreefryGenerator
     template <std::size_t N>
     void generate(std::array<ResultType, K> &state,
         const std::array<ResultType, K + 1> &par, std::true_type) const
-
     {
         internal::ThreefryRotate<ResultType, K, N>::eval(state);
         internal::ThreefryInsertKey<ResultType, K, N>::eval(state, par);

@@ -78,36 +78,6 @@ class U01ImplPow2Inv
 
 } // namespace vsmc::internal
 
-/// \brief Convert uniform unsigned integers to floating points within [0, 1]
-/// \ingroup RNG
-///
-/// \details
-/// Let \f$W\f$ be the number of digits of unsigend integer type `UIntType`,
-/// then if the input is a uniform random number over the set
-/// \f$\{0,1,\dots,2^W - 1\}\f$, the output is
-/// \f$2^{-W} u + 2^{-(W + 1)} u\f$. This floating point number is uniform over
-/// the interval \f$(0, 1]\f$ or \f$(0, 1)\f$ depending on the type of
-/// `RealType`.
-///
-/// Let \f$M\f$ be the number of significant bits of floating point type
-/// `RealType` (24 for `float`, 53 for `double` on most platforms. The minimum
-/// of the output is \f$2^{-W}\f$. The maximum is 1 if \f$W \le N\f$ and the
-/// largest floating point number less than 1 otherwise.
-template <typename UIntType, typename RealType>
-RealType u01(UIntType u) noexcept
-{
-    static_assert(std::is_unsigned<UIntType>::value,
-        "**U01** USED WITH UIntType OTHER THAN UNSIGNED INTEGER TYPES");
-    static_assert(std::is_floating_point<RealType>::value,
-        "**U01** USED WITH RealType OTHER THAN FLOATING POINT TYPES");
-
-    static constexpr int p = std::numeric_limits<UIntType>::digits;
-
-    return static_cast<RealType>(u) *
-        internal::U01ImplPow2Inv<RealType, p>::value +
-        internal::U01ImplPow2Inv<RealType, p + 1>::value;
-}
-
 namespace internal
 {
 

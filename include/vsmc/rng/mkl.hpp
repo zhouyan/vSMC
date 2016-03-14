@@ -164,7 +164,7 @@ class MKLDiscardGeneral
         if (nskip == 0)
             return;
 
-        std::array<MKLResultType<Bits>, 1000> buffer;
+        std::array<MKLResultType<Bits>, 1024> buffer;
         const MKL_INT k = static_cast<MKL_INT>(buffer.size());
         while (nskip > k) {
             MKLUniformBits<Bits>::eval(stream, k, buffer.data());
@@ -379,7 +379,7 @@ class MKLEngine
     }
 
     private:
-    static constexpr std::size_t M_ = 1000;
+    static constexpr std::size_t M_ = 1024;
 
     MKLStream stream_;
     std::array<result_type, M_> buffer_;
