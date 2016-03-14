@@ -135,6 +135,14 @@ class ProgramOption
         return false;
     }
 
+    bool set_value(const std::string &, const std::string &sval,
+        std::string *dest, bool, std::ostream &)
+    {
+        *dest = sval;
+
+        return true;
+    }
+
     template <typename T>
     bool set_value(const std::string &name, const std::string &sval, T *dest,
         bool silent, std::ostream &os)
@@ -541,7 +549,7 @@ class ProgramOptionMap
             auto iter = option_find(nv.first);
             if (iter == option_vec_.end()) {
                 internal::program_option_warning(
-                    std::get<0>(*iter), "Unknown option", silent_, os);
+                    nv.first, "Unknown option", silent_, os);
                 continue;
             }
 
@@ -550,13 +558,12 @@ class ProgramOptionMap
                 proc = process_option(iter, sval_true, os);
             } else if (nv.second.size() == 0) {
                 internal::program_option_warning(
-                    std::get<0>(*iter), "No value found", silent_, os);
+                    nv.first, "No value found", silent_, os);
             } else if (std::get<1>(*iter)->is_vector()) {
                 for (const auto &sval : nv.second)
                     proc = process_option(iter, sval, os);
             } else {
-                for (const auto &sval : nv.second)
-                    proc = process_option(iter, sval, os) || proc;
+                proc = process_option(iter, nv.second.back(), os) || proc;
             }
         }
 
