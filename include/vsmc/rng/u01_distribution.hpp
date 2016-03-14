@@ -43,13 +43,21 @@ namespace internal
 {
 
 template <typename RNGType>
-using U01UIntType = typename std::conditional<(RNGBits<RNGType>::value >= 64),
+using U01UIntType = typename std::conditional<(RNGBits<RNGType>::value > 32),
     std::uint64_t, std::uint32_t>::type;
 
 } // namespace vsmc::internal
 
 /// \brief Standard uniform distribution
 /// \ingroup Distribution
+///
+/// \details
+/// This distribution is different from `std::generate_canonical` in a few
+/// important aspects. First, it never generate the value `1.0`, which is not
+/// the case in some standard library implementations. It will generate enough
+/// random bits from the RNG first. If there are more than 32 random bits from
+/// the RNG output, then 64 bits will be generated. Otherwise, 32 bits will be
+/// generated. Then these random bits are converted floating point numbers.
 template <typename RealType>
 class U01Distribution
 {
