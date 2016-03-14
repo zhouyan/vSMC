@@ -36,14 +36,15 @@
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, func)         \
     VSMC_RUNTIME_ASSERT((ptr != nullptr),                                     \
-        "**ProgramOptionMap::" #func                                          \
+        "**ProgramOption::" #func                                             \
         "** ATTEMPT TO SET OPTION WITH A NULL POINTER")
 
 namespace vsmc
 {
 
-/// \brief Program option warning messages
-/// \ingroup Option
+namespace internal
+{
+
 inline void program_option_warning(const std::string &name,
     const std::string &msg, bool silent, std::ostream &os)
 {
@@ -55,15 +56,17 @@ inline void program_option_warning(const std::string &name,
     os << "Message : " << msg << std::endl;
 }
 
+} // namespace vsmc::internal
+
 /// \brief Option base class
 /// \ingroup Option
-class ProgramOptionBase
+class ProgramOption
 {
     public:
-    ProgramOptionBase() = default;
-    ProgramOptionBase(const ProgramOptionBase &) = default;
-    ProgramOptionBase &operator=(const ProgramOptionBase &) = default;
-    virtual ~ProgramOptionBase() {}
+    ProgramOption() = default;
+    ProgramOption(const ProgramOption &) = default;
+    ProgramOption &operator=(const ProgramOption &) = default;
+    virtual ~ProgramOption() {}
 
     virtual bool is_bool() const = 0;
     virtual bool is_vector() const = 0;
@@ -127,7 +130,7 @@ class ProgramOptionBase
             return true;
         }
 
-        program_option_warning(
+        internal::program_option_warning(
             name, "Failed to set value: " + sval, silent, os);
         return false;
     }
@@ -141,7 +144,7 @@ class ProgramOptionBase
         T tval;
         ss >> tval;
         if (ss.fail()) {
-            program_option_warning(
+            internal::program_option_warning(
                 name, "Failed to set value: " + sval, silent, os);
             ss.clear();
             return false;
@@ -150,11 +153,11 @@ class ProgramOptionBase
 
         return true;
     }
-}; // class ProgramOptionBase
+}; // class ProgramOption
 
 /// \brief Option `--help`
 /// \ingroup Option
-class ProgramOptionHelp : public ProgramOptionBase
+class ProgramOptionHelp : public ProgramOption
 {
     public:
     ProgramOptionHelp() : help_(false) {}
@@ -187,7 +190,7 @@ class ProgramOptionHelp : public ProgramOptionBase
 /// \brief Option with a default value
 /// \ingroup Option
 template <typename T>
-class ProgramOptionDefault : public ProgramOptionBase
+class ProgramOptionDefault : public ProgramOption
 {
     public:
     ProgramOptionDefault(const std::string &desc)
@@ -316,10 +319,10 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
 
 /// \brief Program options
 /// \ingroup Option
-class ProgramOption
+class ProgramOptionMap
 {
     public:
-    explicit ProgramOption(bool silent = false)
+    explicit ProgramOptionMap(bool silent = false)
         : silent_(silent), help_ptr_(std::make_shared<ProgramOptionHelp>())
     {
         add_option("help", help_ptr_);
@@ -332,7 +335,7 @@ class ProgramOption
     /// \param desc A descritpion stream of the option
     /// \param ptr The destination that store the option value
     template <typename T>
-    ProgramOption &add(
+    ProgramOptionMap &add(
         const std::string &name, const std::string &desc, T *ptr)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
@@ -343,7 +346,7 @@ class ProgramOption
 
     /// \brief Add an option with a single value, with a default value
     template <typename T, typename V>
-    ProgramOption &add(
+    ProgramOptionMap &add(
         const std::string &name, const std::string &desc, T *ptr, V val)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
@@ -354,7 +357,7 @@ class ProgramOption
 
     /// \brief Add an option with multiple value
     template <typename T>
-    ProgramOption &add(
+    ProgramOptionMap &add(
         const std::string &name, const std::string &desc, std::vector<T> *ptr)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
@@ -365,7 +368,7 @@ class ProgramOption
 
     /// \brief Add an option with multiple value, with a default value
     template <typename T, typename V>
-    ProgramOption &add(const std::string &name, const std::string &desc,
+    ProgramOptionMap &add(const std::string &name, const std::string &desc,
         std::vector<T> *ptr, V val)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
@@ -374,7 +377,7 @@ class ProgramOption
             name, std::make_shared<ProgramOptionVector<T>>(desc, ptr, val));
     }
 
-    ProgramOption &remove(const std::string &name)
+    ProgramOptionMap &remove(const std::string &name)
     {
         auto iter = option_find(name);
         if (iter != option_vec_.end())
@@ -451,24 +454,23 @@ class ProgramOption
     }
 
     /// \brief Get the underlying option object
-    std::shared_ptr<ProgramOptionBase> option(const std::string &name)
+    std::shared_ptr<ProgramOption> option(const std::string &name)
     {
         auto iter = option_find(name);
         if (iter != option_vec_.end())
             return std::get<1>(*iter);
-        return std::shared_ptr<ProgramOptionBase>(
-            static_cast<ProgramOptionBase *>(nullptr));
+        return std::shared_ptr<ProgramOption>(
+            static_cast<ProgramOption *>(nullptr));
     }
 
     /// \brief Get the underlying option object
-    std::shared_ptr<const ProgramOptionBase> option(
-        const std::string &name) const
+    std::shared_ptr<const ProgramOption> option(const std::string &name) const
     {
         auto iter = option_find(name);
         if (iter != option_vec_.end())
             return std::get<1>(*iter);
-        return std::shared_ptr<const ProgramOptionBase>(
-            static_cast<const ProgramOptionBase *>(nullptr));
+        return std::shared_ptr<const ProgramOption>(
+            static_cast<const ProgramOption *>(nullptr));
     }
 
     /// \brief Set the silent flag, if true, no warning messages will be
@@ -476,8 +478,8 @@ class ProgramOption
     void silent(bool flag) { silent_ = flag; }
 
     private:
-    using option_vec_type = Vector<std::tuple<std::string,
-        std::shared_ptr<ProgramOptionBase>, std::size_t>>;
+    using option_vec_type = Vector<
+        std::tuple<std::string, std::shared_ptr<ProgramOption>, std::size_t>>;
 
     bool silent_;
     std::shared_ptr<ProgramOptionHelp> help_ptr_;
@@ -503,8 +505,8 @@ class ProgramOption
         return iter;
     }
 
-    ProgramOption &add_option(
-        const std::string &name, std::shared_ptr<ProgramOptionBase> optr)
+    ProgramOptionMap &add_option(
+        const std::string &name, std::shared_ptr<ProgramOption> optr)
     {
         auto option = std::make_tuple(name, optr, 0);
         auto iter = option_find(name);
@@ -538,7 +540,7 @@ class ProgramOption
         for (auto &nv : name_vals) {
             auto iter = option_find(nv.first);
             if (iter == option_vec_.end()) {
-                program_option_warning(
+                internal::program_option_warning(
                     std::get<0>(*iter), "Unknown option", silent_, os);
                 continue;
             }
@@ -547,7 +549,7 @@ class ProgramOption
             if (nv.second.size() == 0 && std::get<1>(*iter)->is_bool()) {
                 proc = process_option(iter, sval_true, os);
             } else if (nv.second.size() == 0) {
-                program_option_warning(
+                internal::program_option_warning(
                     std::get<0>(*iter), "No value found", silent_, os);
             } else if (std::get<1>(*iter)->is_vector()) {
                 for (const auto &sval : nv.second)
@@ -581,7 +583,7 @@ class ProgramOption
         const std::string &sval, std::ostream &os)
     {
         if (sval.empty()) {
-            program_option_warning(
+            internal::program_option_warning(
                 std::get<0>(*iter), "No value found", silent_, os);
             return false;
         }
@@ -601,7 +603,7 @@ class ProgramOption
 
         return true;
     }
-}; // class ProgramOption
+}; // class ProgramOptionMap
 
 } // namespace vsmc
 

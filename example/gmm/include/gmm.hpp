@@ -586,7 +586,7 @@ inline int gmm_main(int argc, char **argv)
     std::size_t power = 2;
     std::string datafile("gmm.data");
 
-    vsmc::ProgramOption option;
+    vsmc::ProgramOptionMap option;
     option.add("N", "Number of particles", &N, 1000)
         .add("n", "Number of iterations", &n, 100)
         .add("c", "Number of components", &c, 4)
