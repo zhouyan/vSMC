@@ -67,8 +67,23 @@ class U01Distribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &)
     {
+        return generate(rng,
+            std::integral_constant<bool, RNGBits<RNGType>::value >= 32>());
+    }
+
+    template <typename RNGType>
+    result_type generate(RNGType &rng, std::true_type)
+    {
         return u01<internal::U01UIntType<RNGType>, result_type>(
             UniformBits<internal::U01UIntType<RNGType>>::eval(rng));
+    }
+
+    template <typename RNGType>
+    result_type generate(RNGType &rng, std::false_type)
+    {
+        std::uniform_real_distribution<RealType> u01;
+
+        return u01(rng);
     }
 }; // class U01Distribution
 
