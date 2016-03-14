@@ -94,10 +94,9 @@ inline void u01_distribution(RNGType &rng, std::size_t n, RealType *r)
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k) {
-        internal::u01_distribution_impl<k, RealType>(rng, k, r);
-    }
-    internal::u01_distribution_impl<k, RealType>(rng, l, r);
+    for (std::size_t i = 0; i != m; ++i)
+        internal::u01_distribution_impl<k, RealType>(rng, k, r + i * k);
+    internal::u01_distribution_impl<k, RealType>(rng, l, r + m * k);
 }
 
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(U01, u01, RealType)

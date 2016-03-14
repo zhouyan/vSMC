@@ -139,7 +139,10 @@ template <typename UIntType, typename RNGType>
 inline void uniform_bits_distribution_impl(RNGType &rng, std::size_t n,
     UIntType *r, std::true_type, std::true_type, std::true_type)
 {
-    rng_rand(rng, n, reinterpret_cast<typename RNGType::result_type *>(r));
+    if (sizeof(UIntType) == sizeof(typename RNGType::result_type))
+        rng_rand(rng, n, reinterpret_cast<typename RNGType::result_type *>(r));
+    else
+        rng_rand(rng, n, r);
 }
 
 template <typename UIntType, typename RNGType>
