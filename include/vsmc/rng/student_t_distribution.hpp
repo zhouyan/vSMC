@@ -122,9 +122,9 @@ inline void student_t_distribution(
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::student_t_distribution_impl<k>(rng, k, r + i * k, df);
-    internal::student_t_distribution_impl<k>(rng, l, r + m * k, df);
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::student_t_distribution_impl<k>(rng, k, r, df);
+    internal::student_t_distribution_impl<k>(rng, l, r, df);
 }
 
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_1(StudentT, student_t, n)

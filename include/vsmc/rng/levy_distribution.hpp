@@ -104,9 +104,9 @@ inline void levy_distribution(
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::levy_distribution_impl<k>(rng, k, r + i * k, a, b);
-    internal::levy_distribution_impl<k>(rng, l, r + m * k, a, b);
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::levy_distribution_impl<k>(rng, k, r, a, b);
+    internal::levy_distribution_impl<k>(rng, l, r, a, b);
 }
 
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Levy, levy, a, b)

@@ -115,9 +115,9 @@ inline void fisher_f_distribution(
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::fisher_f_distribution_impl<k>(rng, k, r + i * k, df1, df2);
-    internal::fisher_f_distribution_impl<k>(rng, l, r + m * k, df1, df2);
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::fisher_f_distribution_impl<k>(rng, k, r, df1, df2);
+    internal::fisher_f_distribution_impl<k>(rng, l, r, df1, df2);
 }
 
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(FisherF, fisher_f, m, n)

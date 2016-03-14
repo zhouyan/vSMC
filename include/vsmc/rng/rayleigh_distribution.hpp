@@ -101,9 +101,9 @@ inline void rayleigh_distribution(
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::rayleigh_distribution_impl(rng, k, r + i * k, sigma);
-    internal::rayleigh_distribution_impl(rng, l, r + m * k, sigma);
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::rayleigh_distribution_impl(rng, k, r, sigma);
+    internal::rayleigh_distribution_impl(rng, l, r, sigma);
 }
 
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_1(Rayleigh, rayleigh, sigma)

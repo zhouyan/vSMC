@@ -100,9 +100,9 @@ inline void exponential_distribution(
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::exponential_distribution_impl(rng, k, r + i * k, lambda);
-    internal::exponential_distribution_impl(rng, l, r + m * k, lambda);
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::exponential_distribution_impl(rng, k, r, lambda);
+    internal::exponential_distribution_impl(rng, l, r, lambda);
 }
 
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_1(Exponential, exponential, lambda)

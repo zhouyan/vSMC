@@ -110,9 +110,9 @@ inline void weibull_distribution(
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::weibull_distribution_impl(rng, k, r + i * k, a, b);
-    internal::weibull_distribution_impl(rng, l, r + m * k, a, b);
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::weibull_distribution_impl(rng, k, r, a, b);
+    internal::weibull_distribution_impl(rng, l, r, a, b);
 }
 
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Weibull, weibull, a, b)

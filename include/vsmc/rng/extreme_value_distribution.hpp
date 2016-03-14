@@ -105,9 +105,9 @@ inline void extreme_value_distribution(
     const std::size_t k = 1000;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::extreme_value_distribution_impl(rng, k, r + i * k, a, b);
-    internal::extreme_value_distribution_impl(rng, l, r + m * k, a, b);
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::extreme_value_distribution_impl(rng, k, r, a, b);
+    internal::extreme_value_distribution_impl(rng, l, r, a, b);
 }
 
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(ExtremeValue, extreme_value, a, b)
