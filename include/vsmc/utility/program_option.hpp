@@ -461,6 +461,9 @@ class ProgramOptionMap
         return 0;
     }
 
+    /// \brief If the "help" option is processed and set to true
+    bool help() { return help_ptr_->help(); }
+
     /// \brief Get the underlying option object
     std::shared_ptr<ProgramOption> option(const std::string &name)
     {
@@ -529,7 +532,7 @@ class ProgramOptionMap
     void process_arg_vector(
         std::vector<std::string> &arg_vector, std::ostream &os)
     {
-        std::map<std::string, Vector<std::string>> name_svals;
+        Vector<std::pair<std::string, Vector<std::string>>> name_svals;
         Vector<std::string> svals;
         auto aiter = arg_vector.begin();
         while (aiter != arg_vector.end() && !is_option(*aiter))
@@ -537,20 +540,12 @@ class ProgramOptionMap
         while (aiter != arg_vector.end()) {
             std::string name(aiter->begin() + 2, aiter->end());
             ++aiter;
-            auto niter = name_svals.find(name);
-            if (niter == name_svals.end()) {
-                svals.clear();
-                while (aiter != arg_vector.end() && !is_option(*aiter)) {
-                    svals.push_back(*aiter);
-                    ++aiter;
-                }
-                name_svals.insert(std::make_pair(name, svals));
-            } else {
-                while (aiter != arg_vector.end() && !is_option(*aiter)) {
-                    niter->second.push_back(*aiter);
-                    ++aiter;
-                }
+            svals.clear();
+            while (aiter != arg_vector.end() && !is_option(*aiter)) {
+                svals.push_back(*aiter);
+                ++aiter;
             }
+            name_svals.push_back(std::make_pair(name, svals));
         }
 
         const std::string sval_true("1");
@@ -574,6 +569,8 @@ class ProgramOptionMap
             } else {
                 proc = process_option(iter, nsv.second.back(), os) || proc;
             }
+            if (proc)
+                ++std::get<2>(*iter);
         }
 
         for (auto &option : option_vec_)
@@ -581,7 +578,7 @@ class ProgramOptionMap
                 if (std::get<1>(option)->set_default())
                     std::get<2>(option) = 1;
 
-        if (help_ptr_->help())
+        if (help())
             print_help(os);
     }
 
