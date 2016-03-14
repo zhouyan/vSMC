@@ -131,40 +131,19 @@ class UniformBitsDistribution
 namespace internal
 {
 
-template <int, typename UIntType, typename RNGType, bool eq, bool uk, bool vk>
-inline void uniform_bits_distribution_impl(RNGType &rng, std::size_t n,
-    UIntType *r, std::integral_constant<bool, eq>,
-    std::integral_constant<bool, uk>, std::integral_constant<bool, vk>)
+template <typename UIntType, typename RNGType>
+inline void uniform_bits_distribution_impl(
+    RNGType &rng, std::size_t n, UIntType *r, std::false_type)
 {
     for (std::size_t i = 0; i != n; ++i)
         r[i] = UniformBits<UIntType>::eval(rng);
 }
 
-template <int, typename UIntType, typename RNGType>
-inline void uniform_bits_distribution_impl(RNGType &rng, std::size_t n,
-    UIntType *r, std::true_type, std::false_type, std::false_type)
+template <typename UIntType, typename RNGType>
+inline void uniform_bits_distribution_impl(
+    RNGType &rng, std::size_t n, UIntType *r, std::true_type)
 {
     rng_rand(rng, n, reinterpret_cast<typename RNGType::result_type *>(r));
-}
-
-template <int K, typename UIntType, typename RNGType>
-inline void uniform_bits_distribution_impl(RNGType &rng, std::size_t n,
-    UIntType *r, std::false_type, std::true_type, std::false_type)
-{
-    const std::size_t m = n / static_cast<std::size_t>(K);
-    rng_rand(rng, m, reinterpret_cast<typename RNGType::result_type *>(r));
-    n -= m * static_cast<std::size_t>(K);
-    r += m * static_cast<std::size_t>(K);
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = UniformBits<UIntType>::eval(rng);
-}
-
-template <int K, typename UIntType, typename RNGType>
-inline void uniform_bits_distribution_impl(RNGType &rng, std::size_t n,
-    UIntType *r, std::false_type, std::false_type, std::true_type)
-{
-    const std::size_t m = n * static_cast<std::size_t>(K);
-    rng_rand(rng, m, reinterpret_cast<typename RNGType::result_type *>(r));
 }
 
 } // namespace vsmc::internal
@@ -176,19 +155,17 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
         "**uniform_bits_distribution** USED WITH UIntType OTHER THAN UNSIGNED "
         "TYPES");
 
-    static constexpr int m = RNGMinBits<RNGType>::value;
-    static constexpr int w = std::numeric_limits<UIntType>::digits;
-    static constexpr int p = RNGBits<RNGType>::value;
-    static constexpr int u = sizeof(UIntType);
-    static constexpr int v = sizeof(typename RNGType::result_type);
-    static constexpr int k = w < p ? p / w : w / p;
-    static constexpr bool is_eq = m == 0 && w == p && u == v;
-    static constexpr bool is_uk = m == 0 && w < p && p % w == 0 && u * k == v;
-    static constexpr bool is_vk = m == 0 && w > p && w % p == 0 && u == v * k;
-    internal::uniform_bits_distribution_impl<k>(rng, n, r,
-        std::integral_constant<bool, is_eq>(),
-        std::integral_constant<bool, is_uk>(),
-        std::integral_constant<bool, is_vk>());
+    static constexpr bool zero_min = RNGMinBits<RNGType>::value == 0;
+    static constexpr bool eq_bits =
+        RNGBits<RNGType>::value == std::numeric_limits<UIntType>::digits;
+    static constexpr bool eq_size =
+        sizeof(typename RNGType::result_type) == sizeof(UIntType);
+    static constexpr bool eq_align =
+        alignof(typename RNGType::result_type) == alignof(UIntType);
+
+    internal::uniform_bits_distribution_impl(
+        rng, n, r, std::integral_constant<bool,
+                       (zero_min && eq_bits && eq_size && eq_align)>());
 }
 
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(UniformBits, uniform_bits, UIntType)

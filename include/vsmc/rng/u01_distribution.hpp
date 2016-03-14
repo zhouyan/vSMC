@@ -39,6 +39,15 @@
 namespace vsmc
 {
 
+namespace internal
+{
+
+template <typename RNGType>
+using U01UIntType = typename std::conditional<(RNGBits<RNGType>::value >= 64),
+    std::uint64_t, std::uint32_t>::type;
+
+} // namespace vsmc::internal
+
 /// \brief Standard uniform distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -58,12 +67,8 @@ class U01Distribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &)
     {
-        using uint_type =
-            typename std::conditional<(RNGBits<RNGType>::value > 32),
-                std::uint64_t, std::uint32_t>::type;
-        UniformBitsDistribution<uint_type> rbits;
-
-        return u01<uint_type, result_type>(rbits(rng));
+        return u01<internal::U01UIntType<RNGType>, result_type>(
+            UniformBits<internal::U01UIntType<RNGType>>::eval(rng));
     }
 }; // class U01Distribution
 
@@ -73,10 +78,10 @@ namespace internal
 template <std::size_t K, typename RealType, typename RNGType>
 inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
 {
-    std::uint32_t s[K];
+    U01UIntType<RNGType> s[K];
     uniform_bits_distribution(rng, n, s);
     for (std::size_t i = 0; i != n; ++i)
-        r[i] = u01<std::uint32_t, RealType>(s[i]);
+        r[i] = u01<U01UIntType<RNGType>, RealType>(s[i]);
 }
 
 } // namespace vsmc::internal
