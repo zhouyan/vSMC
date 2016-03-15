@@ -437,7 +437,7 @@ class RNGMinBitsImpl
 
     public:
     static constexpr int value =
-        (U >> M) > 0 ? RNGMinBitsImpl<UIntType, U, N - 1>::value : M;
+        (U >> M) == 0 ? M : RNGMinBitsImpl<UIntType, U, N - 1>::value;
 }; // class RNGMinBitsImpl
 
 template <typename UIntType, UIntType U>
