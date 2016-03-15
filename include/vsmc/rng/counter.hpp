@@ -373,7 +373,7 @@ class CounterEngine
         if (k != 0) {
             const std::size_t m = (n / M_) / k;
             const std::size_t l = (n / M_) % k;
-            std::array<result_type, M_> buffer[k];
+            alignas(32) std::array<result_type, M_> buffer[k];
             for (std::size_t i = 0; i != m; ++i) {
                 generator_(ctr_, key_, k, buffer);
                 std::memcpy(r, buffer, sizeof(result_type) * M_ * k);
@@ -481,11 +481,11 @@ class CounterEngine
     private:
     static constexpr std::size_t M_ = Generator::size();
 
-    std::array<result_type, M_> buffer_;
+    alignas(32) std::array<result_type, M_> buffer_;
+    std::size_t index_;
     ctr_type ctr_;
     key_type key_;
     Generator generator_;
-    std::size_t index_;
 
     void reset()
     {

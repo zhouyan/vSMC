@@ -213,7 +213,7 @@ class MKLEngine
     public:
     using result_type = internal::MKLResultType<Bits>;
 
-    explicit MKLEngine(MKL_UINT s = 1) : stream_(BRNG, 0), index_(M_)
+    explicit MKLEngine(MKL_UINT s = 1) : index_(M_), stream_(BRNG, 0)
     {
         seed(s);
     }
@@ -222,12 +222,12 @@ class MKLEngine
     explicit MKLEngine(SeedSeq &seq,
         typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
             MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
-        : stream_(BRNG, 0), index_(M_)
+        : index_(M_), stream_(BRNG, 0)
     {
         seed(seq);
     }
 
-    MKLEngine(MKL_UINT s, MKL_INT offset) : stream_(BRNG, 0), index_(M_)
+    MKLEngine(MKL_UINT s, MKL_INT offset) : index_(M_), stream_(BRNG, 0)
     {
         seed(s, offset);
     }
@@ -404,9 +404,9 @@ class MKLEngine
     private:
     static constexpr std::size_t M_ = 1024;
 
-    MKLStream stream_;
-    std::array<result_type, M_> buffer_;
+    alignas(32) std::array<result_type, M_> buffer_;
     std::size_t index_;
+    MKLStream stream_;
 }; // class MKLEngine
 
 /// \brief A 59-bits multiplicative congruential generator
