@@ -1,17 +1,4 @@
 /build
-/doc/_minted-user_guide
 /doc/main.md
 /doc/news.md
-/doc/user_guide.aux
-/doc/user_guide.bbl
-/doc/user_guide.bcf
-/doc/user_guide.blg
-/doc/user_guide.fdb_latexmk
-/doc/user_guide.fls
-/doc/user_guide.log
-/doc/user_guide.out
-/doc/user_guide.pdf
-/doc/user_guide.run.xml
-/doc/user_guide.synctex.gz
-/doc/user_guide.synctex.gz(busy)
 /user_options.cmake
