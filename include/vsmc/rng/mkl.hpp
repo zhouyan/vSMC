@@ -282,8 +282,7 @@ class MKLEngine
         const std::size_t l = n % M_;
         for (std::size_t i = 0; i != m; ++i) {
             internal::MKLUniformBits<Bits>::eval(
-                stream_, static_cast<MKL_INT>(M_), buffer_.data());
-            std::memcpy(r, buffer_.data(), sizeof(result_type) * M_);
+                stream_, static_cast<MKL_INT>(M_), r);
             r += M_;
             n -= M_;
         }
