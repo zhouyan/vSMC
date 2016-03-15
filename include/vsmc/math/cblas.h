@@ -34,13 +34,24 @@
 
 #include <vsmc/internal/config.h>
 
+/// \brief Integer type of CBLAS routines
+/// \ingroup Config
+///
+/// \details
+/// Define this macro if the CBLAS interface has unusual integer types. For
+/// example, the CBLAS library use ILP64 while the rest of the program use
+/// LP64.
+#ifndef VSMC_CBLAS_INT_TYPE
+#define VSMC_CBLAS_INT_TYPE int
+#endif
+
 #if VSMC_USE_MKL_CBLAS
 #include <mkl_cblas.h>
 #define VSMC_CBLAS_INT MKL_INT
 #else
 #include <cblas.h>
 #ifndef VSMC_CBLAS_INT
-#define VSMC_CBLAS_INT int
+#define VSMC_CBLAS_INT VSMC_CBLAS_INT_TYPE
 #endif
 #endif
 
