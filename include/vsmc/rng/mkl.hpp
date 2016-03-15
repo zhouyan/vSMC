@@ -265,8 +265,32 @@ class MKLEngine
 
     void operator()(std::size_t n, result_type *r)
     {
+        std::size_t remain = M_ - index_;
+
+        if (n < remain) {
+            std::memcpy(r, buffer_.data() + index_, sizeof(result_type) * n);
+            index_ += n;
+            return;
+        }
+
+        std::memcpy(r, buffer_.data() + index_, sizeof(result_type) * remain);
+        r += remain;
+        n -= remain;
+        index_ = M_;
+
+        const std::size_t m = n / M_;
+        const std::size_t l = n % M_;
+        for (std::size_t i = 0; i != m; ++i) {
+            internal::MKLUniformBits<Bits>::eval(
+                stream_, static_cast<MKL_INT>(M_), buffer_.data());
+            std::memcpy(r, buffer_.data(), sizeof(result_type) * M_);
+            r += M_;
+            n -= M_;
+        }
         internal::MKLUniformBits<Bits>::eval(
-            stream_, static_cast<MKL_INT>(n), r);
+            stream_, static_cast<MKL_INT>(M_), buffer_.data());
+        std::memcpy(r, buffer_.data(), sizeof(result_type) * l);
+        index_ = l;
     }
 
     void discard(long long nskip)

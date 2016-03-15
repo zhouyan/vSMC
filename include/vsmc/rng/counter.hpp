@@ -356,16 +356,17 @@ class CounterEngine
 
     void operator()(std::size_t n, result_type *r)
     {
-        if (n <= M_) {
-            for (std::size_t i = 0; i != n; ++i)
-                r[i] = operator()();
+        const std::size_t remain = M_ - index_;
+
+        if (n < remain) {
+            std::memcpy(r, buffer_.data() + index_, sizeof(result_type) * n);
+            index_ += n;
             return;
         }
 
-        std::memcpy(
-            r, buffer_.data() + index_, sizeof(result_type) * (M_ - index_));
-        r += M_ - index_;
-        n -= M_ - index_;
+        std::memcpy(r, buffer_.data() + index_, sizeof(result_type) * remain);
+        r += remain;
+        n -= remain;
         index_ = M_;
 
         const std::size_t k = 1024 / M_;
