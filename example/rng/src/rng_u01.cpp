@@ -30,8 +30,10 @@
 //============================================================================
 
 #include "rng_u01.hpp"
+#include <vsmc/rng/u01_distribution.hpp>
+#include "rng_dist.hpp"
 
-int main()
+int main(int argc, char **argv)
 {
     rng_u01_lr<std::uint32_t, float, vsmc::Closed, vsmc::Closed>();
     rng_u01_lr<std::uint64_t, float, vsmc::Closed, vsmc::Closed>();
@@ -62,6 +64,13 @@ int main()
     rng_u01_lr<std::uint64_t, long double, vsmc::Open, vsmc::Open>();
 
     std::cout << std::string(50, '=') << std::endl;
+
+    vsmc::Vector<std::array<double, 0>> params(1);
+    VSMC_RNG_DIST_TEST(0, U01, std::uniform_real_distribution);
+    VSMC_RNG_DIST_TEST(0, U01CC, std::uniform_real_distribution);
+    VSMC_RNG_DIST_TEST(0, U01CO, std::uniform_real_distribution);
+    VSMC_RNG_DIST_TEST(0, U01OC, std::uniform_real_distribution);
+    VSMC_RNG_DIST_TEST(0, U01OO, std::uniform_real_distribution);
 
     return 0;
 }

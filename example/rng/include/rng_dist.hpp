@@ -38,12 +38,12 @@
 #include <boost/random.hpp>
 
 #define VSMC_RNG_DIST_TEST(K, Name, STD)                                      \
-    rng_dist_test<float, K, STD<float>, vsmc::Name##Distribution<float>>(     \
+    rng_dist_test<float, K, vsmc::Name##Distribution<float>, STD<float>>(     \
         argc, argv, #Name, params);                                           \
-    rng_dist_test<double, K, STD<double>, vsmc::Name##Distribution<double>>(  \
+    rng_dist_test<double, K, vsmc::Name##Distribution<double>, STD<double>>(  \
         argc, argv, #Name, params);                                           \
-    rng_dist_test<long double, K, STD<long double>,                           \
-        vsmc::Name##Distribution<long double>>(argc, argv, #Name, params);
+    rng_dist_test<long double, K, vsmc::Name##Distribution<long double>,      \
+        STD<long double>>(argc, argv, #Name, params);
 
 template <typename RealType, std::size_t K>
 inline std::string rng_dist_name(
@@ -59,6 +59,12 @@ inline std::string rng_dist_name(
         ss << ")";
 
     return ss.str();
+}
+
+template <typename RealType, typename DistType>
+inline DistType rng_dist_init(const std::array<RealType, 0> &)
+{
+    return DistType();
 }
 
 template <typename RealType, typename DistType>
@@ -238,6 +244,46 @@ inline vsmc::Vector<RealType> rng_dist_partition(
 
 template <typename RealType>
 inline vsmc::Vector<RealType> rng_dist_partition(
+    std::size_t n, vsmc::U01Distribution<RealType> &)
+{
+    return rng_dist_partition_quantile<RealType>(
+        n, [&](RealType p) { return p; });
+}
+
+template <typename RealType>
+inline vsmc::Vector<RealType> rng_dist_partition(
+    std::size_t n, vsmc::U01CCDistribution<RealType> &)
+{
+    return rng_dist_partition_quantile<RealType>(
+        n, [&](RealType p) { return p; });
+}
+
+template <typename RealType>
+inline vsmc::Vector<RealType> rng_dist_partition(
+    std::size_t n, vsmc::U01CODistribution<RealType> &)
+{
+    return rng_dist_partition_quantile<RealType>(
+        n, [&](RealType p) { return p; });
+}
+
+template <typename RealType>
+inline vsmc::Vector<RealType> rng_dist_partition(
+    std::size_t n, vsmc::U01OCDistribution<RealType> &)
+{
+    return rng_dist_partition_quantile<RealType>(
+        n, [&](RealType p) { return p; });
+}
+
+template <typename RealType>
+inline vsmc::Vector<RealType> rng_dist_partition(
+    std::size_t n, vsmc::U01OODistribution<RealType> &)
+{
+    return rng_dist_partition_quantile<RealType>(
+        n, [&](RealType p) { return p; });
+}
+
+template <typename RealType>
+inline vsmc::Vector<RealType> rng_dist_partition(
     std::size_t n, vsmc::UniformRealDistribution<RealType> &dist)
 {
     return rng_dist_partition_quantile<RealType>(
@@ -360,7 +406,7 @@ inline void rng_dist_pval(const vsmc::Vector<RealType> &chi2,
     pval2.push_back(static_cast<RealType>(100.0 * alpha10 / ksad.size()));
 }
 
-template <typename RealType, typename STDDistType, typename vSMCDistType,
+template <typename RealType, typename vSMCDistType, typename STDDistType,
     std::size_t K>
 inline void rng_dist(std::size_t n, std::size_t m,
     const std::array<RealType, K> &param, const std::string &name,
@@ -370,11 +416,11 @@ inline void rng_dist(std::size_t n, std::size_t m,
 {
     names.push_back(rng_dist_name(name, param));
 
-    std::mt19937 rng_std;
-    STDDistType dist_std(rng_dist_init<RealType, STDDistType>(param));
-
     vsmc::RNG rng_vsmc;
     vSMCDistType dist_vsmc(rng_dist_init<RealType, vSMCDistType>(param));
+
+    std::mt19937 rng_std;
+    STDDistType dist_std(rng_dist_init<RealType, STDDistType>(param));
 
     vsmc::Vector<RealType> r(n);
     vsmc::Vector<RealType> chi2;
@@ -526,8 +572,8 @@ inline void rng_dist_output(const vsmc::Vector<std::string> &names,
     std::cout << std::string(lwid, '=') << std::endl;
 }
 
-template <typename RealType, std::size_t K, typename STDDistType,
-    typename vSMCDistType, typename ParamType>
+template <typename RealType, std::size_t K, typename vSMCDistType,
+    typename STDDistType, typename ParamType>
 inline void rng_dist_test(
     int argc, char **argv, const std::string &name, const ParamType &params)
 {
@@ -547,7 +593,7 @@ inline void rng_dist_test(
         std::array<RealType, K> param;
         for (std::size_t i = 0; i != p.size(); ++i)
             param[i] = static_cast<RealType>(p[i]);
-        rng_dist<RealType, STDDistType, vSMCDistType>(
+        rng_dist<RealType, vSMCDistType, STDDistType>(
             N, M, param, name, names, mean, variance, pval1, pval2, sw);
     }
     rng_dist_output<RealType>(names, mean, variance, pval1, pval2, sw);

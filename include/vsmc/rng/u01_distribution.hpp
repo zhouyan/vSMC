@@ -50,14 +50,6 @@ using U01UIntType = typename std::conditional<(RNGBits<RNGType>::value > 32),
 
 /// \brief Standard uniform distribution
 /// \ingroup Distribution
-///
-/// \details
-/// This distribution is different from `std::generate_canonical` in a few
-/// important aspects. First, it never generate the value `1.0`, which is not
-/// the case in some standard library implementations. It will generate enough
-/// random bits from the RNG first. If there are more than 32 random bits from
-/// the RNG output, then 64 bits will be generated. Otherwise, 32 bits will be
-/// generated. Then these random bits are converted floating point numbers.
 template <typename RealType>
 class U01Distribution
 {
@@ -80,6 +72,102 @@ class U01Distribution
     }
 }; // class U01Distribution
 
+/// \brief Standard uniform distribution on [0, 1]
+/// \ingroup Distribution
+template <typename RealType>
+class U01CCDistribution
+{
+    VSMC_DEFINE_RNG_DISTRIBUTION_0(
+        U01CC, u01_cc, RealType, floating_point, FLOATING_POINT)
+
+    public:
+    result_type min() const { return 0; }
+
+    result_type max() const { return 1; }
+
+    void reset() {}
+
+    private:
+    template <typename RNGType>
+    result_type generate(RNGType &rng, const param_type &)
+    {
+        return u01_cc<internal::U01UIntType<RNGType>, result_type>(
+            UniformBits<internal::U01UIntType<RNGType>>::eval(rng));
+    }
+}; // class U01CODistribution
+
+/// \brief Standard uniform distribution on [0, 1)
+/// \ingroup Distribution
+template <typename RealType>
+class U01CODistribution
+{
+    VSMC_DEFINE_RNG_DISTRIBUTION_0(
+        U01CO, u01_co, RealType, floating_point, FLOATING_POINT)
+
+    public:
+    result_type min() const { return 0; }
+
+    result_type max() const { return 1; }
+
+    void reset() {}
+
+    private:
+    template <typename RNGType>
+    result_type generate(RNGType &rng, const param_type &)
+    {
+        return u01_co<internal::U01UIntType<RNGType>, result_type>(
+            UniformBits<internal::U01UIntType<RNGType>>::eval(rng));
+    }
+}; // class U01CODistribution
+
+/// \brief Standard uniform distribution on (0, 1]
+/// \ingroup Distribution
+template <typename RealType>
+class U01OCDistribution
+{
+    VSMC_DEFINE_RNG_DISTRIBUTION_0(
+        U01OC, u01_oc, RealType, floating_point, FLOATING_POINT)
+
+    public:
+    result_type min() const { return 0; }
+
+    result_type max() const { return 1; }
+
+    void reset() {}
+
+    private:
+    template <typename RNGType>
+    result_type generate(RNGType &rng, const param_type &)
+    {
+        return u01_oc<internal::U01UIntType<RNGType>, result_type>(
+            UniformBits<internal::U01UIntType<RNGType>>::eval(rng));
+    }
+}; // class U01CODistribution
+
+/// \brief Standard uniform distribution on (0, 1)
+/// \ingroup Distribution
+template <typename RealType>
+class U01OODistribution
+{
+    VSMC_DEFINE_RNG_DISTRIBUTION_0(
+        U01OO, u01_oo, RealType, floating_point, FLOATING_POINT)
+
+    public:
+    result_type min() const { return 0; }
+
+    result_type max() const { return 1; }
+
+    void reset() {}
+
+    private:
+    template <typename RNGType>
+    result_type generate(RNGType &rng, const param_type &)
+    {
+        return u01_oo<internal::U01UIntType<RNGType>, result_type>(
+            UniformBits<internal::U01UIntType<RNGType>>::eval(rng));
+    }
+}; // class U01CODistribution
+
 namespace internal
 {
 
@@ -90,6 +178,42 @@ inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
     uniform_bits_distribution(rng, n, s);
     for (std::size_t i = 0; i != n; ++i)
         r[i] = u01_co<U01UIntType<RNGType>, RealType>(s[i]);
+}
+
+template <std::size_t K, typename RealType, typename RNGType>
+inline void u01_cc_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
+{
+    U01UIntType<RNGType> s[K];
+    uniform_bits_distribution(rng, n, s);
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = u01_cc<U01UIntType<RNGType>, RealType>(s[i]);
+}
+
+template <std::size_t K, typename RealType, typename RNGType>
+inline void u01_co_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
+{
+    U01UIntType<RNGType> s[K];
+    uniform_bits_distribution(rng, n, s);
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = u01_co<U01UIntType<RNGType>, RealType>(s[i]);
+}
+
+template <std::size_t K, typename RealType, typename RNGType>
+inline void u01_oc_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
+{
+    U01UIntType<RNGType> s[K];
+    uniform_bits_distribution(rng, n, s);
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = u01_oc<U01UIntType<RNGType>, RealType>(s[i]);
+}
+
+template <std::size_t K, typename RealType, typename RNGType>
+inline void u01_oo_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
+{
+    U01UIntType<RNGType> s[K];
+    uniform_bits_distribution(rng, n, s);
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = u01_oo<U01UIntType<RNGType>, RealType>(s[i]);
 }
 
 } // namespace vsmc::internal
@@ -111,7 +235,79 @@ inline void u01_distribution(RNGType &rng, std::size_t n, RealType *r)
     internal::u01_distribution_impl<k>(rng, l, r);
 }
 
+/// \brief Generate standard uniform random variates on [0, 1]
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void u01_cc_distribution(RNGType &rng, std::size_t n, RealType *r)
+{
+    static_assert(std::is_floating_point<RealType>::value,
+        "**u01_cc_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::u01_cc_distribution_impl<k>(rng, k, r);
+    internal::u01_cc_distribution_impl<k>(rng, l, r);
+}
+
+/// \brief Generate standard uniform random variates on [0, 1)
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void u01_co_distribution(RNGType &rng, std::size_t n, RealType *r)
+{
+    static_assert(std::is_floating_point<RealType>::value,
+        "**u01_co_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::u01_co_distribution_impl<k>(rng, k, r);
+    internal::u01_co_distribution_impl<k>(rng, l, r);
+}
+
+/// \brief Generate standard uniform random variates on (0, 1]
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void u01_oc_distribution(RNGType &rng, std::size_t n, RealType *r)
+{
+    static_assert(std::is_floating_point<RealType>::value,
+        "**u01_oc_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::u01_oc_distribution_impl<k>(rng, k, r);
+    internal::u01_oc_distribution_impl<k>(rng, l, r);
+}
+
+/// \brief Generate standard uniform random variates on (0, 1)
+/// \ingroup Distribution
+template <typename RealType, typename RNGType>
+inline void u01_oo_distribution(RNGType &rng, std::size_t n, RealType *r)
+{
+    static_assert(std::is_floating_point<RealType>::value,
+        "**u01_oo_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::u01_oo_distribution_impl<k>(rng, k, r);
+    internal::u01_oo_distribution_impl<k>(rng, l, r);
+}
+
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(U01, u01, RealType)
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(U01CC, u01_cc, RealType)
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(U01CO, u01_co, RealType)
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(U01OC, u01_oc, RealType)
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(U01OO, u01_oo, RealType)
 
 } // namespace vsmc
 

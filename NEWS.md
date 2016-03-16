@@ -11,7 +11,7 @@
 
 * `Particle` now has a new `sp` member that return `SingleParticle` objects.
 * `NormalMVDistribution` and related functions for generating multivariate
-  Normal distribution random variate. 
+  Normal distribution random variate.
 * New module "Random Walk" that implements generic random walk MCMC kernels and
   Normal distribution based proposals. Both scalar and multivariate cases are
   supported.
@@ -24,23 +24,17 @@
 ## Changed behaviors
 
 * `AlignedAllocator` template parameter `Memory` now requires its member
-  functions to be static and the class stateless.
-* `U01Distribution` now produce random numbers in interval (0, 1] if the
-  unsigned integer results from the RNG has more bits than the significant bits
-  of the floating point types. Otherwise it produce random numbers in (0, 1).
-  This behavior affect all distributions. But it shall not be visible within
-  user program.
+  functions to be static and the class stateless. Unless you write your
+  allocator using this template, there is no need to change client code.
 
 ## Removed features
 
-* `U01CCDistribution`, etc., are removed. The functionally of generating fixed
-  point random numbers within interval [0, 1] is preserved through `u01_lr`,
-  etc., functions which convert a random unsigned integer to floating points
-  numbers within desired ranges. It is extended to support all unsigned integer
-  types and floating points types.
+* `U01LRDistribution` is removed, while `U01CCDistribution` etc., remain.
+* `UniformRealLRDistribution` and `UniformRealCCDistribution` etc., are
+  removed.
 
 ## Documentation
-http://zhouyan.github.io/vSMCDoc/v2.2.0/
+http://zhouyan.github.io/vSMCDoc/develop/
 
 # Changes in v2.1.0
 
