@@ -75,7 +75,6 @@ inline void rng_test(std::size_t n, const std::string &name,
     vsmc::StopWatch watch1;
     vsmc::StopWatch watch2;
     bool passed = true;
-
     std::size_t number = 0;
     std::uniform_int_distribution<std::size_t> runif(n, n * 2 - 1);
     for (std::size_t i = 0; i != 10; ++i) {

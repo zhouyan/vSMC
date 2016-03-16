@@ -176,8 +176,7 @@ inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
 {
     U01UIntType<RNGType> s[K];
     uniform_bits_distribution(rng, n, s);
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = u01_co<U01UIntType<RNGType>, RealType>(s[i]);
+    u01_co<U01UIntType<RNGType>, RealType>(n, s, r);
 }
 
 template <std::size_t K, typename RealType, typename RNGType>
@@ -185,6 +184,7 @@ inline void u01_cc_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
 {
     U01UIntType<RNGType> s[K];
     uniform_bits_distribution(rng, n, s);
+    u01_cc<U01UIntType<RNGType>, RealType>(n, s, r);
     for (std::size_t i = 0; i != n; ++i)
         r[i] = u01_cc<U01UIntType<RNGType>, RealType>(s[i]);
 }
@@ -194,8 +194,7 @@ inline void u01_co_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
 {
     U01UIntType<RNGType> s[K];
     uniform_bits_distribution(rng, n, s);
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = u01_co<U01UIntType<RNGType>, RealType>(s[i]);
+    u01_co<U01UIntType<RNGType>, RealType>(n, s, r);
 }
 
 template <std::size_t K, typename RealType, typename RNGType>
@@ -203,8 +202,7 @@ inline void u01_oc_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
 {
     U01UIntType<RNGType> s[K];
     uniform_bits_distribution(rng, n, s);
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = u01_oc<U01UIntType<RNGType>, RealType>(s[i]);
+    u01_oc<U01UIntType<RNGType>, RealType>(n, s, r);
 }
 
 template <std::size_t K, typename RealType, typename RNGType>
@@ -212,8 +210,7 @@ inline void u01_oo_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
 {
     U01UIntType<RNGType> s[K];
     uniform_bits_distribution(rng, n, s);
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = u01_oo<U01UIntType<RNGType>, RealType>(s[i]);
+    u01_oo<U01UIntType<RNGType>, RealType>(n, s, r);
 }
 
 } // namespace vsmc::internal

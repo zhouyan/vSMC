@@ -87,19 +87,28 @@ class U01LRImpl;
 template <typename UIntType, typename RealType>
 class U01LRImpl<UIntType, RealType, Closed, Closed>
 {
+    static constexpr int W = std::numeric_limits<UIntType>::digits;
+    static constexpr int M = std::numeric_limits<RealType>::digits;
+    static constexpr int P = W - 1 < M ? W - 1 : M;
+    static constexpr int V = P + 1;
+    static constexpr int L = V < W ? 1 : 0;
+    static constexpr int R = V < W ? W - 1 - V : 0;
+
     public:
     static RealType eval(UIntType u) noexcept
     {
-        static constexpr int w = std::numeric_limits<UIntType>::digits;
-        static constexpr int m = std::numeric_limits<RealType>::digits;
-        static constexpr int p = w - 1 < m ? w - 1 : m;
-        static constexpr int v = p + 1;
-        static constexpr int l = v < w ? 1 : 0;
-        static constexpr int r = v < w ? w - 1 - v : 0;
+        return trans((u << L) >> (R + L),
+                   std::integral_constant<bool, (V < W)>()) *
+            U01ImplPow2Inv<RealType, P + 1>::value;
+    }
 
-        return trans((u << l) >> (r + l),
-                   std::integral_constant<bool, (v < w)>()) *
-            U01ImplPow2Inv<RealType, p + 1>::value;
+    static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
+    {
+        for (std::size_t i = 0; i != n; ++i) {
+            r[i] = trans((u[i] << L) >> (R + L),
+                std::integral_constant<bool, (V < W)>());
+        }
+        mul(n, U01ImplPow2Inv<RealType, P + 1>::value, r, r);
     }
 
     private:
@@ -117,50 +126,73 @@ class U01LRImpl<UIntType, RealType, Closed, Closed>
 template <typename UIntType, typename RealType>
 class U01LRImpl<UIntType, RealType, Closed, Open>
 {
+    static constexpr int W = std::numeric_limits<UIntType>::digits;
+    static constexpr int M = std::numeric_limits<RealType>::digits;
+    static constexpr int P = W < M ? W : M;
+    static constexpr int R = W - P;
+
     public:
     static RealType eval(UIntType u) noexcept
     {
-        static constexpr int w = std::numeric_limits<UIntType>::digits;
-        static constexpr int m = std::numeric_limits<RealType>::digits;
-        static constexpr int p = w < m ? w : m;
-        static constexpr int r = w - p;
+        return static_cast<RealType>(u >> R) *
+            U01ImplPow2Inv<RealType, P>::value;
+    }
 
-        return static_cast<RealType>(u >> r) *
-            U01ImplPow2Inv<RealType, p>::value;
+    static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
+    {
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = u[i] >> R;
+        mul(n, U01ImplPow2Inv<RealType, P>::value, r, r);
     }
 }; // class U01LRImpl
 
 template <typename UIntType, typename RealType>
 class U01LRImpl<UIntType, RealType, Open, Closed>
 {
+    static constexpr int W = std::numeric_limits<UIntType>::digits;
+    static constexpr int M = std::numeric_limits<RealType>::digits;
+    static constexpr int P = W < M ? W : M;
+    static constexpr int R = W - P;
+
     public:
     static RealType eval(UIntType u) noexcept
     {
-        static constexpr int w = std::numeric_limits<UIntType>::digits;
-        static constexpr int m = std::numeric_limits<RealType>::digits;
-        static constexpr int p = w < m ? w : m;
-        static constexpr int r = w - p;
+        return static_cast<RealType>(u >> R) *
+            U01ImplPow2Inv<RealType, P>::value +
+            U01ImplPow2Inv<RealType, P>::value;
+    }
 
-        return static_cast<RealType>(u >> r) *
-            U01ImplPow2Inv<RealType, p>::value +
-            U01ImplPow2Inv<RealType, p>::value;
+    static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
+    {
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = u[i] >> R;
+        fma(n, U01ImplPow2Inv<RealType, P>::value, r,
+            U01ImplPow2Inv<RealType, P>::value, r);
     }
 }; // class U01LRImpl
 
 template <typename UIntType, typename RealType>
 class U01LRImpl<UIntType, RealType, Open, Open>
 {
+    static constexpr int W = std::numeric_limits<UIntType>::digits;
+    static constexpr int M = std::numeric_limits<RealType>::digits;
+    static constexpr int P = W + 1 < M ? W + 1 : M;
+    static constexpr int R = W + 1 - P;
+
     public:
     static RealType eval(UIntType u) noexcept
     {
-        static constexpr int w = std::numeric_limits<UIntType>::digits;
-        static constexpr int m = std::numeric_limits<RealType>::digits;
-        static constexpr int p = w + 1 < m ? w + 1 : m;
-        static constexpr int r = w + 1 - p;
+        return static_cast<RealType>(u >> R) *
+            U01ImplPow2Inv<RealType, P - 1>::value +
+            U01ImplPow2Inv<RealType, P>::value;
+    }
 
-        return static_cast<RealType>(u >> r) *
-            U01ImplPow2Inv<RealType, p - 1>::value +
-            U01ImplPow2Inv<RealType, p>::value;
+    static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
+    {
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = u[i] >> R;
+        fma(n, U01ImplPow2Inv<RealType, P - 1>::value, r,
+            U01ImplPow2Inv<RealType, P>::value, r);
     }
 }; // class U01LRImpl
 
@@ -187,6 +219,21 @@ RealType u01_lr(UIntType u) noexcept
         "TYPES");
 
     return internal::U01LRImpl<UIntType, RealType, Left, Right>::eval(u);
+}
+
+/// \brief Convert uniform unsigned integers to floating points within [0, 1]
+/// \ingroup RNG
+template <typename UIntType, typename RealType, typename Left, typename Right>
+void u01_lr(std::size_t n, const UIntType *u, RealType *r) noexcept
+{
+    static_assert(std::is_unsigned<UIntType>::value,
+        "**u01_lr** USED WITH UIntType OTHER THAN UNSIGNED INTEGER "
+        "TYPES");
+    static_assert(std::is_floating_point<RealType>::value,
+        "**u01_lr** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
+    internal::U01LRImpl<UIntType, RealType, Left, Right>::eval(n, u, r);
 }
 
 /// \brief Convert uniform unsigned integers to floating points on [0, 1]
@@ -219,6 +266,38 @@ template <typename UIntType, typename RealType>
 RealType u01_oo(UIntType u) noexcept
 {
     return u01_lr<UIntType, RealType, Open, Open>(u);
+}
+
+/// \brief Convert uniform unsigned integers to floating points on [0, 1]
+/// \ingroup RNG
+template <typename UIntType, typename RealType>
+void u01_cc(std::size_t n, const UIntType *u, RealType *r) noexcept
+{
+    u01_lr<UIntType, RealType, Closed, Closed>(n, u, r);
+}
+
+/// \brief Convert uniform unsigned integers to floating points on [0, 1)
+/// \ingroup RNG
+template <typename UIntType, typename RealType>
+void u01_co(std::size_t n, const UIntType *u, RealType *r) noexcept
+{
+    u01_lr<UIntType, RealType, Closed, Open>(n, u, r);
+}
+
+/// \brief Convert uniform unsigned integers to floating points on (0, 1]
+/// \ingroup RNG
+template <typename UIntType, typename RealType>
+void u01_oc(std::size_t n, const UIntType *u, RealType *r) noexcept
+{
+    u01_lr<UIntType, RealType, Open, Closed>(n, u, r);
+}
+
+/// \brief Convert uniform unsigned integers to floating points on (0, 1)
+/// \ingroup RNG
+template <typename UIntType, typename RealType>
+void u01_oo(std::size_t n, const UIntType *u, RealType *r) noexcept
+{
+    u01_lr<UIntType, RealType, Open, Open>(n, u, r);
 }
 
 } // namespace vsmc

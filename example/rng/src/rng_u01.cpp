@@ -35,34 +35,10 @@
 
 int main(int argc, char **argv)
 {
-    rng_u01_lr<std::uint32_t, float, vsmc::Closed, vsmc::Closed>();
-    rng_u01_lr<std::uint64_t, float, vsmc::Closed, vsmc::Closed>();
-    rng_u01_lr<std::uint32_t, double, vsmc::Closed, vsmc::Closed>();
-    rng_u01_lr<std::uint64_t, double, vsmc::Closed, vsmc::Closed>();
-    rng_u01_lr<std::uint32_t, long double, vsmc::Closed, vsmc::Closed>();
-    rng_u01_lr<std::uint64_t, long double, vsmc::Closed, vsmc::Closed>();
-
-    rng_u01_lr<std::uint32_t, float, vsmc::Closed, vsmc::Open>();
-    rng_u01_lr<std::uint64_t, float, vsmc::Closed, vsmc::Open>();
-    rng_u01_lr<std::uint32_t, double, vsmc::Closed, vsmc::Open>();
-    rng_u01_lr<std::uint64_t, double, vsmc::Closed, vsmc::Open>();
-    rng_u01_lr<std::uint32_t, long double, vsmc::Closed, vsmc::Open>();
-    rng_u01_lr<std::uint64_t, long double, vsmc::Closed, vsmc::Open>();
-
-    rng_u01_lr<std::uint32_t, float, vsmc::Open, vsmc::Closed>();
-    rng_u01_lr<std::uint64_t, float, vsmc::Open, vsmc::Closed>();
-    rng_u01_lr<std::uint32_t, double, vsmc::Open, vsmc::Closed>();
-    rng_u01_lr<std::uint64_t, double, vsmc::Open, vsmc::Closed>();
-    rng_u01_lr<std::uint32_t, long double, vsmc::Open, vsmc::Closed>();
-    rng_u01_lr<std::uint64_t, long double, vsmc::Open, vsmc::Closed>();
-
-    rng_u01_lr<std::uint32_t, float, vsmc::Open, vsmc::Open>();
-    rng_u01_lr<std::uint64_t, float, vsmc::Open, vsmc::Open>();
-    rng_u01_lr<std::uint32_t, double, vsmc::Open, vsmc::Open>();
-    rng_u01_lr<std::uint64_t, double, vsmc::Open, vsmc::Open>();
-    rng_u01_lr<std::uint32_t, long double, vsmc::Open, vsmc::Open>();
-    rng_u01_lr<std::uint64_t, long double, vsmc::Open, vsmc::Open>();
-
+    VSMC_RNG_U01_TEST(Closed, Closed);
+    VSMC_RNG_U01_TEST(Closed, Open);
+    VSMC_RNG_U01_TEST(Open, Closed);
+    VSMC_RNG_U01_TEST(Open, Open);
     std::cout << std::string(50, '=') << std::endl;
 
     vsmc::Vector<std::array<double, 0>> params(1);

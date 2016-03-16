@@ -45,6 +45,16 @@
         return vsmc_u01_##lr##_u##ubits##fsuffix(u);                          \
     }
 
+#define VSMC_RNG_U01_TEST(Left, Right)                                        \
+    rng_u01_lr<std::uint32_t, float, vsmc::Left, vsmc::Right>(argc, argv);    \
+    rng_u01_lr<std::uint64_t, float, vsmc::Left, vsmc::Right>(argc, argv);    \
+    rng_u01_lr<std::uint32_t, double, vsmc::Left, vsmc::Right>(argc, argv);   \
+    rng_u01_lr<std::uint64_t, double, vsmc::Left, vsmc::Right>(argc, argv);   \
+    rng_u01_lr<std::uint32_t, long double, vsmc::Left, vsmc::Right>(          \
+        argc, argv);                                                          \
+    rng_u01_lr<std::uint64_t, long double, vsmc::Left, vsmc::Right>(          \
+        argc, argv);
+
 template <typename>
 inline std::string rng_u01_type_name();
 
@@ -146,8 +156,12 @@ inline void rng_u01_rb(RealType x)
 }
 
 template <typename UIntType, typename RealType, typename Left, typename Right>
-inline void rng_u01_lr()
+inline void rng_u01_lr(int argc, char **argv)
 {
+    std::size_t n = 1000000;
+    if (argc > 1)
+        n = static_cast<std::size_t>(std::atoi(argv[1]));
+
     std::cout << std::string(50, '=') << std::endl;
     std::cout << "u01<uint" << std::numeric_limits<UIntType>::digits << "_t, "
               << rng_u01_type_name<RealType>() << ", "
@@ -159,20 +173,49 @@ inline void rng_u01_lr()
     rng_u01_rb(vsmc::u01_lr<UIntType, RealType, Left, Right>(
         std::numeric_limits<UIntType>::max()));
 
-    bool pass = true;
-    std::size_t n = 100000000;
     vsmc::ThreefryEngine<UIntType, 4> rng;
-    for (std::size_t i = 0; i != n; ++i) {
-        UIntType u = rng();
-        RealType c = rng_u01_lr_c<UIntType, RealType, Left, Right>(u);
-        RealType cpp = vsmc::u01_lr<UIntType, RealType, Left, Right>(u);
-        if (!vsmc::internal::is_equal(c, cpp)) {
-            pass = false;
-            break;
+    vsmc::Vector<UIntType> u(n * 2);
+    vsmc::Vector<RealType> r(n * 2);
+    vsmc::Vector<RealType> r1(n * 2);
+    vsmc::Vector<RealType> r2(n * 2);
+    bool passed1 = true;
+    bool passed2 = true;
+    std::uniform_int_distribution<std::size_t> runif(n, n * 2 - 1);
+    for (std::size_t i = 0; i != 10; ++i) {
+        std::size_t m = runif(rng);
+
+        if (passed1 || passed2) {
+            vsmc::rng_rand(rng, m, u.data());
+            for (std::size_t j = 0; j != m; ++j)
+                r[j] = vsmc::u01_lr<UIntType, RealType, Left, Right>(u[j]);
+        }
+
+        if (passed1) {
+            for (std::size_t j = 0; j != m; ++j)
+                r1[j] = rng_u01_lr_c<UIntType, RealType, Left, Right>(u[j]);
+            for (std::size_t j = 0; j != m; ++j) {
+                if (!vsmc::internal::is_equal(r[j], r1[j])) {
+                    passed1 = false;
+                    break;
+                }
+            }
+        }
+
+        if (passed2) {
+            vsmc::u01_lr<UIntType, RealType, Left, Right>(
+                m, u.data(), r2.data());
+            for (std::size_t j = 0; j != n; ++j) {
+                if (!vsmc::internal::is_equal(r[j], r2[j])) {
+                    passed2 = false;
+                    break;
+                }
+            }
         }
     }
     std::cout << std::setw(44) << std::left
-              << "C API: " << (pass ? "Passed" : "Failed") << std::endl;
+              << "C API:" << (passed1 ? "Passed" : "Failed") << std::endl;
+    std::cout << std::setw(44) << std::left
+              << "Batch:" << (passed1 ? "Passed" : "Failed") << std::endl;
 }
 
 #endif // VSMC_EXAMPLE_RNG_U01_HPP

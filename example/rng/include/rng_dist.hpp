@@ -583,6 +583,7 @@ inline void rng_dist_test(
     std::size_t M = 100;
     if (argc > 2)
         M = static_cast<std::size_t>(std::atoi(argv[2]));
+
     vsmc::Vector<std::string> names;
     vsmc::Vector<RealType> mean;
     vsmc::Vector<RealType> variance;
