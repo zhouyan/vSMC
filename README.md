@@ -1,19 +1,19 @@
 # Introduction
 
 The vSMC library provides a framework for implementing SMC algorithms. It has a
-core module which performs resampling, etc., operations common to all SMC
-algorithms and applications. In addition, it provides the bases for
-implementing parallelized samplers. The SMC algorithms are highly
-parallelizable, but there are many frameworks for doing this. This library
-tries to hide the different parallelization mechanism behind a unified
-interface, and thus increases code reuse.
+modules that perform resampling, etc., operations common to all SMC algorithms
+and applications. In addition, it provides bases for implementing parallelized
+samplers. The SMC algorithms are highly parallelizable, but there are many
+frameworks for doing this. This library tries to hide the different
+parallelization mechanism behind a unified interface, and thus increases code
+reuse.
 
 # Installation
 
 This is a header only template C++ library. To install the library just move
 the contents of the `include` directory into a proper place, e.g.,
-`/usr/local/include` in Unix-alike systems. Alternatively, one can use
-[CMake][CMake] (2.8.3 or later required),
+`/usr/local/include` on Unix-alike systems. Alternatively, one can use
+[CMake][CMake] (3.0.0 or later required),
 ~~~sh
 cd /path_to_vSMC_source
 mkdir build
@@ -21,16 +21,40 @@ cd build
 cmake ..
 make install
 ~~~
-One may need `su` or `sudo` permissions to perform the last installation step.
+One may need administrator permissions to perform the last installation step or
+alternatively one can define the [CMake][CMake] variable `CMAKE_INSTALL_PREFIX`
+to change the destination of installation.
 
 # Documentation
 
-To make the documentations one need [Doxygen][Doxygen] 1.8.3 or later.
-~~~sh
-make docs
-~~~
 The documentation of the [master][vSMCDocMaster] and [develop][vSMCDocDevelop]
-branches can be found online.
+branches, as well as for individual releases can be found online.
+
+# Third-party dependencies
+
+This library requires a working BLAS/LAPACK implementation, with the standard C
+interface headers (`cblas.h` and `lapacke.h`). Some of the library's
+functionalities can only be used if a optional dependencies are present.
+Notably, [HDF5][HDF5], [TBB][TBB], [OpenMP][OpenMP] and [MKL][MKL]. One can
+tell the library that these optional features are available by defining
+configuration macros such as `-DVSMC_HAS_HDF5=1` during compilation.
+
+# Parallelization backends
+
+This library support various backends for multi-thread parallelization, unified
+under a uniform interface. The primary backends are [OpenMP][OpenMP] and
+[TBB][TBB].
+
+# Compiler support
+
+This library makes heavy use of some template metaprogramming techniques. It
+requires a C++11 standard conforming compiler.
+
+This library has been regularly tested with recent [Clang][Clang], [GCC][GCC]
+and [Intel C++ Compiler][icpc] in C++11 mode.
+
+Other compilers might work but are not tested. Complete C++11 implementation is
+required.
 
 # Examples
 
@@ -42,61 +66,22 @@ cd build
 cmake ..
 make example
 ~~~
-Most examples also come with their own `README` files that give relevant
-references.
-
-# Parallelization backends
-
-The library support various backends for multi-thread parallelization, unified
-under a uniform interface. The primary backends are [OpenMP][OpenMP] and [Intel
-TBB][Intel TBB]. Other backends are available in the [vSMC Extra][vSMC Extra]
-repository, including MPI and [OpenCL][OpenCL].
-
-# Third-party dependencies
-
-This library requires a working BLAS/LAPACK implementation, with the standard C
-interface headers (`cblas.h` and `lapacke.h`).
-
-This library has no other dependencies other than C++ standard libraries
-(C++11). Any C++11 language features are optional.
-
-In particular, the library use the `<functional>` and `<random>` headers, which
-are parts of the C++11 standard libraries. Equivalences can be found in recent
-versions of [Boost][Boost]. The library does its best to detect a usable C++11
-solution and falls back to [Boost][Boost] if it fails to do so. This behavior
-can be changed explicitly through configuration macros.
-
-# Compiler support
-
-This library makes heavy use of some template metaprogramming techniques. It
-requires a C++11 standard conforming compiler.
-
-This library has been regularly tested with recent [Clang][Clang], [GCC][GCC]
-and [Intel C++ Compiler][icpc] in C++11 mode.
-
-[Microsoft Visual C++][MSVC] 2015 or later are also supported. However, this
-compiler is tested less regularly.
-
-Other compilers might work but are not tested.
+Some examples may only be built if some optional dependencies are present.
 
 # License
 
 The vSMC library is distributed with a 2-clause BSD license which can be found
 in the `LICENSE` file distributed with the source.
 
-[Apple GCD]: http://en.wikipedia.org/wiki/Grand_Central_Dispatch
-[Boost]: http://www.boost.org
 [CMake]: http://www.cmake.org
 [Clang]: http://clang.llvm.org
 [Doxygen]: http://www.stack.nl/~dimitri/doxygen/manual.html
 [GCC]: http://gcc.gnu.org
-[Intel Cilk Plus]: https://www.cilkplus.org
-[Intel TBB]: http://threadingbuildingblocks.org
-[MS PPL]: http://msdn.microsoft.com/en-us/library/dd492418.aspx
-[MSVC]: http://msdn.microsoft.com/en-us/vstudio//default.aspx
+[HDF5]: http://www.hdfgroup.org
+[MKL]: https://software.intel.com/en-us/intel-mkl
+[TBB]: http://threadingbuildingblocks.org
 [OpenCL]: http://www.khronos.org/opencl
 [OpenMP]: http://www.openmp.org
 [icpc]: http://software.intel.com/en-us/intel-compilers
-[vSMCDocMaster]: http://zhouyan.github.io/vSMCDoc/master
 [vSMCDocDevelop]: http://zhouyan.github.io/vSMCDoc/develop
-[vSMC Extra]: https://github.com/zhouyan/vSMCExtra.git
+[vSMCDocMaster]: http://zhouyan.github.io/vSMCDoc/master
