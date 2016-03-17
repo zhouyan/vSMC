@@ -1886,7 +1886,7 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
 /// \brief MKL `DFTaskPtr`
 /// \ingroup MKL
 template <typename RealType = double>
-class MKLDFTask
+class MKLDFTask : public MKLBase<::DFTaskPtr, MKLDFTask<RealType>>
 {
     static_assert(internal::is_one_of<RealType, float, double>::value,
         "**MKLDFTask** USED WITH RealType OTHER THAN float OR double");
