@@ -87,25 +87,6 @@
 namespace vsmc
 {
 
-namespace internal
-{
-
-template <bool>
-class StaticAssert
-{
-    public:
-    static void test(int *) {}
-}; // class StaticAssert
-
-template <>
-class StaticAssert<true>
-{
-    public:
-    static void test(...) {}
-}; // class StaticAssert
-
-} // namespace vsmc::internal
-
 class RuntimeAssert : public std::runtime_error
 {
     public:

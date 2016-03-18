@@ -42,16 +42,16 @@
     {                                                                         \
     }; // class ThreefryRotateConstant
 
-/// \brief ThreefryGenerator default vector length
-/// \ingroup Config
-#ifndef VSMC_RNG_THREEFRY_VECTOR_LENGTH
-#define VSMC_RNG_THREEFRY_VECTOR_LENGTH 4
-#endif
-
 /// \brief ThreefryGenerator default rounds
 /// \ingroup Config
 #ifndef VSMC_RNG_THREEFRY_ROUNDS
 #define VSMC_RNG_THREEFRY_ROUNDS 20
+#endif
+
+/// \brief ThreefryGenerator default vector length
+/// \ingroup Config
+#ifndef VSMC_RNG_THREEFRY_VECTOR_LENGTH
+#define VSMC_RNG_THREEFRY_VECTOR_LENGTH 4
 #endif
 
 namespace vsmc
