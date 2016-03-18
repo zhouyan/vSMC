@@ -244,12 +244,12 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     }
 
     template <typename IntType>
-    void copy(size_type N, const IntType *src_idx)
+    void copy(size_type N, const IntType *index)
     {
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH;
 
         for (size_type dst = 0; dst != N; ++dst)
-            copy_particle(src_idx[dst], dst);
+            copy_particle(index[dst], dst);
     }
 
     void copy_particle(size_type src, size_type dst)
@@ -354,13 +354,13 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     }
 
     template <typename IntType>
-    void copy(size_type N, const IntType *src_idx)
+    void copy(size_type N, const IntType *index)
     {
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH;
 
         for (std::size_t d = 0; d != this->dim(); ++d)
             for (size_type dst = 0; dst != N; ++dst)
-                state(dst, d) = state(static_cast<size_type>(src_idx[dst]), d);
+                state(dst, d) = state(static_cast<size_type>(index[dst]), d);
     }
 
     void copy_particle(size_type src, size_type dst)

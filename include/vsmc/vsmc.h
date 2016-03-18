@@ -286,11 +286,11 @@ typedef enum {
 void vsmc_resample_trans_u01_rep(
     int m, int n, const double *weight, const double *u01, int *replication);
 void vsmc_resample_trans_u01_index(
-    int m, int n, const double *weight, const double *u01, int *src_idx);
+    int m, int n, const double *weight, const double *u01, int *index);
 void vsmc_resample_trans_rep_index(
-    int m, int n, const int *replication, int *src_idx);
+    int m, int n, const int *replication, int *index);
 void vsmc_resample_trans_index_rep(
-    int m, int n, const int *src_idx, int *replication);
+    int m, int n, const int *index, int *replication);
 int vsmc_resample_trans_residual(
     int m, int n, const double *weight, double *resid, int *integ);
 
