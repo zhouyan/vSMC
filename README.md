@@ -29,7 +29,7 @@ to change the destination of installation.
 
 The documentation of the [master][vSMCDocMaster] and [develop][vSMCDocDevelop]
 branches, as well as for individual releases can be found online. A [User
-guide][VSMCUserGuide] is also provided.
+guide][VSMCUserGuide] is also provided for the develop branch.
 
 # Third-party dependencies
 
@@ -86,4 +86,4 @@ in the `LICENSE` file distributed with the source.
 [icpc]: http://software.intel.com/en-us/intel-compilers
 [vSMCDocDevelop]: http://zhouyan.github.io/vSMCDoc/develop
 [vSMCDocMaster]: http://zhouyan.github.io/vSMCDoc/master
-[vSMCUserGuide]: http://zhouyan.github.io/vSMCDoc/user_guide/user_guide.pdf
+[vSMCUserGuide]: http://zhouyan.github.io/vSMCDoc/develop/user_guide.pdf
