@@ -36,19 +36,8 @@
 #include <vsmc/rng/engine.hpp>
 #include <vsmc/rng/u01_sequence.hpp>
 
-/// \brief Default RNG type for resampling
-/// \ingroup Config
-#ifndef VSMC_RESAMPLE_RNG_TYPE
-#define VSMC_RESAMPLE_RNG_TYPE VSMC_RNG_TYPE
-#endif
-
 namespace vsmc
 {
-
-/// \brief Particle::resample_rng_type trait
-/// \ingroup Traits
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(
-    ResampleRNGType, resample_rng_type, VSMC_RESAMPLE_RNG_TYPE)
 
 /// \brief Type trait of ResampleScheme parameter
 /// \ingroup Resample
