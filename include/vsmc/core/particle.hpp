@@ -55,6 +55,7 @@ class Particle
     using rng_type = typename rng_set_type::rng_type;
     using resample_type = std::function<void(
         std::size_t, std::size_t, rng_type &, const double *, size_type *)>;
+    using sp_type = SingleParticle<T>;
 
     explicit Particle(size_type N)
         : size_(N)
@@ -141,11 +142,23 @@ class Particle
     /// \brief Get an (parallel) RNG stream for a given particle
     rng_type &rng(size_type id) { return rng_set_[id]; }
 
+    /// \brief Get an (parallel) RNG stream for a given particle
+    const rng_type &rng(size_type id) const { return rng_set_[id]; }
+
     /// \brief Get the (sequential) RNG used stream for resampling
     rng_type &rng() { return rng_; }
 
-    /// \brief Get a SingleParticle object
-    SingleParticle<T> sp(size_type id) { return SingleParticle<T>(id, this); }
+    /// \brief Get the (sequential) RNG used stream for resampling
+    const rng_type &rng() const { return rng_; }
+
+    /// \brief Get a SingleParticle<T> object
+    sp_type sp(size_type id) { return SingleParticle<T>(id, this); }
+
+    /// \brief Get a SingleParticle<T> object for the first particle
+    sp_type begin() { return sp(0); }
+
+    /// \brief Get a SingleParticle<T> object for the first particle
+    sp_type end() { return sp(size_); }
 
     /// \brief Performing resampling if ESS/N < threshold
     ///

@@ -42,6 +42,7 @@ namespace vsmc
 
 namespace internal
 {
+
 template <typename RealType>
 inline void cov_pack(std::size_t dim, const RealType *cov, RealType *chol,
     MatrixLayout layout, bool upper, bool packed)
