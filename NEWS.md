@@ -32,7 +32,7 @@
   general `Monitor`. See the GMM example.
 
 ## Documentation
-http://zhouyan.github.io/vSMCDoc/develop/
+http://zhouyan.github.io/vSMCDoc/v2.2.0/
 
 # Changes in v2.1.0
 
