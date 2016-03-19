@@ -5,8 +5,8 @@
 \label{sec:Conventions}
 
 All classes that are accessible to users are within the name space
-\cppinline{vsmc}. Class names are in \cppinline{CamelCase} and function names,
-free or class methods, are in \cppinline{small_cases}. In the remaining of this
+\cppinline{vsmc}. Class names are in \cppinline{CamelCase} and function names
+and class members are in \cppinline{small_cases}. In the remaining of this
 guide, we will omit the \cppinline{vsmc::} name space qualifiers. We will use
 ``function'' for referring to name space scope functions and ``method'' for
 class member functions.
@@ -34,8 +34,8 @@ to make their existence known to the library, respectively.
 \label{sec:Concepts}
 
 The library is structured around a few core concepts. A sampler is responsible
-for running an algorithm. It is composed by a particle system and operations on
-it. A particle system is formed by the states $\{X^{(i)}\}_{i=1}^N$ and weights
+for running an algorithm. It contains a particle system and operations on it. A
+particle system is formed by the states $\{X^{(i)}\}_{i=1}^N$ and weights
 $\{W^{(i)}\}_{i=1}^N$. This system will also be responsible for resampling. All
 user defined operations are to be applied to the whole system. These are
 ``initialization'' and ``moves'' which are applied before resampling, and
@@ -44,13 +44,13 @@ have to be \mcmc kernels. They can be used for any purpose that suits the
 particular algorithm. Most statistical inferences requires calculation of
 $\sum_{i=1}^NW^{(i)}\varphi(X^{(i)})$ for some function $\varphi$. This can be
 carried out along each sampler iteration by a monitor. Table~\ref{tab:concepts}
-lists these concepts and the corresponding classes in the library. Each of them
+lists these concepts and the corresponding types in the library. Each of them
 are introduced in detail in the following sections.
 
 \begin{table}[t]
   \begin{tabu}{X[l]X[2l]}
     \toprule
-    Concept & Class \\
+    Concept & Type \\
     \midrule
     State, $\{X^{(i)}\}_{i=1}^N$            & \texttt{T}, user defined   \\
     Weight, $\{W^{(i)}\}_{i=1}^N$           & \texttt{Weight}            \\
@@ -231,7 +231,7 @@ can write functions that process each particle, for example,
   void function(std::size_t i)
   {
       auto &rng = particle.rng(i);
-      // Process the $i$\textsups{t{}h} particle using rng
+      // Process the particle i using rng
   }
 \end{cppcode*}
 And if later this function is called from a parallelized environment, it is
