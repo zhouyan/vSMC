@@ -14,9 +14,8 @@ class PFState : public PFStateBase
     {
         dev_rng_set_ = vsmc::CLMemory(context, CL_MEM_READ_WRITE,
             sizeof(vsmc_threefry4x32) * size(), nullptr);
-        dev_state_ =
-            vsmc::CLMemory(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR,
-                sizeof(cl_float) * size() * dim(), data());
+        dev_state_ = vsmc::CLMemory(context, CL_MEM_READ_WRITE,
+            sizeof(cl_float) * size() * dim(), nullptr);
         dev_obs_x_ = vsmc::CLMemory(
             context, CL_MEM_READ_ONLY, sizeof(cl_float) * n, nullptr);
         dev_obs_y_ = vsmc::CLMemory(
