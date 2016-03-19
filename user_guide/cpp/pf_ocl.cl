@@ -20,15 +20,27 @@ static inline float log_likelihood(const pf_sp *sp, float obs_x, float obs_y)
 
 static inline void rnorm(vsmc_threefry4x32 *rng, float *r)
 {
-    float u[4];
-    u[0] = sqrt(-2 * log(vsmc_u01_co_u32f(vsmc_threefry4x32_rand(rng))));
-    u[1] = sqrt(-2 * log(vsmc_u01_co_u32f(vsmc_threefry4x32_rand(rng))));
-    u[2] = 6.28318531f * vsmc_u01_co_u32f(vsmc_threefry4x32_rand(rng));
-    u[3] = 6.28318531f * vsmc_u01_co_u32f(vsmc_threefry4x32_rand(rng));
-    r[0] = u[0] * sin(u[2]);
-    r[1] = u[0] * cos(u[2]);
-    r[2] = u[1] * sin(u[3]);
-    r[3] = u[1] * cos(u[3]);
+    uint32_t u32[4];
+    u32[0] = vsmc_threefry4x32_rand(rng);
+    u32[1] = vsmc_threefry4x32_rand(rng);
+    u32[2] = vsmc_threefry4x32_rand(rng);
+    u32[3] = vsmc_threefry4x32_rand(rng);
+
+    float u01[4];
+    u01[0] = vsmc_u01_co_u32f(u32[0]);
+    u01[1] = vsmc_u01_co_u32f(u32[1]);
+    u01[2] = vsmc_u01_co_u32f(u32[2]);
+    u01[3] = vsmc_u01_co_u32f(u32[3]);
+
+    u01[0] = sqrt(-2 * log(u01[0]));
+    u01[1] = sqrt(-2 * log(u01[1]));
+    u01[2] *= 2;
+    u01[3] *= 2;
+
+    r[0] = u01[0] * sinpi(u01[2]);
+    r[1] = u01[0] * cospi(u01[2]);
+    r[2] = u01[1] * sinpi(u01[3]);
+    r[3] = u01[1] * cospi(u01[3]);
 }
 
 static inline void init_sp(vsmc_threefry4x32 *rng, pf_sp *sp)
