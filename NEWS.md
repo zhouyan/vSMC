@@ -1,14 +1,8 @@
 # Changes in v2.2.0
 
-## Changed behaviors
-
-* `MatrixOrder` is now an alias to `MatrixLayout`.
-* CBLAS and LAPACK are now required dependency.
-* Path sampling support is removed. It can be easily done through the more
-  general `Monitor`. See the GMM example.
-
 ## New features
 
+* `SingleParticle` now as iterator-like behaviors.
 * `Particle` now has a new `sp` member that return `SingleParticle` objects.
 * `NormalMVDistribution` and related functions for generating multivariate
   Normal distribution random variate.
@@ -26,12 +20,16 @@
 * `AlignedAllocator` template parameter `Memory` now requires its member
   functions to be static and the class stateless. Unless you write your
   allocator using this template, there is no need to change client code.
+* `MatrixOrder` is now an alias to `MatrixLayout`.
+* CBLAS and LAPACK are now required dependency.
 
 ## Removed features
 
 * `U01LRDistribution` is removed, while `U01CCDistribution` etc., remain.
 * `UniformRealLRDistribution` and `UniformRealCCDistribution` etc., are
   removed.
+* Path sampling support is removed. It can be easily done through the more
+  general `Monitor`. See the GMM example.
 
 ## Documentation
 http://zhouyan.github.io/vSMCDoc/develop/
