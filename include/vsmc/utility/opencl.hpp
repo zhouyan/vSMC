@@ -40,6 +40,21 @@
 #include <CL/opencl.h>
 #endif
 
+#ifdef VSMC_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
+#ifdef VSMC_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
+#ifdef VSMC_INTEL
+#pragma warning(push)
+#pragma warning(disable:1478)
+#endif
+
 namespace vsmc
 {
 
@@ -1935,5 +1950,17 @@ inline std::vector<CLKernel> CLProgram::get_kernels() const
 }
 
 } // namespace vsmc
+
+#ifdef VSMC_CLANG
+#pragma clang diagnostic pop
+#endif
+
+#ifdef VSMC_GCC
+#pragma GCC diagnostic pop
+#endif
+
+#ifdef VSMC_INTEL
+#pragma warning(pop)
+#endif
 
 #endif // VSMC_UTILITY_OPENCL_HPP
