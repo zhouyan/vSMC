@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2015, Yan Zhou
+#  Copyright (c) 2013-2016, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -35,16 +35,16 @@
 #
 # AVX2_FOUND - TRUE if AVX2 is found and work correctly
 
-IF (DEFINED AVX2_FOUND)
+IF(DEFINED AVX2_FOUND)
     RETURN()
-ENDIF (DEFINED AVX2_FOUND)
+ENDIF(DEFINED AVX2_FOUND)
 
 FILE(READ ${CMAKE_CURRENT_LIST_DIR}/FindAVX2.cpp AVX2_TEST_SOURCE)
 
 INCLUDE(CheckCXXSourceRuns)
 CHECK_CXX_SOURCE_RUNS("${AVX2_TEST_SOURCE}" AVX2_FOUND)
-IF (AVX2_FOUND)
+IF(AVX2_FOUND)
     MESSAGE(STATUS "Found AVX2 support")
-ELSE (AVX2_FOUND)
+ELSE(AVX2_FOUND)
     MESSAGE(STATUS "NOT Found AVX2 support")
-ENDIF (AVX2_FOUND)
+ENDIF(AVX2_FOUND)

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -48,9 +48,6 @@ template <typename>
 class Monitor;
 
 template <typename>
-class Path;
-
-template <typename>
 class SingleParticle;
 
 template <typename>
@@ -58,7 +55,7 @@ class SingleParticleBase;
 
 class Weight;
 
-template <MatrixOrder, std::size_t, typename>
+template <MatrixLayout, std::size_t, typename>
 class StateMatrix;
 
 template <std::size_t, typename, typename>

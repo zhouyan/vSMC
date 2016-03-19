@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -54,20 +54,15 @@ inline bool logistic_distribution_check_param(RealType, RealType b)
 template <typename RealType>
 class LogisticDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        Logistic, logistic, RealType, result_type, a, 0, result_type, b, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Logistic, logistic, a, 0, b, 1)
 
     public:
-    result_type min VSMC_MNE() const
+    result_type min() const
     {
-        return -std::numeric_limits<result_type>::max VSMC_MNE();
+        return std::numeric_limits<result_type>::lowest();
     }
 
-    result_type max VSMC_MNE() const
-    {
-        return std::numeric_limits<result_type>::max VSMC_MNE();
-    }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
     void reset() {}
 
@@ -75,8 +70,8 @@ class LogisticDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01OODistribution<RealType> runif;
-        result_type u = runif(rng);
+        U01Distribution<RealType> u01;
+        result_type u = u01(rng);
 
         return param.a() + param.b() * std::log(u / (1 - u));
     }
@@ -90,7 +85,7 @@ inline void logistic_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     RealType s[K];
-    u01_oo_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     sub(n, static_cast<RealType>(1), r, s);
     div(n, r, s, r);
     log(n, r, r);
@@ -105,20 +100,19 @@ template <typename RealType, typename RNGType>
 inline void logistic_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    const std::size_t k = 1000;
+    static_assert(std::is_floating_point<RealType>::value,
+        "**logistic_distribution** USED WITH RealType OTHER THAN FLOATING "
+        "POINT TYPES");
+
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::logistic_distribution_impl<k>(rng, k, r + i * k, a, b);
-    internal::logistic_distribution_impl<k>(rng, l, r + m * k, a, b);
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::logistic_distribution_impl<k>(rng, k, r, a, b);
+    internal::logistic_distribution_impl<k>(rng, l, r, a, b);
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, LogisticDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Logistic, logistic, a, b)
 
 } // namespace vsmc
 

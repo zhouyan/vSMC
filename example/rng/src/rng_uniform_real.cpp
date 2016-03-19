@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,18 +29,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "rng_dist.hpp"
 #include <vsmc/rng/uniform_real_distribution.hpp>
+#include "rng_dist.hpp"
 
 int main(int argc, char **argv)
 {
-    VSMC_RNG_DIST_PRE(2);
-    VSMC_RNG_DIST_2(UniformReal, std::uniform_real_distribution, 0, 1);
-    VSMC_RNG_DIST_2(UniformRealCC, vsmc::UniformRealCCDistribution, 0, 1);
-    VSMC_RNG_DIST_2(UniformRealCO, vsmc::UniformRealCODistribution, 0, 1);
-    VSMC_RNG_DIST_2(UniformRealOC, vsmc::UniformRealOCDistribution, 0, 1);
-    VSMC_RNG_DIST_2(UniformRealOO, vsmc::UniformRealOODistribution, 0, 1);
-    VSMC_RNG_DIST_POST;
+    vsmc::Vector<std::array<double, 2>> params;
+    params.push_back({{0.0, 1.0}});
+    VSMC_RNG_DIST_TEST(2, UniformReal, std::uniform_real_distribution);
 
     return 0;
 }

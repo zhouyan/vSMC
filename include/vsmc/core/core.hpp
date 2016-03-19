@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@
 #include <vsmc/internal/config.h>
 #include <vsmc/core/monitor.hpp>
 #include <vsmc/core/particle.hpp>
-#include <vsmc/core/path.hpp>
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/core/state_matrix.hpp>

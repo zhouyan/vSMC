@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -99,10 +99,10 @@ inline void u01_systematic(std::size_t N, RealType u01, RealType *u01seq)
 /// ~~~{.cpp}
 /// const std::size_t N = 1000;
 /// std::mt19937 rng;
-/// std::uniform_real_distribution<double> runif;
+/// std::uniform_real_distribution<double> u01;
 /// std::vector<double> u01(N);
 /// for (std::size_t i = 0; i != N; ++i)
-///     u01[i] = runif(rng);
+///     u01[i] = u01(rng);
 /// std::sort(u01.begin(), u01.end());
 /// for (std::size_t i = 0; i != N; ++i)
 ///     do_something_with_u01(u01[i]);
@@ -145,7 +145,8 @@ class U01SequenceSorted
         if (n == n_)
             return u_;
 
-        lmax_ += std::log(runif_(rng_)) / (N_ - n);
+        U01Distribution<result_type> u01;
+        lmax_ += std::log(u01(rng_)) / (N_ - n);
         n_ = n;
         u_ = 1 - std::exp(lmax_);
 
@@ -160,7 +161,6 @@ class U01SequenceSorted
     result_type u_;
     result_type lmax_;
     RNGType &rng_;
-    U01OODistribution<double> runif_;
 }; // U01SequenceSorted
 
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
@@ -195,8 +195,9 @@ class U01SequenceStratified
         if (n == n_)
             return u_;
 
+        U01Distribution<result_type> u01;
         n_ = n;
-        u_ = runif_(rng_) * delta_ + n * delta_;
+        u_ = u01(rng_) * delta_ + n * delta_;
 
         return u_;
     }
@@ -209,7 +210,6 @@ class U01SequenceStratified
     result_type u_;
     result_type delta_;
     RNGType &rng_;
-    U01CODistribution<double> runif_;
 }; // class U01SequenceStratified
 
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
@@ -231,8 +231,8 @@ class U01SequenceSystematic
     U01SequenceSystematic(std::size_t N, RNGType &rng)
         : N_(N), n_(N), u_(0), u0_(0), delta_(1 / static_cast<result_type>(N))
     {
-        U01CODistribution<double> runif;
-        u0_ = runif(rng) * delta_;
+        U01Distribution<result_type> u01;
+        u0_ = u01(rng) * delta_;
     }
 
     result_type operator[](std::size_t n)

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -210,6 +210,37 @@ namespace vsmc
 /// \brief Particle::size_type etc., traits
 /// \ingroup Traits
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
+
+namespace internal
+{
+
+template <typename T, typename T1, typename... Types>
+class is_one_of : public std::integral_constant<bool,
+                      is_one_of<T, T1>::value || is_one_of<T, Types...>::value>
+{
+}; // class is_one_of
+
+template <typename T, typename T1>
+class is_one_of<T, T1>
+    : public std::integral_constant<bool, std::is_same<T, T1>::value>
+{
+}; // class is_one_of
+
+template <typename T, typename T1, typename... Types>
+class is_seed_seq
+    : public std::integral_constant<bool,
+          is_seed_seq<T, T1>::value && is_seed_seq<T, Types...>::value>
+{
+};
+
+template <typename T, typename T1>
+class is_seed_seq<T, T1>
+    : public std::integral_constant<bool, !std::is_convertible<T, T1>::value &&
+              !std::is_same<typename std::remove_cv<T>::type, T1>::value>
+{
+}; // class is_seed_seq
+
+} // namespace vsmc::internal
 
 } // namespace vsmc
 

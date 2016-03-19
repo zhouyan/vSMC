@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,93 +35,108 @@
 #include <vsmc/rng/uniform_real_distribution.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
-#define VSMC_RNG_TEST(RNGType) rng_test<RNGType>(N, #RNGType, names, size, sw);
-
 #define VSMC_RNG_TEST_PRE(prog)                                               \
     std::size_t N = 1000000;                                                  \
     if (argc > 1)                                                             \
         N = static_cast<std::size_t>(std::atoi(argv[1]));                     \
-    std::string prog_name(#prog);                                             \
-    vsmc::Vector<std::string> names;                                          \
-    vsmc::Vector<std::size_t> size;                                           \
-    vsmc::Vector<vsmc::StopWatch> sw;
+    std::string name(#prog);                                                  \
+    vsmc::Vector<std::string> rng_name;                                       \
+    vsmc::Vector<std::size_t> rng_size;                                       \
+    vsmc::Vector<std::size_t> result_size;                                    \
+    vsmc::Vector<std::size_t> num;                                            \
+    vsmc::Vector<bool> test;                                                  \
+    vsmc::Vector<vsmc::StopWatch> sw1;                                        \
+    vsmc::Vector<vsmc::StopWatch> sw2;
 
-#define VSMC_RNG_TEST_POST rng_test_output(prog_name, names, size, sw);
+#define VSMC_RNG_TEST(RNGType)                                                \
+    rng_test<RNGType>(                                                        \
+        N, #RNGType, rng_name, rng_size, result_size, num, test, sw1, sw2);
+
+#define VSMC_RNG_TEST_POST                                                    \
+    rng_test_output(                                                          \
+        name, rng_name, rng_size, result_size, num, test, sw1, sw2);
 
 template <typename RNGType>
 inline void rng_test(std::size_t n, const std::string &name,
-    vsmc::Vector<std::string> &names, vsmc::Vector<std::size_t> &size,
-    vsmc::Vector<vsmc::StopWatch> &sw)
+    vsmc::Vector<std::string> &rng_name, vsmc::Vector<std::size_t> &rng_size,
+    vsmc::Vector<std::size_t> &result_size, vsmc::Vector<std::size_t> &num,
+    vsmc::Vector<bool> &test, vsmc::Vector<vsmc::StopWatch> &sw1,
+    vsmc::Vector<vsmc::StopWatch> &sw2)
 {
-    names.push_back(name);
-    size.push_back(sizeof(RNGType));
+    rng_name.push_back(name);
+    rng_size.push_back(sizeof(RNGType));
+    result_size.push_back(sizeof(typename RNGType::result_type));
 
     RNGType rng;
-    vsmc::Vector<double> r(n);
-    vsmc::Vector<typename RNGType::result_type> u(n);
-    double result = 0;
-    vsmc::StopWatch watch;
+    RNGType rng1;
+    RNGType rng2;
+    vsmc::Vector<typename RNGType::result_type> r1(n * 2);
+    vsmc::Vector<typename RNGType::result_type> r2(n * 2);
+    vsmc::StopWatch watch1;
+    vsmc::StopWatch watch2;
+    bool passed = true;
+    std::size_t number = 0;
+    std::uniform_int_distribution<std::size_t> runif(n, n * 2 - 1);
+    for (std::size_t i = 0; i != 10; ++i) {
+        std::size_t m = runif(rng);
 
-    std::uniform_real_distribution<double> runif_std(0, 1);
-    watch.reset();
-    watch.start();
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = runif_std(rng);
-    watch.stop();
-    result += std::accumulate(r.begin(), r.end(), 0.0);
-    sw.push_back(watch);
+        watch1.start();
+        for (std::size_t j = 0; j != m; ++j)
+            r1[j] = rng1();
+        watch1.stop();
 
-    vsmc::UniformRealDistribution<double> runif_vsmc(0, 1);
-    watch.reset();
-    watch.start();
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = runif_vsmc(rng);
-    watch.stop();
-    result += std::accumulate(r.begin(), r.end(), 0.0);
-    sw.push_back(watch);
+        watch2.start();
+        vsmc::rng_rand(rng2, m, r2.data());
+        watch2.stop();
 
-    rng_rand(rng, runif_vsmc, 1000, r.data());
-    watch.reset();
-    watch.start();
-    rng_rand(rng, runif_vsmc, n, r.data());
-    watch.stop();
-    result += std::accumulate(r.begin(), r.end(), 0.0);
-    sw.push_back(watch);
-
-    std::ofstream rnd("rnd");
-    rnd << result << std::endl;
-    rnd.close();
+        number += m;
+        for (std::size_t j = 0; j != m; ++j)
+            if (r1[j] != r2[j])
+                passed = false;
+    }
+    sw1.push_back(watch1);
+    sw2.push_back(watch2);
+    num.push_back(number);
+    test.push_back(passed);
 }
 
-inline void rng_test_output(const std::string &prog_name,
-    const vsmc::Vector<std::string> &names,
-    const vsmc::Vector<std::size_t> &size,
-    const vsmc::Vector<vsmc::StopWatch> &sw)
+inline void rng_test_output(const std::string &name,
+    const vsmc::Vector<std::string> &rng_name,
+    const vsmc::Vector<std::size_t> &rng_size,
+    const vsmc::Vector<std::size_t> &result_size,
+    const vsmc::Vector<std::size_t> &num, const vsmc::Vector<bool> &test,
+    const vsmc::Vector<vsmc::StopWatch> &sw1,
+    const vsmc::Vector<vsmc::StopWatch> &sw2)
 {
-    std::size_t N = names.size();
-    std::size_t R = sw.size() / N;
-    std::size_t lwid = 80;
-    int twid = 15;
-    int swid = 5;
-    int Twid = twid * static_cast<int>(R);
-    int nwid = static_cast<int>(lwid) - swid - Twid;
+    const int nwid = 30;
+    const int swid = 5;
+    const int twid = 15;
+    const std::size_t lwid = nwid + swid + twid * 5;
 
     std::cout << std::string(lwid, '=') << std::endl;
-    std::cout << std::left << std::setw(nwid) << prog_name;
+    std::cout << std::left << std::setw(nwid) << name;
     std::cout << std::right << std::setw(swid) << "Size";
-    std::cout << std::right << std::setw(twid) << "Time (STD)";
-    std::cout << std::right << std::setw(twid) << "Time (vSMC)";
-    std::cout << std::right << std::setw(twid) << "Time (Batch)";
+    std::cout << std::right << std::setw(twid) << "N/ns (Loop)";
+    std::cout << std::right << std::setw(twid) << "N/ns (Batch)";
+    std::cout << std::right << std::setw(twid) << "GB/s (Loop)";
+    std::cout << std::right << std::setw(twid) << "GB/s (Batch)";
+    std::cout << std::right << std::setw(twid) << "Test";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
 
-    for (std::size_t i = 0; i != N; ++i) {
-        std::cout << std::left << std::setw(nwid) << names[i];
-        std::cout << std::right << std::setw(swid) << size[i];
-        for (std::size_t r = 0; r != R; ++r) {
-            double time = sw[i * R + r].milliseconds();
-            std::cout << std::right << std::setw(twid) << std::fixed << time;
-        }
+    for (std::size_t i = 0; i != rng_name.size(); ++i) {
+        double n1 = num[i] / sw1[i].nanoseconds();
+        double n2 = num[i] / sw2[i].nanoseconds();
+        double g1 = result_size[i] * num[i] / sw1[i].nanoseconds();
+        double g2 = result_size[i] * num[i] / sw2[i].nanoseconds();
+        std::string ts = test[i] ? "Passed" : "Failed";
+        std::cout << std::left << std::setw(nwid) << rng_name[i];
+        std::cout << std::right << std::setw(swid) << rng_size[i];
+        std::cout << std::right << std::setw(twid) << std::fixed << n1;
+        std::cout << std::right << std::setw(twid) << std::fixed << n2;
+        std::cout << std::right << std::setw(twid) << std::fixed << g1;
+        std::cout << std::right << std::setw(twid) << std::fixed << g2;
+        std::cout << std::right << std::setw(twid) << ts;
         std::cout << std::endl;
     }
     std::cout << std::string(lwid, '=') << std::endl;

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -75,15 +75,15 @@
 
 #ifndef VSMC_OPENCL
 #ifdef __cplusplus
-#include <cstdlib>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include <cmath>
+#include <cstdlib>
 #else
-#include <stdlib.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <math.h>
+#include <stdlib.h>
 #endif
 #endif
 
@@ -91,31 +91,27 @@
 #error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
 #endif
 
-#ifndef VSMC_HAS_RNGC_DOUBLE
-#define VSMC_HAS_RNGC_DOUBLE 1
-#endif
-
-#ifndef VSMC_STATIC_INLINE
-#ifdef __cplusplus
-#define VSMC_STATIC_INLINE inline
-#else
-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-#define VSMC_STATIC_INLINE static inline
-#else
-#define VSMC_STATIC_INLINE static
-#endif
-#endif
-#endif
-
 #ifndef VSMC_INT64
 #define VSMC_INT64 long long
 #endif
 
 #ifndef VSMC_HAS_X86
-#if defined(__x86__) || defined(__x86_64__)
+#if defined(i386) || defined(__i386) || defined(__i386__) ||                  \
+    defined(_M_IX86) || defined(_X86_) || defined(__x86_64) ||                \
+    defined(__x86_64__) || defined(__amd64) || defined(__amd64__) ||          \
+    defined(_M_AMD64) || defined(_M_X64)
 #define VSMC_HAS_X86 1
 #else
 #define VSMC_HAS_X86 0
+#endif
+#endif
+
+#ifndef VSMC_HAS_X86_64
+#if defined(__x86_64) || defined(__x86_64__) || defined(__amd64) ||           \
+    defined(__amd64__) || defined(_M_AMD64) || defined(_M_X64)
+#define VSMC_HAS_X86_64 1
+#else
+#define VSMC_HAS_X86_64 0
 #endif
 #endif
 

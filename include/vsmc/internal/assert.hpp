@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,6 @@
 #include <cstdio>
 #include <stdexcept>
 #include <string>
-
-#define VSMC_STATIC_ASSERT(cond, msg) static_assert(cond, msg)
 
 #if VSMC_NO_RUNTIME_ASSERT
 #define VSMC_RUNTIME_ASSERT(cond, msg)
@@ -88,25 +86,6 @@
 
 namespace vsmc
 {
-
-namespace internal
-{
-
-template <bool>
-class StaticAssert
-{
-    public:
-    static void test(int *) {}
-}; // class StaticAssert
-
-template <>
-class StaticAssert<true>
-{
-    public:
-    static void test(...) {}
-}; // class StaticAssert
-
-} // namespace vsmc::internal
 
 class RuntimeAssert : public std::runtime_error
 {

@@ -3,7 +3,7 @@
  *----------------------------------------------------------------------------
  *                         vSMC: Scalable Monte Carlo
  *----------------------------------------------------------------------------
- * Copyright (c) 2013-2015, Yan Zhou
+ * Copyright (c) 2013-2016, Yan Zhou
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -148,6 +148,10 @@ void vsmc_rng_lognormal(
 void vsmc_rng_normal(
     vsmc_rng *rng_ptr, int n, double *r, double mean, double stddev);
 
+/// \brief `vsmc::NormalMVDistribution<double, vsmc::Dynamic>`
+void vsmc_rng_normal_mv(vsmc_rng *rng_ptr, int n, double *r, int dim,
+    const double *mean, const double *chol);
+
 /// \brief `vsmc::ParetoDistribution<double>`
 void vsmc_rng_pareto(vsmc_rng *rng_ptr, int n, double *r, double a, double b);
 
@@ -160,36 +164,8 @@ void vsmc_rng_student_t(vsmc_rng *rng_ptr, int n, double *r, double df);
 /// \brief `vsmc::U01Distribution<double>`
 void vsmc_rng_u01(vsmc_rng *rng_ptr, int n, double *r);
 
-/// \brief `vsmc::U01CCDistribution<double>`
-void vsmc_rng_u01_cc(vsmc_rng *rng_ptr, int n, double *r);
-
-/// \brief `vsmc::U01CODistribution<double>`
-void vsmc_rng_u01_co(vsmc_rng *rng_ptr, int n, double *r);
-
-/// \brief `vsmc::U01OCDistribution<double>`
-void vsmc_rng_u01_oc(vsmc_rng *rng_ptr, int n, double *r);
-
-/// \brief `vsmc::U01OODistribution<double>`
-void vsmc_rng_u01_oo(vsmc_rng *rng_ptr, int n, double *r);
-
 /// \brief `vsmc::UniformRealDistribution<double>`
 void vsmc_rng_uniform_real(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
-
-/// \brief `vsmc::UniformRealCCDistribution<double>`
-void vsmc_rng_uniform_real_cc(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
-
-/// \brief `vsmc::UniformRealCODistribution<double>`
-void vsmc_rng_uniform_real_co(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
-
-/// \brief `vsmc::UniformRealOCDistribution<double>`
-void vsmc_rng_uniform_real_oc(
-    vsmc_rng *rng_ptr, int n, double *r, double a, double b);
-
-/// \brief `vsmc::UniformRealOODistribution<double>`
-void vsmc_rng_uniform_real_oo(
     vsmc_rng *rng_ptr, int n, double *r, double a, double b);
 
 /// \brief `vsmc::WeibullDistribution<double>`
@@ -263,6 +239,30 @@ int vsmc_mkl_brng_rdrand64(void);
 
 /// @}
 
+/// \defgroup C_API_RandomWalk Random walk
+/// @{
+
+/// \brief `vsmc::RandomWalk<double, vsmc::Dynamic>`
+int vsmc_random_walk(vsmc_rng *rng_ptr, int dim, double *x, double *ltx,
+    double (*log_target)(int, const double *),
+    double (*proposal)(vsmc_rng *, int, const double *, double *));
+
+/// \brief `vsmc::RandomWalkG<double, vsmc::Dynamic, vsmc::Dynamic>`
+int vsmc_random_walk_g(vsmc_rng *rng_ptr, int dim_x, int dim_g, double *x,
+    double *ltx, double *g,
+    double (*log_target)(int, int, const double *, double *),
+    double (*proposal)(vsmc_rng *, int, const double *, double *));
+
+/// \brief `vsmc::NormalProposal<double>`
+double vsmc_normal_proposal(vsmc_rng *rng_ptr, int, const double *x, double *y,
+    double stddev, double a, double b);
+
+/// \brief `vsmc::NormalMVProposal<double, vsmc::Dynamic>`
+double vsmc_normal_mv_proposal(vsmc_rng *rng_ptr, int dim, const double *x,
+    double *y, const double *chol, const double *a, const double *b);
+
+/// @}
+
 /// \defgroup C_API_Memory Memory allocation
 /// @{
 
@@ -286,11 +286,11 @@ typedef enum {
 void vsmc_resample_trans_u01_rep(
     int m, int n, const double *weight, const double *u01, int *replication);
 void vsmc_resample_trans_u01_index(
-    int m, int n, const double *weight, const double *u01, int *src_idx);
+    int m, int n, const double *weight, const double *u01, int *index);
 void vsmc_resample_trans_rep_index(
-    int m, int n, const int *replication, int *src_idx);
+    int m, int n, const int *replication, int *index);
 void vsmc_resample_trans_index_rep(
-    int m, int n, const int *src_idx, int *replication);
+    int m, int n, const int *index, int *replication);
 int vsmc_resample_trans_residual(
     int m, int n, const double *weight, double *resid, int *integ);
 

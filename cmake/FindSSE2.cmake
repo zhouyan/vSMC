@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2015, Yan Zhou
+#  Copyright (c) 2013-2016, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -35,16 +35,16 @@
 #
 # SSE2_FOUND - TRUE if SSE2 is found and work correctly
 
-IF (DEFINED SSE2_FOUND)
+IF(DEFINED SSE2_FOUND)
     RETURN()
-ENDIF (DEFINED SSE2_FOUND)
+ENDIF(DEFINED SSE2_FOUND)
 
 FILE(READ ${CMAKE_CURRENT_LIST_DIR}/FindSSE2.cpp SSE2_TEST_SOURCE)
 
 INCLUDE(CheckCXXSourceRuns)
 CHECK_CXX_SOURCE_RUNS("${SSE2_TEST_SOURCE}" SSE2_FOUND)
-IF (SSE2_FOUND)
+IF(SSE2_FOUND)
     MESSAGE(STATUS "Found SSE2 support")
-ELSE (SSE2_FOUND)
+ELSE(SSE2_FOUND)
     MESSAGE(STATUS "NOT Found SSE2 support")
-ENDIF (SSE2_FOUND)
+ENDIF(SSE2_FOUND)

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -55,20 +55,15 @@ inline bool student_t_distribution_check_param(RealType n)
 template <typename RealType>
 class StudentTDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_1(
-        StudentT, student_t, RealType, result_type, n, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_1(StudentT, student_t, n, 1)
 
     public:
-    result_type min VSMC_MNE() const
+    result_type min() const
     {
-        return -std::numeric_limits<result_type>::max VSMC_MNE();
+        return std::numeric_limits<result_type>::lowest();
     }
 
-    result_type max VSMC_MNE() const
-    {
-        return std::numeric_limits<result_type>::max VSMC_MNE();
-    }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
     void reset()
     {
@@ -120,20 +115,19 @@ template <typename RealType, typename RNGType>
 inline void student_t_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType df)
 {
-    const std::size_t k = 1000;
+    static_assert(std::is_floating_point<RealType>::value,
+        "**student_t_distribution** USED WITH RealType OTHER THAN FLOATING "
+        "POINT TYPES");
+
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::student_t_distribution_impl<k>(rng, k, r + i * k, df);
-    internal::student_t_distribution_impl<k>(rng, l, r + m * k, df);
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::student_t_distribution_impl<k>(rng, k, r, df);
+    internal::student_t_distribution_impl<k>(rng, l, r, df);
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, StudentTDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_1(StudentT, student_t, n)
 
 } // namespace vsmc
 

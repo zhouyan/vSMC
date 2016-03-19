@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -36,18 +36,6 @@
 #include <vsmc/rng/counter.hpp>
 #include <wmmintrin.h>
 
-#define VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks)                          \
-    VSMC_STATIC_ASSERT(                                                       \
-        (Blocks > 0), "**AESNIGenerator** USED WITH ZERO BLOCKS")
-
-#define VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType)                 \
-    VSMC_STATIC_ASSERT((std::is_unsigned<ResultType>::value),                 \
-        "**AESNIGenerator USED WITH ResultType NOT AN UNSIGNED INTEGER")
-
-#define VSMC_STATIC_ASSERT_RNG_AES_NI                                         \
-    VSMC_STATIC_ASSERT_RNG_AES_NI_BLOCKS(Blocks);                             \
-    VSMC_STATIC_ASSERT_RNG_AES_NI_RESULT_TYPE(ResultType);
-
 namespace vsmc
 {
 
@@ -57,12 +45,17 @@ template <typename ResultType, typename KeySeqType, std::size_t Rounds,
     std::size_t Blocks>
 class AESNIGenerator
 {
+    static_assert(std::is_unsigned<ResultType>::value,
+        "**AESNIGenerator** USED WITH ResultType OTHER THAN UNSIGNED INTEGER "
+        "TYPES");
+
+    static_assert(
+        Blocks != 0, "**AESNIGenerator** USED WITH Blocks EQUAL TO ZERO");
+
     public:
     using result_type = ResultType;
     using ctr_type = std::array<ResultType, M128I<ResultType>::size()>;
     using key_type = typename KeySeqType::key_type;
-
-    AESNIGenerator() { VSMC_STATIC_ASSERT_RNG_AES_NI; }
 
     static constexpr std::size_t size()
     {
@@ -72,12 +65,12 @@ class AESNIGenerator
     void reset(const key_type &key) { key_seq_.reset(key); }
 
     void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, Blocks * M128I<ResultType>::size()> &buffer)
+        std::array<ResultType, size()> &buffer) const
     {
         union {
             std::array<M128I<>, Blocks> state;
             std::array<ctr_type, Blocks> ctr_block;
-            std::array<result_type, size()> result;
+            std::array<ResultType, size()> result;
         } buf;
 
         std::array<M128I<>, Rounds + 1> rk;
@@ -90,26 +83,28 @@ class AESNIGenerator
         buffer = buf.result;
     }
 
-    std::size_t operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        result_type *r) const
+    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
+        std::array<ResultType, size()> *buffer) const
     {
-        const std::size_t K = 8;
-        const std::size_t M = K * M128I<ResultType>::size();
-        const std::size_t m = n / M;
+        if (n == 0)
+            return;
+
+        union {
+            std::array<M128I<>, Blocks> state;
+            std::array<ctr_type, Blocks> ctr_block;
+            std::array<ResultType, size()> result;
+        } buf;
+
         std::array<M128I<>, Rounds + 1> rk;
         key_seq_(key, rk);
-        increment(ctr, m * K, reinterpret_cast<ctr_type *>(r));
-        std::array<M128I<>, K> *s =
-            reinterpret_cast<std::array<M128I<>, K> *>(r);
-        for (std::size_t i = 0; i != m; ++i) {
-            enc_first(s[i], rk);
-            enc_round<1>(s[i], rk, std::integral_constant<bool, 1 < Rounds>());
-            enc_last(s[i], rk);
+        for (std::size_t i = 0; i != n; ++i) {
+            increment(ctr, buf.ctr_block);
+            enc_first(buf.state, rk);
+            enc_round<1>(
+                buf.state, rk, std::integral_constant<bool, 1 < Rounds>());
+            enc_last(buf.state, rk);
+            buffer[i] = buf.result;
         }
-        n -= m * M;
-        r += m * M;
-
-        return m * M;
     }
 
     private:
@@ -160,6 +155,7 @@ class AESNIGenerator
     template <std::size_t B, std::size_t N, std::size_t K>
     void enc_round_block(std::array<M128I<>, K> &state,
         const std::array<M128I<>, Rounds + 1> &rk, std::true_type) const
+
     {
         std::get<B>(state) = _mm_aesenc_si128(
             std::get<B>(state).value(), std::get<N>(rk).value());

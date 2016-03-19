@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2015, Yan Zhou
+#  Copyright (c) 2013-2016, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -36,9 +36,9 @@
 # INT128_FOUND - TRUE if 128-bits integer type is found and works correctly
 # INT128_TYPE  - The type of the 128-bits integer
 
-IF (DEFINED INT128_FOUND)
+IF(DEFINED INT128_FOUND)
     RETURN()
-ENDIF (DEFINED INT128_FOUND)
+ENDIF(DEFINED INT128_FOUND)
 
 FILE(READ ${CMAKE_CURRENT_LIST_DIR}/FindInt128.cpp INT128_TEST_SOURCE)
 INCLUDE(CheckCXXSourceRuns)
@@ -49,11 +49,11 @@ SET(CMAKE_REQUIRED_DEFINITIONS ${SAFE_CMAKE_REQUIRED_DEFINITIONS}
     -DINT128=${INT128_TRY_TYPE})
 CHECK_CXX_SOURCE_RUNS("${INT128_TEST_SOURCE}" INT128_FOUND)
 
-IF (INT128_FOUND)
+IF(INT128_FOUND)
     SET(INT128_TYPE ${INT128_TRY_TYPE} CACHE STRING "128-bits type")
     MESSAGE(STATUS "Found 128-bits integer type: ${INT128_TYPE}")
-ELSE (INT128_FOUND)
+ELSE(INT128_FOUND)
     MESSAGE(STATUS "NOT Found 128-bits integer type")
-ENDIF (INT128_FOUND)
+ENDIF(INT128_FOUND)
 
 SET(CMAKE_REQUIRED_DEFINITIONS ${SAFE_CMAKE_REQUIRED_DEFINITIONS})

@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2015, Yan Zhou
+#  Copyright (c) 2013-2016, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -35,16 +35,16 @@
 #
 # AESNI_FOUND - TRUE if AES-NI is found and work correctly
 
-IF (DEFINED AESNI_FOUND)
+IF(DEFINED AESNI_FOUND)
     RETURN()
-ENDIF (DEFINED AESNI_FOUND)
+ENDIF(DEFINED AESNI_FOUND)
 
 FILE(READ ${CMAKE_CURRENT_LIST_DIR}/FindAESNI.cpp AESNI_TEST_SOURCE)
 
 INCLUDE(CheckCXXSourceRuns)
 CHECK_CXX_SOURCE_RUNS("${AESNI_TEST_SOURCE}" AESNI_FOUND)
-IF (AESNI_FOUND)
+IF(AESNI_FOUND)
     MESSAGE(STATUS "Found AES-NI support")
-ELSE (AESNI_FOUND)
+ELSE(AESNI_FOUND)
     MESSAGE(STATUS "NOT Found AES-NI support")
-ENDIF (AESNI_FOUND)
+ENDIF(AESNI_FOUND)

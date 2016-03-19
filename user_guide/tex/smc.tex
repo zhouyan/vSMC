@@ -1,0 +1,205 @@
+\chapter{Sequential Monte Carlo}
+\label{chap:Sequential Monte Carlo}
+
+\section{Introduction}
+\label{sec:Introduction}
+
+Sequential Monte Carlo (\smc) methods are a class of sampling algorithms that
+combine importance sampling and resampling. They have been primarily used as
+``particle filters'' to solve optimal filtering problems; see, for example,
+\textcite{Cappe:2007hz} and \textcite{Doucet:2011us} for recent reviews. They
+are also used in a static setting where a target distribution is of interest,
+for example, for the purpose of Bayesian modeling. This was proposed by
+\textcite{DelMoral:2006hc} and developed by \textcite{Peters:2005wh} and
+\textcite{DelMoral:2006wv}. This framework involves the construction of a
+sequence of artificial distributions on spaces of increasing dimensions which
+admit the distributions of interest as particular marginals.
+
+\smc algorithms are perceived as being difficult to implement while general
+tools were not available until the development of \textcite{Johansen:2009wd},
+which provided a general framework for implementing \smc algorithms. \smc
+algorithms admit natural and scalable parallelization. However, there are only
+parallel implementations of \smc algorithms for many problem specific
+applications, usually associated with specific \smc related researches.
+\textcite{Lee:2010fm} studied the parallelization of \smc algorithms on \gpu{}s
+with some generality. There are few general tools to implement \smc algorithms
+on parallel hardware though multicore \cpu{}s are very common today and
+computing on specialized hardware such as \gpu{}s are more and more popular.
+
+The purpose of the current work is to provide a general framework for
+implementing \smc algorithms on both sequential and parallel hardware. There
+are two main goals of the presented framework. The first is reusability. It
+will be demonstrated that the same implementation source code can be used to
+build a serialized sampler, or using different programming models (for example,
+OpenMP and Intel Threading Building Blocks) to build parallelized samplers for
+multicore \cpu{}s. The second is extensibility. It is possible to write a
+backend for \vsmc to use new parallel programming models while reusing existing
+implementations. It is also possible to enhance the library to improve
+performance for specific applications. Almost all components of the library can
+be reimplemented by users and thus if the default implementation is not
+suitable for a specific application, they can be replaced while being
+integrated with other components seamlessly.
+
+\section{Sequential importance sampling and resampling}
+\label{sec:Sequential importance sampling and resampling}
+
+Importance sampling is a technique which allows the calculation of the
+expectation of a function $\varphi$ with respect to a distribution $\pi$ using
+samples from some other distribution $\eta$ with respect to which $\pi$ is
+absolutely continuous, based on the identity,
+\begin{equation}
+  \Exp_{\pi}[\varphi(X)]
+  = \int\varphi(x)\pi(x)\intd x
+  = \int\frac{\varphi(x)\pi(x)}{\eta(x)}\eta(x)\intd x
+  = \Exp_{\eta}\Square[Big]{\frac{\varphi(X)\pi(X)}{\eta(X)}}
+\end{equation}
+And thus, let $\{X^{(i)}\}_{i=1}^N$ be samples from $\eta$, then
+$\Exp_{\pi}[\varphi(X)]$ can be approximated by
+\begin{equation}
+  \hat\varphi_1 =
+  \frac{1}{N}\sum_{i=1}^N\frac{\varphi(X^{(i)})\pi(X^{(i)})}{\eta(X^{(i)})}
+\end{equation}
+In practice $\pi$ and $\eta$ are often only known up to some normalizing
+constants, which can be estimated using the same samples. Let $w^{(i)} =
+\pi(X^{(i)})/\eta(X^{(i)})$, then we have
+\begin{equation}
+  \hat\varphi_2 =
+  \frac{\sum_{i=1}^Nw^{(i)}\varphi(X^{(i)})}{\sum_{i=1}^Nw^{(i)}}
+\end{equation}
+or
+\begin{equation}
+  \hat\varphi_3 = \sum_{i=1}^NW^{(i)}\varphi(X^{(i)})
+\end{equation}
+where $W^{(i)}\propto w^{(i)}$ and are normalized such that
+$\sum_{i=1}^NW^{(i)} = 1$.
+
+Sequential importance sampling (\sis) generalizes the importance sampling
+technique for a sequence of distributions $\{\pi_t\}_{t\ge0}$ defined on spaces
+$\{\prod_{k=0}^tE_k\}_{t\ge0}$. At time $t = 0$, sample $\{X_0^{(i)}\}_{i=1}^N$
+from $\eta_0$ and compute the weights $W_0^{(i)} \propto
+\pi_0(X_0^{(i)})/\eta_0(X_0^{(i)})$. At time $t\ge1$, each sample
+$X_{0:t-1}^{(i)}$, usually termed \emph{particles} in the literature, is
+extended to $X_{0:t}^{(i)}$ by a proposal distribution
+$q_t(\cdot|X_{0:t-1}^{(i)})$. And the weights are recalculated by $W_t^{(i)}
+\propto \pi_t(X_{0:t}^{(i)})/\eta_t(X_{0:t}^{(i)})$ where
+\begin{equation}
+  \eta_t(X_{0:t}^{(i)}) =
+  \eta_{t-1}(X_{0:t-1}^{(i)})q_t(X_{0:t}^{(i)}|X_{0:t-1}^{(i)})
+\end{equation}
+and thus
+\begin{align}
+  W_t^{(i)} \propto \frac{\pi_t(X_{0:t}^{(i)})}{\eta_t(X_{0:t}^{(i)})}
+  &= \frac{\pi_t(X_{0:t}^{(i)})\pi_{t-1}(X_{0:t-1}^{(i)})}
+  {\eta_{t-1}(X_{0:t-1}^{(i)})q_t(X_{0:t}^{(i)}|X_{0:t-1}^{(i)})
+    \pi_{t-1}(X_{0:t-1}^{(i)})} \notag\\
+  &= \frac{\pi_t(X_{0:t}^{(i)})}
+  {q_t(X_{0:t}^{(i)}|X_{0:t-1}^{(i)})\pi_{t-1}(X_{0:t-1}^{(i)})}W_{t-1}^{(i)}
+  \label{eq:si}
+\end{align}
+and importance sampling estimate of $\Exp_{\pi_t}[\varphi_t(X_{0:t})]$ can be
+obtained using $\{W_t^{(i)},X_{0:t}^{(i)}\}_{i=1}^N$.
+
+However this approach fails as $t$ becomes large. The weights tend to become
+concentrated on a few particles as the discrepancy between $\eta_t$ and $\pi_t$
+becomes larger. Resampling techniques are applied such that, a new particle
+system $\{\bar{W}_t^{(i)},\bar{X}_{0:t}^{(i)}\}_{i=1}^M$ is obtained with the
+property,
+\begin{equation}
+  \Exp\Square[Big]{\sum_{i=1}^M\bar{W}_t^{(i)}\varphi_t(\bar{X}_{0:t}^{(i)})} =
+  \Exp\Square[Big]{\sum_{i=1}^NW_t^{(i)}\varphi_t(X_{0:t}^{(i)})}
+  \label{eq:resample}
+\end{equation}
+In practice, the resampling algorithm is usually chosen such that $M = N$ and
+$\bar{W}^{(i)} = 1/N$ for $i=1,\dots,N$. Resampling can be performed at each
+time $t$ or adaptively based on some criteria of the discrepancy. One popular
+quantity used to monitor the discrepancy is \emph{effective sample size}
+(\ess), introduced by \textcite{Liu:1998iu}, defined as
+\begin{equation}
+  \ess_t = \frac{1}{\sum_{i=1}^N (W_t^{(i)})^2}
+\end{equation}
+where $\{W_t^{(i)}\}_{i=1}^N$ are the normalized weights. And resampling can be
+performed when $\ess\le \alpha N$ where $\alpha\in[0,1]$.
+
+The common practice of resampling is to replicate particles with large weights
+and discard those with small weights. In other words, instead of generating a
+random sample $\{\bar{X}_{0:t}^{(i)}\}_{i=1}^N$ directly, a random sample of
+integers $\{R^{(i)}\}_{i=1}^N$ is generated, such that $R^{(i)} \ge 0$ for $i =
+1,\dots,N$ and $\sum_{i=1}^N R^{(i)} = N$. And each particle value
+$X_{0:t}^{(i)}$ is replicated for $R^{(i)}$ times in the new particle system.
+The distribution of $\{R^{(i)}\}_{i=1}^N$ shall fulfill the requirement of
+Equation~\eqref{eq:resample}. One such distribution is a multinomial
+distribution of size $N$ and weights $(W_t^{(i)},\dots,W_t^{(N)})$. See
+\textcite{Douc:2005wa} for some commonly used resampling algorithms.
+
+\section{\protect\smc samplers}
+\label{sec:SMC Samplers}
+
+\smc samplers allow us to obtain, iteratively, collections of weighted samples
+from a sequence of distributions $\{\pi_t\}_{t\ge0}$ over essentially any
+random variables on some spaces $\{E_t\}_{t\ge0}$, by constructing a sequence
+of auxiliary distributions $\{\tilde\pi_t\}_{t\ge0}$ on spaces of increasing
+dimensions, $\tilde\pi_t(x_{0:t})=\pi_t (x_t) \prod_{s=0}^{t-1}
+L_s(x_{s+1},x_s)$, where the sequence of Markov kernels $\{L_s\}_{s=0}^{t-1}$,
+termed backward kernels, is formally arbitrary but critically influences the
+estimator variance. See \textcite{DelMoral:2006hc} for further details and
+guidance on the selection of these kernels.
+
+Standard sequential importance sampling and resampling algorithms can then be
+applied to the sequence of synthetic distributions, $\{\tilde\pi_t\}_{t\ge0}$.
+At time $t - 1$, assume that a set of weighted particles
+$\{W_{t-1}^{(i)},X_{0:t-1}^{(i)}\}_{i=1}^N$ approximating $\tilde\pi_{t-1}$ is
+available, then at time $t$, the path of each particle is extended with a
+Markov kernel say, $K_t(x_{t-1}, x_t)$ and the set of particles
+$\{X_{0:t}^{(i)}\}_{i=1}^N$ reach the distribution $\eta_t(X_{0:t}^{(i)}) =
+\eta_0(X_0^{(i)})\prod_{k=1}^tK_t(X_{t-1}^{(i)}, X_t^{(i)})$, where $\eta_0$ is
+the initial distribution of the particles. To correct the discrepancy between
+$\eta_t$ and $\tilde\pi_t$, Equation~\eqref{eq:si} is applied and in this case,
+\begin{equation}
+  W_t^{(i)} \propto \frac{\tilde\pi_t(X_{0:t}^{(i)})}{\eta_t(X_{0:t}^{(i)})}
+  = \frac{\pi_t(X_t^{(i)})\prod_{s=0}^{t-1}L_s(X_{s+1}^{(i)}, X_s^{(i)})}
+  {\eta_0(X_0^{(i)})\prod_{k=1}^tK_t(X_{t-1}^{(i)},X_t^{(i)})}
+  \propto \tilde{w}_t(X_{t-1}^{(i)}, X_t^{(i)})W_{t-1}^{(i)}
+\end{equation}
+where $\tilde{w}_t$, termed the \emph{incremental weights}, are calculated as,
+\begin{equation}
+  \tilde{w}_t(X_{t-1}^{(i)},X_t^{(i)}) =
+  \frac{\pi_t(X_t^{(i)})L_{t-1}(X_t^{(i)}, X_{t-1}^{(i)})}
+  {\pi_{t-1}(X_{t-1}^{(i)})K_t(X_{t-1}^{(i)}, X_t^{(i)})}
+\end{equation}
+If $\pi_t$ is only known up to a normalizing constant, say $\pi_t(x_t) =
+\gamma_t(x_t)/Z_t$, then we can use the \emph{unnormalized} incremental weights
+\begin{equation}
+  w_t(X_{t-1}^{(i)},X_t^{(i)}) =
+  \frac{\gamma_t(X_t^{(i)})L_{t-1}(X_t^{(i)}, X_{t-1}^{(i)})}
+  {\gamma_{t-1}(X_{t-1}^{(i)})K_t(X_{t-1}^{(i)}, X_t^{(i)})}
+\end{equation}
+for importance sampling. Further, with the previously \emph{normalized} weights
+$\{W_{t-1}^{(i)}\}_{i=1}^N$, we can estimate the ratio of normalizing constant
+$Z_t/Z_{t-1}$ by
+\begin{equation}
+  \frac{\hat{Z}_t}{Z_{t-1}} =
+  \sum_{i=1}^N W_{t-1}^{(i)}w_t(X_{t-1}^{(i)},X_t^{(i)})
+\end{equation}
+Sequentially, the normalizing constant between initial distribution $\pi_0$ and
+some target $\pi_T$, $T\ge1$ can be estimated. See \textcite{DelMoral:2006hc}
+for details on calculating the incremental weights. In practice, when $K_t$ is
+invariant to $\pi_t$, and an approximated suboptimal backward kernel
+\begin{equation}
+  L_{t-1}(x_t, x_{t-1}) = \frac{\pi(x_{t-1})K_t(x_{t-1}, x_t)}{\pi_t(x_t)}
+\end{equation}
+is used, the unnormalized incremental weights will be
+\begin{equation}
+  w_t(X_{t-1}^{(i)},X_t^{(i)}) =
+  \frac{\gamma_t(X_{t-1}^{(i)})}{\gamma_{t-1}(X_{t-1}^{(i)})}.
+  \label{eq:inc_weight_mcmc}
+\end{equation}
+
+\section{Other sequential Monte Carlo algorithms}
+\label{sec:Other sequential Monte Carlo algorithms}
+
+Some other commonly used sequential Monte Carlo algorithms can be viewed as
+special cases of algorithms introduced above. The annealed importance sampling
+(\ais; \textcite{Neal:2001we}) can be viewed as \smc samplers without
+resampling. Particle filters as seen in the physics and signal processing
+literature, can also be interpreted as the sequential importance sampling and
+resampling algorithms. See \textcite{Doucet:2011us} for a review of this topic.

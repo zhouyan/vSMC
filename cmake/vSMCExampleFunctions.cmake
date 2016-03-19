@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2015, Yan Zhou
+#  Copyright (c) 2013-2016, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -32,49 +32,49 @@
 FUNCTION(ADD_VSMC_EXECUTABLE exe src)
     ADD_EXECUTABLE(${exe} ${src})
 
-    IF (DEFINED VSMC_LINK_LIBRARIES)
+    IF(DEFINED VSMC_LINK_LIBRARIES)
         TARGET_LINK_LIBRARIES(${exe} ${VSMC_LINK_LIBRARIES})
-    ENDIF (DEFINED VSMC_LINK_LIBRARIES)
+    ENDIF(DEFINED VSMC_LINK_LIBRARIES)
 
     GET_TARGET_PROPERTY(compile_flags ${exe} COMPILE_FLAGS)
-    IF (NOT compile_flags)
+    IF(NOT compile_flags)
         UNSET(compile_flags)
-    ENDIF (NOT compile_flags)
+    ENDIF(NOT compile_flags)
 
     GET_TARGET_PROPERTY(link_flags ${exe} LINK_FLAGS)
-    IF (NOT link_flags)
+    IF(NOT link_flags)
         UNSET(link_flags)
-    ENDIF (NOT link_flags)
+    ENDIF(NOT link_flags)
 
-    FOREACH (arg ${ARGN})
-        IF (${arg} STREQUAL "OMP" AND OPENMP_FOUND)
+    FOREACH(arg ${ARGN})
+        IF(${arg} STREQUAL "OMP" AND OPENMP_FOUND)
             SET(compile_flags "${compile_flags} ${OpenMP_CXX_FLAGS}")
-            IF (NOT MSVC)
+            IF(NOT MSVC)
                 SET(link_flags "${link_flags} ${OpenMP_CXX_FLAGS}")
-            ENDIF (NOT MSVC)
-        ENDIF (${arg} STREQUAL "OMP" AND OPENMP_FOUND)
-    ENDFOREACH (arg ${ARGN})
+            ENDIF(NOT MSVC)
+        ENDIF(${arg} STREQUAL "OMP" AND OPENMP_FOUND)
+    ENDFOREACH(arg ${ARGN})
 
-    IF (compile_flags)
+    IF(compile_flags)
         SET_TARGET_PROPERTIES(${exe} PROPERTIES COMPILE_FLAGS
             "${compile_flags}")
-    ENDIF (compile_flags)
+    ENDIF(compile_flags)
 
-    IF (link_flags)
+    IF(link_flags)
         SET_TARGET_PROPERTIES(${exe} PROPERTIES LINK_FLAGS
             "${link_flags}")
-    ENDIF (link_flags)
+    ENDIF(link_flags)
 ENDFUNCTION(ADD_VSMC_EXECUTABLE)
 
 FUNCTION(ADD_SMP_EXECUTABLE base header source smp_name)
     STRING(TOUPPER "${smp_name}" SMP)
     STRING(TOLOWER "${smp_name}" smp)
 
-    IF (EXISTS ${PROJECT_SOURCE_DIR}/include/${header}.hpp)
+    IF(EXISTS ${PROJECT_SOURCE_DIR}/include/${header}.hpp)
         CONFIGURE_FILE(
             ${PROJECT_SOURCE_DIR}/include/${header}.hpp
             ${PROJECT_BINARY_DIR}/include/${header}_${smp}.hpp)
-    ENDIF (EXISTS ${PROJECT_SOURCE_DIR}/include/${header}.hpp)
+    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/include/${header}.hpp)
     CONFIGURE_FILE(
         ${PROJECT_SOURCE_DIR}/src/${source}.cpp
         ${PROJECT_BINARY_DIR}/src/${source}_${smp}.cpp)
@@ -92,50 +92,50 @@ FUNCTION(ADD_SMP_EXAMPLE base)
     FOREACH(smp ${SMP_EXECUTABLES})
         ADD_SMP_EXECUTABLE(${base} ${base} ${base} ${smp} ${ARGN})
         ADD_DEPENDENCIES(${base} ${base}_${smp})
-    ENDFOREACH (smp)
+    ENDFOREACH(smp)
 ENDFUNCTION(ADD_SMP_EXAMPLE)
 
 FUNCTION(COPY_FILE basename filename)
-    IF (UNIX)
+    IF(UNIX)
         ADD_CUSTOM_COMMAND(
             OUTPUT  ${PROJECT_BINARY_DIR}/${filename}
             DEPENDS ${PROJECT_SOURCE_DIR}/${filename}
             COMMAND ${CMAKE_COMMAND} ARGS -E create_symlink
             ${PROJECT_SOURCE_DIR}/${filename}
             ${PROJECT_BINARY_DIR}/${filename})
-    ELSE (UNIX)
+    ELSE(UNIX)
         ADD_CUSTOM_COMMAND(
             OUTPUT  ${PROJECT_BINARY_DIR}/${filename}
             DEPENDS ${PROJECT_SOURCE_DIR}/${filename}
             COMMAND ${CMAKE_COMMAND} ARGS -E copy
             ${PROJECT_SOURCE_DIR}/${filename}
             ${PROJECT_BINARY_DIR}/${filename})
-    ENDIF (UNIX)
+    ENDIF(UNIX)
     ADD_CUSTOM_TARGET(${basename}-${filename}
         DEPENDS ${PROJECT_BINARY_DIR}/${filename})
     ADD_DEPENDENCIES(${basename}-files ${basename}-${filename})
 ENDFUNCTION(COPY_FILE)
 
 FUNCTION(COPY_FILE_OPTIONAL basename filename)
-    IF (EXISTS ${PROJECT_SOURCE_DIR}/${filename})
+    IF(EXISTS ${PROJECT_SOURCE_DIR}/${filename})
         COPY_FILE(${basename} ${filename})
-    ELSE (EXISTS ${PROJECT_SOURCE_DIR}/${filename})
+    ELSE(EXISTS ${PROJECT_SOURCE_DIR}/${filename})
         MESSAGE(STATUS "File: ${basename}: ${filename} not available")
-    ENDIF (EXISTS ${PROJECT_SOURCE_DIR}/${filename})
+    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/${filename})
 ENDFUNCTION(COPY_FILE_OPTIONAL)
 
 FUNCTION(ADD_HEADER_EXECUTABLE basepath cond)
-    IF (${cond})
+    IF(${cond})
         STRING(REPLACE "/" "_" basename "${basepath}")
-        IF (EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
+        IF(EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
             ADD_VSMC_EXECUTABLE(${basename}_hpp
                 ${PROJECT_SOURCE_DIR}/src/${basename}.cpp ${ARGN})
-        ELSE (EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
+        ELSE(EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
             CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/vsmc.cpp
                 ${PROJECT_BINARY_DIR}/src/${basename}.cpp)
             ADD_VSMC_EXECUTABLE(${basename}_hpp
                 ${PROJECT_BINARY_DIR}/src/${basename}.cpp ${ARGN})
-        ENDIF (EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
+        ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
         ADD_DEPENDENCIES(vsmc ${basename}_hpp)
-    ENDIF (${cond})
+    ENDIF(${cond})
 ENDFUNCTION(ADD_HEADER_EXECUTABLE)

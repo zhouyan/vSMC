@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -120,8 +120,7 @@ class M128I
     M128I(const __m128i &value) : value_(value) {}
 
     template <typename T>
-    M128I(const M128I<T> &other)
-        : value_(other.value())
+    M128I(const M128I<T> &other) : value_(other.value())
     {
     }
 
@@ -449,7 +448,8 @@ inline M128I<T> operator|(const M128I<T> &a, const M128I<T> &b)
 }
 
 template <typename T>
-inline M128I<T> operator^(const M128I<T> &a, const M128I<T> &b) {
+inline M128I<T> operator^(const M128I<T> &a, const M128I<T> &b)
+{
     return M128I<T>(_mm_xor_si128(a.value(), b.value()));
 }
 
@@ -788,6 +788,7 @@ class M128TypeTrait<double>
 } // namespace vsmc::internal
 
 /// \brief floating point SSE2 type
+/// \ingroup SIMD
 template <typename T>
 using M128Type = typename std::conditional<std::is_integral<T>::value,
     M128I<T>, typename internal::M128TypeTrait<T>::type>::type;
@@ -810,8 +811,7 @@ class M256I
     M256I(const __m256i &value) : value_(value) {}
 
     template <typename T>
-    M256I(const M256I<T> &other)
-        : value_(other.value())
+    M256I(const M256I<T> &other) : value_(other.value())
     {
     }
 
@@ -1158,7 +1158,8 @@ inline M256I<T> operator|(const M256I<T> &a, const M256I<T> &b)
 }
 
 template <typename T>
-inline M256I<T> operator^(const M256I<T> &a, const M256I<T> &b) {
+inline M256I<T> operator^(const M256I<T> &a, const M256I<T> &b)
+{
     return M256I<T>(_mm256_xor_si256(a.value(), b.value()));
 }
 
@@ -1501,6 +1502,7 @@ class M256TypeTrait<double>
 } // namespace vsmc::internal
 
 /// \brief floating point SSE2 type
+/// \ingroup SIMD
 template <typename T>
 using M256Type = typename std::conditional<std::is_integral<T>::value,
     M256I<T>, typename internal::M256TypeTrait<T>::type>::type;

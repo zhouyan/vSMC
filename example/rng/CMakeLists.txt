@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2015, Yan Zhou
+#  Copyright (c) 2013-2016, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -38,20 +38,17 @@ ADD_DEPENDENCIES(example rng)
 ADD_CUSTOM_TARGET(rng-files)
 ADD_DEPENDENCIES(example-files rng-files)
 
-IF (VSMC_ENABLE_LIBRARY)
-    ADD_DEFINITIONS(-DVSMC_RNG_TEST_C_API=1)
-ENDIF (VSMC_ENABLE_LIBRARY)
-
 FUNCTION(ADD_RNG_TEST name)
     ADD_VSMC_EXECUTABLE(rng_${name} ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp)
     ADD_DEPENDENCIES(rng rng_${name})
 ENDFUNCTION(ADD_RNG_TEST)
 
+ADD_RNG_TEST(u01)
 ADD_RNG_TEST(std)
 ADD_RNG_TEST(philox)
 ADD_RNG_TEST(threefry)
 
-IF (Boost_FOUND)
+IF(Boost_FOUND)
     ADD_RNG_TEST(beta)
     ADD_RNG_TEST(cauchy)
     ADD_RNG_TEST(chi_squared)
@@ -69,17 +66,17 @@ IF (Boost_FOUND)
     ADD_RNG_TEST(student_t)
     ADD_RNG_TEST(uniform_real)
     ADD_RNG_TEST(weibull)
-ENDIF (Boost_FOUND)
+ENDIF(Boost_FOUND)
 
-IF (AESNI_FOUND)
+IF(AESNI_FOUND)
     ADD_RNG_TEST(aes)
     ADD_RNG_TEST(ars)
-ENDIF (AESNI_FOUND)
+ENDIF(AESNI_FOUND)
 
-IF (RDRAND_FOUND)
+IF(RDRAND_FOUND)
     ADD_RNG_TEST(rdrand)
-ENDIF (RDRAND_FOUND)
+ENDIF(RDRAND_FOUND)
 
-IF (MKL_FOUND)
+IF(MKL_FOUND)
     ADD_RNG_TEST(mkl)
-ENDIF (MKL_FOUND)
+ENDIF(MKL_FOUND)

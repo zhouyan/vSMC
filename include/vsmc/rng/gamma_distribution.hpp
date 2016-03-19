@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 #define VSMC_RNG_GAMMA_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/u01_distribution.hpp>
 #include <vsmc/rng/normal_distribution.hpp>
+#include <vsmc/rng/u01_distribution.hpp>
 
 namespace vsmc
 {
@@ -66,7 +66,7 @@ class GammaDistributionConstant
 
     void reset(RealType alpha, RealType)
     {
-        if (alpha < 0.6)
+        if (alpha < static_cast<RealType>(0.6L))
             algorithm = GammaDistributionAlgorithmT;
         else if (alpha < 1)
             algorithm = GammaDistributionAlgorithmW;
@@ -105,17 +105,12 @@ class GammaDistributionConstant
 template <typename RealType>
 class GammaDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        Gamma, gamma, RealType, result_type, alpha, 1, result_type, beta, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Gamma, gamma, alpha, 1, beta, 1)
 
     public:
-    result_type min VSMC_MNE() const { return 0; }
+    result_type min() const { return 0; }
 
-    result_type max VSMC_MNE() const
-    {
-        return std::numeric_limits<result_type>::max VSMC_MNE();
-    }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
     void reset() { constant_.reset(alpha(), beta()); }
 
@@ -161,10 +156,10 @@ class GammaDistribution
     result_type generate_t(RNGType &rng, const param_type &param,
         const internal::GammaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> u01;
         while (true) {
-            result_type u = runif(rng);
-            result_type e = -std::log(runif(rng));
+            result_type u = u01(rng);
+            result_type e = -std::log(u01(rng));
             if (u > constant.d) {
                 u = -std::log(constant.c * (1 - u));
                 e += u;
@@ -180,13 +175,13 @@ class GammaDistribution
     result_type generate_w(RNGType &rng, const param_type &,
         const internal::GammaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> u01;
         result_type u = 0;
         result_type e = 0;
         result_type r = 0;
         do {
-            u = -std::log(runif(rng));
-            e = -std::log(runif(rng));
+            u = -std::log(u01(rng));
+            e = -std::log(u01(rng));
             r = std::exp(constant.c * std::log(u));
         } while (u + e < constant.d + r);
 
@@ -197,10 +192,10 @@ class GammaDistribution
     result_type generate_n(RNGType &rng, const param_type &,
         const internal::GammaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> u01;
         NormalDistribution<RealType> rnorm(0, 1);
         while (true) {
-            result_type u = runif(rng);
+            result_type u = u01(rng);
             result_type e = 0;
             result_type v = 0;
             result_type w = 0;
@@ -224,9 +219,9 @@ class GammaDistribution
     result_type generate_e(RNGType &rng, const param_type &,
         const internal::GammaDistributionConstant<RealType> &)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> u01;
 
-        return -std::log(runif(rng));
+        return -std::log(u01(rng));
     }
 }; // class GammaDistribution
 
@@ -245,7 +240,7 @@ inline std::size_t gamma_distribution_impl_t(RNGType &rng, std::size_t n,
     RealType *const e = s + n;
     RealType *const x = s + n * 2;
 
-    u01_co_distribution(rng, n * 2, s);
+    u01_distribution(rng, n * 2, s);
     log(n, e, e);
     mul(n, static_cast<RealType>(-1), e, e);
     for (std::size_t i = 0; i != n; ++i) {
@@ -281,7 +276,7 @@ inline std::size_t gamma_distribution_impl_w(RNGType &rng, std::size_t n,
     RealType *const e = s + n;
     RealType *const x = s + n * 2;
 
-    u01_co_distribution(rng, n * 2, s);
+    u01_distribution(rng, n * 2, s);
     log(n * 2, s, s);
     mul(n * 2, static_cast<RealType>(-1), s, s);
     log(n, s, x);
@@ -313,7 +308,7 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
     RealType *const w = s + n * 3;
     RealType *const x = s + n * 4;
 
-    u01_co_distribution(rng, n, u);
+    u01_distribution(rng, n, u);
     normal_distribution(
         rng, n, w, static_cast<RealType>(0), static_cast<RealType>(1));
     fma(n, c, w, static_cast<RealType>(1), v);
@@ -352,7 +347,7 @@ inline std::size_t gamma_distribution_impl_e(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType beta,
     const GammaDistributionConstant<RealType> &)
 {
-    u01_co_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     log(n, r, r);
     mul(n, -beta, r, r);
 
@@ -389,7 +384,11 @@ template <typename RealType, typename RNGType>
 inline void gamma_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType alpha, RealType beta)
 {
-    const std::size_t k = 1000;
+    static_assert(std::is_floating_point<RealType>::value,
+        "**gamma_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
+    const std::size_t k = 1024;
     const internal::GammaDistributionConstant<RealType> constant(alpha);
     while (n > k) {
         std::size_t m = internal::gamma_distribution_impl<k>(
@@ -410,12 +409,7 @@ inline void gamma_distribution(
     }
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, GammaDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Gamma, gamma, alpha, beta)
 
 } // namespace vsmc
 

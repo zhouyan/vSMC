@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -54,20 +54,15 @@ inline bool cauchy_distribution_check_param(RealType, RealType b)
 template <typename RealType>
 class CauchyDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        Cauchy, cauchy, RealType, result_type, a, 0, result_type, b, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Cauchy, cauchy, a, 0, b, 1)
 
     public:
-    result_type min VSMC_MNE() const
+    result_type min() const
     {
-        return -std::numeric_limits<result_type>::max VSMC_MNE();
+        return std::numeric_limits<result_type>::lowest();
     }
 
-    result_type max VSMC_MNE() const
-    {
-        return std::numeric_limits<result_type>::max VSMC_MNE();
-    }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
     void reset() {}
 
@@ -75,10 +70,10 @@ class CauchyDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> u01;
 
         return param.a() +
-            param.b() * std::tan(const_pi<result_type>() * runif(rng));
+            param.b() * std::tan(const_pi<result_type>() * (1 - u01(rng)));
     }
 }; // class CauchyDistribution
 
@@ -89,7 +84,8 @@ template <typename RealType, typename RNGType>
 inline void cauchy_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    u01_co_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
+    sub(n, static_cast<RealType>(1), r, r);
     mul(n, const_pi<RealType>(), r, r);
     tan(n, r, r);
     for (std::size_t i = 0; i != n; ++i)
@@ -104,20 +100,19 @@ template <typename RealType, typename RNGType>
 inline void cauchy_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    const std::size_t k = 1000;
+    static_assert(std::is_floating_point<RealType>::value,
+        "**cauchy_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::cauchy_distribution_impl(rng, k, r + i * k, a, b);
-    internal::cauchy_distribution_impl(rng, l, r + m * k, a, b);
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::cauchy_distribution_impl(rng, k, r, a, b);
+    internal::cauchy_distribution_impl(rng, l, r, a, b);
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, CauchyDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Cauchy, cauchy, a, b)
 
 } // namespace vsmc
 

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
-#include <vsmc/math/cblas.hpp>
 
 #define VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(flag)          \
     VSMC_RUNTIME_ASSERT(                                                      \
@@ -61,8 +60,7 @@ class DiscreteDistribution
         param_type() {}
 
         template <typename InputIter>
-        param_type(InputIter first, InputIter last)
-            : probability_(first, last)
+        param_type(InputIter first, InputIter last) : probability_(first, last)
         {
             invariant();
         }
@@ -192,8 +190,7 @@ class DiscreteDistribution
     DiscreteDistribution() {}
 
     template <typename InputIter>
-    DiscreteDistribution(InputIter first, InputIter last)
-        : param_(first, last)
+    DiscreteDistribution(InputIter first, InputIter last) : param_(first, last)
     {
     }
 
@@ -216,9 +213,9 @@ class DiscreteDistribution
     {
     }
 
-    result_type min VSMC_MNE() const { return 0; }
+    result_type min() const { return 0; }
 
-    result_type max VSMC_MNE() const
+    result_type max() const
     {
         return param_.size() == 0 ? 0 : param_.size() - 1;
     }
@@ -257,8 +254,8 @@ class DiscreteDistribution
         using value_type =
             typename std::iterator_traits<InputIter>::value_type;
 
-        U01CODistribution<value_type> runif;
-        value_type u = runif(rng);
+        U01Distribution<value_type> u01;
+        value_type u = u01(rng);
 
         if (!normalized) {
             value_type mulw =
@@ -289,7 +286,37 @@ class DiscreteDistribution
         return index - 1;
     }
 
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    friend bool operator==(
+        const distribution_type &dist1, const distribution_type &dist2)
+    {
+        return dist1.param_ == dist2.param_;
+    }
+
+    friend bool operator!=(
+        const distribution_type &dist1, const distribution_type &dist2)
+    {
+        return !(dist1 == dist2);
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os, const distribution_type &dist)
+    {
+        os << dist.param_;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is, distribution_type &dist)
+    {
+        is >> std::ws >> dist.param_;
+        if (is.good())
+            dist.reset();
+
+        return is;
+    }
 
     private:
     param_type param_;

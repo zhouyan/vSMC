@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2015, Yan Zhou
+#  Copyright (c) 2013-2016, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,6 @@ IF (MSVC)
     SET (TBB_ROOT "C:/Program Files/Intel/TBB")
     SET (TBB_INC_PATH "${TBB_ROOT}/include" CACHE PATH "TBB include")
     SET (TBB_LIB_PATH "${TBB_ROOT}/lib/intel64/vc12" CACHE PATH "TBB lib")
-    SET (VSMC_MPI_FOUND FALSE CACHE BOOL "NO MPI")
-    SET (OPENCL_FOUND FALSE CACHE BOOL "NO OpenCL")
 ENDIF (MSVC)
 
 IF (UNIX AND NOT APPLE AND NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "Intel")

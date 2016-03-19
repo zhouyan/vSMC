@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -134,7 +134,7 @@ typedef struct {
     uint64_t index;
 } vsmc_threefry4x64;
 
-VSMC_STATIC_INLINE void vsmc_threefry2x32_inc(vsmc_threefry2x32_ctr_t *ctr)
+static inline void vsmc_threefry2x32_inc(vsmc_threefry2x32_ctr_t *ctr)
 {
     if (++ctr->v[0] != 0)
         return;
@@ -142,27 +142,7 @@ VSMC_STATIC_INLINE void vsmc_threefry2x32_inc(vsmc_threefry2x32_ctr_t *ctr)
         return;
 }
 
-VSMC_STATIC_INLINE void vsmc_threefry4x32_inc(vsmc_threefry4x32_ctr_t *ctr)
-{
-    if (++ctr->v[0] != 0)
-        return;
-    if (++ctr->v[1] != 0)
-        return;
-    if (++ctr->v[2] != 0)
-        return;
-    if (++ctr->v[3] != 0)
-        return;
-}
-
-VSMC_STATIC_INLINE void vsmc_threefry2x64_inc(vsmc_threefry2x64_ctr_t *ctr)
-{
-    if (++ctr->v[0] != 0)
-        return;
-    if (++ctr->v[1] != 0)
-        return;
-}
-
-VSMC_STATIC_INLINE void vsmc_threefry4x64_inc(vsmc_threefry4x64_ctr_t *ctr)
+static inline void vsmc_threefry4x32_inc(vsmc_threefry4x32_ctr_t *ctr)
 {
     if (++ctr->v[0] != 0)
         return;
@@ -174,7 +154,27 @@ VSMC_STATIC_INLINE void vsmc_threefry4x64_inc(vsmc_threefry4x64_ctr_t *ctr)
         return;
 }
 
-VSMC_STATIC_INLINE void vsmc_threefry2x32_initpar(
+static inline void vsmc_threefry2x64_inc(vsmc_threefry2x64_ctr_t *ctr)
+{
+    if (++ctr->v[0] != 0)
+        return;
+    if (++ctr->v[1] != 0)
+        return;
+}
+
+static inline void vsmc_threefry4x64_inc(vsmc_threefry4x64_ctr_t *ctr)
+{
+    if (++ctr->v[0] != 0)
+        return;
+    if (++ctr->v[1] != 0)
+        return;
+    if (++ctr->v[2] != 0)
+        return;
+    if (++ctr->v[3] != 0)
+        return;
+}
+
+static inline void vsmc_threefry2x32_initpar(
     const vsmc_threefry2x32_key_t *key, vsmc_threefry2x32_par_t *par)
 {
     par->v[0] = key->v[0];
@@ -185,7 +185,7 @@ VSMC_STATIC_INLINE void vsmc_threefry2x32_initpar(
     par->v[2] ^= par->v[1];
 }
 
-VSMC_STATIC_INLINE void vsmc_threefry4x32_initpar(
+static inline void vsmc_threefry4x32_initpar(
     const vsmc_threefry4x32_key_t *key, vsmc_threefry4x32_par_t *par)
 {
     par->v[0] = key->v[0];
@@ -200,7 +200,7 @@ VSMC_STATIC_INLINE void vsmc_threefry4x32_initpar(
     par->v[4] ^= par->v[3];
 }
 
-VSMC_STATIC_INLINE void vsmc_threefry2x64_initpar(
+static inline void vsmc_threefry2x64_initpar(
     const vsmc_threefry2x64_key_t *key, vsmc_threefry2x64_par_t *par)
 {
     par->v[0] = key->v[0];
@@ -211,7 +211,7 @@ VSMC_STATIC_INLINE void vsmc_threefry2x64_initpar(
     par->v[2] ^= par->v[1];
 }
 
-VSMC_STATIC_INLINE void vsmc_threefry4x64_initpar(
+static inline void vsmc_threefry4x64_initpar(
     const vsmc_threefry4x64_key_t *key, vsmc_threefry4x64_par_t *par)
 {
     par->v[0] = key->v[0];
@@ -226,7 +226,7 @@ VSMC_STATIC_INLINE void vsmc_threefry4x64_initpar(
     par->v[4] ^= par->v[3];
 }
 
-VSMC_STATIC_INLINE void vsmc_threefry2x32_rotate(
+static inline void vsmc_threefry2x32_rotate(
     vsmc_threefry2x32_ctr_t *state, uint32_t r)
 {
     state->v[0] += state->v[1];
@@ -234,7 +234,7 @@ VSMC_STATIC_INLINE void vsmc_threefry2x32_rotate(
     state->v[1] ^= state->v[0];
 }
 
-VSMC_STATIC_INLINE void vsmc_threefry4x32_rotate(
+static inline void vsmc_threefry4x32_rotate(
     vsmc_threefry4x32_ctr_t *state, uint32_t r0, uint32_t r2, int i0, int i2)
 {
     state->v[0] += state->v[i0];
@@ -246,7 +246,7 @@ VSMC_STATIC_INLINE void vsmc_threefry4x32_rotate(
     state->v[i2] ^= state->v[2];
 }
 
-VSMC_STATIC_INLINE void vsmc_threefry2x64_rotate(
+static inline void vsmc_threefry2x64_rotate(
     vsmc_threefry2x64_ctr_t *state, uint64_t r)
 {
     state->v[0] += state->v[1];
@@ -254,7 +254,7 @@ VSMC_STATIC_INLINE void vsmc_threefry2x64_rotate(
     state->v[1] ^= state->v[0];
 }
 
-VSMC_STATIC_INLINE void vsmc_threefry4x64_rotate(
+static inline void vsmc_threefry4x64_rotate(
     vsmc_threefry4x64_ctr_t *state, uint64_t r0, uint64_t r2, int i0, int i2)
 {
     state->v[0] += state->v[i0];
@@ -266,18 +266,17 @@ VSMC_STATIC_INLINE void vsmc_threefry4x64_rotate(
     state->v[i2] ^= state->v[2];
 }
 
-VSMC_STATIC_INLINE void vsmc_threefry2x32_insertkey(
-    vsmc_threefry2x32_ctr_t *state, const vsmc_threefry2x32_par_t *par,
-    uint32_t inc, int i0, int i1)
+static inline void vsmc_threefry2x32_insertkey(vsmc_threefry2x32_ctr_t *state,
+    const vsmc_threefry2x32_par_t *par, uint32_t inc, int i0, int i1)
 {
     state->v[0] += par->v[i0];
     state->v[1] += par->v[i1];
     state->v[1] += inc;
 }
 
-VSMC_STATIC_INLINE void vsmc_threefry4x32_insertkey(
-    vsmc_threefry4x32_ctr_t *state, const vsmc_threefry4x32_par_t *par,
-    uint32_t inc, int i0, int i1, int i2, int i3)
+static inline void vsmc_threefry4x32_insertkey(vsmc_threefry4x32_ctr_t *state,
+    const vsmc_threefry4x32_par_t *par, uint32_t inc, int i0, int i1, int i2,
+    int i3)
 {
     state->v[0] += par->v[i0];
     state->v[1] += par->v[i1];
@@ -286,18 +285,17 @@ VSMC_STATIC_INLINE void vsmc_threefry4x32_insertkey(
     state->v[3] += inc;
 }
 
-VSMC_STATIC_INLINE void vsmc_threefry2x64_insertkey(
-    vsmc_threefry2x64_ctr_t *state, const vsmc_threefry2x64_par_t *par,
-    uint64_t inc, int i0, int i1)
+static inline void vsmc_threefry2x64_insertkey(vsmc_threefry2x64_ctr_t *state,
+    const vsmc_threefry2x64_par_t *par, uint64_t inc, int i0, int i1)
 {
     state->v[0] += par->v[i0];
     state->v[1] += par->v[i1];
     state->v[1] += inc;
 }
 
-VSMC_STATIC_INLINE void vsmc_threefry4x64_insertkey(
-    vsmc_threefry4x64_ctr_t *state, const vsmc_threefry4x64_par_t *par,
-    uint64_t inc, int i0, int i1, int i2, int i3)
+static inline void vsmc_threefry4x64_insertkey(vsmc_threefry4x64_ctr_t *state,
+    const vsmc_threefry4x64_par_t *par, uint64_t inc, int i0, int i1, int i2,
+    int i3)
 {
     state->v[0] += par->v[i0];
     state->v[1] += par->v[i1];
@@ -308,9 +306,8 @@ VSMC_STATIC_INLINE void vsmc_threefry4x64_insertkey(
 
 /// \brief Generate Threefry2x32 RNG state
 /// \ingroup ThreefryC
-VSMC_STATIC_INLINE void vsmc_threefry2x32_gen(
-    const vsmc_threefry2x32_ctr_t *ctr, const vsmc_threefry2x32_key_t *key,
-    vsmc_threefry2x32_ctr_t *state)
+static inline void vsmc_threefry2x32_gen(const vsmc_threefry2x32_ctr_t *ctr,
+    const vsmc_threefry2x32_key_t *key, vsmc_threefry2x32_ctr_t *state)
 {
     *state = *ctr;
     vsmc_threefry2x32_par_t par;
@@ -346,9 +343,8 @@ VSMC_STATIC_INLINE void vsmc_threefry2x32_gen(
 
 /// \brief Generate Threefry4x32 RNG state
 /// \ingroup ThreefryC
-VSMC_STATIC_INLINE void vsmc_threefry4x32_gen(
-    const vsmc_threefry4x32_ctr_t *ctr, const vsmc_threefry4x32_key_t *key,
-    vsmc_threefry4x32_ctr_t *state)
+static inline void vsmc_threefry4x32_gen(const vsmc_threefry4x32_ctr_t *ctr,
+    const vsmc_threefry4x32_key_t *key, vsmc_threefry4x32_ctr_t *state)
 {
     *state = *ctr;
     vsmc_threefry4x32_par_t par;
@@ -384,9 +380,8 @@ VSMC_STATIC_INLINE void vsmc_threefry4x32_gen(
 
 /// \brief Generate Threefry2x64 RNG state
 /// \ingroup ThreefryC
-VSMC_STATIC_INLINE void vsmc_threefry2x64_gen(
-    const vsmc_threefry2x64_ctr_t *ctr, const vsmc_threefry2x64_key_t *key,
-    vsmc_threefry2x64_ctr_t *state)
+static inline void vsmc_threefry2x64_gen(const vsmc_threefry2x64_ctr_t *ctr,
+    const vsmc_threefry2x64_key_t *key, vsmc_threefry2x64_ctr_t *state)
 {
     *state = *ctr;
     vsmc_threefry2x64_par_t par;
@@ -422,9 +417,8 @@ VSMC_STATIC_INLINE void vsmc_threefry2x64_gen(
 
 /// \brief Generate Threefry4x64 RNG state
 /// \ingroup ThreefryC
-VSMC_STATIC_INLINE void vsmc_threefry4x64_gen(
-    const vsmc_threefry4x64_ctr_t *ctr, const vsmc_threefry4x64_key_t *key,
-    vsmc_threefry4x64_ctr_t *state)
+static inline void vsmc_threefry4x64_gen(const vsmc_threefry4x64_ctr_t *ctr,
+    const vsmc_threefry4x64_key_t *key, vsmc_threefry4x64_ctr_t *state)
 {
     *state = *ctr;
     vsmc_threefry4x64_par_t par;
@@ -460,7 +454,7 @@ VSMC_STATIC_INLINE void vsmc_threefry4x64_gen(
 
 /// \brief Initialize Threefry2x32 RNG state
 /// \ingroup ThreefryC
-VSMC_STATIC_INLINE void vsmc_threefry2x32_init(
+static inline void vsmc_threefry2x32_init(
     vsmc_threefry2x32 *rng, uint32_t seed)
 {
     rng->ctr.v[0] = 0;
@@ -472,7 +466,7 @@ VSMC_STATIC_INLINE void vsmc_threefry2x32_init(
 
 /// \brief Initialize Threefry4x32 RNG state
 /// \ingroup ThreefryC
-VSMC_STATIC_INLINE void vsmc_threefry4x32_init(
+static inline void vsmc_threefry4x32_init(
     vsmc_threefry4x32 *rng, uint32_t seed)
 {
     rng->ctr.v[0] = 0;
@@ -488,7 +482,7 @@ VSMC_STATIC_INLINE void vsmc_threefry4x32_init(
 
 /// \brief Initialize Threefry2x64 RNG state
 /// \ingroup ThreefryC
-VSMC_STATIC_INLINE void vsmc_threefry2x64_init(
+static inline void vsmc_threefry2x64_init(
     vsmc_threefry2x64 *rng, uint64_t seed)
 {
     rng->ctr.v[0] = 0;
@@ -500,7 +494,7 @@ VSMC_STATIC_INLINE void vsmc_threefry2x64_init(
 
 /// \brief Initialize Threefry4x64 RNG state
 /// \ingroup ThreefryC
-VSMC_STATIC_INLINE void vsmc_threefry4x64_init(
+static inline void vsmc_threefry4x64_init(
     vsmc_threefry4x64 *rng, uint64_t seed)
 {
     rng->ctr.v[0] = 0;
@@ -516,7 +510,7 @@ VSMC_STATIC_INLINE void vsmc_threefry4x64_init(
 
 /// \brief Generate random 32-bits integers from Threefry2x32 RNG
 /// \ingroup ThreefryC
-VSMC_STATIC_INLINE uint32_t vsmc_threefry2x32_rand(vsmc_threefry2x32 *rng)
+static inline uint32_t vsmc_threefry2x32_rand(vsmc_threefry2x32 *rng)
 {
     if (rng->index == 2) {
         vsmc_threefry2x32_inc(&rng->ctr);
@@ -529,7 +523,7 @@ VSMC_STATIC_INLINE uint32_t vsmc_threefry2x32_rand(vsmc_threefry2x32 *rng)
 
 /// \brief Generate random 32-bits integers from Threefry4x32 RNG
 /// \ingroup ThreefryC
-VSMC_STATIC_INLINE uint32_t vsmc_threefry4x32_rand(vsmc_threefry4x32 *rng)
+static inline uint32_t vsmc_threefry4x32_rand(vsmc_threefry4x32 *rng)
 {
     if (rng->index == 4) {
         vsmc_threefry4x32_inc(&rng->ctr);
@@ -542,7 +536,7 @@ VSMC_STATIC_INLINE uint32_t vsmc_threefry4x32_rand(vsmc_threefry4x32 *rng)
 
 /// \brief Generate random 64-bits integers from Threefry2x64 RNG
 /// \ingroup ThreefryC
-VSMC_STATIC_INLINE uint64_t vsmc_threefry2x64_rand(vsmc_threefry2x64 *rng)
+static inline uint64_t vsmc_threefry2x64_rand(vsmc_threefry2x64 *rng)
 {
     if (rng->index == 2) {
         vsmc_threefry2x64_inc(&rng->ctr);
@@ -555,7 +549,7 @@ VSMC_STATIC_INLINE uint64_t vsmc_threefry2x64_rand(vsmc_threefry2x64 *rng)
 
 /// \brief Generate random 64-bits integers from Threefry4x64 RNG
 /// \ingroup ThreefryC
-VSMC_STATIC_INLINE uint64_t vsmc_threefry4x64_rand(vsmc_threefry4x64 *rng)
+static inline uint64_t vsmc_threefry4x64_rand(vsmc_threefry4x64 *rng)
 {
     if (rng->index == 4) {
         vsmc_threefry4x64_inc(&rng->ctr);

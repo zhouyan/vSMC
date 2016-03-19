@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/vsmc.h>
 #include <vsmc/resample/resample.hpp>
+#include <vsmc/vsmc.h>
 #include "vsmc_rng_cast.hpp"
 
 #define VSMC_DEFINE_C_API_RESAMPLE(Name, name)                                \
@@ -53,24 +53,24 @@ void vsmc_resample_trans_u01_rep(
 }
 
 void vsmc_resample_trans_u01_index(
-    int m, int n, const double *weight, const double *u01, int *src_idx)
+    int m, int n, const double *weight, const double *u01, int *index)
 {
     ::vsmc::resample_trans_u01_index(static_cast<std::size_t>(m),
-        static_cast<std::size_t>(n), weight, u01, src_idx);
+        static_cast<std::size_t>(n), weight, u01, index);
 }
 
 void vsmc_resample_trans_rep_index(
-    int m, int n, const int *replication, int *src_idx)
+    int m, int n, const int *replication, int *index)
 {
     ::vsmc::resample_trans_rep_index(static_cast<std::size_t>(m),
-        static_cast<std::size_t>(n), replication, src_idx);
+        static_cast<std::size_t>(n), replication, index);
 }
 
 void vsmc_resample_trans_index_rep(
-    int m, int n, const int *src_idx, int *replication)
+    int m, int n, const int *index, int *replication)
 {
     ::vsmc::resample_trans_index_rep(
-        static_cast<std::size_t>(m), std::size_t(n), src_idx, replication);
+        static_cast<std::size_t>(m), std::size_t(n), index, replication);
 }
 
 int vsmc_resample_trans_residual(

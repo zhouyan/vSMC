@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ namespace vsmc
 namespace internal
 {
 
-template <MatrixOrder>
+template <MatrixLayout>
 inline void hdf5io_matrix_dim(std::size_t, std::size_t, ::hsize_t *);
 
 template <>
@@ -317,7 +317,7 @@ inline void hdf5store_new(const std::string &file_name)
 /// \brief Store a matrix in the HDF5 format from an input iterator
 /// \ingroup HDF5IO
 ///
-/// \tparam Order Storage order (RowMajor or ColMajor)
+/// \tparam Layout Storage layout (RowMajor or ColMajor)
 /// \tparam T Type of the data
 /// \param nrow Number of rows
 /// \param ncol Number of columns
@@ -329,7 +329,7 @@ inline void hdf5store_new(const std::string &file_name)
 /// save in a new file
 ///
 /// \note
-/// HDF5 store data in row major order. For example,
+/// HDF5 store data in row major layout. For example,
 /// ~~~{.cpp}
 /// double data[6] = {1, 2, 3, 4, 5, 6};
 /// // Store matrix
@@ -360,12 +360,11 @@ inline void hdf5store_new(const std::string &file_name)
 /// # [3,]    3    6
 /// #
 /// ~~~
-/// That is, when the data is stored in column major order in C++ memory, then
+/// That is, when the data is stored in column major layout in C++ memory, then
 /// the read in R produces exactly the same output. If the data is stored as
-/// row
-/// major matrix in C++ memory, the read in R produces the transpose the
+/// row major matrix in C++ memory, the read in R produces the transpose the
 /// original matrix though they are identical in memory.
-template <MatrixOrder Order, typename T, typename InputIter>
+template <MatrixLayout Layout, typename T, typename InputIter>
 inline InputIter hdf5store_matrix(std::size_t nrow, std::size_t ncol,
     const std::string &file_name, const std::string &data_name,
     InputIter first, bool append = false)
@@ -375,7 +374,7 @@ inline InputIter hdf5store_matrix(std::size_t nrow, std::size_t ncol,
 
     std::string dataset_name("/" + data_name);
     ::hsize_t dim[2];
-    internal::hdf5io_matrix_dim<Order>(nrow, ncol, dim);
+    internal::hdf5io_matrix_dim<Layout>(nrow, ncol, dim);
     internal::HDF5StoreDataPtr<T> data_ptr;
     InputIter last = data_ptr.set(nrow * ncol, first);
     const T *data = data_ptr.get();
@@ -610,7 +609,7 @@ inline bool hdf5store_int(std::size_t n, IntType *r, std::false_type)
 
     bool flag = true;
     for (std::size_t i = 0; i != n; ++i) {
-        if (r[i] > std::numeric_limits<int>::max VSMC_MNE()) {
+        if (r[i] > std::numeric_limits<int>::max()) {
             flag = false;
             break;
         }
@@ -627,11 +626,11 @@ inline bool hdf5store_int(std::size_t n, IntType *r, std::true_type)
 
     bool flag = true;
     for (std::size_t i = 0; i != n; ++i) {
-        if (r[i] < std::numeric_limits<int>::min VSMC_MNE()) {
+        if (r[i] < std::numeric_limits<int>::min()) {
             flag = false;
             break;
         }
-        if (r[i] > std::numeric_limits<int>::max VSMC_MNE()) {
+        if (r[i] > std::numeric_limits<int>::max()) {
             flag = false;
             break;
         }
@@ -697,18 +696,18 @@ inline void hdf5store(const Sampler<T> &sampler, const std::string &file_name,
 
 /// \brief Store a StateMatrix in the HDF5 format
 /// \ingroup HDF5IO
-template <MatrixOrder Order, std::size_t Dim, typename T>
-inline void hdf5store(const StateMatrix<Order, Dim, T> &state,
+template <MatrixLayout Layout, std::size_t Dim, typename T>
+inline void hdf5store(const StateMatrix<Layout, Dim, T> &state,
     const std::string &file_name, const std::string &data_name,
     bool append = false)
 {
-    hdf5store_matrix<Order, T>(
+    hdf5store_matrix<Layout, T>(
         state.size(), state.dim(), file_name, data_name, state.data(), append);
 }
 
 /// \brief Store a StateCL in the HDF5 format
 /// \ingroup HDF5IO
-template <MatrixOrder Order, typename T, std::size_t StateSize,
+template <MatrixLayout Layout, typename T, std::size_t StateSize,
     typename RealType, typename ID>
 inline void hdf5store(const StateCL<StateSize, RealType, ID> &state,
     const std::string &file_name, const std::string &data_name,
@@ -720,7 +719,7 @@ inline void hdf5store(const StateCL<StateSize, RealType, ID> &state,
     Vector<T> data(N);
     state.manager().template read_buffer<T>(
         state.state_buffer().data(), N, data.data());
-    hdf5store_matrix<Order, T>(
+    hdf5store_matrix<Layout, T>(
         nrow, ncol, file_name, data_name, data.data(), append);
 }
 
@@ -739,13 +738,13 @@ inline void hdf5store(const Particle<T> &particle,
 
 /// \brief Store a Particle with StateCL value type in the HDF5 format
 /// \ingroup HDF5IO
-template <MatrixOrder Order, typename T, typename U>
+template <MatrixLayout Layout, typename T, typename U>
 inline void hdf5store(const Particle<U> &particle,
     const std::string &file_name, const std::string &data_name,
     bool append = false)
 {
     hdf5store_list_empty(file_name, data_name, append);
-    hdf5store<Order, T>(
+    hdf5store<Layout, T>(
         particle.value(), file_name, data_name + "/value", true);
     hdf5store_matrix<ColMajor, double>(particle.size(), 1, file_name,
         data_name + "/weight", particle.weight().data(), true);

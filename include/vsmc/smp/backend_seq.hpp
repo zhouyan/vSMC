@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -113,28 +113,6 @@ class MonitorEvalSEQ : public MonitorEvalBase<T, Derived>
     protected:
     VSMC_DEFINE_SMP_BACKEND_SPECIAL(SEQ, MonitorEval)
 }; // class MonitorEvalSEQ
-
-/// \brief Path<T>::eval_type subtype
-/// \ingroup SEQ
-template <typename T, typename Derived>
-class PathEvalSEQ : public PathEvalBase<T, Derived>
-{
-    public:
-    double operator()(std::size_t iter, Particle<T> &particle, double *r)
-    {
-        using size_type = typename Particle<T>::size_type;
-        const size_type N = particle.size();
-        this->eval_pre(iter, particle);
-        for (size_type i = 0; i != N; ++i)
-            r[i] = this->eval_sp(iter, SingleParticle<T>(i, &particle));
-        this->eval_post(iter, particle);
-
-        return this->eval_grid(iter, particle);
-    }
-
-    protected:
-    VSMC_DEFINE_SMP_BACKEND_SPECIAL(SEQ, PathEval)
-}; // class PathEvalSEQ
 
 } // namespace vsmc
 

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/vsmc.h>
 #include <vsmc/rng/rng.hpp>
+#include <vsmc/vsmc.h>
 #include "vsmc_rng_cast.hpp"
 
 #define VSMC_DEFINE_RNG_DIST                                                  \
@@ -192,11 +192,15 @@ void vsmc_rng_poisson(vsmc_rng *rng_ptr, int n, int *r, double mean)
     VSMC_DEFINE_RNG_DIST;
 }
 
+void vsmc_rng_normal_mv(vsmc_rng *rng_ptr, int n, double *r, int dim,
+    const double *mean, const double *chol)
+{
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    ::vsmc::normal_mv_distribution<double>(rng, static_cast<std::size_t>(n), r,
+        static_cast<std::size_t>(dim), mean, chol);
+}
+
 VSMC_DEFINE_RNG_DIST_0(u01)
-VSMC_DEFINE_RNG_DIST_0(u01_cc)
-VSMC_DEFINE_RNG_DIST_0(u01_co)
-VSMC_DEFINE_RNG_DIST_0(u01_oc)
-VSMC_DEFINE_RNG_DIST_0(u01_oo)
 VSMC_DEFINE_RNG_DIST_1(chi_squared)
 VSMC_DEFINE_RNG_DIST_1(exponential)
 VSMC_DEFINE_RNG_DIST_1(rayleigh)
@@ -213,10 +217,63 @@ VSMC_DEFINE_RNG_DIST_2(lognormal)
 VSMC_DEFINE_RNG_DIST_2(normal)
 VSMC_DEFINE_RNG_DIST_2(pareto)
 VSMC_DEFINE_RNG_DIST_2(uniform_real)
-VSMC_DEFINE_RNG_DIST_2(uniform_real_cc)
-VSMC_DEFINE_RNG_DIST_2(uniform_real_co)
-VSMC_DEFINE_RNG_DIST_2(uniform_real_oc)
-VSMC_DEFINE_RNG_DIST_2(uniform_real_oo)
 VSMC_DEFINE_RNG_DIST_2(weibull)
+
+int vsmc_random_walk(vsmc_rng *rng_ptr, int dim, double *x, double *ltx,
+    double (*log_target)(int, const double *),
+    double (*proposal)(vsmc_rng *, int, const double *, double *))
+{
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    ::vsmc::RandomWalk<double, ::vsmc::Dynamic> rw(
+        static_cast<std::size_t>(dim));
+
+    auto lt = [log_target, dim](
+        std::size_t, const double *lx) { return log_target(dim, lx); };
+
+    auto prop = [proposal, rng_ptr, dim](::vsmc::RNG &, std::size_t,
+        const double *px,
+        double *py) { return proposal(rng_ptr, dim, px, py); };
+
+    return static_cast<int>(rw(rng, x, ltx, lt, prop));
+}
+
+int vsmc_random_walk_g(vsmc_rng *rng_ptr, int dim_x, int dim_g, double *x,
+    double *ltx, double *g,
+    double (*log_target)(int, int, const double *, double *),
+    double (*proposal)(vsmc_rng *, int, const double *, double *))
+{
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    ::vsmc::RandomWalkG<double, vsmc::Dynamic, ::vsmc::Dynamic> rw(
+        static_cast<std::size_t>(dim_x), static_cast<std::size_t>(dim_g));
+
+    auto lt = [log_target, dim_x, dim_g](std::size_t, std::size_t,
+        const double *lx,
+        double *lg) { return log_target(dim_x, dim_g, lx, lg); };
+
+    auto prop = [proposal, rng_ptr, dim_x](::vsmc::RNG &, std::size_t,
+        const double *px,
+        double *py) { return proposal(rng_ptr, dim_x, px, py); };
+
+    return static_cast<int>(rw(rng, x, ltx, g, lt, prop));
+}
+
+double vsmc_normal_proposal(vsmc_rng *rng_ptr, int, const double *x,
+    double *y, double stddev, double a, double b)
+{
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    ::vsmc::NormalProposal<double> prop(stddev, a, b);
+
+    return prop(rng, 1, x, y);
+}
+
+double vsmc_normal_mv_proposal(vsmc_rng *rng_ptr, int dim, const double *x,
+    double *y, const double *chol, const double *a, const double *b)
+{
+    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    ::vsmc::NormalMVProposal<double, vsmc::Dynamic> prop(
+        static_cast<std::size_t>(dim), chol, a, b);
+
+    return prop(rng, static_cast<std::size_t>(dim), x, y);
+}
 
 } // extern "C"

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -54,17 +54,12 @@ inline bool lognormal_distribution_check_param(RealType, RealType s)
 template <typename RealType>
 class LognormalDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        Lognormal, lognormal, RealType, result_type, m, 0, result_type, s, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Lognormal, lognormal, m, 0, s, 1)
 
     public:
-    result_type min VSMC_MNE() const { return 0; }
+    result_type min() const { return 0; }
 
-    result_type max VSMC_MNE() const
-    {
-        return std::numeric_limits<result_type>::max VSMC_MNE();
-    }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
     void reset() { normal_ = NormalDistribution<RealType>(0, 1); }
 
@@ -97,7 +92,11 @@ template <typename RealType, typename RNGType>
 inline void lognormal_distribution(RNGType &rng, std::size_t n, RealType *r,
     RealType logmean, RealType logstddev)
 {
-    const std::size_t k = 1000;
+    static_assert(std::is_floating_point<RealType>::value,
+        "**lognormal_distribution** USED WITH RealType OTHER THAN FLOATING "
+        "POINT TYPES");
+
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, r += k)
@@ -105,12 +104,7 @@ inline void lognormal_distribution(RNGType &rng, std::size_t n, RealType *r,
     internal::lognormal_distribution_impl(rng, l, r, logmean, logstddev);
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, LognormalDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Lognormal, lognormal, m, s)
 
 } // namespace vsmc
 

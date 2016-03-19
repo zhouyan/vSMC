@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -67,8 +67,8 @@ class Monitor
     using eval_type =
         std::function<void(std::size_t, std::size_t, Particle<T> &, double *)>;
 
-    explicit Monitor(std::size_t dim, const eval_type &eval,
-        bool record_only = false, MonitorStage stage = MonitorMCMC)
+    Monitor(std::size_t dim, const eval_type &eval, bool record_only = false,
+        MonitorStage stage = MonitorMCMC)
         : dim_(dim)
         , eval_(eval)
         , recording_(true)
@@ -213,16 +213,16 @@ class Monitor
     ///
     /// \param first The output iterator
     ///
-    /// For example, say `first` is of type `double *`, then if `order ==
+    /// For example, say `first` is of type `double *`, then if `layout ==
     /// ColMajor`, then, `first[j * iter_size() + i] == record(i, j)`.
-    /// Otherwise, if `order == RowMajor`, then `first[i * dim() + j] ==
+    /// Otherwise, if `layout == RowMajor`, then `first[i * dim() + j] ==
     /// record(i, j)`. That is, the output is an `iter_size()` by `dim()`
-    /// matrix, with the usual meaning of column or row major order.
-    template <MatrixOrder Order, typename OutputIter>
+    /// matrix, with the usual meaning of column or row major layout.
+    template <MatrixLayout Layout, typename OutputIter>
     void read_record_matrix(OutputIter first) const
     {
         const std::size_t N = iter_size();
-        if (Order == ColMajor) {
+        if (Layout == ColMajor) {
             for (std::size_t d = 0; d != dim_; ++d) {
                 const double *riter = record_.data() + d;
                 for (std::size_t i = 0; i != N; ++i, ++first, riter += dim_)
@@ -230,7 +230,7 @@ class Monitor
             }
         }
 
-        if (Order == RowMajor)
+        if (Layout == RowMajor)
             std::copy(record_.begin(), record_.end(), first);
     }
 
@@ -260,7 +260,9 @@ class Monitor
         const std::size_t N = static_cast<std::size_t>(particle.size());
         buffer_.resize(N * dim_);
         eval_(iter, dim_, particle, buffer_.data());
-        gemv(ColMajor, NoTrans, dim_, N, 1.0, buffer_.data(), dim_,
+        ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,
+            static_cast<VSMC_CBLAS_INT>(dim_), static_cast<VSMC_CBLAS_INT>(N),
+            1.0, buffer_.data(), static_cast<VSMC_CBLAS_INT>(dim_),
             particle.weight().data(), 1, 0.0, result_.data(), 1);
         push_back(iter);
     }

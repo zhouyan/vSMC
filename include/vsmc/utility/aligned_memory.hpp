@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -32,14 +32,13 @@
 #ifndef VSMC_UTILITY_ALIGNED_MEMORY
 #define VSMC_UTILITY_ALIGNED_MEMORY
 
-#include <vsmc/internal/config.h>
 #include <vsmc/internal/assert.hpp>
+#include <vsmc/internal/config.h>
 
 #include <cstddef>
 #include <cstdlib>
+#include <limits>
 #include <memory>
-#include <new>
-#include <type_traits>
 #include <vector>
 
 #if VSMC_HAS_POSIX
@@ -75,19 +74,6 @@
 #ifndef VSMC_ALIGNMENT
 #define VSMC_ALIGNMENT 32
 #endif
-
-#define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(Alignment)     \
-    VSMC_STATIC_ASSERT(                                                       \
-        (Alignment != 0 && (Alignment & (Alignment - 1)) == 0),               \
-        "**AlignedAllocator** USED WITH Alignment NOT A POWER OF TWO")
-
-#define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_SIZEOF_VOID(Alignemnt)      \
-    VSMC_STATIC_ASSERT((Alignment >= sizeof(void *)),                         \
-        "**AlginedAllocator** USED WITH Alignment LESS THAN sizeof(void *)")
-
-#define VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY                             \
-    VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(Alignment);        \
-    VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY_SIZEOF_VOID(Alignment);
 
 #define VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(alignment)    \
     VSMC_RUNTIME_ASSERT(                                                      \
@@ -257,7 +243,7 @@ using AlignedMemory = VSMC_ALIGNED_MEMORY_TYPE;
 /// \tparam T The value type
 /// \tparam Alignment The alignment requirement of memory, must be a power of
 /// two and no less than `sizeof(void *)`.
-/// \tparam Memory The memory management class. Must provides two member
+/// \tparam Memory The memory management class. Must provides two static member
 /// functions, `aligned_malloc` and `aligned_free`. The member function
 /// `aligned_malloc` shall behave similar to `std::malloc` but take an
 /// additional arguments for alignment. The member function `aligned_free`
@@ -266,71 +252,95 @@ template <typename T, std::size_t Alignment = VSMC_ALIGNMENT,
     typename Memory = AlignedMemory>
 class AlignedAllocator : public std::allocator<T>
 {
+    static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,
+        "**AlignedAllocator** USED WITH Alignment OTHER THAN A POWER OF TWO "
+        "POSITIVE INTEGER");
+
+    static_assert(Alignment >= sizeof(void *),
+        "**AlignedAllocator** USED WITH Alignment LESS THAN sizeof(void *)");
+
     public:
-    using size_type = typename std::allocator<T>::size_type;
-    using pointer = typename std::allocator<T>::pointer;
+    using value_type = T;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
+    using pointer = T *;
+    using const_pointer = const T *;
+    using reference = typename std::add_lvalue_reference<T>::type;
+    using const_reference = typename std::add_lvalue_reference<const T>::type;
+    using is_always_equal = std::true_type;
 
     template <typename U>
     class rebind
     {
         public:
-        using other = AlignedAllocator<U, Alignment>;
+        using other = AlignedAllocator<U, Alignment, Memory>;
     }; // class rebind
 
-    AlignedAllocator() { VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY; }
+    AlignedAllocator() = default;
 
-    AlignedAllocator(const AlignedAllocator<T, Alignment, Memory> &other)
-        : std::allocator<T>(other)
-    {
-        VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY;
-    }
+    AlignedAllocator(const AlignedAllocator<T, Alignment, Memory> &) = default;
 
     template <typename U>
     AlignedAllocator(const AlignedAllocator<U, Alignment, Memory> &other)
         : std::allocator<T>(static_cast<std::allocator<U>>(other))
     {
-        VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY;
     }
 
-    AlignedAllocator<T, Alignment, Memory> &operator=(
-        const AlignedAllocator<T, Alignment, Memory> &) = default;
-
-    AlignedAllocator(AlignedAllocator<T, Alignment, Memory> &&other)
-        : std::allocator<T>(std::move(other))
-    {
-        VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY;
-    }
-
-    template <typename U>
-    AlignedAllocator(AlignedAllocator<U, Alignment, Memory> &&other)
-        : std::allocator<T>(static_cast<std::allocator<U>>(std::move(other)))
-    {
-        VSMC_STATIC_ASSERT_UTILITY_ALIGNED_MEMORY;
-    }
-
-    AlignedAllocator<T, Alignment, Memory> &operator=(
-        AlignedAllocator<T, Alignment, Memory> &&) = default;
-
-    ~AlignedAllocator() {}
-
-    pointer allocate(size_type n, const void * = nullptr)
+    static pointer allocate(size_type n, const void * = nullptr)
     {
         if (n == 0)
             return nullptr;
 
         return static_cast<pointer>(
-            memory_.aligned_malloc(sizeof(T) * n, Alignment));
+            Memory::aligned_malloc(sizeof(T) * n, Alignment));
     }
 
-    void deallocate(pointer ptr, size_type)
+    static void deallocate(pointer ptr, size_type)
     {
         if (ptr != nullptr)
-            memory_.aligned_free(ptr);
+            Memory::aligned_free(ptr);
     }
-
-    private:
-    Memory memory_;
 }; // class AlignedAllocator
+
+template <std::size_t Alignment, typename Memory>
+class AlignedAllocator<void, Alignment, Memory>
+{
+    using value_type = void;
+    using pointer = void *;
+    using const_pointer = const void *;
+
+    template <class U>
+    struct rebind {
+        using other = AlignedAllocator<U, Alignment, Memory>;
+    };
+}; // class AlignedAllocator
+
+template <std::size_t Alignment, typename Memory>
+class AlignedAllocator<const void, Alignment, Memory>
+{
+    using value_type = const void;
+    using pointer = const void *;
+    using const_pointer = const void *;
+
+    template <class U>
+    struct rebind {
+        using other = AlignedAllocator<U, Alignment, Memory>;
+    };
+}; // class AlignedAllocator
+
+template <typename T1, typename T2, std::size_t Alignment, typename Memory>
+inline bool operator==(const AlignedAllocator<T1, Alignment, Memory> &,
+    const AlignedAllocator<T2, Alignment, Memory> &)
+{
+    return true;
+}
+
+template <typename T1, typename T2, std::size_t Alignment, typename Memory>
+inline bool operator!=(const AlignedAllocator<T1, Alignment, Memory> &,
+    const AlignedAllocator<T2, Alignment, Memory> &)
+{
+    return false;
+}
 
 /// \brief AlignedAllocator for scalar type and `std::allocator` for others
 /// \ingroup AlignedMemory
@@ -347,7 +357,7 @@ using AlignedVector = std::vector<T, AlignedAllocator<T>>;
 /// \ingroup AlignedMemory
 template <typename T>
 using Vector = typename std::conditional<std::is_scalar<T>::value,
-    std::vector<T, AlignedAllocator<T>>, std::vector<T>>::type;
+    AlignedVector<T>, std::vector<T>>::type;
 
 } // namespace vsmc
 

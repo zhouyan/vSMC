@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,22 +35,6 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/counter.hpp>
 
-#define VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType, SIMD)         \
-    VSMC_STATIC_ASSERT(((sizeof(ResultType) == sizeof(std::uint32_t) &&       \
-                            std::is_unsigned<ResultType>::value) ||           \
-                           (sizeof(ResultType) == sizeof(std::uint64_t) &&    \
-                               std::is_unsigned<ResultType>::value)),         \
-        "**ThreefryGenerator" #SIMD                                           \
-        "** USED WITH ResultType OTHER THAN UNSIGNED 32/64 BITS INTEGER")
-
-#define VSMC_STATIC_ASSERT_RNG_THREEFRY_SIZE(K, SIMD)                         \
-    VSMC_STATIC_ASSERT((K == 2 || K == 4),                                    \
-        "**Threefry" #SIMD "** USED WITH SIZE OTHER THAN 2 OR 4")
-
-#define VSMC_STATIC_ASSERT_RNG_THREEFRY(SIMD)                                 \
-    VSMC_STATIC_ASSERT_RNG_THREEFRY_RESULT_TYPE(ResultType, SIMD);            \
-    VSMC_STATIC_ASSERT_RNG_THREEFRY_SIZE(K, SIMD);
-
 #define VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(T, K, N, I, val)             \
     template <>                                                               \
     class ThreefryRotateConstant<T, K, N, I>                                  \
@@ -58,16 +42,16 @@
     {                                                                         \
     }; // class ThreefryRotateConstant
 
-/// \brief ThreefryGenerator default vector length
-/// \ingroup Config
-#ifndef VSMC_RNG_THREEFRY_VECTOR_LENGTH
-#define VSMC_RNG_THREEFRY_VECTOR_LENGTH 4
-#endif
-
 /// \brief ThreefryGenerator default rounds
 /// \ingroup Config
 #ifndef VSMC_RNG_THREEFRY_ROUNDS
 #define VSMC_RNG_THREEFRY_ROUNDS 20
+#endif
+
+/// \brief ThreefryGenerator default vector length
+/// \ingroup Config
+#ifndef VSMC_RNG_THREEFRY_VECTOR_LENGTH
+#define VSMC_RNG_THREEFRY_VECTOR_LENGTH 4
 #endif
 
 namespace vsmc
@@ -319,67 +303,74 @@ class ThreefryInsertKey<T, 4, N, true>
 /// \ingroup Threefry
 template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
-class ThreefryGeneratorGeneric
+class ThreefryGenerator
 {
+    static_assert(std::is_unsigned<ResultType>::value,
+        "**ThreefryGenerator** USED WITH ResultType OTHER THAN UNSIGNED "
+        "INTEGER TYPES");
+
+    static_assert(sizeof(ResultType) == sizeof(std::uint32_t) ||
+            sizeof(ResultType) == sizeof(std::uint64_t),
+        "**ThreefryGenerator** USED WITH ResultType OF SIZE OTHER THAN 32 OR "
+        "64 BITS");
+
+    static_assert(K == 2 || K == 4,
+        "**ThreefryGenerator** USED WITH K OTHER THAN 2 OR 4");
+
     public:
     using result_type = ResultType;
     using ctr_type = std::array<ResultType, K>;
     using key_type = std::array<ResultType, K>;
 
-    ThreefryGeneratorGeneric() { VSMC_STATIC_ASSERT_RNG_THREEFRY(Generic); }
-
     static constexpr std::size_t size() { return K; }
 
     void reset(const key_type &) {}
 
-    void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, K> &buffer) const
+    void operator()(ctr_type &ctr, const key_type &key, ctr_type &buffer) const
     {
-        std::array<result_type, K + 1> par;
+        std::array<ResultType, K + 1> par;
         internal::ThreefryInitPar<ResultType, K>::eval(key, par);
         increment(ctr);
         buffer = ctr;
         generate<0>(buffer, par, std::true_type());
     }
 
-    std::size_t operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        result_type *r) const
+    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
+        ctr_type *buffer) const
     {
-        const std::size_t m = n / size();
-        std::array<result_type, K + 1> par;
-        internal::ThreefryInitPar<ResultType, K>::eval(key, par);
-        ctr_type *s = reinterpret_cast<ctr_type *>(r);
-        increment(ctr, m, s);
-        for (std::size_t i = 0; i != m; ++i)
-            generate<0>(s[i], par, std::true_type());
+        if (n == 0)
+            return;
 
-        return m * size();
+        std::array<ResultType, K + 1> par;
+        internal::ThreefryInitPar<ResultType, K>::eval(key, par);
+        increment(ctr, n, buffer);
+        for (std::size_t i = 0; i != n; ++i)
+            generate<0>(buffer[i], par, std::true_type());
     }
 
     private:
     template <std::size_t>
-    void generate(std::array<result_type, K> &,
-        const std::array<result_type, K + 1> &, std::false_type) const
+    void generate(std::array<ResultType, K> &,
+        const std::array<ResultType, K + 1> &, std::false_type) const
     {
     }
 
     template <std::size_t N>
-    void generate(std::array<result_type, K> &state,
-        const std::array<result_type, K + 1> &par, std::true_type) const
+    void generate(std::array<ResultType, K> &state,
+        const std::array<ResultType, K + 1> &par, std::true_type) const
     {
         internal::ThreefryRotate<ResultType, K, N>::eval(state);
         internal::ThreefryInsertKey<ResultType, K, N>::eval(state, par);
         generate<N + 1>(
-            state, par, std::integral_constant < bool, N<Rounds>());
+            state, par, std::integral_constant<bool, (N < Rounds)>());
     }
-}; // class ThreefryGeneratorGeneric
+}; // class ThreefryGenerator
 
 /// \brief Threefry RNG engine
 /// \ingroup Threefry
 template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
-using ThreefryEngine =
-    CounterEngine<ThreefryGeneratorGeneric<ResultType, K, Rounds>>;
+using ThreefryEngine = CounterEngine<ThreefryGenerator<ResultType, K, Rounds>>;
 
 /// \brief Threefry2x32 RNG engine
 /// \ingroup Threefry
@@ -499,12 +490,22 @@ template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
 class ThreefryGeneratorSSE2
 {
+    static_assert(std::is_unsigned<ResultType>::value,
+        "**ThreefryGeneratorSSE2** USED WITH ResultType OTHER THAN UNSIGNED "
+        "INTEGER TYPES");
+
+    static_assert(sizeof(ResultType) == sizeof(std::uint32_t) ||
+            sizeof(ResultType) == sizeof(std::uint64_t),
+        "**ThreefryGeneratorSSE2** USED WITH ResultType OF SIZE OTHER THAN "
+        "32 OR 64 BITS");
+
+    static_assert(K == 2 || K == 4,
+        "**ThreefryGeneratorSSE2** USED WITH K OTHER THAN 2 OR 4");
+
     public:
     using result_type = ResultType;
     using ctr_type = std::array<ResultType, K>;
     using key_type = std::array<ResultType, K>;
-
-    ThreefryGeneratorSSE2() { VSMC_STATIC_ASSERT_RNG_THREEFRY(SSE2); }
 
     static constexpr std::size_t size()
     {
@@ -514,14 +515,14 @@ class ThreefryGeneratorSSE2
     void reset(const key_type &) {}
 
     void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, K * M128I<ResultType>::size()> &buffer)
+        std::array<ResultType, size()> &buffer) const
     {
         union {
             std::array<M128I<ResultType>, K> state;
             std::array<ResultType, size()> result;
         } buf;
 
-        std::array<result_type, K + 1> p;
+        std::array<ResultType, K + 1> p;
         std::array<M128I<ResultType>, K + 1> par;
         internal::ThreefryInitPar<ResultType, K>::eval(key, p);
         internal::ThreefryParPackSSE2<ResultType, K>::eval(p, par);
@@ -530,27 +531,43 @@ class ThreefryGeneratorSSE2
         buffer = buf.result;
     }
 
-    std::size_t operator()(
-        ctr_type &, const key_type &, std::size_t, result_type *) const
+    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
+        std::array<ResultType, size()> *buffer) const
     {
-        return 0;
+        if (n == 0)
+            return;
+
+        union {
+            std::array<M128I<ResultType>, K> state;
+            std::array<ResultType, size()> result;
+        } buf;
+
+        std::array<ResultType, K + 1> p;
+        std::array<M128I<ResultType>, K + 1> par;
+        internal::ThreefryInitPar<ResultType, K>::eval(key, p);
+        internal::ThreefryParPackSSE2<ResultType, K>::eval(p, par);
+        for (std::size_t i = 0; i != n; ++i) {
+            internal::ThreefryCtrPackSSE2<ResultType, K>::eval(ctr, buf.state);
+            generate<0>(buf.state, par, std::true_type());
+            buffer[i] = buf.result;
+        }
     }
 
     private:
     template <std::size_t>
     void generate(std::array<M128I<ResultType>, K> &,
-        const std::array<M128I<ResultType>, K + 1> &, std::false_type)
+        const std::array<M128I<ResultType>, K + 1> &, std::false_type) const
     {
     }
 
     template <std::size_t N>
     void generate(std::array<M128I<ResultType>, K> &state,
-        const std::array<M128I<ResultType>, K + 1> &par, std::true_type)
+        const std::array<M128I<ResultType>, K + 1> &par, std::true_type) const
     {
         internal::ThreefryRotate<M128I<ResultType>, K, N>::eval(state);
         internal::ThreefryInsertKey<M128I<ResultType>, K, N>::eval(state, par);
         generate<N + 1>(
-            state, par, std::integral_constant < bool, N<Rounds>());
+            state, par, std::integral_constant<bool, (N < Rounds)>());
     }
 }; // class ThreefryGeneratorSSE2
 
@@ -687,12 +704,22 @@ template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
 class ThreefryGeneratorAVX2
 {
+    static_assert(std::is_unsigned<ResultType>::value,
+        "**ThreefryGeneratorAVX2** USED WITH ResultType OTHER THAN UNSIGNED "
+        "INTEGER TYPES");
+
+    static_assert(sizeof(ResultType) == sizeof(std::uint32_t) ||
+            sizeof(ResultType) == sizeof(std::uint64_t),
+        "**ThreefryGeneratorAVX2** USED WITH ResultType OF SIZE OTHER THAN "
+        "32 OR 64 BITS");
+
+    static_assert(K == 2 || K == 4,
+        "**ThreefryGeneratorAVX2** USED WITH K OTHER THAN 2 OR 4");
+
     public:
     using result_type = ResultType;
     using ctr_type = std::array<ResultType, K>;
     using key_type = std::array<ResultType, K>;
-
-    ThreefryGeneratorAVX2() { VSMC_STATIC_ASSERT_RNG_THREEFRY(AVX2); }
 
     static constexpr std::size_t size()
     {
@@ -702,14 +729,14 @@ class ThreefryGeneratorAVX2
     void reset(const key_type &) {}
 
     void operator()(ctr_type &ctr, const key_type &key,
-        std::array<result_type, K * M256I<ResultType>::size()> &buffer)
+        std::array<ResultType, size()> &buffer) const
     {
         union {
             std::array<M256I<ResultType>, K> state;
             std::array<ResultType, size()> result;
         } buf;
 
-        std::array<result_type, K + 1> p;
+        std::array<ResultType, K + 1> p;
         std::array<M256I<ResultType>, K + 1> par;
         internal::ThreefryInitPar<ResultType, K>::eval(key, p);
         internal::ThreefryParPackAVX2<ResultType, K>::eval(p, par);
@@ -718,27 +745,43 @@ class ThreefryGeneratorAVX2
         buffer = buf.result;
     }
 
-    std::size_t operator()(
-        ctr_type &, const key_type &, std::size_t, result_type *) const
+    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
+        std::array<ResultType, size()> *buffer) const
     {
-        return 0;
+        if (n == 0)
+            return;
+
+        union {
+            std::array<M256I<ResultType>, K> state;
+            std::array<ResultType, size()> result;
+        } buf;
+
+        std::array<ResultType, K + 1> p;
+        std::array<M256I<ResultType>, K + 1> par;
+        internal::ThreefryInitPar<ResultType, K>::eval(key, p);
+        internal::ThreefryParPackAVX2<ResultType, K>::eval(p, par);
+        for (std::size_t i = 0; i != n; ++i) {
+            internal::ThreefryCtrPackAVX2<ResultType, K>::eval(ctr, buf.state);
+            generate<0>(buf.state, par, std::true_type());
+            buffer[i] = buf.result;
+        }
     }
 
     private:
     template <std::size_t>
     void generate(std::array<M256I<ResultType>, K> &,
-        const std::array<M256I<ResultType>, K + 1> &, std::false_type)
+        const std::array<M256I<ResultType>, K + 1> &, std::false_type) const
     {
     }
 
     template <std::size_t N>
     void generate(std::array<M256I<ResultType>, K> &state,
-        const std::array<M256I<ResultType>, K + 1> &par, std::true_type)
+        const std::array<M256I<ResultType>, K + 1> &par, std::true_type) const
     {
         internal::ThreefryRotate<M256I<ResultType>, K, N>::eval(state);
         internal::ThreefryInsertKey<M256I<ResultType>, K, N>::eval(state, par);
         generate<N + 1>(
-            state, par, std::integral_constant < bool, N<Rounds>());
+            state, par, std::integral_constant<bool, (N < Rounds)>());
     }
 }; // class ThreefryGeneratorAVX2
 

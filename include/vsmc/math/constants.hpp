@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -34,22 +34,22 @@
 
 #define VSMC_DEFINE_MATH_CONSTANTS(name, val)                                 \
     template <typename T>                                                     \
-    inline T const_##name() noexcept                                          \
+    inline constexpr T const_##name() noexcept                                \
     {                                                                         \
         return static_cast<T>(val##l);                                        \
     }                                                                         \
     template <>                                                               \
-    inline float const_##name<float>() noexcept                               \
+    inline constexpr float const_##name<float>() noexcept                     \
     {                                                                         \
         return val##f;                                                        \
     }                                                                         \
     template <>                                                               \
-    inline double const_##name<double>() noexcept                             \
+    inline constexpr double const_##name<double>() noexcept                   \
     {                                                                         \
         return val;                                                           \
     }                                                                         \
     template <>                                                               \
-    inline long double const_##name<long double>() noexcept                   \
+    inline constexpr long double const_##name<long double>() noexcept         \
     {                                                                         \
         return val##l;                                                        \
     }

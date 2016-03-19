@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 #define VSMC_RNG_BETA_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
-#include <vsmc/rng/u01_distribution.hpp>
 #include <vsmc/rng/normal_distribution.hpp>
+#include <vsmc/rng/u01_distribution.hpp>
 
 namespace vsmc
 {
@@ -74,7 +74,8 @@ class BetaDistributionConstant
         const RealType K = static_cast<RealType>(0.852);
         const RealType C = static_cast<RealType>(-0.956);
         const RealType D = beta + K * alpha * alpha + C;
-        if (is_equal<RealType>(alpha, 0.5) && is_equal<RealType>(beta, 0.5))
+        if (is_equal<RealType>(alpha, static_cast<RealType>(0.5)) &&
+            is_equal<RealType>(beta, static_cast<RealType>(0.5)))
             algorithm = BetaDistributionAlgorithmAS;
         else if (is_equal<RealType>(alpha, 1) && is_equal<RealType>(beta, 1))
             algorithm = BetaDistributionAlgorithm11;
@@ -155,13 +156,13 @@ class BetaDistributionConstant
 template <typename RealType>
 class BetaDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        Beta, beta, RealType, result_type, alpha, 1, result_type, beta, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Beta, beta, alpha, 1, beta, 1)
 
     public:
-    result_type min VSMC_MNE() const { return 0; }
-    result_type max VSMC_MNE() const { return 1; }
+    result_type min() const { return 0; }
+
+    result_type max() const { return 1; }
+
     void reset() { constant_.reset(alpha(), beta()); }
 
     private:
@@ -221,8 +222,8 @@ class BetaDistribution
     result_type generate_as(RNGType &rng, const param_type &,
         const internal::BetaDistributionConstant<RealType> &)
     {
-        U01CODistribution<RealType> runif;
-        result_type u = runif(rng);
+        U01Distribution<RealType> u01;
+        result_type u = u01(rng);
         u = std::sin(
             -const_pi_by2<result_type>() + const_pi<result_type>() * u);
 
@@ -234,42 +235,42 @@ class BetaDistribution
     result_type generate_11(RNGType &rng, const param_type &,
         const internal::BetaDistributionConstant<RealType> &)
     {
-        U01OODistribution<RealType> runif;
+        U01Distribution<RealType> u01;
 
-        return runif(rng);
+        return u01(rng);
     }
 
     template <typename RNGType>
     result_type generate_1x(RNGType &rng, const param_type &,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01OODistribution<RealType> runif;
+        U01Distribution<RealType> u01;
 
-        return 1 - std::exp(constant.b * std::log(runif(rng)));
+        return 1 - std::exp(constant.b * std::log(u01(rng)));
     }
 
     template <typename RNGType>
     result_type generate_x1(RNGType &rng, const param_type &,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01OODistribution<RealType> runif;
+        U01Distribution<RealType> u01;
 
-        return std::exp(constant.a * std::log(runif(rng)));
+        return std::exp(constant.a * std::log(u01(rng)));
     }
 
     template <typename RNGType>
     result_type generate_c(RNGType &rng, const param_type &param,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> u01;
         const result_type ln_4 = 2 * const_ln_2<result_type>();
         result_type x = 0;
         result_type y = 0;
         result_type left = 0;
         result_type right = 0;
         do {
-            result_type u1 = runif(rng);
-            result_type u2 = runif(rng);
+            result_type u1 = u01(rng);
+            result_type u2 = u01(rng);
             result_type v = constant.b * std::log(u1 / (1 - u1));
             x = param.alpha() * std::exp(v);
             y = param.beta() + x;
@@ -285,12 +286,12 @@ class BetaDistribution
     result_type generate_j(RNGType &rng, const param_type &,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> u01;
         result_type x = 0;
         result_type y = 0;
         do {
-            x = std::pow(runif(rng), constant.a);
-            y = std::pow(runif(rng), constant.b);
+            x = std::pow(u01(rng), constant.a);
+            y = std::pow(u01(rng), constant.b);
         } while (x + y > 1);
 
         return x / (x + y);
@@ -300,10 +301,10 @@ class BetaDistribution
     result_type generate_a1(RNGType &rng, const param_type &param,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> u01;
         while (true) {
-            result_type u = runif(rng);
-            result_type e = -std::log(runif(rng));
+            result_type u = u01(rng);
+            result_type e = -std::log(u01(rng));
             result_type x = 0;
             result_type v = 0;
             if (u < constant.p) {
@@ -324,10 +325,10 @@ class BetaDistribution
     result_type generate_a2(RNGType &rng, const param_type &param,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> u01;
         while (true) {
-            result_type u = runif(rng);
-            result_type e = -std::log(runif(rng));
+            result_type u = u01(rng);
+            result_type e = -std::log(u01(rng));
             result_type x = 0;
             result_type v = 0;
             if (u < constant.p) {
@@ -348,10 +349,10 @@ class BetaDistribution
     result_type generate_a3(RNGType &rng, const param_type &param,
         const internal::BetaDistributionConstant<RealType> &constant)
     {
-        U01CODistribution<RealType> runif;
+        U01Distribution<RealType> u01;
         while (true) {
-            result_type u = runif(rng);
-            result_type e = -std::log(runif(rng));
+            result_type u = u01(rng);
+            result_type e = -std::log(u01(rng));
             result_type x = 0;
             result_type v = 0;
             if (u < constant.p) {
@@ -377,7 +378,7 @@ inline std::size_t beta_distribution_impl_as(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType,
     const BetaDistributionConstant<RealType> &)
 {
-    u01_oo_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     fma(n, const_pi<RealType>(), r, -const_pi_by2<RealType>(), r);
     sin(n, r, r);
     fma(n, static_cast<RealType>(0.5), r, static_cast<RealType>(0.5), r);
@@ -390,7 +391,7 @@ inline std::size_t beta_distribution_impl_11(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType,
     const BetaDistributionConstant<RealType> &)
 {
-    u01_oo_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
 
     return n;
 }
@@ -400,7 +401,7 @@ inline std::size_t beta_distribution_impl_1x(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType,
     const BetaDistributionConstant<RealType> &constant)
 {
-    u01_oo_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     log(n, r, r);
     mul(n, constant.b, r, r);
     exp(n, r, r);
@@ -414,7 +415,7 @@ inline std::size_t beta_distribution_impl_x1(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType,
     const BetaDistributionConstant<RealType> &constant)
 {
-    u01_oo_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     log(n, r, r);
     mul(n, constant.a, r, r);
     exp(n, r, r);
@@ -438,7 +439,7 @@ inline std::size_t beta_distribution_impl_c(RNGType &rng, std::size_t n,
     RealType *const v = s + n * 2;
     RealType *const x = s + n * 3;
     RealType *const y = s + n * 4;
-    u01_co_distribution(rng, n * 2, s);
+    u01_distribution(rng, n * 2, s);
     sub(n, static_cast<RealType>(1), u1, v);
     div(n, u1, v, v);
     log(n, v, v);
@@ -474,7 +475,7 @@ inline std::size_t beta_distribution_impl_j(RNGType &rng, std::size_t n,
     RealType *const x = s;
     RealType *const y = s + n;
     RealType *const u = s + n * 2;
-    u01_co_distribution(rng, n * 2, s);
+    u01_distribution(rng, n * 2, s);
     pow(n, x, a, x);
     pow(n, y, b, y);
     add(n, x, y, u);
@@ -554,7 +555,11 @@ template <typename RealType, typename RNGType>
 inline void beta_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType alpha, RealType beta)
 {
-    const std::size_t k = 1000;
+    static_assert(std::is_floating_point<RealType>::value,
+        "**beta_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
+    const std::size_t k = 1024;
     const internal::BetaDistributionConstant<RealType> constant(alpha, beta);
     while (n > k) {
         std::size_t m = internal::beta_distribution_impl<k>(
@@ -575,12 +580,7 @@ inline void beta_distribution(
     }
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(
-    RNGType &rng, BetaDistribution<RealType> &dist, std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Beta, beta, alpha, beta)
 
 } // namespace vsmc
 

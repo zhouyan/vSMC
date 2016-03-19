@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -55,24 +55,84 @@ inline bool normal_distribution_check_param(RealType, RealType stddev)
 template <typename RealType>
 class NormalDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        Normal, normal, RealType, result_type, mean, 0, result_type, stddev, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_2(
+        Normal, normal, mean, 0, stddev, 1)
 
     public:
-    result_type min VSMC_MNE() const
+    using result_type = RealType;
+    using distribution_type = NormalDistribution<RealType>;
+
+    explicit NormalDistribution(result_type mean = 0, result_type stddev = 1)
+        : param_(mean, stddev), v_(0), saved_(false)
     {
-        return -std::numeric_limits<result_type>::max VSMC_MNE();
+        reset();
     }
 
-    result_type max VSMC_MNE() const
+    explicit NormalDistribution(const param_type &param)
+        : param_(param), v_(0), saved_(false)
     {
-        return std::numeric_limits<result_type>::max VSMC_MNE();
+        reset();
     }
+
+    result_type mean() const { return param_.mean(); }
+
+    result_type stddev() const { return param_.stddev(); }
+
+    result_type min() const
+    {
+        return std::numeric_limits<result_type>::lowest();
+    }
+
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
     void reset()
     {
         v_ = 0;
         saved_ = false;
+    }
+
+    const param_type &param() const { return param_; }
+
+    void param(const param_type &param)
+    {
+        param_ = param;
+        reset();
+    }
+
+    void pram(param_type &&param)
+    {
+        param_ = std::move(param);
+        reset();
+    }
+
+    template <typename RNGType>
+    result_type operator()(RNGType &rng)
+    {
+        return operator()(rng, param_);
+    }
+
+    template <typename RNGType>
+    result_type operator()(RNGType &rng, const param_type &param)
+    {
+        return generate(rng, param);
+    }
+
+    template <typename RNGType>
+    void operator()(RNGType &rng, std::size_t n, result_type *r)
+    {
+        operator()(rng, n, r, param_);
+    }
+
+    template <typename RNGType>
+    void operator()(
+        RNGType &rng, std::size_t n, result_type *r, const param_type &param)
+    {
+        if (n < 100) {
+            for (std::size_t i = 0; i != n; ++i)
+                r[i] = operator()(rng, param);
+        } else {
+            normal_distribution(rng, n, r, param);
+        }
     }
 
     friend bool operator==(
@@ -92,13 +152,16 @@ class NormalDistribution
     friend bool operator!=(
         const distribution_type &dist1, const distribution_type &dist2)
     {
-        return dist1.param_ != dist2.param_;
+        return !(dist1 == dist2);
     }
 
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os, const distribution_type &dist)
     {
+        if (!os.good())
+            return os;
+
         os << dist.param_ << ' ';
         os << dist.v_ << ' ';
         os << dist.saved_;
@@ -110,6 +173,9 @@ class NormalDistribution
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is, distribution_type &dist)
     {
+        if (!is.good())
+            return is;
+
         param_type param;
         result_type v;
         bool saved;
@@ -126,6 +192,7 @@ class NormalDistribution
     }
 
     private:
+    param_type param_;
     result_type v_;
     bool saved_;
 
@@ -137,9 +204,9 @@ class NormalDistribution
             z = v_;
             saved_ = false;
         } else {
-            U01OCDistribution<RealType> runif;
-            result_type u1 = std::sqrt(-2 * std::log(runif(rng)));
-            result_type u2 = const_pi_2<result_type>() * runif(rng);
+            U01Distribution<RealType> u01;
+            result_type u1 = std::sqrt(-2 * std::log(u01(rng)));
+            result_type u2 = const_pi_2<result_type>() * u01(rng);
             z = u1 * std::cos(u2);
             v_ = u1 * std::sin(u2);
             saved_ = true;
@@ -160,7 +227,7 @@ inline void normal_distribution_impl(
     const std::size_t nu = n / 2;
     RealType *const u1 = r;
     RealType *const u2 = r + nu;
-    u01_oc_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     log(nu, u1, s);
     mul(nu, static_cast<RealType>(-2), s, s);
     sqrt(nu, s, s);
@@ -173,34 +240,33 @@ inline void normal_distribution_impl(
 
 } // namespace vsmc::internal
 
-/// \brief Generating normal random variates
+/// \brief Generating Normal random variates
 /// \ingroup Distribution
 template <typename RealType, typename RNGType>
 inline void normal_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType mean, RealType stddev)
 {
-    const std::size_t k = 1000;
+    static_assert(std::is_floating_point<RealType>::value,
+        "**normal_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, r += k)
         internal::normal_distribution_impl<k>(rng, k, r, mean, stddev);
     internal::normal_distribution_impl<k>(rng, l, r, mean, stddev);
     if (n % 2 != 0) {
-        U01OCDistribution<RealType> runif;
-        RealType u = runif(rng);
-        RealType v = runif(rng);
+        U01Distribution<RealType> u01;
+        RealType u = u01(rng);
+        RealType v = u01(rng);
         r[l - 1] = mean +
             stddev * std::sqrt(-2 * std::log(u)) *
                 std::cos(const_pi_2<RealType>() * v);
     }
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, NormalDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Normal, normal, mean, stddev)
 
 } // namespace vsmc
 

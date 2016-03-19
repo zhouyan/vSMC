@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -32,16 +32,12 @@
 #ifndef VSMC_INTERNAL_COMMON_HPP
 #define VSMC_INTERNAL_COMMON_HPP
 
+#include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/config.h>
 #include <vsmc/internal/defines.hpp>
-#include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
-
-#include <vsmc/math/cblas.hpp>
-#include <vsmc/math/constants.hpp>
-#include <vsmc/math/vmath.hpp>
-
+#include <vsmc/math/math.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 
 #include <algorithm>
@@ -85,6 +81,21 @@ namespace vsmc
 namespace internal
 {
 
+#ifdef VSMC_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wfloat-equal"
+#endif
+
+template <typename T>
+inline bool is_equal(const T &a, const T &b)
+{
+    return a == b;
+}
+
+#ifdef VSMC_CLANG
+#pragma clang diagnostic pop
+#endif
+
 template <typename UIntType>
 inline std::string itos(UIntType i, std::true_type)
 {
@@ -119,13 +130,28 @@ inline std::string itos(IntType i)
     return itos(i, std::is_unsigned<IntType>());
 }
 
+template <typename T, std::size_t Dim>
+using Array = typename std::conditional<Dim == Dynamic, Vector<T>,
+    std::array<T, Dim>>::type;
+
+template <typename T, std::size_t N>
+inline void resize(std::array<T, N> &, std::size_t)
+{
+}
+
+template <typename T>
+inline void resize(Vector<T> &vec, std::size_t n)
+{
+    vec.resize(n);
+}
+
 } // namespace vsmc::internal
 
 template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
 {
-    if (!os.good())
+    if (!os.good() || N == 0)
         return os;
 
     for (std::size_t i = 0; i < N - 1; ++i)
@@ -148,6 +174,37 @@ inline std::basic_istream<CharT, Traits> &operator>>(
 
     if (is.good())
         ary = std::move(ary_tmp);
+
+    return is;
+}
+
+template <typename CharT, typename Traits, typename T, std::size_t N>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const Vector<T> &vec)
+{
+    if (!os.good() || vec.size() == 0)
+        return os;
+
+    for (std::size_t i = 0; i < vec.size() - 1; ++i)
+        os << vec[i] << ' ';
+    os << vec[N - 1];
+
+    return os;
+}
+
+template <typename CharT, typename Traits, typename T, std::size_t N>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, Vector<T> &vec)
+{
+    if (!is.good())
+        return is;
+
+    Vector<T> vec_tmp(vec.size());
+    for (std::size_t i = 0; i != N; ++i)
+        is >> std::ws >> vec_tmp[i];
+
+    if (is.good())
+        vec = std::move(vec_tmp);
 
     return is;
 }

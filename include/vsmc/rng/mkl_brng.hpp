@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -32,9 +32,9 @@
 #ifndef VSMC_RNG_MKL_BRNG_HPP
 #define VSMC_RNG_MKL_BRNG_HPP
 
-#include <vsmc/vsmc.h>
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/engine.hpp>
+#include <vsmc/vsmc.h>
 
 #define VSMC_DEFINE_RNG_MKL_BRNG(RNGType, name)                               \
     template <>                                                               \

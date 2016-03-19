@@ -1,0 +1,237 @@
+\chapter{Utilities}
+\label{chap:Utilities}
+
+The library provides some utilities for writing Monte Carlo simulation
+programs. For some of them, such as command line option processing, there are
+more advanced, dedicated libraries out there. The library only provides some
+basic functionality that is sufficient for most simple cases.
+
+\section{Aligned memory allocation}
+\label{sec:Aligned memory allocation}
+
+The standard library class \cppinline{std::allocator} is used by containers to
+allocate memory. It works fine in most cases. However, sometime it is desired
+to allocate memory aligned by a certain boundary. The library provides the
+class template,
+\begin{cppcode}
+  template <typename T, std::size_t Alignment = VSMC_ALIGNMENT,
+      typename Memory = AlignedMemory>
+  class AlignedAllocator;
+\end{cppcode}
+where the configuration macro \cppinline{VSMC_ALIGNMENT} is defined to be
+\cppinline{32} by default. For the requirement of the parameter type
+\cppinline{Memory}, see the reference manual. It is sufficient to mention here
+that the default implementation works best if \tbb is available. This class can
+be used as a drop-in replacement of \cppinline{std::allocator<T>}. In fact,
+this library defines a type alias \cppinline{Vector<T>} which is
+\cppinline{std::vector<T, AlignedAllocator<T>>} if \cppinline{T} is a scalar
+type, and \cppinline{std::vector<T>} otherwise.
+
+\section{Sample covariance estimating}
+\label{sec:Sample covariance estimating}
+
+The library provides some basic functionality to estimate sample variance. For
+example,
+\begin{cppcode}
+  constexpr std::size_t d = /* Dimension */;
+  using T = StateMatrix<RowMajor, d, double>;
+  Sampler<T> sampler(N);
+  // operations on the sampler
+  double mean[d];
+  double cov[d * d];
+  Covariance eval;
+  auto x = sampler.particle().value().data();
+  auto w = sampler.particle().weight().data();
+  eval(RowMajor, N, d, x, w, mean, cov);
+\end{cppcode}
+The sample covariance matrix will be computed and stored in \cppinline{cov}.
+The mean vector is stored in \cppinline{mean}. Note that, if any of them is a
+null pointer, then the corresponding output is not computed. The sample
+\cppinline{x} is assumed to be stored in an $N$ by $d$ matrix. The first
+argument passed to \cppinline{eval} is the storage layout of this matrix. If
+\cppinline{x} is a null pointer, then no computation will be done. If
+\cppinline{w} is a null pointer, then the weight is assumed to be equal for all
+samples. The method has three additional optional parameters. The first is
+\cppinline{cov_layout}, which specifies the covariance matrix storage layout.
+The second is \cppinline{cov_upper} and the third \cppinline{cov_packed}, both
+are \cppinline{false} by default. If the later is \cppinline{cov_packed}, a
+packed vector of length $d(d+1)/2$ is written into \cppinline{cov}. If
+\cppinline{cov_upper} is \cppinline{false}, then the upper triangular is
+packed, otherwise the lower triangular is packed.
+
+The estimated covariance matrix is often used to construct multivariate Normal
+distribution for the purpose of generating random walk scales. The
+\cppinline{NormalMVDistribution} in section~\ref{sec:Distributions} accepts
+the lower triangular of the Cholesky decomposition of the covariance instead of
+the covariance matrix itself. The following function will compute this
+decomposition,
+\begin{cppcode}
+  double chol[d * (d + 1) / 2];
+  cov_chol(d, cov, chol);
+\end{cppcode}
+The output \cppinline{chol} is a packed vector in row major storage. This
+function also has three optional parameters, which are the same as those of
+\cppinline{Covariance::operator()}, except that they are now used to specify
+the storage scheme of the input parameter \cppinline{cov}.
+
+\section{Storing objects in \protect\hdf}
+\label{sec:Storing objects in HDF5}
+
+If the \hdf library is available, it is possible to store
+\cppinline{Sampler<T>} objects, etc., in the \hdf format. For example,
+\begin{cppcode}
+  hdf5store(sampler, "pf.h5", "sampler");
+\end{cppcode}
+create a \hdf file with the sampler stored as a list. In R it can be processed
+as the following,
+\begin{rcode}
+  library(rhdf5)
+  pf <- as.data.frame(h5read("pf.h5", "sampler"))
+\end{rcode}
+This creates a \rinline{data.frame} similar to that shown in
+section~\ref{sub:Implementations}. Other types of objects can also be store,
+see the reference manual for details.
+
+\section{\protect\raii classes for \protect\mkl pointers}
+\label{sec:RAII classes for MKL pointers}
+
+The library provides a few classes to manage \mkl pointers. It provides
+Resource Acquisition Is Initialization (\raii) idiom on top of the \mkl C
+interface. For example,
+\begin{cppcode}
+  // VSLSSTaskPtr ptr;
+  // vsldSSNewTask(&ptr, &p, &n, &xstorage, x, w, indices);
+  MKLSSTask<double> task(&p, &n, &xstorage, x, w, indices);
+  // vsldSSEditMoments(ptr, mean, r2m, r3m, r4m, c2m, c3m, c4m);
+  task.edit_moments(mean, r2m, r3m, r4m, c2m, c3m, c4m);
+  // vsldSSCompute(ptr, estimates, method);
+  task.compute(estimates, method)
+  // vslSSDeleteTask(&ptr);
+\end{cppcode}
+In the above snippets, \cppinline{MKLSSTask} manages a \cppinline{VSLSSTaskPtr}
+task pointer. All C functions that operates on the pointer, is also defined as
+methods in the class. Table~\ref{tab:RAII classes for MKL pointers} lists the
+classes defined by the library and their corresponding \mkl pointers.
+
+\begin{table}[t]
+  \begin{tabu}{X[l]X[l]}
+    \toprule
+    Class & \mkl pointer type \\
+    \midrule
+    \texttt{MKLStream}   & \texttt{VSLStreamStatePtr} \\
+    \texttt{MKLSSTask}   & \texttt{VSLSSTaskPtr}      \\
+    \texttt{MKLConvTask} & \texttt{VSLConvTask}       \\
+    \texttt{MKLCorrTask} & \texttt{VSLCorrTask}       \\
+    \texttt{MKLDFTask}   & \texttt{DFTaskPtr}         \\
+    \bottomrule
+  \end{tabu}
+  \caption{\protect\raii classes for \protect\mkl pointers}
+  \label{tab:RAII classes for MKL pointers}
+\end{table}
+
+\section{Program options}
+\label{sec:Program options}
+
+The library provides some basic support of processing command line program
+options. Here we show a minimal example. The complete program is shown in
+appendix~\appref{sec:Processing command line program options}. First, one need to
+allocated variables to store the options to be processed.
+\begin{cppcode}
+  int n;
+  std::string str;
+  std::vector<double> vec;
+\end{cppcode}
+All types that support standard library \io stream operations are supported. In
+addition, \cppinline{std::vector<T>}, where \cppinline{T} is a type that
+supports standard library \io stream operations is also supported. Then,
+\begin{cppcode}
+  ProgramOptionMap option_map;
+\end{cppcode}
+constructs the container of options. Options can be added to the map,
+\begin{cppcode}
+  option_map
+      .add("str", "A string option with a default value", &str, "default")
+      .add("n", "An integer option", &n)
+      .add("vec", "A vector option", &vec);
+\end{cppcode}
+The first argument is the name of the option, the second is a description, and
+the third is a pointer to where the option's value shall be stored. The last
+optional argument is a default value. The options on the command line can be
+processed as the following,
+\begin{cppcode}
+  option_map.process(argc, argv);
+\end{cppcode}
+where \cppinline{argc} and \cppinline{argv} are the arguments of the
+\cppinline{main} function. When the program is invoked, each option can be
+passed like below,
+\begin{textcode}
+  ./program_option --vec 1 2 1e-1 --str "abc" --vec 8 9 --str "def hij" --n 2 4
+\end{textcode}
+The results of the option processing is displayed below,
+\begin{textcode}
+  n: 4
+  str: def hij
+  vec: 1 2 0.1 8 9
+\end{textcode}
+To summarize these output, the same option can be specified multiple times. If
+it is a scalar option, the last one is used (\textinline{--str},
+\textinline{--n}). A string option's value can be grouped by quotes. For a
+vector option (\textinline{--vec}), all values are gather together and inserted
+into the vector.
+
+\section{Program progress}
+\label{sec:Program progress}
+
+Sometime it is desirable to see how much progress of a program has been made.
+The library provide a \cppinline{Progress} class for this purpose. Here we show
+a minimal example. The complete program is shown in
+appendix~\appref{sec:Display program progress}.
+\begin{cppcode}
+  vsmc::Progress progress;
+  progress.start(n * n);
+  for (std::size_t i = 0; i != n; ++i) {
+      std::stringstream ss;
+      ss << "i = " << i;
+      progress.message(ss.str());
+      for (std::size_t j = 0; j != n; ++j) {
+          // Do some computation
+          progress.increment();
+      }
+  }
+  progress.stop();
+\end{cppcode}
+When invoked, the program output something similar the below
+\begin{textcode}
+  [  4%][00:07][  49019/1000000][i = 49]
+\end{textcode}
+The method \cppinline{progress.start(n * n)} starts the printing of the
+progress. The argument specifies how many iterations there will be before it is
+stopped. The method \cppinline{progress.message(ss.str())} direct the program
+to print a message. This is optional. Each time after we finish $n$ iterations,
+we increment the progress count by calling \cppinline{progress.increment()}.
+And after everything is finished, the method \cppinline{progress.stop()} is
+called.
+
+\section{Timing}
+\label{sec:Timing}
+
+Performance can only be improved after it is first properly benchmarked. There
+are advanced profiling programs for this purpose. However, sometime simple
+timing facilities are enough. The library provides a simple class
+\cppinline{StopWatch} for this purpose. As its name suggests, it works much
+like a physical stop watch. Here is a simple example
+\begin{cppcode}
+  StopWatch watch;
+  for (std::size_t i = 0; i != n; ++i) {
+      // Some computation
+      watch.start();
+      // Computation to be benchmarked;
+      watch.stop();
+      // Some other computation
+  }
+  double t = watch.seconds(); // The time in seconds
+\end{cppcode}
+The above example demonstrate that timing can be accumulated between loop
+iterations, function calls, etc. It shall be noted that, the time is only
+accurate if the computation between \cppinline{watch.start()} and
+\cppinline{watch.stop()} is non-trivial.

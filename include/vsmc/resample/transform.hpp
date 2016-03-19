@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -74,12 +74,12 @@ inline void resample_trans_u01_rep(std::size_t M, std::size_t N,
 /// \ingroup Resample
 template <typename IntType, typename U01SeqType>
 inline void resample_trans_u01_index(std::size_t M, std::size_t N,
-    const double *weight, U01SeqType &&u01seq, IntType *src_idx)
+    const double *weight, U01SeqType &&u01seq, IntType *index)
 {
     if (M == 0 || N == 0)
         return;
 
-    std::memset(src_idx, 0, sizeof(IntType) * N);
+    std::memset(index, 0, sizeof(IntType) * N);
     if (M == 1)
         return;
 
@@ -88,17 +88,17 @@ inline void resample_trans_u01_index(std::size_t M, std::size_t N,
     for (std::size_t i = 0; i != M - 1; ++i) {
         accw += weight[i];
         while (j != N && u01seq[j] <= accw)
-            src_idx[j++] = static_cast<IntType>(i);
+            index[j++] = static_cast<IntType>(i);
     }
     while (j != N)
-        src_idx[j++] = static_cast<IntType>(M - 1);
+        index[j++] = static_cast<IntType>(M - 1);
 }
 
 /// \brief Transform replication numbers into parent indices
 /// \ingroup Resample
 template <typename IntType1, typename IntType2>
-inline void resample_trans_rep_index(std::size_t M, std::size_t N,
-    const IntType1 *replication, IntType2 *src_idx)
+inline void resample_trans_rep_index(
+    std::size_t M, std::size_t N, const IntType1 *replication, IntType2 *index)
 {
     if (M == 0 || N == 0)
         return;
@@ -108,7 +108,7 @@ inline void resample_trans_rep_index(std::size_t M, std::size_t N,
         for (std::size_t src = 0; src != M; ++src) {
             const IntType1 rep = replication[src];
             for (IntType1 r = 0; r != rep; ++r)
-                src_idx[dst++] = static_cast<IntType2>(src);
+                index[dst++] = static_cast<IntType2>(src);
         }
         return;
     }
@@ -117,7 +117,7 @@ inline void resample_trans_rep_index(std::size_t M, std::size_t N,
     std::size_t src = 0;
     for (std::size_t dst = 0; dst != N; ++dst) {
         if (replication[dst] != 0) {
-            src_idx[dst] = static_cast<IntType2>(dst);
+            index[dst] = static_cast<IntType2>(dst);
         } else {
             // replication[dst] has zero child, copy from elsewhere
             if (replication[src] < time + 2) {
@@ -127,7 +127,7 @@ inline void resample_trans_rep_index(std::size_t M, std::size_t N,
                     ++src;
                 while (replication[src] < 2);
             }
-            src_idx[dst] = static_cast<IntType2>(src);
+            index[dst] = static_cast<IntType2>(src);
             ++time;
         }
     }
@@ -136,8 +136,8 @@ inline void resample_trans_rep_index(std::size_t M, std::size_t N,
 /// \brief Transform parent indices into replication numbers
 /// \ingroup Resample
 template <typename IntType1, typename IntType2>
-inline void resample_trans_index_rep(std::size_t M, std::size_t N,
-    const IntType1 *src_idx, IntType2 *replication)
+inline void resample_trans_index_rep(
+    std::size_t M, std::size_t N, const IntType1 *index, IntType2 *replication)
 {
     if (M == 0 || N == 0)
         return;
@@ -145,7 +145,7 @@ inline void resample_trans_index_rep(std::size_t M, std::size_t N,
     std::memset(replication, 0, sizeof(IntType2) * M);
 
     for (std::size_t i = 0; i != N; ++i)
-        ++replication[src_idx[i]];
+        ++replication[index[i]];
 }
 
 /// \brief Transform normalized weights to normalized residual and integrals,

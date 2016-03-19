@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,24 +29,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "rng_dist.hpp"
 #include <vsmc/rng/rayleigh_distribution.hpp>
-
-template <>
-inline vsmc::Vector<double>
-    rng_dist_partition<vsmc::RayleighDistribution<double>>(
-        std::size_t n, vsmc::RayleighDistribution<double> &dist)
-{
-    return rng_dist_partition_quantile(n, [&](double p) {
-        return std::sqrt(-2 * std::log(1 - p) * dist.sigma() * dist.sigma());
-    });
-}
+#include "rng_dist.hpp"
 
 int main(int argc, char **argv)
 {
-    VSMC_RNG_DIST_PRE(1);
-    VSMC_RNG_DIST_1(Rayleigh, vsmc::RayleighDistribution, 1);
-    VSMC_RNG_DIST_POST;
+    vsmc::Vector<std::array<double, 1>> params;
+    params.push_back({{1.0}});
+    VSMC_RNG_DIST_TEST(1, Rayleigh, vsmc::RayleighDistribution);
 
     return 0;
 }

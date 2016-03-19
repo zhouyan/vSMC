@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -65,10 +65,6 @@
 /// \defgroup Math Mathematics
 /// \brief Mathematical utilities
 
-/// \defgroup CBLAS C BLAS
-/// \ingroup Math
-/// \brief Selected C BLAS like routines
-
 /// \defgroup Constants Constants
 /// \ingroup Math
 /// \brief Mathematical constants
@@ -100,6 +96,10 @@
 /// \ingroup RNG
 /// \brief Random number generating using Random123 Threefry RNG
 
+/// \defgroup RandomWalk Random walk
+/// \ingroup RNG
+/// \brief Random walk MCMC kernels
+
 /// \defgroup RDRAND Intel DRNG
 /// \ingroup RNG
 /// \brief Random number generating using Intel RDRAND instructions
@@ -119,14 +119,6 @@
 /// \defgroup RNGC Random number generating in C and OpenCL
 /// \brief Random number generating in C and OpenCL
 
-/// \defgroup GammaK1C GammaK1
-/// \ingroup RNGC
-/// \brief Generating Gamma(k, 1) random numbers
-
-/// \defgroup Normal01C Normal01
-/// \ingroup RNGC
-/// \brief Generating Normal(0, 1) random numbers
-
 /// \defgroup PhiloxC Philox
 /// \ingroup RNGC
 /// \brief Random number generating using Random123 Philox RNG
@@ -145,6 +137,10 @@
 /// \defgroup AlignedMemory Memory alignment
 /// \ingroup Utility
 /// \brief Memory allocation with alignment requirement
+
+/// \defgroup Covariance Covariance
+/// \ingroup Utility
+/// \brief Covariance matrix estimation and manipulation
 
 /// \defgroup HDF5IO HDF5 objects IO
 /// \ingroup Utility

@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2015, Yan Zhou
+#  Copyright (c) 2013-2016, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@ ADD_DEPENDENCIES(example vsmc)
 ADD_HEADER_EXECUTABLE(vsmc/core/core TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/core/monitor         TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/core/particle        TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/core/path            TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/core/sampler         TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/core/single_particle TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/core/state_matrix    TRUE)
@@ -51,7 +50,6 @@ ADD_HEADER_EXECUTABLE(vsmc/internal/traits   TRUE)
 
 ADD_HEADER_EXECUTABLE(vsmc/math/math TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/math/constants TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/math/cblas     TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/math/vmath     TRUE)
 
 ADD_HEADER_EXECUTABLE(vsmc/resample/resample TRUE)
@@ -66,6 +64,7 @@ ADD_HEADER_EXECUTABLE(vsmc/resample/transform           TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/resample/internal/common     TRUE)
 
 ADD_HEADER_EXECUTABLE(vsmc/rng/rng TRUE "MKL")
+ADD_HEADER_EXECUTABLE(vsmc/rng/random_walk     TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/rng_set         TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/seed            TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/u01             TRUE)
@@ -73,7 +72,6 @@ ADD_HEADER_EXECUTABLE(vsmc/rng/u01_sequence    TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/internal/common TRUE)
 
 ADD_HEADER_EXECUTABLE(vsmc/rng/distribution TRUE)
-ADD_HEADER_EXECUTABLE(vsmc/rng/bernoulli_distribution     TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/uniform_bits_distribution  TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/beta_distribution          TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/cauchy_distribution        TRUE)
@@ -87,6 +85,7 @@ ADD_HEADER_EXECUTABLE(vsmc/rng/levy_distribution          TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/logistic_distribution      TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/lognormal_distribution     TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/normal_distribution        TRUE)
+ADD_HEADER_EXECUTABLE(vsmc/rng/normal_mv_distribution     TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/pareto_distribution        TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/rayleigh_distribution      TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/rng/student_t_distribution     TRUE)
@@ -115,6 +114,7 @@ ADD_HEADER_EXECUTABLE(vsmc/smp/backend_tbb  ${TBB_FOUND} "TBB")
 
 ADD_HEADER_EXECUTABLE(vsmc/utility/utility TRUE "HDF5")
 ADD_HEADER_EXECUTABLE(vsmc/utility/aligned_memory TRUE)
+ADD_HEADER_EXECUTABLE(vsmc/utility/covariance     TRUE)
 ADD_HEADER_EXECUTABLE(vsmc/utility/hdf5io         ${HDF5_FOUND} "HDF5")
 ADD_HEADER_EXECUTABLE(vsmc/utility/mkl            ${MKL_FOUND} "MKL")
 ADD_HEADER_EXECUTABLE(vsmc/utility/program_option TRUE)

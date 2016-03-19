@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -54,17 +54,12 @@ inline bool pareto_distribution_check_param(RealType a, RealType b)
 template <typename RealType>
 class ParetoDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        Pareto, pareto, RealType, result_type, a, 1, result_type, b, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Pareto, pareto, a, 1, b, 1)
 
     public:
-    result_type min VSMC_MNE() const { return a(); }
+    result_type min() const { return a(); }
 
-    result_type max VSMC_MNE() const
-    {
-        return std::numeric_limits<result_type>::max VSMC_MNE();
-    }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
     void reset() {}
 
@@ -72,9 +67,9 @@ class ParetoDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01OCDistribution<RealType> runif;
+        U01Distribution<RealType> u01;
 
-        return param.b() * std::exp(-std::log(runif(rng)) / param.a());
+        return param.b() * std::exp(-std::log(u01(rng)) / param.a());
     }
 }; // class ParetoDistribution
 
@@ -98,20 +93,19 @@ template <typename RealType, typename RNGType>
 inline void pareto_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    const std::size_t k = 1000;
+    static_assert(std::is_floating_point<RealType>::value,
+        "**pareto_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::pareto_distribution_impl<k>(rng, k, r + i * k, a, b);
-    internal::pareto_distribution_impl<k>(rng, l, r + m * k, a, b);
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::pareto_distribution_impl<k>(rng, k, r, a, b);
+    internal::pareto_distribution_impl<k>(rng, l, r, a, b);
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, ParetoDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Pareto, pareto, a, b)
 
 } // namespace vsmc
 

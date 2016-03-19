@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,23 +29,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "rng_dist.hpp"
 #include <vsmc/rng/logistic_distribution.hpp>
-
-template <>
-inline vsmc::Vector<double>
-    rng_dist_partition<vsmc::LogisticDistribution<double>>(
-        std::size_t n, vsmc::LogisticDistribution<double> &dist)
-{
-    return rng_dist_partition_quantile(n,
-        [&](double p) { return dist.a() + dist.b() * std::log(p / (1 - p)); });
-}
+#include "rng_dist.hpp"
 
 int main(int argc, char **argv)
 {
-    VSMC_RNG_DIST_PRE(2);
-    VSMC_RNG_DIST_2(Logistic, vsmc::LogisticDistribution, 0, 1);
-    VSMC_RNG_DIST_POST;
+    vsmc::Vector<std::array<double, 2>> params;
+    params.push_back({{0.0, 1.0}});
+    VSMC_RNG_DIST_TEST(2, Logistic, vsmc::LogisticDistribution);
 
     return 0;
 }

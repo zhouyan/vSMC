@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2015, Yan Zhou
+#  Copyright (c) 2013-2016, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -35,16 +35,16 @@
 #
 # RDRAND_FOUND - TRUE if RDRAND is found and work correctly
 
-IF (DEFINED RDRAND_FOUND)
+IF(DEFINED RDRAND_FOUND)
     RETURN()
-ENDIF (DEFINED RDRAND_FOUND)
+ENDIF(DEFINED RDRAND_FOUND)
 
 FILE(READ ${CMAKE_CURRENT_LIST_DIR}/FindRDRAND.cpp RDRAND_TEST_SOURCE)
 
 INCLUDE(CheckCXXSourceRuns)
 CHECK_CXX_SOURCE_RUNS("${RDRAND_TEST_SOURCE}" RDRAND_FOUND)
-IF (RDRAND_FOUND)
+IF(RDRAND_FOUND)
     MESSAGE(STATUS "Found RDRAND support")
-ELSE (RDRAND_FOUND)
+ELSE(RDRAND_FOUND)
     MESSAGE(STATUS "NOT Found RDRAND support")
-ENDIF (RDRAND_FOUND)
+ENDIF(RDRAND_FOUND)

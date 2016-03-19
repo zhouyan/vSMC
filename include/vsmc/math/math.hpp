@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,9 @@
 #define VSMC_MATH_MATH_HPP
 
 #include <vsmc/internal/config.h>
-#include <vsmc/math/cblas.hpp>
+#include <vsmc/math/cblas.h>
 #include <vsmc/math/constants.hpp>
+#include <vsmc/math/lapacke.h>
 #include <vsmc/math/vmath.hpp>
 
 #endif // VSMC_MATH_MATH_HPP

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -34,10 +34,6 @@
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/single_particle.hpp>
-
-#define VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim)          \
-    VSMC_STATIC_ASSERT((Dim == Dynamic),                                      \
-        "**StateMatrix::resize_dim** USED WITH A FIXED DIMENSION OBJECT")
 
 #define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH              \
     VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),          \
@@ -88,7 +84,7 @@ class StateMatrixDim<Dynamic>
 
 /// \brief Base type of StateMatrix
 /// \ingroup Core
-template <MatrixOrder Order, std::size_t Dim, typename T>
+template <MatrixLayout Layout, std::size_t Dim, typename T>
 class StateMatrixBase : public internal::StateMatrixDim<Dim>
 {
     public:
@@ -116,7 +112,8 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
 
     void resize_dim(std::size_t dim)
     {
-        VSMC_STATIC_ASSERT_CORE_STATE_MATRIX_DYNAMIC_DIM_RESIZE(Dim);
+        static_assert(Dim == Dynamic,
+            "**StateMatrix** OBJECT DECLARED WITH A FIXED DIMENSION");
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_DIM_SIZE(dim);
 
         internal::StateMatrixDim<Dim>::resize_dim(dim);
@@ -129,7 +126,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
 
     const state_type *data() const { return data_.data(); }
 
-    void swap(StateMatrixBase<Order, Dim, T> &other)
+    void swap(StateMatrixBase<Layout, Dim, T> &other)
     {
         internal::StateMatrixDim<Dim>::swap(other);
         std::swap(size_, other.size_);
@@ -139,8 +136,8 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     template <typename OutputIter>
     void read_state(std::size_t pos, OutputIter first) const
     {
-        const StateMatrix<Order, Dim, T> *sptr =
-            static_cast<const StateMatrix<Order, Dim, T> *>(this);
+        const StateMatrix<Layout, Dim, T> *sptr =
+            static_cast<const StateMatrix<Layout, Dim, T> *>(this);
         for (size_type i = 0; i != size_; ++i, ++first)
             *first = sptr->state(i, pos);
     }
@@ -152,19 +149,19 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
             read_state(d, *first);
     }
 
-    template <MatrixOrder ROrder, typename OutputIter>
+    template <MatrixLayout RLayout, typename OutputIter>
     void read_state_matrix(OutputIter first) const
     {
-        if (ROrder == Order) {
+        if (RLayout == Layout) {
             std::copy(data_.begin(), data_.end(), first);
         } else {
-            const StateMatrix<Order, Dim, T> *sptr =
-                static_cast<const StateMatrix<Order, Dim, T> *>(this);
-            if (ROrder == RowMajor) {
+            const StateMatrix<Layout, Dim, T> *sptr =
+                static_cast<const StateMatrix<Layout, Dim, T> *>(this);
+            if (RLayout == RowMajor) {
                 for (size_type i = 0; i != size_; ++i)
                     for (std::size_t d = 0; d != this->dim(); ++d)
                         *first++ = sptr->state(i, d);
-            } else if (ROrder == ColMajor) {
+            } else if (RLayout == ColMajor) {
                 for (std::size_t d = 0; d != this->dim(); ++d)
                     for (size_type i = 0; i != size_; ++i)
                         *first++ = sptr->state(i, d);
@@ -179,8 +176,8 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         if (this->dim() == 0 || size_ == 0 || !os.good())
             return os;
 
-        const StateMatrix<Order, Dim, T> *sptr =
-            static_cast<const StateMatrix<Order, Dim, T> *>(this);
+        const StateMatrix<Layout, Dim, T> *sptr =
+            static_cast<const StateMatrix<Layout, Dim, T> *>(this);
         for (size_type i = 0; i != size_; ++i) {
             for (std::size_t d = 0; d != this->dim() - 1; ++d)
                 os << sptr->state(i, d) << sepchar;
@@ -198,11 +195,11 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     Vector<T> data_;
 }; // class StateMatrixBase
 
-template <typename CharT, typename Traits, MatrixOrder Order, std::size_t Dim,
-    typename T>
+template <typename CharT, typename Traits, MatrixLayout Layout,
+    std::size_t Dim, typename T>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os,
-    const StateMatrixBase<Order, Dim, T> &smatrix)
+    const StateMatrixBase<Layout, Dim, T> &smatrix)
 {
     return smatrix.print(os);
 }
@@ -247,12 +244,12 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     }
 
     template <typename IntType>
-    void copy(size_type N, const IntType *src_idx)
+    void copy(size_type N, const IntType *index)
     {
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH;
 
         for (size_type dst = 0; dst != N; ++dst)
-            copy_particle(src_idx[dst], dst);
+            copy_particle(index[dst], dst);
     }
 
     void copy_particle(size_type src, size_type dst)
@@ -357,13 +354,13 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     }
 
     template <typename IntType>
-    void copy(size_type N, const IntType *src_idx)
+    void copy(size_type N, const IntType *index)
     {
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH;
 
         for (std::size_t d = 0; d != this->dim(); ++d)
             for (size_type dst = 0; dst != N; ++dst)
-                state(dst, d) = state(static_cast<size_type>(src_idx[dst]), d);
+                state(dst, d) = state(static_cast<size_type>(index[dst]), d);
     }
 
     void copy_particle(size_type src, size_type dst)

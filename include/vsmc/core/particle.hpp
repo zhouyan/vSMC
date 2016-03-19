@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -52,10 +52,10 @@ class Particle
     using value_type = T;
     using weight_type = WeightType<T>;
     using rng_set_type = RNGSetType<T>;
-    using resample_rng_type = ResampleRNGType<T>;
     using rng_type = typename rng_set_type::rng_type;
-    using resample_type = std::function<void(std::size_t, std::size_t,
-        resample_rng_type &, const double *, size_type *)>;
+    using resample_type = std::function<void(
+        std::size_t, std::size_t, rng_type &, const double *, size_type *)>;
+    using sp_type = SingleParticle<T>;
 
     explicit Particle(size_type N)
         : size_(N)
@@ -63,7 +63,7 @@ class Particle
         , weight_(static_cast<SizeType<weight_type>>(N))
         , rng_set_(static_cast<SizeType<rng_set_type>>(N))
     {
-        Seed::instance().seed_rng(resample_rng_);
+        Seed::instance().seed_rng(rng_);
     }
 
     /// \brief Clone the particle system except the RNG engines
@@ -75,7 +75,7 @@ class Particle
         Particle<T> particle(*this);
         if (new_rng) {
             particle.rng_set().seed();
-            Seed::instance().seed_rng(particle.resample_rng());
+            Seed::instance().seed_rng(particle.rng());
         }
 
         return particle;
@@ -95,7 +95,7 @@ class Particle
 
             if (!retain_rng) {
                 rng_set_ = other.rng_set_;
-                resample_rng_ = other.resample_rng_;
+                rng_ = other.rng_;
             }
         }
 
@@ -111,7 +111,7 @@ class Particle
 
             if (!retain_rng) {
                 rng_set_ = other.rng_set_;
-                resample_rng_ = other.resample_rng_;
+                rng_ = other.rng_;
             }
         }
 
@@ -142,8 +142,23 @@ class Particle
     /// \brief Get an (parallel) RNG stream for a given particle
     rng_type &rng(size_type id) { return rng_set_[id]; }
 
+    /// \brief Get an (parallel) RNG stream for a given particle
+    const rng_type &rng(size_type id) const { return rng_set_[id]; }
+
     /// \brief Get the (sequential) RNG used stream for resampling
-    resample_rng_type &resample_rng() { return resample_rng_; }
+    rng_type &rng() { return rng_; }
+
+    /// \brief Get the (sequential) RNG used stream for resampling
+    const rng_type &rng() const { return rng_; }
+
+    /// \brief Get a SingleParticle<T> object
+    sp_type sp(size_type id) { return SingleParticle<T>(id, this); }
+
+    /// \brief Get a SingleParticle<T> object for the first particle
+    sp_type begin() { return sp(0); }
+
+    /// \brief Get a SingleParticle<T> object for the first particle
+    sp_type end() { return sp(size_); }
 
     /// \brief Performing resampling if ESS/N < threshold
     ///
@@ -169,7 +184,7 @@ class Particle
                 Vector<size_type> idx(N);
 #endif // VSMC_USE_TBB
 
-                op(N, N, resample_rng_, rwptr, rep.data());
+                op(N, N, rng_, rwptr, rep.data());
                 resample_trans_rep_index(N, N, rep.data(), idx.data());
                 value_.copy(N, idx.data());
             } else {
@@ -186,7 +201,7 @@ class Particle
     value_type value_;
     weight_type weight_;
     rng_set_type rng_set_;
-    resample_rng_type resample_rng_;
+    rng_type rng_;
 #if VSMC_USE_TBB
     ::tbb::combinable<Vector<size_type>> rep_;
     ::tbb::combinable<Vector<size_type>> idx_;

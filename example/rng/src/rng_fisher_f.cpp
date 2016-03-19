@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,43 +29,33 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "rng_dist.hpp"
 #include <vsmc/rng/fisher_f_distribution.hpp>
-#include <boost/math/distributions/fisher_f.hpp>
-
-template <>
-inline vsmc::Vector<double>
-    rng_dist_partition<vsmc::FisherFDistribution<double>>(
-        std::size_t n, vsmc::FisherFDistribution<double> &dist)
-{
-    return rng_dist_partition_boost(
-        n, boost::math::fisher_f_distribution<double>(dist.m(), dist.n()));
-}
+#include "rng_dist.hpp"
 
 int main(int argc, char **argv)
 {
-    VSMC_RNG_DIST_PRE(2);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 0.2, 0.2);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 0.2, 1);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 0.2, 1.5);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 0.2, 2);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 0.2, 3);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 1, 0.2);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 1, 1);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 1, 1.5);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 1, 2);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 1, 3);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 2, 0.2);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 2, 1);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 2, 1.5);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 2, 2);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 2, 3);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 3, 0.2);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 3, 1);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 3, 1.5);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 3, 2);
-    VSMC_RNG_DIST_2(FisherF, std::fisher_f_distribution, 3, 3);
-    VSMC_RNG_DIST_POST;
+    vsmc::Vector<std::array<double, 2>> params;
+    params.push_back({{0.2, 0.2}});
+    params.push_back({{0.2, 1.0}});
+    params.push_back({{0.2, 1.5}});
+    params.push_back({{0.2, 2.0}});
+    params.push_back({{0.2, 3.0}});
+    params.push_back({{1.0, 0.2}});
+    params.push_back({{1.0, 1.0}});
+    params.push_back({{1.0, 1.5}});
+    params.push_back({{1.0, 2.0}});
+    params.push_back({{1.0, 3.0}});
+    params.push_back({{2.0, 0.2}});
+    params.push_back({{2.0, 1.0}});
+    params.push_back({{2.0, 1.5}});
+    params.push_back({{2.0, 2.0}});
+    params.push_back({{2.0, 3.0}});
+    params.push_back({{3.0, 0.2}});
+    params.push_back({{3.0, 1.0}});
+    params.push_back({{3.0, 1.5}});
+    params.push_back({{3.0, 2.0}});
+    params.push_back({{3.0, 3.0}});
+    VSMC_RNG_DIST_TEST(2, FisherF, std::fisher_f_distribution);
 
     return 0;
 }

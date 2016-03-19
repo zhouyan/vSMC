@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,29 +29,19 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "rng_dist.hpp"
 #include <vsmc/rng/chi_squared_distribution.hpp>
-#include <boost/math/distributions/chi_squared.hpp>
-
-template <>
-inline vsmc::Vector<double>
-    rng_dist_partition<vsmc::ChiSquaredDistribution<double>>(
-        std::size_t n, vsmc::ChiSquaredDistribution<double> &dist)
-{
-    return rng_dist_partition_boost(
-        n, boost::math::chi_squared_distribution<double>(dist.n()));
-}
+#include "rng_dist.hpp"
 
 int main(int argc, char **argv)
 {
-    VSMC_RNG_DIST_PRE(1);
-    VSMC_RNG_DIST_1(ChiSquared, std::chi_squared_distribution, 0.2);
-    VSMC_RNG_DIST_1(ChiSquared, std::chi_squared_distribution, 1);
-    VSMC_RNG_DIST_1(ChiSquared, std::chi_squared_distribution, 1.5);
-    VSMC_RNG_DIST_1(ChiSquared, std::chi_squared_distribution, 2);
-    VSMC_RNG_DIST_1(ChiSquared, std::chi_squared_distribution, 3);
-    VSMC_RNG_DIST_1(ChiSquared, std::chi_squared_distribution, 30);
-    VSMC_RNG_DIST_POST;
+    vsmc::Vector<std::array<double, 1>> params;
+    params.push_back({{0.2}});
+    params.push_back({{1.0}});
+    params.push_back({{1.5}});
+    params.push_back({{2.0}});
+    params.push_back({{3.0}});
+    params.push_back({{30.0}});
+    VSMC_RNG_DIST_TEST(1, ChiSquared, std::chi_squared_distribution);
 
     return 0;
 }

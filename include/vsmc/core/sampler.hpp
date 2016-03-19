@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/monitor.hpp>
 #include <vsmc/core/particle.hpp>
-#include <vsmc/core/path.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, map, func)        \
     VSMC_RUNTIME_ASSERT(                                                      \
@@ -73,7 +72,6 @@ class Sampler
         , init_by_iter_(false)
         , resample_threshold_(resample_threshold_never())
         , iter_num_(0)
-        , path_(typename Path<T>::eval_type())
     {
         resample_scheme(Multinomial);
     }
@@ -87,7 +85,6 @@ class Sampler
         , init_by_iter_(false)
         , resample_threshold_(resample_threshold_always())
         , iter_num_(0)
-        , path_(typename Path<T>::eval_type())
     {
         resample_scheme(scheme);
     }
@@ -101,7 +98,6 @@ class Sampler
         , init_by_iter_(false)
         , resample_threshold_(resample_threshold_always())
         , iter_num_(0)
-        , path_(typename Path<T>::eval_type())
     {
         resample_scheme(res_op);
     }
@@ -113,7 +109,6 @@ class Sampler
         , init_by_iter_(false)
         , resample_threshold_(resample_threshold)
         , iter_num_(0)
-        , path_(typename Path<T>::eval_type())
     {
         resample_scheme(scheme);
     }
@@ -126,7 +121,6 @@ class Sampler
         , init_by_iter_(false)
         , resample_threshold_(resample_threshold)
         , iter_num_(0)
-        , path_(typename Path<T>::eval_type())
     {
         resample_scheme(res_op);
     }
@@ -202,8 +196,6 @@ class Sampler
         resampled_history_.reserve(num);
         for (auto &a : accept_history_)
             a.reserve(num);
-        if (!path_.empty())
-            path_.reserve(num);
         for (auto &m : monitor_)
             if (!m.second.empty())
                 m.second.reserve(num);
@@ -445,9 +437,9 @@ class Sampler
     /// \param param Additional parameters passed to the initialization object
     /// of type init_type
     ///
-    /// All histories (ESS, resampled, accept, Monitor and Path) are clared
-    /// before callling the initialization object. Monitors and Path's
-    /// evaluation objects are untouched.
+    /// All histories (ESS, resampled, acceptance count, Monitor) are clared
+    /// before callling the initialization object. Monitors evaluation objects
+    /// are untouched.
     Sampler<T> &initialize(void *param = nullptr)
     {
         do_reset();
@@ -468,7 +460,7 @@ class Sampler
     /// \details
     /// Moves performed first. Then ESS/N is compared to the threshold and
     /// possible resampling is performed. Then mcmcs are performed. Then
-    /// monitors and Path are computed
+    /// monitors are computed
     Sampler<T> &iterate(std::size_t num = 1)
     {
         do_acch();
@@ -482,26 +474,6 @@ class Sampler
 
         return *this;
     }
-
-    /// \brief Read and write access to the Path sampling monitor
-    Path<T> &path() { return path_; }
-
-    /// \brief Read only access to the Path sampling monitor
-    const Path<T> &path() const { return path_; }
-
-    /// \brief Set the Path sampling evaluation object
-    Sampler<T> &path_sampling(
-        const typename Path<T>::eval_type &eval, bool record_only = false)
-    {
-        path_.set_eval(eval, record_only);
-
-        return *this;
-    }
-
-    /// \brief Path sampling estimate of the logarithm of normalizing
-    /// constants
-    /// ratio
-    double path_sampling() const { return path_.log_zconst(); }
 
     /// \brief Add a monitor
     ///
@@ -593,8 +565,6 @@ class Sampler
             return 0;
 
         std::size_t header_size = 1;
-        if (path_.iter_size() > 0)
-            header_size += 2;
         for (const auto &m : monitor_)
             if (m.second.iter_size() > 0)
                 header_size += m.second.dim();
@@ -623,10 +593,6 @@ class Sampler
             return;
 
         *first++ = std::string("ESS");
-        if (path_.iter_size() > 0) {
-            *first++ = std::string("Path.Integrand");
-            *first++ = std::string("Path.Grid");
-        }
         for (const auto &m : monitor_) {
             if (m.second.iter_size() > 0) {
                 unsigned md = static_cast<unsigned>(m.second.dim());
@@ -653,28 +619,28 @@ class Sampler
     }
 
     /// \brief Sampler summary data (integer data)
-    template <MatrixOrder Order, typename OutputIter>
+    template <MatrixLayout Layout, typename OutputIter>
     void summary_data_int(OutputIter first) const
     {
         if (summary_data_size_int() == 0)
             return;
 
-        if (Order == RowMajor)
+        if (Layout == RowMajor)
             summary_data_row_int(first);
-        if (Order == ColMajor)
+        if (Layout == ColMajor)
             summary_data_col_int(first);
     }
 
     /// \brief Sampler summary data (floating point data)
-    template <MatrixOrder Order, typename OutputIter>
+    template <MatrixLayout Layout, typename OutputIter>
     void summary_data(OutputIter first) const
     {
         if (summary_data_size() == 0)
             return;
 
-        if (Order == RowMajor)
+        if (Layout == RowMajor)
             summary_data_row(first);
-        if (Order == ColMajor)
+        if (Layout == ColMajor)
             summary_data_col(first);
     }
 
@@ -738,8 +704,6 @@ class Sampler
     Vector<double> ess_history_;
     Vector<bool> resampled_history_;
     Vector<Vector<std::size_t>> accept_history_;
-
-    Path<T> path_;
     monitor_map_type monitor_;
 
     void do_acch()
@@ -762,7 +726,6 @@ class Sampler
         ess_history_.clear();
         resampled_history_.clear();
         accept_history_.clear();
-        path_.clear();
         for (auto &m : monitor_)
             m.second.clear();
         iter_num_ = 0;
@@ -816,9 +779,6 @@ class Sampler
 
     void do_monitor(MonitorStage stage)
     {
-        if (!path_.empty() && stage == MonitorMCMC)
-            path_.eval(iter_num_, particle_);
-
         for (auto &m : monitor_)
             if (!m.second.empty())
                 m.second.eval(iter_num_, particle_, stage);
@@ -853,8 +813,6 @@ class Sampler
     {
         double missing_data = std::numeric_limits<double>::quiet_NaN();
 
-        std::size_t piter = 0;
-
         Vector<std::pair<std::size_t, const Monitor<T> *>> miter;
         for (const auto &m : monitor_)
             if (m.second.iter_size() > 0)
@@ -862,16 +820,6 @@ class Sampler
 
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
             *first++ = ess_history_[iter];
-            if (path_.iter_size() > 0) {
-                if (piter != path_.iter_size() && iter == path_.index(piter)) {
-                    *first++ = path_.integrand(piter);
-                    *first++ = path_.grid(piter);
-                    ++piter;
-                } else {
-                    *first++ = missing_data;
-                    *first++ = missing_data;
-                }
-            }
             for (auto &m : miter) {
                 std::size_t md = m.second->dim();
                 if (m.first != m.second->iter_size() &&
@@ -891,22 +839,6 @@ class Sampler
         double missing_data = std::numeric_limits<double>::quiet_NaN();
 
         first = std::copy(ess_history_.begin(), ess_history_.end(), first);
-        if (path_.iter_size() > 0) {
-            std::size_t piter = 0;
-            for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-                if (piter != path_.iter_size() || iter == path_.index(piter))
-                    *first++ = path_.integrand(piter++);
-                else
-                    *first = missing_data;
-            }
-            piter = 0;
-            for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-                if (piter != path_.iter_size() || iter == path_.index(piter))
-                    *first++ = path_.grid(piter++);
-                else
-                    *first = missing_data;
-            }
-        }
         for (const auto &m : monitor_) {
             if (m.second.iter_size() > 0) {
                 for (std::size_t d = 0; d != m.second.dim(); ++d) {

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -110,10 +110,6 @@
 
 // Optional libraries
 
-#ifndef VSMC_HAS_CBLAS
-#define VSMC_HAS_CBLAS 0
-#endif
-
 #ifndef VSMC_HAS_HDF5
 #define VSMC_HAS_HDF5 0
 #endif
@@ -124,6 +120,10 @@
 
 #ifndef VSMC_USE_MKL_CBLAS
 #define VSMC_USE_MKL_CBLAS VSMC_HAS_MKL
+#endif
+
+#ifndef VSMC_USE_MKL_LAPACKE
+#define VSMC_USE_MKL_LAPACKE VSMC_HAS_MKL
 #endif
 
 #ifndef VSMC_USE_MKL_VML

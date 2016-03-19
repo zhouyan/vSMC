@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,8 @@ namespace vsmc
 /// \ingroup Core
 inline double weight_ess(std::size_t N, const double *first)
 {
-    return 1 / dot(N, first, 1, first, 1);
+    return 1 /
+        ::cblas_ddot(static_cast<VSMC_CBLAS_INT>(N), first, 1, first, 1);
 }
 
 /// \brief Normalize weights such that the summation is one
@@ -208,7 +209,7 @@ class Weight
     {
         double *w = data_.data();
         double accw = 0;
-        const std::size_t k = 1000;
+        const std::size_t k = 1024;
         const std::size_t m = size() / k;
         const std::size_t l = size() % k;
         for (std::size_t i = 0; i != m; ++i, w += k)
@@ -216,7 +217,8 @@ class Weight
         normalize_eval(l, w, accw, use_log);
         ::vsmc::mul(size(), 1 / accw, data_.data(), data_.data());
 
-        return 1 / dot(size(), data_.data(), 1, data_.data(), 1);
+        return 1 / cblas_ddot(static_cast<VSMC_CBLAS_INT>(size()),
+                       data_.data(), 1, data_.data(), 1);
     }
 
     void normalize_eval(std::size_t n, double *w, double &accw, bool use_log)

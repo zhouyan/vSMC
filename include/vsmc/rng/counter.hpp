@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,7 @@ inline void increment(std::array<T, K> &ctr)
 template <typename T, std::size_t K, T NSkip>
 inline void increment(std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
 {
-    if (ctr.front() < std::numeric_limits<T>::max VSMC_MNE() - NSkip) {
+    if (ctr.front() < std::numeric_limits<T>::max() - NSkip) {
         ctr.front() += NSkip;
     } else {
         ctr.front() += NSkip;
@@ -83,7 +83,7 @@ inline void increment(std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
 template <typename T, std::size_t K>
 inline void increment(std::array<T, K> &ctr, T nskip)
 {
-    if (ctr.front() < std::numeric_limits<T>::max VSMC_MNE() - nskip) {
+    if (ctr.front() < std::numeric_limits<T>::max() - nskip) {
         ctr.front() += nskip;
     } else {
         ctr.front() += nskip;
@@ -151,8 +151,7 @@ inline void increment(
 {
     internal::increment_block_set<0>(
         ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
-    if (ctr.front() <
-        std::numeric_limits<T>::max VSMC_MNE() - static_cast<T>(Blocks)) {
+    if (ctr.front() < std::numeric_limits<T>::max() - static_cast<T>(Blocks)) {
         internal::increment_block_safe<0>(
             ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
     } else {
@@ -262,7 +261,7 @@ inline void increment(
 
     increment(ctr);
     const std::uint64_t m =
-        static_cast<std::uint64_t>(std::numeric_limits<T>::max VSMC_MNE());
+        static_cast<std::uint64_t>(std::numeric_limits<T>::max());
     const std::uint64_t l = static_cast<std::uint64_t>(ctr.front());
     const std::uint64_t k = static_cast<std::uint64_t>(n);
     if (k < m && l < m - k) {
@@ -357,34 +356,35 @@ class CounterEngine
 
     void operator()(std::size_t n, result_type *r)
     {
-        if (n * sizeof(result_type) <= 32) {
-            for (std::size_t i = 0; i != n; ++i)
-                r[i] = operator()();
+        const std::size_t remain = M_ - index_;
+
+        if (n < remain) {
+            std::memcpy(r, buffer_.data() + index_, sizeof(result_type) * n);
+            index_ += n;
             return;
         }
 
-        std::size_t p = 32 -
-            static_cast<std::size_t>(reinterpret_cast<std::uintptr_t>(r) % 32);
-        if (p % sizeof(result_type) == 0) {
-            p /= sizeof(result_type);
-            for (std::size_t i = 0; i != p; ++i)
-                r[i] = operator()();
-            n -= p;
-            r += p;
+        std::memcpy(r, buffer_.data() + index_, sizeof(result_type) * remain);
+        r += remain;
+        n -= remain;
+        index_ = M_;
+
+        const std::size_t k = 1024 / M_;
+        if (k != 0) {
+            const std::size_t m = (n / M_) / k;
+            const std::size_t l = (n / M_) % k;
+            alignas(32) std::array<result_type, M_> buffer[k];
+            for (std::size_t i = 0; i != m; ++i) {
+                generator_(ctr_, key_, k, buffer);
+                std::memcpy(r, buffer, sizeof(result_type) * M_ * k);
+                r += k * M_;
+                n -= k * M_;
+            }
+            generator_(ctr_, key_, l, buffer);
+            std::memcpy(r, buffer, sizeof(result_type) * M_ * l);
+            r += l * M_;
+            n -= l * M_;
         }
-
-        const std::size_t q = generator_(ctr_, key_, n, r);
-        n -= q;
-        r += q;
-
-        const std::size_t m = n / M_;
-        std::array<result_type, M_> *s =
-            reinterpret_cast<std::array<result_type, M_> *>(r);
-        for (std::size_t i = 0; i != m; ++i)
-            generator_(ctr_, key_, s[i]);
-        n -= m * M_;
-        r += m * M_;
-
         for (std::size_t i = 0; i != n; ++i)
             r[i] = operator()();
     }
@@ -411,14 +411,14 @@ class CounterEngine
         index_ = n % M_;
     }
 
-    static constexpr result_type min VSMC_MNE()
+    static constexpr result_type min()
     {
-        return std::numeric_limits<result_type>::min VSMC_MNE();
+        return std::numeric_limits<result_type>::min();
     }
 
-    static constexpr result_type max VSMC_MNE()
+    static constexpr result_type max()
     {
-        return std::numeric_limits<result_type>::max VSMC_MNE();
+        return std::numeric_limits<result_type>::max();
     }
 
     friend bool operator==(const CounterEngine<Generator> &eng1,
@@ -481,11 +481,11 @@ class CounterEngine
     private:
     static constexpr std::size_t M_ = Generator::size();
 
-    std::array<result_type, M_> buffer_;
+    alignas(32) std::array<result_type, M_> buffer_;
+    std::size_t index_;
     ctr_type ctr_;
     key_type key_;
     Generator generator_;
-    std::size_t index_;
 
     void reset()
     {

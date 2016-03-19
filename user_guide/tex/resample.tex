@@ -1,0 +1,68 @@
+\chapter{Resampling}
+\label{chap:Resampling}
+
+The library supports resampling in a more general way than the algorithm
+described in chapter~\ref{chap:Sequential Monte Carlo}. Recall that, given a
+particle system $\{W^{(i)},X^{(i)}\}_{i=1}^N$, a new system $\{\bar{W}^{(i)},
+\bar{X}^{(i)}\}_{i=1}^M$ is generated. Regardless other statistical properties,
+in practice, such an algorithm can be decomposed into three steps. First, a
+vector $\{r_i\}_{i=1}^N$ is generated such that $\sum_{i=1}^N r_i = M$. Then a
+vector $\{a_i\}_{i=1}^M$ is generated such that, $\sum_{i=1}^M
+\mathbb{I}_{\{j\}}(a_i) = r_j$. And last, set $\bar{X}^{(i)} = X^{(a_i)}$.
+
+The first step determines the statistical properties of the resampling
+algorithm. The library defines all algorithms discussed in
+\textcite{Douc:2005wa}. Samplers can be constructed with builtin schemes as
+seen in section~\ref{sub:Implementations}. In addition, samplers can also be
+constructed with user defined resampling operations. Below is the signature,
+\begin{cppcode}
+  template <typename IntType, typename RNGType>
+  void resample(std::size_t M, std::size_t N, RNGType &rng,
+  const double *weight, IntType *replication);
+\end{cppcode}
+The last parameter is the output vector $\{r_i\}_{i=1}^N$. The builtin schemes
+are implemented as classes with \cppinline{operator()} conforms to the above
+signature. For example, \cppinline{ResampleMultinomial} implements the
+multinomial resampling algorithm.
+
+To transform $\{r_i\}_{i=1}^N$ into $\{a_i\}_{i=1}^M$, one can call the
+following function,
+\begin{cppcode}
+  template <typename IntType1, typename IntType2>
+  void resample_trans_rep_index(std::size_t M, std::size_t N,
+  const IntType1 *replication, IntType2 *index);
+\end{cppcode}
+where the last parameter is the output vector $\{a_i\}_{i=1}^M$. This function
+guarantees that $a_i = i$ if $r_i > 0$. However, its output may not be optimal
+for all applications. The last step of a resampling operation, the copying of
+particles can be the most time consuming one, especially on distributed
+systems. The topology of the system will need to be taking into consideration
+to achieve optimal performance. In those situations, it is best to use
+\cppinline{ResampleMultinomial} etc., to generate the replication numbers, and
+manually perform the rest of the resampling algorithm.
+
+\section{Resizing a sampler}
+\label{sec:Resizing a sampler}
+
+Now, we provide an example of changing sampler size,
+\begin{cppcode}
+  // sampler is an existing Sampler<T> object
+  auto N = sampler.size();
+  auto &rng = sampler.particle().rng();
+  auto weight = sampler.particle().weight().data();
+  Vector<std::size_t> rep(N);
+  Vector<std::size_t> idx(M);
+  ResampleMultinomial resample;
+  resample(M, N, rng, weight, rep.data());
+  resample_trans_rep_index(M, N, rep.data(), idx.data());
+  Particle<T> particle(M);
+  for (std::size_t i = 0; i != M; ++i) {
+      auto sp_dst = particle.sp(i);
+      auto sp_src = sampler.partice().sp(idx[i]);
+      // Assuming T is a subclass of StateMatrix
+      for (std::size_t d = 0; d != sp_dst.dim(); ++d)
+      sp_dst.state(d) = sp_src.state(d);
+  }
+  // Copy other data of class T if any
+  sampler.particle() = std::move(particle);
+\end{cppcode}

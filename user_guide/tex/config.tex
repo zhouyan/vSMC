@@ -1,0 +1,63 @@
+\chapter{Configuration macros}
+\label{chap:Configuration macros}
+
+The library has a few configuration macros. All these macros can be overwritten
+by the user by defining them with proper values before including any of the
+library's headers. Most of the macros have the prefix \cppinline{VSMC_HAS_},
+which specify if a feature is available to the library. A few have the prefix
+\cppinline{VSMC_USE_}, which specify if a feature shall be used in the case
+that it is available. A handful remaining ones define some constants or types
+used by the library. These macros are listed in table~\ref{tab:Configuration
+  macros}.
+
+\begin{table}[ht]
+  \begin{tabu}{X[l]X[l]X[2l]}
+    \toprule
+    Macro & Default & Description \\
+    \midrule
+    \texttt{VSMC\_INT64} & Platform dependent &
+    The 64-bits integer type used by x86 intrinsics functions \\
+    \texttt{VSMC\_HAS\_INT128} & Platform dependent &
+    Support for 128-bits integers \\
+    \texttt{VSMC\_INT128} & Platform dependent &
+    The 128-bits integer type \\
+    \texttt{VSMC\_HAS\_SSE2} & Platform dependent &
+    Support for \sse{}2 intrinsic functions \\
+    \texttt{VSMC\_HAS\_AVX2} & Platform dependent &
+    Support for \avx{}2 intrinsic functions \\
+    \texttt{VSMC\_HAS\_AES\_NI} & Platform dependent &
+    Support for \aesni intrinsic functions \\
+    \texttt{VSMC\_HAS\_RDRAND} & Platform dependent &
+    Support for \rdrand intrinsic functions \\
+    \texttt{VSMC\_HAS\_X86} & Platform dependent &
+    If we are using x86 \\
+    \texttt{VSMC\_HAS\_X86\_64} & Platform dependent &
+    If we are using x86-64 \\
+    \texttt{VSMC\_HAS\_POSIX} & Platform dependent &
+    If we are on a \posix platform \\
+    \texttt{VSMC\_HAS\_OMP} & Platform dependent &
+    Support for OpenMP~3.0 or higher \\
+    \texttt{VSMC\_HAS\_TBB} & \texttt{0} & Support for \tbb 4.0 or higher \\
+    \texttt{VSMC\_HAS\_TBB\_MALLOC} & \texttt{VSMC\_HAS\_TBB} &
+    Support for \tbb scalable memory allocation \\
+    \texttt{VSMC\_HAS\_HDF5} & \texttt{0} & Support for \hdf 1.8.6 or higher \\
+    \texttt{VSMC\_HAS\_MKL} & \texttt{0} & Support for \mkl 11 or higher \\
+    \texttt{VSMC\_USE\_MKL\_CBLAS} & \texttt{VSMC\_HAS\_MKL} &
+    Use \mkl header \texttt{mkl\_cblas.h} instead of the standard
+    \texttt{cblas.h} \\
+    \texttt{VSMC\_USE\_MKL\_LAPACKE} & \texttt{VSMC\_HAS\_MKL} &
+    Use \mkl header \texttt{mkl\_lapacke.h} instead of the standard
+    \texttt{lapacke.h} \\
+    \texttt{VSMC\_USE\_MKL\_VML} & \texttt{VSMC\_HAS\_MKL} &
+    Use \mkl vector mathematical functions (\vml) \\
+    \texttt{VSMC\_USE\_MKL\_VSL} & \texttt{VSMC\_HAS\_MKL} &
+    Use \mkl statistical functions (\vsl) \\
+    \texttt{VSMC\_CBLAS\_INT\_TYPE} & \texttt{int} &
+    The default integer type of \blas routines \\
+    \texttt{VSMC\_ALIGNMENT} & \texttt{32} &
+    Default alignment of \texttt{AlignedAllocator} \\
+    \bottomrule
+  \end{tabu}
+  \caption{Configuration macros}
+  \label{tab:Configuration macros}
+\end{table}

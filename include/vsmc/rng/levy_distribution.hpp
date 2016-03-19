@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -54,17 +54,12 @@ inline bool levy_distribution_check_param(RealType, RealType b)
 template <typename RealType>
 class LevyDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(
-        Levy, levy, RealType, result_type, a, 0, result_type, b, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Levy, levy, a, 0, b, 1)
 
     public:
-    result_type min VSMC_MNE() const { return a(); }
+    result_type min() const { return a(); }
 
-    result_type max VSMC_MNE() const
-    {
-        return std::numeric_limits<result_type>::max VSMC_MNE();
-    }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
     void reset() { normal_ = NormalDistribution<RealType>(0, 1); }
 
@@ -102,20 +97,19 @@ template <typename RealType, typename RNGType>
 inline void levy_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    const std::size_t k = 1000;
+    static_assert(std::is_floating_point<RealType>::value,
+        "**levy_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
+    const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i)
-        internal::levy_distribution_impl<k>(rng, k, r + i * k, a, b);
-    internal::levy_distribution_impl<k>(rng, l, r + m * k, a, b);
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        internal::levy_distribution_impl<k>(rng, k, r, a, b);
+    internal::levy_distribution_impl<k>(rng, l, r, a, b);
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(
-    RNGType &rng, LevyDistribution<RealType> &dist, std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Levy, levy, a, b)
 
 } // namespace vsmc
 

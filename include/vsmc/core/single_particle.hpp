@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,16 @@
 
 #include <vsmc/internal/common.hpp>
 
+#define VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_COMPARE(sp1, sp2)                 \
+    VSMC_RUNTIME_ASSERT((sp1.particle_ptr() == sp2.particle_ptr()),           \
+        "COMPARE TWO SingleParticle OBJECTS THAT BELONG TO TWO PARTICLE "     \
+        "SYSTEMS");
+
+#define VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_DIFFERENCE(sp1, sp2)              \
+    VSMC_RUNTIME_ASSERT((sp1.particle_ptr() == sp2.particle_ptr()),           \
+        "SUBSTRACT TWO SingleParticle OBJECTS THAT BELONG TO TWO PARTICLE "   \
+        "SYSTEMS");
+
 namespace vsmc
 {
 
@@ -52,7 +62,9 @@ class SingleParticleBase
 
     Particle<T> &particle() const { return *pptr_; }
 
-    typename Particle<T>::rng_type &rng() const { return pptr_->rng(id_); }
+    Particle<T> *particle_ptr() const { return pptr_; }
+
+    typename Particle<T>::rng_type &rng() { return pptr_->rng(id_); }
 
     private:
     typename Particle<T>::size_type id_;
@@ -94,7 +106,155 @@ class SingleParticle : public SingleParticleBaseType<T>
         : SingleParticleBaseType<T>(id, pptr)
     {
     }
+
+    template <typename IntType>
+    SingleParticle operator[](IntType n)
+    {
+        return SingleParticle<T>(static_cast<typename Particle<T>::size_type>(
+                                     static_cast<std::ptrdiff_t>(this->id()) +
+                                     static_cast<std::ptrdiff_t>(n)),
+            this->particle_ptr());
+    }
+
+    SingleParticle<T> &operator*() { return *this; }
+
+    const SingleParticle<T> &operator*() const { return *this; }
 }; // class SingleParticle
+
+template <typename T>
+bool operator==(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
+{
+    VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_COMPARE(sp1, sp2);
+
+    return sp1.id() == sp2.id();
+}
+
+template <typename T>
+bool operator!=(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
+{
+    VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_COMPARE(sp1, sp2);
+
+    return sp1.id() != sp2.id();
+}
+
+template <typename T>
+bool operator<(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
+{
+    VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_COMPARE(sp1, sp2);
+
+    return sp1.id() < sp2.id();
+}
+
+template <typename T>
+bool operator>(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
+{
+    VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_COMPARE(sp1, sp2);
+
+    return sp1.id() > sp2.id();
+}
+
+template <typename T>
+bool operator<=(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
+{
+    VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_COMPARE(sp1, sp2);
+
+    return sp1.id() <= sp2.id();
+}
+
+template <typename T>
+bool operator>=(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
+{
+    VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_COMPARE(sp1, sp2);
+
+    return sp1.id() >= sp2.id();
+}
+
+template <typename T>
+SingleParticle<T> &operator++(SingleParticle<T> &sp)
+{
+    sp = SingleParticle<T>(sp.id() + 1, sp.particle_ptr());
+
+    return sp;
+}
+
+template <typename T>
+SingleParticle<T> operator++(SingleParticle<T> &sp, int)
+{
+    auto sp_tmp = sp;
+    sp = SingleParticle<T>(sp.id() + 1, sp.particle_ptr());
+
+    return sp_tmp;
+}
+
+template <typename T>
+SingleParticle<T> &operator--(SingleParticle<T> &sp)
+{
+    sp = SingleParticle<T>(sp.id() - 1, sp.particle_ptr());
+
+    return sp;
+}
+
+template <typename T>
+SingleParticle<T> operator--(SingleParticle<T> &sp, int)
+{
+    auto sp_tmp = sp;
+    sp = SingleParticle<T>(sp.id() - 1, sp.particle_ptr());
+
+    return sp_tmp;
+}
+
+template <typename T, typename IntType>
+SingleParticle<T> operator+(const SingleParticle<T> &sp, IntType n)
+{
+    return SingleParticle<T>(static_cast<typename Particle<T>::size_type>(
+                                 static_cast<std::ptrdiff_t>(sp.id()) +
+                                 static_cast<std::ptrdiff_t>(n)),
+        sp.particle_ptr());
+}
+
+template <typename T, typename IntType>
+SingleParticle<T> operator+(IntType n, const SingleParticle<T> &sp)
+{
+    return SingleParticle<T>(static_cast<typename Particle<T>::size_type>(
+                                 static_cast<std::ptrdiff_t>(sp.id()) +
+                                 static_cast<std::ptrdiff_t>(n)),
+        sp.particle_ptr());
+}
+
+template <typename T, typename IntType>
+SingleParticle<T> operator-(const SingleParticle<T> &sp, IntType n)
+{
+    return SingleParticle<T>(static_cast<typename Particle<T>::size_type>(
+                                 static_cast<std::ptrdiff_t>(sp.id()) -
+                                 static_cast<std::ptrdiff_t>(n)),
+        sp.particle_ptr());
+}
+
+template <typename T, typename IntType>
+SingleParticle<T> &operator+=(SingleParticle<T> &sp, IntType n)
+{
+    sp = sp + n;
+
+    return sp;
+}
+
+template <typename T, typename IntType>
+SingleParticle<T> &operator-=(SingleParticle<T> &sp, IntType n)
+{
+    sp = sp - n;
+
+    return sp;
+}
+
+template <typename T>
+std::ptrdiff_t operator-(
+    const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
+{
+    VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_DIFFERENCE(sp1, sp2);
+
+    return static_cast<std::ptrdiff_t>(sp1.id()) -
+        static_cast<std::ptrdiff_t>(sp2.id());
+}
 
 } // namespace vsmc
 

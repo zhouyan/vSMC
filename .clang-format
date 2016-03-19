@@ -29,10 +29,21 @@ ConstructorInitializerAllOnOneLineOrOnePerLine : true
 ConstructorInitializerIndentWidth              : 4
 ContinuationIndentWidth                        : 4
 Cpp11BracedListStyle                           : true
-DerivePointerAlignment                         : true
+DerivePointerAlignment                         : false
 DisableFormat                                  : false
 # ExperimentalAutoDetectBinPacking               :
 # ForEachMacros                                  :
+IncludeCategories                              :
+  - Regex:           '^<vsmc/.*/internal'
+    Priority:        1
+  - Regex:           '^<vsmc/internal'
+    Priority:        2
+  - Regex:           '^<vsmc/'
+    Priority:        3
+  - Regex:           '^<'
+    Priority:        4
+  - Regex:           '.\*'
+    Priority:        5
 IndentCaseLabels                               : true
 IndentWidth                                    : 4
 IndentWrappedFunctionNames                     : true

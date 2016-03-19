@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,6 @@
 #include <vsmc/internal/config.h>
 #include <type_traits>
 
-#define VSMC_MNE
-
 namespace vsmc
 {
 
@@ -44,23 +42,15 @@ class NullType;
 
 /// \brief Dynamic dimension
 /// \ingroup Definitions
-enum {
-    Dynamic = 0 ///< Used to specify a dimension template parameter is dynamic
-};              // enum
+enum { Dynamic = 0 };
 
-/// \brief Matrix order
+/// \brief Matrix layout
 /// \ingroup Definitions
-enum MatrixOrder {
-    RowMajor = 101, ///< Data are stored row by row in memory
-    ColMajor = 102  ///< Data are stored column by column in memory
-};                  // enum MatrixOrder
+enum MatrixLayout { RowMajor = 101, ColMajor = 102 };
 
-/// \brief Matrix Transpose
+/// \brief Alias to MatrixOrder
 /// \ingroup Definitions
-enum MatrixTrans {
-    NoTrans = 111, ///< The matrix shall not be transposed
-    Trans = 112    ///< The matrix shall be transposed
-};                 // enum MatrixTrans
+using MatrixOrder = MatrixLayout;
 
 /// \brief Resampling schemes
 /// \ingroup Definitions

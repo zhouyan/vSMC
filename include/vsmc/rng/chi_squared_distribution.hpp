@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -54,17 +54,12 @@ inline bool chi_squared_distribution_check_param(RealType n)
 template <typename RealType>
 class ChiSquaredDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_1(
-        ChiSquared, chi_squared, RealType, result_type, n, 1)
-    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATORS
+    VSMC_DEFINE_RNG_DISTRIBUTION_1(ChiSquared, chi_squared, n, 1)
 
     public:
-    result_type min VSMC_MNE() const { return 0; }
+    result_type min() const { return 0; }
 
-    result_type max VSMC_MNE() const
-    {
-        return std::numeric_limits<result_type>::max VSMC_MNE();
-    }
+    result_type max() const { return std::numeric_limits<result_type>::max(); }
 
     void reset() { gamma_ = GammaDistribution<RealType>(n() / 2, 2); }
 
@@ -89,15 +84,14 @@ template <typename RealType, typename RNGType>
 inline void chi_squared_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType df)
 {
+    static_assert(std::is_floating_point<RealType>::value,
+        "**chi_squared_distribution** USED WITH RealType OTHER THAN FLOATING "
+        "POINT TYPES");
+
     gamma_distribution(rng, n, r, df / 2, static_cast<RealType>(2));
 }
 
-template <typename RealType, typename RNGType>
-inline void rng_rand(RNGType &rng, ChiSquaredDistribution<RealType> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
-}
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_1(ChiSquared, chi_squared, n)
 
 } // namespace vsmc
 

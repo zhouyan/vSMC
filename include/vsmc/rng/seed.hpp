@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2015, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -34,10 +34,6 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/counter.hpp>
-
-#define VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(T)                  \
-    VSMC_STATIC_ASSERT((std::is_unsigned<T>::value),                          \
-        "**SeedGenerator** USED WITH ResultType NOT AN UNSIGNED INTEGER")
 
 #define VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(div, rem)               \
     VSMC_RUNTIME_ASSERT((div > rem),                                          \
@@ -88,6 +84,10 @@ namespace vsmc
 template <typename ID, typename ResultType = VSMC_SEED_RESULT_TYPE>
 class SeedGenerator
 {
+    static_assert(std::is_unsigned<ResultType>::value,
+        "**SeedGenerator** USED WITH ResultType OTHER THAN UNSIGEND INTEGER "
+        "TYPES");
+
     public:
     using result_type = ResultType;
     using skip_type = ResultType;
@@ -151,7 +151,7 @@ class SeedGenerator
 
         divisor_ = div;
         remainder_ = rem;
-        seed_max_ = std::numeric_limits<skip_type>::max VSMC_MNE();
+        seed_max_ = std::numeric_limits<skip_type>::max();
         seed_max_ -= seed_max_ % divisor_;
         seed_max_ /= divisor_;
 
@@ -223,8 +223,6 @@ class SeedGenerator
 
     SeedGenerator() : seed_(0), seed_max_(0), divisor_(1), remainder_(0)
     {
-        VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(ResultType);
-
         modulo(divisor_, remainder_);
     }
 }; // class SeedGenerator
@@ -249,21 +247,26 @@ class SeedGenerator
 /// s.back() = world.rank();
 /// seed.set(s);
 /// ~~~
-template <typename ID, typename T, std::size_t K>
-class SeedGenerator<ID, std::array<T, K>>
+template <typename ID, typename ResultType, std::size_t K>
+class SeedGenerator<ID, std::array<ResultType, K>>
 {
+    static_assert(std::is_unsigned<ResultType>::value,
+        "**SeedGenerator** USED WITH ResultType OTHER THAN UNSIGEND INTEGER "
+        "TYPES");
+
     public:
-    using result_type = std::array<T, K>;
-    using skip_type = T;
+    using result_type = std::array<ResultType, K>;
+    using skip_type = ResultType;
 
-    SeedGenerator(const SeedGenerator<ID, std::array<T, K>> &) = delete;
+    SeedGenerator(
+        const SeedGenerator<ID, std::array<ResultType, K>> &) = delete;
 
-    SeedGenerator<ID, std::array<T, K>> &operator=(
-        const SeedGenerator<ID, std::array<T, K>> &) = delete;
+    SeedGenerator<ID, std::array<ResultType, K>> &operator=(
+        const SeedGenerator<ID, std::array<ResultType, K>> &) = delete;
 
-    static SeedGenerator<ID, std::array<T, K>> &instance()
+    static SeedGenerator<ID, std::array<ResultType, K>> &instance()
     {
-        static SeedGenerator<ID, std::array<T, K>> seed;
+        static SeedGenerator<ID, std::array<ResultType, K>> seed;
 
         return seed;
     }
@@ -291,7 +294,7 @@ class SeedGenerator<ID, std::array<T, K>>
         return seed_;
     }
 
-    T get_scalar()
+    ResultType get_scalar()
     {
         result_type s1(get());
         result_type s2(get());
@@ -302,7 +305,7 @@ class SeedGenerator<ID, std::array<T, K>>
         return std::get<0>(s2);
     }
 
-    void set(T s)
+    void set(ResultType s)
     {
         seed_.fill(0);
         seed_.front() = s;
@@ -324,7 +327,7 @@ class SeedGenerator<ID, std::array<T, K>>
 
         divisor_ = div;
         remainder_ = rem;
-        seed_max_.fill(std::numeric_limits<skip_type>::max VSMC_MNE());
+        seed_max_.fill(std::numeric_limits<skip_type>::max());
 
         set(seed_);
     }
@@ -336,7 +339,7 @@ class SeedGenerator<ID, std::array<T, K>>
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const SeedGenerator<ID, std::array<T, K>> &sg)
+        const SeedGenerator<ID, std::array<ResultType, K>> &sg)
     {
         if (!os.good())
             return os;
@@ -351,7 +354,7 @@ class SeedGenerator<ID, std::array<T, K>>
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        SeedGenerator<ID, std::array<T, K>> &sg)
+        SeedGenerator<ID, std::array<ResultType, K>> &sg)
     {
         if (!is.good())
             return is;
@@ -380,8 +383,6 @@ class SeedGenerator<ID, std::array<T, K>>
 
     SeedGenerator() : divisor_(1), remainder_(0)
     {
-        VSMC_STATIC_ASSERT_RNG_SEED_GENERATOR_RESULT_TYPE(T);
-
         seed_.fill(0);
         seed_max_.fill(0);
         modulo(divisor_, remainder_);
