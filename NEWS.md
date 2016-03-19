@@ -41,6 +41,11 @@ http://zhouyan.github.io/vSMCDoc/develop/
 The mutation (MCMC) steps are now performed after the resampling of
 initialization step.
 
+## Removed features
+
+* OpenCL and MPI modules are removed for now. It is planned that they will be
+  added back in future with a new interface.
+
 ## Documentation
 http://zhouyan.github.io/vSMCDoc/v2.1.0/
 
