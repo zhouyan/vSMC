@@ -1,0 +1,204 @@
+\chapter{Advanced usage}
+\label{chap:Advanced usage}
+
+\section{Cloning objects}
+\label{sec:Cloning objects}
+
+The \cppinline{Sampler<T>} and \cppinline{Particle<T>} objects have copy
+constructors, assignment operators, move constructors, and move assignment
+operators that behaves exactly the way as \cpp programmers would expect.
+However, these behaviors are not always desired. For example, in
+\textcite{stpf} a stable particle filter in high-dimensions was developed.
+Without going into the details, the algorithm consists of a particle system
+where each particle is itself a particle filter. And thus when resampling the
+global system, the \cppinline{Sampler<T>} object will be copied, together with
+all of its sub-objects. This include the \rng system within the
+\cppinline{Particle<T>} object. Even if the user does not use this \rng system
+for random number generating within user defined operations, one of these \rng
+will be used for resampling by the \cppinline{Particle<T>} object. Direct
+copying the \cppinline{Sampler<T>} object will lead to multiple local filters
+start to generating exactly the same random numbers in the next iteration. This
+is an undesired side effects. In this situation, one can clone the sampler with
+the following method,
+\begin{cppcode}
+  auto new_sampler = sampler.clone(new_rng);
+\end{cppcode}
+where \cppinline{new_rng} is a boolean value. If it is \cppinline{true}, then
+an exact copy of \cppinline{sampler} will be returned, except it will have the
+\rng system re-seeded. If it is \cppinline{false}, then the above assignemnt
+behaves exactly the same as
+\begin{cppcode}
+  auto new_sampler = sampler;
+\end{cppcode}
+Alternatively, the contents of an existing \cppinline{Sampler<T>} object can be
+replaced from another one by the following method,
+\begin{cppcode}
+  sampler.clone(other_sampler, retain_rng);
+\end{cppcode}
+where \cppinline{retain_rng} is a boolean value. If it is \cppinline{true},
+then the \rng system of \cppinline{other_sampler} is not copied and its own
+\rng system is retained. If it is \cppinline{false}, then the above call
+behaves exactly the same as
+\begin{cppcode}
+  sampler = other_sampler;
+\end{cppcode}
+The above method also supports move semantics. Similar \cppinline{clone}
+methods exist for the \cppinline{Particle<T>} class.
+
+\section{Customizing member types}
+\label{sec:Customizing member types}
+
+The \cppinline{Particle<T>} class has a few member types that can be replaced
+by the user. If the class \cppinline{T} has the corresponding types, then the
+member type of \cppinline{Particle<T>} will be replaced. For example, given the
+following declarations inside class \cppinline{T},
+\begin{cppcode}
+  class T
+  {
+      public:
+      using size_type = int;
+      using weight_type = /* User defined type */;
+      using rng_set_type = RNGSetTBB<AES256_4x32>;
+  };
+\end{cppcode}
+The corresponding \cppinline{Particle<T>::size_type}, etc., will have their
+defaults replaced with the above types.
+
+A note on \cppinline{weight_type}, it needs to provide the following method,
+\begin{cppcode*}{texcomments}
+  w.ess();           // Get $\text{\normalfont\textsc{ess}}$
+  w.set_equal();     // Set $W^{(i)} = 1/N$
+  w.resample_size(); // Get the size $N$.
+  w.resample_data(); // Get a pointer to normalized weights
+\end{cppcode*}
+For the library's default class \cppinline{Weight}, the last two calls are the
+same as \cppinline{w.size()} and \cppinline{w.data()}. However, this does not
+need to be so. For example, below is the outline of an implementation of
+\cppinline{weight_type} for distributed systems, assuming each computing node
+has been allocated $N_r$ particles.
+\begin{cppcode*}{texcomments}
+  class WeightMPI
+  {
+      public:
+      double ess()
+      {
+          double local = /* $\sum_{i=1}^{N_r}(W^{(i)})^2$ */;
+          double global = /* Gather local from each all nodes */;
+          // Broadcast the value of global
+
+          return 1 / global;
+      }
+
+      std::size_t resample_size() { return /* $\sum N_r$ */; }
+
+      double *resample_data()
+      {
+          if (rank == 0) {
+              // Gather all normalized weights into a member data on this node
+              // Say resample\_weight\_
+              return resample_weight_.data();
+          } else {
+              return nullptr;
+          }
+      }
+
+      void set_equal()
+      {
+          // Set all weights to $1 / \sum N_r$
+          // Synchronization
+      }
+
+      void set(const double *v)
+      {
+          // Set $W^{(i)} = v_i$ for $i = 1,\dots,N_r$
+          // Compute $S_r = \sum_{i=1}^{N_r} W^{(i)}$
+          // Gathering $S_r$, compute $S = \sum S_r$
+          // Broadcast $S$
+          // Set $W^{(i)} = W^{(i)} / S$ for $i = 1,\dots,N_r$
+      }
+  };
+\end{cppcode*}
+When \cppinline{Particle<T>} performs resampling, it checks if the pointer
+returned by \cppinline{w.resample_data()} is a null pointer. It will only
+generate the vector $\{a_i\}_{i=1}^N$ (see section~\ref{sub:State}) when it is
+not a null pointer. And then a pointer to this vector is passed to
+\cppinline{T::copy}. Of course, the class \cppinline{T} also needs to provide a
+suitable method \cppinline{copy} that can handle the distributed system. By
+defining suitable \cppinline{WeightMPI} and \cppinline{T::copy}, the library
+can be extended to handle distributed systems.
+
+\section{Extending \protect\spt}
+\label{sec:Extending SP}
+
+The \cppinline{SingleParticle<T>} can also be extended by the user. We have
+already see in section~\ref{sub:State} that if class \cppinline{T} is a
+subclass of \cppinline{StateMatrix}, \cppinline{SingleParticle<T>} can have
+additional methods to access the state. This class can be extended by defining
+a member class template inside class \cppinline{T}. For example, for the simple
+particle filter in section~\ref{sec:A simple particle filter}, we can redefine
+the \cppinline{PFState} as the following,
+\begin{cppcode}
+  using PFStateBase = vsmc::StateMatrix<vsmc::RowMajor, 4, double>;
+  
+  template <typename T>
+  using PFStateSPBase = PFStateBase::single_particle_type<T>;
+  
+  class PFState : public PFStateBase
+  {
+      public:
+      using PFStateBase::StateMatrix;
+  
+      template <typename S>
+      class single_particle_type : public PFStateSPBase<S>
+      {
+          public:
+          using PFStateSPBase<S>::single_particle_type;
+  
+          double &pos_x() { return this->state(0); }
+          double &pos_y() { return this->state(1); }
+          double &vel_x() { return this->state(2); }
+          double &vel_y() { return this->state(3); }
+  
+          // Return $\ell(X_t^{(i)}|Y_t)$
+          double log_likelihood(std::size_t t);
+      };
+  
+      void read_data(const char *param);
+  
+      private:
+      vsmc::Vector<double> obs_x_;
+      vsmc::Vector<double> obs_y_;
+  };
+\end{cppcode}
+And later, we can use these methods when implement \cppinline{PFInit} etc.,
+\begin{cppcode}
+  class PFInit : public vsmc::InitializeTBB<PFState, PFInit>
+  {
+      public:
+      void eval_param(vsmc::Particle<PFState> &particle, void *param);
+
+      void eval_pre(vsmc::Particle<PFState> &particle);
+  
+      std::size_t eval_sp(vsmc::SingleParticle<PFState> sp)
+      {
+          vsmc::NormalDistribution<double> norm_pos(0, 2);
+          vsmc::NormalDistribution<double> norm_vel(0, 1);
+          sp.pos_x() = norm_pos(sp.rng());
+          sp.pos_y() = norm_pos(sp.rng());
+          sp.vel_x() = norm_vel(sp.rng());
+          sp.vel_y() = norm_vel(sp.rng());
+          w_[sp.id()] = sp.log_likelihood(0);
+  
+          return 0;
+      }
+  
+      void eval_post(vsmc::Particle<PFState> &particle);
+  
+      private:
+      vsmc::Vector<double> w_;
+  };
+\end{cppcode}
+It shall be noted that, it is important to keep
+\cppinline{single_particle_type} small and copying the object efficient. The
+library will frequently pass argument of \cppinline{SingleParticle<T>} type by
+value.
