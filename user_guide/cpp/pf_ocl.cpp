@@ -81,7 +81,7 @@ class PFInit
         particle.value().read_data(
             command_queue_, static_cast<const char *>(param));
 
-        kernel_.set_arg(0, static_cast<cl_uint>(particle.size()));
+        kernel_.set_arg(0, static_cast<cl_int>(particle.size()));
         kernel_.set_arg(1, particle.value().dev_rng_set());
         kernel_.set_arg(2, particle.value().dev_state());
         kernel_.set_arg(3, particle.value().dev_obs_x());
@@ -118,8 +118,8 @@ class PFMove
 
     std::size_t operator()(std::size_t t, vsmc::Particle<PFState> &particle)
     {
-        kernel_.set_arg(0, static_cast<cl_uint>(t));
-        kernel_.set_arg(1, static_cast<cl_uint>(particle.size()));
+        kernel_.set_arg(0, static_cast<cl_int>(t));
+        kernel_.set_arg(1, static_cast<cl_int>(particle.size()));
         kernel_.set_arg(2, particle.value().dev_rng_set());
         kernel_.set_arg(3, particle.value().dev_state());
         kernel_.set_arg(4, particle.value().dev_obs_x());

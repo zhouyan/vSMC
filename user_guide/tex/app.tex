@@ -1,20 +1,40 @@
 \appendix
 
 \chapter{Source code of complete programs}
-\label{chap:Source code of complete programs}
+\label{app:chap:Source code of complete programs}
 
-\section{Sequential implementation of a simple particle filter}
-\label{sec:Sequential implementation of a simple particle filter}
+\section{A simple particle filter}
+\label{app:sec:A simle particle fitler}
+
+\subsection{Sequential implementation}
+\label{app:sub:Sequential implementation}
+
 \cppfile{cpp/pf_seq.cpp}
 
-\section{Parallelized implementation of a simple particle filter}
-\label{sec:Parallelized implementation of a simple particle filter}
+\subsection{Parallelized implementation using \protect\tbb}
+\label{app:sub:Parallelized implementation using TBB}
+
 \cppfile{cpp/pf_tbb.cpp}
 
-\section{Processing command line program options}
-\label{sec:Processing command line program options}
+\subsection{Parallelized implementation using OpenCL}
+\label{app:sub:Paralleized implementation using OpenCL}
+
+\subsubsection{Host program}
+\label{app:sub:Host program}
+
+\cppfile{cpp/pf_ocl.cpp}
+
+\subsubsection{Device program}
+\label{app:sub:Device program}
+
+\cppfile{cpp/pf_ocl.cl}
+
+\section{Program option}
+\label{app:sec:Program option}
+
 \cppfile{cpp/program_option.cpp}
 
-\section{Display program progress}
-\label{sec:Display program progress}
-\cppfile{cpp/progress.cpp}
+\section{Program progress}
+\label{app:sec:Program progress}
+
+\cppfile{cpp/program_progress.cpp}

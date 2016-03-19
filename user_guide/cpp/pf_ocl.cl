@@ -55,10 +55,11 @@ static inline void move_sp(vsmc_threefry4x32 *rng, pf_sp *sp)
     sp->vel_y += r[3] * sd_vel;
 }
 
-kernel void init(uint N, global vsmc_threefry4x32 *rng_set,
-    global pf_sp *state, const global float *obs_x, const global float *obs_y)
+__kernel void init(int N, __global vsmc_threefry4x32 *rng_set,
+    __global pf_sp *state, const __global float *obs_x,
+    const __global float *obs_y)
 {
-    uint32_t i = get_global_id(0);
+    int i = get_global_id(0);
     if (i >= N)
         return;
 
@@ -71,10 +72,11 @@ kernel void init(uint N, global vsmc_threefry4x32 *rng_set,
     state[i] = sp;
 }
 
-kernel void move(uint t, uint N, global vsmc_threefry4x32 *rng_set,
-    global pf_sp *state, const global float *obs_x, const global float *obs_y)
+__kernel void move(int t, int N, __global vsmc_threefry4x32 *rng_set,
+    __global pf_sp *state, const __global float *obs_x,
+    const __global float *obs_y)
 {
-    uint32_t i = get_global_id(0);
+    int i = get_global_id(0);
     if (i >= N)
         return;
 

@@ -129,13 +129,13 @@ classes defined by the library and their corresponding \mkl pointers.
   \label{tab:RAII classes for MKL pointers}
 \end{table}
 
-\section{Program options}
-\label{sec:Program options}
+\section{Program option}
+\label{sec:Program option}
 
 The library provides some basic support of processing command line program
 options. Here we show a minimal example. The complete program is shown in
-appendix~\appref{sec:Processing command line program options}. First, one need to
-allocated variables to store the options to be processed.
+appendix~\appref{app:sec:Program option}. First, one need to allocated
+variables to store the options to be processed.
 \begin{cppcode}
   int n;
   std::string str;
@@ -185,7 +185,7 @@ into the vector.
 Sometime it is desirable to see how much progress of a program has been made.
 The library provide a \cppinline{Progress} class for this purpose. Here we show
 a minimal example. The complete program is shown in
-appendix~\appref{sec:Display program progress}.
+appendix~\appref{app:sec:Program progress}.
 \begin{cppcode}
   vsmc::Progress progress;
   progress.start(n * n);

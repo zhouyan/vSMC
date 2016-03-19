@@ -134,8 +134,8 @@ counter-base \rng{}s insufficient.
     \texttt{VSMC\_RNG\_THREEFRY\_VECTOR\_LENGTH} & \texttt{4} \\
     \bottomrule
   \end{tabu}
-  \caption{Configuration macros for the counter-based \rng}
-  \label{tab:Configuration macros for the counter-based RNG}
+  \caption{Configuration macros for counter-based \rng{}s}
+  \label{tab:Configuration macros for counter-based RNGs}
 \end{table}
 
 \subsection{\protect\aesni intrinsics based \protect\rng}
@@ -181,8 +181,8 @@ the \ars algorithm in \textcite{Salmon:2011um} and the \aes-128, \aes-192, and
       AESNIEngine<ResultType, AES256KeySeq<ResultType, 14>, 14, Blocks>;
 \end{cppcode}
 The default template arguments can be changed by configuration macros listed in
-table~\ref{tab:Configuration macros for the counter-based RNG}. Shortcuts are
-also defined, as listed in table~\ref{tab:Counter-based RNG}. For example,
+table~\ref{tab:Configuration macros for counter-based RNGs}. Shortcuts are also
+defined, as listed in table~\ref{tab:Counter-based RNG}. For example,
 \cppinline{ARS_4x32} is \cppinline{ARSEngine} with result type
 \cppinline{std::uint32_t}, four blocks, and the default number of rounds.
 
@@ -197,8 +197,8 @@ general form,
   using PhiloxEngine = CounterEngine<PhiloxGenerator<ResultType, K, Rounds>>;
 \end{cppcode}
 The default vector length and the number of rounds can be changed by
-configuration macros listed in table~\ref{tab:Configuration macros for the RNG
-  system}. Shortcuts are also defined, as listed in
+configuration macros listed in table~\ref{tab:Configuration macros for
+  counter-based RNGs}. Shortcuts are also defined, as listed in
 table~\ref{tab:Counter-based RNG}. For example, \cppinline{Philox4x32} is
 \cppinline{PhiloxEngine} with result type \cppinline{std::uint32_t}, vector
 length four, and the default number of rounds.
@@ -214,8 +214,8 @@ general form,
   using ThreefryEngine = CounterEngine<ThreefryGenerator<ResultType, K, Rounds>>;
 \end{cppcode}
 The default vector length and the number of rounds can be changed by
-configuration macros listed in table~\ref{tab:Configuration macros for the RNG
-  system}. Shortcuts are also defined, as listed in
+configuration macros listed in table~\ref{tab:Configuration macros for
+  counter-based RNGs}. Shortcuts are also defined, as listed in
 table~\ref{tab:Counter-based RNG}. For example, \cppinline{Threefry4x32} is
 \cppinline{ThreefryEngine} with result type \cppinline{std::uint32_t}, vector
 length four, and the default number of rounds.

@@ -7,7 +7,7 @@ CXXFLAGS_CL := $(CXXFLAGS) -DVSMC_HAS_OPENCL
 LDFLAGS := -lmkl_rt -ltbb -ltbbmalloc
 LDFLAGS_CL := $(LDFLAGS) -lOpenCL
 
-all : pf_ocl pf_tbb pf_seq program_option progress
+all : pf_ocl pf_tbb pf_seq program_option program_progress
 
 pf_ocl : pf_ocl.cpp
 	$(CXX) $(CXXFLAGS_CL) -o pf_ocl pf_ocl.cpp $(LDFLAGS_CL)
@@ -21,11 +21,11 @@ pf_seq : pf_seq.cpp
 program_option : program_option.cpp
 	$(CXX) $(CXXFLAGS) -o program_option program_option.cpp $(LDFLAGS)
 
-progress : program_option.cpp
-	$(CXX) $(CXXFLAGS) -o progress progress.cpp $(LDFLAGS)
+program_process : program_process.cpp
+	$(CXX) $(CXXFLAGS) -o program_process program_process.cpp $(LDFLAGS)
 
 clean:
 	rm -f pf_ocl pf_seq pf_tbb
 	rm -f pf.out pf.rout pf.pdf
 	rm -f program_option
-	rm -f progress
+	rm -f program_process
