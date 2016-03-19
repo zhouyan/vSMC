@@ -74,7 +74,7 @@ class PFInit : public vsmc::InitializeTBB<PFState, PFInit>
 
     void eval_pre(vsmc::Particle<PFState> &particle)
     {
-        w_.resize(particle.size());
+        weight_.resize(particle.size());
     }
 
     std::size_t eval_sp(vsmc::SingleParticle<PFState> sp)
@@ -85,18 +85,18 @@ class PFInit : public vsmc::InitializeTBB<PFState, PFInit>
         sp.pos_y() = norm_pos(sp.rng());
         sp.vel_x() = norm_vel(sp.rng());
         sp.vel_y() = norm_vel(sp.rng());
-        w_[sp.id()] = sp.log_likelihood(0);
+        weight_[sp.id()] = sp.log_likelihood(0);
 
         return 0;
     }
 
     void eval_post(vsmc::Particle<PFState> &particle)
     {
-        particle.weight().set_log(w_.data());
+        particle.weight().set_log(weight_.data());
     }
 
     private:
-    vsmc::Vector<double> w_;
+    vsmc::Vector<double> weight_;
 };
 
 class PFMove : public vsmc::MoveTBB<PFState, PFMove>
@@ -104,7 +104,7 @@ class PFMove : public vsmc::MoveTBB<PFState, PFMove>
     public:
     void eval_pre(std::size_t t, vsmc::Particle<PFState> &particle)
     {
-        w_.resize(particle.size());
+        weight_.resize(particle.size());
     }
 
     std::size_t eval_sp(std::size_t t, vsmc::SingleParticle<PFState> sp)
@@ -115,21 +115,21 @@ class PFMove : public vsmc::MoveTBB<PFState, PFMove>
         sp.pos_y() += norm_pos(sp.rng()) + 0.1 * sp.vel_y();
         sp.vel_x() += norm_vel(sp.rng());
         sp.vel_y() += norm_vel(sp.rng());
-        w_[sp.id()] = sp.log_likelihood(t);
+        weight_[sp.id()] = sp.log_likelihood(t);
 
         return 0;
     }
 
     void eval_post(std::size_t t, vsmc::Particle<PFState> &particle)
     {
-        particle.weight().add_log(w_.data());
+        particle.weight().add_log(weight_.data());
     }
 
     private:
-    vsmc::Vector<double> w_;
+    vsmc::Vector<double> weight_;
 };
 
-class PFMEval : public vsmc::MonitorEvalTBB<PFState, PFMEval>
+class PFEval : public vsmc::MonitorEvalTBB<PFState, PFEval>
 {
     public:
     void eval_sp(std::size_t t, std::size_t dim,
@@ -143,7 +143,7 @@ class PFMEval : public vsmc::MonitorEvalTBB<PFState, PFMEval>
 int main()
 {
     vsmc::Sampler<PFState> sampler(N, vsmc::Multinomial, 0.5);
-    sampler.init(PFInit()).move(PFMove(), false).monitor("pos", 2, PFMEval());
+    sampler.init(PFInit()).move(PFMove(), false).monitor("pos", 2, PFEval());
 
     vsmc::StopWatch watch;
     watch.start();

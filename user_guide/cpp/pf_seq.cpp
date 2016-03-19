@@ -64,7 +64,7 @@ class PFInit
 
     void eval_pre(vsmc::Particle<PFState> &particle)
     {
-        w_.resize(particle.size());
+        weight_.resize(particle.size());
     }
 
     std::size_t eval_sp(vsmc::SingleParticle<PFState> sp)
@@ -75,18 +75,18 @@ class PFInit
         sp.state(PosY) = norm_pos(sp.rng());
         sp.state(VelX) = norm_vel(sp.rng());
         sp.state(VelY) = norm_vel(sp.rng());
-        w_[sp.id()] = sp.particle().value().log_likelihood(0, sp.id());
+        weight_[sp.id()] = sp.particle().value().log_likelihood(0, sp.id());
 
         return 0;
     }
 
     void eval_post(vsmc::Particle<PFState> &particle)
     {
-        particle.weight().set_log(w_.data());
+        particle.weight().set_log(weight_.data());
     }
 
     private:
-    vsmc::Vector<double> w_;
+    vsmc::Vector<double> weight_;
 };
 
 class PFMove
@@ -105,7 +105,7 @@ class PFMove
 
     void eval_pre(std::size_t t, vsmc::Particle<PFState> &particle)
     {
-        w_.resize(particle.size());
+        weight_.resize(particle.size());
     }
 
     std::size_t eval_sp(std::size_t t, vsmc::SingleParticle<PFState> sp)
@@ -116,21 +116,21 @@ class PFMove
         sp.state(PosY) += norm_pos(sp.rng()) + 0.1 * sp.state(VelY);
         sp.state(VelX) += norm_vel(sp.rng());
         sp.state(VelY) += norm_vel(sp.rng());
-        w_[sp.id()] = sp.particle().value().log_likelihood(t, sp.id());
+        weight_[sp.id()] = sp.particle().value().log_likelihood(t, sp.id());
 
         return 0;
     }
 
     void eval_post(std::size_t t, vsmc::Particle<PFState> &particle)
     {
-        particle.weight().add_log(w_.data());
+        particle.weight().add_log(weight_.data());
     }
 
     private:
-    vsmc::Vector<double> w_;
+    vsmc::Vector<double> weight_;
 };
 
-class PFMEval
+class PFEval
 {
     public:
     void operator()(std::size_t t, std::size_t dim,
@@ -157,7 +157,7 @@ class PFMEval
 int main()
 {
     vsmc::Sampler<PFState> sampler(N, vsmc::Multinomial, 0.5);
-    sampler.init(PFInit()).move(PFMove(), false).monitor("pos", 2, PFMEval());
+    sampler.init(PFInit()).move(PFMove(), false).monitor("pos", 2, PFEval());
 
     vsmc::StopWatch watch;
     watch.start();

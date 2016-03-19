@@ -521,7 +521,7 @@ The complete program is shown in appendix~\appref{app:sub:Sequential
 
 \begin{cppcode}
     Sampler<PFState> sampler(N, Multinomial, 0.5);
-    sampler.init(PFInit()).move(PFMove(), false).monitor("pos", 2, PFMEval());
+    sampler.init(PFInit()).move(PFMove(), false).monitor("pos", 2, PFEval());
     sampler.initialize(const_cast<char *>("pf.data")).iterate(n - 1);
 
     std::ofstream output("pf.out");
@@ -530,7 +530,7 @@ The complete program is shown in appendix~\appref{app:sub:Sequential
 \end{cppcode}
 \cppinline{Sampler<PFState>} object is constructed first. Then the
 initialization \cppinline{PFInit}, move \cppinline{PFMove} and a monitor
-\cppinline{PFMEval} that records $\xpos^t$ and $\ypos^t$ are added to the
+\cppinline{PFEval} that records $\xpos^t$ and $\ypos^t$ are added to the
 sampler. The monitor is named \cppinline{"pos"}. Then it is initialized with
 the name of the data file \cppinline{"pf.data"}, and iterated $n - 1$ times,
 where $n$ is the number of data points. At last, the output is written into a
@@ -657,7 +657,7 @@ The initialization step is implemented as below,
 
       void eval_pre(Particle<PFState> &particle)
       {
-          w_.resize(particle.size());
+          weight_.resize(particle.size());
       }
 
       std::size_t eval_sp(SingleParticle<PFState> sp)
@@ -675,11 +675,11 @@ The initialization step is implemented as below,
 
       void eval_post(Particle<PFState> &particle)
       {
-          particle.weight().set_log(w_.data());
+          particle.weight().set_log(weight_.data());
       }
 
       private:
-      Vector<double> w_;
+      Vector<double> weight_;
   };
 \end{cppcode}
 An object of this class is convertible to
@@ -713,12 +713,12 @@ The move step is similar to the initialization. We show the declaration here,
   };
 \end{cppcode}
 
-\subsubsection{Monitor: \texttt{PFMEval}}
+\subsubsection{Monitor: \texttt{PFEval}}
 
-Last we define \cppinline{PFMEval}, which simply copies the values of the
+Last we define \cppinline{PFEval}, which simply copies the values of the
 positions.
 \begin{cppcode}
-  class PFMEval
+  class PFEval
   {
       public:
       void operator()(std::size_t t, std::size_t dim,
@@ -747,7 +747,7 @@ positions.
 \label{sec:Symmetric Multiprocessing}
 
 The above example is implemented in a sequential fashion. However, the loops
-inside \cppinline{PFInit}, \cppinline{PFMove} and \cppinline{PFMEval} clearly
+inside \cppinline{PFInit}, \cppinline{PFMove} and \cppinline{PFEval} clearly
 can be parallelized. The library provides basic support of multicore
 parallelization through its \smp module. Two widely used backends, OpenMP and
 \tbb are available. Here we demonstrate how to use the \tbb backend. First we
@@ -755,7 +755,7 @@ will declare the implementation classes as subclasses as below,
 \begin{cppcode}
   class PFInit : public InitializationTBB<PFState>;
   class PFMove : public MoveTBB<PFState>;
-  class PFMEval : public MonitorEvalTBB<PFState>;
+  class PFEval : public MonitorEvalTBB<PFState>;
 \end{cppcode}
 And remove \cppinline{operator()} from their implementations. After these
 changes, the implementation will be parallelized using \tbb. The complete
@@ -801,7 +801,7 @@ implementation class, we will declare it in the following way,
 \begin{cppcode}
   class PFInit : public InitializationTBB<PFState, PFInit>;
   class PFMove : public MoveTBB<PFState, PFMove>;
-  class PFMEval : public MonitorEvalTBB<PFState, PFMEval>;
+  class PFEval : public MonitorEvalTBB<PFState, PFEval>;
 \end{cppcode}
 The second template argument of the base class need to be exactly the same as
 the derived class. For interested users, this is called Curiously Recurring

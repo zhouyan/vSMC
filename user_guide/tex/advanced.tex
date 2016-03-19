@@ -296,14 +296,14 @@ By extending \cppinline{SingleParticle<T>}, it provides the same easy access to
 each particle. However, now the state values are stored as two compact vectors.
 
 A second advantage is that it allows easier access to the raw data. Consider
-the implementation \cppinline{PFMEval} in section~\ref{sub:Implementations}.
+the implementation \cppinline{PFEval} in section~\ref{sub:Implementations}.
 It is rather redundant to copy each value of the two positions, just so later
 we can compute weighted sums from them. Recall that in
 section~\ref{sub:Monitor} we showed that a monitor that compute the final
 results directly can also be added to a sampler. Therefore, we might
-implement \cppinline{PFMEval} as the following,
+implement \cppinline{PFEval} as the following,
 \begin{cppcode*}{texcomments}
-  class PFMEval
+  class PFEval
   {
       public:
       void operator()(std::size_t t, std::size_t dim,
@@ -317,7 +317,7 @@ implement \cppinline{PFMEval} as the following,
 \end{cppcode*}
 And it can be added to a sampler as,
 \begin{cppcode}
-  sampler.monitor("pos", 2, PFMEval(), true);
+  sampler.monitor("pos", 2, PFEval(), true);
 \end{cppcode}
 For this particular case, the performance benefit is small. But the possibility
 of accessing compact vector as raw data allows easier interfacing with external
