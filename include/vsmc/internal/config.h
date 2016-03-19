@@ -134,4 +134,8 @@
 #define VSMC_USE_MKL_VSL VSMC_HAS_MKL
 #endif
 
+#ifndef VSMC_HAS_OPENCL
+#define VSMC_HAS_OPENCL 0
+#endif
+
 #endif // VSMC_INTERNAL_CONFIG_H

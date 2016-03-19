@@ -150,6 +150,10 @@
 /// \ingroup Utility
 /// \brief Resource management for Intel Math Kernel Library
 
+/// \defgroup OpenCL OpenCL
+/// \ingroup Utility
+/// \brief Resource management for OpenCL
+
 /// \defgroup Option Program option
 /// \ingroup Utility
 /// \brief Process program command line options
@@ -167,11 +171,11 @@
 /// \brief Time measurement
 
 #include <vsmc/internal/config.h>
-
 #include <vsmc/core/core.hpp>
 #include <vsmc/math/math.hpp>
 #include <vsmc/resample/resample.hpp>
 #include <vsmc/rng/rng.hpp>
+#include <vsmc/rngc/rngc.h>
 #include <vsmc/smp/smp.hpp>
 #include <vsmc/utility/utility.hpp>
 

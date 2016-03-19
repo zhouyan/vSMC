@@ -6,6 +6,7 @@ user_guide/cpp/pf
 user_guide/cpp/pf.out
 user_guide/cpp/pf.pdf
 user_guide/cpp/pf.rout
+user_guide/cpp/pf_ocl
 user_guide/cpp/pf_seq
 user_guide/cpp/pf_tbb
 user_guide/cpp/program_option

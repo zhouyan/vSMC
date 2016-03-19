@@ -32,7 +32,7 @@
 #ifndef VSMC_VSMC_H
 #define VSMC_VSMC_H
 
-#include <stddef.h>
+#include <vsmc/rngc/rngc.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -47,4 +47,8 @@
 #include <vsmc/utility/mkl.hpp>
 #endif
 
+#if VSMC_HAS_OPENCL
+#include <vsmc/utility/opencl.hpp>
+#endif
+
 #endif // VSMC_UTILITY_UTILITY_HPP

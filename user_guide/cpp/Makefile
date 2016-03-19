@@ -1,9 +1,13 @@
 CXX := clang++
+
 CXXFLAGS := $(CXXFLAGS) -std=c++11 -O3
+CXXFLAGS := $(CXXFLAGS) -I ../../include
 CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_MKL
 CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_TBB
-CXXFLAGS := $(CXXFLAGS) -I ~/Documents/GitHub/vSMC/include
+CXXFLAGS_CL := $(CXXFLAGS) -DVSMC_HAS_OPENCL
+
 LDFLAGS := -lmkl_rt -ltbb -ltbbmalloc
+LDFLAGS_CL := $(LDFLAGS) -lOpenCL
 
 all : pf_seq pf_tbb progress program_option
 
@@ -12,6 +16,9 @@ pf_seq : pf_seq.cpp
 
 pf_tbb : pf_tbb.cpp
 	$(CXX) $(CXXFLAGS) -o pf_tbb pf_tbb.cpp $(LDFLAGS)
+
+pf_ocl : pf_ocl.cpp
+	$(CXX) $(CXXFLAGS_CL) -o pf_ocl pf_ocl.cpp $(LDFLAGS_CL)
 
 program_option : program_option.cpp
 	$(CXX) $(CXXFLAGS) -o program_option program_option.cpp $(LDFLAGS)
