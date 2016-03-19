@@ -138,67 +138,189 @@ a member class template inside class \cppinline{T}. For example, for the simple
 particle filter in section~\ref{sec:A simple particle filter}, we can redefine
 the \cppinline{PFState} as the following,
 \begin{cppcode}
-  using PFStateBase = vsmc::StateMatrix<vsmc::RowMajor, 4, double>;
-  
+  using PFStateBase = StateMatrix<RowMajor, 4, double>;
+
   template <typename T>
   using PFStateSPBase = PFStateBase::single_particle_type<T>;
-  
+
   class PFState : public PFStateBase
   {
       public:
       using PFStateBase::StateMatrix;
-  
+
       template <typename S>
       class single_particle_type : public PFStateSPBase<S>
       {
           public:
           using PFStateSPBase<S>::single_particle_type;
-  
+
           double &pos_x() { return this->state(0); }
           double &pos_y() { return this->state(1); }
           double &vel_x() { return this->state(2); }
           double &vel_y() { return this->state(3); }
-  
+
           // Return $\ell(X_t^{(i)}|Y_t)$
           double log_likelihood(std::size_t t);
       };
-  
+
       void read_data(const char *param);
-  
+
       private:
-      vsmc::Vector<double> obs_x_;
-      vsmc::Vector<double> obs_y_;
+      Vector<double> obs_x_;
+      Vector<double> obs_y_;
   };
 \end{cppcode}
 And later, we can use these methods when implement \cppinline{PFInit} etc.,
 \begin{cppcode}
-  class PFInit : public vsmc::InitializeTBB<PFState, PFInit>
+  class PFInit : public InitializeTBB<PFState, PFInit>
   {
       public:
-      void eval_param(vsmc::Particle<PFState> &particle, void *param);
+      void eval_param(Particle<PFState> &particle, void *param);
 
-      void eval_pre(vsmc::Particle<PFState> &particle);
-  
-      std::size_t eval_sp(vsmc::SingleParticle<PFState> sp)
+      void eval_pre(Particle<PFState> &particle);
+
+      std::size_t eval_sp(SingleParticle<PFState> sp)
       {
-          vsmc::NormalDistribution<double> norm_pos(0, 2);
-          vsmc::NormalDistribution<double> norm_vel(0, 1);
+          NormalDistribution<double> norm_pos(0, 2);
+          NormalDistribution<double> norm_vel(0, 1);
           sp.pos_x() = norm_pos(sp.rng());
           sp.pos_y() = norm_pos(sp.rng());
           sp.vel_x() = norm_vel(sp.rng());
           sp.vel_y() = norm_vel(sp.rng());
           w_[sp.id()] = sp.log_likelihood(0);
-  
+
           return 0;
       }
-  
-      void eval_post(vsmc::Particle<PFState> &particle);
-  
+
+      void eval_post(Particle<PFState> &particle);
+
       private:
-      vsmc::Vector<double> w_;
+      Vector<double> w_;
   };
 \end{cppcode}
 It shall be noted that, it is important to keep
 \cppinline{single_particle_type} small and copying the object efficient. The
 library will frequently pass argument of \cppinline{SingleParticle<T>} type by
 value.
+
+\subsection{Compared to custom state type}
+\label{sub:Compared to custom state type}
+
+One can also write a custom state type. For example,
+\begin{cppcode}
+  class PFStateSP
+  {
+      public:
+      double &pos_x() { return pos_x_; }
+      double &pos_y() { return pos_y_; }
+      double &vel_x() { return vel_x_; }
+      double &vel_y() { return vel_y_; }
+
+      double log_likelihood(double obs_x, double obs_y) const;
+
+      private:
+      double pos_x_;
+      double pos_y_;
+      double vel_x_;
+      double vel_y_;
+  };
+\end{cppcode}
+And the \cppinline{PFState} class will be defined as,
+\begin{cppcode}
+  using PFStateBase = StateMatrix<RowMajor, 1, PFStateSP>;
+
+  class PFState : public PFStateBase
+  {
+      public:
+      using PFStateBase::StateMatrix;
+
+      double log_likelihood(std::size_t t, std::size_t i) const
+      {
+          return this->state(i, 0).log_likelihood(obs_x_[t], obs_y_[t]);
+      }
+
+      void read_data(const char *param);
+
+      private:
+      Vector<double> obs_x_;
+      Vector<double> obs_y_;
+  };
+\end{cppcode}
+The implementation of \cppinline{PFInit}, etc., will be similar. Compared to
+extending the \cppinline{SingleParticle<T>} type, this method is perhaps more
+intuitive. Functionality-wise, they are almost identical. However, there are a
+few advantages of extending \cppinline{SingleParticle<T>}. First, it allows
+more compact data storage. Consider a situation where the state space is best
+represented by a real and an integer. The most intuitive way might be the
+following,
+\begin{cppcode}
+  class S
+  {
+      public:
+      double &x() { return x_; }
+      double &u() { return u_; }
+
+      private:
+      double x_;
+      int u_;
+  };
+
+  class T : StateMatrix<RowMajor, 1, S>;
+\end{cppcode}
+However, the type \cppinline{S} will need to satisfy the alignment requirement
+of \cppinline{double}, which is 8-bytes on most platforms. However, its size
+might not be a multiple of 8-bytes. Therefore the type will be padded and the
+storage of a vector of such type will not be as compact as possible. This can
+affect performance in some situations. An alternative approach would be the
+following,
+\begin{cppcode}
+  class T
+  {
+      public:
+      template <typename S>
+      class single_particle_type : SingleParticleBase<S>
+      {
+          public:
+          using SingleParticleBase<S>::SingleParticleBase;
+
+          double &x() { return this->particle().x_[this->id()]; }
+          double &u() { return this->particle().u_[this->id()]; }
+      };
+
+      private:
+      Vector<double> x_;
+      Vector<int> u_;
+  };
+\end{cppcode}
+By extending \cppinline{SingleParticle<T>}, it provides the same easy access to
+each particle. However, now the state values are stored as two compact vectors.
+
+A second advantage is that it allows easier access to the raw data. Consider
+the implementation \cppinline{PFMEval} in section~\ref{sub:Implementations}.
+It is rather redundant to copy each value of the two positions, just so later
+we can compute weighted sums from them. Recall that in
+section~\ref{sub:Monitor} we showed that a monitor that compute the final
+results directly can also be added to a sampler. Therefore, we might
+implement \cppinline{PFMEval} as the following,
+\begin{cppcode*}{texcomments}
+  class PFMEval
+  {
+      public:
+      void operator()(std::size_t t, std::size_t dim,
+          Particle<PFState> &particle, double *r)
+      {
+          cblas_dgemv(CblasRowMajor, CblasTrans, particle.size(), dim, 1,
+              particle.value().data(), particle.value().dim(),
+              particle.weight().data(), 1, 0, r, 1);
+      }
+  };
+\end{cppcode*}
+And it can be added to a sampler as,
+\begin{cppcode}
+  sampler.monitor("pos", 2, PFMEval(), true);
+\end{cppcode}
+For this particular case, the performance benefit is small. But the possibility
+of accessing compact vector as raw data allows easier interfacing with external
+numerical libraries. If we implemented \cppinline{PFState} with the alternative
+approach shown earlier, the above direct invoking of \cppinline{cblas_dgemv}
+will not be possible.

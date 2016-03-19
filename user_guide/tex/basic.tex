@@ -5,8 +5,8 @@
 \label{sec:Conventions}
 
 All classes that are accessible to users are within the name space
-\cppinline{vsmc}. Class names are in \cppinline{CamelCase} and function names,
-free or class methods, are in \cppinline{small_cases}. In the remaining of this
+\cppinline{vsmc}. Class names are in \cppinline{CamelCase} and function names
+and class members are in \cppinline{small_cases}. In the remaining of this
 guide, we will omit the \cppinline{vsmc::} name space qualifiers. We will use
 ``function'' for referring to name space scope functions and ``method'' for
 class member functions.
@@ -34,8 +34,8 @@ to make their existence known to the library, respectively.
 \label{sec:Concepts}
 
 The library is structured around a few core concepts. A sampler is responsible
-for running an algorithm. It is composed by a particle system and operations on
-it. A particle system is formed by the states $\{X^{(i)}\}_{i=1}^N$ and weights
+for running an algorithm. It contains a particle system and operations on it. A
+particle system is formed by the states $\{X^{(i)}\}_{i=1}^N$ and weights
 $\{W^{(i)}\}_{i=1}^N$. This system will also be responsible for resampling. All
 user defined operations are to be applied to the whole system. These are
 ``initialization'' and ``moves'' which are applied before resampling, and
@@ -44,13 +44,13 @@ have to be \mcmc kernels. They can be used for any purpose that suits the
 particular algorithm. Most statistical inferences requires calculation of
 $\sum_{i=1}^NW^{(i)}\varphi(X^{(i)})$ for some function $\varphi$. This can be
 carried out along each sampler iteration by a monitor. Table~\ref{tab:concepts}
-lists these concepts and the corresponding classes in the library. Each of them
+lists these concepts and the corresponding types in the library. Each of them
 are introduced in detail in the following sections.
 
 \begin{table}[t]
   \begin{tabu}{X[l]X[2l]}
     \toprule
-    Concept & Class \\
+    Concept & Type \\
     \midrule
     State, $\{X^{(i)}\}_{i=1}^N$            & \texttt{T}, user defined   \\
     Weight, $\{W^{(i)}\}_{i=1}^N$           & \texttt{Weight}            \\
@@ -231,7 +231,7 @@ can write functions that process each particle, for example,
   void function(std::size_t i)
   {
       auto &rng = particle.rng(i);
-      // Process the $i$\textsups{t{}h} particle using rng
+      // Process the particle i using rng
   }
 \end{cppcode*}
 And if later this function is called from a parallelized environment, it is
@@ -521,7 +521,7 @@ implementation.
 \subsubsection{The main program}
 
 \begin{cppcode}
-    vsmc::Sampler<PFState> sampler(N, vsmc::Multinomial, 0.5);
+    Sampler<PFState> sampler(N, Multinomial, 0.5);
     sampler.init(PFInit()).move(PFMove(), false).monitor("pos", 2, PFMEval());
     sampler.initialize(const_cast<char *>("pf.data")).iterate(n - 1);
 
@@ -590,7 +590,7 @@ etc., we will first define a few constant and types. The state space is of
 dimension $4$. And it is natural to use a \cppinline{StateMatrix} as the base
 class of \cppinline{PFState},
 \begin{cppcode}
-  using PFStateBase = vsmc::StateMatrix<vsmc::RowMajor, 4, double>;
+  using PFStateBase = StateMatrix<RowMajor, 4, double>;
 \end{cppcode}
 The numbers of particles and data points are also defined as constants in this
 simple example,
@@ -619,16 +619,16 @@ shown,
   {
       public:
       using PFStateBase::PFStateBase;
-  
+
       // Return $\ell(X_t^{(i)}|Y_t)$
       double log_likelihood(std::size_t t, size_type i) const;
-  
+
       // Read data from an external file
       void read_data(const char *param);
-  
+
       private:
-      vsmc::Vector<double> obs_x_;
-      vsmc::Vector<double> obs_y_;
+      Vector<double> obs_x_;
+      Vector<double> obs_y_;
   };
 \end{cppcode*}
 
@@ -639,7 +639,7 @@ The initialization step is implemented as below,
   class PFInit
   {
       public:
-      std::size_t operator()(vsmc::Particle<PFState> &particle, void *param)
+      std::size_t operator()(Particle<PFState> &particle, void *param)
       {
           eval_param(particle, param);
           eval_pre(particle);
@@ -647,40 +647,40 @@ The initialization step is implemented as below,
           for (auto sp : particle)
               acc += eval_sp(sp);
           eval_post(particle);
-  
+
           return acc;
       }
-  
-      void eval_param(vsmc::Particle<PFState> &particle, void *param)
+
+      void eval_param(Particle<PFState> &particle, void *param)
       {
           particle.value().read_data(static_cast<const char *>(param));
       }
-  
-      void eval_pre(vsmc::Particle<PFState> &particle)
+
+      void eval_pre(Particle<PFState> &particle)
       {
           w_.resize(particle.size());
       }
-  
-      std::size_t eval_sp(vsmc::SingleParticle<PFState> sp)
+
+      std::size_t eval_sp(SingleParticle<PFState> sp)
       {
-          vsmc::NormalDistribution<double> norm_pos(0, 2);
-          vsmc::NormalDistribution<double> norm_vel(0, 1);
+          NormalDistribution<double> norm_pos(0, 2);
+          NormalDistribution<double> norm_vel(0, 1);
           sp.state(PosX) = norm_pos(sp.rng());
           sp.state(PosY) = norm_pos(sp.rng());
           sp.state(VelX) = norm_vel(sp.rng());
           sp.state(VelY) = norm_vel(sp.rng());
           w_[sp.id()] = sp.particle().value().log_likelihood(0, sp.id());
-  
+
           return 0;
       }
-  
-      void eval_post(vsmc::Particle<PFState> &particle)
+
+      void eval_post(Particle<PFState> &particle)
       {
           particle.weight().set_log(w_.data());
       }
-  
+
       private:
-      vsmc::Vector<double> w_;
+      Vector<double> w_;
   };
 \end{cppcode}
 An object of this class is convertible to
@@ -704,13 +704,13 @@ The move step is similar to the initialization. We show the declaration here,
   class PFMove
   {
       public:
-      std::size_t operator()(std::size_t t, vsmc::Particle<PFState> &particle);
-      void eval_pre(std::size_t t, vsmc::Particle<PFState> &particle);
-      std::size_t eval_sp(std::size_t t, vsmc::SingleParticle<PFState> sp);
-      void eval_post(std::size_t t, vsmc::Particle<PFState> &particle);
-  
+      std::size_t operator()(std::size_t t, Particle<PFState> &particle);
+      void eval_pre(std::size_t t, Particle<PFState> &particle);
+      std::size_t eval_sp(std::size_t t, SingleParticle<PFState> sp);
+      void eval_post(std::size_t t, Particle<PFState> &particle);
+
       private:
-      vsmc::Vector<double> w_;
+      Vector<double> w_;
   };
 \end{cppcode}
 
@@ -723,24 +723,24 @@ positions.
   {
       public:
       void operator()(std::size_t t, std::size_t dim,
-          vsmc::Particle<PFState> &particle, double *r)
+          Particle<PFState> &particle, double *r)
       {
           eval_pre(t, particle);
           for (std::size_t i = 0; i != particle.size(); ++i, r += dim)
               eval_sp(t, dim, particle.sp(i), r);
           eval_post(t, particle);
       }
-  
-      void eval_pre(std::size_t t, vsmc::Particle<PFState> &particle) {}
-  
+
+      void eval_pre(std::size_t t, Particle<PFState> &particle) {}
+
       void eval_sp(std::size_t t, std::size_t dim,
-          vsmc::SingleParticle<PFState> sp, double *r)
+          SingleParticle<PFState> sp, double *r)
       {
           r[0] = sp.state(PosX);
           r[1] = sp.state(PosY);
       }
-  
-      void eval_post(std::size_t t, vsmc::Particle<PFState> &particle) {}
+
+      void eval_post(std::size_t t, Particle<PFState> &particle) {}
   };
 \end{cppcode}
 

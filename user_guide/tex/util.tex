@@ -57,7 +57,7 @@ The second is \cppinline{cov_upper} and the third \cppinline{cov_packed}, both
 are \cppinline{false} by default. If the later is \cppinline{cov_packed}, a
 packed vector of length $d(d+1)/2$ is written into \cppinline{cov}. If
 \cppinline{cov_upper} is \cppinline{false}, then the upper triangular is
-packed, otherwise the lower triangular is packed. 
+packed, otherwise the lower triangular is packed.
 
 The estimated covariance matrix is often used to construct multivariate Normal
 distribution for the purpose of generating random walk scales. The
@@ -72,7 +72,7 @@ decomposition,
 The output \cppinline{chol} is a packed vector in row major storage. This
 function also has three optional parameters, which are the same as those of
 \cppinline{Covariance::operator()}, except that they are now used to specify
-the storage scheme of the input parameter \cppinline{cov}. 
+the storage scheme of the input parameter \cppinline{cov}.
 
 \section{Storing objects in \protect\hdf}
 \label{sec:Storing objects in HDF5}
