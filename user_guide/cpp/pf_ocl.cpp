@@ -159,7 +159,15 @@ class PFMEval : public vsmc::MonitorEvalTBB<PFState, PFMEval>
 int main()
 {
     auto platform = vsmc::CLPlatform::platforms().front();
+    std::string platform_name;
+    platform.get_info(CL_PLATFORM_NAME, platform_name);
+    std::cout << "Platform: " << platform_name << std::endl;
+
     auto device = platform.get_device(CL_DEVICE_TYPE_DEFAULT).front();
+    std::string device_name;
+    device.get_info(CL_DEVICE_NAME, device_name);
+    std::cout << "Device:   " << device_name << std::endl;
+
     cl_context_properties properties[] = {CL_CONTEXT_PLATFORM,
         reinterpret_cast<cl_context_properties>(platform.get()), 0};
     vsmc::CLContext context(properties, device);
@@ -180,7 +188,12 @@ int main()
     sampler.move(PFMove(command_queue, kernel_move), false);
     sampler.monitor("pos", 2, PFMEval());
     sampler.particle().value().initialize(context);
+
+    vsmc::StopWatch watch;
+    watch.start();
     sampler.initialize(const_cast<char *>("pf.data")).iterate(n - 1);
+    watch.stop();
+    std::cout << "Time: " << watch.milliseconds() << std::endl;
 
     std::ofstream output("pf.out");
     output << sampler;

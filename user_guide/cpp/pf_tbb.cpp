@@ -144,7 +144,12 @@ int main()
 {
     vsmc::Sampler<PFState> sampler(N, vsmc::Multinomial, 0.5);
     sampler.init(PFInit()).move(PFMove(), false).monitor("pos", 2, PFMEval());
+
+    vsmc::StopWatch watch;
+    watch.start();
     sampler.initialize(const_cast<char *>("pf.data")).iterate(n - 1);
+    watch.stop();
+    std::cout << "Time: " << watch.milliseconds() << std::endl;
 
     std::ofstream output("pf.out");
     output << sampler;
