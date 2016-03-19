@@ -61,6 +61,7 @@ required.
 
 Examples are in the `example` subdirectory, to build them,
 ~~~sh
+export CXXFLAGS=c++11
 cd /path_to_vSMC_source
 mkdir build
 cd build
