@@ -42,6 +42,8 @@ namespace vsmc
 namespace internal
 {
 
+static constexpr int MKL_SUCCESS = 0;
+
 #if VSMC_NO_RUNTIME_ASSERT
 inline int mkl_error_check(int status, const char *, const char *)
 {
@@ -50,7 +52,7 @@ inline int mkl_error_check(int status, const char *, const char *)
 #else  // VSMC_NO_RUNTIME_ASSERT
 inline int mkl_error_check(int status, const char *cpp, const char *c)
 {
-    if (status == 0)
+    if (status == MKL_SUCCESS)
         return status;
 
     std::string msg("**");
@@ -61,7 +63,7 @@ inline int mkl_error_check(int status, const char *cpp, const char *c)
     msg += "; Error code: ";
     msg += itos(status);
 
-    VSMC_RUNTIME_ASSERT((status == 0), msg.c_str());
+    VSMC_RUNTIME_ASSERT((status == MKL_SUCCESS), msg.c_str());
 
     return status;
 }
@@ -166,24 +168,22 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
         : MKLBase<::VSLStreamStatePtr, MKLStream>()
     {
         ::VSLStreamStatePtr ptr = nullptr;
-        internal::mkl_error_check(::vslCopyStream(&ptr, other.get()),
-            "MKLStream::MKLStream", "::vslCopyStream");
-        reset_ptr(ptr);
+        if (internal::mkl_error_check(::vslCopyStream(&ptr, other.get()),
+                "MKLStream::MKLStream",
+                "::vslCopyStream") == internal::MKL_SUCCESS) {
+            reset_ptr(ptr);
+        }
     }
 
     /// \brief `vslCopyStream`/`vslCopySreamState`
     MKLStream &operator=(const MKLStream &other)
     {
         if (this != &other) {
-            if (get() == nullptr) {
-                ::VSLStreamStatePtr ptr = nullptr;
-                internal::mkl_error_check(::vslCopyStream(&ptr, other.get()),
-                    "MKLStream::operator=", "::vslCopyStream");
+            ::VSLStreamStatePtr ptr = nullptr;
+            if (internal::mkl_error_check(::vslCopyStream(&ptr, other.get()),
+                    "MKLStream::operator=",
+                    "::vslCopyStream") == internal::MKL_SUCCESS) {
                 reset_ptr(ptr);
-            } else {
-                internal::mkl_error_check(
-                    ::vslCopyStreamState(get(), other.get()),
-                    "MKLStream::operator=", "::vslCopyStreamState");
             }
         }
 
@@ -200,7 +200,8 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
         int status =
             internal::mkl_error_check(::vslNewStream(&ptr, brng, seed),
                 "MKLStream::reset", "::vslNewStream");
-        reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            reset_ptr(ptr);
 
         return status;
     }
@@ -212,7 +213,8 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
         int status =
             internal::mkl_error_check(::vslNewStreamEx(&ptr, brng, n, params),
                 "MKLStream::reset", "::vslNewStreamEx");
-        reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            reset_ptr(ptr);
 
         return status;
     }
@@ -221,7 +223,7 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     static int release(::VSLStreamStatePtr ptr)
     {
         if (ptr == nullptr)
-            return 0;
+            return internal::MKL_SUCCESS;
 
         return internal::mkl_error_check(::vslDeleteStream(&ptr),
             "MKLStream::release", "::vslDeleteStream");
@@ -242,7 +244,8 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
         int status =
             internal::mkl_error_check(::vslSaveStreamF(&ptr, fname.c_str()),
                 "MKLStream::load_f", "::vslSaveStreamF");
-        reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            reset_ptr(ptr);
 
         return status;
     }
@@ -260,7 +263,8 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
         ::VSLStreamStatePtr ptr = nullptr;
         int status = internal::mkl_error_check(::vslLoadStreamM(&ptr, memptr),
             "MKLStream::load_m", "::vslLoadStreamM");
-        reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            reset_ptr(ptr);
 
         return status;
     }
@@ -645,7 +649,7 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
     static int release(::VSLSSTaskPtr ptr)
     {
         if (ptr == nullptr)
-            return 0;
+            return internal::MKL_SUCCESS;
 
         return internal::mkl_error_check(::vslSSDeleteTask(&ptr),
             "MKLSSTask::release", "::vslSSDeleteTask");
@@ -787,7 +791,8 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
         int status = internal::mkl_error_check(
             ::vslsSSNewTask(&ptr, p, n, xstorage, x, w, indices),
             "MKLSSTask::reset", "::vslsSSNewTask");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -800,7 +805,8 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
         int status = internal::mkl_error_check(
             ::vsldSSNewTask(&ptr, p, n, xstorage, x, w, indices),
             "MKLSSTask::reset", "::vsldSSNewTask");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1143,9 +1149,11 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
     MKLConvTask(const MKLConvTask<ResultType> &other)
     {
         ::VSLConvTaskPtr ptr = nullptr;
-        internal::mkl_error_check(::vslConvCopyTask(&ptr, other.get()),
-            "MKLConvTask::MKLConvTask", "::vslConvCopyTask");
-        this->reset_ptr(ptr);
+        if (internal::mkl_error_check(::vslConvCopyTask(&ptr, other.get()),
+                "MKLConvTask::MKLConvTask",
+                "::vslConvCopyTask") == internal::MKL_SUCCESS) {
+            this->reset_ptr(ptr);
+        }
     }
 
     /// \brief `vslConvCopyTask`
@@ -1153,9 +1161,11 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
     {
         if (this != &other) {
             ::VSLConvTaskPtr ptr = nullptr;
-            internal::mkl_error_check(::vslConvCopyTask(&ptr, other.get()),
-                "MKLConvTask::operator=", "::vslConvCopyTask");
-            this->reset_ptr(ptr);
+            if (internal::mkl_error_check(::vslConvCopyTask(&ptr, other.get()),
+                    "MKLConvTask::operator=",
+                    "::vslConvCopyTask") == internal::MKL_SUCCESS) {
+                this->reset_ptr(ptr);
+            }
         }
 
         return *this;
@@ -1168,7 +1178,7 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
     static int release(::VSLConvTaskPtr ptr)
     {
         if (ptr == nullptr)
-            return 0;
+            return internal::MKL_SUCCESS;
 
         return internal::mkl_error_check(::vslConvDeleteTask(&ptr),
             "MKLConvTask::release", "::vslConvDeleteTask");
@@ -1211,7 +1221,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vslsConvNewTask(&ptr, mode, dims, xshape, yshape, zshape),
             "MKLConvTask::reset", "::vslsConvNewTask");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1223,7 +1234,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vsldConvNewTask(&ptr, mode, dims, xshape, yshape, zshape),
             "MKLConvTask::reset", "::vsldConvNewTask");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1235,7 +1247,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vslcConvNewTask(&ptr, mode, dims, xshape, yshape, zshape),
             "MKLConvTask::reset", "::vslcConvNewTask");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1247,7 +1260,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vslzConvNewTask(&ptr, mode, dims, xshape, yshape, zshape),
             "MKLConvTask::reset", "::vslzConvNewTask");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1259,7 +1273,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vslsConvNewTask1D(&ptr, mode, xshape, yshape, zshape),
             "MKLConvTask::reset", "::vslsConvNewTask1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1271,7 +1286,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vsldConvNewTask1D(&ptr, mode, xshape, yshape, zshape),
             "MKLConvTask::reset", "::vsldConvNewTask1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1283,7 +1299,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vslcConvNewTask1D(&ptr, mode, xshape, yshape, zshape),
             "MKLConvTask::reset", "::vslcConvNewTask1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1295,7 +1312,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vslzConvNewTask1D(&ptr, mode, xshape, yshape, zshape),
             "MKLConvTask::reset", "::vslzConvNewTask1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1309,7 +1327,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
             internal::mkl_error_check(::vslsConvNewTaskX(&ptr, mode, dims,
                                           xshape, yshape, zshape, x, xstride),
                 "MKLConvTask::reset", "::vslsConvNewTaskX");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1323,7 +1342,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
             internal::mkl_error_check(::vsldConvNewTaskX(&ptr, mode, dims,
                                           xshape, yshape, zshape, x, xstride),
                 "MKLConvTask::reset", "::vsldConvNewTaskX");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1337,7 +1357,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
             internal::mkl_error_check(::vslcConvNewTaskX(&ptr, mode, dims,
                                           xshape, yshape, zshape, x, xstride),
                 "MKLConvTask::reset", "::vslcConvNewTaskX");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1351,7 +1372,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
             internal::mkl_error_check(::vslzConvNewTaskX(&ptr, mode, dims,
                                           xshape, yshape, zshape, x, xstride),
                 "MKLConvTask::reset", "::vslzConvNewTaskX");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1365,7 +1387,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
             internal::mkl_error_check(::vslsConvNewTaskX1D(&ptr, mode, xshape,
                                           yshape, zshape, x, xstride),
                 "MKLConvTask::reset", "::vslsConvNewTaskX1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1379,7 +1402,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
             internal::mkl_error_check(::vsldConvNewTaskX1D(&ptr, mode, xshape,
                                           yshape, zshape, x, xstride),
                 "MKLConvTask::reset", "::vsldConvNewTaskX1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1393,7 +1417,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
             internal::mkl_error_check(::vslcConvNewTaskX1D(&ptr, mode, xshape,
                                           yshape, zshape, x, xstride),
                 "MKLConvTask::reset", "::vslcConvNewTaskX1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1407,7 +1432,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
             internal::mkl_error_check(::vslzConvNewTaskX1D(&ptr, mode, xshape,
                                           yshape, zshape, x, xstride),
                 "MKLConvTask::reset", "::vslzConvNewTaskX1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1459,9 +1485,11 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     MKLCorrTask(const MKLCorrTask<ResultType> &other)
     {
         ::VSLCorrTaskPtr ptr = nullptr;
-        internal::mkl_error_check(::vslCorrCopyTask(&ptr, other.get()),
-            "MKLCorrTask::MKLCorrTask", "::vslCorrCopyTask");
-        this->reset_ptr(ptr);
+        if (internal::mkl_error_check(::vslCorrCopyTask(&ptr, other.get()),
+                "MKLCorrTask::MKLCorrTask",
+                "::vslCorrCopyTask") == internal::MKL_SUCCESS) {
+            this->reset_ptr(ptr);
+        }
     }
 
     /// \brief `vslCorrCopyTask`
@@ -1469,9 +1497,11 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     {
         if (this != &other) {
             ::VSLCorrTaskPtr ptr = nullptr;
-            internal::mkl_error_check(::vslCorrCopyTask(&ptr, other.get()),
-                "MKLCorrTask::operator=", "::vslCorrCopyTask");
-            this->reset_ptr(ptr);
+            if (internal::mkl_error_check(::vslCorrCopyTask(&ptr, other.get()),
+                    "MKLCorrTask::operator=",
+                    "::vslCorrCopyTask") == internal::MKL_SUCCESS) {
+                this->reset_ptr(ptr);
+            }
         }
 
         return *this;
@@ -1484,7 +1514,7 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     static int release(::VSLCorrTaskPtr ptr)
     {
         if (ptr == nullptr)
-            return 0;
+            return internal::MKL_SUCCESS;
 
         return internal::mkl_error_check(::vslCorrDeleteTask(&ptr),
             "MKLCorrTask::release", "::vslCorrDeleteTask");
@@ -1527,7 +1557,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vslsCorrNewTask(&ptr, mode, dims, xshape, yshape, zshape),
             "MKLCorrTask::reset", "::vslsCorrNewTask");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1539,7 +1570,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vsldCorrNewTask(&ptr, mode, dims, xshape, yshape, zshape),
             "MKLCorrTask::reset", "::vsldCorrNewTask");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1551,7 +1583,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vslcCorrNewTask(&ptr, mode, dims, xshape, yshape, zshape),
             "MKLCorrTask::reset", "::vslcCorrNewTask");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1563,7 +1596,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vslzCorrNewTask(&ptr, mode, dims, xshape, yshape, zshape),
             "MKLCorrTask::reset", "::vslzCorrNewTask");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1575,7 +1609,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vslsCorrNewTask1D(&ptr, mode, xshape, yshape, zshape),
             "MKLCorrTask::reset", "::vslsCorrNewTask1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1587,7 +1622,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vsldCorrNewTask1D(&ptr, mode, xshape, yshape, zshape),
             "MKLCorrTask::reset", "::vsldCorrNewTask1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1599,7 +1635,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vslcCorrNewTask1D(&ptr, mode, xshape, yshape, zshape),
             "MKLCorrTask::reset", "::vslcCorrNewTask1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1611,7 +1648,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         int status = internal::mkl_error_check(
             ::vslzCorrNewTask1D(&ptr, mode, xshape, yshape, zshape),
             "MKLCorrTask::reset", "::vslzCorrNewTask1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1625,7 +1663,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
             internal::mkl_error_check(::vslsCorrNewTaskX(&ptr, mode, dims,
                                           xshape, yshape, zshape, x, xstride),
                 "MKLCorrTask::reset", "::vslsCorrNewTaskX");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1639,7 +1678,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
             internal::mkl_error_check(::vsldCorrNewTaskX(&ptr, mode, dims,
                                           xshape, yshape, zshape, x, xstride),
                 "MKLCorrTask::reset", "::vsldCorrNewTaskX");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1653,7 +1693,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
             internal::mkl_error_check(::vslcCorrNewTaskX(&ptr, mode, dims,
                                           xshape, yshape, zshape, x, xstride),
                 "MKLCorrTask::reset", "::vslcCorrNewTaskX");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1667,7 +1708,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
             internal::mkl_error_check(::vslzCorrNewTaskX(&ptr, mode, dims,
                                           xshape, yshape, zshape, x, xstride),
                 "MKLCorrTask::reset", "::vslzCorrNewTaskX");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1681,7 +1723,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
             internal::mkl_error_check(::vslsCorrNewTaskX1D(&ptr, mode, xshape,
                                           yshape, zshape, x, xstride),
                 "MKLCorrTask::reset", "::vslsCorrNewTaskX1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1695,7 +1738,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
             internal::mkl_error_check(::vsldCorrNewTaskX1D(&ptr, mode, xshape,
                                           yshape, zshape, x, xstride),
                 "MKLCorrTask::reset", "::vsldCorrNewTaskX1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1709,7 +1753,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
             internal::mkl_error_check(::vslcCorrNewTaskX1D(&ptr, mode, xshape,
                                           yshape, zshape, x, xstride),
                 "MKLCorrTask::reset", "::vslcCorrNewTaskX1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1723,7 +1768,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
             internal::mkl_error_check(::vslzCorrNewTaskX1D(&ptr, mode, xshape,
                                           yshape, zshape, x, xstride),
                 "MKLCorrTask::reset", "::vslzCorrNewTaskX1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1749,7 +1795,7 @@ class MKLDFTask : public MKLBase<::DFTaskPtr, MKLDFTask<RealType>>
     static int release(::DFTaskPtr ptr)
     {
         if (ptr == nullptr)
-            return 0;
+            return internal::MKL_SUCCESS;
 
         return internal::mkl_error_check(
             ::dfDeleteTask(&ptr), "MKLDFTask::release", "::dfDeleteTask");
@@ -1769,7 +1815,8 @@ class MKLDFTask : public MKLBase<::DFTaskPtr, MKLDFTask<RealType>>
         int status = internal::mkl_error_check(
             ::dfsNewTask1D(&ptr, nx, x, xhint, ny, y, yhint),
             "MKLDFTask::reset", "::dfsNewTask1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
@@ -1781,7 +1828,8 @@ class MKLDFTask : public MKLBase<::DFTaskPtr, MKLDFTask<RealType>>
         int status = internal::mkl_error_check(
             ::dfdNewTask1D(&ptr, nx, x, xhint, ny, y, yhint),
             "MKLDFTask::reset", "::dfdNewTask1D");
-        this->reset_ptr(ptr);
+        if (status == internal::MKL_SUCCESS)
+            this->reset_ptr(ptr);
 
         return status;
     }
