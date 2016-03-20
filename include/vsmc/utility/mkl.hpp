@@ -43,24 +43,29 @@ namespace internal
 {
 
 #if VSMC_NO_RUNTIME_ASSERT
-inline void mkl_error_check(int, const char *, const char *) {}
-#else
-inline void mkl_error_check(int status, const char *func, const char *mklf)
+inline int mkl_error_check(int status, const char *, const char *)
+{
+    return status;
+}
+#else  // VSMC_NO_RUNTIME_ASSERT
+inline int mkl_error_check(int status, const char *cpp, const char *c)
 {
     if (status == 0)
-        return;
+        return status;
 
     std::string msg("**");
-    msg += func;
+    msg += cpp;
     msg += "** failure";
     msg += "; MKL function: ";
-    msg += mklf;
+    msg += c;
     msg += "; Error code: ";
     msg += itos(status);
 
     VSMC_RUNTIME_ASSERT((status == 0), msg.c_str());
+
+    return status;
 }
-#endif
+#endif // VSMC_NO_RUNTIME_ASSERT
 
 } // namespace vsmc::internal
 
@@ -163,21 +168,21 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
         ::VSLStreamStatePtr ptr = nullptr;
         internal::mkl_error_check(::vslCopyStream(&ptr, other.get()),
             "MKLStream::MKLStream", "::vslCopyStream");
-        this->reset_ptr(ptr);
+        reset_ptr(ptr);
     }
 
     /// \brief `vslCopyStream`/`vslCopySreamState`
     MKLStream &operator=(const MKLStream &other)
     {
         if (this != &other) {
-            if (this->get() == nullptr) {
+            if (get() == nullptr) {
                 ::VSLStreamStatePtr ptr = nullptr;
                 internal::mkl_error_check(::vslCopyStream(&ptr, other.get()),
                     "MKLStream::operator=", "::vslCopyStream");
-                this->reset_ptr(ptr);
+                reset_ptr(ptr);
             } else {
                 internal::mkl_error_check(
-                    ::vslCopyStreamState(this->get(), other.get()),
+                    ::vslCopyStreamState(get(), other.get()),
                     "MKLStream::operator=", "::vslCopyStreamState");
             }
         }
@@ -192,10 +197,10 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     int reset(MKL_INT brng, MKL_UINT seed)
     {
         ::VSLStreamStatePtr ptr = nullptr;
-        int status = ::vslNewStream(&ptr, brng, seed);
-        internal::mkl_error_check(
-            status, "MKLStream::reset", "::vslNewStream");
-        this->reset_ptr(ptr);
+        int status =
+            internal::mkl_error_check(::vslNewStream(&ptr, brng, seed),
+                "MKLStream::reset", "::vslNewStream");
+        reset_ptr(ptr);
 
         return status;
     }
@@ -204,10 +209,10 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     int reset(MKL_INT brng, MKL_INT n, unsigned *params)
     {
         ::VSLStreamStatePtr ptr = nullptr;
-        int status = ::vslNewStreamEx(&ptr, brng, n, params);
-        internal::mkl_error_check(
-            status, "MKLStream::reset", "::vslNewStreamEx");
-        this->reset_ptr(ptr);
+        int status =
+            internal::mkl_error_check(::vslNewStreamEx(&ptr, brng, n, params),
+                "MKLStream::reset", "::vslNewStreamEx");
+        reset_ptr(ptr);
 
         return status;
     }
@@ -218,31 +223,26 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
         if (ptr == nullptr)
             return 0;
 
-        int status = ::vslDeleteStream(&ptr);
-        internal::mkl_error_check(
-            status, "MKLStream::release", "::vslDeleteStream");
-
-        return status;
+        return internal::mkl_error_check(::vslDeleteStream(&ptr),
+            "MKLStream::release", "::vslDeleteStream");
     }
 
     /// \brief `vslSaveStreamF`
     int save_f(const std::string &fname) const
     {
-        int status = ::vslSaveStreamF(this->get(), fname.c_str());
-        internal::mkl_error_check(
-            status, "MKLStream::save_f", "::vslSaveStreamF");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vslSaveStreamF(get(), fname.c_str()), "MKLStream::save_f",
+            "::vslSaveStreamF");
     }
 
     /// \brief `vslSaveStreamF`
     int load_f(const std::string &fname)
     {
         ::VSLStreamStatePtr ptr = nullptr;
-        int status = ::vslSaveStreamF(&ptr, fname.c_str());
-        internal::mkl_error_check(
-            status, "MKLStream::load_f", "::vslSaveStreamF");
-        this->reset_ptr(ptr);
+        int status =
+            internal::mkl_error_check(::vslSaveStreamF(&ptr, fname.c_str()),
+                "MKLStream::load_f", "::vslSaveStreamF");
+        reset_ptr(ptr);
 
         return status;
     }
@@ -250,50 +250,41 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     /// \brief `vslSaveStreamM`
     int save_m(char *memptr) const
     {
-        int status = ::vslSaveStreamM(this->get(), memptr);
-        internal::mkl_error_check(
-            status, "MKLStream::save_m", "::vslSaveStreamM");
-
-        return status;
+        return internal::mkl_error_check(::vslSaveStreamM(get(), memptr),
+            "MKLStream::save_m", "::vslSaveStreamM");
     }
 
     /// \brief `vslLoadStreamM`
     int load_m(const char *memptr)
     {
         ::VSLStreamStatePtr ptr = nullptr;
-        int status = ::vslLoadStreamM(&ptr, memptr);
-        internal::mkl_error_check(
-            status, "MKLStream::load_m", "::vslLoadStreamM");
-        this->reset_ptr(ptr);
+        int status = internal::mkl_error_check(::vslLoadStreamM(&ptr, memptr),
+            "MKLStream::load_m", "::vslLoadStreamM");
+        reset_ptr(ptr);
 
         return status;
     }
 
     /// \brief `vslGetStreamSize`
-    int get_size() const { return ::vslGetStreamSize(this->get()); }
+    int get_size() const { return ::vslGetStreamSize(get()); }
 
     /// \brief `vslLeapfrogStream`
     int leapfrog(MKL_INT k, MKL_INT nstreams)
     {
-        int status = ::vslLeapfrogStream(this->get(), k, nstreams);
-        internal::mkl_error_check(
-            status, "MKLStream::leapfrog", "::vslLeapfrogStream");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vslLeapfrogStream(get(), k, nstreams), "MKLStream::leapfrog",
+            "::vslLeapfrogStream");
     }
 
     /// \brief `vslSkipAheadStream`
     int skip_ahead(long long nskip)
     {
-        int status = ::vslSkipAheadStream(this->get(), nskip);
-        internal::mkl_error_check(
-            status, "MKLStream::skip_ahead", "::vslSkipAheadStream");
-
-        return status;
+        return internal::mkl_error_check(::vslSkipAheadStream(get(), nskip),
+            "MKLStream::skip_ahead", "::vslSkipAheadStream");
     }
 
     /// \brief `vslGetStreamStateBrng`
-    int get_brng() const { return ::vslGetStreamStateBrng(this->get()); }
+    int get_brng() const { return ::vslGetStreamStateBrng(get()); }
 
     /// \brief `vslGetNumRegBrngs`
     static int get_num_reg_brngs() { return ::vslGetNumRegBrngs(); }
@@ -302,55 +293,45 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     static int get_brng_properties(
         MKL_INT brng, ::VSLBRngProperties &properties)
     {
-        int status = ::vslGetBrngProperties(brng, &properties);
-        internal::mkl_error_check(status, "MKLStream::get_brng_properties",
-            "::vslGetBrngProperties");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vslGetBrngProperties(brng, &properties),
+            "MKLStream::get_brng_properties", "::vslGetBrngProperties");
     }
 
     /// \brief `vsRngUniform`
     int uniform(MKL_INT n, float *r, float a, float b,
         MKL_INT method = VSL_RNG_METHOD_UNIFORM_STD)
     {
-        int status = ::vsRngUniform(method, this->get(), n, r, a, b);
-        internal::mkl_error_check(
-            status, "MKLStream::uniform", "::vsRngUniform");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsRngUniform(method, get(), n, r, a, b), "MKLStream::uniform",
+            "::vsRngUniform");
     }
 
     /// \brief `vdRngUniform`
     int uniform(MKL_INT n, double *r, double a, double b,
         MKL_INT method = VSL_RNG_METHOD_UNIFORM_STD)
     {
-        int status = ::vdRngUniform(method, this->get(), n, r, a, b);
-        internal::mkl_error_check(
-            status, "MKLStream::uniform", "::vdRngUniform");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vdRngUniform(method, get(), n, r, a, b), "MKLStream::uniform",
+            "::vdRngUniform");
     }
 
     /// \brief `vsRngGaussian`
     int gaussian(MKL_INT n, float *r, float a, float sigma,
         MKL_INT method = VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2)
     {
-        int status = ::vsRngGaussian(method, this->get(), n, r, a, sigma);
-        internal::mkl_error_check(
-            status, "MKLStream::gaussian", "::vsRngGaussian");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsRngGaussian(method, get(), n, r, a, sigma),
+            "MKLStream::gaussian", "::vsRngGaussian");
     }
 
     /// \brief `vdRngGaussian`
     int gaussian(MKL_INT n, double *r, double a, double sigma,
         MKL_INT method = VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2)
     {
-        int status = ::vdRngGaussian(method, this->get(), n, r, a, sigma);
-        internal::mkl_error_check(
-            status, "MKLStream::gaussian", "::vdRngGaussian");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vdRngGaussian(method, get(), n, r, a, sigma),
+            "MKLStream::gaussian", "::vdRngGaussian");
     }
 
     /// \brief `vsRngGaussianMV`
@@ -358,12 +339,9 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
         const float *a, const float *t,
         MKL_INT method = VSL_RNG_METHOD_GAUSSIANMV_BOXMULLER2)
     {
-        int status = ::vsRngGaussianMV(
-            method, this->get(), n, r, dimen, mstorage, a, t);
-        internal::mkl_error_check(
-            status, "MKLStream::gaussian_mv", "::vsRngGaussianMV");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsRngGaussianMV(method, get(), n, r, dimen, mstorage, a, t),
+            "MKLStream::gaussian_mv", "::vsRngGaussianMV");
     }
 
     /// \brief `vdRngGaussianMV`
@@ -371,329 +349,270 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
         const double *a, const double *t,
         MKL_INT method = VSL_RNG_METHOD_GAUSSIANMV_BOXMULLER2)
     {
-        int status = ::vdRngGaussianMV(
-            method, this->get(), n, r, dimen, mstorage, a, t);
-        internal::mkl_error_check(
-            status, "MKLStream::gaussian_mv", "::vdRngGaussianMV");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vdRngGaussianMV(method, get(), n, r, dimen, mstorage, a, t),
+            "MKLStream::gaussian_mv", "::vdRngGaussianMV");
     }
 
     /// \brief `vsRngExponential`
     int exponential(MKL_INT n, float *r, float a, float beta,
         MKL_INT method = VSL_RNG_METHOD_EXPONENTIAL_ICDF)
     {
-        int status = ::vsRngExponential(method, this->get(), n, r, a, beta);
-        internal::mkl_error_check(
-            status, "MKLStream::exponential", "::vsRngExponential");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsRngExponential(method, get(), n, r, a, beta),
+            "MKLStream::exponential", "::vsRngExponential");
     }
 
     /// \brief `vdRngExponential`
     int exponential(MKL_INT n, double *r, double a, double beta,
         MKL_INT method = VSL_RNG_METHOD_EXPONENTIAL_ICDF)
     {
-        int status = ::vdRngExponential(method, this->get(), n, r, a, beta);
-        internal::mkl_error_check(
-            status, "MKLStream::exponential", "::vdRngExponential");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vdRngExponential(method, get(), n, r, a, beta),
+            "MKLStream::exponential", "::vdRngExponential");
     }
 
     /// \brief `vsRngLaplace`
     int laplace(MKL_INT n, float *r, float a, float beta,
         MKL_INT method = VSL_RNG_METHOD_LAPLACE_ICDF)
     {
-        int status = ::vsRngLaplace(method, this->get(), n, r, a, beta);
-        internal::mkl_error_check(
-            status, "MKLStream::laplace", "::vsRngLaplace");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsRngLaplace(method, get(), n, r, a, beta), "MKLStream::laplace",
+            "::vsRngLaplace");
     }
 
     /// \brief `vdRngLaplace`
     int laplace(MKL_INT n, double *r, double a, double beta,
         MKL_INT method = VSL_RNG_METHOD_LAPLACE_ICDF)
     {
-        int status = ::vdRngLaplace(method, this->get(), n, r, a, beta);
-        internal::mkl_error_check(
-            status, "MKLStream::laplace", "::vdRngLaplace");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vdRngLaplace(method, get(), n, r, a, beta), "MKLStream::laplace",
+            "::vdRngLaplace");
     }
 
     /// \brief `vsRngWeibull`
     int weibull(MKL_INT n, float *r, float alpha, float a, float beta,
         MKL_INT method = VSL_RNG_METHOD_WEIBULL_ICDF)
     {
-        int status = ::vsRngWeibull(method, this->get(), n, r, alpha, a, beta);
-        internal::mkl_error_check(
-            status, "MKLStream::weibull", "::vsRngWeibull");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsRngWeibull(method, get(), n, r, alpha, a, beta),
+            "MKLStream::weibull", "::vsRngWeibull");
     }
 
     /// \brief `vdRngWeibull`
     int weibull(MKL_INT n, double *r, double alpha, double a, double beta,
         MKL_INT method = VSL_RNG_METHOD_WEIBULL_ICDF)
     {
-        int status = ::vdRngWeibull(method, this->get(), n, r, alpha, a, beta);
-        internal::mkl_error_check(
-            status, "MKLStream::weibull", "::vdRngWeibull");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vdRngWeibull(method, get(), n, r, alpha, a, beta),
+            "MKLStream::weibull", "::vdRngWeibull");
     }
 
     /// \brief `vsRngCauchy`
     int cauchy(MKL_INT n, float *r, float a, float beta,
         MKL_INT method = VSL_RNG_METHOD_CAUCHY_ICDF)
     {
-        int status = ::vsRngCauchy(method, this->get(), n, r, a, beta);
-        internal::mkl_error_check(
-            status, "MKLStream::cauchy", "::vsRngCauchy");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsRngCauchy(method, get(), n, r, a, beta), "MKLStream::cauchy",
+            "::vsRngCauchy");
     }
 
     /// \brief `vdRngCauchy`
     int cauchy(MKL_INT n, double *r, double a, double beta,
         MKL_INT method = VSL_RNG_METHOD_CAUCHY_ICDF)
     {
-        int status = ::vdRngCauchy(method, this->get(), n, r, a, beta);
-        internal::mkl_error_check(
-            status, "MKLStream::cauchy", "::vdRngCauchy");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vdRngCauchy(method, get(), n, r, a, beta), "MKLStream::cauchy",
+            "::vdRngCauchy");
     }
 
     /// \brief `vsRngRayleigh`
     int rayleigh(MKL_INT n, float *r, float a, float beta,
         MKL_INT method = VSL_RNG_METHOD_RAYLEIGH_ICDF)
     {
-        int status = ::vsRngRayleigh(method, this->get(), n, r, a, beta);
-        internal::mkl_error_check(
-            status, "MKLStream::rayleigh", "::vsRngRayleigh");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsRngRayleigh(method, get(), n, r, a, beta),
+            "MKLStream::rayleigh", "::vsRngRayleigh");
     }
 
     /// \brief `vdRngRayleigh`
     int rayleigh(MKL_INT n, double *r, double a, double beta,
         MKL_INT method = VSL_RNG_METHOD_RAYLEIGH_ICDF)
     {
-        int status = ::vdRngRayleigh(method, this->get(), n, r, a, beta);
-        internal::mkl_error_check(
-            status, "MKLStream::rayleigh", "::vdRngRayleigh");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vdRngRayleigh(method, get(), n, r, a, beta),
+            "MKLStream::rayleigh", "::vdRngRayleigh");
     }
 
     /// \brief `vsRngLognormal`
     int lognormal(MKL_INT n, float *r, float a, float sigma, float b,
         float beta, MKL_INT method = VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2)
     {
-        int status =
-            ::vsRngLognormal(method, this->get(), n, r, a, sigma, b, beta);
-        internal::mkl_error_check(
-            status, "MKLStream::lognormal", "::vsRngLognormal");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsRngLognormal(method, get(), n, r, a, sigma, b, beta),
+            "MKLStream::lognormal", "::vsRngLognormal");
     }
 
     /// \brief `vdRngLognormal`
     int lognormal(MKL_INT n, double *r, double a, double sigma, double b,
         double beta, MKL_INT method = VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2)
     {
-        int status =
-            ::vdRngLognormal(method, this->get(), n, r, a, sigma, b, beta);
-        internal::mkl_error_check(
-            status, "MKLStream::lognormal", "::vdRngLognormal");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vdRngLognormal(method, get(), n, r, a, sigma, b, beta),
+            "MKLStream::lognormal", "::vdRngLognormal");
     }
 
     /// \brief `vsRngGumbel`
     int gumbel(MKL_INT n, float *r, float a, float beta,
         MKL_INT method = VSL_RNG_METHOD_GUMBEL_ICDF)
     {
-        int status = ::vsRngGumbel(method, this->get(), n, r, a, beta);
-        internal::mkl_error_check(
-            status, "MKLStream::gumbel", "::vsRngGumbel");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsRngGumbel(method, get(), n, r, a, beta), "MKLStream::gumbel",
+            "::vsRngGumbel");
     }
 
     /// \brief `vdRngGumbel`
     int gumbel(MKL_INT n, double *r, double a, double beta,
         MKL_INT method = VSL_RNG_METHOD_GUMBEL_ICDF)
     {
-        int status = ::vdRngGumbel(method, this->get(), n, r, a, beta);
-        internal::mkl_error_check(
-            status, "MKLStream::gumbel", "::vdRngGumbel");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vdRngGumbel(method, get(), n, r, a, beta), "MKLStream::gumbel",
+            "::vdRngGumbel");
     }
 
     /// \brief `vsRngGamma`
     int gamma(MKL_INT n, float *r, float alpha, float a, float beta,
         MKL_INT method = VSL_RNG_METHOD_GAMMA_GNORM)
     {
-        int status = ::vsRngGamma(method, this->get(), n, r, alpha, a, beta);
-        internal::mkl_error_check(status, "MKLStream::gamma", "::vsRngGamma");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsRngGamma(method, get(), n, r, alpha, a, beta),
+            "MKLStream::gamma", "::vsRngGamma");
     }
 
     /// \brief `vdRngGamma`
     int gamma(MKL_INT n, double *r, double alpha, double a, double beta,
         MKL_INT method = VSL_RNG_METHOD_GAMMA_GNORM)
     {
-        int status = ::vdRngGamma(method, this->get(), n, r, alpha, a, beta);
-        internal::mkl_error_check(status, "MKLStream::gamma", "::vdRngGamma");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vdRngGamma(method, get(), n, r, alpha, a, beta),
+            "MKLStream::gamma", "::vdRngGamma");
     }
 
     /// \brief `vsRngBeta`
     int beta(MKL_INT n, float *r, float p, float q, float a, float beta,
         MKL_INT method = VSL_RNG_METHOD_BETA_CJA)
     {
-        int status = ::vsRngBeta(method, this->get(), n, r, p, q, a, beta);
-        internal::mkl_error_check(status, "MKLStream::beta", "::vsRngBeta");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsRngBeta(method, get(), n, r, p, q, a, beta), "MKLStream::beta",
+            "::vsRngBeta");
     }
 
     /// \brief `vdRngBeta`
     int beta(MKL_INT n, double *r, double p, double q, double a, double beta,
         MKL_INT method = VSL_RNG_METHOD_BETA_CJA)
     {
-        int status = ::vdRngBeta(method, this->get(), n, r, p, q, a, beta);
-        internal::mkl_error_check(status, "MKLStream::beta", "::vdRngBeta");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vdRngBeta(method, get(), n, r, p, q, a, beta), "MKLStream::beta",
+            "::vdRngBeta");
     }
 
     /// \brief `viRngUniform`
     int uniform(MKL_INT n, int *r, int a, int b,
         MKL_INT method = VSL_RNG_METHOD_UNIFORM_STD)
     {
-        int status = ::viRngUniform(method, this->get(), n, r, a, b);
-        internal::mkl_error_check(
-            status, "MKLStream::uniform", "::viRngUniform");
-
-        return status;
+        return internal::mkl_error_check(
+            ::viRngUniform(method, get(), n, r, a, b), "MKLStream::uniform",
+            "::viRngUniform");
     }
 
     /// \brief `viRngUniform`
     int uniform_bits(MKL_INT n, unsigned *r,
         MKL_INT method = VSL_RNG_METHOD_UNIFORMBITS_STD)
     {
-        int status = ::viRngUniformBits(method, this->get(), n, r);
-        internal::mkl_error_check(
-            status, "MKLStream::uniform_bits", "::viRngUniformBits");
-
-        return status;
+        return internal::mkl_error_check(
+            ::viRngUniformBits(method, get(), n, r), "MKLStream::uniform_bits",
+            "::viRngUniformBits");
     }
 
     /// \brief `viRngUniform32`
     int uniform_bits32(MKL_INT n, unsigned *r,
         MKL_INT method = VSL_RNG_METHOD_UNIFORMBITS32_STD)
     {
-        int status = ::viRngUniformBits32(method, this->get(), n, r);
-        internal::mkl_error_check(
-            status, "MKLStream::uniform_bits32", "::viRngUniformBits32");
-
-        return status;
+        return internal::mkl_error_check(
+            ::viRngUniformBits32(method, get(), n, r),
+            "MKLStream::uniform_bits32", "::viRngUniformBits32");
     }
 
     /// \brief `viRngUniform64`
     int uniform_bits64(MKL_INT n, unsigned MKL_INT64 *r,
         MKL_INT method = VSL_RNG_METHOD_UNIFORMBITS64_STD)
     {
-        int status = ::viRngUniformBits64(method, this->get(), n, r);
-        internal::mkl_error_check(
-            status, "MKLStream::uniform_bits64", "::viRngUniformBits64");
-
-        return status;
+        return internal::mkl_error_check(
+            ::viRngUniformBits64(method, get(), n, r),
+            "MKLStream::uniform_bits64", "::viRngUniformBits64");
     }
 
     /// \brief `viRngBernoulli`
     int bernoulli(MKL_INT n, int *r, double p,
         MKL_INT method = VSL_RNG_METHOD_BERNOULLI_ICDF)
     {
-        int status = ::viRngBernoulli(method, this->get(), n, r, p);
-        internal::mkl_error_check(
-            status, "MKLStream::bernoulli", "::viRngBernoulli");
-
-        return status;
+        return internal::mkl_error_check(
+            ::viRngBernoulli(method, get(), n, r, p), "MKLStream::bernoulli",
+            "::viRngBernoulli");
     }
 
     /// \brief `viRngGeometric`
     int geometric(MKL_INT n, int *r, double p,
         MKL_INT method = VSL_RNG_METHOD_GEOMETRIC_ICDF)
     {
-        int status = ::viRngGeometric(method, this->get(), n, r, p);
-        internal::mkl_error_check(
-            status, "MKLStream::geometric", "::viRngGeometric");
-
-        return status;
+        return internal::mkl_error_check(
+            ::viRngGeometric(method, get(), n, r, p), "MKLStream::geometric",
+            "::viRngGeometric");
     }
 
     /// \brief `viRngBinomial`
     int binomial(MKL_INT n, int *r, int ntrial, double p,
         MKL_INT method = VSL_RNG_METHOD_BINOMIAL_BTPE)
     {
-        int status = ::viRngBinomial(method, this->get(), n, r, ntrial, p);
-        internal::mkl_error_check(
-            status, "MKLStream::binomial", "::viRngBinomial");
-
-        return status;
+        return internal::mkl_error_check(
+            ::viRngBinomial(method, get(), n, r, ntrial, p),
+            "MKLStream::binomial", "::viRngBinomial");
     }
 
     /// \brief `viRngHypergeometric`
     int hypergeometric(MKL_INT n, int *r, int l, int s, int m,
         MKL_INT method = VSL_RNG_METHOD_HYPERGEOMETRIC_H2PE)
     {
-        int status = ::viRngHypergeometric(method, this->get(), n, r, l, s, m);
-        internal::mkl_error_check(
-            status, "MKLStream::hypergeometric", "::viRngHypergeometric");
-
-        return status;
+        return internal::mkl_error_check(
+            ::viRngHypergeometric(method, get(), n, r, l, s, m),
+            "MKLStream::hypergeometric", "::viRngHypergeometric");
     }
 
     /// \brief `viRngPoisson`
     int poisson(MKL_INT n, int *r, double lambda,
         MKL_INT method = VSL_RNG_METHOD_POISSON_PTPE)
     {
-        int status = ::viRngPoisson(method, this->get(), n, r, lambda);
-        internal::mkl_error_check(
-            status, "MKLStream::poisson", "::viRngPoisson");
-
-        return status;
+        return internal::mkl_error_check(
+            ::viRngPoisson(method, get(), n, r, lambda), "MKLStream::poisson",
+            "::viRngPoisson");
     }
 
     /// \brief `viRngPoissonV`
     int poisson_v(MKL_INT n, int *r, const double *lambda,
         MKL_INT method = VSL_RNG_METHOD_POISSONV_POISNORM)
     {
-        int status = ::viRngPoissonV(method, this->get(), n, r, lambda);
-        internal::mkl_error_check(
-            status, "MKLStream::poisson_v", "::viRngPoissonV");
-
-        return status;
+        return internal::mkl_error_check(
+            ::viRngPoissonV(method, get(), n, r, lambda),
+            "MKLStream::poisson_v", "::viRngPoissonV");
     }
 
     /// \brief `viRngNegbinomial`
     int neg_binomial(MKL_INT n, int *r, double a, double p,
         MKL_INT method = VSL_RNG_METHOD_NEGBINOMIAL_NBAR)
     {
-        int status = ::viRngNegbinomial(method, this->get(), n, r, a, p);
-        internal::mkl_error_check(
-            status, "MKLStream::neg_binomial", "::viRngNegbinomial");
-
-        return status;
+        return internal::mkl_error_check(
+            ::viRngNegbinomial(method, get(), n, r, a, p),
+            "MKLStream::neg_binomial", "::viRngNegbinomial");
     }
 }; // class MKLStream
 
@@ -728,11 +647,8 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
         if (ptr == nullptr)
             return 0;
 
-        int status = ::vslSSDeleteTask(&ptr);
-        internal::mkl_error_check(
-            status, "MKLSSTask::release", "::vslSSDeleteTask");
-
-        return status;
+        return internal::mkl_error_check(::vslSSDeleteTask(&ptr),
+            "MKLSSTask::release", "::vslSSDeleteTask");
     }
 
     /// \brief `vslSSEditTask`
@@ -868,9 +784,9 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
         const MKL_INT *indices)
     {
         ::VSLSSTaskPtr ptr;
-        int status = ::vslsSSNewTask(&ptr, p, n, xstorage, x, w, indices);
-        internal::mkl_error_check(
-            status, "MKLSSTask::reset", "::vslsSSNewTask");
+        int status = internal::mkl_error_check(
+            ::vslsSSNewTask(&ptr, p, n, xstorage, x, w, indices),
+            "MKLSSTask::reset", "::vslsSSNewTask");
         this->reset_ptr(ptr);
 
         return status;
@@ -881,9 +797,9 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
         const MKL_INT *indices)
     {
         ::VSLSSTaskPtr ptr;
-        int status = ::vsldSSNewTask(&ptr, p, n, xstorage, x, w, indices);
-        internal::mkl_error_check(
-            status, "MKLSSTask::reset", "::vsldSSNewTask");
+        int status = internal::mkl_error_check(
+            ::vsldSSNewTask(&ptr, p, n, xstorage, x, w, indices),
+            "MKLSSTask::reset", "::vsldSSNewTask");
         this->reset_ptr(ptr);
 
         return status;
@@ -891,121 +807,95 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
 
     int edit_task_dispatch(MKL_INT parameter, const float *par_addr)
     {
-        int status = ::vslsSSEditTask(this->get(), parameter, par_addr);
-        internal::mkl_error_check(
-            status, "MKLSSTask::edit_task", "::vslsSSEditTask");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vslsSSEditTask(this->get(), parameter, par_addr),
+            "MKLSSTask::edit_task", "::vslsSSEditTask");
     }
 
     int edit_task_dispatch(MKL_INT parameter, const double *par_addr)
     {
-        int status = ::vsldSSEditTask(this->get(), parameter, par_addr);
-        internal::mkl_error_check(
-            status, "MKLSSTask::edit_task", "::vsldSSEditTask");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsldSSEditTask(this->get(), parameter, par_addr),
+            "MKLSSTask::edit_task", "::vsldSSEditTask");
     }
 
     int edit_task_dispatch(MKL_INT parameter, const MKL_INT *par_addr)
     {
-        int status = ::vsliSSEditTask(this->get(), parameter, par_addr);
-        internal::mkl_error_check(
-            status, "MKLSSTask::edit_task", "::vsliSSEditTask");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsliSSEditTask(this->get(), parameter, par_addr),
+            "MKLSSTask::edit_task", "::vsliSSEditTask");
     }
 
     int edit_moments_dispatch(const float *mean, const float *r2m,
         const float *r3m, const float *r4m, const float *c2m, const float *c3m,
         const float *c4m)
     {
-        int status = ::vslsSSEditMoments(
-            this->get(), mean, r2m, r3m, r4m, c2m, c3m, c4m);
-        internal::mkl_error_check(
-            status, "MKLSSTask::edit_moments", "::vslsSSEditMoments");
-
-        return status;
+        return internal::mkl_error_check(::vslsSSEditMoments(this->get(), mean,
+                                             r2m, r3m, r4m, c2m, c3m, c4m),
+            "MKLSSTask::edit_moments", "::vslsSSEditMoments");
     }
 
     int edit_moments_dispatch(const double *mean, const double *r2m,
         const double *r3m, const double *r4m, const double *c2m,
         const double *c3m, const double *c4m)
     {
-        int status = ::vsldSSEditMoments(
-            this->get(), mean, r2m, r3m, r4m, c2m, c3m, c4m);
-        internal::mkl_error_check(
-            status, "MKLSSTask::edit_moments", "::vsldSSEditMoments");
-
-        return status;
+        return internal::mkl_error_check(::vsldSSEditMoments(this->get(), mean,
+                                             r2m, r3m, r4m, c2m, c3m, c4m),
+            "MKLSSTask::edit_moments", "::vsldSSEditMoments");
     }
 
     int edit_sums_dispatch(const float *sum, const float *r2s,
         const float *r3s, const float *r4s, const float *c2s, const float *c3s,
         const float *c4s)
     {
-        int status =
-            ::vslsSSEditSums(this->get(), sum, r2s, r3s, r4s, c2s, c3s, c4s);
-        internal::mkl_error_check(
-            status, "MKLSSTask::edit_sums", "::vslsSSEditSums");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vslsSSEditSums(this->get(), sum, r2s, r3s, r4s, c2s, c3s, c4s),
+            "MKLSSTask::edit_sums", "::vslsSSEditSums");
     }
 
     int edit_sums_dispatch(const double *sum, const double *r2s,
         const double *r3s, const double *r4s, const double *c2s,
         const double *c3s, const double *c4s)
     {
-        int status =
-            ::vsldSSEditSums(this->get(), sum, r2s, r3s, r4s, c2s, c3s, c4s);
-        internal::mkl_error_check(
-            status, "MKLSSTask::edit_sums", "::vsldSSEditSums");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsldSSEditSums(this->get(), sum, r2s, r3s, r4s, c2s, c3s, c4s),
+            "MKLSSTask::edit_sums", "::vsldSSEditSums");
     }
 
     int edit_cov_cor_dispatch(const float *mean, const float *cov,
         const MKL_INT *cov_storage, const float *cor,
         const MKL_INT *cor_storage)
     {
-        int status = ::vslsSSEditCovCor(
-            this->get(), mean, cov, cov_storage, cor, cor_storage);
-        internal::mkl_error_check(
-            status, "MKLSSTask::edit_cov_cor", "::vslsSSEditCovCor");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vslsSSEditCovCor(
+                this->get(), mean, cov, cov_storage, cor, cor_storage),
+            "MKLSSTask::edit_cov_cor", "::vslsSSEditCovCor");
     }
 
     int edit_cov_cor_dispatch(const double *mean, const double *cov,
         const MKL_INT *cov_storage, const double *cor,
         const MKL_INT *cor_storage)
     {
-        int status = ::vsldSSEditCovCor(
-            this->get(), mean, cov, cov_storage, cor, cor_storage);
-        internal::mkl_error_check(
-            status, "MKLSSTask::edit_cov_cor", "::vsldSSEditCovCor");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsldSSEditCovCor(
+                this->get(), mean, cov, cov_storage, cor, cor_storage),
+            "MKLSSTask::edit_cov_cor", "::vsldSSEditCovCor");
     }
 
     int edit_cp_dispatch(const float *mean, const float *sum, const float *cp,
         const MKL_INT *cp_storage)
     {
-        int status = ::vslsSSEditCP(this->get(), mean, sum, cp, cp_storage);
-        internal::mkl_error_check(
-            status, "MKLSSTask::edit_cp", "::vslsSSEditCP");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vslsSSEditCP(this->get(), mean, sum, cp, cp_storage),
+            "MKLSSTask::edit_cp", "::vslsSSEditCP");
     }
 
     int edit_cp_dispatch(const double *mean, const double *sum,
         const double *cp, const MKL_INT *cp_storage)
     {
-        int status = ::vsldSSEditCP(this->get(), mean, sum, cp, cp_storage);
-        internal::mkl_error_check(
-            status, "MKLSSTask::edit_cp", "::vsldSSEditCP");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsldSSEditCP(this->get(), mean, sum, cp, cp_storage),
+            "MKLSSTask::edit_cp", "::vsldSSEditCP");
     }
 
     int edit_partial_cov_cor_dispatch(const MKL_INT *p_idx_array,
@@ -1014,13 +904,11 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
         const MKL_INT *p_cov_storage, const float *p_cor,
         const MKL_INT *p_cor_storage) const
     {
-        int status = ::vslsSSEditPartialCovCor(this->get(), p_idx_array, cov,
-            cov_storage, cor, cor_storage, p_cov, p_cov_storage, p_cor,
-            p_cor_storage);
-        internal::mkl_error_check(status, "MKLSSTask::edit_partial_cov_cor",
-            "::vslsSSEditPartialCovCor");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vslsSSEditPartialCovCor(this->get(), p_idx_array, cov,
+                cov_storage, cor, cor_storage, p_cov, p_cov_storage, p_cor,
+                p_cor_storage),
+            "MKLSSTask::edit_partial_cov_cor", "::vslsSSEditPartialCovCor");
     }
 
     int edit_partial_cov_cor_dispatch(const MKL_INT *p_idx_array,
@@ -1029,61 +917,51 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
         const MKL_INT *p_cov_storage, const double *p_cor,
         const MKL_INT *p_cor_storage) const
     {
-        int status = ::vsldSSEditPartialCovCor(this->get(), p_idx_array, cov,
-            cov_storage, cor, cor_storage, p_cov, p_cov_storage, p_cor,
-            p_cor_storage);
-        internal::mkl_error_check(status, "MKLSSTask::edit_partial_cov_cor",
-            "::vsldSSEditPartialCovCor");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsldSSEditPartialCovCor(this->get(), p_idx_array, cov,
+                cov_storage, cor, cor_storage, p_cov, p_cov_storage, p_cor,
+                p_cor_storage),
+            "MKLSSTask::edit_partial_cov_cor", "::vsldSSEditPartialCovCor");
     }
 
     int edit_quantiles_dispatch(const MKL_INT *quant_order_n,
         const float *quant_order, const float *quant, const float *order_stats,
         const MKL_INT *order_stats_storage)
     {
-        int status = ::vslsSSEditQuantiles(this->get(), quant_order_n,
-            quant_order, quant, order_stats, order_stats_storage);
-        internal::mkl_error_check(
-            status, "MKLSSTask::edit_quantiles", "::vslsSSEditQuantiles");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vslsSSEditQuantiles(this->get(), quant_order_n, quant_order,
+                quant, order_stats, order_stats_storage),
+            "MKLSSTask::edit_quantiles", "::vslsSSEditQuantiles");
     }
 
     int edit_quantiles_dispatch(const MKL_INT *quant_order_n,
         const double *quant_order, const double *quant,
         const double *order_stats, const MKL_INT *order_stats_storage)
     {
-        int status = ::vsldSSEditQuantiles(this->get(), quant_order_n,
-            quant_order, quant, order_stats, order_stats_storage);
-        internal::mkl_error_check(
-            status, "MKLSSTask::edit_quantiles", "::vsldSSEditQuantiles");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsldSSEditQuantiles(this->get(), quant_order_n, quant_order,
+                quant, order_stats, order_stats_storage),
+            "MKLSSTask::edit_quantiles", "::vsldSSEditQuantiles");
     }
 
     int edit_stream_quantiles_dispatch(const MKL_INT *quant_order_n,
         const float *quant_order, const float *quants, const MKL_INT *nparams,
         const float *params)
     {
-        int status = ::vslsSSEditStreamQuantiles(
-            this->get(), quant_order_n, quant_order, quants, nparams, params);
-        internal::mkl_error_check(status, "MKLSSTask::edit_stream_quantiles",
-            "::vslsSSEditStreamQuantiles");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vslsSSEditStreamQuantiles(this->get(), quant_order_n,
+                quant_order, quants, nparams, params),
+            "MKLSSTask::edit_stream_quantiles", "::vslsSSEditStreamQuantiles");
     }
 
     int edit_stream_quantiles_dispatch(const MKL_INT *quant_order_n,
         const double *quant_order, const double *quants,
         const MKL_INT *nparams, const double *params)
     {
-        int status = ::vsldSSEditStreamQuantiles(
-            this->get(), quant_order_n, quant_order, quants, nparams, params);
-        internal::mkl_error_check(status, "MKLSSTask::edit_stream_quantiles",
-            "::vsldSSEditStreamQuantiles");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsldSSEditStreamQuantiles(this->get(), quant_order_n,
+                quant_order, quants, nparams, params),
+            "MKLSSTask::edit_stream_quantiles", "::vsldSSEditStreamQuantiles");
     }
 
     int edit_pooled_covariance_dispatch(const MKL_INT *grp_indices,
@@ -1091,12 +969,11 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
         const MKL_INT *req_grp_indices, const float *grp_means,
         const float *grp_cov)
     {
-        int status = ::vslsSSEditPooledCovariance(this->get(), grp_indices,
-            pld_mean, pld_cov, req_grp_indices, grp_means, grp_cov);
-        internal::mkl_error_check(status, "MKLSSTask::edit_pooled_covariance",
+        return internal::mkl_error_check(
+            ::vslsSSEditPooledCovariance(this->get(), grp_indices, pld_mean,
+                pld_cov, req_grp_indices, grp_means, grp_cov),
+            "MKLSSTask::edit_pooled_covariance",
             "::vslsSSEditPooledCovariance");
-
-        return status;
     }
 
     int edit_pooled_covariance_dispatch(const MKL_INT *grp_indices,
@@ -1104,58 +981,51 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
         const MKL_INT *req_grp_indices, const double *grp_means,
         const double *grp_cov)
     {
-        int status = ::vsldSSEditPooledCovariance(this->get(), grp_indices,
-            pld_mean, pld_cov, req_grp_indices, grp_means, grp_cov);
-        internal::mkl_error_check(status, "MKLSSTask::edit_pooled_covariance",
+        return internal::mkl_error_check(
+            ::vsldSSEditPooledCovariance(this->get(), grp_indices, pld_mean,
+                pld_cov, req_grp_indices, grp_means, grp_cov),
+            "MKLSSTask::edit_pooled_covariance",
             "::vsldSSEditPooledCovariance");
-
-        return status;
     }
 
     int edit_robust_covariance_dispatch(const MKL_INT *rcov_storage,
         const MKL_INT *nparams, const float *params, const float *rmean,
         const float *rcov)
     {
-        int status = ::vslsSSEditRobustCovariance(
-            this->get(), rcov_storage, nparams, params, rmean, rcov);
-        internal::mkl_error_check(status, "MKLSSTask::edit_robust_covariance",
+        return internal::mkl_error_check(
+            ::vslsSSEditRobustCovariance(
+                this->get(), rcov_storage, nparams, params, rmean, rcov),
+            "MKLSSTask::edit_robust_covariance",
             "::vslsSSEditRobustCovariance");
-
-        return status;
     }
 
     int edit_robust_covariance_dispatch(const MKL_INT *rcov_storage,
         const MKL_INT *nparams, const double *params, const double *rmean,
         const double *rcov)
     {
-        int status = ::vsldSSEditRobustCovariance(
-            this->get(), rcov_storage, nparams, params, rmean, rcov);
-        internal::mkl_error_check(status, "MKLSSTask::edit_robust_covariance",
+        return internal::mkl_error_check(
+            ::vsldSSEditRobustCovariance(
+                this->get(), rcov_storage, nparams, params, rmean, rcov),
+            "MKLSSTask::edit_robust_covariance",
             "::vsldSSEditRobustCovariance");
-
-        return status;
     }
 
     int edit_outliers_detection_dispatch(
         const MKL_INT *nparams, const float *params, const float *w)
     {
-        int status =
-            ::vslsSSEditOutliersDetection(this->get(), nparams, params, w);
-        internal::mkl_error_check(status, "MKLSSTask::edit_outliers_detection",
+        return internal::mkl_error_check(
+            ::vslsSSEditOutliersDetection(this->get(), nparams, params, w),
+            "MKLSSTask::edit_outliers_detection",
             "::vslsSSEditOutliersDetection");
-
-        return status;
     }
 
     int edit_outliers_detection_dispatch(
         const MKL_INT *nparams, const double *params, const double *w)
     {
-        int status =
-            ::vsldSSEditOutliersDetection(this->get(), nparams, params, w);
-        internal::mkl_error_check(status, "MKLSSTask::edit_outliers_detection",
+        return internal::mkl_error_check(
+            ::vsldSSEditOutliersDetection(this->get(), nparams, params, w),
+            "MKLSSTask::edit_outliers_detection",
             "::vsldSSEditOutliersDetection");
-
-        return status;
     }
 
     int edit_missing_values_dispatch(const MKL_INT *nparams,
@@ -1165,13 +1035,12 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
         const float *simul_missing_vals, const MKL_INT *estimates_n,
         const float *estimates)
     {
-        int status = ::vslsSSEditMissingValues(this->get(), nparams, params,
-            init_estimates_n, init_estimates, prior_n, prior,
-            simul_missing_vals_n, simul_missing_vals, estimates_n, estimates);
-        internal::mkl_error_check(status, "MKLSSTask::edit_missing_values",
-            "::vslsSSEditMissingValues");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vslsSSEditMissingValues(this->get(), nparams, params,
+                init_estimates_n, init_estimates, prior_n, prior,
+                simul_missing_vals_n, simul_missing_vals, estimates_n,
+                estimates),
+            "MKLSSTask::edit_missing_values", "::vslsSSEditMissingValues");
     }
 
     int edit_missing_values_dispatch(const MKL_INT *nparams,
@@ -1181,59 +1050,50 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
         const double *simul_missing_vals, const MKL_INT *estimates_n,
         const double *estimates)
     {
-        int status = ::vsldSSEditMissingValues(this->get(), nparams, params,
-            init_estimates_n, init_estimates, prior_n, prior,
-            simul_missing_vals_n, simul_missing_vals, estimates_n, estimates);
-        internal::mkl_error_check(status, "MKLSSTask::edit_missing_values",
-            "::vsldSSEditMissingValues");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsldSSEditMissingValues(this->get(), nparams, params,
+                init_estimates_n, init_estimates, prior_n, prior,
+                simul_missing_vals_n, simul_missing_vals, estimates_n,
+                estimates),
+            "MKLSSTask::edit_missing_values", "::vsldSSEditMissingValues");
     }
 
     int edit_cor_parameterization_dispatch(const float *cor,
         const MKL_INT *cor_storage, const float *pcor,
         const MKL_INT *pcor_storage)
     {
-        int status = ::vslsSSEditCorParameterization(
-            this->get(), cor, cor_storage, pcor, pcor_storage);
-        internal::mkl_error_check(status,
+        return internal::mkl_error_check(
+            ::vslsSSEditCorParameterization(
+                this->get(), cor, cor_storage, pcor, pcor_storage),
             "MKLSSTask::edit_cor_parameterization",
             "::vslsSSEditCorParameterization");
-
-        return status;
     }
 
     int edit_cor_parameterization_dispatch(const double *cor,
         const MKL_INT *cor_storage, const double *pcor,
         const MKL_INT *pcor_storage)
     {
-        int status = ::vsldSSEditCorParameterization(
-            this->get(), cor, cor_storage, pcor, pcor_storage);
-        internal::mkl_error_check(status,
+        return internal::mkl_error_check(
+            ::vsldSSEditCorParameterization(
+                this->get(), cor, cor_storage, pcor, pcor_storage),
             "MKLSSTask::edit_cor_parameterization",
             "::vsldSSEditCorParameterization");
-
-        return status;
     }
 
     int compute_dispatch(
         unsigned MKL_INT64 estimates, MKL_INT method, const float *)
     {
-        int status = ::vslsSSCompute(this->get(), estimates, method);
-        internal::mkl_error_check(
-            status, "MKLSSTask::compute", "::vslsSSCompute");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vslsSSCompute(this->get(), estimates, method),
+            "MKLSSTask::compute", "::vslsSSCompute");
     }
 
     int compute_dispatch(
         unsigned MKL_INT64 estimates, MKL_INT method, const double *)
     {
-        int status = ::vsldSSCompute(this->get(), estimates, method);
-        internal::mkl_error_check(
-            status, "MKLSSTask::compute", "::vsldSSCompute");
-
-        return status;
+        return internal::mkl_error_check(
+            ::vsldSSCompute(this->get(), estimates, method),
+            "MKLSSTask::compute", "::vsldSSCompute");
     }
 }; // class MKLSSTask
 
@@ -1310,11 +1170,8 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         if (ptr == nullptr)
             return 0;
 
-        int status = ::vslConvDeleteTask(&ptr);
-        internal::mkl_error_check(
-            status, "MKLConvTask::release", "::vslConvDeleteTask");
-
-        return status;
+        return internal::mkl_error_check(::vslConvDeleteTask(&ptr),
+            "MKLConvTask::release", "::vslConvDeleteTask");
     }
 
     /// \brief `vslConvNewTask`
@@ -1351,10 +1208,9 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT *yshape, const MKL_INT *zshape, float *)
     {
         ::VSLConvTaskPtr ptr;
-        int status =
-            ::vslsConvNewTask(&ptr, mode, dims, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vslsConvNewTask");
+        int status = internal::mkl_error_check(
+            ::vslsConvNewTask(&ptr, mode, dims, xshape, yshape, zshape),
+            "MKLConvTask::reset", "::vslsConvNewTask");
         this->reset_ptr(ptr);
 
         return status;
@@ -1364,10 +1220,9 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT *yshape, const MKL_INT *zshape, double *)
     {
         ::VSLConvTaskPtr ptr;
-        int status =
-            ::vsldConvNewTask(&ptr, mode, dims, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vsldConvNewTask");
+        int status = internal::mkl_error_check(
+            ::vsldConvNewTask(&ptr, mode, dims, xshape, yshape, zshape),
+            "MKLConvTask::reset", "::vsldConvNewTask");
         this->reset_ptr(ptr);
 
         return status;
@@ -1377,10 +1232,9 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT *yshape, const MKL_INT *zshape, MKL_Complex8 *)
     {
         ::VSLConvTaskPtr ptr;
-        int status =
-            ::vslcConvNewTask(&ptr, mode, dims, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vslcConvNewTask");
+        int status = internal::mkl_error_check(
+            ::vslcConvNewTask(&ptr, mode, dims, xshape, yshape, zshape),
+            "MKLConvTask::reset", "::vslcConvNewTask");
         this->reset_ptr(ptr);
 
         return status;
@@ -1390,10 +1244,9 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT *yshape, const MKL_INT *zshape, MKL_Complex16 *)
     {
         ::VSLConvTaskPtr ptr;
-        int status =
-            ::vslzConvNewTask(&ptr, mode, dims, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vslzConvNewTask");
+        int status = internal::mkl_error_check(
+            ::vslzConvNewTask(&ptr, mode, dims, xshape, yshape, zshape),
+            "MKLConvTask::reset", "::vslzConvNewTask");
         this->reset_ptr(ptr);
 
         return status;
@@ -1403,9 +1256,9 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT yshape, const MKL_INT zshape, float *)
     {
         ::VSLConvTaskPtr ptr;
-        int status = ::vslsConvNewTask1D(&ptr, mode, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vslsConvNewTask1D");
+        int status = internal::mkl_error_check(
+            ::vslsConvNewTask1D(&ptr, mode, xshape, yshape, zshape),
+            "MKLConvTask::reset", "::vslsConvNewTask1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1415,9 +1268,9 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT yshape, const MKL_INT zshape, double *)
     {
         ::VSLConvTaskPtr ptr;
-        int status = ::vsldConvNewTask1D(&ptr, mode, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vsldConvNewTask1D");
+        int status = internal::mkl_error_check(
+            ::vsldConvNewTask1D(&ptr, mode, xshape, yshape, zshape),
+            "MKLConvTask::reset", "::vsldConvNewTask1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1427,9 +1280,9 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT yshape, const MKL_INT zshape, MKL_Complex8 *)
     {
         ::VSLConvTaskPtr ptr;
-        int status = ::vslcConvNewTask1D(&ptr, mode, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vslcConvNewTask1D");
+        int status = internal::mkl_error_check(
+            ::vslcConvNewTask1D(&ptr, mode, xshape, yshape, zshape),
+            "MKLConvTask::reset", "::vslcConvNewTask1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1439,9 +1292,9 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT yshape, const MKL_INT zshape, MKL_Complex16 *)
     {
         ::VSLConvTaskPtr ptr;
-        int status = ::vslzConvNewTask1D(&ptr, mode, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vslzConvNewTask1D");
+        int status = internal::mkl_error_check(
+            ::vslzConvNewTask1D(&ptr, mode, xshape, yshape, zshape),
+            "MKLConvTask::reset", "::vslzConvNewTask1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1452,10 +1305,10 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT *xstride)
     {
         ::VSLConvTaskPtr ptr;
-        int status = ::vslsConvNewTaskX(
-            &ptr, mode, dims, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vslsConvNewTaskX");
+        int status =
+            internal::mkl_error_check(::vslsConvNewTaskX(&ptr, mode, dims,
+                                          xshape, yshape, zshape, x, xstride),
+                "MKLConvTask::reset", "::vslsConvNewTaskX");
         this->reset_ptr(ptr);
 
         return status;
@@ -1466,10 +1319,10 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT *xstride)
     {
         ::VSLConvTaskPtr ptr;
-        int status = ::vsldConvNewTaskX(
-            &ptr, mode, dims, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vsldConvNewTaskX");
+        int status =
+            internal::mkl_error_check(::vsldConvNewTaskX(&ptr, mode, dims,
+                                          xshape, yshape, zshape, x, xstride),
+                "MKLConvTask::reset", "::vsldConvNewTaskX");
         this->reset_ptr(ptr);
 
         return status;
@@ -1480,10 +1333,10 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT *xstride)
     {
         ::VSLConvTaskPtr ptr;
-        int status = ::vslcConvNewTaskX(
-            &ptr, mode, dims, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vslcConvNewTaskX");
+        int status =
+            internal::mkl_error_check(::vslcConvNewTaskX(&ptr, mode, dims,
+                                          xshape, yshape, zshape, x, xstride),
+                "MKLConvTask::reset", "::vslcConvNewTaskX");
         this->reset_ptr(ptr);
 
         return status;
@@ -1494,10 +1347,10 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT *xstride)
     {
         ::VSLConvTaskPtr ptr;
-        int status = ::vslzConvNewTaskX(
-            &ptr, mode, dims, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vslzConvNewTaskX");
+        int status =
+            internal::mkl_error_check(::vslzConvNewTaskX(&ptr, mode, dims,
+                                          xshape, yshape, zshape, x, xstride),
+                "MKLConvTask::reset", "::vslzConvNewTaskX");
         this->reset_ptr(ptr);
 
         return status;
@@ -1508,10 +1361,10 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT xstride)
     {
         ::VSLConvTaskPtr ptr;
-        int status = ::vslsConvNewTaskX1D(
-            &ptr, mode, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vslsConvNewTaskX1D");
+        int status =
+            internal::mkl_error_check(::vslsConvNewTaskX1D(&ptr, mode, xshape,
+                                          yshape, zshape, x, xstride),
+                "MKLConvTask::reset", "::vslsConvNewTaskX1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1522,10 +1375,10 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT xstride)
     {
         ::VSLConvTaskPtr ptr;
-        int status = ::vsldConvNewTaskX1D(
-            &ptr, mode, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vsldConvNewTaskX1D");
+        int status =
+            internal::mkl_error_check(::vsldConvNewTaskX1D(&ptr, mode, xshape,
+                                          yshape, zshape, x, xstride),
+                "MKLConvTask::reset", "::vsldConvNewTaskX1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1536,10 +1389,10 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT xstride)
     {
         ::VSLConvTaskPtr ptr;
-        int status = ::vslcConvNewTaskX1D(
-            &ptr, mode, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vslcConvNewTaskX1D");
+        int status =
+            internal::mkl_error_check(::vslcConvNewTaskX1D(&ptr, mode, xshape,
+                                          yshape, zshape, x, xstride),
+                "MKLConvTask::reset", "::vslcConvNewTaskX1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1550,10 +1403,10 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT xstride)
     {
         ::VSLConvTaskPtr ptr;
-        int status = ::vslzConvNewTaskX1D(
-            &ptr, mode, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLConvTask::reset", "::vslzConvNewTaskX1D");
+        int status =
+            internal::mkl_error_check(::vslzConvNewTaskX1D(&ptr, mode, xshape,
+                                          yshape, zshape, x, xstride),
+                "MKLConvTask::reset", "::vslzConvNewTaskX1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1633,11 +1486,8 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         if (ptr == nullptr)
             return 0;
 
-        int status = ::vslCorrDeleteTask(&ptr);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::release", "::vslCorrDeleteTask");
-
-        return status;
+        return internal::mkl_error_check(::vslCorrDeleteTask(&ptr),
+            "MKLCorrTask::release", "::vslCorrDeleteTask");
     }
 
     /// \brief `vslCorrNewTask`
@@ -1674,10 +1524,9 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT *yshape, const MKL_INT *zshape, float *)
     {
         ::VSLCorrTaskPtr ptr;
-        int status =
-            ::vslsCorrNewTask(&ptr, mode, dims, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vslsCorrNewTask");
+        int status = internal::mkl_error_check(
+            ::vslsCorrNewTask(&ptr, mode, dims, xshape, yshape, zshape),
+            "MKLCorrTask::reset", "::vslsCorrNewTask");
         this->reset_ptr(ptr);
 
         return status;
@@ -1687,10 +1536,9 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT *yshape, const MKL_INT *zshape, double *)
     {
         ::VSLCorrTaskPtr ptr;
-        int status =
-            ::vsldCorrNewTask(&ptr, mode, dims, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vsldCorrNewTask");
+        int status = internal::mkl_error_check(
+            ::vsldCorrNewTask(&ptr, mode, dims, xshape, yshape, zshape),
+            "MKLCorrTask::reset", "::vsldCorrNewTask");
         this->reset_ptr(ptr);
 
         return status;
@@ -1700,10 +1548,9 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT *yshape, const MKL_INT *zshape, MKL_Complex8 *)
     {
         ::VSLCorrTaskPtr ptr;
-        int status =
-            ::vslcCorrNewTask(&ptr, mode, dims, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vslcCorrNewTask");
+        int status = internal::mkl_error_check(
+            ::vslcCorrNewTask(&ptr, mode, dims, xshape, yshape, zshape),
+            "MKLCorrTask::reset", "::vslcCorrNewTask");
         this->reset_ptr(ptr);
 
         return status;
@@ -1713,10 +1560,9 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT *yshape, const MKL_INT *zshape, MKL_Complex16 *)
     {
         ::VSLCorrTaskPtr ptr;
-        int status =
-            ::vslzCorrNewTask(&ptr, mode, dims, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vslzCorrNewTask");
+        int status = internal::mkl_error_check(
+            ::vslzCorrNewTask(&ptr, mode, dims, xshape, yshape, zshape),
+            "MKLCorrTask::reset", "::vslzCorrNewTask");
         this->reset_ptr(ptr);
 
         return status;
@@ -1726,9 +1572,9 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT yshape, const MKL_INT zshape, float *)
     {
         ::VSLCorrTaskPtr ptr;
-        int status = ::vslsCorrNewTask1D(&ptr, mode, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vslsCorrNewTask1D");
+        int status = internal::mkl_error_check(
+            ::vslsCorrNewTask1D(&ptr, mode, xshape, yshape, zshape),
+            "MKLCorrTask::reset", "::vslsCorrNewTask1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1738,9 +1584,9 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT yshape, const MKL_INT zshape, double *)
     {
         ::VSLCorrTaskPtr ptr;
-        int status = ::vsldCorrNewTask1D(&ptr, mode, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vsldCorrNewTask1D");
+        int status = internal::mkl_error_check(
+            ::vsldCorrNewTask1D(&ptr, mode, xshape, yshape, zshape),
+            "MKLCorrTask::reset", "::vsldCorrNewTask1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1750,9 +1596,9 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT yshape, const MKL_INT zshape, MKL_Complex8 *)
     {
         ::VSLCorrTaskPtr ptr;
-        int status = ::vslcCorrNewTask1D(&ptr, mode, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vslcCorrNewTask1D");
+        int status = internal::mkl_error_check(
+            ::vslcCorrNewTask1D(&ptr, mode, xshape, yshape, zshape),
+            "MKLCorrTask::reset", "::vslcCorrNewTask1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1762,9 +1608,9 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT yshape, const MKL_INT zshape, MKL_Complex16 *)
     {
         ::VSLCorrTaskPtr ptr;
-        int status = ::vslzCorrNewTask1D(&ptr, mode, xshape, yshape, zshape);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vslzCorrNewTask1D");
+        int status = internal::mkl_error_check(
+            ::vslzCorrNewTask1D(&ptr, mode, xshape, yshape, zshape),
+            "MKLCorrTask::reset", "::vslzCorrNewTask1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1775,10 +1621,10 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT *xstride)
     {
         ::VSLCorrTaskPtr ptr;
-        int status = ::vslsCorrNewTaskX(
-            &ptr, mode, dims, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vslsCorrNewTaskX");
+        int status =
+            internal::mkl_error_check(::vslsCorrNewTaskX(&ptr, mode, dims,
+                                          xshape, yshape, zshape, x, xstride),
+                "MKLCorrTask::reset", "::vslsCorrNewTaskX");
         this->reset_ptr(ptr);
 
         return status;
@@ -1789,10 +1635,10 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT *xstride)
     {
         ::VSLCorrTaskPtr ptr;
-        int status = ::vsldCorrNewTaskX(
-            &ptr, mode, dims, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vsldCorrNewTaskX");
+        int status =
+            internal::mkl_error_check(::vsldCorrNewTaskX(&ptr, mode, dims,
+                                          xshape, yshape, zshape, x, xstride),
+                "MKLCorrTask::reset", "::vsldCorrNewTaskX");
         this->reset_ptr(ptr);
 
         return status;
@@ -1803,10 +1649,10 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT *xstride)
     {
         ::VSLCorrTaskPtr ptr;
-        int status = ::vslcCorrNewTaskX(
-            &ptr, mode, dims, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vslcCorrNewTaskX");
+        int status =
+            internal::mkl_error_check(::vslcCorrNewTaskX(&ptr, mode, dims,
+                                          xshape, yshape, zshape, x, xstride),
+                "MKLCorrTask::reset", "::vslcCorrNewTaskX");
         this->reset_ptr(ptr);
 
         return status;
@@ -1817,10 +1663,10 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT *xstride)
     {
         ::VSLCorrTaskPtr ptr;
-        int status = ::vslzCorrNewTaskX(
-            &ptr, mode, dims, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vslzCorrNewTaskX");
+        int status =
+            internal::mkl_error_check(::vslzCorrNewTaskX(&ptr, mode, dims,
+                                          xshape, yshape, zshape, x, xstride),
+                "MKLCorrTask::reset", "::vslzCorrNewTaskX");
         this->reset_ptr(ptr);
 
         return status;
@@ -1831,10 +1677,10 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT xstride)
     {
         ::VSLCorrTaskPtr ptr;
-        int status = ::vslsCorrNewTaskX1D(
-            &ptr, mode, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vslsCorrNewTaskX1D");
+        int status =
+            internal::mkl_error_check(::vslsCorrNewTaskX1D(&ptr, mode, xshape,
+                                          yshape, zshape, x, xstride),
+                "MKLCorrTask::reset", "::vslsCorrNewTaskX1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1845,10 +1691,10 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT xstride)
     {
         ::VSLCorrTaskPtr ptr;
-        int status = ::vsldCorrNewTaskX1D(
-            &ptr, mode, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vsldCorrNewTaskX1D");
+        int status =
+            internal::mkl_error_check(::vsldCorrNewTaskX1D(&ptr, mode, xshape,
+                                          yshape, zshape, x, xstride),
+                "MKLCorrTask::reset", "::vsldCorrNewTaskX1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1859,10 +1705,10 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT xstride)
     {
         ::VSLCorrTaskPtr ptr;
-        int status = ::vslcCorrNewTaskX1D(
-            &ptr, mode, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vslcCorrNewTaskX1D");
+        int status =
+            internal::mkl_error_check(::vslcCorrNewTaskX1D(&ptr, mode, xshape,
+                                          yshape, zshape, x, xstride),
+                "MKLCorrTask::reset", "::vslcCorrNewTaskX1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1873,10 +1719,10 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT xstride)
     {
         ::VSLCorrTaskPtr ptr;
-        int status = ::vslzCorrNewTaskX1D(
-            &ptr, mode, xshape, yshape, zshape, x, xstride);
-        internal::mkl_error_check(
-            status, "MKLCorrTask::reset", "::vslzCorrNewTaskX1D");
+        int status =
+            internal::mkl_error_check(::vslzCorrNewTaskX1D(&ptr, mode, xshape,
+                                          yshape, zshape, x, xstride),
+                "MKLCorrTask::reset", "::vslzCorrNewTaskX1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1905,11 +1751,8 @@ class MKLDFTask : public MKLBase<::DFTaskPtr, MKLDFTask<RealType>>
         if (ptr == nullptr)
             return 0;
 
-        int status = ::dfDeleteTask(&ptr);
-        internal::mkl_error_check(
-            status, "MKLDFTask::release", "::dfDeleteTask");
-
-        return status;
+        return internal::mkl_error_check(
+            ::dfDeleteTask(&ptr), "MKLDFTask::release", "::dfDeleteTask");
     }
 
     int reset(MKL_INT nx, const result_type *x, MKL_INT xhint, MKL_INT ny,
@@ -1923,9 +1766,9 @@ class MKLDFTask : public MKLBase<::DFTaskPtr, MKLDFTask<RealType>>
         const float *y, MKL_INT yhint)
     {
         ::DFTaskPtr ptr;
-        int status = ::dfsNewTask1D(&ptr, nx, x, xhint, ny, y, yhint);
-        internal::mkl_error_check(
-            status, "MKLDFTask::reset", "::dfsNewTask1D");
+        int status = internal::mkl_error_check(
+            ::dfsNewTask1D(&ptr, nx, x, xhint, ny, y, yhint),
+            "MKLDFTask::reset", "::dfsNewTask1D");
         this->reset_ptr(ptr);
 
         return status;
@@ -1935,9 +1778,9 @@ class MKLDFTask : public MKLBase<::DFTaskPtr, MKLDFTask<RealType>>
         const double *y, MKL_INT yhint)
     {
         ::DFTaskPtr ptr;
-        int status = ::dfdNewTask1D(&ptr, nx, x, xhint, ny, y, yhint);
-        internal::mkl_error_check(
-            status, "MKLDFTask::reset", "::dfdNewTask1D");
+        int status = internal::mkl_error_check(
+            ::dfdNewTask1D(&ptr, nx, x, xhint, ny, y, yhint),
+            "MKLDFTask::reset", "::dfdNewTask1D");
         this->reset_ptr(ptr);
 
         return status;
