@@ -10,7 +10,14 @@ static constexpr std::size_t VelY = 3;
 static constexpr std::size_t G = 10240;
 static constexpr std::size_t L = 256;
 
-using PFStateBase = vsmc::StateMatrix<vsmc::RowMajor, 4, cl_float>;
+typedef struct {
+    cl_float pos_x;
+    cl_float pos_y;
+    cl_float vel_x;
+    cl_float vel_y;
+} cl_pf_sp;
+
+using PFStateBase = vsmc::StateMatrix<vsmc::RowMajor, 1, cl_pf_sp>;
 
 class PFState : public PFStateBase
 {
@@ -27,7 +34,7 @@ class PFState : public PFStateBase
 
         dev_data_ =
             vsmc::CLMemory(context, CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
-                sizeof(cl_float4) * size(), nullptr);
+                sizeof(cl_pf_sp) * size(), nullptr);
         dev_weight_ =
             vsmc::CLMemory(context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
                 sizeof(cl_float) * size(), nullptr);
@@ -62,7 +69,7 @@ class PFState : public PFStateBase
     void copy_to_host()
     {
         command_queue_.enqueue_read_buffer(
-            dev_data_, CL_TRUE, 0, sizeof(cl_float) * size() * dim(), data());
+            dev_data_, CL_TRUE, 0, sizeof(cl_pf_sp) * size(), data());
     }
 
     void read_data(const char *param)
@@ -186,8 +193,8 @@ class PFEval : public vsmc::MonitorEvalTBB<PFState, PFEval>
     void eval_sp(std::size_t t, std::size_t dim,
         vsmc::SingleParticle<PFState> sp, double *r)
     {
-        r[0] = sp.state(PosX);
-        r[1] = sp.state(PosY);
+        r[0] = sp.state(0).pos_x;
+        r[1] = sp.state(0).pos_y;
     }
 };
 
