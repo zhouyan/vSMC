@@ -53,8 +53,8 @@
 #define VSMC_RUNTIME_ASSERT(cond, msg)                                        \
     {                                                                         \
         if (!(cond)) {                                                        \
-            std::fprintf(stderr, "vSMC runtime assertion failded:%s:%d:%s\n", \
-                __FILE__, __LINE__, msg);                                     \
+            std::fprintf(stderr, "vSMC runtime assertion failed:%s\n", msg);  \
+            std::fflush(stderr);                                              \
         };                                                                    \
         assert(cond);                                                         \
     }
@@ -75,9 +75,7 @@
 #define VSMC_RUNTIME_WARNING(cond, msg)                                       \
     {                                                                         \
         if (!(cond)) {                                                        \
-            std::fprintf(stderr,                                              \
-                "vSMC runtime warning; File: %s; Line: %d\n%s\n", __FILE__,   \
-                __LINE__, msg);                                               \
+            std::fprintf(stderr, "vSMC runtime warning:%s\n", msg);           \
             std::fflush(stderr);                                              \
         };                                                                    \
     }
