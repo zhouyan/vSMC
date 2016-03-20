@@ -2,13 +2,12 @@ CXXFLAGS := $(CXXFLAGS) -std=c++11 -O3
 CXXFLAGS := $(CXXFLAGS) -I ../../include
 CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_MKL
 CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_TBB
-CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_OPENCL
-LDFLAGS := -lmkl_rt -ltbb -ltbbmalloc -framework OpenCL
+LDFLAGS := -lmkl_rt -ltbb -ltbbmalloc
 
 all : pf_ocl pf_tbb pf_seq program_option program_progress
 
 pf_ocl : pf_ocl.cpp
-	$(CXX) $(CXXFLAGS) -o pf_ocl pf_ocl.cpp $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -DVSMC_HAS_OPENCL -o pf_ocl pf_ocl.cpp $(LDFLAGS) $(OPENCL_LIBRARY)
 
 pf_tbb : pf_tbb.cpp
 	$(CXX) $(CXXFLAGS) -o pf_tbb pf_tbb.cpp $(LDFLAGS)
@@ -26,4 +25,4 @@ clean:
 	rm -f pf_ocl pf_seq pf_tbb
 	rm -f pf.out pf.rout pf.pdf
 	rm -f program_option
-	rm -f program_process
+	rm -f program_progress
