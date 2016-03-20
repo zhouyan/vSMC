@@ -207,7 +207,7 @@ class CLNDRange
     public:
     CLNDRange() : data_(nullptr) {}
 
-    explicit CLNDRange(std::size_t x, std::size_t y = 0, std::size_t z = 0)
+    explicit CLNDRange(std::size_t x, std::size_t y = 1, std::size_t z = 1)
         : range_({x, y, z}), data_(range_.data())
     {
     }
