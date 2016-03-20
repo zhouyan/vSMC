@@ -55,9 +55,11 @@ inline int mkl_error_check(int status, const char *cpp, const char *c)
     if (status == MKL_SUCCESS)
         return status;
 
-    std::string msg("**");
+    std::string msg;
+    msg += "**";
     msg += cpp;
-    msg += "** failure";
+    msg += "**";
+    msg += " failed";
     msg += "; MKL function: ";
     msg += c;
     msg += "; Error code: ";

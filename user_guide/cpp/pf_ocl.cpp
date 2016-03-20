@@ -200,7 +200,7 @@ class PFEval : public vsmc::MonitorEvalTBB<PFState, PFEval>
 
 int main()
 {
-    auto platform = vsmc::CLPlatform::platforms().front();
+    auto platform = vsmc::cl_get_platform().front();
     std::string platform_name;
     platform.get_info(CL_PLATFORM_NAME, platform_name);
     std::cout << "Platform: " << platform_name << std::endl;
@@ -210,31 +210,37 @@ int main()
     device.get_info(CL_DEVICE_NAME, device_name);
     std::cout << "Device:   " << device_name << std::endl;
 
-    cl_context_properties properties[] = {CL_CONTEXT_PLATFORM,
-        reinterpret_cast<cl_context_properties>(platform.get()), 0};
-    vsmc::CLContext context(properties, device);
-    vsmc::CLCommandQueue command_queue(context, device, 0);
+    vsmc::CLContext context(vsmc::CLContextProperties(platform), 1, &device);
+    vsmc::CLCommandQueue command_queue(context, device);
 
     std::ifstream source_cl("pf_ocl.cl");
     std::string source((std::istreambuf_iterator<char>(source_cl)),
         std::istreambuf_iterator<char>());
     source_cl.close();
-    vsmc::CLProgram program(context, source);
+    vsmc::CLProgram program(context, 1, &source);
     program.build(1, &device, "-I ../../include");
 
     vsmc::CLKernel kernel_copy(program, "copy");
     vsmc::CLKernel kernel_init(program, "init");
     vsmc::CLKernel kernel_move(program, "move");
 
-    std::cout << "Kernel copy preferred work group size: "
-              << kernel_copy.preferred_work_group_size_multiple(device)
-              << std::endl;
-    std::cout << "Kernel init preferred work group size: "
-              << kernel_init.preferred_work_group_size_multiple(device)
-              << std::endl;
-    std::cout << "Kernel move preferred work group size: "
-              << kernel_move.preferred_work_group_size_multiple(device)
-              << std::endl;
+    std::size_t pwgsm_copy = 0;
+    std::size_t pwgsm_init = 0;
+    std::size_t pwgsm_move = 0;
+
+    kernel_copy.get_work_group_info(
+        device, CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, pwgsm_copy);
+    kernel_init.get_work_group_info(
+        device, CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, pwgsm_init);
+    kernel_move.get_work_group_info(
+        device, CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE, pwgsm_move);
+
+    std::cout << "Kernel copy preferred work group size multiple: "
+              << pwgsm_copy << std::endl;
+    std::cout << "Kernel init preferred work group size multiple: "
+              << pwgsm_init << std::endl;
+    std::cout << "Kernel move preferred work group size multiple: "
+              << pwgsm_move << std::endl;
 
     vsmc::Sampler<PFState> sampler(N, vsmc::Multinomial, 0.5);
     sampler.particle().value().initialize(context, command_queue, kernel_copy);
