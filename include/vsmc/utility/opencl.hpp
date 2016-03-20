@@ -52,7 +52,7 @@
 
 #ifdef VSMC_INTEL
 #pragma warning(push)
-#pragma warning(disable:1478)
+#pragma warning(disable : 1478)
 #endif
 
 namespace vsmc
@@ -188,7 +188,7 @@ template <typename CLPtr, typename Derived>
 inline bool operator!=(
     const CLBase<CLPtr, Derived> &ptr1, const CLBase<CLPtr, Derived> &ptr2)
 {
-    return ptr1.get() == ptr2.get();
+    return ptr1.get() != ptr2.get();
 }
 
 /// \brief Swap two CLBase objects
