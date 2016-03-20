@@ -34,22 +34,20 @@ class PFState : public PFStateBase
 
         dev_data_ =
             vsmc::CLMemory(context, CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
-                sizeof(cl_pf_sp) * size(), nullptr);
+                sizeof(cl_pf_sp) * size());
         dev_weight_ =
             vsmc::CLMemory(context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
-                sizeof(cl_float) * size(), nullptr);
+                sizeof(cl_float) * size());
         dev_rng_set_ =
             vsmc::CLMemory(context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
-                sizeof(vsmc_threefry4x32) * size(), nullptr);
+                sizeof(vsmc_threefry4x32) * size());
         dev_index_ =
             vsmc::CLMemory(context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
-                sizeof(cl_int) * size(), nullptr);
-        dev_obs_x_ =
-            vsmc::CLMemory(context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
-                sizeof(cl_float) * n, nullptr);
-        dev_obs_y_ =
-            vsmc::CLMemory(context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
-                sizeof(cl_float) * n, nullptr);
+                sizeof(cl_int) * size());
+        dev_obs_x_ = vsmc::CLMemory(context,
+            CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY, sizeof(cl_float) * n);
+        dev_obs_y_ = vsmc::CLMemory(context,
+            CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY, sizeof(cl_float) * n);
     }
 
     void copy(std::size_t N, const cl_int *index)

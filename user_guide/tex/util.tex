@@ -97,36 +97,86 @@ see the reference manual for details.
 
 The library provides a few classes to manage \mkl pointers. It provides
 Resource Acquisition Is Initialization (\raii) idiom on top of the \mkl C
-interface. For example,
+interface. For example, below is a small program using the
+\cppinline{MKLSSTask} class,
 \begin{cppcode}
-  // VSLSSTaskPtr ptr;
-  // vsldSSNewTask(&ptr, &p, &n, &xstorage, x, w, indices);
   MKLSSTask<double> task(&p, &n, &xstorage, x, w, indices);
-  // vsldSSEditMoments(ptr, mean, r2m, r3m, r4m, c2m, c3m, c4m);
   task.edit_moments(mean, r2m, r3m, r4m, c2m, c3m, c4m);
-  // vsldSSCompute(ptr, estimates, method);
   task.compute(estimates, method)
-  // vslSSDeleteTask(&ptr);
 \end{cppcode}
-In the above snippets, \cppinline{MKLSSTask} manages a \cppinline{VSLSSTaskPtr}
-task pointer. All C functions that operates on the pointer, is also defined as
-methods in the class. Table~\ref{tab:RAII classes for MKL pointers} lists the
-classes defined by the library and their corresponding \mkl pointers.
+In the above program, the \cppinline{MKLSSTask} type object manages a
+\cppinline{VSLSSTaskPtr} task pointer. The resouces managed will be released
+when the object is destoryed. All C functions that operates on the pointer, is
+also defined as methods in the class. Table~\ref{tab:RAII classes for MKL
+  pointers} lists the classes defined by the library and their corresponding
+\mkl pointers. For those classes that are copyable, the copy constructor and
+assignment operator perform deep copy. It is safe to use the copy and the
+original independently. Those classes that are not copyable are movable.
 
 \begin{table}[t]
-  \begin{tabu}{X[l]X[l]}
+  \begin{tabu}{X[l]X[l]X[l]}
     \toprule
-    Class & \mkl pointer type \\
+    Class & \mkl pointer type & Copyable \\
     \midrule
-    \texttt{MKLStream}   & \texttt{VSLStreamStatePtr} \\
-    \texttt{MKLSSTask}   & \texttt{VSLSSTaskPtr}      \\
-    \texttt{MKLConvTask} & \texttt{VSLConvTask}       \\
-    \texttt{MKLCorrTask} & \texttt{VSLCorrTask}       \\
-    \texttt{MKLDFTask}   & \texttt{DFTaskPtr}         \\
+    \texttt{MKLStream}   & \texttt{VSLStreamStatePtr} & Yes \\
+    \texttt{MKLSSTask}   & \texttt{VSLSSTaskPtr}      & No  \\
+    \texttt{MKLConvTask} & \texttt{VSLConvTask}       & Yes \\
+    \texttt{MKLCorrTask} & \texttt{VSLCorrTask}       & Yes \\
+    \texttt{MKLDFTask}   & \texttt{DFTaskPtr}         & No  \\
     \bottomrule
   \end{tabu}
   \caption{\protect\raii classes for \protect\mkl pointers}
   \label{tab:RAII classes for MKL pointers}
+\end{table}
+
+\section{\protect\raii classes for OpenCL pointers}
+\label{sec:RAII classes for OpenCL pointers}
+
+The library provides a few classes to manager OpenCL pointers. It provides
+\raii idiom on top of the OpenCL C interface. For example, below is a small
+program,
+\begin{cppcode}
+  auto platform = cl_get_platform().front();
+  auto device = platform.get_device(CL_DEVICE_TYPE_DEFAULT).front();
+  CLContext context(CLContextProperties(platform), 1, &device);
+  CLCommandQueue command_queue(context, device);
+  CLMemory buffer(context, CL_MEM_READ_WRITE, size);
+  std::string source = /* read source */;
+  CLProgram program(context, 1, &source);
+  program.build(1, &device);
+  CLKernel kernel(program, "kernel_name");
+  kernel.set_arg(0, buffer);
+  command_queue.enqueue_nd_range_kernel(kernel, 1, CLNDRange(), CLNDRange(N),
+      CLNDRange());
+\end{cppcode}
+In the above program, each class type object manages an OpenCL C type, such as
+\cppinline{cl_platform}. The resources will be released when the object is
+destroyed. Note that, the copy constructor and assignment operator perform
+shadow copy. This is particularly important for \cppinline{CLMemory} type
+objects. In appendix~\appref{app:sub:Parallelized implementation using OpenCL}
+an OpenCL implementation of the simple particle filter example in
+section~\ref{sec:A simple particle filter} is shown. Table~\ref{tab:RAII
+  classes for OpenCL pointers} lists the classes defined by the library and
+their corresponding OpenCL pointers.
+
+\begin{table}[t]
+  \begin{tabu}{X[l]X[l]}
+    \toprule
+    Class & OpenCL pointer type \\
+    \midrule
+    \texttt{CLPlatform}     & \texttt{cl\_platform\_id}   \\
+    \texttt{CLContext}      & \texttt{cl\_context}        \\
+    \texttt{CLDevice}       & \texttt{cl\_device\_id}     \\
+    \texttt{CLCommandQueue} & \texttt{cl\_command\_queue} \\
+    \texttt{CLMemory}       & \texttt{cl\_mem}            \\
+    \texttt{CLSampler}      & \texttt{cl\_sampler}        \\
+    \texttt{CLProgram}      & \texttt{cl\_program}        \\
+    \texttt{CLKernel}       & \texttt{cl\_kernel}         \\
+    \texttt{CLEvent}        & \texttt{cl\_event}          \\
+    \bottomrule
+  \end{tabu}
+  \caption{\protect\raii classes for OpenCL pointers}
+  \label{tab:RAII classes for OpenCL pointers}
 \end{table}
 
 \section{Program option}

@@ -569,7 +569,7 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
 
     /// \brief `clCreateBuffer`
     CLMemory(const CLContext &context, ::cl_mem_flags flags, std::size_t size,
-        void *host_ptr)
+        void *host_ptr = nullptr)
     {
         ::cl_int status = CL_SUCCESS;
         ::cl_mem ptr =
@@ -583,7 +583,7 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
     /// \brief `clCreateImage`
     CLMemory(const CLContext &context, ::cl_mem_flags flags,
         const ::cl_image_format &image_format,
-        const ::cl_image_desc &image_desc, void *host_ptr)
+        const ::cl_image_desc &image_desc, void *host_ptr = nullptr)
     {
         ::cl_int status = CL_SUCCESS;
         ::cl_mem ptr = ::clCreateImage(context.get(), flags, &image_format,
@@ -597,7 +597,7 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
     /// \brief `clCreateSubBuffer`
     CLMemory sub_buffer(::cl_mem_flags flags,
         ::cl_buffer_create_type buffer_create_type,
-        const void *buffer_create_info)
+        const void *buffer_create_info = nullptr)
     {
         ::cl_int status = CL_SUCCESS;
         ::cl_mem ptr = ::clCreateSubBuffer(
@@ -747,8 +747,9 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
 
     /// \brief `clLinkProgram`
     CLProgram(const CLContext &context, ::cl_uint num_devices,
-        const CLDevice *devices, const std::string &options,
-        ::cl_uint num_input_programs, const CLProgram *input_programs,
+        const CLDevice *devices, const std::string &options = std::string(),
+        ::cl_uint num_input_programs = 0,
+        const CLProgram *input_programs = nullptr,
         pfn_notify_type pfn_notify = nullptr, void *user_data = nullptr)
     {
         auto dvec = internal::cl_vec_cpp2c(num_devices, devices);
@@ -765,8 +766,8 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
 
     /// \brief `clBuildProgram`
     ::cl_int build(::cl_uint num_devices, const CLDevice *devices,
-        const std::string &options, pfn_notify_type pfn_notify = nullptr,
-        void *user_data = nullptr) const
+        const std::string &options = std::string(),
+        pfn_notify_type pfn_notify = nullptr, void *user_data = nullptr) const
     {
         auto vec = internal::cl_vec_cpp2c(num_devices, devices);
         ::cl_int status = ::clBuildProgram(get(), num_devices, vec.data(),
@@ -811,9 +812,10 @@ class CLProgram : public CLBase<::cl_program, CLProgram>
 
     /// \brief `clCompileProgram`
     ::cl_int compile(::cl_uint num_devices, const CLDevice *devices,
-        const std::string &options, ::cl_uint num_input_headers,
-        const CLProgram *input_headers,
-        const std::string *header_include_names,
+        const std::string &options = std::string(),
+        ::cl_uint num_input_headers = 0,
+        const CLProgram *input_headers = nullptr,
+        const std::string *header_include_names = nullptr,
         pfn_notify_type pf_notify = nullptr, void *user_data = nullptr)
     {
         auto dvec = internal::cl_vec_cpp2c(num_devices, devices);
