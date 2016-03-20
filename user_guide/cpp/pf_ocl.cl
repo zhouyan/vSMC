@@ -1,7 +1,6 @@
 #include <vsmc/rngc/rngc.h>
 
 typedef struct {
-    float w;
     float pos_x;
     float pos_y;
     float vel_x;
@@ -43,59 +42,73 @@ static inline void rnorm(vsmc_threefry4x32 *rng, float *r)
     r[3] = u01[1] * cospi(u01[3]);
 }
 
-static inline void init_sp(vsmc_threefry4x32 *rng, pf_sp *sp)
+static inline float init_sp(
+    pf_sp *sp, vsmc_threefry4x32 *rng, float obs_x, float obs_y)
 {
+    vsmc_threefry4x32_init(rng, get_global_id(0));
+
     float r[4];
     rnorm(rng, r);
-    const float sd_pos = 2;
-    const float sd_vel = 1;
+    const float sd_pos = 2.0f;
+    const float sd_vel = 1.0f;
     sp->pos_x = r[0] * sd_pos;
     sp->pos_y = r[1] * sd_pos;
     sp->vel_x = r[2] * sd_vel;
     sp->vel_y = r[3] * sd_vel;
+
+    return log_likelihood(sp, obs_x, obs_y);
 }
 
-static inline void move_sp(vsmc_threefry4x32 *rng, pf_sp *sp)
+static inline float move_sp(
+    pf_sp *sp, vsmc_threefry4x32 *rng, float obs_x, float obs_y)
 {
     float r[4];
     rnorm(rng, r);
-    const float sd_pos = sqrt(0.02);
-    const float sd_vel = sqrt(0.001);
-    sp->pos_x += r[0] * sd_pos + 0.1 * sp->vel_x;
-    sp->pos_y += r[1] * sd_pos + 0.1 * sp->vel_y;
+    const float sd_pos = sqrt(0.02f);
+    const float sd_vel = sqrt(0.001f);
+    sp->pos_x += r[0] * sd_pos + 0.1f * sp->vel_x;
+    sp->pos_y += r[1] * sd_pos + 0.1f * sp->vel_y;
     sp->vel_x += r[2] * sd_vel;
     sp->vel_y += r[3] * sd_vel;
+
+    return log_likelihood(sp, obs_x, obs_y);
 }
 
-__kernel void init(int N, __global vsmc_threefry4x32 *rng_set,
-    __global pf_sp *state, const __global float *obs_x,
-    const __global float *obs_y)
+__kernel void copy(int N, __global pf_sp *state, const __global int *index)
 {
     int i = get_global_id(0);
     if (i >= N)
         return;
 
-    vsmc_threefry4x32 rng = rng_set[i];
-    vsmc_threefry4x32_init(&rng, i);
-    pf_sp sp = state[i];
-    init_sp(&rng, &sp);
-    sp.w = log_likelihood(&sp, obs_x[0], obs_y[0]);
-    rng_set[i] = rng;
-    state[i] = sp;
+    state[i] = state[index[i]];
 }
 
-__kernel void move(int t, int N, __global vsmc_threefry4x32 *rng_set,
-    __global pf_sp *state, const __global float *obs_x,
-    const __global float *obs_y)
+__kernel void init(int N, __global pf_sp *state,
+    __global vsmc_threefry4x32 *rng_set, __global float *weight,
+    const __global float *obs_x, const __global float *obs_y)
 {
     int i = get_global_id(0);
     if (i >= N)
         return;
 
-    vsmc_threefry4x32 rng = rng_set[i];
     pf_sp sp = state[i];
-    move_sp(&rng, &sp);
-    sp.w = log_likelihood(&sp, obs_x[t], obs_y[t]);
-    rng_set[i] = rng;
+    vsmc_threefry4x32 rng = rng_set[i];
+    weight[i] = init_sp(&sp, &rng, obs_x[0], obs_y[0]);
     state[i] = sp;
+    rng_set[i] = rng;
+}
+
+__kernel void move(int t, int N, __global pf_sp *state,
+    __global vsmc_threefry4x32 *rng_set, __global float *weight,
+    const __global float *obs_x, const __global float *obs_y)
+{
+    int i = get_global_id(0);
+    if (i >= N)
+        return;
+
+    pf_sp sp = state[i];
+    vsmc_threefry4x32 rng = rng_set[i];
+    weight[i] = move_sp(&sp, &rng, obs_x[t], obs_y[t]);
+    state[i] = sp;
+    rng_set[i] = rng;
 }

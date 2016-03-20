@@ -1,70 +1,103 @@
 #include <vsmc/vsmc.hpp>
 
-static constexpr std::size_t N = 1000; // Number of particles
-static constexpr std::size_t n = 100;  // Number of particles
+static constexpr std::size_t N = 10000; // Number of particles
+static constexpr std::size_t n = 100;   // Number of data points
+static constexpr std::size_t PosX = 0;
+static constexpr std::size_t PosY = 1;
+static constexpr std::size_t VelX = 2;
+static constexpr std::size_t VelY = 3;
 
-using PFStateBase = vsmc::StateMatrix<vsmc::RowMajor, 5, cl_float>;
+static constexpr std::size_t G = 10240;
+static constexpr std::size_t L = 256;
+
+using PFStateBase = vsmc::StateMatrix<vsmc::RowMajor, 4, cl_float>;
 
 class PFState : public PFStateBase
 {
     public:
+    using size_type = cl_int;
     using PFStateBase::StateMatrix;
 
-    void initialize(const vsmc::CLContext &context)
+    void initialize(const vsmc::CLContext &context,
+        const vsmc::CLCommandQueue &command_queue,
+        const vsmc::CLKernel &kernel)
     {
-        dev_rng_set_ = vsmc::CLMemory(context, CL_MEM_READ_WRITE,
-            sizeof(vsmc_threefry4x32) * size(), nullptr);
-        dev_state_ = vsmc::CLMemory(context, CL_MEM_READ_WRITE,
-            sizeof(cl_float) * size() * dim(), nullptr);
-        dev_obs_x_ = vsmc::CLMemory(
-            context, CL_MEM_READ_ONLY, sizeof(cl_float) * n, nullptr);
-        dev_obs_y_ = vsmc::CLMemory(
-            context, CL_MEM_READ_ONLY, sizeof(cl_float) * n, nullptr);
+        command_queue_ = command_queue;
+        kernel_ = kernel;
+
+        dev_data_ =
+            vsmc::CLMemory(context, CL_MEM_READ_WRITE | CL_MEM_HOST_READ_ONLY,
+                sizeof(cl_float4) * size(), nullptr);
+        dev_weight_ =
+            vsmc::CLMemory(context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
+                sizeof(cl_float) * size(), nullptr);
+        dev_rng_set_ =
+            vsmc::CLMemory(context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
+                sizeof(vsmc_threefry4x32) * size(), nullptr);
+        dev_index_ =
+            vsmc::CLMemory(context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
+                sizeof(cl_int) * size(), nullptr);
+        dev_obs_x_ =
+            vsmc::CLMemory(context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
+                sizeof(cl_float) * n, nullptr);
+        dev_obs_y_ =
+            vsmc::CLMemory(context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
+                sizeof(cl_float) * n, nullptr);
     }
 
-    void update_host(const vsmc::CLCommandQueue &command_queue)
+    void copy(std::size_t N, const cl_int *index)
     {
-        command_queue.enqueue_read_buffer(
-            dev_state_, CL_TRUE, 0, sizeof(cl_float) * size() * dim(), data());
+        command_queue_.enqueue_write_buffer(dev_index_, CL_TRUE, 0,
+            sizeof(cl_int) * N, const_cast<cl_int *>(index));
+
+        kernel_.set_arg(0, static_cast<cl_int>(size()));
+        kernel_.set_arg(1, dev_data_);
+        kernel_.set_arg(2, dev_index_);
+
+        command_queue_.enqueue_nd_range_kernel(kernel_, 1, vsmc::CLNDRange(),
+            vsmc::CLNDRange(G), vsmc::CLNDRange(L));
+        command_queue_.finish();
     }
 
-    void update_device(const vsmc::CLCommandQueue &command_queue)
+    void copy_to_host()
     {
-        command_queue.enqueue_write_buffer(
-            dev_state_, CL_TRUE, 0, sizeof(cl_float) * size() * dim(), data());
+        command_queue_.enqueue_read_buffer(
+            dev_data_, CL_TRUE, 0, sizeof(cl_float) * size() * dim(), data());
     }
 
-    void read_data(
-        const vsmc::CLCommandQueue &command_queue, const char *param)
+    void read_data(const char *param)
     {
         if (param == nullptr)
             return;
 
-        obs_x_.resize(n);
-        obs_y_.resize(n);
+        vsmc::Vector<cl_float> obs_x(n);
+        vsmc::Vector<cl_float> obs_y(n);
         std::ifstream data(param);
         for (std::size_t i = 0; i != n; ++i)
-            data >> obs_x_[i] >> obs_y_[i];
+            data >> obs_x[i] >> obs_y[i];
         data.close();
 
-        command_queue.enqueue_write_buffer(
-            dev_obs_x_, CL_TRUE, 0, sizeof(cl_float) * n, obs_x_.data());
-        command_queue.enqueue_write_buffer(
-            dev_obs_y_, CL_TRUE, 0, sizeof(cl_float) * n, obs_y_.data());
+        command_queue_.enqueue_write_buffer(
+            dev_obs_x_, CL_TRUE, 0, sizeof(cl_float) * n, obs_x.data());
+        command_queue_.enqueue_write_buffer(
+            dev_obs_y_, CL_TRUE, 0, sizeof(cl_float) * n, obs_y.data());
     }
 
+    const vsmc::CLMemory &dev_data() const { return dev_data_; }
+    const vsmc::CLMemory &dev_weight() const { return dev_weight_; }
     const vsmc::CLMemory &dev_rng_set() const { return dev_rng_set_; }
-    const vsmc::CLMemory &dev_state() const { return dev_state_; }
     const vsmc::CLMemory &dev_obs_x() const { return dev_obs_x_; }
     const vsmc::CLMemory &dev_obs_y() const { return dev_obs_y_; }
 
     private:
+    vsmc::CLCommandQueue command_queue_;
+    vsmc::CLKernel kernel_;
+    vsmc::CLMemory dev_data_;
     vsmc::CLMemory dev_rng_set_;
-    vsmc::CLMemory dev_state_;
+    vsmc::CLMemory dev_weight_;
+    vsmc::CLMemory dev_index_;
     vsmc::CLMemory dev_obs_x_;
     vsmc::CLMemory dev_obs_y_;
-    vsmc::Vector<cl_float> obs_x_;
-    vsmc::Vector<cl_float> obs_y_;
 };
 
 class PFInit
@@ -78,26 +111,23 @@ class PFInit
 
     std::size_t operator()(vsmc::Particle<PFState> &particle, void *param)
     {
-        particle.value().read_data(
-            command_queue_, static_cast<const char *>(param));
+        particle.value().read_data(static_cast<const char *>(param));
 
         kernel_.set_arg(0, static_cast<cl_int>(particle.size()));
-        kernel_.set_arg(1, particle.value().dev_rng_set());
-        kernel_.set_arg(2, particle.value().dev_state());
-        kernel_.set_arg(3, particle.value().dev_obs_x());
-        kernel_.set_arg(4, particle.value().dev_obs_y());
+        kernel_.set_arg(1, particle.value().dev_data());
+        kernel_.set_arg(2, particle.value().dev_rng_set());
+        kernel_.set_arg(3, particle.value().dev_weight());
+        kernel_.set_arg(4, particle.value().dev_obs_x());
+        kernel_.set_arg(5, particle.value().dev_obs_y());
 
-        particle.value().update_device(command_queue_);
-        const std::size_t local = 256;
-        const std::size_t global =
-            particle.size() + local - particle.size() % local;
         command_queue_.enqueue_nd_range_kernel(kernel_, 1, vsmc::CLNDRange(),
-            vsmc::CLNDRange(global), vsmc::CLNDRange(local));
+            vsmc::CLNDRange(G), vsmc::CLNDRange(L));
         command_queue_.finish();
-        particle.value().update_host(command_queue_);
 
-        particle.weight().set_log(
-            particle.value().data(), particle.value().dim());
+        weight_.resize(particle.size());
+        command_queue_.enqueue_read_buffer(particle.value().dev_weight(),
+            CL_TRUE, 0, sizeof(cl_float) * particle.size(), weight_.data());
+        particle.weight().set_log(weight_.data());
 
         return 0;
     }
@@ -105,6 +135,7 @@ class PFInit
     private:
     vsmc::CLCommandQueue command_queue_;
     vsmc::CLKernel kernel_;
+    vsmc::Vector<cl_float> weight_;
 };
 
 class PFMove
@@ -120,22 +151,20 @@ class PFMove
     {
         kernel_.set_arg(0, static_cast<cl_int>(t));
         kernel_.set_arg(1, static_cast<cl_int>(particle.size()));
-        kernel_.set_arg(2, particle.value().dev_rng_set());
-        kernel_.set_arg(3, particle.value().dev_state());
-        kernel_.set_arg(4, particle.value().dev_obs_x());
-        kernel_.set_arg(5, particle.value().dev_obs_y());
+        kernel_.set_arg(2, particle.value().dev_data());
+        kernel_.set_arg(3, particle.value().dev_rng_set());
+        kernel_.set_arg(4, particle.value().dev_weight());
+        kernel_.set_arg(5, particle.value().dev_obs_x());
+        kernel_.set_arg(6, particle.value().dev_obs_y());
 
-        const std::size_t local = 256;
-        const std::size_t global =
-            particle.size() + local - particle.size() % local;
-        particle.value().update_device(command_queue_);
         command_queue_.enqueue_nd_range_kernel(kernel_, 1, vsmc::CLNDRange(),
-            vsmc::CLNDRange(global), vsmc::CLNDRange(local));
+            vsmc::CLNDRange(G), vsmc::CLNDRange(L));
         command_queue_.finish();
-        particle.value().update_host(command_queue_);
 
-        particle.weight().add_log(
-            particle.value().data(), particle.value().dim());
+        weight_.resize(particle.size());
+        command_queue_.enqueue_read_buffer(particle.value().dev_weight(),
+            CL_TRUE, 0, sizeof(cl_float) * particle.size(), weight_.data());
+        particle.weight().add_log(weight_.data());
 
         return 0;
     }
@@ -143,16 +172,22 @@ class PFMove
     private:
     vsmc::CLCommandQueue command_queue_;
     vsmc::CLKernel kernel_;
+    vsmc::Vector<cl_float> weight_;
 };
 
-class PFMEval : public vsmc::MonitorEvalTBB<PFState, PFMEval>
+class PFEval : public vsmc::MonitorEvalTBB<PFState, PFEval>
 {
     public:
+    void eval_pre(std::size_t t, vsmc::Particle<PFState> &particle)
+    {
+        particle.value().copy_to_host();
+    }
+
     void eval_sp(std::size_t t, std::size_t dim,
         vsmc::SingleParticle<PFState> sp, double *r)
     {
-        r[0] = sp.state(1);
-        r[1] = sp.state(2);
+        r[0] = sp.state(PosX);
+        r[1] = sp.state(PosY);
     }
 };
 
@@ -180,20 +215,31 @@ int main()
     vsmc::CLProgram program(context, source);
     program.build(1, &device, "-I ../../include");
 
+    vsmc::CLKernel kernel_copy(program, "copy");
     vsmc::CLKernel kernel_init(program, "init");
     vsmc::CLKernel kernel_move(program, "move");
 
+    std::cout << "Kernel copy preferred work group size: "
+              << kernel_copy.preferred_work_group_size_multiple(device)
+              << std::endl;
+    std::cout << "Kernel init preferred work group size: "
+              << kernel_init.preferred_work_group_size_multiple(device)
+              << std::endl;
+    std::cout << "Kernel move preferred work group size: "
+              << kernel_move.preferred_work_group_size_multiple(device)
+              << std::endl;
+
     vsmc::Sampler<PFState> sampler(N, vsmc::Multinomial, 0.5);
+    sampler.particle().value().initialize(context, command_queue, kernel_copy);
     sampler.init(PFInit(command_queue, kernel_init));
     sampler.move(PFMove(command_queue, kernel_move), false);
-    sampler.monitor("pos", 2, PFMEval());
-    sampler.particle().value().initialize(context);
+    sampler.monitor("pos", 2, PFEval());
 
     vsmc::StopWatch watch;
     watch.start();
     sampler.initialize(const_cast<char *>("pf.data")).iterate(n - 1);
     watch.stop();
-    std::cout << "Time: " << watch.milliseconds() << std::endl;
+    std::cout << "Time (ms): " << watch.milliseconds() << std::endl;
 
     std::ofstream output("pf.out");
     output << sampler;

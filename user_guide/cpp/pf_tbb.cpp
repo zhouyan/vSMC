@@ -1,7 +1,7 @@
 #include <vsmc/vsmc.hpp>
 
-static constexpr std::size_t N = 1000; // Number of particles
-static constexpr std::size_t n = 100;  // Number of data points
+static constexpr std::size_t N = 10000; // Number of particles
+static constexpr std::size_t n = 100;   // Number of data points
 
 using PFStateBase = vsmc::StateMatrix<vsmc::RowMajor, 4, double>;
 
@@ -149,7 +149,7 @@ int main()
     watch.start();
     sampler.initialize(const_cast<char *>("pf.data")).iterate(n - 1);
     watch.stop();
-    std::cout << "Time: " << watch.milliseconds() << std::endl;
+    std::cout << "Time (ms): " << watch.milliseconds() << std::endl;
 
     std::ofstream output("pf.out");
     output << sampler;
