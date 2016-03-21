@@ -40,6 +40,10 @@
 #include <CL/opencl.h>
 #endif
 
+#ifndef CL_VERSION_1_2
+#error OpenCL 1.2 support required
+#endif
+
 #ifdef VSMC_CLANG
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -1176,26 +1180,6 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         internal::cl_error_check(status,
             "CLCommandQueue::enqueue_nd_range_kernel",
             "::clEnqueueNDRangeKernel");
-        if (status == CL_SUCCESS && event != nullptr)
-            event->reset(eptr);
-
-        return status;
-    }
-
-    /// \brief `clEnqueueTask`
-    ::cl_int enqueue_task(const CLKernel &kernel,
-        ::cl_uint num_events_in_wait_list = 0,
-        const CLEvent *event_wait_list = nullptr,
-        CLEvent *event = nullptr) const
-    {
-        auto eptrs =
-            internal::cl_vec_cpp2c(num_events_in_wait_list, event_wait_list);
-        ::cl_event eptr = nullptr;
-
-        ::cl_int status = ::clEnqueueTask(
-            get(), kernel.get(), num_events_in_wait_list, eptrs.data(), &eptr);
-        internal::cl_error_check(
-            status, "CLCommandQueue::enqueue_task", "::clEnqueueTask");
         if (status == CL_SUCCESS && event != nullptr)
             event->reset(eptr);
 
