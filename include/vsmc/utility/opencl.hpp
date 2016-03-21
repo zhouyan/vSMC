@@ -179,7 +179,6 @@ class CLContextProperties;
 class CLContext;
 class CLEvent;
 class CLMemory;
-class CLSampler;
 class CLProgram;
 class CLKernel;
 class CLCommandQueue;
@@ -441,29 +440,6 @@ class CLContext : public CLBase<::cl_context, CLContext>
         }
     }
 
-    /// \brief `clGetSupportedImageFormats`
-    std::vector<::cl_image_format> get_supported_image_formats(
-        ::cl_mem_flags flags, ::cl_mem_object_type image_type) const
-    {
-        ::cl_uint n = 0;
-        if (internal::cl_error_check(clGetSupportedImageFormats(get(), flags,
-                                         image_type, 0, nullptr, &n),
-                "CLContext::get_supported_image_format",
-                "::clGetSupportedImageFormats") != CL_SUCCESS) {
-            return std::vector<::cl_image_format>();
-        }
-
-        std::vector<::cl_image_format> vec(n);
-        if (internal::cl_error_check(::clGetSupportedImageFormats(get(), flags,
-                                         image_type, n, vec.data(), nullptr),
-                "CLContext::get_supported_image_format",
-                "::clGetSupportedImageFormats") != CL_SUCCESS) {
-            return std::vector<::cl_image_format>();
-        }
-
-        return vec;
-    }
-
     /// \brief `CL_CONTEXT_DEVICES`
     std::vector<CLDevice> get_device() const
     {
@@ -584,20 +560,6 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
         }
     }
 
-    /// \brief `clCreateImage`
-    CLMemory(const CLContext &context, ::cl_mem_flags flags,
-        const ::cl_image_format &image_format,
-        const ::cl_image_desc &image_desc, void *host_ptr = nullptr)
-    {
-        ::cl_int status = CL_SUCCESS;
-        ::cl_mem ptr = ::clCreateImage(context.get(), flags, &image_format,
-            &image_desc, host_ptr, &status);
-        if (internal::cl_error_check(status, "CLMemory::CLMemory",
-                "::clCreateImage") == CL_SUCCESS) {
-            reset_ptr(ptr);
-        }
-    }
-
     /// \brief `clCreateSubBuffer`
     CLMemory sub_buffer(::cl_mem_flags flags,
         ::cl_buffer_create_type buffer_create_type,
@@ -615,9 +577,6 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
     /// \brief `clGetMemObjectInfo`
     VSMC_DEFINE_UTILITY_OPENCL_GET_INFO(Memory, mem, get, MemObject)
 
-    /// \brief `clGetImageInfo`
-    VSMC_DEFINE_UTILITY_OPENCL_GET_INFO(Memory, image, get_image, Image)
-
     /// \brief `clReleaseMemObject`
     static ::cl_int release(::cl_mem ptr)
     {
@@ -628,51 +587,6 @@ class CLMemory : public CLBase<::cl_mem, CLMemory>
             "CLMemory::release", "::clReleaseMemObject");
     }
 }; // class CLMemory
-
-/// \brief OpenCL `cl_sampler`
-/// \ingroup OpenCL
-class CLSampler : public CLBase<::cl_sampler, CLSampler>
-{
-    public:
-    explicit CLSampler(::cl_sampler ptr = nullptr) { reset_ptr(ptr); }
-
-    /// \brief `clCreateSampler`
-    CLSampler(const CLContext &context, ::cl_bool normalized_coords,
-        ::cl_addressing_mode addressing_mode, ::cl_filter_mode filter_mode)
-    {
-        ::cl_int status = CL_SUCCESS;
-        ::cl_sampler ptr = ::clCreateSampler(context.get(), normalized_coords,
-            addressing_mode, filter_mode, &status);
-        if (internal::cl_error_check(status, "CLSampler::CLSampler",
-                "::clCreateSampler") == CL_SUCCESS) {
-            reset_ptr(ptr);
-        }
-    }
-
-    /// \brief `CL_SAMPLER_CONTEXT`
-    CLContext get_context() const
-    {
-        ::cl_context ptr = nullptr;
-        ::cl_int status = get_info(CL_SAMPLER_CONTEXT, ptr);
-        if (status != CL_SUCCESS)
-            return CLContext();
-
-        return CLContext(ptr);
-    }
-
-    /// \brief `clGEtSamplerInfo`
-    VSMC_DEFINE_UTILITY_OPENCL_GET_INFO(Sampler, sampler, get, Sampler)
-
-    /// \brief `clReleaseSampler`
-    static ::cl_int release(::cl_sampler ptr)
-    {
-        if (ptr == nullptr)
-            return CL_SUCCESS;
-
-        return internal::cl_error_check(::clReleaseSampler(ptr),
-            "CLSampler::release", "::clReleaseSampler");
-    }
-}; // class CLSampler
 
 /// \brief OpenCL `cl_program`
 /// \ingroup OpenCL
@@ -1386,177 +1300,6 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
             event->reset(eptr);
 
         return ptr;
-    }
-
-    /// \brief `clEnqueueReadImage`
-    ::cl_int enqueue_read_image(const CLMemory &image, ::cl_bool blocking_read,
-        const std::array<std::size_t, 3> &origin,
-        const std::array<std::size_t, 3> &region, std::size_t row_pitch,
-        std::size_t slice_pitch, void *ptr,
-        ::cl_uint num_events_in_wait_list = 0,
-        const CLEvent *event_wait_list = nullptr,
-        CLEvent *event = nullptr) const
-    {
-        auto eptrs =
-            internal::cl_vec_cpp2c(num_events_in_wait_list, event_wait_list);
-        ::cl_event eptr = nullptr;
-
-        ::cl_int status = ::clEnqueueReadImage(get(), image.get(),
-            blocking_read, origin.data(), region.data(), row_pitch,
-            slice_pitch, ptr, num_events_in_wait_list, eptrs.data(), &eptr);
-        internal::cl_error_check(status, "CLCommandQueue::enqueue_read_image",
-            "::clEnqueueReadImage");
-        if (status == CL_SUCCESS && event != nullptr)
-            event->reset(eptr);
-
-        return status;
-    }
-
-    /// \brief `clEnqueueWriteImage`
-    ::cl_int enqueue_write_image(const CLMemory &image,
-        ::cl_bool blocking_write, const std::array<std::size_t, 3> &origin,
-        const std::array<std::size_t, 3> &region, std::size_t row_pitch,
-        std::size_t slice_pitch, void *ptr,
-        ::cl_uint num_events_in_wait_list = 0,
-        const CLEvent *event_wait_list = nullptr,
-        CLEvent *event = nullptr) const
-    {
-        auto eptrs =
-            internal::cl_vec_cpp2c(num_events_in_wait_list, event_wait_list);
-        ::cl_event eptr = nullptr;
-
-        ::cl_int status = ::clEnqueueWriteImage(get(), image.get(),
-            blocking_write, origin.data(), region.data(), row_pitch,
-            slice_pitch, ptr, num_events_in_wait_list, eptrs.data(), &eptr);
-        internal::cl_error_check(status, "CLCommandQueue::enqueue_write_image",
-            "::clEnqueueWriteImage");
-        if (status == CL_SUCCESS && event != nullptr)
-            event->reset(eptr);
-
-        return status;
-    }
-
-    /// \brief `clEnqueueCopyImage`
-    ::cl_int enqueue_copy_image(const CLMemory &src_image,
-        const CLMemory &dst_image,
-        const std::array<std::size_t, 3> &src_origin,
-        const std::array<std::size_t, 3> &dst_origin,
-        const std::array<std::size_t, 3> &region,
-        ::cl_uint num_events_in_wait_list = 0,
-        const CLEvent *event_wait_list = nullptr,
-        CLEvent *event = nullptr) const
-    {
-        auto eptrs =
-            internal::cl_vec_cpp2c(num_events_in_wait_list, event_wait_list);
-        ::cl_event eptr = nullptr;
-
-        ::cl_int status = ::clEnqueueCopyImage(get(), src_image.get(),
-            dst_image.get(), src_origin.data(), dst_origin.data(),
-            region.data(), num_events_in_wait_list, eptrs.data(), &eptr);
-        internal::cl_error_check(status, "CLCommandQueue::enqueue_copy_image",
-            "::clEnqueueCopyImage");
-        if (status == CL_SUCCESS && event != nullptr)
-            event->reset(eptr);
-
-        return status;
-    }
-
-    /// \brief `clEnqueueFillImage`
-    ::cl_int enqueue_fill_image(const CLMemory &image, const void *fill_color,
-        const std::array<std::size_t, 3> &origin,
-        const std::array<std::size_t, 3> &region,
-        ::cl_uint num_events_in_wait_list = 0,
-        const CLEvent *event_wait_list = nullptr,
-        CLEvent *event = nullptr) const
-    {
-        auto eptrs =
-            internal::cl_vec_cpp2c(num_events_in_wait_list, event_wait_list);
-        ::cl_event eptr = nullptr;
-
-        ::cl_int status =
-            ::clEnqueueFillImage(get(), image.get(), fill_color, origin.data(),
-                region.data(), num_events_in_wait_list, eptrs.data(), &eptr);
-        internal::cl_error_check(status, "CLCommandQueue::enqueue_fill_image",
-            "::clEnqueueFillImage");
-        if (status == CL_SUCCESS && event != nullptr)
-            event->reset(eptr);
-
-        return status;
-    }
-
-    /// \brief `clEnqueueMapImage`
-    void *enqueue_map_image(const CLMemory &image, ::cl_bool blocking_map,
-        ::cl_map_flags map_flags, const std::array<std::size_t, 3> &origin,
-        const std::array<std::size_t, 3> &region, std::size_t &image_row_pitch,
-        std::size_t &image_slice_pitch, ::cl_uint num_events_in_wait_list = 0,
-        const CLEvent *event_wait_list = nullptr,
-        CLEvent *event = nullptr) const
-    {
-        auto eptrs =
-            internal::cl_vec_cpp2c(num_events_in_wait_list, event_wait_list);
-        ::cl_event eptr = nullptr;
-
-        ::cl_int status = CL_SUCCESS;
-        void *ptr = ::clEnqueueMapImage(get(), image.get(), blocking_map,
-            map_flags, origin.data(), region.data(), &image_row_pitch,
-            &image_slice_pitch, num_events_in_wait_list, eptrs.data(), &eptr,
-            &status);
-        internal::cl_error_check(status, "CLCommandQueue::enqueue_map_image",
-            "::clEnqueueMapImage");
-        if (status == CL_SUCCESS && event != nullptr)
-            event->reset(eptr);
-
-        return ptr;
-    }
-
-    /// \brief `clEnqueueCopyImageToBuffer`
-    ::cl_int enqueue_copy_image_to_buffer(const CLMemory &src_image,
-        const CLMemory &dst_buffer,
-        const std::array<std::size_t, 3> &src_origin,
-        const std::array<std::size_t, 3> &region, std::size_t dst_offset,
-        ::cl_uint num_events_in_wait_list = 0,
-        const CLEvent *event_wait_list = nullptr,
-        CLEvent *event = nullptr) const
-    {
-        auto eptrs =
-            internal::cl_vec_cpp2c(num_events_in_wait_list, event_wait_list);
-        ::cl_event eptr = nullptr;
-
-        ::cl_int status = ::clEnqueueCopyImageToBuffer(get(), src_image.get(),
-            dst_buffer.get(), src_origin.data(), region.data(), dst_offset,
-            num_events_in_wait_list, eptrs.data(), &eptr);
-        internal::cl_error_check(status,
-            "CLCommandQueue::enqueue_copy_image_to_buffer",
-            "::clEnqueueCopyImageToBuffer");
-        if (status == CL_SUCCESS && event != nullptr)
-            event->reset(eptr);
-
-        return status;
-    }
-
-    /// \brief `clEnqueueCopyBufferToImage`
-    ::cl_int enqueue_copy_buffer_to_image(const CLMemory &src_buffer,
-        const CLMemory &dst_image, std::size_t src_offset,
-        const std::array<std::size_t, 3> &dst_origin,
-        const std::array<std::size_t, 3> &region,
-        ::cl_uint num_events_in_wait_list = 0,
-        const CLEvent *event_wait_list = nullptr,
-        CLEvent *event = nullptr) const
-    {
-        auto eptrs =
-            internal::cl_vec_cpp2c(num_events_in_wait_list, event_wait_list);
-        ::cl_event eptr = nullptr;
-
-        ::cl_int status = ::clEnqueueCopyBufferToImage(get(), src_buffer.get(),
-            dst_image.get(), src_offset, dst_origin.data(), region.data(),
-            num_events_in_wait_list, eptrs.data(), &eptr);
-        internal::cl_error_check(status,
-            "CLCommandQueue::enqueue_copy_buffer_to_image",
-            "::clEnqueueCopyBufferToImage");
-        if (status == CL_SUCCESS && event != nullptr)
-            event->reset(eptr);
-
-        return status;
     }
 
     /// \brief `clEnqueueUnmapMemObject`
