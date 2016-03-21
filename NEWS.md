@@ -1,3 +1,14 @@
+# Changes in v2.3.0
+
+## New features
+
+* C++ OpenCL RAII classes
+
+## Removed features
+
+* MKL RAII classes no long has the `reset` method with same arguments as the
+  constructors. Use the constructor and move semantics instead. 
+
 # Changes in v2.2.0
 
 ## New features

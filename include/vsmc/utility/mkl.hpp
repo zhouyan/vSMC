@@ -641,14 +641,7 @@ class MKLSSTask : public MKLBase<::VSLSSTaskPtr, MKLSSTask<RealType>>
     MKLSSTask(const MKL_INT *p, const MKL_INT *n, const MKL_INT *xstorage,
         const result_type *x, const result_type *w, const MKL_INT *indices)
     {
-        reset(p, n, xstorage, x, w, indices);
-    }
-
-    /// \brief `vslSSNewTask`
-    int reset(const MKL_INT *p, const MKL_INT *n, const MKL_INT *xstorage,
-        const result_type *x, const result_type *w, const MKL_INT *indices)
-    {
-        return reset_dispatch(p, n, xstorage, x, w, indices);
+        reset_dispatch(p, n, xstorage, x, w, indices);
     }
 
     /// \brief `vslSSDeleteTask`
@@ -1131,14 +1124,14 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
     MKLConvTask(MKL_INT mode, MKL_INT dims, const MKL_INT *xshape,
         const MKL_INT *yshape, const MKL_INT *zshape)
     {
-        reset(mode, dims, xshape, yshape, zshape);
+        reset_dispatch(mode, dims, xshape, yshape, zshape);
     }
 
     /// \brief `vslConvNewTask1D`
     MKLConvTask(
         MKL_INT mode, const MKL_INT xshape, MKL_INT yshape, MKL_INT zshape)
     {
-        reset(mode, xshape, yshape, zshape);
+        reset_dispatch(mode, xshape, yshape, zshape);
     }
 
     /// \brief `vslConvNewTaskX`
@@ -1146,14 +1139,14 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
         const MKL_INT *yshape, const MKL_INT *zshape, const result_type *x,
         const MKL_INT *xstride)
     {
-        reset(mode, dims, xshape, yshape, zshape, x, xstride);
+        reset_dispatch(mode, dims, xshape, yshape, zshape, x, xstride);
     }
 
     /// \brief `vslConvNewTaskX1D`
     MKLConvTask(MKL_INT mode, MKL_INT xshape, MKL_INT yshape, MKL_INT zshape,
         const result_type *x, const MKL_INT xstride)
     {
-        reset(mode, xshape, yshape, zshape, x, xstride);
+        reset_dispatch(mode, xshape, yshape, zshape, x, xstride);
     }
 
     /// \brief `vslConvCopyTask`
@@ -1193,35 +1186,6 @@ class MKLConvTask : public MKLBase<::VSLConvTaskPtr, MKLConvTask<ResultType>>
 
         return internal::mkl_error_check(::vslConvDeleteTask(&ptr),
             "MKLConvTask::release", "::vslConvDeleteTask");
-    }
-
-    /// \brief `vslConvNewTask`
-    int reset(MKL_INT mode, MKL_INT dims, const MKL_INT *xshape,
-        const MKL_INT *yshape, const MKL_INT *zshape)
-    {
-        return reset_dispatch(mode, dims, xshape, yshape, zshape);
-    }
-
-    /// \brief `vslConvNewTask1D`
-    int reset(
-        MKL_INT mode, const MKL_INT xshape, MKL_INT yshape, MKL_INT zshape)
-    {
-        return reset_dispatch(mode, xshape, yshape, zshape);
-    }
-
-    /// \brief `vslConvNewTaskX`
-    int reset(MKL_INT mode, MKL_INT dims, const MKL_INT *xshape,
-        const MKL_INT *yshape, const MKL_INT *zshape, const result_type *x,
-        const MKL_INT *xstride)
-    {
-        return reset_dispatch(mode, dims, xshape, yshape, zshape, x, xstride);
-    }
-
-    /// \brief `vslConvNewTaskX1D`
-    int reset(MKL_INT mode, MKL_INT xshape, MKL_INT yshape, MKL_INT zshape,
-        const result_type *x, const MKL_INT xstride)
-    {
-        return reset_dispatch(mode, xshape, yshape, zshape, x, xstride);
     }
 
     private:
@@ -1472,14 +1436,14 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
     MKLCorrTask(MKL_INT mode, MKL_INT dims, const MKL_INT *xshape,
         const MKL_INT *yshape, const MKL_INT *zshape)
     {
-        reset(mode, dims, xshape, yshape, zshape);
+        reset_dispatch(mode, dims, xshape, yshape, zshape);
     }
 
     /// \brief `vslCorrNewTask1D`
     MKLCorrTask(
         MKL_INT mode, const MKL_INT xshape, MKL_INT yshape, MKL_INT zshape)
     {
-        reset(mode, xshape, yshape, zshape);
+        reset_dispatch(mode, xshape, yshape, zshape);
     }
 
     /// \brief `vslCorrNewTaskX`
@@ -1487,14 +1451,14 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
         const MKL_INT *yshape, const MKL_INT *zshape, const result_type *x,
         const MKL_INT *xstride)
     {
-        reset(mode, dims, xshape, yshape, zshape, x, xstride);
+        reset_dispatch(mode, dims, xshape, yshape, zshape, x, xstride);
     }
 
     /// \brief `vslCorrNewTaskX1D`
     MKLCorrTask(MKL_INT mode, MKL_INT xshape, MKL_INT yshape, MKL_INT zshape,
         const result_type *x, const MKL_INT xstride)
     {
-        reset(mode, xshape, yshape, zshape, x, xstride);
+        reset_dispatch(mode, xshape, yshape, zshape, x, xstride);
     }
 
     /// \brief `vslCorrCopyTask`
@@ -1534,35 +1498,6 @@ class MKLCorrTask : public MKLBase<::VSLCorrTaskPtr, MKLCorrTask<ResultType>>
 
         return internal::mkl_error_check(::vslCorrDeleteTask(&ptr),
             "MKLCorrTask::release", "::vslCorrDeleteTask");
-    }
-
-    /// \brief `vslCorrNewTask`
-    int reset(MKL_INT mode, MKL_INT dims, const MKL_INT *xshape,
-        const MKL_INT *yshape, const MKL_INT *zshape)
-    {
-        return reset_dispatch(mode, dims, xshape, yshape, zshape);
-    }
-
-    /// \brief `vslCorrNewTask1D`
-    int reset(
-        MKL_INT mode, const MKL_INT xshape, MKL_INT yshape, MKL_INT zshape)
-    {
-        return reset_dispatch(mode, xshape, yshape, zshape);
-    }
-
-    /// \brief `vslCorrNewTaskX`
-    int reset(MKL_INT mode, MKL_INT dims, const MKL_INT *xshape,
-        const MKL_INT *yshape, const MKL_INT *zshape, const result_type *x,
-        const MKL_INT *xstride)
-    {
-        return reset_dispatch(mode, dims, xshape, yshape, zshape, x, xstride);
-    }
-
-    /// \brief `vslCorrNewTaskX1D`
-    int reset(MKL_INT mode, MKL_INT xshape, MKL_INT yshape, MKL_INT zshape,
-        const result_type *x, const MKL_INT xstride)
-    {
-        return reset_dispatch(mode, xshape, yshape, zshape, x, xstride);
     }
 
     private:
@@ -1804,12 +1739,14 @@ class MKLDFTask : public MKLBase<::DFTaskPtr, MKLDFTask<RealType>>
 
     explicit MKLDFTask(::DFTaskPtr ptr = nullptr) { this->reset_ptr(ptr); }
 
+    /// \brief `dfNewTask1D`
     MKLDFTask(MKL_INT nx, const result_type *x, MKL_INT xhint, MKL_INT ny,
         const result_type *y, MKL_INT yhint)
     {
-        reset(nx, x, xhint, ny, y, yhint);
+        reset_dispatch(nx, x, xhint, ny, y, yhint);
     }
 
+    /// \brief `dfDeleteTask`
     static int release(::DFTaskPtr ptr)
     {
         if (ptr == nullptr)
@@ -1817,12 +1754,6 @@ class MKLDFTask : public MKLBase<::DFTaskPtr, MKLDFTask<RealType>>
 
         return internal::mkl_error_check(
             ::dfDeleteTask(&ptr), "MKLDFTask::release", "::dfDeleteTask");
-    }
-
-    int reset(MKL_INT nx, const result_type *x, MKL_INT xhint, MKL_INT ny,
-        const result_type *y, MKL_INT yhint)
-    {
-        return reset_dispatch(nx, x, xhint, ny, y, yhint);
     }
 
     private:
