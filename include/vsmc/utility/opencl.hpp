@@ -1100,8 +1100,6 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
         return status;
     }
 
-    // clEnqueueNativeKernel
-
     /// \brief `clEnqueueReadBuffer`
     ::cl_int enqueue_read_buffer(const CLMemory &buffer,
         ::cl_bool blocking_read, std::size_t offset, std::size_t size,
