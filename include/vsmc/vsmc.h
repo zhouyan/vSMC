@@ -33,6 +33,7 @@
 #define VSMC_VSMC_H
 
 #include <vsmc/rngc/rngc.h>
+#include <stdalign.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,15 +45,51 @@ extern "C" {
 /// \defgroup C_API_RNG Random number generating
 /// @{
 
+/// \defgroup C_API_RNG_SEED vsmc::Seed
+/// @{
+
+/// \brief `vsmc::Seed::get`
+int vsmc_seed_get();
+
+/// \brief `vsmc::Seed::set`
+void vsmc_seed_set(int seed);
+
+/// \brief `vsmc::Seed::modulo`
+void vsmc_seed_modulo(int div, int rem);
+
+/// \brief `vsmc::Seed::skip`
+void vsmc_seed_skip(int steps);
+
+/// \brief `vsmc::Seed::operator<<`
+///
+/// \details
+/// If `mem == nullptr`, return the number of bytes required in `mem`.
+/// Otherwise, store `vsmc::Seed::instacne()` in `mem`
+int vsmc_seed_save(void *mem);
+
+/// \brief `vsmc::Seed::operator>>`
+///
+/// \details
+/// `mem` points to memory previously written by `vsmc_seed_save`
+void vsmc_seed_load(const void *mem);
+
+/// \brief `vsmc::Seed::operator<<`
+void vsmc_seed_save_f(const char *filename);
+
+/// \brief `vsmc::Seed::operator>>`
+void vsmc_seed_load_f(const char *filename);
+
+/// @}
+
+/// \defgroup C_API_RNG_RNG vsmc::RNG
+/// @{
+
 /// \brief `vsmc::RNG`
 typedef struct {
-    int state[64];
+    alignas(32) int state[64];
 } vsmc_rng;
 
-/// \brief `sizeof(vsmc::RNG) + 4`
-int vsmc_rng_size();
-
-/// \brief `vsmc::RNG` constructor
+/// \brief `vsmc::RNG::RNG`
 void vsmc_rng_init(vsmc_rng *rng_ptr, int seed);
 
 /// \brief `vsmc::RNG::seed`
@@ -71,7 +108,12 @@ void vsmc_rng_get_ctr(const vsmc_rng *rng_ptr, int n, int *ctr);
 void vsmc_rng_set_ctr(vsmc_rng *rng_ptr, int n, const int *ctr);
 
 /// \brief `vsmc::RNG::operator()`
-void vsmc_rng_rand(vsmc_rng *rng_ptr, int n, int *r);
+int vsmc_rng_rand(vsmc_rng *rng_ptr);
+
+/// \brief `vsmc::RNG::operator()`
+void vsmc_rng_rand_n(vsmc_rng *rng_ptr, int n, int *r);
+
+/// @}
 
 /// \brief `vsmc::u01_sorted`
 void vsmc_rng_u01_sorted(int n, const double *u01, double *u01seq);
