@@ -29,8 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/utility/aligned_memory.hpp>
-#include <vsmc/vsmc.h>
+#include "libvsmc.hpp"
 
 extern "C" {
 

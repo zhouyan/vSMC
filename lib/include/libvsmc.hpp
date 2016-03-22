@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/seed.cpp
+// vSMC/lib/src/libvsmc.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,57 +29,35 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libvsmc.hpp"
+#ifndef VSMC_LIBVSMC_HPP
+#define VSMC_LIBVSMC_HPP
 
-extern "C" {
+#include <vsmc/vsmc.h>
+#include <vsmc/vsmc.hpp>
 
-int vsmc_seed_get()
+namespace vsmc
 {
-    return static_cast<int>(::vsmc::Seed::instance().get());
+
+inline Weight &cast(vsmc_weight *weight_ptr)
+{
+    return *(reinterpret_cast<::vsmc::Weight *>(weight_ptr->ptr));
 }
 
-void vsmc_seed_set(int seed)
+inline const Weight &cast(const vsmc_weight *weight_ptr)
 {
-    ::vsmc::Seed::instance().set(static_cast<::vsmc::Seed::result_type>(seed));
+    return *(reinterpret_cast<const ::vsmc::Weight *>(weight_ptr->ptr));
 }
 
-void vsmc_seed_modulo(int div, int rem)
+inline RNG &cast(vsmc_rng *rng_ptr)
 {
-    ::vsmc::Seed::instance().modulo(static_cast<::vsmc::Seed::skip_type>(div),
-        static_cast<::vsmc::Seed::skip_type>(rem));
+    return *(reinterpret_cast<::vsmc::RNG *>(rng_ptr->ptr));
 }
 
-void vsmc_seed_skip(int steps)
+inline const RNG &cast(const vsmc_rng *rng_ptr)
 {
-    ::vsmc::Seed::instance().skip(static_cast<::vsmc::Seed::skip_type>(steps));
+    return *(reinterpret_cast<const ::vsmc::RNG *>(rng_ptr->ptr));
 }
 
-int vsmc_seed_save(void *mem)
-{
-    if (mem == nullptr)
-        return sizeof(::vsmc::Seed);
+} // namespace vsmc
 
-    std::memcpy(mem, &::vsmc::Seed::instance(), sizeof(::vsmc::Seed));
-    return sizeof(::vsmc::Seed);
-}
-
-void vsmc_seed_load(const void *mem)
-{
-    std::memcpy(&::vsmc::Seed::instance(), mem, sizeof(::vsmc::Seed));
-}
-
-void vsmc_seed_save_f(const char *filename)
-{
-    std::ofstream os(filename);
-    os << ::vsmc::Seed::instance();
-    os.close();
-}
-
-void vsmc_seed_load_f(const char *filename)
-{
-    std::ifstream is(filename);
-    is >> ::vsmc::Seed::instance();
-    is.close();
-}
-
-} // extern "C"
+#endif // VSMC_LIBVSMC_HPP

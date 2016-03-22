@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/vsmc_rng_cast.hpp
+// vSMC/lib/src/core/particle.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -28,30 +28,3 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
-
-#ifndef VSMC_LIB_RNG_CAST_HPP
-#define VSMC_LIB_RNG_CAST_HPP
-
-#include <vsmc/rng/engine.hpp>
-
-namespace vsmc
-{
-
-namespace internal
-{
-
-inline RNG &rng_cast(vsmc_rng *rng_ptr)
-{
-    return *(reinterpret_cast<::vsmc::RNG *>(rng_ptr));
-}
-
-inline const RNG &rng_cast(const vsmc_rng *rng_ptr)
-{
-    return *(reinterpret_cast<const ::vsmc::RNG *>(rng_ptr));
-}
-
-} // namespace internal
-
-} // namespace vsmc
-
-#endif // VSMC_LIB_RNG_CAST_HPP

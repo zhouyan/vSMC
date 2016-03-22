@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/seed.cpp
+// vSMC/lib/src/core/sampler.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -28,58 +28,3 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
-
-#include "libvsmc.hpp"
-
-extern "C" {
-
-int vsmc_seed_get()
-{
-    return static_cast<int>(::vsmc::Seed::instance().get());
-}
-
-void vsmc_seed_set(int seed)
-{
-    ::vsmc::Seed::instance().set(static_cast<::vsmc::Seed::result_type>(seed));
-}
-
-void vsmc_seed_modulo(int div, int rem)
-{
-    ::vsmc::Seed::instance().modulo(static_cast<::vsmc::Seed::skip_type>(div),
-        static_cast<::vsmc::Seed::skip_type>(rem));
-}
-
-void vsmc_seed_skip(int steps)
-{
-    ::vsmc::Seed::instance().skip(static_cast<::vsmc::Seed::skip_type>(steps));
-}
-
-int vsmc_seed_save(void *mem)
-{
-    if (mem == nullptr)
-        return sizeof(::vsmc::Seed);
-
-    std::memcpy(mem, &::vsmc::Seed::instance(), sizeof(::vsmc::Seed));
-    return sizeof(::vsmc::Seed);
-}
-
-void vsmc_seed_load(const void *mem)
-{
-    std::memcpy(&::vsmc::Seed::instance(), mem, sizeof(::vsmc::Seed));
-}
-
-void vsmc_seed_save_f(const char *filename)
-{
-    std::ofstream os(filename);
-    os << ::vsmc::Seed::instance();
-    os.close();
-}
-
-void vsmc_seed_load_f(const char *filename)
-{
-    std::ifstream is(filename);
-    is >> ::vsmc::Seed::instance();
-    is.close();
-}
-
-} // extern "C"

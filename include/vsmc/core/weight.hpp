@@ -81,21 +81,6 @@ class Weight
 
     const double *resample_data() const { return data_.data(); }
 
-    template <typename OutputIter>
-    void read_weight(OutputIter first) const
-    {
-        std::copy(data_.begin(), data_.end(), first);
-    }
-
-    template <typename RandomIter>
-    void read_weight(RandomIter first, int stride) const
-    {
-        for (size_type i = 0; i != size(); ++i, first += stride)
-            *first = data_[i];
-    }
-
-    void read_resample_weight(double *first) const { read_weight(first); }
-
     void set_equal()
     {
         std::fill(data_.begin(), data_.end(), 1.0 / resample_size());
@@ -112,9 +97,13 @@ class Weight
     template <typename RandomIter>
     void set(RandomIter first, int stride)
     {
-        for (size_type i = 0; i != size(); ++i, first += stride)
-            data_[i] = *first;
-        post_set();
+        if (stride == 1) {
+            set(first);
+        } else {
+            for (size_type i = 0; i != size(); ++i, first += stride)
+                data_[i] = *first;
+            post_set();
+        }
     }
 
     template <typename InputIter>
@@ -136,9 +125,13 @@ class Weight
     template <typename RandomIter>
     void mul(RandomIter first, int stride)
     {
-        for (size_type i = 0; i != size(); ++i, first += stride)
-            data_[i] *= *first;
-        post_set();
+        if (stride == 1) {
+            mul(first);
+        } else {
+            for (size_type i = 0; i != size(); ++i, first += stride)
+                data_[i] *= *first;
+            post_set();
+        }
     }
 
     template <typename InputIter>
@@ -151,9 +144,13 @@ class Weight
     template <typename RandomIter>
     void set_log(RandomIter first, int stride)
     {
-        for (size_type i = 0; i != size(); ++i, first += stride)
-            data_[i] = *first;
-        post_set_log();
+        if (stride == 1) {
+            set_log(first);
+        } else {
+            for (size_type i = 0; i != size(); ++i, first += stride)
+                data_[i] = *first;
+            post_set_log();
+        }
     }
 
     template <typename InputIter>
@@ -177,10 +174,14 @@ class Weight
     template <typename RandomIter>
     void add_log(RandomIter first, int stride)
     {
-        log(size(), data_.data(), data_.data());
-        for (size_type i = 0; i != size(); ++i, first += stride)
-            data_[i] += *first;
-        post_set_log();
+        if (stride == 1) {
+            add_log(first);
+        } else {
+            log(size(), data_.data(), data_.data());
+            for (size_type i = 0; i != size(); ++i, first += stride)
+                data_[i] += *first;
+            post_set_log();
+        }
     }
 
     template <typename URNG>
@@ -254,18 +255,6 @@ class WeightNull
     const double *resample_data() const { return nullptr; }
 
     const double *data() const { return nullptr; }
-
-    template <typename OutputIter>
-    void read_weight(OutputIter) const
-    {
-    }
-
-    template <typename RandomIter>
-    void read_weight(RandomIter, int) const
-    {
-    }
-
-    void read_resample_weight(double *) const {}
 
     void set_equal() {}
 

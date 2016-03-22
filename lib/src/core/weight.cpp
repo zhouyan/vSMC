@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/seed.cpp
+// vSMC/lib/src/core/weight.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -31,55 +31,62 @@
 
 #include "libvsmc.hpp"
 
-extern "C" {
-
-int vsmc_seed_get()
+void vsmc_weight_malloc(vsmc_weight *weight_ptr, int n)
 {
-    return static_cast<int>(::vsmc::Seed::instance().get());
+    ::vsmc::Weight *ptr = new Weight(static_cast<std::size_t>(n));
+    weight_ptr->ptr = ptr;
 }
 
-void vsmc_seed_set(int seed)
+void vsmc_weight_free(vsmc_weight *weight_ptr)
 {
-    ::vsmc::Seed::instance().set(static_cast<::vsmc::Seed::result_type>(seed));
+    delete &::vsmc::cast(weight_ptr);
+    weight_ptr->ptr = nullptr;
 }
 
-void vsmc_seed_modulo(int div, int rem)
+int vsmc_weight_size(const vsmc_weight *weight_ptr)
 {
-    ::vsmc::Seed::instance().modulo(static_cast<::vsmc::Seed::skip_type>(div),
-        static_cast<::vsmc::Seed::skip_type>(rem));
+    return static_cast<int>(::vsmc::cast(weight_ptr).size());
 }
 
-void vsmc_seed_skip(int steps)
+double vsmc_weight_ess(const vsmc_weight *weight_ptr)
 {
-    ::vsmc::Seed::instance().skip(static_cast<::vsmc::Seed::skip_type>(steps));
+    return ::vsmc::cast(weight_ptr).ess();
 }
 
-int vsmc_seed_save(void *mem)
+const double *vsmc_weight_data(const vsmc_weight *weight_ptr)
 {
-    if (mem == nullptr)
-        return sizeof(::vsmc::Seed);
-
-    std::memcpy(mem, &::vsmc::Seed::instance(), sizeof(::vsmc::Seed));
-    return sizeof(::vsmc::Seed);
+    return ::vsmc::cast(weight_ptr).data();
 }
 
-void vsmc_seed_load(const void *mem)
+void vsmc_weight_set_equal(vsmc_weight *weight_ptr)
 {
-    std::memcpy(&::vsmc::Seed::instance(), mem, sizeof(::vsmc::Seed));
+    ::vsmc::cast(weight_ptr).set_equal();
 }
 
-void vsmc_seed_save_f(const char *filename)
+void vsmc_weight_set(vsmc_weight *weight_ptr, const double *first, int stride)
 {
-    std::ofstream os(filename);
-    os << ::vsmc::Seed::instance();
-    os.close();
+    ::vsmc::cast(weight_ptr).set(first, stride);
 }
 
-void vsmc_seed_load_f(const char *filename)
+void vsmc_weight_mul(vsmc_weight *weight_ptr, const double *first, int stride)
 {
-    std::ifstream is(filename);
-    is >> ::vsmc::Seed::instance();
-    is.close();
+    ::vsmc::cast(weight_ptr).mul(first, stride);
 }
 
-} // extern "C"
+void vsmc_weight_set_log(
+    vsmc_weight *weight_ptr, const double *first, int stride)
+{
+    ::vsmc::cast(weight_ptr).set_log(first, stride);
+}
+
+void vsmc_weight_add_log(
+    vsmc_weight *weight_ptr, const double *first, int stride)
+{
+    ::vsmc::cast(weight_ptr).add_log(first, stride);
+}
+
+int vsmc_weight_draw(vsmc_weight *weight_ptr, vsmc_rng *rng_ptr)
+{
+    return static_cast<int>(
+        ::vsmc::cast(weight_ptr).draw(::vsmc::cast(rng_ptr)));
+}

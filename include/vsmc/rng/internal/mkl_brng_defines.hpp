@@ -32,9 +32,9 @@
 #ifdef VSMC_DEFINE_RNG_MKL_BRNG
 
 VSMC_DEFINE_RNG_MKL_BRNG(std::mt19937, mt19937)
+VSMC_DEFINE_RNG_MKL_BRNG(std::mt19937_64, mt19937_64)
 VSMC_DEFINE_RNG_MKL_BRNG(std::minstd_rand0, minstd_rand0)
 VSMC_DEFINE_RNG_MKL_BRNG(std::minstd_rand, minstd_rand)
-VSMC_DEFINE_RNG_MKL_BRNG(std::mt19937_64, mt19937_64)
 VSMC_DEFINE_RNG_MKL_BRNG(std::ranlux24_base, ranlux24_base)
 VSMC_DEFINE_RNG_MKL_BRNG(std::ranlux48_base, ranlux48_base)
 VSMC_DEFINE_RNG_MKL_BRNG(std::ranlux24, ranlux24)
@@ -50,18 +50,18 @@ VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry2x32, threefry2x32)
 VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry4x32, threefry4x32)
 VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry2x64, threefry2x64)
 VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry4x64, threefry4x64)
-#if VSMC_HAS_AVX2
-VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry2x32AVX2, threefry2x32avx2)
-VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry4x32AVX2, threefry4x32avx2)
-VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry2x64AVX2, threefry2x64avx2)
-VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry4x64AVX2, threefry4x64avx2)
-#endif // VSMC_HAS_AVX2
 #if VSMC_HAS_SSE2
 VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry2x32SSE2, threefry2x32sse2)
 VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry4x32SSE2, threefry4x32sse2)
 VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry2x64SSE2, threefry2x64sse2)
 VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry4x64SSE2, threefry4x64sse2)
 #endif // VSMC_HAS_SSE2
+#if VSMC_HAS_AVX2
+VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry2x32AVX2, threefry2x32avx2)
+VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry4x32AVX2, threefry4x32avx2)
+VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry2x64AVX2, threefry2x64avx2)
+VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::Threefry4x64AVX2, threefry4x64avx2)
+#endif // VSMC_HAS_AVX2
 
 #if VSMC_HAS_AES_NI
 VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::AES128_1x32, aes128_1x32)

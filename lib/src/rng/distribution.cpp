@@ -29,47 +29,43 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/distribution.hpp>
-#include <vsmc/vsmc.h>
-#include "vsmc_rng_cast.hpp"
+#include "libvsmc.hpp"
 
 #define VSMC_DEFINE_RNG_DIST                                                  \
-    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);                   \
+    ::vsmc::RNG &rng = ::vsmc::cast(rng_ptr);                                 \
     for (int i = 0; i != n; ++i)                                              \
         r[i] = dist(rng);
 
 #define VSMC_DEFINE_RNG_DIST_0(name)                                          \
-    void vsmc_rng_##name(vsmc_rng *rng_ptr, int n, double *r)                 \
+    void vsmc_##name##_distribution(vsmc_rng *rng_ptr, int n, double *r)      \
     {                                                                         \
-        ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);               \
         ::vsmc::name##_distribution<double>(                                  \
-            rng, static_cast<std::size_t>(n), r);                             \
+            ::vsmc::cast(rng_ptr), static_cast<std::size_t>(n), r);           \
     }
 
 #define VSMC_DEFINE_RNG_DIST_1(name)                                          \
-    void vsmc_rng_##name(vsmc_rng *rng_ptr, int n, double *r, double p1)      \
+    void vsmc_##name##_distribution(                                          \
+        vsmc_rng *rng_ptr, int n, double *r, double p1)                       \
     {                                                                         \
-        ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);               \
         ::vsmc::name##_distribution<double>(                                  \
-            rng, static_cast<std::size_t>(n), r, p1);                         \
+            ::vsmc::cast(rng_ptr), static_cast<std::size_t>(n), r, p1);       \
     }
 
 #define VSMC_DEFINE_RNG_DIST_2(name)                                          \
-    void vsmc_rng_##name(                                                     \
+    void vsmc_##name##_distribution(                                          \
         vsmc_rng *rng_ptr, int n, double *r, double p1, double p2)            \
     {                                                                         \
-        ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);               \
         ::vsmc::name##_distribution<double>(                                  \
-            rng, static_cast<std::size_t>(n), r, p1, p2);                     \
+            ::vsmc::cast(rng_ptr), static_cast<std::size_t>(n), r, p1, p2);   \
     }
 
 extern "C" {
 
-void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,
+void vsmc_discrete_distribution(vsmc_rng *rng_ptr, int n, int *r, int m,
     const double *weight, int normalized)
 {
     ::vsmc::DiscreteDistribution<int> dist;
-    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    ::vsmc::RNG &rng = ::vsmc::cast(rng_ptr);
     bool norm = normalized != 0;
     const double *first = weight;
     const double *last = weight + m;
@@ -77,47 +73,49 @@ void vsmc_rng_discrete(vsmc_rng *rng_ptr, int n, int *r, int m,
         r[i] = dist(rng, first, last, norm);
 }
 
-void vsmc_rng_uniform_int(vsmc_rng *rng_ptr, int n, int *r, int a, int b)
+void vsmc_uniform_int_distribution(
+    vsmc_rng *rng_ptr, int n, int *r, int a, int b)
 {
     std::uniform_int_distribution<int> dist(a, b);
     VSMC_DEFINE_RNG_DIST;
 }
 
-void vsmc_rng_bernoulli(vsmc_rng *rng_ptr, int n, int *r, double p)
+void vsmc_bernoulli_distribution(vsmc_rng *rng_ptr, int n, int *r, double p)
 {
     std::bernoulli_distribution dist(p);
     VSMC_DEFINE_RNG_DIST;
 }
 
-void vsmc_rng_binomial(vsmc_rng *rng_ptr, int n, int *r, int t, double p)
+void vsmc_binomial_distribution(
+    vsmc_rng *rng_ptr, int n, int *r, int t, double p)
 {
     std::binomial_distribution<int> dist(t, p);
     VSMC_DEFINE_RNG_DIST;
 }
 
-void vsmc_rng_negative_binomial(
+void vsmc_negative_binomial_distribution(
     vsmc_rng *rng_ptr, int n, int *r, int k, double p)
 {
     std::negative_binomial_distribution<int> dist(k, p);
     VSMC_DEFINE_RNG_DIST;
 }
 
-void vsmc_rng_geometric(vsmc_rng *rng_ptr, int n, int *r, double p)
+void vsmc_geometric_distribution(vsmc_rng *rng_ptr, int n, int *r, double p)
 {
     std::geometric_distribution<int> dist(p);
     VSMC_DEFINE_RNG_DIST;
 }
 
-void vsmc_rng_poisson(vsmc_rng *rng_ptr, int n, int *r, double mean)
+void vsmc_poisson_distribution(vsmc_rng *rng_ptr, int n, int *r, double mean)
 {
     std::poisson_distribution<int> dist(mean);
     VSMC_DEFINE_RNG_DIST;
 }
 
-void vsmc_rng_normal_mv(vsmc_rng *rng_ptr, int n, double *r, int dim,
+void vsmc_normal_mv_distribution(vsmc_rng *rng_ptr, int n, double *r, int dim,
     const double *mean, const double *chol)
 {
-    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
+    ::vsmc::RNG &rng = ::vsmc::cast(rng_ptr);
     ::vsmc::normal_mv_distribution<double>(rng, static_cast<std::size_t>(n), r,
         static_cast<std::size_t>(dim), mean, chol);
 }

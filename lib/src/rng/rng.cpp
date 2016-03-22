@@ -29,36 +29,32 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/rng.hpp>
-#include <vsmc/vsmc.h>
-#include "vsmc_rng_cast.hpp"
+#include "libvsmc.hpp"
 
 extern "C" {
 
-vsmc_rng *vsmc_rng_malloc(int seed)
+void vsmc_rng_malloc(vsmc_rng *rng_ptr, int seed)
 {
     ::vsmc::RNG *ptr = ::vsmc::AlignedAllocator<::vsmc::RNG, 32>::allocate(1);
     new (ptr)::vsmc::RNG(static_cast<::vsmc::RNG::result_type>(seed));
-
-    return ptr;
+    rng_ptr->ptr = ptr;
 }
 
 void vsmc_rng_free(vsmc_rng *rng_ptr)
 {
     ::vsmc::AlignedAllocator<::vsmc::RNG, 32>::deallocate(
-        &::vsmc::internal::rng_cast(rng_ptr), 1);
+        &::vsmc::cast(rng_ptr), 1);
+    rng_ptr->ptr = nullptr;
 }
 
 void vsmc_rng_seed(vsmc_rng *rng_ptr, int seed)
 {
-    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
-    rng.seed(static_cast<::vsmc::RNG::result_type>(seed));
+    ::vsmc::cast(rng_ptr).seed(static_cast<::vsmc::RNG::result_type>(seed));
 }
 
 void vsmc_rng_get_key(const vsmc_rng *rng_ptr, int n, int *key)
 {
-    const ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
-    typename ::vsmc::RNG::key_type k(rng.key());
+    auto k = ::vsmc::cast(rng_ptr).key();
     const std::size_t dst_size = static_cast<std::size_t>(n) * sizeof(int);
     const std::size_t src_size = sizeof(typename ::vsmc::RNG::key_type);
     const std::size_t size = src_size < dst_size ? src_size : dst_size;
@@ -67,19 +63,17 @@ void vsmc_rng_get_key(const vsmc_rng *rng_ptr, int n, int *key)
 
 void vsmc_rng_set_key(vsmc_rng *rng_ptr, int n, const int *key)
 {
-    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
     typename ::vsmc::RNG::key_type k;
     const std::size_t src_size = static_cast<std::size_t>(n) * sizeof(int);
     const std::size_t dst_size = sizeof(typename ::vsmc::RNG::key_type);
     const std::size_t size = src_size < dst_size ? src_size : dst_size;
     std::memcpy(k.data(), key, size);
-    rng.key(k);
+    ::vsmc::cast(rng_ptr).key(k);
 }
 
 void vsmc_rng_get_ctr(const vsmc_rng *rng_ptr, int n, int *ctr)
 {
-    const ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
-    typename ::vsmc::RNG::ctr_type c(rng.ctr());
+    auto c = ::vsmc::cast(rng_ptr).ctr();
     std::size_t dst_size = static_cast<std::size_t>(n) * sizeof(int);
     std::size_t src_size = sizeof(typename ::vsmc::RNG::ctr_type);
     std::size_t size = src_size < dst_size ? src_size : dst_size;
@@ -88,19 +82,17 @@ void vsmc_rng_get_ctr(const vsmc_rng *rng_ptr, int n, int *ctr)
 
 void vsmc_rng_set_ctr(vsmc_rng *rng_ptr, int n, const int *ctr)
 {
-    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
     typename ::vsmc::RNG::ctr_type c;
     std::size_t src_size = static_cast<std::size_t>(n) * sizeof(int);
     std::size_t dst_size = sizeof(typename ::vsmc::RNG::ctr_type);
     std::size_t size = src_size < dst_size ? src_size : dst_size;
     std::memcpy(c.data(), ctr, size);
-    rng.ctr(c);
+    ::vsmc::cast(rng_ptr).ctr(c);
 }
 
 void vsmc_rng_rand(vsmc_rng *rng_ptr, int n, int *r)
 {
-    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
-    ::vsmc::rng_rand(rng, static_cast<std::size_t>(n),
+    ::vsmc::rng_rand(::vsmc::cast(rng_ptr), static_cast<std::size_t>(n),
         reinterpret_cast<::vsmc::RNG::result_type *>(r));
 }
 
