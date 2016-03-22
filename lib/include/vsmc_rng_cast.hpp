@@ -42,12 +42,12 @@ namespace internal
 
 inline RNG &rng_cast(vsmc_rng *rng_ptr)
 {
-    return *(reinterpret_cast<::vsmc::RNG *>(rng_ptr->state));
+    return *(reinterpret_cast<::vsmc::RNG *>(rng_ptr));
 }
 
 inline const RNG &rng_cast(const vsmc_rng *rng_ptr)
 {
-    return *(reinterpret_cast<const ::vsmc::RNG *>(rng_ptr->state));
+    return *(reinterpret_cast<const ::vsmc::RNG *>(rng_ptr));
 }
 
 } // namespace internal

@@ -36,7 +36,7 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
     ${PROJECT_SOURCE_DIR}/src/resample/resample.cpp
     ${PROJECT_SOURCE_DIR}/src/rng/distribution.cpp
-    ${PROJECT_SOURCE_DIR}/src/rng/engine.cpp
+    ${PROJECT_SOURCE_DIR}/src/rng/rng.cpp
     ${PROJECT_SOURCE_DIR}/src/rng/random_walk.cpp
     ${PROJECT_SOURCE_DIR}/src/rng/seed.cpp
     ${PROJECT_SOURCE_DIR}/src/rng/u01_sequence.cpp

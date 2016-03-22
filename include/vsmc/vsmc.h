@@ -85,12 +85,16 @@ void vsmc_seed_load_f(const char *filename);
 /// @{
 
 /// \brief `vsmc::RNG`
-typedef struct {
-    alignas(32) int state[64];
-} vsmc_rng;
+typedef void vsmc_rng;
 
-/// \brief `vsmc::RNG::RNG`
-void vsmc_rng_init(vsmc_rng *rng_ptr, int seed);
+/// \brief Allocate memory for a new `vsmc::RNG`
+vsmc_rng *vsmc_rng_malloc(int seed);
+
+/// \brief Free memory for a `vsmc::RNG`
+void vsmc_rng_free(vsmc_rng *rng_ptr);
+
+/// \brief `vsmc::RNG::seed`
+void vsmc_rng_seed(vsmc_rng *rng_ptr, int seed);
 
 /// \brief `vsmc::RNG::seed`
 void vsmc_rng_seed(vsmc_rng *rng_ptr, int seed);

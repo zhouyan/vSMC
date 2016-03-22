@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/engine.cpp
+// vSMC/lib/src/rng/rng.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,16 +29,24 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/engine.hpp>
+#include <vsmc/rng/rng.hpp>
 #include <vsmc/vsmc.h>
 #include "vsmc_rng_cast.hpp"
 
 extern "C" {
 
-void vsmc_rng_init(vsmc_rng *rng_ptr, int seed)
+vsmc_rng *vsmc_rng_malloc(int seed)
 {
-    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
-    rng = ::vsmc::RNG(static_cast<::vsmc::RNG::result_type>(seed));
+    ::vsmc::RNG *ptr = ::vsmc::AlignedAllocator<::vsmc::RNG, 32>::allocate(1);
+    new (ptr)::vsmc::RNG(static_cast<::vsmc::RNG::result_type>(seed));
+
+    return ptr;
+}
+
+void vsmc_rng_free(vsmc_rng *rng_ptr)
+{
+    ::vsmc::AlignedAllocator<::vsmc::RNG, 32>::deallocate(
+        &::vsmc::internal::rng_cast(rng_ptr), 1);
 }
 
 void vsmc_rng_seed(vsmc_rng *rng_ptr, int seed)
