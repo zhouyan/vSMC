@@ -28,3 +28,74 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
+
+#include "libvsmc.hpp"
+
+extern "C" {
+
+void vsmc_particle_malloc(vsmc_particle *particle_ptr, int n, int dim)
+{
+    auto ptr = ::vsmc::AlignedAllocator<::vsmc::ParticleC>::allocate(1);
+    new (ptr)::vsmc::ParticleC(n);
+    ptr->value().resize_dim(static_cast<std::size_t>(dim));
+    particle_ptr->ptr = ptr;
+    particle_ptr->value.ptr = &ptr->value();
+    particle_ptr->weight.ptr = &ptr->weight();
+}
+
+void vsmc_particle_free(vsmc_particle *particle_ptr)
+{
+    ::vsmc::AlignedAllocator<::vsmc::ParticleC>::deallocate(
+        &::vsmc::cast(particle_ptr), 1);
+    particle_ptr->ptr = nullptr;
+}
+
+void vsmc_particle_assign(vsmc_particle *dst, const vsmc_particle *src)
+{
+    ::vsmc::cast(dst) = ::vsmc::cast(src);
+}
+
+void vsmc_particle_clone(
+    vsmc_particle *particle_ptr, const vsmc_particle *other, int retain_rng)
+{
+    ::vsmc::cast(particle_ptr).clone(::vsmc::cast(other), retain_rng != 0);
+}
+
+int vsmc_particle_size(const vsmc_particle *particle_ptr)
+{
+    return static_cast<int>(::vsmc::cast(particle_ptr).size());
+}
+
+vsmc_rng vsmc_particle_rng(vsmc_particle *particle_ptr, int id)
+{
+    vsmc_rng rng;
+    rng.ptr = id > 0 ? &::vsmc::cast(particle_ptr).rng(id) :
+                       &::vsmc::cast(particle_ptr).rng();
+
+    return rng;
+}
+
+vsmc_single_particle vsmc_particle_sp(vsmc_particle *particle_ptr, int id)
+{
+    vsmc_single_particle sp;
+    sp.state = ::vsmc::cast(particle_ptr)
+                   .value()
+                   .row_data(static_cast<std::size_t>(id));
+    sp.id = id;
+
+    return sp;
+}
+
+void vsmc_particle_resample(vsmc_particle *particle_ptr,
+    vsmc_particle_resample_type op, double threshold)
+{
+    auto cpp_op = [op](std::size_t M, std::size_t N, ::vsmc::RNG &cpp_rng,
+        const double *weight, int *rep) {
+        vsmc_rng rng = {&cpp_rng};
+        op(static_cast<int>(M), static_cast<int>(N), &rng, weight, rep);
+    };
+
+    ::vsmc::cast(particle_ptr).resample(cpp_op, threshold);
+}
+
+} // extern "C"

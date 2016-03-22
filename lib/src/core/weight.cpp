@@ -31,16 +31,25 @@
 
 #include "libvsmc.hpp"
 
+extern "C" {
+
 void vsmc_weight_malloc(vsmc_weight *weight_ptr, int n)
 {
-    ::vsmc::Weight *ptr = new Weight(static_cast<std::size_t>(n));
+    auto ptr = ::vsmc::AlignedAllocator<::vsmc::Weight>::allocate(1);
+    new (ptr)::vsmc::Weight(static_cast<std::size_t>(n));
     weight_ptr->ptr = ptr;
 }
 
 void vsmc_weight_free(vsmc_weight *weight_ptr)
 {
-    delete &::vsmc::cast(weight_ptr);
+    ::vsmc::AlignedAllocator<::vsmc::Weight>::deallocate(
+        &::vsmc::cast(weight_ptr), 1);
     weight_ptr->ptr = nullptr;
+}
+
+void vsmc_weight_assign(vsmc_weight *dst, const vsmc_weight *src)
+{
+    ::vsmc::cast(dst) = ::vsmc::cast(src);
 }
 
 int vsmc_weight_size(const vsmc_weight *weight_ptr)
@@ -90,3 +99,5 @@ int vsmc_weight_draw(vsmc_weight *weight_ptr, vsmc_rng *rng_ptr)
     return static_cast<int>(
         ::vsmc::cast(weight_ptr).draw(::vsmc::cast(rng_ptr)));
 }
+
+} // extern "C"

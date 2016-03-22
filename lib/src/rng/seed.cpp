@@ -56,11 +56,11 @@ void vsmc_seed_skip(int steps)
 
 int vsmc_seed_save(void *mem)
 {
-    if (mem == nullptr)
-        return sizeof(::vsmc::Seed);
+    std::size_t size = sizeof(::vsmc::Seed);
+    if (mem != nullptr)
+        std::memcpy(mem, &::vsmc::Seed::instance(), size);
 
-    std::memcpy(mem, &::vsmc::Seed::instance(), sizeof(::vsmc::Seed));
-    return sizeof(::vsmc::Seed);
+    return static_cast<int>(size);
 }
 
 void vsmc_seed_load(const void *mem)

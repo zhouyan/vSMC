@@ -34,6 +34,11 @@ PROJECT(vSMCLib C CXX)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
 SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
+    ${PROJECT_SOURCE_DIR}/src/core/monitor.cpp
+    ${PROJECT_SOURCE_DIR}/src/core/particle.cpp
+    ${PROJECT_SOURCE_DIR}/src/core/sampler.cpp
+    ${PROJECT_SOURCE_DIR}/src/core/state_matrix.cpp
+    ${PROJECT_SOURCE_DIR}/src/core/weight.cpp
     ${PROJECT_SOURCE_DIR}/src/resample/resample.cpp
     ${PROJECT_SOURCE_DIR}/src/rng/distribution.cpp
     ${PROJECT_SOURCE_DIR}/src/rng/rng.cpp

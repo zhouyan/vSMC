@@ -42,31 +42,35 @@ extern "C" {
 /// \defgroup C_API C API
 /// @{
 
-/// \defgroup C_API_CORE
+/// \defgroup C_API_Definitions Enumerators, placeholders and macros
 /// @{
 
-typedef struct {
-    void *ptr;
-} vsmc_monitor;
+/// \brief `vsmc::MatrixLayout`
+typedef enum { vSMCRowMajor = 101, vSMCColMajor = 102 } vSMCMatrixLayout;
 
-typedef struct {
-    void *ptr;
-} vsmc_particle;
+/// \brief `vsmc::ResampleScheme`
+typedef enum {
+    vSMCMultinomial,
+    vSMCStratified,
+    vSMCSystematic,
+    vSMCResidual,
+    vSMCResidualStratified,
+    vSMCResidualSystematic
+} vSMCResampleScheme;
 
-typedef struct {
-    void *ptr;
-} vsmc_sampler;
+/// \brief `vsmc::MonitorStage`
+typedef enum {
+    vSMCMonitorMove,
+    vSMCMonitorResample,
+    vSMCMonitorMCMC
+} vSMCMonitorStage;
 
-typedef struct {
-    void *ptr;
-} vsmc_weight;
-
-/// @} C_API_CORE
+/// @}
 
 /// \defgroup C_API_RNG Random number generating
 /// @{
 
-/// \defgroup C_API_RNG_SEED vsmc::Seed
+/// \defgroup C_API_RNG_Seed `vsmc::Seed`
 /// @{
 
 /// \brief `vsmc::Seed::get`
@@ -94,13 +98,13 @@ int vsmc_seed_save(void *mem);
 /// `mem` points to memory previously written by `vsmc_seed_save`
 void vsmc_seed_load(const void *mem);
 
-/// \brief `vsmc::Seed::operator<<`
+/// \brief `vsmc::Seed::operator<<` direct to external file
 void vsmc_seed_save_f(const char *filename);
 
-/// \brief `vsmc::Seed::operator>>`
+/// \brief `vsmc::Seed::operator>>` direct from external file
 void vsmc_seed_load_f(const char *filename);
 
-/// @} C_API_RNG_SEED
+/// @} C_API_RNG_Seed
 
 /// \defgroup C_API_RNG_RNG vsmc::RNG
 /// @{
@@ -110,10 +114,10 @@ typedef struct {
     void *ptr;
 } vsmc_rng;
 
-/// \brief Allocate memory for a new `vsmc::RNG`
+/// \brief `vsmc::RNG::RNG`
 void vsmc_rng_malloc(vsmc_rng *rng_ptr, int seed);
 
-/// \brief Free memory for a `vsmc::RNG`
+/// \brief `vsmc::RNG::~RNG`
 void vsmc_rng_free(vsmc_rng *rng_ptr);
 
 /// \brief `vsmc::RNG::seed`
@@ -480,7 +484,315 @@ double vsmc_normal_mv_proposal(vsmc_rng *rng_ptr, int dim, const double *x,
 
 /// @} C_API_RNG
 
-/// \defgroup C_API_AlignedMemory Memory allocation
+/// \defgroup C_API_Core Core
+/// @{
+
+/// \defgroup C_API_Core_StateMatrix  `vsmc::StateMatrix`
+/// @{
+
+/// \brief `vsmc::StateMatrix<vsmc::RowMajor, vsmc::Dynamic, double>`
+typedef struct {
+    void *ptr;
+} vsmc_state_matrix;
+
+/// \brief `vsmc::StateMatrix::StateMatrix`
+void vsmc_state_matrix_malloc(
+    vsmc_state_matrix *state_matrix_ptr, int n, int dim);
+
+/// \brief `vsmc::StateMatrix::~StateMatrix`
+void vsmc_state_matrix_free(vsmc_state_matrix *state_matrix_ptr);
+
+/// \brief `vsmc::StateMatrix::operator=`
+void vsm_state_matrix_assign(
+    vsmc_state_matrix *dst, const vsmc_state_matrix *src);
+
+/// \brief `vsmc::StateMatrix::dim`
+int vsmc_state_matrix_dim(const vsmc_state_matrix *state_matrix_ptr);
+
+/// \brief `vsmc::StateMatrix::resize_dim`
+void vsmc_state_matrix_resize_dim(vsmc_state_matrix *state_matrix_ptr, int n);
+
+/// \brief `vsmc::StateMatrix::size`
+int vsmc_state_matrix_size(const vsmc_state_matrix *state_matrix_ptr);
+
+/// \brief `vsmc::StateMatrix::state`
+double vsmc_state_matrix_get(
+    const vsmc_state_matrix *state_matrix_ptr, int id, int pos);
+
+/// \brief `vsmc::StateMatrix::state`
+void vsmc_state_matrix_set(
+    vsmc_state_matrix *state_matrix_ptr, int id, int pos, double s);
+
+/// \brief `vsmc::StateMatrix::data`
+double *vsmc_state_matrix_data(vsmc_state_matrix *state_matrix_ptr);
+
+/// \brief `vsmc::StateMatrix::row_data`
+double *vsmc_state_matrix_row_data(
+    vsmc_state_matrix *state_matrix_ptr, int id);
+
+/// \brief `vsmc::StateMatrix::copy`
+void vsmc_state_matrix_copy(
+    vsmc_state_matrix *state_matrix_ptr, int N, const int *index);
+
+/// \brief `vsmc::StateMatrix::copy_particle`
+void vsmc_state_matrix_copy_particle(
+    vsmc_state_matrix *state_matrix_ptr, int src, int dst);
+
+/// @} C_API_Core_StateMatrix
+
+/// \defgroup C_API_Core_Weight  `vsmc::Weight`
+/// @{
+
+/// \brief `vsmc::Weight`
+typedef struct {
+    void *ptr;
+} vsmc_weight;
+
+/// \brief `vsmc::Weight::Weight`
+void vsmc_weight_malloc(vsmc_weight *weight_ptr, int n);
+
+/// \brief `vsmc::Weight::~Weight`
+void vsmc_weight_free(vsmc_weight *weight_ptr);
+
+/// \brief `vsmc::Weight::operator=`
+void vsmc_weight_assign(vsmc_weight *dst, const vsmc_weight *src);
+
+/// \brief `vsmc::Weight::size`
+int vsmc_weight_size(const vsmc_weight *weight_ptr);
+
+/// \brief `vsmc::Weight::ess`
+double vsmc_weight_ess(const vsmc_weight *weight_ptr);
+
+/// \brief `vsmc::Weight::data`
+const double *vsmc_weight_data(const vsmc_weight *weight_ptr);
+
+/// \brief `vsmc::Weight::equal`
+void vsmc_weight_set_equal(vsmc_weight *weight_ptr);
+
+/// \brief `vsmc::Weight::set`
+void vsmc_weight_set(vsmc_weight *weight_ptr, const double *first, int stride);
+
+/// \brief `vsmc::Weight::mul`
+void vsmc_weight_mul(vsmc_weight *weight_ptr, const double *first, int stride);
+
+/// \brief `vsmc::Weight::set_log`
+void vsmc_weight_set_log(
+    vsmc_weight *weight_ptr, const double *first, int stride);
+
+/// \brief `vsmc::Weight::log`
+void vsmc_weight_add_log(
+    vsmc_weight *weight_ptr, const double *first, int stride);
+
+/// \brief `vsmc::Weight::draw`
+int vsmc_weight_draw(vsmc_weight *weight_ptr, vsmc_rng *rng_ptr);
+
+/// @} C_API_Core_Weight
+
+/// \defgroup C_API_Core_SingleParticle
+/// @{
+
+/// \brief `vsmc::SingleParticle`
+typedef struct {
+    double *state;
+    int id;
+} vsmc_single_particle;
+
+/// @} C_API_Core_SingleParticle
+
+/// \defgroup C_API_Core_Particle  `vsmc::Particle`
+/// @{
+
+/// \brief `vsmc::Particle`
+typedef struct {
+    void *ptr;
+    vsmc_state_matrix value;
+    vsmc_weight weight;
+} vsmc_particle;
+
+/// \brief `vsmc::Particle::resample_type`
+typedef void (*vsmc_particle_resample_type)(
+    int, int, vsmc_rng *, const double *, int *);
+
+/// \brief `vsmc::Particle::Particle`
+void vsmc_particle_malloc(vsmc_particle *particle_ptr, int n, int dim);
+
+/// \brief `vsmc::Particle::~Particle`
+void vsmc_particle_free(vsmc_particle *particle_ptr);
+
+/// \brief `vsmc::Particle::operator=`
+void vsmc_particle_assign(vsmc_particle *dst, const vsmc_particle *src);
+
+/// \brief `vsmc::Particle::clone`
+void vsmc_particle_clone(
+    vsmc_particle *particle_ptr, const vsmc_particle *other, int retain_rng);
+
+/// \brief `vsmc::Particle::size`
+int vsmc_particle_size(const vsmc_particle *particle_ptr);
+
+/// \brief `vsmc::Particle::rng`
+vsmc_rng vsmc_particle_rng(vsmc_particle *particle_ptr, int id);
+
+/// \brief `vsmc::Particle::sp`
+vsmc_single_particle vsmc_particle_sp(vsmc_particle *particle_ptr, int id);
+
+/// \brief `vsmc::Particle::resample`
+void vsmc_particle_resample(vsmc_particle *particle_ptr,
+    vsmc_particle_resample_type op, double threshold);
+
+/// @} C_API_Core_Particle
+
+/// \defgroup C_API_Core_Monitor  `vsmc::Monitor`
+/// @{
+
+/// \brief `vsmc::Monitor`
+typedef struct {
+    void *ptr;
+} vsmc_monitor;
+
+/// \brief `vsmc::Monitor::eval_type`
+typedef void (*vsmc_monitor_eval_type)(int, int, vsmc_particle *, double *);
+
+/// @} C_API_Core_Monitor
+
+/// \defgroup C_API_Core_Sampler  `vsmc::Sampler`
+/// @{
+
+/// \brief `vsmc::Sampler`
+typedef struct {
+    void *ptr;
+    vsmc_particle particle;
+} vsmc_sampler;
+
+/// \brief `vsmc::Sampler::init_type`
+typedef int (*vsmc_sampler_init_type)(vsmc_particle *, void *);
+
+/// \brief `vsmc::Sampler::move_type`
+typedef int (*vsmc_sampler_move_type)(int, vsmc_particle *);
+
+/// \brief `vsmc::Sampler::mcmc_type`
+typedef int (*vsmc_sampler_mcmc_type)(int, vsmc_particle *);
+
+/// \brief `vsmc::Sampler::Sampler`
+void vsmc_sampler_malloc(vsmc_sampler *sampler_ptr, int n, int dim,
+    vSMCResampleScheme scheme, double threshold);
+
+/// \brief `vsmc::Sampler::~Sampler`
+void vsmc_sampler_free(vsmc_sampler *sampler_ptr);
+
+/// \brief `vsmc::Sampler::operator=`
+void vsmc_sampler_assign(vsmc_sampler *dst, const vsmc_sampler *src);
+
+/// \brief `vsmc::Sampler::clone`
+void vsmc_sampler_clone(
+    vsmc_sampler *sampler_ptr, const vsmc_sampler *other, int retain_rng);
+
+/// \brief `vsmc::Sampler::size`
+int vsmc_sampler_size(const vsmc_sampler *sampler_ptr);
+
+/// \brief `vsmc::Sampler::reserve`
+void vsmc_sampler_reserve(vsmc_sampler *sampler_ptr, int num);
+
+/// \brief `vsmc::Sampler::iter_size`
+int vsmc_sampler_iter_size(const vsmc_sampler *sampler_ptr);
+
+/// \brief `vsmc::Sampler::iter_num`
+int vsmc_sampler_iter_num(const vsmc_sampler *sampler_ptr);
+
+/// \brief `vsmc::Sampler::resample`
+void vsmc_sampler_resample(vsmc_sampler *sampler_ptr);
+
+/// \brief `vsmc::Sampler::resample_scheme`
+void vsmc_sampler_resample_op(
+    vsmc_sampler *sampler_ptr, vsmc_particle_resample_type op);
+
+/// \brief `vsmc::Sampler::resample_scheme`
+void vsmc_sampler_resample_scheme(
+    vsmc_sampler *sampler_ptr, vSMCResampleScheme scheme);
+
+/// \brief `vsmc::Sampler::threshold`
+double vsmc_sampler_get_threshold(const vsmc_sampler *sampler_ptr);
+
+/// \brief `vsmc::Sampler::threshold`
+void vsmc_sampler_set_threshold(vsmc_sampler *sampler_ptr, double threshold);
+
+/// \brief `vsmc::Sampler::threshold_never`
+double vsmc_sampler_resample_threshold_never();
+
+/// \brief `vsmc::Sampler::threshold_always`
+double vsmc_sampler_resample_threshold_always();
+
+/// \brief `vsmc::Sampler::init`
+void vsmc_sampler_init(
+    vsmc_sampler *sampler_ptr, vsmc_sampler_init_type new_init);
+
+/// \brief `vsmc::Sampler::init_by_iter`
+void vsmc_sampler_init_by_iter(
+    vsmc_sampler *sampler_ptr, int initialize_by_iterate);
+
+/// \brief `vsmc::Sampler::init_by_move`
+void vsmc_sampler_init_by_move(
+    vsmc_sampler *sampler_ptr, vsmc_sampler_move_type new_init);
+
+/// \brief `vsmc::Sampler::move_queue_clear`
+void vsmc_sampler_move_queue_clear(vsmc_sampler *sampler_ptr);
+
+/// \brief `vsmc::Sampler::move_queue_empty`
+int vsmc_sampler_move_queue_empty(const vsmc_sampler *sampler_ptr);
+
+/// \brief `vsmc::Sampler::move`
+void vsmc_smapler_move(
+    vsmc_sampler *sampler_ptr, vsmc_sampler_move_type new_move, int append);
+
+/// \brief `vsmc::Sampler::mcmc_queue_clear`
+void vsmc_sampler_mcmc_queue_clear(vsmc_sampler *sampler_ptr);
+
+/// \brief `vsmc::Sampler::mcmc_queue_empty`
+int vsmc_sampler_mcmc_queue_empty(const vsmc_sampler *sampler_ptr);
+
+/// \brief `vsmc::Sampler::mcmc`
+void vsmc_smapler_mcmc(
+    vsmc_sampler *sampler_ptr, vsmc_sampler_mcmc_type new_mcmc, int append);
+
+/// \brief `vsmc::Sampler::initialize`
+void vsmc_sampler_initialize(vsmc_sampler *sampler_ptr, void *param);
+
+/// \brief `vsmc::Sampler::iterate`
+void vsmc_sampler_iterate(vsmc_sampler *sampler_ptr, int num);
+
+/// \brief `vsmc::Sampler::monitor`
+void vsmc_sampler_set_monitor_direct(
+    vsmc_sampler *sampler_ptr, const char *name, const vsmc_monitor *mon);
+
+/// \brief `vsmc::Sampler::monitor`
+void vsmc_sampler_set_monitor(vsmc_sampler *sampler_ptr, const char *name,
+    int dim, vsmc_monitor_eval_type eval, int record_only,
+    vSMCMonitorStage stage);
+
+/// \brief `vsmc::Sampler::monitor`
+vsmc_monitor vsmc_sampler_get_monitor(
+    vsmc_sampler *sampler_ptr, const char *name);
+
+/// \brief `vsmc::Sampler::clear_monitor`
+void vsmc_sampler_clear_monitor(vsmc_sampler *sampler_ptr, const char *name);
+
+/// \brief `vsmc::Sampler::clear_monitor`
+void vsmc_sampler_clear_monitor_all(vsmc_sampler *sampler_ptr);
+
+/// \brief `operator<<(vsmc::Sampler)`
+int vsmc_sampler_save(const vsmc_sampler *sampler_ptr, char *mem);
+
+/// \brief `operator<<(vsmc::Sampler::Sampler)` direct to file
+void vsmc_sampler_save_f(
+    const vsmc_sampler *sampler_ptr, const char *filename);
+
+/// @} C_API_Core_Sampler
+
+/// @} C_API_Core
+
+/// \defgroup C_API_Utility Utility
+/// @{
+
+/// \defgroup C_API_Utility_AlignedMemory Aligned memory allocation
 /// @{
 
 /// \brief `vsmc::AlignedMemory::aligned_malloc`
@@ -489,7 +801,9 @@ void *vsmc_malloc(size_t n, int alignment);
 /// \brief `vsmc::AlignedMemory::aligned_free`
 void vsmc_free(void *ptr);
 
-/// @} C_API_AlignedMemory
+/// @} C_API_Utility_AlignedMemory
+
+/// @} C_API_Utility
 
 /// \defgroup C_API_Resample Resample algorithms
 /// @{

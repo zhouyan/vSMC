@@ -38,24 +38,80 @@
 namespace vsmc
 {
 
-inline Weight &cast(vsmc_weight *weight_ptr)
-{
-    return *(reinterpret_cast<::vsmc::Weight *>(weight_ptr->ptr));
-}
+using StateMatrixCBase = StateMatrix<RowMajor, Dynamic, double>;
 
-inline const Weight &cast(const vsmc_weight *weight_ptr)
+class StateMatrixC : public StateMatrixCBase
 {
-    return *(reinterpret_cast<const ::vsmc::Weight *>(weight_ptr->ptr));
-}
+    public:
+    using size_type = int;
+
+    StateMatrixC(int N) : StateMatrixCBase(static_cast<std::size_t>(N)) {}
+}; // class StateMatrixC
+
+using ParticleC = Particle<StateMatrixC>;
+
+using SamplerC = Sampler<StateMatrixC>;
+
+using MonitorC = Monitor<StateMatrixC>;
 
 inline RNG &cast(vsmc_rng *rng_ptr)
 {
-    return *(reinterpret_cast<::vsmc::RNG *>(rng_ptr->ptr));
+    return *(reinterpret_cast<RNG *>(rng_ptr->ptr));
 }
 
 inline const RNG &cast(const vsmc_rng *rng_ptr)
 {
-    return *(reinterpret_cast<const ::vsmc::RNG *>(rng_ptr->ptr));
+    return *(reinterpret_cast<const RNG *>(rng_ptr->ptr));
+}
+
+inline StateMatrixC &cast(vsmc_state_matrix *state_matrix_ptr)
+{
+    return *(reinterpret_cast<StateMatrixC *>(state_matrix_ptr->ptr));
+}
+
+inline const StateMatrixC &cast(const vsmc_state_matrix *state_matrix_ptr)
+{
+    return *(reinterpret_cast<StateMatrixC *>(state_matrix_ptr->ptr));
+}
+
+inline Weight &cast(vsmc_weight *weight_ptr)
+{
+    return *(reinterpret_cast<Weight *>(weight_ptr->ptr));
+}
+
+inline const Weight &cast(const vsmc_weight *weight_ptr)
+{
+    return *(reinterpret_cast<const Weight *>(weight_ptr->ptr));
+}
+
+inline ParticleC &cast(vsmc_particle *particle_ptr)
+{
+    return *(reinterpret_cast<ParticleC *>(particle_ptr->ptr));
+}
+
+inline const ParticleC &cast(const vsmc_particle *particle_ptr)
+{
+    return *(reinterpret_cast<ParticleC *>(particle_ptr->ptr));
+}
+
+inline MonitorC &cast(vsmc_monitor *monitor_ptr)
+{
+    return *(reinterpret_cast<MonitorC *>(monitor_ptr->ptr));
+}
+
+inline const MonitorC &cast(const vsmc_monitor *monitor_ptr)
+{
+    return *(reinterpret_cast<MonitorC *>(monitor_ptr->ptr));
+}
+
+inline SamplerC &cast(vsmc_sampler *sampler_ptr)
+{
+    return *(reinterpret_cast<SamplerC *>(sampler_ptr->ptr));
+}
+
+inline const SamplerC &cast(const vsmc_sampler *sampler_ptr)
+{
+    return *(reinterpret_cast<SamplerC *>(sampler_ptr->ptr));
 }
 
 } // namespace vsmc
