@@ -254,7 +254,7 @@ static inline void vsmc_philox4x32_init(vsmc_philox4x32 *rng, uint32_t seed)
     rng->index = 4;
 }
 
-/// \brief Generate random 32-bits integers from Philox2x32 RNG
+/// \brief Generate random 32-bit integers from Philox2x32 RNG
 /// \ingroup PhiloxC
 static inline uint32_t vsmc_philox2x32_rand(vsmc_philox2x32 *rng)
 {
@@ -267,7 +267,7 @@ static inline uint32_t vsmc_philox2x32_rand(vsmc_philox2x32 *rng)
     return rng->state.v[rng->index++];
 }
 
-/// \brief Generate random 32-bits integers from Philox4x32 RNG
+/// \brief Generate random 32-bit integers from Philox4x32 RNG
 /// \ingroup PhiloxC
 static inline uint32_t vsmc_philox4x32_rand(vsmc_philox4x32 *rng)
 {

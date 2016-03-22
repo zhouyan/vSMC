@@ -508,7 +508,7 @@ static inline void vsmc_threefry4x64_init(
     rng->index = 4;
 }
 
-/// \brief Generate random 32-bits integers from Threefry2x32 RNG
+/// \brief Generate random 32-bit integers from Threefry2x32 RNG
 /// \ingroup ThreefryC
 static inline uint32_t vsmc_threefry2x32_rand(vsmc_threefry2x32 *rng)
 {
@@ -521,7 +521,7 @@ static inline uint32_t vsmc_threefry2x32_rand(vsmc_threefry2x32 *rng)
     return rng->state.v[rng->index++];
 }
 
-/// \brief Generate random 32-bits integers from Threefry4x32 RNG
+/// \brief Generate random 32-bit integers from Threefry4x32 RNG
 /// \ingroup ThreefryC
 static inline uint32_t vsmc_threefry4x32_rand(vsmc_threefry4x32 *rng)
 {
@@ -534,7 +534,7 @@ static inline uint32_t vsmc_threefry4x32_rand(vsmc_threefry4x32 *rng)
     return rng->state.v[rng->index++];
 }
 
-/// \brief Generate random 64-bits integers from Threefry2x64 RNG
+/// \brief Generate random 64-bit integers from Threefry2x64 RNG
 /// \ingroup ThreefryC
 static inline uint64_t vsmc_threefry2x64_rand(vsmc_threefry2x64 *rng)
 {
@@ -547,7 +547,7 @@ static inline uint64_t vsmc_threefry2x64_rand(vsmc_threefry2x64 *rng)
     return rng->state.v[rng->index++];
 }
 
-/// \brief Generate random 64-bits integers from Threefry4x64 RNG
+/// \brief Generate random 64-bit integers from Threefry4x64 RNG
 /// \ingroup ThreefryC
 static inline uint64_t vsmc_threefry4x64_rand(vsmc_threefry4x64 *rng)
 {

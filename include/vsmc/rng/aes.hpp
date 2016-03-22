@@ -650,123 +650,123 @@ template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
 using AES256Engine =
     AESNIEngine<ResultType, AES256KeySeq<ResultType, 14>, 14, Blocks>;
 
-/// \brief AES-128 RNG engine with 32-bits integers output and 1 block
+/// \brief AES-128 RNG engine with 32-bit integers output and 1 block
 /// \ingroup AESNIRNG
 using AES128_1x32 = AES128Engine<std::uint32_t, 1>;
 
-/// \brief AES-128 RNG engine with 32-bits integers output and 2 blocks
+/// \brief AES-128 RNG engine with 32-bit integers output and 2 blocks
 /// \ingroup AESNIRNG
 using AES128_2x32 = AES128Engine<std::uint32_t, 2>;
 
-/// \brief AES-128 RNG engine with 32-bits integers output and 4 blocks
+/// \brief AES-128 RNG engine with 32-bit integers output and 4 blocks
 /// \ingroup AESNIRNG
 using AES128_4x32 = AES128Engine<std::uint32_t, 4>;
 
-/// \brief AES-128 RNG engine with 32-bits integers output and 8 blocks
+/// \brief AES-128 RNG engine with 32-bit integers output and 8 blocks
 /// \ingroup AESNIRNG
 using AES128_8x32 = AES128Engine<std::uint32_t, 8>;
 
-/// \brief AES-128 RNG engine with 64-bits integers output and 1 block
+/// \brief AES-128 RNG engine with 64-bit integers output and 1 block
 /// \ingroup AESNIRNG
 using AES128_1x64 = AES128Engine<std::uint64_t, 1>;
 
-/// \brief AES-128 RNG engine with 64-bits integers output and 2 blocks
+/// \brief AES-128 RNG engine with 64-bit integers output and 2 blocks
 /// \ingroup AESNIRNG
 using AES128_2x64 = AES128Engine<std::uint64_t, 2>;
 
-/// \brief AES-128 RNG engine with 64-bits integers output and 4 blocks
+/// \brief AES-128 RNG engine with 64-bit integers output and 4 blocks
 /// \ingroup AESNIRNG
 using AES128_4x64 = AES128Engine<std::uint64_t, 4>;
 
-/// \brief AES-128 RNG engine with 64-bits integers output and 8 blocks
+/// \brief AES-128 RNG engine with 64-bit integers output and 8 blocks
 /// \ingroup AESNIRNG
 using AES128_8x64 = AES128Engine<std::uint64_t, 8>;
 
-/// \brief AES-128 RNG engine with 32-bits integers output and default blocks
+/// \brief AES-128 RNG engine with 32-bit integers output and default blocks
 /// \ingroup AESNIRNG
 using AES128 = AES128Engine<std::uint32_t>;
 
-/// \brief AES-128 RNG engine with 64-bits integers output and default blocks
+/// \brief AES-128 RNG engine with 64-bit integers output and default blocks
 /// \ingroup AESNIRNG
 using AES128_64 = AES128Engine<std::uint64_t>;
 
-/// \brief AES-192 RNG engine with 32-bits integers output and 1 block
+/// \brief AES-192 RNG engine with 32-bit integers output and 1 block
 /// \ingroup AESNIRNG
 using AES192_1x32 = AES192Engine<std::uint32_t, 1>;
 
-/// \brief AES-192 RNG engine with 32-bits integers output and 2 blocks
+/// \brief AES-192 RNG engine with 32-bit integers output and 2 blocks
 /// \ingroup AESNIRNG
 using AES192_2x32 = AES192Engine<std::uint32_t, 2>;
 
-/// \brief AES-192 RNG engine with 32-bits integers output and 4 blocks
+/// \brief AES-192 RNG engine with 32-bit integers output and 4 blocks
 /// \ingroup AESNIRNG
 using AES192_4x32 = AES192Engine<std::uint32_t, 4>;
 
-/// \brief AES-192 RNG engine with 32-bits integers output and 8 blocks
+/// \brief AES-192 RNG engine with 32-bit integers output and 8 blocks
 /// \ingroup AESNIRNG
 using AES192_8x32 = AES192Engine<std::uint32_t, 8>;
 
-/// \brief AES-192 RNG engine with 64-bits integers output and 1 block
+/// \brief AES-192 RNG engine with 64-bit integers output and 1 block
 /// \ingroup AESNIRNG
 using AES192_1x64 = AES192Engine<std::uint64_t, 1>;
 
-/// \brief AES-192 RNG engine with 64-bits integers output and 2 blocks
+/// \brief AES-192 RNG engine with 64-bit integers output and 2 blocks
 /// \ingroup AESNIRNG
 using AES192_2x64 = AES192Engine<std::uint64_t, 2>;
 
-/// \brief AES-192 RNG engine with 64-bits integers output and 4 blocks
+/// \brief AES-192 RNG engine with 64-bit integers output and 4 blocks
 /// \ingroup AESNIRNG
 using AES192_4x64 = AES192Engine<std::uint64_t, 4>;
 
-/// \brief AES-192 RNG engine with 64-bits integers output and 8 blocks
+/// \brief AES-192 RNG engine with 64-bit integers output and 8 blocks
 /// \ingroup AESNIRNG
 using AES192_8x64 = AES192Engine<std::uint64_t, 8>;
 
-/// \brief AES-192 RNG engine with 32-bits integers output and default blocks
+/// \brief AES-192 RNG engine with 32-bit integers output and default blocks
 /// \ingroup AESNIRNG
 using AES192 = AES192Engine<std::uint32_t>;
 
-/// \brief AES-192 RNG engine with 64-bits integers output and default blocks
+/// \brief AES-192 RNG engine with 64-bit integers output and default blocks
 /// \ingroup AESNIRNG
 using AES192_64 = AES192Engine<std::uint64_t>;
 
-/// \brief AES-256 RNG engine with 32-bits integers output and 1 block
+/// \brief AES-256 RNG engine with 32-bit integers output and 1 block
 /// \ingroup AESNIRNG
 using AES256_1x32 = AES256Engine<std::uint32_t, 1>;
 
-/// \brief AES-256 RNG engine with 32-bits integers output and 2 blocks
+/// \brief AES-256 RNG engine with 32-bit integers output and 2 blocks
 /// \ingroup AESNIRNG
 using AES256_2x32 = AES256Engine<std::uint32_t, 2>;
 
-/// \brief AES-256 RNG engine with 32-bits integers output and 4 blocks
+/// \brief AES-256 RNG engine with 32-bit integers output and 4 blocks
 /// \ingroup AESNIRNG
 using AES256_4x32 = AES256Engine<std::uint32_t, 4>;
 
-/// \brief AES-256 RNG engine with 32-bits integers output and 8 blocks
+/// \brief AES-256 RNG engine with 32-bit integers output and 8 blocks
 /// \ingroup AESNIRNG
 using AES256_8x32 = AES256Engine<std::uint32_t, 8>;
 
-/// \brief AES-256 RNG engine with 64-bits integers output and 1 block
+/// \brief AES-256 RNG engine with 64-bit integers output and 1 block
 /// \ingroup AESNIRNG
 using AES256_1x64 = AES256Engine<std::uint64_t, 1>;
 
-/// \brief AES-256 RNG engine with 64-bits integers output and 2 blocks
+/// \brief AES-256 RNG engine with 64-bit integers output and 2 blocks
 /// \ingroup AESNIRNG
 using AES256_2x64 = AES256Engine<std::uint64_t, 2>;
 
-/// \brief AES-256 RNG engine with 64-bits integers output and 4 blocks
+/// \brief AES-256 RNG engine with 64-bit integers output and 4 blocks
 /// \ingroup AESNIRNG
 using AES256_4x64 = AES256Engine<std::uint64_t, 4>;
 
-/// \brief AES-256 RNG engine with 64-bits integers output and 8 blocks
+/// \brief AES-256 RNG engine with 64-bit integers output and 8 blocks
 /// \ingroup AESNIRNG
 using AES256_8x64 = AES256Engine<std::uint64_t, 8>;
 
-/// \brief AES-256 RNG engine with 32-bits integers output and default blocks
+/// \brief AES-256 RNG engine with 32-bit integers output and default blocks
 /// \ingroup AESNIRNG
 using AES256 = AES256Engine<std::uint32_t>;
 
-/// \brief AES-256 RNG engine with 64-bits integers output and default blocks
+/// \brief AES-256 RNG engine with 64-bit integers output and default blocks
 /// \ingroup AESNIRNG
 using AES256_64 = AES256Engine<std::uint64_t>;
 

@@ -388,11 +388,11 @@ using Threefry2x64 = ThreefryEngine<std::uint64_t, 2>;
 /// \ingroup Threefry
 using Threefry4x64 = ThreefryEngine<std::uint64_t, 4>;
 
-/// \brief The default 32-bits Threefry engine
+/// \brief The default 32-bit Threefry engine
 /// \ingroup Threefry
 using Threefry = ThreefryEngine<std::uint32_t>;
 
-/// \brief The default 64-bits Threefry engine
+/// \brief The default 64-bit Threefry engine
 /// \ingroup Threefry
 using Threefry_64 = ThreefryEngine<std::uint64_t>;
 
@@ -594,11 +594,11 @@ using Threefry2x64SSE2 = ThreefryEngineSSE2<std::uint64_t, 2>;
 /// \ingroup Threefry
 using Threefry4x64SSE2 = ThreefryEngineSSE2<std::uint64_t, 4>;
 
-/// \brief The default 32-bits Threefry engine using SSE2
+/// \brief The default 32-bit Threefry engine using SSE2
 /// \ingroup Threefry
 using ThreefrySSE2 = ThreefryEngineSSE2<std::uint32_t>;
 
-/// \brief The default 64-bits ThreefrySSE2 engine using SSE2
+/// \brief The default 64-bit ThreefrySSE2 engine using SSE2
 /// \ingroup Threefry
 using ThreefrySSE2_64 = ThreefryEngineSSE2<std::uint64_t>;
 
@@ -808,11 +808,11 @@ using Threefry2x64AVX2 = ThreefryEngineAVX2<std::uint64_t, 2>;
 /// \ingroup Threefry
 using Threefry4x64AVX2 = ThreefryEngineAVX2<std::uint64_t, 4>;
 
-/// \brief The default 32-bits Threefry engine using AVX2
+/// \brief The default 32-bit Threefry engine using AVX2
 /// \ingroup Threefry
 using ThreefryAVX2 = ThreefryEngineAVX2<std::uint32_t>;
 
-/// \brief The default 64-bits Threefry engine using AVX2
+/// \brief The default 64-bit Threefry engine using AVX2
 /// \ingroup Threefry
 using ThreefryAVX2_64 = ThreefryEngineAVX2<std::uint64_t>;
 

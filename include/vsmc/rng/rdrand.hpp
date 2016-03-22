@@ -51,7 +51,7 @@ namespace vsmc
 template <typename UIntType, std::size_t W>
 inline bool rdrand(UIntType *, std::integral_constant<std::size_t, W>);
 
-/// \brief Invoke the 16-bits RDRAND instruction and return the carry flag
+/// \brief Invoke the 16-bit RDRAND instruction and return the carry flag
 /// \ingroup RDRAND
 template <typename UIntType>
 inline bool rdrand(
@@ -64,7 +64,7 @@ inline bool rdrand(
     return cf != 0;
 }
 
-/// \brief Invoke the 32-bits RDRAND instruction and return the carry flag
+/// \brief Invoke the 32-bit RDRAND instruction and return the carry flag
 /// \ingroup RDRAND
 template <typename UIntType>
 inline bool rdrand(
@@ -77,7 +77,7 @@ inline bool rdrand(
     return cf != 0;
 }
 
-/// \brief Invoke the 64-bits RDRAND instruction and return the carry flag
+/// \brief Invoke the 64-bit RDRAND instruction and return the carry flag
 /// \ingroup RDRAND
 template <typename UIntType>
 inline bool rdrand(
@@ -205,15 +205,15 @@ class RDRANDEngine
     }
 }; // class RDRANDEngine
 
-/// \brief C++11 Engine using 16-bits RDRAND instruction
+/// \brief C++11 Engine using 16-bit RDRAND instruction
 /// \ingroup RDRAND
 using RDRAND16 = RDRANDEngine<std::uint16_t>;
 
-/// \brief C++11 Engine using 32-bits RDRAND instruction
+/// \brief C++11 Engine using 32-bit RDRAND instruction
 /// \ingroup RDRAND
 using RDRAND32 = RDRANDEngine<std::uint32_t>;
 
-/// \brief C++11 Engine using 64-bits RDRAND instruction
+/// \brief C++11 Engine using 64-bit RDRAND instruction
 /// \ingroup RDRAND
 using RDRAND64 = RDRANDEngine<std::uint64_t>;
 

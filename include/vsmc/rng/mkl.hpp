@@ -409,11 +409,11 @@ class MKLEngine
     MKLStream stream_;
 }; // class MKLEngine
 
-/// \brief A 59-bits multiplicative congruential generator
+/// \brief A 59-bit multiplicative congruential generator
 /// \ingroup MKLRNG
 using MKL_MCG59 = MKLEngine<VSL_BRNG_MCG59, 32>;
 
-/// \brief A 59-bits multiplicative congruential generator (64-bits)
+/// \brief A 59-bit multiplicative congruential generator (64-bit)
 /// \ingroup MKLRNG
 using MKL_MCG59_64 = MKLEngine<VSL_BRNG_MCG59, 64>;
 
@@ -421,7 +421,7 @@ using MKL_MCG59_64 = MKLEngine<VSL_BRNG_MCG59, 64>;
 /// \ingroup MKLRNG
 using MKL_MT19937 = MKLEngine<VSL_BRNG_MT19937, 32>;
 
-/// \brief A Mersenne-Twister pseudoranom number genertor (64-bits)
+/// \brief A Mersenne-Twister pseudoranom number genertor (64-bit)
 /// \ingroup MKLRNG
 using MKL_MT19937_64 = MKLEngine<VSL_BRNG_MT19937, 64>;
 
@@ -429,8 +429,7 @@ using MKL_MT19937_64 = MKLEngine<VSL_BRNG_MT19937, 64>;
 /// \ingroup MKLRNG
 using MKL_MT2203 = MKLEngine<VSL_BRNG_MT2203, 32>;
 
-/// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor
-/// (64-bits)
+/// \brief A set of 6024 Mersenne-Twister pseudoranom number genertor (64-bit)
 /// \ingroup MKLRNG
 using MKL_MT2203_64 = MKLEngine<VSL_BRNG_MT2203, 64>;
 
@@ -439,9 +438,8 @@ using MKL_MT2203_64 = MKLEngine<VSL_BRNG_MT2203, 64>;
 /// \ingroup MKLRNG
 using MKL_SFMT19937 = MKLEngine<VSL_BRNG_SFMT19937, 32>;
 
-/// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number
-/// genertor
-/// (64-bits)
+/// \brief A SIMD-oriented fast Mersenne-Twister pseudoranom number genertor
+/// (64-bit)
 /// \ingroup MKLRNG
 using MKL_SFMT19937_64 = MKLEngine<VSL_BRNG_SFMT19937, 64>;
 
@@ -449,7 +447,7 @@ using MKL_SFMT19937_64 = MKLEngine<VSL_BRNG_SFMT19937, 64>;
 /// \ingroup MKLRNG
 using MKL_NONDETERM = MKLEngine<VSL_BRNG_NONDETERM, 32>;
 
-/// \brief A non-determinstic random number generator (64-bits)
+/// \brief A non-determinstic random number generator (64-bit)
 /// \ingroup MKLRNG
 using MKL_NONDETERM_64 = MKLEngine<VSL_BRNG_NONDETERM, 64>;
 
@@ -459,7 +457,7 @@ using MKL_NONDETERM_64 = MKLEngine<VSL_BRNG_NONDETERM, 64>;
 /// \ingroup MKLRNG
 using MKL_ARS5 = MKLEngine<VSL_BRNG_ARS5, 32>;
 
-/// \brief A counter-based random number generator (64-bits)
+/// \brief A counter-based random number generator (64-bit)
 /// \ingroup MKLRNG
 using MKL_ARS5_64 = MKLEngine<VSL_BRNG_ARS5, 64>;
 
@@ -467,7 +465,7 @@ using MKL_ARS5_64 = MKLEngine<VSL_BRNG_ARS5, 64>;
 /// \ingroup MKLRNG
 using MKL_PHILOX4X32X10 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 32>;
 
-/// \brief A counter-based random number generator (64-bits)
+/// \brief A counter-based random number generator (64-bit)
 /// \ingroup MKLRNG
 using MKL_PHILOX4X32X10_64 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 64>;
 

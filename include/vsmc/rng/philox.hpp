@@ -316,11 +316,11 @@ using Philox2x64 = PhiloxEngine<std::uint64_t, 2>;
 /// \ingroup Philox
 using Philox4x64 = PhiloxEngine<std::uint64_t, 4>;
 
-/// \brief The default 32-bits Philox engine
+/// \brief The default 32-bit Philox engine
 /// \ingroup Philox
 using Philox = PhiloxEngine<std::uint32_t>;
 
-/// \brief The default 64-bits Philox engine
+/// \brief The default 64-bit Philox engine
 /// \ingroup Philox
 using Philox_64 = PhiloxEngine<std::uint64_t>;
 
