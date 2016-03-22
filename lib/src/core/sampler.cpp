@@ -167,7 +167,7 @@ int vsmc_sampler_move_queue_empty(const vsmc_sampler *sampler_ptr)
     return ::vsmc::cast(sampler_ptr).move_queue_empty();
 }
 
-void vsmc_smapler_move(
+void vsmc_sampler_move(
     vsmc_sampler *sampler_ptr, vsmc_sampler_move_type new_move, int append)
 {
     auto cpp_new_move = [new_move](
@@ -190,7 +190,7 @@ int vsmc_sampler_mcmc_queue_empty(const vsmc_sampler *sampler_ptr)
     return ::vsmc::cast(sampler_ptr).mcmc_queue_empty();
 }
 
-void vsmc_smapler_mcmc(
+void vsmc_sampler_mcmc(
     vsmc_sampler *sampler_ptr, vsmc_sampler_mcmc_type new_mcmc, int append)
 {
     auto cpp_new_mcmc = [new_mcmc](

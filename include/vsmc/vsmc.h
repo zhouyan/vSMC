@@ -32,8 +32,7 @@
 #ifndef VSMC_VSMC_H
 #define VSMC_VSMC_H
 
-#include <vsmc/rngc/rngc.h>
-#include <stdalign.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -740,7 +739,7 @@ void vsmc_sampler_move_queue_clear(vsmc_sampler *sampler_ptr);
 int vsmc_sampler_move_queue_empty(const vsmc_sampler *sampler_ptr);
 
 /// \brief `vsmc::Sampler::move`
-void vsmc_smapler_move(
+void vsmc_sampler_move(
     vsmc_sampler *sampler_ptr, vsmc_sampler_move_type new_move, int append);
 
 /// \brief `vsmc::Sampler::mcmc_queue_clear`
@@ -750,7 +749,7 @@ void vsmc_sampler_mcmc_queue_clear(vsmc_sampler *sampler_ptr);
 int vsmc_sampler_mcmc_queue_empty(const vsmc_sampler *sampler_ptr);
 
 /// \brief `vsmc::Sampler::mcmc`
-void vsmc_smapler_mcmc(
+void vsmc_sampler_mcmc(
     vsmc_sampler *sampler_ptr, vsmc_sampler_mcmc_type new_mcmc, int append);
 
 /// \brief `vsmc::Sampler::initialize`
