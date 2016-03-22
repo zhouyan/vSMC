@@ -81,6 +81,21 @@ class Weight
 
     const double *resample_data() const { return data_.data(); }
 
+    template <typename OutputIter>
+    void read_weight(OutputIter first) const
+    {
+        std::copy(data_.begin(), data_.end(), first);
+    }
+
+    template <typename RandomIter>
+    void read_weight(RandomIter first, int stride) const
+    {
+        for (size_type i = 0; i != size(); ++i, first += stride)
+            *first = data_[i];
+    }
+
+    void read_resample_weight(double *first) const { read_weight(first); }
+
     void set_equal()
     {
         std::fill(data_.begin(), data_.end(), 1.0 / resample_size());
@@ -255,6 +270,18 @@ class WeightNull
     const double *resample_data() const { return nullptr; }
 
     const double *data() const { return nullptr; }
+
+    template <typename OutputIter>
+    void read_weight(OutputIter) const
+    {
+    }
+
+    template <typename RandomIter>
+    void read_weight(RandomIter, int) const
+    {
+    }
+
+    void read_resample_weight(double *) const {}
 
     void set_equal() {}
 
