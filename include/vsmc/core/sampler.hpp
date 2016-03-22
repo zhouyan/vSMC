@@ -269,7 +269,10 @@ class Sampler
 
     /// \brief Get sampler size of a given iteration (initialization count as
     /// iteration zero)
-    double size_history(std::size_t iter) const { return size_history_[iter]; }
+    size_type size_history(std::size_t iter) const
+    {
+        return size_history_[iter];
+    }
 
     /// \brief Read sampler size history through an output iterator
     template <typename OutputIter>
@@ -345,8 +348,8 @@ class Sampler
     {
         VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_init, init_by_move, MOVE);
 
-        init_ = init_op([new_init](
-            Particle<T> &particle, void *) { new_init(0, particle); });
+        init_ = [new_init](
+            Particle<T> &particle, void *) { return new_init(0, particle); };
 
         return *this;
     }
@@ -700,7 +703,7 @@ class Sampler
     double resample_threshold_;
 
     std::size_t iter_num_;
-    Vector<std::size_t> size_history_;
+    Vector<size_type> size_history_;
     Vector<double> ess_history_;
     Vector<bool> resampled_history_;
     Vector<Vector<std::size_t>> accept_history_;
