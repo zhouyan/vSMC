@@ -108,10 +108,7 @@ void vsmc_rng_get_ctr(const vsmc_rng *rng_ptr, int n, int *ctr);
 void vsmc_rng_set_ctr(vsmc_rng *rng_ptr, int n, const int *ctr);
 
 /// \brief `vsmc::RNG::operator()`
-int vsmc_rng_rand(vsmc_rng *rng_ptr);
-
-/// \brief `vsmc::RNG::operator()`
-void vsmc_rng_rand_n(vsmc_rng *rng_ptr, int n, int *r);
+void vsmc_rng_rand(vsmc_rng *rng_ptr, int n, int *r);
 
 /// @}
 

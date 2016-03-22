@@ -168,18 +168,10 @@ void vsmc_rng_set_ctr(vsmc_rng *rng_ptr, int n, const int *ctr)
     rng.ctr(c);
 }
 
-int vsmc_rng_rand(vsmc_rng *rng_ptr)
+void vsmc_rng_rand(vsmc_rng *rng_ptr, int n, int *r)
 {
     ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
-
-    return static_cast<int>(rng());
-}
-
-void vsmc_rng_rand_n(vsmc_rng *rng_ptr, int n, int *r)
-{
-    ::vsmc::RNG &rng = ::vsmc::internal::rng_cast(rng_ptr);
-
-    rng(static_cast<std::size_t>(n),
+    ::vsmc::rng_rand(rng, static_cast<std::size_t>(n),
         reinterpret_cast<::vsmc::RNG::result_type *>(r));
 }
 
