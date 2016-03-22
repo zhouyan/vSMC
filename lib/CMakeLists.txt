@@ -31,14 +31,20 @@
 
 PROJECT(vSMCLib C CXX)
 
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
+
 SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
-    ${PROJECT_SOURCE_DIR}/src/vsmc_memory.cpp
-    ${PROJECT_SOURCE_DIR}/src/vsmc_resample.cpp
-    ${PROJECT_SOURCE_DIR}/src/vsmc_rng.cpp)
+    ${PROJECT_SOURCE_DIR}/src/resample/resample.cpp
+    ${PROJECT_SOURCE_DIR}/src/rng/distribution.cpp
+    ${PROJECT_SOURCE_DIR}/src/rng/engine.cpp
+    ${PROJECT_SOURCE_DIR}/src/rng/random_walk.cpp
+    ${PROJECT_SOURCE_DIR}/src/rng/seed.cpp
+    ${PROJECT_SOURCE_DIR}/src/rng/u01_sequence.cpp
+    ${PROJECT_SOURCE_DIR}/src/utility/aligned_memory.cpp)
 
 IF(MKL_FOUND)
     SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
-        ${PROJECT_SOURCE_DIR}/src/vsmc_mkl_brng.cpp)
+        ${PROJECT_SOURCE_DIR}/src/rng/mkl_brng.cpp)
 ENDIF(MKL_FOUND)
 
 ADD_LIBRARY(libvsmc ${VSMC_LIB_SOURCE})

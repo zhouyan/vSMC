@@ -29,9 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/vsmc.h>
 #include <vsmc/rng/engine.hpp>
 #include <vsmc/rng/uniform_real_distribution.hpp>
+#include <vsmc/vsmc.h>
 
 #define VSMC_DEFINE_RNG_MKL_BRNG(RNGType, name)                               \
     int vsmc_mkl_init_##name(int, VSLStreamStatePtr, int, const unsigned *);  \

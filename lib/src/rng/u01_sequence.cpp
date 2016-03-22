@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/vsmc_memory.cpp
+// vSMC/lib/src/rng/u01_sequence.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,17 +29,24 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <vsmc/rng/u01_sequence.hpp>
 #include <vsmc/vsmc.h>
-#include <vsmc/utility/aligned_memory.hpp>
 
 extern "C" {
 
-void *vsmc_malloc(size_t n, int alignment)
+void vsmc_rng_u01_sorted(int n, const double *u01, double *u01seq)
 {
-    return ::vsmc::AlignedMemory::aligned_malloc(
-        n, static_cast<std::size_t>(alignment));
+    ::vsmc::u01_sorted(static_cast<std::size_t>(n), u01, u01seq);
 }
 
-void vsmc_free(void *ptr) { ::vsmc::AlignedMemory::aligned_free(ptr); }
+void vsmc_rng_u01_stratified(int n, const double *u01, double *u01seq)
+{
+    ::vsmc::u01_stratified(static_cast<std::size_t>(n), u01, u01seq);
+}
+
+void vsmc_rng_u01_systematic(int n, double u01, double *u01seq)
+{
+    ::vsmc::u01_systematic(static_cast<std::size_t>(n), u01, u01seq);
+}
 
 } // extern "C"
