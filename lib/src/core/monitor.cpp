@@ -50,9 +50,9 @@ void vsmc_monitor_free(vsmc_monitor *monitor_ptr)
     monitor_ptr->ptr = nullptr;
 }
 
-void vsmc_monitor_assign(vsmc_monitor dst, vsmc_monitor src)
+void vsmc_monitor_assign(vsmc_monitor monitor, vsmc_monitor other)
 {
-    ::vsmc::cast(dst) = ::vsmc::cast(src);
+    ::vsmc::cast(monitor) = ::vsmc::cast(other);
 }
 
 int vsmc_monitor_dim(vsmc_monitor monitor)

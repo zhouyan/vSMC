@@ -203,6 +203,16 @@ class MonitorEvalC : public Base<StateMatrixC, MonitorEvalC<Base>>
     vsmc_monitor_eval_post_type eval_post_;
 }; // class MonitorEvalC
 
+inline Progress &cast(const vsmc_progress &progress)
+{
+    return *(reinterpret_cast<Progress *>(progress.ptr));
+}
+
+inline Progress *cast(const vsmc_progress *progress_ptr)
+{
+    return reinterpret_cast<Progress *>(progress_ptr->ptr);
+}
+
 inline RNG &cast(const vsmc_rng &rng)
 {
     return *(reinterpret_cast<RNG *>(rng.ptr));

@@ -111,6 +111,9 @@ extern "C" {
  * \defgroup C_API_Utility_AlignedMemory Aligned memory allocation
  * \ingroup C_API_Utility
  *
+ * \defgroup C_API_Utility_Progress Progress
+ * \ingroup C_API_Utility
+ *
  * \defgroup C_API_Utility_StopWatch Stop watch
  * \ingroup C_API_Utility
  *
@@ -192,7 +195,7 @@ void vsmc_rng_malloc(vsmc_rng *rng_ptr, int seed);
 void vsmc_rng_free(vsmc_rng *rng_ptr);
 
 /** \brief `vsmc::RNG::operator=` */
-void vsmc_rng_assign(vsmc_rng dst, vsmc_rng src);
+void vsmc_rng_assign(vsmc_rng rng, vsmc_rng other);
 
 /** \brief `vsmc::RNG::seed` */
 void vsmc_rng_seed(vsmc_rng rng, int seed);
@@ -565,7 +568,8 @@ void vsmc_state_matrix_malloc(
 void vsmc_state_matrix_free(vsmc_state_matrix *state_matrix_ptr);
 
 /** \brief `vsmc::StateMatrix::operator=` */
-void vsm_state_matrix_assign(vsmc_state_matrix dst, vsmc_state_matrix src);
+void vsm_state_matrix_assign(
+    vsmc_state_matrix state_matrix, vsmc_state_matrix other);
 
 /** \brief `vsmc::StateMatrix::dim` */
 int vsmc_state_matrix_dim(vsmc_state_matrix state_matrix);
@@ -626,7 +630,7 @@ void vsmc_weight_malloc(vsmc_weight *weight_ptr, int n);
 void vsmc_weight_free(vsmc_weight *weight_ptr);
 
 /** \brief `vsmc::Weight::operator=` */
-void vsmc_weight_assign(vsmc_weight dst, vsmc_weight src);
+void vsmc_weight_assign(vsmc_weight weight, vsmc_weight other);
 
 /** \brief `vsmc::Weight::size` */
 int vsmc_weight_size(vsmc_weight weight);
@@ -687,7 +691,7 @@ void vsmc_particle_malloc(vsmc_particle *particle_ptr, int n, int dim);
 void vsmc_particle_free(vsmc_particle *particle_ptr);
 
 /** \brief `vsmc::Particle::operator=` */
-void vsmc_particle_assign(vsmc_particle dst, vsmc_particle src);
+void vsmc_particle_assign(vsmc_particle particle, vsmc_particle other);
 
 /** \brief `vsmc::Particle::clone` */
 void vsmc_particle_clone(
@@ -733,7 +737,7 @@ void vsmc_monitor_malloc(vsmc_monitor *monitor_ptr, int dim,
 void vsmc_monitor_free(vsmc_monitor *monitor_ptr);
 
 /** \brief `vsmc::Monitor::operator=` */
-void vsmc_monitor_assign(vsmc_monitor dst, vsmc_monitor src);
+void vsmc_monitor_assign(vsmc_monitor monitor, vsmc_monitor other);
 
 /** \brief `vsmc::Monitor::dim` */
 int vsmc_monitor_dim(vsmc_monitor monitor);
@@ -834,7 +838,7 @@ void vsmc_sampler_malloc(vsmc_sampler *sampler_ptr, int n, int dim,
 void vsmc_sampler_free(vsmc_sampler *sampler_ptr);
 
 /** \brief `vsmc::Sampler::operator=` */
-void vsmc_sampler_assign(vsmc_sampler dst, vsmc_sampler src);
+void vsmc_sampler_assign(vsmc_sampler sampler, vsmc_sampler other);
 
 /** \brief `vsmc::Sampler::clone` */
 void vsmc_sampler_clone(
@@ -1175,6 +1179,34 @@ void *vsmc_malloc(size_t n, int alignment);
 void vsmc_free(void *ptr);
 
 /** @} */ /* C_API_Utility_AlignedMemory */
+
+/** \addtogroup C_API_Utility_Progress */
+/** @{ */
+
+typedef struct {
+    void *ptr;
+} vsmc_progress;
+
+/** \brief `vsmc:Progress::Progress` */
+void vsmc_progress_malloc(vsmc_progress *progress_ptr);
+
+/** \brief `vsmc:Progress::~Progress` */
+void vsmc_progress_free(vsmc_progress *progress_ptr);
+
+/** \brief `vsmc:Progress::start` */
+void vsmc_progress_start(vsmc_progress progress, int total, const char *msg,
+    int length, int show_iter, double interval_s);
+
+/** \brief `vsmc:Progress::stop` */
+void vsmc_progress_stop(vsmc_progress progress, int finished);
+
+/** \brief `vsmc:Progress::increment` */
+void vsmc_progress_increment(vsmc_progress progress, int step);
+
+/** \brief `vsmc:Progress::message` */
+void vsmc_progress_message(vsmc_progress progress, const char *msg);
+
+/** @} */ /* C_API_Utility_Progress */
 
 /** \addtogroup C_API_Utility_StopWatch */
 /** @{ */

@@ -46,9 +46,9 @@ void vsmc_rng_free(vsmc_rng *rng_ptr)
     rng_ptr->ptr = nullptr;
 }
 
-void vsmc_rng_assign(vsmc_rng dst, vsmc_rng src)
+void vsmc_rng_assign(vsmc_rng rng, vsmc_rng other)
 {
-    ::vsmc::cast(dst) = ::vsmc::cast(src);
+    ::vsmc::cast(rng) = ::vsmc::cast(other);
 }
 
 void vsmc_rng_seed(vsmc_rng rng, int seed)

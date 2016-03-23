@@ -65,6 +65,10 @@ class Progress
     {
     }
 
+    Progress(const Progress &other) = delete;
+
+    Progress &operator=(const Progress &other) = delete;
+
     ~Progress() { join(); }
 
     /// \brief Start to print the progress

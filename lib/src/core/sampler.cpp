@@ -50,9 +50,9 @@ void vsmc_sampler_free(vsmc_sampler *sampler_ptr)
     sampler_ptr->ptr = nullptr;
 }
 
-void vsmc_sampler_assign(vsmc_sampler dst, vsmc_sampler src)
+void vsmc_sampler_assign(vsmc_sampler sampler, vsmc_sampler other)
 {
-    ::vsmc::cast(dst) = ::vsmc::cast(src);
+    ::vsmc::cast(sampler) = ::vsmc::cast(other);
 }
 
 void vsmc_sampler_clone(

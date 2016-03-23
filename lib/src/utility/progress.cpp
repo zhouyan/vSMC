@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/core/weight.cpp
+// vSMC/lib/src/utility/progress.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -33,62 +33,41 @@
 
 extern "C" {
 
-void vsmc_weight_malloc(vsmc_weight *weight_ptr, int n)
+void vsmc_progress_malloc(vsmc_progress *progress_ptr)
 {
-    auto ptr = ::vsmc::Allocator<::vsmc::Weight>::allocate(1);
-    new (ptr)::vsmc::Weight(static_cast<std::size_t>(n));
-    weight_ptr->ptr = ptr;
+    auto ptr = ::vsmc::Allocator<::vsmc::Progress>::allocate(1);
+    new (ptr)::vsmc::Progress(std::cout);
+    progress_ptr->ptr = ptr;
 }
 
-void vsmc_weight_free(vsmc_weight *weight_ptr)
+void vsmc_progress_free(vsmc_progress *progress_ptr)
 {
-    ::vsmc::Allocator<::vsmc::Weight>::deallocate(::vsmc::cast(weight_ptr), 1);
-    weight_ptr->ptr = nullptr;
+    ::vsmc::Allocator<::vsmc::Progress>::deallocate(
+        ::vsmc::cast(progress_ptr), 1);
+    progress_ptr->ptr = nullptr;
 }
 
-void vsmc_weight_assign(vsmc_weight weight, vsmc_weight other)
+void vsmc_progress_start(vsmc_progress progress, int total, const char *msg,
+    int length, int show_iter, double interval_s)
 {
-    ::vsmc::cast(weight) = ::vsmc::cast(other);
+    ::vsmc::cast(progress).start(static_cast<std::size_t>(total),
+        msg == nullptr ? std::string() : msg, static_cast<std::size_t>(length),
+        show_iter != 0, interval_s);
 }
 
-int vsmc_weight_size(vsmc_weight weight)
+void vsmc_progress_stop(vsmc_progress progress, int finished)
 {
-    return static_cast<int>(::vsmc::cast(weight).size());
+    ::vsmc::cast(progress).stop(finished != 0);
 }
 
-double vsmc_weight_ess(vsmc_weight weight)
+void vsmc_progress_increment(vsmc_progress progress, int step)
 {
-    return ::vsmc::cast(weight).ess();
+    ::vsmc::cast(progress).increment(static_cast<std::size_t>(step));
 }
 
-void vsmc_weight_set_equal(vsmc_weight weight)
+void vsmc_progress_message(vsmc_progress progress, const char *msg)
 {
-    ::vsmc::cast(weight).set_equal();
-}
-
-void vsmc_weight_set(vsmc_weight weight, const double *first, int stride)
-{
-    ::vsmc::cast(weight).set(first, stride);
-}
-
-void vsmc_weight_mul(vsmc_weight weight, const double *first, int stride)
-{
-    ::vsmc::cast(weight).mul(first, stride);
-}
-
-void vsmc_weight_set_log(vsmc_weight weight, const double *first, int stride)
-{
-    ::vsmc::cast(weight).set_log(first, stride);
-}
-
-void vsmc_weight_add_log(vsmc_weight weight, const double *first, int stride)
-{
-    ::vsmc::cast(weight).add_log(first, stride);
-}
-
-int vsmc_weight_draw(vsmc_weight weight, vsmc_rng rng)
-{
-    return static_cast<int>(::vsmc::cast(weight).draw(::vsmc::cast(rng)));
+    ::vsmc::cast(progress).message(msg == nullptr ? std::string() : msg);
 }
 
 } // extern "C"

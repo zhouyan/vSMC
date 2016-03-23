@@ -47,6 +47,7 @@ SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
     ${PROJECT_SOURCE_DIR}/src/rng/u01_sequence.cpp
     ${PROJECT_SOURCE_DIR}/src/smp/backend_seq.cpp
     ${PROJECT_SOURCE_DIR}/src/utility/aligned_memory.cpp
+    ${PROJECT_SOURCE_DIR}/src/utility/progress.cpp
     ${PROJECT_SOURCE_DIR}/src/utility/stop_watch.cpp)
 
 IF(MKL_FOUND)

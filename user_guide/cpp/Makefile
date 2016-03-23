@@ -1,16 +1,17 @@
 .PHONY : all clean
 
 CC := clang
-CFLAGS := $(CFLAGS) -std=c89 -O3 -DNDEBUG
+CFLAGS := $(CFLAGS) -std=c99 -O3 -DNDEBUG
 CFLAGS := $(CFLAGS) -I ../../include
-CFLAGS := $(CFLAGS) -L ../../build/$(CC)-Release/lib
-CFLAGS := $(CFLAGS) -rpath ../../build/$(CC)-Release/lib
+CFLAGS := $(CFLAGS) -L ../../build/clang-Release/lib
+CFLAGS := $(CFLAGS) -Wl,-rpath -Wl,../../build/clang-Release/lib
 
 CXX := clang++
 CXXFLAGS := $(CXXFLAGS) -std=c++11 -O3 -DNDEBUG
 CXXFLAGS := $(CXXFLAGS) -I ../../include
 CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_MKL
 CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_TBB
+
 LDFLAGS := -lmkl_rt -ltbb -ltbbmalloc
 
 all : pf_ocl pf_tbb pf_seq pf_tbb_c pf_seq_c program_option program_progress
@@ -25,12 +26,12 @@ pf_seq : pf_seq.cpp
 	$(CXX) $(CXXFLAGS) -o pf_seq pf_seq.cpp $(LDFLAGS)
 
 pf_tbb_c : pf_tbb.c
-	ninja -C ../../build/$(CC)-Release lib
-	$(CC) $(CFLAGS) -o pf_tbb_c pf_tbb.c $(LDFLAGS) -lvsmc
+	ninja -C ../../build/clang-Release lib
+	$(CC) $(CFLAGS) -o pf_tbb_c pf_tbb.c -lvsmc
 
 pf_seq_c : pf_seq.c
-	ninja -C ../../build/$(CC)-Release lib
-	$(CC) $(CFLAGS) -o pf_seq_c pf_seq.c $(LDFLAGS) -lvsmc
+	ninja -C ../../build/clang-Release lib
+	$(CC) $(CFLAGS) -o pf_seq_c pf_seq.c -lvsmc
 
 pf_bench : pf_tbb pf_seq pf_tbb_c pf_seq_c
 	./pf_tbb
@@ -41,8 +42,8 @@ pf_bench : pf_tbb pf_seq pf_tbb_c pf_seq_c
 program_option : program_option.cpp
 	$(CXX) $(CXXFLAGS) -o program_option program_option.cpp $(LDFLAGS)
 
-program_process : program_process.cpp
-	$(CXX) $(CXXFLAGS) -o program_process program_process.cpp $(LDFLAGS)
+program_progress : program_progress.cpp
+	$(CXX) $(CXXFLAGS) -o program_progress program_progress.cpp $(LDFLAGS)
 
 clean:
 	rm -f pf_ocl pf_seq pf_tbb pf_seq_c pf_tbb_c

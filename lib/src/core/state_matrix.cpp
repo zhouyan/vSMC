@@ -49,9 +49,10 @@ void vsmc_state_matrix_free(vsmc_state_matrix *state_matrix_ptr)
     state_matrix_ptr->ptr = nullptr;
 }
 
-void vsm_state_matrix_assign(vsmc_state_matrix dst, vsmc_state_matrix src)
+void vsm_state_matrix_assign(
+    vsmc_state_matrix state_matrix, vsmc_state_matrix other)
 {
-    ::vsmc::cast(dst) = ::vsmc::cast(src);
+    ::vsmc::cast(state_matrix) = ::vsmc::cast(other);
 }
 
 int vsmc_state_matrix_dim(vsmc_state_matrix state_matrix)

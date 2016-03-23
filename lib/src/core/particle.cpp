@@ -48,9 +48,9 @@ void vsmc_particle_free(vsmc_particle *particle_ptr)
     particle_ptr->ptr = nullptr;
 }
 
-void vsmc_particle_assign(vsmc_particle dst, vsmc_particle src)
+void vsmc_particle_assign(vsmc_particle particle, vsmc_particle other)
 {
-    ::vsmc::cast(dst) = ::vsmc::cast(src);
+    ::vsmc::cast(particle) = ::vsmc::cast(other);
 }
 
 void vsmc_particle_clone(
