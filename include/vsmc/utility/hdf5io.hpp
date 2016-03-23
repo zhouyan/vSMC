@@ -359,18 +359,18 @@ inline void hdf5store_new(const std::string &file_name)
 /// row major matrix in C++ memory, the read in R produces the transpose the
 /// original matrix though they are identical in memory.
 template <typename T, typename InputIter>
-inline InputIter hdf5store_matrix(MatrixLayout layout, std::size_t nrow,
+inline void hdf5store_matrix(MatrixLayout layout, std::size_t nrow,
     std::size_t ncol, const std::string &file_name,
-    const std::string &data_name, InputIter first, bool append = false)
+    const std::string &data_name, InputIter first, bool append)
 {
     if (nrow == 0 || ncol == 0)
-        return first;
+        return;
 
     std::string dataset_name("/" + data_name);
     ::hsize_t dim[2];
     internal::hdf5io_matrix_dim(layout, nrow, ncol, dim);
     internal::HDF5StoreDataPtr<T> data_ptr;
-    InputIter last = data_ptr.set(nrow * ncol, first);
+    data_ptr.set(nrow * ncol, first);
     const T *data = data_ptr.get();
 
     ::hid_t datafile = append ?
@@ -387,8 +387,6 @@ inline InputIter hdf5store_matrix(MatrixLayout layout, std::size_t nrow,
     ::H5Tclose(datatype);
     ::H5Sclose(dataspace);
     ::H5Fclose(datafile);
-
-    return last;
 }
 
 /// \brief Create an empty list
@@ -399,8 +397,8 @@ inline InputIter hdf5store_matrix(MatrixLayout layout, std::size_t nrow,
 /// \param append If true the data is appended into an existing file,
 /// otherwise
 /// save in a new file
-inline void hdf5store_list_empty(const std::string &file_name,
-    const std::string &data_name, bool append = false)
+inline void hdf5store_list_empty(
+    const std::string &file_name, const std::string &data_name, bool append)
 {
     std::string group_name("/" + data_name);
 
@@ -447,7 +445,7 @@ inline void hdf5store_list_empty(const std::string &file_name,
 template <typename T, typename InputIterIter, typename SInputIter>
 inline void hdf5store_list(std::size_t nrow, std::size_t ncol,
     const std::string &file_name, const std::string &data_name,
-    InputIterIter first, SInputIter sfirst, bool append = false)
+    InputIterIter first, SInputIter sfirst, bool append)
 {
     std::string group_name("/" + data_name);
     ::hsize_t dim[1] = {nrow};
@@ -578,7 +576,7 @@ template <typename SInputIter, typename InputIter, typename... InputIters>
 inline void hdf5store_list(std::size_t nrow, const std::string &file_name,
     const std::string &data_name,
     const std::tuple<InputIter, InputIters...> &first, SInputIter sfirst,
-    bool append = false)
+    bool append)
 {
     static constexpr std::size_t dim = sizeof...(InputIters) + 1;
     internal::HDF5StoreDataPtr<std::string> vnames;
@@ -636,7 +634,7 @@ inline bool hdf5store_int(std::size_t n, IntType *r, std::true_type)
 /// \ingroup HDF5IO
 template <typename T>
 inline void hdf5store(const Sampler<T> &sampler, const std::string &file_name,
-    const std::string &data_name, bool append = false)
+    const std::string &data_name, bool append)
 {
     using size_type = typename Sampler<T>::size_type;
 
@@ -689,23 +687,22 @@ inline void hdf5store(const Sampler<T> &sampler, const std::string &file_name,
 /// \ingroup HDF5IO
 template <MatrixLayout Layout, std::size_t Dim, typename T>
 inline void hdf5store(const StateMatrix<Layout, Dim, T> &state,
-    const std::string &file_name, const std::string &data_name,
-    bool append = false)
+    const std::string &file_name, const std::string &data_name, bool append)
 {
-    hdf5store_matrix<Layout, T>(
-        state.size(), state.dim(), file_name, data_name, state.data(), append);
+    hdf5store_matrix<T>(Layout, state.size(), state.dim(), file_name,
+        data_name, state.data(), append);
 }
 
 /// \brief Store a Particle in the HDF5 format
 /// \ingroup HDF5IO
 template <typename T>
 inline void hdf5store(const Particle<T> &particle,
-    const std::string &file_name, const std::string &data_name,
-    bool append = false)
+    const std::string &file_name, const std::string &data_name, bool append)
 {
     hdf5store_list_empty(file_name, data_name, append);
     hdf5store(particle.value(), file_name, data_name + "/value", true);
-    hdf5store_matrix<ColMajor, double>(particle.size(), 1, file_name,
+    hdf5store_matrix<double>(ColMajor,
+        static_cast<std::size_t>(particle.size()), 1, file_name,
         data_name + "/weight", particle.weight().data(), true);
 }
 
