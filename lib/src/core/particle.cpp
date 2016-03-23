@@ -97,13 +97,7 @@ vsmc_single_particle vsmc_particle_sp(vsmc_particle particle, int id)
 void vsmc_particle_resample(const vsmc_particle particle,
     vsmc_particle_resample_type op, double threshold)
 {
-    auto cpp_op = [op](std::size_t M, std::size_t N, ::vsmc::RNG &cpp_rng,
-        const double *weight, int *rep) {
-        vsmc_rng rng = {&cpp_rng};
-        op(static_cast<int>(M), static_cast<int>(N), rng, weight, rep);
-    };
-
-    ::vsmc::cast(particle).resample(cpp_op, threshold);
+    ::vsmc::cast(particle).resample(::vsmc::cast(op), threshold);
 }
 
 } // extern "C"

@@ -89,13 +89,7 @@ void vsmc_sampler_resample(vsmc_sampler sampler)
 void vsmc_sampler_resample_scheme_f(
     vsmc_sampler sampler, vsmc_particle_resample_type op)
 {
-    auto cpp_op = [op](std::size_t M, std::size_t N, ::vsmc::RNG &cpp_rng,
-        const double *weight, int *rep) {
-        vsmc_rng rng = {&cpp_rng};
-        op(static_cast<int>(M), static_cast<int>(N), rng, weight, rep);
-    };
-
-    ::vsmc::cast(sampler).resample_scheme(cpp_op);
+    ::vsmc::cast(sampler).resample_scheme(::vsmc::cast(op));
 }
 
 void vsmc_sampler_resample_scheme(
@@ -134,12 +128,7 @@ vsmc_particle vsmc_sampler_particle(vsmc_sampler sampler)
 
 void vsmc_sampler_init(vsmc_sampler sampler, vsmc_sampler_init_type new_init)
 {
-    auto cpp_new_init = [new_init](
-        ::vsmc::ParticleC &cpp_particle, void *param) {
-        vsmc_particle particle = {&cpp_particle};
-        return static_cast<std::size_t>(new_init(particle, param));
-    };
-    ::vsmc::cast(sampler).init(cpp_new_init);
+    ::vsmc::cast(sampler).init(::vsmc::cast(new_init));
 }
 
 void vsmc_sampler_init_by_iter(vsmc_sampler sampler, int initialize_by_iterate)
@@ -150,13 +139,7 @@ void vsmc_sampler_init_by_iter(vsmc_sampler sampler, int initialize_by_iterate)
 void vsmc_sampler_init_by_move(
     vsmc_sampler sampler, vsmc_sampler_move_type new_init)
 {
-    auto cpp_new_init = [new_init](
-        std::size_t iter, ::vsmc::ParticleC &cpp_particle) {
-        vsmc_particle particle = {&cpp_particle};
-        return static_cast<std::size_t>(
-            new_init(static_cast<int>(iter), particle));
-    };
-    ::vsmc::cast(sampler).init_by_move(cpp_new_init);
+    ::vsmc::cast(sampler).init_by_move(::vsmc::cast(new_init));
 }
 
 void vsmc_sampler_move_queue_clear(vsmc_sampler sampler)
@@ -172,13 +155,7 @@ int vsmc_sampler_move_queue_empty(vsmc_sampler sampler)
 void vsmc_sampler_move(
     vsmc_sampler sampler, vsmc_sampler_move_type new_move, int append)
 {
-    auto cpp_new_move = [new_move](
-        std::size_t iter, ::vsmc::ParticleC &cpp_particle) {
-        vsmc_particle particle = {&cpp_particle};
-        return static_cast<std::size_t>(
-            new_move(static_cast<int>(iter), particle));
-    };
-    ::vsmc::cast(sampler).move(cpp_new_move, append != 0);
+    ::vsmc::cast(sampler).move(::vsmc::cast(new_move), append != 0);
 }
 
 void vsmc_sampler_mcmc_queue_clear(vsmc_sampler sampler)
@@ -194,13 +171,7 @@ int vsmc_sampler_mcmc_queue_empty(vsmc_sampler sampler)
 void vsmc_sampler_mcmc(
     vsmc_sampler sampler, vsmc_sampler_mcmc_type new_mcmc, int append)
 {
-    auto cpp_new_mcmc = [new_mcmc](
-        std::size_t iter, ::vsmc::ParticleC &cpp_particle) {
-        vsmc_particle particle = {&cpp_particle};
-        return static_cast<std::size_t>(
-            new_mcmc(static_cast<int>(iter), particle));
-    };
-    ::vsmc::cast(sampler).mcmc(cpp_new_mcmc, append != 0);
+    ::vsmc::cast(sampler).mcmc(::vsmc::cast(new_mcmc), append != 0);
 }
 
 void vsmc_sampler_initialize(vsmc_sampler sampler, void *param)
@@ -222,13 +193,9 @@ void vsmc_sampler_set_monitor_direct(
 void vsmc_sampler_set_monitor(vsmc_sampler sampler, const char *name, int dim,
     vsmc_monitor_eval_type eval, int record_only, vSMCMonitorStage stage)
 {
-    auto cpp_eval = [eval](std::size_t iter, std::size_t d,
-        ::vsmc::ParticleC &cpp_particle, double *res) {
-        vsmc_particle particle = {&cpp_particle};
-        eval(static_cast<int>(iter), static_cast<int>(d), particle, res);
-    };
     ::vsmc::cast(sampler).monitor(name, static_cast<std::size_t>(dim),
-        cpp_eval, record_only != 0, static_cast<vsmc::MonitorStage>(stage));
+        ::vsmc::cast(eval), record_only != 0,
+        static_cast<vsmc::MonitorStage>(stage));
 }
 
 vsmc_monitor vsmc_sampler_get_monitor(vsmc_sampler sampler, const char *name)
@@ -253,7 +220,7 @@ int vsmc_sampler_save(const vsmc_sampler sampler, char *mem)
     std::stringstream ss;
     ss << ::vsmc::cast(sampler);
     std::string str(ss.str());
-    std::size_t size = (ss.str().size() + 1) * sizeof(char);
+    std::size_t size = (str.size() + 1) * sizeof(char);
     if (mem != nullptr)
         std::memcpy(mem, str.c_str(), size);
 

@@ -140,9 +140,6 @@ class Monitor
 
     /// \brief Get the latest Monte Carlo integration record of a given
     /// variable
-    ///
-    /// \details
-    /// For a `dim` dimension Monitor, `id` shall be 0 to `dim` - 1
     double record(std::size_t id) const
     {
         std::size_t iter = iter_size() ? iter_size() - 1 : iter_size();
@@ -154,9 +151,6 @@ class Monitor
 
     /// \brief Get the Monte Carlo integration record of a given variable and
     /// the Monitor iteration
-    ///
-    /// \details
-    /// For a `dim` dimension Monitor, `id` shall be 0 to `dim` - 1
     double record(std::size_t id, std::size_t iter) const
     {
         VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(record);
@@ -170,20 +164,6 @@ class Monitor
     void read_index(OutputIter first) const
     {
         std::copy(index_.begin(), index_.end(), first);
-    }
-
-    /// \brief Read only access to the raw data of the index vector
-    const std::size_t *index_data() const { return index_.data(); }
-
-    /// \brief Read only access to the raw data of records (a row major
-    /// matrix)
-    const double *record_data() const { return record_.data(); }
-
-    /// \brief Read only access to the raw data of records for a given
-    /// Monitor iteration
-    const double *record_data(std::size_t iter) const
-    {
-        return record_.data() + iter * dim_;
     }
 
     /// \brief Read the record history for a given variable through an output
@@ -202,7 +182,7 @@ class Monitor
     ///
     /// \param first An iterator of container of output iterators
     template <typename OutputIterIter>
-    void read_record_matrix(OutputIterIter first) const
+    void read_record_list(OutputIterIter first) const
     {
         for (std::size_t d = 0; d != dim_; ++d, ++first)
             read_record(d, *first);
