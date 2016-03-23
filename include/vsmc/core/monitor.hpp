@@ -177,41 +177,33 @@ class Monitor
             *first = *riter;
     }
 
-    /// \brief Read the record history of all variables through an array of
-    /// output iterators
+    /// \brief Read the record history of all variables as a list through an
+    /// array of output iterators
     ///
-    /// \param first An iterator of container of output iterators
+    /// \param first An iterator whose value type is itself an output iterator
     template <typename OutputIterIter>
     void read_record_list(OutputIterIter first) const
     {
-        for (std::size_t d = 0; d != dim_; ++d, ++first)
-            read_record(d, *first);
+        for (std::size_t id = 0; id != dim_; ++id, ++first)
+            read_record(id, *first);
     }
 
-    /// \brief Read the record history of all variables through an output
-    /// iterator
-    ///
-    /// \param first The output iterator
-    ///
-    /// For example, say `first` is of type `double *`, then if `layout ==
-    /// ColMajor`, then, `first[j * iter_size() + i] == record(i, j)`.
-    /// Otherwise, if `layout == RowMajor`, then `first[i * dim() + j] ==
-    /// record(i, j)`. That is, the output is an `iter_size()` by `dim()`
-    /// matrix, with the usual meaning of column or row major layout.
-    template <MatrixLayout Layout, typename OutputIter>
-    void read_record_matrix(OutputIter first) const
+    /// \brief Read the record history of all variables as a matrix through an
+    /// output iterator
+    template <typename OutputIter>
+    void read_record_matrix(MatrixLayout layout, OutputIter first) const
     {
-        const std::size_t N = iter_size();
-        if (Layout == ColMajor) {
+        if (layout == RowMajor)
+            std::copy(record_.begin(), record_.end(), first);
+
+        if (layout == ColMajor) {
+            const std::size_t N = iter_size();
             for (std::size_t d = 0; d != dim_; ++d) {
                 const double *riter = record_.data() + d;
                 for (std::size_t i = 0; i != N; ++i, ++first, riter += dim_)
                     *first = *riter;
             }
         }
-
-        if (Layout == RowMajor)
-            std::copy(record_.begin(), record_.end(), first);
     }
 
     /// \brief Set a new evaluation object of type eval_type

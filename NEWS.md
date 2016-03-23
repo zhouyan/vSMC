@@ -3,11 +3,17 @@
 ## New features
 
 * C++ OpenCL RAII classes
+* `Sampler` gains new methods, `accept_size`, `read_accept_history`,
+  `read_accept_history_list`, and `read_accept_history_matrix`.
 
 ## Changed behaviors
 
 * `Monitor::read_record_matrix` overload which takes iterators to iterators is
   renamed to `read_record_list`.
+* `StateMatrix::read_state_matrix` overload which takes iterators to iterators
+  is renamed to `read_record_list`
+* Most methods which take a `MatrixLayout` type template parameter now has that
+  parameter as a runtime parameter.
 
 ## Removed features
 

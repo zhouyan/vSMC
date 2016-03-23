@@ -58,9 +58,6 @@ class Weight;
 template <MatrixLayout, std::size_t, typename>
 class StateMatrix;
 
-template <std::size_t, typename, typename>
-class StateCL;
-
 } // namesapce vsmc
 
 #endif // VSMC_INTERNAL_FORWARD_HPP

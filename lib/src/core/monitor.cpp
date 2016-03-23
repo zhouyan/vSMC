@@ -132,10 +132,8 @@ void vsmc_monitor_read_record_list(vsmc_monitor monitor, double *const *first)
 void vsmc_monitor_read_record_matrix(
     vsmc_monitor monitor, vSMCMatrixLayout layout, double *first)
 {
-    if (layout == vSMCRowMajor)
-        ::vsmc::cast(monitor).read_record_matrix<::vsmc::RowMajor>(first);
-    if (layout == vSMCColMajor)
-        ::vsmc::cast(monitor).read_record_matrix<::vsmc::ColMajor>(first);
+    ::vsmc::cast(monitor).read_record_matrix(
+        static_cast<::vsmc::MatrixLayout>(layout), first);
 }
 
 void vsmc_monitor_set_eval(

@@ -143,25 +143,25 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     }
 
     template <typename OutputIterIter>
-    void read_state_matrix(OutputIterIter first) const
+    void read_state_list(OutputIterIter first) const
     {
         for (std::size_t d = 0; d != this->dim(); ++d, ++first)
             read_state(d, *first);
     }
 
-    template <MatrixLayout RLayout, typename OutputIter>
-    void read_state_matrix(OutputIter first) const
+    template <typename OutputIter>
+    void read_state_matrix(MatrixLayout layout, OutputIter first) const
     {
-        if (RLayout == Layout) {
+        if (layout == Layout) {
             std::copy(data_.begin(), data_.end(), first);
         } else {
-            const StateMatrix<Layout, Dim, T> *sptr =
-                static_cast<const StateMatrix<Layout, Dim, T> *>(this);
-            if (RLayout == RowMajor) {
+            auto sptr = static_cast<const StateMatrix<Layout, Dim, T> *>(this);
+            if (layout == RowMajor) {
                 for (size_type i = 0; i != size_; ++i)
                     for (std::size_t d = 0; d != this->dim(); ++d)
                         *first++ = sptr->state(i, d);
-            } else if (RLayout == ColMajor) {
+            }
+            if (layout == ColMajor) {
                 for (std::size_t d = 0; d != this->dim(); ++d)
                     for (size_type i = 0; i != size_; ++i)
                         *first++ = sptr->state(i, d);

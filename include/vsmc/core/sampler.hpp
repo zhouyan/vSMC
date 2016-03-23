@@ -207,6 +207,15 @@ class Sampler
     /// \brief Current iteration number (initialization count as zero)
     std::size_t iter_num() const { return iter_num_; }
 
+    /// \brief Number of acceptance count histories
+    ///
+    /// \details
+    /// At each iterations, including the initialization step, let `M` be the
+    /// size of the move queue (or 1 for initialization step) plus the size of
+    /// the mcmc queue. The value return by this method is the maximum of `M`
+    /// for all iterations already performed.
+    std::size_t accept_size() const { return accept_history_.size(); }
+
     /// \brief Force resample
     Sampler<T> &resample()
     {
@@ -304,10 +313,50 @@ class Sampler
         std::copy(resampled_history_.begin(), resampled_history_.end(), first);
     }
 
-    /// \brief Get the accept count of a given move id and the iteration
+    /// \brief Get the acceptance count of a given move id and the iteration
     std::size_t accept_history(std::size_t id, std::size_t iter) const
     {
         return accept_history_[id][iter];
+    }
+
+    /// \brief Read acceptance count history for a given move id through an
+    /// output it ertor
+    template <typename OutputIter>
+    void read_accept_history(std::size_t id, OutputIter first) const
+    {
+        std::copy(
+            accept_history_[id].begin(), accept_history_[id].end(), first);
+    }
+
+    /// \brief Read acceptance count history of all moves as a list through an
+    /// array of output iterators
+    ///
+    /// \param first An iterator whose value type is itself an output iterator
+    template <typename OutputIterIter>
+    void read_accept_history_list(OutputIterIter first) const
+    {
+        for (std::size_t id = 0; id != accept_size(); ++id, ++first)
+            read_accept_history(id, *first);
+    }
+
+    /// \brief Read the record history of all moves as a matrix through an
+    /// output iterator
+    template <typename OutputIter>
+    void read_accept_history_matrix(
+        MatrixLayout layout, OutputIter first) const
+    {
+        if (layout == RowMajor) {
+            for (std::size_t iter = 0; iter != iter_size(); ++iter)
+                for (std::size_t id = 0; id != accept_size(); ++id, ++first)
+                    *first = accept_history(id, iter);
+        }
+
+        if (layout == ColMajor) {
+            for (std::size_t id = 0; id != accept_history_.size(); ++id) {
+                first = std::copy(accept_history_[id].begin(),
+                    accept_history_[id].end(), first);
+            }
+        }
     }
 
     /// \brief Read and write access to the Particle<T> object
@@ -558,7 +607,7 @@ class Sampler
         if (iter_size() == 0)
             return 0;
 
-        return accept_history_.size() + 2;
+        return accept_size() + 2;
     }
 
     /// \brief The size of Sampler summary header (floating point data)
@@ -622,28 +671,28 @@ class Sampler
     }
 
     /// \brief Sampler summary data (integer data)
-    template <MatrixLayout Layout, typename OutputIter>
-    void summary_data_int(OutputIter first) const
+    template <typename OutputIter>
+    void summary_data_int(MatrixLayout layout, OutputIter first) const
     {
         if (summary_data_size_int() == 0)
             return;
 
-        if (Layout == RowMajor)
+        if (layout == RowMajor)
             summary_data_row_int(first);
-        if (Layout == ColMajor)
+        if (layout == ColMajor)
             summary_data_col_int(first);
     }
 
     /// \brief Sampler summary data (floating point data)
-    template <MatrixLayout Layout, typename OutputIter>
-    void summary_data(OutputIter first) const
+    template <typename OutputIter>
+    void summary_data(MatrixLayout layout, OutputIter first) const
     {
         if (summary_data_size() == 0)
             return;
 
-        if (Layout == RowMajor)
+        if (layout == RowMajor)
             summary_data_row(first);
-        if (Layout == ColMajor)
+        if (layout == ColMajor)
             summary_data_col(first);
     }
 
@@ -664,13 +713,13 @@ class Sampler
         Vector<std::string> header_int(ncol_int);
         Vector<size_type> data_int(nrow * ncol_int);
         summary_header_int(header_int.begin());
-        summary_data_int<RowMajor>(data_int.begin());
+        summary_data_int(RowMajor, data_int.begin());
 
         std::size_t ncol = summary_header_size();
         Vector<std::string> header(ncol);
         Vector<double> data(nrow * ncol);
         summary_header(header.begin());
-        summary_data<RowMajor>(data.begin());
+        summary_data(RowMajor, data.begin());
 
         for (const auto &h : header_int)
             os << h << sepchar;

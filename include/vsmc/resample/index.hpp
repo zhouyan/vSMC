@@ -133,17 +133,55 @@ class ResampleIndex
         return idx;
     }
 
-    template <MatrixLayout Layout>
-    Vector<index_type> index_matrix() const
+    Vector<index_type> index_matrix(MatrixLayout layout) const
     {
-        return index_matrix_dispatch(
-            std::integral_constant<MatrixLayout, Layout>());
+        Vector<index_type> idxmat(size_ * iter_size_);
+
+        if (size_ * iter_size_ == 0)
+            return idxmat;
+
+        if (layout == RowMajor) {
+            index_type *back = idxmat.data() + iter_size_ - 1;
+            for (size_type i = 0; i != size_; ++i, back += iter_size_)
+                *back = index_[iter_size_ - 1][i];
+            if (iter_size_ == 1)
+                return idxmat;
+
+            for (std::size_t iter = iter_size_ - 1; iter != 0; --iter) {
+                const index_type *idx = index_[iter - 1].data();
+                const index_type *last = idxmat.data() + iter;
+                index_type *next = idxmat.data() + iter - 1;
+                for (size_type i = 0; i != size_; ++i) {
+                    *next = idx[static_cast<size_type>(*last)];
+                    last += iter_size_;
+                    next += iter_size_;
+                }
+            }
+        }
+
+        if (layout == ColMajor) {
+            index_type *back = idxmat.data() + size_ * (iter_size_ - 1);
+            for (size_type i = 0; i != size_; ++i)
+                back[i] = index_[iter_size_ - 1][i];
+            if (iter_size_ == 1)
+                return idxmat;
+
+            for (std::size_t iter = iter_size_ - 1; iter != 0; --iter) {
+                const index_type *idx = index_[iter - 1].data();
+                const index_type *last = idxmat.data() + size_ * iter;
+                index_type *next = idxmat.data() + size_ * (iter - 1);
+                for (size_type i = 0; i != size_; ++i)
+                    next[i] = idx[static_cast<size_type>(last[i])];
+            }
+        }
+
+        return idxmat;
     }
 
-    template <MatrixLayout Layout, typename OutputIter>
-    void read_index_matrix(OutputIter first) const
+    template <typename OutputIter>
+    void read_index_matrix(MatrixLayout layout, OutputIter first) const
     {
-        Vector<index_type> idxmat(index_matrix<Layout>());
+        auto idxmat = index_matrix(layout);
         std::copy(idxmat.begin(), idxmat.end(), first);
     }
 
@@ -152,57 +190,6 @@ class ResampleIndex
     std::size_t iter_size_;
     Vector<index_type> identity_;
     Vector<Vector<index_type>> index_;
-
-    Vector<index_type> index_matrix_dispatch(
-        std::integral_constant<MatrixLayout, RowMajor>) const
-    {
-        Vector<index_type> idxmat(size_ * iter_size_);
-        if (size_ * iter_size_ == 0)
-            return idxmat;
-
-        index_type *back = idxmat.data() + iter_size_ - 1;
-        for (size_type i = 0; i != size_; ++i, back += iter_size_)
-            *back = index_[iter_size_ - 1][i];
-        if (iter_size_ == 1)
-            return idxmat;
-
-        for (std::size_t iter = iter_size_ - 1; iter != 0; --iter) {
-            const index_type *idx = index_[iter - 1].data();
-            const index_type *last = idxmat.data() + iter;
-            index_type *next = idxmat.data() + iter - 1;
-            for (size_type i = 0; i != size_; ++i) {
-                *next = idx[static_cast<size_type>(*last)];
-                last += iter_size_;
-                next += iter_size_;
-            }
-        }
-
-        return idxmat;
-    }
-
-    Vector<index_type> index_matrix_dispatch(
-        std::integral_constant<MatrixLayout, ColMajor>) const
-    {
-        Vector<index_type> idxmat(size_ * iter_size_);
-        if (size_ * iter_size_ == 0)
-            return idxmat;
-
-        index_type *back = idxmat.data() + size_ * (iter_size_ - 1);
-        for (size_type i = 0; i != size_; ++i)
-            back[i] = index_[iter_size_ - 1][i];
-        if (iter_size_ == 1)
-            return idxmat;
-
-        for (std::size_t iter = iter_size_ - 1; iter != 0; --iter) {
-            const index_type *idx = index_[iter - 1].data();
-            const index_type *last = idxmat.data() + size_ * iter;
-            index_type *next = idxmat.data() + size_ * (iter - 1);
-            for (size_type i = 0; i != size_; ++i)
-                next[i] = idx[static_cast<size_type>(last[i])];
-        }
-
-        return idxmat;
-    }
 }; // class ResampleIndex
 
 } // namespace vsmc
