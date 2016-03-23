@@ -106,7 +106,8 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
 
         state_type &state(std::size_t pos) const
         {
-            return this->particle().value().state(this->id(), pos);
+            return this->particle().value().state(
+                static_cast<size_type>(this->id()), pos);
         }
     }; // class single_particle_type
 
