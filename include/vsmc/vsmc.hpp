@@ -108,13 +108,9 @@
 /// \ingroup RNG
 /// \brief Converting random integers to uniform floating points
 
-/// \defgroup U01Sequence U01 Sequence
+/// \defgroup U01Sequence U01 sequence
 /// \ingroup RNG
 /// \brief Generating ordered uniform random sequence
-
-/// \defgroup Xorshift Xorshift
-/// \ingroup RNG
-/// \brief Random number generating using the Xorshift algorithm
 
 /// \defgroup RNGC Random number generating in C and OpenCL
 /// \brief Random number generating in C and OpenCL

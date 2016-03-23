@@ -38,10 +38,85 @@
 extern "C" {
 #endif
 
-/** \defgroup C_API C API */
-/** @{ */
+/**
+ * \defgroup C_API C API
+ * \brief Interfacing with C and other languages
+ *
+ * \defgroup C_API_Definitions Enumerators, placeholders and macros
+ * \ingroup C_API
+ *
+ * \defgroup C_API_Core Core
+ * \ingroup C_API
+ *
+ * \defgroup C_API_Core_StateMatrix vsmc::StateMatrix
+ * \ingroup C_API_Core
+ *
+ * \defgroup C_API_Core_Weight vsmc::Weight
+ * \ingroup C_API_Core
+ *
+ * \defgroup C_API_Core_Particle vsmc::Particle
+ * \ingroup C_API_Core
+ *
+ * \defgroup C_API_Core_SingleParticle vsmc::SingleParticle
+ * \ingroup C_API_Core
+ *
+ * \defgroup C_API_Core_Monitor vsmc::Monitor
+ * \ingroup C_API_Core
+ *
+ * \defgroup C_API_Core_Sampler vsmc::Sampler
+ * \ingroup C_API_Core
+ *
+ * \defgroup C_API_Resample Resample algorithms
+ * \ingroup C_API
+ *
+ * \defgroup C_API_RNG Random number generating
+ * \ingroup C_API
+ *
+ * \defgroup C_API_RNG_RNG vsmc::RNG
+ * \ingroup C_API_RNG
+ *
+ * \defgroup C_API_RNG_Seed vsmc::Seed
+ * \ingroup C_API_RNG
+ *
+ * \defgroup C_API_RNG_RNG vsmc::RNG
+ * \ingroup C_API_RNG
+ *
+ * \defgroup C_API_RNG_U01Sequence U01 sequence
+ * \ingroup C_API_RNG
+ *
+ * \defgroup C_API_RNG_DISTRIBUITON Distribution
+ * \ingroup C_API_RNG
+ *
+ * \defgroup C_API_RNG_MLK_BRNG Register MKL BRNG
+ * \ingroup C_API_RNG
+ *
+ * \defgroup C_API_RNG_RandomWalk Random walk
+ * \ingroup C_API_RNG
+ *
+ * \defgroup C_API_SMP Symmetric multiprocessing
+ * \ingroup C_API
+ *
+ * \defgroup C_API_SMP_SEQ Sequential
+ * \ingroup C_API_SMP
+ *
+ * \defgroup C_API_SMP_OMP OpenMP
+ * \ingroup C_API_SMP
+ *
+ * \defgroup C_API_SMP_TBB Intel Threading Building Blocks
+ * \ingroup C_API_SMP
+ *
+ * \defgroup C_API_Utility Utility
+ * \ingroup C_API
+ *
+ * \defgroup C_API_Utility_AlignedMemory Aligned memory allocation
+ * \ingroup C_API_Utility
+ *
+ * \defgroup C_API_Utility_StopWatch Stop watch
+ * \ingroup C_API_Utility
+ *
+ */
 
-/** \defgroup C_API_Definitions Enumerators, placeholders and macros */
+/** \addtogroup C_API_Definitions */
 /** @{ */
 
 /** \brief `vsmc::MatrixLayout` */
@@ -66,10 +141,7 @@ typedef enum {
 
 /** @} */ /* C_API_Definitions */
 
-/** \defgroup C_API_RNG Random number generating */
-/** @{ */
-
-/** \defgroup C_API_RNG_Seed `vsmc::Seed` */
+/** \addtogroup C_API_RNG_Seed */
 /** @{ */
 
 /** \brief `vsmc::Seed::get` */
@@ -105,7 +177,7 @@ void vsmc_seed_load_f(const char *filename);
 
 /** @} */ /* C_API_RNG_Seed */
 
-/** \defgroup C_API_RNG_RNG vsmc::RNG */
+/** \addtogroup C_API_RNG_RNG */
 /** @{ */
 
 /** \brief `vsmc::RNG` */
@@ -142,7 +214,7 @@ void vsmc_rng_rand(vsmc_rng rng, int n, int *r);
 
 /** @} */ /* C_API_RNG_RNG */
 
-/** \defgroup C_API_RNG_U01Sequence U01 Sequence */
+/** \addtogroup C_API_RNG_U01Sequence */
 /** @{ */
 
 /** \brief `vsmc::u01_sorted` */
@@ -156,7 +228,7 @@ void vsmc_u01_systematic(int n, double u01, double *u01seq);
 
 /** @} */ /* C_API_RNG_U01Sequence */
 
-/** \defgroup C_API_RNG_DISTRIBUITON Distributions */
+/** \addtogroup C_API_RNG_DISTRIBUITON */
 /** @{ */
 
 /** \brief `vsmc::DiscreteDistribution<int>` */
@@ -176,99 +248,99 @@ void vsmc_binomial_distribution(vsmc_rng rng, int n, int *r, int t, double p);
 void vsmc_negative_binomial_distribution(
     vsmc_rng rng, int n, int *r, int k, double p);
 
-/** \brief `std::geometri_distribution<int>` */
+/** \brief `std::geometric_distribution<int>` */
 void vsmc_geometric_distribution(vsmc_rng rng, int n, int *r, double p);
 
 /** \brief `std::poisson_distribution<int>` */
 void vsmc_poisson_distribution(vsmc_rng rng, int n, int *r, double mean);
 
-/** \brief `vsmc::BetaDistribution<double>` */
+/** \brief `vsmc::beta_distribution<double>` */
 void vsmc_beta_distribution(
     vsmc_rng rng, int n, double *r, double alpha, double beta);
 
-/** \brief `vsmc::CachyDistribution<double>` */
+/** \brief `vsmc::cauchy_distribution<double>` */
 void vsmc_cauchy_distribution(
     vsmc_rng rng, int n, double *r, double a, double b);
 
-/** \brief `vsmc::ChiSquaredDistribution<double>` */
+/** \brief `vsmc::chi_squared_distribution<double>` */
 void vsmc_chi_squared_distribution(vsmc_rng rng, int n, double *r, double df);
 
-/** \brief `vsmc::ExponentialDistribution<double>` */
+/** \brief `vsmc::exponential_distribution<double>` */
 void vsmc_exponential_distribution(
     vsmc_rng rng, int n, double *r, double lambda);
 
-/** \brief `vsmc::ExtremeValueDistribution<double>` */
+/** \brief `vsmc::extreme_value_distribution<double>` */
 void vsmc_extreme_value_distribution(
     vsmc_rng rng, int n, double *r, double a, double b);
 
-/** \brief `vsmc::FisherFDistribution<double>` */
+/** \brief `vsmc::fisher_f_distribution<double>` */
 void vsmc_fisher_f_distribution(
     vsmc_rng rng, int n, double *r, double df1, double df2);
 
-/** \brief `vsmc::GammaDistribution<double>` */
+/** \brief `vsmc::gamma_distribution<double>` */
 void vsmc_gamma_distribution(
     vsmc_rng rng, int n, double *r, double alpha, double beta);
 
-/** \brief `vsmc::LaplaceDistribution<double>` */
+/** \brief `vsmc::laplace_distribution<double>` */
 void vsmc_laplace_distribution(
     vsmc_rng rng, int n, double *r, double a, double b);
 
-/** \brief `vsmc::LevyDistribution<double>` */
+/** \brief `vsmc::levy_distribution<double>` */
 void vsmc_levy_distribution(
     vsmc_rng rng, int n, double *r, double a, double b);
 
-/** \brief `vsmc::LogisticDistribution<double>` */
+/** \brief `vsmc::logistic_distribution<double>` */
 void vsmc_logistic_distribution(
     vsmc_rng rng, int n, double *r, double a, double b);
 
-/** \brief `vsmc::LognormalDistribution<double>` */
+/** \brief `vsmc::lognormal_distribution<double>` */
 void vsmc_lognormal_distribution(
     vsmc_rng rng, int n, double *r, double m, double s);
 
-/** \brief `vsmc::NormalDistribution<double>` */
+/** \brief `vsmc::normal_distribution<double>` */
 void vsmc_normal_distribution(
     vsmc_rng rng, int n, double *r, double mean, double stddev);
 
-/** \brief `vsmc::NormalMVDistribution<double, vsmc::Dynamic>` */
+/** \brief `vsmc::normal_mv_distribution<double>` */
 void vsmc_normal_mv_distribution(vsmc_rng rng, int n, double *r, int dim,
     const double *mean, const double *chol);
 
-/** \brief `vsmc::ParetoDistribution<double>` */
+/** \brief `vsmc::pareto_distribution<double>` */
 void vsmc_pareto_distribution(
     vsmc_rng rng, int n, double *r, double a, double b);
 
-/** \brief `vsmc::RayleighDistribution<double>` */
+/** \brief `vsmc::rayleigh_distribution<double>` */
 void vsmc_rayleigh_distribution(vsmc_rng rng, int n, double *r, double b);
 
-/** \brief `vsmc::StudentTDistribution<double>` */
+/** \brief `vsmc::student_t_distribution<double>` */
 void vsmc_student_t_distribution(vsmc_rng rng, int n, double *r, double df);
 
-/** \brief `vsmc::U01Distribution<double>` */
+/** \brief `vsmc::u01_distribution<double>` */
 void vsmc_u01_distribution(vsmc_rng rng, int n, double *r);
 
-/** \brief `vsmc::U01DistributionCC<double>` */
+/** \brief `vsmc::u01_cc_distribution<double>` */
 void vsmc_u01_cc_distribution(vsmc_rng rng, int n, double *r);
 
-/** \brief `vsmc::U01DistributionCO<double>` */
+/** \brief `vsmc::u01_co_distribution<double>` */
 void vsmc_u01_co_distribution(vsmc_rng rng, int n, double *r);
 
-/** \brief `vsmc::U01DistributionOC<double>` */
+/** \brief `vsmc::u01_oc_distribution<double>` */
 void vsmc_u01_oc_distribution(vsmc_rng rng, int n, double *r);
 
-/** \brief `vsmc::U01DistributionOO<double>` */
-void vsmc_u01_oc_distribution(vsmc_rng rng, int n, double *r);
+/** \brief `vsmc::u01_oo_distribution<double>` */
+void vsmc_u01_oo_distribution(vsmc_rng rng, int n, double *r);
 
-/** \brief `vsmc::UniformRealDistribution<double>` */
+/** \brief `vsmc::uniform_real_distribution<double>` */
 void vsmc_uniform_real_distribution(
     vsmc_rng rng, int n, double *r, double a, double b);
 
-/** \brief `vsmc::WeibullDistribution<double>` */
+/** \brief `vsmc::weibull_distribution<double>` */
 void vsmc_weibull_distribution(
     vsmc_rng rng, int n, double *r, double a, double b);
 
 /** @} */ /* C_API_RNG_DISTRIBUITON */
 
-/** \defgroup C_API_RNG_MLK_BRNG Register MKL BRNG (`vsmc::mkl_brng`) */
+/** \addtogroup C_API_RNG_MLK_BRNG */
 /** @{ */
 
 /** \brief `vsmc::mkl_brng<std::mt19937>` */
@@ -453,7 +525,7 @@ int vsmc_mkl_brng_rdrand64(void);
 
 /** @} */ /* C_API_RNG_MLK_BRNG */
 
-/** \defgroup C_API_RNG_RandomWalk Random walk */
+/** \addtogroup C_API_RNG_RandomWalk */
 /** @{ */
 
 /** \brief `vsmc::RandomWalk<double, vsmc::Dynamic>` */
@@ -477,12 +549,7 @@ double vsmc_normal_mv_proposal(vsmc_rng rng, int dim, const double *x,
 
 /** @} */ /* C_API_RNG_RandomWalk */
 
-/** @} */ /* C_API_RNG */
-
-/** \defgroup C_API_Core Core */
-/** @{ */
-
-/** \defgroup C_API_Core_StateMatrix  `vsmc::StateMatrix` */
+/** \addtogroup C_API_Core_StateMatrix */
 /** @{ */
 
 /** \brief `vsmc::StateMatrix<vsmc::RowMajor, vsmc::Dynamic, double>` */
@@ -544,7 +611,7 @@ void vsmc_state_matrix_copy_particle(
 
 /** @} */ /* C_API_Core_StateMatrix */
 
-/** \defgroup C_API_Core_Weight  `vsmc::Weight` */
+/** \addtogroup C_API_Core_Weight */
 /** @{ */
 
 /** \brief `vsmc::Weight` */
@@ -590,7 +657,7 @@ int vsmc_weight_draw(vsmc_weight weight, vsmc_rng rng);
 
 /** @} */ /* C_API_Core_Weight */
 
-/** \defgroup C_API_Core_SingleParticle `vsmc::SingleParticle` */
+/** \addtogroup C_API_Core_SingleParticle */
 /** @{ */
 
 /** \brief `vsmc::SingleParticle` */
@@ -601,7 +668,7 @@ typedef struct {
 
 /** @} C_API_Core_SingleParticle */
 
-/** \defgroup C_API_Core_Particle  `vsmc::Particle` */
+/** \addtogroup C_API_Core_Particle */
 /** @{ */
 
 /** \brief `vsmc::Particle` */
@@ -647,7 +714,7 @@ void vsmc_particle_resample(
 
 /** @} */ /* C_API_Core_Particle */
 
-/** \defgroup C_API_Core_Monitor  `vsmc::Monitor` */
+/** \addtogroup C_API_Core_Monitor */
 /** @{ */
 
 /** \brief `vsmc::Monitor` */
@@ -742,7 +809,7 @@ void vsmc_monitor_turn_off(vsmc_monitor monitor);
 
 /** @} */ /* C_API_Core_Monitor */
 
-/** \defgroup C_API_Core_Sampler  `vsmc::Sampler` */
+/** \addtogroup C_API_Core_Sampler */
 /** @{ */
 
 /** \brief `vsmc::Sampler` */
@@ -914,9 +981,7 @@ void vsmc_sampler_save_f(vsmc_sampler sampler, const char *filename);
 
 /** @} */ /* C_API_Core_Sampler */
 
-/** @} */ /* C_API_Core */
-
-/** \defgroup C_API_Resample Resample algorithms */
+/** \addtogroup C_API_Resample */
 /** @{ */
 
 /** \brief `vsmc::resample_trans_u01_rep` */
@@ -965,7 +1030,7 @@ void vsmc_resample_residual_systematic(
 
 /** @} */ /* C_API_Resample */
 
-/** \defgroup C_API_SMP Symmetric multiprocessing */
+/** \addtogroup C_API_SMP */
 /** @{ */
 
 /** \brief `vsmc::InitializeBase::eval_sp` */
@@ -999,7 +1064,9 @@ typedef void (*vsmc_monitor_eval_pre_type)(int, vsmc_particle);
 /** \brief `vsmc::MonitorEvalBase::eval_post` */
 typedef void (*vsmc_monitor_eval_post_type)(int, vsmc_particle);
 
-/** \defgroup C_API_SMP_SEQ Sequential */
+/** @} */ /* C_API_SMP */
+
+/** \addtogroup C_API_SMP_SEQ */
 /** @{ */
 
 /** \brief `vsmc::Sampler::init` with `vsmc::InitializeSEQ` as input */
@@ -1032,7 +1099,7 @@ void vsmc_sampler_set_monitor_seq(vsmc_sampler sampler, const char *name,
 
 /** @} */ /* C_API_SMP_SEQ */
 
-/** \defgroup C_API_SMP_OMP OpenMP */
+/** \addtogroup C_API_SMP_OMP */
 /** @{ */
 
 /** \brief `vsmc::Sampler::init` with `vsmc::InitializeOMP` as input */
@@ -1065,7 +1132,7 @@ void vsmc_sampler_set_monitor_omp(vsmc_sampler sampler, const char *name,
 
 /** @} */ /* C_API_SMP_OMP */
 
-/** \defgroup C_API_SMP_TBB Intel Threading Building Blocks */
+/** \addtogroup C_API_SMP_TBB */
 /** @{ */
 
 /** \brief `vsmc::Sampler::init` with `vsmc::InitializeTBB` as input */
@@ -1098,12 +1165,7 @@ void vsmc_sampler_set_monitor_tbb(vsmc_sampler sampler, const char *name,
 
 /** @} */ /* C_API_SMP_TBB */
 
-/** @} */ /* C_API_SMP */
-
-/** \defgroup C_API_Utility Utility */
-/** @{ */
-
-/** \defgroup C_API_Utility_AlignedMemory Aligned memory allocation */
+/** \addtogroup C_API_Utility_AlignedMemory */
 /** @{ */
 
 /** \brief `vsmc::AlignedMemory::aligned_malloc` */
@@ -1114,7 +1176,7 @@ void vsmc_free(void *ptr);
 
 /** @} */ /* C_API_Utility_AlignedMemory */
 
-/** \defgroup C_API_Utility_StopWatch Stop watch */
+/** \addtogroup C_API_Utility_StopWatch */
 /** @{ */
 
 /** \brief `vsmc::StopWatch` */
@@ -1162,10 +1224,6 @@ double vsmc_stop_watch_minutes(vsmc_stop_watch stop_watch);
 double vsmc_stop_watch_hours(vsmc_stop_watch stop_watch);
 
 /** @} */ /* C_API_Utility_StopWatch */
-
-/** @} */ /* C_API_Utility */
-
-/** @} */ /* C_API */
 
 #ifdef __cplusplus
 } /* extern "C" */

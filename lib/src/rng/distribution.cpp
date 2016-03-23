@@ -120,6 +120,10 @@ void vsmc_normal_mv_distribution(vsmc_rng rng, int n, double *r, int dim,
 }
 
 VSMC_DEFINE_RNG_DIST_0(u01)
+VSMC_DEFINE_RNG_DIST_0(u01_cc)
+VSMC_DEFINE_RNG_DIST_0(u01_co)
+VSMC_DEFINE_RNG_DIST_0(u01_oc)
+VSMC_DEFINE_RNG_DIST_0(u01_oo)
 VSMC_DEFINE_RNG_DIST_1(chi_squared)
 VSMC_DEFINE_RNG_DIST_1(exponential)
 VSMC_DEFINE_RNG_DIST_1(rayleigh)

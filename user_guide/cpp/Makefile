@@ -1,13 +1,13 @@
 .PHONY : all clean
 
 CC := clang
-CFLAGS := $(CFLAGS) -std=c89 -O0 -g
+CFLAGS := $(CFLAGS) -std=c89 -O3 -DNDEBUG
 CFLAGS := $(CFLAGS) -I ../../include
 CFLAGS := $(CFLAGS) -L ../../build/$(CC)-Release/lib
 CFLAGS := $(CFLAGS) -rpath ../../build/$(CC)-Release/lib
 
 CXX := clang++
-CXXFLAGS := $(CXXFLAGS) -std=c++11 -O3
+CXXFLAGS := $(CXXFLAGS) -std=c++11 -O3 -DNDEBUG
 CXXFLAGS := $(CXXFLAGS) -I ../../include
 CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_MKL
 CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_TBB
@@ -31,6 +31,12 @@ pf_tbb_c : pf_tbb.c
 pf_seq_c : pf_seq.c
 	ninja -C ../../build/$(CC)-Release lib
 	$(CC) $(CFLAGS) -o pf_seq_c pf_seq.c $(LDFLAGS) -lvsmc
+
+pf_bench : pf_tbb pf_seq pf_tbb_c pf_seq_c
+	./pf_tbb
+	./pf_seq
+	./pf_tbb_c
+	./pf_seq_c
 
 program_option : program_option.cpp
 	$(CXX) $(CXXFLAGS) -o program_option program_option.cpp $(LDFLAGS)
