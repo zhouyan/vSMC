@@ -203,6 +203,18 @@ class MonitorEvalC : public Base<StateMatrixC, MonitorEvalC<Base>>
     vsmc_monitor_eval_post_type eval_post_;
 }; // class MonitorEvalC
 
+inline ProgramOptionMap &cast(
+    const vsmc_program_option_map &program_option_map)
+{
+    return *(reinterpret_cast<ProgramOptionMap *>(program_option_map.ptr));
+}
+
+inline ProgramOptionMap *cast(
+    const vsmc_program_option_map *program_option_map_ptr)
+{
+    return reinterpret_cast<ProgramOptionMap *>(program_option_map_ptr->ptr);
+}
+
 inline Progress &cast(const vsmc_progress &progress)
 {
     return *(reinterpret_cast<Progress *>(progress.ptr));

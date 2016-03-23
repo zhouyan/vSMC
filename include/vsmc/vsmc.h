@@ -111,6 +111,9 @@ extern "C" {
  * \defgroup C_API_Utility_AlignedMemory Aligned memory allocation
  * \ingroup C_API_Utility
  *
+ * \defgroup C_API_Utility_ProgramOption Program option
+ * \ingroup C_API_Utility
+ *
  * \defgroup C_API_Utility_Progress Progress
  * \ingroup C_API_Utility
  *
@@ -1179,6 +1182,69 @@ void *vsmc_malloc(size_t n, int alignment);
 void vsmc_free(void *ptr);
 
 /** @} */ /* C_API_Utility_AlignedMemory */
+
+/** \addtogroup C_API_Utility_ProgramOption */
+/** @{ */
+
+typedef struct {
+    void *ptr;
+} vsmc_program_option_map;
+
+/** \brief `vsmc::ProgramOptionMap::ProgramOptionMap` */
+void vsmc_program_option_map_malloc(
+    vsmc_program_option_map *program_option_map_ptr, int silent);
+
+/** \brief `vsmc::ProgramOptionMap::~ProgramOptionMap` */
+void vsmc_program_option_map_free(
+    vsmc_program_option_map *program_option_map_ptr);
+
+/** \brief `vsmc::ProgramOptionMap::operator=` */
+void vsmc_program_option_map_assign(
+    vsmc_program_option_map program_option_map, vsmc_program_option_map other);
+
+/** \brief `vsmc::ProgramOptionMap::add<double>` */
+void vsmc_program_option_map_add(vsmc_program_option_map program_option_map,
+    const char *name, const char *desc, double *ptr);
+
+/** \brief `vsmc::ProgramOptionMap::add<double, double>` */
+void vsmc_program_option_map_add_val(
+    vsmc_program_option_map program_option_map, const char *name,
+    const char *desc, double *ptr, double val);
+
+/** \brief `vsmc::ProgramOptionMap::add<int>` */
+void vsmc_program_option_map_add_int(
+    vsmc_program_option_map program_option_map, const char *name,
+    const char *desc, int *ptr);
+
+/** \brief `vsmc::ProgramOptionMap::add<int, int>` */
+void vsmc_program_option_map_add_val_int(
+    vsmc_program_option_map program_option_map, const char *name,
+    const char *desc, int *ptr, int val);
+
+/** \brief `vsmc::ProgramOptionMap::remove` */
+void vsmc_program_option_map_remove(
+    vsmc_program_option_map program_option_map, const char *name);
+
+/** \brief `vsmc::ProgramOptionMap::process` */
+void vsmc_program_option_map_process(
+    vsmc_program_option_map program_option_map, int argc, char *const *argv);
+
+/** \brief `vsmc::ProgramOptionMap::print_help` */
+void vsmc_program_option_map_print_help(
+    vsmc_program_option_map program_option_map);
+
+/** \brief `vsmc::ProgramOptionMap::count` */
+void vsmc_program_option_map_count(
+    vsmc_program_option_map program_option_map, const char *name);
+
+/** \brief `vsmc::ProgramOptionMap::help` */
+int vsmc_program_option_map_help(vsmc_program_option_map program_option_map);
+
+/** \brief `vsmc::ProgramOptionMap::silent` */
+void vsmc_program_option_map_silent(
+    vsmc_program_option_map program_option_map, int flag);
+
+/** @} */
 
 /** \addtogroup C_API_Utility_Progress */
 /** @{ */

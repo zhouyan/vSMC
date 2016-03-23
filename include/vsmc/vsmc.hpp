@@ -150,7 +150,7 @@
 /// \ingroup Utility
 /// \brief Resource management for OpenCL
 
-/// \defgroup Option Program option
+/// \defgroup ProgramOption Program option
 /// \ingroup Utility
 /// \brief Process program command line options
 

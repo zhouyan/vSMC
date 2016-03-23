@@ -59,7 +59,7 @@ inline void program_option_warning(const std::string &name,
 } // namespace vsmc::internal
 
 /// \brief Option base class
-/// \ingroup Option
+/// \ingroup ProgramOption
 class ProgramOption
 {
     public:
@@ -164,7 +164,7 @@ class ProgramOption
 }; // class ProgramOption
 
 /// \brief Option `--help`
-/// \ingroup Option
+/// \ingroup ProgramOption
 class ProgramOptionHelp : public ProgramOption
 {
     public:
@@ -196,7 +196,7 @@ class ProgramOptionHelp : public ProgramOption
 }; // ProgramOptionHelp
 
 /// \brief Option with a default value
-/// \ingroup Option
+/// \ingroup ProgramOption
 template <typename T>
 class ProgramOptionDefault : public ProgramOption
 {
@@ -251,7 +251,7 @@ class ProgramOptionDefault : public ProgramOption
 }; // ProgramOptionDefault
 
 /// \brief Option with a single value
-/// \ingroup Option
+/// \ingroup ProgramOption
 template <typename T>
 class ProgramOptionScalar : public ProgramOptionDefault<T>
 {
@@ -282,7 +282,7 @@ class ProgramOptionScalar : public ProgramOptionDefault<T>
 }; // class ProgramOptionScalar
 
 /// \brief Option with multiple values
-/// \ingroup Option
+/// \ingroup ProgramOption
 template <typename T, typename Alloc>
 class ProgramOptionVector : public ProgramOptionDefault<T>
 {
@@ -327,7 +327,7 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
 }; // class ProgramOptionVector
 
 /// \brief Program options
-/// \ingroup Option
+/// \ingroup ProgramOption
 class ProgramOptionMap
 {
     public:
@@ -405,7 +405,8 @@ class ProgramOptionMap
     /// \param argv The second argument of the `main` function
     /// \param os The output stream used to print help information and the
     /// warning messages if any error occurs when processing the options.
-    void process(int argc, const char **argv, std::ostream &os = std::cout)
+    void process(
+        int argc, const char *const *argv, std::ostream &os = std::cout)
     {
         std::string arg;
         Vector<std::string> arg_vector;
@@ -419,7 +420,7 @@ class ProgramOptionMap
     }
 
     /// \brief Process the options
-    void process(int argc, char **argv, std::ostream &os = std::cout)
+    void process(int argc, char *const *argv, std::ostream &os = std::cout)
     {
         std::string arg;
         Vector<std::string> arg_vector;
