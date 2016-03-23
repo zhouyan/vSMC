@@ -1,5 +1,5 @@
 CC := clang
-CFLAGS := $(CFLAGS) -std=c89 -O3
+CFLAGS := $(CFLAGS) -std=c89 -O0 -g
 CFLAGS := $(CFLAGS) -I ../../include
 CFLAGS := $(CFLAGS) -L ../../build/$(CC)-Release/lib
 CFLAGS := $(CFLAGS) -rpath ../../build/$(CC)-Release/lib
@@ -11,7 +11,7 @@ CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_MKL
 CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_TBB
 LDFLAGS := -lmkl_rt -ltbb -ltbbmalloc
 
-all : pf_ocl pf_tbb pf_seq program_option program_progress
+all : pf_ocl pf_tbb pf_seq pf_tbb_c pf_seq_c program_option program_progress
 
 pf_ocl : pf_ocl.cpp
 	$(CXX) $(CXXFLAGS) -DVSMC_HAS_OPENCL -o pf_ocl pf_ocl.cpp $(LDFLAGS) $(OPENCL_LIBRARY)

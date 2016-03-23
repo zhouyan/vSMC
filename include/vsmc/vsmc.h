@@ -916,22 +916,6 @@ void vsmc_sampler_save_f(vsmc_sampler sampler, const char *filename);
 
 /** @} */ /* C_API_Core */
 
-/** \defgroup C_API_Utility Utility */
-/** @{ */
-
-/** \defgroup C_API_Utility_AlignedMemory Aligned memory allocation */
-/** @{ */
-
-/** \brief `vsmc::AlignedMemory::aligned_malloc` */
-void *vsmc_malloc(size_t n, int alignment);
-
-/** \brief `vsmc::AlignedMemory::aligned_free` */
-void vsmc_free(void *ptr);
-
-/** @} */ /* C_API_Utility_AlignedMemory */
-
-/** @} */ /* C_API_Utility */
-
 /** \defgroup C_API_Resample Resample algorithms */
 /** @{ */
 
@@ -1115,6 +1099,71 @@ void vsmc_sampler_set_monitor_tbb(vsmc_sampler sampler, const char *name,
 /** @} */ /* C_API_SMP_TBB */
 
 /** @} */ /* C_API_SMP */
+
+/** \defgroup C_API_Utility Utility */
+/** @{ */
+
+/** \defgroup C_API_Utility_AlignedMemory Aligned memory allocation */
+/** @{ */
+
+/** \brief `vsmc::AlignedMemory::aligned_malloc` */
+void *vsmc_malloc(size_t n, int alignment);
+
+/** \brief `vsmc::AlignedMemory::aligned_free` */
+void vsmc_free(void *ptr);
+
+/** @} */ /* C_API_Utility_AlignedMemory */
+
+/** \defgroup C_API_Utility_StopWatch Stop watch */
+/** @{ */
+
+/** \brief `vsmc::StopWatch` */
+typedef struct {
+    void *ptr;
+} vsmc_stop_watch;
+
+/** \brief `vsmc::StopWatch::StopWatch` */
+void vsmc_stop_watch_malloc(vsmc_stop_watch *stop_watch_ptr);
+
+/** \brief `vsmc::StopWatch::~StopWatch` */
+void vsmc_stop_watch_free(vsmc_stop_watch *stop_watch_ptr);
+
+/** \brief `vsmc::StopWatch::operator=` */
+void vsmc_stop_watch_assign(vsmc_stop_watch stop_watch, vsmc_stop_watch other);
+
+/** \brief `vsmc::StopWatch::running` */
+int vsmc_stop_watch_running(vsmc_stop_watch stop_watch);
+
+/** \brief `vsmc::StopWatch::start` */
+int vsmc_stop_watch_start(vsmc_stop_watch stop_watch);
+
+/** \brief `vsmc::StopWatch::stop` */
+int vsmc_stop_watch_stop(vsmc_stop_watch stop_watch);
+
+/** \brief `vsmc::StopWatch::reset` */
+void vsmc_stop_watch_reset(vsmc_stop_watch stop_watch);
+
+/** \brief `vsmc::StopWatch::nanoseconds` */
+double vsmc_stop_watch_nanoseconds(vsmc_stop_watch stop_watch);
+
+/** \brief `vsmc::StopWatch::microseconds` */
+double vsmc_stop_watch_microseconds(vsmc_stop_watch stop_watch);
+
+/** \brief `vsmc::StopWatch::milliseconds` */
+double vsmc_stop_watch_milliseconds(vsmc_stop_watch stop_watch);
+
+/** \brief `vsmc::StopWatch::seconds` */
+double vsmc_stop_watch_seconds(vsmc_stop_watch stop_watch);
+
+/** \brief `vsmc::StopWatch::minutes` */
+double vsmc_stop_watch_minutes(vsmc_stop_watch stop_watch);
+
+/** \brief `vsmc::StopWatch::hours` */
+double vsmc_stop_watch_hours(vsmc_stop_watch stop_watch);
+
+/** @} */ /* C_API_Utility_StopWatch */
+
+/** @} */ /* C_API_Utility */
 
 /** @} */ /* C_API */
 

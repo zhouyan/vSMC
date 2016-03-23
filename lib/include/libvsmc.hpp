@@ -213,6 +213,16 @@ inline RNG *cast(const vsmc_rng *rng_ptr)
     return reinterpret_cast<RNG *>(rng_ptr->ptr);
 }
 
+inline StopWatch &cast(const vsmc_stop_watch &stop_watch)
+{
+    return *(reinterpret_cast<StopWatch *>(stop_watch.ptr));
+}
+
+inline StopWatch *cast(const vsmc_stop_watch *stop_watch_ptr)
+{
+    return reinterpret_cast<StopWatch *>(stop_watch_ptr->ptr);
+}
+
 inline StateMatrixC &cast(const vsmc_state_matrix &state_matrix)
 {
     return *(reinterpret_cast<StateMatrixC *>(state_matrix.ptr));

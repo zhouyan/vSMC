@@ -1,8 +1,5 @@
 #include <vsmc/vsmc.hpp>
 
-static constexpr std::size_t N = 10000; // Number of particles
-static constexpr std::size_t n = 100;   // Number of data points
-
 using PFStateBase = vsmc::StateMatrix<vsmc::RowMajor, 4, double>;
 
 template <typename T>
@@ -51,13 +48,20 @@ class PFState : public PFStateBase
         if (param == nullptr)
             return;
 
-        obs_x_.resize(n);
-        obs_y_.resize(n);
         std::ifstream data(param);
-        for (std::size_t i = 0; i != n; ++i)
-            data >> obs_x_[i] >> obs_y_[i];
+        while (data.good()) {
+            double x;
+            double y;
+            data >> x >> y;
+            if (data.good()) {
+                obs_x_.push_back(x);
+                obs_y_.push_back(y);
+            }
+        }
         data.close();
     }
+
+    std::size_t data_size() const { return obs_x_.size(); }
 
     private:
     vsmc::Vector<double> obs_x_;
@@ -140,14 +144,19 @@ class PFEval : public vsmc::MonitorEvalTBB<PFState, PFEval>
     }
 };
 
-int main()
+int main(int argc, char **argv)
 {
+    std::size_t N = 10000;
+    if (argc > 1)
+        N = static_cast<std::size_t>(std::atoi(argv[1]));
+
     vsmc::Sampler<PFState> sampler(N, vsmc::Multinomial, 0.5);
     sampler.init(PFInit()).move(PFMove(), false).monitor("pos", 2, PFEval());
 
     vsmc::StopWatch watch;
     watch.start();
-    sampler.initialize(const_cast<char *>("pf.data")).iterate(n - 1);
+    sampler.initialize(const_cast<char *>("pf.data"));
+    sampler.iterate(sampler.particle().value().data_size() - 1);
     watch.stop();
     std::cout << "Time (ms): " << watch.milliseconds() << std::endl;
 
