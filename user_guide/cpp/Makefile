@@ -1,3 +1,5 @@
+.PHONY : all clean
+
 CC := clang
 CFLAGS := $(CFLAGS) -std=c89 -O0 -g
 CFLAGS := $(CFLAGS) -I ../../include
