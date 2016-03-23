@@ -203,6 +203,16 @@ class MonitorEvalC : public Base<StateMatrixC, MonitorEvalC<Base>>
     vsmc_monitor_eval_post_type eval_post_;
 }; // class MonitorEvalC
 
+inline Covariance<double> &cast(const vsmc_covariance &covariance)
+{
+    return *(reinterpret_cast<Covariance<double> *>(covariance.ptr));
+}
+
+inline Covariance<double> *cast(const vsmc_covariance *covariance_ptr)
+{
+    return reinterpret_cast<Covariance<double> *>(covariance_ptr->ptr);
+}
+
 inline ProgramOptionMap &cast(
     const vsmc_program_option_map &program_option_map)
 {

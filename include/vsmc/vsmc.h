@@ -111,6 +111,9 @@ extern "C" {
  * \defgroup C_API_Utility_AlignedMemory Aligned memory allocation
  * \ingroup C_API_Utility
  *
+ * \defgroup C_API_Utility_Covariance Covariance
+ * \ingroup C_API_Utility
+ *
  * \defgroup C_API_Utility_ProgramOption Program option
  * \ingroup C_API_Utility
  *
@@ -1183,6 +1186,34 @@ void vsmc_free(void *ptr);
 
 /** @} */ /* C_API_Utility_AlignedMemory */
 
+/** \addtogroup C_API_Utility_Covariance */
+/** @{ */
+
+typedef struct {
+    void *ptr;
+} vsmc_covariance;
+
+/** \brief `vsmc::cov_chol` */
+int vsmc_cov_chol(int dim, const double *cov, double *chol,
+    vSMCMatrixLayout layout, int upper, int packed);
+
+/** \brief `vsmc::Covariance::Covariance` */
+void vsmc_covariance_malloc(vsmc_covariance *covariance_ptr);
+
+/** \brief `vsmc::Covariance::~Covariance` */
+void vsmc_covariance_free(vsmc_covariance *covariance_ptr);
+
+/** \brief `vsmc::Covariance::operator=` */
+void vsmc_covariance_assign(vsmc_covariance covariance, vsmc_covariance other);
+
+/** \brief `vsmc::Covariance::operator()` */
+void vsmc_covariance_compute(vsmc_covariance covariance,
+    vSMCMatrixLayout layout, int n, int dim, const double *x, const double *w,
+    double *mean, double *cov, vSMCMatrixLayout cov_layout, int cov_upper,
+    int cov_packed);
+
+/** @} */ /* C_API_Utility_Covariance */
+
 /** \addtogroup C_API_Utility_ProgramOption */
 /** @{ */
 
@@ -1244,7 +1275,7 @@ int vsmc_program_option_map_help(vsmc_program_option_map program_option_map);
 void vsmc_program_option_map_silent(
     vsmc_program_option_map program_option_map, int flag);
 
-/** @} */
+/** @} */ /* C_API_Utility_ProgramOption */
 
 /** \addtogroup C_API_Utility_Progress */
 /** @{ */
