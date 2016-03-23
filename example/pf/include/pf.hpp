@@ -221,7 +221,7 @@ inline void pf_run(vsmc::ResampleScheme scheme, const std::string &datafile,
     pf_sampler.close();
 
 #if VSMC_HAS_HDF5
-    vsmc::hdf5store(sampler, pf_h5, "Sampler");
+    vsmc::hdf5store(sampler, pf_h5, "Sampler", false);
 #endif
 }
 
