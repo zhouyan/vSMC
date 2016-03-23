@@ -73,25 +73,36 @@ class InitializeC : public Base<StateMatrixC, InitializeC<Base>>
 
     std::size_t eval_sp(SingleParticleC sp)
     {
-        vsmc_single_particle c_sp = {&sp.state(0), sp.id()};
+        if (eval_sp_ == nullptr)
+            return 0;
 
+        vsmc_single_particle c_sp = {&sp.state(0), sp.id()};
         return static_cast<std::size_t>(eval_sp_(c_sp));
     }
 
     void eval_param(ParticleC &particle, void *param)
     {
+        if (eval_param_ == nullptr)
+            return;
+
         vsmc_particle c_particle = {&particle};
         eval_param_(c_particle, param);
     }
 
     void eval_pre(ParticleC &particle)
     {
+        if (eval_pre_ == nullptr)
+            return;
+
         vsmc_particle c_particle = {&particle};
         eval_pre_(c_particle);
     }
 
     void eval_post(ParticleC &particle)
     {
+        if (eval_post_ == nullptr)
+            return;
+
         vsmc_particle c_particle = {&particle};
         eval_post_(c_particle);
     }
@@ -115,20 +126,28 @@ class MoveC : public Base<StateMatrixC, MoveC<Base>>
 
     std::size_t eval_sp(std::size_t iter, SingleParticleC sp)
     {
-        vsmc_single_particle c_sp = {&sp.state(0), sp.id()};
+        if (eval_sp_ == nullptr)
+            return 0;
 
+        vsmc_single_particle c_sp = {&sp.state(0), sp.id()};
         return static_cast<std::size_t>(
             eval_sp_(static_cast<int>(iter), c_sp));
     }
 
     void eval_pre(std::size_t iter, ParticleC &particle)
     {
+        if (eval_pre_ == nullptr)
+            return;
+
         vsmc_particle c_particle = {&particle};
         eval_pre_(static_cast<int>(iter), c_particle);
     }
 
     void eval_post(std::size_t iter, ParticleC &particle)
     {
+        if (eval_post_ == nullptr)
+            return;
+
         vsmc_particle c_particle = {&particle};
         eval_post_(static_cast<int>(iter), c_particle);
     }
@@ -153,18 +172,27 @@ class MonitorEvalC : public Base<StateMatrixC, MonitorEvalC<Base>>
     void eval_sp(
         std::size_t iter, std::size_t dim, SingleParticleC sp, double *r)
     {
+        if (eval_sp_ == nullptr)
+            return;
+
         vsmc_single_particle c_sp = {&sp.state(0), sp.id()};
         eval_sp_(static_cast<int>(iter), static_cast<int>(dim), c_sp, r);
     }
 
     void eval_pre(std::size_t iter, ParticleC &particle)
     {
+        if (eval_pre_ == nullptr)
+            return;
+
         vsmc_particle c_particle = {&particle};
         eval_pre_(static_cast<int>(iter), c_particle);
     }
 
     void eval_post(std::size_t iter, ParticleC &particle)
     {
+        if (eval_post_ == nullptr)
+            return;
+
         vsmc_particle c_particle = {&particle};
         eval_post_(static_cast<int>(iter), c_particle);
     }

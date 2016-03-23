@@ -69,10 +69,10 @@ void vsmc_sampler_mcmc_seq(vsmc_sampler sampler,
         append != 0);
 }
 
-void vsmc_sampler_monitor_seq(vsmc_sampler sampler, const char *name, int dim,
-    vsmc_monitor_eval_sp_type eval_sp, vsmc_monitor_eval_pre_type eval_pre,
-    vsmc_monitor_eval_post_type eval_post, int record_only,
-    vSMCMonitorStage stage)
+void vsmc_sampler_set_monitor_seq(vsmc_sampler sampler, const char *name,
+    int dim, vsmc_monitor_eval_sp_type eval_sp,
+    vsmc_monitor_eval_pre_type eval_pre, vsmc_monitor_eval_post_type eval_post,
+    int record_only, vSMCMonitorStage stage)
 {
     ::vsmc::cast(sampler).monitor(name, static_cast<std::size_t>(dim),
         ::vsmc::cast<::vsmc::MonitorEvalSEQ>(eval_sp, eval_pre, eval_post),

@@ -1006,7 +1006,7 @@ typedef void (*vsmc_move_eval_pre_type)(int, vsmc_particle);
 typedef void (*vsmc_move_eval_post_type)(int, vsmc_particle);
 
 /** \brief `vsmc::MonitorEvalBase::eval_sp` */
-typedef int (*vsmc_monitor_eval_sp_type)(
+typedef void (*vsmc_monitor_eval_sp_type)(
     int, int, vsmc_single_particle, double *);
 
 /** \brief `vsmc::MonitorEvalBase::eval_pre` */
@@ -1041,10 +1041,10 @@ void vsmc_sampler_mcmc_seq(vsmc_sampler sampler,
     vsmc_move_eval_post_type eval_post, int append);
 
 /** \brief `vsmc::Sampler::monitor` with `vsmc::MonitorEvalSEQ` as input */
-void vsmc_sampler_monitor_seq(vsmc_sampler sampler, const char *name, int dim,
-    vsmc_monitor_eval_sp_type eval_sp, vsmc_monitor_eval_pre_type eval_pre,
-    vsmc_monitor_eval_post_type eval_post, int record_only,
-    vSMCMonitorStage stage);
+void vsmc_sampler_set_monitor_seq(vsmc_sampler sampler, const char *name,
+    int dim, vsmc_monitor_eval_sp_type eval_sp,
+    vsmc_monitor_eval_pre_type eval_pre, vsmc_monitor_eval_post_type eval_post,
+    int record_only, vSMCMonitorStage stage);
 
 /** @} */ /* C_API_SMP_SEQ */
 
@@ -1074,10 +1074,10 @@ void vsmc_sampler_mcmc_omp(vsmc_sampler sampler,
     vsmc_move_eval_post_type eval_post, int append);
 
 /** \brief `vsmc::Sampler::monitor` with `vsmc::MonitorEvalOMP` as input */
-void vsmc_sampler_monitor_omp(vsmc_sampler sampler, const char *name, int dim,
-    vsmc_monitor_eval_sp_type eval_sp, vsmc_monitor_eval_pre_type eval_pre,
-    vsmc_monitor_eval_post_type eval_post, int record_only,
-    vSMCMonitorStage stage);
+void vsmc_sampler_set_monitor_omp(vsmc_sampler sampler, const char *name,
+    int dim, vsmc_monitor_eval_sp_type eval_sp,
+    vsmc_monitor_eval_pre_type eval_pre, vsmc_monitor_eval_post_type eval_post,
+    int record_only, vSMCMonitorStage stage);
 
 /** @} */ /* C_API_SMP_OMP */
 
@@ -1107,10 +1107,10 @@ void vsmc_sampler_mcmc_tbb(vsmc_sampler sampler,
     vsmc_move_eval_post_type eval_post, int append);
 
 /** \brief `vsmc::Sampler::monitor` with `vsmc::MonitorEvalTBB` as input */
-void vsmc_sampler_monitor_tbb(vsmc_sampler sampler, const char *name, int dim,
-    vsmc_monitor_eval_sp_type eval_sp, vsmc_monitor_eval_pre_type eval_pre,
-    vsmc_monitor_eval_post_type eval_post, int record_only,
-    vSMCMonitorStage stage);
+void vsmc_sampler_set_monitor_tbb(vsmc_sampler sampler, const char *name,
+    int dim, vsmc_monitor_eval_sp_type eval_sp,
+    vsmc_monitor_eval_pre_type eval_pre, vsmc_monitor_eval_post_type eval_post,
+    int record_only, vSMCMonitorStage stage);
 
 /** @} */ /* C_API_SMP_TBB */
 
