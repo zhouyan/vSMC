@@ -656,6 +656,73 @@ void vsmc_monitor_free(vsmc_monitor *monitor_ptr);
 /** \brief `vsmc::Monitor::operator=` */
 void vsmc_monitor_assign(vsmc_monitor dst, vsmc_monitor src);
 
+/** \brief `vsmc::Monitor::dim` */
+int vsmc_monitor_dim(vsmc_monitor monitor);
+
+/** \brief `vsmc::Monitor::record_only` */
+int vsmc_monitor_record_only(vsmc_monitor monitor);
+
+/** \brief `vsmc::Monitor::stage` */
+vSMCMonitorStage vsmc_monitor_stage(vsmc_monitor monitor);
+
+/** \brief `vsmc::Monitor::iter_size` */
+int vsmc_monitor_iter_size(vsmc_monitor monitor);
+
+/** \brief `vsmc::Monitor::reserve` */
+void vsmc_monitor_reserve(vsmc_monitor monitor, int num);
+
+/** \brief `vsmc::Monitor::empty` */
+int vsmc_monitor_empty(vsmc_monitor monitor);
+
+/** \brief `vsmc::Monitor::set_name` */
+void vsmc_monitor_set_name(vsmc_monitor monitor, int id, const char *name);
+
+/** \brief `vsmc::Monitor::get_name` */
+int vsmc_monitor_get_name(vsmc_monitor monitor, int id, char *name);
+
+/** \brief `vsmc::Monitor::index` */
+int vsmc_monitor_index(vsmc_monitor monitor, int iter);
+
+/** \brief `vsmc::Monitor::record`
+ *
+ * \details
+ * If `iter < 0`, then call `monitor.record(id)`, otherwise call
+ * `monitor.record(id, iter)`; */
+double vsmc_monitor_record(vsmc_monitor monitor, int id, int iter);
+
+/** \brief `vsmc::Monitor::read_index` */
+void vsmc_monitor_read_index(vsmc_monitor monitor, int *fist);
+
+/** \brief `vsmc::Monitor::read_record` */
+void vsmc_monitor_read_record(vsmc_monitor monitor, int id, double *first);
+
+/** \brief `vsmc::Monitor::read_record_list` */
+void vsmc_monitor_read_record_list(vsmc_monitor monitor, double *const *first);
+
+/** \brief `vsmc::Monitor::read_record_matrix` */
+void vsmc_monitor_read_record_matrix(
+    vsmc_monitor monitor, vSMCMatrixLayout layout, double *first);
+
+/** \brief `vsmc::Monitor::set_eval` */
+void vsmc_monitor_set_eval(
+    vsmc_monitor monitor, vsmc_monitor_eval_type new_eval);
+
+/** \brief `vsmc::Monitor::eval` */
+void vsmc_monitor_eval(vsmc_monitor monitor, int iter, vsmc_particle particle,
+    vSMCMonitorStage stage);
+
+/** \brief `vsmc::Monitor::clear` */
+void vsmc_monitor_clear(vsmc_monitor monitor);
+
+/** \brief `vsmc::Monitor::recording` */
+int vsmc_monitor_recording(vsmc_monitor monitor);
+
+/** \brief `vsmc::Monitor::turn_on` */
+void vsmc_monitor_turn_on(vsmc_monitor monitor);
+
+/** \brief `vsmc::Monitor::turn_off` */
+void vsmc_monitor_turn_off(vsmc_monitor monitor);
+
 /** @} */ /* C_API_Core_Monitor */
 
 /** \defgroup C_API_Core_Sampler  `vsmc::Sampler` */

@@ -38,8 +38,6 @@
 namespace vsmc
 {
 
-using RNGC = RNG;
-
 using StateMatrixCBase = StateMatrix<RowMajor, Dynamic, double>;
 
 class StateMatrixC : public StateMatrixCBase
@@ -56,14 +54,14 @@ using SamplerC = Sampler<StateMatrixC>;
 
 using MonitorC = Monitor<StateMatrixC>;
 
-inline RNGC &cast(const vsmc_rng &rng)
+inline RNG &cast(const vsmc_rng &rng)
 {
-    return *(reinterpret_cast<RNGC *>(rng.ptr));
+    return *(reinterpret_cast<RNG *>(rng.ptr));
 }
 
-inline RNGC *cast(const vsmc_rng *rng_ptr)
+inline RNG *cast(const vsmc_rng *rng_ptr)
 {
-    return reinterpret_cast<RNGC *>(rng_ptr->ptr);
+    return reinterpret_cast<RNG *>(rng_ptr->ptr);
 }
 
 inline StateMatrixC &cast(const vsmc_state_matrix &state_matrix)
@@ -114,6 +112,41 @@ inline SamplerC &cast(const vsmc_sampler &sampler)
 inline SamplerC *cast(const vsmc_sampler *sampler_ptr)
 {
     return reinterpret_cast<SamplerC *>(sampler_ptr->ptr);
+}
+
+inline ParticleC::resample_type cast(vsmc_particle_resample_type fptr)
+{
+    return [fptr](
+        std::size_t M, std::size_t N, RNG &rng, const double *w, int *rep) {
+        vsmc_rng c_rng = {&rng};
+        fptr(static_cast<int>(M), static_cast<int>(N), c_rng, w, rep);
+    };
+}
+
+inline MonitorC::eval_type cast(vsmc_monitor_eval_type fptr)
+{
+    return [fptr](
+        std::size_t iter, std::size_t dim, ParticleC &particle, double *r) {
+        vsmc_particle c_particle = {&particle};
+        fptr(static_cast<int>(iter), static_cast<int>(dim), c_particle, r);
+    };
+}
+
+inline SamplerC::init_type cast(vsmc_sampler_init_type fptr)
+{
+    return [fptr](ParticleC &particle, void *param) {
+        vsmc_particle c_particle = {&particle};
+        return static_cast<std::size_t>(fptr(c_particle, param));
+    };
+}
+
+inline SamplerC::move_type cast(vsmc_sampler_move_type fptr)
+{
+    return [fptr](std::size_t iter, ParticleC &particle) {
+        vsmc_particle c_particle = {&particle};
+        return static_cast<std::size_t>(
+            fptr(static_cast<int>(iter), c_particle));
+    };
 }
 
 } // namespace vsmc

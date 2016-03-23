@@ -168,12 +168,13 @@ class Particle
 
     /// \brief Performing resampling if ESS/N < threshold
     ///
-    /// \param op The resampling operation funcitor
+    /// \param op The resampling operation functor
     /// \param threshold The threshold of ESS/N below which resampling will be
     /// performed
     ///
     /// \return true if resampling was performed
-    bool resample(const resample_type &op, double threshold)
+    template <typename ResampleType>
+    bool resample(ResampleType &&op, double threshold)
     {
         std::size_t N = static_cast<std::size_t>(weight_.resample_size());
         bool resampled = weight_.ess() < threshold * N;
@@ -189,7 +190,6 @@ class Particle
                 Vector<size_type> rep(N);
                 Vector<size_type> idx(N);
 #endif // VSMC_USE_TBB
-
                 op(N, N, rng_, rwptr, rep.data());
                 resample_trans_rep_index(N, N, rep.data(), idx.data());
                 value_.copy(N, idx.data());

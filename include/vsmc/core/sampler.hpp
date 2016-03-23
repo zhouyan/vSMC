@@ -827,8 +827,9 @@ class Sampler
                 std::size_t md = m.second->dim();
                 if (m.first != m.second->iter_size() &&
                     iter == m.second->index(m.first)) {
-                    first = std::copy_n(
-                        m.second->record_data(m.first++), md, first);
+                    for (std::size_t id = 0; id != md; ++id, ++first)
+                        *first = m.second->record(id, m.first);
+                    ++m.first;
                 } else {
                     first = std::fill_n(first, md, missing_data);
                 }
