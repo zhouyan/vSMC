@@ -32,12 +32,12 @@
 #include "libvsmc.hpp"
 
 #define VSMC_DEFINE_C_API_RESAMPLE(Name, name)                                \
-    void vsmc_resample_##name(int m, int n, vsmc_rng *rng_ptr,                \
-        const double *weight, int *replication)                               \
+    void vsmc_resample_##name(                                                \
+        int m, int n, vsmc_rng rng, const double *weight, int *replication)   \
     {                                                                         \
         ::vsmc::Resample##Name resample;                                      \
         resample(static_cast<std::size_t>(m), static_cast<std::size_t>(n),    \
-            ::vsmc::cast(rng_ptr), weight, replication);                      \
+            ::vsmc::cast(rng), weight, replication);                          \
     }
 
 extern "C" {

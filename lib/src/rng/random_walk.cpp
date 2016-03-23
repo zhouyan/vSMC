@@ -33,9 +33,9 @@
 
 extern "C" {
 
-int vsmc_random_walk(vsmc_rng *rng_ptr, int dim, double *x, double *ltx,
+int vsmc_random_walk(vsmc_rng rng, int dim, double *x, double *ltx,
     double (*log_target)(int, const double *),
-    double (*proposal)(vsmc_rng *, int, const double *, double *))
+    double (*proposal)(vsmc_rng, int, const double *, double *))
 {
     ::vsmc::RandomWalk<double, ::vsmc::Dynamic> rw(
         static_cast<std::size_t>(dim));
@@ -43,17 +43,16 @@ int vsmc_random_walk(vsmc_rng *rng_ptr, int dim, double *x, double *ltx,
     auto lt = [log_target, dim](
         std::size_t, const double *lx) { return log_target(dim, lx); };
 
-    auto prop = [proposal, rng_ptr, dim](::vsmc::RNG &, std::size_t,
-        const double *px,
-        double *py) { return proposal(rng_ptr, dim, px, py); };
+    auto prop = [proposal, rng, dim](::vsmc::RNG &, std::size_t,
+        const double *px, double *py) { return proposal(rng, dim, px, py); };
 
-    return static_cast<int>(rw(::vsmc::cast(rng_ptr), x, ltx, lt, prop));
+    return static_cast<int>(rw(::vsmc::cast(rng), x, ltx, lt, prop));
 }
 
-int vsmc_random_walk_g(vsmc_rng *rng_ptr, int dim_x, int dim_g, double *x,
+int vsmc_random_walk_g(vsmc_rng rng, int dim_x, int dim_g, double *x,
     double *ltx, double *g,
     double (*log_target)(int, int, const double *, double *),
-    double (*proposal)(vsmc_rng *, int, const double *, double *))
+    double (*proposal)(vsmc_rng, int, const double *, double *))
 {
     ::vsmc::RandomWalkG<double, vsmc::Dynamic, ::vsmc::Dynamic> rw(
         static_cast<std::size_t>(dim_x), static_cast<std::size_t>(dim_g));
@@ -62,28 +61,27 @@ int vsmc_random_walk_g(vsmc_rng *rng_ptr, int dim_x, int dim_g, double *x,
         const double *lx,
         double *lg) { return log_target(dim_x, dim_g, lx, lg); };
 
-    auto prop = [proposal, rng_ptr, dim_x](::vsmc::RNG &, std::size_t,
-        const double *px,
-        double *py) { return proposal(rng_ptr, dim_x, px, py); };
+    auto prop = [proposal, rng, dim_x](::vsmc::RNG &, std::size_t,
+        const double *px, double *py) { return proposal(rng, dim_x, px, py); };
 
-    return static_cast<int>(rw(::vsmc::cast(rng_ptr), x, ltx, g, lt, prop));
+    return static_cast<int>(rw(::vsmc::cast(rng), x, ltx, g, lt, prop));
 }
 
-double vsmc_normal_proposal(vsmc_rng *rng_ptr, int, const double *x, double *y,
+double vsmc_normal_proposal(vsmc_rng rng, int, const double *x, double *y,
     double stddev, double a, double b)
 {
     ::vsmc::NormalProposal<double> prop(stddev, a, b);
 
-    return prop(::vsmc::cast(rng_ptr), 1, x, y);
+    return prop(::vsmc::cast(rng), 1, x, y);
 }
 
-double vsmc_normal_mv_proposal(vsmc_rng *rng_ptr, int dim, const double *x,
+double vsmc_normal_mv_proposal(vsmc_rng rng, int dim, const double *x,
     double *y, const double *chol, const double *a, const double *b)
 {
     ::vsmc::NormalMVProposal<double, vsmc::Dynamic> prop(
         static_cast<std::size_t>(dim), chol, a, b);
 
-    return prop(::vsmc::cast(rng_ptr), static_cast<std::size_t>(dim), x, y);
+    return prop(::vsmc::cast(rng), static_cast<std::size_t>(dim), x, y);
 }
 
 } // extern "C"

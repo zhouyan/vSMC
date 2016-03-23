@@ -43,61 +43,53 @@ void vsmc_weight_malloc(vsmc_weight *weight_ptr, int n)
 void vsmc_weight_free(vsmc_weight *weight_ptr)
 {
     ::vsmc::AlignedAllocator<::vsmc::Weight>::deallocate(
-        &::vsmc::cast(weight_ptr), 1);
+        ::vsmc::cast(weight_ptr), 1);
     weight_ptr->ptr = nullptr;
 }
 
-void vsmc_weight_assign(vsmc_weight *dst, const vsmc_weight *src)
+void vsmc_weight_assign(vsmc_weight dst, vsmc_weight src)
 {
     ::vsmc::cast(dst) = ::vsmc::cast(src);
 }
 
-int vsmc_weight_size(const vsmc_weight *weight_ptr)
+int vsmc_weight_size(vsmc_weight weight)
 {
-    return static_cast<int>(::vsmc::cast(weight_ptr).size());
+    return static_cast<int>(::vsmc::cast(weight).size());
 }
 
-double vsmc_weight_ess(const vsmc_weight *weight_ptr)
+double vsmc_weight_ess(vsmc_weight weight)
 {
-    return ::vsmc::cast(weight_ptr).ess();
+    return ::vsmc::cast(weight).ess();
 }
 
-const double *vsmc_weight_data(const vsmc_weight *weight_ptr)
+void vsmc_weight_set_equal(vsmc_weight weight)
 {
-    return ::vsmc::cast(weight_ptr).data();
+    ::vsmc::cast(weight).set_equal();
 }
 
-void vsmc_weight_set_equal(vsmc_weight *weight_ptr)
+void vsmc_weight_set(vsmc_weight weight, const double *first, int stride)
 {
-    ::vsmc::cast(weight_ptr).set_equal();
+    ::vsmc::cast(weight).set(first, stride);
 }
 
-void vsmc_weight_set(vsmc_weight *weight_ptr, const double *first, int stride)
+void vsmc_weight_mul(vsmc_weight weight, const double *first, int stride)
 {
-    ::vsmc::cast(weight_ptr).set(first, stride);
+    ::vsmc::cast(weight).mul(first, stride);
 }
 
-void vsmc_weight_mul(vsmc_weight *weight_ptr, const double *first, int stride)
+void vsmc_weight_set_log(vsmc_weight weight, const double *first, int stride)
 {
-    ::vsmc::cast(weight_ptr).mul(first, stride);
+    ::vsmc::cast(weight).set_log(first, stride);
 }
 
-void vsmc_weight_set_log(
-    vsmc_weight *weight_ptr, const double *first, int stride)
+void vsmc_weight_add_log(vsmc_weight weight, const double *first, int stride)
 {
-    ::vsmc::cast(weight_ptr).set_log(first, stride);
+    ::vsmc::cast(weight).add_log(first, stride);
 }
 
-void vsmc_weight_add_log(
-    vsmc_weight *weight_ptr, const double *first, int stride)
+int vsmc_weight_draw(vsmc_weight weight, vsmc_rng rng)
 {
-    ::vsmc::cast(weight_ptr).add_log(first, stride);
-}
-
-int vsmc_weight_draw(vsmc_weight *weight_ptr, vsmc_rng *rng_ptr)
-{
-    return static_cast<int>(
-        ::vsmc::cast(weight_ptr).draw(::vsmc::cast(rng_ptr)));
+    return static_cast<int>(::vsmc::cast(weight).draw(::vsmc::cast(rng)));
 }
 
 } // extern "C"

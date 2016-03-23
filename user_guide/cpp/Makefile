@@ -20,10 +20,10 @@ pf_seq : pf_seq.cpp
 	$(CXX) $(CXXFLAGS) -o pf_seq pf_seq.cpp $(LDFLAGS)
 
 pf_tbb_c : pf_tbb.c
-	$(CC) $(CFLAGS) -o pf_tbb_c pf_tbb.c $(LDFLAGS) -lvsmc -lc++
+	$(CC) $(CFLAGS) -o pf_tbb_c pf_tbb.c $(LDFLAGS) -lvsmc
 
 pf_seq_c : pf_seq.c
-	$(CC) $(CFLAGS) -o pf_seq_c pf_seq.c $(LDFLAGS) -lvsmc -lc++
+	$(CC) $(CFLAGS) -o pf_seq_c pf_seq.c $(LDFLAGS) -lvsmc
 
 program_option : program_option.cpp
 	$(CXX) $(CXXFLAGS) -o program_option program_option.cpp $(LDFLAGS)

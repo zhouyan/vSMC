@@ -45,67 +45,64 @@ void vsmc_state_matrix_malloc(
 void vsmc_state_matrix_free(vsmc_state_matrix *state_matrix_ptr)
 {
     ::vsmc::AlignedAllocator<::vsmc::StateMatrixC>::deallocate(
-        &::vsmc::cast(state_matrix_ptr), 1);
+        ::vsmc::cast(state_matrix_ptr), 1);
     state_matrix_ptr->ptr = nullptr;
 }
 
-void vsm_state_matrix_assign(
-    vsmc_state_matrix *dst, const vsmc_state_matrix *src)
+void vsm_state_matrix_assign(vsmc_state_matrix dst, vsmc_state_matrix src)
 {
     ::vsmc::cast(dst) = ::vsmc::cast(src);
 }
 
-int vsmc_state_matrix_dim(const vsmc_state_matrix *state_matrix_ptr)
+int vsmc_state_matrix_dim(vsmc_state_matrix state_matrix)
 {
-    return static_cast<int>(::vsmc::cast(state_matrix_ptr).dim());
+    return static_cast<int>(::vsmc::cast(state_matrix).dim());
 }
 
-void vsmc_state_matrix_resize_dim(vsmc_state_matrix *state_matrix_ptr, int n)
+void vsmc_state_matrix_resize_dim(vsmc_state_matrix state_matrix, int n)
 {
-    ::vsmc::cast(state_matrix_ptr).resize_dim(static_cast<std::size_t>(n));
+    ::vsmc::cast(state_matrix).resize_dim(static_cast<std::size_t>(n));
 }
 
-int vsmc_state_matrix_size(const vsmc_state_matrix *state_matrix_ptr)
+int vsmc_state_matrix_size(vsmc_state_matrix state_matrix)
 {
-    return static_cast<int>(::vsmc::cast(state_matrix_ptr).size());
+    return static_cast<int>(::vsmc::cast(state_matrix).size());
 }
 
-double vsmc_state_matrix_get(
-    const vsmc_state_matrix *state_matrix_ptr, int id, int pos)
+double vsmc_state_matrix_get(vsmc_state_matrix state_matrix, int id, int pos)
 {
-    return ::vsmc::cast(state_matrix_ptr)
+    return ::vsmc::cast(state_matrix)
         .state(static_cast<std::size_t>(id), static_cast<std::size_t>(pos));
 }
 
 void vsmc_state_matrix_set(
-    vsmc_state_matrix *state_matrix_ptr, int id, int pos, double s)
+    vsmc_state_matrix state_matrix, int id, int pos, double state)
 {
-    ::vsmc::cast(state_matrix_ptr)
+    ::vsmc::cast(state_matrix)
         .state(static_cast<std::size_t>(id), static_cast<std::size_t>(pos)) =
-        s;
+        state;
 }
 
-double *vsmc_state_matrix_data(vsmc_state_matrix *state_matrix_ptr)
+double *vsmc_state_matrix_data(vsmc_state_matrix state_matrix)
 {
-    return ::vsmc::cast(state_matrix_ptr).data();
+    return ::vsmc::cast(state_matrix).data();
 }
 
-double *vsmc_state_matrix_row_data(vsmc_state_matrix *state_matrix_ptr, int id)
+double *vsmc_state_matrix_row_data(vsmc_state_matrix state_matrix, int id)
 {
-    return ::vsmc::cast(state_matrix_ptr)
-        .row_data(static_cast<std::size_t>(id));
+    return ::vsmc::cast(state_matrix).row_data(static_cast<std::size_t>(id));
 }
 
 void vsmc_state_matrix_copy(
-    vsmc_state_matrix *state_matrix_ptr, int N, const int *index)
+    vsmc_state_matrix state_matrix, int N, const int *index)
 {
-    ::vsmc::cast(state_matrix_ptr).copy(static_cast<std::size_t>(N), index);
+    ::vsmc::cast(state_matrix).copy(static_cast<std::size_t>(N), index);
 }
 
 void vsmc_state_matrix_copy_particle(
-    vsmc_state_matrix *state_matrix_ptr, int src, int dst)
+    vsmc_state_matrix state_matrix, int src, int dst)
 {
-    ::vsmc::cast(state_matrix_ptr)
+    ::vsmc::cast(state_matrix)
         .copy_particle(
             static_cast<std::size_t>(src), static_cast<std::size_t>(dst));
 }

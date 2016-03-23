@@ -39,63 +39,71 @@ void vsmc_particle_malloc(vsmc_particle *particle_ptr, int n, int dim)
     new (ptr)::vsmc::ParticleC(n);
     ptr->value().resize_dim(static_cast<std::size_t>(dim));
     particle_ptr->ptr = ptr;
-    particle_ptr->value.ptr = &ptr->value();
-    particle_ptr->weight.ptr = &ptr->weight();
 }
 
 void vsmc_particle_free(vsmc_particle *particle_ptr)
 {
     ::vsmc::AlignedAllocator<::vsmc::ParticleC>::deallocate(
-        &::vsmc::cast(particle_ptr), 1);
+        ::vsmc::cast(particle_ptr), 1);
     particle_ptr->ptr = nullptr;
 }
 
-void vsmc_particle_assign(vsmc_particle *dst, const vsmc_particle *src)
+void vsmc_particle_assign(vsmc_particle dst, vsmc_particle src)
 {
     ::vsmc::cast(dst) = ::vsmc::cast(src);
 }
 
 void vsmc_particle_clone(
-    vsmc_particle *particle_ptr, const vsmc_particle *other, int retain_rng)
+    vsmc_particle particle, vsmc_particle other, int retain_rng)
 {
-    ::vsmc::cast(particle_ptr).clone(::vsmc::cast(other), retain_rng != 0);
+    ::vsmc::cast(particle).clone(::vsmc::cast(other), retain_rng != 0);
 }
 
-int vsmc_particle_size(const vsmc_particle *particle_ptr)
+int vsmc_particle_size(vsmc_particle particle)
 {
-    return static_cast<int>(::vsmc::cast(particle_ptr).size());
+    return ::vsmc::cast(particle).size();
 }
 
-vsmc_rng vsmc_particle_rng(vsmc_particle *particle_ptr, int id)
+vsmc_state_matrix vsmc_particle_value(vsmc_particle particle)
 {
-    vsmc_rng rng;
-    rng.ptr = id > 0 ? &::vsmc::cast(particle_ptr).rng(id) :
-                       &::vsmc::cast(particle_ptr).rng();
+    vsmc_state_matrix value = {&::vsmc::cast(particle).value()};
+
+    return value;
+}
+
+vsmc_weight vsmc_particle_weight(vsmc_particle particle)
+{
+    vsmc_weight weight = {&::vsmc::cast(particle).weight()};
+
+    return weight;
+}
+
+vsmc_rng vsmc_particle_rng(vsmc_particle particle, int id)
+{
+    vsmc_rng rng = {&::vsmc::cast(particle).rng(id)};
 
     return rng;
 }
 
-vsmc_single_particle vsmc_particle_sp(vsmc_particle *particle_ptr, int id)
+vsmc_single_particle vsmc_particle_sp(vsmc_particle particle, int id)
 {
-    vsmc_single_particle sp;
-    sp.state = ::vsmc::cast(particle_ptr)
-                   .value()
-                   .row_data(static_cast<std::size_t>(id));
-    sp.id = id;
+    vsmc_single_particle sp = {
+        ::vsmc::cast(particle).value().row_data(static_cast<std::size_t>(id)),
+        id};
 
     return sp;
 }
 
-void vsmc_particle_resample(vsmc_particle *particle_ptr,
+void vsmc_particle_resample(const vsmc_particle particle,
     vsmc_particle_resample_type op, double threshold)
 {
     auto cpp_op = [op](std::size_t M, std::size_t N, ::vsmc::RNG &cpp_rng,
         const double *weight, int *rep) {
         vsmc_rng rng = {&cpp_rng};
-        op(static_cast<int>(M), static_cast<int>(N), &rng, weight, rep);
+        op(static_cast<int>(M), static_cast<int>(N), rng, weight, rep);
     };
 
-    ::vsmc::cast(particle_ptr).resample(cpp_op, threshold);
+    ::vsmc::cast(particle).resample(cpp_op, threshold);
 }
 
 } // extern "C"
