@@ -82,19 +82,25 @@ class Weight
     const double *resample_data() const { return data_.data(); }
 
     template <typename OutputIter>
-    void read_weight(OutputIter first) const
+    OutputIter read_weight(OutputIter first) const
     {
-        std::copy(data_.begin(), data_.end(), first);
+        return std::copy(data_.begin(), data_.end(), first);
     }
 
     template <typename RandomIter>
-    void read_weight(RandomIter first, int stride) const
+    RandomIter read_weight(RandomIter first, int stride) const
     {
         for (size_type i = 0; i != size(); ++i, first += stride)
             *first = data_[i];
+
+        return first;
     }
 
-    void read_resample_weight(double *first) const { read_weight(first); }
+    template <typename OutputIter>
+    OutputIter read_resample_weight(OutputIter first) const
+    {
+        return read_weight(first);
+    }
 
     void set_equal()
     {
@@ -114,11 +120,12 @@ class Weight
     {
         if (stride == 1) {
             set(first);
-        } else {
-            for (size_type i = 0; i != size(); ++i, first += stride)
-                data_[i] = *first;
-            post_set();
+            return;
         }
+
+        for (size_type i = 0; i != size(); ++i, first += stride)
+            data_[i] = *first;
+        post_set();
     }
 
     template <typename InputIter>
@@ -142,11 +149,12 @@ class Weight
     {
         if (stride == 1) {
             mul(first);
-        } else {
-            for (size_type i = 0; i != size(); ++i, first += stride)
-                data_[i] *= *first;
-            post_set();
+            return;
         }
+
+        for (size_type i = 0; i != size(); ++i, first += stride)
+            data_[i] *= *first;
+        post_set();
     }
 
     template <typename InputIter>
@@ -161,11 +169,12 @@ class Weight
     {
         if (stride == 1) {
             set_log(first);
-        } else {
-            for (size_type i = 0; i != size(); ++i, first += stride)
-                data_[i] = *first;
-            post_set_log();
+            return;
         }
+
+        for (size_type i = 0; i != size(); ++i, first += stride)
+            data_[i] = *first;
+        post_set_log();
     }
 
     template <typename InputIter>
@@ -191,12 +200,13 @@ class Weight
     {
         if (stride == 1) {
             add_log(first);
-        } else {
-            log(size(), data_.data(), data_.data());
-            for (size_type i = 0; i != size(); ++i, first += stride)
-                data_[i] += *first;
-            post_set_log();
+            return;
         }
+
+        log(size(), data_.data(), data_.data());
+        for (size_type i = 0; i != size(); ++i, first += stride)
+            data_[i] += *first;
+        post_set_log();
     }
 
     template <typename URNG>
@@ -249,11 +259,11 @@ class Weight
 /// \ingroup Core
 ///
 /// \details
-/// This class provides all the interfaces of Weight, while they do nothing
-/// at all and the class cost no memory usage. This is primarily to be used in
-/// algorithms where weights are irrelevant. Any attempt of using member
-/// functions of this class will not result in compile time or runtime errors,
-/// but the results might not be what one will be expecting.
+/// This class provides all the interfaces of Weight, while they do nothing at
+/// all and the class cost no memory space. This is primarily to be used in
+/// algorithms where weights are irrelevant or managed outside the sampler for
+/// any reason. Any attempt of using methods of this class will not result in
+/// compile time or runtime errors.
 class WeightNull
 {
     public:
@@ -281,7 +291,10 @@ class WeightNull
     {
     }
 
-    void read_resample_weight(double *) const {}
+    template <typename OutputIter>
+    void read_resample_weight(OutputIter) const
+    {
+    }
 
     void set_equal() {}
 

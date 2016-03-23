@@ -102,8 +102,14 @@ int vsmc_monitor_get_name(vsmc_monitor monitor, int id, char *name)
 
 int vsmc_monitor_index(vsmc_monitor monitor, int iter)
 {
-    return static_cast<int>(
-        ::vsmc::cast(monitor).index(static_cast<std::size_t>(iter)));
+    return iter < 0 ? static_cast<int>(::vsmc::cast(monitor).index()) :
+                      static_cast<int>(::vsmc::cast(monitor).index(
+                          static_cast<std::size_t>(iter)));
+}
+
+int *vsmc_monitor_read_index(vsmc_monitor monitor, int *first)
+{
+    return ::vsmc::cast(monitor).read_index(first);
 }
 
 double vsmc_monitor_record(vsmc_monitor monitor, int id, int iter)
@@ -114,25 +120,22 @@ double vsmc_monitor_record(vsmc_monitor monitor, int id, int iter)
             static_cast<std::size_t>(id), static_cast<std::size_t>(iter));
 }
 
-void vsmc_monitor_read_index(vsmc_monitor monitor, int *first)
+double *vsmc_monitor_read_record(vsmc_monitor monitor, int id, double *first)
 {
-    ::vsmc::cast(monitor).read_index(first);
+    return ::vsmc::cast(monitor).read_record(
+        static_cast<std::size_t>(id), first);
 }
 
-void vsmc_monitor_read_record(vsmc_monitor monitor, int id, double *first)
+double *const *vsmc_monitor_read_record_list(
+    vsmc_monitor monitor, double *const *first)
 {
-    ::vsmc::cast(monitor).read_record(static_cast<std::size_t>(id), first);
+    return ::vsmc::cast(monitor).read_record_list(first);
 }
 
-void vsmc_monitor_read_record_list(vsmc_monitor monitor, double *const *first)
-{
-    ::vsmc::cast(monitor).read_record_list(first);
-}
-
-void vsmc_monitor_read_record_matrix(
+double *vsmc_monitor_read_record_matrix(
     vsmc_monitor monitor, vSMCMatrixLayout layout, double *first)
 {
-    ::vsmc::cast(monitor).read_record_matrix(
+    return ::vsmc::cast(monitor).read_record_matrix(
         static_cast<::vsmc::MatrixLayout>(layout), first);
 }
 

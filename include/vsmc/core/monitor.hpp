@@ -122,6 +122,15 @@ class Monitor
         return name_[id];
     }
 
+    /// \brief Get the latest iteration index of the sampler
+    std::size_t index() const
+    {
+        std::size_t iter = iter_size() > 0 ? iter_size() - 1 : iter_size();
+        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ITER(index);
+
+        return index_[iter];
+    }
+
     /// \brief Get the iteration index of the sampler of a given Monitor
     /// iteration
     ///
@@ -138,11 +147,18 @@ class Monitor
         return index_[iter];
     }
 
+    /// \brief Read the index history through an output iterator
+    template <typename OutputIter>
+    OutputIter read_index(OutputIter first) const
+    {
+        return std::copy(index_.begin(), index_.end(), first);
+    }
+
     /// \brief Get the latest Monte Carlo integration record of a given
     /// variable
     double record(std::size_t id) const
     {
-        std::size_t iter = iter_size() ? iter_size() - 1 : iter_size();
+        std::size_t iter = iter_size() > 0 ? iter_size() - 1 : iter_size();
         VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(record);
         VSMC_RUNTIME_ASSERT_CORE_MONITOR_ITER(record);
 
@@ -159,22 +175,17 @@ class Monitor
         return record_[iter * dim_ + id];
     }
 
-    /// \brief Read the index history through an output iterator
-    template <typename OutputIter>
-    void read_index(OutputIter first) const
-    {
-        std::copy(index_.begin(), index_.end(), first);
-    }
-
     /// \brief Read the record history for a given variable through an output
     /// iterator
     template <typename OutputIter>
-    void read_record(std::size_t id, OutputIter first) const
+    OutputIter read_record(std::size_t id, OutputIter first) const
     {
         const std::size_t N = iter_size();
         const double *riter = record_.data() + id;
         for (std::size_t i = 0; i != N; ++i, ++first, riter += dim_)
             *first = *riter;
+
+        return first;
     }
 
     /// \brief Read the record history of all variables as a list through an
@@ -182,19 +193,21 @@ class Monitor
     ///
     /// \param first An iterator whose value type is itself an output iterator
     template <typename OutputIterIter>
-    void read_record_list(OutputIterIter first) const
+    OutputIterIter read_record_list(OutputIterIter first) const
     {
         for (std::size_t id = 0; id != dim_; ++id, ++first)
             read_record(id, *first);
+
+        return first;
     }
 
     /// \brief Read the record history of all variables as a matrix through an
     /// output iterator
     template <typename OutputIter>
-    void read_record_matrix(MatrixLayout layout, OutputIter first) const
+    OutputIter read_record_matrix(MatrixLayout layout, OutputIter first) const
     {
         if (layout == RowMajor)
-            std::copy(record_.begin(), record_.end(), first);
+            return std::copy(record_.begin(), record_.end(), first);
 
         if (layout == ColMajor) {
             const std::size_t N = iter_size();
@@ -204,6 +217,7 @@ class Monitor
                     *first = *riter;
             }
         }
+        return first;
     }
 
     /// \brief Set a new evaluation object of type eval_type

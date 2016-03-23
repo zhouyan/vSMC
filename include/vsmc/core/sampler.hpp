@@ -285,9 +285,9 @@ class Sampler
 
     /// \brief Read sampler size history through an output iterator
     template <typename OutputIter>
-    void read_size_history(OutputIter first) const
+    OutputIter read_size_history(OutputIter first) const
     {
-        std::copy(size_history_.begin(), size_history_.end(), first);
+        return std::copy(size_history_.begin(), size_history_.end(), first);
     }
 
     /// \brief Get ESS of a given iteration, initialization count as iter 0
@@ -295,9 +295,9 @@ class Sampler
 
     /// \brief Read ESS history through an output iterator
     template <typename OutputIter>
-    void read_ess_history(OutputIter first) const
+    OutputIter read_ess_history(OutputIter first) const
     {
-        std::copy(ess_history_.begin(), ess_history_.end(), first);
+        return std::copy(ess_history_.begin(), ess_history_.end(), first);
     }
 
     /// \brief Get resampling indicator of a given iteration
@@ -308,9 +308,10 @@ class Sampler
 
     /// \brief Read resampling indicator history through an output iterator
     template <typename OutputIter>
-    void read_resampled_history(OutputIter first) const
+    OutputIter read_resampled_history(OutputIter first) const
     {
-        std::copy(resampled_history_.begin(), resampled_history_.end(), first);
+        return std::copy(
+            resampled_history_.begin(), resampled_history_.end(), first);
     }
 
     /// \brief Get the acceptance count of a given move id and the iteration
@@ -322,9 +323,9 @@ class Sampler
     /// \brief Read acceptance count history for a given move id through an
     /// output it ertor
     template <typename OutputIter>
-    void read_accept_history(std::size_t id, OutputIter first) const
+    OutputIter read_accept_history(std::size_t id, OutputIter first) const
     {
-        std::copy(
+        return std::copy(
             accept_history_[id].begin(), accept_history_[id].end(), first);
     }
 
@@ -333,30 +334,38 @@ class Sampler
     ///
     /// \param first An iterator whose value type is itself an output iterator
     template <typename OutputIterIter>
-    void read_accept_history_list(OutputIterIter first) const
+    OutputIterIter read_accept_history_list(OutputIterIter first) const
     {
         for (std::size_t id = 0; id != accept_size(); ++id, ++first)
             read_accept_history(id, *first);
+
+        return first;
     }
 
     /// \brief Read the record history of all moves as a matrix through an
     /// output iterator
     template <typename OutputIter>
-    void read_accept_history_matrix(
+    OutputIter read_accept_history_matrix(
         MatrixLayout layout, OutputIter first) const
     {
         if (layout == RowMajor) {
-            for (std::size_t iter = 0; iter != iter_size(); ++iter)
-                for (std::size_t id = 0; id != accept_size(); ++id, ++first)
-                    *first = accept_history(id, iter);
+            for (std::size_t iter = 0; iter != iter_size(); ++iter) {
+                for (std::size_t id = 0; id != accept_size(); ++id, ++first) {
+                    *first = static_cast<
+                        typename std::iterator_traits<OutputIter>::value_type>(
+                        accept_history(id, iter));
+                }
+            }
         }
 
         if (layout == ColMajor) {
-            for (std::size_t id = 0; id != accept_history_.size(); ++id) {
+            for (std::size_t id = 0; id != accept_size(); ++id) {
                 first = std::copy(accept_history_[id].begin(),
                     accept_history_[id].end(), first);
             }
         }
+
+        return first;
     }
 
     /// \brief Read and write access to the Particle<T> object
@@ -633,7 +642,7 @@ class Sampler
 
         *first++ = std::string("Size");
         *first++ = std::string("Resampled");
-        for (std::size_t i = 0; i != accept_history_.size(); ++i)
+        for (std::size_t i = 0; i != accept_size(); ++i)
             *first++ = "Accept." + internal::itos(i);
     }
 
@@ -763,12 +772,12 @@ class Sampler
         if (accept_history_.empty())
             accept_history_.push_back(Vector<std::size_t>());
         std::size_t acc_size = move_queue_.size() + mcmc_queue_.size();
-        if (accept_history_.size() < acc_size) {
-            std::size_t diff = acc_size - accept_history_.size();
+        if (accept_size() < acc_size) {
+            std::size_t diff = acc_size - accept_size();
             for (std::size_t d = 0; d != diff; ++d)
                 accept_history_.push_back(Vector<std::size_t>());
         }
-        for (std::size_t i = 0; i != accept_history_.size(); ++i)
+        for (std::size_t i = 0; i != accept_size(); ++i)
             accept_history_[i].resize(iter_size());
     }
 
@@ -843,7 +852,7 @@ class Sampler
         for (std::size_t iter = 0; iter != iter_size(); ++iter) {
             *first++ = static_cast<int_type>(size_history_[iter]);
             *first++ = static_cast<int_type>(resampled_history_[iter]);
-            for (std::size_t i = 0; i != accept_history_.size(); ++i)
+            for (std::size_t i = 0; i != accept_size(); ++i)
                 *first++ = static_cast<int_type>(accept_history_[i][iter]);
         }
     }
@@ -854,7 +863,7 @@ class Sampler
         first = std::copy(size_history_.begin(), size_history_.end(), first);
         first = std::copy(
             resampled_history_.begin(), resampled_history_.end(), first);
-        for (std::size_t i = 0; i != accept_history_.size(); ++i) {
+        for (std::size_t i = 0; i != accept_size(); ++i) {
             first = std::copy(
                 accept_history_[i].begin(), accept_history_[i].end(), first);
         }

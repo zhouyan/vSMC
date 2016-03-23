@@ -81,6 +81,11 @@ int vsmc_sampler_iter_num(vsmc_sampler sampler)
     return static_cast<int>(::vsmc::cast(sampler).iter_num());
 }
 
+int vsmc_sampler_accept_size(vsmc_sampler sampler)
+{
+    return static_cast<int>(::vsmc::cast(sampler).accept_size());
+}
+
 void vsmc_sampler_resample(vsmc_sampler sampler)
 {
     ::vsmc::cast(sampler).resample();
@@ -119,6 +124,63 @@ double vsmc_sampler_resample_threshold_always()
     return ::vsmc::SamplerC::resample_threshold_always();
 }
 
+int vsmc_sampler_size_history(vsmc_sampler sampler, int iter)
+{
+    return static_cast<int>(
+        ::vsmc::cast(sampler).size_history(static_cast<std::size_t>(iter)));
+}
+
+int *vsmc_sampler_read_size_history(vsmc_sampler sampler, int *first)
+{
+    return ::vsmc::cast(sampler).read_size_history(first);
+}
+
+double vsmc_sampler_ess_history(vsmc_sampler sampler, int iter)
+{
+    return ::vsmc::cast(sampler).ess_history(static_cast<std::size_t>(iter));
+}
+
+double *vsmc_sampler_read_ess_history(vsmc_sampler sampler, double *first)
+{
+    return ::vsmc::cast(sampler).read_ess_history(first);
+}
+
+int vsmc_sampler_resampled_history(vsmc_sampler sampler, int iter)
+{
+    return ::vsmc::cast(sampler).resampled_history(
+        static_cast<std::size_t>(iter));
+}
+
+int *vsmc_sampler_read_resampled_history(vsmc_sampler sampler, int *first)
+{
+    return ::vsmc::cast(sampler).read_resampled_history(first);
+}
+
+int vsmc_sampler_accept_history(vsmc_sampler sampler, int id, int iter)
+{
+    return static_cast<int>(::vsmc::cast(sampler).accept_history(
+        static_cast<std::size_t>(id), static_cast<std::size_t>(iter)));
+}
+
+int *vsmc_sampler_read_accept_history(vsmc_sampler sampler, int id, int *first)
+{
+    return ::vsmc::cast(sampler).read_accept_history(
+        static_cast<std::size_t>(id), first);
+}
+
+int *const *vsmc_sampler_read_accept_history_list(
+    vsmc_sampler sampler, int *const *first)
+{
+    return ::vsmc::cast(sampler).read_accept_history_list(first);
+}
+
+int *vsmc_sampler_read_accept_history_matrix(
+    vsmc_sampler sampler, vSMCMatrixLayout layout, int *first)
+{
+    return ::vsmc::cast(sampler).read_accept_history_matrix(
+        static_cast<::vsmc::MatrixLayout>(layout), first);
+}
+
 vsmc_particle vsmc_sampler_particle(vsmc_sampler sampler)
 {
     vsmc_particle particle = {&::vsmc::cast(sampler).particle()};
@@ -152,6 +214,11 @@ int vsmc_sampler_move_queue_empty(vsmc_sampler sampler)
     return ::vsmc::cast(sampler).move_queue_empty();
 }
 
+int vsmc_sampler_move_queue_size(vsmc_sampler sampler)
+{
+    return static_cast<int>(::vsmc::cast(sampler).move_queue_size());
+}
+
 void vsmc_sampler_move(
     vsmc_sampler sampler, vsmc_sampler_move_type new_move, int append)
 {
@@ -166,6 +233,11 @@ void vsmc_sampler_mcmc_queue_clear(vsmc_sampler sampler)
 int vsmc_sampler_mcmc_queue_empty(vsmc_sampler sampler)
 {
     return ::vsmc::cast(sampler).mcmc_queue_empty();
+}
+
+int vsmc_sampler_mcmc_queue_size(vsmc_sampler sampler)
+{
+    return static_cast<int>(::vsmc::cast(sampler).mcmc_queue_size());
 }
 
 void vsmc_sampler_mcmc(

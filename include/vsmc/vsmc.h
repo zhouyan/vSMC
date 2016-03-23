@@ -680,8 +680,15 @@ void vsmc_monitor_set_name(vsmc_monitor monitor, int id, const char *name);
 /** \brief `vsmc::Monitor::get_name` */
 int vsmc_monitor_get_name(vsmc_monitor monitor, int id, char *name);
 
-/** \brief `vsmc::Monitor::index` */
+/** \brief `vsmc::Monitor::index`
+ *
+ * \details
+ * If `iter < 0`, call `monitor.index()`, otherwise call `monitor.index(iter)`
+ * */
 int vsmc_monitor_index(vsmc_monitor monitor, int iter);
+
+/** \brief `vsmc::Monitor::read_index` */
+int *vsmc_monitor_read_index(vsmc_monitor monitor, int *fist);
 
 /** \brief `vsmc::Monitor::record`
  *
@@ -690,17 +697,15 @@ int vsmc_monitor_index(vsmc_monitor monitor, int iter);
  * `monitor.record(id, iter)`; */
 double vsmc_monitor_record(vsmc_monitor monitor, int id, int iter);
 
-/** \brief `vsmc::Monitor::read_index` */
-void vsmc_monitor_read_index(vsmc_monitor monitor, int *fist);
-
 /** \brief `vsmc::Monitor::read_record` */
-void vsmc_monitor_read_record(vsmc_monitor monitor, int id, double *first);
+double *vsmc_monitor_read_record(vsmc_monitor monitor, int id, double *first);
 
 /** \brief `vsmc::Monitor::read_record_list` */
-void vsmc_monitor_read_record_list(vsmc_monitor monitor, double *const *first);
+double *const *vsmc_monitor_read_record_list(
+    vsmc_monitor monitor, double *const *first);
 
 /** \brief `vsmc::Monitor::read_record_matrix` */
-void vsmc_monitor_read_record_matrix(
+double *vsmc_monitor_read_record_matrix(
     vsmc_monitor monitor, vSMCMatrixLayout layout, double *first);
 
 /** \brief `vsmc::Monitor::set_eval` */
@@ -768,6 +773,9 @@ int vsmc_sampler_iter_size(vsmc_sampler sampler);
 /** \brief `vsmc::Sampler::iter_num` */
 int vsmc_sampler_iter_num(vsmc_sampler sampler);
 
+/** \brief `vsmc::Sampler::accept_size` */
+int vsmc_sampler_accept_size(vsmc_sampler sampler);
+
 /** \brief `vsmc::Sampler::resample` */
 void vsmc_sampler_resample(vsmc_sampler sampler);
 
@@ -791,6 +799,38 @@ double vsmc_sampler_resample_threshold_never(void);
 /** \brief `vsmc::Sampler::threshold_always` */
 double vsmc_sampler_resample_threshold_always(void);
 
+/** \brief `vsmc::Sampler::size_history` */
+int vsmc_sampler_size_history(vsmc_sampler sampler, int iter);
+
+/** \brief `vsmc::Sampler::read_size_history` */
+int *vsmc_sampler_read_size_history(vsmc_sampler sampler, int *first);
+
+/** \brief `vsmc::Sampler::ess_history` */
+double vsmc_sampler_ess_history(vsmc_sampler sampler, int iter);
+
+/** \brief `vsmc::Sampler::read_ess_history` */
+double *vsmc_sampler_read_ess_history(vsmc_sampler sampler, double *first);
+
+/** \brief `vsmc::Sampler::resampled_history` */
+int vsmc_sampler_resampled_history(vsmc_sampler sampler, int iter);
+
+/** \brief `vsmc::Sampler::read_resampled_history` */
+int *vsmc_sampler_read_resampled_history(vsmc_sampler sampler, int *first);
+
+/** \brief `vsmc::Sampler::accept_history` */
+int vsmc_sampler_accept_history(vsmc_sampler sampler, int id, int iter);
+
+/** \brief `vsmc::Sampler::read_accept_history` */
+int *vsmc_sampler_read_accept_history(vsmc_sampler, int id, int *first);
+
+/** \brief `vsmc::Sampler::read_accept_history_list` */
+int *const *vsmc_sampler_read_accept_history_list(
+    vsmc_sampler sampler, int *const *first);
+
+/** \brief `vsmc::Sampler::read_accept_history_matrix` */
+int *vsmc_sampler_read_accept_history_matrix(
+    vsmc_sampler sampler, vSMCMatrixLayout layout, int *first);
+
 /** \brief `vsmc::Sampler::particle` */
 vsmc_particle vsmc_sampler_particle(vsmc_sampler sampler);
 
@@ -811,6 +851,9 @@ void vsmc_sampler_move_queue_clear(vsmc_sampler sampler);
 /** \brief `vsmc::Sampler::move_queue_empty` */
 int vsmc_sampler_move_queue_empty(vsmc_sampler sampler);
 
+/** \brief `vsmc::Sampler::move_queue_size` */
+int vsmc_sampler_move_queue_size(vsmc_sampler sampler);
+
 /** \brief `vsmc::Sampler::move` */
 void vsmc_sampler_move(
     vsmc_sampler sampler, vsmc_sampler_move_type new_move, int append);
@@ -820,6 +863,9 @@ void vsmc_sampler_mcmc_queue_clear(vsmc_sampler sampler);
 
 /** \brief `vsmc::Sampler::mcmc_queue_empty` */
 int vsmc_sampler_mcmc_queue_empty(vsmc_sampler sampler);
+
+/** \brief `vsmc::Sampler::mcmc_queue_size` */
+int vsmc_sampler_mcmc_queue_size(vsmc_sampler sampler);
 
 /** \brief `vsmc::Sampler::mcmc` */
 void vsmc_sampler_mcmc(

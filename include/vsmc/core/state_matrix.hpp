@@ -134,26 +134,29 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     }
 
     template <typename OutputIter>
-    void read_state(std::size_t pos, OutputIter first) const
+    OutputIter read_state(std::size_t pos, OutputIter first) const
     {
-        const StateMatrix<Layout, Dim, T> *sptr =
-            static_cast<const StateMatrix<Layout, Dim, T> *>(this);
+        auto sptr = static_cast<const StateMatrix<Layout, Dim, T> *>(this);
         for (size_type i = 0; i != size_; ++i, ++first)
             *first = sptr->state(i, pos);
+
+        return first;
     }
 
     template <typename OutputIterIter>
-    void read_state_list(OutputIterIter first) const
+    OutputIterIter read_state_list(OutputIterIter first) const
     {
         for (std::size_t d = 0; d != this->dim(); ++d, ++first)
             read_state(d, *first);
+
+        return first;
     }
 
     template <typename OutputIter>
-    void read_state_matrix(MatrixLayout layout, OutputIter first) const
+    OutputIter read_state_matrix(MatrixLayout layout, OutputIter first) const
     {
         if (layout == Layout) {
-            std::copy(data_.begin(), data_.end(), first);
+            return std::copy(data_.begin(), data_.end(), first);
         } else {
             auto sptr = static_cast<const StateMatrix<Layout, Dim, T> *>(this);
             if (layout == RowMajor) {
@@ -166,6 +169,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
                     for (size_type i = 0; i != size_; ++i)
                         *first++ = sptr->state(i, d);
             }
+            return first;
         }
     }
 

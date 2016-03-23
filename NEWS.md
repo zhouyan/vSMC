@@ -14,6 +14,8 @@
   is renamed to `read_record_list`
 * Most methods which take a `MatrixLayout` type template parameter now has that
   parameter as a runtime parameter.
+* Most methods that takes output iterators, (including pointers that used in
+  this fashion), now returns an iterator in the same way as `std::copy` etc.
 
 ## Removed features
 
