@@ -705,7 +705,7 @@ int vsmc_sampler_iter_num(vsmc_sampler sampler);
 void vsmc_sampler_resample(vsmc_sampler sampler);
 
 /** \brief `vsmc::Sampler::resample_scheme` */
-void vsmc_sampler_resample_op(
+void vsmc_sampler_resample_scheme_f(
     vsmc_sampler sampler, vsmc_particle_resample_type op);
 
 /** \brief `vsmc::Sampler::resample_scheme` */
@@ -855,6 +855,26 @@ void vsmc_resample_residual_systematic(
     int m, int n, vsmc_rng rng, const double *weight, int *replication);
 
 /** @} */ /* C_API_Resample */
+
+/** \defgroup C_API_SMP Symmetric multiprocessing */
+/** @{ */
+
+/** \defgroup C_API_SMP_SEQ Sequential */
+/** @{ */
+
+/** @} */ /* C_API_SMP_SEQ */
+
+/** \defgroup C_API_SMP_OMP OpenMP */
+/** @{ */
+
+/** @} */ /* C_API_SMP_OMP */
+
+/** \defgroup C_API_SMP_TBB Intel Threading Building Blocks */
+/** @{ */
+
+/** @} */ /* C_API_SMP_TBB */
+
+/** @} */ /* C_API_SMP */
 
 /** @} */ /* C_API */
 

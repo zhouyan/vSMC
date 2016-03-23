@@ -47,7 +47,7 @@
 /// \defgroup Resample Resampling algorithms
 /// \brief Resampling algorithm functor classes
 
-/// \defgroup SMP Symmetric Multiprocessing
+/// \defgroup SMP Symmetric multiprocessing
 /// \brief Parallel samplers using multi-threading on SMP architecture
 
 /// \defgroup OMP OpenMP

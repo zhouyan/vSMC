@@ -86,7 +86,7 @@ void vsmc_sampler_resample(vsmc_sampler sampler)
     ::vsmc::cast(sampler).resample();
 }
 
-void vsmc_sampler_resample_op(
+void vsmc_sampler_resample_scheme_f(
     vsmc_sampler sampler, vsmc_particle_resample_type op)
 {
     auto cpp_op = [op](std::size_t M, std::size_t N, ::vsmc::RNG &cpp_rng,
