@@ -36,7 +36,7 @@ extern "C" {
 void vsmc_state_matrix_malloc(
     vsmc_state_matrix *state_matrix_ptr, int n, int dim)
 {
-    auto ptr = ::vsmc::AlignedAllocator<::vsmc::StateMatrixC>::allocate(1);
+    auto ptr = ::vsmc::Allocator<::vsmc::StateMatrixC>::allocate(1);
     new (ptr)::vsmc::StateMatrixC(n);
     ptr->resize_dim(static_cast<std::size_t>(dim));
     state_matrix_ptr->ptr = ptr;
@@ -44,7 +44,7 @@ void vsmc_state_matrix_malloc(
 
 void vsmc_state_matrix_free(vsmc_state_matrix *state_matrix_ptr)
 {
-    ::vsmc::AlignedAllocator<::vsmc::StateMatrixC>::deallocate(
+    ::vsmc::Allocator<::vsmc::StateMatrixC>::deallocate(
         ::vsmc::cast(state_matrix_ptr), 1);
     state_matrix_ptr->ptr = nullptr;
 }

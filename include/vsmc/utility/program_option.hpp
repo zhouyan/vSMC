@@ -283,17 +283,18 @@ class ProgramOptionScalar : public ProgramOptionDefault<T>
 
 /// \brief Option with multiple values
 /// \ingroup Option
-template <typename T>
+template <typename T, typename Alloc>
 class ProgramOptionVector : public ProgramOptionDefault<T>
 {
     public:
-    ProgramOptionVector(const std::string &desc, std::vector<T> *ptr)
+    ProgramOptionVector(const std::string &desc, std::vector<T, Alloc> *ptr)
         : ProgramOptionDefault<T>(desc), ptr_(ptr)
     {
     }
 
     template <typename V>
-    ProgramOptionVector(const std::string &desc, std::vector<T> *ptr, V val)
+    ProgramOptionVector(
+        const std::string &desc, std::vector<T, Alloc> *ptr, V val)
         : ProgramOptionDefault<T>(desc, val), ptr_(ptr)
     {
     }
@@ -322,7 +323,7 @@ class ProgramOptionVector : public ProgramOptionDefault<T>
     }
 
     private:
-    std::vector<T> *const ptr_;
+    std::vector<T, Alloc> *const ptr_;
 }; // class ProgramOptionVector
 
 /// \brief Program options
@@ -364,25 +365,25 @@ class ProgramOptionMap
     }
 
     /// \brief Add an option with multiple value
-    template <typename T>
-    ProgramOptionMap &add(
-        const std::string &name, const std::string &desc, std::vector<T> *ptr)
+    template <typename T, typename Alloc>
+    ProgramOptionMap &add(const std::string &name, const std::string &desc,
+        std::vector<T, Alloc> *ptr)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
 
         return add_option(
-            name, std::make_shared<ProgramOptionVector<T>>(desc, ptr));
+            name, std::make_shared<ProgramOptionVector<T, Alloc>>(desc, ptr));
     }
 
     /// \brief Add an option with multiple value, with a default value
-    template <typename T, typename V>
+    template <typename T, typename Alloc, typename V>
     ProgramOptionMap &add(const std::string &name, const std::string &desc,
-        std::vector<T> *ptr, V val)
+        std::vector<T, Alloc> *ptr, V val)
     {
         VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
 
-        return add_option(
-            name, std::make_shared<ProgramOptionVector<T>>(desc, ptr, val));
+        return add_option(name,
+            std::make_shared<ProgramOptionVector<T, Alloc>>(desc, ptr, val));
     }
 
     ProgramOptionMap &remove(const std::string &name)
@@ -529,8 +530,7 @@ class ProgramOptionMap
         return *this;
     }
 
-    void process_arg_vector(
-        std::vector<std::string> &arg_vector, std::ostream &os)
+    void process_arg_vector(Vector<std::string> &arg_vector, std::ostream &os)
     {
         Vector<std::pair<std::string, Vector<std::string>>> name_svals;
         Vector<std::string> svals;

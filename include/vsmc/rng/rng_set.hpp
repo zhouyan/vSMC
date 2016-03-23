@@ -83,7 +83,7 @@ class RNGSetVector
 {
     public:
     using rng_type = RNGType;
-    using size_type = typename AlignedVector<rng_type>::size_type;
+    using size_type = typename Vector<rng_type>::size_type;
 
     explicit RNGSetVector(size_type N = 0) : size_(N), rng_(size_, rng_type())
     {
@@ -118,7 +118,7 @@ class RNGSetVector
 
     private:
     std::size_t size_;
-    AlignedVector<rng_type> rng_;
+    Vector<rng_type> rng_;
 }; // class RNGSetVector
 
 #if VSMC_HAS_TBB

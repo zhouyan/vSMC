@@ -89,9 +89,8 @@ class StopWatchClockAdapter
 
     /// \brief Start the watch, no effect if already started
     ///
-    /// \return `true` if it is started by this call, and the elapsed time
-    /// will be incremented next time `stop()` is called. The increment will
-    /// be
+    /// \return `true` if it is started by this call, and the elapsed time will
+    /// be incremented next time `stop()` is called. The increment will be
     /// relative to the time point of this call. `false` if it is already
     /// started earlier.
     bool start()

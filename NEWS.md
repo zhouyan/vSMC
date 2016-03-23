@@ -16,12 +16,16 @@
   parameter as a runtime parameter.
 * Most methods that takes output iterators, (including pointers that used in
   this fashion), now returns an iterator in the same way as `std::copy` etc.
+* `Allocator` is now always an alias to `AlignedAllocator`. The alignment is 32
+  for scalar types and `max(alignof(T), 16)` for others.
+* `Vector` is now defined to be `std::vector<T, Allocator<T>`
 
 ## Removed features
 
 * MKL RAII classes no long has the `reset` method with same arguments as the
   constructors. Use the constructor and move semantics instead. 
 * `Monitor::index_data` and `Monitor::record_data` are removed
+* `AlignedVector` is removed
 
 # Changes in v2.2.0
 

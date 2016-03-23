@@ -342,22 +342,16 @@ inline bool operator!=(const AlignedAllocator<T1, Alignment, Memory> &,
     return false;
 }
 
-/// \brief AlignedAllocator for scalar type and `std::allocator` for others
+/// \brief AlignedAllocator with proper alignement detected for type
 /// \ingroup AlignedMemory
 template <typename T>
-using Allocator = typename std::conditional<std::is_scalar<T>::value,
-    AlignedAllocator<T>, std::allocator<T>>::type;
+using Allocator = AlignedAllocator<T,
+    std::is_scalar<T>::value ? 32 : (alignof(T) > 16 ? alignof(T) : 16)>;
 
-/// \brief Vector type using AlignedAllocator
+/// \brief Vector type using Allocator
 /// \ingroup AlignedMemory
 template <typename T>
-using AlignedVector = std::vector<T, AlignedAllocator<T>>;
-
-/// \brief AlignedVector for scalar type and `std::vector` for others
-/// \ingroup AlignedMemory
-template <typename T>
-using Vector = typename std::conditional<std::is_scalar<T>::value,
-    AlignedVector<T>, std::vector<T>>::type;
+using Vector = std::vector<T, Allocator<T>>;
 
 } // namespace vsmc
 

@@ -35,15 +35,14 @@ extern "C" {
 
 void vsmc_weight_malloc(vsmc_weight *weight_ptr, int n)
 {
-    auto ptr = ::vsmc::AlignedAllocator<::vsmc::Weight>::allocate(1);
+    auto ptr = ::vsmc::Allocator<::vsmc::Weight>::allocate(1);
     new (ptr)::vsmc::Weight(static_cast<std::size_t>(n));
     weight_ptr->ptr = ptr;
 }
 
 void vsmc_weight_free(vsmc_weight *weight_ptr)
 {
-    ::vsmc::AlignedAllocator<::vsmc::Weight>::deallocate(
-        ::vsmc::cast(weight_ptr), 1);
+    ::vsmc::Allocator<::vsmc::Weight>::deallocate(::vsmc::cast(weight_ptr), 1);
     weight_ptr->ptr = nullptr;
 }
 

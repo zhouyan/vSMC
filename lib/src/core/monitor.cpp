@@ -36,7 +36,7 @@ extern "C" {
 void vsmc_monitor_malloc(vsmc_monitor *monitor_ptr, int dim,
     vsmc_monitor_eval_type eval, int record_only, vSMCMonitorStage stage)
 {
-    auto ptr = ::vsmc::AlignedAllocator<::vsmc::MonitorC>::allocate(1);
+    auto ptr = ::vsmc::Allocator<::vsmc::MonitorC>::allocate(1);
     new (ptr)::vsmc::MonitorC(static_cast<std::size_t>(dim),
         ::vsmc::cast(eval), record_only != 0,
         static_cast<::vsmc::MonitorStage>(stage));
@@ -45,7 +45,7 @@ void vsmc_monitor_malloc(vsmc_monitor *monitor_ptr, int dim,
 
 void vsmc_monitor_free(vsmc_monitor *monitor_ptr)
 {
-    ::vsmc::AlignedAllocator<::vsmc::MonitorC>::deallocate(
+    ::vsmc::Allocator<::vsmc::MonitorC>::deallocate(
         ::vsmc::cast(monitor_ptr), 1);
     monitor_ptr->ptr = nullptr;
 }
