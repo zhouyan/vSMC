@@ -114,6 +114,9 @@ extern "C" {
  * \defgroup C_API_Utility_Covariance Covariance
  * \ingroup C_API_Utility
  *
+ * \defgroup C_API_Utility_HDF5IO HDF5 objects IO
+ * \ingroup C_API_Utility
+ *
  * \defgroup C_API_Utility_ProgramOption Program option
  * \ingroup C_API_Utility
  *
@@ -1213,6 +1216,59 @@ void vsmc_covariance_compute(vsmc_covariance covariance,
     int cov_packed);
 
 /** @} */ /* C_API_Utility_Covariance */
+
+/** \addtogroup C_API_Utility_HDF5IO */
+/** @{ */
+
+/** \brief `vsmc::hdf5size` */
+int vsmc_hdf5size(const char *file_name, const char *data_name);
+
+/** \brief `vsmc::hdf5load<double>` */
+double *vsmc_hdf5load(
+    const char *file_name, const char *data_name, double *first);
+
+/** \brief `vsmc::hdf5load<int>` */
+int *vsmc_hdf5load_int(
+    const char *file_name, const char *data_name, int *first);
+
+/** \brief `vsmc::hdf5store_new` */
+void vsmc_hdf5store_new(const char *file_name);
+
+/** \brief `vsmc::hdf5store_matrix<double>` */
+void vsmc_hdf5store_matrix(vSMCMatrixLayout layout, int nrow, int ncol,
+    const char *file_name, const char *data_name, const double *first,
+    int append);
+
+/** \brief `vsmc::hdf5store_matrix<int>` */
+void vsmc_hdf5store_matrix_int(vSMCMatrixLayout layout, int nrow, int ncol,
+    const char *file_name, const char *data_name, const int *first,
+    int append);
+
+/** \brief `vsmc::hdf5store_list_empty` */
+void vsmc_hdf5store_list_empty(
+    const char *file_name, const char *data_name, int append);
+
+/** \brief `vsmc::hdf5store_list_insert<double>` */
+void vsmc_hdf5store_list_insert(int N, const char *file_name,
+    const char *data_name, const double *first, const char *vname);
+
+/** \brief `vsmc::hdf5store_list_insert<int>` */
+void vsmc_hdf5store_list_insert_int(int N, const char *file_name,
+    const char *data_name, const int *first, const char *vname);
+
+/** \brief `vsmc::hdf5store` for `vsmc::Sampler` */
+void vsmc_hdf5store_sampler(vsmc_sampler sampler, const char *file_name,
+    const char *data_name, int append);
+
+/** \brief `vsmc::hdf5store` for `vsmc::StateMatrix` */
+void vsmc_hdf5store_state_matrix(vsmc_state_matrix state_matrix,
+    const char *file_name, const char *data_name, int append);
+
+/** \brief `vsmc::hdf5store` for `vsmc::Particle` */
+void vsmc_hdf5store_particle(vsmc_particle particle, const char *file_name,
+    const char *data_name, int append);
+
+/** @} */ /* C_API_Utility_HDF5IO */
 
 /** \addtogroup C_API_Utility_ProgramOption */
 /** @{ */

@@ -48,6 +48,7 @@ SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
     ${PROJECT_SOURCE_DIR}/src/smp/backend_seq.cpp
     ${PROJECT_SOURCE_DIR}/src/utility/aligned_memory.cpp
     ${PROJECT_SOURCE_DIR}/src/utility/covariance.cpp
+    ${PROJECT_SOURCE_DIR}/src/utility/hdf5io.cpp
     ${PROJECT_SOURCE_DIR}/src/utility/program_option.cpp
     ${PROJECT_SOURCE_DIR}/src/utility/progress.cpp
     ${PROJECT_SOURCE_DIR}/src/utility/stop_watch.cpp)
