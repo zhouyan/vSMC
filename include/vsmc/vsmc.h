@@ -522,6 +522,18 @@ double *vsmc_state_matrix_data(vsmc_state_matrix state_matrix);
 /** \brief `vsmc::StateMatrix::row_data` */
 double *vsmc_state_matrix_row_data(vsmc_state_matrix state_matrix, int id);
 
+/** \brief `vsmc::StateMatrix::read_state` */
+double *vsmc_state_matrix_read_state(
+    vsmc_state_matrix state_matrix, int pos, double *first);
+
+/** \brief `vsmc::StateMatrix::read_state_list` */
+double *const *vsmc_state_matrix_read_state_list(
+    vsmc_state_matrix state_matrix, double *const *first);
+
+/** \brief `vsmc::StateMatrix::read_state_matrix` */
+double *vsmc_state_matrix_read_state_matrix(
+    vsmc_state_matrix state_matrix, vSMCMatrixLayout layout, double *first);
+
 /** \brief `vsmc::StateMatrix::copy` */
 void vsmc_state_matrix_copy(
     vsmc_state_matrix state_matrix, int N, const int *index);

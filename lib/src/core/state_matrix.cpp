@@ -93,6 +93,26 @@ double *vsmc_state_matrix_row_data(vsmc_state_matrix state_matrix, int id)
     return ::vsmc::cast(state_matrix).row_data(static_cast<std::size_t>(id));
 }
 
+double *vsmc_state_matrix_read_state(
+    vsmc_state_matrix state_matrix, int pos, double *first)
+{
+    return ::vsmc::cast(state_matrix)
+        .read_state(static_cast<std::size_t>(pos), first);
+}
+
+double *const *vsmc_state_matrix_read_state_list(
+    vsmc_state_matrix state_matrix, double *const *first)
+{
+    return ::vsmc::cast(state_matrix).read_state_list(first);
+}
+
+double *vsmc_state_matrix_read_state_matrix(
+    vsmc_state_matrix state_matrix, vSMCMatrixLayout layout, double *first)
+{
+    return ::vsmc::cast(state_matrix)
+        .read_state_matrix(static_cast<::vsmc::MatrixLayout>(layout), first);
+}
+
 void vsmc_state_matrix_copy(
     vsmc_state_matrix state_matrix, int N, const int *index)
 {

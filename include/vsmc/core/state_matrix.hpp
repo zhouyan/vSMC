@@ -155,22 +155,24 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     template <typename OutputIter>
     OutputIter read_state_matrix(MatrixLayout layout, OutputIter first) const
     {
-        if (layout == Layout) {
+        if (layout == Layout)
             return std::copy(data_.begin(), data_.end(), first);
-        } else {
-            auto sptr = static_cast<const StateMatrix<Layout, Dim, T> *>(this);
-            if (layout == RowMajor) {
-                for (size_type i = 0; i != size_; ++i)
-                    for (std::size_t d = 0; d != this->dim(); ++d)
-                        *first++ = sptr->state(i, d);
-            }
-            if (layout == ColMajor) {
+
+        auto sptr = static_cast<const StateMatrix<Layout, Dim, T> *>(this);
+
+        if (layout == RowMajor) {
+            for (size_type i = 0; i != size_; ++i)
                 for (std::size_t d = 0; d != this->dim(); ++d)
-                    for (size_type i = 0; i != size_; ++i)
-                        *first++ = sptr->state(i, d);
-            }
-            return first;
+                    *first++ = sptr->state(i, d);
         }
+
+        if (layout == ColMajor) {
+            for (std::size_t d = 0; d != this->dim(); ++d)
+                for (size_type i = 0; i != size_; ++i)
+                    *first++ = sptr->state(i, d);
+        }
+
+        return first;
     }
 
     template <typename CharT, typename Traits>
@@ -180,8 +182,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         if (this->dim() == 0 || size_ == 0 || !os.good())
             return os;
 
-        const StateMatrix<Layout, Dim, T> *sptr =
-            static_cast<const StateMatrix<Layout, Dim, T> *>(this);
+        auto sptr = static_cast<const StateMatrix<Layout, Dim, T> *>(this);
         for (size_type i = 0; i != size_; ++i) {
             for (std::size_t d = 0; d != this->dim() - 1; ++d)
                 os << sptr->state(i, d) << sepchar;
