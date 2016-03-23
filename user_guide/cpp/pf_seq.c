@@ -19,7 +19,7 @@ static double pf_vel_x[N];
 static double pf_vel_y[N];
 static double pf_weight[N];
 
-static inline double pf_log_likelihood(int t, const vsmc_single_particle *sp)
+static double pf_log_likelihood(int t, const vsmc_single_particle *sp)
 {
     double llh_x = 10 * (sp->state[PosX] - pf_obs_x[t]);
     double llh_y = 10 * (sp->state[PosY] - pf_obs_y[t]);
@@ -29,7 +29,7 @@ static inline double pf_log_likelihood(int t, const vsmc_single_particle *sp)
     return -0.5 * (10 + 1) * (llh_x + llh_y);
 }
 
-static inline void pf_read_data(const char *param)
+static void pf_read_data(const char *param)
 {
     if (!param)
         return;
@@ -42,7 +42,7 @@ static inline void pf_read_data(const char *param)
     fclose(data);
 }
 
-static inline int pf_init(vsmc_particle particle, void *param)
+static int pf_init(vsmc_particle particle, void *param)
 {
     pf_read_data((const char *) param);
 
@@ -68,7 +68,7 @@ static inline int pf_init(vsmc_particle particle, void *param)
     return 0;
 }
 
-static inline int pf_move(int t, vsmc_particle particle)
+static int pf_move(int t, vsmc_particle particle)
 {
     vsmc_rng rng = vsmc_particle_rng(particle, 0);
     const int size = vsmc_particle_size(particle);
@@ -92,7 +92,7 @@ static inline int pf_move(int t, vsmc_particle particle)
     return 0;
 }
 
-static inline void pf_eval(int t, int dim, vsmc_particle particle, double *r)
+static void pf_eval(int t, int dim, vsmc_particle particle, double *r)
 {
     const int size = vsmc_particle_size(particle);
     for (int i = 0; i < size; ++i) {

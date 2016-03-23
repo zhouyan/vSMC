@@ -1,7 +1,10 @@
-CFLAGS := $(CFLAGS) -std=c11 -O3
+CC := clang
+CFLAGS := $(CFLAGS) -std=c89 -O3
 CFLAGS := $(CFLAGS) -I ../../include
-CFLAGS := $(CFLAGS) -L ../../build/clang-Release/lib
+CFLAGS := $(CFLAGS) -L ../../build/$(CC)-Release/lib
+CFLAGS := $(CFLAGS) -rpath ../../build/$(CC)-Release/lib
 
+CXX := clang++
 CXXFLAGS := $(CXXFLAGS) -std=c++11 -O3
 CXXFLAGS := $(CXXFLAGS) -I ../../include
 CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_MKL
@@ -20,9 +23,11 @@ pf_seq : pf_seq.cpp
 	$(CXX) $(CXXFLAGS) -o pf_seq pf_seq.cpp $(LDFLAGS)
 
 pf_tbb_c : pf_tbb.c
+	ninja -C ../../build/$(CC)-Release lib
 	$(CC) $(CFLAGS) -o pf_tbb_c pf_tbb.c $(LDFLAGS) -lvsmc
 
 pf_seq_c : pf_seq.c
+	ninja -C ../../build/$(CC)-Release lib
 	$(CC) $(CFLAGS) -o pf_seq_c pf_seq.c $(LDFLAGS) -lvsmc
 
 program_option : program_option.cpp
@@ -32,7 +37,7 @@ program_process : program_process.cpp
 	$(CXX) $(CXXFLAGS) -o program_process program_process.cpp $(LDFLAGS)
 
 clean:
-	rm -f pf_ocl pf_seq pf_tbb
+	rm -f pf_ocl pf_seq pf_tbb pf_seq_c pf_tbb_c
 	rm -f pf.out pf.rout pf.pdf
 	rm -f program_option
 	rm -f program_progress
