@@ -984,18 +984,133 @@ void vsmc_resample_residual_systematic(
 /** \defgroup C_API_SMP Symmetric multiprocessing */
 /** @{ */
 
+/** \brief `vsmc::InitializeBase::eval_sp` */
+typedef int (*vsmc_initialize_eval_sp_type)(vsmc_single_particle);
+
+/** \brief `vsmc::InitializeBase::eval_param` */
+typedef void (*vsmc_initialize_eval_param_type)(vsmc_particle, void *);
+
+/** \brief `vsmc::InitializeBase::eval_pre` */
+typedef void (*vsmc_initialize_eval_pre_type)(vsmc_particle);
+
+/** \brief `vsmc::InitializeBase::eval_post` */
+typedef void (*vsmc_initialize_eval_post_type)(vsmc_particle);
+
+/** \brief `vsmc::MoveBase::eval_sp` */
+typedef int (*vsmc_move_eval_sp_type)(int, vsmc_single_particle);
+
+/** \brief `vsmc::MoveBase::eval_pre` */
+typedef void (*vsmc_move_eval_pre_type)(int, vsmc_particle);
+
+/** \brief `vsmc::MoveBase::eval_post` */
+typedef void (*vsmc_move_eval_post_type)(int, vsmc_particle);
+
+/** \brief `vsmc::MonitorEvalBase::eval_sp` */
+typedef int (*vsmc_monitor_eval_sp_type)(
+    int, int, vsmc_single_particle, double *);
+
+/** \brief `vsmc::MonitorEvalBase::eval_pre` */
+typedef void (*vsmc_monitor_eval_pre_type)(int, vsmc_particle);
+
+/** \brief `vsmc::MonitorEvalBase::eval_post` */
+typedef void (*vsmc_monitor_eval_post_type)(int, vsmc_particle);
+
 /** \defgroup C_API_SMP_SEQ Sequential */
 /** @{ */
+
+/** \brief `vsmc::Sampler::init` with `vsmc::InitializeSEQ` as input */
+void vsmc_sampler_init_seq(vsmc_sampler sampler,
+    vsmc_initialize_eval_sp_type eval_sp,
+    vsmc_initialize_eval_param_type eval_param,
+    vsmc_initialize_eval_pre_type eval_pre,
+    vsmc_initialize_eval_post_type eval_post);
+
+/** \brief `vsmc::Sampler::init_by_move` with `vsmc::MoveSEQ` as input */
+void vsmc_sampler_init_by_move_seq(vsmc_sampler sampler,
+    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
+    vsmc_move_eval_post_type eval_post);
+
+/** \brief `vsmc::Sampler::move` with `vsmc::MoveSEQ` as input */
+void vsmc_sampler_move_seq(vsmc_sampler sampler,
+    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
+    vsmc_move_eval_post_type eval_post, int append);
+
+/** \brief `vsmc::Sampler::mcmc` with `vsmc::MoveSEQ` as input */
+void vsmc_sampler_mcmc_seq(vsmc_sampler sampler,
+    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
+    vsmc_move_eval_post_type eval_post, int append);
+
+/** \brief `vsmc::Sampler::monitor` with `vsmc::MonitorEvalSEQ` as input */
+void vsmc_sampler_monitor_seq(vsmc_sampler sampler, const char *name, int dim,
+    vsmc_monitor_eval_sp_type eval_sp, vsmc_monitor_eval_pre_type eval_pre,
+    vsmc_monitor_eval_post_type eval_post, int record_only,
+    vSMCMonitorStage stage);
 
 /** @} */ /* C_API_SMP_SEQ */
 
 /** \defgroup C_API_SMP_OMP OpenMP */
 /** @{ */
 
+/** \brief `vsmc::Sampler::init` with `vsmc::InitializeOMP` as input */
+void vsmc_sampler_init_omp(vsmc_sampler sampler,
+    vsmc_initialize_eval_sp_type eval_sp,
+    vsmc_initialize_eval_param_type eval_param,
+    vsmc_initialize_eval_pre_type eval_pre,
+    vsmc_initialize_eval_post_type eval_post);
+
+/** \brief `vsmc::Sampler::init_by_move` with `vsmc::MoveOMP` as input */
+void vsmc_sampler_init_by_move_omp(vsmc_sampler sampler,
+    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
+    vsmc_move_eval_post_type eval_post);
+
+/** \brief `vsmc::Sampler::move` with `vsmc::MoveOMP` as input */
+void vsmc_sampler_move_omp(vsmc_sampler sampler,
+    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
+    vsmc_move_eval_post_type eval_post, int append);
+
+/** \brief `vsmc::Sampler::mcmc` with `vsmc::MoveOMP` as input */
+void vsmc_sampler_mcmc_omp(vsmc_sampler sampler,
+    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
+    vsmc_move_eval_post_type eval_post, int append);
+
+/** \brief `vsmc::Sampler::monitor` with `vsmc::MonitorEvalOMP` as input */
+void vsmc_sampler_monitor_omp(vsmc_sampler sampler, const char *name, int dim,
+    vsmc_monitor_eval_sp_type eval_sp, vsmc_monitor_eval_pre_type eval_pre,
+    vsmc_monitor_eval_post_type eval_post, int record_only,
+    vSMCMonitorStage stage);
+
 /** @} */ /* C_API_SMP_OMP */
 
 /** \defgroup C_API_SMP_TBB Intel Threading Building Blocks */
 /** @{ */
+
+/** \brief `vsmc::Sampler::init` with `vsmc::InitializeTBB` as input */
+void vsmc_sampler_init_tbb(vsmc_sampler sampler,
+    vsmc_initialize_eval_sp_type eval_sp,
+    vsmc_initialize_eval_param_type eval_param,
+    vsmc_initialize_eval_pre_type eval_pre,
+    vsmc_initialize_eval_post_type eval_post);
+
+/** \brief `vsmc::Sampler::init_by_move` with `vsmc::MoveTBB` as input */
+void vsmc_sampler_init_by_move_tbb(vsmc_sampler sampler,
+    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
+    vsmc_move_eval_post_type eval_post);
+
+/** \brief `vsmc::Sampler::move` with `vsmc::MoveTBB` as input */
+void vsmc_sampler_move_tbb(vsmc_sampler sampler,
+    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
+    vsmc_move_eval_post_type eval_post, int append);
+
+/** \brief `vsmc::Sampler::mcmc` with `vsmc::MoveTBB` as input */
+void vsmc_sampler_mcmc_tbb(vsmc_sampler sampler,
+    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
+    vsmc_move_eval_post_type eval_post, int append);
+
+/** \brief `vsmc::Sampler::monitor` with `vsmc::MonitorEvalTBB` as input */
+void vsmc_sampler_monitor_tbb(vsmc_sampler sampler, const char *name, int dim,
+    vsmc_monitor_eval_sp_type eval_sp, vsmc_monitor_eval_pre_type eval_pre,
+    vsmc_monitor_eval_post_type eval_post, int record_only,
+    vSMCMonitorStage stage);
 
 /** @} */ /* C_API_SMP_TBB */
 
