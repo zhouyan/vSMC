@@ -4,54 +4,53 @@
 \section{Cloning objects}
 \label{sec:Cloning objects}
 
-The \cppinline{Sampler<T>} and \cppinline{Particle<T>} objects have copy
-constructors, assignment operators, move constructors, and move assignment
-operators that behaves exactly the way as \cpp programmers would expect.
-However, these behaviors are not always desired. For example, in
-\textcite{stpf} a stable particle filter in high-dimensions was developed.
-Without going into the details, the algorithm consists of a particle system
-where each particle is itself a particle filter. And thus when resampling the
-global system, the \cppinline{Sampler<T>} object will be copied, together with
-all of its sub-objects. This include the \rng system within the
-\cppinline{Particle<T>} object. Even if the user does not use this \rng system
-for random number generating within user defined operations, one of these \rng
-will be used for resampling by the \cppinline{Particle<T>} object. Direct
-copying the \cppinline{Sampler<T>} object will lead to multiple local filters
-start to generating exactly the same random numbers in the next iteration. This
-is an undesired side effects. In this situation, one can clone the sampler with
-the following method,
+The \verb|Sampler<T>| and \verb|Particle<T>| objects have copy constructors,
+assignment operators, move constructors, and move assignment operators that
+behaves exactly the way as \cpp programmers would expect. However, these
+behaviors are not always desired. For example, in \textcite{stpf} a stable
+particle filter in high-dimensions was developed. Without going into the
+details, the algorithm consists of a particle system where each particle is
+itself a particle filter. And thus when resampling the global system, the
+\verb|Sampler<T>| object will be copied, together with all of its sub-objects.
+This include the \rng system within the \verb|Particle<T>| object. Even if the
+user does not use this \rng system for random number generating within user
+defined operations, one of these \rng will be used for resampling by the
+\verb|Particle<T>| object. Direct copying the \verb|Sampler<T>| object will
+lead to multiple local filters start to generating exactly the same random
+numbers in the next iteration. This is an undesired side effects. In this
+situation, one can clone the sampler with the following method,
 \begin{cppcode}
   auto new_sampler = sampler.clone(new_rng);
 \end{cppcode}
-where \cppinline{new_rng} is a boolean value. If it is \cppinline{true}, then
-an exact copy of \cppinline{sampler} will be returned, except it will have the
-\rng system re-seeded. If it is \cppinline{false}, then the above assignemnt
-behaves exactly the same as
+where \verb|new_rng| is a boolean value. If it is \verb|true|, then an exact
+copy of \verb|sampler| will be returned, except it will have the \rng system
+re-seeded. If it is \verb|false|, then the above assignemnt behaves exactly the
+same as
 \begin{cppcode}
   auto new_sampler = sampler;
 \end{cppcode}
-Alternatively, the contents of an existing \cppinline{Sampler<T>} object can be
+Alternatively, the contents of an existing \verb|Sampler<T>| object can be
 replaced from another one by the following method,
 \begin{cppcode}
   sampler.clone(other_sampler, retain_rng);
 \end{cppcode}
-where \cppinline{retain_rng} is a boolean value. If it is \cppinline{true},
-then the \rng system of \cppinline{other_sampler} is not copied and its own
-\rng system is retained. If it is \cppinline{false}, then the above call
-behaves exactly the same as
+where \verb|retain_rng| is a boolean value. If it is \verb|true|, then the \rng
+system of \verb|other_sampler| is not copied and its own \rng system is
+retained. If it is \verb|false|, then the above call behaves exactly the same
+as
 \begin{cppcode}
   sampler = other_sampler;
 \end{cppcode}
-The above method also supports move semantics. Similar \cppinline{clone}
-methods exist for the \cppinline{Particle<T>} class.
+The above method also supports move semantics. Similar \verb|clone| methods
+exist for the \verb|Particle<T>| class.
 
 \section{Customizing member types}
 \label{sec:Customizing member types}
 
-The \cppinline{Particle<T>} class has a few member types that can be replaced
-by the user. If the class \cppinline{T} has the corresponding types, then the
-member type of \cppinline{Particle<T>} will be replaced. For example, given the
-following declarations inside class \cppinline{T},
+The \verb|Particle<T>| class has a few member types that can be replaced by the
+user. If the class \verb|T| has the corresponding types, then the member type
+of \verb|Particle<T>| will be replaced. For example, given the following
+declarations inside class \verb|T|,
 \begin{cppcode}
   class T
   {
@@ -61,21 +60,21 @@ following declarations inside class \cppinline{T},
       using rng_set_type = RNGSetTBB<AES256_4x32>;
   };
 \end{cppcode}
-The corresponding \cppinline{Particle<T>::size_type}, etc., will have their
-defaults replaced with the above types.
+The corresponding \verb|Particle<T>::size_type|, etc., will have their defaults
+replaced with the above types.
 
-A note on \cppinline{weight_type}, it needs to provide the following method,
+A note on \verb|weight_type|, it needs to provide the following method,
 \begin{cppcode*}{texcomments}
   w.ess();           // Get $\text{\normalfont\textsc{ess}}$
   w.set_equal();     // Set $W^{(i)} = 1/N$
   w.resample_size(); // Get the size $N$.
   w.resample_data(); // Get a pointer to normalized weights
 \end{cppcode*}
-For the library's default class \cppinline{Weight}, the last two calls are the
-same as \cppinline{w.size()} and \cppinline{w.data()}. However, this does not
-need to be so. For example, below is the outline of an implementation of
-\cppinline{weight_type} for distributed systems, assuming each computing node
-has been allocated $N_r$ particles.
+For the library's default class \verb|Weight|, the last two calls are the same
+as \verb|w.size()| and \verb|w.data()|. However, this does not need to be so.
+For example, below is the outline of an implementation of \verb|weight_type|
+for distributed systems, assuming each computing node has been allocated $N_r$
+particles.
 \begin{cppcode*}{texcomments}
   class WeightMPI
   {
@@ -118,25 +117,24 @@ has been allocated $N_r$ particles.
       }
   };
 \end{cppcode*}
-When \cppinline{Particle<T>} performs resampling, it checks if the pointer
-returned by \cppinline{w.resample_data()} is a null pointer. It will only
-generate the vector $\{a_i\}_{i=1}^N$ (see section~\ref{sub:State}) when it is
-not a null pointer. And then a pointer to this vector is passed to
-\cppinline{T::copy}. Of course, the class \cppinline{T} also needs to provide a
-suitable method \cppinline{copy} that can handle the distributed system. By
-defining suitable \cppinline{WeightMPI} and \cppinline{T::copy}, the library
-can be extended to handle distributed systems.
+When \verb|Particle<T>| performs resampling, it checks if the pointer returned
+by \verb|w.resample_data()| is a null pointer. It will only generate the vector
+$\{a_i\}_{i=1}^N$ (see section~\ref{sub:State}) when it is not a null pointer.
+And then a pointer to this vector is passed to \verb|T::copy|. Of course, the
+class \verb|T| also needs to provide a suitable method \verb|copy| that can
+handle the distributed system. By defining suitable \verb|WeightMPI| and
+\verb|T::copy|, the library can be extended to handle distributed systems.
 
 \section{Extending \protect\spt}
 \label{sec:Extending SP}
 
-The \cppinline{SingleParticle<T>} can also be extended by the user. We have
-already see in section~\ref{sub:State} that if class \cppinline{T} is a
-subclass of \cppinline{StateMatrix}, \cppinline{SingleParticle<T>} can have
-additional methods to access the state. This class can be extended by defining
-a member class template inside class \cppinline{T}. For example, for the simple
-particle filter in section~\ref{sec:A simple particle filter}, we can redefine
-the \cppinline{PFState} as the following,
+The \verb|SingleParticle<T>| can also be extended by the user. We have already
+see in section~\ref{sub:State} that if class \verb|T| is a subclass of
+\verb|StateMatrix|, \verb|SingleParticle<T>| can have additional methods to
+access the state. This class can be extended by defining a member class
+template inside class \verb|T|. For example, for the simple particle filter in
+section~\ref{sec:A simple particle filter}, we can redefine the \verb|PFState|
+as the following,
 \begin{cppcode}
   using PFStateBase = StateMatrix<RowMajor, 4, double>;
 
@@ -170,7 +168,7 @@ the \cppinline{PFState} as the following,
       Vector<double> obs_y_;
   };
 \end{cppcode}
-And later, we can use these methods when implement \cppinline{PFInit} etc.,
+And later, we can use these methods when implement \verb|PFInit| etc.,
 \begin{cppcode}
   class PFInit : public InitializeTBB<PFState, PFInit>
   {
@@ -198,10 +196,9 @@ And later, we can use these methods when implement \cppinline{PFInit} etc.,
       Vector<double> w_;
   };
 \end{cppcode}
-It shall be noted that, it is important to keep
-\cppinline{single_particle_type} small and copying the object efficient. The
-library will frequently pass argument of \cppinline{SingleParticle<T>} type by
-value.
+It shall be noted that, it is important to keep \verb|single_particle_type|
+small and copying the object efficient. The library will frequently pass
+argument of \verb|SingleParticle<T>| type by value.
 
 \subsection{Compared to custom state type}
 \label{sub:Compared to custom state type}
@@ -225,7 +222,7 @@ One can also write a custom state type. For example,
       double vel_y_;
   };
 \end{cppcode}
-And the \cppinline{PFState} class will be defined as,
+And the \verb|PFState| class will be defined as,
 \begin{cppcode}
   using PFStateBase = StateMatrix<RowMajor, 1, PFStateSP>;
 
@@ -246,11 +243,11 @@ And the \cppinline{PFState} class will be defined as,
       Vector<double> obs_y_;
   };
 \end{cppcode}
-The implementation of \cppinline{PFInit}, etc., will be similar. Compared to
-extending the \cppinline{SingleParticle<T>} type, this method is perhaps more
+The implementation of \verb|PFInit|, etc., will be similar. Compared to
+extending the \verb|SingleParticle<T>| type, this method is perhaps more
 intuitive. Functionality-wise, they are almost identical. However, there are a
-few advantages of extending \cppinline{SingleParticle<T>}. First, it allows
-more compact data storage. Consider a situation where the state space is best
+few advantages of extending \verb|SingleParticle<T>|. First, it allows more
+compact data storage. Consider a situation where the state space is best
 represented by a real and an integer. The most intuitive way might be the
 following,
 \begin{cppcode}
@@ -267,12 +264,11 @@ following,
 
   class T : StateMatrix<RowMajor, 1, S>;
 \end{cppcode}
-However, the type \cppinline{S} will need to satisfy the alignment requirement
-of \cppinline{double}, which is 8-bytes on most platforms. However, its size
-might not be a multiple of 8-bytes. Therefore the type will be padded and the
-storage of a vector of such type will not be as compact as possible. This can
-affect performance in some situations. An alternative approach would be the
-following,
+However, the type \verb|S| will need to satisfy the alignment requirement of
+\verb|double|, which is 8-bytes on most platforms. However, its size might not
+be a multiple of 8-bytes. Therefore the type will be padded and the storage of
+a vector of such type will not be as compact as possible. This can affect
+performance in some situations. An alternative approach would be the following,
 \begin{cppcode}
   class T
   {
@@ -292,16 +288,15 @@ following,
       Vector<int> u_;
   };
 \end{cppcode}
-By extending \cppinline{SingleParticle<T>}, it provides the same easy access to
-each particle. However, now the state values are stored as two compact vectors.
+By extending \verb|SingleParticle<T>|, it provides the same easy access to each
+particle. However, now the state values are stored as two compact vectors.
 
 A second advantage is that it allows easier access to the raw data. Consider
-the implementation \cppinline{PFEval} in section~\ref{sub:Implementations}.
-It is rather redundant to copy each value of the two positions, just so later
-we can compute weighted sums from them. Recall that in
-section~\ref{sub:Monitor} we showed that a monitor that compute the final
-results directly can also be added to a sampler. Therefore, we might
-implement \cppinline{PFEval} as the following,
+the implementation \verb|PFEval| in section~\ref{sub:Implementations}. It is
+rather redundant to copy each value of the two positions, just so later we can
+compute weighted sums from them. Recall that in section~\ref{sub:Monitor} we
+showed that a monitor that compute the final results directly can also be added
+to a sampler. Therefore, we might implement \verb|PFEval| as the following,
 \begin{cppcode*}{texcomments}
   class PFEval
   {
@@ -321,6 +316,6 @@ And it can be added to a sampler as,
 \end{cppcode}
 For this particular case, the performance benefit is small. But the possibility
 of accessing compact vector as raw data allows easier interfacing with external
-numerical libraries. If we implemented \cppinline{PFState} with the alternative
-approach shown earlier, the above direct invoking of \cppinline{cblas_dgemv}
-will not be possible.
+numerical libraries. If we implemented \verb|PFState| with the alternative
+approach shown earlier, the above direct invoking of \verb|cblas_dgemv| will
+not be possible.

@@ -4,9 +4,9 @@
 \section{Constants}
 \label{sec:Constants}
 
-The library defines some mathematical constants in the form of
-\cppinline{constexpr} functions. For example, to get the value of $\pi$ with a
-desired precision, one can call the following.
+The library defines some mathematical constants in the form of \verb|constexpr|
+functions. For example, to get the value of $\pi$ with a desired precision, one
+can call the following,
 \begin{cppcode}
   auto pi_f = const_pi<float>();
   auto pi_d = const_pi<double>();
@@ -15,74 +15,68 @@ desired precision, one can call the following.
 The compiler will evaluate these values at compile-time and thus there is no
 performance difference from hard-coding the constants in the program, while the
 readability is improved. All defined constants are listed in
-table~\ref{tab:Mathematical constants}. Note that all functions has a prefix
-\cppinline{const_}, which is omitted in the table.
+table~\ref{tab:Mathematical constants}.
 
-\begin{table}[ht]
-  \begin{tabu}{X[2l]X[l]X[2l]X[l]X[2l]X[l]}
+\begin{table}
+  \begin{tabularx}{\textwidth}{XXXX}
     \toprule
-    Function & Value &
-    Function & Value &
-    Function & Value \\
+    Function & Value & Function & Value \\
     \midrule
-    \texttt{pi}             & $\pi$              &
-    \texttt{pi\_2}          & $2\pi$             &
-    \texttt{pi\_inv}        & $1/\pi$            \\
-    \texttt{pi\_sqr}        & $\pi^2$            &
-    \texttt{pi\_by2}        & $\pi/2$            &
-    \texttt{pi\_by3}        & $\pi/3$            \\
-    \texttt{pi\_by4}        & $\pi/4$            &
-    \texttt{pi\_by6}        & $\pi/6$            &
-    \texttt{pi\_2by3}       & $2\pi/3$           \\
-    \texttt{pi\_3by4}       & $3\pi/4$           &
-    \texttt{pi\_4by3}       & $4\pi/3$           &
-    \texttt{sqrt\_pi}       & $\sqrt{\pi}$       \\
-    \texttt{sqrt\_pi\_2}    & $\sqrt{2\pi}$      &
-    \texttt{sqrt\_pi\_inv}  & $\sqrt{1/\pi}$     &
-    \texttt{sqrt\_pi\_by2}  & $\sqrt{\pi/2}$     \\
-    \texttt{sqrt\_pi\_by3}  & $\sqrt{\pi/3}$     &
-    \texttt{sqrt\_pi\_by4}  & $\sqrt{\pi/4}$     &
-    \texttt{sqrt\_pi\_by6}  & $\sqrt{\pi/6}$     \\
-    \texttt{sqrt\_pi\_2by3} & $\sqrt{2\pi/3}$    &
-    \texttt{sqrt\_pi\_3by4} & $\sqrt{3\pi/4}$    &
-    \texttt{sqrt\_pi\_4by3} & $\sqrt{4\pi/3}$    \\
-    \texttt{ln\_pi}         & $\ln{\pi}$         &
-    \texttt{ln\_pi\_2}      & $\ln{2\pi}$        &
-    \texttt{ln\_pi\_inv}    & $\ln{1/\pi}$       \\
-    \texttt{ln\_pi\_by2}    & $\ln{\pi/2}$       &
-    \texttt{ln\_pi\_by3}    & $\ln{\pi/3}$       &
-    \texttt{ln\_pi\_by4}    & $\ln{\pi/4}$       \\
-    \texttt{ln\_pi\_by6}    & $\ln{\pi/6}$       &
-    \texttt{ln\_pi\_2by3}   & $\ln{2\pi/3}$      &
-    \texttt{ln\_pi\_3by4}   & $\ln{3\pi/4}$      \\
-    \texttt{ln\_pi\_4by3}   & $\ln{4\pi/3}$      &
-    \texttt{e}              & $\EE$              &
-    \texttt{e\_inv}         & $1/\EE$            \\
-    \texttt{sqrt\_e}        & $\sqrt{\EE}$       &
-    \texttt{sqrt\_e\_inv}   & $\sqrt{1/\EE}$     &
-    \texttt{sqrt\_2}        & $\sqrt{2}$         \\
-    \texttt{sqrt\_3}        & $\sqrt{3}$         &
-    \texttt{sqrt\_5}        & $\sqrt{5}$         &
-    \texttt{sqrt\_10}       & $\sqrt{10}$        \\
-    \texttt{sqrt\_1by2}     & $\sqrt{1/2}$       &
-    \texttt{sqrt\_1by3}     & $\sqrt{1/3}$       &
-    \texttt{sqrt\_1by5}     & $\sqrt{1/5}$       \\
-    \texttt{sqrt\_1by10}    & $\sqrt{1/10}$      &
-    \texttt{ln\_2}          & $\ln{2}$           &
-    \texttt{ln\_3}          & $\ln{3}$           \\
-    \texttt{ln\_5}          & $\ln{5}$           &
-    \texttt{ln\_10}         & $\ln{10}$          &
-    \texttt{ln\_inv\_2}     & $1/\ln{2}$         \\
-    \texttt{ln\_inv\_3}     & $1/\ln{3}$         &
-    \texttt{ln\_inv\_5}     & $1/\ln{5}$         &
-    \texttt{ln\_inv\_10}    & $1/\ln{10}$        \\
-    \texttt{ln\_ln\_2}      & $\ln\ln{2}$        &
-    &                    &
-    &                    \\
+    \verb|const_pi|           & $\pi$           &
+    \verb|const_pi_2|         & $2\pi$          \\
+    \verb|const_pi_inv|       & $1/\pi$         &
+    \verb|const_pi_sqr|       & $\pi^2$         \\
+    \verb|const_pi_by2|       & $\pi/2$         &
+    \verb|const_pi_by3|       & $\pi/3$         \\
+    \verb|const_pi_by4|       & $\pi/4$         &
+    \verb|const_pi_by6|       & $\pi/6$         \\
+    \verb|const_pi_2by3|      & $2\pi/3$        &
+    \verb|const_pi_3by4|      & $3\pi/4$        \\
+    \verb|const_pi_4by3|      & $4\pi/3$        &
+    \verb|const_sqrt_pi|      & $\sqrt{\pi}$    \\
+    \verb|const_sqrt_pi_2|    & $\sqrt{2\pi}$   &
+    \verb|const_sqrt_pi_inv|  & $\sqrt{1/\pi}$  \\
+    \verb|const_sqrt_pi_by2|  & $\sqrt{\pi/2}$  &
+    \verb|const_sqrt_pi_by3|  & $\sqrt{\pi/3}$  \\
+    \verb|const_sqrt_pi_by4|  & $\sqrt{\pi/4}$  &
+    \verb|const_sqrt_pi_by6|  & $\sqrt{\pi/6}$  \\
+    \verb|const_sqrt_pi_2by3| & $\sqrt{2\pi/3}$ &
+    \verb|const_sqrt_pi_3by4| & $\sqrt{3\pi/4}$ \\
+    \verb|const_sqrt_pi_4by3| & $\sqrt{4\pi/3}$ &
+    \verb|const_ln_pi|        & $\ln{\pi}$      \\
+    \verb|const_ln_pi_2|      & $\ln{2\pi}$     &
+    \verb|const_ln_pi_inv|    & $\ln{1/\pi}$    \\
+    \verb|const_ln_pi_by2|    & $\ln{\pi/2}$    &
+    \verb|const_ln_pi_by3|    & $\ln{\pi/3}$    \\
+    \verb|const_ln_pi_by4|    & $\ln{\pi/4}$    &
+    \verb|const_ln_pi_by6|    & $\ln{\pi/6}$    \\
+    \verb|const_ln_pi_2by3|   & $\ln{2\pi/3}$   &
+    \verb|const_ln_pi_3by4|   & $\ln{3\pi/4}$   \\
+    \verb|const_ln_pi_4by3|   & $\ln{4\pi/3}$   &
+    \verb|const_e|            & $\EE$           \\
+    \verb|const_e_inv|        & $1/\EE$         &
+    \verb|const_sqrt_e|       & $\sqrt{\EE}$    \\
+    \verb|const_sqrt_e_inv|   & $\sqrt{1/\EE}$  &
+    \verb|const_sqrt_2|       & $\sqrt{2}$      \\
+    \verb|const_sqrt_3|       & $\sqrt{3}$      &
+    \verb|const_sqrt_5|       & $\sqrt{5}$      \\
+    \verb|const_sqrt_10|      & $\sqrt{10}$     &
+    \verb|const_sqrt_1by2|    & $\sqrt{1/2}$    \\
+    \verb|const_sqrt_1by3|    & $\sqrt{1/3}$    &
+    \verb|const_sqrt_1by5|    & $\sqrt{1/5}$    \\
+    \verb|const_sqrt_1by10|   & $\sqrt{1/10}$   &
+    \verb|const_ln_2|         & $\ln{2}$        \\
+    \verb|const_ln_3|         & $\ln{3}$        &
+    \verb|const_ln_5|         & $\ln{5}$        \\
+    \verb|const_ln_10|        & $\ln{10}$       &
+    \verb|const_ln_inv_2|     & $1/\ln{2}$      \\
+    \verb|const_ln_inv_3|     & $1/\ln{3}$      &
+    \verb|const_ln_inv_5|     & $1/\ln{5}$      \\
+    \verb|const_ln_inv_10|    & $1/\ln{10}$     &
+    \verb|const_ln_ln_2|      & $\ln\ln{2}$     \\
     \bottomrule
-  \end{tabu}
-  \caption{Mathematical constants. Note: All functions are prefixed by
-    \cppinline{const_}.}
+  \end{tabularx}
+  \caption{Mathematical constants}
   \label{tab:Mathematical constants}
 \end{table}
 
@@ -93,7 +87,7 @@ The library provides a set of functions for vectorized mathematical operations.
 For example,
 \begin{cppcode}
   std::size_t n = 1000;
-  vsmc::Vector<double> a(n), b(n), y(n);
+  Vector<double> a(n), b(n), y(n);
   // Fill vectors a and b
   add(n, a.data(), b.data(), y.data());
 \end{cppcode}
@@ -102,78 +96,183 @@ performs addition for vectors. It is equivalent to
   for (std::size_t i = 0; i != n; ++i)
       y[i] = a[i] + b[i];
 \end{cppcode}
-The functions defined are listed in table~\ref{tab:Vectorized mathematical
-  operations}.
+The functions defined are listed in table~\ref{tab:Arithmetic functions}
+to~\ref{tab:Special functions}. For each function, the first parameter is
+always the length of the vector, and the last is a pointer to the output vector
+(except \verb|sincos| which has two output parameters). For all functions, the
+output is always a vector. If there are more than one input parameters, then
+some of them, but not all, can be scalars. For example, for the function call
+\verb|fma(n, a, b, c, y)| in table~\ref{tab:Arithmetic functions}, the input
+parameters are \verb|a|, \verb|b|, and \verb|c|. Some of them, not all, can be
+scalars instead of pointers to vectors. The output parameter \verb|y| has to be
+a pointer to a vector.
 
-\begin{table}[ht]
-  \begin{tabu}{X[l]X[2l]X[l]X[2l]X[l]X[2l]}
+\begin{table}
+  \begin{tabularx}{\textwidth}{XX}
     \toprule
-    Function & Operation &
-    Function & Operation &
     Function & Operation \\
     \midrule
-    \texttt{add}     & $a + b$                               &
-    \texttt{sub}     & $a - b$                               &
-    \texttt{sqr}     & $a^2$                                 \\
-    \texttt{mul}     & $ab$                                  &
-    \texttt{abs}     & $|a|$                                 &
-    \texttt{fma}     & $ab + c$                              \\
-    \texttt{inv}     & $1 / a$                               &
-    \texttt{div}     & $a / b$                               &
-    \texttt{sqrt}    & $\sqrt{a}$                            \\
-    \texttt{invsqrt} & $1 / \sqrt{a}$                        &
-    \texttt{cbrt}    & $\sqrt[3]{a}$                         &
-    \texttt{invcbrt} & $1 / \sqrt[3]{a}$                     \\
-    \texttt{pow2o3}  & $a^{2/3}$                             &
-    \texttt{pow3o2}  & $a^{3/2}$                             &
-    \texttt{pow}     & $a^b$                                 \\
-    \texttt{hypot}   & $\sqrt{a^2 + b^2}$                    &
-    \texttt{exp}     & $\EE^a$                               &
-    \texttt{exp2}    & $2^a$                                 \\
-    \texttt{exp10}   & $10^a$                                &
-    \texttt{expm1}   & $\EE^a - 1$                           &
-    \texttt{log}     & $\ln(a)$                              \\
-    \texttt{log2}    & $\log_2(a)$                           &
-    \texttt{log10}   & $\log_{10}(a)$                        &
-    \texttt{log1p}   & $\ln(a + 1)$                          \\
-    \texttt{cos}     & $\cos(a)$                             &
-    \texttt{sin}     & $\sin(a)$                             &
-    \texttt{sincos}  & $\sin(a)$ and $\cos(a)$               \\
-    \texttt{tan}     & $\tan(a)$                             &
-    \texttt{acos}    & $\arccos(a)$                          &
-    \texttt{asin}    & $\arcsin(a)$                          \\
-    \texttt{atan}    & $\arctan(a)$                          &
-    \texttt{acos}    & $\arccos(a)$                          &
-    \texttt{atan2}   & $\arctan(a / b)$                      \\
-    \texttt{cosh}    & $\cosh(a)$                            &
-    \texttt{sinh}    & $\sinh(a)$                            &
-    \texttt{tanh}    & $\tanh(a)$                            \\
-    \texttt{acosh}   & $\mathrm{arc}\cosh(a)$                &
-    \texttt{asinh}   & $\mathrm{arc}\sinh(a)$                &
-    \texttt{atanh}   & $\mathrm{arc}\tanh(a)$                \\
-    \texttt{erf}     & $\mathrm{erf}(a)$                     &
-    \texttt{erfc}    & $\mathrm{erfc}(a)$                    &
-    \texttt{cdfnorm} & $1 - \mathrm{erfc}(a / \sqrt{2}) / 2$ \\
-    \texttt{lgamma}  & $\ln\Gamma(a)$                        &
-    \texttt{tgamma}  & $\Gamma(a)$                           &
-                     &                                       \\
+    \verb|add(n, a, b, y)|    & $y_i = a_i + b_i$     \\
+    \verb|sub(n, a, b, y)|    & $y_i = a_i - b_i$     \\
+    \verb|sqr(n, a, y)|       & $y_i = a_i^2$         \\
+    \verb|mul(n, a, b, y)|    & $y_i = a_i b_i$       \\
+    \verb|abs(n, a, y)|       & $y_i = |a_i|$         \\
+    \verb|fma(n, a, b, c, y)| & $y_i = a_i b_i + c_i$ \\
     \bottomrule
-  \end{tabu}
-  \caption{Vectorized mathematical operations}
-  \label{tab:Vectorized mathematical operations}
+  \end{tabularx}
+  \caption{Arithmetic functions}
+  \label{tab:Arithmetic functions}
 \end{table}
 
-For each function, the first parameter is always the length of
-the vector, and the last is a pointer to the output vector (except
-\cppinline{sincos} which has two output parameters). For all functions, the
-output is always a vector. If there are more than one input parameters, then
-some of them, but not all, can be scalars. The order of the input parameters
-are as they appear in the mathematical expressions. For example,
-\cppinline{fma} perform the operation $ab + c$, then the function shall be
-called as,
+\begin{table}
+  \begin{tabularx}{\textwidth}{XX}
+    \toprule
+    Function & Operation \\
+    \midrule
+    \verb|inv(n, a, y)|      & $y_i = 1 / a_i$              \\
+    \verb|div(n, a, b, y)|   & $y_i = a_i / b_i$            \\
+    \verb|sqrt(n, a, y)|     & $y_i = \sqrt{a_i}$           \\
+    \verb|invsqrt(n, a, y)|  & $y_i = 1 / \sqrt{a_i}$       \\
+    \verb|cbrt(n, a, y)|     & $y_i = \sqrt[3]{a_i}$        \\
+    \verb|invcbrt(n, a, y)|  & $y_i = 1 / \sqrt[3]{a_i}$    \\
+    \verb|pow2o3(n, a, y)|   & $y_i = a_i^{2/3}$            \\
+    \verb|pow3o2(n, a, y)|   & $y_i = a_i^{3/2}$            \\
+    \verb|pow(n, a, b, y)|   & $y_i = a_i^{b_i}$            \\
+    \verb|hypot(n, a, b, y)| & $y_i = \sqrt{a_i^2 + b_i^2}$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Power and root functions}
+  \label{tab:Power and root functions}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{XX}
+    \toprule
+    Function & Operation \\
+    \midrule
+    \verb|exp(n, a, y)|   & $y_i = \EE^a_i$       \\
+    \verb|exp2(n, a, y)|  & $y_i = 2^a_i$         \\
+    \verb|exp10(n, a, y)| & $y_i = 10^a_i$        \\
+    \verb|expm1(n, a, y)| & $y_i = \EE^a_i - 1$   \\
+    \verb|log(n, a, y)|   & $y_i = \ln a_)$       \\
+    \verb|log2(n, a, y)|  & $y_i = \log_2 a_i$    \\
+    \verb|log10(n, a, y)| & $y_i = \log_{10} a_i$ \\
+    \verb|log1p(n, a, y)| & $y_i = \ln(a_i + 1)$  \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Exponential and logarithm functions}
+  \label{tab:Exponential and logarithm functions}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{XX}
+    \toprule
+    Function & Operation \\
+    \midrule
+    \verb|cos(n, a, y)|       & $y_i = \cos(a_i)$                    \\
+    \verb|sin(n, a, y)|       & $y_i = \sin(a_i)$                    \\
+    \verb|sincos(n, a, y, z)| & $y_i = \sin(a_i)$, $z_i = \cos(a_i)$ \\
+    \verb|tan(n, a, y)|       & $y_i = \tan(a_i)$                    \\
+    \verb|acos(n, a, y)|      & $y_i = \arccos(a_i)$                 \\
+    \verb|asin(n, a, y)|      & $y_i = \arcsin(a_i)$                 \\
+    \verb|atan(n, a, y)|      & $y_i = \arctan(a_i)$                 \\
+    \verb|acos(n, a, y)|      & $y_i = \arccos(a_i)$                 \\
+    \verb|atan2(n, a, y)|     & $y_i = \arctan(a_i / b_i)$           \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Trigonometric functions}
+  \label{tab:Trigonometric functions}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{XX}
+    \toprule
+    Function & Operation \\
+    \midrule
+    \verb|cosh(n, a, y)|  & $y_i = \cosh(a_i)$             \\
+    \verb|sinh(n, a, y)|  & $y_i = \sinh(a_i)$             \\
+    \verb|tanh(n, a, y)|  & $y_i = \tanh(a_i)$             \\
+    \verb|acosh(n, a, y)| & $y_i = \mathrm{arc}\cosh(a_i)$ \\
+    \verb|asinh(n, a, y)| & $y_i = \mathrm{arc}\sinh(a_i)$ \\
+    \verb|atanh(n, a, y)| & $y_i = \mathrm{arc}\tanh(a_i)$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Hyperbolic functions}
+  \label{tab:Hyperbolic functions}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{XX}
+    \toprule
+    Function & Operation \\
+    \midrule
+    \verb|erf(n, a, y)|     & $y_i = \mathrm{erf}(a_i)$                     \\
+    \verb|erfc(n, a, y)|    & $y_i = \mathrm{erfc}(a_i)$                    \\
+    \verb|cdfnorm(n, a, y)| & $y_i = 1 - \mathrm{erfc}(a_i / \sqrt{2}) / 2$ \\
+    \verb|lgamma(n, a, y)|  & $y_i = \ln\Gamma(a_i)$                        \\
+    \verb|tgamma(n, a, y)|  & $y_i = \Gamma(a_i)$                           \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Special functions}
+  \label{tab:Special functions}
+\end{table}
+
+\section{Pack and unpack vectors}
+\label{sec:Pack and unpack vectors}
+
+The vectorized operations in the last section only operates on contiguous
+vectors. The library provides three functions to pack general vector into such
+storage,
 \begin{cppcode}
-  fma(n, a, b, c, y);
+  // dst[i] = src[i * stride], i = 1 to n
+  template <typename RandomIter, typename IntType, typename OutputIter>
+  inline void pack_s(
+      std::size_t n, RandomIter src, IntType stride, OutputIter dst);
+
+  // dst[i] = src[index[i]], i = 1 to n
+  template <typename RandomIter, typename InputIter, typename OutputIter>
+  inline void pack_i(
+      std::size_t n, RandomIter src, InputIter index, OutputIter dst);
+
+  // Pack all src[i] with static_cast<boo>(mask[i]) is true, i = 1 to n
+  template <typename InputIterSrc, typename InputIterMask, typename OutputIter>
+  inline void pack_m(
+      std::size_t n, InputIterSrc src, InputIterMask mask, OutputIter dst);
 \end{cppcode}
-where \cppinline{a}, \cppinline{b}, \cppinline{c} are input parameters, and
-some of them, not all, can be scalars instead of pointers. And \cppinline{y} is
-the output parameter, which has to be pointer to a length $n$ vector.
+There are also three corresponding unpack functions,
+\begin{cppcode}
+  // dst[i * stride] = src[i], i = 1 to n
+  template <typename InputIter, typename IntType, typename RandomIter>
+  inline void unpack_s(
+      std::size_t n, InputIter src, IntType stride, RandomIter dst);
+
+  // dst[index[i]] = src[i], i = 1 to n
+  template <typename InputIterSrc, typename InputIterIndex, typename RandomIter>
+  inline void unpack_i(
+      std::size_t n, InputIterSrc src, InputIterIndex index, RandomIter dst);
+
+  // dst[j] = src[i], where mask[j] is the i-th element of mask such that
+  // static_cast<bool>(mask[j]) is true, i = 1 to n
+  template <typename InputIterSrc, typename InputIterMask, typename OutputIter>
+  inline void unpack_m(
+      std::size_t n, InputIterSrc src, InputIterMask mask, OutputIter dst);
+\end{cppcode}
+These functions guarantee that the three assertions in the following program
+will never fail,
+\begin{cppcode}
+  pack_s(n, src, stride, tmp);
+  unpack_s(n, tmp, stride, dst);
+  for (std::size_t i = 0; i != n; ++i)
+      assert(src[i * stride] == dst[i * stride]);
+
+  pack_i(n, src, index, tmp);
+  unpack_i(n, tmp, index, dst);
+  for (std::size_t i = 0; i != n; ++i)
+      assert(src[index[i]] == dst[index[i]]);
+
+  pack_m(n, src, mask, tmp);
+  unpack_m(n, tmp, mask, src);
+  for (std::size_t i = 0; i != n; ++i)
+      if (mask[i])
+          assert(src[i] == dst[i]);
+\end{cppcode}

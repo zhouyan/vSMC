@@ -21,9 +21,9 @@ constructed with user defined resampling operations. Below is the signature,
   const double *weight, IntType *replication);
 \end{cppcode}
 The last parameter is the output vector $\{r_i\}_{i=1}^N$. The builtin schemes
-are implemented as classes with \cppinline{operator()} conforms to the above
-signature. For example, \cppinline{ResampleMultinomial} implements the
-multinomial resampling algorithm.
+are implemented as classes with \verb|operator()| conforms to the above
+signature. For example, \verb|ResampleMultinomial| implements the multinomial
+resampling algorithm.
 
 To transform $\{r_i\}_{i=1}^N$ into $\{a_i\}_{i=1}^M$, one can call the
 following function,
@@ -38,7 +38,7 @@ for all applications. The last step of a resampling operation, the copying of
 particles can be the most time consuming one, especially on distributed
 systems. The topology of the system will need to be taking into consideration
 to achieve optimal performance. In those situations, it is best to use
-\cppinline{ResampleMultinomial} etc., to generate the replication numbers, and
+\verb|ResampleMultinomial| etc., to generate the replication numbers, and
 manually perform the rest of the resampling algorithm.
 
 \section{Resizing a sampler}

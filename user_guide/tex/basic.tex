@@ -4,12 +4,11 @@
 \section{Conventions}
 \label{sec:Conventions}
 
-All classes that are accessible to users are within the name space
-\cppinline{vsmc}. Class names are in \cppinline{CamelCase} and function names
-and class members are in \cppinline{small_cases}. In the remaining of this
-guide, we will omit the \cppinline{vsmc::} name space qualifiers. We will use
-``function'' for referring to name space scope functions and ``method'' for
-class member functions.
+All classes that are accessible to users are within the name space \verb|vsmc|.
+Class names are in \verb|CamelCase| and function names and class members are in
+\verb|small_cases|. In the remaining of this guide, we will omit the
+\verb|vsmc::| name space qualifiers. We will use ``function'' for referring to
+name space scope functions and ``method'' for class member functions.
 
 \section{Getting and installing the library}
 \label{sec:Getting and installing the library}
@@ -20,15 +19,15 @@ GitHub\footnote{\url{https://github.com/zhouyan/vSMC}}. This is a header only
 \texttt{include} directory into a proper place, e.g.,
 \texttt{/usr/local/include} on Unix-alike systems. This library requires
 working \cppoo, \blas and \lapack implementations. Standard C interface headers
-for the later two (\cppinline{cblas.h} and \cppinline{lapacke.h}) are required.
-Intel Threading Building
+for the later two (\verb|cblas.h| and \verb|lapacke.h|) are required. Intel
+Threading Building
 Blocks\footnote{\url{https://www.threadingbuildingblocks.org}} (\tbb), Intel
 Math Kernel Library\footnote{\url{https://software.intel.com/en-us/intel-mkl}}
 (\mkl) and \hdf\footnote{\url{http://www.hdfgroup.org}} are optional
 third-party libraries. One need to define the configuration macros
-\cppinline{VSMC_HAS_TBB}, \cppinline{VSMC_HAS_MKL} and
-\cppinline{VSMC_HAS_HDF5} to nonzero values before including any \vsmc headers
-to make their existence known to the library, respectively.
+\verb|VSMC_HAS_TBB|, \verb|VSMC_HAS_MKL| and \verb|VSMC_HAS_HDF5| to nonzero
+values before including any \vsmc headers to make their existence known to the
+library, respectively.
 
 \section{Concepts}
 \label{sec:Concepts}
@@ -73,7 +72,7 @@ are introduced in detail in the following sections.
 The library gives users the maximum flexibility of how the states
 $\{X^{(i)}\}_{i=1}^N$ shall be stored and structured. Any class type with a
 constructor that takes a single integer value, the number of particles, as its
-argument, and a method named \cppinline{copy} is acceptable. For example,
+argument, and a method named \verb|copy| is acceptable. For example,
 \begin{cppcode*}{texcomments}
   class T
   {
@@ -90,7 +89,7 @@ argument, and a method named \cppinline{copy} is acceptable. For example,
   };
 \end{cppcode*}
 How the state values are actually stored and accessed are entirely up to the
-user. The method \cppinline{copy} is necessary since the library assumes no
+user. The method \verb|copy| is necessary since the library assumes no
 knowledge of the internal structure of the state. And thus it cannot perform
 the last step of a resampling algorithm, which makes copies of particles with
 larger weights and eliminate those with smaller weights.
@@ -102,42 +101,40 @@ class template for this situation,
   template <MatrixLayout Layout, std::size_t Dim, typename T>
   class StateMatrix;
 \end{cppcode}
-where \cppinline{Layout} is either \cppinline{RowMajor} or
-\cppinline{ColMajor}, which specifies the matrix storage layout;
-\cppinline{Dim} is a non-negative integer value. If \cppinline{Dim} is zero,
-then the dimension may be changed at runtime. If it is positive, then the
-dimension is fixed and cannot be changed at runtime. The last template
-parameter \cppinline{T} is the \cpp type of state space. The following
-constructs an object of this class,
+where \verb|Layout| is either \verb|RowMajor| or \verb|ColMajor|, which
+specifies the matrix storage layout; \verb|Dim| is a non-negative integer
+value. If \verb|Dim| is zero, then the dimension may be changed at runtime. If
+it is positive, then the dimension is fixed and cannot be changed at runtime.
+The last template parameter \verb|T| is the \cpp type of state space. The
+following constructs an object of this class,
 \begin{cppcode}
   StateMatrix<ColMajor, Dynamic, double> s(N);
 \end{cppcode}
-where \cppinline{Dynamic} is just an enumerator with value zero. We can specify
-the dimension at runtime through the method \cppinline{s.resize_dim(d)}. Note
-that, if the template parameter \cppinline{Dim} is positive, then this call
-results in a compile-time error.
+where \verb|Dynamic| is just an enumerator with value zero. We can specify the
+dimension at runtime through the method \verb|s.resize_dim(d)|. Note that, if
+the template parameter \verb|Dim| is positive, then this call results in a
+compile-time error.
 
 To access $X_{ij}$, the value of the state of the $i$\ith particle at the
-$j$\ith coordinate, one can use the method \cppinline{s.state(i,j)}. The method
-\cppinline{s.data()} returns a pointer to the beginning of the matrix.  If
-\cppinline{Layout} is \cppinline{RowMajor}, then the method
-\cppinline{s.row_data(i)} returns a pointer to the beginning of the $i$\ith
-row. If \cppinline{Layout} is \cppinline{ColMajor}, then the method
-\cppinline{s.col_data(j)} returns a pointer to the beginning of the $j$\ith
-column. These methods help interfacing with numerical libraries, such as \blas.
+$j$\ith coordinate, one can use the method \verb|s.state(i,j)|. The method
+\verb|s.data()| returns a pointer to the beginning of the matrix. If
+\verb|Layout| is \verb|RowMajor|, then the method \verb|s.row_data(i)| returns
+a pointer to the beginning of the $i$\ith row. If \verb|Layout| is
+\verb|ColMajor|, then the method \verb|s.col_data(j)| returns a pointer to the
+beginning of the $j$\ith column. These methods help interfacing with numerical
+libraries, such as \blas.
 
-The \cppinline{StateMatrix} class deliberately does not provide a
-\cppinline{resize} method. There are algorithms that change the sample size
-between iterations. However, such algorithms often change size through
-resampling or other methods, either deterministically or stochastically. An
-example of changing size of a sampler is provided in section~\ref{sec:Resizing
-  a sampler}.
+The \verb|StateMatrix| class deliberately does not provide a \verb|resize|
+method. There are algorithms that change the sample size between iterations.
+However, such algorithms often change size through resampling or other methods,
+either deterministically or stochastically. An example of changing size of a
+sampler is provided in section~\ref{sec:Resizing a sampler}.
 
 \subsection{Weight}
 \label{sub:Weight}
 
 The vector of weights $\{W^{(i)}\}_{i=1}^N$ is abstracted in the library by the
-\cppinline{Weight} class. The following constructs an object of this class,
+\verb|Weight| class. The following constructs an object of this class,
 \begin{cppcode}
   Weight w(N);
 \end{cppcode}
@@ -153,27 +150,26 @@ The weights can be manipulated, given a vector of length $N$, say $v$,
   w.set_log(v);     // Set $\log W^{(i)} = v^{(i)} + \text{const.}$
   w.add_log(v);     // Set $\log W^{(i)} = \log W^{(i)} + v^{(i)} + \text{const.}$
 \end{cppcode*}
-The method \cppinline{w.data()} returns a pointer to the normalized weights. It
-is important to note that the weights are always normalized and all mutable
+The method \verb|w.data()| returns a pointer to the normalized weights. It is
+important to note that the weights are always normalized and all mutable
 methods only allow access to $\{W^{(i)}\}_{i=1}^N$ as a whole.
 
 \subsection{Particle}
 \label{sub:Particle}
 
 A particle system is composed of both the state values, which is of user
-defined type, say \cppinline{T}, and the weights. The following constructs an
-object of class \cppinline{Particle<T>},
+defined type, say \verb|T|, and the weights. The following constructs an object
+of class \verb|Particle<T>|,
 \begin{cppcode}
   Particle<T> particle(N);
 \end{cppcode}
-The method \cppinline{particle.value()} returns the type \cppinline{T} object,
-and \cppinline{particle.weight()} returns the type \cppinline{Weight}
-object\footnote{More precisely, it is a \cppinline{Particle<T>::weight_type}
-  object, whose exact type depends on the type \cppinline{T}. See
-  section~\ref{sec:Customizing member types} for more details. If the user does
-  not do something special as shown in that section, then the default type is
-  the class \cppinline{Weight}}. They are constructed with the same integer
-value $N$ when the above constructor is invoked.
+The method \verb|particle.value()| returns the type \verb|T| object, and
+\verb|particle.weight()| returns a \verb|Particle<T>::weight_type| object,
+whose exact type depends on the type \verb|T|. See section~\ref{sec:Customizing
+  member types} for more details. If the user does not do something special as
+shown in that section, then the default type is the \verb|Weight|. They are
+constructed with the same integer value $N$ when the above constructor is
+invoked.
 
 As a Monte Carlo algorithm, random number generators (\rng) will be used
 frequently. The user is free to use whatever \rng mechanism as they see fit.
@@ -188,9 +184,9 @@ below a function that manipulates some state values,
       x = rnorm(rng);
   }
 \end{cppcode}
-Every call of this function will give \cppinline{x} exactly the same value.
-This is hardly what the user intended. One might consider an global \rng or one
-as class member data. For example,
+Every call of this function will give \verb|x| exactly the same value. This is
+hardly what the user intended. One might consider an global \rng or one as
+class member data. For example,
 \begin{cppcode}
   std::mt19937 rng;
   void function(double &x)
@@ -216,7 +212,7 @@ details, it is sufficient to say that this is perhaps not a problem that most
 users bother to solve.
 
 The library provides a simple solution to this issue. The method
-\cppinline{particle.rng(i)} returns a reference to an \rng that conforms to the
+\verb|particle.rng(i)| returns a reference to an \rng that conforms to the
 \cppoo uniform \rng concept. It can be called from different threads at the
 same time, for example,
 \begin{cppcode*}{texcomments}
@@ -242,12 +238,11 @@ still thread-safe and produce desired statistical results. The details of the
 \label{sub:Single particle}
 
 It is often easier to define a function $f(X^{(i)})$ than
-$f(X^{(1)},\dots,X^{(N)})$. However, \cppinline{Particle<T>} only provides
-access to $\{X^{(i)}\}_{i=1}^N$ as a whole through
-\cppinline{particle.value()}. To allow direct access to $X^{(i)}$, the library
-uses a class template \cppinline{SingeParticle<T>}. An object of this class is
-constructed from the index $i$ of the particle, and a pointer to the particle
-system it belongs to,
+$f(X^{(1)},\dots,X^{(N)})$. However, \verb|Particle<T>| only provides access to
+$\{X^{(i)}\}_{i=1}^N$ as a whole through \verb|particle.value()|. To allow
+direct access to $X^{(i)}$, the library uses a class template
+\verb|SingeParticle<T>|. An object of this class is constructed from the index
+$i$ of the particle, and a pointer to the particle system it belongs to,
 \begin{cppcode}
   SingleParticle<T> sp(i, &particle);
 \end{cppcode}
@@ -261,35 +256,34 @@ In its most basic form, it has the following methods,
   sp.particle(); // Get a reference to the Particle<T> object sp belongs to
   sp.rng();      // => sp.particle().rng(sp.id());
 \end{cppcode}
-If \cppinline{T} is a subclass of \cppinline{StateMatrix}, then it has two
-additional methods,
+If \verb|T| is a subclass of \verb|StateMatrix|, then it has two additional
+methods,
 \begin{cppcode}
   sp.dim();    // => sp.particle().value().dim();
   sp.state(j); // => sp.particle().value().state(sp.id(), j);
 \end{cppcode}
-It is clear now that the interface of \cppinline{SingleParticle<T>} depends on
-the type \cppinline{T}. Later in section~\ref{sec:Extending SP}
-we will show how to insert additional methods into this class.
+It is clear now that the interface of \verb|SingleParticle<T>| depends on the
+type \verb|T|. Later in section~\ref{sec:Extending SP} we will show how to
+insert additional methods into this class.
 
-A \cppinline{SingleParticle<T>} object is similar to an iterator. In fact, it
+A \verb|SingleParticle<T>| object is similar to an iterator. In fact, it
 supports almost all of the operations of a random access iterator with two
-exceptions. First dereferencing a \cppinline{SingleParticle<T>} object returns
-itself. The support of \cppinline{operator*} allows the range-based for loop to
-be applied on a \cppinline{Particle<T>} object, for example,
+exceptions. First dereferencing a \verb|SingleParticle<T>| object returns
+itself. The support of \verb|operator*| allows the range-based for loop to be
+applied on a \verb|Particle<T>| object, for example,
 \begin{cppcode}
   for (auto sp : particle) {
       // sp is of type SingleParticle<T>
   }
 \end{cppcode}
 The above loop does make some sense. However trying to dereferencing a
-\cppinline{SingleParticle<T>} object in other contexts does not make much
-sense. Recall that it is an \emph{index}, not a \emph{pointer}. The library
-does not require the user defined type \cppinline{T} to provide access to
-individual values, and thus it cannot dereference a
-\cppinline{SingleParticle<T>} object to obtain such a value. Similarly, the
-expression \cppinline{sp[n]} returns \cppinline{sp + n}, another
-\cppinline{SingleParticle<T>} object. For the same reason,
-\cppinline{operator->} is not supported at all.
+\verb|SingleParticle<T>| object in other contexts does not make much sense.
+Recall that it is an \emph{index}, not a \emph{pointer}. The library does not
+require the user defined type \verb|T| to provide access to individual values,
+and thus it cannot dereference a \verb|SingleParticle<T>| object to obtain such
+a value. Similarly, the expression \verb|sp[n]| returns \verb|sp + n|, another
+\verb|SingleParticle<T>| object. For the same reason, \verb|operator->| is not
+supported at all.
 
 \subsection{Sampler}
 \label{sub:Sampler}
@@ -319,7 +313,7 @@ use, then it is assumed one does not want to do resampling. If one specify the
 resampling scheme without a threshold for \ess, then it is assumed it need to
 be done at every step.
 
-The method \cppinline{sampler.particle()} returns a reference to the particle
+The method \verb|sampler.particle()| returns a reference to the particle
 system. A sampler can be initialized by user defined object that is convertible
 to the following type,
 \begin{cppcode}
@@ -333,10 +327,9 @@ For example,
   };
 \end{cppcode}
 is a \cppoo lambda expression that can be used for this purpose. One can add it
-to a sampler by calling \cppinline{sampler.init(init)}. Upon calling
-\cppinline{sampler.initialize(param)}, the user defined function
-\cppinline{init} will be called and the argument \cppinline{param} will be
-passed to it.
+to a sampler by calling \verb|sampler.init(init)|. Upon calling
+\verb|sampler.initialize(param)|, the user defined function \verb|init| will be
+called and the argument \verb|param| will be passed to it.
 
 Similarly, after initialization, at each iteration, the particle system can be
 manipulated by user defined callable objects that is convertible to the
@@ -346,28 +339,27 @@ following types,
   using mcmc_type = std::function<std::size_t(std::size_t, Particle<T> &)>;
 \end{cppcode}
 Multiple moves can be added to a sampler. The call
-\cppinline{sampler.move(move, append)} adds a \cppinline{move_type} object to
-the sampler, where \cppinline{append} is a boolean value. If it is
-\cppinline{false}, it will clear any moves that were added before. If it is
-\cppinline{true}, then \cppinline{move} is appended to the end of an existing
-sequence of moves. Each move will be called one by one upon calling
-\cppinline{sampler.iterate()}. A similar sequence of \mcmc moves can also be
-added to a sampler. The call \cppinline{sampler.iterate()} will call user
-defined moves first, then perform the possible resampling, and then the
-sequence of \mcmc moves.
+\verb|sampler.move(move, append)| adds a \verb|move_type| object to the
+sampler, where \verb|append| is a boolean value. If it is \verb|false|, it will
+clear any moves that were added before. If it is \verb|true|, then \verb|move|
+is appended to the end of an existing sequence of moves. Each move will be
+called one by one upon calling \verb|sampler.iterate()|. A similar sequence of
+\mcmc moves can also be added to a sampler. The call \verb|sampler.iterate()|
+will call user defined moves first, then perform the possible resampling, and
+then the sequence of \mcmc moves.
 
 Note that the possible resampling will also be performed after the user defined
-initialization function is called by \cppinline{sampler.initialize(param)}. And
+initialization function is called by \verb|sampler.initialize(param)|. And
 after that, the sequence of \mcmc moves will be called. If it desired not to
 perform mutations during initialization, then following can be used,
 \begin{cppcode}
   sampler.init(init).initialize(param);
   sampler.move(move, false).mcmc(mcmc, false).iterate(n);
 \end{cppcode}
-The above code also demonstrates that most methods of \cppinline{Sampler<T>}
-return a reference to the sampler itself and thus method calls can be chained.
-In addition, method \cppinline{sampler.iterate(n)} accepts an optional argument
-that specifies the number of iterations. It is a shortcut for
+The above code also demonstrates that most methods of \verb|Sampler<T>| return
+a reference to the sampler itself and thus method calls can be chained. In
+addition, method \verb|sampler.iterate(n)| accepts an optional argument that
+specifies the number of iterations. It is a shortcut for
 \begin{cppcode}
   for (std::size_t i = 0; i != n; ++i)
       sampler.iterate();
@@ -396,10 +388,10 @@ For example,
       }
   }
 \end{cppcode*}
-The argument \cppinline{d} is the dimension of the vector function $\varphi$.
-The output is an $N$ by $d$ matrix in row major layout, with each row
-corresponding to the value of $\varphi(X^{(i)})$. Then one can add this
-function to a sampler by calling,
+The argument \verb|d| is the dimension of the vector function $\varphi$. The
+output is an $N$ by $d$ matrix in row major layout, with each row corresponding
+to the value of $\varphi(X^{(i)})$. Then one can add this function to a sampler
+by calling,
 \begin{cppcode}
   sampler.monitor("name", d, eval);
 \end{cppcode}
@@ -407,8 +399,8 @@ where the first argument is the name for the monitor, the second its dimension,
 and the third the evaluation function. At each iteration, after all the
 initialization, possible resampling, moves and \mcmc moves are done, the
 sampler will calculate $\sum_{i=1}^NW^{(i)}\varphi(X^{(i)})$. This method has
-two optional arguments. First is a boolean value \cppinline{record_only}. If it
-is \cppinline{true}, it is assumed that no summation is needed. For example,
+two optional arguments. First is a boolean value \verb|record_only|. If it is
+\verb|true|, it is assumed that no summation is needed. For example,
 \begin{cppcode*}{texcomments}
   void eval(std::size_t iter, std::size_t d, Particle<T> &particle, double *r)
   {
@@ -418,13 +410,13 @@ is \cppinline{true}, it is assumed that no summation is needed. For example,
   }
 \end{cppcode*}
 In this case, the monitor acts merely as a storage facility. The second
-optional argument is \cppinline{stage} which specifies at which point the
-monitoring shall happen. It can be \cppinline{MonitorMove}, which specifies
-that the monitoring happens right after the moves and before resampling. It can
-also be \cppinline{MonitorResample}, which specifies that the monitoring
-happens right after the resampling and before the \mcmc moves. Last, the
-default is \cppinline{MonitorMCMC}, which specifies that the monitoring happens
-after everything.
+optional argument is \verb|stage| which specifies at which point the monitoring
+shall happen. It can be \verb|MonitorMove|, which specifies that the monitoring
+happens right after the moves and before resampling. It can also be
+\verb|MonitorResample|, which specifies that the monitoring happens right after
+the resampling and before the \mcmc moves. Last, the default is
+\verb|MonitorMCMC|, which specifies that the monitoring happens after
+everything.
 
 The output of a sampler, together with the records of any monitors it has can
 be output in plain text forms through a \cpp output stream. For example,
@@ -528,15 +520,14 @@ The complete program is shown in appendix~\appref{app:sub:Sequential
     output << sampler;
     output.close();
 \end{cppcode}
-\cppinline{Sampler<PFState>} object is constructed first. Then the
-initialization \cppinline{PFInit}, move \cppinline{PFMove} and a monitor
-\cppinline{PFEval} that records $\xpos^t$ and $\ypos^t$ are added to the
-sampler. The monitor is named \cppinline{"pos"}. Then it is initialized with
-the name of the data file \cppinline{"pf.data"}, and iterated $n - 1$ times,
-where $n$ is the number of data points. At last, the output is written into a
-text file \cppinline{"pf.out"}. Below is a short
-R\footnote{\url{http://r-project.org}} script that can be used to process the
-output
+\verb|Sampler<PFState>| object is constructed first. Then the initialization
+\verb|PFInit|, move \verb|PFMove| and a monitor \verb|PFEval| that records
+$\xpos^t$ and $\ypos^t$ are added to the sampler. The monitor is named
+\verb|"pos"|. Then it is initialized with the name of the data file
+\verb|"pf.data"|, and iterated $n - 1$ times, where $n$ is the number of data
+points. At last, the output is written into a text file \verb|"pf.out"|. Below
+is a short R\footnote{\url{http://r-project.org}} script that can be used to
+process the output
 \begin{rcode}
   library(ggplot2)
 
@@ -557,7 +548,7 @@ output
   print(plt)
   dev.off()
 \end{rcode}
-The \rinline{print} statement shows the first five lines of the output,
+The \verb|print| statement shows the first five lines of the output,
 \begin{textcode}
     Size Resampled Accept.0      ESS    pos.0   pos.1
   1 1000         1        0   2.9204 -1.21951 3.16397
@@ -566,16 +557,15 @@ The \rinline{print} statement shows the first five lines of the output,
   4 1000         1        0  80.1088 -1.45922 3.37625
   5 1000         1        0 382.8820 -1.47299 3.49230
 \end{textcode}
-The column \textinline{Size} shows the sample size at each iteration. The
-library does not provide direct support of changing the sample size. However,
-it is possible and an example is shown in section~\ref{sec:Resizing a sampler}.
-The column \textinline{Resampled} shows nonzero values if resampling were
-performed and zero otherwise. For each moves and \mcmc steps, an acceptance
-count will be recorded. In this particular example, it is irrelevant. Next the
-column \textinline{ESS} shows the value of \ess. The last two columns show the
-importance sampling estimates of the positions recorded by the monitor named
-\cppinline{"pos"}. The graphical representation of the output is shown in
-figure~\ref{fig:pf}.
+The column \verb|Size| shows the sample size at each iteration. The library
+does not provide direct support of changing the sample size. However, it is
+possible and an example is shown in section~\ref{sec:Resizing a sampler}. The
+column \verb|Resampled| shows nonzero values if resampling were performed and
+zero otherwise. For each moves and \mcmc steps, an acceptance count will be
+recorded. In this particular example, it is irrelevant. Next the column
+\verb|ESS| shows the value of \ess. The last two columns show the importance
+sampling estimates of the positions recorded by the monitor named \verb|"pos"|.
+The graphical representation of the output is shown in figure~\ref{fig:pf}.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{cpp/pf}
@@ -583,10 +573,10 @@ figure~\ref{fig:pf}.
   \label{fig:pf}
 \end{figure}
 
-Before diving into the details of the implementation of \cppinline{PFState},
-etc., we will first define a few constant and types. The state space is of
-dimension $4$. And it is natural to use a \cppinline{StateMatrix} as the base
-class of \cppinline{PFState},
+Before diving into the details of the implementation of \verb|PFState|, etc.,
+we will first define a few constant and types. The state space is of dimension
+$4$. And it is natural to use a \verb|StateMatrix| as the base class of
+\verb|PFState|,
 \begin{cppcode}
   using PFStateBase = StateMatrix<RowMajor, 4, double>;
 \end{cppcode}
@@ -606,12 +596,11 @@ Last, we define the following constants as the indices of each state component.
 
 \subsubsection{State: \texttt{PFState}}
 
-As noted earlier, \cppinline{StateMatrix} will be used as the base class of
-\cppinline{PFState}. Since the data will be shared by all particles, we also
-store the data within this class. And methods will be provided to read the data
-from an external file, and compute the log-likelihood $\ell(X^{(i)})$, which
-accesses the data. Below the declaration of the class \cppinline{PFState} is
-shown,
+As noted earlier, \verb|StateMatrix| will be used as the base class of
+\verb|PFState|. Since the data will be shared by all particles, we also store
+the data within this class. And methods will be provided to read the data from
+an external file, and compute the log-likelihood $\ell(X^{(i)})$, which
+accesses the data. Below the declaration of the class \verb|PFState| is shown,
 \begin{cppcode*}{texcomments}
   class PFState : public PFStateBase
   {
@@ -681,19 +670,17 @@ The initialization step is implemented as below,
       Vector<double> weight_;
   };
 \end{cppcode}
-An object of this class is convertible to
-\cppinline{Sampler<PFState>::init_type}. In the main method,
-\cppinline{operator()}, \cppinline{eval_param} is called first to initialize
-the data. Then \cppinline{eval_pre} is called to allocated any resource this
-class need before calling any \cppinline{eval_sp}. In this case, it allocate
-the vector \cppinline{w_} for storing weights computed later. Next, the main
-loop initializes each state component with the respective Gaussian
-distribution, computes the log-likelihood and store them in the vector
-allocated in the last step. This is done by calling the \cppinline{eval_sp}
-method. After all particles have been initialized, we set the weights of the
-system in \cppinline{eval_post}. Later in section~\ref{sec:Symmetric
-  Multiprocessing} it will become clear why we structured the implementation
-this way.
+An object of this class is convertible to \verb|Sampler<PFState>::init_type|.
+In the main method, \verb|operator()|, \verb|eval_param| is called first to
+initialize the data. Then \verb|eval_pre| is called to allocated any resource
+this class need before calling any \verb|eval_sp|. In this case, it allocate
+the vector \verb|w_| for storing weights computed later. Next, the main loop
+initializes each state component with the respective Gaussian distribution,
+computes the log-likelihood and store them in the vector allocated in the last
+step. This is done by calling the \verb|eval_sp| method. After all particles
+have been initialized, we set the weights of the system in \verb|eval_post|.
+Later in section~\ref{sec:Symmetric Multiprocessing} it will become clear why
+we structured the implementation this way.
 
 \subsubsection{Move: \texttt{PFMove}}
 
@@ -714,8 +701,7 @@ The move step is similar to the initialization. We show the declaration here,
 
 \subsubsection{Monitor: \texttt{PFEval}}
 
-Last we define \cppinline{PFEval}, which simply copies the values of the
-positions.
+Last we define \verb|PFEval|, which simply copies the values of the positions.
 \begin{cppcode}
   class PFEval
   {
@@ -746,53 +732,52 @@ positions.
 \label{sec:Symmetric Multiprocessing}
 
 The above example is implemented in a sequential fashion. However, the loops
-inside \cppinline{PFInit}, \cppinline{PFMove} and \cppinline{PFEval} clearly
-can be parallelized. The library provides basic support of multicore
-parallelization through its \smp module. Two widely used backends, OpenMP and
-\tbb are available. Here we demonstrate how to use the \tbb backend. First we
-will declare the implementation classes as subclasses as below,
+inside \verb|PFInit|, \verb|PFMove| and \verb|PFEval| clearly can be
+parallelized. The library provides basic support of multicore parallelization
+through its \smp module. Two widely used backends, OpenMP and \tbb are
+available. Here we demonstrate how to use the \tbb backend. First we will
+declare the implementation classes as subclasses as below,
 \begin{cppcode}
   class PFInit : public InitializationTBB<PFState>;
   class PFMove : public MoveTBB<PFState>;
   class PFEval : public MonitorEvalTBB<PFState>;
 \end{cppcode}
-And remove \cppinline{operator()} from their implementations. After these
-changes, the implementation will be parallelized using \tbb. The complete
-program can be found in section The complete program is shown in
+And remove \verb|operator()| from their implementations. After these changes,
+the implementation will be parallelized using \tbb. The complete program can be
+found in section The complete program is shown in
 appendix~\appref{app:sub:Parallelized implementation using TBB}.
 
-It works as if \cppinline{InitializationTBB<PFState>} has an implementation of
-\cppinline{operator()} as we did before, except it is parallelized. Now it is
-clear that, method such as \cppinline{eval_pre} and \cppinline{eval_post} are
-called before and after the main loop. Method \cppinline{eval_sp} is called
-within the loop and it need to be thread-safe if called with different
-arguments. This is the main reason we constructed the
-\cppinline{NormalDistribution} objects within \cppinline{eval_sp} instead of as
-member data, even though they are constructed in exactly the same way for each
-particle. This is because \cppinline{NormalDistribution::operator()} is a
-mutable method and thus not thread-safe. If any of these member functions does
-not do anything, then it does not have to be defined in the derived class.
+It works as if \verb|InitializationTBB<PFState>| has an implementation of
+\verb|operator()| as we did before, except it is parallelized. Now it is clear
+that, method such as \verb|eval_pre| and \verb|eval_post| are called before and
+after the main loop. Method \verb|eval_sp| is called within the loop and it
+need to be thread-safe if called with different arguments. This is the main
+reason we constructed the \verb|NormalDistribution| objects within
+\verb|eval_sp| instead of as member data, even though they are constructed in
+exactly the same way for each particle. This is because
+\verb|NormalDistribution::operator()| is a mutable method and thus not
+thread-safe. If any of these member functions does not do anything, then it
+does not have to be defined in the derived class.
 
 Apart from the three base classes we have shown here, there are also
-\cppinline{InitializationOMP}, etc., for using the OpenMP backend. And
-\cppinline{InitializationSEQ}, etc., for implementation without
-parallelization. The later works in exactly the same way as our implementation
-in the last section. It is often easier to debug a single-threaded program than
-a parallelized one. And thus one may develop the algorithm with the sequential
-backend and obtain optimal performance latter by only changing the name of a
-few base class names. This can usually be done automatically through a build
-system.
+\verb|InitializationOMP|, etc., for using the OpenMP backend. And
+\verb|InitializationSEQ|, etc., for implementation without parallelization. The
+later works in exactly the same way as our implementation in the last section.
+It is often easier to debug a single-threaded program than a parallelized one.
+And thus one may develop the algorithm with the sequential backend and obtain
+optimal performance latter by only changing the name of a few base class names.
+This can usually be done automatically through a build system.
 
 \subsection{Performance consideration}
 \label{sec:Performance consideration}
 
-The base classes dispatch calls to \cppinline{eval_pre}, \cppinline{eval_sp},
-etc., through the virtual function mechanism. The performance impact is minimal
-for \cppinline{eval_pre} and \cppinline{eval_post}, since they are called only
-once in each iteration and we expect the computational cost will be dominated
-by \cppinline{eval_sp} in most cases. However, the dynamic dispatch can cause
+The base classes dispatch calls to \verb|eval_pre|, \verb|eval_sp|, etc.,
+through the virtual function mechanism. The performance impact is minimal for
+\verb|eval_pre| and \verb|eval_post|, since they are called only once in each
+iteration and we expect the computational cost will be dominated by
+\verb|eval_sp| in most cases. However, the dynamic dispatch can cause
 considerable performance degenerating if the cost of a single call to
-\cppinline{eval_sp} is small while the number of particles is large. Modern
+\verb|eval_sp| is small while the number of particles is large. Modern
 optimizing compilers can usually devirtualize the method calls in trivial
 situations. However, it is not always possible. In this situation, the library
 will need a little help from the user to make compile-time dispatch. For each
@@ -807,5 +792,5 @@ the derived class. For interested users, this is called Curiously Recurring
 Template
 Pattern\footnote{\url{https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern}}
 (\crtp). This usage of the library's base classes also provides other
-flexibility. The methods \cppinline{eval_pre} etc., can be either
-\cppinline{const} or mutable. They can also be \cppinline{static}.
+flexibility. The methods \verb|eval_pre| etc., can be either \verb|const| or
+mutable. They can also be \verb|static|.

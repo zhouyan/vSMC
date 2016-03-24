@@ -9,23 +9,15 @@ basic functionality that is sufficient for most simple cases.
 \section{Aligned memory allocation}
 \label{sec:Aligned memory allocation}
 
-The standard library class \cppinline{std::allocator} is used by containers to
+The standard library class \verb|std::allocator| is used by containers to
 allocate memory. It works fine in most cases. However, sometime it is desired
 to allocate memory aligned by a certain boundary. The library provides the
 class template,
 \begin{cppcode}
-  template <typename T, std::size_t Alignment = VSMC_ALIGNMENT,
+  template <typename T, std::size_t Alignment = Alignment<T>::value,
       typename Memory = AlignedMemory>
-  class AlignedAllocator;
+  class Allocator;
 \end{cppcode}
-where the configuration macro \cppinline{VSMC_ALIGNMENT} is defined to be
-\cppinline{32} by default. For the requirement of the parameter type
-\cppinline{Memory}, see the reference manual. It is sufficient to mention here
-that the default implementation works best if \tbb is available. This class can
-be used as a drop-in replacement of \cppinline{std::allocator<T>}. In fact,
-this library defines a type alias \cppinline{Vector<T>} which is
-\cppinline{std::vector<T, AlignedAllocator<T>>} if \cppinline{T} is a scalar
-type, and \cppinline{std::vector<T>} otherwise.
 
 \section{Sample covariance estimating}
 \label{sec:Sample covariance estimating}
@@ -44,41 +36,40 @@ example,
   auto w = sampler.particle().weight().data();
   eval(RowMajor, N, d, x, w, mean, cov);
 \end{cppcode}
-The sample covariance matrix will be computed and stored in \cppinline{cov}.
-The mean vector is stored in \cppinline{mean}. Note that, if any of them is a
-null pointer, then the corresponding output is not computed. The sample
-\cppinline{x} is assumed to be stored in an $N$ by $d$ matrix. The first
-argument passed to \cppinline{eval} is the storage layout of this matrix. If
-\cppinline{x} is a null pointer, then no computation will be done. If
-\cppinline{w} is a null pointer, then the weight is assumed to be equal for all
-samples. The method has three additional optional parameters. The first is
-\cppinline{cov_layout}, which specifies the covariance matrix storage layout.
-The second is \cppinline{cov_upper} and the third \cppinline{cov_packed}, both
-are \cppinline{false} by default. If the later is \cppinline{cov_packed}, a
-packed vector of length $d(d+1)/2$ is written into \cppinline{cov}. If
-\cppinline{cov_upper} is \cppinline{false}, then the upper triangular is
+The sample covariance matrix will be computed and stored in \verb|cov|. The
+mean vector is stored in \verb|mean|. Note that, if any of them is a null
+pointer, then the corresponding output is not computed. The sample \verb|x| is
+assumed to be stored in an $N$ by $d$ matrix. The first argument passed to
+\verb|eval| is the storage layout of this matrix. If \verb|x| is a null
+pointer, then no computation will be done. If \verb|w| is a null pointer, then
+the weight is assumed to be equal for all samples. The method has three
+additional optional parameters. The first is \verb|cov_layout|, which specifies
+the covariance matrix storage layout. The second is \verb|cov_upper| and the
+third \verb|cov_packed|, both are \verb|false| by default. If the later is
+\verb|cov_packed|, a packed vector of length $d(d+1)/2$ is written into
+\verb|cov|. If \verb|cov_upper| is \verb|false|, then the upper triangular is
 packed, otherwise the lower triangular is packed.
 
 The estimated covariance matrix is often used to construct multivariate Normal
 distribution for the purpose of generating random walk scales. The
-\cppinline{NormalMVDistribution} in section~\ref{sec:Distributions} accepts
-the lower triangular of the Cholesky decomposition of the covariance instead of
-the covariance matrix itself. The following function will compute this
+\verb|NormalMVDistribution| in section~\ref{sec:Distributions} accepts the
+lower triangular of the Cholesky decomposition of the covariance instead of the
+covariance matrix itself. The following function will compute this
 decomposition,
 \begin{cppcode}
   double chol[d * (d + 1) / 2];
   cov_chol(d, cov, chol);
 \end{cppcode}
-The output \cppinline{chol} is a packed vector in row major storage. This
-function also has three optional parameters, which are the same as those of
-\cppinline{Covariance::operator()}, except that they are now used to specify
-the storage scheme of the input parameter \cppinline{cov}.
+The output \verb|chol| is a packed vector in row major storage. This function
+also has three optional parameters, which are the same as those of
+\verb|Covariance::operator()|, except that they are now used to specify the
+storage scheme of the input parameter \verb|cov|.
 
 \section{Storing objects in \protect\hdf}
 \label{sec:Storing objects in HDF5}
 
-If the \hdf library is available, it is possible to store
-\cppinline{Sampler<T>} objects, etc., in the \hdf format. For example,
+If the \hdf library is available, it is possible to store \verb|Sampler<T>|
+objects, etc., in the \hdf format. For example,
 \begin{cppcode}
   hdf5store(sampler, "pf.h5", "sampler");
 \end{cppcode}
@@ -88,7 +79,7 @@ as the following,
   library(rhdf5)
   pf <- as.data.frame(h5read("pf.h5", "sampler"))
 \end{rcode}
-This creates a \rinline{data.frame} similar to that shown in
+This creates a \verb|data.frame| similar to that shown in
 section~\ref{sub:Implementations}. Other types of objects can also be store,
 see the reference manual for details.
 
@@ -97,21 +88,21 @@ see the reference manual for details.
 
 The library provides a few classes to manage \mkl pointers. It provides
 Resource Acquisition Is Initialization (\raii) idiom on top of the \mkl C
-interface. For example, below is a small program using the
-\cppinline{MKLSSTask} class,
+interface. For example, below is a small program using the \verb|MKLSSTask|
+class,
 \begin{cppcode}
   MKLSSTask<double> task(&p, &n, &xstorage, x, w, indices);
   task.edit_moments(mean, r2m, r3m, r4m, c2m, c3m, c4m);
   task.compute(estimates, method)
 \end{cppcode}
-In the above program, the \cppinline{MKLSSTask} type object manages a
-\cppinline{VSLSSTaskPtr} task pointer. The resouces managed will be released
-when the object is destoryed. All C functions that operates on the pointer, is
-also defined as methods in the class. Table~\ref{tab:RAII classes for MKL
-  pointers} lists the classes defined by the library and their corresponding
-\mkl pointers. For those classes that are copyable, the copy constructor and
-assignment operator perform deep copy. It is safe to use the copy and the
-original independently. Those classes that are not copyable are movable.
+In the above program, the \verb|MKLSSTask| type object manages a
+\verb|VSLSSTaskPtr| task pointer. The resouces managed will be released when
+the object is destoryed. All C functions that operates on the pointer, is also
+defined as methods in the class. Table~\ref{tab:RAII classes for MKL pointers}
+lists the classes defined by the library and their corresponding \mkl pointers.
+For those classes that are copyable, the copy constructor and assignment
+operator perform deep copy. It is safe to use the copy and the original
+independently. Those classes that are not copyable are movable.
 
 \begin{table}[t]
   \begin{tabu}{X[l]X[l]X[l]}
@@ -150,14 +141,14 @@ program,
       CLNDRange());
 \end{cppcode}
 In the above program, each class type object manages an OpenCL C type, such as
-\cppinline{cl_platform}. The resources will be released when the object is
+\verb|cl_platform|. The resources will be released when the object is
 destroyed. Note that, the copy constructor and assignment operator perform
-shadow copy. This is particularly important for \cppinline{CLMemory} type
-objects. In appendix~\appref{app:sub:Parallelized implementation using OpenCL}
-an OpenCL implementation of the simple particle filter example in
-section~\ref{sec:A simple particle filter} is shown. Table~\ref{tab:RAII
-  classes for OpenCL pointers} lists the classes defined by the library and
-their corresponding OpenCL pointers.
+shadow copy. This is particularly important for \verb|CLMemory| type objects.
+In appendix~\appref{app:sub:Parallelized implementation using OpenCL} an OpenCL
+implementation of the simple particle filter example in section~\ref{sec:A
+  simple particle filter} is shown. Table~\ref{tab:RAII classes for OpenCL
+  pointers} lists the classes defined by the library and their corresponding
+OpenCL pointers.
 
 \begin{table}[t]
   \begin{tabu}{X[l]X[l]}
@@ -191,8 +182,8 @@ variables to store the options to be processed.
   std::vector<double> vec;
 \end{cppcode}
 All types that support standard library \io stream operations are supported. In
-addition, \cppinline{std::vector<T>}, where \cppinline{T} is a type that
-supports standard library \io stream operations is also supported. Then,
+addition, \verb|std::vector<T>|, where \verb|T| is a type that supports
+standard library \io stream operations is also supported. Then,
 \begin{cppcode}
   ProgramOptionMap option_map;
 \end{cppcode}
@@ -210,9 +201,8 @@ processed as the following,
 \begin{cppcode}
   option_map.process(argc, argv);
 \end{cppcode}
-where \cppinline{argc} and \cppinline{argv} are the arguments of the
-\cppinline{main} function. When the program is invoked, each option can be
-passed like below,
+where \verb|argc| and \verb|argv| are the arguments of the \verb|main|
+function. When the program is invoked, each option can be passed like below,
 \begin{textcode}
   ./program_option --vec 1 2 1e-1 --str "abc" --vec 8 9 --str "def hij" --n 2 4
 \end{textcode}
@@ -223,20 +213,19 @@ The results of the option processing is displayed below,
   vec: 1 2 0.1 8 9
 \end{textcode}
 To summarize these output, the same option can be specified multiple times. If
-it is a scalar option, the last one is used (\textinline{--str},
-\textinline{--n}). A string option's value can be grouped by quotes. For a
-vector option (\textinline{--vec}), all values are gather together and inserted
-into the vector.
+it is a scalar option, the last one is used (\verb|--str|, \verb|--n|). A
+string option's value can be grouped by quotes. For a vector option
+(\verb|--vec|), all values are gather together and inserted into the vector.
 
 \section{Program progress}
 \label{sec:Program progress}
 
 Sometime it is desirable to see how much progress of a program has been made.
-The library provide a \cppinline{Progress} class for this purpose. Here we show
-a minimal example. The complete program is shown in
+The library provide a \verb|Progress| class for this purpose. Here we show a
+minimal example. The complete program is shown in
 appendix~\appref{app:sec:Program progress}.
 \begin{cppcode}
-  vsmc::Progress progress;
+  Progress progress;
   progress.start(n * n);
   for (std::size_t i = 0; i != n; ++i) {
       std::stringstream ss;
@@ -253,13 +242,12 @@ When invoked, the program output something similar the below
 \begin{textcode}
   [  4%][00:07][  49019/1000000][i = 49]
 \end{textcode}
-The method \cppinline{progress.start(n * n)} starts the printing of the
-progress. The argument specifies how many iterations there will be before it is
-stopped. The method \cppinline{progress.message(ss.str())} direct the program
-to print a message. This is optional. Each time after we finish $n$ iterations,
-we increment the progress count by calling \cppinline{progress.increment()}.
-And after everything is finished, the method \cppinline{progress.stop()} is
-called.
+The method \verb|progress.start(n * n)| starts the printing of the progress.
+The argument specifies how many iterations there will be before it is stopped.
+The method \verb|progress.message(ss.str())| direct the program to print a
+message. This is optional. Each time after we finish $n$ iterations, we
+increment the progress count by calling \verb|progress.increment()|. And after
+everything is finished, the method \verb|progress.stop()| is called.
 
 \section{Timing}
 \label{sec:Timing}
@@ -267,8 +255,8 @@ called.
 Performance can only be improved after it is first properly benchmarked. There
 are advanced profiling programs for this purpose. However, sometime simple
 timing facilities are enough. The library provides a simple class
-\cppinline{StopWatch} for this purpose. As its name suggests, it works much
-like a physical stop watch. Here is a simple example
+\verb|StopWatch| for this purpose. As its name suggests, it works much like a
+physical stop watch. Here is a simple example
 \begin{cppcode}
   StopWatch watch;
   for (std::size_t i = 0; i != n; ++i) {
@@ -282,5 +270,5 @@ like a physical stop watch. Here is a simple example
 \end{cppcode}
 The above example demonstrate that timing can be accumulated between loop
 iterations, function calls, etc. It shall be noted that, the time is only
-accurate if the computation between \cppinline{watch.start()} and
-\cppinline{watch.stop()} is non-trivial.
+accurate if the computation between \verb|watch.start()| and
+\verb|watch.stop()| is non-trivial.
