@@ -251,8 +251,7 @@ inline void linear_frac(std::size_t n, const T *a, const T *b, T beta_a,
         y[i] /= beta_b * b[i] + mu_b;
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = a_i * b_i + c_i\f$.
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i * b_i + c_i\f$.
 template <typename T>
 inline void fma(std::size_t n, const T *a, const T *b, const T *c, T *y)
 {
@@ -260,8 +259,7 @@ inline void fma(std::size_t n, const T *a, const T *b, const T *c, T *y)
         y[i] = a[i] * b[i] + c[i];
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = a_i * b_i + c\f$.
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i * b_i + c\f$.
 template <typename T>
 inline void fma(std::size_t n, const T *a, const T *b, T c, T *y)
 {
@@ -269,8 +267,7 @@ inline void fma(std::size_t n, const T *a, const T *b, T c, T *y)
         y[i] = a[i] * b[i] + c;
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = a_i * b + c_i\f$.
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i * b + c_i\f$.
 template <typename T>
 inline void fma(std::size_t n, const T *a, T b, const T *c, T *y)
 {
@@ -278,8 +275,7 @@ inline void fma(std::size_t n, const T *a, T b, const T *c, T *y)
         y[i] = a[i] * b + c[i];
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = a_i * b + c\f$.
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i * b + c\f$.
 template <typename T>
 inline void fma(std::size_t n, const T *a, T b, T c, T *y)
 {
@@ -287,8 +283,7 @@ inline void fma(std::size_t n, const T *a, T b, T c, T *y)
         y[i] = a[i] * b + c;
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = a * b_i + c_i\f$.
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a * b_i + c_i\f$.
 template <typename T>
 inline void fma(std::size_t n, T a, const T *b, const T *c, T *y)
 {
@@ -296,8 +291,7 @@ inline void fma(std::size_t n, T a, const T *b, const T *c, T *y)
         y[i] = a * b[i] + c[i];
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = a * b_i + c\f$.
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a * b_i + c\f$.
 template <typename T>
 inline void fma(std::size_t n, T a, const T *b, T c, T *y)
 {
@@ -305,8 +299,7 @@ inline void fma(std::size_t n, T a, const T *b, T c, T *y)
         y[i] = a * b[i] + c;
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = a * b + c_i\f$.
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a * b + c_i\f$.
 template <typename T>
 inline void fma(std::size_t n, T a, T b, const T *c, T *y)
 {
@@ -314,8 +307,9 @@ inline void fma(std::size_t n, T a, T b, const T *c, T *y)
 }
 
 /// @}
+// vArithmetic
 
-/// \defgroup vPower Power and root functions
+/// \defgroup vPower Power root functions
 /// \ingroup vMath
 /// @{
 
@@ -323,9 +317,8 @@ inline void fma(std::size_t n, T a, T b, const T *c, T *y)
 template <typename T>
 inline void inv(std::size_t n, const T *a, T *y)
 {
-    const T one = static_cast<T>(1);
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = one / a[i];
+        y[i] = static_cast<T>(1) / a[i];
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i / b_i\f$
@@ -420,6 +413,7 @@ inline void pow(std::size_t n, const T *a, T b, T *y)
 VSMC_DEFINE_MATH_VMATH_2(std::hypot, hypot)
 
 /// @}
+// vPower
 
 /// \defgroup vExponential Exponential and logarithm functions
 /// \ingroup vMath
@@ -460,7 +454,9 @@ VSMC_DEFINE_MATH_VMATH_1(std::log10, log10)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \log(a_i + 1)\f$
 VSMC_DEFINE_MATH_VMATH_1(std::log1p, log1p)
+
 /// @}
+// vExponential
 
 /// \defgroup vTrigonometric Trigonometric functions
 /// \ingroup vMath
@@ -505,6 +501,7 @@ VSMC_DEFINE_MATH_VMATH_1(std::atan, atan)
 VSMC_DEFINE_MATH_VMATH_2(std::atan2, atan2)
 
 /// @}
+// vTrigonometric
 
 /// \defgroup vHyperbolic Hyperbolic functions
 /// \ingroup vMath
@@ -529,6 +526,7 @@ VSMC_DEFINE_MATH_VMATH_1(std::asinh, asinh)
 VSMC_DEFINE_MATH_VMATH_1(std::atanh, atanh)
 
 /// @}
+// vHyperbolic
 
 /// \defgroup vSpecial Special functions
 /// \ingroup vMath
@@ -550,23 +548,23 @@ inline void cdfnorm(std::size_t n, const T *a, T *y)
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        mul(k, 1 / const_sqrt_2<T>(), a, y);
+        mul(k, static_cast<T>(1) / const_sqrt_2<T>(), a, y);
         erf(k, y, y);
         fma(k, static_cast<T>(0.5), static_cast<T>(0.5), y, y);
     }
-    mul(l, 1 / const_sqrt_2<T>(), a, y);
+    mul(l, static_cast<T>(1) / const_sqrt_2<T>(), a, y);
     erf(l, y, y);
     fma(l, static_cast<T>(0.5), static_cast<T>(0.5), y, y);
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \ln\Gamma(a_i)\f$,
-/// logarithm of the Gamma function
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \ln\Gamma(a_i)\f$
 VSMC_DEFINE_MATH_VMATH_1(std::lgamma, lgamma)
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \Gamma(a_i)\f$, the Gamma
-/// function
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \Gamma(a_i)\f$
 VSMC_DEFINE_MATH_VMATH_1(std::tgamma, tgamma)
+
 /// @}
+// vSpecial
 
 } // namespace vsmc
 
