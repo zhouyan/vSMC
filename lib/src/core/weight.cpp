@@ -33,16 +33,17 @@
 
 extern "C" {
 
-void vsmc_weight_malloc(vsmc_weight *weight_ptr, int n)
+vsmc_weight vsmc_weight_new(int n)
 {
-    auto ptr = ::vsmc::Allocator<::vsmc::Weight>::allocate(1);
-    new (ptr)::vsmc::Weight(static_cast<std::size_t>(n));
-    weight_ptr->ptr = ptr;
+    auto ptr = new ::vsmc::Weight(static_cast<std::size_t>(n));
+    vsmc_weight weight = {ptr};
+
+    return weight;
 }
 
-void vsmc_weight_free(vsmc_weight *weight_ptr)
+void vsmc_weight_delete(vsmc_weight *weight_ptr)
 {
-    ::vsmc::Allocator<::vsmc::Weight>::deallocate(::vsmc::cast(weight_ptr), 1);
+    delete ::vsmc::cast(weight_ptr);
     weight_ptr->ptr = nullptr;
 }
 

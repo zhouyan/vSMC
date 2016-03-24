@@ -33,20 +33,20 @@
 
 extern "C" {
 
-void vsmc_sampler_malloc(vsmc_sampler *sampler_ptr, int n, int dim,
-    vSMCResampleScheme scheme, double threshold)
+vsmc_sampler vsmc_sampler_new(
+    int n, int dim, vSMCResampleScheme scheme, double threshold)
 {
-    auto ptr = ::vsmc::Allocator<::vsmc::SamplerC>::allocate(1);
-    new (ptr)::vsmc::SamplerC(
+    auto ptr = new ::vsmc::SamplerC(
         n, static_cast<::vsmc::ResampleScheme>(scheme), threshold);
     ptr->particle().value().resize_dim(static_cast<std::size_t>(dim));
-    sampler_ptr->ptr = ptr;
+    vsmc_sampler sampler = {ptr};
+
+    return sampler;
 }
 
-void vsmc_sampler_free(vsmc_sampler *sampler_ptr)
+void vsmc_sampler_delete(vsmc_sampler *sampler_ptr)
 {
-    ::vsmc::Allocator<::vsmc::SamplerC>::deallocate(
-        ::vsmc::cast(sampler_ptr), 1);
+    delete ::vsmc::cast(sampler_ptr);
     sampler_ptr->ptr = nullptr;
 }
 

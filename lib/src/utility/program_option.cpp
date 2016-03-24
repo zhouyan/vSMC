@@ -33,19 +33,18 @@
 
 extern "C" {
 
-void vsmc_program_option_map_malloc(
-    vsmc_program_option_map *program_option_map_ptr, int silent)
+vsmc_program_option_map vsmc_program_option_map_new(int silent)
 {
-    auto ptr = ::vsmc::Allocator<::vsmc::ProgramOptionMap>::allocate(1);
-    new (ptr)::vsmc::ProgramOptionMap(silent != 0);
-    program_option_map_ptr->ptr = ptr;
+    auto ptr = new ::vsmc::ProgramOptionMap(silent != 0);
+    vsmc_program_option_map program_option_map = {ptr};
+
+    return program_option_map;
 }
 
-void vsmc_program_option_map_free(
+void vsmc_program_option_map_delete(
     vsmc_program_option_map *program_option_map_ptr)
 {
-    ::vsmc::Allocator<::vsmc::ProgramOptionMap>::deallocate(
-        ::vsmc::cast(program_option_map_ptr), 1);
+    delete ::vsmc::cast(program_option_map_ptr);
     program_option_map_ptr->ptr = nullptr;
 }
 

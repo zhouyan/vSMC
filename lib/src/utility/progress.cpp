@@ -33,17 +33,17 @@
 
 extern "C" {
 
-void vsmc_progress_malloc(vsmc_progress *progress_ptr)
+vsmc_progress vsmc_progress_new(void)
 {
-    auto ptr = ::vsmc::Allocator<::vsmc::Progress>::allocate(1);
-    new (ptr)::vsmc::Progress(std::cout);
-    progress_ptr->ptr = ptr;
+    auto ptr = new ::vsmc::Progress(std::cout);
+    vsmc_progress progress = {ptr};
+
+    return progress;
 }
 
-void vsmc_progress_free(vsmc_progress *progress_ptr)
+void vsmc_progress_delete(vsmc_progress *progress_ptr)
 {
-    ::vsmc::Allocator<::vsmc::Progress>::deallocate(
-        ::vsmc::cast(progress_ptr), 1);
+    delete ::vsmc::cast(progress_ptr);
     progress_ptr->ptr = nullptr;
 }
 

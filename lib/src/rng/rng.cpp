@@ -33,16 +33,17 @@
 
 extern "C" {
 
-void vsmc_rng_malloc(vsmc_rng *rng_ptr, int seed)
+vsmc_rng vsmc_rng_new(int seed)
 {
-    auto ptr = ::vsmc::Allocator<::vsmc::RNG>::allocate(1);
-    new (ptr)::vsmc::RNG(static_cast<::vsmc::RNG::result_type>(seed));
-    rng_ptr->ptr = ptr;
+    auto ptr = new ::vsmc::RNG(static_cast<::vsmc::RNG::result_type>(seed));
+    vsmc_rng rng = {ptr};
+
+    return rng;
 }
 
-void vsmc_rng_free(vsmc_rng *rng_ptr)
+void vsmc_rng_delete(vsmc_rng *rng_ptr)
 {
-    ::vsmc::Allocator<::vsmc::RNG>::deallocate(::vsmc::cast(rng_ptr), 1);
+    delete ::vsmc::cast(rng_ptr);
     rng_ptr->ptr = nullptr;
 }
 

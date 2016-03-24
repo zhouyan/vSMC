@@ -157,7 +157,7 @@ typedef enum {
 /** @{ */
 
 /** \brief `vsmc::Seed::get` */
-int vsmc_seed_get();
+int vsmc_seed_get(void);
 
 /** \brief `vsmc::Seed::set` */
 void vsmc_seed_set(int seed);
@@ -198,10 +198,10 @@ typedef struct {
 } vsmc_rng;
 
 /** \brief `vsmc::RNG::RNG` */
-void vsmc_rng_malloc(vsmc_rng *rng_ptr, int seed);
+vsmc_rng vsmc_rng_new(int seed);
 
 /** \brief `vsmc::RNG::~RNG` */
-void vsmc_rng_free(vsmc_rng *rng_ptr);
+void vsmc_rng_delete(vsmc_rng *rng_ptr);
 
 /** \brief `vsmc::RNG::operator=` */
 void vsmc_rng_assign(vsmc_rng rng, vsmc_rng other);
@@ -570,11 +570,10 @@ typedef struct {
 } vsmc_state_matrix;
 
 /** \brief `vsmc::StateMatrix::StateMatrix` */
-void vsmc_state_matrix_malloc(
-    vsmc_state_matrix *state_matrix_ptr, int n, int dim);
+vsmc_state_matrix vsmc_state_matrix_new(int n, int dim);
 
 /** \brief `vsmc::StateMatrix::~StateMatrix` */
-void vsmc_state_matrix_free(vsmc_state_matrix *state_matrix_ptr);
+void vsmc_state_matrix_delete(vsmc_state_matrix *state_matrix_ptr);
 
 /** \brief `vsmc::StateMatrix::operator=` */
 void vsm_state_matrix_assign(
@@ -633,10 +632,10 @@ typedef struct {
 } vsmc_weight;
 
 /** \brief `vsmc::Weight::Weight` */
-void vsmc_weight_malloc(vsmc_weight *weight_ptr, int n);
+vsmc_weight vsmc_weight_new(int n);
 
 /** \brief `vsmc::Weight::~Weight` */
-void vsmc_weight_free(vsmc_weight *weight_ptr);
+void vsmc_weight_delete(vsmc_weight *weight_ptr);
 
 /** \brief `vsmc::Weight::operator=` */
 void vsmc_weight_assign(vsmc_weight weight, vsmc_weight other);
@@ -694,10 +693,10 @@ typedef void (*vsmc_particle_resample_type)(
     int, int, vsmc_rng, const double *, int *);
 
 /** \brief `vsmc::Particle::Particle` */
-void vsmc_particle_malloc(vsmc_particle *particle_ptr, int n, int dim);
+vsmc_particle vsmc_particle_new(int n, int dim);
 
 /** \brief `vsmc::Particle::~Particle` */
-void vsmc_particle_free(vsmc_particle *particle_ptr);
+void vsmc_particle_delete(vsmc_particle *particle_ptr);
 
 /** \brief `vsmc::Particle::operator=` */
 void vsmc_particle_assign(vsmc_particle particle, vsmc_particle other);
@@ -739,11 +738,11 @@ typedef struct {
 typedef void (*vsmc_monitor_eval_type)(int, int, vsmc_particle, double *);
 
 /** \brief `vsmc::Monitor::Monitor` */
-void vsmc_monitor_malloc(vsmc_monitor *monitor_ptr, int dim,
-    vsmc_monitor_eval_type eval, int record_only, vSMCMonitorStage stage);
+vsmc_monitor vsmc_monitor_new(int dim, vsmc_monitor_eval_type eval,
+    int record_only, vSMCMonitorStage stage);
 
 /** \brief `vsmc::Monitor::~Monitor` */
-void vsmc_monitor_free(vsmc_monitor *monitor_ptr);
+void vsmc_monitor_delete(vsmc_monitor *monitor_ptr);
 
 /** \brief `vsmc::Monitor::operator=` */
 void vsmc_monitor_assign(vsmc_monitor monitor, vsmc_monitor other);
@@ -840,11 +839,11 @@ typedef int (*vsmc_sampler_move_type)(int, vsmc_particle);
 typedef int (*vsmc_sampler_mcmc_type)(int, vsmc_particle);
 
 /** \brief `vsmc::Sampler::Sampler` */
-void vsmc_sampler_malloc(vsmc_sampler *sampler_ptr, int n, int dim,
-    vSMCResampleScheme scheme, double threshold);
+vsmc_sampler vsmc_sampler_new(
+    int n, int dim, vSMCResampleScheme scheme, double threshold);
 
 /** \brief `vsmc::Sampler::~Sampler` */
-void vsmc_sampler_free(vsmc_sampler *sampler_ptr);
+void vsmc_sampler_delete(vsmc_sampler *sampler_ptr);
 
 /** \brief `vsmc::Sampler::operator=` */
 void vsmc_sampler_assign(vsmc_sampler sampler, vsmc_sampler other);
@@ -1201,10 +1200,10 @@ int vsmc_cov_chol(int dim, const double *cov, double *chol,
     vSMCMatrixLayout layout, int upper, int packed);
 
 /** \brief `vsmc::Covariance::Covariance` */
-void vsmc_covariance_malloc(vsmc_covariance *covariance_ptr);
+vsmc_covariance vsmc_covariance_new(void);
 
 /** \brief `vsmc::Covariance::~Covariance` */
-void vsmc_covariance_free(vsmc_covariance *covariance_ptr);
+void vsmc_covariance_delete(vsmc_covariance *covariance_ptr);
 
 /** \brief `vsmc::Covariance::operator=` */
 void vsmc_covariance_assign(vsmc_covariance covariance, vsmc_covariance other);
@@ -1282,11 +1281,10 @@ typedef struct {
 } vsmc_program_option_map;
 
 /** \brief `vsmc::ProgramOptionMap::ProgramOptionMap` */
-void vsmc_program_option_map_malloc(
-    vsmc_program_option_map *program_option_map_ptr, int silent);
+vsmc_program_option_map vsmc_program_option_map_new(int silent);
 
 /** \brief `vsmc::ProgramOptionMap::~ProgramOptionMap` */
-void vsmc_program_option_map_free(
+void vsmc_program_option_map_delete(
     vsmc_program_option_map *program_option_map_ptr);
 
 /** \brief `vsmc::ProgramOptionMap::operator=` */
@@ -1345,10 +1343,10 @@ typedef struct {
 } vsmc_progress;
 
 /** \brief `vsmc:Progress::Progress` */
-void vsmc_progress_malloc(vsmc_progress *progress_ptr);
+vsmc_progress vsmc_progress_new(void);
 
 /** \brief `vsmc:Progress::~Progress` */
-void vsmc_progress_free(vsmc_progress *progress_ptr);
+void vsmc_progress_delete(vsmc_progress *progress_ptr);
 
 /** \brief `vsmc:Progress::start` */
 void vsmc_progress_start(vsmc_progress progress, int total, const char *msg,
@@ -1374,10 +1372,10 @@ typedef struct {
 } vsmc_stop_watch;
 
 /** \brief `vsmc::StopWatch::StopWatch` */
-void vsmc_stop_watch_malloc(vsmc_stop_watch *stop_watch_ptr);
+vsmc_stop_watch vsmc_stop_watch_new(void);
 
 /** \brief `vsmc::StopWatch::~StopWatch` */
-void vsmc_stop_watch_free(vsmc_stop_watch *stop_watch_ptr);
+void vsmc_stop_watch_delete(vsmc_stop_watch *stop_watch_ptr);
 
 /** \brief `vsmc::StopWatch::operator=` */
 void vsmc_stop_watch_assign(vsmc_stop_watch stop_watch, vsmc_stop_watch other);

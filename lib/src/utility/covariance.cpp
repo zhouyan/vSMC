@@ -40,17 +40,17 @@ int vsmc_cov_chol(int dim, const double *cov, double *chol,
         static_cast<::vsmc::MatrixLayout>(layout), upper != 0, packed != 0);
 }
 
-void vsmc_covariance_malloc(vsmc_covariance *covariance_ptr)
+vsmc_covariance vsmc_covariance_new(void)
 {
-    auto ptr = ::vsmc::Allocator<::vsmc::Covariance<double>>::allocate(1);
-    new (ptr)::vsmc::Covariance<double>();
-    covariance_ptr->ptr = ptr;
+    auto ptr = new ::vsmc::Covariance<double>();
+    vsmc_covariance covariance = {ptr};
+
+    return covariance;
 }
 
-void vsmc_covariance_free(vsmc_covariance *covariance_ptr)
+void vsmc_covariance_delete(vsmc_covariance *covariance_ptr)
 {
-    ::vsmc::Allocator<::vsmc::Covariance<double>>::deallocate(
-        ::vsmc::cast(covariance_ptr), 1);
+    delete ::vsmc::cast(covariance_ptr);
     covariance_ptr->ptr = nullptr;
 }
 

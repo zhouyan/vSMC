@@ -33,18 +33,18 @@
 
 extern "C" {
 
-void vsmc_particle_malloc(vsmc_particle *particle_ptr, int n, int dim)
+vsmc_particle vsmc_particle_new(int n, int dim)
 {
-    auto ptr = ::vsmc::Allocator<::vsmc::ParticleC>::allocate(1);
-    new (ptr)::vsmc::ParticleC(n);
+    auto ptr = new ::vsmc::ParticleC(n);
     ptr->value().resize_dim(static_cast<std::size_t>(dim));
-    particle_ptr->ptr = ptr;
+    vsmc_particle particle = {ptr};
+
+    return particle;
 }
 
-void vsmc_particle_free(vsmc_particle *particle_ptr)
+void vsmc_particle_delete(vsmc_particle *particle_ptr)
 {
-    ::vsmc::Allocator<::vsmc::ParticleC>::deallocate(
-        ::vsmc::cast(particle_ptr), 1);
+    delete ::vsmc::cast(particle_ptr);
     particle_ptr->ptr = nullptr;
 }
 

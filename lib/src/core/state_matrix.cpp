@@ -33,19 +33,18 @@
 
 extern "C" {
 
-void vsmc_state_matrix_malloc(
-    vsmc_state_matrix *state_matrix_ptr, int n, int dim)
+vsmc_state_matrix vsmc_state_matrix_new(int n, int dim)
 {
-    auto ptr = ::vsmc::Allocator<::vsmc::StateMatrixC>::allocate(1);
-    new (ptr)::vsmc::StateMatrixC(n);
+    auto ptr = new ::vsmc::StateMatrixC(n);
     ptr->resize_dim(static_cast<std::size_t>(dim));
-    state_matrix_ptr->ptr = ptr;
+    vsmc_state_matrix state_matrix = {ptr};
+
+    return state_matrix;
 }
 
-void vsmc_state_matrix_free(vsmc_state_matrix *state_matrix_ptr)
+void vsmc_state_matrix_delete(vsmc_state_matrix *state_matrix_ptr)
 {
-    ::vsmc::Allocator<::vsmc::StateMatrixC>::deallocate(
-        ::vsmc::cast(state_matrix_ptr), 1);
+    delete ::vsmc::cast(state_matrix_ptr);
     state_matrix_ptr->ptr = nullptr;
 }
 

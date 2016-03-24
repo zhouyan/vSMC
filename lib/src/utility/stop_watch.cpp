@@ -31,17 +31,17 @@
 
 #include "libvsmc.hpp"
 
-void vsmc_stop_watch_malloc(vsmc_stop_watch *stop_watch_ptr)
+vsmc_stop_watch vsmc_stop_watch_new(void)
 {
-    auto ptr = ::vsmc::Allocator<::vsmc::StopWatch>::allocate(1);
-    new (ptr)::vsmc::StopWatch;
-    stop_watch_ptr->ptr = ptr;
+    auto ptr = new ::vsmc::StopWatch();
+    vsmc_stop_watch stop_watch = {ptr};
+
+    return stop_watch;
 }
 
-void vsmc_stop_watch_free(vsmc_stop_watch *stop_watch_ptr)
+void vsmc_stop_watch_delete(vsmc_stop_watch *stop_watch_ptr)
 {
-    ::vsmc::Allocator<::vsmc::StopWatch>::deallocate(
-        ::vsmc::cast(stop_watch_ptr), 1);
+    delete ::vsmc::cast(stop_watch_ptr);
     stop_watch_ptr->ptr = nullptr;
 }
 

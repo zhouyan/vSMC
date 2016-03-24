@@ -33,7 +33,7 @@
 
 extern "C" {
 
-int vsmc_seed_get()
+int vsmc_seed_get(void)
 {
     return static_cast<int>(::vsmc::Seed::instance().get());
 }
