@@ -1,4 +1,4 @@
-.PHONY : all clean
+.PHONY : all clean libvsmc
 
 CC := clang
 CFLAGS := $(CFLAGS) -std=c99 -O3 -DNDEBUG
@@ -16,6 +16,9 @@ LDFLAGS := -lmkl_rt -ltbb -ltbbmalloc
 
 all : pf_ocl pf_tbb pf_seq pf_tbb_c pf_seq_c program_option program_progress
 
+libvsmc :
+	ninja -C ../../build/clang-Release lib
+
 pf_ocl : pf_ocl.cpp
 	$(CXX) $(CXXFLAGS) -DVSMC_HAS_OPENCL -o pf_ocl pf_ocl.cpp $(LDFLAGS) $(OPENCL_LIBRARY)
 
@@ -25,12 +28,10 @@ pf_tbb : pf_tbb.cpp
 pf_seq : pf_seq.cpp
 	$(CXX) $(CXXFLAGS) -o pf_seq pf_seq.cpp $(LDFLAGS)
 
-pf_tbb_c : pf_tbb.c
-	ninja -C ../../build/clang-Release lib
+pf_tbb_c : pf_tbb.c libvsmc
 	$(CC) $(CFLAGS) -o pf_tbb_c pf_tbb.c -lvsmc
 
-pf_seq_c : pf_seq.c
-	ninja -C ../../build/clang-Release lib
+pf_seq_c : pf_seq.c libvsmc
 	$(CC) $(CFLAGS) -o pf_seq_c pf_seq.c -lvsmc
 
 pf_bench : pf_tbb pf_seq pf_tbb_c pf_seq_c
