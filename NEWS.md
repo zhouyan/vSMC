@@ -5,6 +5,8 @@
 * C++ OpenCL RAII classes
 * `Sampler` gains new methods, `accept_size`, `read_accept_history`,
   `read_accept_history_list`, and `read_accept_history_matrix`.
+* New functions `pack_s`, `pack_i`, `pack_m`, `unpack_s`, `unpack_i`, and
+  `unpack_m`, for pack and unpack vectors into/from contiguous storage
 
 ## Changed behaviors
 
