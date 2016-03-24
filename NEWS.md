@@ -27,6 +27,7 @@
   constructors. Use the constructor and move semantics instead. 
 * `Monitor::index_data` and `Monitor::record_data` are removed
 * `AlignedVector` is removed
+* `hdf5store` is now overloaded for `Monitor`
 
 # Changes in v2.2.0
 
