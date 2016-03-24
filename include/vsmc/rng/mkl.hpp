@@ -255,8 +255,7 @@ class MKLEngine
     result_type operator()()
     {
         if (index_ == M_) {
-            internal::MKLUniformBits<Bits>::eval(
-                stream_, static_cast<MKL_INT>(M_), buffer_.data());
+            generate();
             index_ = 0;
         }
 
@@ -286,8 +285,7 @@ class MKLEngine
             r += M_;
             n -= M_;
         }
-        internal::MKLUniformBits<Bits>::eval(
-            stream_, static_cast<MKL_INT>(M_), buffer_.data());
+        generate();
         std::memcpy(r, buffer_.data(), sizeof(result_type) * l);
         index_ = l;
     }
@@ -404,9 +402,16 @@ class MKLEngine
     private:
     static constexpr std::size_t M_ = 1024;
 
-    alignas(32) std::array<result_type, M_> buffer_;
+    Vector<result_type> buffer_;
     std::size_t index_;
     MKLStream stream_;
+
+    void generate()
+    {
+        buffer_.resize(M_);
+        internal::MKLUniformBits<Bits>::eval(
+            stream_, static_cast<MKL_INT>(M_), buffer_.data());
+    }
 }; // class MKLEngine
 
 /// \brief A 59-bit multiplicative congruential generator
