@@ -13,6 +13,7 @@ user_guide/cpp/pf_tbb
 user_guide/cpp/pf_tbb_c
 user_guide/cpp/program_option
 user_guide/cpp/program_progress
+user_guide/tex/*.aux
 user_guide/user_guide.aux
 user_guide/user_guide.bbl
 user_guide/user_guide.bcf
@@ -25,5 +26,6 @@ user_guide/user_guide.pdf
 user_guide/user_guide.pyg
 user_guide/user_guide.run.xml
 user_guide/user_guide.synctex.gz
+user_guide/user_guide.synctex.gz(busy)
 user_guide/user_guide.toc
 user_options.cmake

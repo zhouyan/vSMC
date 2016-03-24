@@ -4,10 +4,13 @@
 \author{Yan Zhou}
 \date{Second edition (version develop)\vskip1ex\today}
 
+\addbibresource{user_guide.bib}
 \newlength\fixedchar
 \settowidth{\fixedchar}{\texttt{\normalsize 0}}
 \geometry{textwidth=80\fixedchar}
-\addbibresource{user_guide.bib}
+\gdef\topfraction{0.9}
+\gdef\bottomfraction{0.9}
+\gdef\floatpagefraction{0.9}
 
 \NewMinted{cpp}
 \NewMinted{c}
@@ -59,23 +62,23 @@
 \def\STATESKIP{\hskip.68cm}
 \def\spt{\texttt{SingleParticle<T>}}
 
+\includeonly{tex/math}
+
 \begin{document}
 
-\maketitle
+\frontmatter
+\include{tex/front}
 
-\tableofcontents
-
-\input{tex/smc}
-\input{tex/basic}
-\input{tex/advanced}
-\input{tex/config}
-\input{tex/math}
-\input{tex/resample}
-\input{tex/rng}
-\input{tex/util}
-
-\printbibliography
-
-\input{tex/app}
+\mainmatter
+\include{tex/smc}
+\include{tex/basic}
+\include{tex/advanced}
+\include{tex/config}
+\include{tex/math}
+\include{tex/resample}
+\include{tex/rng}
+\include{tex/util}
+\include{tex/bib}
+\include{tex/app}
 
 \end{document}

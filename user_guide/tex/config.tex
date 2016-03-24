@@ -3,61 +3,72 @@
 
 The library has a few configuration macros. All these macros can be overwritten
 by the user by defining them with proper values before including any of the
-library's headers. Most of the macros have the prefix \cppinline{VSMC_HAS_},
-which specify if a feature is available to the library. A few have the prefix
-\cppinline{VSMC_USE_}, which specify if a feature shall be used in the case
-that it is available. A handful remaining ones define some constants or types
-used by the library. These macros are listed in table~\ref{tab:Configuration
-  macros}.
+library's headers. All configurations macros are listed in
+table~\ref{tab:Configuration macros}. There are some additional macros for \rng
+related functionalities. They will be discussed in
+section~\ref{sec:Counter-based RNG}.
 
-\begin{table}[ht]
-  \begin{tabu}{X[l]X[l]X[2l]}
+\begin{table}
+  \begin{tabularx}{\textwidth}{llX}
     \toprule
     Macro & Default & Description \\
     \midrule
-    \texttt{VSMC\_INT64} & Platform dependent &
-    The 64-bits integer type used by x86 intrinsics functions \\
-    \texttt{VSMC\_HAS\_INT128} & Platform dependent &
-    Support for 128-bits integers \\
-    \texttt{VSMC\_INT128} & Platform dependent &
-    The 128-bits integer type \\
-    \texttt{VSMC\_HAS\_SSE2} & Platform dependent &
-    Support for \sse{}2 intrinsic functions \\
-    \texttt{VSMC\_HAS\_AVX2} & Platform dependent &
-    Support for \avx{}2 intrinsic functions \\
-    \texttt{VSMC\_HAS\_AES\_NI} & Platform dependent &
-    Support for \aesni intrinsic functions \\
-    \texttt{VSMC\_HAS\_RDRAND} & Platform dependent &
-    Support for \rdrand intrinsic functions \\
-    \texttt{VSMC\_HAS\_X86} & Platform dependent &
-    If we are using x86 \\
-    \texttt{VSMC\_HAS\_X86\_64} & Platform dependent &
-    If we are using x86-64 \\
-    \texttt{VSMC\_HAS\_POSIX} & Platform dependent &
-    If we are on a \posix platform \\
-    \texttt{VSMC\_HAS\_OMP} & Platform dependent &
-    Support for OpenMP~3.0 or higher \\
-    \texttt{VSMC\_HAS\_TBB} & \texttt{0} & Support for \tbb 4.0 or higher \\
-    \texttt{VSMC\_HAS\_TBB\_MALLOC} & \texttt{VSMC\_HAS\_TBB} &
-    Support for \tbb scalable memory allocation \\
-    \texttt{VSMC\_HAS\_HDF5} & \texttt{0} & Support for \hdf 1.8.6 or higher \\
-    \texttt{VSMC\_HAS\_MKL} & \texttt{0} & Support for \mkl 11 or higher \\
-    \texttt{VSMC\_USE\_MKL\_CBLAS} & \texttt{VSMC\_HAS\_MKL} &
-    Use \mkl header \texttt{mkl\_cblas.h} instead of the standard
-    \texttt{cblas.h} \\
-    \texttt{VSMC\_USE\_MKL\_LAPACKE} & \texttt{VSMC\_HAS\_MKL} &
-    Use \mkl header \texttt{mkl\_lapacke.h} instead of the standard
-    \texttt{lapacke.h} \\
-    \texttt{VSMC\_USE\_MKL\_VML} & \texttt{VSMC\_HAS\_MKL} &
-    Use \mkl vector mathematical functions (\vml) \\
-    \texttt{VSMC\_USE\_MKL\_VSL} & \texttt{VSMC\_HAS\_MKL} &
-    Use \mkl statistical functions (\vsl) \\
-    \texttt{VSMC\_CBLAS\_INT\_TYPE} & \texttt{int} &
-    The default integer type of \blas routines \\
-    \texttt{VSMC\_ALIGNMENT} & \texttt{32} &
-    Default alignment of \texttt{AlignedAllocator} \\
+    \verb|VSMC_HAS_INT128| & Platform dependent
+    & Support for 128-bits integers \\
+    \verb|VSMC_HAS_SSE2| & Platform dependent
+    & Support for \sse{}2 intrinsic functions \\
+    \verb|VSMC_HAS_AVX2| & Platform dependent
+    & Support for \avx{}2 intrinsic functions \\
+    \verb|VSMC_HAS_AES_NI| & Platform dependent
+    & Support for \aesni intrinsic functions \\
+    \verb|VSMC_HAS_RDRAND| & Platform dependent
+    & Support for \rdrand intrinsic functions \\
+    \verb|VSMC_HAS_X86| & Platform dependent
+    & Support for x86 platform \\
+    \verb|VSMC_HAS_X86_64| & Platform dependent
+    & Support for x86-64 platform \\
+    \verb|VSMC_HAS_POSIX|  & Platform dependent
+    & Support for \posix platform \\
+    \verb|VSMC_HAS_OMP| & Platform dependent
+    & Support for OpenMP~3.0 or higher \\
+    \verb|VSMC_HAS_TBB| & \verb|0|
+    & Support for \tbb~4.0 or higher \\
+    \verb|VSMC_HAS_TBB_MALLOC| & \verb|VSMC_HAS_TBB|
+    & Support for \tbb scalable memory allocation \\
+    \verb|VSMC_HAS_HDF5| & \verb|0| &
+    Support for \hdf~1.8.6 or higher \\
+    \verb|VSMC_HAS_MKL| & \verb|0|
+    & Support for \mkl~11.0 or higher \\
+    \verb|VSMC_USE_MKL_CBLAS| & \verb|VSMC_HAS_MKL|
+    & Use \verb|mkl_cblas.h| instead of \verb|cblas.h| \\
+    \verb|VSMC_USE_MKL_LAPACKE| & \verb|VSMC_HAS_MKL|
+    & Use \verb|mkl_lapacke.h| instead of \verb|lapacke.h| \\
+    \verb|VSMC_USE_MKL_VML| & \verb|VSMC_HAS_MKL|
+    & Use \mkl vector mathematical functions (\vml) \\
+    \verb|VSMC_USE_MKL_VSL| & \verb|VSMC_HAS_MKL|
+    & Use \mkl statistical functions (\vsl) \\
+    \verb|VSMC_INT64| & Platform dependent
+    & The 64-bit integer type used by x86 intrinsics \\
+    \verb|VSMC_INT128| & Platform dependent
+    & The 128-bit integer type \\
+    \verb|VSMC_CBLAS_INT_TYPE| & \verb|int|
+    & The default integer type of \blas routines \\
+    \verb|VSMC_ALIGNMENT| & \verb|32|
+    & Default alignment for scalar types \\
+    \verb|VSMC_ALIGNMENT_MIN| & \verb|16| 
+    & Minimum alignment for all types \\
     \bottomrule
-  \end{tabu}
+  \end{tabularx}
   \caption{Configuration macros}
   \label{tab:Configuration macros}
 \end{table}
+
+There are three types of configuration macros. The first type has a prefix
+\verb|VSMC_HAS|. These macros specify a certain feature or third-party library
+is available. The second type has a prefix \verb|VSMC_USE|. These macros
+specify that a certain feature or third-party library shall be used, if
+available. For example, if \verb|VSMC_HAS_MKL| is defined to a non-zero value,
+but the it is desirable not to use \mkl's vector math functions, then one can
+define \verb|VSMC_USE_MKL_VML| to zero to prevent the library to use this
+individual component. All other macros define either types or constants that
+are used by the library.
