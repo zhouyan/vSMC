@@ -450,13 +450,10 @@ inline void hdf5store_list(std::size_t nrow, std::size_t ncol,
     std::string group_name("/" + data_name);
     ::hsize_t dim[1] = {nrow};
 
-    ::hid_t datafile;
-    if (append) {
-        datafile = ::H5Fopen(file_name.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
-    } else {
-        datafile = ::H5Fcreate(
+    ::hid_t datafile = append ?
+        ::H5Fopen(file_name.c_str(), H5F_ACC_RDWR, H5P_DEFAULT) :
+        ::H5Fcreate(
             file_name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    }
     ::hid_t datagroup = ::H5Gcreate(
         datafile, group_name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -630,6 +627,68 @@ inline bool hdf5store_int(std::size_t n, IntType *r, std::true_type)
 
 } // namespace vsmc::internal
 
+/// \brief Store a StateMatrix in the HDF5 format
+/// \ingroup HDF5IO
+template <MatrixLayout Layout, std::size_t Dim, typename T>
+inline void hdf5store(const StateMatrix<Layout, Dim, T> &state_matrix,
+    const std::string &file_name, const std::string &data_name, bool append)
+{
+    hdf5store_matrix<T>(Layout, state_matrix.size(), state_matrix.dim(),
+        file_name, data_name, state_matrix.data(), append);
+}
+
+/// \brief Store a Particle in the HDF5 format
+/// \ingroup HDF5IO
+template <typename T>
+inline void hdf5store(const Particle<T> &particle,
+    const std::string &file_name, const std::string &data_name, bool append)
+{
+    hdf5store_list_empty(file_name, data_name, append);
+    hdf5store(particle.value(), file_name, data_name + "/value", true);
+    hdf5store_matrix<double>(ColMajor,
+        static_cast<std::size_t>(particle.size()), 1, file_name,
+        data_name + "/weight", particle.weight().data(), true);
+}
+
+/// \brief Store a Monitor in the HDF5 format
+/// \ingroup HDF5IO
+template <typename T>
+inline void hdf5store(const Monitor<T> &monitor, const std::string &file_name,
+    const std::string &data_name, bool append)
+{
+    std::size_t nrow = monitor.iter_size();
+    std::size_t ncol = monitor.dim();
+
+    hdf5store_list_empty(file_name, data_name, append);
+    Vector<std::size_t> index(nrow);
+    monitor.read_index(index.data());
+    bool use_int = internal::hdf5store_int(
+        index.size(), index.data(), std::is_signed<std::size_t>());
+    if (use_int) {
+        Vector<int> index_small(index.size());
+        std::copy(index.begin(), index.end(), index_small.begin());
+        hdf5store_list_insert<int>(
+            nrow, file_name, data_name, index_small.data(), "Index");
+    } else {
+        hdf5store_list_insert<std::size_t>(
+            nrow, file_name, data_name, index.data(), "Index");
+    }
+
+    std::string record_name = data_name + "/Record";
+    hdf5store_list_empty(file_name, record_name, true);
+    Vector<double> record(nrow * ncol);
+    monitor.read_record_matrix(ColMajor, record.data());
+    const double *record_ptr = record.data();
+    std::stringstream ss;
+    for (std::size_t j = 0; j != ncol; ++j, record_ptr += nrow) {
+        std::string vname = monitor.name(j);
+        if (vname.empty())
+            vname = "X." + internal::itos(j);
+        hdf5store_list_insert<double>(
+            nrow, file_name, record_name, record_ptr, vname);
+    }
+}
+
 /// \brief Store a Sampler in the HDF5 format
 /// \ingroup HDF5IO
 template <typename T>
@@ -655,19 +714,17 @@ inline void hdf5store(const Sampler<T> &sampler, const std::string &file_name,
     if (use_int) {
         Vector<int> data_int_small(data_int.size());
         std::copy(data_int.begin(), data_int.end(), data_int_small.begin());
-        Vector<const int *> data_ptr_int(ncol_int);
-        for (std::size_t j = 0; j != ncol_int; ++j)
-            data_ptr_int[j] = data_int_small.data() + j * nrow;
-        for (std::size_t j = 0; j != ncol_int; ++j)
+        const int *data_ptr_int = data_int_small.data();
+        for (std::size_t j = 0; j != ncol_int; ++j, data_ptr_int += nrow) {
             hdf5store_list_insert<int>(
-                nrow, file_name, data_name, data_ptr_int[j], header_int[j]);
+                nrow, file_name, data_name, data_ptr_int, header_int[j]);
+        }
     } else {
-        Vector<const size_type *> data_ptr_int(ncol_int);
-        for (std::size_t j = 0; j != ncol_int; ++j)
-            data_ptr_int[j] = data_int.data() + j * nrow;
-        for (std::size_t j = 0; j != ncol_int; ++j)
+        const size_type *data_ptr_int = data_int.data();
+        for (std::size_t j = 0; j != ncol_int; ++j, data_ptr_int += nrow) {
             hdf5store_list_insert<size_type>(
-                nrow, file_name, data_name, data_ptr_int[j], header_int[j]);
+                nrow, file_name, data_name, data_ptr_int, header_int[j]);
+        }
     }
 
     std::size_t ncol = sampler.summary_header_size();
@@ -675,35 +732,11 @@ inline void hdf5store(const Sampler<T> &sampler, const std::string &file_name,
     Vector<double> data(nrow * ncol);
     sampler.summary_header(header.begin());
     sampler.template summary_data(ColMajor, data.begin());
-    Vector<const double *> data_ptr(ncol);
-    for (std::size_t j = 0; j != ncol; ++j)
-        data_ptr[j] = data.data() + j * nrow;
-    for (std::size_t j = 0; j != ncol; ++j)
+    const double *data_ptr = data.data();
+    for (std::size_t j = 0; j != ncol; ++j, data_ptr += nrow) {
         hdf5store_list_insert<double>(
-            nrow, file_name, data_name, data_ptr[j], header[j]);
-}
-
-/// \brief Store a StateMatrix in the HDF5 format
-/// \ingroup HDF5IO
-template <MatrixLayout Layout, std::size_t Dim, typename T>
-inline void hdf5store(const StateMatrix<Layout, Dim, T> &state,
-    const std::string &file_name, const std::string &data_name, bool append)
-{
-    hdf5store_matrix<T>(Layout, state.size(), state.dim(), file_name,
-        data_name, state.data(), append);
-}
-
-/// \brief Store a Particle in the HDF5 format
-/// \ingroup HDF5IO
-template <typename T>
-inline void hdf5store(const Particle<T> &particle,
-    const std::string &file_name, const std::string &data_name, bool append)
-{
-    hdf5store_list_empty(file_name, data_name, append);
-    hdf5store(particle.value(), file_name, data_name + "/value", true);
-    hdf5store_matrix<double>(ColMajor,
-        static_cast<std::size_t>(particle.size()), 1, file_name,
-        data_name + "/weight", particle.weight().data(), true);
+            nrow, file_name, data_name, data_ptr, header[j]);
+    }
 }
 
 } // namespace vsmc
