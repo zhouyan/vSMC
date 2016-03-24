@@ -288,6 +288,8 @@ inline void increment(
 template <typename Generator>
 class CounterEngine
 {
+    VSMC_DEFINE_NEW_DELETE(CounterEngine<Generator>)
+
     public:
     using result_type = typename Generator::result_type;
     using ctr_type = typename Generator::ctr_type;

@@ -57,6 +57,8 @@ namespace vsmc
 template <typename RNGType>
 class RNGSetScalar
 {
+    VSMC_DEFINE_NEW_DELETE(RNGSetScalar<RNGType>)
+
     public:
     using rng_type = RNGType;
     using size_type = std::size_t;

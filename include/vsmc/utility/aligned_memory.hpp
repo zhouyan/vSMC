@@ -75,6 +75,50 @@
 #define VSMC_ALIGNMENT 32
 #endif
 
+/// \brief Define class member `new` and `delete` using Allocator
+/// \ingroup AlignedMemory
+#define VSMC_DEFINE_NEW_DELETE(Class)                                         \
+    public:                                                                   \
+    static void *operator new(std::size_t count)                              \
+    {                                                                         \
+        static constexpr std::size_t alignment =                              \
+            alignof(Class) > 16 ? alignof(Class) : 16;                        \
+                                                                              \
+        if (count == 0)                                                       \
+            count = 1;                                                        \
+                                                                              \
+        return AlignedMemory::aligned_malloc(count, alignment);               \
+    }                                                                         \
+                                                                              \
+    static void *operator new[](std::size_t count)                            \
+    {                                                                         \
+        static constexpr std::size_t alignment =                              \
+            alignof(Class) > 16 ? alignof(Class) : 16;                        \
+                                                                              \
+        if (count == 0)                                                       \
+            count = 1;                                                        \
+                                                                              \
+        return AlignedMemory::aligned_malloc(count, alignment);               \
+    }                                                                         \
+                                                                              \
+    static void *operator new(std::size_t, void *ptr) { return ptr; }         \
+                                                                              \
+    static void *operator new[](std::size_t, void *ptr) { return ptr; }       \
+                                                                              \
+    static void operator delete(void *ptr)                                    \
+    {                                                                         \
+        AlignedMemory::aligned_free(ptr);                                     \
+    }                                                                         \
+                                                                              \
+    static void operator delete[](void *ptr)                                  \
+    {                                                                         \
+        AlignedMemory::aligned_free(ptr);                                     \
+    }                                                                         \
+                                                                              \
+    static void operator delete(void *, void *) {}                            \
+                                                                              \
+    static void operator delete[](void *, void *) {}
+
 #define VSMC_RUNTIME_ASSERT_UTILITY_ALIGNED_MEMORY_POWER_OF_TWO(alignment)    \
     VSMC_RUNTIME_ASSERT(                                                      \
         (alignment != 0 && (alignment & (alignment - 1)) == 0),               \
