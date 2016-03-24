@@ -152,8 +152,10 @@ class AlignedMemorySTD
             return nullptr;
 
         void *orig_ptr = std::malloc(n + alignment + sizeof(void *));
-        if (orig_ptr == nullptr)
+        if (orig_ptr == nullptr) {
             throw std::bad_alloc();
+            return nullptr;
+        }
 
         uintptr_t address = reinterpret_cast<uintptr_t>(orig_ptr);
         uintptr_t offset = alignment - (address + sizeof(void *)) % alignment;
@@ -167,6 +169,9 @@ class AlignedMemorySTD
 
     static void aligned_free(void *ptr)
     {
+        if (ptr == nullptr)
+            return;
+
         std::free(*reinterpret_cast<void **>(
             reinterpret_cast<uintptr_t>(ptr) - sizeof(void *)));
     }
@@ -191,13 +196,21 @@ class AlignedMemorySYS
             return nullptr;
 
         void *ptr;
-        if (posix_memalign(&ptr, alignment, n) != 0)
+        if (posix_memalign(&ptr, alignment, n) != 0) {
             throw std::bad_alloc();
+            return nullptr;
+        }
 
         return ptr;
     }
 
-    static void aligned_free(void *ptr) { free(ptr); }
+    static void aligned_free(void *ptr)
+    {
+        if (ptr == nullptr)
+            return;
+
+        free(ptr);
+    }
 }; // class AlignedMallocSYS
 
 #elif defined(VSMC_MSVC)
@@ -213,13 +226,21 @@ class AlignedMemorySYS
             return nullptr;
 
         void *ptr = _aligned_malloc(n, alignment);
-        if (ptr == nullptr)
+        if (ptr == nullptr) {
             throw std::bad_alloc();
+            return nullptr;
+        }
 
         return ptr;
     }
 
-    static void aligned_free(void *ptr) { _aligned_free(ptr); }
+    static void aligned_free(void *ptr)
+    {
+        if (ptr == nullptr)
+            return;
+
+        _aligned_free(ptr);
+    }
 }; // class AlignedMemorySYS
 
 #endif // VSMC_HAS_POSIX
@@ -240,13 +261,21 @@ class AlignedMemoryTBB
             return nullptr;
 
         void *ptr = scalable_aligned_malloc(n, alignment);
-        if (ptr == nullptr)
+        if (ptr == nullptr) {
             throw std::bad_alloc();
+            return nullptr;
+        }
 
         return ptr;
     }
 
-    static void aligned_free(void *ptr) { scalable_aligned_free(ptr); }
+    static void aligned_free(void *ptr)
+    {
+        if (ptr == nullptr)
+            return;
+
+        scalable_aligned_free(ptr);
+    }
 }; // class AlignedMemoryTBB
 
 #endif // VSMC_HAS_TBB_MALLOC
@@ -266,13 +295,21 @@ class AlignedMemoryMKL
             return nullptr;
 
         void *ptr = mkl_malloc(n, static_cast<int>(alignment));
-        if (ptr == nullptr)
+        if (ptr == nullptr) {
             throw std::bad_alloc();
+            return nullptr;
+        }
 
         return ptr;
     }
 
-    static void aligned_free(void *ptr) { mkl_free(ptr); }
+    static void aligned_free(void *ptr)
+    {
+        if (ptr == nullptr)
+            return;
+
+        mkl_free(ptr);
+    }
 }; // class AlignedMemoryMKL
 
 #endif // VSMC_HAS_MKL
@@ -290,8 +327,11 @@ using AlignedMemory = VSMC_ALIGNED_MEMORY_TYPE;
 /// \tparam Memory The memory management class. Must provides two static member
 /// functions, `aligned_malloc` and `aligned_free`. The member function
 /// `aligned_malloc` shall behave similar to `std::malloc` but take an
-/// additional arguments for alignment. The member function `aligned_free`
-/// shall behave just like `std::free`.
+/// additional arguments for alignment. It shall return a null pointer if the
+/// input size is zero. If there is an error, it throw an error or use other
+/// error handiling techniques, and if it mush return, it returns a null
+/// pointer . The member function `aligned_free` shall behave just like
+/// `std::free`. It shall be able to handle null pointer as an input.
 template <typename T, std::size_t Alignment = VSMC_ALIGNMENT,
     typename Memory = AlignedMemory>
 class AlignedAllocator : public std::allocator<T>
@@ -332,17 +372,13 @@ class AlignedAllocator : public std::allocator<T>
 
     static pointer allocate(size_type n, const void * = nullptr)
     {
-        if (n == 0)
-            return nullptr;
-
         return static_cast<pointer>(
             Memory::aligned_malloc(sizeof(T) * n, Alignment));
     }
 
     static void deallocate(pointer ptr, size_type)
     {
-        if (ptr != nullptr)
-            Memory::aligned_free(ptr);
+        Memory::aligned_free(ptr);
     }
 }; // class AlignedAllocator
 

@@ -1186,6 +1186,36 @@ void *vsmc_malloc(size_t n, int alignment);
 /** \brief `vsmc::AlignedMemory::aligned_free` */
 void vsmc_free(void *ptr);
 
+/** \brief Simple vector type for `double` */
+typedef struct {
+    double *data;
+    int size;
+} vsmc_vector;
+
+/** \brief Simple vector type for `int` */
+typedef struct {
+    int *data;
+    int size;
+} vsmc_vector_int;
+
+/** \brief Create a new vector given its size  */
+vsmc_vector vsmc_vector_new(int size);
+
+/** \brief Delete a vector */
+void vsmc_vector_delete(vsmc_vector *vector_ptr);
+
+/** \brief Resize a vector */
+void vsmc_vector_resize(vsmc_vector *vector_ptr, int size);
+
+/** \brief Create a new vector given its size  */
+vsmc_vector_int vsmc_vector_int_new(int size);
+
+/** \brief Delete a vector */
+void vsmc_vector_int_delete(vsmc_vector_int *vector_int_ptr);
+
+/** \brief Resize a vector */
+void vsmc_vector_int_resize(vsmc_vector_int *vector_int_ptr, int size);
+
 /** @} */ /* C_API_Utility_AlignedMemory */
 
 /** \addtogroup C_API_Utility_Covariance */
