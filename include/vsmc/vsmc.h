@@ -1256,16 +1256,20 @@ void vsmc_hdf5store_list_insert(int N, const char *file_name,
 void vsmc_hdf5store_list_insert_int(int N, const char *file_name,
     const char *data_name, const int *first, const char *vname);
 
-/** \brief `vsmc::hdf5store` for `vsmc::Sampler` */
-void vsmc_hdf5store_sampler(vsmc_sampler sampler, const char *file_name,
-    const char *data_name, int append);
-
 /** \brief `vsmc::hdf5store` for `vsmc::StateMatrix` */
 void vsmc_hdf5store_state_matrix(vsmc_state_matrix state_matrix,
     const char *file_name, const char *data_name, int append);
 
 /** \brief `vsmc::hdf5store` for `vsmc::Particle` */
 void vsmc_hdf5store_particle(vsmc_particle particle, const char *file_name,
+    const char *data_name, int append);
+
+/** \brief `vsmc::hdf5store` for `vsmc::Monitor` */
+void vsmc_hdf5store_monitor(vsmc_monitor monitor, const char *file_name,
+    const char *data_name, int append);
+
+/** \brief `vsmc::hdf5store` for `vsmc::Sampler` */
+void vsmc_hdf5store_sampler(vsmc_sampler sampler, const char *file_name,
     const char *data_name, int append);
 
 /** @} */ /* C_API_Utility_HDF5IO */

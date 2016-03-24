@@ -92,13 +92,6 @@ void vsmc_hdf5store_list_insert_int(int N, const char *file_name,
         static_cast<std::size_t>(N), file_name, data_name, first, vname);
 }
 
-void vsmc_hdf5store_sampler(vsmc_sampler sampler, const char *file_name,
-    const char *data_name, int append)
-{
-    ::vsmc::hdf5store(
-        ::vsmc::cast(sampler), file_name, data_name, append != 0);
-}
-
 void vsmc_hdf5store_state_matrix(vsmc_state_matrix state_matrix,
     const char *file_name, const char *data_name, int append)
 {
@@ -111,6 +104,20 @@ void vsmc_hdf5store_particle(vsmc_particle particle, const char *file_name,
 {
     ::vsmc::hdf5store(
         ::vsmc::cast(particle), file_name, data_name, append != 0);
+}
+
+void vsmc_hdf5store_monitor(vsmc_monitor monitor, const char *file_name,
+    const char *data_name, int append)
+{
+    ::vsmc::hdf5store(
+        ::vsmc::cast(monitor), file_name, data_name, append != 0);
+}
+
+void vsmc_hdf5store_sampler(vsmc_sampler sampler, const char *file_name,
+    const char *data_name, int append)
+{
+    ::vsmc::hdf5store(
+        ::vsmc::cast(sampler), file_name, data_name, append != 0);
 }
 
 } // extern "C"
