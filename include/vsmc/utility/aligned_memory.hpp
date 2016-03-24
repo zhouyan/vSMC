@@ -95,7 +95,7 @@
     static void *operator new(std::size_t n)                                  \
     {                                                                         \
         void *ptr = ::vsmc::AlignedMemory::aligned_malloc(                    \
-            n, ::vsmc::Alignment<Class>::value);                              \
+            n, ::vsmc::AlignmentTrait<Class>::value);                         \
         if (ptr == nullptr)                                                   \
             throw std::bad_alloc();                                           \
                                                                               \
@@ -105,7 +105,7 @@
     static void *operator new[](std::size_t n)                                \
     {                                                                         \
         void *ptr = ::vsmc::AlignedMemory::aligned_malloc(                    \
-            n, ::vsmc::Alignment<Class>::value);                              \
+            n, ::vsmc::AlignmentTrait<Class>::value);                         \
         if (ptr == nullptr)                                                   \
             throw std::bad_alloc();                                           \
                                                                               \
@@ -137,19 +137,19 @@ namespace internal
 {
 
 template <typename T, bool = std::is_scalar<T>::value>
-class AlignmentImpl
+class AlignmentTraitImpl
 {
     public:
     static constexpr std::size_t value =
         alignof(T) > VSMC_ALIGNMENT_MIN ? alignof(T) : VSMC_ALIGNMENT_MIN;
-}; // class AlignmentImpl
+}; // class AlignmentTraitImpl
 
 template <typename T>
-class AlignmentImpl<T, false>
+class AlignmentTraitImpl<T, false>
 {
     public:
     static constexpr std::size_t value = VSMC_ALIGNMENT;
-}; // class AlignmentImpl
+}; // class AlignmentTraitImpl
 
 } // namespace vsmc::internal
 
@@ -160,7 +160,7 @@ class AlignmentImpl<T, false>
 /// be big enough for SIME aligned operations. For other types, it return
 /// `VSMC_ALIGNMENT_MIN` if `alignof(T)` is smaller, otherwise `alignof(T)`
 template <typename T>
-class Alignment : public internal::AlignmentImpl<T>
+class AlignmentTrait : public internal::AlignmentTraitImpl<T>
 {
 };
 
@@ -306,16 +306,16 @@ using AlignedMemory = VSMC_ALIGNED_MEMORY_TYPE;
 /// pointer if it fails to allocated the memory. It shall not throw any
 /// exceptions. The member function `aligned_free` shall behave just like
 /// `std::free`. It shall be able to handle a null pointer as its input.
-template <typename T, std::size_t Alignment = VSMC_ALIGNMENT,
+template <typename T, std::size_t Alignment = AlignmentTrait<T>::value,
     typename Memory = AlignedMemory>
-class AlignedAllocator : public std::allocator<T>
+class Allocator : public std::allocator<T>
 {
     static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,
-        "**AlignedAllocator** USED WITH Alignment OTHER THAN A POWER OF TWO "
+        "**Allocator** USED WITH Alignment OTHER THAN A POWER OF TWO "
         "POSITIVE INTEGER");
 
     static_assert(Alignment >= sizeof(void *),
-        "**AlignedAllocator** USED WITH Alignment LESS THAN sizeof(void *)");
+        "**Allocator** USED WITH Alignment LESS THAN sizeof(void *)");
 
     public:
     using value_type = T;
@@ -331,15 +331,15 @@ class AlignedAllocator : public std::allocator<T>
     class rebind
     {
         public:
-        using other = AlignedAllocator<U, Alignment, Memory>;
+        using other = Allocator<U, Alignment, Memory>;
     }; // class rebind
 
-    AlignedAllocator() = default;
+    Allocator() = default;
 
-    AlignedAllocator(const AlignedAllocator<T, Alignment, Memory> &) = default;
+    Allocator(const Allocator<T, Alignment, Memory> &) = default;
 
     template <typename U>
-    AlignedAllocator(const AlignedAllocator<U, Alignment, Memory> &other)
+    Allocator(const Allocator<U, Alignment, Memory> &other)
         : std::allocator<T>(static_cast<std::allocator<U>>(other))
     {
     }
@@ -359,10 +359,10 @@ class AlignedAllocator : public std::allocator<T>
         if (ptr != nullptr)
             Memory::aligned_free(ptr);
     }
-}; // class AlignedAllocator
+}; // class Allocator
 
 template <std::size_t Alignment, typename Memory>
-class AlignedAllocator<void, Alignment, Memory>
+class Allocator<void, Alignment, Memory>
 {
     using value_type = void;
     using pointer = void *;
@@ -370,12 +370,12 @@ class AlignedAllocator<void, Alignment, Memory>
 
     template <class U>
     struct rebind {
-        using other = AlignedAllocator<U, Alignment, Memory>;
+        using other = Allocator<U, Alignment, Memory>;
     };
-}; // class AlignedAllocator
+}; // class Allocator
 
 template <std::size_t Alignment, typename Memory>
-class AlignedAllocator<const void, Alignment, Memory>
+class Allocator<const void, Alignment, Memory>
 {
     using value_type = const void;
     using pointer = const void *;
@@ -383,28 +383,23 @@ class AlignedAllocator<const void, Alignment, Memory>
 
     template <class U>
     struct rebind {
-        using other = AlignedAllocator<U, Alignment, Memory>;
+        using other = Allocator<U, Alignment, Memory>;
     };
-}; // class AlignedAllocator
+}; // class Allocator
 
 template <typename T1, typename T2, std::size_t Alignment, typename Memory>
-inline bool operator==(const AlignedAllocator<T1, Alignment, Memory> &,
-    const AlignedAllocator<T2, Alignment, Memory> &)
+inline bool operator==(const Allocator<T1, Alignment, Memory> &,
+    const Allocator<T2, Alignment, Memory> &)
 {
     return true;
 }
 
 template <typename T1, typename T2, std::size_t Alignment, typename Memory>
-inline bool operator!=(const AlignedAllocator<T1, Alignment, Memory> &,
-    const AlignedAllocator<T2, Alignment, Memory> &)
+inline bool operator!=(const Allocator<T1, Alignment, Memory> &,
+    const Allocator<T2, Alignment, Memory> &)
 {
     return false;
 }
-
-/// \brief AlignedAllocator with proper alignement detected for type
-/// \ingroup AlignedMemory
-template <typename T>
-using Allocator = AlignedAllocator<T, Alignment<T>::value>;
 
 /// \brief Vector type using Allocator
 /// \ingroup AlignedMemory
