@@ -20,6 +20,7 @@
   for scalar types and `max(alignof(T), 16)` for others.
 * `Vector` is now defined to be `std::vector<T, Allocator<T>`
 * HDF5 IO functions' `append` parameter no longer has a default argument
+* `hdf5store` is now overloaded for `Monitor`
 
 ## Removed features
 
