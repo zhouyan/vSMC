@@ -55,8 +55,6 @@ class Particle
     using weight_type = WeightType<T>;
     using rng_set_type = RNGSetType<T>;
     using rng_type = typename rng_set_type::rng_type;
-    using resample_type = std::function<void(
-        std::size_t, std::size_t, rng_type &, const double *, size_type *)>;
     using sp_type = SingleParticle<T>;
 
     explicit Particle(size_type N)

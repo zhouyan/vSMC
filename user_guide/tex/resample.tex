@@ -4,33 +4,55 @@
 The library supports resampling in a more general way than the algorithm
 described in chapter~\ref{chap:Sequential Monte Carlo}. Recall that, given a
 particle system $\{W^{(i)},X^{(i)}\}_{i=1}^N$, a new system $\{\bar{W}^{(i)},
-\bar{X}^{(i)}\}_{i=1}^M$ is generated. Regardless other statistical properties,
-in practice, such an algorithm can be decomposed into three steps. First, a
-vector $\{r_i\}_{i=1}^N$ is generated such that $\sum_{i=1}^N r_i = M$. Then a
-vector $\{a_i\}_{i=1}^M$ is generated such that, $\sum_{i=1}^M
-\mathbb{I}_{\{j\}}(a_i) = r_j$. And last, set $\bar{X}^{(i)} = X^{(a_i)}$.
+\bar{X}^{(i)}\}_{i=1}^M$ is generated. Regardless of other statistical
+properties, in practice, such an algorithm can be decomposed into three steps.
+First, a vector of replication numbers $\{r_i\}_{i=1}^N$ is generated such that
+$\sum_{i=1}^N r_i = M$, and $0 \le r_i \le M$ for $i=1,\dots,N$. Then a vector
+of indices $\{a_i\}_{i=1}^M$ is generated such that $\sum_{i=1}^M
+\mathbb{I}_{\{j\}}(a_i) = r_j$, and $1 \le a_i \le N$ for $i= 1,\dots,M$. And
+last, set $\bar{X}^{(i)} = X^{(a_i)}$.
 
 The first step determines the statistical properties of the resampling
 algorithm. The library defines all algorithms discussed in
 \textcite{Douc:2005wa}. Samplers can be constructed with builtin schemes as
 seen in section~\ref{sub:Implementations}. In addition, samplers can also be
-constructed with user defined resampling operations. Below is the signature,
+constructed with user defined resampling operations. A user defined resampling
+algorithm can be any type that is convertible to
+\verb|Sampler<T>::resample_type|,
+following function call,
 \begin{cppcode}
-  template <typename IntType, typename RNGType>
-  void resample(std::size_t M, std::size_t N, RNGType &rng,
-  const double *weight, IntType *replication);
+  using resample_type = std::function<void(std::size_t, std::size_t,
+      typename Particle<T>::rng_type &, const double *, size_type *)>;
 \end{cppcode}
-The last parameter is the output vector $\{r_i\}_{i=1}^N$. The builtin schemes
-are implemented as classes with \verb|operator()| conforms to the above
-signature. For example, \verb|ResampleMultinomial| implements the multinomial
-resampling algorithm.
+where the first argument is $M$, the second $N$, the third is a \cppoo{} \rng
+type, the fourth is a pointer to normalized weight, and the last a pointer to
+the vector $\{r_i\}_{i=1}^N$. The builtin schemes are implemented as classes
+with \verb|operator()| conforms to the above signature. All builtin schemes are
+listed in table~\ref{tab:Resampling schemes}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{lX}
+    \toprule
+    \verb|ResampleScheme| & Algorithm \\
+    \midrule
+    \verb|Multinomial|        & Multinomial resampling             \\
+    \verb|Stratified|         & Stratified resampling              \\
+    \verb|Systematic|         & Systematic resampling              \\
+    \verb|Residual|           & Residual resampling                \\
+    \verb|ResidualStratified| & Stratified resampling on residuals \\
+    \verb|ResidualSystematic| & Systematic resampling on residuals \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Resampling schemes}
+  \label{lab:Resampling schemes}
+\end{table}
 
 To transform $\{r_i\}_{i=1}^N$ into $\{a_i\}_{i=1}^M$, one can call the
 following function,
 \begin{cppcode}
   template <typename IntType1, typename IntType2>
   void resample_trans_rep_index(std::size_t M, std::size_t N,
-  const IntType1 *replication, IntType2 *index);
+      const IntType1 *replication, IntType2 *index);
 \end{cppcode}
 where the last parameter is the output vector $\{a_i\}_{i=1}^M$. This function
 guarantees that $a_i = i$ if $r_i > 0$. However, its output may not be optimal
@@ -44,7 +66,9 @@ manually perform the rest of the resampling algorithm.
 \section{Resizing a sampler}
 \label{sec:Resizing a sampler}
 
-Now, we provide an example of changing sampler size,
+The library does not direct support varying sample size algorithms. However, it
+is possible. Below is a program within which the sample size is changed through
+a Multinomial resampling algorithm.
 \begin{cppcode}
   // sampler is an existing Sampler<T> object
   auto N = sampler.size();
@@ -56,13 +80,23 @@ Now, we provide an example of changing sampler size,
   resample(M, N, rng, weight, rep.data());
   resample_trans_rep_index(M, N, rep.data(), idx.data());
   Particle<T> particle(M);
+  particle.weight().set_equal();
   for (std::size_t i = 0; i != M; ++i) {
       auto sp_dst = particle.sp(i);
       auto sp_src = sampler.partice().sp(idx[i]);
       // Assuming T is a subclass of StateMatrix
       for (std::size_t d = 0; d != sp_dst.dim(); ++d)
-      sp_dst.state(d) = sp_src.state(d);
+          sp_dst.state(d) = sp_src.state(d);
   }
   // Copy other data of class T if any
   sampler.particle() = std::move(particle);
 \end{cppcode}
+The vectors of replication numbers \verb|rep| and indices \verb|idx| are
+generated with the library's functions. Particles in the original sampler are
+copied into a temporary particle system \verb|particle|. And then this
+temporary is moved into the original sampler. It is important to note that, if
+the \verb|T| type object \verb|particle.value()| has any other non-static
+member data other than the states, they also need to be copied into the
+temporary first. Note that \verb|sampler.size()| is only a shortcut for
+\verb|sampler.particle().size()|. The sampler object itself does not store size
+information, nor does it need to.

@@ -61,12 +61,13 @@ class Sampler
 
     public:
     using size_type = typename Particle<T>::size_type;
-    using resample_type = typename Particle<T>::resample_type;
     using value_type = T;
     using init_type = std::function<std::size_t(Particle<T> &, void *)>;
     using move_type = std::function<std::size_t(std::size_t, Particle<T> &)>;
     using mcmc_type = std::function<std::size_t(std::size_t, Particle<T> &)>;
     using monitor_map_type = std::map<std::string, Monitor<T>>;
+    using resample_type = std::function<void(std::size_t, std::size_t,
+        typename Particle<T>::rng_type &, const double *, size_type *)>;
 
     /// \brief Construct a Sampler without selection of resampling method
     explicit Sampler(size_type N)
