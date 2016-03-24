@@ -12,7 +12,7 @@ user_guide/cpp/pf_seq_c
 user_guide/cpp/pf_tbb
 user_guide/cpp/pf_tbb_c
 user_guide/cpp/program_option
-user_guide/cpp/program_progress
+user_guide/cpp/progress
 user_guide/tex/*.aux
 user_guide/user_guide.aux
 user_guide/user_guide.bbl
