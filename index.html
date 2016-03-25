@@ -1,143 +1,117 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset="UTF-8">
     <title>vSMC by zhouyan</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>vSMC</h1>
-        <p>vSMC: Scalable Monte Carlo</p>
+    <section class="page-header">
+      <h1 class="project-name">vSMC</h1>
+      <h2 class="project-tagline">vSMC: Scalable Monte Carlo</h2>
+      <a href="https://github.com/zhouyan/vSMC" class="btn">View on GitHub</a>
+      <a href="https://github.com/zhouyan/vSMC/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/zhouyan/vSMC/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-        <p class="view"><a href="https://github.com/zhouyan/vSMC">View the Project on GitHub <small>zhouyan/vSMC</small></a></p>
-
-
-        <ul>
-          <li><a href="https://github.com/zhouyan/vSMC/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/zhouyan/vSMC/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/zhouyan/vSMC">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h1>
-<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h1>
+    <section class="main-content">
+      <h1>
+<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Introduction</h1>
 
 <p>The vSMC library provides a framework for implementing SMC algorithms. It has a
-core module which performs resampling, etc., operations common to all SMC
-algorithms and applications. In addition, it provides the bases for
-implementing parallelized samplers. The SMC algorithms are highly
-parallelizable, but there are many frameworks for doing this. This library
-tries to hide the different parallelization mechanism behind a unified
-interface, and thus increases code reuse.</p>
+modules that perform resampling, etc., operations common to all SMC algorithms
+and applications. In addition, it provides bases for implementing parallelized
+samplers. The SMC algorithms are highly parallelizable, but there are many
+frameworks for doing this. This library tries to hide the different
+parallelization mechanism behind a unified interface, and thus increases code
+reuse.</p>
 
 <h1>
-<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h1>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h1>
 
 <p>This is a header only template C++ library. To install the library just move
 the contents of the <code>include</code> directory into a proper place, e.g.,
-<code>/usr/local/include</code> in Unix-alike systems. Alternatively, one can use
-<a href="http://www.cmake.org">CMake</a> (2.8.3 or later required),</p>
+<code>/usr/local/include</code> on Unix-alike systems. Alternatively, one can use
+<a href="http://www.cmake.org">CMake</a> (3.0.0 or later required),</p>
 
-<div class="highlight highlight-sh"><pre><span class="pl-s3">cd</span> /path_to_vSMC_source
+<div class="highlight highlight-source-shell"><pre><span class="pl-c1">cd</span> /path_to_vSMC_source
 mkdir build
-<span class="pl-s3">cd</span> build
+<span class="pl-c1">cd</span> build
 cmake ..
 make install</pre></div>
 
-<p>One may need <code>su</code> or <code>sudo</code> permissions to perform the last installation step.</p>
+<p>One may need administrator permissions to perform the last installation step or
+alternatively one can define the <a href="http://www.cmake.org">CMake</a> variable <code>CMAKE_INSTALL_PREFIX</code>
+to change the destination of installation.</p>
 
 <h1>
-<a id="documentation" class="anchor" href="#documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Documentation</h1>
+<a id="documentation" class="anchor" href="#documentation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Documentation</h1>
 
-<p>To make the documentations one need <a href="http://www.stack.nl/%7Edimitri/doxygen/manual.html">Doxygen</a> 1.8.3 or later.</p>
-
-<div class="highlight highlight-sh"><pre>make docs</pre></div>
-
-<p>The documentation of the <a href="http://zhouyan.github.io/vSMCDoc/master">master</a> and
-<a href="http://zhouyan.github.io/vSMCDoc/develop">develop</a> branches can be found online.</p>
-
-<p>A <a href="http://arxiv.org/pdf/1306.5583v1.pdf">tutorial</a> is also available. However, it describes an earlier
-version of the library.  There are a few incompatibilities with the current
-version. It is still highly relevant. Users shall use the Doxygen generated
-documentations when things do not work exactly the same way as in the tutorial.</p>
+<p>The documentation of the <a href="http://zhouyan.github.io/vSMCDoc/master">master</a> and <a href="http://zhouyan.github.io/vSMCDoc/develop">develop</a>
+branches, as well as for individual releases can be found online. A <a href="http://zhouyan.github.io/vSMCDoc/develop/user_guide.pdf">User
+guide</a> is also provided for the develop branch.</p>
 
 <h1>
-<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h1>
+<a id="third-party-dependencies" class="anchor" href="#third-party-dependencies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Third-party dependencies</h1>
+
+<p>This library requires a working BLAS/LAPACK implementation, with the standard C
+interface headers (<code>cblas.h</code> and <code>lapacke.h</code>). Some of the library's
+functionalities can only be used if optional dependencies are present.
+Notably, <a href="http://www.hdfgroup.org">HDF5</a>, <a href="http://threadingbuildingblocks.org">TBB</a>, <a href="http://www.openmp.org">OpenMP</a> and <a href="https://software.intel.com/en-us/intel-mkl">MKL</a>. One can
+tell the library that these optional features are available by defining
+configuration macros such as <code>-DVSMC_HAS_HDF5=1</code> during compilation.</p>
+
+<h1>
+<a id="parallelization-backends" class="anchor" href="#parallelization-backends" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Parallelization backends</h1>
+
+<p>This library support various backends for multi-thread parallelization, unified
+under a uniform interface. The primary backends are <a href="http://www.openmp.org">OpenMP</a> and
+<a href="http://threadingbuildingblocks.org">TBB</a>.</p>
+
+<h1>
+<a id="compiler-support" class="anchor" href="#compiler-support" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Compiler support</h1>
+
+<p>This library makes heavy use of some template metaprogramming techniques. It
+requires a C++11 standard conforming compiler.</p>
+
+<p>This library has been regularly tested with recent <a href="http://clang.llvm.org">Clang</a>, <a href="http://gcc.gnu.org">GCC</a>
+and <a href="http://software.intel.com/en-us/intel-compilers">Intel C++ Compiler</a> in C++11 mode.</p>
+
+<p>Other compilers might work but are not tested. Complete C++11 implementation is
+required.</p>
+
+<h1>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Examples</h1>
 
 <p>Examples are in the <code>example</code> subdirectory, to build them,</p>
 
-<div class="highlight highlight-sh"><pre><span class="pl-s3">cd</span> /path_to_vSMC_source
+<div class="highlight highlight-source-shell"><pre><span class="pl-k">export</span> CXXFLAGS=c++11
+<span class="pl-c1">cd</span> /path_to_vSMC_source
 mkdir build
-<span class="pl-s3">cd</span> build
+<span class="pl-c1">cd</span> build
 cmake ..
 make example</pre></div>
 
-<p>Most examples also come with their own <code>README</code> files that give relevant
-references.</p>
+<p>Some examples may only be built if some optional dependencies are present.</p>
 
 <h1>
-<a id="parallelization-backends" class="anchor" href="#parallelization-backends" aria-hidden="true"><span class="octicon octicon-link"></span></a>Parallelization backends</h1>
-
-<p>The library support various backends for multi-thread parallelization, unified
-under a uniform interface. One is C++11 concurrency. For a full C++11
-implementation, this means no third-party dependency is required to write a
-parallel SMC sampler. Other third-party parallelization include, <a href="https://www.cilkplus.org">Intel Cilk
-Plus</a>, <a href="http://threadingbuildingblocks.org">Intel TBB</a> and <a href="http://www.openmp.org">OpenMP</a>. <a href="http://en.wikipedia.org/wiki/Grand_Central_Dispatch">Apple
-Grand Central Dispatch</a> is also supported on Mac OS X. <a href="http://msdn.microsoft.com/en-us/library/dd492418.aspx">Microsoft
-Parallel Patterns Library</a> is supported on Windows when compiled with
-<a href="http://msdn.microsoft.com/en-us/vstudio//default.aspx">Microsoft Visual C++</a> 2012 or later. In addition, this library also
-support using <a href="http://www.khronos.org/opencl">OpenCL</a> for GPGPU computing, though the interface is
-different than others.</p>
-
-<h1>
-<a id="third-party-dependencies" class="anchor" href="#third-party-dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>Third-party dependencies</h1>
-
-<p>This library has no dependences other than C++ standard libraries (C++11). Any
-C++11 language features are optional.</p>
-
-<p>In particular, the library use the <code>&lt;functional&gt;</code> and <code>&lt;random&gt;</code> headers, which
-are parts of the C++11 standard libraries. Equivalences can be found in recent
-versions of <a href="http://www.boost.org">Boost</a>. The library does its best to detect a usable C++11
-solution and falls back to <a href="http://www.boost.org">Boost</a> if it fails to do so. This behavior
-can be changed explicitly through configuration macros.</p>
-
-<h1>
-<a id="compiler-support" class="anchor" href="#compiler-support" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compiler support</h1>
-
-<p>This library makes heavy use of some template metaprogramming techniques. It
-requires a standard conforming compiler. Fortunately, most commonly used
-modern compilers, at least in C++98 mode, is able to compile the examples
-distributed with the library, provided that they can compile the Boost library.</p>
-
-<p>This library has been regularly tested with recent <a href="http://clang.llvm.org">Clang</a>, <a href="http://gcc.gnu.org">GCC</a>
-and <a href="http://software.intel.com/en-us/intel-compilers">Intel C++ Compiler</a>, in both C++98 and C++11 modes.</p>
-
-<p><a href="http://msdn.microsoft.com/en-us/vstudio//default.aspx">Microsoft Visual C++</a> 2012 or later are also supported. However, this
-compiler is tested less regularly.</p>
-
-<p>Other compilers might work but are not tested.</p>
-
-<h1>
-<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h1>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h1>
 
 <p>The vSMC library is distributed with a 2-clause BSD license which can be found
 in the <code>LICENSE</code> file distributed with the source.</p>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/zhouyan">zhouyan</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/zhouyan/vSMC">vSMC</a> is maintained by <a href="https://github.com/zhouyan">zhouyan</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
-    </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
+
+    </section>
+
+  
   </body>
 </html>
