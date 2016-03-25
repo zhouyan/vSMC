@@ -10,7 +10,7 @@ basic functionality that is sufficient for most simple cases.
 \label{sec:Aligned memory allocation}
 
 The standard library class \verb|std::allocator| is used by containers to
-allocate memory. It works fine in most cases. However, sometime it is desired
+allocate memory. It works fine in most cases. However, sometime it is desirable
 to allocate memory aligned by a certain boundary. The library provides the
 class template,
 \begin{cppcode}
@@ -18,9 +18,71 @@ class template,
       typename Memory = AlignedMemory>
   class Allocator;
 \end{cppcode}
+which conforms to the \verb|std::allocator| interface. The address of the
+pointer return by the \verb|allocate| method will be a multiple of
+\verb|Alignment|. The value of alignment has to be positive, larger than
+\verb|sizeof(void *)|, and a power of two. Violating any of these conditions
+will result in compile-time error. The last template parameter \verb|Memory|
+shall have two static methods,
+\begin{cppcode}
+  static void *aligned_malloc(std::size_t n, std::size_t alignment);
+  static void aligned_free(void *ptr);
+\end{cppcode}
+The method \verb|aligned_malloc| shall behave similar to \verb|std::malloc|
+with the additional alignment requirement. It shall return a null pointer if it
+fails to allocate memory. In any other case, including zero input size, it
+shall return a reachable non-null pointer. The method \verb|aligned_free| shall
+behave similar to \verb|std::free|. It shall be able to handle a null pointer
+as its input. The library provides a few implementations, listed in
+table~\ref{tab:Aligned memory allocation}. In addition, a type alias
+\verb|AlignedMemory| is defined to be one of the class listed in the table,
+depending on the availability of those classes, with preference in the same
+order as they are listed. The user can define the configuration macro
+\verb|VSMC_ALIGNED_MEMORY_TYPE| to override the choice made by the library.
 
-\section{Sample covariance estimating}
-\label{sec:Sample covariance estimating}
+The default alignment depends on the type \verb|T|. If it is a scalar type
+(\verb|std::is_scalar<T>|), then the alignment is \verb|VSMC_ALIGNMENT|, whose
+default is 32. This alignment is sufficient for modern \simd operations, such
+as \avx{}2. For other types, the alignment is the maximum of \verb|alignof(T)|
+and \verb|VSMC_ALIGNMENT_MIN|, whose default is 16.
+
+Some classes in the library are over-aligned to make efficient use of \simd
+operations. Those classes' \verb|operator new| and related methods are
+overloaded using \verb|AlignedMemory|.
+
+Last, a type alias \verb|Vector| is defined,
+\begin{cppcode}
+  template <typename T>
+  using Vector = std::vector<T, Allocator<T>>;
+\end{cppcode}
+This vector type is used throughout the library.
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{lX}
+    \toprule
+    Class & Notes \\
+    \midrule
+    \verb|AlignedMemoryTBB|
+    & Use \verb|scalable_aligned_malloc| and \verb|scalable_aligned_free|.
+    Defined if \verb|VSMC_HAS_TBB_MALLOC| is defined to a non-zero value. \\
+    \verb|AlignedMemoryMKL|
+    & Use \verb|mkl_malloc| and \verb|mkl_free|. Defined if \verb|VSMC_HAS_MKL|
+    is defined to a non-zero value. \\
+    \verb|AlignedMemorySYS|
+    & Use \verb|posix_memalign| and \verb|free| on \posix platforms. Use
+    \verb|_aligned_malloc| and \verb|_aligned_free| if using \msvc. Defined if
+    \verb|VSMC_HAS_POSIX| is defined to a non-zero value, or the \msvc compiler
+    is detected. \\
+    \verb|AlignedMemorySTD|
+    & Use \verb|std::malloc| and \verb|std::free|. Always defined. \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Aligned memory allocation}
+  \label{tab:Aligned memory allocation}
+\end{table}
+
+\section{Sample covariance}
+\label{sec:Sample covariance}
 
 The library provides some basic functionality to estimate sample variance. For
 example,
@@ -42,46 +104,52 @@ pointer, then the corresponding output is not computed. The sample \verb|x| is
 assumed to be stored in an $N$ by $d$ matrix. The first argument passed to
 \verb|eval| is the storage layout of this matrix. If \verb|x| is a null
 pointer, then no computation will be done. If \verb|w| is a null pointer, then
-the weight is assumed to be equal for all samples. The method has three
-additional optional parameters. The first is \verb|cov_layout|, which specifies
-the covariance matrix storage layout. The second is \verb|cov_upper| and the
-third \verb|cov_packed|, both are \verb|false| by default. If the later is
-\verb|cov_packed|, a packed vector of length $d(d+1)/2$ is written into
-\verb|cov|. If \verb|cov_upper| is \verb|false|, then the upper triangular is
+the weight is assumed to be equal for all samples. This method has three
+optional parameters. The first is \verb|cov_layout|, which specifies the
+storage layout of \verb|cov|. The second is \verb|cov_upper| and the third is
+\verb|cov_packed|, both are \verb|false| by default. If the later is
+\verb|true|, a packed vector of length $d(d+1)/2$ is written into
+\verb|cov|. If \verb|cov_upper| is \verb|true|, then the upper triangular is
 packed, otherwise the lower triangular is packed.
 
 The estimated covariance matrix is often used to construct multivariate Normal
-distribution for the purpose of generating random walk scales. The
+distribution for the purpose of generating random walk proposals. The
 \verb|NormalMVDistribution| in section~\ref{sec:Distributions} accepts the
-lower triangular of the Cholesky decomposition of the covariance instead of the
-covariance matrix itself. The following function will compute this
-decomposition,
+lower triangular of the Cholesky decomposition of the covariance matrix instead
+of itself. The following function will compute this decomposition,
 \begin{cppcode}
   double chol[d * (d + 1) / 2];
   cov_chol(d, cov, chol);
+  NormalMVDistribution<double> normal_mv(d, nullptr, chol); // zero mean
 \end{cppcode}
 The output \verb|chol| is a packed vector in row major storage. This function
 also has three optional parameters, which are the same as those of
 \verb|Covariance::operator()|, except that they are now used to specify the
 storage scheme of the input parameter \verb|cov|.
 
-\section{Storing objects in \protect\hdf}
-\label{sec:Storing objects in HDF5}
+\section{Store objects in \protect\hdf format}
+\label{sec:Store objects in HDF5 format}
 
-If the \hdf library is available, it is possible to store \verb|Sampler<T>|
-objects, etc., in the \hdf format. For example,
+If the \hdf library is available (\verb|VSMC_HAS_HDF5|), it is possible to
+store \verb|Sampler<T>| objects, etc., in the \hdf format. For example,
 \begin{cppcode}
-  hdf5store(sampler, "pf.h5", "sampler");
+  hdf5store(sampler, "pf.h5", "sampler", false);
 \end{cppcode}
-create a \hdf file with the sampler stored as a list. In R it can be processed
+creates a \hdf file named \verb|pf.h5| with the sampler stored as a list in the
+group \verb|sampler|. If the last argument is \verb|true|, the data is inserted
+to an existing file. Otherwise a new file is created. In R it can be processed
 as the following,
 \begin{rcode}
   library(rhdf5)
   pf <- as.data.frame(h5read("pf.h5", "sampler"))
 \end{rcode}
 This creates a \verb|data.frame| similar to that shown in
-section~\ref{sub:Implementations}. Other types of objects can also be store,
-see the reference manual for details.
+section~\ref{sub:Implementations}. The \verb|hdf5store| function is overloaded
+for \verb|StateMatrix|, \verb|Sampler<T>| and \verb|Monitor<T>|. It is also
+overloaded for \verb|Particle<T>| if an overload for \verb|T| is available.
+Such an overload is automatically available if \verb|T| is a derived class of
+\verb|StateMatrix|. However, it may not be the most suitable one. Other types
+of objects can also be stored, see the reference manual for details.
 
 \section{\protect\raii classes for \protect\mkl pointers}
 \label{sec:RAII classes for MKL pointers}
@@ -96,26 +164,26 @@ class,
   task.compute(estimates, method)
 \end{cppcode}
 In the above program, the \verb|MKLSSTask| type object manages a
-\verb|VSLSSTaskPtr| task pointer. The resouces managed will be released when
-the object is destoryed. All C functions that operates on the pointer, is also
+\verb|VSLSSTaskPtr| task pointer. The resources managed will be released when
+the object is destroyed. All C functions that operates on the pointer, is also
 defined as methods in the class. Table~\ref{tab:RAII classes for MKL pointers}
 lists the classes defined by the library and their corresponding \mkl pointers.
 For those classes that are copyable, the copy constructor and assignment
 operator perform deep copy. It is safe to use the copy and the original
 independently. Those classes that are not copyable are movable.
 
-\begin{table}[t]
-  \begin{tabu}{X[l]X[l]X[l]}
+\begin{table}
+  \begin{tabularx}{\textwidth}{XXX}
     \toprule
     Class & \mkl pointer type & Copyable \\
     \midrule
-    \texttt{MKLStream}   & \texttt{VSLStreamStatePtr} & Yes \\
-    \texttt{MKLSSTask}   & \texttt{VSLSSTaskPtr}      & No  \\
-    \texttt{MKLConvTask} & \texttt{VSLConvTask}       & Yes \\
-    \texttt{MKLCorrTask} & \texttt{VSLCorrTask}       & Yes \\
-    \texttt{MKLDFTask}   & \texttt{DFTaskPtr}         & No  \\
+    \verb|MKLStream|   & \verb|VSLStreamStatePtr| & Yes \\
+    \verb|MKLSSTask|   & \verb|VSLSSTaskPtr|      & No  \\
+    \verb|MKLConvTask| & \verb|VSLConvTask|       & Yes \\
+    \verb|MKLCorrTask| & \verb|VSLCorrTask|       & Yes \\
+    \verb|MKLDFTask|   & \verb|DFTaskPtr|         & No  \\
     \bottomrule
-  \end{tabu}
+  \end{tabularx}
   \caption{\protect\raii classes for \protect\mkl pointers}
   \label{tab:RAII classes for MKL pointers}
 \end{table}
@@ -143,47 +211,47 @@ program,
 In the above program, each class type object manages an OpenCL C type, such as
 \verb|cl_platform|. The resources will be released when the object is
 destroyed. Note that, the copy constructor and assignment operator perform
-shadow copy. This is particularly important for \verb|CLMemory| type objects.
+shallow copy. This is particularly important for \verb|CLMemory| type objects.
 In appendix~\appref{app:sub:Parallelized implementation using OpenCL} an OpenCL
 implementation of the simple particle filter example in section~\ref{sec:A
   simple particle filter} is shown. Table~\ref{tab:RAII classes for OpenCL
   pointers} lists the classes defined by the library and their corresponding
 OpenCL pointers.
 
-\begin{table}[t]
-  \begin{tabu}{X[l]X[l]}
+\begin{table}
+  \begin{tabularx}{\textwidth}{XX}
     \toprule
     Class & OpenCL pointer type \\
     \midrule
-    \texttt{CLPlatform}     & \texttt{cl\_platform\_id}   \\
-    \texttt{CLContext}      & \texttt{cl\_context}        \\
-    \texttt{CLDevice}       & \texttt{cl\_device\_id}     \\
-    \texttt{CLCommandQueue} & \texttt{cl\_command\_queue} \\
-    \texttt{CLMemory}       & \texttt{cl\_mem}            \\
-    \texttt{CLProgram}      & \texttt{cl\_program}        \\
-    \texttt{CLKernel}       & \texttt{cl\_kernel}         \\
-    \texttt{CLEvent}        & \texttt{cl\_event}          \\
+    \verb|CLPlatform|     & \verb|cl_platform_id|   \\
+    \verb|CLContext|      & \verb|cl_context|       \\
+    \verb|CLDevice|       & \verb|cl_device_id|     \\
+    \verb|CLCommandQueue| & \verb|cl_command_queue| \\
+    \verb|CLMemory|       & \verb|cl_mem|           \\
+    \verb|CLProgram|      & \verb|cl_program|       \\
+    \verb|CLKernel|       & \verb|cl_kernel|        \\
+    \verb|CLEvent|        & \verb|cl_event|         \\
     \bottomrule
-  \end{tabu}
+  \end{tabularx}
   \caption{\protect\raii classes for OpenCL pointers}
   \label{tab:RAII classes for OpenCL pointers}
 \end{table}
 
-\section{Program option}
-\label{sec:Program option}
+\section{Process command line options}
+\label{sec:Process command line options}
 
-The library provides some basic support of processing command line program
-options. Here we show a minimal example. The complete program is shown in
-appendix~\appref{app:sec:Program option}. First, one need to allocated
-variables to store the options to be processed.
+The library provides some basic support for processing command line options.
+Here we show a minimal example. The complete program is shown in
+appendix~\appref{app:sec:Process command options}. First, we allocate define to
+store values of options,
 \begin{cppcode}
   int n;
   std::string str;
   std::vector<double> vec;
 \end{cppcode}
 All types that support standard library \io stream operations are supported. In
-addition, \verb|std::vector<T>|, where \verb|T| is a type that supports
-standard library \io stream operations is also supported. Then,
+addition, for any type \verb|T| that supports such options,
+\verb|std::vector<T, Alloc>|, is also supported. Then,
 \begin{cppcode}
   ProgramOptionMap option_map;
 \end{cppcode}
@@ -195,14 +263,15 @@ constructs the container of options. Options can be added to the map,
       .add("vec", "A vector option", &vec);
 \end{cppcode}
 The first argument is the name of the option, the second is a description, and
-the third is a pointer to where the option's value shall be stored. The last
-optional argument is a default value. The options on the command line can be
-processed as the following,
+the third is a pointer to where the value of the option shall be stored. The
+last optional argument is a default value. The options on the command line can
+be processed as the following,
 \begin{cppcode}
   option_map.process(argc, argv);
 \end{cppcode}
 where \verb|argc| and \verb|argv| are the arguments of the \verb|main|
-function. When the program is invoked, each option can be passed like below,
+function. When the program is invoked, each option can be passed to it like
+below,
 \begin{textcode}
   ./program_option --vec 1 2 1e-1 --str "abc" --vec 8 9 --str "def hij" --n 2 4
 \end{textcode}
@@ -213,17 +282,17 @@ The results of the option processing is displayed below,
   vec: 1 2 0.1 8 9
 \end{textcode}
 To summarize these output, the same option can be specified multiple times. If
-it is a scalar option, the last one is used (\verb|--str|, \verb|--n|). A
-string option's value can be grouped by quotes. For a vector option
+it is a scalar option, the last one is used (\verb|--str|, \verb|--n|). The
+value of a string option can be grouped by quotes. For a vector option
 (\verb|--vec|), all values are gather together and inserted into the vector.
 
-\section{Program progress}
-\label{sec:Program progress}
+\section{Display program progress}
+\label{sec:Display program progress}
 
 Sometime it is desirable to see how much progress of a program has been made.
-The library provide a \verb|Progress| class for this purpose. Here we show a
+The library provides a \verb|Progress| class for this purpose. Here we show a
 minimal example. The complete program is shown in
-appendix~\appref{app:sec:Program progress}.
+appendix~\appref{app:sec:Display program progress}.
 \begin{cppcode}
   Progress progress;
   progress.start(n * n);
@@ -238,19 +307,23 @@ appendix~\appref{app:sec:Program progress}.
   }
   progress.stop();
 \end{cppcode}
-When invoked, the program output something similar the below
+When invoked, the program output something similar the following,
 \begin{textcode}
   [  4%][00:07][  49019/1000000][i = 49]
 \end{textcode}
 The method \verb|progress.start(n * n)| starts the printing of the progress.
 The argument specifies how many iterations there will be before it is stopped.
 The method \verb|progress.message(ss.str())| direct the program to print a
-message. This is optional. Each time after we finish $n$ iterations, we
-increment the progress count by calling \verb|progress.increment()|. And after
-everything is finished, the method \verb|progress.stop()| is called.
+message. This is optional. Each time after we finish $n$ iterations (there are
+$n^3$ total iterations of the inner-most loop), we increment the progress count
+by calling \verb|progress.increment()|. And after everything is finished, the
+method \verb|progress.stop()| is called. The \verb|increment| method has an
+optional argument, which specifies how many steps has been finished. The
+default is one. For example, we can call \verb|progress.start(n * n * n)| and
+\verb|progress.increment(n)| instead.
 
-\section{Timing}
-\label{sec:Timing}
+\section{Stop watch}
+\label{sec:Stop watch}
 
 Performance can only be improved after it is first properly benchmarked. There
 are advanced profiling programs for this purpose. However, sometime simple
@@ -269,6 +342,6 @@ physical stop watch. Here is a simple example
   double t = watch.seconds(); // The time in seconds
 \end{cppcode}
 The above example demonstrate that timing can be accumulated between loop
-iterations, function calls, etc. It shall be noted that, the time is only
+iterations, function calls, etc. It shall be noted that, the timing is only
 accurate if the computation between \verb|watch.start()| and
 \verb|watch.stop()| is non-trivial.

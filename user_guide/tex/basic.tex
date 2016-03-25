@@ -16,8 +16,8 @@ name space scope functions and ``method'' for class member functions.
 The library is hosted at
 GitHub\footnote{\url{https://github.com/zhouyan/vSMC}}. This is a header only
 \cpp template library. To install the library just move the contents of the
-\texttt{include} directory into a proper place, e.g.,
-\texttt{/usr/local/include} on Unix-alike systems. This library requires
+\verb|include| directory into a proper place, e.g.,
+\verb|/usr/local/include| on Unix-alike systems. This library requires
 working \cppoo, \blas and \lapack implementations. Standard C interface headers
 for the later two (\verb|cblas.h| and \verb|lapacke.h|) are required. Intel
 Threading Building
@@ -46,22 +46,22 @@ carried out along each sampler iteration by a monitor. Table~\ref{tab:concepts}
 lists these concepts and the corresponding types in the library. Each of them
 are introduced in detail in the following sections.
 
-\begin{table}[t]
-  \begin{tabu}{X[l]X[2l]}
+\begin{table}
+  \begin{tabularx}{\textwidth}{lX}
     \toprule
     Concept & Type \\
     \midrule
-    State, $\{X^{(i)}\}_{i=1}^N$            & \texttt{T}, user defined   \\
-    Weight, $\{W^{(i)}\}_{i=1}^N$           & \texttt{Weight}            \\
-    Particle, $\{W^{(i)},X^{(i)}\}_{i=1}^N$ & \texttt{Particle<T>}       \\
-    Single particle, $\{W^{(i)},X^{(i)}\}$  & \texttt{SingleParticle<T>} \\
-    Sampler        & \texttt{Sampler<T>}                           \\
-    Initialization & \texttt{Sampler<T>::init\_type}, user defined \\
-    Move           & \texttt{Sampler<T>::move\_type}, user defined \\
-    \mcmc          & \texttt{Sampler<T>::mcmc\_type}, user defined \\
-    Monitor        & \texttt{Monitor<T>}                           \\
+    State, $\{X^{(i)}\}_{i=1}^N$            & \verb|T|, user defined   \\
+    Weight, $\{W^{(i)}\}_{i=1}^N$           & \verb|Weight|            \\
+    Particle, $\{W^{(i)},X^{(i)}\}_{i=1}^N$ & \verb|Particle<T>|       \\
+    Single particle, $\{W^{(i)},X^{(i)}\}$  & \verb|SingleParticle<T>| \\
+    Sampler        & \verb|Sampler<T>|                                 \\
+    Initialization & \verb|Sampler<T>::init_type|, user defined        \\
+    Move           & \verb|Sampler<T>::move_type|, user defined        \\
+    \mcmc          & \verb|Sampler<T>::mcmc_type|, user defined        \\
+    Monitor        & \verb|Monitor<T>|                                 \\
     \bottomrule
-  \end{tabu}
+  \end{tabularx}
   \caption{Core concepts of the library}
   \label{tab:concepts}
 \end{table}
@@ -163,13 +163,13 @@ of class \verb|Particle<T>|,
 \begin{cppcode}
   Particle<T> particle(N);
 \end{cppcode}
-The method \verb|particle.value()| returns the type \verb|T| object, and
-\verb|particle.weight()| returns a \verb|Particle<T>::weight_type| object,
-whose exact type depends on the type \verb|T|. See section~\ref{sec:Customizing
-  member types} for more details. If the user does not do something special as
-shown in that section, then the default type is the \verb|Weight|. They are
-constructed with the same integer value $N$ when the above constructor is
-invoked.
+The method \verb|particle.value()| returns the type \verb|T| object. The object
+containing the weights is returned by \verb|particle.weight()|. Its type is
+\verb|Particle<T>::weight_type|, whose definition depends on the type \verb|T|.
+See section~\ref{sec:Customizing member types} for more details. If the user
+does not do something special as shown in that section, then the default type
+is the \verb|Weight|. They are constructed with the same integer value $N$ when
+the above constructor is invoked.
 
 As a Monte Carlo algorithm, random number generators (\rng) will be used
 frequently. The user is free to use whatever \rng mechanism as they see fit.
@@ -256,8 +256,8 @@ In its most basic form, it has the following methods,
   sp.particle(); // Get a reference to the Particle<T> object sp belongs to
   sp.rng();      // => sp.particle().rng(sp.id());
 \end{cppcode}
-If \verb|T| is a subclass of \verb|StateMatrix|, then it has two additional
-methods,
+If \verb|T| is a derived class of \verb|StateMatrix|, then it has two
+additional methods,
 \begin{cppcode}
   sp.dim();    // => sp.particle().value().dim();
   sp.state(j); // => sp.particle().value().state(sp.id(), j);
@@ -429,7 +429,7 @@ format, for example,
 \begin{cppcode}
   hdf5store(sampler, file_name, data_name);
 \end{cppcode}
-Details can be found in section~\ref{sec:Storing objects in HDF5}.
+Details can be found in section~\ref{sec:Store objects in HDF5 format}.
 
 \section{A simple particle filter}
 \label{sec:A simple particle filter}
@@ -679,7 +679,7 @@ initializes each state component with the respective Gaussian distribution,
 computes the log-likelihood and store them in the vector allocated in the last
 step. This is done by calling the \verb|eval_sp| method. After all particles
 have been initialized, we set the weights of the system in \verb|eval_post|.
-Later in section~\ref{sec:Symmetric Multiprocessing} it will become clear why
+Later in section~\ref{sec:Symmetric multiprocessing} it will become clear why
 we structured the implementation this way.
 
 \subsubsection{Move: \texttt{PFMove}}
@@ -728,15 +728,15 @@ Last we define \verb|PFEval|, which simply copies the values of the positions.
   };
 \end{cppcode}
 
-\section{Symmetric Multiprocessing}
-\label{sec:Symmetric Multiprocessing}
+\section{Symmetric multiprocessing}
+\label{sec:Symmetric multiprocessing}
 
 The above example is implemented in a sequential fashion. However, the loops
 inside \verb|PFInit|, \verb|PFMove| and \verb|PFEval| clearly can be
 parallelized. The library provides basic support of multicore parallelization
 through its \smp module. Two widely used backends, OpenMP and \tbb are
 available. Here we demonstrate how to use the \tbb backend. First we will
-declare the implementation classes as subclasses as below,
+declare the implementation classes as derived classes,
 \begin{cppcode}
   class PFInit : public InitializationTBB<PFState>;
   class PFMove : public MoveTBB<PFState>;

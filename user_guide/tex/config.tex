@@ -5,8 +5,8 @@ The library has a few configuration macros. All these macros can be overwritten
 by the user by defining them with proper values before including any of the
 library's headers. All configurations macros are listed in
 table~\ref{tab:Configuration macros}. There are some additional macros for \rng
-related functionalities. They will be discussed in
-section~\ref{sec:Counter-based RNG}.
+related functionalities. They will be discussed in chapter~\ref{chap:Random
+  number generating}.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{llX}
@@ -47,6 +47,9 @@ section~\ref{sec:Counter-based RNG}.
     & Use \mkl vector mathematical functions (\vml) \\
     \verb|VSMC_USE_MKL_VSL| & \verb|VSMC_HAS_MKL|
     & Use \mkl statistical functions (\vsl) \\
+    \verb|VSMC_USE_ACCELERATE| & Platform dependent
+    & Use Mac OS X Accelerate framework for \blas. Ignored if
+    \verb|VSMC_USE_MKL_BLAS| is defined to a non-zero value. \\
     \verb|VSMC_INT64| & Platform dependent
     & The 64-bit integer type used by x86 intrinsics \\
     \verb|VSMC_INT128| & Platform dependent
@@ -57,6 +60,8 @@ section~\ref{sec:Counter-based RNG}.
     & Default alignment for scalar types \\
     \verb|VSMC_ALIGNMENT_MIN| & \verb|16| 
     & Minimum alignment for all types \\
+    \verb|VSMC_ALIGNED_MEMORY_TYPE| & Platform dependent
+    & The type of \verb|AlignedMemory| \\
     \bottomrule
   \end{tabularx}
   \caption{Configuration macros}

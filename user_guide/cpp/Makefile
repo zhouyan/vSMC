@@ -14,7 +14,7 @@ CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_TBB
 
 LDFLAGS := -lmkl_rt -ltbb -ltbbmalloc
 
-all : pf_ocl pf_tbb pf_seq pf_tbb_c pf_seq_c program_option program_progress
+all : pf_ocl pf_tbb pf_seq pf_tbb_c pf_seq_c program_option progress
 
 libvsmc :
 	ninja -C ../../build/clang-Release lib
@@ -43,11 +43,13 @@ pf_bench : pf_tbb pf_seq pf_tbb_c pf_seq_c
 program_option : program_option.cpp
 	$(CXX) $(CXXFLAGS) -o program_option program_option.cpp $(LDFLAGS)
 
-program_progress : program_progress.cpp
-	$(CXX) $(CXXFLAGS) -o program_progress program_progress.cpp $(LDFLAGS)
+progress : progress.cpp
+	$(CXX) $(CXXFLAGS) -o progress progress.cpp $(LDFLAGS)
 
 clean:
-	rm -f pf_ocl pf_seq pf_tbb pf_seq_c pf_tbb_c
+	rm -f pf_ocl
+	rm -f pf_seq pf_tbb
+	rm -f pf_seq_c pf_tbb_c
 	rm -f pf.out pf.rout pf.pdf
 	rm -f program_option
-	rm -f program_progress
+	rm -f progress
