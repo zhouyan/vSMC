@@ -64,7 +64,7 @@ The development by \textcite{Salmon:2011um} made high performance parallel \rng
 much more accessible than it was before. In the author's personal opinion, it
 is the most significant development for parallel Monte Carlo algorithms in
 recent memory. See the paper for more details. Here, it is sufficient to
-mention that, the \rng introduced in the paper use a deterministic function
+note that, the \rng{}s introduced in the paper use deterministic functions
 $f_k$, such that, for any sequence $\{c_i\}_{i>0}$, the sequence
 $\{y_i\}_{i>0}$, $y_i = f_k(c_i)$, appears as random. In addition, for $k_1 \ne
 k_2$, $f_{k_1}$ and $f_{k_2}$ will generate two sequences that appear
@@ -80,8 +80,8 @@ in this library, along with the bits of the counter and the key. They all
 conform to the \cppoo uniform \rng concept. All \rng{}s in
 \textcite{Salmon:2011um} are implemented along with a few additions. Note that,
 the actual period of an \rng can be longer. For example, \verb|Philox4x64| has
-a 256-bits counter but output 64-bit integers. And thus it has a $2^{1024}$
-period. Such period length may seems very small compared to many well known
+a 256-bit counter but output 64-bit integers. And thus it has a $2^{1024}$
+period. Such period length may seem very small compared to many well known
 \rng{}s. For example, the famous Mersenne-Twister generator
 (\verb|std::mt19937|) has a period $2^{19937} - 1$. However, combined with
 $2^{256}$ independent streams, only the most demanding programs will find these
@@ -144,14 +144,14 @@ The \aesni intrinsics based \rng{}s in \textcite{Salmon:2011um} are implemented
 in a more general form,
 \begin{cppcode}
   template <typename ResultType, typename KeySeqType, std::size_t Rounds,
-  std::size_t Blocks>
+      std::size_t Blocks>
   using AESNIEngine =
-  CounterEngine<AESNIGenerator<ResultType, KeySeqType, Rounds, Blocks>>;
+      CounterEngine<AESNIGenerator<ResultType, KeySeqType, Rounds, Blocks>>;
 \end{cppcode}
 where \verb|KeySeqType| is the class used to generate the sequence of round
 keys; \verb|Rounds| is the number of rounds of \aes encryption to be performed.
 See the reference manual for details of how to define the key sequence class.
-The \aesni intrinsics have a latency of seven or eight cycles, while they can
+The \aesni instructions have a latency of seven or eight cycles, while they can
 be issued at every cycle. Therefore better performance can be achieved if
 multiple 128-bit random integers are generated at the same time. This is
 specified by the template parameter \verb|Blocks|. Larger blocks, up to eight,
@@ -179,8 +179,8 @@ the \ars algorithm in \textcite{Salmon:2011um} and the \aes-128, \aes-192, and
       AESNIEngine<ResultType, AES256KeySeq<ResultType, 14>, 14, Blocks>;
 \end{cppcode}
 The default template arguments can be changed by configuration macros listed in
-table~\ref{tab:Configuration macros for counter-based RNGs}. Shortcuts are also
-defined, as listed in table~\ref{tab:Counter-based RNG}. For example,
+table~\ref{tab:Configuration macros for counter-based RNGs}. Type aliases are
+also defined, as listed in table~\ref{tab:Counter-based RNG}. For example,
 \verb|ARS_4x32| is \verb|ARSEngine| with result type \verb|std::uint32_t|, four
 blocks, and the default number of rounds.
 
@@ -202,14 +202,12 @@ general form,
 \end{cppcode}
 The default vector length and the number of rounds can be changed by
 configuration macros listed in table~\ref{tab:Configuration macros for
-  counter-based RNGs}. Shortcuts are also defined, as listed in
+  counter-based RNGs}. Type aliases are also defined, as listed in
 table~\ref{tab:Counter-based RNG}. For example, \verb|Philox4x32| is
 \verb|PhiloxEngine| with result type \verb|std::uint32_t|, vector length four,
-and the default number of rounds.
-
-The type aliases \verb|Philox| and \verb|Philox_64| are the engine with
-\verb|std::uint32_t| and \verb|std::uint64_t| as \verb|ResultType| and other
-template parameters taking their default values, respectively.
+and the default number of rounds. The type aliases \verb|Philox| and
+\verb|Philox_64| are defined similarly to \verb|ARS| and \verb|ARS_64|,
+respectively.
 
 \subsection{Threefry}
 \label{sub:Threefry}
@@ -223,39 +221,35 @@ general form,
 \end{cppcode}
 The default vector length and the number of rounds can be changed by
 configuration macros listed in table~\ref{tab:Configuration macros for
-  counter-based RNGs}. Shortcuts are also defined, as listed in
+  counter-based RNGs}. Type aliases are also defined, as listed in
 table~\ref{tab:Counter-based RNG}. For example, \verb|Threefry4x32| is
 \verb|ThreefryEngine| with result type \verb|std::uint32_t|, vector length
-four, and the default number of rounds.
+four, and the default number of rounds. The type aliases \verb|Threefry| and
+\verb|Threefry_64| are defined similarly to \verb|ARS| and \verb|ARS_64|,
+respectively.
 
-The type aliases \verb|Threefry| and \verb|Threefry_64| are the engine with
-\verb|std::uint32_t| and \verb|std::uint64_t| as \verb|ResultType| and other
-template parameters taking their default values, respectively.
-
-If \sse{}2 intrinsics are supported, then a more optimized version is also
-implemented. This implementation can have higher performance at the cost of
-larger state size.
+If \sse{}2 intrinsics are supported, then a faster version is also implemented.
+This implementation can have higher performance at the cost of larger state
+size.
 \begin{cppcode}
   template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
       std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
   using ThreefryEngineSSE2 =
       CounterEngine<ThreefryGeneratorSSE2<ResultType, K, Rounds>>;
 \end{cppcode}
-The type alias \verb|ThreefrySSE2| and \verb|ThreefrySSE2_64| are the engine
-with \verb|std::uint32_t| and \verb|std::uint64_t| as \verb|ResultType| and
-other template parameters taking their default values, respectively.
+The type alias \verb|ThreefrySSE2| and \verb|ThreefrySSE2_64| are defined
+similarly to \verb|ARS| and \verb|ARS_64|, respectively.
 
-If \avx{}2 intrinsics are supported, then a even more optimized, with even
-larger state size version is also implemented.
+If \avx{}2 intrinsics are supported, then the following version is also
+implemented.
 \begin{cppcode}
   template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
       std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
   using ThreefryEngineAVX2 =
       CounterEngine<ThreefryGeneratorAVX2<ResultType, K, Rounds>>;
 \end{cppcode}
-The type aliases \verb|ThreefryAVX2| and \verb|ThreefryAVX2_64| are the engine
-with \verb|std::uint32_t| and \verb|std::uint64_t| as \verb|ResultType| and
-other template parameters taking their default values, respectively.
+The type aliases \verb|ThreefryAVX2| and \verb|ThreefryAVX2_64| are defined
+similar to \verb|ARS| and \verb|ARS_64|, respectively.
 
 \subsection{Default \protect\rng}
 \label{sub:Default RNG}
@@ -285,14 +279,14 @@ library.
 \section{Non-deterministic \protect\rng}
 \label{sec:Non-deterministic RNG}
 
-If the \rdrand intrinsics are supported, the library also implement three
+If the \rdrand intrinsics are supported, the library also implements three
 \rng{}s, \verb|RDRAND16|, \verb|RDRAND32| and \verb|RDRAND64|. They output 16-,
 32-, and 64-bit random unsigned integers, respectively.
 
 \section{\protect\mkl{} \protect\rng}
 \label{sec:MKL RNG}
 
-The \mkl library provides some high performance \rng{}s. The library implement
+The \mkl library provides some high performance \rng{}s. The library implements
 a wrapper class \verb|MKLEngine| that makes them accessible as \cppoo{}
 generators. They are listed in table~\ref{tab:MKL RNG}. Note that, \mkl{}
 \rng{}s performs best when they are used to generate vectors of random numbers.
@@ -382,11 +376,11 @@ available, otherwise defined to be \verb|RNGSetVector|. It is used by the
 \begin{cppcode}
   class T
   {
-      using rng_set_type = /* User defined type */;
+      using rng_set_type = RNGSetScalar<RNG>;
   };
 \end{cppcode}
-will make the \rng set used by \verb|Particle<T>| replaced by the user defined
-type.
+will replace the type of the \rng set contained in \verb|Particle<T>|.  Note
+that, \verb|Particle<T>| itself does not use any \rng in the set.
 
 \section{Distributions}
 \label{sec:Distributions}
@@ -394,12 +388,34 @@ type.
 The library also provides implementations of some common distributions. They
 all conforms to the \cppoo random number distribution concepts. Some of them
 are the same as those in the \cppoo standard library, with \verb|CamelCase|
-names. For example, \verb|NormalDistribuiton| can be used as an drop-in
-replacement for \verb|std::normal_distribuiton|. This includes all of the
+names. For example, \verb|NormalDistribuiton| can be used as a drop-in
+replacement of \verb|std::normal_distribuiton|. This includes all of the
 continuous distributions defined in the standard library. Their benefits
 compared to the standard library will be discussed later.
 Table~\ref{tab:Random number distributions} lists all the additional
-distributions implemented.
+distributions implemented. The library also implement the multivariate Normal
+distribution. Its usable is shown by the following example,
+\begin{cppcode*}{texcomments}
+  double mean[2] = { /* the mean vector */ };
+  double cov[4] = { /* the covariance matrix */ };
+  double chol[3];
+  double r[2];
+  // Compute the lower triangular of the Cholesky decomposition
+  cov_chol(2, cov, chol);
+  RNG rng;
+  NormalMVDistribution<double, 2> norm2(mean, chol); // Bivariate Normal
+  NormalMVDistribution<double, Dynamic> normd(2, mean, chol); // Same as above
+  norm2(rng, r); // Generate a bivariate Normal
+  normd(rng, r); // Same as above
+\end{cppcode*}
+We shall mention here that the static form (\verb|norm2|), where the dimension
+is specified as a template parameter is more efficient. The distribution accept
+the lower triangular of the Choleskey decomposition of the covariance matrix as
+input, instead of the covariance matrix itself. The input matrix shall be in
+packed format, with row major storage layout. A function \verb|cov_chol| is
+provided to compute this decomposition from a covariance matrix stored in
+various format. The output is suitable as direct input to the distribution. See
+section~\ref{sec:Sample covariance} for details.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{lX}
@@ -425,24 +441,6 @@ distributions implemented.
     \texttt{Distribution} which is omitted in the table}
   \label{tab:Random number distributions}
 \end{table}
-
-The last, the library also implement the multivariate Normal distribution. Its
-usable is summarized by the following.
-\begin{cppcode*}{texcomments}
-  double mean[2] = { /* the mean vector */ };
-  double cov[4] = { /* the covariance matrix */ };
-  double chol[3];
-  double r[2];
-  // Compute the lower triangular of the Cholesky decomposition
-  cov_chol(2, cov, chol);
-  RNG rng;
-  NormalMVDistribution<double, 2> norm2(mean, chol); // Bivariate Normal
-  NormalMVDistribution<double, Dynamic> normd(2, mean, chol); // Same as above
-  norm2(rng, r); // Generate a bivariate Normal
-  normd(rng, r); // Same as above
-\end{cppcode*}
-We shall mention here that the static form, where the dimension is specified as
-a template parameter is more efficient.
 
 \section{Vectorized random number generating}
 \label{sec:Vectorized random number generating}

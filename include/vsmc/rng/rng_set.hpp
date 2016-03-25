@@ -43,9 +43,9 @@
 /// \ingroup Config
 #ifndef VSMC_RNG_SET_TYPE
 #if VSMC_HAS_TBB
-#define VSMC_RNG_SET_TYPE ::vsmc::RNGSetTBB<::vsmc::RNG>
+#define VSMC_RNG_SET_TYPE RNGSetTBB
 #else
-#define VSMC_RNG_SET_TYPE ::vsmc::RNGSetVector<::vsmc::RNG>
+#define VSMC_RNG_SET_TYPE RNGSetVector
 #endif
 #endif
 
@@ -159,11 +159,12 @@ class RNGSetTBB
 
 #endif // VSMC_HAS_TBB
 
-using RNGSet = VSMC_RNG_SET_TYPE;
+template <typename RNGType>
+using RNGSet = VSMC_RNG_SET_TYPE<RNGType>;
 
 /// \brief Particle::rng_set_type trait
 /// \ingroup Traits
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RNGSetType, rng_set_type, RNGSet)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RNGSetType, rng_set_type, RNGSet<RNG>)
 
 } // namespace vsmc
 
