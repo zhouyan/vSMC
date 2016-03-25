@@ -34,10 +34,6 @@
 
 #include <vsmc/internal/common.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(test, func)                   \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (test), "**StateIndex::" #func "ITERATION NUMBER OUT OF RANGE")
-
 namespace vsmc
 {
 
@@ -47,19 +43,16 @@ template <typename IntType = std::size_t>
 class ResampleIndex
 {
     public:
-    using size_type = std::size_t;
     using index_type = IntType;
-
-    ResampleIndex(size_type N) : size_(N), identity_(N)
-    {
-        for (size_type i = 0; i != N; ++i)
-            identity_[i] = static_cast<index_type>(i);
-    }
-
-    size_type size() const { return size_; }
 
     /// \brief Number of iterations recorded
     std::size_t iter_size() const { return iter_size_; }
+
+    /// \brief The sample size of the last iteration
+    std::size_t size() const { return index_.back().size(); }
+
+    /// \brief The sample size of a given iteration
+    std::size_t size(std::size_t iter) const { return index_[iter].size(); }
 
     /// \brief Reset history
     void reset() { iter_size_ = 0; }
@@ -67,62 +60,50 @@ class ResampleIndex
     /// \brief Release memory
     void clear() { index_.clear(); }
 
-    void push_back()
+    /// \brief Push back history of one iteration without resampling
+    void push_back(std::size_t N)
     {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(
-            (index_.size() >= iter_size_), push_back);
-
         ++iter_size_;
+        resize_identity(N);
         if (index_.size() < iter_size_)
             index_.push_back(identity_);
         else
             index_[iter_size_ - 1] = identity_;
     }
 
+    /// \brief Push back history of one iteration with resampling index
     template <typename InputIter>
-    void push_back(InputIter first)
+    void push_back(std::size_t N, InputIter first)
     {
-        push_back();
-        std::copy_n(first, size_, index_[iter_size_ - 1].data());
+        push_back(N);
+        std::copy_n(first, N, index_[iter_size_ - 1].begin());
     }
 
-    void insert()
+    /// \brief Insert at the back of the history without resampling
+    void insert(std::size_t N)
     {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(
-            (iter_size_ > 0 && index_.size() >= iter_size_), insert);
-
-        std::copy_n(identity_.data(), size_, index_[iter_size_ - 1].data());
+        resize_identity(N);
+        std::copy_n(identity_.begin(), N, index_[iter_size_ - 1].begin());
     }
 
+    /// \brief Insert at the back of the history with resampling index
     template <typename InputIter>
-    void insert(InputIter first)
+    void insert(std::size_t N, InputIter first)
     {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(
-            (iter_size_ > 0 && index_.size() >= iter_size_), insert);
-
-        std::copy_n(first, size_, index_[iter_size_ - 1].begin());
+        std::copy_n(first, N, index_[iter_size_ - 1].begin());
     }
 
+    /// \brief Insert at a given iteration with resampling index
     template <typename InputIter>
-    void insert(std::size_t iter, InputIter first)
+    void insert(std::size_t N, std::size_t iter, InputIter first)
     {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(
-            (iter_size_ > iter && index_.size() >= iter_size_), insert);
-
-        std::copy_n(first, size_, index_[iter].begin());
+        std::copy_n(first, N, index_[iter].begin());
     }
 
     /// \brief Get the index given the particle ID and iteration number,
     /// starting with zero.
-    ///
-    /// \details
-    /// The index is traced back using the history. The cost is O(iter_size() -
-    /// iter)
     index_type index(size_type id, std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(
-            (iter_size_ > iter && index_.size() >= iter_size_), index);
-
         std::size_t iter_current = iter_size_ - 1;
         index_type idx = index_.back()[id];
         while (iter_current != iter) {
@@ -133,63 +114,19 @@ class ResampleIndex
         return idx;
     }
 
-    Vector<index_type> index_matrix(MatrixLayout layout) const
-    {
-        Vector<index_type> idxmat(size_ * iter_size_);
-
-        if (size_ * iter_size_ == 0)
-            return idxmat;
-
-        if (layout == RowMajor) {
-            index_type *back = idxmat.data() + iter_size_ - 1;
-            for (size_type i = 0; i != size_; ++i, back += iter_size_)
-                *back = index_[iter_size_ - 1][i];
-            if (iter_size_ == 1)
-                return idxmat;
-
-            for (std::size_t iter = iter_size_ - 1; iter != 0; --iter) {
-                const index_type *idx = index_[iter - 1].data();
-                const index_type *last = idxmat.data() + iter;
-                index_type *next = idxmat.data() + iter - 1;
-                for (size_type i = 0; i != size_; ++i) {
-                    *next = idx[static_cast<size_type>(*last)];
-                    last += iter_size_;
-                    next += iter_size_;
-                }
-            }
-        }
-
-        if (layout == ColMajor) {
-            index_type *back = idxmat.data() + size_ * (iter_size_ - 1);
-            for (size_type i = 0; i != size_; ++i)
-                back[i] = index_[iter_size_ - 1][i];
-            if (iter_size_ == 1)
-                return idxmat;
-
-            for (std::size_t iter = iter_size_ - 1; iter != 0; --iter) {
-                const index_type *idx = index_[iter - 1].data();
-                const index_type *last = idxmat.data() + size_ * iter;
-                index_type *next = idxmat.data() + size_ * (iter - 1);
-                for (size_type i = 0; i != size_; ++i)
-                    next[i] = idx[static_cast<size_type>(last[i])];
-            }
-        }
-
-        return idxmat;
-    }
-
-    template <typename OutputIter>
-    void read_index_matrix(MatrixLayout layout, OutputIter first) const
-    {
-        auto idxmat = index_matrix(layout);
-        std::copy(idxmat.begin(), idxmat.end(), first);
-    }
-
     private:
-    size_type size_;
     std::size_t iter_size_;
     Vector<index_type> identity_;
     Vector<Vector<index_type>> index_;
+
+    resize_identity(std::size_t N)
+    {
+        std::size_t n = identity_.size();
+        identity_.resize(N);
+        if (n < N)
+            for (std::size_t i = n; i != N; ++i)
+                identity_[i] = static_cast<index_type>(i);
+    }
 }; // class ResampleIndex
 
 } // namespace vsmc
