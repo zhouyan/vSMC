@@ -17,7 +17,7 @@ LDFLAGS := -lmkl_rt -ltbb -ltbbmalloc
 all : pf_ocl pf_tbb pf_seq pf_tbb_c pf_seq_c program_option progress
 
 libvsmc :
-	ninja -C ../../build/clang-Release lib
+	ninja -C ../../build/clang-Release libvsmc_shared
 
 pf_ocl : pf_ocl.cpp
 	$(CXX) $(CXXFLAGS) -DVSMC_HAS_OPENCL -o pf_ocl pf_ocl.cpp $(LDFLAGS) $(OPENCL_LIBRARY)
