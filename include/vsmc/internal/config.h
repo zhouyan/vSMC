@@ -138,4 +138,12 @@
 #define VSMC_HAS_OPENCL 0
 #endif
 
+#ifndef VSMC_USE_ACCELERATE
+#if defined(__APPLE__) || defined(__MACOSX)
+#define VSMC_USE_ACCELERATE 1
+#else
+#define VSMC_USE_ACCELERATE 0
+#endif
+#endif // VSMC_USE_ACCELERATE
+
 #endif // VSMC_INTERNAL_CONFIG_H

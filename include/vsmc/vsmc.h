@@ -561,6 +561,58 @@ double vsmc_normal_mv_proposal(vsmc_rng rng, int dim, const double *x,
 
 /** @} */ /* C_API_RNG_RandomWalk */
 
+/** \addtogroup C_API_Resample */
+/** @{ */
+
+/** \brief `vsmc::Sampler::resample_type` */
+typedef void (*vsmc_resample_type)(int, int, vsmc_rng, const double *, int *);
+
+/** \brief `vsmc::resample_trans_u01_rep` */
+void vsmc_resample_trans_u01_rep(
+    int m, int n, const double *weight, const double *u01, int *replication);
+
+/** \brief `vsmc::resample_trans_u01_index` */
+void vsmc_resample_trans_u01_index(
+    int m, int n, const double *weight, const double *u01, int *index);
+
+/** \brief `vsmc::resample_trans_rep_index` */
+void vsmc_resample_trans_rep_index(
+    int m, int n, const int *replication, int *index);
+
+/** \brief `vsmc::resample_trans_index_rep` */
+void vsmc_resample_trans_index_rep(
+    int m, int n, const int *index, int *replication);
+
+/** \brief `vsmc::resample_trans_residual` */
+int vsmc_resample_trans_residual(
+    int m, int n, const double *weight, double *resid, int *integ);
+
+/** \brief `vsmc::ResampleMultinomial` */
+void vsmc_resample_multinomial(
+    int m, int n, vsmc_rng rng, const double *weight, int *replication);
+
+/** \brief `vsmc::ResampleStratified` */
+void vsmc_resample_stratified(
+    int m, int n, vsmc_rng rng, const double *weight, int *replication);
+
+/** \brief `vsmc::ResampleSystematic` */
+void vsmc_resample_systematic(
+    int m, int n, vsmc_rng rng, const double *weight, int *replication);
+
+/** \brief `vsmc::ResampleResidual` */
+void vsmc_resample_residual(
+    int m, int n, vsmc_rng rng, const double *weight, int *replication);
+
+/** \brief `vsmc::ResampleResidualStratified` */
+void vsmc_resample_residual_stratified(
+    int m, int n, vsmc_rng rng, const double *weight, int *replication);
+
+/** \brief `vsmc::ResampleSystematic` */
+void vsmc_resample_residual_systematic(
+    int m, int n, vsmc_rng rng, const double *weight, int *replication);
+
+/** @} */ /* C_API_Resample */
+
 /** \addtogroup C_API_Core_StateMatrix */
 /** @{ */
 
@@ -688,10 +740,6 @@ typedef struct {
     void *ptr;
 } vsmc_particle;
 
-/** \brief `vsmc::Particle::resample_type` */
-typedef void (*vsmc_particle_resample_type)(
-    int, int, vsmc_rng, const double *, int *);
-
 /** \brief `vsmc::Particle::Particle` */
 vsmc_particle vsmc_particle_new(int n, int dim);
 
@@ -722,7 +770,7 @@ vsmc_single_particle vsmc_particle_sp(vsmc_particle particle, int id);
 
 /** \brief `vsmc::Particle::resample` */
 void vsmc_particle_resample(
-    vsmc_particle particle, vsmc_particle_resample_type op, double threshold);
+    vsmc_particle particle, vsmc_resample_type op, double threshold);
 
 /** @} */ /* C_API_Core_Particle */
 
@@ -872,7 +920,7 @@ void vsmc_sampler_resample(vsmc_sampler sampler);
 
 /** \brief `vsmc::Sampler::resample_scheme` */
 void vsmc_sampler_resample_scheme_f(
-    vsmc_sampler sampler, vsmc_particle_resample_type op);
+    vsmc_sampler sampler, vsmc_resample_type op);
 
 /** \brief `vsmc::Sampler::resample_scheme` */
 void vsmc_sampler_resample_scheme(
@@ -992,55 +1040,6 @@ int vsmc_sampler_save(vsmc_sampler sampler, char *mem);
 void vsmc_sampler_save_f(vsmc_sampler sampler, const char *filename);
 
 /** @} */ /* C_API_Core_Sampler */
-
-/** \addtogroup C_API_Resample */
-/** @{ */
-
-/** \brief `vsmc::resample_trans_u01_rep` */
-void vsmc_resample_trans_u01_rep(
-    int m, int n, const double *weight, const double *u01, int *replication);
-
-/** \brief `vsmc::resample_trans_u01_index` */
-void vsmc_resample_trans_u01_index(
-    int m, int n, const double *weight, const double *u01, int *index);
-
-/** \brief `vsmc::resample_trans_rep_index` */
-void vsmc_resample_trans_rep_index(
-    int m, int n, const int *replication, int *index);
-
-/** \brief `vsmc::resample_trans_index_rep` */
-void vsmc_resample_trans_index_rep(
-    int m, int n, const int *index, int *replication);
-
-/** \brief `vsmc::resample_trans_residual` */
-int vsmc_resample_trans_residual(
-    int m, int n, const double *weight, double *resid, int *integ);
-
-/** \brief `vsmc::ResampleMultinomial` */
-void vsmc_resample_multinomial(
-    int m, int n, vsmc_rng rng, const double *weight, int *replication);
-
-/** \brief `vsmc::ResampleStratified` */
-void vsmc_resample_stratified(
-    int m, int n, vsmc_rng rng, const double *weight, int *replication);
-
-/** \brief `vsmc::ResampleSystematic` */
-void vsmc_resample_systematic(
-    int m, int n, vsmc_rng rng, const double *weight, int *replication);
-
-/** \brief `vsmc::ResampleResidual` */
-void vsmc_resample_residual(
-    int m, int n, vsmc_rng rng, const double *weight, int *replication);
-
-/** \brief `vsmc::ResampleResidualStratified` */
-void vsmc_resample_residual_stratified(
-    int m, int n, vsmc_rng rng, const double *weight, int *replication);
-
-/** \brief `vsmc::ResampleSystematic` */
-void vsmc_resample_residual_systematic(
-    int m, int n, vsmc_rng rng, const double *weight, int *replication);
-
-/** @} */ /* C_API_Resample */
 
 /** \addtogroup C_API_SMP */
 /** @{ */

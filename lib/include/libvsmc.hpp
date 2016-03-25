@@ -305,7 +305,7 @@ inline SamplerC *cast(const vsmc_sampler *sampler_ptr)
     return reinterpret_cast<SamplerC *>(sampler_ptr->ptr);
 }
 
-inline ParticleC::resample_type cast(vsmc_particle_resample_type fptr)
+inline SamplerC::resample_type cast(vsmc_resample_type fptr)
 {
     return [fptr](
         std::size_t M, std::size_t N, RNG &rng, const double *w, int *rep) {

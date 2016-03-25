@@ -48,11 +48,12 @@
 #if VSMC_USE_MKL_CBLAS
 #include <mkl_cblas.h>
 #define VSMC_CBLAS_INT MKL_INT
+#elif VSMC_USE_ACCELERATE
+#include <Accelerate/Accelerate.h>
+#define VSMC_CBLAS_INT VSMC_CBLAS_INT_TYPE
 #else
 #include <cblas.h>
-#ifndef VSMC_CBLAS_INT
 #define VSMC_CBLAS_INT VSMC_CBLAS_INT_TYPE
-#endif
 #endif
 
 #endif // VSMC_MATH_CBLAS_H

@@ -92,7 +92,7 @@ void vsmc_sampler_resample(vsmc_sampler sampler)
 }
 
 void vsmc_sampler_resample_scheme_f(
-    vsmc_sampler sampler, vsmc_particle_resample_type op)
+    vsmc_sampler sampler, vsmc_resample_type op)
 {
     ::vsmc::cast(sampler).resample_scheme(::vsmc::cast(op));
 }
