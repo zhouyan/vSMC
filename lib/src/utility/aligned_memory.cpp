@@ -91,4 +91,29 @@ void vsmc_vector_int_resize(vsmc_vector_int *vector_int_ptr, int size)
     }
 }
 
+vsmc_vector_raw vsmc_vector_raw_new(int size)
+{
+    vsmc_vector_raw vector_raw = {
+        static_cast<unsigned char *>(vsmc_malloc(
+            static_cast<std::size_t>(size) * sizeof(unsigned char), 32)),
+        size};
+
+    return vector_raw;
+}
+
+void vsmc_vector_raw_delete(vsmc_vector_raw *vector_raw_ptr)
+{
+    vsmc_free(vector_raw_ptr->data);
+    vector_raw_ptr->data = nullptr;
+    vector_raw_ptr->size = 0;
+}
+
+void vsmc_vector_raw_resize(vsmc_vector_raw *vector_raw_ptr, int size)
+{
+    if (vector_raw_ptr->size != size) {
+        vsmc_vector_raw_delete(vector_raw_ptr);
+        *vector_raw_ptr = vsmc_vector_raw_new(size);
+    }
+}
+
 } // extern "C"

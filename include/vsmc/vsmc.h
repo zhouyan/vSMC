@@ -1197,6 +1197,12 @@ typedef struct {
     int size;
 } vsmc_vector_int;
 
+/** \brief Simple vector type for `unsigned char` */
+typedef struct {
+    unsigned char *data;
+    int size;
+} vsmc_vector_raw;
+
 /** \brief Create a new vector given its size  */
 vsmc_vector vsmc_vector_new(int size);
 
@@ -1214,6 +1220,15 @@ void vsmc_vector_int_delete(vsmc_vector_int *vector_int_ptr);
 
 /** \brief Resize a vector */
 void vsmc_vector_int_resize(vsmc_vector_int *vector_int_ptr, int size);
+
+/** \brief Create a new vector given its size  */
+vsmc_vector_raw vsmc_vector_raw_new(int size);
+
+/** \brief Delete a vector */
+void vsmc_vector_raw_delete(vsmc_vector_raw *vector_raw_ptr);
+
+/** \brief Resize a vector */
+void vsmc_vector_raw_resize(vsmc_vector_raw *vector_raw_ptr, int size);
 
 /** @} */ /* C_API_Utility_AlignedMemory */
 
@@ -1259,6 +1274,10 @@ double *vsmc_hdf5load(
 int *vsmc_hdf5load_int(
     const char *file_name, const char *data_name, int *first);
 
+/** \brief `vsmc::hdf5load<unsigned char>` */
+unsigned char *vsmc_hdf5load_raw(
+    const char *file_name, const char *data_name, unsigned char *first);
+
 /** \brief `vsmc::hdf5store_new` */
 void vsmc_hdf5store_new(const char *file_name);
 
@@ -1272,6 +1291,11 @@ void vsmc_hdf5store_matrix_int(vSMCMatrixLayout layout, int nrow, int ncol,
     const char *file_name, const char *data_name, const int *first,
     int append);
 
+/** \brief `vsmc::hdf5store_matrix<unsigned char>` */
+void vsmc_hdf5store_matrix_raw(vSMCMatrixLayout layout, int nrow, int ncol,
+    const char *file_name, const char *data_name, const unsigned char *first,
+    int append);
+
 /** \brief `vsmc::hdf5store_list_empty` */
 void vsmc_hdf5store_list_empty(
     const char *file_name, const char *data_name, int append);
@@ -1283,6 +1307,10 @@ void vsmc_hdf5store_list_insert(int N, const char *file_name,
 /** \brief `vsmc::hdf5store_list_insert<int>` */
 void vsmc_hdf5store_list_insert_int(int N, const char *file_name,
     const char *data_name, const int *first, const char *vname);
+
+/** \brief `vsmc::hdf5store_list_insert<unsigned char>` */
+void vsmc_hdf5store_list_insert_raw(int N, const char *file_name,
+    const char *data_name, const unsigned char *first, const char *vname);
 
 /** \brief `vsmc::hdf5store` for `vsmc::StateMatrix` */
 void vsmc_hdf5store_state_matrix(vsmc_state_matrix state_matrix,

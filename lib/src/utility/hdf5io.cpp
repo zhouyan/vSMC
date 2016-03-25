@@ -50,6 +50,12 @@ int *vsmc_hdf5load_int(
     return ::vsmc::hdf5load<int>(file_name, data_name, first);
 }
 
+unsigned char *vsmc_hdf5load_raw(
+    const char *file_name, const char *data_name, unsigned char *first)
+{
+    return ::vsmc::hdf5load<unsigned char>(file_name, data_name, first);
+}
+
 void vsmc_hdf5store_new(const char *file_name)
 {
     ::vsmc::hdf5store_new(file_name);
@@ -72,6 +78,16 @@ void vsmc_hdf5store_matrix_int(vSMCMatrixLayout layout, int nrow, int ncol,
         file_name, data_name, first, append != 0);
 }
 
+void vsmc_hdf5store_matrix_raw(vSMCMatrixLayout layout, int nrow, int ncol,
+    const char *file_name, const char *data_name, const unsigned char *first,
+    int append)
+{
+    ::vsmc::hdf5store_matrix<unsigned char>(
+        static_cast<::vsmc::MatrixLayout>(layout),
+        static_cast<std::size_t>(nrow), static_cast<std::size_t>(ncol),
+        file_name, data_name, first, append != 0);
+}
+
 void vsmc_hdf5store_list_empty(
     const char *file_name, const char *data_name, int append)
 {
@@ -89,6 +105,13 @@ void vsmc_hdf5store_list_insert_int(int N, const char *file_name,
     const char *data_name, const int *first, const char *vname)
 {
     ::vsmc::hdf5store_list_insert<int>(
+        static_cast<std::size_t>(N), file_name, data_name, first, vname);
+}
+
+void vsmc_hdf5store_list_insert_raw(int N, const char *file_name,
+    const char *data_name, const unsigned char *first, const char *vname)
+{
+    ::vsmc::hdf5store_list_insert<unsigned char>(
         static_cast<std::size_t>(N), file_name, data_name, first, vname);
 }
 
