@@ -68,7 +68,6 @@ IF(TBB_FOUND)
         ${PROJECT_SOURCE_DIR}/src/smp/backend_tbb.cpp)
 ENDIF(TBB_FOUND)
 
-SET(VSMC_LIB_TYPE ${VSMC_LIB_TYPE} module)
 SET(VSMC_LIB_TYPE ${VSMC_LIB_TYPE} shared)
 SET(VSMC_LIB_TYPE ${VSMC_LIB_TYPE} static)
 
