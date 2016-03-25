@@ -462,3 +462,58 @@ operations. For example,
 \end{cppcode}
 Note that these functions will be specialized to use \mkl routines if
 \verb|rng| is one of the engines listed in table~\ref{tab:MKL RNG}.
+
+\section{\protect\rng in C and OpenCL}
+\label{sec:RNG in C and OpenCL}
+
+The Philox and Threefry engines, together with a set of functions that transfer
+unsigned random integers to floating points numbers, are also implemented with
+only a subset of \cnn features. They can be used in both \cnn and OpenCL 1.2
+device programs. See appendix~\appref{app:sub:Parallelized implementation using
+  OpenCL} for an example of such an OpenCL program. Here we provide a minimal
+example that generates two standard Normal random numbers using the Box-Muller
+method,
+\begin{ccode}
+    vsmc_threefry4x32 rng;
+    vsmc_threefry4x32_init(&rng, seed);
+
+    uint32_t u32[2];
+    u32[0] = vsmc_threefry4x32_rand(&rng);
+    u32[1] = vsmc_threefry4x32_rand(&rng);
+
+    double u01[2];
+    u01[0] = vsmc_u01_oc_u32d(u32[0]);
+    u01[1] = vsmc_u01_oc_u32d(u32[1]);
+    u01[0] = sqrt(-2 * log(u01[0]));
+    u01[1] *= 2;
+
+    double normal01[2];
+    normal01[0] = u01[0] * sin(M_PI * u01[1]);
+    normal01[1] = u01[0] * cos(M_PI * u01[1]);
+\end{ccode}
+For each engine type, there are two primary functions. One is used to
+initialize the state. These functions take the form of the engine name suffixed
+with \verb|_init|. They take a pointer to the \rng and an unsigned integer as
+input. The other function is used to increment the counter and generate
+unsigned random integers. These functions take the form of the engine name
+suffixed with \verb|_rand|. They take a pointer to the \rng as input and return
+an unsigned integer.
+
+The functions that convert unsigned random integers to floating points uniform
+on $[0, 1]$ take the form
+\texttt{vsmc\_u01\_%
+  \textcolor{MRed}{\textit{l}}%
+  \textcolor{MRed}{\textit{r}}\_u%
+  \textcolor{MRed}{\textit{bits}}%
+  \textcolor{MRed}{\textit{fp}}},
+where \texttt{\textcolor{MRed}{\textit{l}}} specify the lower bound of the
+interval to be closed (\verb|c|) or open (\verb|o|); similarly
+\texttt{\textcolor{MRed}{\textit{r}}} specify the upper bound of the interval;
+\texttt{\textcolor{MRed}{\textit{bits}}} can be either \verb|32| or \verb|64|,
+which specifies the input type to be \verb|uint32_t| or \verb|uint64_t|,
+respectively; and last \texttt{\textcolor{MRed}{\textit{fp}}} can be either
+\verb|f|, \verb|d|, or \verb|l|, which specifies the output type to be
+\verb|float|, \verb|double|, or \verb|long double|, respectively. Note that, if
+used in OpenCL device programs, the \verb|long double| versions are not
+defined. And the \verb|double| versions are only defined if the macro
+\verb|VSMC_HAS_OPENCL_DOUBLE| is defined to a non-zero value.
