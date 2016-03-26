@@ -45,32 +45,37 @@ namespace vsmc
 /// \param weight N-vector of normalized weights
 /// \param u01seq M ordered uniform [0, 1] random numbers
 /// \param replication N-vector of replication numbers
-template <typename IntType, typename U01SeqType>
-inline void resample_trans_u01_rep(std::size_t N, std::size_t M,
-    const double *weight, U01SeqType &&u01seq, IntType *replication)
+template <typename InputIter, typename OutputIter, typename U01SeqType>
+inline OutputIter resample_trans_u01_rep(std::size_t N, std::size_t M,
+    InputIter weight, U01SeqType &&u01seq, OutputIter replication)
 {
+    using flt_type = typename std::iterator_traits<InputIter>::value_type;
+    using rep_type = typename std::iterator_traits<OutputIter>::value_type;
+
     if (N == 0)
-        return;
+        return replication;
 
     if (N == 1) {
-        *replication = static_cast<IntType>(M);
-        return;
+        *replication++ = static_cast<rep_type>(M);
+        return replication;
     }
 
-    std::memset(replication, 0, sizeof(IntType) * N);
+    OutputIter rep = std::fill_n(replication, N, static_cast<rep_type>(0));
     if (M == 0)
-        return;
+        return rep;
 
-    double accw = 0;
+    flt_type accw = 0;
     std::size_t j = 0;
-    for (std::size_t i = 0; i != N - 1; ++i) {
-        accw += weight[i];
-        while (j != M && u01seq[j] < accw) {
-            ++replication[i];
+    for (std::size_t i = 0; i != N - 1; ++i, ++weight, ++replication) {
+        accw += *weight;
+        while (j != M && static_cast<flt_type>(u01seq[j]) < accw) {
+            *replication += 1;
             ++j;
         }
     }
-    replication[N - 1] = static_cast<IntType>(M - j);
+    *replication++ = static_cast<rep_type>(M - j);
+
+    return replication;
 }
 
 /// \brief Transform replication numbers into parent indices
@@ -80,49 +85,58 @@ inline void resample_trans_u01_rep(std::size_t N, std::size_t M,
 /// \param M Sample size after resampling
 /// \param replication N-vector of replication numbers
 /// \param index M-vector of parent indices
-template <typename IntType1, typename IntType2>
-inline void resample_trans_rep_index(
-    std::size_t N, std::size_t M, const IntType1 *replication, IntType2 *index)
+template <typename InputIter, typename OutputIter>
+inline OutputIter resample_trans_rep_index(
+    std::size_t N, std::size_t M, InputIter replication, OutputIter index)
 {
+    using rep_type = typename std::iterator_traits<InputIter>::value_type;
+    using idx_type = typename std::iterator_traits<OutputIter>::value_type;
+
     if (N == 0 || M == 0)
-        return;
+        return index;
 
     const std::size_t K = std::min(N, M);
-    IntType1 time = 0;
+    rep_type time = 0;
     std::size_t src = 0;
+    InputIter rep = replication;
 
-    auto good_src = [K, replication, &time, &src]() {
-        return src < K ? replication[src] > time + 1 : replication[src] > time;
-    };
-
-    auto find_src = [&time, &src, &good_src]() {
-        if (!good_src()) {
+    auto seek = [N, K, &time, &src, &rep]() {
+        if (src < K && *rep < time + 2) {
             time = 0;
-            do
+            do {
                 ++src;
-            while (!good_src());
+                ++rep;
+            } while (src < K && *rep < time + 2);
+        }
+        if (src >= K && *rep < time + 1) {
+            time = 0;
+            do {
+                ++src;
+                ++rep;
+            } while (src < N && *rep < time + 1);
         }
     };
 
-    for (std::size_t dst = 0; dst != K; ++dst) {
-        if (replication[dst] > 0) {
-            index[dst] = static_cast<IntType2>(dst);
+    for (std::size_t dst = 0; dst != K; ++dst, ++replication, ++index) {
+        if (*replication > 0) {
+            *index = static_cast<idx_type>(dst);
         } else {
-            find_src();
-            index[dst] = static_cast<IntType2>(src);
+            seek();
+            *index = static_cast<idx_type>(src);
             ++time;
         }
     }
 
-    for (std::size_t dst = K; dst < M; ++dst) {
-        find_src();
-        index[dst] = static_cast<IntType2>(src);
+    for (std::size_t dst = K; dst < M; ++dst, ++index) {
+        seek();
+        *index = static_cast<idx_type>(src);
         ++time;
     }
+
+    return index;
 }
 
 /// \brief Transform normalized weights to normalized residual and integrals,
-/// and return the number of remaining elements to be resampled
 /// \ingroup Resample
 ///
 /// \param N Sample size before resampling
@@ -130,20 +144,35 @@ inline void resample_trans_rep_index(
 /// \param weight N-vector of normalized weights
 /// \param resid N-vector of normalized residuals
 /// \param integ N-vector of integral parts
-template <typename IntType>
+/// \return The number of remaining elements to be resampled
+template <typename InputIter, typename RandomIterR, typename RandomIterI>
 inline std::size_t resample_trans_residual(std::size_t N, std::size_t M,
-    const double *weight, double *resid, IntType *integ)
+    InputIter weight, RandomIterR resid, RandomIterI integ)
 {
-    double integral = 0;
-    const double coeff = static_cast<double>(M);
-    for (std::size_t i = 0; i != N; ++i) {
-        resid[i] = std::modf(coeff * weight[i], &integral);
-        integ[i] = static_cast<IntType>(integral);
-    }
-    mul(N, 1 / std::accumulate(resid, resid + N, 0.0), resid, resid);
-    IntType R = std::accumulate(integ, integ + N, static_cast<IntType>(0));
+    using resid_type = typename std::iterator_traits<RandomIterR>::value_type;
+    using integ_type = typename std::iterator_traits<RandomIterI>::value_type;
 
-    return M - static_cast<std::size_t>(R);
+    static_assert(std::is_floating_point<resid_type>::value,
+        "**resample_trans_residual** OUTPUT RESIDUAL IS NOT OF FLOATING POINT "
+        "TYPE");
+
+    resid_type sum_resid = 0;
+    integ_type sum_integ = 0;
+    const resid_type coeff = static_cast<resid_type>(M);
+    for (std::size_t i = 0; i != N; ++i, ++weight) {
+        resid_type w = coeff * static_cast<resid_type>(*weight);
+        resid_type integral;
+        resid[i] = std::modf(w, &integral);
+        integ[i] = static_cast<integ_type>(integral);
+        sum_resid += resid[i];
+        sum_integ += integ[i];
+    }
+
+    const resid_type mul_resid = 1 / sum_resid;
+    for (std::size_t i = 0; i != N; ++i)
+        resid[i] *= mul_resid;
+
+    return M - static_cast<std::size_t>(sum_integ);
 }
 
 } // namespace vsmc
