@@ -9,8 +9,8 @@ properties, in practice, such an algorithm can be decomposed into three steps.
 First, a vector of replication numbers $\{r_i\}_{i=1}^N$ is generated such that
 $\sum_{i=1}^N r_i = M$, and $0 \le r_i \le M$ for $i=1,\dots,N$. Then a vector
 of indices $\{a_i\}_{i=1}^M$ is generated such that $\sum_{i=1}^M
-\mathbb{I}_{\{j\}}(a_i) = r_j$, and $1 \le a_i \le N$ for $i= 1,\dots,M$. And
-last, set $\bar{X}^{(i)} = X^{(a_i)}$.
+\bbI_{\{j\}}(a_i) = r_j$, and $1 \le a_i \le N$ for $i= 1,\dots,M$. And last,
+set $\bar{X}^{(i)} = X^{(a_i)}$.
 
 The first step determines the statistical properties of the resampling
 algorithm. The library defines all algorithms discussed in
@@ -64,8 +64,72 @@ be taking into consideration to achieve optimal performance. In those
 situations, it is best to use \verb|ResampleMultinomial| etc., to generate the
 replication numbers, and manually perform the rest of the resampling algorithm.
 
-\section{Resizing a sampler}
-\label{sec:Resizing a sampler}
+\section{User defined resampling algorithm}
+\label{sec:User defined resampling algorithm}
+
+The library provides facilities for implementing new resampling algorithms.
+The most common situation is that, a vector of random numbers on the interval
+$[0, 1)$ is generated, say $\{u_i\}_{i=1}^M$. The replication numbers are $r_i
+= \sum_{j=1}^M \bbI_{[v_{i-1},v_i)}(u_i)$, where $v_i = \sum_{j=1}^i W_i$, $v_0
+= 0$. For example, the Multinomial resampling algorithm is equivalent to
+$\{u_i\}_{i=1}^M$ being i.i.d.\ standard uniform random numbers.
+
+Alternatively, let $p_i = \Floor{MW_i}$, $q_i = MW_i - p_i$. One can perform
+resampling on the residuals, using weights proportional to $\{q_i\}_{i=1}^N$.
+The output size shall be $R = M - \sum_{i=1}^N p_i$. Let the replication
+numbers be $\{s_i\}_{i=1}^N$, then $r_i = p_i + s_i$.
+
+The library provides the following class template for implementing such
+algorithms,
+\begin{cppcode}
+  template <template <typename, typename> class U01SeqType, bool Residual>
+  class ResampleAlgorithm;
+\end{cppcode}
+where \verb|U01SeqType| will be discussed later. The second parameter
+\verb|Residual| determines if the resampling shall be applied to residuals.
+
+The template template parameter \verb|U01SeqType| shall be a class template
+that takes the following form,
+\begin{cppcode}
+  template <typename RNGType, typename RealType>
+  class U01SeqType
+  {
+        public:
+        U01SeqType(std::size_t M, RNGType &rng);
+
+        RealType operator[](std::size_t i);
+  };
+\end{cppcode}
+The constructor and operator are required. The specific behavior of the
+operator is more tricky. Let \verb|u01seq| be an object of the above type. The
+operator \verb|u01seq[i]| will be called exactly $M$ times, with arguments $i =
+1,\dots,M$, in the increasing order. Each time \verb|u01seq[i]| is called, it
+shall return a number between \verb|u01seq[i-1]| and $1$. In other words, a
+\verb|U01SeqType| object shall be able to generate ordered random numbers on
+the interval $[0, 1)$. However, it only need to be able to generate such a
+sequence once. After $M$ calls, or if its called twice with the same arguments,
+or its called with a sequence of arguments other than $i=1,\dots,M$, its
+behavior might well be undefined.
+
+An obvious method is to generate the random numbers first and then sort them.
+However, no sorting algorithm has cost $O(M)$, while it is possible to generate
+such an ordered sequence with cost $O(M)$ by using order statistics. The
+library defines three such sequences. The first is equivalent to sorted i.i.d.\
+random numbers. The second and the third are stratified and systematic,
+respectively. The builtin resampling algorithms are implemented using these
+sequences. For example,
+\begin{cppcode}
+  using ResampleMultinomial = ResampleAlgorithm<U01SequenceSorted, false>;
+  using ResampleResidual = ResampleAlgorithm<U01SequenceSorted, true>;
+\end{cppcode}
+If the user is able to define a new ordered random sequence, either through
+sorting or otherwise, then using the \verb|ResampleAlgorithm| template, a new
+resampling algorithm can easily be implemented. Note that, the algorithm
+implemented by this class template always has a cost $O(N + M)$, unless the
+random sequence has a greater cost.
+
+\section{Algorithms with varying sample sizes}
+\label{sec:Algorithms with varying sample sizes}
 
 The library does not direct support varying sample size algorithms. However, it
 is possible. Below is a program within which the sample size is changed through
@@ -102,10 +166,8 @@ temporary first. Note that \verb|sampler.size()| is only a shortcut for
 \verb|sampler.particle().size()|. The sampler object itself does not store size
 information, nor does it need to.
 
-\section{High performance resampling for algorithms with increasing
-  dimensions}
-\label{sec:High performance resampling for algorithms with increasing
-  dimensions}
+\section{Algorithms with increasing dimensions}
+\label{sec:Algorithms with increasing dimensions}
 
 Recall section~\ref{sec:Sequential importance sampling and resampling}, in
 general an \sis algorithm operates on increasing dimensions. Assume that the

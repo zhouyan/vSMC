@@ -128,7 +128,7 @@ The \verb|StateMatrix| class deliberately does not provide a \verb|resize|
 method. There are algorithms that change the sample size between iterations.
 However, such algorithms often change size through resampling or other methods,
 either deterministically or stochastically. An example of changing size of a
-sampler is provided in section~\ref{sec:Resizing a sampler}.
+sampler is provided in section~\ref{sec:Algorithms with varying sample sizes}.
 
 \subsection{Weight}
 \label{sub:Weight}
@@ -559,13 +559,14 @@ The \verb|print| statement shows the first five lines of the output,
 \end{textcode}
 The column \verb|Size| shows the sample size at each iteration. The library
 does not provide direct support of changing the sample size. However, it is
-possible and an example is shown in section~\ref{sec:Resizing a sampler}. The
-column \verb|Resampled| shows nonzero values if resampling were performed and
-zero otherwise. For each moves and \mcmc steps, an acceptance count will be
-recorded. In this particular example, it is irrelevant. Next the column
-\verb|ESS| shows the value of \ess. The last two columns show the importance
-sampling estimates of the positions recorded by the monitor named \verb|"pos"|.
-The graphical representation of the output is shown in figure~\ref{fig:pf}.
+possible and an example is shown in section~\ref{sec:Algorithms with varying
+  sample sizes}. The column \verb|Resampled| shows nonzero values if resampling
+were performed and zero otherwise. For each moves and \mcmc steps, an
+acceptance count will be recorded. In this particular example, it is
+irrelevant. Next the column \verb|ESS| shows the value of \ess. The last two
+columns show the importance sampling estimates of the positions recorded by the
+monitor named \verb|"pos"|.  The graphical representation of the output is
+shown in figure~\ref{fig:pf}.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{cpp/pf}
