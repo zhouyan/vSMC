@@ -35,13 +35,14 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/single_particle.hpp>
 
+#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_RESIZE_DIM                      \
+    VSMC_RUNTIME_ASSERT((dim == this->dim() || Dim == Dynamic),               \
+        "**StateMatrix::resize** CHANGE DIMENSION OF A FIXED DIMENSION "      \
+        "OBJECT")
+
 #define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH              \
     VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),          \
         "**StateMatrix::copy** SIZE MISMATCH")
-
-#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_DIM_SIZE(dim)                   \
-    VSMC_RUNTIME_ASSERT((dim >= 1), "**StateMatrix** DIMENSION IS LESS THAN " \
-                                    "1")
 
 #define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(psize, dim)         \
     VSMC_RUNTIME_ASSERT((psize >= dim),                                       \
@@ -118,6 +119,18 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
 
     size_type size() const { return size_; }
 
+    void resize(size_type N)
+    {
+        static_cast<StateMatrix<Layout, Dim, T> *>(this)->resize(
+            N, this->dim());
+    }
+
+    void resize_dim(std::size_t dim)
+    {
+        static_cast<StateMatrix<Layout, Dim, T> *>(this)->resize(
+            this->size(), dim);
+    }
+
     state_type *data() { return data_.data(); }
 
     const state_type *data() const { return data_.data(); }
@@ -191,10 +204,25 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     protected:
     explicit StateMatrixBase(size_type N) : size_(N), data_(N * Dim) {}
 
+    StateMatrixBase(const StateMatrixBase<Layout, Dim, T> &) = default;
+
+    StateMatrixBase<Layout, Dim, T> &operator=(
+        const StateMatrixBase<Layout, Dim, T> &) = default;
+
+    StateMatrixBase(StateMatrixBase<Layout, Dim, T> &&) = default;
+
+    StateMatrixBase<Layout, Dim, T> &operator=(
+        StateMatrixBase<Layout, Dim, T> &&other) noexcept
+    {
+        swap(other);
+
+        return *this;
+    }
+
     void resize_data(size_type N, std::size_t dim)
     {
-        this->set_dim(dim);
         size_ = N;
+        this->set_dim(dim);
         data_.resize(N * dim);
     }
 
@@ -216,19 +244,27 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     explicit StateMatrix(size_type N) : state_matrix_base_type(N) {}
 
-    void resize_dim(std::size_t dim)
-    {
-        static_assert(Dim == Dynamic,
-            "**StateMatrix** OBJECT DECLARED WITH A FIXED DIMENSION");
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_DIM_SIZE(dim);
+    using state_matrix_base_type::resize;
 
-        if (dim == this->dim())
+    void resize(size_type N, std::size_t dim)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_RESIZE_DIM;
+
+        if (N == this->size() && dim == this->dim())
             return;
 
+        if (dim == this->dim()) {
+            this->resize_data(N, dim);
+            return;
+        }
+
         StateMatrix<RowMajor, Dim, T> tmp(0);
-        tmp.resize_data(this->size(), dim);
-        for (size_type i = 0; i != this->size(); ++i)
-            std::copy_n(row_data(i), this->dim(), tmp.row_data(i));
+        tmp.resize_data(N, dim);
+        const size_type K = std::min(N, this->size());
+        const std::size_t D = std::min(dim, this->dim());
+        if (D > 0)
+            for (size_type k = 0; k != K; ++k)
+                std::copy_n(row_data(k), D, tmp.row_data(k));
         *this = std::move(tmp);
     }
 
@@ -336,13 +372,28 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     explicit StateMatrix(size_type N) : state_matrix_base_type(N) {}
 
-    void resize_dim(std::size_t dim)
-    {
-        static_assert(Dim == Dynamic,
-            "**StateMatrix** OBJECT DECLARED WITH A FIXED DIMENSION");
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_DIM_SIZE(dim);
+    using state_matrix_base_type::resize;
 
-        this->resize_data(this->size(), dim);
+    void resize(size_type N, std::size_t dim)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_RESIZE_DIM;
+
+        if (N == this->size() && dim == this->dim())
+            return;
+
+        if (N == this->size()) {
+            this->resize_data(N, dim);
+            return;
+        }
+
+        StateMatrix<ColMajor, Dim, T> tmp(0);
+        tmp.resize_data(N, dim);
+        const size_type K = std::min(N, this->size());
+        const std::size_t D = std::min(dim, this->dim());
+        if (K > 0)
+            for (std::size_t d = 0; d != D; ++d)
+                std::copy_n(col_data(d), K, tmp.col_data(d));
+        *this = std::move(tmp);
     }
 
     T &state(size_type id, std::size_t pos)
