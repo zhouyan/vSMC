@@ -1,5 +1,5 @@
 # ============================================================================
-#  vSMC/example/CMakeLists.txt
+#  vSMC/example/resample/CMakeLists.txt
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
 #
-#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
 #  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 #  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -29,40 +29,20 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT(vSMCExample C CXX)
+PROJECT(vSMCExample-resample CXX)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
-INCLUDE(vSMCExampleFunctions)
-ADD_DEFINITIONS(${EXAMPLE_DEFINITIONS})
+ADD_CUSTOM_TARGET(resample)
+ADD_DEPENDENCIES(example resample)
 
-##############################################################################
-# Check examples
-##############################################################################
+ADD_CUSTOM_TARGET(resample-files)
+ADD_DEPENDENCIES(example-files resample-files)
 
-ADD_CUSTOM_TARGET(example-files)
-ADD_DEPENDENCIES(example example-files)
+FUNCTION(ADD_RESAMPLE_TEST name)
+    ADD_VSMC_EXECUTABLE(resample_${name}
+        ${PROJECT_SOURCE_DIR}/src/resample_${name}.cpp)
+    ADD_DEPENDENCIES(resample resample_${name})
+ENDFUNCTION(ADD_RESAMPLE_TEST)
 
-SET(EXAMPLES ${EXAMPLES} "vsmc")
-ADD_SUBDIRECTORY(vsmc)
-
-SET(EXAMPLES ${EXAMPLES} "gmm")
-ADD_SUBDIRECTORY(gmm)
-
-SET(EXAMPLES ${EXAMPLES} "pf")
-ADD_SUBDIRECTORY(pf)
-
-SET(EXAMPLES ${EXAMPLES} "resample")
-ADD_SUBDIRECTORY(resample)
-
-SET(EXAMPLES ${EXAMPLES} "rng")
-ADD_SUBDIRECTORY(rng)
-
-##############################################################################
-# Enable examples
-##############################################################################
-
-MESSAGE(STATUS "=================== Enable examples ===================")
-FOREACH(example ${EXAMPLES})
-    MESSAGE(STATUS ${example})
-ENDFOREACH(example ${EXAMPLES})
-
-MESSAGE(STATUS "=======================================================")
+ADD_RESAMPLE_TEST(index)
+ADD_RESAMPLE_TEST(transform)

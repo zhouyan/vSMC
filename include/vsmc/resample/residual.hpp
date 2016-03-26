@@ -60,7 +60,7 @@ class ResampleResidual : public ResampleBase<ResampleResidual>
             resample_trans_residual(N, M, weight, resid.data(), integ.data());
         U01SequenceSorted<RNGType, double> u01seq(R, rng);
         resample_trans_u01_rep(N, R, resid.data(), u01seq, replication);
-        add(N, replication, integ.data(), replication);
+        add(N, integ.data(), replication, replication);
     }
 }; // ResampleResidual
 

@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/resample/residual_systematic.hpp
+// vSMC/example/resample/src/resample_index.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,51 +29,26 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RESAMPLE_RESIDUAL_SYSTEMATIC_HPP
-#define VSMC_RESAMPLE_RESIDUAL_SYSTEMATIC_HPP
+#include "resample_index.hpp"
 
-#include <vsmc/resample/internal/common.hpp>
-#include <vsmc/resample/transform.hpp>
-
-namespace vsmc
+int main(int argc, char **argv)
 {
+    std::size_t N = 1000;
+    if (argc > 1)
+        N = static_cast<std::size_t>(std::atoi(argv[1]));
 
-/// \brief Residual systematic resampling
-/// \ingroup Resample
-class ResampleResidualSystematic
-    : public ResampleBase<ResampleResidualSystematic>
-{
-    public:
-    /// \brief Generate replication numbers from normalized weights
-    ///
-    /// \param N Sample size before resampling
-    /// \param M Sample size after resampling
-    /// \param rng An RNG engine
-    /// \param weight N-vector of normalized weights
-    /// \param replication N-vector of replication numbers
-    template <typename IntType, typename RNGType>
-    static void eval(std::size_t N, std::size_t M, RNGType &rng,
-        const double *weight, IntType *replication)
-    {
-        Vector<IntType> integ(N);
-        Vector<double> resid(N);
-        std::size_t R =
-            resample_trans_residual(N, M, weight, resid.data(), integ.data());
-        U01SequenceSystematic<RNGType, double> u01seq(R, rng);
-        resample_trans_u01_rep(N, R, resid.data(), u01seq, replication);
-        add(N, integ.data(), replication, replication);
-    }
-}; // ResampleResidualSystematic
+    std::size_t dim = 1000;
+    if (argc > 2)
+        dim = static_cast<std::size_t>(std::atoi(argv[2]));
 
-/// \brief Type trait of ResidualSystematic scheme
-/// \ingroup Resample
-template <>
-class ResampleTypeTrait<ResidualSystematic>
-{
-    public:
-    using type = ResampleResidualSystematic;
-}; // class ResampleTypeTrait
+    resample_index_test<vsmc::RowMajor, vsmc::RowMajor>(N, dim, true);
+    resample_index_test<vsmc::RowMajor, vsmc::ColMajor>(N, dim, true);
+    resample_index_test<vsmc::ColMajor, vsmc::RowMajor>(N, dim, true);
+    resample_index_test<vsmc::ColMajor, vsmc::ColMajor>(N, dim, true);
+    resample_index_test<vsmc::RowMajor, vsmc::RowMajor>(N, dim, false);
+    resample_index_test<vsmc::RowMajor, vsmc::ColMajor>(N, dim, false);
+    resample_index_test<vsmc::ColMajor, vsmc::RowMajor>(N, dim, false);
+    resample_index_test<vsmc::ColMajor, vsmc::ColMajor>(N, dim, false);
 
-} // namespace vsmc
-
-#endif // VSMC_RESAMPLE_RESIDUAL_SYSTEMATIC_HPP
+    return 0;
+}
