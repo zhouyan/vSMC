@@ -1,6 +1,9 @@
 \chapter{Resampling}
 \label{chap:Resampling}
 
+\section{Builtin algorithms}
+\label{sec:Builtin algorithms}
+
 The library supports resampling in a more general way than the algorithm
 described in chapter~\ref{chap:Sequential Monte Carlo}. Recall that, given a
 particle system $\{W^{(i)},X^{(i)}\}_{i=1}^N$, a new system $\{\bar{W}^{(i)},
@@ -64,8 +67,8 @@ be taking into consideration to achieve optimal performance. In those
 situations, it is best to use \verb|ResampleMultinomial| etc., to generate the
 replication numbers, and manually perform the rest of the resampling algorithm.
 
-\section{User defined resampling algorithm}
-\label{sec:User defined resampling algorithm}
+\section{User defined algorithms}
+\label{sec:User defined algorithms}
 
 The library provides facilities for implementing new resampling algorithms.
 The most common situation is that, a vector of random numbers on the interval
