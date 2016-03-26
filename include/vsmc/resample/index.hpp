@@ -49,6 +49,8 @@ class ResampleIndex
     public:
     using index_type = IntType;
 
+    ResampleIndex() : iter_size_(0) {}
+
     /// \brief Number of iterations recorded
     std::size_t iter_size() const { return iter_size_; }
 
@@ -161,7 +163,7 @@ class ResampleIndex
 
     std::size_t index_matrix_ncol() const
     {
-        return index_matrix_ncol(0, iter_size_ - 1);
+        return index_matrix_ncol(iter_size_ - 1, 0);
     }
 
     std::size_t index_matrix_ncol(std::size_t iter_back) const
@@ -239,7 +241,8 @@ class ResampleIndex
             const index_type *idx = index_[iter_back].data();
             for (std::size_t i = 0; i != N; ++i)
                 back[static_cast<difference_type>(i * R)] = idx[i];
-            for (std::size_t j = iter_back - 1; j >= iter; --j) {
+            for (std::size_t r = 1; r != R; ++r) {
+                const std::size_t j = iter_back - r;
                 RandomIter last = back;
                 --back;
                 idx = index_[j].data();
@@ -256,7 +259,8 @@ class ResampleIndex
                 first + static_cast<difference_type>(N * (R - 1));
             const index_type *idx = index_[iter_back].data();
             std::copy_n(idx, N, back);
-            for (std::size_t j = iter_back - 1; j >= iter; --j) {
+            for (std::size_t r = 1; r != R; ++r) {
+                const std::size_t j = iter_back - r;
                 RandomIter last = back;
                 back -= static_cast<difference_type>(N);
                 idx = index_[j].data();
