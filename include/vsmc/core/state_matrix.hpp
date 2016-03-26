@@ -60,7 +60,7 @@ class StateMatrixDim
     static constexpr std::size_t dim() { return Dim; }
 
     protected:
-    void swap(StateMatrixDim<Dim> &) {}
+    void swap(StateMatrixDim<Dim> &) noexcept {}
 }; // class StateMatrixDim
 
 template <>
@@ -72,7 +72,10 @@ class StateMatrixDim<Dynamic>
     std::size_t dim() const { return dim_; }
 
     protected:
-    void swap(StateMatrixDim<Dynamic> &other) { std::swap(dim_, other.dim_); }
+    void swap(StateMatrixDim<Dynamic> &other) noexcept
+    {
+        std::swap(dim_, other.dim_);
+    }
 
     void resize_dim(std::size_t dim) { dim_ = dim; }
 
@@ -127,7 +130,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
 
     const state_type *data() const { return data_.data(); }
 
-    void swap(StateMatrixBase<Layout, Dim, T> &other)
+    void swap(StateMatrixBase<Layout, Dim, T> &other) noexcept
     {
         internal::StateMatrixDim<Dim>::swap(other);
         std::swap(size_, other.size_);
@@ -200,15 +203,6 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     size_type size_;
     Vector<T> data_;
 }; // class StateMatrixBase
-
-template <typename CharT, typename Traits, MatrixLayout Layout,
-    std::size_t Dim, typename T>
-inline std::basic_ostream<CharT, Traits> &operator<<(
-    std::basic_ostream<CharT, Traits> &os,
-    const StateMatrixBase<Layout, Dim, T> &smatrix)
-{
-    return smatrix.print(os);
-}
 
 /// \brief Particle::value_type subtype
 /// \ingroup Core
@@ -420,6 +414,46 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
             src, dst, std::integral_constant<bool, D + 1 < Dim>());
     }
 }; // class StateMatrix
+
+template <typename CharT, typename Traits, MatrixLayout Layout,
+    std::size_t Dim, typename T>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os,
+    const StateMatrix<Layout, Dim, T> &state)
+{
+    return state.print(os);
+}
+
+template <MatrixLayout Layout, std::size_t Dim, typename T>
+inline bool operator==(const StateMatrix<Layout, Dim, T> &state1,
+    const StateMatrix<Layout, Dim, T> &state2)
+{
+    if (state1.size() != state2.size())
+        return false;
+    if (state1.dim() != state2.dim())
+        return false;
+    std::size_t N = state1.size() * state1.dim();
+    const T *s1 = state1.data();
+    const T *s2 = state2.data();
+    for (std::size_t i = 0; i != N; ++i)
+        if (!internal::is_equal(s1[i] != s2[i]))
+            return false;
+    return true;
+}
+
+template <MatrixLayout Layout, std::size_t Dim, typename T>
+inline bool operator!=(const StateMatrix<Layout, Dim, T> &state1,
+    const StateMatrix<Layout, Dim, T> &state2)
+{
+    return !(state1 == state2);
+}
+
+template <MatrixLayout Layout, std::size_t Dim, typename T>
+inline void swap(StateMatrix<Layout, Dim, T> &state1,
+    StateMatrix<Layout, Dim, T> &state2) noexcept
+{
+    state1.swap(state2);
+}
 
 } // namespace vsmc
 
