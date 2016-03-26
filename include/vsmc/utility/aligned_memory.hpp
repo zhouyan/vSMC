@@ -338,9 +338,23 @@ class Allocator : public std::allocator<T>
 
     Allocator(const Allocator<T, Alignment, Memory> &) = default;
 
+    Allocator(Allocator<T, Alignment, Memory> &&) = default;
+
+    Allocator<T, Alignment, Memory> &operator=(
+        const Allocator<T, Alignment, Memory> &) = default;
+
+    Allocator<T, Alignment, Memory> &operator=(
+        Allocator<T, Alignment, Memory> &&) = default;
+
     template <typename U>
     Allocator(const Allocator<U, Alignment, Memory> &other)
         : std::allocator<T>(static_cast<std::allocator<U>>(other))
+    {
+    }
+
+    template <typename U>
+    Allocator(Allocator<U, Alignment, Memory> &&other)
+        : std::allocator<T>(std::move(static_cast<std::allocator<U>>(other)))
     {
     }
 
