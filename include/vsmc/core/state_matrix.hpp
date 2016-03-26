@@ -61,13 +61,15 @@ class StateMatrixDim
 
     protected:
     void swap(StateMatrixDim<Dim> &) noexcept {}
+
+    static void set_dim(std::size_t) {}
 }; // class StateMatrixDim
 
 template <>
 class StateMatrixDim<Dynamic>
 {
     public:
-    StateMatrixDim() : dim_(1) {}
+    StateMatrixDim() : dim_(0) {}
 
     std::size_t dim() const { return dim_; }
 
@@ -77,7 +79,7 @@ class StateMatrixDim<Dynamic>
         std::swap(dim_, other.dim_);
     }
 
-    void resize_dim(std::size_t dim) { dim_ = dim; }
+    void set_dim(std::size_t dim) { dim_ = dim; }
 
     private:
     std::size_t dim_;
@@ -113,16 +115,6 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
                 static_cast<size_type>(this->id()), pos);
         }
     }; // class single_particle_type
-
-    void resize_dim(std::size_t dim)
-    {
-        static_assert(Dim == Dynamic,
-            "**StateMatrix** OBJECT DECLARED WITH A FIXED DIMENSION");
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_DIM_SIZE(dim);
-
-        internal::StateMatrixDim<Dim>::resize_dim(dim);
-        data_.resize(size_ * dim);
-    }
 
     size_type size() const { return size_; }
 
@@ -199,6 +191,13 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     protected:
     explicit StateMatrixBase(size_type N) : size_(N), data_(N * Dim) {}
 
+    void resize_data(size_type N, std::size_t dim)
+    {
+        this->set_dim(dim);
+        size_ = N;
+        data_.resize(N * dim);
+    }
+
     private:
     size_type size_;
     Vector<T> data_;
@@ -219,11 +218,15 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     void resize_dim(std::size_t dim)
     {
+        static_assert(Dim == Dynamic,
+            "**StateMatrix** OBJECT DECLARED WITH A FIXED DIMENSION");
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_DIM_SIZE(dim);
+
         if (dim == this->dim())
             return;
 
-        StateMatrix<RowMajor, Dim, T> tmp(this->size());
-        tmp.resize_dim(dim);
+        StateMatrix<RowMajor, Dim, T> tmp(0);
+        tmp.resize_data(this->size(), dim);
         for (size_type i = 0; i != this->size(); ++i)
             std::copy_n(row_data(i), this->dim(), tmp.row_data(i));
         *this = std::move(tmp);
@@ -332,6 +335,15 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     using state_pack_type = typename state_matrix_base_type::state_pack_type;
 
     explicit StateMatrix(size_type N) : state_matrix_base_type(N) {}
+
+    void resize_dim(std::size_t dim)
+    {
+        static_assert(Dim == Dynamic,
+            "**StateMatrix** OBJECT DECLARED WITH A FIXED DIMENSION");
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_DIM_SIZE(dim);
+
+        this->resize_data(this->size(), dim);
+    }
 
     T &state(size_type id, std::size_t pos)
     {
