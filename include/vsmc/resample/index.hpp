@@ -94,6 +94,8 @@ class ResampleIndex
         ++iter_size_;
         if (index_.size() < iter_size_)
             index_.push_back(vsmc::Vector<index_type>(N));
+        else
+            index_.[iter_size_ - 1].resize(N);
         std::copy_n(first, N, index_[iter_size_ - 1].begin());
     }
 
@@ -103,6 +105,7 @@ class ResampleIndex
         VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(0, 0, insert);
 
         resize_identity(N);
+        index_[iter_size_ - 1].resize(N);
         std::copy_n(identity_.begin(), N, index_[iter_size_ - 1].begin());
     }
 
@@ -112,6 +115,7 @@ class ResampleIndex
     {
         VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(0, 0, insert);
 
+        index_[iter_size_ - 1].resize(N);
         std::copy_n(first, N, index_[iter_size_ - 1].begin());
     }
 
@@ -121,6 +125,7 @@ class ResampleIndex
     {
         VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(iter, iter, insert);
 
+        index_[iter].resize(N);
         std::copy_n(first, N, index_[iter].begin());
     }
 
