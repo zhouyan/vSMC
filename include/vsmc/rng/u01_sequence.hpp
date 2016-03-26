@@ -130,6 +130,10 @@ inline void u01_systematic(std::size_t N, RealType u01, RealType *u01seq)
 template <typename RNGType, typename RealType = double>
 class U01SequenceSorted
 {
+    static_assert(std::is_floating_point<RealType>::value,
+        "**U01SequenceSorted** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
     public:
     using result_type = RealType;
 
@@ -176,6 +180,10 @@ class U01SequenceSorted
 template <typename RNGType, typename RealType = double>
 class U01SequenceStratified
 {
+    static_assert(std::is_floating_point<RealType>::value,
+        "**U01SequenceSorted** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
     public:
     using result_type = RealType;
 
@@ -225,6 +233,10 @@ class U01SequenceStratified
 template <typename RNGType, typename RealType = double>
 class U01SequenceSystematic
 {
+    static_assert(std::is_floating_point<RealType>::value,
+        "**U01SequenceSorted** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
     public:
     using result_type = RealType;
 

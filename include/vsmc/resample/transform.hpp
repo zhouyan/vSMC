@@ -32,7 +32,7 @@
 #ifndef VSMC_RESAMPLE_TRANSFORM_HPP
 #define VSMC_RESAMPLE_TRANSFORM_HPP
 
-#include <vsmc/resample/internal/common.hpp>
+#include <vsmc/internal/common.hpp>
 
 namespace vsmc
 {
@@ -49,7 +49,7 @@ template <typename InputIter, typename OutputIter, typename U01SeqType>
 inline OutputIter resample_trans_u01_rep(std::size_t N, std::size_t M,
     InputIter weight, U01SeqType &&u01seq, OutputIter replication)
 {
-    using flt_type = typename std::iterator_traits<InputIter>::value_type;
+    using real_type = typename std::iterator_traits<InputIter>::value_type;
     using rep_type = typename std::iterator_traits<OutputIter>::value_type;
 
     if (N == 0)
@@ -64,11 +64,11 @@ inline OutputIter resample_trans_u01_rep(std::size_t N, std::size_t M,
     if (M == 0)
         return rep;
 
-    flt_type accw = 0;
+    real_type accw = 0;
     std::size_t j = 0;
     for (std::size_t i = 0; i != N - 1; ++i, ++weight, ++replication) {
         accw += *weight;
-        while (j != M && static_cast<flt_type>(u01seq[j]) < accw) {
+        while (j != M && static_cast<real_type>(u01seq[j]) < accw) {
             *replication += 1;
             ++j;
         }
@@ -145,32 +145,34 @@ inline OutputIter resample_trans_rep_index(
 /// \param resid N-vector of normalized residuals
 /// \param integ N-vector of integral parts
 /// \return The number of remaining elements to be resampled
-template <typename InputIter, typename RandomIterR, typename RandomIterI>
+template <typename InputIter, typename OutputIterR, typename OutputIterI>
 inline std::size_t resample_trans_residual(std::size_t N, std::size_t M,
-    InputIter weight, RandomIterR resid, RandomIterI integ)
+    InputIter weight, OutputIterR resid, OutputIterI integ)
 {
-    using resid_type = typename std::iterator_traits<RandomIterR>::value_type;
-    using integ_type = typename std::iterator_traits<RandomIterI>::value_type;
+    using resid_type = typename std::iterator_traits<OutputIterR>::value_type;
+    using integ_type = typename std::iterator_traits<OutputIterI>::value_type;
 
     static_assert(std::is_floating_point<resid_type>::value,
-        "**resample_trans_residual** OUTPUT RESIDUAL IS NOT OF FLOATING POINT "
-        "TYPE");
+        "**resample_trans_residual** OUTPUT resid IS NOT OF FLOATING POINT "
+        "TYPES");
 
     resid_type sum_resid = 0;
     integ_type sum_integ = 0;
+    OutputIterR resid_i = resid;
+    OutputIterI integ_i = integ;
     const resid_type coeff = static_cast<resid_type>(M);
-    for (std::size_t i = 0; i != N; ++i, ++weight) {
+    for (std::size_t i = 0; i != N; ++i, ++weight, ++resid_i, ++integ_i) {
         resid_type w = coeff * static_cast<resid_type>(*weight);
         resid_type integral;
-        resid[i] = std::modf(w, &integral);
-        integ[i] = static_cast<integ_type>(integral);
-        sum_resid += resid[i];
-        sum_integ += integ[i];
+        *resid_i = std::modf(w, &integral);
+        *integ_i = static_cast<integ_type>(integral);
+        sum_resid += *resid_i;
+        sum_integ += *integ_i;
     }
 
     const resid_type mul_resid = 1 / sum_resid;
-    for (std::size_t i = 0; i != N; ++i)
-        resid[i] *= mul_resid;
+    for (std::size_t i = 0; i != N; ++i, ++resid)
+        *resid *= mul_resid;
 
     return M - static_cast<std::size_t>(sum_integ);
 }
