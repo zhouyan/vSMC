@@ -39,132 +39,111 @@ namespace vsmc
 
 /// \brief Transform uniform [0, 1] sequence into replication numbers
 /// \ingroup Resample
+///
+/// \param N Sample size before resampling
+/// \param M Sample size after resampling
+/// \param weight N-vector of normalized weights
+/// \param u01seq M ordered uniform [0, 1] random numbers
+/// \param replication N-vector of replication numbers
 template <typename IntType, typename U01SeqType>
-inline void resample_trans_u01_rep(std::size_t M, std::size_t N,
+inline void resample_trans_u01_rep(std::size_t N, std::size_t M,
     const double *weight, U01SeqType &&u01seq, IntType *replication)
 {
-    // Given N sorted U01 random variates
-    // Compute M replication numbers based on M weights
-
-    if (M == 0)
+    if (N == 0)
         return;
 
-    if (M == 1) {
-        *replication = static_cast<IntType>(N);
+    if (N == 1) {
+        *replication = static_cast<IntType>(M);
         return;
     }
 
-    std::memset(replication, 0, sizeof(IntType) * M);
-    if (N == 0)
+    std::memset(replication, 0, sizeof(IntType) * N);
+    if (M == 0)
         return;
 
     double accw = 0;
     std::size_t j = 0;
-    for (std::size_t i = 0; i != M - 1; ++i) {
+    for (std::size_t i = 0; i != N - 1; ++i) {
         accw += weight[i];
-        while (j != N && u01seq[j] <= accw) {
+        while (j != M && u01seq[j] < accw) {
             ++replication[i];
             ++j;
         }
     }
-    replication[M - 1] = static_cast<IntType>(N - j);
-}
-
-/// \brief Transform uniform [0, 1] sequence into parent indices
-/// \ingroup Resample
-template <typename IntType, typename U01SeqType>
-inline void resample_trans_u01_index(std::size_t M, std::size_t N,
-    const double *weight, U01SeqType &&u01seq, IntType *index)
-{
-    if (M == 0 || N == 0)
-        return;
-
-    std::memset(index, 0, sizeof(IntType) * N);
-    if (M == 1)
-        return;
-
-    double accw = 0;
-    std::size_t j = 0;
-    for (std::size_t i = 0; i != M - 1; ++i) {
-        accw += weight[i];
-        while (j != N && u01seq[j] <= accw)
-            index[j++] = static_cast<IntType>(i);
-    }
-    while (j != N)
-        index[j++] = static_cast<IntType>(M - 1);
+    replication[N - 1] = static_cast<IntType>(M - j);
 }
 
 /// \brief Transform replication numbers into parent indices
 /// \ingroup Resample
+///
+/// \param N Sample size before resampling
+/// \param M Sample size after resampling
+/// \param replication N-vector of replication numbers
+/// \param index M-vector of parent indices
 template <typename IntType1, typename IntType2>
 inline void resample_trans_rep_index(
-    std::size_t M, std::size_t N, const IntType1 *replication, IntType2 *index)
+    std::size_t N, std::size_t M, const IntType1 *replication, IntType2 *index)
 {
-    if (M == 0 || N == 0)
+    if (N == 0 || M == 0)
         return;
 
-    if (M != N) {
-        std::size_t dst = 0;
-        for (std::size_t src = 0; src != M; ++src) {
-            const IntType1 rep = replication[src];
-            for (IntType1 r = 0; r != rep; ++r)
-                index[dst++] = static_cast<IntType2>(src);
-        }
-        return;
-    }
-
+    const std::size_t K = std::min(N, M);
     IntType1 time = 0;
     std::size_t src = 0;
-    for (std::size_t dst = 0; dst != N; ++dst) {
-        if (replication[dst] != 0) {
+
+    auto good_src = [K, replication, &time, &src]() {
+        return src < K ? replication[src] > time + 1 : replication[src] > time;
+    };
+
+    auto find_src = [&time, &src, &good_src]() {
+        if (!good_src()) {
+            time = 0;
+            do
+                ++src;
+            while (!good_src());
+        }
+    };
+
+    for (std::size_t dst = 0; dst != K; ++dst) {
+        if (replication[dst] > 0) {
             index[dst] = static_cast<IntType2>(dst);
         } else {
-            // replication[dst] has zero child, copy from elsewhere
-            if (replication[src] < time + 2) {
-                // only 1 child left on replication[src]
-                time = 0;
-                do // move src to a position with at least 2 children
-                    ++src;
-                while (replication[src] < 2);
-            }
+            find_src();
             index[dst] = static_cast<IntType2>(src);
             ++time;
         }
     }
-}
 
-/// \brief Transform parent indices into replication numbers
-/// \ingroup Resample
-template <typename IntType1, typename IntType2>
-inline void resample_trans_index_rep(
-    std::size_t M, std::size_t N, const IntType1 *index, IntType2 *replication)
-{
-    if (M == 0 || N == 0)
-        return;
-
-    std::memset(replication, 0, sizeof(IntType2) * M);
-
-    for (std::size_t i = 0; i != N; ++i)
-        ++replication[index[i]];
+    for (std::size_t dst = K; dst < M; ++dst) {
+        find_src();
+        index[dst] = static_cast<IntType2>(src);
+        ++time;
+    }
 }
 
 /// \brief Transform normalized weights to normalized residual and integrals,
 /// and return the number of remaining elements to be resampled
 /// \ingroup Resample
+///
+/// \param N Sample size before resampling
+/// \param M Sample size after resampling
+/// \param weight N-vector of normalized weights
+/// \param resid N-vector of normalized residuals
+/// \param integ N-vector of integral parts
 template <typename IntType>
-inline std::size_t resample_trans_residual(std::size_t M, std::size_t N,
+inline std::size_t resample_trans_residual(std::size_t N, std::size_t M,
     const double *weight, double *resid, IntType *integ)
 {
     double integral = 0;
-    const double coeff = static_cast<double>(N);
-    for (std::size_t i = 0; i != M; ++i) {
+    const double coeff = static_cast<double>(M);
+    for (std::size_t i = 0; i != N; ++i) {
         resid[i] = std::modf(coeff * weight[i], &integral);
         integ[i] = static_cast<IntType>(integral);
     }
-    mul(M, 1 / std::accumulate(resid, resid + M, 0.0), resid, resid);
-    IntType R = std::accumulate(integ, integ + M, static_cast<IntType>(0));
+    mul(N, 1 / std::accumulate(resid, resid + N, 0.0), resid, resid);
+    IntType R = std::accumulate(integ, integ + N, static_cast<IntType>(0));
 
-    return N - static_cast<std::size_t>(R);
+    return M - static_cast<std::size_t>(R);
 }
 
 } // namespace vsmc

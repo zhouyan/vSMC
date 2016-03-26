@@ -43,12 +43,18 @@ namespace vsmc
 class ResampleMultinomial
 {
     public:
+    /// \brief Generate replication numbers from normalized weights
+    ///
+    /// \param N Sample size before resampling
+    /// \param M Sample size after resampling
+    /// \param weight N-vector of normalized weights
+    /// \param replication N-vector of replication numbers
     template <typename IntType, typename RNGType>
-    void operator()(std::size_t M, std::size_t N, RNGType &rng,
+    void operator()(std::size_t N, std::size_t M, RNGType &rng,
         const double *weight, IntType *replication)
     {
-        U01SequenceSorted<RNGType, double> u01seq(N, rng);
-        resample_trans_u01_rep(M, N, weight, u01seq, replication);
+        U01SequenceSorted<RNGType, double> u01seq(M, rng);
+        resample_trans_u01_rep(N, M, weight, u01seq, replication);
     }
 }; // ResampleMultinomial
 

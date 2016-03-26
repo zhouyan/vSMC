@@ -43,17 +43,23 @@ namespace vsmc
 class ResampleResidualSystematic
 {
     public:
+    /// \brief Generate replication numbers from normalized weights
+    ///
+    /// \param N Sample size before resampling
+    /// \param M Sample size after resampling
+    /// \param weight N-vector of normalized weights
+    /// \param replication N-vector of replication numbers
     template <typename IntType, typename RNGType>
-    void operator()(std::size_t M, std::size_t N, RNGType &rng,
+    void operator()(std::size_t N, std::size_t M, RNGType &rng,
         const double *weight, IntType *replication)
     {
-        Vector<IntType> integ(M);
-        Vector<double> resid(M);
+        Vector<IntType> integ(N);
+        Vector<double> resid(N);
         std::size_t R =
-            resample_trans_residual(M, N, weight, resid.data(), integ.data());
+            resample_trans_residual(N, M, weight, resid.data(), integ.data());
         U01SequenceSystematic<RNGType, double> u01seq(R, rng);
-        resample_trans_u01_rep(M, R, resid.data(), u01seq, replication);
-        add(M, replication, integ.data(), replication);
+        resample_trans_u01_rep(N, R, resid.data(), u01seq, replication);
+        add(N, replication, integ.data(), replication);
     }
 }; // ResampleResidualSystematic
 
