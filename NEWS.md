@@ -2,11 +2,18 @@
 
 ## New features
 
-* C++ OpenCL RAII classes
+* New C++ OpenCL RAII classes
 * `Sampler` gains new methods, `accept_size`, `read_accept_history`,
   `read_accept_history_list`, and `read_accept_history_matrix`.
 * New functions `pack_s`, `pack_i`, `pack_m`, `unpack_s`, `unpack_i`, and
   `unpack_m`, for pack and unpack vectors into/from contiguous storage
+* `StateMatrix` gain `resize(N, dim)` method. Resizing a `StateMatrix` object
+  preserve original values in the following sense. Let N and M be the original
+  and new sizes, let K and L be the original and new dimensions. Then
+  `resize(M, L)` preserve the min(N, M) by min(K, L) matrix at the upper left
+  corner of the original. The overloading `resize(N)` assumes the dimension
+  does not change. The method `resize_dim` also gains this new behavior of
+  preserving values.
 
 ## Changed behaviors
 
@@ -19,9 +26,9 @@
 * Most methods that takes output iterators, (including pointers that used in
   this fashion), now returns an iterator in the same way as `std::copy` etc.
 * `AlignedAllocator` is renamed to `Allocator`. The old type alias `Allocator`
-  is removed. The default alignment is `AlignmentTrait<T>::value`, which is
- `VSMC_ALIGNMENT` for scalar types and `max(alignof(T), VSMC_ALIGNMENT_MIN)`
- for others.
+  is removed. The default alignment is defined by `AlignmentTrait<T>`, which is
+  `VSMC_ALIGNMENT` for scalar types and `max(alignof(T), VSMC_ALIGNMENT_MIN)`
+  for others.
 * `Vector` is now defined to be `std::vector<T, Allocator<T>>`
 * HDF5 IO functions' `append` parameter no longer has a default argument
 * `hdf5store` is now overloaded for `Monitor`
