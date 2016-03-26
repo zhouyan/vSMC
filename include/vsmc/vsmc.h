@@ -626,6 +626,9 @@ void vsm_state_matrix_assign(
 /** \brief `vsmc::StateMatrix::dim` */
 int vsmc_state_matrix_dim(vsmc_state_matrix state_matrix);
 
+/** \brief `vsmc::StateMatrix::resize` */
+void vsmc_state_matrix_resize(vsmc_state_matrix state_matrix, int n, int dim);
+
 /** \brief `vsmc::StateMatrix::resize_dim` */
 void vsmc_state_matrix_resize_dim(vsmc_state_matrix state_matrix, int n);
 

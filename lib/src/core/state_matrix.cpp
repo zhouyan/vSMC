@@ -59,6 +59,12 @@ int vsmc_state_matrix_dim(vsmc_state_matrix state_matrix)
     return static_cast<int>(::vsmc::cast(state_matrix).dim());
 }
 
+void vsmc_state_matrix_resize(vsmc_state_matrix state_matrix, int n, int dim)
+{
+    ::vsmc::cast(state_matrix)
+        .resize(static_cast<std::size_t>(n), static_cast<std::size_t>(dim));
+}
+
 void vsmc_state_matrix_resize_dim(vsmc_state_matrix state_matrix, int n)
 {
     ::vsmc::cast(state_matrix).resize_dim(static_cast<std::size_t>(n));
