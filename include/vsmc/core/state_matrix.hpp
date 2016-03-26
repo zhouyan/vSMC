@@ -233,12 +233,6 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         return this->data()[id * this->dim() + pos];
     }
 
-    using state_matrix_base_type::data;
-
-    state_type *data(size_type id) { return row_data(id); }
-
-    const state_type *data(size_type id) const { return row_data(id); }
-
     state_type *row_data(size_type id)
     {
         return this->data() + id * this->dim();
@@ -342,12 +336,6 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     {
         return this->data()[pos * this->size() + id];
     }
-
-    using state_matrix_base_type::data;
-
-    state_type *data(size_type pos) { return col_data(pos); }
-
-    const state_type *data(size_type pos) const { return col_data(pos); }
 
     state_type *col_data(std::size_t pos)
     {
