@@ -217,6 +217,18 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     explicit StateMatrix(size_type N) : state_matrix_base_type(N) {}
 
+    void resize_dim(std::size_t dim)
+    {
+        if (dim == this->dim())
+            return;
+
+        StateMatrix<RowMajor, Dim, T> tmp(this->size());
+        tmp.resize_dim(dim);
+        for (size_type i = 0; i != this->size(); ++i)
+            std::copy_n(row_data(i), this->dim(), tmp.row_data(i));
+        *this = std::move(tmp);
+    }
+
     T &state(size_type id, std::size_t pos)
     {
         return this->data()[id * this->dim() + pos];
