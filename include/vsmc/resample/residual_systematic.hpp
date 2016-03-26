@@ -41,16 +41,18 @@ namespace vsmc
 /// \brief Residual systematic resampling
 /// \ingroup Resample
 class ResampleResidualSystematic
+    : public ResampleBase<ResampleResidualSystematic>
 {
     public:
     /// \brief Generate replication numbers from normalized weights
     ///
     /// \param N Sample size before resampling
     /// \param M Sample size after resampling
+    /// \param rng An RNG engine
     /// \param weight N-vector of normalized weights
     /// \param replication N-vector of replication numbers
     template <typename IntType, typename RNGType>
-    void operator()(std::size_t N, std::size_t M, RNGType &rng,
+    static void eval(std::size_t N, std::size_t M, RNGType &rng,
         const double *weight, IntType *replication)
     {
         Vector<IntType> integ(N);

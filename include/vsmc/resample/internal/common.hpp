@@ -49,6 +49,19 @@ class ResampleTypeTrait;
 template <ResampleScheme Scheme>
 using ResampleType = typename ResampleTypeTrait<Scheme>::type;
 
+/// \brief Base class of resampling algorithms
+template <typename Derived>
+class ResampleBase
+{
+    public:
+    template <typename IntType, typename RNGType>
+    void operator()(std::size_t N, std::size_t M, RNGType &rng,
+        const double *weight, IntType *replication)
+    {
+        static_cast<Derived *>(this)->eval(N, M, rng, weight, replication);
+    }
+}; // class ResampleBase
+
 } // namespace vsmc
 
 #endif // VSMC_RESAMPLE_INTERNAL_COMMON_HPP
