@@ -104,6 +104,14 @@
 #define VSMC_HAS_TBB_MALLOC VSMC_HAS_TBB
 #endif
 
+#ifndef VSMC_USE_OMP
+#define VSMC_USE_OMP VSMC_HAS_OMP
+#endif
+
+#ifndef VSMC_USE_TBB
+#define VSMC_USE_TBB VSMC_HAS_TBB
+#endif
+
 // Optional libraries
 
 #ifndef VSMC_HAS_HDF5

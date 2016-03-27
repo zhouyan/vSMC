@@ -39,6 +39,10 @@ related functionalities. They will be discussed in chapter~\ref{chap:Random
     Support for \hdf~1.8.6 or higher \\
     \verb|VSMC_HAS_MKL| & \verb|0|
     & Support for \mkl~11.0 or higher \\
+    \verb|VSMC_USE_OMP| & \verb|VSMC_HAS_OMP|
+    & Use OpenMP parallelization outside the \smp module \\
+    \verb|VSMC_USE_TBB| & \verb|VSMC_HAS_TBB|
+    & Use \tbb parallelization outside the \smp module \\
     \verb|VSMC_USE_MKL_CBLAS| & \verb|VSMC_HAS_MKL|
     & Use \verb|mkl_cblas.h| instead of \verb|cblas.h| \\
     \verb|VSMC_USE_MKL_LAPACKE| & \verb|VSMC_HAS_MKL|
@@ -58,7 +62,7 @@ related functionalities. They will be discussed in chapter~\ref{chap:Random
     & The default integer type of \blas routines \\
     \verb|VSMC_ALIGNMENT| & \verb|32|
     & Default alignment for scalar types \\
-    \verb|VSMC_ALIGNMENT_MIN| & \verb|16| 
+    \verb|VSMC_ALIGNMENT_MIN| & \verb|16|
     & Minimum alignment for all types \\
     \verb|VSMC_ALIGNED_MEMORY_TYPE| & Platform dependent
     & The type of \verb|AlignedMemory| \\
