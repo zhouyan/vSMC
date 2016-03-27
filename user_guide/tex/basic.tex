@@ -16,18 +16,17 @@ name space scope functions and ``method'' for class member functions.
 The library is hosted at
 GitHub\footnote{\url{https://github.com/zhouyan/vSMC}}. This is a header only
 \cpp template library. To install the library just move the contents of the
-\verb|include| directory into a proper place, e.g.,
-\verb|/usr/local/include| on Unix-alike systems. This library requires
-working \cppoo, \blas and \lapack implementations. Standard C interface headers
-for the later two (\verb|cblas.h| and \verb|lapacke.h|) are required. Intel
-Threading Building
+\verb|include| directory into a proper place, e.g., \verb|/usr/local/include|
+on Unix-alike systems. This library requires working \cppoo, \blas and \lapack
+implementations. Standard C interface headers for the later two (\verb|cblas.h|
+and \verb|lapacke.h|) are required. Intel Threading Building
 Blocks\footnote{\url{https://www.threadingbuildingblocks.org}} (\tbb), Intel
 Math Kernel Library\footnote{\url{https://software.intel.com/en-us/intel-mkl}}
 (\mkl) and \hdf\footnote{\url{http://www.hdfgroup.org}} are optional
 third-party libraries. One need to define the configuration macros
-\verb|VSMC_HAS_TBB|, \verb|VSMC_HAS_MKL| and \verb|VSMC_HAS_HDF5| to nonzero
-values before including any \vsmc headers to make their existence known to the
-library, respectively.
+\verb|VSMC_HAS_TBB|, \verb|VSMC_HAS_MKL| and \verb|VSMC_HAS_HDF5|,
+respectively, to nonzero values before including any \vsmc headers to make
+their existence known to the library.
 
 \section{Concepts}
 \label{sec:Concepts}
@@ -94,6 +93,8 @@ knowledge of the internal structure of the state. And thus it cannot perform
 the last step of a resampling algorithm, which makes copies of particles with
 larger weights and eliminate those with smaller weights.
 
+\subsubsection{The \texttt{StateMatrix} class template}
+
 For most applications, the values can be stored within an $N$ by $d$ matrix,
 where $d$ is the dimension of the state. The library provides a convenient
 class template for this situation,
@@ -113,7 +114,7 @@ following constructs an object of this class,
 where \verb|Dynamic| is just an enumerator with value zero. We can specify the
 dimension at runtime through the method \verb|s.resize_dim(d)|. Note that, if
 the template parameter \verb|Dim| is positive, then this call results in a
-runtime error.
+compile-time error.
 
 To access $X_{ij}$, the value of the state of the $i$\ith particle at the
 $j$\ith coordinate, one can use the method \verb|s.state(i,j)|. The method
@@ -129,9 +130,25 @@ or both. \verb|s.resize(N, dim)| is the most general form. Let $n$ be the
 minimum of the original and new sample sizes, and $d$ be the minimum of the
 original and new dimensions. The $n$ by $d$ matrix at the upper left corner of
 the original matrix is preserved. If the matrix is enlarged in either
-direction, new values will be inserted and default initialized. For more
-sophisticated resizing, use the \verb|copy| method, which will create a new set
-of states according to the index vector.
+direction, new values will be inserted and default initialized. Note that, if
+the template parameter \verb|Dim| is positive, then this call results in a
+compile-time error. The method call \verb|s.resize(N)| is equivalent to
+\verb|s.resize(N, s.dim())| except that it never generate a compile-time error.
+For more sophisticated resizing, use the \verb|copy| method, which will create
+a new set of states according to the index vector.
+
+\paragraph{Choice between matrix storage layout}
+
+If one needs to access the matrix frequently row by row or column by column,
+then the choice of the first template parameter \verb|Layout| is obvious. The
+\verb|copy| method, which is used by resampling algorithms, is more efficient
+with \verb|RowMajor|. The difference is more significant with large sample
+size, high dimension or both. The performance of resizing, either explicitly or
+implicitly through \verb|copy|, depends on both the matrix storage layout, the
+new sample size and dimension. If the dimension does not change, it is more
+efficient to use \verb|RowMajor|. If the sample size does not change, it is
+more efficient to use the \verb|ColMajor|. If both of them are changed, then
+the performance depends on the original and new sizes.
 
 \subsection{Weight}
 \label{sub:Weight}
@@ -171,10 +188,10 @@ containing the weights is returned by \verb|particle.weight()|. Its type is
 \verb|Particle<T>::weight_type|, whose definition depends on the type \verb|T|.
 See section~\ref{sec:Customizing member types} for more details. If the user
 does not do something special as shown in that section, then the default type
-is the \verb|Weight|. They are constructed with the same integer value $N$ when
-the above constructor is invoked.
+is \verb|Weight|. They are constructed with the same integer value $N$ when the
+above constructor is invoked.
 
-As a Monte Carlo algorithm, random number generators (\rng) will be used
+For Monte Carlo algorithm, random number generators (\rng) will be used
 frequently. The user is free to use whatever \rng mechanism as they see fit.
 However, one common issue encountered in practice is how to maintain
 independence of the \rng streams between function calls. For example, consider
@@ -192,6 +209,7 @@ hardly what the user intended. One might consider an global \rng or one as
 class member data. For example,
 \begin{cppcode}
   std::mt19937 rng;
+
   void function(double &x)
   {
       std::normal_distribution<double> rnorm(0, 1);
@@ -246,11 +264,9 @@ or stochastic algorithms. At least some particles will be preserved and
 possibly replicated. The \verb|Particle<T>| class has a few methods for
 resizing using different user input to determine the particles to be preserved.
 All these methods use \verb|T::copy| to resize the state vector. Therefore, if
-any of them need to be used, then the call \verb|copy(N, index)| need to be
+any of them need to be used, the method call \verb|copy(N, index)| need to be
 able to handle the situation where its first argument has a value other than
-its original size. After the resizing, the weights are set to be equal except
-\verb|reszie_by_range| below. All methods are discussed in the following
-paragraphs.
+its original size. After the resizing, the weights are set to be equal.
 
 \paragraph{Resize by selecting according to a user supplied index vector}
 
@@ -311,7 +327,7 @@ This is equivalent to,
   void resize_by_range(size_type N, size_type first, size_type last);
 \end{cppcode}
 This is the most destructive resizing method. Let $n = \text{last} -
-\text{first}$. If $n < N$,the particles in the range $[\text{first},
+\text{first}$. If $n < N$, the particles in the range $[\text{first},
 \text{last})$ are copied repeatedly until there are enough particles to fill
 the new system. Otherwise only the first $N$ particles are copied. If
 \verb|last| is omitted, then it is set to \verb|size()|. If \verb|first| is
@@ -327,9 +343,9 @@ size.
 It is often easier to define a function $f(X^{(i)})$ than
 $f(X^{(1)},\dots,X^{(N)})$. However, \verb|Particle<T>| only provides access to
 $\{X^{(i)}\}_{i=1}^N$ as a whole through \verb|particle.value()|. To allow
-direct access to $X^{(i)}$, the library uses a class template
-\verb|SingeParticle<T>|. An object of this class is constructed from the index
-$i$ of the particle, and a pointer to the particle system it belongs to,
+direct access to $X^{(i)}$, the library uses a class \verb|SingeParticle<T>|.
+An object of this class is constructed from the index $i$ of the particle, and
+a pointer to the particle system it belongs to,
 \begin{cppcode}
   SingleParticle<T> sp(i, &particle);
 \end{cppcode}
@@ -360,17 +376,24 @@ itself. The support of \verb|operator*| allows the range-based for loop to be
 applied on a \verb|Particle<T>| object, for example,
 \begin{cppcode}
   for (auto sp : particle) {
-      // sp is of type SingleParticle<T>
+      // operations on sp
   }
 \end{cppcode}
-The above loop does make some sense. However trying to dereferencing a
-\verb|SingleParticle<T>| object in other contexts does not make much sense.
-Recall that it is an \emph{index}, not a \emph{pointer}. The library does not
-require the user defined type \verb|T| to provide access to individual values,
-and thus it cannot dereference a \verb|SingleParticle<T>| object to obtain such
-a value. Similarly, the expression \verb|sp[n]| returns \verb|sp + n|, another
-\verb|SingleParticle<T>| object. For the same reason, \verb|operator->| is not
-supported at all.
+is equivalent to
+\begin{cppcode}
+  for (std::size_t i = 0; i != particle.size(); ++i) {
+      auto sp = particle.sp(i);
+      // operations on sp
+  }
+\end{cppcode}
+The above range-based loop does make some sense. However trying to
+dereferencing a \verb|SingleParticle<T>| object in other contexts does not make
+much sense.  Recall that it is an \emph{index}, not a \emph{pointer}. The
+library does not require the user defined type \verb|T| to provide access to
+individual values, and thus it cannot dereference a \verb|SingleParticle<T>|
+object to obtain such a value. Similarly, the expression \verb|sp[n]| returns
+\verb|sp + n|, another \verb|SingleParticle<T>| object. For the same reason,
+\verb|operator->| is not supported at all.
 
 \subsection{Sampler}
 \label{sub:Sampler}
@@ -383,7 +406,7 @@ constructs a sampler that is never resampled, while
 \begin{cppcode}
   Sampler<T> sampler(N, Multinomial);
 \end{cppcode}
-constructs a sampler that is resampled every iteration, using the multinomial
+constructs a sampler that is resampled every iteration, using the Multinomial
 algorithm. Other resampling schemes are also implemented, see
 chapter~\ref{chap:Resampling}. Last, one can also construct a sampler that is
 only resampled when $\ess < \alpha N$, where $\alpha\in[0, 1]$, by the
@@ -401,29 +424,32 @@ resampling scheme without a threshold for \ess, then it is assumed it need to
 be done at every step.
 
 The method \verb|sampler.particle()| returns a reference to the particle
-system. A sampler can be initialized by user defined object that is convertible
-to the following type,
+system. It is safe to resize a \verb|Particle<T>| object contained within a
+\verb|Sampler<T>| object. The method \verb|sampler.size()| is only a shortcut
+to \verb|sampler.particle().size()|.
+
+A sampler can be initialized by user defined function objects that are
+convertible to the following type,
 \begin{cppcode}
   using init_type = std::function<std::size_t(Particle<T> &, void *)>;
 \end{cppcode}
 For example,
 \begin{cppcode}
   auto init = [](Particle<T> &particle, void *param) {
-      // Process initialization parameter
-      // Initialize the particle system
+      // Process initialization parameter param
+      // Initialize the particle system particle
   };
 \end{cppcode}
 is a \cppoo lambda expression that can be used for this purpose. One can add it
 to a sampler by calling \verb|sampler.init(init)|. Upon calling
-\verb|sampler.initialize(param)|, the user defined function \verb|init| will be
-called and the argument \verb|param| will be passed to it.
+\verb|sampler.initialize(param)|, the user defined \verb|init| will be called
+and the argument \verb|param| will be passed to it.
 
 Similarly, after initialization, at each iteration, the particle system can be
-manipulated by user defined callable objects that is convertible to the
+manipulated by user defined function objects that are convertible to the
 following types,
 \begin{cppcode}
   using move_type = std::function<std::size_t(std::size_t, Particle<T> &)>;
-  using mcmc_type = std::function<std::size_t(std::size_t, Particle<T> &)>;
 \end{cppcode}
 Multiple moves can be added to a sampler. The call
 \verb|sampler.move(move, append)| adds a \verb|move_type| object to the
@@ -457,7 +483,7 @@ specifies the number of iterations. It is a shortcut for
 
 Inferences using a \smc algorithm usually require the calculation of the
 quantity $\sum_{i=1}^NW^{(i)}\varphi(X^{(i)})$ at each iteration for some
-function $\varphi$. One can define callable object that is convertible to the
+function $\varphi$. One can define function objects that are convertible to the
 following type,
 \begin{cppcode}
   using eval_type =
@@ -482,12 +508,13 @@ by calling,
 \begin{cppcode}
   sampler.monitor("name", d, eval);
 \end{cppcode}
-where the first argument is the name for the monitor, the second its dimension,
-and the third the evaluation function. At each iteration, after all the
-initialization, possible resampling, moves and \mcmc moves are done, the
-sampler will calculate $\sum_{i=1}^NW^{(i)}\varphi(X^{(i)})$. This method has
-two optional arguments. First is a boolean value \verb|record_only|. If it is
-\verb|true|, it is assumed that no summation is needed. For example,
+where the first argument is the name for the monitor; the second is the
+dimension to be passed to the user defined function; and the third is the
+evaluation function. At each iteration, after all the initialization, possible
+resampling, moves and \mcmc moves are done, the sampler will calculate
+$\sum_{i=1}^NW^{(i)}\varphi(X^{(i)})$. This method has two optional arguments.
+The first is a boolean value \verb|record_only|. If it is \verb|true|, it is
+assumed that no summation is needed. For example,
 \begin{cppcode*}{texcomments}
   void eval(std::size_t iter, std::size_t d, Particle<T> &particle, double *r)
   {
@@ -516,7 +543,10 @@ format, for example,
 \begin{cppcode}
   hdf5store(sampler, file_name, data_name);
 \end{cppcode}
-Details can be found in section~\ref{sec:Store objects in HDF5 format}.
+Details can be found in section~\ref{sec:Store objects in HDF5 format}. More
+sophisticated methods for retrieving monitor records are defined by the
+\verb|Monitor<T>| class. An object of this class can be retrieved by
+\verb|sampler.monitor("name")|. See the reference manual for details.
 
 \section{A simple particle filter}
 \label{sec:A simple particle filter}
@@ -541,10 +571,10 @@ state and observation equations are linear with additive noises,
 where
 \begin{equation*}
   A = \begin{pmatrix}
-    1 & \Delta & 0 & 0 \\
-    0 & 1 & 0 & 0 \\
-    0 & 0 & 1 & 0 \\
-    0 & 0 & 0 & 1
+    1 & 0 & \Delta & 0      \\
+    0 & 1 & 0      & \Delta \\
+    0 & 0 & 1      & 0      \\
+    0 & 0 & 0      & 1
   \end{pmatrix} \qquad
   B = \begin{pmatrix}
     1 & 0 & 0 & 0 \\
@@ -569,7 +599,7 @@ filter algorithm is shown in algorithm~\ref{alg:pf}.
     $\xpos^{(0,i)},\ypos^{(0,i)}\sim\calN(0,4)$ and
     $\xvel^{(0,i)},\yvel^{(0,i)}\sim\calN(0,1)$.
     \STATE\STATESKIP Weight $W_0^{(i)} \propto \exp{\ell(X_0^{(i)}|Y_0)}$ where
-    $\ell$ is the likelihood function.
+    $\ell$ is the log-likelihood function.
 
     \STATE \emph{Iteration}
     \STATE\STATESKIP Set $t\leftarrow t + 1$.
@@ -601,6 +631,7 @@ The complete program is shown in appendix~\appref{app:sub:Sequential
 \begin{cppcode}
     Sampler<PFState> sampler(N, Multinomial, 0.5);
     sampler.init(PFInit()).move(PFMove(), false).monitor("pos", 2, PFEval());
+
     sampler.initialize(const_cast<char *>("pf.data")).iterate(n - 1);
 
     std::ofstream output("pf.out");
@@ -616,41 +647,26 @@ points. At last, the output is written into a text file \verb|"pf.out"|. Below
 is a short R\footnote{\url{http://r-project.org}} script that can be used to
 process the output
 \begin{rcode}
-  library(ggplot2)
-
   pf <- read.table("pf.out", header = TRUE)
-  sink("pf.rout")
   print(pf[1:5,])
-  sink()
-
-  obs <- read.table("pf.data", header = FALSE)
-  dat <- data.frame(
-  X = c(pf[["pos.0"]], obs[,1]),
-  Y = c(pf[["pos.1"]], obs[,2]))
-  dat[["Source"]] <- rep(c("Estimate", "Observation"), each = dim(obs)[1])
-  plt <- qplot(x = X, y = Y, data = dat, geom = "path")
-  plt <- plt + aes(group = Source, color = Source, linetype = Source)
-  plt <- plt + theme_bw() + theme(legend.position = "top")
-  pdf("pf.pdf")
-  print(plt)
-  dev.off()
 \end{rcode}
-The \verb|print| statement shows the first five lines of the output,
-\begin{textcode}
+The \verb|print(pf[1:5,])| statement shows the first five lines of the output,
+\begin{Verbatim}
     Size Resampled Accept.0      ESS    pos.0   pos.1
   1 1000         1        0   2.9204 -1.21951 3.16397
   2 1000         1        0 313.6830 -1.15602 3.22770
   3 1000         1        0  33.0421 -1.26451 3.04031
   4 1000         1        0  80.1088 -1.45922 3.37625
   5 1000         1        0 382.8820 -1.47299 3.49230
-\end{textcode}
+\end{Verbatim}
 The column \verb|Size| shows the sample size at each iteration. The column
 \verb|Resampled| shows nonzero values if resampling were performed and zero
 otherwise. For each moves and \mcmc steps, an acceptance count will be
 recorded. In this particular example, it is irrelevant. Next the column
-\verb|ESS| shows the value of \ess. The last two columns show the importance
-sampling estimates of the positions recorded by the monitor named \verb|"pos"|.
-The graphical representation of the output is shown in figure~\ref{fig:pf}.
+\verb|ESS| shows the value of \ess \emph{before} resampling. The last two
+columns show the importance sampling estimates of the positions recorded by the
+monitor named \verb|"pos"|. A graphical representation of the output is shown
+in figure~\ref{fig:pf}.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{cpp/pf}
@@ -659,19 +675,13 @@ The graphical representation of the output is shown in figure~\ref{fig:pf}.
 \end{figure}
 
 Before diving into the details of the implementation of \verb|PFState|, etc.,
-we will first define a few constant and types. The state space is of dimension
+we will first define a few constants and types. The state space is of dimension
 $4$. And it is natural to use a \verb|StateMatrix| as the base class of
 \verb|PFState|,
 \begin{cppcode}
   using PFStateBase = StateMatrix<RowMajor, 4, double>;
 \end{cppcode}
-The numbers of particles and data points are also defined as constants in this
-simple example,
-\begin{cppcode}
-  static constexpr std::size_t N = 1000; // Number of particles
-  static constexpr std::size_t n = 100;  // Number of data points
-\end{cppcode}
-Last, we define the following constants as the indices of each state component.
+We define the following constants as the indices of each state component.
 \begin{cppcode}
   static constexpr std::size_t PosX = 0;
   static constexpr std::size_t PosY = 1;
@@ -741,7 +751,7 @@ The initialization step is implemented as below,
           sp.state(PosY) = norm_pos(sp.rng());
           sp.state(VelX) = norm_vel(sp.rng());
           sp.state(VelY) = norm_vel(sp.rng());
-          w_[sp.id()] = sp.particle().value().log_likelihood(0, sp.id());
+          weight_[sp.id()] = sp.particle().value().log_likelihood(0, sp.id());
 
           return 0;
       }
@@ -759,13 +769,13 @@ An object of this class is convertible to \verb|Sampler<PFState>::init_type|.
 In the main method, \verb|operator()|, \verb|eval_param| is called first to
 initialize the data. Then \verb|eval_pre| is called to allocated any resource
 this class need before calling any \verb|eval_sp|. In this case, it allocate
-the vector \verb|w_| for storing weights computed later. Next, the main loop
-initializes each state component with the respective Gaussian distribution,
-computes the log-likelihood and store them in the vector allocated in the last
-step. This is done by calling the \verb|eval_sp| method. After all particles
-have been initialized, we set the weights of the system in \verb|eval_post|.
-Later in section~\ref{sec:Symmetric multiprocessing} it will become clear why
-we structured the implementation this way.
+the vector \verb|weight_| for storing weights computed later. Next, the main
+loop initializes each state component with the respective Gaussian
+distribution, computes the log-likelihood and store them in the vector
+allocated in the last step. This is done by calling the \verb|eval_sp| method.
+After all particles have been initialized, we set the weights of the system in
+\verb|eval_post|. Later in section~\ref{sec:Symmetric multiprocessing}, it will
+become clear why we structured the implementation this way.
 
 \subsubsection{Move: \texttt{PFMove}}
 

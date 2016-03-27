@@ -69,27 +69,17 @@ class PFInit
 
     void eval_pre(vsmc::Particle<PFState> &particle)
     {
-        auto &rng = particle.rng();
-        const std::size_t size = particle.size();
-        const double sd_pos = 2;
-        const double sd_vel = 1;
-        pos_x_.resize(size);
-        pos_y_.resize(size);
-        vel_x_.resize(size);
-        vel_y_.resize(size);
-        weight_.resize(size);
-        vsmc::normal_distribution(rng, size, pos_x_.data(), 0.0, sd_pos);
-        vsmc::normal_distribution(rng, size, pos_y_.data(), 0.0, sd_pos);
-        vsmc::normal_distribution(rng, size, vel_x_.data(), 0.0, sd_vel);
-        vsmc::normal_distribution(rng, size, vel_y_.data(), 0.0, sd_vel);
+        weight_.resize(particle.size());
     }
 
     std::size_t eval_sp(vsmc::SingleParticle<PFState> sp)
     {
-        sp.state(PosX) = pos_x_[sp.id()];
-        sp.state(PosY) = pos_y_[sp.id()];
-        sp.state(VelX) = vel_x_[sp.id()];
-        sp.state(VelY) = vel_y_[sp.id()];
+        vsmc::NormalDistribution<double> norm_pos(0, 2);
+        vsmc::NormalDistribution<double> norm_vel(0, 1);
+        sp.state(PosX) = norm_pos(sp.rng());
+        sp.state(PosY) = norm_pos(sp.rng());
+        sp.state(VelX) = norm_vel(sp.rng());
+        sp.state(VelY) = norm_vel(sp.rng());
         weight_[sp.id()] = sp.particle().value().log_likelihood(0, sp.id());
 
         return 0;
@@ -101,10 +91,6 @@ class PFInit
     }
 
     private:
-    vsmc::Vector<double> pos_x_;
-    vsmc::Vector<double> pos_y_;
-    vsmc::Vector<double> vel_x_;
-    vsmc::Vector<double> vel_y_;
     vsmc::Vector<double> weight_;
 };
 

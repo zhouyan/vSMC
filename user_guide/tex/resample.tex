@@ -190,7 +190,8 @@ class ResampleIndex;
 Its usage is demonstrated by the following example (assuming
 $X_t^{(i)}\in\Real$, and $\phi_t$ is the same as $\varphi_t$),
 \begin{cppcode*}{texcomments}
-  using StateBase = StateMatrix<vsmc::ColMajor, vsmc::Dynamic, double>;
+  using StateBase = StateMatrix<ColMajor, Dynamic, double>;
+
   class State : StateBase
   {
       public:
@@ -232,7 +233,7 @@ $X_t^{(i)}\in\Real$, and $\phi_t$ is the same as $\varphi_t$),
       ResampleIndex index_;
   };
 
-  Sampler<State> sampler(N, vsmc::Multinomial); // Always resampling
+  Sampler<State> sampler(N, Multinomial); // Always resampling
   sampler.particle.value().resize_dim(n + 1);
   // configure the sampler
   sampler.initialize(param);
