@@ -69,12 +69,25 @@ class Weight
     public:
     using size_type = std::size_t;
 
-    explicit Weight(size_type N) : ess_(0), data_(N) {}
+    explicit Weight(size_type N = 0) : ess_(0), data_(N) {}
 
     /// \brief Size of this Weight object
     size_type size() const { return data_.size(); }
 
     size_type resample_size() const { return size(); }
+
+    /// \brief Resize the Weight object
+    ///
+    /// \details
+    /// After resizing, if the size changed, equal weights are set
+    void resize(size_type N)
+    {
+        if (N == size)
+            return;
+
+        data_.resize(N);
+        set_equal();
+    }
 
     /// \brief Return the ESS of the particle system
     double ess() const { return ess_; }
