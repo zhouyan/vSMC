@@ -82,7 +82,7 @@ class Weight
     /// After resizing, if the size changed, equal weights are set
     void resize(size_type N)
     {
-        if (N == size)
+        if (N == size())
             return;
 
         data_.resize(N);
