@@ -40,10 +40,6 @@
         "**StateMatrix::resize** CHANGE DIMENSION OF A FIXED DIMENSION "      \
         "OBJECT")
 
-#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH              \
-    VSMC_RUNTIME_ASSERT((N == static_cast<size_type>(this->size())),          \
-        "**StateMatrix::copy** SIZE MISMATCH")
-
 #define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(psize, dim)         \
     VSMC_RUNTIME_ASSERT((psize >= dim),                                       \
         "**StateMatrix::state_unpack** INPUT PACK SIZE TOO SMALL")
@@ -202,7 +198,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     }
 
     protected:
-    explicit StateMatrixBase(size_type N) : size_(N), data_(N * Dim) {}
+    explicit StateMatrixBase(size_type N = 0) : size_(N), data_(N * Dim) {}
 
     StateMatrixBase(const StateMatrixBase<Layout, Dim, T> &) = default;
 
@@ -242,7 +238,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     using state_type = typename state_matrix_base_type::state_type;
     using state_pack_type = typename state_matrix_base_type::state_pack_type;
 
-    explicit StateMatrix(size_type N) : state_matrix_base_type(N) {}
+    explicit StateMatrix(size_type N = 0) : state_matrix_base_type(N) {}
 
     using state_matrix_base_type::resize;
 
@@ -288,13 +284,19 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         return this->data() + id * this->dim();
     }
 
-    template <typename IntType>
-    void copy(size_type N, const IntType *index)
+    template <typename InputIter>
+    InputIter copy(size_type N, InputIter index)
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH;
+        if (N > this->size())
+            this->resize(N);
 
-        for (size_type dst = 0; dst != N; ++dst)
-            copy_particle(static_cast<size_type>(index[dst]), dst);
+        for (size_type dst = 0; dst != N; ++dst, ++index)
+            copy_particle(static_cast<size_type>(*index), dst);
+
+        if (N < this->size())
+            this->resize(N);
+
+        return index;
     }
 
     void copy_particle(size_type src, size_type dst)
@@ -370,7 +372,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     using state_type = typename state_matrix_base_type::state_type;
     using state_pack_type = typename state_matrix_base_type::state_pack_type;
 
-    explicit StateMatrix(size_type N) : state_matrix_base_type(N) {}
+    explicit StateMatrix(size_type N = 0) : state_matrix_base_type(N) {}
 
     using state_matrix_base_type::resize;
 
@@ -416,14 +418,29 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         return this->data() + pos * this->size();
     }
 
-    template <typename IntType>
-    void copy(size_type N, const IntType *index)
+    template <typename InputIter>
+    InputIter copy(size_type N, InputIter index)
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_COPY_SIZE_MISMATCH;
+        InputIter idx = index;
 
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            for (size_type dst = 0; dst != N; ++dst)
-                state(dst, d) = state(static_cast<size_type>(index[dst]), d);
+        if (N == this->size()) {
+            for (std::size_t d = 0; d != this->dim(); ++d) {
+                idx = index;
+                for (size_type dst = 0; dst != N; ++dst, ++idx)
+                    state(dst, d) = state(static_cast<size_type>(*idx), d);
+            }
+        } else {
+            StateMatrix<ColMajor, Dim, T> tmp;
+            tmp.resize(N, this->dim());
+            for (std::size_t d = 0; d != this->dim(); ++d) {
+                idx = index;
+                for (size_type dst = 0; dst != N; ++dst, ++idx)
+                    tmp.state(dst, d) = state(static_cast<size_type>(*idx), d);
+            }
+            *this = std::move(tmp);
+        }
+
+        return idx;
     }
 
     void copy_particle(size_type src, size_type dst)

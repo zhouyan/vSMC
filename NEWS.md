@@ -14,6 +14,8 @@
   corner of the original. The overloading `resize(N)` assumes the dimension
   does not change. The method `resize_dim` also gains this new behavior of
   preserving values.
+* `StateMatrix` can now handle the situation where the length of the input to
+  `copy`, `index` is not the same as its own size.
 
 ## Changed behaviors
 
