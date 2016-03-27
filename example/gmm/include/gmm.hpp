@@ -41,9 +41,6 @@
 #include <vsmc/utility/stop_watch.hpp>
 
 // clang-format off
-template <typename T>
-using StateSMP = vsmc::State@SMP@<T>;
-
 template <typename T, typename Derived>
 using InitializeSMP = vsmc::Initialize@SMP@<T, Derived>;
 
@@ -222,7 +219,7 @@ class gmm_param
     vsmc::Vector<double> log_lambda_;
 };
 
-using StateBase = StateSMP<vsmc::StateMatrix<vsmc::RowMajor, 1, gmm_param>>;
+using StateBase = vsmc::StateMatrix<vsmc::RowMajor, 1, gmm_param>;
 
 class gmm_state : public StateBase
 {

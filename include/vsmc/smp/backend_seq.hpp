@@ -39,11 +39,6 @@ namespace vsmc
 
 VSMC_DEFINE_SMP_BACKEND_FORWARD(SEQ)
 
-/// \brief Particle::value_type subtype
-/// \ingroup SEQ
-template <typename StateBase>
-using StateSEQ = StateBase;
-
 /// \brief Sampler<T>::init_type subtype
 /// \ingroup SEQ
 template <typename T, typename Derived>

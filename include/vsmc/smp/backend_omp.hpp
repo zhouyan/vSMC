@@ -40,25 +40,6 @@ namespace vsmc
 
 VSMC_DEFINE_SMP_BACKEND_FORWARD(OMP)
 
-/// \brief Particle::value_type subtype using OpenMP
-/// \ingroup OMP
-template <typename StateBase>
-class StateOMP : public StateBase
-{
-    public:
-    using size_type = SizeType<StateBase>;
-
-    explicit StateOMP(size_type N) : StateBase(N) {}
-
-    template <typename IntType>
-    void copy(size_type N, const IntType *src_idx)
-    {
-#pragma omp parallel for default(shared)
-        for (size_type i = 0; i < N; ++i)
-            this->copy_particle(static_cast<size_type>(src_idx[i]), i);
-    }
-}; // class StateOMP
-
 /// \brief Sampler<T>::init_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>

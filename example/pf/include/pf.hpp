@@ -43,9 +43,6 @@
 #endif
 
 // clang-format off
-template <typename T>
-using StateSMP = vsmc::State@SMP@<T>;
-
 template <typename T, typename Derived>
 using InitializeSMP = vsmc::Initialize@SMP@<T, Derived>;
 
@@ -65,7 +62,7 @@ static const std::size_t VelY = 3;
 static const std::size_t LogL = 4;
 
 template <vsmc::MatrixLayout Layout>
-using StateBase = StateSMP<vsmc::StateMatrix<Layout, 5, double>>;
+using StateBase = vsmc::StateMatrix<Layout, 5, double>;
 
 template <vsmc::MatrixLayout Layout>
 class pf_state : public StateBase<Layout>
