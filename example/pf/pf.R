@@ -35,8 +35,7 @@ suppressPackageStartupMessages(library(rhdf5))
 theme_set(theme_bw())
 
 smp <- c("seq", "omp", "tbb")
-exe <- character()
-exe <- c(exe, paste("pf", smp, sep = "_"))
+exe <- paste("pf", smp, sep = "_")
 res <- c(
     "Multinomial",
     "Stratified",
@@ -47,64 +46,56 @@ res <- c(
 runs <- expand.grid(exe, res)
 runs <- paste(runs$Var1, runs$Var2, sep = ".")
 
+src.level <- c("Estimates", "Observation")
 obs <- read.table("pf.data", header = FALSE)
-dat.list <- data.frame(
+dat <- data.frame(
     Position.X = obs[,1], Position.Y = obs[,2],
     Group = rep("Observation", dim(obs)[1]),
     Source = rep("Observation", dim(obs)[1]))
 plt.list <- list()
 
-pf <- function (suffix, run, rowcol, est)
+pf <- function (filename, est)
 {
-    name <- paste(run, rowcol, ".", suffix, sep = "")
     dat <- data.frame(
         Position.X = c(obs[,1], est$pos.x),
         Position.Y = c(obs[,2], est$pos.y),
         Source = c(
             rep("Observation", dim(obs)[1]),
             rep("Estimates",   dim(est)[1])))
+    dat$Source <- factor(dat$Source, ordered = TRUE, levels = src.level)
     plt <- qplot(x = Position.X, y = Position.Y, data = dat,
         group = Source, color = Source, linetype = Source, geom = "path")
-    plt <- plt + ggtitle(name)
-    .GlobalEnv$plt.list[[name]] <- plt
+    plt <- plt + ggtitle(filename)
 
     dat <- data.frame(
         Position.X = est$pos.x, Position.Y = est$pos.y,
-        Group = rep(name, dim(est)[1]),
+        Group = rep(filename, dim(est)[1]),
         Source = rep("Estimates", dim(est)[1]))
-    .GlobalEnv$dat.list <- rbind(.GlobalEnv$dat.list, dat)
+
+    list(plt = plt, dat = dat)
 }
 
-for (rowcol in c(".row", ".col", "")) {
+for (rowcol in c(".row", ".col")) {
     for (run in runs) {
-        pf.txt    <- paste(run, rowcol,        ".txt", sep = "")
-        pf.r0.txt <- paste(run, rowcol, ".r0", ".txt", sep = "")
-        pf.r1.txt <- paste(run, rowcol, ".r1", ".txt", sep = "")
+        pf.txt <- paste0(run, rowcol, ".txt")
         if (file.exists(pf.txt)) {
-            pf("txt", run, rowcol,
-                read.table(pf.txt, header = TRUE))
-        } else if (file.exists(pf.r0.txt) && file.exists(pf.r1.txt)) {
-            pf("txt", run, rowcol,
-                read.table(pf.r0.txt, header = TRUE) +
-                read.table(pf.r1.txt, header = TRUE))
+            tmp <- pf(pf.txt, read.table(pf.txt, header = TRUE))
+            plt.list[[pf.txt]] <- tmp$plt
+            dat <- rbind(dat, tmp$dat)
         }
-
-        pf.h5     <- paste(run, rowcol,        ".h5",  sep = "")
-        pf.r0.h5  <- paste(run, rowcol, ".r0", ".h5",  sep = "")
-        pf.r1.h5  <- paste(run, rowcol, ".r1", ".h5",  sep = "")
+        pf.h5 <- paste0(run, rowcol, ".h5")
         if (file.exists(pf.h5)) {
-            pf("h5", run, rowcol,
-                as.data.frame(suppressWarnings(h5read(pf.h5, "/Sampler"))))
-        } else if (file.exists(pf.r0.h5) && file.exists(pf.r1.h5)) {
-            pf("h5", run, rowcol,
-                as.data.frame(suppressWarnings(h5read(pf.r0.h5, "/Sampler"))) +
-                as.data.frame(suppressWarnings(h5read(pf.r1.h5, "/Sampler"))))
+            tmp <- pf(pf.h5, as.data.frame(h5read(pf.h5, "/Sampler")))
+            plt.list[[pf.h5]] <- tmp$plt
+            dat <- rbind(dat, tmp$dat)
         }
     }
 }
 
-plt <- qplot(x = Position.X, y = Position.Y, data = dat.list,
+dat$Source <- factor(dat$Source, ordered = TRUE, levels = src.level)
+plt <- qplot(x = Position.X, y = Position.Y, data = dat,
     group = Group, color = Source, linetype= Source, geom = "path")
+plt <- plt + ggtitle("pf")
 
 pdf("pf.pdf", width = 14.4, height = 9)
 print(plt)
