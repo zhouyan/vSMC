@@ -287,6 +287,11 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     template <typename InputIter>
     InputIter copy(size_type N, InputIter index)
     {
+        if (this->size() == 0) {
+            this->resize(N);
+            return index;
+        }
+
         if (N > this->size())
             this->resize(N);
 
@@ -421,6 +426,11 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     template <typename InputIter>
     InputIter copy(size_type N, InputIter index)
     {
+        if (this->size() == 0) {
+            this->resize(N);
+            return index;
+        }
+
         InputIter idx = index;
 
         if (N == this->size()) {
