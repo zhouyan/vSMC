@@ -1,2 +1,179 @@
 \chapter{Interfacing with C and other languages}
 \label{app:chap:Interfacing with C and other languages}
+
+The library provides a set of C functions, declared in the header
+\verb|vsmc.h|, and a companion runtime library. These functions expose a subset
+of the functionality of the \cpp template library. The main purpose is for
+easier interfacing with other languages, instead of implementing algorithms in
+C itself. Of course, the later is possible and two complete \cnn
+implementations of the simple particle filter in section~\ref{sec:A simple
+  particle filter} are shown in appendices~\appref{app:sub:Sequential
+  implementation in C} and~\appref{app:sub:Parallelized implementation using
+  TBB in C}. See the reference manual for complete list of the \api. In this
+appendix, we introduce the conventions used in the \api.
+
+\section{Argument types}
+\label{sec:Argument types}
+
+For all C interfaces, \verb|int| is always used for integer types, regardless
+of the \cpp interfaces. And \verb|double| is always used for floating points.
+For example, the following method of \verb|Seed|,
+\begin{cppcode}
+  unsigned get();
+\end{cppcode}
+is exposed to C as
+\begin{ccode}
+  int vsmc_seed_get(void);
+\end{ccode}
+And \rng methods where \verb|unsigned| was expected in \cpp, an \verb|int| is
+expected in C. If a function is a template, then only the specialization for
+\verb|double| is exposed to C. In some cases, specializations for \verb|int|
+and \verb|unsigned char| are also exposed. The use of \verb|int| as the
+universal integer type is for compatibility consideration. Again, the main
+purpose is for interfacing with other languages instead of implementing
+algorithms in C itself. For example, Fortran does not have native unsigned
+integer types. This is the main limitation of the C \api. If integer values,
+such as sample size, larger than the largest value can be represented by
+\verb|int| is needed. One can write their own C wrapper. Note that, when an
+unsigned integer type, such as \verb|std::size_t| is expected in the \cpp
+interface, and the input for the C function was a negative value, it is
+silently converted to a positive value through \verb|static_cast|. Therefore
+\verb|-1| will be treated as a very big number instead of emit an error. The
+user is responsible to check input argument ranges. This limitation is not so
+significant in practice. The types \verb|int| and \verb|double| are as portable
+as one would get for interfacing with other languages. For instance, R's core
+storage modes for atomic numeric vectors are either \verb|int| or
+\verb|double|. Similarly, wherever an iteration is expected by the \cpp
+interface, pointers to \verb|int| and \verb|double| will expected by the C
+interface, with possible \verb|const| qualifiers. Enumerators are also defined
+with the same values as in \cpp, but with a \verb|vSMC| prefix. For example,
+\verb|Multinomial| becomes \verb|vSMCMultinomial| and the type
+\verb|ResampleScheme| becomes \verb|vSMCResampleScheme|. The other two
+enumerator types are \verb|vSMCMatrixLayout| and \verb|vSMCMonitorStage|.
+Last, when a function object is expected in the \cpp interface, a function
+pointer will be expected in the C interface. For example,
+\verb|Sampler::move_type| is translated to,
+\begin{ccode}
+  typedef int (*vsmc_sampler_move_type)(int, vsmc_particle);
+\end{ccode}
+
+\section{Classes and methods}
+\label{sec:Classes and methods}
+
+A few core classes are accessible from this \api. They are listed in
+table~\appref{app:tab:capi types}. Table~\appref{app:tab:capi} lists additional
+features of the library exposed to the C \api apart from the core classes
+listed above. With the exception of
+\begin{ccode}
+  typedef {
+      double *state;
+      int id;
+  } vsmc_single_particle;
+\end{ccode}
+all the C types in the table are only wrappers around a pointer. For example,
+\begin{ccode}
+  typedef {
+      void *ptr;
+  } vsmc_sampler;
+\end{ccode}
+The pointer points to the address of a \cpp object of the corresponding type.
+
+Each C type objects can be created by an allocation function and destroyed by a
+deallocation function. For example,
+\begin{ccode}
+  vsmc_sampler sampler = vsmc_sampler_new(n, dim, vSMCMultinomial, 0.5);
+\end{ccode}
+corresponds to the \cpp calls,
+\begin{cppcode}
+  Sampler<T> sampler(n, Multinomial, 0.5);
+  sampler.particle.value().resize_dim(dim);
+\end{cppcode}
+The memory can later be freed by
+\begin{ccode}
+  vsmc_sampler_delete(sampler);
+  sampler.ptr = NULL;
+\end{ccode}
+Most non-static methods can be accesses through C. The corresponding functions
+names takes the form
+\texttt{\textcolor{MRed}{\textit{class}}\_\textcolor{MRed}{\textit{method}}},
+where \texttt{\textcolor{MRed}{\textit{class}}} is a type name, for example
+\verb|vsmc_sampler|; and \texttt{\textcolor{MRed}{\textit{method}}} is the name
+of the method. The first argument will be a
+\texttt{\textcolor{MRed}{\textit{class}}} type object, and the following
+arguments are the same as in \cpp. When there are multiple overloading of a
+method, the most general form is provided. For example,
+\begin{cppcode}
+  StateMatrix<RowMajor, Dynamic, double> s;
+  s.resize(n);
+  s.resize(n, dim);
+\end{cppcode}
+are two overloading of the \verb|resize| method. In C, only
+\begin{ccode}
+  vsmc_state_matrix s = vsmc_state_matrix_new(n, dim);
+  vsmc_state_matrix_resize(s, n, dim);
+\end{ccode}
+are accessible. In a few cases, when a getter and a setter are overloaded,
+\verb|get| and \verb|set| are inserted into the method name. For example,
+\begin{cppcode}
+  double thres = sampler.threshold();
+  sampler.threshold(thres);
+\end{cppcode}
+are translated to C as
+\begin{ccode}
+  double thres = vsmc_sampler_get_threshold(sampler);
+  vsmc_sampler_set_threshold(sampler, thres);
+\end{ccode}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{lX}
+    \toprule
+    \cpp types & C types \\
+    \midrule
+    \verb|StateMatrix<RowMajor, Dynamic, double>| & \verb|vsmc_state_matrix| \\
+    \verb|Weight|            & \verb|vsmc_weight|          \\
+    \verb|Particle<T>|       & \verb|vsmc_particle|        \\
+    \verb|SingleParticle<T>| & \verb|vsmc_single_particle| \\
+    \verb|Sampler<T>|        & \verb|vsmc_sampler|         \\
+    \verb|Monitor<T>|        & \verb|vsmc_monitor|         \\
+    \verb|RNG|               & \verb|vsmc_rng|             \\
+    \bottomrule
+  \end{tabularx}
+  \caption{C types . Note that, all template parameter \texttt{T} are of type
+    \texttt{StateMatrix<RowMajor, Dynamic, double>}}
+  \label{app:tab:capi types}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{lX}
+    \toprule
+    Feature & Notes \\
+    \midrule
+    \smp backends
+    & Section~\ref{sec:Symmetric multiprocessing} \\
+    Resamling algorithms
+    & Section~\ref{sec:Builtin algorithms} \\
+    Ordered uniform random numbers
+    & Section~\ref{sec:User defined algorithms} \\
+    Seeding
+    & Section~\ref{sec:Seeding} \\
+    Vectorized random number generating
+    & Section~\ref{sec:Distributions} \\
+    Aligned memory allocation
+    & Section~\ref{sec:Aligned memory allocation} \\
+    Covariance matrix
+    & Section~\ref{sec:Sample covariance} \\
+    Process program command line options
+    & Section~\ref{sec:Process command line program options} \\
+    Display program progress
+    & Section~\ref{sec:Display program progress} \\
+    Stop watch
+    & Section~\ref{sec:Stop watch} \\
+    Registering \cppoo{} \rng as \mkl{} \brng
+    & Reference manual \\
+    Random walk
+    & Reference manual \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Features accessible from C}
+  \label{app:tab:capi}
+\end{table}
