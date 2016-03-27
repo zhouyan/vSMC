@@ -100,10 +100,6 @@
 #define VSMC_HAS_TBB 0
 #endif
 
-#ifndef VSMC_USE_TBB
-#define VSMC_USE_TBB VSMC_HAS_TBB
-#endif
-
 #ifndef VSMC_HAS_TBB_MALLOC
 #define VSMC_HAS_TBB_MALLOC VSMC_HAS_TBB
 #endif

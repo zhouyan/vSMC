@@ -181,15 +181,15 @@ class Particle
         if (resampled) {
             const double *const rwptr = weight_.resample_data();
             if (rwptr != nullptr) {
-#if VSMC_USE_TBB
+#if VSMC_HAS_TBB
                 Vector<size_type> &rep = rep_.local();
                 Vector<size_type> &idx = idx_.local();
                 rep.resize(N);
                 idx.resize(N);
-#else  // VSMC_USE_TBB
+#else  // VSMC_HAS_TBB
                 Vector<size_type> rep(N);
                 Vector<size_type> idx(N);
-#endif // VSMC_USE_TBB
+#endif // VSMC_HAS_TBB
                 op(N, N, rng_, rwptr, rep.data());
                 resample_trans_rep_index(N, N, rep.data(), idx.data());
                 value_.copy(N, idx.data());
@@ -208,10 +208,10 @@ class Particle
     weight_type weight_;
     rng_set_type rng_set_;
     rng_type rng_;
-#if VSMC_USE_TBB
+#if VSMC_HAS_TBB
     ::tbb::combinable<Vector<size_type>> rep_;
     ::tbb::combinable<Vector<size_type>> idx_;
-#endif
+#endif // VSMC_HAS_TBB
 }; // class Particle
 
 } // namespace vsmc
