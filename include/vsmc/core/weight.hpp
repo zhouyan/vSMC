@@ -71,22 +71,27 @@ class Weight
 
     explicit Weight(size_type N) : ess_(0), data_(N) {}
 
+    /// \brief Size of this Weight object
     size_type size() const { return data_.size(); }
 
     size_type resample_size() const { return size(); }
 
+    /// \brief Return the ESS of the particle system
     double ess() const { return ess_; }
 
+    /// \brief Pointer to data of the normalized weight
     const double *data() const { return data_.data(); }
 
     const double *resample_data() const { return data_.data(); }
 
+    /// \brief Read all normalized weights to an output iterator
     template <typename OutputIter>
     OutputIter read_weight(OutputIter first) const
     {
         return std::copy(data_.begin(), data_.end(), first);
     }
 
+    /// \brief Read all normalized weights to a random access iterator
     template <typename RandomIter>
     RandomIter read_weight(RandomIter first, int stride) const
     {
@@ -102,12 +107,14 @@ class Weight
         return read_weight(first);
     }
 
+    /// \brief Set \f$W_i = 1/N\f$
     void set_equal()
     {
         std::fill(data_.begin(), data_.end(), 1.0 / resample_size());
         post_set();
     }
 
+    /// \brief Set \f$W_i \propto w_i\f$
     template <typename InputIter>
     void set(InputIter first)
     {
@@ -115,6 +122,7 @@ class Weight
         post_set();
     }
 
+    /// \brief Set \f$W_i \propto w_i\f$
     template <typename RandomIter>
     void set(RandomIter first, int stride)
     {
@@ -128,6 +136,7 @@ class Weight
         post_set();
     }
 
+    /// \brief Set \f$W_i \propto W_i w_i\f$
     template <typename InputIter>
     void mul(InputIter first)
     {
@@ -136,14 +145,17 @@ class Weight
         post_set();
     }
 
+    /// \brief Set \f$W_i \propto W_i w_i\f$
     void mul(const double *first)
     {
         ::vsmc::mul(size(), first, data_.data(), data_.data());
         post_set();
     }
 
+    /// \brief Set \f$W_i \propto W_i w_i\f$
     void mul(double *first) { mul(const_cast<const double *>(first)); }
 
+    /// \brief Set \f$W_i \propto W_i w_i\f$
     template <typename RandomIter>
     void mul(RandomIter first, int stride)
     {
@@ -157,6 +169,7 @@ class Weight
         post_set();
     }
 
+    /// \brief Set \f$\log W_i = v_i + \mathrm{const.}\f$
     template <typename InputIter>
     void set_log(InputIter first)
     {
@@ -164,6 +177,7 @@ class Weight
         post_set_log();
     }
 
+    /// \brief Set \f$\log W_i = v_i + \mathrm{const.}\f$
     template <typename RandomIter>
     void set_log(RandomIter first, int stride)
     {
@@ -177,6 +191,7 @@ class Weight
         post_set_log();
     }
 
+    /// \brief Set \f$\log W_i = \log W_i + v_i + \mathrm{const.}\f$
     template <typename InputIter>
     void add_log(InputIter first)
     {
@@ -186,6 +201,7 @@ class Weight
         post_set_log();
     }
 
+    /// \brief Set \f$\log W_i = \log W_i + v_i + \mathrm{const.}\f$
     void add_log(const double *first)
     {
         log(size(), data_.data(), data_.data());
@@ -193,8 +209,10 @@ class Weight
         post_set_log();
     }
 
+    /// \brief Set \f$\log W_i = \log W_i + v_i + \mathrm{const.}\f$
     void add_log(double *first) { add_log(const_cast<const double *>(first)); }
 
+    /// \brief Set \f$\log W_i = \log W_i + v_i + \mathrm{const.}\f$
     template <typename RandomIter>
     void add_log(RandomIter first, int stride)
     {
@@ -209,14 +227,13 @@ class Weight
         post_set_log();
     }
 
+    /// \brief Draw integer index in the range \f$[0, N)\f$ according to the
+    /// weights
     template <typename URNG>
     size_type draw(URNG &eng) const
     {
         return draw_(eng, data_.begin(), data_.end(), true);
     }
-
-    protected:
-    double *mutable_data() { return data_.data(); }
 
     private:
     double ess_;
