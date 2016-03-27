@@ -254,7 +254,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
             return;
         }
 
-        StateMatrix<RowMajor, Dim, T> tmp(0);
+        StateMatrix<RowMajor, Dim, T> tmp;
         tmp.resize_data(N, dim);
         const size_type K = std::min(N, this->size());
         const std::size_t D = std::min(dim, this->dim());
@@ -284,22 +284,21 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         return this->data() + id * this->dim();
     }
 
-    template <typename InputIter>
-    InputIter copy(size_type N, InputIter index)
+    template <typename IntType, typename InputIter>
+    InputIter copy(IntType N, InputIter index)
     {
-        if (this->size() == 0) {
-            this->resize(N);
+        size_type n = static_cast<size_type>(N);
+        if (this->size() == 0 || internal::is_nullptr(index)) {
+            this->resize(n);
             return index;
         }
 
-        if (N > this->size())
-            this->resize(N);
-
-        for (size_type dst = 0; dst != N; ++dst, ++index)
+        if (n > this->size())
+            this->resize(n);
+        for (size_type dst = 0; dst != n; ++dst, ++index)
             copy_particle(static_cast<size_type>(*index), dst);
-
-        if (N < this->size())
-            this->resize(N);
+        if (n < this->size())
+            this->resize(n);
 
         return index;
     }
@@ -393,7 +392,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
             return;
         }
 
-        StateMatrix<ColMajor, Dim, T> tmp(0);
+        StateMatrix<ColMajor, Dim, T> tmp;
         tmp.resize_data(N, dim);
         const size_type K = std::min(N, this->size());
         const std::size_t D = std::min(dim, this->dim());
@@ -426,25 +425,25 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     template <typename InputIter>
     InputIter copy(size_type N, InputIter index)
     {
-        if (this->size() == 0) {
+        size_type n = static_cast<size_type>(N);
+        if (this->size() == 0 || internal::is_nullptr(index)) {
             this->resize(N);
             return index;
         }
 
         InputIter idx = index;
-
-        if (N == this->size()) {
+        if (n == this->size()) {
             for (std::size_t d = 0; d != this->dim(); ++d) {
                 idx = index;
-                for (size_type dst = 0; dst != N; ++dst, ++idx)
+                for (size_type dst = 0; dst != n; ++dst, ++idx)
                     state(dst, d) = state(static_cast<size_type>(*idx), d);
             }
         } else {
             StateMatrix<ColMajor, Dim, T> tmp;
-            tmp.resize(N, this->dim());
+            tmp.resize(n, this->dim());
             for (std::size_t d = 0; d != this->dim(); ++d) {
                 idx = index;
-                for (size_type dst = 0; dst != N; ++dst, ++idx)
+                for (size_type dst = 0; dst != n; ++dst, ++idx)
                     tmp.state(dst, d) = state(static_cast<size_type>(*idx), d);
             }
             *this = std::move(tmp);
