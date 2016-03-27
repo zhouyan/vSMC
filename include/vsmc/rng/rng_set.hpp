@@ -135,12 +135,14 @@ class RNGSetTBB
     using size_type = std::size_t;
 
     explicit RNGSetTBB(size_type N = 0)
-        : size_(N), rng_([]() {
+        : size_(static_cast<size_type>(Seed::instance().get_scalar()))
+        , rng_([]() {
             rng_type rng;
             Seed::instance().seed_rng(rng);
             return rng;
         })
     {
+        size_ = N;
         seed();
     }
 
