@@ -122,7 +122,7 @@ double *vsmc_state_matrix_read_state_matrix(
 void vsmc_state_matrix_copy(
     vsmc_state_matrix state_matrix, int N, const int *index)
 {
-    ::vsmc::cast(state_matrix).copy(static_cast<std::size_t>(N), index);
+    ::vsmc::cast(state_matrix).copy(N, index);
 }
 
 void vsmc_state_matrix_copy_particle(
