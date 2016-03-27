@@ -87,7 +87,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     public:
     using size_type = std::size_t;
     using state_type = T;
-    using state_pack_type = Vector<T>;
+    using state_pack_type = internal::Array<T, Dim>;
 
     template <typename S>
     class single_particle_type : public SingleParticleBase<S>
@@ -109,6 +109,8 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     }; // class single_particle_type
 
     size_type size() const { return size_; }
+
+    void shrink_to_fit() { data_.shrink_to_fit(); }
 
     state_type *data() { return data_.data(); }
 
@@ -289,7 +291,8 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     state_pack_type state_pack(size_type id) const
     {
-        state_pack_type pack(this->dim());
+        state_pack_type pack;
+        internal::resize(pack, this->dim());
         std::copy(row_data(id), row_data(id) + this->dim(), pack.data());
 
         return pack;
@@ -450,7 +453,8 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     state_pack_type state_pack(size_type id) const
     {
-        state_pack_type pack(this->dim());
+        state_pack_type pack;
+        internal::resize(pack, this->dim());
         for (std::size_t d = 0; d != this->dim(); ++d)
             pack[d] = state(id, d);
 
