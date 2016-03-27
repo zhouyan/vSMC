@@ -1,7 +1,7 @@
 .PHONY : all clean
 
 all :
-	cd cpp; ./make.sh pf_seq; ./pf_seq >/dev/null; Rscript pf.R >/dev/null
+	cd cpp; ./make.sh pf.pdf
 	ulimit -n 4096
 	latexmk -silent -f user_guide.tex >/dev/null
 
