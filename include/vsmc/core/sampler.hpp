@@ -64,7 +64,6 @@ class Sampler
     using value_type = T;
     using init_type = std::function<std::size_t(Particle<T> &, void *)>;
     using move_type = std::function<std::size_t(std::size_t, Particle<T> &)>;
-    using mcmc_type = std::function<std::size_t(std::size_t, Particle<T> &)>;
     using monitor_map_type = std::map<std::string, Monitor<T>>;
     using resample_type = std::function<void(std::size_t, std::size_t,
         typename Particle<T>::rng_type &, const double *, size_type *)>;
@@ -470,7 +469,7 @@ class Sampler
     std::size_t mcmc_queue_size() const { return mcmc_queue_.size(); }
 
     /// \brief Add a new mcmc
-    Sampler<T> &mcmc(const mcmc_type &new_mcmc, bool append)
+    Sampler<T> &mcmc(const move_type &new_mcmc, bool append)
     {
         VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_mcmc, mcmc, MCMC);
 
@@ -758,7 +757,7 @@ class Sampler
     bool init_by_iter_;
     init_type init_;
     Vector<move_type> move_queue_;
-    Vector<mcmc_type> mcmc_queue_;
+    Vector<move_type> mcmc_queue_;
 
     resample_type resample_op_;
     double resample_threshold_;

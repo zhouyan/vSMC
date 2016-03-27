@@ -43,6 +43,9 @@
 * `Monitor::index_data` and `Monitor::record_data` are removed
 * `AlignedVector` is removed
 * `hdf5store` is now overloaded for `Monitor`
+* `Sampler::mcmc_type` is removed. It was exactly the same as
+  `Sampler::move_type`. Unless the user code explicitly use the name
+  `mcmc_type`, nothing shall break.
 
 # Changes in v2.2.0
 

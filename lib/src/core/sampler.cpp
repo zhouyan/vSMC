@@ -241,7 +241,7 @@ int vsmc_sampler_mcmc_queue_size(vsmc_sampler sampler)
 }
 
 void vsmc_sampler_mcmc(
-    vsmc_sampler sampler, vsmc_sampler_mcmc_type new_mcmc, int append)
+    vsmc_sampler sampler, vsmc_sampler_move_type new_mcmc, int append)
 {
     ::vsmc::cast(sampler).mcmc(::vsmc::cast(new_mcmc), append != 0);
 }

@@ -895,9 +895,6 @@ typedef int (*vsmc_sampler_init_type)(vsmc_particle, void *);
 /** \brief `vsmc::Sampler::move_type` */
 typedef int (*vsmc_sampler_move_type)(int, vsmc_particle);
 
-/** \brief `vsmc::Sampler::mcmc_type` */
-typedef int (*vsmc_sampler_mcmc_type)(int, vsmc_particle);
-
 /** \brief `vsmc::Sampler::Sampler` */
 vsmc_sampler vsmc_sampler_new(
     int n, int dim, vSMCResampleScheme scheme, double threshold);
@@ -1020,7 +1017,7 @@ int vsmc_sampler_mcmc_queue_size(vsmc_sampler sampler);
 
 /** \brief `vsmc::Sampler::mcmc` */
 void vsmc_sampler_mcmc(
-    vsmc_sampler sampler, vsmc_sampler_mcmc_type new_mcmc, int append);
+    vsmc_sampler sampler, vsmc_sampler_move_type new_mcmc, int append);
 
 /** \brief `vsmc::Sampler::initialize` */
 void vsmc_sampler_initialize(vsmc_sampler sampler, void *param);
