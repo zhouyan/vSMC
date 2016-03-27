@@ -131,44 +131,6 @@ resampling algorithm can easily be implemented. Note that, the algorithm
 implemented by this class template always has a cost $O(N + M)$, unless the
 random sequence has a greater cost.
 
-\section{Algorithms with varying sample sizes}
-\label{sec:Algorithms with varying sample sizes}
-
-The library does not direct support varying sample size algorithms. However, it
-is possible. Below is a program within which the sample size is changed through
-a Multinomial resampling algorithm.
-\begin{cppcode}
-  // sampler is an existing Sampler<T> object
-  auto N = sampler.size();
-  auto &rng = sampler.particle().rng();
-  auto weight = sampler.particle().weight().data();
-  Vector<std::size_t> rep(N);
-  Vector<std::size_t> idx(M);
-  ResampleMultinomial resample;
-  resample(N, M, rng, weight, rep.data());
-  resample_trans_rep_index(N, M, rep.data(), idx.data());
-  Particle<T> particle(M);
-  particle.weight().set_equal();
-  for (std::size_t i = 0; i != M; ++i) {
-      auto sp_dst = particle.sp(i);
-      auto sp_src = sampler.partice().sp(idx[i]);
-      // Assuming T is a subclass of StateMatrix
-      for (std::size_t d = 0; d != sp_dst.dim(); ++d)
-          sp_dst.state(d) = sp_src.state(d);
-  }
-  // Copy other data of class T if any
-  sampler.particle() = std::move(particle);
-\end{cppcode}
-The vectors of replication numbers \verb|rep| and indices \verb|idx| are
-generated with the library's functions. Particles in the original sampler are
-copied into a temporary particle system \verb|particle|. And then this
-temporary is moved into the original sampler. It is important to note that, if
-the \verb|T| type object \verb|particle.value()| has any other non-static
-member data other than the states, they also need to be copied into the
-temporary first. Note that \verb|sampler.size()| is only a shortcut for
-\verb|sampler.particle().size()|. The sampler object itself does not store size
-information, nor does it need to.
-
 \section{Algorithms with increasing dimensions}
 \label{sec:Algorithms with increasing dimensions}
 

@@ -113,7 +113,7 @@ following constructs an object of this class,
 where \verb|Dynamic| is just an enumerator with value zero. We can specify the
 dimension at runtime through the method \verb|s.resize_dim(d)|. Note that, if
 the template parameter \verb|Dim| is positive, then this call results in a
-compile-time error.
+runtime error.
 
 To access $X_{ij}$, the value of the state of the $i$\ith particle at the
 $j$\ith coordinate, one can use the method \verb|s.state(i,j)|. The method
@@ -124,11 +124,14 @@ a pointer to the beginning of the $i$\ith row. If \verb|Layout| is
 beginning of the $j$\ith column. These methods help interfacing with numerical
 libraries, such as \blas.
 
-The \verb|StateMatrix| class deliberately does not provide a \verb|resize|
-method. There are algorithms that change the sample size between iterations.
-However, such algorithms often change size through resampling or other methods,
-either deterministically or stochastically. An example of changing size of a
-sampler is provided in section~\ref{sec:Algorithms with varying sample sizes}.
+Apart from \verb|resize_dim|, the matrix can also be resized by the sample size
+or both. \verb|s.resize(N, dim)| is the most general form. Let $n$ be the
+minimum of the original and new sample sizes, and $d$ be the minimum of the
+original and new dimensions. The $n$ by $d$ matrix at the upper left corner of
+the original matrix is preserved. If the matrix is enlarged in either
+direction, new values will be inserted and default initialized. For more
+sophisticated resizing, use the \verb|copy| method, which will create a new set
+of states according to the index vector.
 
 \subsection{Weight}
 \label{sub:Weight}
@@ -233,6 +236,90 @@ can write functions that process each particle, for example,
 And if later this function is called from a parallelized environment, it is
 still thread-safe and produce desired statistical results. The details of the
 \rng system are documented later in chapter~\ref{chap:Random number generating}.
+
+\subsubsection{Resize the particle system}
+
+The particle system can be resized. However, the library does not provide a
+simple \verb|resize| method that works the same way as \verb|std::vector|, etc.
+When a particle system is resized, it is often done through some deterministic
+or stochastic algorithms. At least some particles will be preserved and
+possibly replicated. The \verb|Particle<T>| class has a few methods for
+resizing using different user input to determine the particles to be preserved.
+All these methods use \verb|T::copy| to resize the state vector. Therefore, if
+any of them need to be used, then the call \verb|copy(N, index)| need to be
+able to handle the situation where its first argument has a value other than
+its original size. After the resizing, the weights are set to be equal except
+\verb|reszie_by_range| below. All methods are discussed in the following
+paragraphs.
+
+\paragraph{Resize by selecting according to a user supplied index vector}
+
+\begin{cppcode}
+  template <typename InputIter>
+  void resize_by_index(size_type N, InputIter index);
+\end{cppcode}
+The input iterator \verb|index| shall point to a length $N$ vector. Each
+element is the parent index of the corresponding new particle. The new system
+is formed by $\bar{X}^{(i)} = X^{(a_i)}$ where $a_i$ is the $i$\ith element of
+the index vector.
+
+\paragraph{Resize by selecting according to a user supplied mask vector}
+
+\begin{cppcode}
+  template <typename InputIter>
+  void resize_by_mask(size_type N, InputIter mask);
+\end{cppcode}
+The input iterator \verb|mask| shall point to a length $n$ vector, where $n$ is
+the original sample size. For each element, when converted to \verb|bool|, if
+it is \verb|true|, then the corresponding particle is preserved. Otherwise it
+is discarded. If there are more than $N$ particles to be preserved, then only
+the first $N$ particles are copied into the new system. If there are less than
+$N$ particles to be preserved, then the vector of these particles are copied
+repeatedly until there are enough particles to fill the new system.
+
+\paragraph{Resize by resampling}
+
+\begin{cppcode}
+  template <typename ResampleType>
+  void resize_by_resample(size_type N, ResampleType &&op);
+\end{cppcode}
+The details of the resampling operation function object is discussed in
+chapter~\ref{chap:Resampling}. For now, it is sufficient to say that, to use
+any of the builtin schemes, one can call the method like the following,
+\begin{cppcode}
+  particle.resize_by_resample(N, ResampleMultinomial());
+\end{cppcode}
+This method produce a new particle system by using the specified resampling
+algorithm. Note that, this is different from resampling a particle system in
+that, all operations are local. That is, if the particle is in a distributed
+system, only local weights are used, and re-normalized.
+
+\paragraph{Resize by uniformly selecting from all particles}
+
+\begin{cppcode}
+  void resize_by_uniform(size_type N);
+\end{cppcode}
+This is equivalent to,
+\begin{cppcode}
+  particle.weight().set_equal();
+  particle.resize_by_resample(N, ResampleMultinomial());
+\end{cppcode}
+
+\paragraph{Resize by selecting a range of particles}
+
+\begin{cppcode}
+  void resize_by_range(size_type N, size_type first, size_type last);
+\end{cppcode}
+This is the most destructive resizing method. Let $n = \text{last} -
+\text{first}$. If $n < N$,the particles in the range $[\text{first},
+\text{last})$ are copied repeatedly until there are enough particles to fill
+the new system. Otherwise only the first $N$ particles are copied. If
+\verb|last| is omitted, then it is set to \verb|size()|. If \verb|first| is
+also omitted, then it is set to zero. Use this method only when the statistical
+properties of the new system is irrelevant. If one want to avoid the copying
+altogether, it might be more efficient to simply create a new system with
+the desired size. This method is a no-op if $N$ is the same as the original
+size.
 
 \subsection{Single particle}
 \label{sub:Single particle}
@@ -557,16 +644,13 @@ The \verb|print| statement shows the first five lines of the output,
   4 1000         1        0  80.1088 -1.45922 3.37625
   5 1000         1        0 382.8820 -1.47299 3.49230
 \end{textcode}
-The column \verb|Size| shows the sample size at each iteration. The library
-does not provide direct support of changing the sample size. However, it is
-possible and an example is shown in section~\ref{sec:Algorithms with varying
-  sample sizes}. The column \verb|Resampled| shows nonzero values if resampling
-were performed and zero otherwise. For each moves and \mcmc steps, an
-acceptance count will be recorded. In this particular example, it is
-irrelevant. Next the column \verb|ESS| shows the value of \ess. The last two
-columns show the importance sampling estimates of the positions recorded by the
-monitor named \verb|"pos"|.  The graphical representation of the output is
-shown in figure~\ref{fig:pf}.
+The column \verb|Size| shows the sample size at each iteration. The column
+\verb|Resampled| shows nonzero values if resampling were performed and zero
+otherwise. For each moves and \mcmc steps, an acceptance count will be
+recorded. In this particular example, it is irrelevant. Next the column
+\verb|ESS| shows the value of \ess. The last two columns show the importance
+sampling estimates of the positions recorded by the monitor named \verb|"pos"|.
+The graphical representation of the output is shown in figure~\ref{fig:pf}.
 
 \begin{figure}
   \includegraphics[width=\linewidth]{cpp/pf}
