@@ -272,15 +272,15 @@ be processed as the following,
 where \verb|argc| and \verb|argv| are the arguments of the \verb|main|
 function. When the program is invoked, each option can be passed to it like
 below,
-\begin{textcode}
+\begin{Verbatim}
   ./program_option --vec 1 2 1e-1 --str "abc" --vec 8 9 --str "def hij" --n 2 4
-\end{textcode}
+\end{Verbatim}
 The results of the option processing is displayed below,
-\begin{textcode}
+\begin{Verbatim}
   n: 4
   str: def hij
   vec: 1 2 0.1 8 9
-\end{textcode}
+\end{Verbatim}
 To summarize these output, the same option can be specified multiple times. If
 it is a scalar option, the last one is used (\verb|--str|, \verb|--n|). The
 value of a string option can be grouped by quotes. For a vector option
@@ -308,9 +308,9 @@ appendix~\appref{app:sec:Display program progress}.
   progress.stop();
 \end{cppcode}
 When invoked, the program output something similar the following,
-\begin{textcode}
+\begin{Verbatim}
   [  4%][00:07][  49019/1000000][i = 49]
-\end{textcode}
+\end{Verbatim}
 The method \verb|progress.start(n * n)| starts the printing of the progress.
 The argument specifies how many iterations there will be before it is stopped.
 The method \verb|progress.message(ss.str())| direct the program to print a
