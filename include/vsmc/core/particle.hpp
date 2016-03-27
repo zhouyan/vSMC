@@ -39,6 +39,10 @@
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
 
+#define VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RESIZE_BY_RANGE                     \
+    VSMC_RUNTIME_ASSERT((first >= 0 && first < last && last <= size()),       \
+        "**Particle::resize_by_range** INDICES OUT OF RANGE")
+
 namespace vsmc
 {
 
@@ -57,7 +61,7 @@ class Particle
     using rng_type = typename rng_set_type::rng_type;
     using sp_type = SingleParticle<T>;
 
-    explicit Particle(size_type N)
+    explicit Particle(size_type N = 0)
         : size_(N)
         , value_(N)
         , weight_(static_cast<SizeType<weight_type>>(N))
@@ -120,6 +124,136 @@ class Particle
 
     /// \brief Number of particles
     size_type size() const { return size_; }
+
+    /// \brief Resize by selecting according to user supplied index vector
+    ///
+    /// \param N The new sample size
+    /// \param index N-vector of parent indices
+    template <typename InputIter>
+    void resize_by_index(size_type N, InputIter index)
+    {
+        resize_by_index(
+            N, index, std::is_convertible<InputIter, const size_type *>());
+    }
+
+    /// \brief Resize by selecting according to user supplied mask vector
+    ///
+    /// \param N The new sample size
+    /// \param mask A mask vector of length at least `size()`. Each element,
+    ///
+    /// \details
+    /// when converted to `bool`, if `true`, the corresponding particle is
+    /// preserved. The vector of preserved particles is copied repeatedly until
+    /// there are enough particles to fill the new system.
+    template <typename InputIter>
+    void resize_by_mask(size_type N, InputIter mask)
+    {
+#if VSMC_HAS_TBB
+        Vector<size_type> &idx = idx_.local();
+        idx.resize(static_cast<std::size_t>(N));
+#else
+        Vector<size_type> idx(static_cast<std::size_t>(N));
+#endif
+        Vector<size_type> mask_index;
+        mask_index.reserve(static_cast<std::size_t>(size()));
+        for (size_type i = 0; i != size(); ++i, ++mask)
+            if (static_cast<bool>(*mask))
+                mask_index.push_back(i);
+        resize_copy_index(static_cast<std::size_t>(N), mask_index.size(),
+            mask_index.data(), idx.data());
+        resize(N, idx.data());
+    }
+
+    /// \brief Resize by resampling
+    ///
+    /// \param N The new sample size
+    /// \param op The resampling function object
+    ///
+    /// \details
+    /// The particle system is resampled to a new system with possibly
+    /// different size. The system will be changed even if `N == size()`.
+    ///
+    /// This is different from `resample` in the sense that the operation is
+    /// always local. Only the local weights are used, and re-normalized.
+    template <typename ResampleType>
+    void resize_by_resample(size_type N, ResampleType &&op)
+    {
+#if VSMC_HAS_TBB
+        Vector<size_type> &rep = rep_.local();
+        Vector<size_type> &idx = idx_.local();
+        rep.resize(static_cast<std::size_t>(N));
+        idx.resize(static_cast<std::size_t>(N));
+#else  // VSMC_HAS_TBB
+        Vector<size_type> rep(static_cast<std::size_t>(N));
+        Vector<size_type> idx(static_cast<std::size_t>(N));
+#endif // VSMC_HAS_TBB
+        Weight w(static_cast<SizeType<weight_type>>(this->size()));
+        w.set(weight_.data());
+        op(static_cast<std::size_t>(size()), static_cast<std::size_t>(N), rng_,
+            w.data(), rep.data());
+        resample_trans_rep_index(static_cast<std::size_t>(size()),
+            static_cast<std::size_t>(N), rep.data(), idx.data());
+        resize(N, idx.data());
+    }
+
+    /// \brief Resize by uniformly selecting from all particles
+    ///
+    /// \param N The new sample size
+    ///
+    /// \details
+    /// This is equivalent to first set the weights to equal, and then perform
+    /// Multinomial resampling. The particle system will be changed even if `N
+    /// == size()`.
+    void resize_by_uniform(size_type N)
+    {
+        weight_.set_equal();
+        resize_by_resample(N, ResampleMultinomial());
+    }
+
+    /// \brief Equivalent to `resize_by_range(N, 0, size());
+    void resize_by_range(size_type N) { resize_by_range(N, 0, size()); }
+
+    /// \brief Equivalent to `resize_by_range(N, first, size());
+    void resize_by_range(size_type N, size_type first)
+    {
+        resize_by_range(N, first, size());
+    }
+
+    /// \brief Resize by selecting a range of particles
+    ///
+    /// \param N The new sample size
+    /// \param first The index of the first particle to be preserved
+    /// \param last The index past the last particle to be preserved
+    ///
+    /// \details
+    /// This is the most destructive resizing method. The particles in the
+    /// range [first, last) are copied repeatedly until there are enough
+    /// particles to fill the new system.
+    void resize_by_range(size_type N, size_type first, size_type last)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RESIZE_BY_RANGE;
+
+        if (N == size() && first == 0)
+            return;
+
+#if VSMC_HAS_TBB
+        Vector<size_type> &idx = idx_.local();
+        idx.resize(static_cast<std::size_t>(N));
+#else
+        Vector<size_type> idx(static_cast<std::size_t>(N));
+#endif
+        size_type M = last - first;
+        if (M >= N) {
+            for (size_type i = 0; i != N; ++i, ++first)
+                idx[static_cast<std::size_t>(i)] = first;
+        } else {
+            for (size_type i = 0; i != M; ++i, ++first)
+                idx[static_cast<std::size_t>(i)] = first;
+            resize_copy_index(static_cast<std::size_t>(N - M),
+                static_cast<std::size_t>(M), idx.data(), idx.data() + M);
+        }
+        resize(N, idx.data());
+    }
 
     /// \brief Read and write access to the value collection object
     value_type &value() { return value_; }
@@ -211,7 +345,45 @@ class Particle
 #if VSMC_HAS_TBB
     ::tbb::combinable<Vector<size_type>> rep_;
     ::tbb::combinable<Vector<size_type>> idx_;
-#endif // VSMC_HAS_TBB
+#endif
+
+    void resize(size_type N, const size_type *idx)
+    {
+        size_ = N;
+        value_.copy(N, idx);
+        weight_.resize(static_cast<SizeType<weight_type>>(N));
+        rng_set_.resize(static_cast<SizeType<rng_set_type>>(N));
+    }
+
+    template <typename InputIter>
+    void resize_by_index(size_type N, InputIter index, std::true_type)
+    {
+        resize(N, static_cast<const size_type *>(index));
+    }
+
+    template <typename InputIter>
+    void resize_by_index(size_type N, InputIter index, std::false_type)
+    {
+#if VSMC_HAS_TBB
+        Vector<size_type> &idx = idx_.local();
+        idx.resize(static_cast<std::size_t>(N));
+#else
+        Vector<size_type> idx(static_cast<std::size_t>(N));
+#endif
+        std::copy_n(index, N, idx.data());
+        resize(N, idx.data());
+    }
+
+    template <typename InputIter, typename OutputIter>
+    void resize_copy_index(
+        std::size_t N, std::size_t M, InputIter src, OutputIter dst)
+    {
+        while (N > M) {
+            dst = std::copy_n(src, M, dst);
+            N -= M;
+        }
+        std::copy_n(src, N, dst);
+    }
 }; // class Particle
 
 } // namespace vsmc

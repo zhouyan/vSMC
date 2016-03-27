@@ -16,6 +16,7 @@
   preserving values.
 * `StateMatrix` can now handle the situation where the length of the input to
   `copy`, `index` is not the same as its own size.
+* `Particle` can now be resized by various methods
 
 ## Changed behaviors
 

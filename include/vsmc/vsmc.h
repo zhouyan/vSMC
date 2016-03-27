@@ -751,6 +751,23 @@ void vsmc_particle_clone(
 /** \brief `vsmc::Particle::size` */
 int vsmc_particle_size(vsmc_particle particle);
 
+/** \brief `vsmc::Particle::resize_by_index` */
+void vsmc_particle_resize_by_index(vsmc_particle particle, int N, int *index);
+
+/** \brief `vsmc::Particle::resize_by_mask` */
+void vsmc_particle_resize_by_mask(vsmc_particle particle, int N, int *mask);
+
+/** \brief `vsmc::Particle::resize_by_resample` */
+void vsmc_particle_resize_by_resample(
+    vsmc_particle particle, int N, vsmc_resample_type op);
+
+/** \brief `vsmc::Particle::resize_by_uniform` */
+void vsmc_particle_resize_by_uniform(vsmc_particle particle, int N);
+
+/** \brief `vsmc::Particle::resize_by_range` */
+void vsmc_particle_resize_by_ragne(
+    vsmc_particle particle, int N, int first, int last);
+
 /** \brief `vsmc:Particle::value` */
 vsmc_state_matrix vsmc_particle_value(vsmc_particle particle);
 

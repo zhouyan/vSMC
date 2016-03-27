@@ -64,6 +64,33 @@ int vsmc_particle_size(vsmc_particle particle)
     return ::vsmc::cast(particle).size();
 }
 
+void vsmc_particle_resize_by_index(vsmc_particle particle, int N, int *index)
+{
+    ::vsmc::cast(particle).resize_by_index(N, index);
+}
+
+void vsmc_particle_resize_by_mask(vsmc_particle particle, int N, int *mask)
+{
+    ::vsmc::cast(particle).resize_by_mask(N, mask);
+}
+
+void vsmc_particle_resize_by_resample(
+    vsmc_particle particle, int N, vsmc_resample_type op)
+{
+    ::vsmc::cast(particle).resize_by_resample(N, ::vsmc::cast(op));
+}
+
+void vsmc_particle_resize_by_uniform(vsmc_particle particle, int N)
+{
+    ::vsmc::cast(particle).resize_by_uniform(N);
+}
+
+void vsmc_particle_resize_by_ragne(
+    vsmc_particle particle, int N, int first, int last)
+{
+    ::vsmc::cast(particle).resize_by_range(N, first, last);
+}
+
 vsmc_state_matrix vsmc_particle_value(vsmc_particle particle)
 {
     vsmc_state_matrix value = {&::vsmc::cast(particle).value()};
