@@ -35,11 +35,6 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/single_particle.hpp>
 
-#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_RESIZE_DIM                      \
-    VSMC_RUNTIME_ASSERT((dim == this->dim() || Dim == Dynamic),               \
-        "**StateMatrix::resize** CHANGE DIMENSION OF A FIXED DIMENSION "      \
-        "OBJECT")
-
 #define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(psize, dim)         \
     VSMC_RUNTIME_ASSERT((psize >= dim),                                       \
         "**StateMatrix::state_unpack** INPUT PACK SIZE TOO SMALL")
@@ -114,18 +109,6 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     }; // class single_particle_type
 
     size_type size() const { return size_; }
-
-    void resize(size_type N)
-    {
-        static_cast<StateMatrix<Layout, Dim, T> *>(this)->resize(
-            N, this->dim());
-    }
-
-    void resize_dim(std::size_t dim)
-    {
-        static_cast<StateMatrix<Layout, Dim, T> *>(this)->resize(
-            this->size(), dim);
-    }
 
     state_type *data() { return data_.data(); }
 
@@ -240,28 +223,20 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     explicit StateMatrix(size_type N = 0) : state_matrix_base_type(N) {}
 
-    using state_matrix_base_type::resize;
+    void resize(size_type N) { resize_both(N, this->dim()); }
 
     void resize(size_type N, std::size_t dim)
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_RESIZE_DIM;
+        static_assert(Dim == Dynamic, "**StateMatrix::resize**  USED WITH AN "
+                                      "OBJECT WITH FIXED DIMENSION");
+        resize_both(N, dim);
+    }
 
-        if (N == this->size() && dim == this->dim())
-            return;
-
-        if (dim == this->dim()) {
-            this->resize_data(N, dim);
-            return;
-        }
-
-        StateMatrix<RowMajor, Dim, T> tmp;
-        tmp.resize_data(N, dim);
-        const size_type K = std::min(N, this->size());
-        const std::size_t D = std::min(dim, this->dim());
-        if (D > 0)
-            for (size_type k = 0; k != K; ++k)
-                std::copy_n(row_data(k), D, tmp.row_data(k));
-        *this = std::move(tmp);
+    void resize_dim(std::size_t dim)
+    {
+        static_assert(Dim == Dynamic, "**StateMatrix::resize_dim**  USED WITH "
+                                      "AN OBJECT WITH FIXED DIMENSION");
+        resize_both(this->size(), dim);
     }
 
     T &state(size_type id, std::size_t pos)
@@ -339,6 +314,26 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     }
 
     private:
+    void resize_both(size_type N, std::size_t dim)
+    {
+        if (N == this->size() && dim == this->dim())
+            return;
+
+        if (dim == this->dim()) {
+            this->resize_data(N, dim);
+            return;
+        }
+
+        StateMatrix<RowMajor, Dim, T> tmp;
+        tmp.resize_data(N, dim);
+        const size_type K = std::min(N, this->size());
+        const std::size_t D = std::min(dim, this->dim());
+        if (D > 0)
+            for (size_type k = 0; k != K; ++k)
+                std::copy_n(row_data(k), D, tmp.row_data(k));
+        *this = std::move(tmp);
+    }
+
     void copy_particle_dispatch(size_type src, size_type dst, std::true_type)
     {
         std::copy(row_data(src), row_data(src) + this->dim(), row_data(dst));
@@ -378,28 +373,20 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     explicit StateMatrix(size_type N = 0) : state_matrix_base_type(N) {}
 
-    using state_matrix_base_type::resize;
+    void resize(size_type N) { resize_both(N, this->dim()); }
 
     void resize(size_type N, std::size_t dim)
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_RESIZE_DIM;
+        static_assert(Dim == Dynamic, "**StateMatrix::resize**  USED WITH AN "
+                                      "OBJECT WITH FIXED DIMENSION");
+        resize_both(N, dim);
+    }
 
-        if (N == this->size() && dim == this->dim())
-            return;
-
-        if (N == this->size()) {
-            this->resize_data(N, dim);
-            return;
-        }
-
-        StateMatrix<ColMajor, Dim, T> tmp;
-        tmp.resize_data(N, dim);
-        const size_type K = std::min(N, this->size());
-        const std::size_t D = std::min(dim, this->dim());
-        if (K > 0)
-            for (std::size_t d = 0; d != D; ++d)
-                std::copy_n(col_data(d), K, tmp.col_data(d));
-        *this = std::move(tmp);
+    void resize_dim(std::size_t dim)
+    {
+        static_assert(Dim == Dynamic, "**StateMatrix::resize_dim**  USED WITH "
+                                      "AN OBJECT WITH FIXED DIMENSION");
+        resize_both(this->size(), dim);
     }
 
     T &state(size_type id, std::size_t pos)
@@ -440,7 +427,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
             }
         } else {
             StateMatrix<ColMajor, Dim, T> tmp;
-            tmp.resize(n, this->dim());
+            tmp.resize_data(n, this->dim());
             for (std::size_t d = 0; d != this->dim(); ++d) {
                 idx = index;
                 for (size_type dst = 0; dst != n; ++dst, ++idx)
@@ -489,6 +476,26 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     }
 
     private:
+    void resize_both(size_type N, std::size_t dim)
+    {
+        if (N == this->size() && dim == this->dim())
+            return;
+
+        if (N == this->size()) {
+            this->resize_data(N, dim);
+            return;
+        }
+
+        StateMatrix<ColMajor, Dim, T> tmp;
+        tmp.resize_data(N, dim);
+        const size_type K = std::min(N, this->size());
+        const std::size_t D = std::min(dim, this->dim());
+        if (K > 0)
+            for (std::size_t d = 0; d != D; ++d)
+                std::copy_n(col_data(d), K, tmp.col_data(d));
+        *this = std::move(tmp);
+    }
+
     void copy_particle_dispatch(size_type src, size_type dst, std::true_type)
     {
         for (std::size_t d = 0; d != this->dim(); ++d)
