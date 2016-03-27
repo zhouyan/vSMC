@@ -96,6 +96,24 @@ inline bool is_equal(const T &a, const T &b)
 #pragma clang diagnostic pop
 #endif
 
+template <typename T>
+inline bool is_nullptr(T ptr, std::true_type)
+{
+    return ptr == nullptr;
+}
+
+template <typename T>
+inline bool is_nullptr(T, std::false_type)
+{
+    return false;
+}
+
+template <typename T>
+inline bool is_nullptr(T ptr)
+{
+    return is_nullptr(ptr, std::is_pointer<T>());
+}
+
 template <typename UIntType>
 inline std::string itos(UIntType i, std::true_type)
 {
