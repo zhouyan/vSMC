@@ -46,8 +46,12 @@
 namespace vsmc
 {
 
-/// \brief Register a C++11 RNG engine for use as a MKL BRNG
+/// \brief Register a C++11 RNG as MKL BRNG
 /// \ingroup MKL
+///
+/// \details
+/// Only engines defined in this library and the standard library are
+/// specialized. This function requires the C runtime of the library.
 template <typename RNGType>
 int mkl_brng();
 
