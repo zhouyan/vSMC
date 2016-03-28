@@ -299,10 +299,10 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
 
     /// \brief `vslGetBrngProperties`
     static int get_brng_properties(
-        MKL_INT brng, ::VSLBRngProperties &properties)
+        MKL_INT brng, ::VSLBRngProperties *properties)
     {
         return internal::mkl_error_check(
-            ::vslGetBrngProperties(brng, &properties),
+            ::vslGetBrngProperties(brng, properties),
             "MKLStream::get_brng_properties", "::vslGetBrngProperties");
     }
 
