@@ -55,6 +55,18 @@
 #include <mkl_service.h>
 #endif
 
+/// \brief The default alignment for scalar type
+/// \ingroup Config
+#ifndef VSMC_ALIGNMENT
+#define VSMC_ALIGNMENT 32
+#endif
+
+/// \brief The minimum alignment for any type
+/// \ingroup Config
+#ifndef VSMC_ALIGNMENT_MIN
+#define VSMC_ALIGNMENT_MIN 16
+#endif
+
 /// \brief Default AlignedMemory type
 /// \ingroup Config
 #ifndef VSMC_ALIGNED_MEMORY_TYPE
@@ -69,16 +81,9 @@
 #endif
 #endif
 
-/// \brief The default alignment for scalar type
-/// \ingroup Config
-#ifndef VSMC_ALIGNMENT
-#define VSMC_ALIGNMENT 32
-#endif
-
-/// \brief The minimum alignment for any type
-/// \ingroup Config
-#ifndef VSMC_ALIGNMENT_MIN
-#define VSMC_ALIGNMENT_MIN 16
+/// \brief Allocator::construct default behavior for scalar type
+#ifndef VSMC_CONSTRUCT_SCALAR
+#define VSMC_CONSTRUCT_SCALAR 0
 #endif
 
 /// \brief Define class member `new` and `delete` using Allocator
@@ -297,6 +302,8 @@ using AlignedMemory = VSMC_ALIGNED_MEMORY_TYPE;
 /// \tparam T The value type
 /// \tparam Alignment The alignment requirement of memory, must be a power of
 /// two and no less than `sizeof(void *)`.
+/// \tparam ConstructScalar Should construct(ptr) initialize a scalar type with
+/// zero or left it uninitialized.
 /// \tparam Memory The memory management class. Must provides two static member
 /// functions, `aligned_malloc` and `aligned_free`. The member function
 /// `aligned_malloc` shall behave similar to `std::malloc` but take an
@@ -306,7 +313,8 @@ using AlignedMemory = VSMC_ALIGNED_MEMORY_TYPE;
 /// pointer if it fails to allocated the memory. It shall not throw any
 /// exceptions. The member function `aligned_free` shall behave just like
 /// `std::free`. It shall be able to handle a null pointer as its input.
-template <typename T, std::size_t Alignment = AlignmentTrait<T>::value,
+template <typename T, bool ConstructScalar = VSMC_CONSTRUCT_SCALAR != 0,
+    std::size_t Alignment = AlignmentTrait<T>::value,
     typename Memory = AlignedMemory>
 class Allocator : public std::allocator<T>
 {
@@ -331,34 +339,35 @@ class Allocator : public std::allocator<T>
     class rebind
     {
         public:
-        using other = Allocator<U, Alignment, Memory>;
+        using other = Allocator<U, ConstructScalar, Alignment, Memory>;
     }; // class rebind
 
     Allocator() = default;
 
-    Allocator(const Allocator<T, Alignment, Memory> &) = default;
+    Allocator(
+        const Allocator<T, ConstructScalar, Alignment, Memory> &) = default;
 
-    Allocator(Allocator<T, Alignment, Memory> &&) = default;
+    Allocator(Allocator<T, ConstructScalar, Alignment, Memory> &&) = default;
 
-    Allocator<T, Alignment, Memory> &operator=(
-        const Allocator<T, Alignment, Memory> &) = default;
+    Allocator<T, ConstructScalar, Alignment, Memory> &operator=(
+        const Allocator<T, ConstructScalar, Alignment, Memory> &) = default;
 
-    Allocator<T, Alignment, Memory> &operator=(
-        Allocator<T, Alignment, Memory> &&) = default;
+    Allocator<T, ConstructScalar, Alignment, Memory> &operator=(
+        Allocator<T, ConstructScalar, Alignment, Memory> &&) = default;
 
     template <typename U>
-    Allocator(const Allocator<U, Alignment, Memory> &other)
+    Allocator(const Allocator<U, ConstructScalar, Alignment, Memory> &other)
         : std::allocator<T>(static_cast<std::allocator<U>>(other))
     {
     }
 
     template <typename U>
-    Allocator(Allocator<U, Alignment, Memory> &&other)
+    Allocator(Allocator<U, ConstructScalar, Alignment, Memory> &&other)
         : std::allocator<T>(std::move(static_cast<std::allocator<U>>(other)))
     {
     }
 
-    static pointer allocate(size_type n, const void * = nullptr)
+    pointer allocate(size_type n, const void * = nullptr)
     {
         pointer ptr = static_cast<pointer>(Memory::aligned_malloc(
             (n > 0 ? n : 1) * sizeof(value_type), Alignment));
@@ -368,15 +377,42 @@ class Allocator : public std::allocator<T>
         return ptr;
     }
 
-    static void deallocate(pointer ptr, size_type)
+    void deallocate(pointer ptr, size_type = 0) noexcept
     {
         if (ptr != nullptr)
             Memory::aligned_free(ptr);
     }
+
+    template <typename U>
+    void construct(U *ptr)
+    {
+        construct_dispatch(
+            ptr, std::integral_constant<bool,
+                     (ConstructScalar || !std::is_scalar<U>::value)>());
+    }
+
+    template <typename U, typename Arg, typename... Args>
+    void constrct(U *ptr, Arg &&arg, Args &&... args)
+    {
+        std::allocator<T>::construct(
+            ptr, std::forward<Arg>(arg), std::forward<Args>(args)...);
+    }
+
+    private:
+    template <typename U>
+    void construct_dispatch(U *ptr, std::true_type)
+    {
+        std::allocator<T>::construct(ptr);
+    }
+
+    template <typename U>
+    void construct_dispatch(U *, std::false_type)
+    {
+    }
 }; // class Allocator
 
-template <std::size_t Alignment, typename Memory>
-class Allocator<void, Alignment, Memory>
+template <bool ConstructScalar, std::size_t Alignment, typename Memory>
+class Allocator<void, ConstructScalar, Alignment, Memory>
 {
     using value_type = void;
     using pointer = void *;
@@ -384,12 +420,12 @@ class Allocator<void, Alignment, Memory>
 
     template <class U>
     struct rebind {
-        using other = Allocator<U, Alignment, Memory>;
+        using other = Allocator<U, ConstructScalar, Alignment, Memory>;
     };
 }; // class Allocator
 
-template <std::size_t Alignment, typename Memory>
-class Allocator<const void, Alignment, Memory>
+template <bool ConstructScalar, std::size_t Alignment, typename Memory>
+class Allocator<const void, ConstructScalar, Alignment, Memory>
 {
     using value_type = const void;
     using pointer = const void *;
@@ -397,20 +433,24 @@ class Allocator<const void, Alignment, Memory>
 
     template <class U>
     struct rebind {
-        using other = Allocator<U, Alignment, Memory>;
+        using other = Allocator<U, ConstructScalar, Alignment, Memory>;
     };
 }; // class Allocator
 
-template <typename T1, typename T2, std::size_t Alignment, typename Memory>
-inline bool operator==(const Allocator<T1, Alignment, Memory> &,
-    const Allocator<T2, Alignment, Memory> &)
+template <typename T1, typename T2, bool ConstructScalar,
+    std::size_t Alignment, typename Memory>
+inline bool operator==(
+    const Allocator<T1, ConstructScalar, Alignment, Memory> &,
+    const Allocator<T2, ConstructScalar, Alignment, Memory> &)
 {
     return true;
 }
 
-template <typename T1, typename T2, std::size_t Alignment, typename Memory>
-inline bool operator!=(const Allocator<T1, Alignment, Memory> &,
-    const Allocator<T2, Alignment, Memory> &)
+template <typename T1, typename T2, bool ConstructScalar,
+    std::size_t Alignment, typename Memory>
+inline bool operator!=(
+    const Allocator<T1, ConstructScalar, Alignment, Memory> &,
+    const Allocator<T2, ConstructScalar, Alignment, Memory> &)
 {
     return false;
 }

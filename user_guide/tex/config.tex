@@ -39,6 +39,7 @@ related functionalities. They will be discussed in chapter~\ref{chap:Random
     Support for \hdf~1.8.6 or higher \\
     \verb|VSMC_HAS_MKL| & \verb|0|
     & Support for \mkl~11.0 or higher \\
+    \midrule
     \verb|VSMC_USE_OMP| & \verb|VSMC_HAS_OMP|
     & Use OpenMP parallelization outside the \smp module \\
     \verb|VSMC_USE_TBB| & \verb|VSMC_HAS_TBB|
@@ -54,6 +55,7 @@ related functionalities. They will be discussed in chapter~\ref{chap:Random
     \verb|VSMC_USE_ACCELERATE| & Platform dependent
     & Use Mac OS X Accelerate framework for \blas. Ignored if
     \verb|VSMC_USE_MKL_BLAS| is defined to a non-zero value. \\
+    \midrule
     \verb|VSMC_INT64| & Platform dependent
     & The 64-bit integer type used by x86 intrinsics \\
     \verb|VSMC_INT128| & Platform dependent
@@ -66,6 +68,8 @@ related functionalities. They will be discussed in chapter~\ref{chap:Random
     & Minimum alignment for all types \\
     \verb|VSMC_ALIGNED_MEMORY_TYPE| & Platform dependent
     & The type of \verb|AlignedMemory| \\
+    \verb|VSMC_CONSTRUCT_SCALAR| & \verb|0|
+    & Should \verb|Allocator::construct| zero out scalar types \\
     \bottomrule
   \end{tabularx}
   \caption{Configuration macros}
@@ -81,3 +85,7 @@ but the it is desirable not to use \mkl's vector math functions, then one can
 define \verb|VSMC_USE_MKL_VML| to zero to prevent the library to use this
 individual component. All other macros define either types or constants that
 are used by the library.
+
+Another important difference between macros with prefixes \verb|VSMC_HAS| and
+\verb|VSMC_USE| is that, the former will affect the interface while the later
+only affect internal implementations.

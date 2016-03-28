@@ -1,5 +1,16 @@
 # Changes in v2.3.0
 
+## Important changes
+* `AlignedAllocator` is renamed to `Allocator`. The old type alias `Allocator`
+  is removed. The default alignment is defined by `AlignmentTrait<T>`, which is
+  `VSMC_ALIGNMENT` for scalar types and `max(alignof(T), VSMC_ALIGNMENT_MIN)`
+  for others.
+* `Allocator` has an additional second template argument, `ConstructScalar`,
+  which defaults to `false`. If `false`, `construct` will leave scalar types
+  uninitialized instead of zeroing. The default behavior can be changed by
+  macro `VSMC_CONSTRUCT_SCALAR`
+
+
 ## New features
 
 * New C++ OpenCL RAII classes
@@ -28,10 +39,6 @@
   parameter as a runtime parameter.
 * Most methods that takes output iterators, (including pointers that used in
   this fashion), now returns an iterator in the same way as `std::copy` etc.
-* `AlignedAllocator` is renamed to `Allocator`. The old type alias `Allocator`
-  is removed. The default alignment is defined by `AlignmentTrait<T>`, which is
-  `VSMC_ALIGNMENT` for scalar types and `max(alignof(T), VSMC_ALIGNMENT_MIN)`
-  for others.
 * `Vector` is now defined to be `std::vector<T, Allocator<T>>`
 * HDF5 IO functions' `append` parameter no longer has a default argument
 * `hdf5store` is now overloaded for `Monitor`
