@@ -113,9 +113,7 @@ class DiscreteDistribution
             if (!os.good())
                 return os;
 
-            os << param.probability_.size() << ' ';
-            for (std::size_t i = 0; i != param.probability_.size(); ++i)
-                os << param.probability_[i] << ' ';
+            os << param.probability_;
 
             return os;
         }
@@ -127,14 +125,8 @@ class DiscreteDistribution
             if (!is.good())
                 return is;
 
-            std::size_t n = 0;
-            is >> std::ws >> n;
-            if (!is.good())
-                return is;
-
-            Vector<double> probability(n);
-            for (std::size_t i = 0; i != n; ++i)
-                is >> std::ws >> probability[i];
+            Vector<double> probability;
+            is >> std::ws >> probability;
 
             if (is.good()) {
                 double sum = 0;
