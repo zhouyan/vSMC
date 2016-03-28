@@ -1,5 +1,5 @@
 # ============================================================================
-#  vSMC/example/CMakeLists.txt
+#  vSMC/example/utility/CMakeLists.txt
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
 #
-#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
 #  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 #  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -29,43 +29,19 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT(vSMCExample C CXX)
+PROJECT(vSMCExample-utility CXX)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
-INCLUDE(vSMCExampleFunctions)
-ADD_DEFINITIONS(${EXAMPLE_DEFINITIONS})
+ADD_CUSTOM_TARGET(utility)
+ADD_DEPENDENCIES(example utility)
 
-##############################################################################
-# Check examples
-##############################################################################
+ADD_CUSTOM_TARGET(utility-files)
+ADD_DEPENDENCIES(example-files utility-files)
 
-ADD_CUSTOM_TARGET(example-files)
-ADD_DEPENDENCIES(example example-files)
+FUNCTION(ADD_UTILITY_TEST name)
+    ADD_VSMC_EXECUTABLE(utility_${name}
+        ${PROJECT_SOURCE_DIR}/src/utility_${name}.cpp)
+    ADD_DEPENDENCIES(utility utility_${name})
+ENDFUNCTION(ADD_UTILITY_TEST)
 
-SET(EXAMPLES ${EXAMPLES} "vsmc")
-ADD_SUBDIRECTORY(vsmc)
-
-SET(EXAMPLES ${EXAMPLES} "gmm")
-ADD_SUBDIRECTORY(gmm)
-
-SET(EXAMPLES ${EXAMPLES} "pf")
-ADD_SUBDIRECTORY(pf)
-
-SET(EXAMPLES ${EXAMPLES} "resample")
-ADD_SUBDIRECTORY(resample)
-
-SET(EXAMPLES ${EXAMPLES} "rng")
-ADD_SUBDIRECTORY(rng)
-
-SET(EXAMPLES ${EXAMPLES} "utility")
-ADD_SUBDIRECTORY(utility)
-
-##############################################################################
-# Enable examples
-##############################################################################
-
-MESSAGE(STATUS "=================== Enable examples ===================")
-FOREACH(example ${EXAMPLES})
-    MESSAGE(STATUS ${example})
-ENDFOREACH(example ${EXAMPLES})
-
-MESSAGE(STATUS "=======================================================")
+ADD_UTILITY_TEST(aligned_memory)
