@@ -140,7 +140,7 @@ class NormalMVDistribution
         }
 
         template <typename CharT, typename Traits>
-        friend std::basic_ostream<CharT, Traits> &operator>>(
+        friend std::basic_istream<CharT, Traits> &operator>>(
             std::basic_istream<CharT, Traits> &is, const param_type &param)
         {
             if (!is.good())
@@ -310,7 +310,7 @@ class NormalMVDistribution
         if (!os.good())
             return os;
 
-        os << dist.param_ << ' ';
+        os << dist.param_;
 
         return os;
     }
