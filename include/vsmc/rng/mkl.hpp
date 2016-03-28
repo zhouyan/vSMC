@@ -274,14 +274,7 @@ class MKLGenerator
     friend bool operator==(
         const MKLGenerator<Bits> &gen1, const MKLGenerator<Bits> &gen2)
     {
-        if (gen1.stream_.get_brng() != gen2.stream_.get_brng())
-            return false;
-        std::size_t n = static_cast<std::size_t>(gen1.stream_.get_size());
-        Vector<char> s1(n);
-        Vector<char> s2(n);
-        gen1.stream_.save_m(s1.data());
-        gen2.stream_.save_m(s2.data());
-        if (s1 != s2)
+        if (gen1.stream_ != gen2.stream_)
             return false;
         if (gen1.buffer_ != gen2.buffer_)
             return false;
@@ -303,16 +296,7 @@ class MKLGenerator
         if (!os.good())
             return os;
 
-        os << gen.stream_.get_brng() << ' ';
-
-        std::size_t n = static_cast<std::size_t>(gen.stream_.get_size());
-        if (n % sizeof(std::uint64_t) != 0)
-            n += sizeof(std::uint64_t) - n % sizeof(std::uint64_t);
-        n /= sizeof(std::uint64_t);
-        Vector<std::uint64_t> s(n);
-        gen.stream_.save_m(reinterpret_cast<char *>(s.data()));
-        os << s << ' ';
-
+        os << gen.stream_ << ' ';
         os << gen.buffer_ << ' ';
         os << gen.index_;
 
@@ -326,20 +310,10 @@ class MKLGenerator
         if (!is.good())
             return is;
 
-        MKL_INT brng = 0;
-        is >> std::ws >> brng;
-        if (!is.good())
-            return is;
-
-        MKLStream stream(brng, 1);
-        Vector<std::uint64_t> s;
-        is >> std::ws >> s;
-        if (!is.good())
-            return is;
-
-        stream.load_m(reinterpret_cast<const char *>(s.data()));
-        Vector<result_type> buffer(M_);
-        std::size_t index = 0;
+        MKLStream stream;
+        Vector<result_type> buffer;
+        std::size_t index;
+        is >> std::ws >> stream;
         is >> std::ws >> buffer;
         is >> std::ws >> index;
 

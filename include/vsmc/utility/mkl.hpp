@@ -624,6 +624,69 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     }
 }; // class MKLStream
 
+inline bool operator==(const MKLStream &stream1, const MKLStream &stream2)
+{
+    if (stream1.get_brng() != stream2.get_brng())
+        return false;
+
+    std::size_t n = static_cast<std::size_t>(stream1.get_size());
+    Vector<char> s1(n);
+    Vector<char> s2(n);
+    stream1.save_m(s1.data());
+    stream2.save_m(s2.data());
+    if (s1 != s2)
+        return false;
+
+    return true;
+}
+
+inline bool operator!=(const MKLStream &stream1, const MKLStream &stream2)
+{
+    return !(stream1 == stream2);
+}
+
+template <typename CharT, typename Traits>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const MKLStream &stream)
+{
+    if (!os.good())
+        return os;
+
+    std::size_t n = static_cast<std::size_t>(stream.get_size());
+    std::size_t m = sizeof(std::uintmax_t) / sizeof(char);
+    if (n % m != 0)
+        n += m - n % m;
+    n /= m;
+    Vector<std::uintmax_t> s(n);
+    stream.save_m(reinterpret_cast<char *>(s.data()));
+
+    os << stream.get_brng() << ' ';
+    os << s;
+
+    return os;
+}
+
+template <typename CharT, typename Traits>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, MKLStream &stream)
+{
+    if (!is.good())
+        return is;
+
+    MKL_INT brng;
+    Vector<std::uintmax_t> s;
+    is >> std::ws >> brng;
+    is >> std::ws >> s;
+
+    if (is.good()) {
+        MKLStream tmp(brng, 0);
+        tmp.load_m(reinterpret_cast<const char *>(s.data()));
+        stream = std::move(tmp);
+    }
+
+    return is;
+}
+
 /// \brief MKL `VSLSSTaskPtr`
 /// \ingroup MKL
 template <typename RealType = double>
