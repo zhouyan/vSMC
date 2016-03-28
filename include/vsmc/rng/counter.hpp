@@ -394,21 +394,19 @@ class CounterEngine
     void discard(result_type nskip)
     {
         std::size_t n = static_cast<std::size_t>(nskip);
-        if (index_ + n <= M_) {
+        
+        if (n == 0)
+            return;
+
+        const std::size_t remain = M_ - index_;
+        if (n <= remain) {
             index_ += n;
             return;
         }
-
-        n -= M_ - index_;
-        if (n <= M_) {
-            index_ = M_;
-            operator()();
-            index_ = n;
-            return;
-        }
+        n -= remain;
+        index_ = M_;
 
         increment(ctr_, static_cast<result_type>(n / M_));
-        index_ = M_;
         operator()();
         index_ = n % M_;
     }
