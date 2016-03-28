@@ -34,10 +34,9 @@
 
 #include <vsmc/rng/internal/common.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_MKL_OFFSET(offset)                            \
-    VSMC_RUNTIME_ASSERT((offset < max()),                                     \
-        "**MKLOffsetDynamic** "                                               \
-        "EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS")
+#define VSMC_RUNTIME_WARNING_RNG_MKL_OFFSET                                   \
+    VSMC_RUNTIME_WARNING((offset < MaxOffset),                                \
+        "**MKLEngine** EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS")
 
 namespace vsmc
 {
@@ -45,62 +44,39 @@ namespace vsmc
 namespace internal
 {
 
-class MKLOffsetZero
+template <MKL_INT BRNG>
+class MKLMaxOffset : public std::integral_constant<MKL_INT, 0>
 {
-    public:
-    static constexpr MKL_INT min() { return 0; }
-    static constexpr MKL_INT max() { return 0; }
-    static void set(MKL_INT) {}
-    static constexpr MKL_INT get() { return 0; }
-}; // class OffsetZero
+}; // MKLMaxOffset;
 
-template <MKL_INT MaxOffset>
-class MKLOffsetDynamic
+template <>
+class MKLMaxOffset<VSL_BRNG_MT2203>
+    : public std::integral_constant<MKL_INT, 6024>
 {
-    public:
-    MKLOffsetDynamic() : offset_(0) {}
+}; // MKLMaxOffset
 
-    static constexpr MKL_INT min() { return 0; }
-    static constexpr MKL_INT max() { return MaxOffset; }
+template <>
+class MKLMaxOffset<VSL_BRNG_WH> : public std::integral_constant<MKL_INT, 273>
+{
+}; // MKLMaxOffset
 
-    void set(MKL_INT n)
-    {
-        VSMC_RUNTIME_ASSERT_RNG_MKL_OFFSET(n);
-        offset_ = n % MaxOffset;
-    }
-
-    MKL_INT get() const { return offset_; }
-
-    private:
-    MKL_INT offset_;
-}; // class OffsetDynamic
-
-template <MKL_INT>
+template <MKL_INT BRNG, MKL_INT MaxOffset = MKLMaxOffset<BRNG>::value>
 class MKLOffset
 {
     public:
-    using type = MKLOffsetZero;
+    static MKL_INT eval(MKL_INT offset)
+    {
+        VSMC_RUNTIME_WARNING_RNG_MKL_OFFSET;
+
+        return BRNG + offset % MaxOffset;
+    }
 }; // class MKLOffset
 
-template <>
-class MKLOffset<Dynamic>
+template <MKL_INT BRNG>
+class MKLOffset<BRNG, 0>
 {
     public:
-    using type = MKLOffsetDynamic<std::numeric_limits<MKL_INT>::max()>;
-}; // class MKLOffset
-
-template <>
-class MKLOffset<VSL_BRNG_MT2203>
-{
-    public:
-    using type = MKLOffsetDynamic<6024>;
-}; // class MKLOffset
-
-template <>
-class MKLOffset<VSL_BRNG_WH>
-{
-    public:
-    using type = MKLOffsetDynamic<273>;
+    static MKL_INT eval(MKL_INT) { return BRNG; }
 }; // class MKLOffset
 
 template <int>
@@ -146,110 +122,64 @@ class MKLUniformBits<64>
     }
 }; // class MKLUniformBits
 
-class MKLDiscardSkipAhead
-{
-    public:
-    static void eval(MKLStream &stream, long long nskip)
-    {
-        stream.skip_ahead(nskip);
-    }
-}; // class DiscardSkipAhead
-
-template <MKL_INT BRNG, int Bits>
-class MKLDiscardGeneral
-{
-    public:
-    static void eval(MKLStream &stream, long long nskip)
-    {
-        if (nskip == 0)
-            return;
-
-        std::array<MKLResultType<Bits>, 1024> buffer;
-        const MKL_INT k = static_cast<MKL_INT>(buffer.size());
-        while (nskip > k) {
-            MKLUniformBits<Bits>::eval(stream, k, buffer.data());
-            nskip -= k;
-        }
-        MKLUniformBits<Bits>::eval(
-            stream, static_cast<MKL_INT>(nskip), buffer.data());
-    }
-}; // class DiscardGeneral
-
-template <MKL_INT BRNG, int Bits>
-class MKLDiscard
-{
-    public:
-    using type = MKLDiscardGeneral<BRNG, Bits>;
-}; // clas MKLDiscard
-
-template <int Bits>
-class MKLDiscard<VSL_BRNG_MCG59, Bits>
-{
-    public:
-    using type = MKLDiscardSkipAhead;
-}; // clas MKLDiscard
-
-template <int Bits>
-class MKLDiscard<VSL_BRNG_MT19937, Bits>
-{
-    public:
-    using type = MKLDiscardSkipAhead;
-}; // clas MKLDiscard
-
-template <int Bits>
-class MKLDiscard<VSL_BRNG_SFMT19937, Bits>
-{
-    public:
-    using type = MKLDiscardSkipAhead;
-}; // clas MKLDiscard
-
 } // namespace vsmc::internal
 
-/// \brief MKL RNG C++11 engine
-/// \ingroup MKLRNG
-template <MKL_INT BRNG, int Bits>
-class MKLEngine
+/// \brief MKL RNG generator
+///
+/// \details
+/// This class is almost like an C++11 engine except its constructors and
+/// seeding methods. The RNG type `BRNG` is provided at runtime.
+template <int Bits>
+class MKLGenerator
 {
+    static_assert(Bits == 32 || Bits == 64,
+        "**MKLGenerator** USED WITH Bits OTHER THAN 32 OR 64");
+
     public:
     using result_type = internal::MKLResultType<Bits>;
 
-    explicit MKLEngine(MKL_UINT s = 1) : index_(M_), stream_(BRNG, 0)
+    explicit MKLGenerator(MKL_INT brng, MKL_UINT s = 1) : index_(M_)
     {
-        seed(s);
+        seed(brng, s);
+    }
+
+    MKLGenerator(MKL_INT brng, MKL_INT n, unsigned *params) : index_(M_)
+    {
+        seed(brng, n, params);
     }
 
     template <typename SeedSeq>
-    explicit MKLEngine(SeedSeq &seq,
+    explicit MKLGenerator(MKL_INT brng, SeedSeq &seq,
         typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
-            MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
-        : index_(M_), stream_(BRNG, 0)
+            MKLGenerator<Bits>>::value>::type * = nullptr)
+        : index_(M_), stream_(brng, 0)
     {
-        seed(seq);
+        seed(brng, seq);
     }
 
-    MKLEngine(MKL_UINT s, MKL_INT offset) : index_(M_), stream_(BRNG, 0)
+    void seed(MKL_INT brng, MKL_UINT s)
     {
-        seed(s, offset);
+        stream_.reset(brng, s);
+        index_ = M_;
     }
 
-    void seed(MKL_UINT s) { seed(s, 0); }
+    void seed(MKL_INT brng, MKL_INT n, unsigned *params)
+    {
+        stream_.reset(brng, n, params);
+        index_ = M_;
+    }
 
     template <typename SeedSeq>
-    void seed(SeedSeq &seq,
+    void seed(MKL_INT brng, SeedSeq &seq,
         typename std::enable_if<
             internal::is_seed_seq<SeedSeq, MKL_UINT>::value>::type * = nullptr)
     {
-        MKL_UINT s;
-        seq.generate(&s, &s + 1);
-        seed(s, 0);
-    }
-
-    void seed(MKL_UINT s, MKL_INT offset)
-    {
-        typename internal::MKLOffset<BRNG>::type off;
-        off.set(offset);
-        stream_.reset(BRNG + off.get(), s);
-        index_ = M_;
+        ::VSLBRngProperties properties;
+        MKLStream::get_brng_properties(brng, &properties);
+        MKL_INT n = properties.NSeeds;
+        Vector<unsigned> params(static_cast<std::size_t>(n));
+        seq.generate(params.begin(), params.end());
+        seed(brng, n, params.data());
     }
 
     result_type operator()()
@@ -292,8 +222,40 @@ class MKLEngine
 
     void discard(long long nskip)
     {
-        internal::MKLDiscard<BRNG, Bits>::eval(stream_, nskip);
+        std::size_t n = static_cast<std::size_t>(nskip);
+
+        if (n == 0)
+            return;
+
+        std::size_t remain = M_ - index_;
+        if (n <= remain) {
+            index_ += n;
+            return;
+        }
+        n -= remain;
         index_ = M_;
+
+        long long m = static_cast<long long>(n / M_ * M_);
+        switch (stream_.get_brng()) {
+            case VSL_BRNG_MCG31: stream_.skip_ahead(m); break;
+            case VSL_BRNG_MRG32K3A: stream_.skip_ahead(m); break;
+            case VSL_BRNG_MCG59: stream_.skip_ahead(m); break;
+            case VSL_BRNG_WH: stream_.skip_ahead(m); break;
+            case VSL_BRNG_MT19937: stream_.skip_ahead(m); break;
+            case VSL_BRNG_SFMT19937: stream_.skip_ahead(m); break;
+            case VSL_BRNG_SOBOL: stream_.skip_ahead(m); break;
+            case VSL_BRNG_NIEDERR: stream_.skip_ahead(m); break;
+            case VSL_BRNG_PHILOX4X32X10: stream_.skip_ahead(m); break;
+            case VSL_BRNG_ARS5: stream_.skip_ahead(m); break;
+            default:
+                while (n > M_) {
+                    operator()();
+                    n -= M_;
+                }
+                break;
+        };
+        operator()();
+        index_ = n % M_;
     }
 
     static constexpr result_type min()
@@ -310,90 +272,81 @@ class MKLEngine
     const MKLStream &stream() const { return stream_; }
 
     friend bool operator==(
-        const MKLEngine<BRNG, Bits> &eng1, const MKLEngine<BRNG, Bits> &eng2)
+        const MKLGenerator<Bits> &gen1, const MKLGenerator<Bits> &gen2)
     {
-        if (eng1.stream_.get_brng() != eng2.stream_.get_brng())
+        if (gen1.stream_.get_brng() != gen2.stream_.get_brng())
             return false;
-        std::size_t n = static_cast<std::size_t>(eng1.stream_.get_size());
+        std::size_t n = static_cast<std::size_t>(gen1.stream_.get_size());
         Vector<char> s1(n);
         Vector<char> s2(n);
-        eng1.stream_.save_m(s1.data());
-        eng2.stream_.save_m(s2.data());
+        gen1.stream_.save_m(s1.data());
+        gen2.stream_.save_m(s2.data());
         if (s1 != s2)
             return false;
-        if (eng1.buffer_ != eng2.buffer_)
+        if (gen1.buffer_ != gen2.buffer_)
             return false;
-        if (eng1.index_ != eng2.index_)
+        if (gen1.index_ != gen2.index_)
             return false;
         return true;
     }
 
     friend bool operator!=(
-        const MKLEngine<BRNG, Bits> &eng1, const MKLEngine<BRNG, Bits> &eng2)
+        const MKLGenerator<Bits> &gen1, const MKLGenerator<Bits> &gen2)
     {
-        return !(eng1 == eng2);
+        return !(gen1 == gen2);
     }
 
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os,
-        const MKLEngine<BRNG, Bits> &eng)
+        std::basic_ostream<CharT, Traits> &os, const MKLGenerator<Bits> &gen)
     {
         if (!os.good())
             return os;
 
-        os << eng.stream_.get_brng() << ' ';
-        std::size_t n = static_cast<std::size_t>(eng.stream_.get_size());
+        os << gen.stream_.get_brng() << ' ';
+
+        std::size_t n = static_cast<std::size_t>(gen.stream_.get_size());
         if (n % sizeof(std::uint64_t) != 0)
             n += sizeof(std::uint64_t) - n % sizeof(std::uint64_t);
         n /= sizeof(std::uint64_t);
         Vector<std::uint64_t> s(n);
-        eng.stream_.save_m(reinterpret_cast<char *>(s.data()));
-        for (std::size_t i = 0; i != n; ++i)
-            os << s[i] << ' ';
-        os << eng.buffer_ << ' ';
-        os << eng.index_;
+        gen.stream_.save_m(reinterpret_cast<char *>(s.data()));
+        os << s << ' ';
+
+        os << gen.buffer_ << ' ';
+        os << gen.index_;
 
         return os;
     }
 
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is, MKLEngine<BRNG, Bits> &eng)
+        std::basic_istream<CharT, Traits> &is, MKLGenerator<Bits> &gen)
     {
         if (!is.good())
             return is;
 
         MKL_INT brng = 0;
-        MKLStream stream(BRNG, 1);
-        std::array<result_type, M_> buffer;
-        std::size_t index = 0;
-
         is >> std::ws >> brng;
-        if (is.good())
-            stream.reset(brng, 1);
-        else
+        if (!is.good())
             return is;
 
-        std::size_t n = static_cast<std::size_t>(eng.stream_.get_size());
-        if (n % sizeof(std::uint64_t) != 0)
-            n += sizeof(std::uint64_t) - n % sizeof(std::uint64_t);
-        n /= sizeof(std::uint64_t);
-        Vector<std::uint64_t> s(n);
-        for (std::size_t i = 0; i != n; ++i)
-            is >> std::ws >> s[i];
-        if (is.good())
-            stream.load_m(reinterpret_cast<const char *>(s.data()));
-        else
+        MKLStream stream(brng, 1);
+        Vector<std::uint64_t> s;
+        is >> std::ws >> s;
+        if (!is.good())
             return is;
 
+        stream.load_m(reinterpret_cast<const char *>(s.data()));
+        Vector<result_type> buffer(M_);
+        std::size_t index = 0;
         is >> std::ws >> buffer;
         is >> std::ws >> index;
 
         if (is.good()) {
-            eng.stream_ = stream;
-            eng.buffer_ = buffer;
-            eng.index_ = index;
+            gen.stream_ = std::move(stream);
+            gen.buffer_ = std::move(buffer);
+            gen.index_ = index;
         }
 
         return is;
@@ -411,6 +364,48 @@ class MKLEngine
         buffer_.resize(M_);
         internal::MKLUniformBits<Bits>::eval(
             stream_, static_cast<MKL_INT>(M_), buffer_.data());
+    }
+}; // class MKLGenerator
+
+/// \brief MKL RNG C++11 engine
+/// \ingroup MKLRNG
+template <MKL_INT BRNG, int Bits>
+class MKLEngine : public MKLGenerator<Bits>
+{
+    public:
+    explicit MKLEngine(MKL_UINT s = 1) : MKLGenerator<Bits>(BRNG, s) {}
+
+    template <typename SeedSeq>
+    explicit MKLEngine(SeedSeq &seq,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
+            MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
+        : MKLGenerator<Bits>(BRNG, seq)
+    {
+    }
+
+    MKLEngine(MKL_UINT s, MKL_INT offset)
+        : MKLGenerator<Bits>(internal::MKLOffset<BRNG>::eval(offset), s)
+    {
+        static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
+            "**MKLEngine** DOES NOT SUPPORT OFFSETING");
+    }
+
+    void seed(MKL_UINT s) { MKLGenerator<Bits>::seed(s); }
+
+    template <typename SeedSeq>
+    void seed(SeedSeq &seq,
+        typename std::enable_if<
+            internal::is_seed_seq<SeedSeq, MKL_UINT>::value>::type * = nullptr)
+    {
+        MKLGenerator<Bits>::seed(this->stream().get_brng(), seq);
+    }
+
+    void seed(MKL_UINT s, MKL_INT offset)
+    {
+        static_assert(internal::MKLOffset<BRNG>::value > 0,
+            "**MKLEngine** DOES NOT SUPPORT OFFSETING");
+
+        MKLGenerator<Bits>::seed(internal::MKLOffset<BRNG>::eval(offset), s);
     }
 }; // class MKLEngine
 
