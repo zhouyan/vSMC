@@ -181,10 +181,10 @@ int vsmc_seed_save(void *mem);
  * `mem` points to memory previously written by `vsmc_seed_save` */
 void vsmc_seed_load(const void *mem);
 
-/** \brief `vsmc::Seed::operator<<` direct to external file */
+/** \brief `vsmc::Seed::operator<<` directly to an external file */
 void vsmc_seed_save_f(const char *filename);
 
-/** \brief `vsmc::Seed::operator>>` direct from external file */
+/** \brief `vsmc::Seed::operator>>` directly from an external file */
 void vsmc_seed_load_f(const char *filename);
 
 /** @} */ /* C_API_RNG_Seed */
@@ -223,6 +223,27 @@ void vsmc_rng_set_ctr(vsmc_rng rng, int n, const int *ctr);
 
 /** \brief `vsmc::rng_rand` */
 void vsmc_rng_rand(vsmc_rng rng, int n, int *r);
+
+/** \brief `vsmc::RNG::discard` */
+void vsmc_rng_discard(vsmc_rng rng, int nskip);
+
+/** \brief `vsmc::RNG::operator==` */
+int vsmc_rng_is_eq(vsmc_rng rng1, vsmc_rng rng2);
+
+/** \brief `vsmc::RNG::operator!=` */
+int vsmc_rng_is_neq(vsmc_rng rng1, vsmc_rng rng2);
+
+/** \brief `vsmc::RNG::operator<<` */
+int vsmc_rng_save(vsmc_rng rng, void *mem);
+
+/** \brief `vsmc::RNG::operator>>` */
+void vsmc_rng_load(vsmc_rng rng, void *mem);
+
+/** \brief `vsmc::RNG::operator<<` directly to an external file */
+void vsmc_rng_save_f(vsmc_rng rng, const char *filename);
+
+/** \brief `vsmc::RNG::operator>>` directly from an external file*/
+void vsmc_rng_load_f(vsmc_rng rng, const char *filename);
 
 /** @} */ /* C_API_RNG_RNG */
 
@@ -1045,7 +1066,7 @@ void vsmc_sampler_clear_monitor_all(vsmc_sampler sampler);
 /** \brief `operator<<(vsmc::Sampler)` */
 int vsmc_sampler_save(vsmc_sampler sampler, char *mem);
 
-/** \brief `operator<<(vsmc::Sampler::Sampler)` direct to file */
+/** \brief `operator<<(vsmc::Sampler::Sampler)` directly to an external file */
 void vsmc_sampler_save_f(vsmc_sampler sampler, const char *filename);
 
 /** @} */ /* C_API_Core_Sampler */

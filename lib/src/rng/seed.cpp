@@ -71,7 +71,7 @@ void vsmc_seed_load(const void *mem)
 void vsmc_seed_save_f(const char *filename)
 {
     std::ofstream os(filename);
-    os << ::vsmc::Seed::instance();
+    os << ::vsmc::Seed::instance() << std::endl;
     os.close();
 }
 

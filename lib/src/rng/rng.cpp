@@ -101,4 +101,47 @@ void vsmc_rng_rand(vsmc_rng rng, int n, int *r)
         reinterpret_cast<unsigned *>(r));
 }
 
+void vsmc_rng_discard(vsmc_rng rng, int nskip)
+{
+    ::vsmc::cast(rng).discard(static_cast<::vsmc::RNG::result_type>(nskip));
+}
+
+int vsmc_rng_is_eq(vsmc_rng rng1, vsmc_rng rng2)
+{
+    return static_cast<int>(::vsmc::cast(rng1) == ::vsmc::cast(rng2));
+}
+
+int vsmc_rng_is_neq(vsmc_rng rng1, vsmc_rng rng2)
+{
+    return static_cast<int>(::vsmc::cast(rng1) != ::vsmc::cast(rng2));
+}
+
+int vsmc_rng_save(vsmc_rng rng, void *mem)
+{
+    std::size_t size = sizeof(::vsmc::RNG);
+    if (mem != nullptr)
+        std::memcpy(mem, rng.ptr, size);
+
+    return static_cast<int>(size);
+}
+
+void vsmc_rng_load(vsmc_rng rng, void *mem)
+{
+    std::memcpy(rng.ptr, mem, sizeof(::vsmc::RNG));
+}
+
+void vsmc_rng_save_f(vsmc_rng rng, const char *filename)
+{
+    std::ofstream os(filename);
+    os << ::vsmc::cast(rng) << std::endl;
+    os.close();
+}
+
+void vsmc_rng_load_f(vsmc_rng rng, const char *filename)
+{
+    std::ifstream is(filename);
+    is >> ::vsmc::cast(rng);
+    is.close();
+}
+
 } // extern "C"
