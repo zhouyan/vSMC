@@ -95,6 +95,11 @@ void vsmc_rng_set_ctr(vsmc_rng rng, int n, const int *ctr)
     ::vsmc::cast(rng).ctr(c);
 }
 
+int vsmc_rng_rand1(vsmc_rng rng)
+{
+    return static_cast<int>(::vsmc::cast(rng)());
+}
+
 void vsmc_rng_rand(vsmc_rng rng, int n, int *r)
 {
     ::vsmc::rng_rand(::vsmc::cast(rng), static_cast<std::size_t>(n),

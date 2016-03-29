@@ -221,6 +221,9 @@ void vsmc_rng_get_ctr(vsmc_rng rng, int n, int *ctr);
 /** \brief `vsmc::RNG::ctr` */
 void vsmc_rng_set_ctr(vsmc_rng rng, int n, const int *ctr);
 
+/** \brief `vsmc::RNG::operator()` */
+int vsmc_rng_rand1(vsmc_rng rng);
+
 /** \brief `vsmc::rng_rand` */
 void vsmc_rng_rand(vsmc_rng rng, int n, int *r);
 
