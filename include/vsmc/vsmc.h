@@ -173,7 +173,7 @@ void vsmc_seed_skip(int steps);
  * \details
  * If `mem == nullptr`, return the number of bytes required in `mem`.
  * Otherwise, store `vsmc::Seed::instacne()` in `mem` */
-int vsmc_seed_save(void *mem);
+size_t vsmc_seed_save(void *mem);
 
 /** \brief `vsmc::Seed::operator>>`
  *
@@ -237,7 +237,7 @@ int vsmc_rng_is_eq(vsmc_rng rng1, vsmc_rng rng2);
 int vsmc_rng_is_neq(vsmc_rng rng1, vsmc_rng rng2);
 
 /** \brief `vsmc::RNG::operator<<` */
-int vsmc_rng_save(vsmc_rng rng, void *mem);
+size_t vsmc_rng_save(vsmc_rng rng, void *mem);
 
 /** \brief `vsmc::RNG::operator>>` */
 void vsmc_rng_load(vsmc_rng rng, void *mem);
@@ -1148,11 +1148,12 @@ void vsmc_sampler_clear_monitor(vsmc_sampler sampler, const char *name);
 /** \brief `vsmc::Sampler::clear_monitor` */
 void vsmc_sampler_clear_monitor_all(vsmc_sampler sampler);
 
-/** \brief `operator<<(vsmc::Sampler)` */
-int vsmc_sampler_save(vsmc_sampler sampler, char *mem);
+/** \brief `vsmc::Sampler::print` */
+size_t vsmc_sampler_print(vsmc_sampler sampler, char *buf, char sepchar);
 
-/** \brief `operator<<(vsmc::Sampler::Sampler)` directly to an external file */
-void vsmc_sampler_save_f(vsmc_sampler sampler, const char *filename);
+/** \brief `vsmc::Sampler::print` directly to an external file */
+void vsmc_sampler_print_f(
+    vsmc_sampler sampler, const char *filename, char sepchar);
 
 /** @} */ /* C_API_Core_Sampler */
 

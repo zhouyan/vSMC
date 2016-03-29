@@ -287,22 +287,23 @@ void vsmc_sampler_clear_monitor_all(vsmc_sampler sampler)
     ::vsmc::cast(sampler).clear_monitor();
 }
 
-int vsmc_sampler_save(const vsmc_sampler sampler, char *mem)
+size_t vsmc_sampler_print(vsmc_sampler sampler, char *buf, char sepchar)
 {
     std::stringstream ss;
-    ss << ::vsmc::cast(sampler);
+    ::vsmc::cast(sampler).print(ss, sepchar);
     std::string str(ss.str());
     std::size_t size = (str.size() + 1) * sizeof(char);
-    if (mem != nullptr)
-        std::memcpy(mem, str.c_str(), size);
+    if (buf != nullptr)
+        std::memcpy(buf, str.c_str(), size);
 
-    return static_cast<int>(size);
+    return size;
 }
 
-void vsmc_sampler_save_f(const vsmc_sampler sampler, const char *filename)
+void vsmc_sampler_print_f(
+    vsmc_sampler sampler, const char *filename, char sepchar)
 {
     std::ofstream os(filename);
-    os << ::vsmc::cast(sampler);
+    ::vsmc::cast(sampler).print(os, sepchar);
     os.close();
 }
 

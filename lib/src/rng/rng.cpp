@@ -121,13 +121,13 @@ int vsmc_rng_is_neq(vsmc_rng rng1, vsmc_rng rng2)
     return static_cast<int>(::vsmc::cast(rng1) != ::vsmc::cast(rng2));
 }
 
-int vsmc_rng_save(vsmc_rng rng, void *mem)
+size_t vsmc_rng_save(vsmc_rng rng, void *mem)
 {
     std::size_t size = sizeof(::vsmc::RNG);
     if (mem != nullptr)
         std::memcpy(mem, rng.ptr, size);
 
-    return static_cast<int>(size);
+    return size;
 }
 
 void vsmc_rng_load(vsmc_rng rng, void *mem)
