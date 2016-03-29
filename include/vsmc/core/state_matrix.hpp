@@ -165,23 +165,6 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         return first;
     }
 
-    template <typename CharT, typename Traits>
-    std::basic_ostream<CharT, Traits> &print(
-        std::basic_ostream<CharT, Traits> &os, char sepchar = '\t') const
-    {
-        if (this->dim() == 0 || size_ == 0 || !os.good())
-            return os;
-
-        auto sptr = static_cast<const StateMatrix<Layout, Dim, T> *>(this);
-        for (size_type i = 0; i != size_; ++i) {
-            for (std::size_t d = 0; d != this->dim() - 1; ++d)
-                os << sptr->state(i, d) << sepchar;
-            os << sptr->state(i, this->dim() - 1) << '\n';
-        }
-
-        return os;
-    }
-
     protected:
     explicit StateMatrixBase(size_type N = 0) : size_(N), data_(N * Dim) {}
 
@@ -526,15 +509,6 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
             src, dst, std::integral_constant<bool, D + 1 < Dim>());
     }
 }; // class StateMatrix
-
-template <typename CharT, typename Traits, MatrixLayout Layout,
-    std::size_t Dim, typename T>
-inline std::basic_ostream<CharT, Traits> &operator<<(
-    std::basic_ostream<CharT, Traits> &os,
-    const StateMatrix<Layout, Dim, T> &state)
-{
-    return state.print(os);
-}
 
 template <MatrixLayout Layout, std::size_t Dim, typename T>
 inline bool operator==(const StateMatrix<Layout, Dim, T> &state1,
