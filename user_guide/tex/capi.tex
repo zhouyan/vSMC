@@ -16,8 +16,9 @@ appendix, we introduce the conventions used in the \api.
 \label{sec:Argument types}
 
 For all C interfaces, \verb|int| is always used for integer types, regardless
-of the \cpp interfaces. And \verb|double| is always used for floating points.
-For example, the following method of \verb|Seed|,
+of the \cpp interfaces, except for memory functions. And \verb|double| is
+always used for floating points. For example, the following method of
+\verb|Seed|,
 \begin{cppcode}
   unsigned get();
 \end{cppcode}
