@@ -71,10 +71,10 @@ static inline void pf_normal(
     vsmc_vector_resize(&pf_vel_x, size);
     vsmc_vector_resize(&pf_vel_y, size);
     vsmc_vector_resize(&pf_weight, size);
-    vsmc_normal_distribution(rng, size, pf_pos_x.data, 0, sd_pos);
-    vsmc_normal_distribution(rng, size, pf_pos_y.data, 0, sd_pos);
-    vsmc_normal_distribution(rng, size, pf_vel_x.data, 0, sd_vel);
-    vsmc_normal_distribution(rng, size, pf_vel_y.data, 0, sd_vel);
+    vsmc_normal_rand(rng, size, pf_pos_x.data, 0, sd_pos);
+    vsmc_normal_rand(rng, size, pf_pos_y.data, 0, sd_pos);
+    vsmc_normal_rand(rng, size, pf_vel_x.data, 0, sd_vel);
+    vsmc_normal_rand(rng, size, pf_vel_y.data, 0, sd_vel);
 }
 
 static inline int pf_init(vsmc_particle particle, void *param)

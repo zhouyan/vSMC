@@ -268,111 +268,193 @@ void vsmc_u01_systematic(int n, double u01, double *u01seq);
 /** @{ */
 
 /** \brief `vsmc::DiscreteDistribution<int>` */
-void vsmc_discrete_distribution(
+int vsmc_discrete_rand1(
+    vsmc_rng rng, int m, const double *weight, int normalized);
+
+/** \brief `vsmc::DiscreteDistribution<int>` */
+void vsmc_discrete_rand(
     vsmc_rng rng, int n, int *r, int m, const double *weight, int normalized);
 
 /** \brief `std::uniform_int_distribution<int>` */
-void vsmc_uniform_int_distribution(vsmc_rng rng, int n, int *r, int a, int b);
+int vsmc_uniform_int_rand1(vsmc_rng rng, int a, int b);
+
+/** \brief `std::uniform_int_distribution<int>` */
+void vsmc_uniform_int_rand(vsmc_rng rng, int n, int *r, int a, int b);
 
 /** \brief `std::bernoulli_distribution` */
-void vsmc_bernoulli_distribution(vsmc_rng rng, int n, int *r, double p);
+int vsmc_bernoulli_rand1(vsmc_rng rng, double p);
+
+/** \brief `std::bernoulli_distribution` */
+void vsmc_bernoulli_rand(vsmc_rng rng, int n, int *r, double p);
 
 /** \brief `std::binomial_distribution<int>` */
-void vsmc_binomial_distribution(vsmc_rng rng, int n, int *r, int t, double p);
+int vsmc_binomial_rand1(vsmc_rng rng, int t, double p);
+
+/** \brief `std::binomial_distribution<int>` */
+void vsmc_binomial_rand(vsmc_rng rng, int n, int *r, int t, double p);
 
 /** \brief `std::negative_binomial_distribution<int>` */
-void vsmc_negative_binomial_distribution(
-    vsmc_rng rng, int n, int *r, int k, double p);
+int vsmc_negative_binomial_rand1(vsmc_rng rng, int k, double p);
+
+/** \brief `std::negative_binomial_distribution<int>` */
+void vsmc_negative_binomial_rand(vsmc_rng rng, int n, int *r, int k, double p);
 
 /** \brief `std::geometric_distribution<int>` */
-void vsmc_geometric_distribution(vsmc_rng rng, int n, int *r, double p);
+int vsmc_geometric_rand1(vsmc_rng rng, double p);
+
+/** \brief `std::geometric_distribution<int>` */
+void vsmc_geometric_rand(vsmc_rng rng, int n, int *r, double p);
 
 /** \brief `std::poisson_distribution<int>` */
-void vsmc_poisson_distribution(vsmc_rng rng, int n, int *r, double mean);
+int vsmc_poisson_rand1(vsmc_rng rng, double mean);
+
+/** \brief `std::poisson_distribution<int>` */
+void vsmc_poisson_rand(vsmc_rng rng, int n, int *r, double mean);
 
 /** \brief `vsmc::beta_distribution<double>` */
-void vsmc_beta_distribution(
-    vsmc_rng rng, int n, double *r, double alpha, double beta);
+double vsmc_beta_rand1(vsmc_rng rng, double alpha, double beta);
+
+/** \brief `vsmc::beta_distribution<double>` */
+void vsmc_beta_rand(vsmc_rng rng, int n, double *r, double alpha, double beta);
 
 /** \brief `vsmc::cauchy_distribution<double>` */
-void vsmc_cauchy_distribution(
-    vsmc_rng rng, int n, double *r, double a, double b);
+double vsmc_cauchy_rand1(vsmc_rng rng, double a, double b);
+
+/** \brief `vsmc::cauchy_distribution<double>` */
+void vsmc_cauchy_rand(vsmc_rng rng, int n, double *r, double a, double b);
 
 /** \brief `vsmc::chi_squared_distribution<double>` */
-void vsmc_chi_squared_distribution(vsmc_rng rng, int n, double *r, double df);
+double vsmc_chi_squared_rand1(vsmc_rng rng, double df);
+
+/** \brief `vsmc::chi_squared_distribution<double>` */
+void vsmc_chi_squared_rand(vsmc_rng rng, int n, double *r, double df);
 
 /** \brief `vsmc::exponential_distribution<double>` */
-void vsmc_exponential_distribution(
-    vsmc_rng rng, int n, double *r, double lambda);
+double vsmc_exponential_rand1(vsmc_rng rng, double lambda);
+
+/** \brief `vsmc::exponential_distribution<double>` */
+void vsmc_exponential_rand(vsmc_rng rng, int n, double *r, double lambda);
 
 /** \brief `vsmc::extreme_value_distribution<double>` */
-void vsmc_extreme_value_distribution(
+double vsmc_extreme_value_rand1(vsmc_rng rng, double a, double b);
+
+/** \brief `vsmc::extreme_value_distribution<double>` */
+void vsmc_extreme_value_rand(
     vsmc_rng rng, int n, double *r, double a, double b);
 
 /** \brief `vsmc::fisher_f_distribution<double>` */
-void vsmc_fisher_f_distribution(
+double vsmc_fisher_f_rand1(vsmc_rng rng, double df1, double df2);
+
+/** \brief `vsmc::fisher_f_distribution<double>` */
+void vsmc_fisher_f_rand(
     vsmc_rng rng, int n, double *r, double df1, double df2);
 
 /** \brief `vsmc::gamma_distribution<double>` */
-void vsmc_gamma_distribution(
+double vsmc_gamma_rand1(vsmc_rng rng, double alpha, double beta);
+
+/** \brief `vsmc::gamma_distribution<double>` */
+void vsmc_gamma_rand(
     vsmc_rng rng, int n, double *r, double alpha, double beta);
 
 /** \brief `vsmc::laplace_distribution<double>` */
-void vsmc_laplace_distribution(
-    vsmc_rng rng, int n, double *r, double a, double b);
+double vsmc_laplace_rand1(vsmc_rng rng, double a, double b);
+
+/** \brief `vsmc::laplace_distribution<double>` */
+void vsmc_laplace_rand(vsmc_rng rng, int n, double *r, double a, double b);
 
 /** \brief `vsmc::levy_distribution<double>` */
-void vsmc_levy_distribution(
-    vsmc_rng rng, int n, double *r, double a, double b);
+double vsmc_levy_rand1(vsmc_rng rng, double a, double b);
+
+/** \brief `vsmc::levy_distribution<double>` */
+void vsmc_levy_rand(vsmc_rng rng, int n, double *r, double a, double b);
 
 /** \brief `vsmc::logistic_distribution<double>` */
-void vsmc_logistic_distribution(
-    vsmc_rng rng, int n, double *r, double a, double b);
+double vsmc_logistic_rand1(vsmc_rng rng, double a, double b);
+
+/** \brief `vsmc::logistic_distribution<double>` */
+void vsmc_logistic_rand(vsmc_rng rng, int n, double *r, double a, double b);
 
 /** \brief `vsmc::lognormal_distribution<double>` */
-void vsmc_lognormal_distribution(
-    vsmc_rng rng, int n, double *r, double m, double s);
+double vsmc_lognormal_rand1(vsmc_rng rng, double m, double s);
+
+/** \brief `vsmc::lognormal_distribution<double>` */
+void vsmc_lognormal_rand(vsmc_rng rng, int n, double *r, double m, double s);
 
 /** \brief `vsmc::normal_distribution<double>` */
-void vsmc_normal_distribution(
+double vsmc_normal_rand1(vsmc_rng rng, double mean, double stddev);
+
+/** \brief `vsmc::normal_distribution<double>` */
+void vsmc_normal_rand(
     vsmc_rng rng, int n, double *r, double mean, double stddev);
 
 /** \brief `vsmc::normal_mv_distribution<double>` */
-void vsmc_normal_mv_distribution(vsmc_rng rng, int n, double *r, int dim,
+void vsmc_normal_mv_rand1(
+    vsmc_rng rng, double *r, int dim, const double *mean, const double *chol);
+
+/** \brief `vsmc::normal_mv_distribution<double>` */
+void vsmc_normal_mv_rand(vsmc_rng rng, int n, double *r, int dim,
     const double *mean, const double *chol);
 
 /** \brief `vsmc::pareto_distribution<double>` */
-void vsmc_pareto_distribution(
-    vsmc_rng rng, int n, double *r, double a, double b);
+double vsmc_pareto_rand1(vsmc_rng rng, double a, double b);
+
+/** \brief `vsmc::pareto_distribution<double>` */
+void vsmc_pareto_rand(vsmc_rng rng, int n, double *r, double a, double b);
 
 /** \brief `vsmc::rayleigh_distribution<double>` */
-void vsmc_rayleigh_distribution(vsmc_rng rng, int n, double *r, double b);
+double vsmc_rayleigh_rand1(vsmc_rng rng, double b);
+
+/** \brief `vsmc::rayleigh_distribution<double>` */
+void vsmc_rayleigh_rand(vsmc_rng rng, int n, double *r, double b);
 
 /** \brief `vsmc::student_t_distribution<double>` */
-void vsmc_student_t_distribution(vsmc_rng rng, int n, double *r, double df);
+double vsmc_student_t_rand1(vsmc_rng rng, double df);
+
+/** \brief `vsmc::student_t_distribution<double>` */
+void vsmc_student_t_rand(vsmc_rng rng, int n, double *r, double df);
 
 /** \brief `vsmc::u01_distribution<double>` */
-void vsmc_u01_distribution(vsmc_rng rng, int n, double *r);
+double vsmc_u01_rand1(vsmc_rng rng);
+
+/** \brief `vsmc::u01_distribution<double>` */
+void vsmc_u01_rand(vsmc_rng rng, int n, double *r);
 
 /** \brief `vsmc::u01_cc_distribution<double>` */
-void vsmc_u01_cc_distribution(vsmc_rng rng, int n, double *r);
+double vsmc_u01_cc_rand1(vsmc_rng rng);
+
+/** \brief `vsmc::u01_cc_distribution<double>` */
+void vsmc_u01_cc_rand(vsmc_rng rng, int n, double *r);
 
 /** \brief `vsmc::u01_co_distribution<double>` */
-void vsmc_u01_co_distribution(vsmc_rng rng, int n, double *r);
+double vsmc_u01_co_rand1(vsmc_rng rng);
+
+/** \brief `vsmc::u01_co_distribution<double>` */
+void vsmc_u01_co_rand(vsmc_rng rng, int n, double *r);
 
 /** \brief `vsmc::u01_oc_distribution<double>` */
-void vsmc_u01_oc_distribution(vsmc_rng rng, int n, double *r);
+double vsmc_u01_oc_rand1(vsmc_rng rng);
+
+/** \brief `vsmc::u01_oc_distribution<double>` */
+void vsmc_u01_oc_rand(vsmc_rng rng, int n, double *r);
 
 /** \brief `vsmc::u01_oo_distribution<double>` */
-void vsmc_u01_oo_distribution(vsmc_rng rng, int n, double *r);
+double vsmc_u01_oo_rand1(vsmc_rng rng);
+
+/** \brief `vsmc::u01_oo_distribution<double>` */
+void vsmc_u01_oo_rand(vsmc_rng rng, int n, double *r);
 
 /** \brief `vsmc::uniform_real_distribution<double>` */
-void vsmc_uniform_real_distribution(
+double vsmc_uniform_real_rand1(vsmc_rng rng, double a, double b);
+
+/** \brief `vsmc::uniform_real_distribution<double>` */
+void vsmc_uniform_real_rand(
     vsmc_rng rng, int n, double *r, double a, double b);
 
 /** \brief `vsmc::weibull_distribution<double>` */
-void vsmc_weibull_distribution(
-    vsmc_rng rng, int n, double *r, double a, double b);
+double vsmc_weibull_rand1(vsmc_rng rng, double a, double b);
+
+/** \brief `vsmc::weibull_distribution<double>` */
+void vsmc_weibull_rand(vsmc_rng rng, int n, double *r, double a, double b);
 
 /** @} */ /* C_API_RNG_DISTRIBUITON */
 
