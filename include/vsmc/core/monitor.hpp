@@ -182,23 +182,12 @@ class Monitor
     template <typename OutputIter>
     OutputIter read_record(std::size_t id, OutputIter first) const
     {
+        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(record);
+
         const std::size_t N = iter_size();
         const double *riter = record_.data() + id;
         for (std::size_t i = 0; i != N; ++i, ++first, riter += dim_)
             *first = *riter;
-
-        return first;
-    }
-
-    /// \brief Read the record history of all variables as a list through an
-    /// array of output iterators
-    ///
-    /// \param first An iterator whose value type is itself an output iterator
-    template <typename OutputIterIter>
-    OutputIterIter read_record_list(OutputIterIter first) const
-    {
-        for (std::size_t id = 0; id != dim_; ++id, ++first)
-            read_record(id, *first);
 
         return first;
     }
