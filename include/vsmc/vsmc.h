@@ -1380,69 +1380,67 @@ void vsmc_covariance_compute(vsmc_covariance covariance,
 /** @{ */
 
 /** \brief `vsmc::hdf5size` */
-int vsmc_hdf5size(const char *file_name, const char *data_name);
+int vsmc_hdf5size(const char *filename, const char *dataname);
 
 /** \brief `vsmc::hdf5load<double>` */
 double *vsmc_hdf5load(
-    const char *file_name, const char *data_name, double *first);
+    const char *filename, const char *dataname, double *first);
 
 /** \brief `vsmc::hdf5load<int>` */
-int *vsmc_hdf5load_int(
-    const char *file_name, const char *data_name, int *first);
+int *vsmc_hdf5load_int(const char *filename, const char *dataname, int *first);
 
 /** \brief `vsmc::hdf5load<unsigned char>` */
 unsigned char *vsmc_hdf5load_raw(
-    const char *file_name, const char *data_name, unsigned char *first);
+    const char *filename, const char *dataname, unsigned char *first);
 
 /** \brief `vsmc::hdf5store_new` */
-void vsmc_hdf5store_new(const char *file_name);
+void vsmc_hdf5store_new(const char *filename);
 
 /** \brief `vsmc::hdf5store_matrix<double>` */
 void vsmc_hdf5store_matrix(vSMCMatrixLayout layout, int nrow, int ncol,
-    const char *file_name, const char *data_name, const double *first,
+    const char *filename, const char *dataname, const double *first,
     int append);
 
 /** \brief `vsmc::hdf5store_matrix<int>` */
 void vsmc_hdf5store_matrix_int(vSMCMatrixLayout layout, int nrow, int ncol,
-    const char *file_name, const char *data_name, const int *first,
-    int append);
+    const char *filename, const char *dataname, const int *first, int append);
 
 /** \brief `vsmc::hdf5store_matrix<unsigned char>` */
 void vsmc_hdf5store_matrix_raw(vSMCMatrixLayout layout, int nrow, int ncol,
-    const char *file_name, const char *data_name, const unsigned char *first,
+    const char *filename, const char *dataname, const unsigned char *first,
     int append);
 
 /** \brief `vsmc::hdf5store_list_empty` */
 void vsmc_hdf5store_list_empty(
-    const char *file_name, const char *data_name, int append);
+    const char *filename, const char *dataname, int append);
 
 /** \brief `vsmc::hdf5store_list_insert<double>` */
-void vsmc_hdf5store_list_insert(int N, const char *file_name,
-    const char *data_name, const double *first, const char *vname);
+void vsmc_hdf5store_list_insert(int N, const char *filename,
+    const char *dataname, const double *first, const char *vname);
 
 /** \brief `vsmc::hdf5store_list_insert<int>` */
-void vsmc_hdf5store_list_insert_int(int N, const char *file_name,
-    const char *data_name, const int *first, const char *vname);
+void vsmc_hdf5store_list_insert_int(int N, const char *filename,
+    const char *dataname, const int *first, const char *vname);
 
 /** \brief `vsmc::hdf5store_list_insert<unsigned char>` */
-void vsmc_hdf5store_list_insert_raw(int N, const char *file_name,
-    const char *data_name, const unsigned char *first, const char *vname);
+void vsmc_hdf5store_list_insert_raw(int N, const char *filename,
+    const char *dataname, const unsigned char *first, const char *vname);
 
 /** \brief `vsmc::hdf5store` for `vsmc::StateMatrix` */
 void vsmc_hdf5store_state_matrix(vsmc_state_matrix state_matrix,
-    const char *file_name, const char *data_name, int append);
+    const char *filename, const char *dataname, int append);
 
 /** \brief `vsmc::hdf5store` for `vsmc::Particle` */
-void vsmc_hdf5store_particle(vsmc_particle particle, const char *file_name,
-    const char *data_name, int append);
+void vsmc_hdf5store_particle(vsmc_particle particle, const char *filename,
+    const char *dataname, int append);
 
 /** \brief `vsmc::hdf5store` for `vsmc::Monitor` */
-void vsmc_hdf5store_monitor(vsmc_monitor monitor, const char *file_name,
-    const char *data_name, int append);
+void vsmc_hdf5store_monitor(vsmc_monitor monitor, const char *filename,
+    const char *dataname, int append);
 
 /** \brief `vsmc::hdf5store` for `vsmc::Sampler` */
-void vsmc_hdf5store_sampler(vsmc_sampler sampler, const char *file_name,
-    const char *data_name, int append);
+void vsmc_hdf5store_sampler(vsmc_sampler sampler, const char *filename,
+    const char *dataname, int append);
 
 /** @} */ /* C_API_Utility_HDF5IO */
 
