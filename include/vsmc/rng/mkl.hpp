@@ -224,6 +224,9 @@ class MKLGenerator
         index_ = l;
     }
 
+    /// \brief Discard the buffer
+    void discard() { index_ = M_; }
+
     void discard(long long nskip)
     {
         VSMC_RUNTIME_ASSERT_RNG_MKL_DISCARD;

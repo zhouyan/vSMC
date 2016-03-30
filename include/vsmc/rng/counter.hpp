@@ -391,6 +391,9 @@ class CounterEngine
             r[i] = operator()();
     }
 
+    /// \brief Discard the buffer
+    void discard() { index_ = M_; }
+
     void discard(result_type nskip)
     {
         if (nskip == 0)
