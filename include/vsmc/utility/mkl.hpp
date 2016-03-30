@@ -294,9 +294,6 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     /// \brief `vslGetStreamStateBrng`
     int get_brng() const { return ::vslGetStreamStateBrng(get()); }
 
-    /// \brief `vslGetNumRegBrngs`
-    static int get_num_reg_brngs() { return ::vslGetNumRegBrngs(); }
-
     /// \brief `vslGetBrngProperties`
     int get_brng_properties(::VSLBRngProperties *properties) const
     {
@@ -310,6 +307,29 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
         return internal::mkl_error_check(
             ::vslGetBrngProperties(brng, properties),
             "MKLStream::get_brng_properties", "::vslGetBrngProperties");
+    }
+
+    /// \brief `vslGetNumRegBrngs`
+    static int get_num_reg_brngs() { return ::vslGetNumRegBrngs(); }
+
+    /// \brief Test if `viRngUniformBits32` is supported
+    static bool has_uniform_bits32(
+        MKL_INT brng, MKL_INT method = VSL_RNG_METHOD_UNIFORMBITS32_STD)
+    {
+        MKLStream stream(brng, 1);
+        std::array<unsigned, 1024> r;
+
+        return ::viRngUniformBits32(method, stream.get(), 1024, r.data()) == 0;
+    }
+
+    /// \brief Test if `viRngUniformBits64` is supported
+    static bool has_uniform_bits64(
+        MKL_INT brng, MKL_INT method = VSL_RNG_METHOD_UNIFORMBITS64_STD)
+    {
+        MKLStream stream(brng, 1);
+        std::array<unsigned MKL_INT64, 1024> r;
+
+        return ::viRngUniformBits64(method, stream.get(), 1024, r.data()) == 0;
     }
 
     /// \brief `vsRngUniform`

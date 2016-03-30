@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/rng/src/rng_mkl.cpp
+// vSMC/example/rng/include/rng_mkl.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,57 +29,22 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "rng_mkl.hpp"
+#ifndef VSMC_EXAMPLE_RNG_MKL_HPP
+#define VSMC_EXAMPLE_RNG_MKL_HPP
 
-int main(int argc, char **argv)
+#include <vsmc/rng/mkl.hpp>
+#include "rng_test.hpp"
+
+#define VSMC_RNG_MKL_TEST(BRNG) rng_mkl_test(BRNG, #BRNG)
+
+inline void rng_mkl_test(int brng, const std::string &name)
 {
-    VSMC_RNG_TEST_PRE(rng_mkl);
-
-    VSMC_RNG_TEST(vsmc::MKL_MCG59);
-    VSMC_RNG_TEST(vsmc::MKL_MCG59_64);
-    VSMC_RNG_TEST(vsmc::MKL_MT19937);
-    VSMC_RNG_TEST(vsmc::MKL_MT19937_64);
-    VSMC_RNG_TEST(vsmc::MKL_MT2203);
-    VSMC_RNG_TEST(vsmc::MKL_MT2203_64);
-    VSMC_RNG_TEST(vsmc::MKL_SFMT19937);
-    VSMC_RNG_TEST(vsmc::MKL_SFMT19937_64);
-#if VSMC_HAS_RDRAND
-    VSMC_RNG_TEST(vsmc::MKL_NONDETERM);
-    VSMC_RNG_TEST(vsmc::MKL_NONDETERM_64);
-#endif
-#if INTEL_MKL_VERSION >= 110300
-#if VSMC_HAS_AES_NI
-    VSMC_RNG_TEST(vsmc::MKL_ARS5);
-    VSMC_RNG_TEST(vsmc::MKL_ARS5_64);
-#endif
-    VSMC_RNG_TEST(vsmc::MKL_PHILOX4X32X10);
-    VSMC_RNG_TEST(vsmc::MKL_PHILOX4X32X10_64);
-#endif
-
-    VSMC_RNG_TEST_POST;
-
-    std::cout << std::string(80, '=') << std::endl;
-    std::cout << std::setw(40) << std::left << "BRNG" << std::setw(20)
-              << std::right << "viRngUniformBits32" << std::setw(20)
-              << std::right << "viRngUniformBits64" << std::endl;
+    bool has_u32 = vsmc::MKLStream::has_uniform_bits32(brng);
+    bool has_u64 = vsmc::MKLStream::has_uniform_bits64(brng);
+    std::cout << std::setw(40) << std::left << name << std::setw(20)
+              << std::right << (has_u32 ? "Yes" : "No") << std::setw(20)
+              << std::right << (has_u64 ? "Yes" : "No") << std::endl;
     std::cout << std::string(80, '-') << std::endl;
-    VSMC_RNG_MKL_TEST(VSL_BRNG_MCG31);
-    VSMC_RNG_MKL_TEST(VSL_BRNG_R250);
-    VSMC_RNG_MKL_TEST(VSL_BRNG_MRG32K3A);
-    VSMC_RNG_MKL_TEST(VSL_BRNG_MCG59);
-    VSMC_RNG_MKL_TEST(VSL_BRNG_WH);
-    VSMC_RNG_MKL_TEST(VSL_BRNG_MT19937);
-    VSMC_RNG_MKL_TEST(VSL_BRNG_MT2203);
-    VSMC_RNG_MKL_TEST(VSL_BRNG_SFMT19937);
-    VSMC_RNG_MKL_TEST(VSL_BRNG_SOBOL);
-    VSMC_RNG_MKL_TEST(VSL_BRNG_NIEDERR);
-    VSMC_RNG_MKL_TEST(VSL_BRNG_NONDETERM);
-#if INTEL_MKL_VERSION >= 110300
-#if VSMC_HAS_AES_NI
-    VSMC_RNG_MKL_TEST(VSL_BRNG_ARS5);
-#endif
-    VSMC_RNG_MKL_TEST(VSL_BRNG_PHILOX4X32X10);
-#endif
-
-    return 0;
 }
+
+#endif // VSMC_EXAMPLE_RNG_MKL_HPP
