@@ -64,7 +64,7 @@
                                                                               \
     int vsmc_mkl_brng_##name(void)                                            \
     {                                                                         \
-        VSLBRngProperties properties;                                         \
+        ::VSLBRngProperties properties;                                       \
         properties.StreamStateSize =                                          \
             sizeof(::vsmc::internal::MKLStreamState<RNGType>);                \
         properties.NSeeds = 1;                                                \

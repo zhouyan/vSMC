@@ -38,6 +38,10 @@
     VSMC_RUNTIME_WARNING((offset < MaxOffset),                                \
         "**MKLEngine** EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS")
 
+#define VSMC_RUNTIME_ASSERT_RNG_MKL_DISCARD                                   \
+    VSMC_RUNTIME_ASSERT(                                                      \
+        (nskip >= 0), "**MKLEngine::discard** INPUT IS NEGATIVE")
+
 namespace vsmc
 {
 
@@ -222,20 +226,26 @@ class MKLGenerator
 
     void discard(long long nskip)
     {
-        std::size_t n = static_cast<std::size_t>(nskip);
+        VSMC_RUNTIME_ASSERT_RNG_MKL_DISCARD;
 
-        if (n == 0)
+        if (nskip == 0)
             return;
 
-        std::size_t remain = M_ - index_;
-        if (n <= remain) {
-            index_ += n;
+        const long long remain = static_cast<long long>(M_ - index_);
+        if (nskip <= remain) {
+            index_ += static_cast<std::size_t>(nskip);
             return;
         }
-        n -= remain;
+        nskip -= remain;
         index_ = M_;
 
-        long long m = static_cast<long long>(n / M_ * M_);
+        ::VSLBRngProperties properties;
+        stream_.get_brng_properties(&properties);
+        int bits = properties.NBits;
+        long long M = static_cast<long long>(M_);
+        long long m = nskip / M * M;
+        if (Bits >= bits)
+            m *= Bits / bits + (Bits % bits == 0 ? 0 : 1);
         switch (stream_.get_brng()) {
             case VSL_BRNG_MCG31: stream_.skip_ahead(m); break;
             case VSL_BRNG_MRG32K3A: stream_.skip_ahead(m); break;
@@ -250,14 +260,14 @@ class MKLGenerator
             case VSL_BRNG_ARS5: stream_.skip_ahead(m); break;
 #endif
             default:
-                while (n > M_) {
-                    operator()();
-                    n -= M_;
+                while (nskip > M) {
+                    generate();
+                    nskip -= M;
                 }
                 break;
         };
         operator()();
-        index_ = n % M_;
+        index_ = static_cast<std::size_t>(nskip % M);
     }
 
     static constexpr result_type min()

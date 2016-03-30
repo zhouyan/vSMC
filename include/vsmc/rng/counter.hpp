@@ -393,22 +393,24 @@ class CounterEngine
 
     void discard(result_type nskip)
     {
-        std::size_t n = static_cast<std::size_t>(nskip);
-        
-        if (n == 0)
+        if (nskip == 0)
             return;
 
-        const std::size_t remain = M_ - index_;
-        if (n <= remain) {
-            index_ += n;
+        const result_type remain = static_cast<result_type>(M_ - index_);
+        if (nskip <= remain) {
+            index_ += static_cast<std::size_t>(nskip);
             return;
         }
-        n -= remain;
+        nskip -= remain;
         index_ = M_;
 
-        increment(ctr_, static_cast<result_type>(n / M_));
+        result_type M = static_cast<result_type>(M_);
+        std::size_t buf_size = sizeof(result_type) * M_;
+        std::size_t ctr_size = sizeof(ctr_type);
+        result_type rate = static_cast<result_type>(buf_size / ctr_size);
+        increment(ctr_, static_cast<result_type>(nskip / M * rate));
         operator()();
-        index_ = n % M_;
+        index_ = static_cast<std::size_t>(nskip % M);
     }
 
     static constexpr result_type min()

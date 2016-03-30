@@ -298,6 +298,12 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     static int get_num_reg_brngs() { return ::vslGetNumRegBrngs(); }
 
     /// \brief `vslGetBrngProperties`
+    int get_brng_properties(::VSLBRngProperties *properties) const
+    {
+        return get_brng_properties(get_brng(), properties);
+    }
+
+    /// \brief `vslGetBrngProperties`
     static int get_brng_properties(
         MKL_INT brng, ::VSLBRngProperties *properties)
     {

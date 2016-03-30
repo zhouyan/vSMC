@@ -47,6 +47,7 @@ ADD_RNG_TEST(u01)
 ADD_RNG_TEST(std)
 ADD_RNG_TEST(philox)
 ADD_RNG_TEST(threefry)
+ADD_RNG_TEST(discard)
 
 IF(Boost_FOUND)
     ADD_RNG_TEST(beta)
