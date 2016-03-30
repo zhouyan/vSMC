@@ -9,6 +9,9 @@
   which defaults to `false`. If `false`, `construct` will leave scalar types
   uninitialized instead of zeroing. The default behavior can be changed by
   macro `VSMC_CONSTRUCT_SCALAR`
+* The HDFIO module has been rewritten. Now there are only two main functions,
+  `hdf5load` and `hdf5store`. The data types are detected based on iterator
+  types.
 
 
 ## New features
@@ -36,8 +39,6 @@
 * Most methods that takes output iterators, (including pointers that used in
   this fashion), now returns an iterator in the same way as `std::copy` etc.
 * `Vector` is now defined to be `std::vector<T, Allocator<T>>`
-* HDF5 IO functions' `append` parameter no longer has a default argument
-* `hdf5store` is now overloaded for `Monitor`
 
 ## Removed features
 

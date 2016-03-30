@@ -33,85 +33,62 @@
 
 extern "C" {
 
-int vsmc_hdf5size(const char *filename, const char *dataname)
+int vsmc_hdf5load_size(const char *filename, const char *dataname)
 {
-    return static_cast<int>(::vsmc::hdf5size(filename, dataname));
+    return static_cast<int>(::vsmc::hdf5load_size(filename, dataname));
 }
 
 double *vsmc_hdf5load(
     const char *filename, const char *dataname, double *first)
 {
-    return ::vsmc::hdf5load<double>(filename, dataname, first);
+    return ::vsmc::hdf5load(filename, dataname, first);
 }
 
 int *vsmc_hdf5load_int(const char *filename, const char *dataname, int *first)
 {
-    return ::vsmc::hdf5load<int>(filename, dataname, first);
+    return ::vsmc::hdf5load(filename, dataname, first);
 }
 
-unsigned char *vsmc_hdf5load_raw(
-    const char *filename, const char *dataname, unsigned char *first)
+void vsmc_hdf5store_file(const char *filename)
 {
-    return ::vsmc::hdf5load<unsigned char>(filename, dataname, first);
+    ::vsmc::hdf5store(filename);
 }
 
-void vsmc_hdf5store_new(const char *filename)
+void vsmc_hdf5store_group(
+    const char *filename, const char *dataname, int append)
 {
-    ::vsmc::hdf5store_new(filename);
+    ::vsmc::hdf5store(filename, dataname, append != 0);
+}
+
+void vsmc_hdf5store_vector(int n, const double *first, const char *filename,
+    const char *dataname, int append)
+{
+    ::vsmc::hdf5store(
+        static_cast<std::size_t>(n), first, filename, dataname, append != 0);
+}
+
+void vsmc_hdf5store_vector_int(int n, const int *first, const char *filename,
+    const char *dataname, int append)
+{
+    ::vsmc::hdf5store(
+        static_cast<std::size_t>(n), first, filename, dataname, append != 0);
 }
 
 void vsmc_hdf5store_matrix(vSMCMatrixLayout layout, int nrow, int ncol,
-    const char *filename, const char *dataname, const double *first,
+    const double *first, const char *filename, const char *dataname,
     int append)
 {
-    ::vsmc::hdf5store_matrix<double>(static_cast<::vsmc::MatrixLayout>(layout),
-        static_cast<std::size_t>(nrow), static_cast<std::size_t>(ncol),
-        filename, dataname, first, append != 0);
+    ::vsmc::hdf5store(static_cast<::vsmc::MatrixLayout>(layout),
+        static_cast<std::size_t>(nrow), static_cast<std::size_t>(ncol), first,
+        filename, dataname, append != 0);
 }
 
 void vsmc_hdf5store_matrix_int(vSMCMatrixLayout layout, int nrow, int ncol,
-    const char *filename, const char *dataname, const int *first, int append)
+    const int *first, const char *filename, const char *dataname, int append)
 {
-    ::vsmc::hdf5store_matrix<int>(static_cast<::vsmc::MatrixLayout>(layout),
-        static_cast<std::size_t>(nrow), static_cast<std::size_t>(ncol),
-        filename, dataname, first, append != 0);
-}
-
-void vsmc_hdf5store_matrix_raw(vSMCMatrixLayout layout, int nrow, int ncol,
-    const char *filename, const char *dataname, const unsigned char *first,
-    int append)
-{
-    ::vsmc::hdf5store_matrix<unsigned char>(
-        static_cast<::vsmc::MatrixLayout>(layout),
-        static_cast<std::size_t>(nrow), static_cast<std::size_t>(ncol),
-        filename, dataname, first, append != 0);
-}
-
-void vsmc_hdf5store_list_empty(
-    const char *filename, const char *dataname, int append)
-{
-    ::vsmc::hdf5store_list_empty(filename, dataname, append != 0);
-}
-
-void vsmc_hdf5store_list_insert(int N, const char *filename,
-    const char *dataname, const double *first, const char *vname)
-{
-    ::vsmc::hdf5store_list_insert<double>(
-        static_cast<std::size_t>(N), filename, dataname, first, vname);
-}
-
-void vsmc_hdf5store_list_insert_int(int N, const char *filename,
-    const char *dataname, const int *first, const char *vname)
-{
-    ::vsmc::hdf5store_list_insert<int>(
-        static_cast<std::size_t>(N), filename, dataname, first, vname);
-}
-
-void vsmc_hdf5store_list_insert_raw(int N, const char *filename,
-    const char *dataname, const unsigned char *first, const char *vname)
-{
-    ::vsmc::hdf5store_list_insert<unsigned char>(
-        static_cast<std::size_t>(N), filename, dataname, first, vname);
+    ::vsmc::hdf5store(static_cast<::vsmc::MatrixLayout>(layout),
+        static_cast<std::size_t>(nrow), static_cast<std::size_t>(ncol), first,
+        filename, dataname, append != 0);
 }
 
 void vsmc_hdf5store_state_matrix(vsmc_state_matrix state_matrix,

@@ -29,6 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#ifndef VSMC_EXAMPLE_UTILITY_ALIGNED_MEMORY_HPP
+#define VSMC_EXAMPLE_UTILITY_ALIGNED_MEMORY_HPP
+
 #include <vsmc/rng/rng.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 #include <vsmc/utility/stop_watch.hpp>
@@ -171,3 +174,5 @@ inline void aligned_memory_test(
     aligned_memory_test<T, true>(n, m, tname);
     aligned_memory_test<T, false>(n, m, tname);
 }
+
+#endif // VSMC_EXAMPLE_UTILITY_ALIGNED_MEMORY_HPP
