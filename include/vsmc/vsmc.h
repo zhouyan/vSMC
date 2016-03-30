@@ -758,10 +758,6 @@ double *vsmc_state_matrix_row_data(vsmc_state_matrix state_matrix, int id);
 double *vsmc_state_matrix_read_state(
     vsmc_state_matrix state_matrix, int pos, double *first);
 
-/** \brief `vsmc::StateMatrix::read_state_list` */
-double *const *vsmc_state_matrix_read_state_list(
-    vsmc_state_matrix state_matrix, double *const *first);
-
 /** \brief `vsmc::StateMatrix::read_state_matrix` */
 double *vsmc_state_matrix_read_state_matrix(
     vsmc_state_matrix state_matrix, vSMCMatrixLayout layout, double *first);
@@ -957,10 +953,6 @@ double vsmc_monitor_record(vsmc_monitor monitor, int id, int iter);
 /** \brief `vsmc::Monitor::read_record` */
 double *vsmc_monitor_read_record(vsmc_monitor monitor, int id, double *first);
 
-/** \brief `vsmc::Monitor::read_record_list` */
-double *const *vsmc_monitor_read_record_list(
-    vsmc_monitor monitor, double *const *first);
-
 /** \brief `vsmc::Monitor::read_record_matrix` */
 double *vsmc_monitor_read_record_matrix(
     vsmc_monitor monitor, vSMCMatrixLayout layout, double *first);
@@ -1076,10 +1068,6 @@ int vsmc_sampler_accept_history(vsmc_sampler sampler, int id, int iter);
 
 /** \brief `vsmc::Sampler::read_accept_history` */
 int *vsmc_sampler_read_accept_history(vsmc_sampler, int id, int *first);
-
-/** \brief `vsmc::Sampler::read_accept_history_list` */
-int *const *vsmc_sampler_read_accept_history_list(
-    vsmc_sampler sampler, int *const *first);
 
 /** \brief `vsmc::Sampler::read_accept_history_matrix` */
 int *vsmc_sampler_read_accept_history_matrix(

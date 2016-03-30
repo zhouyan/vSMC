@@ -126,12 +126,6 @@ double *vsmc_monitor_read_record(vsmc_monitor monitor, int id, double *first)
         static_cast<std::size_t>(id), first);
 }
 
-double *const *vsmc_monitor_read_record_list(
-    vsmc_monitor monitor, double *const *first)
-{
-    return ::vsmc::cast(monitor).read_record_list(first);
-}
-
 double *vsmc_monitor_read_record_matrix(
     vsmc_monitor monitor, vSMCMatrixLayout layout, double *first)
 {

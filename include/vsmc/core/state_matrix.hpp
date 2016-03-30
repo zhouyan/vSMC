@@ -123,48 +123,6 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         data_.swap(other.data_);
     }
 
-    template <typename OutputIter>
-    OutputIter read_state(std::size_t pos, OutputIter first) const
-    {
-        auto sptr = static_cast<const StateMatrix<Layout, Dim, T> *>(this);
-        for (size_type i = 0; i != size_; ++i, ++first)
-            *first = sptr->state(i, pos);
-
-        return first;
-    }
-
-    template <typename OutputIterIter>
-    OutputIterIter read_state_list(OutputIterIter first) const
-    {
-        for (std::size_t d = 0; d != this->dim(); ++d, ++first)
-            read_state(d, *first);
-
-        return first;
-    }
-
-    template <typename OutputIter>
-    OutputIter read_state_matrix(MatrixLayout layout, OutputIter first) const
-    {
-        if (layout == Layout)
-            return std::copy(data_.begin(), data_.end(), first);
-
-        auto sptr = static_cast<const StateMatrix<Layout, Dim, T> *>(this);
-
-        if (layout == RowMajor) {
-            for (size_type i = 0; i != size_; ++i)
-                for (std::size_t d = 0; d != this->dim(); ++d)
-                    *first++ = sptr->state(i, d);
-        }
-
-        if (layout == ColMajor) {
-            for (std::size_t d = 0; d != this->dim(); ++d)
-                for (size_type i = 0; i != size_; ++i)
-                    *first++ = sptr->state(i, d);
-        }
-
-        return first;
-    }
-
     protected:
     explicit StateMatrixBase(size_type N = 0) : size_(N), data_(N * Dim) {}
 
@@ -189,6 +147,8 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         this->set_dim(dim);
         data_.resize(N * dim);
     }
+
+    std::size_t data_size() const { return data_.size(); }
 
     private:
     size_type size_;
@@ -232,6 +192,29 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     const T &state(size_type id, std::size_t pos) const
     {
         return this->data()[id * this->dim() + pos];
+    }
+
+    template <typename OutputIter>
+    OutputIter read_state(std::size_t pos, OutputIter first) const
+    {
+        for (size_type i = 0; i != this->size(); ++i, ++first)
+            *first = state(i, pos);
+
+        return first;
+    }
+
+    template <typename OutputIter>
+    OutputIter read_state_matrix(MatrixLayout layout, OutputIter first) const
+    {
+        if (layout == RowMajor)
+            first = std::copy_n(this->data(), this->data_size(), first);
+
+        if (layout == ColMajor)
+            for (std::size_t d = 0; d != this->dim(); ++d)
+                for (size_type i = 0; i != this->size(); ++i, ++first)
+                    *first = state(i, d);
+
+        return first;
     }
 
     state_type *row_data(size_type id)
@@ -383,6 +366,26 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     const T &state(size_type id, std::size_t pos) const
     {
         return this->data()[pos * this->size() + id];
+    }
+
+    template <typename OutputIter>
+    OutputIter read_state(std::size_t pos, OutputIter first) const
+    {
+        return std::copy_n(col_data(pos), this->size(), first);
+    }
+
+    template <typename OutputIter>
+    OutputIter read_state_matrix(MatrixLayout layout, OutputIter first) const
+    {
+        if (layout == RowMajor)
+            for (size_type i = 0; i != this->size(); ++i)
+                for (std::size_t d = 0; d != this->size(); ++d, ++first)
+                    *first = state(i, d);
+
+        if (layout == ColMajor)
+            first = std::copy_n(this->data(), this->data_size(), first);
+
+        return first;
     }
 
     state_type *col_data(std::size_t pos)

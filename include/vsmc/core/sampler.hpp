@@ -331,19 +331,6 @@ class Sampler
             accept_history_[id].begin(), accept_history_[id].end(), first);
     }
 
-    /// \brief Read acceptance count history of all moves as a list through an
-    /// array of output iterators
-    ///
-    /// \param first An iterator whose value type is itself an output iterator
-    template <typename OutputIterIter>
-    OutputIterIter read_accept_history_list(OutputIterIter first) const
-    {
-        for (std::size_t id = 0; id != accept_size(); ++id, ++first)
-            read_accept_history(id, *first);
-
-        return first;
-    }
-
     /// \brief Read the record history of all moves as a matrix through an
     /// output iterator
     template <typename OutputIter>

@@ -414,68 +414,6 @@ inline void hdf5store_list_empty(
     ::H5Fclose(datafile);
 }
 
-/// \brief Store a list in the HDF5 format from an iterator to iterators
-/// \ingroup HDF5IO
-///
-/// \tparam T Type of the data
-/// \tparam InputIterIter The input iterator type, which points to input
-/// iterators
-/// \tparam SInputIter The input iterator type of names
-/// \param nrow Number of elements in each element of the list
-/// \param ncol Number of elements in the list
-/// \param filename Name of the HDF5 file
-/// \param dataname Name of the list
-/// \param first An iterator points to a sequence of iterators of length ncol.
-/// Each derefence of an iterator is iteself an iterator that points to the
-/// beginning of an element of the list.
-/// \param sfirst An iterator points to the beginning of a sequence of strings
-/// that store the names of each column. The dereference need to be
-/// convertible
-/// to std::string
-/// \param append If true the data is appended into an existing file,
-/// otherwise
-/// save in a new file
-///
-/// \note
-/// Each element in the list is assumed to be a vector of the same length. If
-/// the list contains elements of different length, then create an empty list,
-/// which is exactly an empty group in HDF5 terminology and use
-/// `hdf5store_list_insert` to insert each element.
-template <typename T, typename InputIterIter, typename SInputIter>
-inline void hdf5store_list(std::size_t nrow, std::size_t ncol,
-    const std::string &filename, const std::string &dataname,
-    InputIterIter first, SInputIter sfirst, bool append)
-{
-    std::string group_name("/" + dataname);
-    ::hsize_t dim[1] = {nrow};
-
-    ::hid_t datafile = append ?
-        ::H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT) :
-        ::H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    ::hid_t datagroup = ::H5Gcreate(
-        datafile, group_name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-    if (nrow != 0 && ncol != 0) {
-        ::hid_t dataspace = ::H5Screate_simple(1, dim, nullptr);
-        ::hid_t datatype = hdf5io_datatype<T>();
-        internal::HDF5StoreDataPtr<T> data_ptr;
-        for (std::size_t j = 0; j != ncol; ++j, ++first, ++sfirst) {
-            data_ptr.set(nrow, *first);
-            const T *data = data_ptr.get();
-            std::string dataset_name(group_name + "/" + (*sfirst));
-            ::hid_t dataset = ::H5Dcreate(datafile, dataset_name.c_str(),
-                datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-            ::H5Dwrite(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
-            ::H5Dclose(dataset);
-        }
-        ::H5Tclose(datatype);
-        ::H5Sclose(dataspace);
-    }
-
-    ::H5Gclose(datagroup);
-    ::H5Fclose(datafile);
-}
-
 /// \brief Insert a variable into an existing list saved in HDF5 format
 /// \ingroup HDF5IO
 ///
@@ -509,77 +447,6 @@ inline void hdf5store_list_insert(std::size_t N, const std::string &filename,
     ::H5Tclose(datatype);
     ::H5Sclose(dataspace);
     ::H5Fclose(datafile);
-}
-
-namespace internal
-{
-
-template <typename InputIter, typename... InputIters>
-inline void hdf5store_list_insert_tuple(std::size_t nrow,
-    const std::string &filename, const std::string &dataname,
-    const std::tuple<InputIter, InputIters...> &first, const std::string *sptr,
-    std::integral_constant<std::size_t, 0>)
-{
-    using value_type =
-        typename std::iterator_traits<typename std::tuple_element<0,
-            std::tuple<InputIter, InputIters...>>::type>::value_type;
-    HDF5StoreDataPtr<value_type> data_ptr;
-    data_ptr.set(nrow, std::get<0>(first));
-    const value_type *data = data_ptr.get();
-    hdf5store_list_insert<value_type>(nrow, filename, dataname, data, *sptr);
-}
-
-template <typename InputIter, typename... InputIters, std::size_t Pos>
-inline void hdf5store_list_insert_tuple(std::size_t nrow,
-    const std::string &filename, const std::string &dataname,
-    const std::tuple<InputIter, InputIters...> &first, const std::string *sptr,
-    std::integral_constant<std::size_t, Pos>)
-{
-    using value_type =
-        typename std::iterator_traits<typename std::tuple_element<Pos,
-            std::tuple<InputIter, InputIters...>>::type>::value_type;
-    HDF5StoreDataPtr<value_type> data_ptr;
-    data_ptr.set(nrow, std::get<Pos>(first));
-    const value_type *data = data_ptr.get();
-    hdf5store_list_insert<value_type>(nrow, filename, dataname, data, *sptr);
-    hdf5store_list_insert_tuple(nrow, filename, dataname, first, --sptr,
-        std::integral_constant<std::size_t, Pos - 1>());
-}
-
-} // namespace vsmc::internal
-
-/// \brief Store a list in the HDF5 format from tuple of iterators
-/// \ingroup HDF5IO
-///
-/// \details
-/// A list is similar to that in R. It is much like a matrix except that
-/// each column will be stored seperatedly as an variable and given a name.
-///
-/// \param nrow Number of rows
-/// \param filename Name of the HDF5 file
-/// \param dataname Name of the list
-/// \param first A `std::tuple` type object whose element types are iterators.
-/// Each element is the beginning of an element of the list.
-/// \param sfirst An iterator points to the beginning of a sequence of strings
-/// that store the names of each column. The dereference need to be
-/// convertible
-/// to std::string
-/// \param append If true the data is appended into an existing file,
-/// otherwise
-/// save in a new file
-template <typename SInputIter, typename InputIter, typename... InputIters>
-inline void hdf5store_list(std::size_t nrow, const std::string &filename,
-    const std::string &dataname,
-    const std::tuple<InputIter, InputIters...> &first, SInputIter sfirst,
-    bool append)
-{
-    static constexpr std::size_t dim = sizeof...(InputIters) + 1;
-    internal::HDF5StoreDataPtr<std::string> vnames;
-    vnames.set(dim, sfirst);
-    const std::string *sptr = vnames.get() + dim;
-    hdf5store_list_empty(filename, dataname, append);
-    internal::hdf5store_list_insert_tuple(nrow, filename, dataname, first,
-        --sptr, std::integral_constant<std::size_t, dim - 1>());
 }
 
 namespace internal
@@ -675,7 +542,7 @@ inline void hdf5store(const Monitor<T> &monitor, const std::string &filename,
     std::string record_name = dataname + "/Record";
     hdf5store_list_empty(filename, record_name, true);
     Vector<double> record(nrow * ncol);
-    monitor.read_record_matrix(ColMajor, record.data());
+    monitor.read_record(ColMajor, record.data());
     const double *record_ptr = record.data();
     std::stringstream ss;
     for (std::size_t j = 0; j != ncol; ++j, record_ptr += nrow) {

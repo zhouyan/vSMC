@@ -695,7 +695,7 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
         return os;
 
     std::size_t n = static_cast<std::size_t>(stream.get_size());
-    std::size_t m = sizeof(std::uintmax_t) / sizeof(char);
+    std::size_t m = sizeof(std::uintmax_t);
     if (n % m != 0)
         n += m - n % m;
     n /= m;

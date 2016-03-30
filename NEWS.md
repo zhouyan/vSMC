@@ -31,10 +31,6 @@
 
 ## Changed behaviors
 
-* `Monitor::read_record_matrix` overload which takes iterators to iterators is
-  renamed to `read_record_list`.
-* `StateMatrix::read_state_matrix` overload which takes iterators to iterators
-  is renamed to `read_record_list`
 * Most methods which take a `MatrixLayout` type template parameter now has that
   parameter as a runtime parameter.
 * Most methods that takes output iterators, (including pointers that used in
@@ -45,6 +41,10 @@
 
 ## Removed features
 
+* `Monitor::read_record_matrix` overload which takes iterators to iterators is
+  removed
+* `StateMatrix::read_state_matrix` overload which takes iterators to iterators
+  is removed
 * MKL RAII classes no long has the `reset` method with same arguments as the
   constructors. Use the constructor and move semantics instead.
 * `Monitor::index_data` and `Monitor::record_data` are removed

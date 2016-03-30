@@ -168,12 +168,6 @@ int *vsmc_sampler_read_accept_history(vsmc_sampler sampler, int id, int *first)
         static_cast<std::size_t>(id), first);
 }
 
-int *const *vsmc_sampler_read_accept_history_list(
-    vsmc_sampler sampler, int *const *first)
-{
-    return ::vsmc::cast(sampler).read_accept_history_list(first);
-}
-
 int *vsmc_sampler_read_accept_history_matrix(
     vsmc_sampler sampler, vSMCMatrixLayout layout, int *first)
 {
