@@ -41,10 +41,14 @@ inline void rng_mkl_test(int brng, const std::string &name)
 {
     bool has_u32 = vsmc::MKLStream::has_uniform_bits32(brng);
     bool has_u64 = vsmc::MKLStream::has_uniform_bits64(brng);
-    std::cout << std::setw(40) << std::left << name << std::setw(20)
+    bool has_skip_ahead = vsmc::MKLStream::has_skip_ahead(brng);
+    bool has_leap_frog = vsmc::MKLStream::has_leap_frog(brng);
+    std::cout << std::setw(30) << std::left << name << std::setw(20)
+              << std::right << (has_leap_frog ? "Yes" : "No") << std::setw(20)
+              << std::right << (has_skip_ahead ? "Yes" : "No") << std::setw(20)
               << std::right << (has_u32 ? "Yes" : "No") << std::setw(20)
               << std::right << (has_u64 ? "Yes" : "No") << std::endl;
-    std::cout << std::string(80, '-') << std::endl;
+    std::cout << std::string(110, '-') << std::endl;
 }
 
 #endif // VSMC_EXAMPLE_RNG_MKL_HPP

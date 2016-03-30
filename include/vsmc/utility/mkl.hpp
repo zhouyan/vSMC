@@ -312,6 +312,22 @@ class MKLStream : public MKLBase<::VSLStreamStatePtr, MKLStream>
     /// \brief `vslGetNumRegBrngs`
     static int get_num_reg_brngs() { return ::vslGetNumRegBrngs(); }
 
+    /// \brief Test if `vslLeapfrogStream` is supported
+    static bool has_leap_frog(MKL_INT brng)
+    {
+        MKLStream stream(brng, 1);
+
+        return ::vslLeapfrogStream(stream.get(), 1, 1024);
+    }
+
+    /// \brief Test if `vslSkipAheadStream` is supported
+    static bool has_skip_ahead(MKL_INT brng)
+    {
+        MKLStream stream(brng, 1);
+
+        return ::vslSkipAheadStream(stream.get(), 1024) == 0;
+    }
+
     /// \brief Test if `viRngUniformBits32` is supported
     static bool has_uniform_bits32(
         MKL_INT brng, MKL_INT method = VSL_RNG_METHOD_UNIFORMBITS32_STD)

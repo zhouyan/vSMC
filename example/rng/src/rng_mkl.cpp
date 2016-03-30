@@ -58,11 +58,13 @@ int main(int argc, char **argv)
 
     VSMC_RNG_TEST_POST;
 
-    std::cout << std::string(80, '=') << std::endl;
-    std::cout << std::setw(40) << std::left << "BRNG" << std::setw(20)
+    std::cout << std::string(110, '=') << std::endl;
+    std::cout << std::setw(30) << std::left << "BRNG" << std::setw(20)
+              << std::right << "vslLeapfrogStream" << std::setw(20)
+              << std::right << "vslSkipAheadStream" << std::setw(20)
               << std::right << "viRngUniformBits32" << std::setw(20)
               << std::right << "viRngUniformBits64" << std::endl;
-    std::cout << std::string(80, '-') << std::endl;
+    std::cout << std::string(110, '-') << std::endl;
     VSMC_RNG_MKL_TEST(VSL_BRNG_MCG31);
     VSMC_RNG_MKL_TEST(VSL_BRNG_R250);
     VSMC_RNG_MKL_TEST(VSL_BRNG_MRG32K3A);
