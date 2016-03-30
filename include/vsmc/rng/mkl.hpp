@@ -245,8 +245,10 @@ class MKLGenerator
             case VSL_BRNG_SFMT19937: stream_.skip_ahead(m); break;
             case VSL_BRNG_SOBOL: stream_.skip_ahead(m); break;
             case VSL_BRNG_NIEDERR: stream_.skip_ahead(m); break;
+#if INTEL_MKL_VERSION >= 110300
             case VSL_BRNG_PHILOX4X32X10: stream_.skip_ahead(m); break;
             case VSL_BRNG_ARS5: stream_.skip_ahead(m); break;
+#endif
             default:
                 while (n > M_) {
                     operator()();
