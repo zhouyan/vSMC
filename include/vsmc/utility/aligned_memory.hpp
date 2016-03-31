@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_UTILITY_ALIGNED_MEMORY
-#define VSMC_UTILITY_ALIGNED_MEMORY
+#ifndef VSMC_UTILITY_ALIGNED_MEMORY_HPP
+#define VSMC_UTILITY_ALIGNED_MEMORY_HPP
 
 #include <vsmc/internal/assert.hpp>
 #include <vsmc/internal/config.h>
@@ -462,4 +462,4 @@ using Vector = std::vector<T, Allocator<T>>;
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_ALIGNED_MEMORY
+#endif // VSMC_UTILITY_ALIGNED_MEMORY_HPP
