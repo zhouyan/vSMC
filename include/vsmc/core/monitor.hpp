@@ -78,6 +78,7 @@ class Monitor
         , stage_(stage)
         , name_(dim)
     {
+        internal::size_check<VSMC_CBLAS_INT>(dim_, "Monitor::Monitor");
     }
 
     /// \brief The dimension of the Monitor
@@ -218,6 +219,8 @@ class Monitor
     /// object.
     void eval(std::size_t iter, Particle<T> &particle, MonitorStage stage)
     {
+        internal::size_check<VSMC_CBLAS_INT>(particle.size(), "Monitor::eval");
+
         if (!recording_)
             return;
 

@@ -42,6 +42,8 @@ namespace vsmc
 /// \ingroup Core
 inline double weight_ess(std::size_t N, const double *first)
 {
+    internal::size_check<VSMC_CBLAS_INT>(N, "weight_ess");
+
     return 1 /
         ::cblas_ddot(static_cast<VSMC_CBLAS_INT>(N), first, 1, first, 1);
 }

@@ -36,6 +36,7 @@
 
 #include <cassert>
 #include <cstdio>
+#include <limits>
 #include <stdexcept>
 #include <string>
 
@@ -102,6 +103,31 @@ class RuntimeWarning : public std::runtime_error
     {
     }
 }; // class RuntimeWarning
+
+namespace internal
+{
+
+#if VSMC_NO_RUNTIME_ASSERT
+template <typename IntType, typename SizeType>
+inline void size_check(SizeType, const char *)
+{
+}
+#else  // VSMC_NO_RUNTIME_ASSERT
+template <typename IntType, typename SizeType>
+inline void size_check(SizeType n, const char *f)
+{
+    static constexpr std::uintmax_t nmax =
+        static_cast<std::uintmax_t>(std::numeric_limits<IntType>::max());
+    std::string msg;
+    msg += "**";
+    msg += f;
+    msg += "** INPUT SIZE TOO BIG";
+
+    VSMC_RUNTIME_ASSERT((static_cast<std::uintmax_t>(n) <= nmax), msg.c_str());
+}
+#endif // VSMC_NO_RUNTIME_ASSERT
+
+} // namespace vsmc::internal
 
 } // namespace vsmc
 

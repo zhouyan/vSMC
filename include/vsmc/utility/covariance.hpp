@@ -44,7 +44,7 @@ namespace internal
 {
 
 template <typename RealType>
-inline void cov_pack(std::size_t dim, const RealType *cov, RealType *chol,
+inline void chol_pack(std::size_t dim, const RealType *orig, RealType *chol,
     MatrixLayout layout, bool upper, bool packed)
 {
     unsigned l = layout == RowMajor ? 0 : 1;
@@ -55,50 +55,50 @@ inline void cov_pack(std::size_t dim, const RealType *cov, RealType *chol,
         case 0: // Row, Lower, Full
             for (std::size_t i = 0; i != dim; ++i)
                 for (std::size_t j = 0; j <= i; ++j)
-                    *chol++ = cov[i * dim + j];
+                    *chol++ = orig[i * dim + j];
             break;
         case 1: // Row, Lower, Pack
-            std::copy_n(cov, dim * (dim + 1) / 2, chol);
+            std::copy_n(orig, dim * (dim + 1) / 2, chol);
             break;
         case 2: // Row, Upper, Full
             for (std::size_t i = 0; i != dim; ++i)
                 for (std::size_t j = 0; j <= i; ++j)
-                    *chol++ = cov[j * dim + i];
+                    *chol++ = orig[j * dim + i];
             break;
         case 3: // Row, Upper, Pack
             for (std::size_t i = 0; i != dim; ++i)
                 for (std::size_t j = 0; j <= i; ++j)
-                    *chol++ = cov[dim * j - j * (j + 1) / 2 + i];
+                    *chol++ = orig[dim * j - j * (j + 1) / 2 + i];
             break;
         case 4: // Col, Lower, Full
             for (std::size_t i = 0; i != dim; ++i)
                 for (std::size_t j = 0; j <= i; ++j)
-                    *chol++ = cov[j * dim + i];
+                    *chol++ = orig[j * dim + i];
             break;
         case 5: // Col, Lower, Pack
             for (std::size_t i = 0; i != dim; ++i)
                 for (std::size_t j = 0; j <= i; ++j)
-                    *chol++ = cov[dim * j - j * (j + 1) / 2 + i];
+                    *chol++ = orig[dim * j - j * (j + 1) / 2 + i];
             break;
         case 6: // Col, Upper, Full
             for (std::size_t j = 0; j != dim; ++j)
                 for (std::size_t i = 0; i <= j; ++i)
-                    *chol++ = cov[j * dim + i];
+                    *chol++ = orig[j * dim + i];
             break;
         case 7: // Col, Upper, Pack
-            std::copy_n(cov, dim * (dim + 1) / 2, chol);
+            std::copy_n(orig, dim * (dim + 1) / 2, chol);
             break;
         default: break;
     }
 }
 
-inline int cov_chol(std::size_t dim, float *chol)
+inline int chol(std::size_t dim, float *chol)
 {
     return static_cast<int>(::LAPACKE_spptrf(
         LAPACK_ROW_MAJOR, 'L', static_cast<lapack_int>(dim), chol));
 }
 
-inline int cov_chol(std::size_t dim, double *chol)
+inline int chol(std::size_t dim, double *chol)
 {
     return static_cast<int>(::LAPACKE_dpptrf(
         LAPACK_ROW_MAJOR, 'L', static_cast<lapack_int>(dim), chol));
@@ -110,7 +110,7 @@ inline int cov_chol(std::size_t dim, double *chol)
 /// \ingroup Covariance
 ///
 /// \param dim The number of rows of the covariance matrix
-/// \param cov The covariance matrix
+/// \param a The input matrix
 /// \param chol The output lower triangular elements of the Cholesky
 /// decomposition, packed row by row. This can be directly used as the input
 /// parameter of the NormalMVDistribution constructors.
@@ -126,14 +126,16 @@ inline int cov_chol(std::size_t dim, double *chol)
 /// - Positive value `i` if the `i`th minor of the covariance matrix is not
 /// psotive-definite.
 template <typename RealType>
-inline int cov_chol(std::size_t dim, const RealType *cov, RealType *chol,
+inline int chol(std::size_t dim, const RealType *a, RealType *chol,
     MatrixLayout layout = RowMajor, bool upper = false, bool packed = false)
 {
     static_assert(internal::is_one_of<RealType, float, double>::value,
-        "**cov_chol** USED WITH RealType OTHER THAN float OR double");
+        "**chol** USED WITH RealType OTHER THAN float OR double");
 
-    internal::cov_pack(dim, cov, chol, layout, upper, packed);
-    return internal::cov_chol(dim, chol);
+    internal::size_check<lapack_int>(dim, "chol");
+    internal::chol_pack(dim, a, chol, layout, upper, packed);
+
+    return internal::chol(dim, chol);
 }
 
 /// \brief Covariance
@@ -182,6 +184,9 @@ class Covariance
             return;
 
 #if VSMC_USE_MKL_VSL
+        internal::size_check<MKL_INT>(dim, "Covariance::operator()");
+        internal::size_check<MKL_INT>(n, "Covariance::operator()");
+
         MKL_INT px = static_cast<MKL_INT>(dim);
         MKL_INT nx = static_cast<MKL_INT>(n);
         MKL_INT xstorage = layout == RowMajor ? VSL_SS_MATRIX_STORAGE_COLS :
@@ -197,6 +202,9 @@ class Covariance
         task.edit_cov_cor(mean, cov, &cov_storage, nullptr, nullptr);
         task.compute(estimates, VSL_SS_METHOD_FAST);
 #else  // VSMC_USE_MKL_VSL
+        internal::size_check<VSMC_CBLAS_INT>(dim, "Covariance::operator()");
+        internal::size_check<VSMC_CBLAS_INT>(n, "Covariance::operator()");
+
         result_type sw = w == nullptr ?
             static_cast<result_type>(n) :
             std::accumulate(w, w + n, static_cast<result_type>(0));

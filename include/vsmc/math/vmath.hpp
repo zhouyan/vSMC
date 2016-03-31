@@ -32,10 +32,11 @@
 #ifndef VSMC_MATH_VMATH_HPP
 #define VSMC_MATH_VMATH_HPP
 
-#include <vsmc/internal/config.h>
+#include <vsmc/internal/basic.hpp>
 #include <vsmc/math/constants.hpp>
 #include <algorithm>
 #include <cmath>
+#include <string>
 
 #if VSMC_USE_MKL_VML
 #include <mkl.h>
@@ -86,21 +87,25 @@
 #define VSMC_DEFINE_MATH_VMATH_VML_1(func, name)                              \
     inline void name(std::size_t n, const float *a, float *y)                 \
     {                                                                         \
+        internal::size_check<MKL_INT>(n, #name);                              \
         ::vs##func(static_cast<MKL_INT>(n), a, y);                            \
     }                                                                         \
     inline void name(std::size_t n, const double *a, double *y)               \
     {                                                                         \
+        internal::size_check<MKL_INT>(n, #name);                              \
         ::vd##func(static_cast<MKL_INT>(n), a, y);                            \
     }
 
 #define VSMC_DEFINE_MATH_VMATH_VML_2(func, name)                              \
     inline void name(std::size_t n, const float *a, const float *b, float *y) \
     {                                                                         \
+        internal::size_check<MKL_INT>(n, #name);                              \
         ::vs##func(static_cast<MKL_INT>(n), a, b, y);                         \
     }                                                                         \
     inline void name(                                                         \
         std::size_t n, const double *a, const double *b, double *y)           \
     {                                                                         \
+        internal::size_check<MKL_INT>(n, #name);                              \
         ::vd##func(static_cast<MKL_INT>(n), a, b, y);                         \
     }
 
@@ -115,12 +120,14 @@ VSMC_DEFINE_MATH_VMATH_VML_1(Abs, abs)
 inline void linear_frac(std::size_t n, const float *a, const float *b,
     float beta_a, float beta_b, float mu_a, float mu_b, float *y)
 {
+    internal::size_check<MKL_INT>(n, "linear_frac");
     ::vsLinearFrac(
         static_cast<MKL_INT>(n), a, b, beta_a, beta_b, mu_a, mu_b, y);
 }
 inline void linear_frac(std::size_t n, const double *a, const double *b,
     double beta_a, double beta_b, double mu_a, double mu_b, double *y)
 {
+    internal::size_check<MKL_INT>(n, "linear_frac");
     ::vdLinearFrac(
         static_cast<MKL_INT>(n), a, b, beta_a, beta_b, mu_a, mu_b, y);
 }
@@ -136,10 +143,12 @@ VSMC_DEFINE_MATH_VMATH_VML_1(Pow3o2, pow3o2)
 VSMC_DEFINE_MATH_VMATH_VML_2(Pow, pow)
 inline void pow(std::size_t n, const float *a, float b, float *y)
 {
+    internal::size_check<MKL_INT>(n, "pow");
     ::vsPowx(static_cast<MKL_INT>(n), a, b, y);
 }
 inline void pow(std::size_t n, const double *a, double b, double *y)
 {
+    internal::size_check<MKL_INT>(n, "pow");
     ::vdPowx(static_cast<MKL_INT>(n), a, b, y);
 }
 VSMC_DEFINE_MATH_VMATH_VML_2(Hypot, hypot)
@@ -154,10 +163,12 @@ VSMC_DEFINE_MATH_VMATH_VML_1(Cos, cos)
 VSMC_DEFINE_MATH_VMATH_VML_1(Sin, sin)
 inline void sincos(std::size_t n, const float *a, float *y, float *z)
 {
+    internal::size_check<MKL_INT>(n, "sincos");
     ::vsSinCos(static_cast<MKL_INT>(n), a, y, z);
 }
 inline void sincos(std::size_t n, const double *a, double *y, double *z)
 {
+    internal::size_check<MKL_INT>(n, "sincos");
     ::vdSinCos(static_cast<MKL_INT>(n), a, y, z);
 }
 VSMC_DEFINE_MATH_VMATH_VML_1(Tan, tan)
