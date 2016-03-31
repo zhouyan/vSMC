@@ -42,6 +42,50 @@
     VSMC_RUNTIME_ASSERT(                                                      \
         (nskip >= 0), "**MKLEngine::discard** INPUT IS NEGATIVE")
 
+#define VSMC_DEFINE_RNG_MKL_DISTRIBUTION_1(dist, p1)                          \
+    static constexpr std::uintmax_t NMax =                                    \
+        static_cast<std::uintmax_t>(std::numeric_limits<MKL_INT>::max());     \
+    std::uintmax_t N = static_cast<std::uintmax_t>(n);                        \
+    while (N > NMax) {                                                        \
+        rng.stream().dist(static_cast<MKL_INT>(NMax), r, p1);                 \
+        N -= NMax;                                                            \
+        r += NMax;                                                            \
+    }                                                                         \
+    rng.stream().dist(static_cast<MKL_INT>(N), r, p1);
+
+#define VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(dist, p1, p2)                      \
+    static constexpr std::uintmax_t NMax =                                    \
+        static_cast<std::uintmax_t>(std::numeric_limits<MKL_INT>::max());     \
+    std::uintmax_t N = static_cast<std::uintmax_t>(n);                        \
+    while (N > NMax) {                                                        \
+        rng.stream().dist(static_cast<MKL_INT>(NMax), r, p1, p2);             \
+        N -= NMax;                                                            \
+        r += NMax;                                                            \
+    }                                                                         \
+    rng.stream().dist(static_cast<MKL_INT>(N), r, p1, p2);
+
+#define VSMC_DEFINE_RNG_MKL_DISTRIBUTION_3(dist, p1, p2, p3)                  \
+    static constexpr std::uintmax_t NMax =                                    \
+        static_cast<std::uintmax_t>(std::numeric_limits<MKL_INT>::max());     \
+    std::uintmax_t N = static_cast<std::uintmax_t>(n);                        \
+    while (N > NMax) {                                                        \
+        rng.stream().dist(static_cast<MKL_INT>(NMax), r, p1, p2, p3);         \
+        N -= NMax;                                                            \
+        r += NMax;                                                            \
+    }                                                                         \
+    rng.stream().dist(static_cast<MKL_INT>(N), r, p1, p2, p3);
+
+#define VSMC_DEFINE_RNG_MKL_DISTRIBUTION_4(dist, p1, p2, p3, p4)              \
+    static constexpr std::uintmax_t NMax =                                    \
+        static_cast<std::uintmax_t>(std::numeric_limits<MKL_INT>::max());     \
+    std::uintmax_t N = static_cast<std::uintmax_t>(n);                        \
+    while (N > NMax) {                                                        \
+        rng.stream().dist(static_cast<MKL_INT>(NMax), r, p1, p2, p3, p4);     \
+        N -= NMax;                                                            \
+        r += NMax;                                                            \
+    }                                                                         \
+    rng.stream().dist(static_cast<MKL_INT>(N), r, p1, p2, p3, p4);
+
 namespace vsmc
 {
 
@@ -211,17 +255,24 @@ class MKLGenerator
         n -= remain;
         index_ = M_;
 
-        const std::size_t m = n / M_;
-        const std::size_t l = n % M_;
-        for (std::size_t i = 0; i != m; ++i) {
+        static constexpr std::uintmax_t NMax =
+            static_cast<std::uintmax_t>(std::numeric_limits<MKL_INT>::max());
+        const std::size_t m = n / M_ * M_;
+        std::uintmax_t N = static_cast<std::uintmax_t>(m);
+        while (N > NMax) {
             internal::MKLUniformBits<Bits>::eval(
-                stream_, static_cast<MKL_INT>(M_), r);
-            r += M_;
-            n -= M_;
+                stream_, static_cast<MKL_INT>(NMax), r);
+            N -= NMax;
+            r += NMax;
         }
+        internal::MKLUniformBits<Bits>::eval(
+            stream_, static_cast<MKL_INT>(N), r);
+        n -= m;
+        r += m;
+
         generate();
-        std::memcpy(r, buffer_.data(), sizeof(result_type) * l);
-        index_ = l;
+        std::memcpy(r, buffer_.data(), sizeof(result_type) * n);
+        index_ = n;
     }
 
     /// \brief Discard the buffer
@@ -471,49 +522,49 @@ template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float alpha, float beta)
 {
-    rng.stream().beta(static_cast<MKL_INT>(n), r, alpha, beta, 0, 1);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_4(beta, alpha, beta, 0, 1);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double alpha, double beta)
 {
-    rng.stream().beta(static_cast<MKL_INT>(n), r, alpha, beta, 0, 1);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_4(beta, alpha, beta, 0, 1);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void cauchy_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
-    rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(cauchy, a, b);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void cauchy_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
-    rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(cauchy, a, b);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void exponential_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float lambda)
 {
-    rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(exponential, 0, 1 / lambda);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void exponential_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double lambda)
 {
-    rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(exponential, 0, 1 / lambda);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void extreme_value_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
-    rng.stream().gumbel(static_cast<MKL_INT>(n), r, a, b);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(gumbel, a, b);
     sub(n, 2 * a, r, r);
 }
 
@@ -521,7 +572,7 @@ template <MKL_INT BRNG, int Bits>
 inline void extreme_value_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
-    rng.stream().gumbel(static_cast<MKL_INT>(n), r, a, b);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(gumbel, a, b);
     sub(n, 2 * a, r, r);
 }
 
@@ -529,63 +580,72 @@ template <MKL_INT BRNG, int Bits>
 inline void gamma_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float alpha, float beta)
 {
-    rng.stream().gamma(static_cast<MKL_INT>(n), r, alpha, 0, beta);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_3(gamma, alpha, 0, beta);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void gamma_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double alpha, double beta)
 {
-    rng.stream().gamma(static_cast<MKL_INT>(n), r, alpha, 0, beta);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_3(gamma, alpha, 0, beta);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void laplace_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float location, float scale)
 {
-    rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(laplace, location, scale);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void laplace_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double location, double scale)
 {
-    rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(laplace, location, scale);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void lognormal_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float m, float s)
 {
-    rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_4(lognormal, m, s, 0, 1);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void lognormal_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double m, double s)
 {
-    rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_4(lognormal, m, s, 0, 1);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float mean, float stddev)
 {
-    rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(gaussian, mean, stddev);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double mean, double stddev)
 {
-    rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(gaussian, mean, stddev);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void normal_mv_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, std::size_t m, const float *mean, const float *chol)
 {
-    rng.stream().gaussian_mv(static_cast<MKL_INT>(n), r,
+    static constexpr std::uintmax_t NMax =
+        static_cast<std::uintmax_t>(std::numeric_limits<MKL_INT>::max());
+    std::uintmax_t N = static_cast<std::uintmax_t>(n);
+    while (N > NMax) {
+        rng.stream().gaussian_mv(static_cast<MKL_INT>(NMax), r,
+            static_cast<MKL_INT>(m), VSL_MATRIX_STORAGE_PACKED, mean, chol);
+        N -= NMax;
+        r += NMax * m;
+    }
+    rng.stream().gaussian_mv(static_cast<MKL_INT>(N), r,
         static_cast<MKL_INT>(m), VSL_MATRIX_STORAGE_PACKED, mean, chol);
 }
 
@@ -593,7 +653,16 @@ template <MKL_INT BRNG, int Bits>
 inline void normal_mv_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, std::size_t m, const double *mean, const double *chol)
 {
-    rng.stream().gaussian_mv(static_cast<MKL_INT>(n), r,
+    static constexpr std::uintmax_t NMax =
+        static_cast<std::uintmax_t>(std::numeric_limits<MKL_INT>::max());
+    std::uintmax_t N = static_cast<std::uintmax_t>(n);
+    while (N > NMax) {
+        rng.stream().gaussian_mv(static_cast<MKL_INT>(NMax), r,
+            static_cast<MKL_INT>(m), VSL_MATRIX_STORAGE_PACKED, mean, chol);
+        N -= NMax;
+        r += NMax * m;
+    }
+    rng.stream().gaussian_mv(static_cast<MKL_INT>(N), r,
         static_cast<MKL_INT>(m), VSL_MATRIX_STORAGE_PACKED, mean, chol);
 }
 
@@ -603,56 +672,58 @@ inline void rayleigh_distribution(
 {
     rng.stream().rayleigh(
         static_cast<MKL_INT>(n), r, 0, const_sqrt_2<float>() * sigma);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(
+        rayleigh, 0, const_sqrt_2<float>() * sigma);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void rayleigh_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double sigma)
 {
-    rng.stream().rayleigh(
-        static_cast<MKL_INT>(n), r, 0, const_sqrt_2<double>() * sigma);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(
+        rayleigh, 0, const_sqrt_2<double>() * sigma);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void u01_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r)
 {
-    rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(uniform, 0, 1);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void u01_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r)
 {
-    rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(uniform, 0, 1);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void uniform_real_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
-    rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(uniform, a, b);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void uniform_real_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
-    rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_2(uniform, a, b);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
-    rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_3(weibull, a, 0, b);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
-    rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
+    VSMC_DEFINE_RNG_MKL_DISTRIBUTION_3(weibull, a, 0, b);
 }
 
 } // namespace vsmc
