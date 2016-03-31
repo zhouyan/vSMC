@@ -32,11 +32,7 @@
 #ifndef VSMC_INTERNAL_COMMON_HPP
 #define VSMC_INTERNAL_COMMON_HPP
 
-#include <vsmc/internal/assert.hpp>
-#include <vsmc/internal/config.h>
-#include <vsmc/internal/defines.hpp>
-#include <vsmc/internal/forward.hpp>
-#include <vsmc/internal/traits.hpp>
+#include <vsmc/internal/basic.hpp>
 #include <vsmc/math/math.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 

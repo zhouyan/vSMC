@@ -198,6 +198,8 @@ class MKLGenerator
 
     void operator()(std::size_t n, result_type *r)
     {
+        internal::size_check<MKL_INT>(n, "MKLGenerator::operator()");
+
         std::size_t remain = M_ - index_;
 
         if (n < remain) {
@@ -467,6 +469,7 @@ template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float alpha, float beta)
 {
+    internal::size_check<MKL_INT>(n, "beta_distribution)");
     rng.stream().beta(static_cast<MKL_INT>(n), r, alpha, beta, 0, 1);
 }
 
@@ -474,6 +477,7 @@ template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double alpha, double beta)
 {
+    internal::size_check<MKL_INT>(n, "beta_distribution)");
     rng.stream().beta(static_cast<MKL_INT>(n), r, alpha, beta, 0, 1);
 }
 
@@ -481,6 +485,7 @@ template <MKL_INT BRNG, int Bits>
 inline void cauchy_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
+    internal::size_check<MKL_INT>(n, "cauchy_distribution)");
     rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
 }
 
@@ -488,6 +493,7 @@ template <MKL_INT BRNG, int Bits>
 inline void cauchy_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
+    internal::size_check<MKL_INT>(n, "cauchy_distribution)");
     rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
 }
 
@@ -495,6 +501,7 @@ template <MKL_INT BRNG, int Bits>
 inline void exponential_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float lambda)
 {
+    internal::size_check<MKL_INT>(n, "exponential_distribution)");
     rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
 }
 
@@ -502,6 +509,7 @@ template <MKL_INT BRNG, int Bits>
 inline void exponential_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double lambda)
 {
+    internal::size_check<MKL_INT>(n, "exponential_distribution)");
     rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
 }
 
@@ -509,6 +517,7 @@ template <MKL_INT BRNG, int Bits>
 inline void extreme_value_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
+    internal::size_check<MKL_INT>(n, "extreme_value_distribution)");
     rng.stream().gumbel(static_cast<MKL_INT>(n), r, a, b);
     sub(n, 2 * a, r, r);
 }
@@ -517,6 +526,7 @@ template <MKL_INT BRNG, int Bits>
 inline void extreme_value_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
+    internal::size_check<MKL_INT>(n, "extreme_value_distribution)");
     rng.stream().gumbel(static_cast<MKL_INT>(n), r, a, b);
     sub(n, 2 * a, r, r);
 }
@@ -525,6 +535,7 @@ template <MKL_INT BRNG, int Bits>
 inline void gamma_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float alpha, float beta)
 {
+    internal::size_check<MKL_INT>(n, "gamma_distribution)");
     rng.stream().gamma(static_cast<MKL_INT>(n), r, alpha, 0, beta);
 }
 
@@ -532,6 +543,7 @@ template <MKL_INT BRNG, int Bits>
 inline void gamma_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double alpha, double beta)
 {
+    internal::size_check<MKL_INT>(n, "gamma_distribution)");
     rng.stream().gamma(static_cast<MKL_INT>(n), r, alpha, 0, beta);
 }
 
@@ -539,6 +551,7 @@ template <MKL_INT BRNG, int Bits>
 inline void laplace_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float location, float scale)
 {
+    internal::size_check<MKL_INT>(n, "lapace_distribution)");
     rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
 }
 
@@ -546,6 +559,7 @@ template <MKL_INT BRNG, int Bits>
 inline void laplace_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double location, double scale)
 {
+    internal::size_check<MKL_INT>(n, "lapace_distribution)");
     rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
 }
 
@@ -553,6 +567,7 @@ template <MKL_INT BRNG, int Bits>
 inline void lognormal_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float m, float s)
 {
+    internal::size_check<MKL_INT>(n, "lognormal_distribution)");
     rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
 }
 
@@ -560,6 +575,7 @@ template <MKL_INT BRNG, int Bits>
 inline void lognormal_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double m, double s)
 {
+    internal::size_check<MKL_INT>(n, "lognormal_distribution)");
     rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
 }
 
@@ -567,6 +583,7 @@ template <MKL_INT BRNG, int Bits>
 inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float mean, float stddev)
 {
+    internal::size_check<MKL_INT>(n, "normal_distribution)");
     rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
 }
 
@@ -574,6 +591,7 @@ template <MKL_INT BRNG, int Bits>
 inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double mean, double stddev)
 {
+    internal::size_check<MKL_INT>(n, "normal_distribution)");
     rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
 }
 
@@ -581,6 +599,8 @@ template <MKL_INT BRNG, int Bits>
 inline void normal_mv_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, std::size_t m, const float *mean, const float *chol)
 {
+    internal::size_check<MKL_INT>(n, "normal_mv_distribution)");
+    internal::size_check<MKL_INT>(m, "normal_mv_distribution)");
     rng.stream().gaussian_mv(static_cast<MKL_INT>(n), r,
         static_cast<MKL_INT>(m), VSL_MATRIX_STORAGE_PACKED, mean, chol);
 }
@@ -589,6 +609,8 @@ template <MKL_INT BRNG, int Bits>
 inline void normal_mv_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, std::size_t m, const double *mean, const double *chol)
 {
+    internal::size_check<MKL_INT>(n, "normal_mv_distribution)");
+    internal::size_check<MKL_INT>(m, "normal_mv_distribution)");
     rng.stream().gaussian_mv(static_cast<MKL_INT>(n), r,
         static_cast<MKL_INT>(m), VSL_MATRIX_STORAGE_PACKED, mean, chol);
 }
@@ -597,6 +619,7 @@ template <MKL_INT BRNG, int Bits>
 inline void rayleigh_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float sigma)
 {
+    internal::size_check<MKL_INT>(n, "rayleigh_distribution)");
     rng.stream().rayleigh(
         static_cast<MKL_INT>(n), r, 0, const_sqrt_2<float>() * sigma);
 }
@@ -605,6 +628,7 @@ template <MKL_INT BRNG, int Bits>
 inline void rayleigh_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double sigma)
 {
+    internal::size_check<MKL_INT>(n, "rayleigh_distribution)");
     rng.stream().rayleigh(
         static_cast<MKL_INT>(n), r, 0, const_sqrt_2<double>() * sigma);
 }
@@ -613,6 +637,7 @@ template <MKL_INT BRNG, int Bits>
 inline void u01_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r)
 {
+    internal::size_check<MKL_INT>(n, "u01_distribution)");
     rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
 }
 
@@ -620,6 +645,7 @@ template <MKL_INT BRNG, int Bits>
 inline void u01_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r)
 {
+    internal::size_check<MKL_INT>(n, "u01_distribution)");
     rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
 }
 
@@ -627,6 +653,7 @@ template <MKL_INT BRNG, int Bits>
 inline void uniform_real_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
+    internal::size_check<MKL_INT>(n, "uniform_real_distribution)");
     rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
 }
 
@@ -634,6 +661,7 @@ template <MKL_INT BRNG, int Bits>
 inline void uniform_real_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
+    internal::size_check<MKL_INT>(n, "uniform_real_distribution)");
     rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
 }
 
@@ -641,6 +669,7 @@ template <MKL_INT BRNG, int Bits>
 inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
+    internal::size_check<MKL_INT>(n, "weibull_distribution)");
     rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
 }
 
@@ -648,6 +677,7 @@ template <MKL_INT BRNG, int Bits>
 inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
+    internal::size_check<MKL_INT>(n, "weibull_distribution)");
     rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
 }
 

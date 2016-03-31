@@ -116,14 +116,14 @@ The estimated covariance matrix is often used to construct multivariate Normal
 distribution for the purpose of generating random walk proposals. The
 \verb|NormalMVDistribution| in section~\ref{sec:Distributions} accepts the
 lower triangular of the Cholesky decomposition of the covariance matrix instead
-of itself. The following function will compute this decomposition,
+of itself. The following function \verb|chol| will compute this decomposition,
 \begin{cppcode}
-  double chol[d * (d + 1) / 2];
-  cov_chol(d, cov, chol);
-  NormalMVDistribution<double> normal_mv(d, nullptr, chol); // zero mean
+  double chol_mat[d * (d + 1) / 2];
+  chol(d, cov, chol_mat);
+  NormalMVDistribution<double> normal_mv(d, nullptr, chol_mat); // zero mean
 \end{cppcode}
-The output \verb|chol| is a packed vector in row major storage. This function
-also has three optional parameters, which are the same as those of
+The output \verb|chol_mat| is a packed vector in row major storage. This
+function also has three optional parameters, which are the same as those of
 \verb|Covariance::operator()|, except that they are now used to specify the
 storage scheme of the input parameter \verb|cov|.
 

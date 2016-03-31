@@ -219,6 +219,8 @@ class NormalMVDistribution
         const result_type *mean = nullptr, const result_type *chol = nullptr)
         : param_(mean, chol)
     {
+        internal::size_check<VSMC_CBLAS_INT>(
+            Dim, "NormalMVDistribution::NormalMVDistribution");
         reset();
     }
 
@@ -227,6 +229,8 @@ class NormalMVDistribution
         const result_type *mean = nullptr, const result_type *chol = nullptr)
         : param_(dim, mean, chol)
     {
+        internal::size_check<VSMC_CBLAS_INT>(
+            dim, "NormalMVDistribution::NormalMVDistribution");
         reset();
     }
 
@@ -362,21 +366,21 @@ namespace internal
 {
 
 inline void normal_mv_distribution_mulchol(
-    std::size_t n, float *r, std::size_t m, const float *chol)
+    std::size_t n, float *r, std::size_t dim, const float *chol)
 {
     ::cblas_strmm(::CblasRowMajor, ::CblasRight, ::CblasLower, ::CblasTrans,
         ::CblasNonUnit, static_cast<VSMC_CBLAS_INT>(n),
-        static_cast<VSMC_CBLAS_INT>(m), 1, chol,
-        static_cast<VSMC_CBLAS_INT>(m), r, static_cast<VSMC_CBLAS_INT>(m));
+        static_cast<VSMC_CBLAS_INT>(dim), 1, chol,
+        static_cast<VSMC_CBLAS_INT>(dim), r, static_cast<VSMC_CBLAS_INT>(dim));
 }
 
 inline void normal_mv_distribution_mulchol(
-    std::size_t n, double *r, std::size_t m, const double *chol)
+    std::size_t n, double *r, std::size_t dim, const double *chol)
 {
     ::cblas_dtrmm(::CblasRowMajor, ::CblasRight, ::CblasLower, ::CblasTrans,
         ::CblasNonUnit, static_cast<VSMC_CBLAS_INT>(n),
-        static_cast<VSMC_CBLAS_INT>(m), 1, chol,
-        static_cast<VSMC_CBLAS_INT>(m), r, static_cast<VSMC_CBLAS_INT>(m));
+        static_cast<VSMC_CBLAS_INT>(dim), 1, chol,
+        static_cast<VSMC_CBLAS_INT>(dim), r, static_cast<VSMC_CBLAS_INT>(dim));
 }
 
 } // namespace vsmc::internal
@@ -390,6 +394,9 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     static_assert(internal::is_one_of<RealType, float, double>::value,
         "**normal_mv_distribution** USED WITH RealType OTHER THAN float OR "
         "double");
+
+    internal::size_check<VSMC_CBLAS_INT>(n, "normal_mv_distribution");
+    internal::size_check<VSMC_CBLAS_INT>(dim, "normal_mv_distribution");
 
     normal_distribution(rng, n * dim, r, 0.0, 1.0);
     if (chol != nullptr) {

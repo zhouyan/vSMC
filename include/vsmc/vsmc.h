@@ -1343,9 +1343,9 @@ typedef struct {
     void *ptr;
 } vsmc_covariance;
 
-/** \brief `vsmc::cov_chol` */
-int vsmc_cov_chol(int dim, const double *cov, double *chol,
-    vSMCMatrixLayout layout, int upper, int packed);
+/** \brief `vsmc::chol` */
+int vsmc_chol(int dim, const double *a, double *chol, vSMCMatrixLayout layout,
+    int upper, int packed);
 
 /** \brief `vsmc::Covariance::Covariance` */
 vsmc_covariance vsmc_covariance_new(void);

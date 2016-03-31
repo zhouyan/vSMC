@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/utility/program_option.cpp
+// vSMC/include/vsmc/internal/basic.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,45 +29,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libvsmc.hpp"
+#ifndef VSMC_INTERNAL_BASIC_HPP
+#define VSMC_INTERNAL_BASIC_HPP
 
-extern "C" {
+#include <vsmc/internal/config.h>
 
-int vsmc_chol(int dim, const double *a, double *chol, vSMCMatrixLayout layout,
-    int upper, int packed)
-{
-    return ::vsmc::chol(static_cast<std::size_t>(dim), a, chol,
-        static_cast<::vsmc::MatrixLayout>(layout), upper != 0, packed != 0);
-}
+#include <vsmc/internal/assert.hpp>
+#include <vsmc/internal/defines.hpp>
+#include <vsmc/internal/forward.hpp>
+#include <vsmc/internal/traits.hpp>
 
-vsmc_covariance vsmc_covariance_new(void)
-{
-    auto ptr = new ::vsmc::Covariance<double>();
-    vsmc_covariance covariance = {ptr};
-
-    return covariance;
-}
-
-void vsmc_covariance_delete(vsmc_covariance *covariance_ptr)
-{
-    delete ::vsmc::cast(covariance_ptr);
-    covariance_ptr->ptr = nullptr;
-}
-
-void vsmc_covariance_assign(vsmc_covariance covariance, vsmc_covariance other)
-{
-    ::vsmc::cast(covariance) = ::vsmc::cast(other);
-}
-
-void vsmc_covariance_compute(vsmc_covariance covariance,
-    vSMCMatrixLayout layout, int n, int dim, const double *x, const double *w,
-    double *mean, double *cov, vSMCMatrixLayout cov_layout, int cov_upper,
-    int cov_packed)
-{
-    ::vsmc::cast(covariance)(static_cast<::vsmc::MatrixLayout>(layout),
-        static_cast<std::size_t>(n), static_cast<std::size_t>(dim), x, w, mean,
-        cov, static_cast<::vsmc::MatrixLayout>(cov_layout), cov_upper != 0,
-        cov_packed != 0);
-}
-
-} // extern "C"
+#endif // VSMC_INTERNAL_BASIC_HPP
