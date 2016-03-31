@@ -83,7 +83,7 @@ class HDF5StoreDataPtr
     template <typename InputIter>
     HDF5StoreDataPtr(std::size_t n, InputIter first) : ptr_(nullptr)
     {
-        set(n, first);
+        set(n, first, std::is_convertible<InputIter, const T *>());
     }
 
     const T *get() const { return ptr_ == nullptr ? data_.data() : ptr_; }
@@ -93,15 +93,17 @@ class HDF5StoreDataPtr
     const T *ptr_;
 
     template <typename InputIter>
-    void set(std::size_t n, InputIter first)
+    void set(std::size_t, InputIter first, std::true_type)
+    {
+        ptr_ = static_cast<const T *>(first);
+    }
+
+    template <typename InputIter>
+    void set(std::size_t n, InputIter first, std::false_type)
     {
         data_.resize(n);
         std::copy_n(first, n, data_.begin());
     }
-
-    void set(std::size_t, T *ptr) { ptr_ = ptr; }
-
-    void set(std::size_t, const T *ptr) { ptr_ = ptr; }
 }; // class HDF5StoreDataPtr
 
 inline void hdf5io_dim(
