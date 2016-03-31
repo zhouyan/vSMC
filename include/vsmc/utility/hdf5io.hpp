@@ -348,6 +348,10 @@ inline OutputIter hdf5load(
     if (!dst_datatype.good())
         return first;
 
+    ::htri_t is_eq = ::H5Tequal(src_datatype.id(), dst_datatype.id());
+    if (is_eq < 0)
+        return first;
+
     std::size_t src_size = ::H5Tget_size(src_datatype.id());
     std::size_t dst_size = ::H5Tget_size(dst_datatype.id());
     std::size_t buf_size = std::max(src_size, dst_size);
@@ -359,7 +363,7 @@ inline OutputIter hdf5load(
     if (err < 0)
         return first;
 
-    if (::H5Tequal(src_datatype.id(), dst_datatype.id()) <= 0) {
+    if (is_eq == 0) {
         err = ::H5Tconvert(src_datatype.id(), dst_datatype.id(), N, buf.data(),
             nullptr, H5P_DEFAULT);
         if (err < 0)
@@ -367,6 +371,15 @@ inline OutputIter hdf5load(
     }
 
     return std::copy_n(buf.begin(), N, first);
+}
+
+/// \brief Load HDF5 data
+template <typename T>
+inline Vector<T> hdf5load(
+    const std::string &filename, const std::string &dataname)
+{
+    Vector<T> vector(hdf5load_size(filename, dataname));
+    hdf5load(filename, dataname, vector.data());
 }
 
 /// \brief Create a new HDF5 file
@@ -425,6 +438,15 @@ inline void hdf5store(std::size_t N, InputIter first,
         dataptr.get());
 }
 
+/// \brief Store one dimensional vector
+/// \ingroup HDF5IO
+template <typename T, typename Alloc>
+inline void hdf5store(const std::vector<T, Alloc> &vector,
+    const std::string &filename, const std::string &dataname, bool append)
+{
+    hdf5store(vector.size(), vector.data(), filename, dataname, append);
+}
+
 /// \brief Store a matrix in the HDF5 format from an input iterator
 /// \ingroup HDF5IO
 ///
@@ -445,7 +467,8 @@ inline void hdf5store(std::size_t N, InputIter first,
 /// // 3 6
 /// hdf5store_matrix<double>(ColMajor, 3, 2, data, "col.hdf5", "data");
 /// ~~~
-/// When the results are read by other program, for example R, a transpose may
+/// When the results are read by other program, for example R, a transpose
+/// may
 /// be needed. For instance,
 /// ~~~{.r}
 /// library(rhdf5)
@@ -462,9 +485,12 @@ inline void hdf5store(std::size_t N, InputIter first,
 /// # [3,]    3    6
 /// #
 /// ~~~
-/// That is, when the data is stored in column major layout in C++ memory, then
-/// the read in R produces exactly the same output. If the data is stored as
-/// row major matrix in C++ memory, the read in R produces the transpose the
+/// That is, when the data is stored in column major layout in C++ memory,
+/// then
+/// the read in R produces exactly the same output. If the data is stored
+/// as
+/// row major matrix in C++ memory, the read in R produces the transpose
+/// the
 /// original matrix though they are identical in memory.
 template <typename InputIter>
 inline void hdf5store(MatrixLayout layout, std::size_t nrow, std::size_t ncol,
