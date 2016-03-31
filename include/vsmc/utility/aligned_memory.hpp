@@ -165,9 +165,10 @@ class AlignmentTraitImpl<T, false>
 /// be big enough for SIME aligned operations. For other types, it return
 /// `VSMC_ALIGNMENT_MIN` if `alignof(T)` is smaller, otherwise `alignof(T)`
 template <typename T>
-class AlignmentTrait : public internal::AlignmentTraitImpl<T>
+class AlignmentTrait : public std::integral_constant<std::size_t,
+                           internal::AlignmentTraitImpl<T>::value>
 {
-};
+}; // class AlignmentTrait
 
 /// \brief Aligned memory using `std::malloc` and `std::free`
 /// \ingroup AlignedMemory
@@ -459,6 +460,24 @@ inline bool operator!=(
 /// \ingroup AlignedMemory
 template <typename T, typename Alloc = Allocator<T>>
 using Vector = std::vector<T, Alloc>;
+
+namespace internal
+{
+
+template <typename Alloc>
+class AllocatorAlignment
+    : public AlignmentTrait<typename std::allocator_traits<Alloc>::value_type>
+{
+}; // class AllocatorAlignemnt
+
+template <typename T, bool ConstructScalar, std::size_t Alignment,
+    typename Memory>
+class AllocatorAlignment<Allocator<T, ConstructScalar, Alignment, Memory>>
+    : public std::integral_constant<std::size_t, Alignment>
+{
+}; // class AllocatorAlignment
+
+} // namespace vsmc::internal
 
 } // namespace vsmc
 
