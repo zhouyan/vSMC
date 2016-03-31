@@ -457,8 +457,8 @@ inline bool operator!=(
 
 /// \brief Vector type using Allocator
 /// \ingroup AlignedMemory
-template <typename T>
-using Vector = std::vector<T, Allocator<T>>;
+template <typename T, typename Alloc = Allocator<T>>
+using Vector = std::vector<T, Alloc>;
 
 } // namespace vsmc
 
