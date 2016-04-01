@@ -98,7 +98,7 @@ template <std::size_t K, typename RealType, typename RNGType>
 inline void student_t_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType df)
 {
-    alignas(AlignmentTrait<RealType>::value) RealType s[K];
+    alignas(32) RealType s[K];
     chi_squared_distribution(rng, n, r, df);
     mul(n, 1 / df, r, r);
     sqrt(n, r, r);

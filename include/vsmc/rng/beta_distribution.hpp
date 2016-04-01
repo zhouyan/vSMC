@@ -433,7 +433,7 @@ inline std::size_t beta_distribution_impl_c(RNGType &rng, std::size_t n,
     const RealType t = constant.t;
     const RealType p = constant.p;
     const RealType ln_4 = 2 * const_ln_2<RealType>();
-    alignas(AlignmentTrait<RealType>::value) RealType s[K * 5];
+    alignas(32) RealType s[K * 5];
     RealType *const u1 = s;
     RealType *const u2 = s + n;
     RealType *const v = s + n * 2;
@@ -471,7 +471,7 @@ inline std::size_t beta_distribution_impl_j(RNGType &rng, std::size_t n,
 {
     const RealType a = constant.a;
     const RealType b = constant.b;
-    alignas(AlignmentTrait<RealType>::value) RealType s[K * 3];
+    alignas(32) RealType s[K * 3];
     RealType *const x = s;
     RealType *const y = s + n;
     RealType *const u = s + n * 2;

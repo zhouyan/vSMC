@@ -84,7 +84,7 @@ template <std::size_t K, typename RealType, typename RNGType>
 inline void logistic_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    alignas(AlignmentTrait<RealType>::value) RealType s[K];
+    alignas(32) RealType s[K];
     u01_oo_distribution(rng, n, r);
     sub(n, static_cast<RealType>(1), r, s);
     div(n, r, s, r);

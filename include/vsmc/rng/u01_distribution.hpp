@@ -66,7 +66,7 @@
     {                                                                         \
         using UIntType = U01UIntType<RNGType>;                                \
                                                                               \
-        alignas(AlignmentTrait<UIntType>::value) UIntType s[K];               \
+        alignas(32) UIntType s[K];                                            \
         uniform_bits_distribution(rng, n, s);                                 \
         name<UIntType, RealType>(n, s, r);                                    \
     }

@@ -75,6 +75,9 @@
 #define VSMC_ALIGNMENT VSMC_ALIGNMENT_MIN
 #endif
 
+#define VSMC_ALIGNMENT_TRAIT(T)                                               \
+    alignof(T) > VSMC_ALIGNMENT ? alignof(T) : VSMC_ALIGNMENT
+
 /// \brief Default AlignedMemory type
 /// \ingroup Config
 #ifndef VSMC_ALIGNED_MEMORY_TYPE

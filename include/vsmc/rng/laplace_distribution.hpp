@@ -89,7 +89,7 @@ template <std::size_t K, typename RealType, typename RNGType>
 inline void laplace_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    alignas(AlignmentTrait<RealType>::value) RealType s[K];
+    alignas(32) RealType s[K];
     u01_oo_distribution(rng, n, r);
     sub(n, r, static_cast<RealType>(0.5), r);
     for (std::size_t i = 0; i != n; ++i) {

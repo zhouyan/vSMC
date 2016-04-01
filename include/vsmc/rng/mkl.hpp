@@ -1005,8 +1005,7 @@ class MKLGenerator
     static constexpr std::size_t M_ =
         internal::StaticBufferSize<result_type>::value;
 
-    alignas(AlignmentTrait<result_type>::value)
-        std::array<result_type, M_> buffer_;
+    alignas(32) std::array<result_type, M_> buffer_;
     std::size_t index_;
     MKLStream stream_;
 

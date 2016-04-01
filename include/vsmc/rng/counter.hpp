@@ -373,8 +373,7 @@ class CounterEngine
 
         const std::size_t k =
             internal::StaticBufferSize<result_type>::value / M_;
-        alignas(AlignmentTrait<result_type>::value) std::array<result_type, M_>
-            buffer[k];
+        alignas(32) std::array<result_type, M_> buffer[k];
         if (k != 0) {
             const std::size_t m = (n / M_) / k;
             const std::size_t l = (n / M_) % k;
@@ -494,8 +493,7 @@ class CounterEngine
     private:
     static constexpr std::size_t M_ = Generator::size();
 
-    alignas(AlignmentTrait<result_type>::value)
-        std::array<result_type, M_> buffer_;
+    alignas(32) std::array<result_type, M_> buffer_;
     std::size_t index_;
     ctr_type ctr_;
     key_type key_;
