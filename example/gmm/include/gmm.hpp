@@ -584,7 +584,7 @@ inline int gmm_main(int argc, char **argv)
     std::string datafile("gmm.data");
 
     vsmc::ProgramOptionMap option;
-    option.add("N", "Number of particles", &N, 100000)
+    option.add("N", "Number of particles", &N, 10000)
         .add("n", "Number of iterations", &n, 100)
         .add("c", "Number of components", &c, 4)
         .add("power", "Power of the prior annealing (0 for linear)", &power, 2)
