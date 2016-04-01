@@ -44,7 +44,7 @@
 /// \brief ARSEngine default blocks
 /// \ingroup Config
 #ifndef VSMC_RNG_ARS_BLOCKS
-#define VSMC_RNG_ARS_BLOCKS 4
+#define VSMC_RNG_ARS_BLOCKS 8
 #endif
 
 namespace vsmc

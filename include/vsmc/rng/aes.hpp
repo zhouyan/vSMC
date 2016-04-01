@@ -45,7 +45,7 @@
 /// \brief AESEngine default blocks
 /// \ingroup Config
 #ifndef VSMC_RNG_AES_BLOCKS
-#define VSMC_RNG_AES_BLOCKS 4
+#define VSMC_RNG_AES_BLOCKS 8
 #endif
 
 namespace vsmc
