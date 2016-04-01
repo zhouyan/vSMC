@@ -126,7 +126,7 @@ class NormalMVDistribution
         friend std::basic_ostream<CharT, Traits> &operator<<(
             std::basic_ostream<CharT, Traits> &os, const param_type &param)
         {
-            if (!os.good())
+            if (!os)
                 return os;
 
             os << param.norm_ << ' ';
@@ -143,7 +143,7 @@ class NormalMVDistribution
         friend std::basic_istream<CharT, Traits> &operator>>(
             std::basic_istream<CharT, Traits> &is, const param_type &param)
         {
-            if (!is.good())
+            if (!is)
                 return is;
 
             NormalDistribution<RealType> rnorm;
@@ -153,12 +153,12 @@ class NormalMVDistribution
             bool null_chol;
 
             is >> std::ws >> rnorm;
-            if (!is.good())
+            if (!is)
                 return is;
 
             std::size_t dim = 0;
             is >> std::ws >> dim;
-            if (!is.good())
+            if (!is)
                 return is;
 
             internal::resize(mean, dim);
@@ -168,7 +168,7 @@ class NormalMVDistribution
             is >> std::ws >> null_mean;
             is >> std::ws >> null_chol;
 
-            if (is.good()) {
+            if (static_cast<bool>(is)) {
                 param.rnorm_ = std::move(rnorm);
                 param.mean_ = std::move(mean);
                 param.chol_ = std::move(chol);
@@ -311,7 +311,7 @@ class NormalMVDistribution
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os, const distribution_type &dist)
     {
-        if (!os.good())
+        if (!os)
             return os;
 
         os << dist.param_;
@@ -323,12 +323,12 @@ class NormalMVDistribution
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is, distribution_type &dist)
     {
-        if (!is.good())
+        if (!is)
             return is;
 
         param_type param;
         is >> std::ws >> param;
-        if (is.good())
+        if (static_cast<bool>(is))
             dist.param_ = std::move(param);
 
         return is;

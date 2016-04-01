@@ -66,6 +66,10 @@ class HDF5ID
 
     bool good() const { return id_ >= 0; }
 
+    bool operator!() const { return !good(); }
+
+    explicit operator bool() const { return good(); }
+
     private:
     ::hid_t id_;
 }; // class HDFID
@@ -295,16 +299,16 @@ inline std::size_t hdf5load_size(
 {
     internal::HDF5File datafile(
         internal::hdf5io_datafile(filename, true, true));
-    if (!datafile.good())
+    if (!datafile)
         return 0;
 
     internal::HDF5DataSet dataset(
         ::H5Dopen(datafile.id(), dataname.c_str(), H5P_DEFAULT));
-    if (!dataset.good())
+    if (!dataset)
         return 0;
 
     internal::HDF5DataSpace dataspace(::H5Dget_space(dataset.id()));
-    if (!dataspace.good())
+    if (!dataspace)
         return 0;
 
     ::hssize_t n = ::H5Sget_simple_extent_npoints(dataspace.id());
@@ -322,16 +326,16 @@ inline OutputIter hdf5load(
 {
     internal::HDF5File datafile(
         internal::hdf5io_datafile(filename, true, true));
-    if (!datafile.good())
+    if (!datafile)
         return first;
 
     internal::HDF5DataSet dataset(
         ::H5Dopen(datafile.id(), dataname.c_str(), H5P_DEFAULT));
-    if (!dataset.good())
+    if (!dataset)
         return first;
 
     internal::HDF5DataSpace dataspace(::H5Dget_space(dataset.id()));
-    if (!dataspace.good())
+    if (!dataspace)
         return first;
 
     ::hssize_t n = ::H5Sget_simple_extent_npoints(dataspace.id());
@@ -343,11 +347,11 @@ inline OutputIter hdf5load(
     ::herr_t err = 0;
 
     internal::HDF5DataType src_datatype(::H5Dget_type(dataset.id()));
-    if (!src_datatype.good())
+    if (!src_datatype)
         return first;
 
     internal::HDF5DataType dst_datatype(hdf5io_datatype<T>());
-    if (!dst_datatype.good())
+    if (!dst_datatype)
         return first;
 
     ::htri_t is_eq = ::H5Tequal(src_datatype.id(), dst_datatype.id());
@@ -399,7 +403,7 @@ inline void hdf5store(
 {
     internal::HDF5File datafile(
         internal::hdf5io_datafile(filename, append, false));
-    if (datafile.good()) {
+    if (static_cast<bool>(datafile)) {
         internal::HDF5Group datagroup(::H5Gcreate2(datafile.id(),
             dataname.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
     }
@@ -418,21 +422,21 @@ inline void hdf5store(std::size_t N, InputIter first,
 
     internal::HDF5File datafile(
         internal::hdf5io_datafile(filename, append, false));
-    if (!datafile.good())
+    if (!datafile)
         return;
 
     internal::HDF5DataType datatype(hdf5io_datatype<T>());
-    if (!datatype.good())
+    if (!datatype)
         return;
 
     ::hsize_t dim[1] = {N};
     internal::HDF5DataSpace dataspace(::H5Screate_simple(1, dim, nullptr));
-    if (!dataspace.good())
+    if (!dataspace)
         return;
 
     internal::HDF5DataSet dataset(::H5Dcreate2(datafile.id(), dataname.c_str(),
         datatype.id(), dataspace.id(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-    if (!dataset.good())
+    if (!dataset)
         return;
 
     internal::HDF5StoreDataPtr<T> dataptr(N, first);
@@ -506,22 +510,22 @@ inline void hdf5store(MatrixLayout layout, std::size_t nrow, std::size_t ncol,
 
     internal::HDF5File datafile(
         internal::hdf5io_datafile(filename, append, false));
-    if (!datafile.good())
+    if (!datafile)
         return;
 
     internal::HDF5DataType datatype(hdf5io_datatype<T>());
-    if (!datatype.good())
+    if (!datatype)
         return;
 
     ::hsize_t dim[2];
     internal::hdf5io_dim(layout, nrow, ncol, dim);
     internal::HDF5DataSpace dataspace(::H5Screate_simple(2, dim, nullptr));
-    if (!dataspace.good())
+    if (!dataspace)
         return;
 
     internal::HDF5DataSet dataset(::H5Dcreate2(datafile.id(), dataname.c_str(),
         datatype.id(), dataspace.id(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-    if (!dataset.good())
+    if (!dataset)
         return;
 
     internal::HDF5StoreDataPtr<T> dataptr(nrow * ncol, first);

@@ -165,7 +165,7 @@ template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
 {
-    if (!os.good() || N == 0)
+    if (!os || N == 0)
         return os;
 
     for (std::size_t i = 0; i < N - 1; ++i)
@@ -180,14 +180,14 @@ template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_istream<CharT, Traits> &operator>>(
     std::basic_istream<CharT, Traits> &is, std::array<T, N> &ary)
 {
-    if (!is.good())
+    if (!is)
         return is;
 
     std::array<T, N> tmp;
     for (std::size_t i = 0; i != N; ++i)
         is >> std::ws >> tmp[i];
 
-    if (is.good())
+    if (static_cast<bool>(is))
         ary = std::move(tmp);
 
     return is;
@@ -197,11 +197,11 @@ template <typename CharT, typename Traits, typename T, typename Alloc>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const std::vector<T, Alloc> &vec)
 {
-    if (!os.good())
+    if (!os)
         return os;
 
     os << vec.size();
-    if (!os.good())
+    if (!os)
         return os;
 
     for (const auto &v : vec)
@@ -214,18 +214,18 @@ template <typename CharT, typename Traits, typename T, typename Alloc>
 inline std::basic_istream<CharT, Traits> &operator>>(
     std::basic_istream<CharT, Traits> &is, std::vector<T, Alloc> &vec)
 {
-    if (!is.good())
+    if (!is)
         return is;
 
     std::size_t n = 0;
     is >> n;
-    if (!is.good())
+    if (!is)
         return is;
 
     std::vector<T, Alloc> tmp(n);
     for (std::size_t i = 0; i != n; ++i)
         is >> std::ws >> tmp[i];
-    if (is.good())
+    if (static_cast<bool>(is))
         vec = std::move(tmp);
 
     return is;

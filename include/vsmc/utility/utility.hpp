@@ -43,10 +43,6 @@
 #include <vsmc/utility/hdf5io.hpp>
 #endif
 
-#if VSMC_HAS_MKL
-#include <vsmc/utility/mkl.hpp>
-#endif
-
 #if VSMC_HAS_OPENCL
 #include <vsmc/utility/opencl.hpp>
 #endif

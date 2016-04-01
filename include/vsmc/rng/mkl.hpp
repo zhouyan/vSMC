@@ -48,6 +48,654 @@ namespace vsmc
 namespace internal
 {
 
+#if VSMC_NO_RUNTIME_ASSERT
+inline int mkl_error_check(int status, const char *, const char *)
+{
+    return status;
+}
+#else  // VSMC_NO_RUNTIME_ASSERT
+inline int mkl_error_check(int status, const char *cpp, const char *c)
+{
+    if (status == VSL_ERROR_OK)
+        return status;
+
+    std::string msg;
+    msg += "**";
+    msg += cpp;
+    msg += "**";
+    msg += " failed";
+    msg += "; MKL function: ";
+    msg += c;
+    msg += "; Error code: ";
+    msg += itos(status);
+
+    VSMC_RUNTIME_ASSERT((status == VSL_ERROR_OK), msg.c_str());
+
+    return status;
+}
+#endif // VSMC_NO_RUNTIME_ASSERT
+
+} // namespace vsmc::internal
+
+/// \brief MKL `VSLStreamStatePtr` wrapper
+/// \ingroup MKLRNG
+class MKLStream
+{
+    public:
+    explicit MKLStream(::VSLStreamStatePtr ptr = nullptr) : ptr_(nullptr)
+    {
+        reset(ptr);
+    }
+
+    /// \brief `vslNewStream`
+    MKLStream(MKL_INT brng, MKL_UINT seed) : ptr_(nullptr)
+    {
+        reset(brng, seed);
+    }
+
+    /// \brief `vslNewStreamEx`
+    MKLStream(MKL_INT brng, MKL_INT n, unsigned *params) : ptr_(nullptr)
+    {
+        reset(brng, n, params);
+    }
+
+    /// \brief `vslCopyStream`
+    MKLStream(const MKLStream &other)
+    {
+        ::VSLStreamStatePtr ptr = nullptr;
+        if (internal::mkl_error_check(::vslCopyStream(&ptr, other.ptr_),
+                "MKLStream::MKLStream", "::vslCopyStream") == VSL_ERROR_OK) {
+            reset(ptr);
+        }
+    }
+
+    /// \brief `vslCopyStream`/`vslCopySreamState`
+    MKLStream &operator=(const MKLStream &other)
+    {
+        if (this != &other) {
+            ::VSLStreamStatePtr ptr = nullptr;
+            if (internal::mkl_error_check(::vslCopyStream(&ptr, other.ptr_),
+                    "MKLStream::operator=",
+                    "::vslCopyStream") == VSL_ERROR_OK) {
+                reset(ptr);
+            }
+        }
+
+        return *this;
+    }
+
+    MKLStream(MKLStream &&other) : ptr_(other.ptr_) { other.ptr_ = nullptr; }
+
+    MKLStream &operator=(MKLStream &&other)
+    {
+        if (this != &other) {
+            release();
+            ptr_ = other.ptr_;
+            other.ptr_ = nullptr;
+        }
+
+        return *this;
+    }
+
+    /// \brief `vslDeleteStream`
+    ~MKLStream() { release(); }
+
+    int reset(::VSLStreamStatePtr ptr)
+    {
+        int status = release();
+        ptr_ = ptr;
+
+        return status;
+    }
+
+    /// \brief `vslNewStream`
+    int reset(MKL_INT brng, MKL_UINT seed)
+    {
+        ::VSLStreamStatePtr ptr = nullptr;
+        int status =
+            internal::mkl_error_check(::vslNewStream(&ptr, brng, seed),
+                "MKLStream::reset", "::vslNewStream");
+        if (status == VSL_ERROR_OK)
+            reset(ptr);
+
+        return status;
+    }
+
+    /// \brief `vslNewStreamEx`
+    int reset(MKL_INT brng, MKL_INT n, unsigned *params)
+    {
+        ::VSLStreamStatePtr ptr = nullptr;
+        int status =
+            internal::mkl_error_check(::vslNewStreamEx(&ptr, brng, n, params),
+                "MKLStream::reset", "::vslNewStreamEx");
+        if (status == VSL_ERROR_OK)
+            reset(ptr);
+
+        return status;
+    }
+
+    /// \brief `vslDeleteStream`
+    int release()
+    {
+        if (ptr_ == nullptr)
+            return VSL_ERROR_OK;
+
+        int status = internal::mkl_error_check(::vslDeleteStream(&ptr_),
+            "MKLStream::release", "::vslDeleteStream");
+        ptr_ = nullptr;
+
+        return status;
+    }
+
+    /// \brief `vslSaveStreamF`
+    int save_f(const std::string &fname) const
+    {
+        return internal::mkl_error_check(::vslSaveStreamF(ptr_, fname.c_str()),
+            "MKLStream::save_f", "::vslSaveStreamF");
+    }
+
+    /// \brief `vslSaveStreamF`
+    int load_f(const std::string &fname)
+    {
+        ::VSLStreamStatePtr ptr = nullptr;
+        int status =
+            internal::mkl_error_check(::vslSaveStreamF(&ptr, fname.c_str()),
+                "MKLStream::load_f", "::vslSaveStreamF");
+        if (status == VSL_ERROR_OK)
+            reset(ptr);
+
+        return status;
+    }
+
+    /// \brief `vslSaveStreamM`
+    int save_m(char *memptr) const
+    {
+        return internal::mkl_error_check(::vslSaveStreamM(ptr_, memptr),
+            "MKLStream::save_m", "::vslSaveStreamM");
+    }
+
+    /// \brief `vslLoadStreamM`
+    int load_m(const char *memptr)
+    {
+        ::VSLStreamStatePtr ptr = nullptr;
+        int status = internal::mkl_error_check(::vslLoadStreamM(&ptr, memptr),
+            "MKLStream::load_m", "::vslLoadStreamM");
+        if (status == VSL_ERROR_OK)
+            reset(ptr);
+
+        return status;
+    }
+
+    /// \brief `vslGetStreamSize`
+    int get_size() const { return ::vslGetStreamSize(ptr_); }
+
+    /// \brief `vslLeapfrogStream`
+    int leapfrog(MKL_INT k, MKL_INT nstreams)
+    {
+        return internal::mkl_error_check(
+            ::vslLeapfrogStream(ptr_, k, nstreams), "MKLStream::leapfrog",
+            "::vslLeapfrogStream");
+    }
+
+    /// \brief `vslSkipAheadStream`
+    int skip_ahead(long long nskip)
+    {
+        return internal::mkl_error_check(::vslSkipAheadStream(ptr_, nskip),
+            "MKLStream::skip_ahead", "::vslSkipAheadStream");
+    }
+
+    /// \brief `vslGetStreamStateBrng`
+    int get_brng() const { return ::vslGetStreamStateBrng(ptr_); }
+
+    /// \brief `vslGetBrngProperties`
+    int get_brng_properties(::VSLBRngProperties *properties) const
+    {
+        return get_brng_properties(get_brng(), properties);
+    }
+
+    /// \brief `vslGetBrngProperties`
+    static int get_brng_properties(
+        MKL_INT brng, ::VSLBRngProperties *properties)
+    {
+        return internal::mkl_error_check(
+            ::vslGetBrngProperties(brng, properties),
+            "MKLStream::get_brng_properties", "::vslGetBrngProperties");
+    }
+
+    /// \brief `vslGetNumRegBrngs`
+    static int get_num_reg_brngs() { return ::vslGetNumRegBrngs(); }
+
+    /// \brief Test if `vslLeapfrogStream` is supported
+    static bool has_leap_frog(MKL_INT brng)
+    {
+        MKLStream stream(brng, 1);
+
+        return ::vslLeapfrogStream(stream.ptr_, 1, 1024);
+    }
+
+    /// \brief Test if `vslSkipAheadStream` is supported
+    static bool has_skip_ahead(MKL_INT brng)
+    {
+        MKLStream stream(brng, 1);
+
+        return ::vslSkipAheadStream(stream.ptr_, 1024) == 0;
+    }
+
+    /// \brief Test if `viRngUniformBits32` is supported
+    static bool has_uniform_bits32(
+        MKL_INT brng, MKL_INT method = VSL_RNG_METHOD_UNIFORMBITS32_STD)
+    {
+        MKLStream stream(brng, 1);
+        std::array<unsigned, 1024> r;
+
+        return ::viRngUniformBits32(method, stream.ptr_, 1024, r.data()) == 0;
+    }
+
+    /// \brief Test if `viRngUniformBits64` is supported
+    static bool has_uniform_bits64(
+        MKL_INT brng, MKL_INT method = VSL_RNG_METHOD_UNIFORMBITS64_STD)
+    {
+        MKLStream stream(brng, 1);
+        std::array<unsigned MKL_INT64, 1024> r;
+
+        return ::viRngUniformBits64(method, stream.ptr_, 1024, r.data()) == 0;
+    }
+
+    /// \brief `vsRngUniform`
+    int uniform(MKL_INT n, float *r, float a, float b,
+        MKL_INT method = VSL_RNG_METHOD_UNIFORM_STD)
+    {
+        return internal::mkl_error_check(
+            ::vsRngUniform(method, ptr_, n, r, a, b), "MKLStream::uniform",
+            "::vsRngUniform");
+    }
+
+    /// \brief `vdRngUniform`
+    int uniform(MKL_INT n, double *r, double a, double b,
+        MKL_INT method = VSL_RNG_METHOD_UNIFORM_STD)
+    {
+        return internal::mkl_error_check(
+            ::vdRngUniform(method, ptr_, n, r, a, b), "MKLStream::uniform",
+            "::vdRngUniform");
+    }
+
+    /// \brief `vsRngGaussian`
+    int gaussian(MKL_INT n, float *r, float a, float sigma,
+        MKL_INT method = VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2)
+    {
+        return internal::mkl_error_check(
+            ::vsRngGaussian(method, ptr_, n, r, a, sigma),
+            "MKLStream::gaussian", "::vsRngGaussian");
+    }
+
+    /// \brief `vdRngGaussian`
+    int gaussian(MKL_INT n, double *r, double a, double sigma,
+        MKL_INT method = VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2)
+    {
+        return internal::mkl_error_check(
+            ::vdRngGaussian(method, ptr_, n, r, a, sigma),
+            "MKLStream::gaussian", "::vdRngGaussian");
+    }
+
+    /// \brief `vsRngGaussianMV`
+    int gaussian_mv(MKL_INT n, float *r, MKL_INT dimen, MKL_INT mstorage,
+        const float *a, const float *t,
+        MKL_INT method = VSL_RNG_METHOD_GAUSSIANMV_BOXMULLER2)
+    {
+        return internal::mkl_error_check(
+            ::vsRngGaussianMV(method, ptr_, n, r, dimen, mstorage, a, t),
+            "MKLStream::gaussian_mv", "::vsRngGaussianMV");
+    }
+
+    /// \brief `vdRngGaussianMV`
+    int gaussian_mv(MKL_INT n, double *r, MKL_INT dimen, MKL_INT mstorage,
+        const double *a, const double *t,
+        MKL_INT method = VSL_RNG_METHOD_GAUSSIANMV_BOXMULLER2)
+    {
+        return internal::mkl_error_check(
+            ::vdRngGaussianMV(method, ptr_, n, r, dimen, mstorage, a, t),
+            "MKLStream::gaussian_mv", "::vdRngGaussianMV");
+    }
+
+    /// \brief `vsRngExponential`
+    int exponential(MKL_INT n, float *r, float a, float beta,
+        MKL_INT method = VSL_RNG_METHOD_EXPONENTIAL_ICDF)
+    {
+        return internal::mkl_error_check(
+            ::vsRngExponential(method, ptr_, n, r, a, beta),
+            "MKLStream::exponential", "::vsRngExponential");
+    }
+
+    /// \brief `vdRngExponential`
+    int exponential(MKL_INT n, double *r, double a, double beta,
+        MKL_INT method = VSL_RNG_METHOD_EXPONENTIAL_ICDF)
+    {
+        return internal::mkl_error_check(
+            ::vdRngExponential(method, ptr_, n, r, a, beta),
+            "MKLStream::exponential", "::vdRngExponential");
+    }
+
+    /// \brief `vsRngLaplace`
+    int laplace(MKL_INT n, float *r, float a, float beta,
+        MKL_INT method = VSL_RNG_METHOD_LAPLACE_ICDF)
+    {
+        return internal::mkl_error_check(
+            ::vsRngLaplace(method, ptr_, n, r, a, beta), "MKLStream::laplace",
+            "::vsRngLaplace");
+    }
+
+    /// \brief `vdRngLaplace`
+    int laplace(MKL_INT n, double *r, double a, double beta,
+        MKL_INT method = VSL_RNG_METHOD_LAPLACE_ICDF)
+    {
+        return internal::mkl_error_check(
+            ::vdRngLaplace(method, ptr_, n, r, a, beta), "MKLStream::laplace",
+            "::vdRngLaplace");
+    }
+
+    /// \brief `vsRngWeibull`
+    int weibull(MKL_INT n, float *r, float alpha, float a, float beta,
+        MKL_INT method = VSL_RNG_METHOD_WEIBULL_ICDF)
+    {
+        return internal::mkl_error_check(
+            ::vsRngWeibull(method, ptr_, n, r, alpha, a, beta),
+            "MKLStream::weibull", "::vsRngWeibull");
+    }
+
+    /// \brief `vdRngWeibull`
+    int weibull(MKL_INT n, double *r, double alpha, double a, double beta,
+        MKL_INT method = VSL_RNG_METHOD_WEIBULL_ICDF)
+    {
+        return internal::mkl_error_check(
+            ::vdRngWeibull(method, ptr_, n, r, alpha, a, beta),
+            "MKLStream::weibull", "::vdRngWeibull");
+    }
+
+    /// \brief `vsRngCauchy`
+    int cauchy(MKL_INT n, float *r, float a, float beta,
+        MKL_INT method = VSL_RNG_METHOD_CAUCHY_ICDF)
+    {
+        return internal::mkl_error_check(
+            ::vsRngCauchy(method, ptr_, n, r, a, beta), "MKLStream::cauchy",
+            "::vsRngCauchy");
+    }
+
+    /// \brief `vdRngCauchy`
+    int cauchy(MKL_INT n, double *r, double a, double beta,
+        MKL_INT method = VSL_RNG_METHOD_CAUCHY_ICDF)
+    {
+        return internal::mkl_error_check(
+            ::vdRngCauchy(method, ptr_, n, r, a, beta), "MKLStream::cauchy",
+            "::vdRngCauchy");
+    }
+
+    /// \brief `vsRngRayleigh`
+    int rayleigh(MKL_INT n, float *r, float a, float beta,
+        MKL_INT method = VSL_RNG_METHOD_RAYLEIGH_ICDF)
+    {
+        return internal::mkl_error_check(
+            ::vsRngRayleigh(method, ptr_, n, r, a, beta),
+            "MKLStream::rayleigh", "::vsRngRayleigh");
+    }
+
+    /// \brief `vdRngRayleigh`
+    int rayleigh(MKL_INT n, double *r, double a, double beta,
+        MKL_INT method = VSL_RNG_METHOD_RAYLEIGH_ICDF)
+    {
+        return internal::mkl_error_check(
+            ::vdRngRayleigh(method, ptr_, n, r, a, beta),
+            "MKLStream::rayleigh", "::vdRngRayleigh");
+    }
+
+    /// \brief `vsRngLognormal`
+    int lognormal(MKL_INT n, float *r, float a, float sigma, float b,
+        float beta, MKL_INT method = VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2)
+    {
+        return internal::mkl_error_check(
+            ::vsRngLognormal(method, ptr_, n, r, a, sigma, b, beta),
+            "MKLStream::lognormal", "::vsRngLognormal");
+    }
+
+    /// \brief `vdRngLognormal`
+    int lognormal(MKL_INT n, double *r, double a, double sigma, double b,
+        double beta, MKL_INT method = VSL_RNG_METHOD_LOGNORMAL_BOXMULLER2)
+    {
+        return internal::mkl_error_check(
+            ::vdRngLognormal(method, ptr_, n, r, a, sigma, b, beta),
+            "MKLStream::lognormal", "::vdRngLognormal");
+    }
+
+    /// \brief `vsRngGumbel`
+    int gumbel(MKL_INT n, float *r, float a, float beta,
+        MKL_INT method = VSL_RNG_METHOD_GUMBEL_ICDF)
+    {
+        return internal::mkl_error_check(
+            ::vsRngGumbel(method, ptr_, n, r, a, beta), "MKLStream::gumbel",
+            "::vsRngGumbel");
+    }
+
+    /// \brief `vdRngGumbel`
+    int gumbel(MKL_INT n, double *r, double a, double beta,
+        MKL_INT method = VSL_RNG_METHOD_GUMBEL_ICDF)
+    {
+        return internal::mkl_error_check(
+            ::vdRngGumbel(method, ptr_, n, r, a, beta), "MKLStream::gumbel",
+            "::vdRngGumbel");
+    }
+
+    /// \brief `vsRngGamma`
+    int gamma(MKL_INT n, float *r, float alpha, float a, float beta,
+        MKL_INT method = VSL_RNG_METHOD_GAMMA_GNORM)
+    {
+        return internal::mkl_error_check(
+            ::vsRngGamma(method, ptr_, n, r, alpha, a, beta),
+            "MKLStream::gamma", "::vsRngGamma");
+    }
+
+    /// \brief `vdRngGamma`
+    int gamma(MKL_INT n, double *r, double alpha, double a, double beta,
+        MKL_INT method = VSL_RNG_METHOD_GAMMA_GNORM)
+    {
+        return internal::mkl_error_check(
+            ::vdRngGamma(method, ptr_, n, r, alpha, a, beta),
+            "MKLStream::gamma", "::vdRngGamma");
+    }
+
+    /// \brief `vsRngBeta`
+    int beta(MKL_INT n, float *r, float p, float q, float a, float beta,
+        MKL_INT method = VSL_RNG_METHOD_BETA_CJA)
+    {
+        return internal::mkl_error_check(
+            ::vsRngBeta(method, ptr_, n, r, p, q, a, beta), "MKLStream::beta",
+            "::vsRngBeta");
+    }
+
+    /// \brief `vdRngBeta`
+    int beta(MKL_INT n, double *r, double p, double q, double a, double beta,
+        MKL_INT method = VSL_RNG_METHOD_BETA_CJA)
+    {
+        return internal::mkl_error_check(
+            ::vdRngBeta(method, ptr_, n, r, p, q, a, beta), "MKLStream::beta",
+            "::vdRngBeta");
+    }
+
+    /// \brief `viRngUniform`
+    int uniform(MKL_INT n, int *r, int a, int b,
+        MKL_INT method = VSL_RNG_METHOD_UNIFORM_STD)
+    {
+        return internal::mkl_error_check(
+            ::viRngUniform(method, ptr_, n, r, a, b), "MKLStream::uniform",
+            "::viRngUniform");
+    }
+
+    /// \brief `viRngUniform`
+    int uniform_bits(MKL_INT n, unsigned *r,
+        MKL_INT method = VSL_RNG_METHOD_UNIFORMBITS_STD)
+    {
+        return internal::mkl_error_check(
+            ::viRngUniformBits(method, ptr_, n, r), "MKLStream::uniform_bits",
+            "::viRngUniformBits");
+    }
+
+    /// \brief `viRngUniform32`
+    int uniform_bits32(MKL_INT n, unsigned *r,
+        MKL_INT method = VSL_RNG_METHOD_UNIFORMBITS32_STD)
+    {
+        return internal::mkl_error_check(
+            ::viRngUniformBits32(method, ptr_, n, r),
+            "MKLStream::uniform_bits32", "::viRngUniformBits32");
+    }
+
+    /// \brief `viRngUniform64`
+    int uniform_bits64(MKL_INT n, unsigned MKL_INT64 *r,
+        MKL_INT method = VSL_RNG_METHOD_UNIFORMBITS64_STD)
+    {
+        return internal::mkl_error_check(
+            ::viRngUniformBits64(method, ptr_, n, r),
+            "MKLStream::uniform_bits64", "::viRngUniformBits64");
+    }
+
+    /// \brief `viRngBernoulli`
+    int bernoulli(MKL_INT n, int *r, double p,
+        MKL_INT method = VSL_RNG_METHOD_BERNOULLI_ICDF)
+    {
+        return internal::mkl_error_check(
+            ::viRngBernoulli(method, ptr_, n, r, p), "MKLStream::bernoulli",
+            "::viRngBernoulli");
+    }
+
+    /// \brief `viRngGeometric`
+    int geometric(MKL_INT n, int *r, double p,
+        MKL_INT method = VSL_RNG_METHOD_GEOMETRIC_ICDF)
+    {
+        return internal::mkl_error_check(
+            ::viRngGeometric(method, ptr_, n, r, p), "MKLStream::geometric",
+            "::viRngGeometric");
+    }
+
+    /// \brief `viRngBinomial`
+    int binomial(MKL_INT n, int *r, int ntrial, double p,
+        MKL_INT method = VSL_RNG_METHOD_BINOMIAL_BTPE)
+    {
+        return internal::mkl_error_check(
+            ::viRngBinomial(method, ptr_, n, r, ntrial, p),
+            "MKLStream::binomial", "::viRngBinomial");
+    }
+
+    /// \brief `viRngHypergeometric`
+    int hypergeometric(MKL_INT n, int *r, int l, int s, int m,
+        MKL_INT method = VSL_RNG_METHOD_HYPERGEOMETRIC_H2PE)
+    {
+        return internal::mkl_error_check(
+            ::viRngHypergeometric(method, ptr_, n, r, l, s, m),
+            "MKLStream::hypergeometric", "::viRngHypergeometric");
+    }
+
+    /// \brief `viRngPoisson`
+    int poisson(MKL_INT n, int *r, double lambda,
+        MKL_INT method = VSL_RNG_METHOD_POISSON_PTPE)
+    {
+        return internal::mkl_error_check(
+            ::viRngPoisson(method, ptr_, n, r, lambda), "MKLStream::poisson",
+            "::viRngPoisson");
+    }
+
+    /// \brief `viRngPoissonV`
+    int poisson_v(MKL_INT n, int *r, const double *lambda,
+        MKL_INT method = VSL_RNG_METHOD_POISSONV_POISNORM)
+    {
+        return internal::mkl_error_check(
+            ::viRngPoissonV(method, ptr_, n, r, lambda),
+            "MKLStream::poisson_v", "::viRngPoissonV");
+    }
+
+    /// \brief `viRngNegbinomial`
+    int neg_binomial(MKL_INT n, int *r, double a, double p,
+        MKL_INT method = VSL_RNG_METHOD_NEGBINOMIAL_NBAR)
+    {
+        return internal::mkl_error_check(
+            ::viRngNegbinomial(method, ptr_, n, r, a, p),
+            "MKLStream::neg_binomial", "::viRngNegbinomial");
+    }
+
+    private:
+    ::VSLStreamStatePtr ptr_;
+}; // class MKLStream
+
+/// \brief Equality comparison of MKLStream
+/// \ingroup MKLRNG
+inline bool operator==(const MKLStream &stream1, const MKLStream &stream2)
+{
+    if (stream1.get_brng() != stream2.get_brng())
+        return false;
+
+    std::size_t n = static_cast<std::size_t>(stream1.get_size());
+    Vector<char> s1(n);
+    Vector<char> s2(n);
+    stream1.save_m(s1.data());
+    stream2.save_m(s2.data());
+    if (s1 != s2)
+        return false;
+
+    return true;
+}
+
+/// \brief Inequality comparison of MKLStream
+/// \ingroup MKLRNG
+inline bool operator!=(const MKLStream &stream1, const MKLStream &stream2)
+{
+    return !(stream1 == stream2);
+}
+
+/// \brief Output of MKLStream
+/// \ingroup MKLRNG
+template <typename CharT, typename Traits>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const MKLStream &stream)
+{
+    if (!os)
+        return os;
+
+    std::size_t n = static_cast<std::size_t>(stream.get_size());
+    std::size_t m = sizeof(std::uintmax_t);
+    if (n % m != 0)
+        n += m - n % m;
+    n /= m;
+    Vector<std::uintmax_t> s(n);
+    stream.save_m(reinterpret_cast<char *>(s.data()));
+
+    os << stream.get_brng() << ' ';
+    os << s;
+
+    return os;
+}
+
+/// \brief Input of MKLStream
+/// \ingroup MKLRNG
+template <typename CharT, typename Traits>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, MKLStream &stream)
+{
+    if (!is)
+        return is;
+
+    MKL_INT brng;
+    Vector<std::uintmax_t> s;
+    is >> std::ws >> brng;
+    is >> std::ws >> s;
+
+    if (static_cast<bool>(is)) {
+        MKLStream tmp;
+        tmp.load_m(reinterpret_cast<const char *>(s.data()));
+        stream = std::move(tmp);
+    }
+
+    return is;
+}
+
+namespace internal
+{
+
 template <MKL_INT BRNG>
 class MKLMaxOffset : public std::integral_constant<MKL_INT, 0>
 {
@@ -306,7 +954,7 @@ class MKLGenerator
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os, const MKLGenerator<Bits> &gen)
     {
-        if (!os.good())
+        if (!os)
             return os;
 
         os << gen.stream_ << ' ';
@@ -320,7 +968,7 @@ class MKLGenerator
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is, MKLGenerator<Bits> &gen)
     {
-        if (!is.good())
+        if (!is)
             return is;
 
         MKLStream stream;
@@ -330,7 +978,7 @@ class MKLGenerator
         is >> std::ws >> buffer;
         is >> std::ws >> index;
 
-        if (is.good()) {
+        if (static_cast<bool>(is)) {
             gen.stream_ = std::move(stream);
             gen.buffer_ = std::move(buffer);
             gen.index_ = index;

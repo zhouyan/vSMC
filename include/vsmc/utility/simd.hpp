@@ -395,7 +395,7 @@ template <typename CharT, typename Traits, typename T>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const M128I<T> &a)
 {
-    if (!os.good())
+    if (!os)
         return os;
 
     std::array<T, M128I<T>::size()> sa;
@@ -409,13 +409,13 @@ template <typename CharT, typename Traits, typename T>
 inline std::basic_istream<CharT, Traits> &operator>>(
     std::basic_istream<CharT, Traits> &is, M128I<T> &a)
 {
-    if (!is.good())
+    if (!is)
         return is;
 
     std::array<T, M128I<T>::size()> sa;
     is >> sa;
 
-    if (is.good())
+    if (static_cast<bool>(is))
         a.load_u(sa.data());
 
     return is;
@@ -578,7 +578,7 @@ template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const M128 &a)
 {
-    if (!os.good())
+    if (!os)
         return os;
 
     std::array<float, 4> sa;
@@ -592,13 +592,13 @@ template <typename CharT, typename Traits>
 inline std::basic_istream<CharT, Traits> &operator>>(
     std::basic_istream<CharT, Traits> &is, M128 &a)
 {
-    if (!is.good())
+    if (!is)
         return is;
 
     std::array<float, 4> sa;
     is >> sa;
 
-    if (is.good())
+    if (static_cast<bool>(is))
         a.load_u(sa.data());
 
     return is;
@@ -710,7 +710,7 @@ template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const M128D &a)
 {
-    if (!os.good())
+    if (!os)
         return os;
 
     std::array<double, 2> sa;
@@ -724,13 +724,13 @@ template <typename CharT, typename Traits>
 inline std::basic_istream<CharT, Traits> &operator>>(
     std::basic_istream<CharT, Traits> &is, M128D &a)
 {
-    if (!is.good())
+    if (!is)
         return is;
 
     std::array<double, 2> sa;
     is >> sa;
 
-    if (is.good())
+    if (static_cast<bool>(is))
         a.load_u(sa.data());
 
     return is;
@@ -1105,7 +1105,7 @@ template <typename CharT, typename Traits, typename T>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const M256I<T> &a)
 {
-    if (!os.good())
+    if (!os)
         return os;
 
     std::array<T, M256I<T>::size()> sa;
@@ -1119,13 +1119,13 @@ template <typename CharT, typename Traits, typename T>
 inline std::basic_istream<CharT, Traits> &operator>>(
     std::basic_istream<CharT, Traits> &is, M256I<T> &a)
 {
-    if (!is.good())
+    if (!is)
         return is;
 
     std::array<T, M256I<T>::size()> sa;
     is >> sa;
 
-    if (is.good())
+    if (static_cast<bool>(is))
         a.load_u(sa.data());
 
     return is;
@@ -1289,7 +1289,7 @@ template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const M256 &a)
 {
-    if (!os.good())
+    if (!os)
         return os;
 
     std::array<float, 8> sa;
@@ -1303,13 +1303,13 @@ template <typename CharT, typename Traits>
 inline std::basic_istream<CharT, Traits> &operator>>(
     std::basic_istream<CharT, Traits> &is, M256 &a)
 {
-    if (!is.good())
+    if (!is)
         return is;
 
     std::array<float, 8> sa;
     is >> sa;
 
-    if (is.good())
+    if (static_cast<bool>(is))
         a.load_u(sa.data());
 
     return is;
@@ -1424,7 +1424,7 @@ template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const M256D &a)
 {
-    if (!os.good())
+    if (!os)
         return os;
 
     std::array<double, 4> sa;
@@ -1438,13 +1438,13 @@ template <typename CharT, typename Traits>
 inline std::basic_istream<CharT, Traits> &operator>>(
     std::basic_istream<CharT, Traits> &is, M256D &a)
 {
-    if (!is.good())
+    if (!is)
         return is;
 
     std::array<double, 4> sa;
     is >> sa;
 
-    if (is.good())
+    if (static_cast<bool>(is))
         a.load_u(sa.data());
 
     return is;

@@ -151,43 +151,6 @@ Such an overload is automatically available if \verb|T| is a derived class of
 \verb|StateMatrix|. However, it may not be the most suitable one. Other types
 of objects can also be stored, see the reference manual for details.
 
-\section{\protect\raii classes for \protect\mkl pointers}
-\label{sec:RAII classes for MKL pointers}
-
-The library provides a few classes to manage \mkl pointers. It provides
-Resource Acquisition Is Initialization (\raii) idiom on top of the \mkl C
-interface. For example, below is a small program using the \verb|MKLSSTask|
-class,
-\begin{cppcode}
-  MKLSSTask<double> task(&p, &n, &xstorage, x, w, indices);
-  task.edit_moments(mean, r2m, r3m, r4m, c2m, c3m, c4m);
-  task.compute(estimates, method)
-\end{cppcode}
-In the above program, the \verb|MKLSSTask| type object manages a
-\verb|VSLSSTaskPtr| task pointer. The resources managed will be released when
-the object is destroyed. All C functions that operates on the pointer, is also
-defined as methods in the class. Table~\ref{tab:RAII classes for MKL pointers}
-lists the classes defined by the library and their corresponding \mkl pointers.
-For those classes that are copyable, the copy constructor and assignment
-operator perform deep copy. It is safe to use the copy and the original
-independently. Those classes that are not copyable are movable.
-
-\begin{table}
-  \begin{tabularx}{\textwidth}{XXX}
-    \toprule
-    Class & \mkl pointer type & Copyable \\
-    \midrule
-    \verb|MKLStream|   & \verb|VSLStreamStatePtr| & Yes \\
-    \verb|MKLSSTask|   & \verb|VSLSSTaskPtr|      & No  \\
-    \verb|MKLConvTask| & \verb|VSLConvTask|       & Yes \\
-    \verb|MKLCorrTask| & \verb|VSLCorrTask|       & Yes \\
-    \verb|MKLDFTask|   & \verb|DFTaskPtr|         & No  \\
-    \bottomrule
-  \end{tabularx}
-  \caption{\protect\raii classes for \protect\mkl pointers}
-  \label{tab:RAII classes for MKL pointers}
-\end{table}
-
 \section{\protect\raii classes for OpenCL pointers}
 \label{sec:RAII classes for OpenCL pointers}
 

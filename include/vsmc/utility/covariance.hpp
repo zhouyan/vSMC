@@ -33,9 +33,6 @@
 #define VSMC_UTILITY_COVARIANCE_HPP
 
 #include <vsmc/internal/common.hpp>
-#if VSMC_USE_MKL_VSL
-#include <vsmc/utility/mkl.hpp>
-#endif
 
 namespace vsmc
 {
@@ -183,25 +180,6 @@ class Covariance
         if (mean == nullptr && cov == nullptr)
             return;
 
-#if VSMC_USE_MKL_VSL
-        internal::size_check<MKL_INT>(dim, "Covariance::operator()");
-        internal::size_check<MKL_INT>(n, "Covariance::operator()");
-
-        MKL_INT px = static_cast<MKL_INT>(dim);
-        MKL_INT nx = static_cast<MKL_INT>(n);
-        MKL_INT xstorage = layout == RowMajor ? VSL_SS_MATRIX_STORAGE_COLS :
-                                                VSL_SS_MATRIX_STORAGE_ROWS;
-        MKL_INT cov_storage = storage(cov_layout, cov_upper, cov_packed);
-        unsigned MKL_INT64 estimates = 0;
-        if (mean != nullptr)
-            estimates |= VSL_SS_MEAN;
-        if (cov != nullptr)
-            estimates |= VSL_SS_COV;
-
-        MKLSSTask<result_type> task(&px, &nx, &xstorage, x, w, nullptr);
-        task.edit_cov_cor(mean, cov, &cov_storage, nullptr, nullptr);
-        task.compute(estimates, VSL_SS_METHOD_FAST);
-#else  // VSMC_USE_MKL_VSL
         internal::size_check<VSMC_CBLAS_INT>(dim, "Covariance::operator()");
         internal::size_check<VSMC_CBLAS_INT>(n, "Covariance::operator()");
 
@@ -252,24 +230,9 @@ class Covariance
             cov_update(layout, n, dim, buffer_.data(), B, BW);
         }
         cov_pack(dim, cov, layout, cov_layout, cov_upper, cov_packed);
-#endif // VSMC_USE_MKL_VSL
     }
 
     private:
-#if VSMC_USE_MKL_VSL
-    MKL_INT storage(MatrixLayout layout, bool upper, bool packed)
-    {
-        if (!packed)
-            return VSL_SS_MATRIX_STORAGE_FULL;
-
-        if (layout == RowMajor)
-            return upper ? VSL_SS_MATRIX_STORAGE_U_PACKED :
-                           VSL_SS_MATRIX_STORAGE_L_PACKED;
-
-        return upper ? VSL_SS_MATRIX_STORAGE_L_PACKED :
-                       VSL_SS_MATRIX_STORAGE_U_PACKED;
-    }
-#else  // VSMC_USE_MKL_VSL
     Vector<result_type> mean_;
     Vector<result_type> cov_;
     Vector<result_type> wsqrt_;
@@ -384,8 +347,7 @@ class Covariance
             default: break;
         }
     }
-#endif // VSMC_USE_MKL_VSL
-};     // class Covariance
+}; // class Covariance
 
 } // namespace vsmc
 

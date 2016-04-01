@@ -110,7 +110,7 @@ class DiscreteDistribution
         friend std::basic_ostream<CharT, Traits> &operator<<(
             std::basic_ostream<CharT, Traits> &os, const param_type &param)
         {
-            if (!os.good())
+            if (!os)
                 return os;
 
             os << param.probability_;
@@ -122,13 +122,13 @@ class DiscreteDistribution
         friend std::basic_istream<CharT, Traits> &operator>>(
             std::basic_istream<CharT, Traits> &is, param_type &param)
         {
-            if (!is.good())
+            if (!is)
                 return is;
 
             Vector<double> probability;
             is >> std::ws >> probability;
 
-            if (is.good()) {
+            if (static_cast<bool>(is)) {
                 double sum = 0;
                 if (is_positive(probability, sum)) {
                     mul(probability.size(), 1 / sum, probability.data(),
@@ -304,7 +304,7 @@ class DiscreteDistribution
         std::basic_istream<CharT, Traits> &is, distribution_type &dist)
     {
         is >> std::ws >> dist.param_;
-        if (is.good())
+        if (static_cast<bool>(is))
             dist.reset();
 
         return is;

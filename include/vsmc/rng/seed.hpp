@@ -182,7 +182,7 @@ class SeedGenerator
         std::basic_ostream<CharT, Traits> &os,
         const SeedGenerator<ID, ResultType> &sg)
     {
-        if (!os.good())
+        if (!os)
             return os;
 
         os << sg.seed_ << ' ';
@@ -197,7 +197,7 @@ class SeedGenerator
         std::basic_istream<CharT, Traits> &is,
         SeedGenerator<ID, ResultType> &sg)
     {
-        if (!is.good())
+        if (!is)
             return is;
 
         result_type s;
@@ -207,7 +207,7 @@ class SeedGenerator
         is >> std::ws >> div;
         is >> std::ws >> rem;
 
-        if (is.good()) {
+        if (static_cast<bool>(is)) {
             sg.modulo(div, rem);
             sg.set(s);
         }
@@ -341,7 +341,7 @@ class SeedGenerator<ID, std::array<ResultType, K>>
         std::basic_ostream<CharT, Traits> &os,
         const SeedGenerator<ID, std::array<ResultType, K>> &sg)
     {
-        if (!os.good())
+        if (!os)
             return os;
 
         os << sg.seed_ << ' ';
@@ -356,7 +356,7 @@ class SeedGenerator<ID, std::array<ResultType, K>>
         std::basic_istream<CharT, Traits> &is,
         SeedGenerator<ID, std::array<ResultType, K>> &sg)
     {
-        if (!is.good())
+        if (!is)
             return is;
 
         result_type s;
@@ -366,7 +366,7 @@ class SeedGenerator<ID, std::array<ResultType, K>>
         is >> std::ws >> div;
         is >> std::ws >> rem;
 
-        if (is.good()) {
+        if (static_cast<bool>(is)) {
             sg.modulo(div, rem);
             sg.set(s);
         }

@@ -702,7 +702,7 @@ class Sampler
     std::basic_ostream<CharT, Traits> &print(
         std::basic_ostream<CharT, Traits> &os, char sepchar = '\t') const
     {
-        if (iter_size() == 0 || !os.good())
+        if (!os || iter_size() == 0)
             return os;
 
         std::size_t nrow = iter_size();

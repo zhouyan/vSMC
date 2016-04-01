@@ -451,7 +451,7 @@ class CounterEngine
         std::basic_ostream<CharT, Traits> &os,
         const CounterEngine<Generator> &eng)
     {
-        if (!os.good())
+        if (!os)
             return os;
 
         os << eng.buffer_ << ' ';
@@ -466,7 +466,7 @@ class CounterEngine
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is, CounterEngine<Generator> &eng)
     {
-        if (!is.good())
+        if (!is)
             return is;
 
         CounterEngine<Generator> eng_tmp;
@@ -475,7 +475,7 @@ class CounterEngine
         is >> std::ws >> eng_tmp.key_;
         is >> std::ws >> eng_tmp.index_;
 
-        if (is.good()) {
+        if (static_cast<bool>(is)) {
             eng_tmp.generator_.reset(eng_tmp.key_);
             eng = std::move(eng_tmp);
         }
