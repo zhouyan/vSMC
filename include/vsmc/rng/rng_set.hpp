@@ -87,12 +87,9 @@ class RNGSetVector
     using rng_type = RNGType;
     using size_type = typename Vector<rng_type>::size_type;
 
-    explicit RNGSetVector(size_type N = 0) : size_(N), rng_(size_, rng_type())
-    {
-        seed();
-    }
+    explicit RNGSetVector(size_type N = 0) : rng_(N, rng_type()) { seed(); }
 
-    size_type size() const { return size_; }
+    size_type size() const { return rng_.size(); }
 
     void resize(std::size_t n)
     {
@@ -102,24 +99,16 @@ class RNGSetVector
         if (n < rng_.size())
             rng_.resize(n);
 
-        rng_.reserve(n);
-        rng_type rng;
-        for (std::size_t i = rng_.size(); i != n; ++i) {
-            Seed::instance()(rng);
-            rng_.push_back(rng);
-        }
+        size_type m = rng_.size();
+        rng_.resize(n);
+        Seed::instance()(n - m, rng_.begin() + m);
     }
 
-    void seed()
-    {
-        for (auto &rng : rng_)
-            Seed::instance()(rng);
-    }
+    void seed() { Seed::instance()(rng_.size(), rng_.begin()); }
 
-    rng_type &operator[](size_type id) { return rng_[id % size_]; }
+    rng_type &operator[](size_type id) { return rng_[id % size()]; }
 
     private:
-    std::size_t size_;
     Vector<rng_type> rng_;
 }; // class RNGSetVector
 

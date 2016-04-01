@@ -107,11 +107,26 @@ class SeedGenerator
         return seed;
     }
 
-    /// \brief Seeding an RNG
+    /// \brief Seed a single RNG
     template <typename RNGType>
     void operator()(RNGType &rng)
     {
+        std::lock_guard<std::mutex> lock(mtx_);
         rng_seed(rng, std::is_same<key_type, internal::KeyType<RNGType>>());
+    }
+
+    /// \brief Seed a sequence of RNGs
+    template <typename OutputIter>
+    OutputIter operator()(std::size_t n, OutputIter first)
+    {
+        std::lock_guard<std::mutex> lock(mtx_);
+        using RNGType = typename std::iterator_traits<OutputIter>::value_type;
+        for (std::size_t i = 0; i != n; ++i, ++first) {
+            rng_seed(
+                *first, std::is_same<key_type, internal::KeyType<RNGType>>());
+        }
+
+        return first;
     }
 
     /// \brief Set the seed
@@ -238,14 +253,12 @@ class SeedGenerator
     template <typename RNGType>
     void rng_seed(RNGType &rng, std::true_type)
     {
-        std::lock_guard<std::mutex> lock(mtx_);
         rng.seed(get_key());
     }
 
     template <typename RNGType>
     void rng_seed(RNGType &rng, std::false_type)
     {
-        std::lock_guard<std::mutex> lock(mtx_);
         rng.seed(static_cast<typename RNGType::result_type>(get()));
     }
 }; // class SeedGenerator
