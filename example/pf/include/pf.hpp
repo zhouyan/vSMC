@@ -65,11 +65,12 @@ static const std::size_t LogL = 4;
 template <vsmc::MatrixLayout Layout>
 using StateBase = vsmc::StateMatrix<Layout, 5, double>;
 
-template <vsmc::MatrixLayout Layout>
+template <vsmc::MatrixLayout Layout, typename RNGSetType>
 class pf_state : public StateBase<Layout>
 {
     public:
     using size_type = typename StateBase<Layout>::size_type;
+    using rng_set_type = RNGSetType;
 
     pf_state(size_type N) : StateBase<Layout>(N) {}
 
@@ -108,33 +109,36 @@ class pf_state : public StateBase<Layout>
     vsmc::Vector<double> obs_y_;
 };
 
-template <vsmc::MatrixLayout Layout>
-class pf_init : public InitializeSMP<pf_state<Layout>, pf_init<Layout>>
+template <vsmc::MatrixLayout Layout, typename RNGSetType>
+class pf_init : public InitializeSMP<pf_state<Layout, RNGSetType>,
+                    pf_init<Layout, RNGSetType>>
 {
     public:
-    std::size_t eval_sp(vsmc::SingleParticle<pf_state<Layout>> sp) const
+    std::size_t eval_sp(
+        vsmc::SingleParticle<pf_state<Layout, RNGSetType>> sp) const
     {
         const double sd_pos0 = 2;
         const double sd_vel0 = 1;
         vsmc::NormalDistribution<double> norm_pos(0, sd_pos0);
         vsmc::NormalDistribution<double> norm_vel(0, sd_vel0);
 
-        sp.state(PosX) = norm_pos(sp.rng());
-        sp.state(PosY) = norm_pos(sp.rng());
-        sp.state(VelX) = norm_vel(sp.rng());
-        sp.state(VelY) = norm_vel(sp.rng());
+        auto &rng = sp.rng();
+        sp.state(PosX) = norm_pos(rng);
+        sp.state(PosY) = norm_pos(rng);
+        sp.state(VelX) = norm_vel(rng);
+        sp.state(VelY) = norm_vel(rng);
         sp.state(LogL) = sp.particle().value().log_likelihood(0, sp.id());
 
         return 1;
     }
 
-    void eval_param(
-        vsmc::Particle<pf_state<Layout>> &particle, void *file) const
+    void eval_param(vsmc::Particle<pf_state<Layout, RNGSetType>> &particle,
+        void *file) const
     {
         particle.value().read_data(static_cast<const char *>(file));
     }
 
-    void eval_post(vsmc::Particle<pf_state<Layout>> &particle)
+    void eval_post(vsmc::Particle<pf_state<Layout, RNGSetType>> &particle)
     {
         w_.resize(particle.size());
         particle.value().read_state(LogL, w_.data());
@@ -145,12 +149,13 @@ class pf_init : public InitializeSMP<pf_state<Layout>, pf_init<Layout>>
     vsmc::Vector<double> w_;
 };
 
-template <vsmc::MatrixLayout Layout>
-class pf_move : public MoveSMP<pf_state<Layout>, pf_move<Layout>>
+template <vsmc::MatrixLayout Layout, typename RNGSetType>
+class pf_move
+    : public MoveSMP<pf_state<Layout, RNGSetType>, pf_move<Layout, RNGSetType>>
 {
     public:
-    std::size_t eval_sp(
-        std::size_t iter, vsmc::SingleParticle<pf_state<Layout>> sp) const
+    std::size_t eval_sp(std::size_t iter,
+        vsmc::SingleParticle<pf_state<Layout, RNGSetType>> sp) const
     {
         const double sd_pos = std::sqrt(0.02);
         const double sd_vel = std::sqrt(0.001);
@@ -158,16 +163,18 @@ class pf_move : public MoveSMP<pf_state<Layout>, pf_move<Layout>>
         vsmc::NormalDistribution<double> norm_pos(0, sd_pos);
         vsmc::NormalDistribution<double> norm_vel(0, sd_vel);
 
-        sp.state(PosX) += norm_pos(sp.rng()) + delta * sp.state(VelX);
-        sp.state(PosY) += norm_pos(sp.rng()) + delta * sp.state(VelY);
-        sp.state(VelX) += norm_vel(sp.rng());
-        sp.state(VelY) += norm_vel(sp.rng());
+        auto &rng = sp.rng();
+        sp.state(PosX) += norm_pos(rng) + delta * sp.state(VelX);
+        sp.state(PosY) += norm_pos(rng) + delta * sp.state(VelY);
+        sp.state(VelX) += norm_vel(rng);
+        sp.state(VelY) += norm_vel(rng);
         sp.state(LogL) = sp.particle().value().log_likelihood(iter, sp.id());
 
         return 1;
     }
 
-    void eval_post(std::size_t, vsmc::Particle<pf_state<Layout>> &particle)
+    void eval_post(
+        std::size_t, vsmc::Particle<pf_state<Layout, RNGSetType>> &particle)
     {
         w_.resize(particle.size());
         particle.value().read_state(LogL, w_.data());
@@ -178,33 +185,35 @@ class pf_move : public MoveSMP<pf_state<Layout>, pf_move<Layout>>
     vsmc::Vector<double> w_;
 };
 
-template <vsmc::MatrixLayout Layout>
-class pf_eval : public MonitorEvalSMP<pf_state<Layout>, pf_eval<Layout>>
+template <vsmc::MatrixLayout Layout, typename RNGSetType>
+class pf_eval : public MonitorEvalSMP<pf_state<Layout, RNGSetType>,
+                    pf_eval<Layout, RNGSetType>>
 {
     public:
     void eval_sp(std::size_t, std::size_t,
-        vsmc::SingleParticle<pf_state<Layout>> sp, double *res)
+        vsmc::SingleParticle<pf_state<Layout, RNGSetType>> sp, double *res)
     {
         res[0] = sp.state(PosX);
         res[1] = sp.state(PosY);
     }
 };
 
-template <vsmc::MatrixLayout Layout>
+template <vsmc::MatrixLayout Layout, typename RNGSetType>
 inline void pf_run(vsmc::ResampleScheme scheme, const std::string &datafile,
-    const std::string &prg, const std::string &res, const std::string &rc)
+    const std::string &prg, const std::string &res, const std::string &rc,
+    const std::string &rs)
 {
     std::size_t N = ParticleNum;
-    std::string basename("pf." + prg + "." + res + "." + rc);
+    std::string basename("pf." + prg + "." + res + "." + rc + "." + rs);
     std::string pf_h5(basename + ".h5");
     std::string pf_time(basename + ".time");
     std::string pf_txt(basename + ".txt");
 
     vsmc::Seed::instance().set(101);
-    vsmc::Sampler<pf_state<Layout>> sampler(N, scheme, 0.5);
-    sampler.init(pf_init<Layout>());
-    sampler.move(pf_move<Layout>(), false);
-    sampler.monitor("pos", 2, pf_eval<Layout>());
+    vsmc::Sampler<pf_state<Layout, RNGSetType>> sampler(N, scheme, 0.5);
+    sampler.init(pf_init<Layout, RNGSetType>());
+    sampler.move(pf_move<Layout, RNGSetType>(), false);
+    sampler.monitor("pos", 2, pf_eval<Layout, RNGSetType>());
     sampler.monitor("pos").name(0) = "pos.x";
     sampler.monitor("pos").name(1) = "pos.y";
 
@@ -232,9 +241,12 @@ inline void pf_run(vsmc::ResampleScheme scheme, const std::string &datafile,
     vsmc::hdf5store(sampler.monitor("pos"), pf_h5, "Monitor", true);
 #endif
     std::ofstream time(pf_time);
-    time << std::setw(10) << std::left << prg << std::setw(20) << std::left
-         << res << std::setw(10) << std::left << rc << std::setw(20)
-         << std::left << std::fixed << watch.milliseconds() << std::endl;
+    time << std::setw(10) << std::left << prg;
+    time << std::setw(20) << std::left << res;
+    time << std::setw(10) << std::left << rc;
+    time << std::setw(20) << std::left << rs;
+    time << std::setw(20) << std::left << std::fixed << watch.milliseconds()
+         << std::endl;
     time.close();
 
     std::ofstream txt(pf_txt);
@@ -253,8 +265,16 @@ inline void pf_run(vsmc::ResampleScheme scheme, char **argv)
         case vsmc::ResidualStratified: res = "ResidualStratified"; break;
         case vsmc::ResidualSystematic: res = "ResidualSystematic"; break;
     }
-    pf_run<vsmc::RowMajor>(scheme, argv[1], argv[2], res, "Row");
-    pf_run<vsmc::ColMajor>(scheme, argv[1], argv[2], res, "Col");
+    pf_run<vsmc::RowMajor, vsmc::RNGSetVector<vsmc::RNG>>(
+        scheme, argv[1], argv[2], res, "Row", "Vector");
+    pf_run<vsmc::ColMajor, vsmc::RNGSetVector<vsmc::RNG>>(
+        scheme, argv[1], argv[2], res, "Col", "Vector");
+#if VSMC_HAS_TBB
+    pf_run<vsmc::RowMajor, vsmc::RNGSetTBB<vsmc::RNG>>(
+        scheme, argv[1], argv[2], res, "Row", "TBB");
+    pf_run<vsmc::ColMajor, vsmc::RNGSetTBB<vsmc::RNG>>(
+        scheme, argv[1], argv[2], res, "Col", "TBB");
+#endif
 }
 
 inline int pf_main(int argc, char **argv)

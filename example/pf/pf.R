@@ -34,8 +34,8 @@ suppressPackageStartupMessages(library(rhdf5))
 
 theme_set(theme_bw())
 
-smp <- c("SEQ", "OMP", "TBB")
-exe <- paste("pf", smp, sep = ".")
+prg <- c("SEQ", "OMP", "TBB")
+exe <- paste("pf", prg, sep = ".")
 res <- c(
     "Multinomial",
     "Stratified",
@@ -43,8 +43,10 @@ res <- c(
     "Residual",
     "ResidualStratified",
     "ResidualSystematic")
-runs <- expand.grid(exe, res)
-runs <- paste(runs$Var1, runs$Var2, sep = ".")
+rc <- c("Row", "Col")
+rs <- c("Vector", "TBB")
+runs <- expand.grid(exe, res, rc, rs)
+runs <- paste(runs$Var1, runs$Var2, runs$Var3, runs$Var4, sep = ".")
 
 src.level <- c("Estimates", "Observation")
 obs <- read.table("pf.data", header = FALSE)
@@ -76,53 +78,51 @@ pf <- function (filename, est)
 }
 
 dat.time <- numeric()
-for (rowcol in c(".Row", ".Col")) {
-    for (run in runs) {
-        pf.time <- paste0(run, rowcol, ".time")
-        if (file.exists(pf.time)) {
-            dat.time <- rbind(dat.time, read.table(pf.time, header = FALSE))
-        }
+for (run in runs) {
+    pf.time <- paste0(run, ".time")
+    if (file.exists(pf.time)) {
+        dat.time <- rbind(dat.time, read.table(pf.time, header = FALSE))
+    }
 
-        pf.txt <- paste0(run, rowcol, ".txt")
-        if (file.exists(pf.txt)) {
-            tmp <- pf(pf.txt, read.table(pf.txt, header = TRUE))
-            plt.list[[pf.txt]] <- tmp$plt
-            dat <- rbind(dat, tmp$dat)
-        }
+    pf.txt <- paste0(run, ".txt")
+    if (file.exists(pf.txt)) {
+        tmp <- pf(pf.txt, read.table(pf.txt, header = TRUE))
+        plt.list[[pf.txt]] <- tmp$plt
+        dat <- rbind(dat, tmp$dat)
+    }
 
-        pf.h5 <- paste0(run, rowcol, ".h5")
-        if (file.exists(pf.h5)) {
-            pf.s <- paste(pf.h5, "(Sampler)")
-            tmp <- pf(pf.s, as.data.frame(h5read(pf.h5, "Sampler")))
-            plt.list[[pf.s]] <- tmp$plt
-            dat <- rbind(dat, tmp$dat)
+    pf.h5 <- paste0(run, ".h5")
+    if (file.exists(pf.h5)) {
+        pf.s <- paste(pf.h5, "(Sampler)")
+        tmp <- pf(pf.s, as.data.frame(h5read(pf.h5, "Sampler")))
+        plt.list[[pf.s]] <- tmp$plt
+        dat <- rbind(dat, tmp$dat)
 
-            pf.m <- paste(pf.h5, "(Monitor)")
-            tmp <- pf(pf.m, as.data.frame(h5read(pf.h5, "Monitor/Record")))
-            plt.list[[pf.m]] <- tmp$plt
-            dat <- rbind(dat, tmp$dat)
+        pf.m <- paste(pf.h5, "(Monitor)")
+        tmp <- pf(pf.m, as.data.frame(h5read(pf.h5, "Monitor/Record")))
+        plt.list[[pf.m]] <- tmp$plt
+        dat <- rbind(dat, tmp$dat)
 
-            pf.p <- paste(pf.h5, "(Particle)")
-            particle <- h5read(pf.h5, "Particle")
-            pos.x <- numeric()
-            pos.y <- numeric()
-            for (i in 0:(length(particle) - 1)) {
-                name <- paste0("Iter.", i)
-                w <- particle[[name]]$Weight
-                s <- particle[[name]]$Value
-                if (rowcol == ".row") {
-                    pos.x <- c(pos.x, sum(w * s[1,]))
-                    pos.y <- c(pos.y, sum(w * s[2,]))
-                }
-                if (rowcol == ".col") {
-                    pos.x <- c(pos.x, sum(w * s[,1]))
-                    pos.y <- c(pos.y, sum(w * s[,2]))
-                }
+        pf.p <- paste(pf.h5, "(Particle)")
+        particle <- h5read(pf.h5, "Particle")
+        pos.x <- numeric()
+        pos.y <- numeric()
+        for (i in 0:(length(particle) - 1)) {
+            name <- paste0("Iter.", i)
+            w <- particle[[name]]$Weight
+            s <- particle[[name]]$Value
+            if (dim(s)[1] == 5) {
+                pos.x <- c(pos.x, sum(w * s[1,]))
+                pos.y <- c(pos.y, sum(w * s[2,]))
             }
-            tmp <- pf(pf.p, as.data.frame(cbind(pos.x, pos.y)))
-            plt.list[[pf.p]] <- tmp$plt
-            dat <- rbind(dat, tmp$dat)
+            if (dim(s)[2] == 5) {
+                pos.x <- c(pos.x, sum(w * s[,1]))
+                pos.y <- c(pos.y, sum(w * s[,2]))
+            }
         }
+        tmp <- pf(pf.p, as.data.frame(cbind(pos.x, pos.y)))
+        plt.list[[pf.p]] <- tmp$plt
+        dat <- rbind(dat, tmp$dat)
     }
 }
 
@@ -135,13 +135,16 @@ plt <- plt + ggtitle("pf")
 print(plt)
 
 dat <- data.frame(
-    Implementation = dat.time[,1],
+    SMP = dat.time[,1],
     ResampleScheme = dat.time[,2],
-    MatrixLayout = paste0(dat.time[,3], "Major"),
-    Time = dat.time[,4])
+    MatrixLayout = paste0("MatrixLayout = ", dat.time[,3], "Major"),
+    RNGSet = paste0(dat.time[,4]),
+    Time = dat.time[,5],
+    Group = paste(dat.time[,1], dat.time[,4]))
 plt <- qplot(x = ResampleScheme, y = Time, data = dat,
-    group = Implementation, color = Implementation, geom = c("line", "point"))
-plt <- plt + facet_wrap(~MatrixLayout, scale = "free_y", ncol = 1)
+    group = Group, color = SMP, linetype = RNGSet, shape = RNGSet,
+    geom = c("line", "point"))
+plt <- plt + facet_wrap(~MatrixLayout, ncol = 1)
 plt <- plt + ggtitle("pf.time")
 print(plt)
 
