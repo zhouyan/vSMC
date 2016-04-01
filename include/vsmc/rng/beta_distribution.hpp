@@ -433,13 +433,13 @@ inline std::size_t beta_distribution_impl_c(RNGType &rng, std::size_t n,
     const RealType t = constant.t;
     const RealType p = constant.p;
     const RealType ln_4 = 2 * const_ln_2<RealType>();
-    alignas(32) RealType s[K * 5];
-    RealType *const u1 = s;
-    RealType *const u2 = s + n;
-    RealType *const v = s + n * 2;
-    RealType *const x = s + n * 3;
-    RealType *const y = s + n * 4;
-    u01_distribution(rng, n * 2, s);
+    Array<RealType, K * 5> s;
+    RealType *const u1 = s.data();
+    RealType *const u2 = s.data() + n;
+    RealType *const v = s.data() + n * 2;
+    RealType *const x = s.data() + n * 3;
+    RealType *const y = s.data() + n * 4;
+    u01_distribution(rng, n * 2, s.data());
     sub(n, static_cast<RealType>(1), u1, v);
     div(n, u1, v, v);
     log(n, v, v);
@@ -471,11 +471,11 @@ inline std::size_t beta_distribution_impl_j(RNGType &rng, std::size_t n,
 {
     const RealType a = constant.a;
     const RealType b = constant.b;
-    alignas(32) RealType s[K * 3];
-    RealType *const x = s;
-    RealType *const y = s + n;
-    RealType *const u = s + n * 2;
-    u01_distribution(rng, n * 2, s);
+    Array<RealType, K * 3> s;
+    RealType *const x = s.data();
+    RealType *const y = s.data() + n;
+    RealType *const u = s.data() + n * 2;
+    u01_distribution(rng, n * 2, s.data());
     pow(n, x, a, x);
     pow(n, y, b, y);
     add(n, x, y, u);
@@ -559,7 +559,7 @@ inline void beta_distribution(
         "**beta_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
         "TYPES");
 
-    const std::size_t k = internal::StaticBufferSize<RealType>::value;
+    const std::size_t k = internal::BufferSize<RealType>::value;
     const internal::BetaDistributionConstant<RealType> constant(alpha, beta);
     while (n > k) {
         std::size_t m = internal::beta_distribution_impl<k>(

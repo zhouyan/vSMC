@@ -235,12 +235,12 @@ inline std::size_t gamma_distribution_impl_t(RNGType &rng, std::size_t n,
 {
     const RealType d = constant.d;
     const RealType c = constant.c;
-    alignas(32) RealType s[K * 3];
-    RealType *const u = s;
-    RealType *const e = s + n;
-    RealType *const x = s + n * 2;
+    Array<RealType, K * 3> s;
+    RealType *const u = s.data();
+    RealType *const e = s.data() + n;
+    RealType *const x = s.data() + n * 2;
 
-    u01_distribution(rng, n * 2, s);
+    u01_distribution(rng, n * 2, s.data());
     log(n, e, e);
     mul(n, static_cast<RealType>(-1), e, e);
     for (std::size_t i = 0; i != n; ++i) {
@@ -271,15 +271,15 @@ inline std::size_t gamma_distribution_impl_w(RNGType &rng, std::size_t n,
 {
     const RealType d = constant.d;
     const RealType c = constant.c;
-    alignas(32) RealType s[K * 3];
-    RealType *const u = s;
-    RealType *const e = s + n;
-    RealType *const x = s + n * 2;
+    Array<RealType, K * 3> s;
+    RealType *const u = s.data();
+    RealType *const e = s.data() + n;
+    RealType *const x = s.data() + n * 2;
 
-    u01_distribution(rng, n * 2, s);
-    log(n * 2, s, s);
-    mul(n * 2, static_cast<RealType>(-1), s, s);
-    log(n, s, x);
+    u01_distribution(rng, n * 2, s.data());
+    log(n * 2, s.data(), s.data());
+    mul(n * 2, static_cast<RealType>(-1), s.data(), s.data());
+    log(n, s.data(), x);
     mul(n, c, x, x);
     exp(n, x, x);
     add(n, u, e, u);
@@ -301,12 +301,12 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
 {
     const RealType d = constant.d;
     const RealType c = constant.c;
-    alignas(32) RealType s[K * 5];
-    RealType *const u = s;
-    RealType *const e = s + n;
-    RealType *const v = s + n * 2;
-    RealType *const w = s + n * 3;
-    RealType *const x = s + n * 4;
+    Array<RealType, K * 5> s;
+    RealType *const u = s.data();
+    RealType *const e = s.data() + n;
+    RealType *const v = s.data() + n * 2;
+    RealType *const w = s.data() + n * 3;
+    RealType *const x = s.data() + n * 4;
 
     u01_distribution(rng, n, u);
     normal_distribution(
@@ -388,7 +388,7 @@ inline void gamma_distribution(
         "**gamma_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
         "TYPES");
 
-    const std::size_t k = internal::StaticBufferSize<RealType>::value;
+    const std::size_t k = internal::BufferSize<RealType>::value;
     const internal::GammaDistributionConstant<RealType> constant(alpha);
     while (n > k) {
         std::size_t m = internal::gamma_distribution_impl<k>(

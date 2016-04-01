@@ -381,7 +381,7 @@
             "**" #name "_distribution** USED WITH RealType OTHER THAN "       \
             "FLOATING POINT TYPES");                                          \
                                                                               \
-        const std::size_t K = internal::StaticBufferSize<RealType>::value;    \
+        const std::size_t K = internal::BufferSize<RealType>::value;          \
         const std::size_t M = n / K;                                          \
         const std::size_t L = n % K;                                          \
         for (std::size_t i = 0; i != M; ++i, r += K)                          \
@@ -398,7 +398,7 @@
             "**" #name "_distribution** USED WITH RealType OTHER THAN "       \
             "FLOATING POINT TYPES");                                          \
                                                                               \
-        const std::size_t K = internal::StaticBufferSize<RealType>::value;    \
+        const std::size_t K = internal::BufferSize<RealType>::value;          \
         const std::size_t M = N / K;                                          \
         const std::size_t L = N % K;                                          \
         for (std::size_t i = 0; i != M; ++i, r += K)                          \
@@ -415,7 +415,7 @@
             "**" #name "_distribution** USED WITH RealType OTHER THAN "       \
             "FLOATING POINT TYPES");                                          \
                                                                               \
-        const std::size_t K = internal::StaticBufferSize<RealType>::value;    \
+        const std::size_t K = internal::BufferSize<RealType>::value;          \
         const std::size_t M = N / K;                                          \
         const std::size_t L = N % K;                                          \
         for (std::size_t i = 0; i != M; ++i, r += K)                          \

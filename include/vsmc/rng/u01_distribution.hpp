@@ -66,9 +66,9 @@
     {                                                                         \
         using UIntType = U01UIntType<RNGType>;                                \
                                                                               \
-        alignas(32) UIntType s[K];                                            \
-        uniform_bits_distribution(rng, n, s);                                 \
-        name<UIntType, RealType>(n, s, r);                                    \
+        Array<UIntType, K> s;                                                 \
+        uniform_bits_distribution(rng, n, s.data());                          \
+        name<UIntType, RealType>(n, s.data(), r);                             \
     }
 
 namespace vsmc

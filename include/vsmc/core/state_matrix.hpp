@@ -87,7 +87,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     public:
     using size_type = std::size_t;
     using state_type = T;
-    using state_pack_type = internal::Array<T, Dim>;
+    using state_pack_type = internal::Buffer<T, Dim>;
 
     template <typename S>
     class single_particle_type : public SingleParticleBase<S>

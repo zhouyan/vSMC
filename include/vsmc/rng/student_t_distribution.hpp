@@ -98,13 +98,13 @@ template <std::size_t K, typename RealType, typename RNGType>
 inline void student_t_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType df)
 {
-    alignas(32) RealType s[K];
+    Array<RealType, K> s;
     chi_squared_distribution(rng, n, r, df);
     mul(n, 1 / df, r, r);
     sqrt(n, r, r);
     normal_distribution(
-        rng, n, s, static_cast<RealType>(0), static_cast<RealType>(1));
-    div(n, s, r, r);
+        rng, n, s.data(), static_cast<RealType>(0), static_cast<RealType>(1));
+    div(n, s.data(), r, r);
 }
 
 } // namespace vsmc::internal

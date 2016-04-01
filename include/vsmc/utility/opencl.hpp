@@ -269,7 +269,7 @@ class CLNDRange
 
     private:
     const std::size_t dim_;
-    const std::array<std::size_t, 3> range_;
+    const Array<std::size_t, 3> range_;
 }; // class CLNDRange
 
 /// \brief OpenCL `cl_device_id`
@@ -398,7 +398,7 @@ class CLContextProperties
     const ::cl_context_properties *data() const { return properties_.data(); }
 
     private:
-    const std::array<::cl_context_properties, 5> properties_;
+    const Array<::cl_context_properties, 5> properties_;
 }; // class CLContextProperty
 
 /// \brief OpenCL `cl_context`
@@ -1146,10 +1146,9 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
 
     /// \brief `clEnqueueReadBufferRect`
     ::cl_int enqueue_read_buffer_rect(const CLMemory &buffer,
-        ::cl_bool blocking_read,
-        const std::array<std::size_t, 3> &buffer_origin,
-        const std::array<std::size_t, 3> &host_origin,
-        const std::array<std::size_t, 3> &region, std::size_t buffer_row_pitch,
+        ::cl_bool blocking_read, const Array<std::size_t, 3> &buffer_origin,
+        const Array<std::size_t, 3> &host_origin,
+        const Array<std::size_t, 3> &region, std::size_t buffer_row_pitch,
         std::size_t buffer_slice_pitch, std::size_t host_row_pitch,
         std::size_t host_slice_pitch, void *ptr,
         ::cl_uint num_events_in_wait_list = 0,
@@ -1176,10 +1175,9 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
 
     /// \brief `clEnqueueWriteBufferRect`
     ::cl_int enqueue_write_buffer_rect(const CLMemory &buffer,
-        ::cl_bool blocking_write,
-        const std::array<std::size_t, 3> &buffer_origin,
-        const std::array<std::size_t, 3> &host_origin,
-        const std::array<std::size_t, 3> &region, std::size_t buffer_row_pitch,
+        ::cl_bool blocking_write, const Array<std::size_t, 3> &buffer_origin,
+        const Array<std::size_t, 3> &host_origin,
+        const Array<std::size_t, 3> &region, std::size_t buffer_row_pitch,
         std::size_t buffer_slice_pitch, std::size_t host_row_pitch,
         std::size_t host_slice_pitch, const void *ptr,
         ::cl_uint num_events_in_wait_list = 0,
@@ -1229,10 +1227,9 @@ class CLCommandQueue : public CLBase<::cl_command_queue, CLCommandQueue>
 
     /// \brief `clEnqueueCopyBufferRect`
     ::cl_int enqueue_copy_buffer_rect(const CLMemory &src_buffer,
-        const CLMemory &dst_buffer,
-        const std::array<std::size_t, 3> &src_origin,
-        const std::array<std::size_t, 3> &dst_origin,
-        const std::array<std::size_t, 3> &region, std::size_t src_row_pitch,
+        const CLMemory &dst_buffer, const Array<std::size_t, 3> &src_origin,
+        const Array<std::size_t, 3> &dst_origin,
+        const Array<std::size_t, 3> &region, std::size_t src_row_pitch,
         std::size_t src_slice_pitch, std::size_t dst_row_pitch,
         std::size_t dst_slice_pitch, ::cl_uint num_events_in_wait_list = 0,
         const CLEvent *event_wait_list = nullptr,

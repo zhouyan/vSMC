@@ -147,8 +147,8 @@ class NormalMVDistribution
                 return is;
 
             NormalDistribution<RealType> rnorm;
-            internal::Array<result_type, Dim> mean;
-            internal::Array<result_type, Dim *(Dim + 1) / 2> chol;
+            internal::Buffer<result_type, Dim> mean;
+            internal::Buffer<result_type, Dim *(Dim + 1) / 2> chol;
             bool null_mean;
             bool null_chol;
 
@@ -183,8 +183,8 @@ class NormalMVDistribution
 
         private:
         NormalDistribution<RealType> rnorm_;
-        internal::Array<result_type, Dim> mean_;
-        internal::Array<result_type, Dim *(Dim + 1) / 2> chol_;
+        internal::Buffer<result_type, Dim> mean_;
+        internal::Buffer<result_type, Dim *(Dim + 1) / 2> chol_;
         bool null_mean_;
         bool null_chol_;
 

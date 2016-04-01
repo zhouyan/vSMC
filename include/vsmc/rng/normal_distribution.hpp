@@ -223,19 +223,19 @@ template <std::size_t K, typename RealType, typename RNGType>
 inline void normal_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType mean, RealType stddev)
 {
-    alignas(32) RealType s[K / 2];
+    Array<RealType, K / 2> s;
     const std::size_t nu = n / 2;
     RealType *const u1 = r;
     RealType *const u2 = r + nu;
     u01_distribution(rng, n, r);
-    log(nu, u1, s);
-    mul(nu, static_cast<RealType>(-2), s, s);
-    sqrt(nu, s, s);
+    log(nu, u1, s.data());
+    mul(nu, static_cast<RealType>(-2), s.data(), s.data());
+    sqrt(nu, s.data(), s.data());
     mul(nu, const_pi_2<RealType>(), u2, u2);
     sincos(nu, u2, u1, u2);
-    mul(nu, stddev, s, s);
-    fma(nu, s, u1, mean, u1);
-    fma(nu, s, u2, mean, u2);
+    mul(nu, stddev, s.data(), s.data());
+    fma(nu, s.data(), u1, mean, u1);
+    fma(nu, s.data(), u2, mean, u2);
 }
 
 } // namespace vsmc::internal
@@ -250,7 +250,7 @@ inline void normal_distribution(
         "**normal_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
         "TYPES");
 
-    const std::size_t k = internal::StaticBufferSize<RealType>::value;
+    const std::size_t k = internal::BufferSize<RealType>::value;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, r += k)

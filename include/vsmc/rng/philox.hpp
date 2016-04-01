@@ -163,14 +163,14 @@ template <typename T, std::size_t K, std::size_t N, bool = (N > 1)>
 class PhiloxBumpKey
 {
     public:
-    static void eval(std::array<T, K / 2> &) {}
+    static void eval(Array<T, K / 2> &) {}
 }; // class PhiloxBumpKey
 
 template <typename T, std::size_t N>
 class PhiloxBumpKey<T, 2, N, true>
 {
     public:
-    static void eval(std::array<T, 1> &par)
+    static void eval(Array<T, 1> &par)
     {
         std::get<0>(par) += PhiloxWeylConstant<T, 0>::value;
     }
@@ -180,7 +180,7 @@ template <typename T, std::size_t N>
 class PhiloxBumpKey<T, 4, N, true>
 {
     public:
-    static void eval(std::array<T, 2> &par)
+    static void eval(Array<T, 2> &par)
     {
         std::get<0>(par) += PhiloxWeylConstant<T, 0>::value;
         std::get<1>(par) += PhiloxWeylConstant<T, 1>::value;
@@ -191,14 +191,14 @@ template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
 class PhiloxRound
 {
     public:
-    static void eval(std::array<T, K> &, const std::array<T, K / 2> &) {}
+    static void eval(Array<T, K> &, const Array<T, K / 2> &) {}
 }; // class PhiloxRound
 
 template <typename T, std::size_t N>
 class PhiloxRound<T, 2, N, true>
 {
     public:
-    static void eval(std::array<T, 2> &state, const std::array<T, 1> &par)
+    static void eval(Array<T, 2> &state, const Array<T, 1> &par)
     {
         T hi = 0;
         T lo = 0;
@@ -213,7 +213,7 @@ template <typename T, std::size_t N>
 class PhiloxRound<T, 4, N, true>
 {
     public:
-    static void eval(std::array<T, 4> &state, const std::array<T, 2> &par)
+    static void eval(Array<T, 4> &state, const Array<T, 2> &par)
     {
         T hi0 = 0;
         T lo1 = 0;
@@ -253,8 +253,8 @@ class PhiloxGenerator
 
     public:
     using result_type = ResultType;
-    using ctr_type = std::array<ResultType, K>;
-    using key_type = std::array<ResultType, K / 2>;
+    using ctr_type = Array<ResultType, K>;
+    using key_type = Array<ResultType, K / 2>;
 
     static constexpr std::size_t size() { return K; }
 

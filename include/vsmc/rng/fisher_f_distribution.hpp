@@ -92,12 +92,12 @@ template <std::size_t K, typename RealType, typename RNGType>
 inline void fisher_f_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType df1, RealType df2)
 {
-    alignas(32) RealType s[K];
-    chi_squared_distribution(rng, n, s, df1);
+    Array<RealType, K> s;
+    chi_squared_distribution(rng, n, s.data(), df1);
     chi_squared_distribution(rng, n, r, df2);
-    mul(n, 1 / df1, s, s);
+    mul(n, 1 / df1, s.data(), s.data());
     mul(n, 1 / df2, r, r);
-    div(n, s, r, r);
+    div(n, s.data(), r, r);
 }
 
 } // namespace vsmc::internal

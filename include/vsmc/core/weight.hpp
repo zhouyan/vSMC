@@ -267,7 +267,7 @@ class Weight
     {
         double *w = data_.data();
         double accw = 0;
-        const std::size_t k = internal::StaticBufferSize<double>::value;
+        const std::size_t k = internal::BufferSize<double>::value;
         const std::size_t m = size() / k;
         const std::size_t l = size() % k;
         for (std::size_t i = 0; i != m; ++i, w += k)
