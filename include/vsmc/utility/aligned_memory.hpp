@@ -154,14 +154,15 @@ class AlignmentTraitImpl
 {
     public:
     static constexpr std::size_t value =
-        alignof(T) > VSMC_ALIGNMENT_MIN ? alignof(T) : VSMC_ALIGNMENT_MIN;
+        (alignof(T) > VSMC_ALIGNMENT_MIN ? alignof(T) : VSMC_ALIGNMENT_MIN);
 }; // class AlignmentTraitImpl
 
 template <typename T>
 class AlignmentTraitImpl<T, false>
 {
     public:
-    static constexpr std::size_t value = VSMC_ALIGNMENT;
+    static constexpr std::size_t value =
+        (alignof(T) > VSMC_ALIGNMENT ? alignof(T) : VSMC_ALIGNMENT);
 }; // class AlignmentTraitImpl
 
 } // namespace vsmc::internal
