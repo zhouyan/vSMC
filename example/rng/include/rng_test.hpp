@@ -96,6 +96,15 @@ inline void rng_test(std::size_t n, const std::string &name,
         ss >> rng;
         vsmc::rng_rand(rng, m, r2.data());
         passed = passed && r1 == r2;
+
+        rng1.discard(1001);
+        typename RNGType::result_type next = rng1();
+        for (std::size_t j = 0; j != 1001; ++j)
+            rng2();
+        bool find = false;
+        for (std::size_t j = 0; j != 2; ++j)
+            find = find || rng2() == next;
+        passed = passed && find;
     }
 
     sw1.push_back(watch1);
