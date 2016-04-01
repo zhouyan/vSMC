@@ -33,6 +33,8 @@
 
 extern "C" {
 
+void vsmc_seed(vsmc_rng rng) { ::vsmc::Seed::instance()(::vsmc::cast(rng)); }
+
 int vsmc_seed_get(void)
 {
     return static_cast<int>(::vsmc::Seed::instance().get());
@@ -45,13 +47,9 @@ void vsmc_seed_set(int seed)
 
 void vsmc_seed_modulo(int div, int rem)
 {
-    ::vsmc::Seed::instance().modulo(static_cast<::vsmc::Seed::skip_type>(div),
-        static_cast<::vsmc::Seed::skip_type>(rem));
-}
-
-void vsmc_seed_skip(int steps)
-{
-    ::vsmc::Seed::instance().skip(static_cast<::vsmc::Seed::skip_type>(steps));
+    ::vsmc::Seed::instance().modulo(
+        static_cast<::vsmc::Seed::result_type>(div),
+        static_cast<::vsmc::Seed::result_type>(rem));
 }
 
 size_t vsmc_seed_save(void *mem)

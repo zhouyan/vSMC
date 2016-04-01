@@ -78,9 +78,6 @@ extern "C" {
  * \defgroup C_API_RNG_Seed vsmc::Seed
  * \ingroup C_API_RNG
  *
- * \defgroup C_API_RNG_RNG vsmc::RNG
- * \ingroup C_API_RNG
- *
  * \defgroup C_API_RNG_U01Sequence U01 sequence
  * \ingroup C_API_RNG
  *
@@ -153,42 +150,6 @@ typedef enum {
 
 /** @} */ /* C_API_Definitions */
 
-/** \addtogroup C_API_RNG_Seed */
-/** @{ */
-
-/** \brief `vsmc::Seed::get` */
-int vsmc_seed_get(void);
-
-/** \brief `vsmc::Seed::set` */
-void vsmc_seed_set(int seed);
-
-/** \brief `vsmc::Seed::modulo` */
-void vsmc_seed_modulo(int div, int rem);
-
-/** \brief `vsmc::Seed::skip` */
-void vsmc_seed_skip(int steps);
-
-/** \brief `vsmc::Seed::operator<<`
- *
- * \details
- * If `mem == nullptr`, return the number of bytes required in `mem`.
- * Otherwise, store `vsmc::Seed::instacne()` in `mem` */
-size_t vsmc_seed_save(void *mem);
-
-/** \brief `vsmc::Seed::operator>>`
- *
- * \details
- * `mem` points to memory previously written by `vsmc_seed_save` */
-void vsmc_seed_load(const void *mem);
-
-/** \brief `vsmc::Seed::operator<<` directly to an external file */
-void vsmc_seed_save_f(const char *filename);
-
-/** \brief `vsmc::Seed::operator>>` directly from an external file */
-void vsmc_seed_load_f(const char *filename);
-
-/** @} */ /* C_API_RNG_Seed */
-
 /** \addtogroup C_API_RNG_RNG */
 /** @{ */
 
@@ -249,6 +210,42 @@ void vsmc_rng_save_f(vsmc_rng rng, const char *filename);
 void vsmc_rng_load_f(vsmc_rng rng, const char *filename);
 
 /** @} */ /* C_API_RNG_RNG */
+
+/** \addtogroup C_API_RNG_Seed */
+/** @{ */
+
+/** \brief `vsmc::Seed::operator()` */
+void vsmc_seed(vsmc_rng rng);
+
+/** \brief `vsmc::Seed::get` */
+int vsmc_seed_get(void);
+
+/** \brief `vsmc::Seed::set` */
+void vsmc_seed_set(int seed);
+
+/** \brief `vsmc::Seed::modulo` */
+void vsmc_seed_modulo(int div, int rem);
+
+/** \brief `vsmc::Seed::operator<<`
+ *
+ * \details
+ * If `mem == nullptr`, return the number of bytes required in `mem`.
+ * Otherwise, store `vsmc::Seed::instacne()` in `mem` */
+size_t vsmc_seed_save(void *mem);
+
+/** \brief `vsmc::Seed::operator>>`
+ *
+ * \details
+ * `mem` points to memory previously written by `vsmc_seed_save` */
+void vsmc_seed_load(const void *mem);
+
+/** \brief `vsmc::Seed::operator<<` directly to an external file */
+void vsmc_seed_save_f(const char *filename);
+
+/** \brief `vsmc::Seed::operator>>` directly from an external file */
+void vsmc_seed_load_f(const char *filename);
+
+/** @} */ /* C_API_RNG_Seed */
 
 /** \addtogroup C_API_RNG_U01Sequence */
 /** @{ */
