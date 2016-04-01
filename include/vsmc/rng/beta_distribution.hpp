@@ -559,7 +559,7 @@ inline void beta_distribution(
         "**beta_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
         "TYPES");
 
-    const std::size_t k = 1024;
+    const std::size_t k = internal::StaticBufferSize<RealType>::value;
     const internal::BetaDistributionConstant<RealType> constant(alpha, beta);
     while (n > k) {
         std::size_t m = internal::beta_distribution_impl<k>(

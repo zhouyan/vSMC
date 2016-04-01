@@ -39,4 +39,89 @@
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
 
+namespace vsmc
+{
+
+namespace internal
+{
+
+#ifdef VSMC_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wfloat-equal"
+#endif
+
+template <typename T>
+inline bool is_equal(const T &a, const T &b)
+{
+    return a == b;
+}
+
+#ifdef VSMC_CLANG
+#pragma clang diagnostic pop
+#endif
+
+template <typename T>
+inline bool is_nullptr(T ptr, std::true_type)
+{
+    return ptr == nullptr;
+}
+
+template <typename T>
+inline bool is_nullptr(T, std::false_type)
+{
+    return false;
+}
+
+template <typename T>
+inline bool is_nullptr(T ptr)
+{
+    return is_nullptr(ptr, std::is_pointer<T>());
+}
+
+template <typename UIntType>
+inline std::string itos(UIntType i, std::true_type)
+{
+    if (i == 0)
+        return std::string("0");
+
+    char str[24] = {0};
+    std::size_t n = 0;
+    while (i > 0) {
+        str[n++] = '0' + i % 10;
+        i /= 10;
+    }
+    std::reverse(str, str + n);
+
+    return std::string(str);
+}
+
+template <typename IntType>
+inline std::string itos(IntType i, std::false_type)
+{
+    using uint_type = typename std::make_unsigned<IntType>::type;
+
+    if (i < 0)
+        return "-" + itos(static_cast<uint_type>(-i), std::true_type());
+
+    return itos(static_cast<uint_type>(i), std::true_type());
+}
+
+template <typename IntType>
+inline std::string itos(IntType i)
+{
+    return itos(i, std::is_unsigned<IntType>());
+}
+
+template <typename T>
+class StaticBufferSize
+    : public std::integral_constant<std::size_t, sizeof(T) < sizeof(double) ?
+              1024 * sizeof(double) / sizeof(T) :
+              1024 * sizeof(T) / sizeof(double)>
+{
+}; // class StaticBufferSize;
+
+} // namespace vsmc::internal
+
+} // namespace vsmc
+
 #endif // VSMC_INTERNAL_BASIC_HPP

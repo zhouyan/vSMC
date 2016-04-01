@@ -270,7 +270,8 @@ class MKLStream
     {
         MKLStream stream(brng, 1);
 
-        return ::vslLeapfrogStream(stream.ptr_, 1, 1024);
+        return ::vslLeapfrogStream(stream.ptr_, 1,
+                   internal::StaticBufferSize<MKL_INT>::value) == VSL_ERROR_OK;
     }
 
     /// \brief Test if `vslSkipAheadStream` is supported
@@ -278,7 +279,8 @@ class MKLStream
     {
         MKLStream stream(brng, 1);
 
-        return ::vslSkipAheadStream(stream.ptr_, 1024) == 0;
+        return ::vslSkipAheadStream(stream.ptr_,
+                   internal::StaticBufferSize<MKL_INT>::value) == VSL_ERROR_OK;
     }
 
     /// \brief Test if `viRngUniformBits32` is supported
@@ -286,9 +288,11 @@ class MKLStream
         MKL_INT brng, MKL_INT method = VSL_RNG_METHOD_UNIFORMBITS32_STD)
     {
         MKLStream stream(brng, 1);
-        std::array<unsigned, 1024> r;
+        std::array<unsigned, internal::StaticBufferSize<unsigned>::value> r;
 
-        return ::viRngUniformBits32(method, stream.ptr_, 1024, r.data()) == 0;
+        return ::viRngUniformBits32(method, stream.ptr_,
+                   internal::StaticBufferSize<unsigned>::value,
+                   r.data()) == VSL_ERROR_OK;
     }
 
     /// \brief Test if `viRngUniformBits64` is supported
@@ -296,9 +300,13 @@ class MKLStream
         MKL_INT brng, MKL_INT method = VSL_RNG_METHOD_UNIFORMBITS64_STD)
     {
         MKLStream stream(brng, 1);
-        std::array<unsigned MKL_INT64, 1024> r;
+        std::array<unsigned MKL_INT64,
+            internal::StaticBufferSize<unsigned MKL_INT64>::value>
+            r;
 
-        return ::viRngUniformBits64(method, stream.ptr_, 1024, r.data()) == 0;
+        return ::viRngUniformBits64(method, stream.ptr_,
+                   internal::StaticBufferSize<unsigned MKL_INT64>::value,
+                   r.data()) == VSL_ERROR_OK;
     }
 
     /// \brief `vsRngUniform`
@@ -978,7 +986,7 @@ class MKLGenerator
             return is;
 
         MKLStream stream;
-        Vector<result_type> buffer;
+        std::array<result_type, M_> buffer;
         std::size_t index;
         is >> std::ws >> stream;
         is >> std::ws >> buffer;
@@ -994,15 +1002,16 @@ class MKLGenerator
     }
 
     private:
-    static constexpr std::size_t M_ = 1024;
+    static constexpr std::size_t M_ =
+        internal::StaticBufferSize<result_type>::value;
 
-    Vector<result_type> buffer_;
+    alignas(AlignmentTrait<result_type>::value)
+        std::array<result_type, M_> buffer_;
     std::size_t index_;
     MKLStream stream_;
 
     void generate()
     {
-        buffer_.resize(M_);
         internal::MKLUniformBits<Bits>::eval(
             stream_, static_cast<MKL_INT>(M_), buffer_.data());
     }

@@ -92,7 +92,7 @@ template <std::size_t K, typename RealType, typename RNGType>
 inline void fisher_f_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType df1, RealType df2)
 {
-    RealType s[K];
+    alignas(AlignmentTrait<RealType>::value) RealType s[K];
     chi_squared_distribution(rng, n, s, df1);
     chi_squared_distribution(rng, n, r, df2);
     mul(n, 1 / df1, s, s);
@@ -104,22 +104,7 @@ inline void fisher_f_distribution_impl(
 
 /// \brief Generating Fisher-F random variates
 /// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void fisher_f_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType df1, RealType df2)
-{
-    static_assert(std::is_floating_point<RealType>::value,
-        "**fisher_f_distribution** USED WITH RealType OTHER THAN FLOATING "
-        "POINT TYPES");
-
-    const std::size_t k = 1024;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
-        internal::fisher_f_distribution_impl<k>(rng, k, r, df1, df2);
-    internal::fisher_f_distribution_impl<k>(rng, l, r, df1, df2);
-}
-
+VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_2(fisher_f, m, n)
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(FisherF, fisher_f, m, n)
 
 } // namespace vsmc
