@@ -41,12 +41,12 @@ namespace internal
 {
 
 template <std::size_t, typename T, std::size_t K>
-inline void increment_single(Array<T, K> &, std::false_type)
+inline void increment_single(std::array<T, K> &, std::false_type)
 {
 }
 
 template <std::size_t N, typename T, std::size_t K>
-inline void increment_single(Array<T, K> &ctr, std::true_type)
+inline void increment_single(std::array<T, K> &ctr, std::true_type)
 {
     if (++std::get<N>(ctr) != 0)
         return;
@@ -59,7 +59,7 @@ inline void increment_single(Array<T, K> &ctr, std::true_type)
 /// \brief Increment a counter by one
 /// \ingroup RNG
 template <typename T, std::size_t K>
-inline void increment(Array<T, K> &ctr)
+inline void increment(std::array<T, K> &ctr)
 {
     internal::increment_single<0>(ctr, std::true_type());
 }
@@ -67,7 +67,7 @@ inline void increment(Array<T, K> &ctr)
 /// \brief Increment a counter by given steps
 /// \ingroup RNG
 template <typename T, std::size_t K, T NSkip>
-inline void increment(Array<T, K> &ctr, std::integral_constant<T, NSkip>)
+inline void increment(std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
 {
     if (ctr.front() < std::numeric_limits<T>::max() - NSkip) {
         ctr.front() += NSkip;
@@ -81,7 +81,7 @@ inline void increment(Array<T, K> &ctr, std::integral_constant<T, NSkip>)
 /// \brief Increment a counter by given steps
 /// \ingroup RNG
 template <typename T, std::size_t K>
-inline void increment(Array<T, K> &ctr, T nskip)
+inline void increment(std::array<T, K> &ctr, T nskip)
 {
     if (ctr.front() < std::numeric_limits<T>::max() - nskip) {
         ctr.front() += nskip;
@@ -96,14 +96,14 @@ namespace internal
 {
 
 template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block_set(
-    const Array<T, K> &, Array<Array<T, K>, Blocks> &, std::false_type)
+inline void increment_block_set(const std::array<T, K> &,
+    std::array<std::array<T, K>, Blocks> &, std::false_type)
 {
 }
 
 template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block_set(const Array<T, K> &ctr,
-    Array<Array<T, K>, Blocks> &ctr_block, std::true_type)
+inline void increment_block_set(const std::array<T, K> &ctr,
+    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
 {
     std::get<B>(ctr_block) = ctr;
     increment_block_set<B + 1>(
@@ -111,14 +111,14 @@ inline void increment_block_set(const Array<T, K> &ctr,
 }
 
 template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block(
-    Array<T, K> &, Array<Array<T, K>, Blocks> &, std::false_type)
+inline void increment_block(std::array<T, K> &,
+    std::array<std::array<T, K>, Blocks> &, std::false_type)
 {
 }
 
 template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block(
-    Array<T, K> &ctr, Array<Array<T, K>, Blocks> &ctr_block, std::true_type)
+inline void increment_block(std::array<T, K> &ctr,
+    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
 {
     increment(std::get<B>(ctr_block), std::integral_constant<T, B + 1>());
     increment_block<B + 1>(
@@ -126,14 +126,14 @@ inline void increment_block(
 }
 
 template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block_safe(
-    Array<T, K> &, Array<Array<T, K>, Blocks> &, std::false_type)
+inline void increment_block_safe(std::array<T, K> &,
+    std::array<std::array<T, K>, Blocks> &, std::false_type)
 {
 }
 
 template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block_safe(
-    Array<T, K> &ctr, Array<Array<T, K>, Blocks> &ctr_block, std::true_type)
+inline void increment_block_safe(std::array<T, K> &ctr,
+    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
 {
     std::get<B>(ctr_block).front() += B + 1;
     increment_block_safe<B + 1>(
@@ -146,7 +146,8 @@ inline void increment_block_safe(
 /// array of counters
 /// \ingroup RNG
 template <typename T, std::size_t K, std::size_t Blocks>
-inline void increment(Array<T, K> &ctr, Array<Array<T, K>, Blocks> &ctr_block)
+inline void increment(
+    std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
 {
     internal::increment_block_set<0>(
         ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
@@ -164,8 +165,8 @@ namespace internal
 {
 
 template <typename T, std::size_t K>
-inline void increment_block_set(const Array<T, K> &ctr, std::size_t n,
-    Array<T, K> *ctr_block, std::false_type)
+inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
+    std::array<T, K> *ctr_block, std::false_type)
 {
     for (std::size_t i = 0; i != n; ++i)
         ctr_block[i] = ctr;
@@ -174,14 +175,14 @@ inline void increment_block_set(const Array<T, K> &ctr, std::size_t n,
 #if VSMC_HAS_AVX2
 
 template <typename T, std::size_t K>
-inline void increment_block_set(const Array<T, K> &ctr, std::size_t n,
-    Array<T, K> *ctr_block, std::true_type)
+inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
+    std::array<T, K> *ctr_block, std::true_type)
 {
     const std::size_t Blocks = M256I<T>::size() / K;
     const std::size_t m = n / Blocks;
     const std::size_t l = n % Blocks;
     M256I<> c;
-    Array<Array<T, K>, Blocks> cb;
+    std::array<std::array<T, K>, Blocks> cb;
     increment_block_set<0>(ctr, cb, std::true_type());
     c.load(cb.data());
     if (reinterpret_cast<std::uintptr_t>(ctr_block) % 32 == 0) {
@@ -197,7 +198,7 @@ inline void increment_block_set(const Array<T, K> &ctr, std::size_t n,
 
 template <typename T, std::size_t K>
 inline void increment_block_set(
-    const Array<T, K> &ctr, std::size_t n, Array<T, K> *ctr_block)
+    const std::array<T, K> &ctr, std::size_t n, std::array<T, K> *ctr_block)
 {
     increment_block_set(ctr, n, ctr_block,
         std::integral_constant<bool, M256I<T>::size() % K == 0>());
@@ -206,14 +207,14 @@ inline void increment_block_set(
 #elif VSMC_HAS_SSE2
 
 template <typename T, std::size_t K>
-inline void increment_block_set(const Array<T, K> &ctr, std::size_t n,
-    Array<T, K> *ctr_block, std::true_type)
+inline void increment_block_set(const std::array<T, K> &ctr, std::size_t n,
+    std::array<T, K> *ctr_block, std::true_type)
 {
     const std::size_t Blocks = M128I<T>::size() / K;
     const std::size_t m = n / Blocks;
     const std::size_t l = n % Blocks;
     M128I<> c;
-    Array<Array<T, K>, Blocks> cb;
+    std::array<std::array<T, K>, Blocks> cb;
     increment_block_set<0>(ctr, cb, std::true_type());
     c.load(cb.data());
     if (reinterpret_cast<std::uintptr_t>(ctr_block) % 16 == 0) {
@@ -229,7 +230,7 @@ inline void increment_block_set(const Array<T, K> &ctr, std::size_t n,
 
 template <typename T, std::size_t K>
 inline void increment_block_set(
-    const Array<T, K> &ctr, std::size_t n, Array<T, K> *ctr_block)
+    const std::array<T, K> &ctr, std::size_t n, std::array<T, K> *ctr_block)
 {
     increment_block_set(ctr, n, ctr_block,
         std::integral_constant<bool, M128I<T>::size() % K == 0>());
@@ -239,7 +240,7 @@ inline void increment_block_set(
 
 template <typename T, std::size_t K>
 inline void increment_block_set(
-    const Array<T, K> &ctr, std::size_t n, Array<T, K> *ctr_block)
+    const std::array<T, K> &ctr, std::size_t n, std::array<T, K> *ctr_block)
 {
     increment_block_set(ctr, n, ctr_block, std::false_type());
 }
@@ -252,7 +253,8 @@ inline void increment_block_set(
 /// of counters
 /// \ingroup RNG
 template <typename T, std::size_t K>
-inline void increment(Array<T, K> &ctr, std::size_t n, Array<T, K> *ctr_block)
+inline void increment(
+    std::array<T, K> &ctr, std::size_t n, std::array<T, K> *ctr_block)
 {
     if (n == 0)
         return;
@@ -490,7 +492,7 @@ class CounterEngine
     private:
     static constexpr std::size_t M_ = Generator::size();
 
-    Array<result_type, M_> buffer_;
+    std::array<result_type, M_> buffer_;
     std::size_t index_;
     ctr_type ctr_;
     key_type key_;

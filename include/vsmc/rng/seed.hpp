@@ -59,7 +59,7 @@ namespace vsmc
 ///
 /// \tparam ID Different ID type create indepdent SeedGenerator instances
 /// \tparam ResultType The unsigned integer type of the seeds
-/// \tparam K The length of the key. A key is a `Array<ResultType, K>`
+/// \tparam K The length of the key. A key is a `std::array<ResultType, K>`
 /// type object
 ///
 /// \details
@@ -93,7 +93,7 @@ class SeedGenerator
 
     public:
     using result_type = ResultType;
-    using key_type = Array<ResultType, K>;
+    using key_type = std::array<ResultType, K>;
 
     SeedGenerator(const SeedGenerator<ID, ResultType, K> &) = delete;
 
@@ -235,7 +235,7 @@ class SeedGenerator
     }
 
     private:
-    using ctr_type = Array<ResultType, K == 0 ? 0 : K - 1>;
+    using ctr_type = std::array<ResultType, K == 0 ? 0 : K - 1>;
 
     result_type seed_;
     result_type seed_max_;

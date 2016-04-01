@@ -78,11 +78,11 @@ namespace internal
 {
 
 template <typename T, std::size_t Dim>
-using Buffer =
+using StaticVector =
     typename std::conditional<Dim == Dynamic, Vector<T>, Array<T, Dim>>::type;
 
 template <typename T, std::size_t N>
-inline void resize(Array<T, N> &, std::size_t)
+inline void resize(std::array<T, N> &, std::size_t)
 {
 }
 

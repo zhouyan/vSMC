@@ -377,8 +377,8 @@ inline M128I<T> m128i_srli(const M128I<T> &a, int imm8,
 template <typename T>
 inline bool operator==(const M128I<T> &a, const M128I<T> &b)
 {
-    Array<std::uint64_t, 2> sa;
-    Array<std::uint64_t, 2> sb;
+    std::array<std::uint64_t, 2> sa;
+    std::array<std::uint64_t, 2> sb;
     a.store_u(sa.data());
     b.store_u(sb.data());
 
@@ -398,7 +398,7 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
     if (!os)
         return os;
 
-    Array<T, M128I<T>::size()> sa;
+    std::array<T, M128I<T>::size()> sa;
     a.store_u(sa.data());
     os << sa;
 
@@ -412,7 +412,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
     if (!is)
         return is;
 
-    Array<T, M128I<T>::size()> sa;
+    std::array<T, M128I<T>::size()> sa;
     is >> sa;
 
     if (static_cast<bool>(is))
@@ -564,8 +564,8 @@ class M128
 
 inline bool operator==(const M128 &a, const M128 &b)
 {
-    Array<float, 4> sa;
-    Array<float, 4> sb;
+    std::array<float, 4> sa;
+    std::array<float, 4> sb;
     a.store_u(sa.data());
     b.store_u(sb.data());
 
@@ -581,7 +581,7 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
     if (!os)
         return os;
 
-    Array<float, 4> sa;
+    std::array<float, 4> sa;
     a.store_u(sa.data());
     os << sa;
 
@@ -595,7 +595,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
     if (!is)
         return is;
 
-    Array<float, 4> sa;
+    std::array<float, 4> sa;
     is >> sa;
 
     if (static_cast<bool>(is))
@@ -696,8 +696,8 @@ class M128D
 
 inline bool operator==(const M128D &a, const M128D &b)
 {
-    Array<double, 2> sa;
-    Array<double, 2> sb;
+    std::array<double, 2> sa;
+    std::array<double, 2> sb;
     a.store_u(sa.data());
     b.store_u(sb.data());
 
@@ -713,7 +713,7 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
     if (!os)
         return os;
 
-    Array<double, 2> sa;
+    std::array<double, 2> sa;
     a.store_u(sa.data());
     os << sa;
 
@@ -727,7 +727,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
     if (!is)
         return is;
 
-    Array<double, 2> sa;
+    std::array<double, 2> sa;
     is >> sa;
 
     if (static_cast<bool>(is))
@@ -1087,8 +1087,8 @@ inline M256I<T> m256i_srli(const M256I<T> &a, int imm8,
 template <typename T>
 inline bool operator==(const M256I<T> &a, const M256I<T> &b)
 {
-    Array<std::uint64_t, 4> sa;
-    Array<std::uint64_t, 4> sb;
+    std::array<std::uint64_t, 4> sa;
+    std::array<std::uint64_t, 4> sb;
     a.store_u(sa.data());
     b.store_u(sb.data());
 
@@ -1108,7 +1108,7 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
     if (!os)
         return os;
 
-    Array<T, M256I<T>::size()> sa;
+    std::array<T, M256I<T>::size()> sa;
     a.store_u(sa.data());
     os << sa;
 
@@ -1122,7 +1122,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
     if (!is)
         return is;
 
-    Array<T, M256I<T>::size()> sa;
+    std::array<T, M256I<T>::size()> sa;
     is >> sa;
 
     if (static_cast<bool>(is))
@@ -1275,8 +1275,8 @@ class M256
 
 inline bool operator==(const M256 &a, const M256 &b)
 {
-    Array<float, 8> sa;
-    Array<float, 8> sb;
+    std::array<float, 8> sa;
+    std::array<float, 8> sb;
     a.store_u(sa.data());
     b.store_u(sb.data());
 
@@ -1292,7 +1292,7 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
     if (!os)
         return os;
 
-    Array<float, 8> sa;
+    std::array<float, 8> sa;
     a.store_u(sa.data());
     os << sa;
 
@@ -1306,7 +1306,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
     if (!is)
         return is;
 
-    Array<float, 8> sa;
+    std::array<float, 8> sa;
     is >> sa;
 
     if (static_cast<bool>(is))
@@ -1410,8 +1410,8 @@ class M256D
 
 inline bool operator==(const M256D &a, const M256D &b)
 {
-    Array<double, 4> sa;
-    Array<double, 4> sb;
+    std::array<double, 4> sa;
+    std::array<double, 4> sb;
     a.store_u(sa.data());
     b.store_u(sb.data());
 
@@ -1427,7 +1427,7 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
     if (!os)
         return os;
 
-    Array<double, 4> sa;
+    std::array<double, 4> sa;
     a.store_u(sa.data());
     os << sa;
 
@@ -1441,7 +1441,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
     if (!is)
         return is;
 
-    Array<double, 4> sa;
+    std::array<double, 4> sa;
     is >> sa;
 
     if (static_cast<bool>(is))

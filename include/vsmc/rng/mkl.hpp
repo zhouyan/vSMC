@@ -270,8 +270,7 @@ class MKLStream
     {
         MKLStream stream(brng, 1);
 
-        return ::vslLeapfrogStream(stream.ptr_, 1,
-                   internal::BufferSize<MKL_INT>::value) == VSL_ERROR_OK;
+        return ::vslLeapfrogStream(stream.ptr_, 1, 2) == VSL_ERROR_OK;
     }
 
     /// \brief Test if `vslSkipAheadStream` is supported
@@ -279,8 +278,7 @@ class MKLStream
     {
         MKLStream stream(brng, 1);
 
-        return ::vslSkipAheadStream(stream.ptr_,
-                   internal::BufferSize<MKL_INT>::value) == VSL_ERROR_OK;
+        return ::vslSkipAheadStream(stream.ptr_, 1) == VSL_ERROR_OK;
     }
 
     /// \brief Test if `viRngUniformBits32` is supported
@@ -288,11 +286,10 @@ class MKLStream
         MKL_INT brng, MKL_INT method = VSL_RNG_METHOD_UNIFORMBITS32_STD)
     {
         MKLStream stream(brng, 1);
-        Array<unsigned, internal::BufferSize<unsigned>::value> r;
+        unsigned r;
 
-        return ::viRngUniformBits32(method, stream.ptr_,
-                   internal::BufferSize<unsigned>::value,
-                   r.data()) == VSL_ERROR_OK;
+        return ::viRngUniformBits32(method, stream.ptr_, 1, &r) ==
+            VSL_ERROR_OK;
     }
 
     /// \brief Test if `viRngUniformBits64` is supported
@@ -300,13 +297,10 @@ class MKLStream
         MKL_INT brng, MKL_INT method = VSL_RNG_METHOD_UNIFORMBITS64_STD)
     {
         MKLStream stream(brng, 1);
-        Array<unsigned MKL_INT64,
-            internal::BufferSize<unsigned MKL_INT64>::value>
-            r;
+        unsigned MKL_INT64 r;
 
-        return ::viRngUniformBits64(method, stream.ptr_,
-                   internal::BufferSize<unsigned MKL_INT64>::value,
-                   r.data()) == VSL_ERROR_OK;
+        return ::viRngUniformBits64(method, stream.ptr_, 1, &r) ==
+            VSL_ERROR_OK;
     }
 
     /// \brief `vsRngUniform`
@@ -986,7 +980,7 @@ class MKLGenerator
             return is;
 
         MKLStream stream;
-        Array<result_type, M_> buffer;
+        Vector<result_type> buffer;
         std::size_t index;
         is >> std::ws >> stream;
         is >> std::ws >> buffer;
@@ -1004,12 +998,13 @@ class MKLGenerator
     private:
     static constexpr std::size_t M_ = internal::BufferSize<result_type>::value;
 
-    Array<result_type, M_> buffer_;
+    Vector<result_type> buffer_;
     std::size_t index_;
     MKLStream stream_;
 
     void generate()
     {
+        buffer_.resize(M_);
         internal::MKLUniformBits<Bits>::eval(
             stream_, static_cast<MKL_INT>(M_), buffer_.data());
     }

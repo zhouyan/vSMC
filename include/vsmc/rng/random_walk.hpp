@@ -186,8 +186,8 @@ class RandomWalk
     }
 
     private:
-    internal::Buffer<RealType, Dim> x_;
-    internal::Buffer<RealType, Dim> y_;
+    internal::StaticVector<RealType, Dim> x_;
+    internal::StaticVector<RealType, Dim> y_;
 }; // class RandomWalk
 
 /// \brief Random walk MCMC update with test function
@@ -351,9 +351,9 @@ class RandomWalkG
     }
 
     private:
-    internal::Buffer<RealType, DimX> x_;
-    internal::Buffer<RealType, DimX> y_;
-    internal::Buffer<RealType, DimG> g_;
+    internal::StaticVector<RealType, DimX> x_;
+    internal::StaticVector<RealType, DimX> y_;
+    internal::StaticVector<RealType, DimG> g_;
 }; // class RandomWalkG
 
 namespace internal
@@ -538,10 +538,10 @@ class NormalMVProposal
 
     private:
     NormalMVDistribution<RealType, Dim> rnorm_;
-    internal::Buffer<RealType, Dim> a_;
-    internal::Buffer<RealType, Dim> b_;
-    internal::Buffer<RealType, Dim> z_;
-    internal::Buffer<unsigned, Dim> flag_;
+    internal::StaticVector<RealType, Dim> a_;
+    internal::StaticVector<RealType, Dim> b_;
+    internal::StaticVector<RealType, Dim> z_;
+    internal::StaticVector<unsigned, Dim> flag_;
 
     void init(std::size_t dim, const result_type *a, const result_type *b)
     {

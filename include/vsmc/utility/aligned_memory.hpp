@@ -54,7 +54,7 @@
 #include <mkl_service.h>
 #endif
 
-/// \brief The default alignment for POD type
+/// \brief The default alignment for scalar type
 /// \ingroup Config
 #ifndef VSMC_ALIGNMENT
 #if VSMC_HAS_X86_64
@@ -152,7 +152,7 @@ namespace vsmc
 namespace internal
 {
 
-template <typename T, bool = std::is_pod<T>::value>
+template <typename T, bool = std::is_scalar<T>::value>
 class AlignmentTraitImpl
 {
     public:
@@ -173,10 +173,9 @@ class AlignmentTraitImpl<T, true>
 /// \brief Alignment of a given type
 ///
 /// \details
-/// For POD type, such as `double`, `std::array<double, N>`, etc., `value` is
-/// VSMC_ALIGNMENT, which shall be big enough for SIME aligned operations. For
-/// other types, it return `VSMC_ALIGNMENT_MIN` if `alignof(T)` is smaller,
-/// otherwise `alignof(T)`
+/// For scalar type, such as `double`, `value` is VSMC_ALIGNMENT, which shall
+/// be big enough for SIME aligned operations. For other types, it return
+/// `VSMC_ALIGNMENT_MIN` if `alignof(T)` is smaller, otherwise `alignof(T)`
 template <typename T>
 class AlignmentTrait : public std::integral_constant<std::size_t,
                            internal::AlignmentTraitImpl<T>::value>

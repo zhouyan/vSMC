@@ -84,7 +84,7 @@ class BufferSize
               1024 * sizeof(double) / sizeof(T) :
               1024 * sizeof(T) / sizeof(double)>
 {
-}; // class StaticBufferSize;
+}; // class BufferSize;
 
 } // namespace vsmc::internal
 
