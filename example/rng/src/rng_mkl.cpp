@@ -83,18 +83,5 @@ int main(int argc, char **argv)
     VSMC_RNG_MKL_TEST(VSL_BRNG_PHILOX4X32X10);
 #endif
 
-    std::stringstream ss;
-    vsmc::MKL_MT19937 rng;
-    ss << rng;
-    unsigned r1 = rng();
-    rng.discard(100);
-    ss >> rng;
-    unsigned r2 = rng();
-    std::cout << std::string(110, '=') << std::endl;
-    std::cout << std::setw(60) << std::left << "Loading and saving MKLEngine"
-              << std::setw(50) << std::right
-              << (r1 == r2 ? "Passed" : "Failed") << std::endl;
-    std::cout << std::string(110, '-') << std::endl;
-
     return 0;
 }

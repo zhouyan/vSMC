@@ -70,8 +70,8 @@ inline void rng_test(std::size_t n, const std::string &name,
     RNGType rng;
     RNGType rng1;
     RNGType rng2;
-    vsmc::Vector<typename RNGType::result_type> r1(n * 2);
-    vsmc::Vector<typename RNGType::result_type> r2(n * 2);
+    vsmc::Vector<typename RNGType::result_type> r1(n * 2, 0);
+    vsmc::Vector<typename RNGType::result_type> r2(n * 2, 0);
     vsmc::StopWatch watch1;
     vsmc::StopWatch watch2;
     bool passed = true;
@@ -79,21 +79,25 @@ inline void rng_test(std::size_t n, const std::string &name,
     std::uniform_int_distribution<std::size_t> runif(n, n * 2 - 1);
     for (std::size_t i = 0; i != 10; ++i) {
         std::size_t m = runif(rng);
+        number += m;
 
         watch1.start();
         for (std::size_t j = 0; j != m; ++j)
             r1[j] = rng1();
         watch1.stop();
-
         watch2.start();
         vsmc::rng_rand(rng2, m, r2.data());
         watch2.stop();
+        passed = passed && r1 == r2;
 
-        number += m;
-        for (std::size_t j = 0; j != m; ++j)
-            if (r1[j] != r2[j])
-                passed = false;
+        std::stringstream ss;
+        ss << rng;
+        vsmc::rng_rand(rng, m, r1.data());
+        ss >> rng;
+        vsmc::rng_rand(rng, m, r2.data());
+        passed = passed && r1 == r2;
     }
+
     sw1.push_back(watch1);
     sw2.push_back(watch2);
     num.push_back(number);
@@ -120,7 +124,7 @@ inline void rng_test_output(const std::string &name,
     std::cout << std::right << std::setw(twid) << "N/ns (Batch)";
     std::cout << std::right << std::setw(twid) << "GB/s (Loop)";
     std::cout << std::right << std::setw(twid) << "GB/s (Batch)";
-    std::cout << std::right << std::setw(twid) << "Test";
+    std::cout << std::right << std::setw(twid) << "Deterministics";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
 

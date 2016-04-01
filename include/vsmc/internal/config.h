@@ -96,6 +96,10 @@
 #define VSMC_HAS_OMP 0
 #endif
 
+#ifndef VSMC_HAS_OPENCL
+#define VSMC_HAS_OPENCL 0
+#endif
+
 #ifndef VSMC_HAS_TBB
 #define VSMC_HAS_TBB 0
 #endif
@@ -136,10 +140,6 @@
 
 #ifndef VSMC_USE_MKL_VSL
 #define VSMC_USE_MKL_VSL VSMC_HAS_MKL
-#endif
-
-#ifndef VSMC_HAS_OPENCL
-#define VSMC_HAS_OPENCL 0
 #endif
 
 #ifndef VSMC_USE_ACCELERATE
