@@ -57,13 +57,22 @@
 /// \brief The default alignment for scalar type
 /// \ingroup Config
 #ifndef VSMC_ALIGNMENT
+#if VSMC_HAS_X86_64
 #define VSMC_ALIGNMENT 32
+#else
+#define VSMC_ALIGNMENT 16
+#endif
 #endif
 
 /// \brief The minimum alignment for any type
 /// \ingroup Config
 #ifndef VSMC_ALIGNMENT_MIN
 #define VSMC_ALIGNMENT_MIN 16
+#endif
+
+#if VSMC_ALIGNMENT < VSMC_ALIGNMENT_MIN
+#undef VSMC_ALIGNEMNT
+#define VSMC_ALIGNMENT VSMC_ALIGNMENT_MIN
 #endif
 
 /// \brief Default AlignedMemory type
