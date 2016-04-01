@@ -392,7 +392,13 @@ class CounterEngine
     }
 
     /// \brief Discard the buffer
-    void discard() { index_ = M_; }
+    std::size_t discard()
+    {
+        const std::size_t remain = M_ - index_;
+        index_ = M_;
+
+        return remain;
+    }
 
     void discard(result_type nskip)
     {
