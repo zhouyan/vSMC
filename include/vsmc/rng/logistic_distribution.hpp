@@ -70,7 +70,7 @@ class LogisticDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01Distribution<RealType> u01;
+        U01OODistribution<RealType> u01;
         result_type u = u01(rng);
 
         return param.a() + param.b() * std::log(u / (1 - u));
@@ -84,34 +84,19 @@ template <std::size_t K, typename RealType, typename RNGType>
 inline void logistic_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    RealType s[K];
-    u01_distribution(rng, n, r);
+    alignas(AlignmentTrait<RealType>::value) RealType s[K];
+    u01_oo_distribution(rng, n, r);
     sub(n, static_cast<RealType>(1), r, s);
     div(n, r, s, r);
     log(n, r, r);
-    fma(n, b, r, a, r);
+    distribution_impl_location_scale(n, r, a, b);
 }
 
 } // namespace vsmc::internal
 
 /// \brief Generating logistic random variates
 /// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void logistic_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    static_assert(std::is_floating_point<RealType>::value,
-        "**logistic_distribution** USED WITH RealType OTHER THAN FLOATING "
-        "POINT TYPES");
-
-    const std::size_t k = 1024;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
-        internal::logistic_distribution_impl<k>(rng, k, r, a, b);
-    internal::logistic_distribution_impl<k>(rng, l, r, a, b);
-}
-
+VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_2(logistic, a, b)
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Logistic, logistic, a, b)
 
 } // namespace vsmc

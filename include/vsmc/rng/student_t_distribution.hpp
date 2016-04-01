@@ -98,7 +98,7 @@ template <std::size_t K, typename RealType, typename RNGType>
 inline void student_t_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType df)
 {
-    RealType s[K];
+    alignas(AlignmentTrait<RealType>::value) RealType s[K];
     chi_squared_distribution(rng, n, r, df);
     mul(n, 1 / df, r, r);
     sqrt(n, r, r);
@@ -111,22 +111,7 @@ inline void student_t_distribution_impl(
 
 /// \brief Generating student-t random variates
 /// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void student_t_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType df)
-{
-    static_assert(std::is_floating_point<RealType>::value,
-        "**student_t_distribution** USED WITH RealType OTHER THAN FLOATING "
-        "POINT TYPES");
-
-    const std::size_t k = 1024;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
-        internal::student_t_distribution_impl<k>(rng, k, r, df);
-    internal::student_t_distribution_impl<k>(rng, l, r, df);
-}
-
+VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_1(student_t, n)
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_1(StudentT, student_t, n)
 
 } // namespace vsmc

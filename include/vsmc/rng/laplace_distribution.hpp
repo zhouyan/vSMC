@@ -74,7 +74,7 @@ class LaplaceDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01Distribution<RealType> u01;
+        U01OODistribution<RealType> u01;
         result_type u = u01(rng) - static_cast<result_type>(0.5);
 
         return u > 0 ? param.a() - param.b() * std::log(1 - 2 * u) :
@@ -89,8 +89,8 @@ template <std::size_t K, typename RealType, typename RNGType>
 inline void laplace_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    RealType s[K];
-    u01_distribution(rng, n, r);
+    alignas(AlignmentTrait<RealType>::value) RealType s[K];
+    u01_oo_distribution(rng, n, r);
     sub(n, r, static_cast<RealType>(0.5), r);
     for (std::size_t i = 0; i != n; ++i) {
         if (r[i] > 0) {
@@ -109,22 +109,7 @@ inline void laplace_distribution_impl(
 
 /// \brief Generating laplace random variates
 /// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void laplace_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    static_assert(std::is_floating_point<RealType>::value,
-        "**laplace_distribution** USED WITH RealType OTHER THAN FLOATING "
-        "POINT TYPES");
-
-    const std::size_t k = 1024;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
-        internal::laplace_distribution_impl<k>(rng, k, r, a, b);
-    internal::laplace_distribution_impl<k>(rng, l, r, a, b);
-}
-
+VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_2(laplace, a, b)
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Laplace, laplace, a, b)
 
 } // namespace vsmc

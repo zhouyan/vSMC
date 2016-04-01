@@ -70,48 +70,31 @@ class CauchyDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01Distribution<RealType> u01;
+        U01CODistribution<RealType> u01;
 
         return param.a() +
-            param.b() * std::tan(const_pi<result_type>() * (1 - u01(rng)));
+            param.b() * std::tan(const_pi<result_type>() * u01(rng));
     }
 }; // class CauchyDistribution
 
 namespace internal
 {
 
-template <typename RealType, typename RNGType>
+template <std::size_t, typename RealType, typename RNGType>
 inline void cauchy_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    u01_distribution(rng, n, r);
-    sub(n, static_cast<RealType>(1), r, r);
+    u01_co_distribution(rng, n, r);
     mul(n, const_pi<RealType>(), r, r);
     tan(n, r, r);
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = a + b * r[i];
+    distribution_impl_location_scale(n, r, a, b);
 }
 
 } // namespace vsmc::internal
 
 /// \brief Generating cauchy random variates
 /// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void cauchy_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    static_assert(std::is_floating_point<RealType>::value,
-        "**cauchy_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
-        "TYPES");
-
-    const std::size_t k = 1024;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
-        internal::cauchy_distribution_impl(rng, k, r, a, b);
-    internal::cauchy_distribution_impl(rng, l, r, a, b);
-}
-
+VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_2(cauchy, a, b)
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Cauchy, cauchy, a, b)
 
 } // namespace vsmc

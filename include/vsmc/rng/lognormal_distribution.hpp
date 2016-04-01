@@ -76,7 +76,7 @@ class LognormalDistribution
 namespace internal
 {
 
-template <typename RealType, typename RNGType>
+template <std::size_t, typename RealType, typename RNGType>
 inline void lognormal_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType m, RealType s)
 {
@@ -88,22 +88,7 @@ inline void lognormal_distribution_impl(
 
 /// \brief Generating lognormal random variates
 /// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void lognormal_distribution(RNGType &rng, std::size_t n, RealType *r,
-    RealType logmean, RealType logstddev)
-{
-    static_assert(std::is_floating_point<RealType>::value,
-        "**lognormal_distribution** USED WITH RealType OTHER THAN FLOATING "
-        "POINT TYPES");
-
-    const std::size_t k = 1024;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
-        internal::lognormal_distribution_impl(rng, k, r, logmean, logstddev);
-    internal::lognormal_distribution_impl(rng, l, r, logmean, logstddev);
-}
-
+VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_2(lognormal, m, s)
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Lognormal, lognormal, m, s)
 
 } // namespace vsmc

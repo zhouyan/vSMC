@@ -76,34 +76,19 @@ class UniformRealDistribution
 namespace internal
 {
 
-template <typename RealType, typename RNGType>
+template <std::size_t, typename RealType, typename RNGType>
 inline void uniform_real_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     u01_distribution<RealType>(rng, n, r);
-    fma(n, (b - a), r, a, r);
+    distribution_impl_location_scale(n, r, a, b - a);
 }
 
 } // namespace vsmc::internal
 
 /// \brief Generate uniform real random variates with open/closed variants
 /// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void uniform_real_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    static_assert(std::is_floating_point<RealType>::value,
-        "**uniform_real_distribution** USED WITH RealType OTHER THAN FLOATING "
-        "POINT TYPES");
-
-    const std::size_t k = 1024;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
-        internal::uniform_real_distribution_impl<RealType>(rng, k, r, a, b);
-    internal::uniform_real_distribution_impl<RealType>(rng, l, r, a, b);
-}
-
+VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_2(uniform_real, a, b)
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(UniformReal, uniform_real, a, b)
 
 } // namespace vsmc

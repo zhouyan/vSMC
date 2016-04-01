@@ -235,7 +235,7 @@ inline std::size_t gamma_distribution_impl_t(RNGType &rng, std::size_t n,
 {
     const RealType d = constant.d;
     const RealType c = constant.c;
-    RealType s[K * 3];
+    alignas(AlignmentTrait<RealType>::value) RealType s[K * 3];
     RealType *const u = s;
     RealType *const e = s + n;
     RealType *const x = s + n * 2;
@@ -271,7 +271,7 @@ inline std::size_t gamma_distribution_impl_w(RNGType &rng, std::size_t n,
 {
     const RealType d = constant.d;
     const RealType c = constant.c;
-    RealType s[K * 3];
+    alignas(AlignmentTrait<RealType>::value) RealType s[K * 3];
     RealType *const u = s;
     RealType *const e = s + n;
     RealType *const x = s + n * 2;
@@ -301,7 +301,7 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
 {
     const RealType d = constant.d;
     const RealType c = constant.c;
-    RealType s[K * 5];
+    alignas(AlignmentTrait<RealType>::value) RealType s[K * 5];
     RealType *const u = s;
     RealType *const e = s + n;
     RealType *const v = s + n * 2;

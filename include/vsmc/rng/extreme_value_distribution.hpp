@@ -70,7 +70,7 @@ class ExtremeValueDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01Distribution<RealType> u01;
+        U01OODistribution<RealType> u01;
 
         return param.a() - param.b() * std::log(-std::log(u01(rng)));
     }
@@ -79,37 +79,22 @@ class ExtremeValueDistribution
 namespace internal
 {
 
-template <typename RealType, typename RNGType>
+template <std::size_t, typename RealType, typename RNGType>
 inline void extreme_value_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    u01_distribution(rng, n, r);
+    u01_oo_distribution(rng, n, r);
     log(n, r, r);
     mul(n, static_cast<RealType>(-1), r, r);
     log(n, r, r);
-    fma(n, -b, r, a, r);
+    distribution_impl_location_scale(n, r, a, -b);
 }
 
 } // namespace vsmc::internal
 
 /// \brief Generating extreme_value random variates
 /// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void extreme_value_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    static_assert(std::is_floating_point<RealType>::value,
-        "**extreme_value_distribution** USED WITH RealType OTHER THAN "
-        "FLOATING POINT TYPES");
-
-    const std::size_t k = 1024;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
-        internal::extreme_value_distribution_impl(rng, k, r, a, b);
-    internal::extreme_value_distribution_impl(rng, l, r, a, b);
-}
-
+VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_2(extreme_value, a, b)
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(ExtremeValue, extreme_value, a, b)
 
 } // namespace vsmc

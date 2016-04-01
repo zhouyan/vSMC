@@ -373,49 +373,99 @@
     VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_2(Name, p1, v1, p2, v2)          \
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATOR(Name, name)
 
+#define VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_0(name)                             \
+    template <typename RealType, typename RNGType>                            \
+    inline void name##_distribution(RNGType &rng, std::size_t n, RealType *r) \
+    {                                                                         \
+        static_assert(std::is_floating_point<RealType>::value,                \
+            "**" #name "_distribution** USED WITH RealType OTHER THAN "       \
+            "FLOATING POINT TYPES");                                          \
+                                                                              \
+        const std::size_t K = 1024;                                           \
+        const std::size_t M = n / K;                                          \
+        const std::size_t L = n % K;                                          \
+        for (std::size_t i = 0; i != M; ++i, r += K)                          \
+            internal::name##_distribution_impl<K>(rng, K, r);                 \
+        internal::name##_distribution_impl<K>(rng, L, r);                     \
+    }
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_1(name, p1)                         \
+    template <typename RealType, typename RNGType>                            \
+    inline void name##_distribution(                                          \
+        RNGType &rng, std::size_t N, RealType *r, RealType p1)                \
+    {                                                                         \
+        static_assert(std::is_floating_point<RealType>::value,                \
+            "**" #name "_distribution** USED WITH RealType OTHER THAN "       \
+            "FLOATING POINT TYPES");                                          \
+                                                                              \
+        const std::size_t K = 1024;                                           \
+        const std::size_t M = N / K;                                          \
+        const std::size_t L = N % K;                                          \
+        for (std::size_t i = 0; i != M; ++i, r += K)                          \
+            internal::name##_distribution_impl<K>(rng, K, r, p1);             \
+        internal::name##_distribution_impl<K>(rng, L, r, p1);                 \
+    }
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_2(name, p1, p2)                     \
+    template <typename RealType, typename RNGType>                            \
+    inline void name##_distribution(                                          \
+        RNGType &rng, std::size_t N, RealType *r, RealType p1, RealType p2)   \
+    {                                                                         \
+        static_assert(std::is_floating_point<RealType>::value,                \
+            "**" #name "_distribution** USED WITH RealType OTHER THAN "       \
+            "FLOATING POINT TYPES");                                          \
+                                                                              \
+        const std::size_t K = 1024;                                           \
+        const std::size_t M = N / K;                                          \
+        const std::size_t L = N % K;                                          \
+        for (std::size_t i = 0; i != M; ++i, r += K)                          \
+            internal::name##_distribution_impl<K>(rng, K, r, p1, p2);         \
+        internal::name##_distribution_impl<K>(rng, L, r, p1, p2);             \
+    }
+
 #define VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(Name, name, T)                    \
     template <typename T, typename RNGType>                                   \
-    inline void name##_distribution(RNGType &rng, std::size_t n, T *r,        \
+    inline void name##_distribution(RNGType &rng, std::size_t N, T *r,        \
         const typename Name##Distribution<T>::param_type &)                   \
     {                                                                         \
-        name##_distribution(rng, n, r);                                       \
+        name##_distribution(rng, N, r);                                       \
     }                                                                         \
                                                                               \
     template <typename T, typename RNGType>                                   \
     inline void rng_rand(                                                     \
-        RNGType &rng, Name##Distribution<T> &dist, std::size_t n, T *r)       \
+        RNGType &rng, Name##Distribution<T> &dist, std::size_t N, T *r)       \
     {                                                                         \
-        dist(rng, n, r);                                                      \
+        dist(rng, N, r);                                                      \
     }
 
 #define VSMC_DEFINE_RNG_DISTRIBUTION_RAND_1(Name, name, p1)                   \
     template <typename RealType, typename RNGType>                            \
-    inline void name##_distribution(RNGType &rng, std::size_t n, RealType *r, \
+    inline void name##_distribution(RNGType &rng, std::size_t N, RealType *r, \
         const typename Name##Distribution<RealType>::param_type &param)       \
     {                                                                         \
-        name##_distribution(rng, n, r, param.p1());                           \
+        name##_distribution(rng, N, r, param.p1());                           \
     }                                                                         \
                                                                               \
     template <typename RealType, typename RNGType>                            \
     inline void rng_rand(RNGType &rng, Name##Distribution<RealType> &dist,    \
-        std::size_t n, RealType *r)                                           \
+        std::size_t N, RealType *r)                                           \
     {                                                                         \
-        dist(rng, n, r);                                                      \
+        dist(rng, N, r);                                                      \
     }
 
 #define VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Name, name, p1, p2)               \
     template <typename RealType, typename RNGType>                            \
-    inline void name##_distribution(RNGType &rng, std::size_t n, RealType *r, \
+    inline void name##_distribution(RNGType &rng, std::size_t N, RealType *r, \
         const typename Name##Distribution<RealType>::param_type &param)       \
     {                                                                         \
-        name##_distribution(rng, n, r, param.p1(), param.p2());               \
+        name##_distribution(rng, N, r, param.p1(), param.p2());               \
     }                                                                         \
                                                                               \
     template <typename RealType, typename RNGType>                            \
     inline void rng_rand(RNGType &rng, Name##Distribution<RealType> &dist,    \
-        std::size_t n, RealType *r)                                           \
+        std::size_t N, RealType *r)                                           \
     {                                                                         \
-        dist(rng, n, r);                                                      \
+        dist(rng, N, r);                                                      \
     }
 
 namespace vsmc
@@ -476,6 +526,22 @@ class RNGMaxBitsImpl<UIntType, U, 0>
     public:
     static constexpr int value = 0;
 }; // class RNGMaxBitsImpl
+
+template <typename RealType>
+inline void distribution_impl_location_scale(
+    std::size_t n, RealType *r, RealType location, RealType scale)
+{
+    bool loca0 = is_equal(location, static_cast<RealType>(0));
+    bool scal1 = is_equal(scale, static_cast<RealType>(1));
+    if (loca0 && scal1)
+        return;
+    else if (loca0)
+        mul(n, r, scale, r);
+    else if (scal1)
+        add(n, r, location, r);
+    else
+        fma(n, r, scale, location, r);
+}
 
 } // namespace vsmc::internal
 

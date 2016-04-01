@@ -76,7 +76,7 @@ class RayleighDistribution
 namespace internal
 {
 
-template <typename RealType, typename RNGType>
+template <std::size_t, typename RealType, typename RNGType>
 inline void rayleigh_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType sigma)
 {
@@ -90,22 +90,7 @@ inline void rayleigh_distribution_impl(
 
 /// \brief Generating rayleigh random variates
 /// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void rayleigh_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType sigma)
-{
-    static_assert(std::is_floating_point<RealType>::value,
-        "**rayleigh_distribution** USED WITH RealType OTHER THAN FLOATING "
-        "POINT TYPES");
-
-    const std::size_t k = 1024;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
-        internal::rayleigh_distribution_impl(rng, k, r, sigma);
-    internal::rayleigh_distribution_impl(rng, l, r, sigma);
-}
-
+VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_1(rayleigh, sigma)
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_1(Rayleigh, rayleigh, sigma)
 
 } // namespace vsmc

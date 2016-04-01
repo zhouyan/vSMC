@@ -89,22 +89,7 @@ inline void pareto_distribution_impl(
 
 /// \brief Generating pareto random variates
 /// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void pareto_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    static_assert(std::is_floating_point<RealType>::value,
-        "**pareto_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
-        "TYPES");
-
-    const std::size_t k = 1024;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
-        internal::pareto_distribution_impl<k>(rng, k, r, a, b);
-    internal::pareto_distribution_impl<k>(rng, l, r, a, b);
-}
-
+VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_2(pareto, a, b)
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Pareto, pareto, a, b)
 
 } // namespace vsmc

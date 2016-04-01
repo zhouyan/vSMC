@@ -236,6 +236,14 @@ void u01_lr(std::size_t n, const UIntType *u, RealType *r) noexcept
     internal::U01LRImpl<UIntType, RealType, Left, Right>::eval(n, u, r);
 }
 
+/// \brief Convert uniform unsigned integers to floating points on [0, 1)
+/// \ingroup RNG
+template <typename UIntType, typename RealType>
+RealType u01(UIntType u) noexcept
+{
+    return u01_lr<UIntType, RealType, Closed, Open>(u);
+}
+
 /// \brief Convert uniform unsigned integers to floating points on [0, 1]
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
@@ -266,6 +274,14 @@ template <typename UIntType, typename RealType>
 RealType u01_oo(UIntType u) noexcept
 {
     return u01_lr<UIntType, RealType, Open, Open>(u);
+}
+
+/// \brief Convert uniform unsigned integers to floating points on [0, 1)
+/// \ingroup RNG
+template <typename UIntType, typename RealType>
+void u01(std::size_t n, const UIntType *u, RealType *r) noexcept
+{
+    u01_lr<UIntType, RealType, Closed, Open>(n, u, r);
 }
 
 /// \brief Convert uniform unsigned integers to floating points on [0, 1]

@@ -68,24 +68,23 @@ class WeibullDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01Distribution<RealType> u01;
+        U01OCDistribution<RealType> u01;
 
         return internal::is_equal<RealType>(
                    param.a(), static_cast<RealType>(1)) ?
-            -param.b() * std::log(1 - u01(rng)) :
-            param.b() * std::pow(-std::log(1 - u01(rng)), 1 / param.a());
+            -param.b() * std::log(u01(rng)) :
+            param.b() * std::pow(-std::log(u01(rng)), 1 / param.a());
     }
 }; // class WeibullDistribution
 
 namespace internal
 {
 
-template <typename RealType, typename RNGType>
+template <std::size_t, typename RealType, typename RNGType>
 inline void weibull_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    u01_distribution(rng, n, r);
-    sub(n, static_cast<RealType>(1), r, r);
+    u01_oc_distribution(rng, n, r);
     log(n, r, r);
     if (is_equal<RealType>(a, static_cast<RealType>(1))) {
         mul(n, -b, r, r);
@@ -100,22 +99,7 @@ inline void weibull_distribution_impl(
 
 /// \brief Generating weibull random variates
 /// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void weibull_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    static_assert(std::is_floating_point<RealType>::value,
-        "**weibull_distribution** USED WITH RealType OTHER THAN FLOATING "
-        "POINT TYPES");
-
-    const std::size_t k = 1024;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
-        internal::weibull_distribution_impl(rng, k, r, a, b);
-    internal::weibull_distribution_impl(rng, l, r, a, b);
-}
-
+VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_2(weibull, a, b)
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Weibull, weibull, a, b)
 
 } // namespace vsmc

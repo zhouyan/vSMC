@@ -86,29 +86,14 @@ inline void levy_distribution_impl(
         rng, n, r, static_cast<RealType>(0), static_cast<RealType>(1));
     sqr(n, r, r);
     inv(n, r, r);
-    fma(n, b, r, a, r);
+    distribution_impl_location_scale(n, r, a, b);
 }
 
 } // namespace vsmc::internal
 
 /// \brief Generating levy random variates
 /// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void levy_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    static_assert(std::is_floating_point<RealType>::value,
-        "**levy_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
-        "TYPES");
-
-    const std::size_t k = 1024;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
-        internal::levy_distribution_impl<k>(rng, k, r, a, b);
-    internal::levy_distribution_impl<k>(rng, l, r, a, b);
-}
-
+VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_2(levy, a, b)
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Levy, levy, a, b)
 
 } // namespace vsmc
