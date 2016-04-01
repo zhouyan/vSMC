@@ -550,9 +550,9 @@ inline void hdf5store(const Particle<T> &particle, const std::string &filename,
     const std::string &dataname, bool append)
 {
     hdf5store(filename, dataname, append);
-    hdf5store(particle.value(), filename, dataname + "/value", true);
+    hdf5store(particle.value(), filename, dataname + "/Value", true);
     hdf5store(static_cast<std::size_t>(particle.weight().size()),
-        particle.weight().data(), filename, dataname + "/weight", true);
+        particle.weight().data(), filename, dataname + "/Weight", true);
 }
 
 /// \brief Store a Monitor in the HDF5 format

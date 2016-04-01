@@ -34,10 +34,10 @@ INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/include)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
 FUNCTION(ADD_PF_SMP_CHECK backend)
+    STRING(TOUPPER "${backend}" BACKEND)
     ADD_CUSTOM_TARGET(pf_${backend}-check
         DEPENDS pf_${backend} pf-files
-        COMMAND pf_${backend}
-        "pf.data" "pf_${backend}" ">>pf.out"
+        COMMAND pf_${backend} "pf.data" "${BACKEND}"
         COMMENT "Running pf_${backend}"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
     ADD_DEPENDENCIES(pf-check pf_${backend}-check)

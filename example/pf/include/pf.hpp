@@ -36,6 +36,7 @@
 
 #include <vsmc/core/sampler.hpp>
 #include <vsmc/core/state_matrix.hpp>
+#include <vsmc/rng/normal_distribution.hpp>
 #include <vsmc/smp/backend_@smp@.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 #if VSMC_HAS_HDF5
@@ -115,8 +116,8 @@ class pf_init : public InitializeSMP<pf_state<Layout>, pf_init<Layout>>
     {
         const double sd_pos0 = 2;
         const double sd_vel0 = 1;
-        std::normal_distribution<> norm_pos(0, sd_pos0);
-        std::normal_distribution<> norm_vel(0, sd_vel0);
+        vsmc::NormalDistribution<double> norm_pos(0, sd_pos0);
+        vsmc::NormalDistribution<double> norm_vel(0, sd_vel0);
 
         sp.state(PosX) = norm_pos(sp.rng());
         sp.state(PosY) = norm_pos(sp.rng());
@@ -154,8 +155,8 @@ class pf_move : public MoveSMP<pf_state<Layout>, pf_move<Layout>>
         const double sd_pos = std::sqrt(0.02);
         const double sd_vel = std::sqrt(0.001);
         const double delta = 0.1;
-        std::normal_distribution<> norm_pos(0, sd_pos);
-        std::normal_distribution<> norm_vel(0, sd_vel);
+        vsmc::NormalDistribution<double> norm_pos(0, sd_pos);
+        vsmc::NormalDistribution<double> norm_vel(0, sd_vel);
 
         sp.state(PosX) += norm_pos(sp.rng()) + delta * sp.state(VelX);
         sp.state(PosY) += norm_pos(sp.rng()) + delta * sp.state(VelY);
@@ -178,7 +179,7 @@ class pf_move : public MoveSMP<pf_state<Layout>, pf_move<Layout>>
 };
 
 template <vsmc::MatrixLayout Layout>
-class pf_meval : public MonitorEvalSMP<pf_state<Layout>, pf_meval<Layout>>
+class pf_eval : public MonitorEvalSMP<pf_state<Layout>, pf_eval<Layout>>
 {
     public:
     void eval_sp(std::size_t, std::size_t,
@@ -191,51 +192,69 @@ class pf_meval : public MonitorEvalSMP<pf_state<Layout>, pf_meval<Layout>>
 
 template <vsmc::MatrixLayout Layout>
 inline void pf_run(vsmc::ResampleScheme scheme, const std::string &datafile,
-    const std::string &prog, const std::string &name)
+    const std::string &prg, const std::string &res, const std::string &rc)
 {
     std::size_t N = ParticleNum;
-    std::string pf_txt(prog + name + ".txt");
-    std::string pf_h5(prog + name + ".h5");
+    std::string basename("pf." + prg + "." + res + "." + rc);
+    std::string pf_h5(basename + ".h5");
+    std::string pf_time(basename + ".time");
+    std::string pf_txt(basename + ".txt");
 
     vsmc::Seed::instance().set(101);
     vsmc::Sampler<pf_state<Layout>> sampler(N, scheme, 0.5);
     sampler.init(pf_init<Layout>());
     sampler.move(pf_move<Layout>(), false);
-    sampler.monitor("pos", 2, pf_meval<Layout>());
+    sampler.monitor("pos", 2, pf_eval<Layout>());
     sampler.monitor("pos").name(0) = "pos.x";
     sampler.monitor("pos").name(1) = "pos.y";
 
+#if VSMC_HAS_HDF5
+    vsmc::hdf5store(pf_h5);
+    vsmc::hdf5store(pf_h5, "Particle", true);
+#endif
     vsmc::StopWatch watch;
     watch.start();
-    sampler.initialize(const_cast<char *>(datafile.c_str()));
-    sampler.iterate(DataNum - 1);
-    watch.stop();
-    std::cout << std::setw(40) << std::left << name;
-    std::cout << watch.milliseconds() << std::endl;
-
-    std::ofstream pf_sampler(pf_txt);
-    pf_sampler << sampler << std::endl;
-    pf_sampler.close();
-
+    for (std::size_t i = 0; i != DataNum; ++i) {
+        if (i == 0)
+            sampler.initialize(const_cast<char *>(datafile.c_str()));
+        else
+            sampler.iterate();
 #if VSMC_HAS_HDF5
-    vsmc::hdf5store(sampler, pf_h5, "Sampler", false);
+        std::stringstream ss;
+        ss << "Iter." << i;
+        vsmc::hdf5store(
+            sampler.particle(), pf_h5, "Particle/" + ss.str(), true);
+#endif
+    }
+    watch.stop();
+#if VSMC_HAS_HDF5
+    vsmc::hdf5store(sampler, pf_h5, "Sampler", true);
     vsmc::hdf5store(sampler.monitor("pos"), pf_h5, "Monitor", true);
 #endif
+    std::ofstream time(pf_time);
+    time << std::setw(10) << std::left << prg << std::setw(20) << std::left
+         << res << std::setw(10) << std::left << rc << std::setw(20)
+         << std::left << std::fixed << watch.milliseconds() << std::endl;
+    time.close();
+
+    std::ofstream txt(pf_txt);
+    txt << sampler << std::endl;
+    txt.close();
 }
 
 inline void pf_run(vsmc::ResampleScheme scheme, char **argv)
 {
-    std::string resname;
+    std::string res;
     switch (scheme) {
-        case vsmc::Multinomial: resname = "Multinomial"; break;
-        case vsmc::Stratified: resname = "Stratified"; break;
-        case vsmc::Systematic: resname = "Systematic"; break;
-        case vsmc::Residual: resname = "Residual"; break;
-        case vsmc::ResidualStratified: resname = "ResidualStratified"; break;
-        case vsmc::ResidualSystematic: resname = "ResidualSystematic"; break;
+        case vsmc::Multinomial: res = "Multinomial"; break;
+        case vsmc::Stratified: res = "Stratified"; break;
+        case vsmc::Systematic: res = "Systematic"; break;
+        case vsmc::Residual: res = "Residual"; break;
+        case vsmc::ResidualStratified: res = "ResidualStratified"; break;
+        case vsmc::ResidualSystematic: res = "ResidualSystematic"; break;
     }
-    pf_run<vsmc::RowMajor>(scheme, argv[1], argv[2], "." + resname + ".row");
-    pf_run<vsmc::ColMajor>(scheme, argv[1], argv[2], "." + resname + ".col");
+    pf_run<vsmc::RowMajor>(scheme, argv[1], argv[2], res, "Row");
+    pf_run<vsmc::ColMajor>(scheme, argv[1], argv[2], res, "Col");
 }
 
 inline int pf_main(int argc, char **argv)
