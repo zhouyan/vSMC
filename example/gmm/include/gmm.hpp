@@ -577,14 +577,14 @@ class gmm_alpha_prior
 
 inline int gmm_main(int argc, char **argv)
 {
-    std::size_t N = 100000;
-    std::size_t n = 100;
-    std::size_t c = 4;
-    std::size_t power = 2;
+    std::size_t N = 0;
+    std::size_t n = 0;
+    std::size_t c = 0;
+    std::size_t power = 0;
     std::string datafile("gmm.data");
 
     vsmc::ProgramOptionMap option;
-    option.add("N", "Number of particles", &N, 1000)
+    option.add("N", "Number of particles", &N, 100000)
         .add("n", "Number of iterations", &n, 100)
         .add("c", "Number of components", &c, 4)
         .add("power", "Power of the prior annealing (0 for linear)", &power, 2)
