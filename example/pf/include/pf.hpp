@@ -54,7 +54,7 @@ using MonitorEvalSMP = vsmc::MonitorEval@SMP@<T, Derived>;
 // clang-format on
 
 static const std::size_t DataNum = 100;
-static const std::size_t ParticleNum = 1000;
+static const std::size_t ParticleNum = 100000;
 static const std::size_t PosX = 0;
 static const std::size_t PosY = 1;
 static const std::size_t VelX = 2;

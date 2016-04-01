@@ -69,7 +69,7 @@ class RNGSetScalar
 
     void resize(std::size_t) {}
 
-    void seed() { Seed::instance().seed_rng(rng_); }
+    void seed() { Seed::instance()(rng_); }
 
     rng_type &operator[](size_type) { return rng_; }
 
@@ -105,7 +105,7 @@ class RNGSetVector
         rng_.reserve(n);
         rng_type rng;
         for (std::size_t i = rng_.size(); i != n; ++i) {
-            Seed::instance().seed_rng(rng);
+            Seed::instance()(rng);
             rng_.push_back(rng);
         }
     }
@@ -113,7 +113,7 @@ class RNGSetVector
     void seed()
     {
         for (auto &rng : rng_)
-            Seed::instance().seed_rng(rng);
+            Seed::instance()(rng);
     }
 
     rng_type &operator[](size_type id) { return rng_[id % size_]; }
@@ -135,14 +135,12 @@ class RNGSetTBB
     using size_type = std::size_t;
 
     explicit RNGSetTBB(size_type N = 0)
-        : size_(static_cast<size_type>(Seed::instance().get_scalar()))
-        , rng_([]() {
+        : size_(N), rng_([]() {
             rng_type rng;
-            Seed::instance().seed_rng(rng);
+            Seed::instance()(rng);
             return rng;
         })
     {
-        size_ = N;
         seed();
     }
 

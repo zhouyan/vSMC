@@ -40,11 +40,6 @@
         "**SeedGenerator::modulo** "                                          \
         "REMAINDER IS NOT SMALLER THAN THE DIVISOR")
 
-#define VSMC_RUNTIME_WARNING_RNG_SEED_GENERATOR_MODULO(div, rem)              \
-    VSMC_RUNTIME_WARNING((div == 1 && rem == 0),                              \
-        "**SeedGenerator::modulo** "                                          \
-        "COUNTER TYPE SEED DOES NOT SUPPORT MODULO")
-
 #define VSMC_RUNTIME_ASSERT_RNG_SEED_MAX(seed_max)                            \
     VSMC_RUNTIME_ASSERT((seed_max > 1),                                       \
         "**SeedGenerator::modulo** "                                          \
@@ -53,7 +48,7 @@
 /// \brief Default result type of Seed
 /// \ingroup Config
 #ifndef VSMC_SEED_RESULT_TYPE
-#define VSMC_SEED_RESULT_TYPE unsigned
+#define VSMC_SEED_RESULT_TYPE std::uint32_t
 #endif
 
 namespace vsmc
@@ -62,26 +57,34 @@ namespace vsmc
 /// \brief Seed generator
 /// \ingroup RNG
 ///
+/// \tparam ID Different ID type create indepdent SeedGenerator instances
+/// \tparam ResultType The unsigned integer type of the seeds
+/// \tparam K The length of the key. A key is a `std::array<ResultType, K>`
+/// type object
+///
 /// \details
-/// Let \f$S\f$ be the current internal seed, an integer in the range between 1
-/// and \f$S_{\mathrm{max}}\f$ where \f$S_{\mathrm{max}}\f$ is the maximum of
-/// the internal seed. Each time `get()` is called, the internal is first
-/// increased by 1. If it is already equal to \f$S_{\mathrm{max}}\f$, then it
-/// is set to 1. The output seed is \f$S \times D + R\f$ where \f$D\f$ is the
-/// divisor and \f$R\f$ is the remainder. In other words, the output seed
-/// belongs to the equivalent class \f$S\ \mathrm{mod}\ D \equiv R\f$. The
-/// divisor and the remainder can be set through the `modulo(div, rem)` member
-/// function.
+/// The sequence of seeds are belongs to the equivalent class \f$s \mod D
+/// \equiv R\f$ where \f$D > 0\f$, \f$R \ge 0\f$. The defaults are \f$1\f$ and
+/// \f$0\f$ respectively. Each time `get()` is called, a new seed is returned.
 ///
-/// This property is useful when using programming models such as MPI where one
-/// want to have distinct seeds across nodes. Each process can then configure
-/// the SeedGenerator using the `modulo` member such that \f$D\f$ is the number
-/// of total nodes and \f$R\f$ is the rank of each node, counting from zero.
+/// The sequence of keys are of the form \f$\{s_1,s_2,\dots,s_{K - 1},s\}\f$.
+/// The first \f$K - 1\f$ elements forms a counter. Each time `get_key()` is
+/// called, the counter is incremented and a key that combine the counter and
+/// the current seed is returned.
 ///
-/// For multithreading programs, the access to this member function shall be
-/// protected by mutex, if it is called from multiple threads. Or one can use
-/// distinct type `ID` to initialized distinct SeedGenerator instances.
-template <typename ID, typename ResultType = VSMC_SEED_RESULT_TYPE>
+/// The method `operator()(RNGType &rng)` is equivalent to
+/// `rng.seed(get_key())` if `RNGType::key_type` exists and it is the same type
+/// as `key_type` of this class. Otherwise, it is equivalent to
+/// `rng.seed(get())`. This method is thread-safe but slower than
+/// `rng.seed(get())` or `rng.seed(get_key())`, which are not thread-safe.
+///
+/// The only thread-safe mutable method is `operator()`. Seeding RNGs from
+/// multiple threads at the same time using this method is possible. Any other
+/// mutable methods are not thread-safe. In particular, if this singleton is
+/// going to be used in a multi-threaded environment, make sure `instance()` is
+/// called at least once in a single threaded environment.
+template <typename ID, typename ResultType = VSMC_SEED_RESULT_TYPE,
+    std::size_t K = 4>
 class SeedGenerator
 {
     static_assert(std::is_unsigned<ResultType>::value,
@@ -90,104 +93,98 @@ class SeedGenerator
 
     public:
     using result_type = ResultType;
-    using skip_type = ResultType;
+    using key_type = std::array<ResultType, K>;
 
-    SeedGenerator(const SeedGenerator<ID, ResultType> &) = delete;
+    SeedGenerator(const SeedGenerator<ID, ResultType, K> &) = delete;
 
-    SeedGenerator<ID, ResultType> &operator=(
-        const SeedGenerator<ID, ResultType> &) = delete;
+    SeedGenerator<ID, ResultType, K> &operator=(
+        const SeedGenerator<ID, ResultType, K> &) = delete;
 
-    static SeedGenerator<ID, ResultType> &instance()
+    static SeedGenerator<ID, ResultType, K> &instance()
     {
-        static SeedGenerator<ID, ResultType> seed;
+        static SeedGenerator<ID, ResultType, K> seed;
 
         return seed;
     }
 
-    /// \brief Equivalent to `rng.seed(get())`
+    /// \brief Seeding an RNG
     template <typename RNGType>
-    void seed_rng(RNGType &rng)
+    void operator()(RNGType &rng)
     {
-        rng.seed(get());
+        rng_seed(rng, std::is_same<key_type, internal::KeyType<RNGType>>());
     }
 
-    /// \brief Get a new seed
-    ///
-    /// \details
-    /// This member function is thread safe
+    /// \brief Set the seed
+    void set(result_type seed)
+    {
+        seed_ = seed % seed_max_;
+        std::fill(ctr_.begin(), ctr_.end(), 0);
+    }
+
+    /// \brief Set the seed and key
+    void set_key(const key_type &key)
+    {
+        std::copy_n(key.begin(), ctr_.size(), ctr_.begin());
+        if (key.size() != 0)
+            seed_ = key.back() % seed_max_;
+    }
+
+    /// \brief Get a seed
     result_type get()
     {
-        skip();
+        if (seed_ < seed_max_)
+            ++seed_;
+        else
+            seed_ = 1;
 
         return seed_ * divisor_ + remainder_;
     }
 
-    result_type get_scalar() { return get(); }
+    /// \brief Get a key
+    key_type get_key()
+    {
+        key_type key;
+        increment(ctr_);
+        std::copy(ctr_.begin(), ctr_.end(), key.begin());
+        if (key.size() > 0)
+            key.back() = get();
 
-    /// \brief Set the internal seed
-    ///
-    /// \details
-    /// If `seed` is larger than the maximum of the internal seed, than it will
-    /// be round up to fit into the range. For example, say the range is from 1
-    /// to 1000, and the new internal seed is 6061, it will be round up to 61.
-    void set(result_type seed) { seed_ = seed % seed_max_; }
-
-    /// \brief The current internal seed
-    result_type seed() const { return seed_; }
-
-    /// \brief The maximum of the internal seed integer
-    result_type seed_max() const { return seed_max_; }
+        return key;
+    }
 
     /// \brief The divisor of the output seed
-    skip_type divisor() const { return divisor_; }
+    result_type divisor() const { return divisor_; }
 
     /// \brief The remainder of the output seed
-    skip_type remainder() const { return remainder_; }
+    result_type remainder() const { return remainder_; }
 
     /// \brief Set the divisor and the remainder
-    void modulo(skip_type div, skip_type rem)
+    void modulo(result_type divisor, result_type remainder)
     {
-        VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(div, rem);
+        VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(divisor, remainder);
 
-        divisor_ = div;
-        remainder_ = rem;
-        seed_max_ = std::numeric_limits<skip_type>::max();
-        seed_max_ -= seed_max_ % divisor_;
-        seed_max_ /= divisor_;
+        divisor_ = divisor;
+        remainder_ = remainder;
+        seed_max_ = std::numeric_limits<result_type>::max() / divisor;
 
         VSMC_RUNTIME_ASSERT_RNG_SEED_MAX(seed_max_);
 
         set(seed_);
     }
 
-    /// \brief Skip the internal seed by a given steps
-    void skip(skip_type steps)
-    {
-        result_type incr = steps % seed_max_;
-        result_type diff = seed_max_ - seed_;
-        seed_ = incr <= diff ? (seed_ + incr) : (incr - diff);
-    }
-
-    /// \brief Skip the internal seed by 1 step
-    void skip()
-    {
-        if (seed_ < seed_max_)
-            ++seed_;
-        else
-            seed_ = 1;
-    }
-
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const SeedGenerator<ID, ResultType> &sg)
+        const SeedGenerator<ID, ResultType, K> &sg)
     {
         if (!os)
             return os;
 
         os << sg.seed_ << ' ';
+        os << sg.seed_max_ << ' ';
         os << sg.divisor_ << ' ';
-        os << sg.remainder_;
+        os << sg.remainder_ << ' ';
+        os << sg.ctr_;
 
         return os;
     }
@@ -195,215 +192,67 @@ class SeedGenerator
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        SeedGenerator<ID, ResultType> &sg)
+        SeedGenerator<ID, ResultType, K> &sg)
     {
         if (!is)
             return is;
 
-        result_type s;
-        skip_type div;
-        skip_type rem;
-        is >> std::ws >> s;
-        is >> std::ws >> div;
-        is >> std::ws >> rem;
+        result_type seed;
+        result_type seed_max;
+        result_type divisor;
+        result_type remainder;
+        ctr_type ctr;
+        is >> std::ws >> seed;
+        is >> std::ws >> seed_max;
+        is >> std::ws >> divisor;
+        is >> std::ws >> remainder;
+        is >> std::ws >> ctr;
 
         if (static_cast<bool>(is)) {
-            sg.modulo(div, rem);
-            sg.set(s);
+            sg.seed_ = seed;
+            sg.seed_max_ = seed_max;
+            sg.divisor_ = divisor;
+            sg.remainder_ = remainder;
+            sg.ctr_ = ctr;
         }
 
         return is;
     }
 
     private:
-    std::atomic<result_type> seed_;
+    using ctr_type = std::array<ResultType, K == 0 ? 0 : K - 1>;
+
+    result_type seed_;
     result_type seed_max_;
-    skip_type divisor_;
-    skip_type remainder_;
+    result_type divisor_;
+    result_type remainder_;
+    ctr_type ctr_;
+    std::mutex mtx_;
 
     SeedGenerator() : seed_(0), seed_max_(0), divisor_(1), remainder_(0)
     {
         modulo(divisor_, remainder_);
-    }
-}; // class SeedGenerator
-
-/// \brief Seed generator counters
-/// \ingroup RNG
-///
-/// \details
-/// When SeedGenerator is used with an counter, the `modulo` has no effect and
-/// a warning will be generated if `div != 1` or `rem != 0`. If the program
-/// need to be parallelized on distributed memory system, it shall be
-/// sufficient to set the the last component of the counter to be unique to
-/// each node. For example,
-/// ~~~{.cpp}
-/// #include <vsmc/rng/seed.hpp>
-///
-/// using Seed4x32 = SeedGeneartor<NullType, std::array<std::uint32_t, 4> >;
-/// Seed4x32 &seed = SeedType::instance();
-/// boost::mpi::communicator world;
-/// Seed4x32::result_type s;
-/// s.fill(0);
-/// s.back() = world.rank();
-/// seed.set(s);
-/// ~~~
-template <typename ID, typename ResultType, std::size_t K>
-class SeedGenerator<ID, std::array<ResultType, K>>
-{
-    static_assert(std::is_unsigned<ResultType>::value,
-        "**SeedGenerator** USED WITH ResultType OTHER THAN UNSIGEND INTEGER "
-        "TYPES");
-
-    public:
-    using result_type = std::array<ResultType, K>;
-    using skip_type = ResultType;
-
-    SeedGenerator(
-        const SeedGenerator<ID, std::array<ResultType, K>> &) = delete;
-
-    SeedGenerator<ID, std::array<ResultType, K>> &operator=(
-        const SeedGenerator<ID, std::array<ResultType, K>> &) = delete;
-
-    static SeedGenerator<ID, std::array<ResultType, K>> &instance()
-    {
-        static SeedGenerator<ID, std::array<ResultType, K>> seed;
-
-        return seed;
-    }
-
-    /// \brief Equivalent to `rng.seed(get())` or
-    /// `rng.seed(std::get<0>(get()))`.
-    ///
-    /// \details
-    /// If `RNGType::key_type` exists and it is the same as `result_type`, call
-    /// the former, otherwise the later.
-    template <typename RNGType>
-    void seed_rng(RNGType &rng)
-    {
-        seed_rng_dispatch(rng,
-            std::integral_constant<bool,
-                              std::is_same<result_type,
-                                       internal::KeyType<RNGType>>::value>());
-    }
-
-    result_type get()
-    {
-        std::lock_guard<std::mutex> lock_(mtx_);
-        skip();
-
-        return seed_;
-    }
-
-    ResultType get_scalar()
-    {
-        result_type s1(get());
-        result_type s2(get());
-        for (std::size_t k = 0; k != K; ++k)
-            if (s1[k] != s2[k])
-                return s2[k];
-
-        return std::get<0>(s2);
-    }
-
-    void set(ResultType s)
-    {
-        seed_.fill(0);
-        seed_.front() = s;
-    }
-
-    void set(result_type seed) { seed_ = seed; }
-
-    result_type seed() const { return seed_; }
-
-    result_type seed_max() const { return seed_max_; }
-
-    skip_type divisor() const { return divisor_; }
-
-    skip_type remainder() const { return remainder_; }
-
-    void modulo(skip_type div, skip_type rem)
-    {
-        VSMC_RUNTIME_WARNING_RNG_SEED_GENERATOR_MODULO(div, rem);
-
-        divisor_ = div;
-        remainder_ = rem;
-        seed_max_.fill(std::numeric_limits<skip_type>::max());
-
-        set(seed_);
-    }
-
-    void skip(skip_type steps) { increment(seed_, steps); }
-
-    void skip() { increment(seed_); }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os,
-        const SeedGenerator<ID, std::array<ResultType, K>> &sg)
-    {
-        if (!os)
-            return os;
-
-        os << sg.seed_ << ' ';
-        os << sg.divisor_ << ' ';
-        os << sg.remainder_ << ' ';
-
-        return os;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is,
-        SeedGenerator<ID, std::array<ResultType, K>> &sg)
-    {
-        if (!is)
-            return is;
-
-        result_type s;
-        skip_type div;
-        skip_type rem;
-        is >> std::ws >> s;
-        is >> std::ws >> div;
-        is >> std::ws >> rem;
-
-        if (static_cast<bool>(is)) {
-            sg.modulo(div, rem);
-            sg.set(s);
-        }
-
-        return is;
-    }
-
-    private:
-    result_type seed_;
-    result_type seed_max_;
-    skip_type divisor_;
-    skip_type remainder_;
-    std::mutex mtx_;
-
-    SeedGenerator() : divisor_(1), remainder_(0)
-    {
-        seed_.fill(0);
-        seed_max_.fill(0);
-        modulo(divisor_, remainder_);
+        std::fill(ctr_.begin(), ctr_.end(), 0);
     }
 
     template <typename RNGType>
-    void seed_rng_dispatch(RNGType &rng, std::true_type)
+    void rng_seed(RNGType &rng, std::true_type)
     {
-        rng.seed(get());
+        std::lock_guard<std::mutex> lock(mtx_);
+        rng.seed(get_key());
     }
 
     template <typename RNGType>
-    void seed_rng_dispatch(RNGType &rng, std::false_type)
+    void rng_seed(RNGType &rng, std::false_type)
     {
-        rng.seed(get_scalar());
+        std::lock_guard<std::mutex> lock(mtx_);
+        rng.seed(static_cast<typename RNGType::result_type>(get()));
     }
 }; // class SeedGenerator
 
 /// \brief The default Seed type
 /// \ingroup RNG
-using Seed = SeedGenerator<NullType, VSMC_SEED_RESULT_TYPE>;
+using Seed = SeedGenerator<NullType>;
 
 } // namespace vsmc
 

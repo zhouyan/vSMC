@@ -67,7 +67,7 @@ class Particle
         , weight_(static_cast<SizeType<weight_type>>(N))
         , rng_set_(static_cast<SizeType<rng_set_type>>(N))
     {
-        Seed::instance().seed_rng(rng_);
+        Seed::instance()(rng_);
     }
 
     /// \brief Clone the particle system except the RNG engines
@@ -79,7 +79,7 @@ class Particle
         Particle<T> particle(*this);
         if (new_rng) {
             particle.rng_set().seed();
-            Seed::instance().seed_rng(particle.rng());
+            Seed::instance()(particle.rng());
         }
 
         return particle;
