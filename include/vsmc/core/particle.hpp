@@ -40,7 +40,7 @@
 #include <vsmc/rng/seed.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RESIZE_BY_RANGE                     \
-    VSMC_RUNTIME_ASSERT((first >= 0 && first < last && last <= size()),       \
+    VSMC_RUNTIME_ASSERT((first >= 0 && first < last && last <= size_),        \
         "**Particle::resize_by_range** INDICES OUT OF RANGE")
 
 namespace vsmc
@@ -148,14 +148,15 @@ class Particle
     template <typename InputIter>
     void resize_by_mask(size_type N, InputIter mask)
     {
-        Vector<size_type> idx(static_cast<std::size_t>(N));
-        Vector<size_type> mask_index;
-        mask_index.reserve(static_cast<std::size_t>(size()));
-        for (size_type i = 0; i != size(); ++i, ++mask)
+        StaticVector<size_type, M_> idx(static_cast<std::size_t>(N));
+        StaticVector<size_type, M_> mask_index(
+            static_cast<std::size_t>(size_));
+        std::size_t M = 0;
+        for (size_type i = 0; i != size_; ++i, ++mask)
             if (static_cast<bool>(*mask))
-                mask_index.push_back(i);
-        resize_copy_index(static_cast<std::size_t>(N), mask_index.size(),
-            mask_index.data(), idx.data());
+                mask_index[M++] = i;
+        resize_copy_index(
+            static_cast<std::size_t>(N), M, mask_index.data(), idx.data());
         resize(N, idx.data());
     }
 
@@ -173,13 +174,13 @@ class Particle
     template <typename ResampleType>
     void resize_by_resample(size_type N, ResampleType &&op)
     {
-        Vector<size_type> rep(static_cast<std::size_t>(N));
-        Vector<size_type> idx(static_cast<std::size_t>(N));
-        Weight w(static_cast<SizeType<weight_type>>(this->size()));
+        StaticVector<size_type, M_> rep(static_cast<std::size_t>(size_));
+        StaticVector<size_type, M_> idx(static_cast<std::size_t>(N));
+        Weight w(static_cast<SizeType<weight_type>>(size_));
         w.set(weight_.data());
-        op(static_cast<std::size_t>(size()), static_cast<std::size_t>(N), rng_,
+        op(static_cast<std::size_t>(size_), static_cast<std::size_t>(N), rng_,
             w.data(), rep.data());
-        resample_trans_rep_index(static_cast<std::size_t>(size()),
+        resample_trans_rep_index(static_cast<std::size_t>(size_),
             static_cast<std::size_t>(N), rep.data(), idx.data());
         resize(N, idx.data());
     }
@@ -190,8 +191,8 @@ class Particle
     ///
     /// \details
     /// This is equivalent to first set the weights to equal, and then perform
-    /// Multinomial resampling. The particle system will be changed even if `N
-    /// == size()`.
+    /// Multinomial resampling. The particle system will be changed even if
+    /// `N == size()`.
     void resize_by_uniform(size_type N)
     {
         weight_.set_equal();
@@ -199,12 +200,12 @@ class Particle
     }
 
     /// \brief Equivalent to `resize_by_range(N, 0, size());
-    void resize_by_range(size_type N) { resize_by_range(N, 0, size()); }
+    void resize_by_range(size_type N) { resize_by_range(N, 0, size_); }
 
     /// \brief Equivalent to `resize_by_range(N, first, size());
     void resize_by_range(size_type N, size_type first)
     {
-        resize_by_range(N, first, size());
+        resize_by_range(N, first, size_);
     }
 
     /// \brief Resize by selecting a range of particles
@@ -221,10 +222,10 @@ class Particle
     {
         VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RESIZE_BY_RANGE;
 
-        if (N == size() && first == 0)
+        if (N == size_ && first == 0)
             return;
 
-        Vector<size_type> idx(static_cast<std::size_t>(N));
+        StaticVector<size_type, M_> idx(static_cast<std::size_t>(N));
         size_type M = last - first;
         if (M >= N) {
             for (size_type i = 0; i != N; ++i, ++first)
@@ -298,8 +299,8 @@ class Particle
         if (resampled) {
             const double *const rwptr = weight_.resample_data();
             if (rwptr != nullptr) {
-                Vector<size_type> rep(N);
-                Vector<size_type> idx(N);
+                StaticVector<size_type, M_> rep(N);
+                StaticVector<size_type, M_> idx(N);
                 op(N, N, rng_, rwptr, rep.data());
                 resample_trans_rep_index(N, N, rep.data(), idx.data());
                 value_.copy(N, idx.data());
@@ -313,6 +314,8 @@ class Particle
     }
 
     private:
+    static constexpr std::size_t M_ = internal::BufferSize<size_type>::value;
+
     size_type size_;
     value_type value_;
     weight_type weight_;
@@ -336,7 +339,7 @@ class Particle
     template <typename InputIter>
     void resize_by_index(size_type N, InputIter index, std::false_type)
     {
-        Vector<size_type> idx(static_cast<std::size_t>(N));
+        StaticVector<size_type, M_> idx(static_cast<std::size_t>(N));
         std::copy_n(index, N, idx.data());
         resize(N, idx.data());
     }

@@ -147,10 +147,6 @@ class NormalMVDistribution
                 return is;
 
             NormalDistribution<RealType> rnorm;
-            internal::StaticVector<result_type, Dim> mean;
-            internal::StaticVector<result_type, Dim *(Dim + 1) / 2> chol;
-            bool null_mean;
-            bool null_chol;
 
             is >> std::ws >> rnorm;
             if (!is)
@@ -161,8 +157,12 @@ class NormalMVDistribution
             if (!is)
                 return is;
 
-            internal::resize(mean, dim);
-            internal::resize(chol, dim * (dim + 1) / 2);
+            StaticVector<result_type, Dim> mean(dim);
+            StaticVector<result_type, Dim *(Dim + 1) / 2> chol(
+                dim * (dim + 1) / 2);
+            bool null_mean;
+            bool null_chol;
+
             is >> std::ws >> mean;
             is >> std::ws >> chol;
             is >> std::ws >> null_mean;
@@ -183,8 +183,8 @@ class NormalMVDistribution
 
         private:
         NormalDistribution<RealType> rnorm_;
-        internal::StaticVector<result_type, Dim> mean_;
-        internal::StaticVector<result_type, Dim *(Dim + 1) / 2> chol_;
+        StaticVector<result_type, Dim> mean_;
+        StaticVector<result_type, Dim *(Dim + 1) / 2> chol_;
         bool null_mean_;
         bool null_chol_;
 
