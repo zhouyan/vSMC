@@ -39,6 +39,41 @@
 #include <vsmc/internal/forward.hpp>
 #include <vsmc/internal/traits.hpp>
 
+#include <algorithm>
+#include <array>
+#include <atomic>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <exception>
+#include <fstream>
+#include <functional>
+#include <future>
+#include <initializer_list>
+#include <iomanip>
+#include <iostream>
+#include <iterator>
+#include <limits>
+#include <list>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <new>
+#include <numeric>
+#include <random>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <thread>
+#include <tuple>
+#include <type_traits>
+#include <utility>
+#include <vector>
+
 namespace vsmc
 {
 
@@ -86,7 +121,111 @@ class BufferSize
 {
 }; // class BufferSize;
 
+template <typename UIntType>
+inline std::string itos(UIntType i, std::true_type)
+{
+    if (i == 0)
+        return std::string("0");
+
+    char str[24] = {0};
+    std::size_t n = 0;
+    while (i > 0) {
+        str[n++] = '0' + i % 10;
+        i /= 10;
+    }
+    std::reverse(str, str + n);
+
+    return std::string(str);
+}
+
+template <typename IntType>
+inline std::string itos(IntType i, std::false_type)
+{
+    using uint_type = typename std::make_unsigned<IntType>::type;
+
+    if (i < 0)
+        return "-" + itos(static_cast<uint_type>(-i), std::true_type());
+
+    return itos(static_cast<uint_type>(i), std::true_type());
+}
+
+template <typename IntType>
+inline std::string itos(IntType i)
+{
+    return itos(i, std::is_unsigned<IntType>());
+}
+
 } // namespace vsmc::internal
+
+template <typename CharT, typename Traits, typename T, std::size_t N>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
+{
+    if (!os || N == 0)
+        return os;
+
+    for (std::size_t i = 0; i < N - 1; ++i)
+        os << ary[i] << ' ';
+    if (N > 0)
+        os << ary[N - 1];
+
+    return os;
+}
+
+template <typename CharT, typename Traits, typename T, std::size_t N>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, std::array<T, N> &ary)
+{
+    if (!is)
+        return is;
+
+    std::array<T, N> tmp;
+    for (std::size_t i = 0; i != N; ++i)
+        is >> std::ws >> tmp[i];
+
+    if (static_cast<bool>(is))
+        ary = std::move(tmp);
+
+    return is;
+}
+
+template <typename CharT, typename Traits, typename T, typename Alloc>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const std::vector<T, Alloc> &vec)
+{
+    if (!os)
+        return os;
+
+    os << vec.size();
+    if (!os)
+        return os;
+
+    for (const auto &v : vec)
+        os << ' ' << v;
+
+    return os;
+}
+
+template <typename CharT, typename Traits, typename T, typename Alloc>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, std::vector<T, Alloc> &vec)
+{
+    if (!is)
+        return is;
+
+    std::size_t n = 0;
+    is >> n;
+    if (!is)
+        return is;
+
+    std::vector<T, Alloc> tmp(n);
+    for (std::size_t i = 0; i != n; ++i)
+        is >> std::ws >> tmp[i];
+    if (static_cast<bool>(is))
+        vec = std::move(tmp);
+
+    return is;
+}
 
 } // namespace vsmc
 

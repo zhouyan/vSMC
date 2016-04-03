@@ -34,12 +34,6 @@
 
 #include <vsmc/internal/basic.hpp>
 
-#include <cstddef>
-#include <cstdlib>
-#include <limits>
-#include <memory>
-#include <vector>
-
 #if VSMC_HAS_POSIX
 #include <stdlib.h>
 #elif defined(VSMC_MSVC)
@@ -92,9 +86,9 @@
 #endif
 #endif
 
-/// \brief Allocator::construct default behavior for POD type
-#ifndef VSMC_CONSTRUCT_POD
-#define VSMC_CONSTRUCT_POD 0
+/// \brief Allocator::construct default behavior for scalar type
+#ifndef VSMC_CONSTRUCT_SCALAR
+#define VSMC_CONSTRUCT_SCALAR 0
 #endif
 
 /// \brief Define class member `new` and `delete` using Allocator
@@ -315,8 +309,8 @@ using AlignedMemory = VSMC_ALIGNED_MEMORY_TYPE;
 /// \tparam T The value type
 /// \tparam Alignment The alignment requirement of memory, must be a power of
 /// two and no less than `sizeof(void *)`.
-/// \tparam ConstructPOD Should construct(ptr) initialize a POD type with zero
-/// or left it uninitialized.
+/// \tparam ConstructScalar Should construct(ptr) initialize a scalar type with
+/// zero or left it uninitialized.
 /// \tparam Memory The memory management class. Must provides two static member
 /// functions, `aligned_malloc` and `aligned_free`. The member function
 /// `aligned_malloc` shall behave similar to `std::malloc` but take an
@@ -326,7 +320,7 @@ using AlignedMemory = VSMC_ALIGNED_MEMORY_TYPE;
 /// pointer if it fails to allocated the memory. It shall not throw any
 /// exceptions. The member function `aligned_free` shall behave just like
 /// `std::free`. It shall be able to handle a null pointer as its input.
-template <typename T, bool ConstructPOD = VSMC_CONSTRUCT_POD != 0,
+template <typename T, bool ConstructScalar = VSMC_CONSTRUCT_SCALAR != 0,
     std::size_t Alignment = AlignmentTrait<T>::value,
     typename Memory = AlignedMemory>
 class Allocator : public std::allocator<T>
@@ -352,29 +346,30 @@ class Allocator : public std::allocator<T>
     class rebind
     {
         public:
-        using other = Allocator<U, ConstructPOD, Alignment, Memory>;
+        using other = Allocator<U, ConstructScalar, Alignment, Memory>;
     }; // class rebind
 
     Allocator() = default;
 
-    Allocator(const Allocator<T, ConstructPOD, Alignment, Memory> &) = default;
+    Allocator(
+        const Allocator<T, ConstructScalar, Alignment, Memory> &) = default;
 
-    Allocator(Allocator<T, ConstructPOD, Alignment, Memory> &&) = default;
+    Allocator(Allocator<T, ConstructScalar, Alignment, Memory> &&) = default;
 
-    Allocator<T, ConstructPOD, Alignment, Memory> &operator=(
-        const Allocator<T, ConstructPOD, Alignment, Memory> &) = default;
+    Allocator<T, ConstructScalar, Alignment, Memory> &operator=(
+        const Allocator<T, ConstructScalar, Alignment, Memory> &) = default;
 
-    Allocator<T, ConstructPOD, Alignment, Memory> &operator=(
-        Allocator<T, ConstructPOD, Alignment, Memory> &&) = default;
+    Allocator<T, ConstructScalar, Alignment, Memory> &operator=(
+        Allocator<T, ConstructScalar, Alignment, Memory> &&) = default;
 
     template <typename U>
-    Allocator(const Allocator<U, ConstructPOD, Alignment, Memory> &other)
+    Allocator(const Allocator<U, ConstructScalar, Alignment, Memory> &other)
         : std::allocator<T>(static_cast<std::allocator<U>>(other))
     {
     }
 
     template <typename U>
-    Allocator(Allocator<U, ConstructPOD, Alignment, Memory> &&other)
+    Allocator(Allocator<U, ConstructScalar, Alignment, Memory> &&other)
         : std::allocator<T>(std::move(static_cast<std::allocator<U>>(other)))
     {
     }
@@ -400,7 +395,7 @@ class Allocator : public std::allocator<T>
     {
         construct_dispatch(
             ptr, std::integral_constant<bool,
-                     (ConstructPOD || !std::is_pod<U>::value)>());
+                     (ConstructScalar || !std::is_scalar<U>::value)>());
     }
 
     template <typename U, typename Arg, typename... Args>
@@ -423,8 +418,8 @@ class Allocator : public std::allocator<T>
     }
 }; // class Allocator
 
-template <bool ConstructPOD, std::size_t Alignment, typename Memory>
-class Allocator<void, ConstructPOD, Alignment, Memory>
+template <bool ConstructScalar, std::size_t Alignment, typename Memory>
+class Allocator<void, ConstructScalar, Alignment, Memory>
 {
     using value_type = void;
     using pointer = void *;
@@ -432,12 +427,12 @@ class Allocator<void, ConstructPOD, Alignment, Memory>
 
     template <class U>
     struct rebind {
-        using other = Allocator<U, ConstructPOD, Alignment, Memory>;
+        using other = Allocator<U, ConstructScalar, Alignment, Memory>;
     };
 }; // class Allocator
 
-template <bool ConstructPOD, std::size_t Alignment, typename Memory>
-class Allocator<const void, ConstructPOD, Alignment, Memory>
+template <bool ConstructScalar, std::size_t Alignment, typename Memory>
+class Allocator<const void, ConstructScalar, Alignment, Memory>
 {
     using value_type = const void;
     using pointer = const void *;
@@ -445,22 +440,24 @@ class Allocator<const void, ConstructPOD, Alignment, Memory>
 
     template <class U>
     struct rebind {
-        using other = Allocator<U, ConstructPOD, Alignment, Memory>;
+        using other = Allocator<U, ConstructScalar, Alignment, Memory>;
     };
 }; // class Allocator
 
-template <typename T1, typename T2, bool ConstructPOD, std::size_t Alignment,
-    typename Memory>
-inline bool operator==(const Allocator<T1, ConstructPOD, Alignment, Memory> &,
-    const Allocator<T2, ConstructPOD, Alignment, Memory> &)
+template <typename T1, typename T2, bool ConstructScalar,
+    std::size_t Alignment, typename Memory>
+inline bool operator==(
+    const Allocator<T1, ConstructScalar, Alignment, Memory> &,
+    const Allocator<T2, ConstructScalar, Alignment, Memory> &)
 {
     return true;
 }
 
-template <typename T1, typename T2, bool ConstructPOD, std::size_t Alignment,
-    typename Memory>
-inline bool operator!=(const Allocator<T1, ConstructPOD, Alignment, Memory> &,
-    const Allocator<T2, ConstructPOD, Alignment, Memory> &)
+template <typename T1, typename T2, bool ConstructScalar,
+    std::size_t Alignment, typename Memory>
+inline bool operator!=(
+    const Allocator<T1, ConstructScalar, Alignment, Memory> &,
+    const Allocator<T2, ConstructScalar, Alignment, Memory> &)
 {
     return false;
 }
@@ -474,9 +471,9 @@ class AllocatorAlignment
 {
 }; // class AllocatorAlignemnt
 
-template <typename T, bool ConstructPOD, std::size_t Alignment,
+template <typename T, bool ConstructScalar, std::size_t Alignment,
     typename Memory>
-class AllocatorAlignment<Allocator<T, ConstructPOD, Alignment, Memory>>
+class AllocatorAlignment<Allocator<T, ConstructScalar, Alignment, Memory>>
     : public std::integral_constant<std::size_t, Alignment>
 {
 }; // class AllocatorAlignment

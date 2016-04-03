@@ -34,9 +34,6 @@
 
 #include <vsmc/internal/basic.hpp>
 #include <vsmc/math/constants.hpp>
-#include <algorithm>
-#include <cmath>
-#include <string>
 
 #if VSMC_USE_MKL_VML
 #include <mkl.h>
