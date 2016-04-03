@@ -132,11 +132,47 @@ namespace internal
 {
 
 template <typename UIntType, typename RNGType>
-inline void uniform_bits_distribution_impl(
+inline void uniform_bits_distribution_impl_neq(
     RNGType &rng, std::size_t n, UIntType *r, std::false_type)
 {
     for (std::size_t i = 0; i != n; ++i)
         r[i] = UniformBits<UIntType>::eval(rng);
+}
+
+template <typename UIntType, typename RNGType>
+inline void uniform_bits_distribution_impl_neq(
+    RNGType &rng, std::size_t n, UIntType *r, std::true_type)
+{
+    static constexpr std::uintptr_t alignment =
+        static_cast<std::uintptr_t>(alignof(typename RNGType::result_type));
+    static constexpr std::size_t rbits = RNGBits<RNGType>::value;
+    static constexpr std::size_t ubits = std::numeric_limits<UIntType>::digits;
+    static constexpr std::size_t k = rbits / ubits;
+
+    while (reinterpret_cast<std::uintptr_t>(r) % alignment != 0) {
+        *r = UniformBits<UIntType>::eval(rng);
+        ++r;
+        --n;
+    }
+    const std::size_t m = n / k;
+    rng_rand(rng, m, reinterpret_cast<typename RNGType::result_type *>(r));
+    r += m * k;
+    n -= m * k;
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = UniformBits<UIntType>::eval(rng);
+}
+
+template <typename UIntType, typename RNGType>
+inline void uniform_bits_distribution_impl(
+    RNGType &rng, std::size_t n, UIntType *r, std::false_type)
+{
+    static constexpr bool zero_min = RNGMinBits<RNGType>::value == 0;
+    static constexpr std::size_t rbits = RNGBits<RNGType>::value;
+    static constexpr std::size_t ubits = std::numeric_limits<UIntType>::digits;
+
+    uniform_bits_distribution_impl_neq(
+        rng, n, r, std::integral_constant<bool,
+                       (zero_min && rbits >= ubits && rbits % ubits == 0)>());
 }
 
 template <typename UIntType, typename RNGType>

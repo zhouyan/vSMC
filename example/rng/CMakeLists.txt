@@ -48,6 +48,7 @@ ADD_RNG_TEST(u01_sequence)
 ADD_RNG_TEST(std)
 ADD_RNG_TEST(philox)
 ADD_RNG_TEST(threefry)
+ADD_RNG_TEST(uniform_bits)
 
 IF(AESNI_FOUND)
     ADD_RNG_TEST(aes)
