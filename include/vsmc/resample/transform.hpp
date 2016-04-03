@@ -68,7 +68,7 @@ inline OutputIter resample_trans_u01_rep(std::size_t N, std::size_t M,
     std::size_t j = 0;
     for (std::size_t i = 0; i != N - 1; ++i, ++weight, ++replication) {
         accw += *weight;
-        while (j != M && static_cast<real_type>(u01seq[j]) < accw) {
+        while (j != M && static_cast<real_type>(u01seq[j]) <= accw) {
             *replication += 1;
             ++j;
         }

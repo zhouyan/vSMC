@@ -47,17 +47,17 @@ namespace vsmc
 /// \ingroup U01Sequence
 ///
 /// \details
-/// This function does not acutally sort the sequence `u01`, instead `u01seq`
-/// is a sequence generated such that it comes from the same distribution of
-/// the sorted sequence.
+/// This function does not acutally sort the sequence `u01`, instead `r` is a
+/// sequence generated such that it comes from the same distribution of the
+/// sorted sequence.
 template <typename RealType>
-inline void u01_sorted(std::size_t N, const RealType *u01, RealType *u01seq)
+inline void u01_sorted(std::size_t N, const RealType *u01, RealType *r)
 {
-    log(N, u01, u01seq);
+    log(N, u01, r);
     RealType lmax = 0;
     for (std::size_t i = 0; i != N; ++i) {
-        lmax += u01seq[i] / (N - i);
-        u01seq[i] = 1 - std::exp(lmax);
+        lmax += r[i] / (N - i);
+        r[i] = 1 - std::exp(lmax);
     }
 }
 
@@ -65,27 +65,53 @@ inline void u01_sorted(std::size_t N, const RealType *u01, RealType *u01seq)
 /// stratified sequence
 /// \ingroup U01Sequence
 template <typename RealType>
-inline void u01_stratified(
-    std::size_t N, const RealType *u01, RealType *u01seq)
+inline void u01_stratified(std::size_t N, const RealType *u01, RealType *r)
 {
     RealType delta = 1 / static_cast<RealType>(N);
     for (std::size_t i = 0; i != N; ++i)
-        u01seq[i] = u01[i] * delta + i * delta;
+        r[i] = u01[i] * delta + i * delta;
 }
 
 /// \brief Transform a single standard uniform random number to a systematic
 /// sequence
 /// \ingroup U01Sequence
 template <typename RealType>
-inline void u01_systematic(std::size_t N, RealType u01, RealType *u01seq)
+inline void u01_systematic(std::size_t N, RealType u01, RealType *r)
 {
     if (N == 0)
         return;
 
     RealType delta = 1.0 / static_cast<RealType>(N);
-    u01seq[0] = u01 * delta;
+    r[0] = u01 * delta;
     for (std::size_t i = 1; i != N; ++i)
-        u01seq[i] = u01seq[i - 1] + delta;
+        r[i] = r[i - 1] + delta;
+}
+
+/// \brief Generate sorted standard uniform numbers with \f$O(N)\f$ cost
+/// \ingroup U01Sequence
+template <typename RealType, typename RNGType>
+inline void u01_sorted(RNGType &rng, std::size_t N, RealType *r)
+{
+    u01_oc_distribution(rng, N, r);
+    u01_sorted(N, r, r);
+}
+
+/// \brief Generate stratified standard uniform numbers
+/// \ingroup U01Sequence
+template <typename RealType, typename RNGType>
+inline void u01_stratified(RNGType &rng, std::size_t N, RealType *r)
+{
+    u01_oc_distribution(rng, N, r);
+    u01_stratified(N, r, r);
+}
+
+/// \brief Generate systematic standard uniform numbers
+/// \ingroup U01Sequence
+template <typename RealType, typename RNGType>
+inline void u01_systematic(RNGType &rng, std::size_t N, RealType *r)
+{
+    U01OCDistribution<RealType> u01;
+    u01_systematic(N, u01(rng), r);
 }
 
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
@@ -110,8 +136,7 @@ inline void u01_systematic(std::size_t N, RealType u01, RealType *u01seq)
 /// In the above example, one want N uniform random variates, and having them
 /// sorted. The sorted sequence is accessed sequentially. There are two
 /// undesired effects. First the program has a runtime cost \f$O(N\log N)\f$.
-/// Second, it has a memory cost \f$O(N)\f$. The presented class can be used
-/// in
+/// Second, it has a memory cost \f$O(N)\f$. The presented class can be used in
 /// place of the temporary vector in the following fashion.
 /// ~~~{.cpp}
 /// const std::size_t N = 1000;
@@ -149,7 +174,7 @@ class U01SequenceSorted
         if (n == n_)
             return u_;
 
-        U01Distribution<result_type> u01;
+        U01OCDistribution<result_type> u01;
         lmax_ += std::log(u01(rng_)) / (N_ - n);
         n_ = n;
         u_ = 1 - std::exp(lmax_);
@@ -157,7 +182,17 @@ class U01SequenceSorted
         return u_;
     }
 
-    result_type operator()(std::size_t n) { return operator[](n); }
+    static void transform(
+        std::size_t N, const result_type *u01, result_type *r)
+    {
+        u01_sorted(N, u01, r);
+    }
+
+    template <typename RNG>
+    static void generate(RNG &rng, std::size_t N, result_type *r)
+    {
+        u01_sorted(rng, N, r);
+    }
 
     private:
     std::size_t N_;
@@ -203,14 +238,24 @@ class U01SequenceStratified
         if (n == n_)
             return u_;
 
-        U01Distribution<result_type> u01;
+        U01OCDistribution<result_type> u01;
         n_ = n;
         u_ = u01(rng_) * delta_ + n * delta_;
 
         return u_;
     }
 
-    result_type operator()(std::size_t n) { return operator[](n); }
+    static void transform(
+        std::size_t N, const result_type *u01, result_type *r)
+    {
+        u01_stratified(N, u01, r);
+    }
+
+    template <typename RNG>
+    static void generate(RNG &rng, std::size_t N, result_type *r)
+    {
+        u01_stratified(rng, N, r);
+    }
 
     private:
     std::size_t N_;
@@ -243,7 +288,7 @@ class U01SequenceSystematic
     U01SequenceSystematic(std::size_t N, RNGType &rng)
         : N_(N), n_(N), u_(0), u0_(0), delta_(1 / static_cast<result_type>(N))
     {
-        U01Distribution<result_type> u01;
+        U01OCDistribution<result_type> u01;
         u0_ = u01(rng) * delta_;
     }
 
@@ -260,7 +305,17 @@ class U01SequenceSystematic
         return u_;
     }
 
-    result_type operator()(std::size_t n) { return operator[](n); }
+    static void transform(
+        std::size_t N, const result_type *u01, result_type *r)
+    {
+        u01_systematic(N, u01, r);
+    }
+
+    template <typename RNG>
+    static void generate(RNG &rng, std::size_t N, result_type *r)
+    {
+        u01_systematic(rng, N, r);
+    }
 
     private:
     std::size_t N_;
