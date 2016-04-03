@@ -1114,6 +1114,227 @@ using MKL_PHILOX4X32X10_64 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 64>;
 
 #endif // INTEL_MKL_VERSION >= 110300
 
+template <int Bits>
+inline void rng_rand(MKLGenerator<Bits> &rng, std::size_t n,
+    typename MKLGenerator<Bits>::result_type *r)
+{
+    rng(n, r);
+}
+
+template <int Bits>
+inline void beta_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, float *r, float alpha, float beta)
+{
+    internal::size_check<MKL_INT>(n, "beta_distribution)");
+    rng.stream().beta(static_cast<MKL_INT>(n), r, alpha, beta, 0, 1);
+}
+
+template <int Bits>
+inline void beta_distribution(MKLGenerator<Bits> &rng, std::size_t n,
+    double *r, double alpha, double beta)
+{
+    internal::size_check<MKL_INT>(n, "beta_distribution)");
+    rng.stream().beta(static_cast<MKL_INT>(n), r, alpha, beta, 0, 1);
+}
+
+template <int Bits>
+inline void cauchy_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, float *r, float a, float b)
+{
+    internal::size_check<MKL_INT>(n, "cauchy_distribution)");
+    rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
+}
+
+template <int Bits>
+inline void cauchy_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, double *r, double a, double b)
+{
+    internal::size_check<MKL_INT>(n, "cauchy_distribution)");
+    rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
+}
+
+template <int Bits>
+inline void exponential_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, float *r, float lambda)
+{
+    internal::size_check<MKL_INT>(n, "exponential_distribution)");
+    rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
+}
+
+template <int Bits>
+inline void exponential_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, double *r, double lambda)
+{
+    internal::size_check<MKL_INT>(n, "exponential_distribution)");
+    rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
+}
+
+template <int Bits>
+inline void extreme_value_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, float *r, float a, float b)
+{
+    internal::size_check<MKL_INT>(n, "extreme_value_distribution)");
+    rng.stream().gumbel(static_cast<MKL_INT>(n), r, a, b);
+    sub(n, 2 * a, r, r);
+}
+
+template <int Bits>
+inline void extreme_value_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, double *r, double a, double b)
+{
+    internal::size_check<MKL_INT>(n, "extreme_value_distribution)");
+    rng.stream().gumbel(static_cast<MKL_INT>(n), r, a, b);
+    sub(n, 2 * a, r, r);
+}
+
+template <int Bits>
+inline void gamma_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, float *r, float alpha, float beta)
+{
+    internal::size_check<MKL_INT>(n, "gamma_distribution)");
+    rng.stream().gamma(static_cast<MKL_INT>(n), r, alpha, 0, beta);
+}
+
+template <int Bits>
+inline void gamma_distribution(MKLGenerator<Bits> &rng, std::size_t n,
+    double *r, double alpha, double beta)
+{
+    internal::size_check<MKL_INT>(n, "gamma_distribution)");
+    rng.stream().gamma(static_cast<MKL_INT>(n), r, alpha, 0, beta);
+}
+
+template <int Bits>
+inline void laplace_distribution(MKLGenerator<Bits> &rng, std::size_t n,
+    float *r, float location, float scale)
+{
+    internal::size_check<MKL_INT>(n, "lapace_distribution)");
+    rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
+}
+
+template <int Bits>
+inline void laplace_distribution(MKLGenerator<Bits> &rng, std::size_t n,
+    double *r, double location, double scale)
+{
+    internal::size_check<MKL_INT>(n, "lapace_distribution)");
+    rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
+}
+
+template <int Bits>
+inline void lognormal_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, float *r, float m, float s)
+{
+    internal::size_check<MKL_INT>(n, "lognormal_distribution)");
+    rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
+}
+
+template <int Bits>
+inline void lognormal_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, double *r, double m, double s)
+{
+    internal::size_check<MKL_INT>(n, "lognormal_distribution)");
+    rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
+}
+
+template <int Bits>
+inline void normal_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, float *r, float mean, float stddev)
+{
+    internal::size_check<MKL_INT>(n, "normal_distribution)");
+    rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
+}
+
+template <int Bits>
+inline void normal_distribution(MKLGenerator<Bits> &rng, std::size_t n,
+    double *r, double mean, double stddev)
+{
+    internal::size_check<MKL_INT>(n, "normal_distribution)");
+    rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
+}
+
+template <int Bits>
+inline void normal_mv_distribution(MKLGenerator<Bits> &rng, std::size_t n,
+    float *r, std::size_t m, const float *mean, const float *chol)
+{
+    internal::size_check<MKL_INT>(n, "normal_mv_distribution)");
+    internal::size_check<MKL_INT>(m, "normal_mv_distribution)");
+    rng.stream().gaussian_mv(static_cast<MKL_INT>(n), r,
+        static_cast<MKL_INT>(m), VSL_MATRIX_STORAGE_PACKED, mean, chol);
+}
+
+template <int Bits>
+inline void normal_mv_distribution(MKLGenerator<Bits> &rng, std::size_t n,
+    double *r, std::size_t m, const double *mean, const double *chol)
+{
+    internal::size_check<MKL_INT>(n, "normal_mv_distribution)");
+    internal::size_check<MKL_INT>(m, "normal_mv_distribution)");
+    rng.stream().gaussian_mv(static_cast<MKL_INT>(n), r,
+        static_cast<MKL_INT>(m), VSL_MATRIX_STORAGE_PACKED, mean, chol);
+}
+
+template <int Bits>
+inline void rayleigh_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, float *r, float sigma)
+{
+    internal::size_check<MKL_INT>(n, "rayleigh_distribution)");
+    rng.stream().rayleigh(
+        static_cast<MKL_INT>(n), r, 0, const_sqrt_2<float>() * sigma);
+}
+
+template <int Bits>
+inline void rayleigh_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, double *r, double sigma)
+{
+    internal::size_check<MKL_INT>(n, "rayleigh_distribution)");
+    rng.stream().rayleigh(
+        static_cast<MKL_INT>(n), r, 0, const_sqrt_2<double>() * sigma);
+}
+
+template <int Bits>
+inline void u01_distribution(MKLGenerator<Bits> &rng, std::size_t n, float *r)
+{
+    internal::size_check<MKL_INT>(n, "u01_distribution)");
+    rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
+}
+
+template <int Bits>
+inline void u01_distribution(MKLGenerator<Bits> &rng, std::size_t n, double *r)
+{
+    internal::size_check<MKL_INT>(n, "u01_distribution)");
+    rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
+}
+
+template <int Bits>
+inline void uniform_real_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, float *r, float a, float b)
+{
+    internal::size_check<MKL_INT>(n, "uniform_real_distribution)");
+    rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
+}
+
+template <int Bits>
+inline void uniform_real_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, double *r, double a, double b)
+{
+    internal::size_check<MKL_INT>(n, "uniform_real_distribution)");
+    rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
+}
+
+template <int Bits>
+inline void weibull_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, float *r, float a, float b)
+{
+    internal::size_check<MKL_INT>(n, "weibull_distribution)");
+    rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
+}
+
+template <int Bits>
+inline void weibull_distribution(
+    MKLGenerator<Bits> &rng, std::size_t n, double *r, double a, double b)
+{
+    internal::size_check<MKL_INT>(n, "weibull_distribution)");
+    rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
+}
+
 template <MKL_INT BRNG, int Bits>
 inline void rng_rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     typename MKLEngine<BRNG, Bits>::result_type *r)

@@ -848,8 +848,117 @@ inline void weibull_distribution(
 
 class MKLStream;
 
+template <int>
+class MKLGenerator;
+
 template <MKL_INT, int>
 class MKLEngine;
+
+template <int Bits>
+inline void rng_rand(MKLGenerator<Bits> &, std::size_t,
+    typename MKLGenerator<Bits>::result_type *);
+
+template <int Bits>
+inline void beta_distribution(
+    MKLGenerator<Bits> &, std::size_t, float *, float, float);
+
+template <int Bits>
+inline void beta_distribution(
+    MKLGenerator<Bits> &, std::size_t, double *, double, double);
+
+template <int Bits>
+inline void cauchy_distribution(
+    MKLGenerator<Bits> &, std::size_t, float *, float, float);
+
+template <int Bits>
+inline void cauchy_distribution(
+    MKLGenerator<Bits> &, std::size_t, double *, double, double);
+
+template <int Bits>
+inline void exponential_distribution(
+    MKLGenerator<Bits> &, std::size_t, float *, float);
+
+template <int Bits>
+inline void exponential_distribution(
+    MKLGenerator<Bits> &, std::size_t, double *, double);
+
+template <int Bits>
+inline void extreme_value_distribution(
+    MKLGenerator<Bits> &, std::size_t, float *, float, float);
+
+template <int Bits>
+inline void extreme_value_distribution(
+    MKLGenerator<Bits> &, std::size_t, double *, double, double);
+
+template <int Bits>
+inline void gamma_distribution(
+    MKLGenerator<Bits> &, std::size_t, float *, float, float);
+
+template <int Bits>
+inline void gamma_distribution(
+    MKLGenerator<Bits> &, std::size_t, double *, double, double);
+
+template <int Bits>
+inline void laplace_distribution(
+    MKLGenerator<Bits> &, std::size_t, float *, float, float);
+
+template <int Bits>
+inline void laplace_distribution(
+    MKLGenerator<Bits> &, std::size_t, double *, double, double);
+
+template <int Bits>
+inline void lognormal_distribution(
+    MKLGenerator<Bits> &, std::size_t, float *, float, float);
+
+template <int Bits>
+inline void lognormal_distribution(
+    MKLGenerator<Bits> &, std::size_t, double *, double, double);
+
+template <int Bits>
+inline void normal_distribution(
+    MKLGenerator<Bits> &, std::size_t, float *r, float, float);
+
+template <int Bits>
+inline void normal_distribution(
+    MKLGenerator<Bits> &, std::size_t, double *r, double, double);
+
+template <int Bits>
+inline void normal_mv_distribution(MKLGenerator<Bits> &, std::size_t, float *,
+    std::size_t, const float *, const float *);
+
+template <int Bits>
+inline void normal_mv_distribution(MKLGenerator<Bits> &, std::size_t, double *,
+    std::size_t, const double *, const double *);
+
+template <int Bits>
+inline void rayleigh_distribution(
+    MKLGenerator<Bits> &, std::size_t, float *, float);
+
+template <int Bits>
+inline void rayleigh_distribution(
+    MKLGenerator<Bits> &, std::size_t, double *, double);
+
+template <int Bits>
+inline void u01_distribution(MKLGenerator<Bits> &, std::size_t, float *);
+
+template <int Bits>
+inline void u01_distribution(MKLGenerator<Bits> &, std::size_t, double *);
+
+template <int Bits>
+inline void uniform_real_distribution(
+    MKLGenerator<Bits> &, std::size_t, float *, float, float);
+
+template <int Bits>
+inline void uniform_real_distribution(
+    MKLGenerator<Bits> &, std::size_t, double *, double, double);
+
+template <int Bits>
+inline void weibull_distribution(
+    MKLGenerator<Bits> &, std::size_t, float *, float, float);
+
+template <int Bits>
+inline void weibull_distribution(
+    MKLGenerator<Bits> &, std::size_t, double *, double, double);
 
 template <MKL_INT BRNG, int Bits>
 inline void rng_rand(MKLEngine<BRNG, Bits> &, std::size_t,
