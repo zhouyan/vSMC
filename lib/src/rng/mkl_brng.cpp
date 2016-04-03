@@ -67,7 +67,7 @@
         ::VSLBRngProperties properties;                                       \
         properties.StreamStateSize =                                          \
             sizeof(::vsmc::internal::MKLStreamState<RNGType>);                \
-        properties.NSeeds = 1;                                                \
+        properties.NSeeds = ::vsmc::internal::mkl_nseeds<RNGType>();          \
         properties.IncludesZero = 1;                                          \
         properties.WordSize = 4;                                              \
         properties.NBits = 32;                                                \
@@ -95,14 +95,90 @@ class MKLStreamState
 }; // class MKLStreamState
 
 template <typename RNGType>
+inline int mkl_nseeds(std::false_type)
+{
+    return (sizeof(typename RNGType::ctr_type) +
+               sizeof(typename RNGType::key_type)) /
+        sizeof(unsigned);
+}
+
+template <typename RNGType>
+inline int mkl_nseeds(std::true_type)
+{
+    return 1;
+}
+
+template <typename RNGType>
+inline int mkl_nseeds()
+{
+    return mkl_nseeds<RNGType>(std::integral_constant<
+        bool, (std::is_same<CtrType<RNGType>, NullType>::value ||
+                  std::is_same<KeyType<RNGType>, NullType>::value)>());
+}
+
+template <typename RNGType>
+inline int mkl_init(
+    RNGType &rng, int n, const unsigned *param, std::false_type)
+{
+    int nc = static_cast<int>(
+        sizeof(typename RNGType::ctr_type) / sizeof(unsigned));
+    int nk = static_cast<int>(
+        sizeof(typename RNGType::key_type) / sizeof(unsigned));
+    new (static_cast<void *>(&rng)) RNGType();
+
+    if (n > 0) {
+        std::size_t size =
+            static_cast<std::size_t>(std::min(n, nk)) * sizeof(unsigned);
+        typename RNGType::key_type key;
+        std::fill(key.begin(), key.end(), 0);
+        std::memcpy(key.data(), param, size);
+        rng.key(key);
+    }
+
+    if (n > nk) {
+        n -= nk;
+        param += nk;
+        std::size_t size =
+            static_cast<std::size_t>(std::min(n, nc)) * sizeof(unsigned);
+        typename RNGType::ctr_type ctr;
+        std::fill(ctr.begin(), ctr.end(), 0);
+        std::memcpy(ctr.data(), param, size);
+        rng.ctr(ctr);
+    }
+
+    return 0;
+}
+
+template <typename RNGType>
+inline int mkl_init(RNGType &rng, int n, const unsigned *param, std::true_type)
+{
+    if (n == 0) {
+        new (static_cast<void *>(&rng)) RNGType();
+    } else {
+        new (static_cast<void *>(&rng))
+            RNGType(static_cast<typename RNGType::result_type>(param[0]));
+    }
+
+    return 0;
+}
+
+template <typename RNGType>
 inline int mkl_init(
     int method, ::VSLStreamStatePtr stream, int n, const unsigned *param)
 {
     RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
-    if (method == VSL_INIT_METHOD_STANDARD)
-        rng = RNGType(static_cast<typename RNGType::result_type>(param[0]));
+
+    if (method == VSL_INIT_METHOD_STANDARD) {
+        return mkl_init(
+            rng, n, param,
+            std::integral_constant<
+                bool, (std::is_same<CtrType<RNGType>, NullType>::value ||
+                          std::is_same<KeyType<RNGType>, NullType>::value)>());
+    }
+
     if (method == VSL_INIT_METHOD_LEAPFROG)
         return VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED;
+
     if (method == VSL_INIT_METHOD_SKIPAHEAD)
         rng.discard(static_cast<unsigned>(n));
 
@@ -114,8 +190,7 @@ inline int mkl_uniform_real(
     ::VSLStreamStatePtr stream, int n, RealType *r, RealType a, RealType b)
 {
     RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
-    ::vsmc::uniform_real_distribution(
-        rng, static_cast<std::size_t>(n), r, a, b);
+    uniform_real_distribution(rng, static_cast<std::size_t>(n), r, a, b);
 
     return 0;
 }
@@ -124,7 +199,7 @@ template <typename RNGType>
 inline int mkl_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
 {
     RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
-    ::vsmc::uniform_bits_distribution(rng, static_cast<std::size_t>(n), r);
+    uniform_bits_distribution(rng, static_cast<std::size_t>(n), r);
 
     return 0;
 }

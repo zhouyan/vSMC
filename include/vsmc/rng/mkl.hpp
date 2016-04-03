@@ -737,6 +737,13 @@ template <int>
 class MKLResultTypeTrait;
 
 template <>
+class MKLResultTypeTrait<0>
+{
+    public:
+    using type = unsigned;
+}; // class MKLResultTypeTrait
+
+template <>
 class MKLResultTypeTrait<32>
 {
     public:
@@ -755,6 +762,16 @@ using MKLResultType = typename MKLResultTypeTrait<Bits>::type;
 
 template <int>
 class MKLUniformBits;
+
+template <>
+class MKLUniformBits<0>
+{
+    public:
+    static void eval(MKLStream &stream, MKL_INT n, unsigned *r)
+    {
+        stream.uniform_bits(n, r);
+    }
+}; // class MKLUniformBits
 
 template <>
 class MKLUniformBits<32>
@@ -786,8 +803,8 @@ class MKLUniformBits<64>
 template <int Bits>
 class MKLGenerator
 {
-    static_assert(Bits == 32 || Bits == 64,
-        "**MKLGenerator** USED WITH Bits OTHER THAN 32 OR 64");
+    static_assert(Bits == 0 || Bits == 32 || Bits == 64,
+        "**MKLGenerator** USED WITH Bits OTHER THAN 0, 32, OR 64");
 
     public:
     using result_type = internal::MKLResultType<Bits>;

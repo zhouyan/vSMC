@@ -474,6 +474,7 @@ namespace vsmc
 namespace internal
 {
 
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(CtrType, ctr_type, NullType)
 VSMC_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
 
 template <typename UIntType, UIntType U,

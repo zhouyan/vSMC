@@ -32,22 +32,43 @@
 #ifndef VSMC_EXAMPLE_RNG_MKL_HPP
 #define VSMC_EXAMPLE_RNG_MKL_HPP
 
-#include <vsmc/rng/mkl.hpp>
 #include "rng_test.hpp"
 
-#define VSMC_RNG_MKL_TEST(BRNG) rng_mkl_test(BRNG, #BRNG)
+#include <vsmc/rng/mkl.hpp>
 
-inline void rng_mkl_test(int brng, const std::string &name)
+#ifdef VSMC_HAS_RUNTIME
+#include <vsmc/rng/mkl_brng.hpp>
+#endif
+
+#define VSMC_RNG_MKL_FEATURES(BRNG) rng_mkl_features(BRNG, #BRNG)
+
+#define VSMC_RNG_MKL_PROPERTIES(BRNG) rng_mkl_properties(BRNG, #BRNG)
+
+inline void rng_mkl_features(int brng, const std::string &name)
 {
     bool has_u32 = vsmc::MKLStream::has_uniform_bits32(brng);
     bool has_u64 = vsmc::MKLStream::has_uniform_bits64(brng);
     bool has_skip_ahead = vsmc::MKLStream::has_skip_ahead(brng);
     bool has_leap_frog = vsmc::MKLStream::has_leap_frog(brng);
-    std::cout << std::setw(30) << std::left << name << std::setw(20)
-              << std::right << (has_leap_frog ? "Yes" : "No") << std::setw(20)
-              << std::right << (has_skip_ahead ? "Yes" : "No") << std::setw(20)
-              << std::right << (has_u32 ? "Yes" : "No") << std::setw(20)
-              << std::right << (has_u64 ? "Yes" : "No") << std::endl;
+    std::cout << std::setw(30) << std::left << name;
+    std::cout << std::setw(20) << std::left << (has_leap_frog ? "Yes" : "No");
+    std::cout << std::setw(20) << std::left << (has_skip_ahead ? "Yes" : "No");
+    std::cout << std::setw(20) << std::left << (has_u32 ? "Yes" : "No");
+    std::cout << std::setw(20) << std::left << (has_u64 ? "Yes" : "No");
+    std::cout << std::endl;
+    std::cout << std::string(110, '-') << std::endl;
+}
+
+inline void rng_mkl_properties(int brng, const std::string &name)
+{
+    VSLBRngProperties properties;
+    vsmc::MKLStream::get_brng_properties(brng, &properties);
+    std::cout << std::setw(30) << std::left << name;
+    std::cout << std::setw(20) << std::left << properties.NSeeds;
+    std::cout << std::setw(20) << std::left << properties.IncludesZero;
+    std::cout << std::setw(20) << std::left << properties.WordSize;
+    std::cout << std::setw(20) << std::left << properties.NBits;
+    std::cout << std::endl;
     std::cout << std::string(110, '-') << std::endl;
 }
 
