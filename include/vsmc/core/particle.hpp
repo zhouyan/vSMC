@@ -148,12 +148,7 @@ class Particle
     template <typename InputIter>
     void resize_by_mask(size_type N, InputIter mask)
     {
-#if VSMC_HAS_TBB
-        Vector<size_type> &idx = idx_.local();
-        idx.resize(static_cast<std::size_t>(N));
-#else
         Vector<size_type> idx(static_cast<std::size_t>(N));
-#endif
         Vector<size_type> mask_index;
         mask_index.reserve(static_cast<std::size_t>(size()));
         for (size_type i = 0; i != size(); ++i, ++mask)
@@ -178,15 +173,8 @@ class Particle
     template <typename ResampleType>
     void resize_by_resample(size_type N, ResampleType &&op)
     {
-#if VSMC_HAS_TBB
-        Vector<size_type> &rep = rep_.local();
-        Vector<size_type> &idx = idx_.local();
-        rep.resize(static_cast<std::size_t>(N));
-        idx.resize(static_cast<std::size_t>(N));
-#else  // VSMC_HAS_TBB
         Vector<size_type> rep(static_cast<std::size_t>(N));
         Vector<size_type> idx(static_cast<std::size_t>(N));
-#endif // VSMC_HAS_TBB
         Weight w(static_cast<SizeType<weight_type>>(this->size()));
         w.set(weight_.data());
         op(static_cast<std::size_t>(size()), static_cast<std::size_t>(N), rng_,
@@ -236,12 +224,7 @@ class Particle
         if (N == size() && first == 0)
             return;
 
-#if VSMC_HAS_TBB
-        Vector<size_type> &idx = idx_.local();
-        idx.resize(static_cast<std::size_t>(N));
-#else
         Vector<size_type> idx(static_cast<std::size_t>(N));
-#endif
         size_type M = last - first;
         if (M >= N) {
             for (size_type i = 0; i != N; ++i, ++first)
@@ -315,15 +298,8 @@ class Particle
         if (resampled) {
             const double *const rwptr = weight_.resample_data();
             if (rwptr != nullptr) {
-#if VSMC_HAS_TBB
-                Vector<size_type> &rep = rep_.local();
-                Vector<size_type> &idx = idx_.local();
-                rep.resize(N);
-                idx.resize(N);
-#else  // VSMC_HAS_TBB
                 Vector<size_type> rep(N);
                 Vector<size_type> idx(N);
-#endif // VSMC_HAS_TBB
                 op(N, N, rng_, rwptr, rep.data());
                 resample_trans_rep_index(N, N, rep.data(), idx.data());
                 value_.copy(N, idx.data());
@@ -342,10 +318,6 @@ class Particle
     weight_type weight_;
     rng_set_type rng_set_;
     rng_type rng_;
-#if VSMC_HAS_TBB
-    ::tbb::combinable<Vector<size_type>> rep_;
-    ::tbb::combinable<Vector<size_type>> idx_;
-#endif
 
     void resize(size_type N, const size_type *idx)
     {
@@ -364,12 +336,7 @@ class Particle
     template <typename InputIter>
     void resize_by_index(size_type N, InputIter index, std::false_type)
     {
-#if VSMC_HAS_TBB
-        Vector<size_type> &idx = idx_.local();
-        idx.resize(static_cast<std::size_t>(N));
-#else
         Vector<size_type> idx(static_cast<std::size_t>(N));
-#endif
         std::copy_n(index, N, idx.data());
         resize(N, idx.data());
     }

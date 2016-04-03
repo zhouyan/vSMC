@@ -198,16 +198,21 @@ class pf_eval : public MonitorEvalSMP<pf_state<Layout, RNGSetType>,
     }
 };
 
-template <vsmc::MatrixLayout Layout, typename RNGSetType>
-inline void pf_run(vsmc::ResampleScheme scheme, const std::string &datafile,
-    const std::string &prg, const std::string &res, const std::string &rc,
-    const std::string &rs)
+template <vsmc::MatrixLayout Layout, typename RNGSetType, typename CharT,
+    typename Traits>
+inline void pf_run(std::size_t N, vsmc::ResampleScheme scheme,
+    const std::string &datafile, const std::string &implname,
+    const std::string &res, const std::string &rc, const std::string &rs,
+    bool store, std::basic_ostream<CharT, Traits> &os)
 {
-    std::size_t N = ParticleNum;
-    std::string basename("pf." + prg + "." + res + "." + rc + "." + rs);
-    std::string pf_h5(basename + ".h5");
-    std::string pf_time(basename + ".time");
-    std::string pf_txt(basename + ".txt");
+    std::string basename;
+    std::string pf_h5;
+    std::string pf_txt;
+    if (store) {
+        basename = "pf." + implname + "." + res + "." + rc + "." + rs;
+        pf_h5 = basename + ".h5";
+        pf_txt = basename + ".txt";
+    }
 
     vsmc::Seed::instance().set(101);
     vsmc::Sampler<pf_state<Layout, RNGSetType>> sampler(N, scheme, 0.5);
@@ -218,8 +223,10 @@ inline void pf_run(vsmc::ResampleScheme scheme, const std::string &datafile,
     sampler.monitor("pos").name(1) = "pos.y";
 
 #if VSMC_HAS_HDF5
-    vsmc::hdf5store(pf_h5);
-    vsmc::hdf5store(pf_h5, "Particle", true);
+    if (store) {
+        vsmc::hdf5store(pf_h5);
+        vsmc::hdf5store(pf_h5, "Particle", true);
+    }
 #endif
     vsmc::StopWatch watch;
     watch.start();
@@ -229,32 +236,40 @@ inline void pf_run(vsmc::ResampleScheme scheme, const std::string &datafile,
         else
             sampler.iterate();
 #if VSMC_HAS_HDF5
-        std::stringstream ss;
-        ss << "Iter." << i;
-        vsmc::hdf5store(
-            sampler.particle(), pf_h5, "Particle/" + ss.str(), true);
+        if (store) {
+            std::stringstream ss;
+            ss << "Iter." << i;
+            vsmc::hdf5store(
+                sampler.particle(), pf_h5, "Particle/" + ss.str(), true);
+        }
 #endif
     }
     watch.stop();
 #if VSMC_HAS_HDF5
-    vsmc::hdf5store(sampler, pf_h5, "Sampler", true);
-    vsmc::hdf5store(sampler.monitor("pos"), pf_h5, "Monitor", true);
+    if (store) {
+        vsmc::hdf5store(sampler, pf_h5, "Sampler", true);
+        vsmc::hdf5store(sampler.monitor("pos"), pf_h5, "Monitor", true);
+    }
 #endif
-    std::ofstream time(pf_time);
-    time << std::setw(10) << std::left << prg;
-    time << std::setw(20) << std::left << res;
-    time << std::setw(10) << std::left << rc;
-    time << std::setw(20) << std::left << rs;
-    time << std::setw(20) << std::left << std::fixed << watch.milliseconds()
-         << std::endl;
-    time.close();
-
-    std::ofstream txt(pf_txt);
-    txt << sampler << std::endl;
-    txt.close();
+    if (store) {
+        std::ofstream txt(pf_txt);
+        txt << sampler << std::endl;
+        txt.close();
+    } else {
+        os << std::setw(20) << std::left << N;
+        os << std::setw(20) << std::left << implname;
+        os << std::setw(20) << std::left << res;
+        os << std::setw(20) << std::left << rc;
+        os << std::setw(20) << std::left << rs;
+        os << std::setw(20) << std::left << std::fixed << watch.milliseconds();
+        os << std::endl;
+    }
 }
 
-inline void pf_run(vsmc::ResampleScheme scheme, char **argv)
+template <typename CharT, typename Traits>
+inline void pf_run(std::size_t N, vsmc::ResampleScheme scheme,
+    const std::string &datafile, const std::string &implname, bool store,
+    std::basic_ostream<CharT, Traits> &os)
 {
     std::string res;
     switch (scheme) {
@@ -266,15 +281,29 @@ inline void pf_run(vsmc::ResampleScheme scheme, char **argv)
         case vsmc::ResidualSystematic: res = "ResidualSystematic"; break;
     }
     pf_run<vsmc::RowMajor, vsmc::RNGSetVector<vsmc::RNG>>(
-        scheme, argv[1], argv[2], res, "Row", "Vector");
+        N, scheme, datafile, implname, res, "RowMajor", "Vector", store, os);
     pf_run<vsmc::ColMajor, vsmc::RNGSetVector<vsmc::RNG>>(
-        scheme, argv[1], argv[2], res, "Col", "Vector");
+        N, scheme, datafile, implname, res, "ColMajor", "Vector", store, os);
 #if VSMC_HAS_TBB
     pf_run<vsmc::RowMajor, vsmc::RNGSetTBB<vsmc::RNG>>(
-        scheme, argv[1], argv[2], res, "Row", "TBB");
+        N, scheme, datafile, implname, res, "RowMajor", "TBB", store, os);
     pf_run<vsmc::ColMajor, vsmc::RNGSetTBB<vsmc::RNG>>(
-        scheme, argv[1], argv[2], res, "Col", "TBB");
+        N, scheme, datafile, implname, res, "ColMajor", "TBB", store, os);
 #endif
+}
+
+template <typename CharT, typename Traits>
+inline void pf_run(std::size_t N, const std::string &datafile,
+    const std::string &implname, bool store,
+    std::basic_ostream<CharT, Traits> &os)
+{
+
+    pf_run(N, vsmc::Multinomial, datafile, implname, store, os);
+    pf_run(N, vsmc::Stratified, datafile, implname, store, os);
+    pf_run(N, vsmc::Systematic, datafile, implname, store, os);
+    pf_run(N, vsmc::Residual, datafile, implname, store, os);
+    pf_run(N, vsmc::ResidualStratified, datafile, implname, store, os);
+    pf_run(N, vsmc::ResidualSystematic, datafile, implname, store, os);
 }
 
 inline int pf_main(int argc, char **argv)
@@ -284,13 +313,25 @@ inline int pf_main(int argc, char **argv)
                   << " <output file>" << std::endl;
         return -1;
     }
+    std::string datafile(argv[1]);
+    std::string implname(argv[2]);
 
-    pf_run(vsmc::Multinomial, argv);
-    pf_run(vsmc::Stratified, argv);
-    pf_run(vsmc::Systematic, argv);
-    pf_run(vsmc::Residual, argv);
-    pf_run(vsmc::ResidualStratified, argv);
-    pf_run(vsmc::ResidualSystematic, argv);
+    std::string pf_time("pf.");
+    pf_time += argv[2];
+    std::ofstream time(pf_time);
+    time << std::setw(20) << std::left << "N";
+    time << std::setw(20) << std::left << "Implementation";
+    time << std::setw(20) << std::left << "ResampleScheme";
+    time << std::setw(20) << std::left << "MatrixLayout";
+    time << std::setw(20) << std::left << "RNGSet";
+    time << std::setw(20) << std::left << "Time";
+    time << std::endl;
+    pf_run(ParticleNum, datafile, implname, true, time);
+    std::size_t N = 1;
+    while (N < ParticleNum) {
+        N *= 2;
+        pf_run(N, datafile, implname, false, time);
+    }
 
     return 0;
 }

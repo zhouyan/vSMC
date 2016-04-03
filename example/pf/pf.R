@@ -43,111 +43,120 @@ res <- c(
     "Residual",
     "ResidualStratified",
     "ResidualSystematic")
-rc <- c("Row", "Col")
+rc <- c("RowMajor", "ColMajor")
 rs <- c("Vector", "TBB")
 runs <- expand.grid(exe, res, rc, rs)
 runs <- paste(runs$Var1, runs$Var2, runs$Var3, runs$Var4, sep = ".")
 
-src.level <- c("Estimates", "Observation")
-obs <- read.table("pf.data", header = FALSE)
-dat <- data.frame(
-    Position.X = obs[,1], Position.Y = obs[,2],
-    Group = rep("Observation", dim(obs)[1]),
-    Source = rep("Observation", dim(obs)[1]))
-plt.list <- list()
-
-pf <- function (filename, est)
-{
+pf_est <- function() {
+    src.level <- c("Estimates", "Observation")
+    obs <- read.table("pf.data", header = FALSE)
     dat <- data.frame(
-        Position.X = c(obs[,1], est$pos.x),
-        Position.Y = c(obs[,2], est$pos.y),
-        Source = c(
-            rep("Observation", dim(obs)[1]),
-            rep("Estimates",   dim(est)[1])))
+        Position.X = obs[,1], Position.Y = obs[,2],
+        Group = rep("Observation", dim(obs)[1]),
+        Source = rep("Observation", dim(obs)[1]))
+    plt.list <- list()
+
+    pf <- function (filename, est)
+    {
+        dat <- data.frame(
+            Position.X = c(obs[,1], est$pos.x),
+            Position.Y = c(obs[,2], est$pos.y),
+            Source = c(
+                rep("Observation", dim(obs)[1]),
+                rep("Estimates",   dim(est)[1])))
+        dat$Source <- factor(dat$Source, ordered = TRUE, levels = src.level)
+        plt <- qplot(x = Position.X, y = Position.Y, data = dat,
+            group = Source, color = Source, linetype = Source, geom = "path")
+        plt <- plt + ggtitle(filename)
+
+        dat <- data.frame(
+            Position.X = est$pos.x, Position.Y = est$pos.y,
+            Group = rep(filename, dim(est)[1]),
+            Source = rep("Estimates", dim(est)[1]))
+
+        list(plt = plt, dat = dat)
+    }
+
+    for (run in runs) {
+        pf.txt <- paste0(run, ".txt")
+        if (file.exists(pf.txt)) {
+            tmp <- pf(pf.txt, read.table(pf.txt, header = TRUE))
+            plt.list[[pf.txt]] <- tmp$plt
+            dat <- rbind(dat, tmp$dat)
+        }
+
+        pf.h5 <- paste0(run, ".h5")
+        if (file.exists(pf.h5)) {
+            pf.s <- paste(pf.h5, "(Sampler)")
+            tmp <- pf(pf.s, as.data.frame(h5read(pf.h5, "Sampler")))
+            plt.list[[pf.s]] <- tmp$plt
+            dat <- rbind(dat, tmp$dat)
+
+            pf.m <- paste(pf.h5, "(Monitor)")
+            tmp <- pf(pf.m, as.data.frame(h5read(pf.h5, "Monitor/Record")))
+            plt.list[[pf.m]] <- tmp$plt
+            dat <- rbind(dat, tmp$dat)
+
+            pf.p <- paste(pf.h5, "(Particle)")
+            particle <- h5read(pf.h5, "Particle")
+            pos.x <- numeric()
+            pos.y <- numeric()
+            for (i in 0:(length(particle) - 1)) {
+                name <- paste0("Iter.", i)
+                w <- particle[[name]]$Weight
+                s <- particle[[name]]$Value
+                if (dim(s)[1] == 5) {
+                    pos.x <- c(pos.x, sum(w * s[1,]))
+                    pos.y <- c(pos.y, sum(w * s[2,]))
+                }
+                if (dim(s)[2] == 5) {
+                    pos.x <- c(pos.x, sum(w * s[,1]))
+                    pos.y <- c(pos.y, sum(w * s[,2]))
+                }
+            }
+            tmp <- pf(pf.p, as.data.frame(cbind(pos.x, pos.y)))
+            plt.list[[pf.p]] <- tmp$plt
+            dat <- rbind(dat, tmp$dat)
+        }
+    }
+
     dat$Source <- factor(dat$Source, ordered = TRUE, levels = src.level)
     plt <- qplot(x = Position.X, y = Position.Y, data = dat,
-        group = Source, color = Source, linetype = Source, geom = "path")
-    plt <- plt + ggtitle(filename)
+        group = Group, color = Source, linetype= Source, geom = "path")
+    plt <- plt + ggtitle("pf")
 
-    dat <- data.frame(
-        Position.X = est$pos.x, Position.Y = est$pos.y,
-        Group = rep(filename, dim(est)[1]),
-        Source = rep("Estimates", dim(est)[1]))
-
-    list(plt = plt, dat = dat)
+    list(plot = plt, plot.list = plt.list)
 }
 
-dat.time <- numeric()
-for (run in runs) {
-    pf.time <- paste0(run, ".time")
-    if (file.exists(pf.time)) {
-        dat.time <- rbind(dat.time, read.table(pf.time, header = FALSE))
-    }
-
-    pf.txt <- paste0(run, ".txt")
-    if (file.exists(pf.txt)) {
-        tmp <- pf(pf.txt, read.table(pf.txt, header = TRUE))
-        plt.list[[pf.txt]] <- tmp$plt
-        dat <- rbind(dat, tmp$dat)
-    }
-
-    pf.h5 <- paste0(run, ".h5")
-    if (file.exists(pf.h5)) {
-        pf.s <- paste(pf.h5, "(Sampler)")
-        tmp <- pf(pf.s, as.data.frame(h5read(pf.h5, "Sampler")))
-        plt.list[[pf.s]] <- tmp$plt
-        dat <- rbind(dat, tmp$dat)
-
-        pf.m <- paste(pf.h5, "(Monitor)")
-        tmp <- pf(pf.m, as.data.frame(h5read(pf.h5, "Monitor/Record")))
-        plt.list[[pf.m]] <- tmp$plt
-        dat <- rbind(dat, tmp$dat)
-
-        pf.p <- paste(pf.h5, "(Particle)")
-        particle <- h5read(pf.h5, "Particle")
-        pos.x <- numeric()
-        pos.y <- numeric()
-        for (i in 0:(length(particle) - 1)) {
-            name <- paste0("Iter.", i)
-            w <- particle[[name]]$Weight
-            s <- particle[[name]]$Value
-            if (dim(s)[1] == 5) {
-                pos.x <- c(pos.x, sum(w * s[1,]))
-                pos.y <- c(pos.y, sum(w * s[2,]))
-            }
-            if (dim(s)[2] == 5) {
-                pos.x <- c(pos.x, sum(w * s[,1]))
-                pos.y <- c(pos.y, sum(w * s[,2]))
-            }
+pf_time <- function()
+{
+    dat <- numeric()
+    for (smp in prg) {
+        pf.time <- paste0("pf.", smp)
+        if (file.exists(pf.time)) {
+            dat <- rbind(dat, read.table(pf.time, header = TRUE))
         }
-        tmp <- pf(pf.p, as.data.frame(cbind(pos.x, pos.y)))
-        plt.list[[pf.p]] <- tmp$plt
-        dat <- rbind(dat, tmp$dat)
     }
+    dat$Group = paste(
+        dat$Implementation, dat$RNGSet, dat$MatrixLayout)
+    plt <- qplot(x = N, y = Time, data = dat, group = Group,
+        geom = c("point", "line"))
+    plt <- plt + aes(color = Implementation)
+    plt <- plt + aes(linetype = RNGSet)
+    plt <- plt + aes(shape = MatrixLayout)
+    plt <- plt + scale_x_log10()
+    plt <- plt + scale_y_log10()
+    plt <- plt + facet_wrap(~ResampleScheme, ncol = 3)
+    plt <- plt + ggtitle("pf.time")
+
+    list(data = dat, plot = plt)
 }
 
 pdf("pf.pdf", width = 14.4, height = 9)
-
-dat$Source <- factor(dat$Source, ordered = TRUE, levels = src.level)
-plt <- qplot(x = Position.X, y = Position.Y, data = dat,
-    group = Group, color = Source, linetype= Source, geom = "path")
-plt <- plt + ggtitle("pf")
-print(plt)
-
-dat <- data.frame(
-    SMP = dat.time[,1],
-    ResampleScheme = dat.time[,2],
-    MatrixLayout = paste0("MatrixLayout = ", dat.time[,3], "Major"),
-    RNGSet = paste0(dat.time[,4]),
-    Time = dat.time[,5],
-    Group = paste(dat.time[,1], dat.time[,4]))
-plt <- qplot(x = ResampleScheme, y = Time, data = dat,
-    group = Group, color = SMP, linetype = RNGSet, shape = RNGSet,
-    geom = c("line", "point"))
-plt <- plt + facet_wrap(~MatrixLayout, ncol = 1)
-plt <- plt + ggtitle("pf.time")
-print(plt)
-
-for (plt in plt.list) print(plt)
-
+time <- pf_time()
+est <- pf_est()
+print(time$plot)
+print(est$plot)
+for (p in est$plot.list) print(p)
 garbage <- dev.off()
