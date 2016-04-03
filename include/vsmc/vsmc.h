@@ -250,14 +250,23 @@ void vsmc_seed_load_f(const char *filename);
 /** \addtogroup C_API_RNG_U01Sequence */
 /** @{ */
 
-/** \brief `vsmc::u01_sorted` */
-void vsmc_u01_sorted(int n, const double *u01, double *u01seq);
+/** \brief `vsmc::u01_trans_sorted` */
+void vsmc_u01_trans_sorted(int n, const double *u01, double *r);
 
-/** \brief `vsmc::u01_stratifed` */
-void vsmc_u01_stratified(int n, const double *u01, double *u01seq);
+/** \brief `vsmc::u01_trans_stratifed` */
+void vsmc_u01_trans_stratified(int n, const double *u01, double *r);
 
-/** \brief `vsmc::u01_systematic` */
-void vsmc_u01_systematic(int n, double u01, double *u01seq);
+/** \brief `vsmc::u01_trans_systematic` */
+void vsmc_u01_trans_systematic(int n, const double *u01, double *r);
+
+/** \brief `vsmc::u01_rand_sorted` */
+void vsmc_u01_rand_sorted(vsmc_rng rng, int n, double *r);
+
+/** \brief `vsmc::u01_rand_stratifed` */
+void vsmc_u01_rand_stratified(vsmc_rng rng, int n, double *r);
+
+/** \brief `vsmc::u01_rand_systematic` */
+void vsmc_u01_rand_systematic(vsmc_rng rng, int n, double *r);
 
 /** @} */ /* C_API_RNG_U01Sequence */
 

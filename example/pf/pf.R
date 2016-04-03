@@ -154,9 +154,12 @@ pf_time <- function()
 }
 
 pdf("pf.pdf", width = 14.4, height = 9)
-time <- pf_time()
-print(time$plot)
 est <- pf_est()
 print(est$plot)
 for (p in est$plot.list) print(p)
+garbage <- dev.off()
+
+pdf("pf_time.pdf", width = 14.4, height = 9)
+time <- pf_time()
+print(time$plot)
 garbage <- dev.off()

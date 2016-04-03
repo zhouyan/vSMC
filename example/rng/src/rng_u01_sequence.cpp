@@ -1,9 +1,9 @@
 //============================================================================
-// vSMC/lib/src/rng/u01_sequence.cpp
+// vSMC/example/rng/include/rng_u01_sequence.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c); 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -23,46 +23,25 @@
 // LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 // CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 // SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// INTERRUPTION); HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE);
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libvsmc.hpp"
+#include "rng_u01_sequence.hpp"
 
-extern "C" {
-
-void vsmc_u01_trans_sorted(int n, const double *u01, double *r)
+int main(int argc, char **argv)
 {
-    ::vsmc::u01_trans_sorted(static_cast<std::size_t>(n), u01, r);
-}
+    std::size_t n = 1000;
+    if (argc > 1)
+        n = static_cast<std::size_t>(std::atoi(argv[1]));
 
-void vsmc_u01_trans_stratified(int n, const double *u01, double *r)
-{
-    ::vsmc::u01_trans_stratified(static_cast<std::size_t>(n), u01, r);
-}
+    std::size_t m = 1000;
+    if (argc > 2)
+        m = static_cast<std::size_t>(std::atoi(argv[2]));
 
-void vsmc_u01_trans_systematic(int n, const double *u01, double *r)
-{
-    ::vsmc::u01_trans_systematic(static_cast<std::size_t>(n), u01, r);
-}
+    rng_u01_sequence_test(n, m);
 
-void vsmc_u01_rand_sorted(vsmc_rng rng, int n, double *r)
-{
-    ::vsmc::u01_rand_sorted(::vsmc::cast(rng), static_cast<std::size_t>(n), r);
+    return 0;
 }
-
-void vsmc_u01_rand_stratified(vsmc_rng rng, int n, double *r)
-{
-    ::vsmc::u01_rand_stratified(
-        ::vsmc::cast(rng), static_cast<std::size_t>(n), r);
-}
-
-void vsmc_u01_rand_systematic(vsmc_rng rng, int n, double *r)
-{
-    ::vsmc::u01_rand_systematic(
-        ::vsmc::cast(rng), static_cast<std::size_t>(n), r);
-}
-
-} // extern "C"

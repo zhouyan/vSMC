@@ -42,6 +42,78 @@
 namespace vsmc
 {
 
+namespace internal
+{
+
+template <std::size_t K, typename RealType>
+inline void u01_trans_sorted_impl(std::size_t n0, std::size_t n,
+    const RealType *u01, RealType *r, std::size_t N, RealType &lmax)
+{
+    if (n0 == n)
+        return;
+
+    Array<RealType, K> s;
+    std::size_t j = 0;
+    std::size_t m = N - n0;
+    log(n - n0, u01, r);
+    for (std::size_t i = n0; i != n; ++i, ++j, --m) {
+        lmax += r[j] / m;
+        s[j] = lmax;
+    }
+    exp(n - n0, s.data(), s.data());
+    sub(n - n0, static_cast<RealType>(1), s.data(), r);
+}
+
+template <std::size_t K, typename RealType, typename RNGType>
+inline void u01_rand_sorted_impl(RNGType &rng, std::size_t n0, std::size_t n,
+    RealType *r, std::size_t N, RealType &lmax)
+{
+    if (n0 == n)
+        return;
+
+    u01_oc_distribution(rng, n - n0, r);
+    u01_trans_sorted_impl<K>(n0, n, r, r, N, lmax);
+}
+
+template <typename RealType>
+inline void u01_trans_stratified_impl(std::size_t n0, std::size_t n,
+    const RealType *u01, RealType *r, RealType delta)
+{
+    if (n0 == n)
+        return;
+
+    std::size_t j = 0;
+    for (std::size_t i = n0; i != n; ++i, ++j)
+        r[j] = u01[j] + i;
+    mul(n - n0, delta, r, r);
+}
+
+template <typename RealType, typename RNGType>
+inline void u01_rand_stratified_impl(
+    RNGType &rng, std::size_t n0, std::size_t n, RealType *r, RealType delta)
+{
+    if (n0 == n)
+        return;
+
+    u01_oc_distribution(rng, n - n0, r);
+    u01_trans_stratified_impl(n0, n, r, r, delta);
+}
+
+template <typename RealType>
+inline void u01_trans_systematic_impl(
+    std::size_t n0, std::size_t n, RealType u, RealType *r, RealType delta)
+{
+    if (n0 == n)
+        return;
+
+    std::size_t j = 0;
+    for (std::size_t i = n0; i != n; ++i, ++j)
+        r[j] = i;
+    fma(n - n0, r, delta, u, r);
+}
+
+} // namespace vsmc::internal
+
 /// \brief Tranform a sequence of standard uniform random numbers to sorted
 /// sequence
 /// \ingroup U01Sequence
@@ -51,67 +123,122 @@ namespace vsmc
 /// sequence generated such that it comes from the same distribution of the
 /// sorted sequence.
 template <typename RealType>
-inline void u01_sorted(std::size_t N, const RealType *u01, RealType *r)
+inline void u01_trans_sorted(std::size_t N, const RealType *u01, RealType *r)
 {
-    log(N, u01, r);
+    static_assert(std::is_floating_point<RealType>::value,
+        "**u01_trans_sorted** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
+    if (N == 0)
+        return;
+
+    const std::size_t k = internal::BufferSize<RealType>::value;
+    const std::size_t m = N / k;
+    std::size_t n0 = 0;
     RealType lmax = 0;
-    for (std::size_t i = 0; i != N; ++i) {
-        lmax += r[i] / (N - i);
-        r[i] = 1 - std::exp(lmax);
-    }
+    for (std::size_t i = 0; i != m; ++i, n0 += k, u01 += k, r += k)
+        internal::u01_trans_sorted_impl<k>(n0, n0 + k, u01, r, N, lmax);
+    internal::u01_trans_sorted_impl<k>(n0, N, u01, r, N, lmax);
 }
 
 /// \brief Transform a sequence of standard uniform random numbers to a
 /// stratified sequence
 /// \ingroup U01Sequence
 template <typename RealType>
-inline void u01_stratified(std::size_t N, const RealType *u01, RealType *r)
+inline void u01_trans_stratified(
+    std::size_t N, const RealType *u01, RealType *r)
 {
-    RealType delta = 1 / static_cast<RealType>(N);
-    for (std::size_t i = 0; i != N; ++i)
-        r[i] = u01[i] * delta + i * delta;
+    static_assert(std::is_floating_point<RealType>::value,
+        "**u01_trans_stratified** USED WITH RealType OTHER THAN FLOATING "
+        "POINT TYPES");
+
+    if (N == 0)
+        return;
+
+    const std::size_t k = internal::BufferSize<RealType>::value;
+    const std::size_t m = N / k;
+    std::size_t n0 = 0;
+    const RealType delta = 1 / static_cast<RealType>(N);
+    for (std::size_t i = 0; i != m; ++i, n0 += k, u01 += k, r += k)
+        internal::u01_trans_stratified_impl(n0, n0 + k, u01, r, delta);
+    internal::u01_trans_stratified_impl(n0, N, u01, r, delta);
 }
 
 /// \brief Transform a single standard uniform random number to a systematic
 /// sequence
 /// \ingroup U01Sequence
 template <typename RealType>
-inline void u01_systematic(std::size_t N, RealType u01, RealType *r)
+inline void u01_trans_systematic(
+    std::size_t N, const RealType *u01, RealType *r)
 {
+    static_assert(std::is_floating_point<RealType>::value,
+        "**u01_trans_systematic** USED WITH RealType OTHER THAN FLOATING "
+        "POINT TYPES");
+
     if (N == 0)
         return;
 
-    RealType delta = 1.0 / static_cast<RealType>(N);
-    r[0] = u01 * delta;
-    for (std::size_t i = 1; i != N; ++i)
-        r[i] = r[i - 1] + delta;
+    const std::size_t k = internal::BufferSize<RealType>::value;
+    const std::size_t m = N / k;
+    std::size_t n0 = 0;
+    const RealType delta = 1 / static_cast<RealType>(N);
+    const RealType u = u01[0] * delta;
+    for (std::size_t i = 0; i != m; ++i, n0 += k, r += k)
+        internal::u01_trans_systematic_impl(n0, n0 + k, u, r, delta);
+    internal::u01_trans_systematic_impl(n0, N, u, r, delta);
 }
 
 /// \brief Generate sorted standard uniform numbers with \f$O(N)\f$ cost
 /// \ingroup U01Sequence
 template <typename RealType, typename RNGType>
-inline void u01_sorted(RNGType &rng, std::size_t N, RealType *r)
+inline void u01_rand_sorted(RNGType &rng, std::size_t N, RealType *r)
 {
-    u01_oc_distribution(rng, N, r);
-    u01_sorted(N, r, r);
+    static_assert(std::is_floating_point<RealType>::value,
+        "**u01_rand_sorted** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
+    if (N == 0)
+        return;
+
+    const std::size_t k = internal::BufferSize<RealType>::value;
+    const std::size_t m = N / k;
+    std::size_t n0 = 0;
+    RealType lmax = 0;
+    for (std::size_t i = 0; i != m; ++i, n0 += k, r += k)
+        internal::u01_rand_sorted_impl<k>(rng, n0, n0 + k, r, N, lmax);
+    internal::u01_rand_sorted_impl<k>(rng, n0, N, r, N, lmax);
 }
 
 /// \brief Generate stratified standard uniform numbers
 /// \ingroup U01Sequence
 template <typename RealType, typename RNGType>
-inline void u01_stratified(RNGType &rng, std::size_t N, RealType *r)
+inline void u01_rand_stratified(RNGType &rng, std::size_t N, RealType *r)
 {
-    u01_oc_distribution(rng, N, r);
-    u01_stratified(N, r, r);
+    static_assert(std::is_floating_point<RealType>::value,
+        "**u01_rand_stratified** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
+    const std::size_t k = internal::BufferSize<RealType>::value;
+    const std::size_t m = N / k;
+    std::size_t n0 = 0;
+    const RealType delta = 1 / static_cast<RealType>(N);
+    for (std::size_t i = 0; i != m; ++i, n0 += k, r += k)
+        internal::u01_rand_stratified_impl(rng, n0, n0 + k, r, delta);
+    internal::u01_rand_stratified_impl(rng, n0, N, r, delta);
 }
 
 /// \brief Generate systematic standard uniform numbers
 /// \ingroup U01Sequence
 template <typename RealType, typename RNGType>
-inline void u01_systematic(RNGType &rng, std::size_t N, RealType *r)
+inline void u01_rand_systematic(RNGType &rng, std::size_t N, RealType *r)
 {
-    U01OCDistribution<RealType> u01;
-    u01_systematic(N, u01(rng), r);
+    static_assert(std::is_floating_point<RealType>::value,
+        "**u01_rand_systematic** USED WITH RealType OTHER THAN FLOATING POINT "
+        "TYPES");
+
+    U01OCDistribution<RealType> ru01;
+    RealType u01 = ru01(rng);
+    u01_trans_systematic(N, &u01, r);
 }
 
 /// \brief Generate a fixed length sequence of uniform \f$[0,1)\f$ random
@@ -185,13 +312,13 @@ class U01SequenceSorted
     static void transform(
         std::size_t N, const result_type *u01, result_type *r)
     {
-        u01_sorted(N, u01, r);
+        u01_trans_sorted(N, u01, r);
     }
 
     template <typename RNG>
     static void generate(RNG &rng, std::size_t N, result_type *r)
     {
-        u01_sorted(rng, N, r);
+        u01_rand_sorted(rng, N, r);
     }
 
     private:
@@ -248,13 +375,13 @@ class U01SequenceStratified
     static void transform(
         std::size_t N, const result_type *u01, result_type *r)
     {
-        u01_stratified(N, u01, r);
+        u01_trans_stratified(N, u01, r);
     }
 
     template <typename RNG>
     static void generate(RNG &rng, std::size_t N, result_type *r)
     {
-        u01_stratified(rng, N, r);
+        u01_rand_stratified(rng, N, r);
     }
 
     private:
@@ -308,13 +435,13 @@ class U01SequenceSystematic
     static void transform(
         std::size_t N, const result_type *u01, result_type *r)
     {
-        u01_systematic(N, u01, r);
+        u01_trans_systematic(N, u01, r);
     }
 
     template <typename RNG>
     static void generate(RNG &rng, std::size_t N, result_type *r)
     {
-        u01_systematic(rng, N, r);
+        u01_rand_systematic(rng, N, r);
     }
 
     private:
