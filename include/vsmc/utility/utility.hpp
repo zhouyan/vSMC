@@ -37,6 +37,8 @@
 #include <vsmc/utility/covariance.hpp>
 #include <vsmc/utility/program_option.hpp>
 #include <vsmc/utility/progress.hpp>
+#include <vsmc/utility/simd.hpp>
+#include <vsmc/utility/static_vector.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
 #if VSMC_HAS_HDF5
