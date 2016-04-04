@@ -298,23 +298,26 @@ IF(MSVC)
 ENDIF(MSVC)
 
 ##############################################################################
-# Includes and flags
+# Defs, includes, and libs
 ##############################################################################
 
 ADD_DEFINITIONS(${VSMC_DEFINITIONS})
 INCLUDE_DIRECTORIES(SYSTEM ${VSMC_INCLUDE_DIRS})
 
 MESSAGE(STATUS "=================== Definitions =======================")
+SET(VSMC_DEF ${VSMC_DEFINITIONS} CACHE INTERNAL "vSMC defs")
 FOREACH(def ${VSMC_DEFINITIONS})
     MESSAGE(STATUS "${def}")
 ENDFOREACH(def ${VSMC_DEFINITIONS})
 
 MESSAGE(STATUS "=================== Includes ==========================")
+SET(VSMC_INC ${VSMC_INCLUDE_DIRS} CACHE INTERNAL "vSMC includes")
 FOREACH(inc ${VSMC_INCLUDE_DIRS})
     MESSAGE(STATUS "${inc}")
 ENDFOREACH(inc ${VSMC_INCLUDE_DIRS})
 
 MESSAGE(STATUS "=================== Libraries ========================")
+SET(VSMC_LIB ${VSMC_LINK_LIBRARIES} CACHE INTERNAL "vSMC libs")
 FOREACH(lib ${VSMC_LINK_LIBRARIES})
     MESSAGE(STATUS "${lib}")
 ENDFOREACH(lib ${VSMC_LINK_LIBRARIES})
