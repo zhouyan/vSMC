@@ -276,6 +276,13 @@ ENDIF(HDF5_FOUND)
 # Macros
 ##############################################################################
 
+# Runtime library
+IF(VSMC_ENABLE_LIBRARY AND MKL_FOUND)
+    SET(VSMC_DEFINITIONS ${VSMC_DEFINITIONS} -DVSMC_HAS_RUNTIME_LIBRARY=1)
+ELSE(VSMC_ENABLE_LIBRARY AND MKL_FOUND)
+    SET(VSMC_DEFINITIONS ${VSMC_DEFINITIONS} -DVSMC_HAS_RUNTIME_LIBRARY=0)
+ENDIF(VSMC_ENABLE_LIBRARY AND MKL_FOUND)
+
 # Make sure __STDC_CONSTANT_MACROS is defined
 SET(VSMC_DEFINITIONS ${VSMC_DEFINITIONS} -D__STDC_CONSTANT_MACROS)
 
@@ -290,18 +297,27 @@ IF(MSVC)
     SET(VSMC_DEFINITIONS ${VSMC_DEFINITIONS} -D_SCL_SECURE_NO_WARNINGS)
 ENDIF(MSVC)
 
-IF(VSMC_ENABLE_LIBRARY AND MKL_FOUND)
-    SET(VSMC_DEFINITIONS ${VSMC_DEFINITIONS} -DVSMC_HAS_RUNTIME_LIBRARY=1)
-ELSE(VSMC_ENABLE_LIBRARY AND MKL_FOUND)
-    SET(VSMC_DEFINITIONS ${VSMC_DEFINITIONS} -DVSMC_HAS_RUNTIME_LIBRARY=0)
-ENDIF(VSMC_ENABLE_LIBRARY AND MKL_FOUND)
-
 ##############################################################################
 # Includes and flags
 ##############################################################################
 
 ADD_DEFINITIONS(${VSMC_DEFINITIONS})
 INCLUDE_DIRECTORIES(SYSTEM ${VSMC_INCLUDE_DIRS})
+
+MESSAGE(STATUS "=================== Definitions =======================")
+FOREACH(def ${VSMC_DEFINITIONS})
+    MESSAGE(STATUS "${def}")
+ENDFOREACH(def ${VSMC_DEFINITIONS})
+
+MESSAGE(STATUS "=================== Includes ==========================")
+FOREACH(inc ${VSMC_INCLUDE_DIRS})
+    MESSAGE(STATUS "${inc}")
+ENDFOREACH(inc ${VSMC_INCLUDE_DIRS})
+
+MESSAGE(STATUS "=================== Libraries ========================")
+FOREACH(lib ${VSMC_LINK_LIBRARIES})
+    MESSAGE(STATUS "${lib}")
+ENDFOREACH(lib ${VSMC_LINK_LIBRARIES})
 
 ##############################################################################
 # Enable backends
@@ -320,8 +336,6 @@ MESSAGE(STATUS "=================== Enable features ===================")
 FOREACH(feature ${FEATURES})
     MESSAGE(STATUS ${feature})
 ENDFOREACH(feature ${FEATURES})
-
-MESSAGE(STATUS "Linked libraries: ${VSMC_LINK_LIBRARIES}")
 
 ##############################################################################
 # Library
