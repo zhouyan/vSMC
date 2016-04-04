@@ -35,12 +35,45 @@
 #include <vsmc/internal/basic.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 
+#if VSMC_HAS_TBB
+#include <tbb/combinable.h>
+#endif
+
 #define VSMC_RUNTIME_ASSERT_UTILITY_STATIC_VECTOR_AT(pos)                     \
     VSMC_RUNTIME_ASSERT(                                                      \
         (pos < size()), "**StaticVectorN::at INDEX OUT OF RANGE")
 
+#if VSMC_HAS_TBB
+#define VSMC_BUFFER(var, T, n)                                                \
+    static ::tbb::combinable<Vector<T>> var##_tls;                            \
+    Vector<T> &var = var##_tls.local();                                       \
+    var.resize(static_cast<std::size_t>(n));
+#else
+#define VSMC_BUFFER(var, T, n)                                                \
+    StaticVector<T, internal::BufferSize<T>::value> var(                      \
+        static_cast<std::size_t>(n));
+#endif
+
 namespace vsmc
 {
+
+#if VSMC_HAS_TBB
+namespace internal
+{
+
+template <typename T, int = 0>
+inline Vector<T> &buffer(std::size_t n)
+{
+    static tbb::combinable<Vector<T>> tls;
+
+    Vector<T> &local = tls.local();
+    local.resize(n);
+
+    return local;
+}
+
+} // namespace internal
+#endif // VSMC_HAS_TBB
 
 /// \brief Vector with statically allocated space
 /// \ingroup StaticVector

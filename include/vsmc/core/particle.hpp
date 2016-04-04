@@ -148,9 +148,8 @@ class Particle
     template <typename InputIter>
     void resize_by_mask(size_type N, InputIter mask)
     {
-        StaticVector<size_type, M_> idx(static_cast<std::size_t>(N));
-        StaticVector<size_type, M_> mask_index(
-            static_cast<std::size_t>(size_));
+        VSMC_BUFFER(idx, size_type, N);
+        VSMC_BUFFER(mask_index, size_type, size_);
         std::size_t M = 0;
         for (size_type i = 0; i != size_; ++i, ++mask)
             if (static_cast<bool>(*mask))
@@ -174,8 +173,8 @@ class Particle
     template <typename ResampleType>
     void resize_by_resample(size_type N, ResampleType &&op)
     {
-        StaticVector<size_type, M_> rep(static_cast<std::size_t>(size_));
-        StaticVector<size_type, M_> idx(static_cast<std::size_t>(N));
+        VSMC_BUFFER(rep, size_type, size_);
+        VSMC_BUFFER(idx, size_type, N);
         Weight w(static_cast<SizeType<weight_type>>(size_));
         w.set(weight_.data());
         op(static_cast<std::size_t>(size_), static_cast<std::size_t>(N), rng_,
@@ -225,7 +224,7 @@ class Particle
         if (N == size_ && first == 0)
             return;
 
-        StaticVector<size_type, M_> idx(static_cast<std::size_t>(N));
+        VSMC_BUFFER(idx, size_type, N);
         size_type M = last - first;
         if (M >= N) {
             for (size_type i = 0; i != N; ++i, ++first)
@@ -299,8 +298,8 @@ class Particle
         if (resampled) {
             const double *const rwptr = weight_.resample_data();
             if (rwptr != nullptr) {
-                StaticVector<size_type, M_> rep(N);
-                StaticVector<size_type, M_> idx(N);
+                VSMC_BUFFER(rep, size_type, N);
+                VSMC_BUFFER(idx, size_type, N);
                 op(N, N, rng_, rwptr, rep.data());
                 resample_trans_rep_index(N, N, rep.data(), idx.data());
                 value_.copy(N, idx.data());
@@ -339,7 +338,7 @@ class Particle
     template <typename InputIter>
     void resize_by_index(size_type N, InputIter index, std::false_type)
     {
-        StaticVector<size_type, M_> idx(static_cast<std::size_t>(N));
+        VSMC_BUFFER(idx, size_type, N);
         std::copy_n(index, N, idx.data());
         resize(N, idx.data());
     }

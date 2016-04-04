@@ -75,8 +75,9 @@ class ResampleAlgorithm
     {
         using real_type = typename std::iterator_traits<InputIter>::value_type;
 
-        StaticVector<real_type, internal::BufferSize<real_type>::value> u01(M);
+        VSMC_BUFFER(u01, real_type, M);
         U01SeqType<RNGType, real_type>::generate(rng, M, u01.data());
+
         return resample_trans_u01_rep(N, M, weight, u01.data(), replication);
     }
 
@@ -87,11 +88,11 @@ class ResampleAlgorithm
         using real_type = typename std::iterator_traits<InputIter>::value_type;
         using rep_type = typename std::iterator_traits<OutputIter>::value_type;
 
-        Vector<real_type> resid(N);
-        Vector<rep_type> integ(N);
+        VSMC_BUFFER(resid, real_type, N);
+        VSMC_BUFFER(integ, rep_type, N);
         std::size_t R = resample_trans_residual(
             N, M, weight, resid.begin(), integ.begin());
-        StaticVector<real_type, internal::BufferSize<real_type>::value> u01(R);
+        VSMC_BUFFER(u01, real_type, R);
         U01SeqType<RNGType, real_type>::generate(rng, R, u01.data());
         resample_trans_u01_rep(N, R, resid.begin(), u01.data(), replication);
         for (std::size_t i = 0; i != N; ++i, ++replication)

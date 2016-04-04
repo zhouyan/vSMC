@@ -19,8 +19,8 @@ all : pf_ocl pf_tbb pf_seq pf_tbb_c pf_seq_c program_option progress
 libvsmc :
 	ninja -C ../../build/clang-Release libvsmc_shared
 
-pf.pdf : pf_seq pf.R
-	./pf_seq
+pf.pdf : pf_tbb pf.R
+	./pf_tbb
 	Rscript pf.R
 
 pf_ocl : pf_ocl.cpp

@@ -92,10 +92,6 @@
 
 // Parallelization features
 
-#ifndef VSMC_HAS_OMP
-#define VSMC_HAS_OMP 0
-#endif
-
 #ifndef VSMC_HAS_OPENCL
 #define VSMC_HAS_OPENCL 0
 #endif
