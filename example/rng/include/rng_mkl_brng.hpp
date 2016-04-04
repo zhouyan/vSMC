@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/rng/include/rng_mkl.hpp
+// vSMC/example/rng/include/rng_mkl_brng.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,22 +29,16 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_EXAMPLE_RNG_MKL_HPP
-#define VSMC_EXAMPLE_RNG_MKL_HPP
-
-#include "rng_test.hpp"
+#ifndef VSMC_EXAMPLE_RNG_MKL_BRNG_HPP
+#define VSMC_EXAMPLE_RNG_MKL_BRNG_HPP
 
 #include <vsmc/rng/mkl.hpp>
 
-#if VSMC_HAS_RUNTIME_LIBRARY
-#include <vsmc/rng/mkl_brng.hpp>
-#endif
+#define VSMC_RNG_MKL_BRNG_FEATURES(BRNG) rng_mkl_brng_features(BRNG, #BRNG)
 
-#define VSMC_RNG_MKL_FEATURES(BRNG) rng_mkl_features(BRNG, #BRNG)
+#define VSMC_RNG_MKL_BRNG_PROPERTIES(BRNG) rng_mkl_brng_properties(BRNG, #BRNG)
 
-#define VSMC_RNG_MKL_PROPERTIES(BRNG) rng_mkl_properties(BRNG, #BRNG)
-
-inline void rng_mkl_features(int brng, const std::string &name)
+inline void rng_mkl_brng_features(int brng, const std::string &name)
 {
     bool has_u32 = vsmc::MKLStream::has_uniform_bits32(brng);
     bool has_u64 = vsmc::MKLStream::has_uniform_bits64(brng);
@@ -59,7 +53,7 @@ inline void rng_mkl_features(int brng, const std::string &name)
     std::cout << std::string(110, '-') << std::endl;
 }
 
-inline void rng_mkl_properties(int brng, const std::string &name)
+inline void rng_mkl_brng_properties(int brng, const std::string &name)
 {
     VSLBRngProperties properties;
     vsmc::MKLStream::get_brng_properties(brng, &properties);
@@ -72,4 +66,4 @@ inline void rng_mkl_properties(int brng, const std::string &name)
     std::cout << std::string(110, '-') << std::endl;
 }
 
-#endif // VSMC_EXAMPLE_RNG_MKL_HPP
+#endif // VSMC_EXAMPLE_RNG_MKL_BRNG_HPP

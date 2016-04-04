@@ -61,8 +61,9 @@ ENDIF(RDRAND_FOUND)
 
 IF(MKL_FOUND)
     VSMC_ADD_RNG_TEST(mkl)
+    VSMC_ADD_RNG_TEST(mkl_brng)
     IF(VSMC_ENABLE_LIBRARY)
-        TARGET_LINK_LIBRARIES(rng_mkl libvsmc_shared)
+        TARGET_LINK_LIBRARIES(rng_mkl_brng libvsmc_shared)
     ENDIF(VSMC_ENABLE_LIBRARY)
 ENDIF(MKL_FOUND)
 

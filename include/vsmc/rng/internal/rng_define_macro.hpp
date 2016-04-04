@@ -29,15 +29,15 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-VSMC_RNG_DEFINE_MACRO(std::mt19937, mt19937)
-VSMC_RNG_DEFINE_MACRO(std::mt19937_64, mt19937_64)
-VSMC_RNG_DEFINE_MACRO(std::minstd_rand0, minstd_rand0)
-VSMC_RNG_DEFINE_MACRO(std::minstd_rand, minstd_rand)
-VSMC_RNG_DEFINE_MACRO(std::ranlux24_base, ranlux24_base)
-VSMC_RNG_DEFINE_MACRO(std::ranlux48_base, ranlux48_base)
-VSMC_RNG_DEFINE_MACRO(std::ranlux24, ranlux24)
-VSMC_RNG_DEFINE_MACRO(std::ranlux48, ranlux48)
-VSMC_RNG_DEFINE_MACRO(std::knuth_b, knuth_b)
+VSMC_RNG_DEFINE_MACRO(::std::mt19937, mt19937)
+VSMC_RNG_DEFINE_MACRO(::std::mt19937_64, mt19937_64)
+VSMC_RNG_DEFINE_MACRO(::std::minstd_rand0, minstd_rand0)
+VSMC_RNG_DEFINE_MACRO(::std::minstd_rand, minstd_rand)
+VSMC_RNG_DEFINE_MACRO(::std::ranlux24_base, ranlux24_base)
+VSMC_RNG_DEFINE_MACRO(::std::ranlux48_base, ranlux48_base)
+VSMC_RNG_DEFINE_MACRO(::std::ranlux24, ranlux24)
+VSMC_RNG_DEFINE_MACRO(::std::ranlux48, ranlux48)
+VSMC_RNG_DEFINE_MACRO(::std::knuth_b, knuth_b)
 
 VSMC_RNG_DEFINE_MACRO(::vsmc::Philox2x32, philox2x32)
 VSMC_RNG_DEFINE_MACRO(::vsmc::Philox4x32, philox4x32)
