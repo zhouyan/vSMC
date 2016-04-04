@@ -56,17 +56,17 @@ int main(int argc, char **argv)
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    rng_engine_test<RNGType>(N, #Name);
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-    std::cout << std::string(lwid, '-') << std::endl;
 
 #ifdef VSMC_RNG_DEFINE_MACRO_MKL
 #undef VSMC_RNG_DEFINE_MACRO_MKL
 #endif
-#define VSMC_RNG_DEFINE_MACRO_MKL(RNGType, Name, name)                        \
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     rng_engine_test<RNGType>(N, #Name);
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
 #include <vsmc/rng/internal/rng_define_macro_mkl.hpp>
+
     std::cout << std::string(lwid, '-') << std::endl;
 
     return 0;

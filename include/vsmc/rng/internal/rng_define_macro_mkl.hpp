@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#ifndef VSMC_RNG_DEFINE_MACRO_MKL
+#define VSMC_RNG_DEFINE_MACRO_MKL VSMC_RNG_DEFINE_MACRO
+#endif
+
 #if VSMC_HAS_MKL
 VSMC_RNG_DEFINE_MACRO_MKL(::vsmc::MKL_MCG59, MKL_MCG59, mkl_mcg69)
 VSMC_RNG_DEFINE_MACRO_MKL(::vsmc::MKL_MCG59_64, MKL_MCG59_64, mkl_mcg69_64)
