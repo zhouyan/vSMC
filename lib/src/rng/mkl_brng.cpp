@@ -31,6 +31,10 @@
 
 #include "libvsmc.hpp"
 
+#ifdef VSMC_DEFINE_RNG_MKL_BRNG
+#undef VSMC_DEFINE_RNG_MKL_BRNG
+#endif
+
 #define VSMC_DEFINE_RNG_MKL_BRNG(RNGType, name)                               \
     int vsmc_mkl_init_##name(int, VSLStreamStatePtr, int, const unsigned *);  \
     int vsmc_mkl_init_##name(                                                 \

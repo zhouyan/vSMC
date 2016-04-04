@@ -36,11 +36,17 @@
 #include <vsmc/rng/engine.hpp>
 #include <vsmc/vsmc.h>
 
+#ifdef VSMC_DEFINE_RNG_MKL_BRNG
+#undef VSMC_DEFINE_RNG_MKL_BRNG
+#endif
+
 #define VSMC_DEFINE_RNG_MKL_BRNG(RNGType, name)                               \
     template <>                                                               \
     inline int mkl_brng<RNGType>()                                            \
     {                                                                         \
-        return ::vsmc_mkl_brng_##name();                                      \
+        static int brng = ::vsmc_mkl_brng_##name();                           \
+                                                                              \
+        return brng;                                                          \
     }
 
 namespace vsmc
