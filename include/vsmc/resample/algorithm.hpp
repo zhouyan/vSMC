@@ -74,9 +74,18 @@ class ResampleAlgorithm
         InputIter weight, OutputIter replication, std::false_type)
     {
         using real_type = typename std::iterator_traits<InputIter>::value_type;
+        static constexpr std::size_t M_ =
+            internal::BufferSize<real_type>::value;
 
-        StaticVector<real_type, internal::BufferSize<real_type>::value> u01(M);
+#if VSMC_HAS_TBB
+        static tbb::combinable<Vector<real_type>> u01_tls;
+        Vector<real_type> &u01 = u01_tls.local();
+        u01.resize(M);
+#else  // VSMC_HAS_TBB
+        StaticVector<real_type, M_> u01(M);
+#endif // VSMC_HAS_TBB
         U01SeqType<RNGType, real_type>::generate(rng, M, u01.data());
+
         return resample_trans_u01_rep(N, M, weight, u01.data(), replication);
     }
 
@@ -86,12 +95,29 @@ class ResampleAlgorithm
     {
         using real_type = typename std::iterator_traits<InputIter>::value_type;
         using rep_type = typename std::iterator_traits<OutputIter>::value_type;
+        static constexpr std::size_t M_ =
+            internal::BufferSize<real_type>::value;
 
-        Vector<real_type> resid(N);
-        Vector<rep_type> integ(N);
+#if VSMC_HAS_TBB
+        static tbb::combinable<Vector<real_type>> resid_tls;
+        static tbb::combinable<Vector<rep_type>> integ_tls;
+        Vector<real_type> &resid = resid_tls.local();
+        Vector<rep_type> &integ = integ_tls.local();
+        resid.resize(N);
+        integ.resize(N);
+#else  // VSMC_HAS_TBB
+        StaticVector<real_type, M_> resid(N);
+        StaticVector<rep_type, M_> integ(N);
+#endif // VSMC_HAS_TBB
         std::size_t R = resample_trans_residual(
             N, M, weight, resid.begin(), integ.begin());
-        StaticVector<real_type, internal::BufferSize<real_type>::value> u01(R);
+#if VSMC_HAS_TBB
+        static tbb::combinable<Vector<real_type>> u01_tls;
+        Vector<real_type> &u01 = u01_tls.local();
+        u01.resize(R);
+#else  // VSMC_HAS_TBB
+        StaticVector<real_type, M_> u01(R);
+#endif // VSMC_HAS_TBB
         U01SeqType<RNGType, real_type>::generate(rng, R, u01.data());
         resample_trans_u01_rep(N, R, resid.begin(), u01.data(), replication);
         for (std::size_t i = 0; i != N; ++i, ++replication)

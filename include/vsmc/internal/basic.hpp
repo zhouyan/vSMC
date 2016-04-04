@@ -74,6 +74,10 @@
 #include <utility>
 #include <vector>
 
+#if VSMC_HAS_TBB
+#include <tbb/combinable.h>
+#endif
+
 namespace vsmc
 {
 
