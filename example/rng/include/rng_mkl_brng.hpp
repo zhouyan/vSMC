@@ -32,7 +32,7 @@
 #ifndef VSMC_EXAMPLE_RNG_MKL_BRNG_HPP
 #define VSMC_EXAMPLE_RNG_MKL_BRNG_HPP
 
-#include <vsmc/rng/mkl.hpp>
+#include <vsmc/rng/engine.hpp>
 
 #define VSMC_RNG_MKL_BRNG_FEATURES(BRNG) rng_mkl_brng_features(BRNG, #BRNG)
 

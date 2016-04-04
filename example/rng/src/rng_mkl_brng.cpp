@@ -31,10 +31,6 @@
 
 #include "rng_mkl_brng.hpp"
 
-#if VSMC_HAS_RUNTIME_LIBRARY
-#include <vsmc/rng/mkl_brng.hpp>
-#endif
-
 int main()
 {
     std::cout << std::string(110, '=') << std::endl;
@@ -89,7 +85,6 @@ int main()
     VSMC_RNG_MKL_BRNG_PROPERTIES(VSL_BRNG_PHILOX4X32X10);
 #endif
 
-#if VSMC_HAS_RUNTIME_LIBRARY
     std::cout << std::string(110, '=') << std::endl;
     std::cout << std::setw(30) << std::left << "RNGType";
     std::cout << std::setw(20) << std::left << "NSeeds";
@@ -106,12 +101,10 @@ int main()
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     {                                                                         \
         int brng = vsmc::mkl_brng<RNGType>();                                 \
-        rng_mkl_brng_properties(brng, #RNGType);                              \
+        rng_mkl_brng_properties(brng, #Name);                                 \
     }
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
-
-#endif // VSMC_HAS_RUNTIME_LIBRARY
 
     return 0;
 }

@@ -86,7 +86,7 @@
 
 /// \defgroup MKLRNG Intel Math Kernel Library
 /// \ingroup RNG
-/// \brief Random number generating using MKL RNG
+/// \brief Random number generating using MKL
 
 /// \defgroup Philox Philox
 /// \ingroup RNG
@@ -141,10 +141,6 @@
 /// \defgroup HDF5IO HDF5 objects IO
 /// \ingroup Utility
 /// \brief Load and store objects in the HDF5 format
-
-/// \defgroup MKL Intel Math Kernel Library
-/// \ingroup Utility
-/// \brief Resource management for Intel Math Kernel Library
 
 /// \defgroup OpenCL OpenCL
 /// \ingroup Utility

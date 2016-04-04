@@ -33,6 +33,7 @@
 #define VSMC_RNG_MKL_HPP
 
 #include <vsmc/rng/internal/common.hpp>
+#include <vsmc/rng/uniform_real_distribution.hpp>
 #include <mkl.h>
 
 #define VSMC_RUNTIME_WARNING_RNG_MKL_OFFSET                                   \
@@ -1340,6 +1341,150 @@ inline void weibull_distribution(
 {
     internal::size_check<MKL_INT>(n, "weibull_distribution)");
     rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
+}
+
+namespace internal
+{
+
+template <typename RNGType>
+class MKLStreamState
+{
+    public:
+    unsigned reserved1[2];
+    unsigned reserved2[2];
+    RNGType rng;
+}; // class MKLStreamState
+
+template <typename RNGType>
+inline constexpr int mkl_nseeds(std::false_type)
+{
+    return (sizeof(typename RNGType::ctr_type) +
+               sizeof(typename RNGType::key_type)) /
+        sizeof(unsigned);
+}
+
+template <typename RNGType>
+inline constexpr int mkl_nseeds(std::true_type)
+{
+    return 1;
+}
+
+template <typename RNGType>
+inline constexpr int mkl_nseeds()
+{
+    return mkl_nseeds<RNGType>(std::integral_constant<
+        bool, (std::is_same<CtrType<RNGType>, NullType>::value ||
+                  std::is_same<KeyType<RNGType>, NullType>::value)>());
+}
+
+template <typename RNGType>
+inline int mkl_init(
+    RNGType &rng, int n, const unsigned *param, std::false_type)
+{
+    int nc = static_cast<int>(
+        sizeof(typename RNGType::ctr_type) / sizeof(unsigned));
+    int nk = static_cast<int>(
+        sizeof(typename RNGType::key_type) / sizeof(unsigned));
+    new (static_cast<void *>(&rng)) RNGType();
+
+    if (n > 0) {
+        std::size_t size =
+            static_cast<std::size_t>(std::min(n, nk)) * sizeof(unsigned);
+        typename RNGType::key_type key;
+        std::fill(key.begin(), key.end(), 0);
+        std::memcpy(key.data(), param, size);
+        rng.key(key);
+    }
+
+    if (n > nk) {
+        n -= nk;
+        param += nk;
+        std::size_t size =
+            static_cast<std::size_t>(std::min(n, nc)) * sizeof(unsigned);
+        typename RNGType::ctr_type ctr;
+        std::fill(ctr.begin(), ctr.end(), 0);
+        std::memcpy(ctr.data(), param, size);
+        rng.ctr(ctr);
+    }
+
+    return 0;
+}
+
+template <typename RNGType>
+inline int mkl_init(RNGType &rng, int n, const unsigned *param, std::true_type)
+{
+    if (n == 0) {
+        new (static_cast<void *>(&rng)) RNGType();
+    } else {
+        new (static_cast<void *>(&rng))
+            RNGType(static_cast<typename RNGType::result_type>(param[0]));
+    }
+
+    return 0;
+}
+
+template <typename RNGType>
+inline int mkl_init(
+    int method, ::VSLStreamStatePtr stream, int n, const unsigned *param)
+{
+    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
+
+    if (method == VSL_INIT_METHOD_STANDARD) {
+        return mkl_init(
+            rng, n, param,
+            std::integral_constant<
+                bool, (std::is_same<CtrType<RNGType>, NullType>::value ||
+                          std::is_same<KeyType<RNGType>, NullType>::value)>());
+    }
+
+    if (method == VSL_INIT_METHOD_LEAPFROG)
+        return VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED;
+
+    if (method == VSL_INIT_METHOD_SKIPAHEAD)
+        rng.discard(static_cast<unsigned>(n));
+
+    return 0;
+}
+
+template <typename RNGType, typename RealType>
+inline int mkl_uniform_real(
+    ::VSLStreamStatePtr stream, int n, RealType *r, RealType a, RealType b)
+{
+    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
+    uniform_real_distribution(rng, static_cast<std::size_t>(n), r, a, b);
+
+    return 0;
+}
+
+template <typename RNGType>
+inline int mkl_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
+{
+    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
+    uniform_bits_distribution(rng, static_cast<std::size_t>(n), r);
+
+    return 0;
+}
+
+} // namespace vsmc::internal
+
+/// \brief Register a C++11 RNG as MKL BRNG
+/// \ingroup MKLRNG
+///
+/// \details
+/// Only engines defined in this library and the standard library are
+/// specialized. This function requires the C runtime of the library.
+template <typename RNGType>
+int mkl_brng()
+{
+    static ::VSLBRngProperties properties = {
+        sizeof(internal::MKLStreamState<RNGType>),
+        internal::mkl_nseeds<RNGType>(), 1, 4, 32, internal::mkl_init<RNGType>,
+        internal::mkl_uniform_real<RNGType, float>,
+        internal::mkl_uniform_real<RNGType, double>,
+        internal::mkl_uniform_int<RNGType>};
+    static int brng = ::vslRegisterBrng(&properties);
+
+    return brng;
 }
 
 } // namespace vsmc

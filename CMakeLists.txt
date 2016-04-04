@@ -91,6 +91,10 @@ ENDIF(NOT VSMC_ENABLE_LIBRARY AND NOT VSMC_ENABLE_EXAMPLE)
 # Check features
 INCLUDE(vSMCFunction)
 
+IF (NOT (MKL_FOUND OR (BLAS_FOUND AND LAPACK_FOUND)))
+    RETURN()
+ENDIF (NOT (MKL_FOUND OR (BLAS_FOUND AND LAPACK_FOUND)))
+
 ##############################################################################
 # Enable backends
 ##############################################################################
@@ -113,18 +117,18 @@ ENDFOREACH(feature ${FEATURES})
 # Library
 ##############################################################################
 
-IF(VSMC_ENABLE_LIBRARY AND MKL_FOUND)
+IF(VSMC_ENABLE_LIBRARY)
     ADD_CUSTOM_TARGET(lib)
     ADD_SUBDIRECTORY(lib EXCLUDE_FROM_ALL)
-ENDIF(VSMC_ENABLE_LIBRARY AND MKL_FOUND)
+ENDIF(VSMC_ENABLE_LIBRARY)
 
 ##############################################################################
 # Example
 ##############################################################################
 
-IF(VSMC_ENABLE_EXAMPLE AND (MKL_FOUND OR BLAS_FOUND))
+IF(VSMC_ENABLE_EXAMPLE)
     ADD_CUSTOM_TARGET(example)
     ADD_CUSTOM_TARGET(check)
     ADD_CUSTOM_TARGET(pdf)
     ADD_SUBDIRECTORY(example EXCLUDE_FROM_ALL)
-ENDIF(VSMC_ENABLE_EXAMPLE AND (MKL_FOUND OR BLAS_FOUND))
+ENDIF(VSMC_ENABLE_EXAMPLE)

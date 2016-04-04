@@ -84,7 +84,7 @@ extern "C" {
  * \defgroup C_API_RNG_DISTRIBUITON Distribution
  * \ingroup C_API_RNG
  *
- * \defgroup C_API_RNG_MLK_BRNG Register MKL BRNG
+ * \defgroup C_API_RNG_MKLRNG Intel Math Kernel Library
  * \ingroup C_API_RNG
  *
  * \defgroup C_API_RNG_RandomWalk Random walk
@@ -464,190 +464,190 @@ void vsmc_weibull_rand(vsmc_rng rng, int n, double *r, double a, double b);
 
 /** @} */ /* C_API_RNG_DISTRIBUITON */
 
-/** \addtogroup C_API_RNG_MLK_BRNG */
+/** \addtogroup C_API_RNG_MKLRNG */
 /** @{ */
 
-/** \brief `Register std::mt19937 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<std::mt19937>` */
 int vsmc_mkl_brng_mt19937(void);
 
-/** \brief `Register std::mt19937_64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<std::mt19937_64>` */
 int vsmc_mkl_brng_mt19937_64(void);
 
-/** \brief `Register std::minstd_rand0 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<std::minstd_rand0>` */
 int vsmc_mkl_brng_minstd_rand0(void);
 
-/** \brief `Register std::minstd_rand as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<std::minstd_rand>` */
 int vsmc_mkl_brng_minstd_rand(void);
 
-/** \brief `Register std::ranlux24_base as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<std::ranlux24_base>` */
 int vsmc_mkl_brng_ranlux24_base(void);
 
-/** \brief `Register std::ranlux48_base as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<std::ranlux48_base>` */
 int vsmc_mkl_brng_ranlux48_base(void);
 
-/** \brief `Register std::ranlux24 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<std::ranlux24>` */
 int vsmc_mkl_brng_ranlux24(void);
 
-/** \brief `Register std::ranlux48 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<std::ranlux48>` */
 int vsmc_mkl_brng_ranlux48(void);
 
-/** \brief `Register std::knuth_b as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<std::knuth_b>` */
 int vsmc_mkl_brng_knuth_b(void);
 
-/** \brief `Register vsmc::Philox2x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Philox2x32>` */
 int vsmc_mkl_brng_philox2x32(void);
 
-/** \brief `Register vsmc::Philox4x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Philox4x32>` */
 int vsmc_mkl_brng_philox4x32(void);
 
-/** \brief `Register vsmc::Philox2x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Philox2x64>` */
 int vsmc_mkl_brng_philox2x64(void);
 
-/** \brief `Register vsmc::Philox4x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Philox4x64>` */
 int vsmc_mkl_brng_philox4x64(void);
 
-/** \brief `Register vsmc::Threefry2x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Threefry2x32>` */
 int vsmc_mkl_brng_threefry2x32(void);
 
-/** \brief `Register vsmc::Threefry4x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Threefry4x32>` */
 int vsmc_mkl_brng_threefry4x32(void);
 
-/** \brief `Register vsmc::Threefry2x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Threefry2x64>` */
 int vsmc_mkl_brng_threefry2x64(void);
 
-/** \brief `Register vsmc::Threefry4x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Threefry4x64>` */
 int vsmc_mkl_brng_threefry4x64(void);
 
-/** \brief `Register vsmc::Threefry2x32SSE2 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Threefry2x32SSE2>` */
 int vsmc_mkl_brng_threefry2x32sse2(void);
 
-/** \brief `Register vsmc::Threefry4x32SSE2 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Threefry4x32SSE2>` */
 int vsmc_mkl_brng_threefry4x32sse2(void);
 
-/** \brief `Register vsmc::Threefry2x64SSE2 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Threefry2x64SSE2>` */
 int vsmc_mkl_brng_threefry2x64sse2(void);
 
-/** \brief `Register vsmc::Threefry4x64SSE2 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Threefry4x64SSE2>` */
 int vsmc_mkl_brng_threefry4x64sse2(void);
 
-/** \brief `Register vsmc::Threefry2x32AVX2 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Threefry2x32AVX2>` */
 int vsmc_mkl_brng_threefry2x32avx2(void);
 
-/** \brief `Register vsmc::Threefry4x32AVX2 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Threefry4x32AVX2>` */
 int vsmc_mkl_brng_threefry4x32avx2(void);
 
-/** \brief `Register vsmc::Threefry2x64AVX2 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Threefry2x64AVX2>` */
 int vsmc_mkl_brng_threefry2x64avx2(void);
 
-/** \brief `Register vsmc::Threefry4x64AVX2 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::Threefry4x64AVX2>` */
 int vsmc_mkl_brng_threefry4x64avx2(void);
 
-/** \brief `Register vsmc::AES128_1x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES128_1x32>` */
 int vsmc_mkl_brng_aes128_1x32(void);
 
-/** \brief `Register vsmc::AES128_2x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES128_2x32>` */
 int vsmc_mkl_brng_aes128_2x32(void);
 
-/** \brief `Register vsmc::AES128_4x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES128_4x32>` */
 int vsmc_mkl_brng_aes128_4x32(void);
 
-/** \brief `Register vsmc::AES128_8x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES128_8x32>` */
 int vsmc_mkl_brng_aes128_8x32(void);
 
-/** \brief `Register vsmc::AES128_1x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES128_1x64>` */
 int vsmc_mkl_brng_aes128_1x64(void);
 
-/** \brief `Register vsmc::AES128_2x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES128_2x64>` */
 int vsmc_mkl_brng_aes128_2x64(void);
 
-/** \brief `Register vsmc::AES128_4x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES128_4x64>` */
 int vsmc_mkl_brng_aes128_4x64(void);
 
-/** \brief `Register vsmc::AES128_8x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES128_8x64>` */
 int vsmc_mkl_brng_aes128_8x64(void);
 
-/** \brief `Register vsmc::AES192_1x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES192_1x32>` */
 int vsmc_mkl_brng_aes192_1x32(void);
 
-/** \brief `Register vsmc::AES192_2x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES192_2x32>` */
 int vsmc_mkl_brng_aes192_2x32(void);
 
-/** \brief `Register vsmc::AES192_4x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES192_4x32>` */
 int vsmc_mkl_brng_aes192_4x32(void);
 
-/** \brief `Register vsmc::AES192_8x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES192_8x32>` */
 int vsmc_mkl_brng_aes192_8x32(void);
 
-/** \brief `Register vsmc::AES192_1x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES192_1x64>` */
 int vsmc_mkl_brng_aes192_1x64(void);
 
-/** \brief `Register vsmc::AES192_2x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES192_2x64>` */
 int vsmc_mkl_brng_aes192_2x64(void);
 
-/** \brief `Register vsmc::AES192_4x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES192_4x64>` */
 int vsmc_mkl_brng_aes192_4x64(void);
 
-/** \brief `Register vsmc::AES192_8x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES192_8x64>` */
 int vsmc_mkl_brng_aes192_8x64(void);
 
-/** \brief `Register vsmc::AES256_1x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES256_1x32>` */
 int vsmc_mkl_brng_aes256_1x32(void);
 
-/** \brief `Register vsmc::AES256_2x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES256_2x32>` */
 int vsmc_mkl_brng_aes256_2x32(void);
 
-/** \brief `Register vsmc::AES256_4x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES256_4x32>` */
 int vsmc_mkl_brng_aes256_4x32(void);
 
-/** \brief `Register vsmc::AES256_8x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES256_8x32>` */
 int vsmc_mkl_brng_aes256_8x32(void);
 
-/** \brief `Register vsmc::AES256_1x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES256_1x64>` */
 int vsmc_mkl_brng_aes256_1x64(void);
 
-/** \brief `Register vsmc::AES256_2x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES256_2x64>` */
 int vsmc_mkl_brng_aes256_2x64(void);
 
-/** \brief `Register vsmc::AES256_4x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES256_4x64>` */
 int vsmc_mkl_brng_aes256_4x64(void);
 
-/** \brief `Register vsmc::AES256_8x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::AES256_8x64>` */
 int vsmc_mkl_brng_aes256_8x64(void);
 
-/** \brief `Register vsmc::ARS_1x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::ARS_1x32>` */
 int vsmc_mkl_brng_ars_1x32(void);
 
-/** \brief `Register vsmc::ARS_2x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::ARS_2x32>` */
 int vsmc_mkl_brng_ars_2x32(void);
 
-/** \brief `Register vsmc::ARS_4x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::ARS_4x32>` */
 int vsmc_mkl_brng_ars_4x32(void);
 
-/** \brief `Register vsmc::ARS_8x32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::ARS_8x32>` */
 int vsmc_mkl_brng_ars_8x32(void);
 
-/** \brief `Register vsmc::ARS_1x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::ARS_1x64>` */
 int vsmc_mkl_brng_ars_1x64(void);
 
-/** \brief `Register vsmc::ARS_2x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::ARS_2x64>` */
 int vsmc_mkl_brng_ars_2x64(void);
 
-/** \brief `Register vsmc::ARS_4x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::ARS_4x64>` */
 int vsmc_mkl_brng_ars_4x64(void);
 
-/** \brief `Register vsmc::ARS_8x64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::ARS_8x64>` */
 int vsmc_mkl_brng_ars_8x64(void);
 
-/** \brief `Register vsmc::RDRAND16 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::RDRAND16>` */
 int vsmc_mkl_brng_rdrand16(void);
 
-/** \brief `Register vsmc::RDRAND32 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::RDRAND32>` */
 int vsmc_mkl_brng_rdrand32(void);
 
-/** \brief `Register vsmc::RDRAND64 as MKL BRNG` */
+/** \brief `vsmc::mkl_brng<vsmc::RDRAND64>` */
 int vsmc_mkl_brng_rdrand64(void);
 
-/** @} */ /* C_API_RNG_MLK_BRNG */
+/** @} */ /* C_API_RNG_MKLRNG */
 
 /** \addtogroup C_API_RNG_RandomWalk */
 /** @{ */

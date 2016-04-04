@@ -37,10 +37,6 @@
 #include <boost/math/distributions.hpp>
 #include <boost/random.hpp>
 
-#if VSMC_HAS_RUNTIME_LIBRARY
-#include <vsmc/rng/mkl_brng.hpp>
-#endif
-
 #define VSMC_RNG_DIST_TEST(K, Name, STD)                                      \
     rng_dist_test<float, K, vsmc::Name##Distribution<float>, STD<float>>(     \
         argc, argv, #Name, params);                                           \
@@ -499,7 +495,7 @@ inline void rng_dist_test(std::size_t n, std::size_t m,
     rng_dist_moments<RealType>(r, mean, variance);
     rng_dist_pval<RealType>(chi2, ksad, pval);
 
-#if VSMC_HAS_RUNTIME_LIBRARY && defined(RNG_DIST_STREAM)
+#ifdef RNG_DIST_STREAM
     int brng = vsmc::mkl_brng<vsmc::RNG>();
     vsmc::MKLStream stream(brng, 101);
     watch.reset();
@@ -515,8 +511,8 @@ inline void rng_dist_test(std::size_t n, std::size_t m,
     sw.push_back(watch);
     rng_dist_moments<RealType>(r, mean, variance);
     rng_dist_pval<RealType>(chi2, ksad, pval);
-#endif // VSMC_HAS_RUNTIME_LIBRARY && defined(RNG_DIST_STREAM)
-#endif // VSMC_HAS_MKL
+#endif
+#endif
 }
 
 template <typename RealType>
@@ -559,7 +555,7 @@ inline void rng_dist_output(const vsmc::Vector<std::string> &names,
         std::cout << std::right << std::setw(twid) << "Batch";
 #if VSMC_HAS_MKL
         std::cout << std::right << std::setw(twid) << "MKL";
-#if VSMC_HAS_RUNTIME_LIBRARY && defined(RNG_DIST_STREAM)
+#ifdef RNG_DIST_STREAM
         std::cout << std::right << std::setw(twid) << "MKL (vSMC)";
 #endif
 #endif
