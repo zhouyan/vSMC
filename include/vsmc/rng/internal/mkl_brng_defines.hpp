@@ -29,8 +29,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifdef VSMC_DEFINE_RNG_MKL_BRNG
-
 VSMC_DEFINE_RNG_MKL_BRNG(std::mt19937, mt19937)
 VSMC_DEFINE_RNG_MKL_BRNG(std::mt19937_64, mt19937_64)
 VSMC_DEFINE_RNG_MKL_BRNG(std::minstd_rand0, minstd_rand0)
@@ -102,5 +100,3 @@ VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::ARS_8x64, ars_8x64)
 VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::RDRAND32, rdrand32)
 VSMC_DEFINE_RNG_MKL_BRNG(::vsmc::RDRAND64, rdrand64)
 #endif // VSMC_HAS_RDRAND
-
-#endif // VSMC_DEFINE_RNG_MKL_BRNG
