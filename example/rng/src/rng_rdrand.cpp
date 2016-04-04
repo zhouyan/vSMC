@@ -36,6 +36,7 @@ int main(int argc, char **argv)
 {
     VSMC_RNG_TEST_PRE(rng_rdrand);
 
+    VSMC_RNG_TEST(vsmc::RDRAND16);
     VSMC_RNG_TEST(vsmc::RDRAND32);
     VSMC_RNG_TEST(vsmc::RDRAND64);
 
