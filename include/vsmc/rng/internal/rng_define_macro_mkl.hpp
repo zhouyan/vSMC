@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/rng/src/rng_engine.cpp
+// vSMC/include/rng/internal/rng_define_macro_mkl.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,45 +29,29 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "rng_engine.hpp"
-
-int main(int argc, char **argv)
-{
-    std::size_t N = 1000000;
-    if (argc > 1)
-        N = static_cast<std::size_t>(std::atoi(argv[1]));
-
-    const int nwid = 30;
-    const int swid = 5;
-    const int twid = 15;
-    const std::size_t lwid = nwid + swid + twid * 5;
-
-    std::cout << std::string(lwid, '=') << std::endl;
-    std::cout << std::left << std::setw(nwid) << "RNGType";
-    std::cout << std::right << std::setw(swid) << "Size";
-    std::cout << std::right << std::setw(twid) << "N/ns (Loop)";
-    std::cout << std::right << std::setw(twid) << "N/ns (Batch)";
-    std::cout << std::right << std::setw(twid) << "GB/s (Loop)";
-    std::cout << std::right << std::setw(twid) << "GB/s (Batch)";
-    std::cout << std::right << std::setw(twid) << "Deterministics";
-    std::cout << std::endl;
-    std::cout << std::string(lwid, '-') << std::endl;
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    rng_engine_test<RNGType>(N, #Name);
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-    std::cout << std::string(lwid, '-') << std::endl;
-
-#ifdef VSMC_RNG_DEFINE_MACRO_MKL
-#undef VSMC_RNG_DEFINE_MACRO_MKL
-#endif
-#define VSMC_RNG_DEFINE_MACRO_MKL(RNGType, Name, name)                        \
-    rng_engine_test<RNGType>(N, #Name);
-#include <vsmc/rng/internal/rng_define_macro_mkl.hpp>
-    std::cout << std::string(lwid, '-') << std::endl;
-
-    return 0;
-}
+#if VSMC_HAS_MKL
+VSMC_RNG_DEFINE_MACRO_MKL(::vsmc::MKL_MCG59, MKL_MCG59, mkl_mcg69)
+VSMC_RNG_DEFINE_MACRO_MKL(::vsmc::MKL_MCG59_64, MKL_MCG59_64, mkl_mcg69_64)
+VSMC_RNG_DEFINE_MACRO_MKL(::vsmc::MKL_MT19937, MKL_MT19937, mkl_mt19937)
+VSMC_RNG_DEFINE_MACRO_MKL(::vsmc::MKL_MT19937_64, MKL_MT19937, mkl_mt19937_64)
+VSMC_RNG_DEFINE_MACRO_MKL(::vsmc::MKL_MT2203, MKL_MT2203, mkl_mt2203)
+VSMC_RNG_DEFINE_MACRO_MKL(::vsmc::MKL_MT2203_64, MKL_MT2203_64, mkl_mt2203_64)
+VSMC_RNG_DEFINE_MACRO_MKL(::vsmc::MKL_SFMT19937, MKL_STMT19937, mkl_sftmt19937)
+VSMC_RNG_DEFINE_MACRO_MKL(
+    ::vsmc::MKL_SFMT19937_64, MKL_STMT19937_64, mkl_sftmt19937_64)
+#if VSMC_HAS_RDRAND
+VSMC_RNG_DEFINE_MACRO_MKL(::vsmc::MKL_NONDETERM, MKL_NONDETERM, mkl_nondeterm)
+VSMC_RNG_DEFINE_MACRO_MKL(
+    ::vsmc::MKL_NONDETERM_64, MKL_NONDETERM_64, mkl_nondeterm_64)
+#endif // VSMC_HAS_RDRAND
+#if INTEL_MKL_VERSION >= 110300
+#if VSMC_HAS_AES_NI
+VSMC_RNG_DEFINE_MACRO_MKL(::vsmc::MKL_ARS5, MKL_ARS5, mkl_ars5)
+VSMC_RNG_DEFINE_MACRO_MKL(::vsmc::MKL_ARS5_64, MKL_ARS5_64, mkl_ars5)
+#endif // VSMC_HAS_AES_NI
+VSMC_RNG_DEFINE_MACRO_MKL(
+    vsmc::MKL_PHILOX4X32X10, MKL_PHILOX4X32X10, mkl_philox4x32x10)
+VSMC_RNG_DEFINE_MACRO_MKL(
+    vsmc::MKL_PHILOX4X32X10_64, MKL_PHILOX4X32X10_64, mkl_philox4x32x10_64)
+#endif // INTEL_MKL_VERSION >= 110300
+#endif // VSMC_HAS_MKL
