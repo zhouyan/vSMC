@@ -38,14 +38,14 @@ ADD_DEPENDENCIES(example utility)
 ADD_CUSTOM_TARGET(utility-files)
 ADD_DEPENDENCIES(example-files utility-files)
 
-FUNCTION(ADD_UTILITY_TEST name)
-    ADD_VSMC_EXECUTABLE(utility_${name}
+FUNCTION(VSMC_ADD_UTILITY_TEST name)
+    VSMC_ADD_EXECUTABLE(utility_${name}
         ${PROJECT_SOURCE_DIR}/src/utility_${name}.cpp)
     ADD_DEPENDENCIES(utility utility_${name})
-ENDFUNCTION(ADD_UTILITY_TEST)
+ENDFUNCTION(VSMC_ADD_UTILITY_TEST)
 
-ADD_UTILITY_TEST(aligned_memory)
+VSMC_ADD_UTILITY_TEST(aligned_memory)
 
 IF(HDF5_FOUND)
-    ADD_UTILITY_TEST(hdf5io)
+    VSMC_ADD_UTILITY_TEST(hdf5io)
 ENDIF(HDF5_FOUND)

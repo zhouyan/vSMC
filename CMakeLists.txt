@@ -48,6 +48,7 @@ OPTION(VSMC_ENABLE_EXAMPLE "Enable building of example" ON)
 IF(EXISTS ${PROJECT_SOURCE_DIR}/user_options.cmake)
     INCLUDE(${PROJECT_SOURCE_DIR}/user_options.cmake)
 ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/user_options.cmake)
+INCLUDE(vSMCFunction)
 
 # Configuration files
 FILE(READ ${PROJECT_SOURCE_DIR}/README.md README)

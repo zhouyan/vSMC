@@ -1,5 +1,5 @@
 # ============================================================================
-#  vSMC/vSMCExample/cmake/vSMCExampleFunctions.cmake
+#  vSMC/cmake/vSMCFunction.cmake
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
@@ -29,7 +29,7 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-FUNCTION(ADD_VSMC_EXECUTABLE exe src)
+FUNCTION(VSMC_ADD_EXECUTABLE exe src)
     ADD_EXECUTABLE(${exe} ${src})
 
     IF(DEFINED VSMC_LINK_LIBRARIES)
@@ -64,9 +64,9 @@ FUNCTION(ADD_VSMC_EXECUTABLE exe src)
         SET_TARGET_PROPERTIES(${exe} PROPERTIES LINK_FLAGS
             "${link_flags}")
     ENDIF(link_flags)
-ENDFUNCTION(ADD_VSMC_EXECUTABLE)
+ENDFUNCTION(VSMC_ADD_EXECUTABLE)
 
-FUNCTION(ADD_SMP_EXECUTABLE base header source smp_name)
+FUNCTION(VSMC_ADD_SMP_EXECUTABLE base header source smp_name)
     STRING(TOUPPER "${smp_name}" SMP)
     STRING(TOLOWER "${smp_name}" smp)
 
@@ -78,24 +78,24 @@ FUNCTION(ADD_SMP_EXECUTABLE base header source smp_name)
     CONFIGURE_FILE(
         ${PROJECT_SOURCE_DIR}/src/${source}.cpp
         ${PROJECT_BINARY_DIR}/src/${source}_${smp}.cpp)
-    ADD_VSMC_EXECUTABLE(${source}_${smp}
+    VSMC_ADD_EXECUTABLE(${source}_${smp}
         ${PROJECT_BINARY_DIR}/src/${source}_${smp}.cpp "${SMP}" ${ARGN})
     ADD_DEPENDENCIES(${base} ${source}_${smp})
     ADD_DEPENDENCIES(example_${smp} ${source}_${smp})
-ENDFUNCTION(ADD_SMP_EXECUTABLE)
+ENDFUNCTION(VSMC_ADD_SMP_EXECUTABLE)
 
-FUNCTION(ADD_SMP_EXAMPLE base)
+FUNCTION(VSMC_ADD_SMP_EXAMPLE base)
     ADD_CUSTOM_TARGET(${base})
     ADD_CUSTOM_TARGET(${base}-files)
     ADD_DEPENDENCIES(${base} ${base}-files)
     ADD_DEPENDENCIES(example ${base})
     FOREACH(smp ${SMP_EXECUTABLES})
-        ADD_SMP_EXECUTABLE(${base} ${base} ${base} ${smp} ${ARGN})
+        VSMC_ADD_SMP_EXECUTABLE(${base} ${base} ${base} ${smp} ${ARGN})
         ADD_DEPENDENCIES(${base} ${base}_${smp})
     ENDFOREACH(smp)
-ENDFUNCTION(ADD_SMP_EXAMPLE)
+ENDFUNCTION(VSMC_ADD_SMP_EXAMPLE)
 
-FUNCTION(COPY_FILE basename filename)
+FUNCTION(VSMC_ADD_FILE basename filename)
     IF(UNIX)
         ADD_CUSTOM_COMMAND(
             OUTPUT  ${PROJECT_BINARY_DIR}/${filename}
@@ -114,28 +114,20 @@ FUNCTION(COPY_FILE basename filename)
     ADD_CUSTOM_TARGET(${basename}-${filename}
         DEPENDS ${PROJECT_BINARY_DIR}/${filename})
     ADD_DEPENDENCIES(${basename}-files ${basename}-${filename})
-ENDFUNCTION(COPY_FILE)
+ENDFUNCTION(VSMC_ADD_FILE)
 
-FUNCTION(COPY_FILE_OPTIONAL basename filename)
-    IF(EXISTS ${PROJECT_SOURCE_DIR}/${filename})
-        COPY_FILE(${basename} ${filename})
-    ELSE(EXISTS ${PROJECT_SOURCE_DIR}/${filename})
-        MESSAGE(STATUS "File: ${basename}: ${filename} not available")
-    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/${filename})
-ENDFUNCTION(COPY_FILE_OPTIONAL)
-
-FUNCTION(ADD_HEADER_EXECUTABLE basepath cond)
+FUNCTION(VSMC_ADD_HEADER_EXECUTABLE basepath cond)
     IF(${cond})
         STRING(REPLACE "/" "_" basename "${basepath}")
         IF(EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
-            ADD_VSMC_EXECUTABLE(${basename}_hpp
+            VSMC_ADD_EXECUTABLE(${basename}_hpp
                 ${PROJECT_SOURCE_DIR}/src/${basename}.cpp ${ARGN})
         ELSE(EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
             CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/vsmc.cpp
                 ${PROJECT_BINARY_DIR}/src/${basename}.cpp)
-            ADD_VSMC_EXECUTABLE(${basename}_hpp
+            VSMC_ADD_EXECUTABLE(${basename}_hpp
                 ${PROJECT_BINARY_DIR}/src/${basename}.cpp ${ARGN})
         ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
         ADD_DEPENDENCIES(vsmc ${basename}_hpp)
     ENDIF(${cond})
-ENDFUNCTION(ADD_HEADER_EXECUTABLE)
+ENDFUNCTION(VSMC_ADD_HEADER_EXECUTABLE)

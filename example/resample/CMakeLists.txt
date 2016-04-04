@@ -38,11 +38,11 @@ ADD_DEPENDENCIES(example resample)
 ADD_CUSTOM_TARGET(resample-files)
 ADD_DEPENDENCIES(example-files resample-files)
 
-FUNCTION(ADD_RESAMPLE_TEST name)
-    ADD_VSMC_EXECUTABLE(resample_${name}
+FUNCTION(VSMC_ADD_RESAMPLE_TEST name)
+    VSMC_ADD_EXECUTABLE(resample_${name}
         ${PROJECT_SOURCE_DIR}/src/resample_${name}.cpp)
     ADD_DEPENDENCIES(resample resample_${name})
-ENDFUNCTION(ADD_RESAMPLE_TEST)
+ENDFUNCTION(VSMC_ADD_RESAMPLE_TEST)
 
-ADD_RESAMPLE_TEST(index)
-ADD_RESAMPLE_TEST(transform)
+VSMC_ADD_RESAMPLE_TEST(index)
+VSMC_ADD_RESAMPLE_TEST(transform)

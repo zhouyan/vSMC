@@ -33,7 +33,7 @@ PROJECT(vSMCExample-pf CXX)
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/include)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
-FUNCTION(ADD_PF_SMP_CHECK backend)
+FUNCTION(VSMC_ADD_PF_SMP_CHECK backend)
     STRING(TOUPPER "${backend}" BACKEND)
     ADD_CUSTOM_TARGET(pf_${backend}-check
         DEPENDS pf_${backend} pf-files
@@ -41,17 +41,17 @@ FUNCTION(ADD_PF_SMP_CHECK backend)
         COMMENT "Running pf_${backend}"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
     ADD_DEPENDENCIES(pf-check pf_${backend}-check)
-ENDFUNCTION(ADD_PF_SMP_CHECK)
+ENDFUNCTION(VSMC_ADD_PF_SMP_CHECK)
 
-ADD_SMP_EXAMPLE(pf "HDF5")
-COPY_FILE(pf pf.data)
-COPY_FILE(pf pf.R)
+VSMC_ADD_SMP_EXAMPLE(pf "HDF5")
+VSMC_ADD_FILE(pf pf.data)
+VSMC_ADD_FILE(pf pf.R)
 
 ADD_CUSTOM_TARGET(pf-check)
 ADD_DEPENDENCIES(check pf-check)
 
 FOREACH(backend ${SMP_EXECUTABLES})
-    ADD_PF_SMP_CHECK(${backend})
+    VSMC_ADD_PF_SMP_CHECK(${backend})
 ENDFOREACH(backend ${SMP_EXECUTABLES})
 
 ADD_CUSTOM_TARGET(pf-pdf

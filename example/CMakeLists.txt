@@ -31,7 +31,6 @@
 
 PROJECT(vSMCExample C CXX)
 
-INCLUDE(vSMCExampleFunctions)
 ADD_DEFINITIONS(${EXAMPLE_DEFINITIONS})
 
 ##############################################################################
