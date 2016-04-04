@@ -29,6 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define RNG_DIST_STREAM(stream, n, r, param)                                  \
+    stream.exponential(static_cast<MKL_INT>(n), r.data(), 0, 1 / param[0])
+
 #include <vsmc/rng/exponential_distribution.hpp>
 #include "rng_dist.hpp"
 

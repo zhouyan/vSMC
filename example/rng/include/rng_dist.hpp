@@ -37,20 +37,29 @@
 #include <boost/math/distributions.hpp>
 #include <boost/random.hpp>
 
+#if VSMC_HAS_RUNTIME_LIBRARY
+#include <vsmc/rng/mkl_brng.hpp>
+#endif
+
 #define VSMC_RNG_DIST_TEST(K, Name, STD)                                      \
     rng_dist_test<float, K, vsmc::Name##Distribution<float>, STD<float>>(     \
         argc, argv, #Name, params);                                           \
     rng_dist_test<double, K, vsmc::Name##Distribution<double>, STD<double>>(  \
-        argc, argv, #Name, params);                                           \
-    rng_dist_test<long double, K, vsmc::Name##Distribution<long double>,      \
-        STD<long double>>(argc, argv, #Name, params);
+        argc, argv, #Name, params);
 
 template <typename RealType, std::size_t K>
 inline std::string rng_dist_name(
     const std::string &name, const std::array<RealType, K> &param)
 {
     std::stringstream ss;
-    ss << name;
+    ss << name << '<';
+    if (sizeof(RealType) == sizeof(float))
+        ss << "float";
+    if (sizeof(RealType) == sizeof(double))
+        ss << "double";
+    if (sizeof(RealType) == sizeof(long double))
+        ss << "long double";
+    ss << '>';
     if (K > 0)
         ss << "(" << param[0];
     for (std::size_t k = 1; k < K; ++k)
@@ -369,8 +378,8 @@ inline void rng_dist_moments(const vsmc::Vector<RealType> &r,
 
 template <typename RealType>
 inline void rng_dist_pval(const vsmc::Vector<RealType> &chi2,
-    const vsmc::Vector<RealType> &ksad, vsmc::Vector<RealType> &pval1,
-    vsmc::Vector<RealType> &pval2)
+    const vsmc::Vector<RealType> &ksad,
+    std::array<vsmc::Vector<RealType>, 6> &pval)
 {
     std::size_t alpha1;
     std::size_t alpha5;
@@ -378,19 +387,19 @@ inline void rng_dist_pval(const vsmc::Vector<RealType> &chi2,
 
     alpha1 = alpha5 = alpha10 = 0;
     for (std::size_t i = 0; i != chi2.size(); ++i) {
-        if (chi2[i] > static_cast<RealType>(0.005) &&
-            chi2[i] < static_cast<RealType>(1 - 0.005))
+        if (chi2[i] > static_cast<RealType>(0.01) &&
+            chi2[i] < static_cast<RealType>(1 - 0.01))
             ++alpha1;
-        if (chi2[i] > static_cast<RealType>(0.025) &&
-            chi2[i] < static_cast<RealType>(1 - 0.025))
-            ++alpha5;
         if (chi2[i] > static_cast<RealType>(0.05) &&
             chi2[i] < static_cast<RealType>(1 - 0.05))
+            ++alpha5;
+        if (chi2[i] > static_cast<RealType>(0.1) &&
+            chi2[i] < static_cast<RealType>(1 - 0.1))
             ++alpha10;
     }
-    pval1.push_back(static_cast<RealType>(100.0 * alpha1 / chi2.size()));
-    pval1.push_back(static_cast<RealType>(100.0 * alpha5 / chi2.size()));
-    pval1.push_back(static_cast<RealType>(100.0 * alpha10 / chi2.size()));
+    pval[0].push_back(static_cast<RealType>(100.0 * alpha1 / chi2.size()));
+    pval[1].push_back(static_cast<RealType>(100.0 * alpha5 / chi2.size()));
+    pval[2].push_back(static_cast<RealType>(100.0 * alpha10 / chi2.size()));
 
     alpha1 = alpha5 = alpha10 = 0;
     for (std::size_t i = 0; i != ksad.size(); ++i) {
@@ -401,18 +410,19 @@ inline void rng_dist_pval(const vsmc::Vector<RealType> &chi2,
         if (ksad[i] < static_cast<RealType>(1.933))
             ++alpha10;
     }
-    pval2.push_back(static_cast<RealType>(100.0 * alpha1 / ksad.size()));
-    pval2.push_back(static_cast<RealType>(100.0 * alpha5 / ksad.size()));
-    pval2.push_back(static_cast<RealType>(100.0 * alpha10 / ksad.size()));
+    pval[3].push_back(static_cast<RealType>(100.0 * alpha1 / ksad.size()));
+    pval[4].push_back(static_cast<RealType>(100.0 * alpha5 / ksad.size()));
+    pval[5].push_back(static_cast<RealType>(100.0 * alpha10 / ksad.size()));
 }
 
 template <typename RealType, typename vSMCDistType, typename STDDistType,
     std::size_t K>
-inline void rng_dist(std::size_t n, std::size_t m,
+inline void rng_dist_test(std::size_t n, std::size_t m,
     const std::array<RealType, K> &param, const std::string &name,
     vsmc::Vector<std::string> &names, vsmc::Vector<RealType> &mean,
-    vsmc::Vector<RealType> &variance, vsmc::Vector<RealType> &pval1,
-    vsmc::Vector<RealType> &pval2, vsmc::Vector<vsmc::StopWatch> &sw)
+    vsmc::Vector<RealType> &variance,
+    std::array<vsmc::Vector<RealType>, 6> &pval,
+    vsmc::Vector<vsmc::StopWatch> &sw)
 {
     names.push_back(rng_dist_name(name, param));
 
@@ -442,7 +452,7 @@ inline void rng_dist(std::size_t n, std::size_t m,
     }
     sw.push_back(watch);
     rng_dist_moments<RealType>(r, mean, variance);
-    rng_dist_pval<RealType>(chi2, ksad, pval1, pval2);
+    rng_dist_pval<RealType>(chi2, ksad, pval);
 
     watch.reset();
     chi2.clear();
@@ -457,7 +467,7 @@ inline void rng_dist(std::size_t n, std::size_t m,
     }
     sw.push_back(watch);
     rng_dist_moments<RealType>(r, mean, variance);
-    rng_dist_pval<RealType>(chi2, ksad, pval1, pval2);
+    rng_dist_pval<RealType>(chi2, ksad, pval);
 
     watch.reset();
     chi2.clear();
@@ -471,7 +481,7 @@ inline void rng_dist(std::size_t n, std::size_t m,
     }
     sw.push_back(watch);
     rng_dist_moments<RealType>(r, mean, variance);
-    rng_dist_pval<RealType>(chi2, ksad, pval1, pval2);
+    rng_dist_pval<RealType>(chi2, ksad, pval);
 
 #if VSMC_HAS_MKL
     vsmc::MKL_SFMT19937 rng_mkl;
@@ -487,38 +497,60 @@ inline void rng_dist(std::size_t n, std::size_t m,
     }
     sw.push_back(watch);
     rng_dist_moments<RealType>(r, mean, variance);
-    rng_dist_pval<RealType>(chi2, ksad, pval1, pval2);
-#endif
+    rng_dist_pval<RealType>(chi2, ksad, pval);
+
+#if VSMC_HAS_RUNTIME_LIBRARY && defined(RNG_DIST_STREAM)
+    int brng = vsmc::mkl_brng<vsmc::RNG>();
+    vsmc::MKLStream stream(brng, 101);
+    watch.reset();
+    chi2.clear();
+    ksad.clear();
+    for (std::size_t i = 0; i != m; ++i) {
+        watch.start();
+        RNG_DIST_STREAM(stream, n, r, param);
+        watch.stop();
+        chi2.push_back(rng_dist_chi2<RealType>(r, partition));
+        ksad.push_back(rng_dist_ksad<RealType>(r, partition));
+    }
+    sw.push_back(watch);
+    rng_dist_moments<RealType>(r, mean, variance);
+    rng_dist_pval<RealType>(chi2, ksad, pval);
+#endif // VSMC_HAS_RUNTIME_LIBRARY && defined(RNG_DIST_STREAM)
+#endif // VSMC_HAS_MKL
+}
+
+template <typename RealType>
+inline void rng_dist_output_pval(RealType pval)
+{
+    std::stringstream ss;
+    if (pval < 50)
+        ss << '*';
+    ss << pval << '%';
+    std::cout << std::right << std::setw(15) << ss.str();
 }
 
 template <typename RealType>
 inline void rng_dist_output(const vsmc::Vector<std::string> &names,
     const vsmc::Vector<RealType> &mean, const vsmc::Vector<RealType> &variance,
-    const vsmc::Vector<RealType> &pval1, const vsmc::Vector<RealType> &pval2,
+    const std::array<vsmc::Vector<RealType>, 6> &pval,
     const vsmc::Vector<vsmc::StopWatch> &sw)
 {
     std::size_t N = names.size();
     std::size_t R = sw.size() / N;
-    std::size_t lwid = 80;
+    int nwid = 40;
     int twid = 15;
-    int Twid = twid * static_cast<int>(R);
-    int nwid = static_cast<int>(lwid) - Twid;
-    if (sizeof(RealType) == sizeof(float)) {
-        std::cout << std::string(lwid, '=') << std::endl;
-        std::cout << "Precision: float" << std::endl;
-        std::cout << std::string(lwid, '=') << std::endl;
-    }
-    if (sizeof(RealType) == sizeof(double)) {
-        std::cout << std::string(lwid, '=') << std::endl;
-        std::cout << "Precision: double" << std::endl;
-        std::cout << std::string(lwid, '=') << std::endl;
-    }
-    if (sizeof(RealType) == sizeof(long double)) {
-        std::cout << std::string(lwid, '=') << std::endl;
-        std::cout << "Precision: long double" << std::endl;
-        std::cout << std::string(lwid, '=') << std::endl;
-    }
+    int Twid = static_cast<int>(R) * twid;
+    std::size_t lwid = static_cast<std::size_t>(nwid + Twid);
 
+    const vsmc::StopWatch *w = sw.data();
+    const RealType *m = mean.data();
+    const RealType *v = variance.data();
+    const RealType *p0 = pval[0].data();
+    const RealType *p1 = pval[1].data();
+    const RealType *p2 = pval[2].data();
+    const RealType *p3 = pval[3].data();
+    const RealType *p4 = pval[4].data();
+    const RealType *p5 = pval[5].data();
     for (std::size_t i = 0; i != N; ++i) {
         std::cout << std::string(lwid, '=') << std::endl;
         std::cout << std::left << std::setw(nwid) << names[i];
@@ -527,49 +559,59 @@ inline void rng_dist_output(const vsmc::Vector<std::string> &names,
         std::cout << std::right << std::setw(twid) << "Batch";
 #if VSMC_HAS_MKL
         std::cout << std::right << std::setw(twid) << "MKL";
+#if VSMC_HAS_RUNTIME_LIBRARY && defined(RNG_DIST_STREAM)
+        std::cout << std::right << std::setw(twid) << "MKL (vSMC)";
+#endif
 #endif
         std::cout << std::endl;
         std::cout << std::string(lwid, '-') << std::endl;
+
         std::cout << std::left << std::setw(nwid) << "Time";
-        for (std::size_t r = 0; r != R; ++r) {
-            double time = sw[i * R + r].milliseconds();
-            std::cout << std::right << std::setw(twid) << time;
-        }
+        for (std::size_t r = 0; r != R; ++r, ++w)
+            std::cout << std::right << std::setw(twid) << w->milliseconds();
         std::cout << std::endl;
+
         std::cout << std::left << std::setw(nwid) << "Mean";
-        for (std::size_t r = 0; r != R; ++r) {
-            RealType m = mean[i * R + r];
-            std::cout << std::right << std::setw(twid) << m;
-        }
+        for (std::size_t r = 0; r != R; ++r)
+            std::cout << std::right << std::setw(twid) << *m++;
         std::cout << std::endl;
+
         std::cout << std::left << std::setw(nwid) << "Variance";
-        for (std::size_t r = 0; r != R; ++r) {
-            RealType v = variance[i * R + r];
-            std::cout << std::right << std::setw(twid) << v;
-        }
+        for (std::size_t r = 0; r != R; ++r)
+            std::cout << std::right << std::setw(twid) << *v++;
         std::cout << std::endl;
-        std::cout << std::left << std::setw(nwid) << "Single level test";
-        for (std::size_t r = 0; r != R; ++r) {
-            RealType p = pval1[i * R + r];
-            std::stringstream ss;
-            if (p < 50)
-                ss << '*';
-            ss << p << '%';
-            std::cout << std::right << std::setw(twid) << ss.str();
-        }
+
+        std::cout << std::left << std::setw(nwid) << "One level test (1%)";
+        for (std::size_t r = 0; r != R; ++r)
+            rng_dist_output_pval(*p0++);
         std::cout << std::endl;
-        std::cout << std::left << std::setw(nwid) << "Two level Test";
-        for (std::size_t r = 0; r != R; ++r) {
-            RealType p = pval2[i * R + r];
-            std::stringstream ss;
-            if (p < 50)
-                ss << '*';
-            ss << p << '%';
-            std::cout << std::right << std::setw(twid) << ss.str();
-        }
+
+        std::cout << std::left << std::setw(nwid) << "One level test (5%)";
+        for (std::size_t r = 0; r != R; ++r)
+            rng_dist_output_pval(*p1++);
+        std::cout << std::endl;
+
+        std::cout << std::left << std::setw(nwid) << "One level test (10%)";
+        for (std::size_t r = 0; r != R; ++r)
+            rng_dist_output_pval(*p2++);
+        std::cout << std::endl;
+
+        std::cout << std::left << std::setw(nwid) << "Two level test (1%)";
+        for (std::size_t r = 0; r != R; ++r)
+            rng_dist_output_pval(*p3++);
+        std::cout << std::endl;
+
+        std::cout << std::left << std::setw(nwid) << "Two level test (5%)";
+        for (std::size_t r = 0; r != R; ++r)
+            rng_dist_output_pval(*p4++);
+        std::cout << std::endl;
+
+        std::cout << std::left << std::setw(nwid) << "Two level test (10%)";
+        for (std::size_t r = 0; r != R; ++r)
+            rng_dist_output_pval(*p5++);
         std::cout << std::endl;
     }
-    std::cout << std::string(lwid, '=') << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
 }
 
 template <typename RealType, std::size_t K, typename vSMCDistType,
@@ -587,17 +629,16 @@ inline void rng_dist_test(
     vsmc::Vector<std::string> names;
     vsmc::Vector<RealType> mean;
     vsmc::Vector<RealType> variance;
-    vsmc::Vector<RealType> pval1;
-    vsmc::Vector<RealType> pval2;
+    std::array<vsmc::Vector<RealType>, 6> pval;
     vsmc::Vector<vsmc::StopWatch> sw;
     for (const auto &p : params) {
         std::array<RealType, K> param;
         for (std::size_t i = 0; i != p.size(); ++i)
             param[i] = static_cast<RealType>(p[i]);
-        rng_dist<RealType, vSMCDistType, STDDistType>(
-            N, M, param, name, names, mean, variance, pval1, pval2, sw);
+        rng_dist_test<RealType, vSMCDistType, STDDistType>(
+            N, M, param, name, names, mean, variance, pval, sw);
     }
-    rng_dist_output<RealType>(names, mean, variance, pval1, pval2, sw);
+    rng_dist_output<RealType>(names, mean, variance, pval, sw);
 }
 
 #endif // VSMC_EXAMPLE_RNG_DIST_HPP

@@ -29,6 +29,28 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define RNG_DIST_STREAM(stream, n, r, param)                                  \
+    {                                                                         \
+        const std::size_t k = vsmc::internal::BufferSize<RealType>::value;    \
+        const std::size_t p = n / k;                                          \
+        const std::size_t q = n % k;                                          \
+        vsmc::Array<RealType, k> s;                                           \
+        RealType *ptr = r.data();                                             \
+        for (std::size_t x = 0; x != p; ++x, ptr += k) {                      \
+            stream.gamma(                                                     \
+                static_cast<MKL_INT>(k), s.data(), param[0] / 2, 0, 2);       \
+            stream.gamma(static_cast<MKL_INT>(k), ptr, param[1] / 2, 0, 2);   \
+            vsmc::mul(k, 1 / param[0], s.data(), s.data());                   \
+            vsmc::mul(k, 1 / param[1], ptr, ptr);                             \
+            vsmc::div(k, s.data(), ptr, ptr);                                 \
+        }                                                                     \
+        stream.gamma(static_cast<MKL_INT>(q), s.data(), param[0] / 2, 0, 2);  \
+        stream.gamma(static_cast<MKL_INT>(q), ptr, param[1] / 2, 0, 2);       \
+        vsmc::mul(q, 1 / param[0], s.data(), s.data());                       \
+        vsmc::mul(q, 1 / param[1], ptr, ptr);                                 \
+        vsmc::div(q, s.data(), ptr, ptr);                                     \
+    }
+
 #include <vsmc/rng/fisher_f_distribution.hpp>
 #include "rng_dist.hpp"
 

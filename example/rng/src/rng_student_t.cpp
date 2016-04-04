@@ -29,6 +29,27 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define RNG_DIST_STREAM(stream, n, r, param)                                  \
+    {                                                                         \
+        const std::size_t k = vsmc::internal::BufferSize<RealType>::value;    \
+        const std::size_t p = n / k;                                          \
+        const std::size_t q = n % k;                                          \
+        vsmc::Array<RealType, k> s;                                           \
+        RealType *ptr = r.data();                                             \
+        for (std::size_t x = 0; x != p; ++x, ptr += k) {                      \
+            stream.gamma(static_cast<MKL_INT>(k), ptr, param[0] / 2, 0, 2);   \
+            vsmc::mul(k, 1 / param[0], ptr, ptr);                             \
+            vsmc::sqrt(k, ptr, ptr);                                          \
+            stream.gaussian(static_cast<MKL_INT>(k), s.data(), 0, 1);         \
+            vsmc::div(k, s.data(), ptr, ptr);                                 \
+        }                                                                     \
+        stream.gamma(static_cast<MKL_INT>(q), ptr, param[0] / 2, 0, 2);       \
+        vsmc::mul(q, 1 / param[0], ptr, ptr);                                 \
+        vsmc::sqrt(q, ptr, ptr);                                              \
+        stream.gaussian(static_cast<MKL_INT>(q), s.data(), 0, 1);             \
+        vsmc::div(q, s.data(), ptr, ptr);                                     \
+    }
+
 #include <vsmc/rng/student_t_distribution.hpp>
 #include "rng_dist.hpp"
 

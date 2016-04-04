@@ -40,6 +40,9 @@ ADD_DEPENDENCIES(example-files rng-files)
 
 FUNCTION(VSMC_ADD_RNG_TEST name)
     VSMC_ADD_EXECUTABLE(rng_${name} ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp)
+    IF(VSMC_ENABLE_LIBRARY)
+        TARGET_LINK_LIBRARIES(rng_${name} libvsmc_static)
+    ENDIF(VSMC_ENABLE_LIBRARY)
     ADD_DEPENDENCIES(rng rng_${name})
 ENDFUNCTION(VSMC_ADD_RNG_TEST)
 
@@ -49,9 +52,6 @@ VSMC_ADD_RNG_TEST(uniform_bits)
 
 IF(MKL_FOUND)
     VSMC_ADD_RNG_TEST(mkl_brng)
-    IF(VSMC_ENABLE_LIBRARY)
-        TARGET_LINK_LIBRARIES(rng_mkl_brng libvsmc_shared)
-    ENDIF(VSMC_ENABLE_LIBRARY)
 ENDIF(MKL_FOUND)
 
 IF(Boost_FOUND)

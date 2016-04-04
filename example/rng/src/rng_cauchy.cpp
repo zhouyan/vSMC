@@ -29,6 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define RNG_DIST_STREAM(stream, n, r, param)                                  \
+    stream.cauchy(static_cast<MKL_INT>(n), r.data(), param[0], param[1])
+
 #include <vsmc/rng/cauchy_distribution.hpp>
 #include "rng_dist.hpp"
 

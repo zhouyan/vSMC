@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define RNG_DIST_STREAM(stream, n, r, param)                                  \
+    stream.gumbel(static_cast<MKL_INT>(n), r.data(), param[0], param[1]);     \
+    vsmc::sub(n, 2 * param[0], r.data(), r.data());
+
 #include <vsmc/rng/extreme_value_distribution.hpp>
 #include "rng_dist.hpp"
 

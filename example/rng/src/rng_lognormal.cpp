@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define RNG_DIST_STREAM(stream, n, r, param)                                  \
+    stream.lognormal(                                                         \
+        static_cast<MKL_INT>(n), r.data(), param[0], param[1], 0, 1)
+
 #include <vsmc/rng/lognormal_distribution.hpp>
 #include "rng_dist.hpp"
 

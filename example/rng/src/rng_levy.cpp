@@ -29,6 +29,26 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define RNG_DIST_STREAM(stream, n, r, param)                                  \
+    {                                                                         \
+        const std::size_t k = vsmc::internal::BufferSize<RealType>::value;    \
+        const std::size_t p = n / k;                                          \
+        const std::size_t q = n % k;                                          \
+        RealType *ptr = r.data();                                             \
+        for (std::size_t x = 0; x != p; ++x, ptr += k) {                      \
+            stream.gaussian(static_cast<MKL_INT>(k), ptr, 0, 1);              \
+            vsmc::sqr(k, ptr, ptr);                                           \
+            vsmc::inv(k, ptr, ptr);                                           \
+            vsmc::internal::distribution_impl_location_scale(                 \
+                k, ptr, param[0], param[1]);                                  \
+        }                                                                     \
+        stream.gaussian(static_cast<MKL_INT>(q), ptr, 0, 1);                  \
+        vsmc::sqr(q, ptr, ptr);                                               \
+        vsmc::inv(q, ptr, ptr);                                               \
+        vsmc::internal::distribution_impl_location_scale(                     \
+            q, ptr, param[0], param[1]);                                      \
+    }
+
 #include <vsmc/rng/levy_distribution.hpp>
 #include "rng_dist.hpp"
 

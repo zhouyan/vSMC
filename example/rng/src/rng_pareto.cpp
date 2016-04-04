@@ -29,6 +29,23 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define RNG_DIST_STREAM(stream, n, r, param)                                  \
+    {                                                                         \
+        const std::size_t k = vsmc::internal::BufferSize<RealType>::value;    \
+        const std::size_t p = n / k;                                          \
+        const std::size_t q = n % k;                                          \
+        RealType *ptr = r.data();                                             \
+        for (std::size_t x = 0; x != p; ++x, ptr += k) {                      \
+            stream.exponential(                                               \
+                static_cast<MKL_INT>(k), ptr, 0, 1 / param[0]);               \
+            vsmc::exp(k, ptr, ptr);                                           \
+            vsmc::mul(k, param[1], ptr, ptr);                                 \
+        }                                                                     \
+        stream.exponential(static_cast<MKL_INT>(q), ptr, 0, 1 / param[0]);    \
+        vsmc::exp(q, ptr, ptr);                                               \
+        vsmc::mul(q, param[1], ptr, ptr);                                     \
+    }
+
 #include <vsmc/rng/pareto_distribution.hpp>
 #include "rng_dist.hpp"
 
