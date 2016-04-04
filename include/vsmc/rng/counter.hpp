@@ -418,7 +418,7 @@ class CounterEngine
         std::size_t ctr_size = sizeof(ctr_type);
         result_type rate = static_cast<result_type>(buf_size / ctr_size);
         increment(ctr_, static_cast<result_type>(nskip / M * rate));
-        operator()();
+        generator_(ctr_, key_, buffer_);
         index_ = static_cast<std::size_t>(nskip % M);
     }
 

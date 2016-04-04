@@ -188,6 +188,8 @@ class MKLStream
         return status;
     }
 
+    bool empty() const { return ptr_ == nullptr; }
+
     /// \brief `vslSaveStreamF`
     int save_f(const std::string &fname) const
     {
@@ -248,11 +250,8 @@ class MKLStream
     /// \brief `vslGetStreamStateBrng`
     int get_brng() const { return ::vslGetStreamStateBrng(ptr_); }
 
-    /// \brief `vslGetBrngProperties`
-    int get_brng_properties(::VSLBRngProperties *properties) const
-    {
-        return get_brng_properties(get_brng(), properties);
-    }
+    /// \brief `vslGetNumRegBrngs`
+    static int get_num_reg_brngs() { return ::vslGetNumRegBrngs(); }
 
     /// \brief `vslGetBrngProperties`
     static int get_brng_properties(
@@ -262,9 +261,6 @@ class MKLStream
             ::vslGetBrngProperties(brng, properties),
             "MKLStream::get_brng_properties", "::vslGetBrngProperties");
     }
-
-    /// \brief `vslGetNumRegBrngs`
-    static int get_num_reg_brngs() { return ::vslGetNumRegBrngs(); }
 
     /// \brief Test if `vslLeapfrogStream` is supported
     static bool has_leap_frog(MKL_INT brng)
@@ -738,13 +734,6 @@ template <int>
 class MKLResultTypeTrait;
 
 template <>
-class MKLResultTypeTrait<0>
-{
-    public:
-    using type = unsigned;
-}; // class MKLResultTypeTrait
-
-template <>
 class MKLResultTypeTrait<32>
 {
     public:
@@ -763,16 +752,6 @@ using MKLResultType = typename MKLResultTypeTrait<Bits>::type;
 
 template <int>
 class MKLUniformBits;
-
-template <>
-class MKLUniformBits<0>
-{
-    public:
-    static void eval(MKLStream &stream, MKL_INT n, unsigned *r)
-    {
-        stream.uniform_bits(n, r);
-    }
-}; // class MKLUniformBits
 
 template <>
 class MKLUniformBits<32>
@@ -796,62 +775,96 @@ class MKLUniformBits<64>
 
 } // namespace vsmc::internal
 
-/// \brief MKL RNG generator
+/// \brief MKL RNG C++11 engine
+/// \ingroup MKLRNG
 ///
-/// \details
-/// This class is almost like an C++11 engine except its constructors and
-/// seeding methods. The RNG type `BRNG` is provided at runtime.
-template <int Bits>
-class MKLGenerator
+/// \tparam BRNG A MKL BRNG. It need to support either `viRngUniformBits32` or
+/// `viRngUniformBits64`.
+/// \tparam Bits The number of bits in the output unsigned integer
+/// - It can be 32 if and only if `viRngUniformBits32` is supported
+/// - It can be 64 if and only if `viRngUniformBits64` is supported
+template <MKL_INT BRNG, int Bits>
+class MKLEngine
 {
-    static_assert(Bits == 0 || Bits == 32 || Bits == 64,
-        "**MKLGenerator** USED WITH Bits OTHER THAN 0, 32, OR 64");
+    static_assert(Bits == 32 || Bits == 64,
+        "**MKLEngine** USED WITH Bits OTHER THAN 32, OR 64");
 
     public:
     using result_type = internal::MKLResultType<Bits>;
 
-    explicit MKLGenerator(MKL_INT brng, MKL_UINT s = 1) : index_(M_)
+    explicit MKLEngine(MKL_UINT s = 1) : index_(M_) { seed(s); }
+
+    template <typename SeedSeq>
+    explicit MKLEngine(SeedSeq &seq,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_INT,
+            MKL_UINT, MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
+        : index_(M_)
     {
-        seed(brng, s);
+        seed(seq);
     }
 
-    MKLGenerator(MKL_INT brng, MKL_INT n, unsigned *params) : index_(M_)
+    MKLEngine(MKL_INT offset, MKL_UINT s) : index_(M_)
     {
-        seed(brng, n, params);
+        static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
+            "**MKLEngine** DOES NOT SUPPORT OFFSETING");
+
+        seed(offset, s);
     }
 
     template <typename SeedSeq>
-    explicit MKLGenerator(MKL_INT brng, SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
-            MKLGenerator<Bits>>::value>::type * = nullptr)
-        : index_(M_), stream_(brng, 0)
+    explicit MKLEngine(MKL_INT offset, SeedSeq &seq,
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_INT,
+            MKL_UINT, MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
+        : index_(M_)
     {
-        seed(brng, seq);
+        static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
+            "**MKLEngine** DOES NOT SUPPORT OFFSETING");
+
+        seed(offset, seq);
     }
 
-    void seed(MKL_INT brng, MKL_UINT s)
+    void seed(MKL_UINT s)
     {
+        MKL_INT brng = stream_.empty() ? BRNG : stream_.get_brng();
         stream_.reset(brng, s);
         index_ = M_;
     }
 
-    void seed(MKL_INT brng, MKL_INT n, unsigned *params)
+    template <typename SeedSeq>
+    void seed(
+        SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
+                          MKL_INT, MKL_UINT>::value>::type * = nullptr)
     {
-        stream_.reset(brng, n, params);
+        MKL_INT brng = stream_.empty() ? BRNG : stream_.get_brng();
+        Vector<unsigned> params;
+        MKL_INT n = seed_params(brng, seq, params);
+        stream_.reset(brng, n, params.data());
+        index_ = M_;
+    }
+
+    void seed(MKL_INT offset, MKL_UINT s)
+    {
+        static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
+            "**MKLEngine** DOES NOT SUPPORT OFFSETING");
+
+        MKL_INT brng = internal::MKLOffset<BRNG>::eval(offset);
+        stream_.reset(brng, s);
         index_ = M_;
     }
 
     template <typename SeedSeq>
-    void seed(MKL_INT brng, SeedSeq &seq,
+    void seed(MKL_INT offset, SeedSeq &seq,
         typename std::enable_if<
             internal::is_seed_seq<SeedSeq, MKL_UINT>::value>::type * = nullptr)
     {
-        ::VSLBRngProperties properties;
-        MKLStream::get_brng_properties(brng, &properties);
-        MKL_INT n = properties.NSeeds;
-        Vector<unsigned> params(static_cast<std::size_t>(n));
-        seq.generate(params.begin(), params.end());
-        seed(brng, n, params.data());
+        static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
+            "**MKLEngine** DOES NOT SUPPORT OFFSETING");
+
+        MKL_INT brng = internal::MKLOffset<BRNG>::eval(offset);
+        Vector<unsigned> params;
+        MKL_INT n = seed_params(brng, seq, params);
+        stream_.reset(brng, n, params.data());
+        index_ = M_;
     }
 
     result_type operator()()
@@ -866,7 +879,7 @@ class MKLGenerator
 
     void operator()(std::size_t n, result_type *r)
     {
-        internal::size_check<MKL_INT>(n, "MKLGenerator::operator()");
+        internal::size_check<MKL_INT>(n, "MKLEngine::operator()");
 
         std::size_t remain = M_ - index_;
 
@@ -915,7 +928,7 @@ class MKLGenerator
         index_ = M_;
 
         ::VSLBRngProperties properties;
-        stream_.get_brng_properties(&properties);
+        MKLStream::get_brng_properties(stream_.get_brng(), &properties);
         int bits = properties.NBits;
         long long M = static_cast<long long>(M_);
         long long m = nskip / M * M;
@@ -935,13 +948,16 @@ class MKLGenerator
             case VSL_BRNG_ARS5: stream_.skip_ahead(m); break;
 #endif
             default:
+                if (MKLStream::has_skip_ahead(stream_.get_brng())) {
+                    stream_.skip_ahead(m);
+                    break;
+                }
                 while (nskip > M) {
                     generate();
                     nskip -= M;
                 }
-                break;
         };
-        operator()();
+        generate();
         index_ = static_cast<std::size_t>(nskip % M);
     }
 
@@ -959,7 +975,7 @@ class MKLGenerator
     const MKLStream &stream() const { return stream_; }
 
     friend bool operator==(
-        const MKLGenerator<Bits> &gen1, const MKLGenerator<Bits> &gen2)
+        const MKLEngine<BRNG, Bits> &gen1, const MKLEngine<BRNG, Bits> &gen2)
     {
         if (gen1.stream_ != gen2.stream_)
             return false;
@@ -971,14 +987,15 @@ class MKLGenerator
     }
 
     friend bool operator!=(
-        const MKLGenerator<Bits> &gen1, const MKLGenerator<Bits> &gen2)
+        const MKLEngine<BRNG, Bits> &gen1, const MKLEngine<BRNG, Bits> &gen2)
     {
         return !(gen1 == gen2);
     }
 
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os, const MKLGenerator<Bits> &gen)
+        std::basic_ostream<CharT, Traits> &os,
+        const MKLEngine<BRNG, Bits> &gen)
     {
         if (!os)
             return os;
@@ -992,7 +1009,7 @@ class MKLGenerator
 
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is, MKLGenerator<Bits> &gen)
+        std::basic_istream<CharT, Traits> &is, MKLEngine<BRNG, Bits> &gen)
     {
         if (!is)
             return is;
@@ -1026,47 +1043,17 @@ class MKLGenerator
         internal::MKLUniformBits<Bits>::eval(
             stream_, static_cast<MKL_INT>(M_), buffer_.data());
     }
-}; // class MKLGenerator
-
-/// \brief MKL RNG C++11 engine
-/// \ingroup MKLRNG
-template <MKL_INT BRNG, int Bits>
-class MKLEngine : public MKLGenerator<Bits>
-{
-    public:
-    explicit MKLEngine(MKL_UINT s = 1) : MKLGenerator<Bits>(BRNG, s) {}
 
     template <typename SeedSeq>
-    explicit MKLEngine(SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_UINT,
-            MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
-        : MKLGenerator<Bits>(BRNG, seq)
+    MKL_INT seed_params(MKL_INT brng, SeedSeq &seq, Vector<unsigned> &params)
     {
-    }
+        ::VSLBRngProperties properties;
+        MKLStream::get_brng_properties(brng, &properties);
+        MKL_INT n = properties.NSeeds;
+        params.resize(static_cast<std::size_t>(n));
+        seq.generate(params.begin(), params.end());
 
-    MKLEngine(MKL_UINT s, MKL_INT offset)
-        : MKLGenerator<Bits>(internal::MKLOffset<BRNG>::eval(offset), s)
-    {
-        static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
-            "**MKLEngine** DOES NOT SUPPORT OFFSETING");
-    }
-
-    void seed(MKL_UINT s) { MKLGenerator<Bits>::seed(s); }
-
-    template <typename SeedSeq>
-    void seed(SeedSeq &seq,
-        typename std::enable_if<
-            internal::is_seed_seq<SeedSeq, MKL_UINT>::value>::type * = nullptr)
-    {
-        MKLGenerator<Bits>::seed(this->stream().get_brng(), seq);
-    }
-
-    void seed(MKL_UINT s, MKL_INT offset)
-    {
-        static_assert(internal::MKLOffset<BRNG>::value > 0,
-            "**MKLEngine** DOES NOT SUPPORT OFFSETING");
-
-        MKLGenerator<Bits>::seed(internal::MKLOffset<BRNG>::eval(offset), s);
+        return n;
     }
 }; // class MKLEngine
 
@@ -1131,227 +1118,6 @@ using MKL_PHILOX4X32X10 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 32>;
 using MKL_PHILOX4X32X10_64 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 64>;
 
 #endif // INTEL_MKL_VERSION >= 110300
-
-template <int Bits>
-inline void rng_rand(MKLGenerator<Bits> &rng, std::size_t n,
-    typename MKLGenerator<Bits>::result_type *r)
-{
-    rng(n, r);
-}
-
-template <int Bits>
-inline void beta_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, float *r, float alpha, float beta)
-{
-    internal::size_check<MKL_INT>(n, "beta_distribution)");
-    rng.stream().beta(static_cast<MKL_INT>(n), r, alpha, beta, 0, 1);
-}
-
-template <int Bits>
-inline void beta_distribution(MKLGenerator<Bits> &rng, std::size_t n,
-    double *r, double alpha, double beta)
-{
-    internal::size_check<MKL_INT>(n, "beta_distribution)");
-    rng.stream().beta(static_cast<MKL_INT>(n), r, alpha, beta, 0, 1);
-}
-
-template <int Bits>
-inline void cauchy_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, float *r, float a, float b)
-{
-    internal::size_check<MKL_INT>(n, "cauchy_distribution)");
-    rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
-}
-
-template <int Bits>
-inline void cauchy_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, double *r, double a, double b)
-{
-    internal::size_check<MKL_INT>(n, "cauchy_distribution)");
-    rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
-}
-
-template <int Bits>
-inline void exponential_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, float *r, float lambda)
-{
-    internal::size_check<MKL_INT>(n, "exponential_distribution)");
-    rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
-}
-
-template <int Bits>
-inline void exponential_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, double *r, double lambda)
-{
-    internal::size_check<MKL_INT>(n, "exponential_distribution)");
-    rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
-}
-
-template <int Bits>
-inline void extreme_value_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, float *r, float a, float b)
-{
-    internal::size_check<MKL_INT>(n, "extreme_value_distribution)");
-    rng.stream().gumbel(static_cast<MKL_INT>(n), r, a, b);
-    sub(n, 2 * a, r, r);
-}
-
-template <int Bits>
-inline void extreme_value_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, double *r, double a, double b)
-{
-    internal::size_check<MKL_INT>(n, "extreme_value_distribution)");
-    rng.stream().gumbel(static_cast<MKL_INT>(n), r, a, b);
-    sub(n, 2 * a, r, r);
-}
-
-template <int Bits>
-inline void gamma_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, float *r, float alpha, float beta)
-{
-    internal::size_check<MKL_INT>(n, "gamma_distribution)");
-    rng.stream().gamma(static_cast<MKL_INT>(n), r, alpha, 0, beta);
-}
-
-template <int Bits>
-inline void gamma_distribution(MKLGenerator<Bits> &rng, std::size_t n,
-    double *r, double alpha, double beta)
-{
-    internal::size_check<MKL_INT>(n, "gamma_distribution)");
-    rng.stream().gamma(static_cast<MKL_INT>(n), r, alpha, 0, beta);
-}
-
-template <int Bits>
-inline void laplace_distribution(MKLGenerator<Bits> &rng, std::size_t n,
-    float *r, float location, float scale)
-{
-    internal::size_check<MKL_INT>(n, "lapace_distribution)");
-    rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
-}
-
-template <int Bits>
-inline void laplace_distribution(MKLGenerator<Bits> &rng, std::size_t n,
-    double *r, double location, double scale)
-{
-    internal::size_check<MKL_INT>(n, "lapace_distribution)");
-    rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
-}
-
-template <int Bits>
-inline void lognormal_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, float *r, float m, float s)
-{
-    internal::size_check<MKL_INT>(n, "lognormal_distribution)");
-    rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
-}
-
-template <int Bits>
-inline void lognormal_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, double *r, double m, double s)
-{
-    internal::size_check<MKL_INT>(n, "lognormal_distribution)");
-    rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
-}
-
-template <int Bits>
-inline void normal_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, float *r, float mean, float stddev)
-{
-    internal::size_check<MKL_INT>(n, "normal_distribution)");
-    rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
-}
-
-template <int Bits>
-inline void normal_distribution(MKLGenerator<Bits> &rng, std::size_t n,
-    double *r, double mean, double stddev)
-{
-    internal::size_check<MKL_INT>(n, "normal_distribution)");
-    rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
-}
-
-template <int Bits>
-inline void normal_mv_distribution(MKLGenerator<Bits> &rng, std::size_t n,
-    float *r, std::size_t m, const float *mean, const float *chol)
-{
-    internal::size_check<MKL_INT>(n, "normal_mv_distribution)");
-    internal::size_check<MKL_INT>(m, "normal_mv_distribution)");
-    rng.stream().gaussian_mv(static_cast<MKL_INT>(n), r,
-        static_cast<MKL_INT>(m), VSL_MATRIX_STORAGE_PACKED, mean, chol);
-}
-
-template <int Bits>
-inline void normal_mv_distribution(MKLGenerator<Bits> &rng, std::size_t n,
-    double *r, std::size_t m, const double *mean, const double *chol)
-{
-    internal::size_check<MKL_INT>(n, "normal_mv_distribution)");
-    internal::size_check<MKL_INT>(m, "normal_mv_distribution)");
-    rng.stream().gaussian_mv(static_cast<MKL_INT>(n), r,
-        static_cast<MKL_INT>(m), VSL_MATRIX_STORAGE_PACKED, mean, chol);
-}
-
-template <int Bits>
-inline void rayleigh_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, float *r, float sigma)
-{
-    internal::size_check<MKL_INT>(n, "rayleigh_distribution)");
-    rng.stream().rayleigh(
-        static_cast<MKL_INT>(n), r, 0, const_sqrt_2<float>() * sigma);
-}
-
-template <int Bits>
-inline void rayleigh_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, double *r, double sigma)
-{
-    internal::size_check<MKL_INT>(n, "rayleigh_distribution)");
-    rng.stream().rayleigh(
-        static_cast<MKL_INT>(n), r, 0, const_sqrt_2<double>() * sigma);
-}
-
-template <int Bits>
-inline void u01_distribution(MKLGenerator<Bits> &rng, std::size_t n, float *r)
-{
-    internal::size_check<MKL_INT>(n, "u01_distribution)");
-    rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
-}
-
-template <int Bits>
-inline void u01_distribution(MKLGenerator<Bits> &rng, std::size_t n, double *r)
-{
-    internal::size_check<MKL_INT>(n, "u01_distribution)");
-    rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
-}
-
-template <int Bits>
-inline void uniform_real_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, float *r, float a, float b)
-{
-    internal::size_check<MKL_INT>(n, "uniform_real_distribution)");
-    rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
-}
-
-template <int Bits>
-inline void uniform_real_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, double *r, double a, double b)
-{
-    internal::size_check<MKL_INT>(n, "uniform_real_distribution)");
-    rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
-}
-
-template <int Bits>
-inline void weibull_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, float *r, float a, float b)
-{
-    internal::size_check<MKL_INT>(n, "weibull_distribution)");
-    rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
-}
-
-template <int Bits>
-inline void weibull_distribution(
-    MKLGenerator<Bits> &rng, std::size_t n, double *r, double a, double b)
-{
-    internal::size_check<MKL_INT>(n, "weibull_distribution)");
-    rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
-}
 
 template <MKL_INT BRNG, int Bits>
 inline void rng_rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
