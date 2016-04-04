@@ -103,7 +103,7 @@ int main()
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
 
-#define VSMC_RNG_DEFINE_MACRO(RNGType, name)                                  \
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     {                                                                         \
         int brng = vsmc::mkl_brng<RNGType>();                                 \
         rng_mkl_brng_properties(brng, #RNGType);                              \

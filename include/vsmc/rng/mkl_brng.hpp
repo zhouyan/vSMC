@@ -53,7 +53,7 @@ int mkl_brng();
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
 
-#define VSMC_RNG_DEFINE_MACRO(RNGType, name)                                  \
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     template <>                                                               \
     inline int mkl_brng<RNGType>()                                            \
     {                                                                         \

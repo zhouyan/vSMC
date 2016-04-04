@@ -35,7 +35,7 @@
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
 
-#define VSMC_RNG_DEFINE_MACRO(RNGType, name)                                  \
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     int vsmc_mkl_init_##name(int, VSLStreamStatePtr, int, const unsigned *);  \
     int vsmc_mkl_init_##name(                                                 \
         int method, VSLStreamStatePtr stream, int n, const unsigned *param)   \
