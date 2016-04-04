@@ -95,11 +95,11 @@
 /// \ingroup AlignedMemory
 ///
 /// \details
-/// The behavior of the custom `operator new` is sligtly different than
-/// the standard ones. There will be no `new` handler called in the case of
-/// failure to allocate memroy. Another way to view this is that the class tha
-/// uses these custom `operator new` has its own `new` handler which does
-/// exactly nothing.
+/// The behavior of the custom `operator new` is sligtly different than the
+/// standard ones. There will be no `new` handler called in the case of failure
+/// to allocate memroy. Another way to view this is that the class that uses
+/// these custom `operator new` has its own `new` handler which does exactly
+/// nothing.
 #define VSMC_DEFINE_NEW_DELETE(Class)                                         \
     public:                                                                   \
     static void *operator new(std::size_t n)                                  \
