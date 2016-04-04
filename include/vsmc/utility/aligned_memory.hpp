@@ -91,7 +91,7 @@
 #define VSMC_CONSTRUCT_SCALAR 0
 #endif
 
-/// \brief Define class member `new` and `delete` using Allocator
+/// \brief Define class member `new` and `delete` using AlignedMemory
 /// \ingroup AlignedMemory
 ///
 /// \details
