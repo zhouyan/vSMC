@@ -49,7 +49,7 @@ inline bool extreme_value_distribution_check_param(RealType, RealType b)
 
 } // namespace vsmc::internal
 
-/// \brief ExtremeValue distribution
+/// \brief Extreme value distribution
 /// \ingroup Distribution
 template <typename RealType>
 class ExtremeValueDistribution
@@ -92,7 +92,7 @@ inline void extreme_value_distribution_impl(
 
 } // namespace vsmc::internal
 
-/// \brief Generating extreme_value random variates
+/// \brief Generating extreme value random variates
 /// \ingroup Distribution
 VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_2(extreme_value, a, b)
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(ExtremeValue, extreme_value, a, b)
