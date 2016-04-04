@@ -31,11 +31,11 @@
 
 #include "libvsmc.hpp"
 
-#ifdef VSMC_DEFINE_RNG_MKL_BRNG
-#undef VSMC_DEFINE_RNG_MKL_BRNG
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
 #endif
 
-#define VSMC_DEFINE_RNG_MKL_BRNG(RNGType, name)                               \
+#define VSMC_RNG_DEFINE_MACRO(RNGType, name)                                  \
     int vsmc_mkl_init_##name(int, VSLStreamStatePtr, int, const unsigned *);  \
     int vsmc_mkl_init_##name(                                                 \
         int method, VSLStreamStatePtr stream, int n, const unsigned *param)   \
@@ -214,6 +214,6 @@ inline int mkl_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
 
 extern "C" {
 
-#include <vsmc/rng/internal/mkl_brng_defines.hpp>
+#include <vsmc/rng/internal/rng_define_macro.hpp>
 
 } // extern "C"

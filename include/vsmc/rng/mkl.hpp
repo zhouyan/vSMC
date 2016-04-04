@@ -33,6 +33,7 @@
 #define VSMC_RNG_MKL_HPP
 
 #include <vsmc/rng/internal/common.hpp>
+#include <mkl.h>
 
 #define VSMC_RUNTIME_WARNING_RNG_MKL_OFFSET                                   \
     VSMC_RUNTIME_WARNING((offset < MaxOffset),                                \

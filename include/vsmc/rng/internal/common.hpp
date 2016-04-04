@@ -849,10 +849,10 @@ inline void weibull_distribution(
 
 class MKLStream;
 
-template <int>
+template <int = 0>
 class MKLGenerator;
 
-template <MKL_INT, int>
+template <MKL_INT, int = 0>
 class MKLEngine;
 
 template <int Bits>
@@ -1066,6 +1066,119 @@ inline void weibull_distribution(
 template <MKL_INT BRNG, int Bits>
 inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+
+#if VSMC_HAS_RUNTIME_LIBRARY
+
+template <typename>
+class MKLAdaptor;
+
+template <typename RNGType>
+inline void rng_rand(MKLAdaptor<RNGType> &, std::size_t,
+    typename MKLAdaptor<RNGType>::result_type *);
+
+template <typename RNGType>
+inline void beta_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, float *, float, float);
+
+template <typename RNGType>
+inline void beta_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, double *, double, double);
+
+template <typename RNGType>
+inline void cauchy_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, float *, float, float);
+
+template <typename RNGType>
+inline void cauchy_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, double *, double, double);
+
+template <typename RNGType>
+inline void exponential_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, float *, float);
+
+template <typename RNGType>
+inline void exponential_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, double *, double);
+
+template <typename RNGType>
+inline void extreme_value_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, float *, float, float);
+
+template <typename RNGType>
+inline void extreme_value_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, double *, double, double);
+
+template <typename RNGType>
+inline void gamma_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, float *, float, float);
+
+template <typename RNGType>
+inline void gamma_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, double *, double, double);
+
+template <typename RNGType>
+inline void laplace_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, float *, float, float);
+
+template <typename RNGType>
+inline void laplace_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, double *, double, double);
+
+template <typename RNGType>
+inline void lognormal_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, float *, float, float);
+
+template <typename RNGType>
+inline void lognormal_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, double *, double, double);
+
+template <typename RNGType>
+inline void normal_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, float *r, float, float);
+
+template <typename RNGType>
+inline void normal_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, double *r, double, double);
+
+template <typename RNGType>
+inline void normal_mv_distribution(MKLAdaptor<RNGType> &, std::size_t, float *,
+    std::size_t, const float *, const float *);
+
+template <typename RNGType>
+inline void normal_mv_distribution(MKLAdaptor<RNGType> &, std::size_t,
+    double *, std::size_t, const double *, const double *);
+
+template <typename RNGType>
+inline void rayleigh_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, float *, float);
+
+template <typename RNGType>
+inline void rayleigh_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, double *, double);
+
+template <typename RNGType>
+inline void u01_distribution(MKLAdaptor<RNGType> &, std::size_t, float *);
+
+template <typename RNGType>
+inline void u01_distribution(MKLAdaptor<RNGType> &, std::size_t, double *);
+
+template <typename RNGType>
+inline void uniform_real_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, float *, float, float);
+
+template <typename RNGType>
+inline void uniform_real_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, double *, double, double);
+
+template <typename RNGType>
+inline void weibull_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, float *, float, float);
+
+template <typename RNGType>
+inline void weibull_distribution(
+    MKLAdaptor<RNGType> &, std::size_t, double *, double, double);
+
+#endif // VSMC_HAS_RUNTIME_LIBRARY
 
 #endif // VSMC_HAS_MKL
 

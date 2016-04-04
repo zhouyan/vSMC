@@ -63,6 +63,9 @@
 
 #if VSMC_HAS_MKL
 #include <vsmc/rng/mkl.hpp>
+#if VSMC_HAS_RUNTIME_LIBRARY
+#include <vsmc/rng/mkl_brng.hpp>
+#endif
 #endif
 
 namespace vsmc

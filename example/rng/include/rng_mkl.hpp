@@ -36,7 +36,7 @@
 
 #include <vsmc/rng/mkl.hpp>
 
-#ifdef VSMC_HAS_RUNTIME
+#if VSMC_HAS_RUNTIME_LIBRARY
 #include <vsmc/rng/mkl_brng.hpp>
 #endif
 

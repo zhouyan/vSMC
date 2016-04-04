@@ -31,13 +31,9 @@
 
 #include "rng_mkl.hpp"
 
-#ifdef VSMC_DEFINE_RNG_MKL_BRNG
-#undef VSMC_DEFINE_RNG_MKL_BRNG
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
 #endif
-
-#define VSMC_DEFINE_RNG_MKL_BRNG(RNGType, name)                               \
-    int name = vsmc::mkl_brng<RNGType>();                                     \
-    VSMC_RNG_MKL_PROPERTIES(name);
 
 int main(int argc, char **argv)
 {
@@ -93,8 +89,12 @@ int main(int argc, char **argv)
     VSMC_RNG_MKL_PROPERTIES(VSL_BRNG_PHILOX4X32X10);
 #endif
 
-#ifdef VSMC_HAS_RUNTIME
-#include <vsmc/rng/internal/mkl_brng_defines.hpp>
+#define VSMC_RNG_DEFINE_MACRO(RNGType, name)                                  \
+    int name = vsmc::mkl_brng<RNGType>();                                     \
+    VSMC_RNG_MKL_PROPERTIES(name);
+
+#if VSMC_HAS_RUNTIME_LIBRARY
+#include <vsmc/rng/internal/rng_define_macro.hpp>
 #endif
 
     VSMC_RNG_TEST_PRE(rng_mkl);
