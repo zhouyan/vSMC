@@ -114,10 +114,7 @@ inline bool is_nullptr(T ptr)
 }
 
 template <typename T>
-class BufferSize
-    : public std::integral_constant<std::size_t, sizeof(T) < sizeof(double) ?
-              1024 * sizeof(double) / sizeof(T) :
-              1024 * sizeof(T) / sizeof(double)>
+class BufferSize : public std::integral_constant<std::size_t, 8192 / sizeof(T)>
 {
 }; // class BufferSize;
 
