@@ -64,13 +64,21 @@
 #define VSMC_ALIGNMENT_MIN 16
 #endif
 
+/// \brief The cache line size
+/// \ingroup Config
+#ifndef VSMC_ALIGNMENT_CACHE
+#define VSMC_ALIGNMENT_CACHE 64
+#endif
+
 #if VSMC_ALIGNMENT < VSMC_ALIGNMENT_MIN
 #undef VSMC_ALIGNEMNT
 #define VSMC_ALIGNMENT VSMC_ALIGNMENT_MIN
 #endif
 
-#define VSMC_ALIGNMENT_TRAIT(T)                                               \
-    alignof(T) > VSMC_ALIGNMENT ? alignof(T) : VSMC_ALIGNMENT
+#if VSMC_ALIGNMENT_CACHE < VSMC_ALIGNMENT_MIN
+#undef VSMC_ALIGNEMNT_CACHE
+#define VSMC_ALIGNMENT_CACHE VSMC_ALIGNMENT_MIN
+#endif
 
 /// \brief Default AlignedMemory type
 /// \ingroup Config
@@ -151,16 +159,32 @@ class AlignmentTraitImpl
 {
     public:
     static constexpr std::size_t value =
-        (alignof(T) > VSMC_ALIGNMENT_MIN ? alignof(T) : VSMC_ALIGNMENT_MIN);
+        alignof(T) > VSMC_ALIGNMENT_MIN ? alignof(T) : VSMC_ALIGNMENT_MIN;
 }; // class AlignmentTraitImpl
 
 template <typename T>
 class AlignmentTraitImpl<T, true>
 {
     public:
-    static constexpr std::size_t value =
-        (alignof(T) > VSMC_ALIGNMENT ? alignof(T) : VSMC_ALIGNMENT);
+    static constexpr std::size_t
+        value = alignof(T) > VSMC_ALIGNMENT ? alignof(T) : VSMC_ALIGNMENT;
 }; // class AlignmentTraitImpl
+
+template <typename T, bool = std::is_scalar<T>::value>
+class AlignmentCacheTraitImpl
+{
+    public:
+    static constexpr std::size_t value =
+        alignof(T) > VSMC_ALIGNMENT_MIN ? alignof(T) : VSMC_ALIGNMENT_MIN;
+}; // class AlignmentCacheTraitImpl
+
+template <typename T>
+class AlignmentCacheTraitImpl<T, true>
+{
+    public:
+    static constexpr std::size_t value =
+        alignof(T) > VSMC_ALIGNMENT_CACHE ? alignof(T) : VSMC_ALIGNMENT_CACHE;
+}; // class AlignmentCacheTraitImpl
 
 } // namespace vsmc::internal
 
@@ -169,12 +193,25 @@ class AlignmentTraitImpl<T, true>
 /// \details
 /// For scalar type, such as `double`, `value` is VSMC_ALIGNMENT, which shall
 /// be big enough for SIME aligned operations. For other types, it return
-/// `VSMC_ALIGNMENT_MIN` if `alignof(T)` is smaller, otherwise `alignof(T)`
+/// `VSMC_ALIGNMENT_MIN` if `alignof(T)` is smaller, otherwise `alignof(T)`.
 template <typename T>
 class AlignmentTrait : public std::integral_constant<std::size_t,
                            internal::AlignmentTraitImpl<T>::value>
 {
 }; // class AlignmentTrait
+
+/// \brief Alignment of a given type
+///
+/// \details
+/// For scalar type, such as `double`, `value` is VSMC_ALIGNMENT_CACHE, which
+/// shall be big enough for cache line aligned operations. For other types, it
+/// return `VSMC_ALIGNMENT_MIN` if `alignof(T)` is smaller, otherwise
+/// `alignof(T)`.
+template <typename T>
+class AlignmentCacheTrait : public std::integral_constant<std::size_t,
+                                internal::AlignmentCacheTraitImpl<T>::value>
+{
+}; // class AlignmentCacheTrait
 
 /// \brief Aligned memory using `std::malloc` and `std::free`
 /// \ingroup AlignedMemory
@@ -187,8 +224,11 @@ class AlignedMemorySTD
     public:
     static void *aligned_malloc(std::size_t n, std::size_t alignment) noexcept
     {
-        void *orig_ptr =
-            std::malloc((n > 0 ? n : 1) + alignment + sizeof(void *));
+        std::size_t bytes = (n > 0 ? n : 1) + alignment + sizeof(void *);
+        if (bytes < n)
+            return nullptr;
+
+        void *orig_ptr = std::malloc(bytes);
         if (orig_ptr == nullptr)
             return nullptr;
 
@@ -376,8 +416,13 @@ class Allocator : public std::allocator<T>
 
     pointer allocate(size_type n, const void * = nullptr)
     {
-        pointer ptr = static_cast<pointer>(Memory::aligned_malloc(
-            (n > 0 ? n : 1) * sizeof(value_type), Alignment));
+        n = std::max(n, static_cast<size_type>(1));
+        size_type bytes = n * sizeof(value_type);
+        if (bytes < n)
+            throw std::bad_alloc();
+
+        pointer ptr =
+            static_cast<pointer>(Memory::aligned_malloc(bytes, Alignment));
         if (ptr == nullptr)
             throw std::bad_alloc();
 
@@ -418,6 +463,15 @@ class Allocator : public std::allocator<T>
     }
 }; // class Allocator
 
+/// \brief Aligned allocator default to cache line alignment
+/// \ingroup AlignedMemory
+template <typename T, bool ConstructScalar = VSMC_CONSTRUCT_SCALAR != 0,
+    std::size_t Alignment = AlignmentCacheTrait<T>::value,
+    typename Memory = AlignedMemory>
+using AllocatorCache = Allocator<T, ConstructScalar, Alignment, Memory>;
+
+/// \brief Aligned allocator specialization of `void`
+/// \ingroup AlignedMemory
 template <bool ConstructScalar, std::size_t Alignment, typename Memory>
 class Allocator<void, ConstructScalar, Alignment, Memory>
 {
@@ -431,6 +485,8 @@ class Allocator<void, ConstructScalar, Alignment, Memory>
     };
 }; // class Allocator
 
+/// \brief Aligned allocator specialization of `const void`
+/// \ingroup AlignedMemory
 template <bool ConstructScalar, std::size_t Alignment, typename Memory>
 class Allocator<const void, ConstructScalar, Alignment, Memory>
 {
@@ -444,6 +500,8 @@ class Allocator<const void, ConstructScalar, Alignment, Memory>
     };
 }; // class Allocator
 
+/// \brief Comparision of two Allocator
+/// \ingroup AlignedMemory
 template <typename T1, typename T2, bool ConstructScalar,
     std::size_t Alignment, typename Memory>
 inline bool operator==(
@@ -453,6 +511,8 @@ inline bool operator==(
     return true;
 }
 
+/// \brief Comparision of two Allocator
+/// \ingroup AlignedMemory
 template <typename T1, typename T2, bool ConstructScalar,
     std::size_t Alignment, typename Memory>
 inline bool operator!=(
@@ -486,6 +546,7 @@ template <typename T, typename Alloc = Allocator<T>>
 using Vector = std::vector<T, Alloc>;
 
 /// \brief std::array with proper alignment
+/// \ingroup AlignedMemory
 template <typename T, std::size_t N,
     std::size_t Alignment = AlignmentTrait<T>::value>
 class alignas(Alignment) Array : public std::array<T, N>

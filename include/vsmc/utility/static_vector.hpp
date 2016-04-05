@@ -45,14 +45,14 @@
 
 #if VSMC_HAS_TBB
 #define VSMC_BUFFER(var, T, n)                                                \
-    static ::tbb::combinable<Vector<T>> var##_tls;                            \
-    Vector<T> &var = var##_tls.local();                                       \
+    static ::tbb::combinable<Vector<T, AllocatorCache<T>>> var##_tls;         \
+    auto &var = var##_tls.local();                                            \
     var.resize(static_cast<std::size_t>(n));
-#else
+#else // VSMC_HAS_TBB
 #define VSMC_BUFFER(var, T, n)                                                \
     StaticVector<T, internal::BufferSize<T>::value> var(                      \
         static_cast<std::size_t>(n));
-#endif
+#endif // VSMC_HAS_TBB
 
 namespace vsmc
 {
