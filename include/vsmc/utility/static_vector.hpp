@@ -35,7 +35,7 @@
 #include <vsmc/internal/basic.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
 
-#if VSMC_HAS_TBB
+#if VSMC_USE_TBB_TLS
 #include <tbb/combinable.h>
 #endif
 
@@ -43,21 +43,24 @@
     VSMC_RUNTIME_ASSERT(                                                      \
         (pos < size()), "**StaticVectorN::at INDEX OUT OF RANGE")
 
-#if VSMC_HAS_TBB
+#if VSMC_USE_TBB_TLS
 #define VSMC_BUFFER(var, T, n)                                                \
-    static ::tbb::combinable<Vector<T, AllocatorCache<T>>> var##_tls;         \
+    static ::tbb::combinable<Vector<T,                                        \
+        Allocator<T, (AlignmentTrait<T>::value < 64 ? 64 : AlignmentTrait<    \
+                                                               T>::value)>>>  \
+        var##_tls;                                                            \
     auto &var = var##_tls.local();                                            \
     var.resize(static_cast<std::size_t>(n));
-#else // VSMC_HAS_TBB
+#else // VSMC_USE_TBB_TLS
 #define VSMC_BUFFER(var, T, n)                                                \
     StaticVector<T, internal::BufferSize<T>::value> var(                      \
         static_cast<std::size_t>(n));
-#endif // VSMC_HAS_TBB
+#endif // VSMC_USE_TBB_TLS
 
 namespace vsmc
 {
 
-#if VSMC_HAS_TBB
+#if VSMC_USE_TBB_TLS
 namespace internal
 {
 
@@ -73,7 +76,7 @@ inline Vector<T> &buffer(std::size_t n)
 }
 
 } // namespace internal
-#endif // VSMC_HAS_TBB
+#endif // VSMC_USE_TBB_TLS
 
 /// \brief Vector with statically allocated space
 /// \ingroup StaticVector

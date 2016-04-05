@@ -35,14 +35,14 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/engine.hpp>
 #include <vsmc/rng/seed.hpp>
-#if VSMC_HAS_TBB
+#if VSMC_USE_TBB_TLS
 #include <tbb/combinable.h>
 #endif
 
 /// \brief Default RNG set type
 /// \ingroup Config
 #ifndef VSMC_RNG_SET_TYPE
-#if VSMC_HAS_TBB
+#if VSMC_USE_TBB_TLS
 #define VSMC_RNG_SET_TYPE RNGSetTBB
 #else
 #define VSMC_RNG_SET_TYPE RNGSetVector
@@ -112,7 +112,7 @@ class RNGSetVector
     Vector<rng_type> rng_;
 }; // class RNGSetVector
 
-#if VSMC_HAS_TBB
+#if VSMC_USE_TBB_TLS
 
 /// \brief Thread-local storage RNG set using tbb::combinable
 /// \ingroup RNG
@@ -146,7 +146,7 @@ class RNGSetTBB
     ::tbb::combinable<rng_type> rng_;
 }; // class RNGSetTBB
 
-#endif // VSMC_HAS_TBB
+#endif // VSMC_USE_TBB_TLS
 
 template <typename RNGType>
 using RNGSet = VSMC_RNG_SET_TYPE<RNGType>;

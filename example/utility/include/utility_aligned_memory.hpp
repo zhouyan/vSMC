@@ -36,17 +36,13 @@
 #include <vsmc/utility/aligned_memory.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
-template <typename T, bool ConstructScalar, std::size_t Alignment,
-    typename Memory>
+template <typename T, std::size_t Alignment, typename Memory>
 inline void aligned_memory_test(std::size_t N, std::size_t m,
     const std::string &tname, const std::string &memory)
 {
     std::cout << std::string(80, '=') << std::endl;
     std::cout << std::setw(60) << std::left << "Type name" << std::setw(20)
               << std::right << tname << std::endl;
-    std::cout << std::setw(60) << std::left << "ConstructScalar"
-              << std::setw(20) << std::right
-              << (ConstructScalar ? "True" : "False") << std::endl;
     std::cout << std::setw(60) << std::left << "Alignment" << std::setw(20)
               << std::right << Alignment << std::endl;
     std::cout << std::setw(60) << std::left << "Memory" << std::setw(20)
@@ -62,7 +58,7 @@ inline void aligned_memory_test(std::size_t N, std::size_t m,
     vsmc::RNG rng;
     std::uniform_int_distribution<std::size_t> runif(N / 2, N * 2);
 
-    using Alloc = vsmc::Allocator<T, ConstructScalar, Alignment, Memory>;
+    using Alloc = vsmc::Allocator<T, Alignment, Memory>;
     using Vec = std::vector<T, Alloc>;
     Alloc alloc;
 
@@ -97,11 +93,6 @@ inline void aligned_memory_test(std::size_t N, std::size_t m,
         for (std::size_t j = 0; j != n; ++j)
             flag = flag && vsmc::internal::is_equal(vec[j], zero);
         zeroed = zeroed && flag;
-        if (ConstructScalar) {
-            if (!flag)
-                std::cout << "Failed initialization (vector(n))" << std::endl;
-            passed = passed && flag;
-        }
 
         T v = static_cast<T>(123.456);
         watch_val.start();
@@ -138,41 +129,31 @@ inline void aligned_memory_test(std::size_t N, std::size_t m,
     std::cout << std::string(80, '-') << std::endl;
 }
 
-template <typename T, bool ConstructScalar, std::size_t Alignment>
+template <typename T, std::size_t Alignment>
 inline void aligned_memory_test(
     std::size_t n, std::size_t m, const std::string &tname)
 {
-    aligned_memory_test<T, ConstructScalar, Alignment, vsmc::AlignedMemorySTD>(
+    aligned_memory_test<T, Alignment, vsmc::AlignedMemorySTD>(
         n, m, tname, "AlignedMemorySTD");
 #if VSMC_HAS_POSIX || defined(VSMC_MSVC)
-    aligned_memory_test<T, ConstructScalar, Alignment, vsmc::AlignedMemorySYS>(
+    aligned_memory_test<T, Alignment, vsmc::AlignedMemorySYS>(
         n, m, tname, "AlignedMemorySYS");
 #endif
 #if VSMC_HAS_TBB_MALLOC
-    aligned_memory_test<T, ConstructScalar, Alignment, vsmc::AlignedMemoryTBB>(
+    aligned_memory_test<T, Alignment, vsmc::AlignedMemoryTBB>(
         n, m, tname, "AlignedMemoryTBB");
 #endif
 #if VSMC_HAS_MKL
-    aligned_memory_test<T, ConstructScalar, Alignment, vsmc::AlignedMemoryMKL>(
+    aligned_memory_test<T, Alignment, vsmc::AlignedMemoryMKL>(
         n, m, tname, "AlignedMemoryMKL");
 #endif
-}
-
-template <typename T, bool ConstructScalar>
-inline void aligned_memory_test(
-    std::size_t n, std::size_t m, const std::string &tname)
-{
-    // aligned_memory_test<T, ConstructScalar, 8>(n, m, tname);
-    // aligned_memory_test<T, ConstructScalar, 16>(n, m, tname);
-    aligned_memory_test<T, ConstructScalar, 32>(n, m, tname);
 }
 
 template <typename T>
 inline void aligned_memory_test(
     std::size_t n, std::size_t m, const std::string &tname)
 {
-    aligned_memory_test<T, true>(n, m, tname);
-    aligned_memory_test<T, false>(n, m, tname);
+    aligned_memory_test<T, 32>(n, m, tname);
 }
 
 #endif // VSMC_EXAMPLE_UTILITY_ALIGNED_MEMORY_HPP

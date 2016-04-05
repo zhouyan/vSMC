@@ -116,6 +116,10 @@
 #define VSMC_USE_TBB VSMC_HAS_TBB
 #endif
 
+#ifndef VSMC_USE_TBB_TLS
+#define VSMC_USE_TBB_TLS VSMC_HAS_TBB
+#endif
+
 // Optional libraries
 
 #ifndef VSMC_HAS_HDF5
