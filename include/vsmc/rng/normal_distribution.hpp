@@ -233,9 +233,15 @@ inline void normal_distribution_impl(
     sqrt(nu, s.data(), s.data());
     mul(nu, const_pi_2<RealType>(), u2, u2);
     sincos(nu, u2, u1, u2);
-    mul(nu, stddev, s.data(), s.data());
-    fma(nu, s.data(), u1, mean, u1);
-    fma(nu, s.data(), u2, mean, u2);
+    if (!is_equal(stddev, static_cast<RealType>(1)))
+        mul(nu, stddev, s.data(), s.data());
+    if (!is_equal(mean, static_cast<RealType>(0))) {
+        fma(nu, s.data(), u1, mean, u1);
+        fma(nu, s.data(), u2, mean, u2);
+    } else {
+        mul(nu, s.data(), u1, u1);
+        mul(nu, s.data(), u2, u2);
+    }
 }
 
 } // namespace vsmc::internal
