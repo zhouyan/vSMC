@@ -74,10 +74,10 @@
 #ifndef VSMC_ALIGNED_MEMORY_TYPE
 #if VSMC_HAS_TBB_MALLOC
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryTBB
-#elif VSMC_HAS_MKL
-#define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryMKL
 #elif VSMC_HAS_POSIX || defined(VSMC_MSVC)
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemorySYS
+#elif VSMC_HAS_MKL
+#define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryMKL
 #else
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemorySTD
 #endif

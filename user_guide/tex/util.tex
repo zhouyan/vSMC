@@ -65,14 +65,14 @@ This vector type is used throughout the library.
     \verb|AlignedMemoryTBB|
     & Use \verb|scalable_aligned_malloc| and \verb|scalable_aligned_free|.
     Defined if \verb|VSMC_HAS_TBB_MALLOC| is defined to a non-zero value. \\
-    \verb|AlignedMemoryMKL|
-    & Use \verb|mkl_malloc| and \verb|mkl_free|. Defined if \verb|VSMC_HAS_MKL|
-    is defined to a non-zero value. \\
     \verb|AlignedMemorySYS|
     & Use \verb|posix_memalign| and \verb|free| on \posix platforms. Use
     \verb|_aligned_malloc| and \verb|_aligned_free| if using \msvc. Defined if
     \verb|VSMC_HAS_POSIX| is defined to a non-zero value, or the \msvc compiler
     is detected. \\
+    \verb|AlignedMemoryMKL|
+    & Use \verb|mkl_malloc| and \verb|mkl_free|. Defined if \verb|VSMC_HAS_MKL|
+    is defined to a non-zero value. \\
     \verb|AlignedMemorySTD|
     & Use \verb|std::malloc| and \verb|std::free|. Always defined. \\
     \bottomrule
