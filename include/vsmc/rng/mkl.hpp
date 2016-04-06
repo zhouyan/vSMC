@@ -1314,6 +1314,22 @@ inline void u01_distribution(
 }
 
 template <MKL_INT BRNG, int Bits>
+inline void u01_co_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r)
+{
+    internal::size_check<MKL_INT>(n, "u01_co_distribution)");
+    rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void u01_co_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r)
+{
+    internal::size_check<MKL_INT>(n, "u01_co_distribution)");
+    rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
+}
+
+template <MKL_INT BRNG, int Bits>
 inline void uniform_real_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {

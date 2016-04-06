@@ -40,39 +40,7 @@ int main(int argc, char **argv)
     if (argc > 2)
         M = static_cast<std::size_t>(std::atoi(argv[2]));
 
-    const int nwid = 30;
-    const int swid = 5;
-    const int twid = 15;
-    const std::size_t lwid = nwid + swid + twid * 7;
-
-    std::cout << std::string(lwid, '=') << std::endl;
-    std::cout << std::left << std::setw(nwid) << "RNGType";
-    std::cout << std::right << std::setw(swid) << "Size";
-    std::cout << std::right << std::setw(twid) << "ns (Loop)";
-    std::cout << std::right << std::setw(twid) << "ns (Batch)";
-    std::cout << std::right << std::setw(twid) << "ns (U01, Loop)";
-    std::cout << std::right << std::setw(twid) << "ns (U01, Batch)";
-    std::cout << std::right << std::setw(twid) << "GB/s (Loop)";
-    std::cout << std::right << std::setw(twid) << "GB/s (Batch)";
-    std::cout << std::right << std::setw(twid) << "Deterministics";
-    std::cout << std::endl;
-    std::cout << std::string(lwid, '-') << std::endl;
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#ifdef VSMC_RNG_DEFINE_MACRO_MKL
-#undef VSMC_RNG_DEFINE_MACRO_MKL
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    rng_engine_test<RNGType>(N, M, #Name);
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-#include <vsmc/rng/internal/rng_define_macro_mkl.hpp>
-
-    std::cout << std::string(lwid, '-') << std::endl;
+    rng_engine(N, M);
 
     return 0;
 }

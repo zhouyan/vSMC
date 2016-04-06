@@ -36,57 +36,48 @@
 #include <vsmc/utility/stop_watch.hpp>
 
 template <typename RNGType>
-inline void rng_engine_test(
-    std::size_t N, std::size_t M, const std::string &name)
+inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
+    int twid, const std::string &name)
 {
     RNGType rng;
     RNGType rng1;
     RNGType rng2;
-    vsmc::Vector<typename RNGType::result_type> r1(N);
-    vsmc::Vector<typename RNGType::result_type> r2(N);
-    vsmc::Vector<double> r3(N);
-    vsmc::Vector<double> r4(N);
+    vsmc::Vector<typename RNGType::result_type> r1;
+    vsmc::Vector<typename RNGType::result_type> r2;
+    r1.reserve(N);
+    r2.reserve(N);
     vsmc::StopWatch watch1;
     vsmc::StopWatch watch2;
-    vsmc::StopWatch watch3;
-    vsmc::StopWatch watch4;
     bool passed = true;
 
-    std::uniform_int_distribution<std::size_t> runif(0, N);
+    std::uniform_int_distribution<std::size_t> runif(N / 2, N);
+    std::size_t num = 0;
     for (std::size_t i = 0; i != M; ++i) {
+        std::size_t K = runif(rng);
+        num += K;
+        r1.resize(K);
+        r2.resize(K);
+
         watch1.start();
-        for (std::size_t j = 0; j != N; ++j)
+        for (std::size_t j = 0; j != K; ++j)
             r1[j] = rng1();
         watch1.stop();
 
         watch2.start();
-        vsmc::rng_rand(rng2, N, r2.data());
+        vsmc::rng_rand(rng2, K, r2.data());
         watch2.stop();
         passed = passed && r1 == r2;
 
-        vsmc::U01Distribution<double> u01;
-        watch3.start();
-        for (std::size_t j = 0; j != N; ++j)
-            r3[j] = u01(rng);
-        watch3.stop();
-
-        watch4.start();
-        u01(rng, N, r4.data());
-        watch4.stop();
-
-        std::fill(r1.begin(), r1.end(), 0);
-        std::fill(r2.begin(), r2.end(), 0);
         std::stringstream ss;
         ss << rng;
-        vsmc::rng_rand(rng, N, r1.data());
+        vsmc::rng_rand(rng, K, r1.data());
         ss >> rng;
-        vsmc::rng_rand(rng, N, r2.data());
+        vsmc::rng_rand(rng, K, r2.data());
         passed = passed && r1 == r2;
 
-        std::size_t k = runif(rng);
-        rng1.discard(static_cast<unsigned>(k));
+        rng1.discard(static_cast<unsigned>(K));
         typename RNGType::result_type next = rng1();
-        for (std::size_t j = 0; j != k; ++j)
+        for (std::size_t j = 0; j != K; ++j)
             rng2();
         bool find = false;
         for (std::size_t j = 0; j != 2; ++j)
@@ -94,14 +85,8 @@ inline void rng_engine_test(
         passed = passed && find;
     }
 
-    const int nwid = 30;
-    const int swid = 5;
-    const int twid = 15;
-
-    double n1 = watch1.nanoseconds() / (N * M);
-    double n2 = watch2.nanoseconds() / (N * M);
-    double u1 = watch3.nanoseconds() / (N * M);
-    double u2 = watch4.nanoseconds() / (N * M);
+    double n1 = watch1.nanoseconds() / num;
+    double n2 = watch2.nanoseconds() / num;
     double g1 = sizeof(typename RNGType::result_type) / n1;
     double g2 = sizeof(typename RNGType::result_type) / n2;
     std::string pass = passed ? "Passed" : "Failed";
@@ -110,12 +95,45 @@ inline void rng_engine_test(
     std::cout << std::right << std::setw(swid) << sizeof(RNGType);
     std::cout << std::right << std::setw(twid) << std::fixed << n1;
     std::cout << std::right << std::setw(twid) << std::fixed << n2;
-    std::cout << std::right << std::setw(twid) << std::fixed << u1;
-    std::cout << std::right << std::setw(twid) << std::fixed << u2;
     std::cout << std::right << std::setw(twid) << std::fixed << g1;
     std::cout << std::right << std::setw(twid) << std::fixed << g2;
     std::cout << std::right << std::setw(twid) << pass;
     std::cout << std::endl;
+}
+
+inline void rng_engine(std::size_t N, std::size_t M)
+{
+    const int nwid = 30;
+    const int swid = 5;
+    const int twid = 15;
+    const std::size_t lwid = nwid + swid + twid * 5;
+
+    std::cout << std::string(lwid, '=') << std::endl;
+    std::cout << std::left << std::setw(nwid) << "RNGType";
+    std::cout << std::right << std::setw(swid) << "Size";
+    std::cout << std::right << std::setw(twid) << "ns (Loop)";
+    std::cout << std::right << std::setw(twid) << "ns (Batch)";
+    std::cout << std::right << std::setw(twid) << "GB/s (Loop)";
+    std::cout << std::right << std::setw(twid) << "GB/s (Batch)";
+    std::cout << std::right << std::setw(twid) << "Deterministics";
+    std::cout << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#ifdef VSMC_RNG_DEFINE_MACRO_MKL
+#undef VSMC_RNG_DEFINE_MACRO_MKL
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    rng_engine<RNGType>(N, M, nwid, swid, twid, #Name);
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+#include <vsmc/rng/internal/rng_define_macro_mkl.hpp>
+
+    std::cout << std::string(lwid, '-') << std::endl;
 }
 
 #endif // VSMC_EXAMPLE_RNG_ENGINE_HPP

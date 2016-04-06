@@ -29,63 +29,102 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/threefry.hpp>
+#include <vsmc/rng/engine.hpp>
 #include <vsmc/rng/uniform_bits_distribution.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
-inline void rng_uniform_bits_test()
+template <typename RNGType, typename UIntType>
+inline void rng_uniform_bits(std::size_t N, std::size_t M, int nwid, int swid,
+    int twid, const std::string &name)
 {
-    const std::size_t n = 1 << 16;
-    vsmc::Vector<std::uint64_t> r1(n);
-    vsmc::Vector<std::uint64_t> r2(n);
-    vsmc::Vector<std::uint64_t> r3(n);
-    vsmc::Vector<std::uint32_t> r4(n * 2);
-    vsmc::Vector<std::uint32_t> r5(n * 2);
+    RNGType rng;
+    RNGType rng1;
+    RNGType rng2;
+    vsmc::Vector<UIntType> r1;
+    vsmc::Vector<UIntType> r2;
+    r1.reserve(N);
+    r2.reserve(N);
     vsmc::StopWatch watch1;
     vsmc::StopWatch watch2;
-    vsmc::StopWatch watch3;
-    vsmc::StopWatch watch4;
-    vsmc::StopWatch watch5;
-    vsmc::Threefry4x64 rng;
     bool passed = true;
-    const std::size_t size = sizeof(std::uint64_t) * n;
 
-    rng.seed(101);
-    watch1.start();
-    vsmc::rng_rand(rng, n, r1.data());
-    watch1.stop();
+    std::uniform_int_distribution<std::size_t> runif(N / 2, N);
+    std::size_t num = 0;
+    vsmc::UniformBitsDistribution<UIntType> rubits;
+    for (std::size_t i = 0; i != M; ++i) {
+        std::size_t K = runif(rng);
+        num += K;
+        r1.resize(K);
+        r2.resize(K);
 
-    rng.seed(101);
-    watch2.start();
-    for (std::size_t i = 0; i != n; ++i)
-        r2[i] = vsmc::UniformBits<std::uint64_t>::eval(rng);
-    watch2.stop();
-    passed = passed && std::memcmp(r1.data(), r2.data(), size) == 0;
+        watch1.start();
+        for (std::size_t j = 0; j != K; ++j)
+            r1[j] = rubits(rng1);
+        watch1.stop();
 
-    rng.seed(101);
-    watch3.start();
-    vsmc::uniform_bits_distribution(rng, n, r3.data());
-    watch3.stop();
-    passed = passed && std::memcmp(r1.data(), r3.data(), size) == 0;
+        watch2.start();
+        vsmc::rng_rand(rng2, rubits, K, r2.data());
+        watch2.stop();
+        passed = passed && r1 == r2;
+    }
 
-    rng.seed(101);
-    watch4.start();
-    for (std::size_t i = 0; i != n; ++i)
-        r4[i] = vsmc::UniformBits<std::uint32_t>::eval(rng);
-    watch4.stop();
-    for (std::size_t i = 0; i != n; ++i)
-        passed = passed && static_cast<std::uint32_t>(r1[i]) == r4[i];
+    int rbits = vsmc::RNGBits<RNGType>::value;
+    int tbits = std::numeric_limits<typename RNGType::result_type>::digits;
+    int ubits = std::numeric_limits<UIntType>::digits;
+    double n1 = watch1.nanoseconds() / num;
+    double n2 = watch2.nanoseconds() / num;
+    double g1 = sizeof(UIntType) / n1;
+    double g2 = sizeof(UIntType) / n2;
+    std::string pass = passed ? "Passed" : "Failed";
 
-    rng.seed(101);
-    watch5.start();
-    vsmc::uniform_bits_distribution(rng, n * 2, r5.data());
-    watch5.stop();
-    passed = passed && std::memcmp(r1.data(), r5.data(), size) == 0;
+    std::cout << std::left << std::setw(nwid) << name;
+    std::cout << std::right << std::setw(swid) << rbits;
+    std::cout << std::right << std::setw(swid) << tbits;
+    std::cout << std::right << std::setw(swid) << ubits;
+    std::cout << std::right << std::setw(twid) << std::fixed << n1;
+    std::cout << std::right << std::setw(twid) << std::fixed << n2;
+    std::cout << std::right << std::setw(twid) << std::fixed << g1;
+    std::cout << std::right << std::setw(twid) << std::fixed << g2;
+    std::cout << std::right << std::setw(twid) << pass;
+    std::cout << std::endl;
+}
 
-    std::cout << watch1.milliseconds() << std::endl;
-    std::cout << watch2.milliseconds() << std::endl;
-    std::cout << watch3.milliseconds() << std::endl;
-    std::cout << watch4.milliseconds() << std::endl;
-    std::cout << watch5.milliseconds() << std::endl;
-    std::cout << (passed ? "Passed" : "Failed") << std::endl;
+inline void rng_uniform_bits(std::size_t N, std::size_t M)
+{
+    const int nwid = 30;
+    const int swid = 5;
+    const int twid = 15;
+    const std::size_t lwid = nwid + swid * 3 + twid * 5;
+
+    std::cout << std::string(lwid, '=') << std::endl;
+    std::cout << std::left << std::setw(nwid) << "RNGType";
+    std::cout << std::right << std::setw(swid) << "R";
+    std::cout << std::right << std::setw(swid) << "T";
+    std::cout << std::right << std::setw(swid) << "U";
+    std::cout << std::right << std::setw(twid) << "ns (Loop)";
+    std::cout << std::right << std::setw(twid) << "ns (Batch)";
+    std::cout << std::right << std::setw(twid) << "GB/s (Loop)";
+    std::cout << std::right << std::setw(twid) << "GB/s (Batch)";
+    std::cout << std::right << std::setw(twid) << "Deterministics";
+    std::cout << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#ifdef VSMC_RNG_DEFINE_MACRO_MKL
+#undef VSMC_RNG_DEFINE_MACRO_MKL
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    rng_uniform_bits<RNGType, std::uint8_t>(N, M, nwid, swid, twid, #Name);   \
+    rng_uniform_bits<RNGType, std::uint16_t>(N, M, nwid, swid, twid, #Name);  \
+    rng_uniform_bits<RNGType, std::uint32_t>(N, M, nwid, swid, twid, #Name);  \
+    rng_uniform_bits<RNGType, std::uint64_t>(N, M, nwid, swid, twid, #Name);
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+#include <vsmc/rng/internal/rng_define_macro_mkl.hpp>
+
+    std::cout << std::string(lwid, '-') << std::endl;
 }

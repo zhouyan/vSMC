@@ -140,25 +140,7 @@ inline void uniform_bits_distribution_impl(
 }
 
 template <typename UIntType, typename RNGType>
-inline void uniform_bits_distribution_impl_less(
-    RNGType &, std::size_t, UIntType *, std::false_type)
-{
-}
-
-template <typename UIntType, typename RNGType>
-inline void uniform_bits_distribution_impl_more(
-    RNGType &, std::size_t, UIntType *, std::false_type)
-{
-}
-
-template <typename UIntType, typename RNGType>
-inline void uniform_bits_distribution_impl_same(
-    RNGType &, std::size_t, UIntType *, std::false_type)
-{
-}
-
-template <typename UIntType, typename RNGType>
-inline void uniform_bits_distribution_impl_less(
+inline void uniform_bits_distribution_impl(
     RNGType &rng, std::size_t n, UIntType *r, std::true_type)
 {
     static constexpr int rbits = RNGBits<RNGType>::value;
@@ -166,53 +148,6 @@ inline void uniform_bits_distribution_impl_less(
     static constexpr std::size_t rate = ubits / rbits;
     const std::size_t m = n * rate;
     rng_rand(rng, m, reinterpret_cast<typename RNGType::result_type *>(r));
-}
-
-template <typename UIntType, typename RNGType>
-inline void uniform_bits_distribution_impl_more(
-    RNGType &rng, std::size_t n, UIntType *r, std::true_type)
-{
-    static constexpr int rbits = RNGBits<RNGType>::value;
-    static constexpr int ubits = std::numeric_limits<UIntType>::digits;
-    static constexpr std::size_t rate = rbits / ubits;
-    const std::size_t m = n / rate;
-    const std::size_t l = n % rate;
-    rng_rand(rng, m, reinterpret_cast<typename RNGType::result_type *>(r));
-    if (l > 0) {
-        r += m * rate;
-        n -= m * rate;
-        uniform_bits_distribution_impl(rng, l, r, std::false_type());
-    }
-}
-
-template <typename UIntType, typename RNGType>
-inline void uniform_bits_distribution_impl_same(
-    RNGType &rng, std::size_t n, UIntType *r, std::true_type)
-{
-    rng_rand(rng, n, reinterpret_cast<typename RNGType::result_type *>(r));
-}
-
-template <typename UIntType, typename RNGType>
-inline void uniform_bits_distribution_impl(
-    RNGType &rng, std::size_t n, UIntType *r, std::true_type)
-{
-    static constexpr int rbits = RNGBits<RNGType>::value;
-    static constexpr int ubits = std::numeric_limits<UIntType>::digits;
-    static constexpr std::uintptr_t alignment =
-        alignof(typename RNGType::result_type);
-
-    while (reinterpret_cast<std::uintptr_t>(r) % alignment != 0) {
-        *r = UniformBits<UIntType>::eval(rng);
-        ++r;
-        --n;
-    }
-
-    uniform_bits_distribution_impl_less(
-        rng, n, r, std::integral_constant<bool, (rbits < ubits)>());
-    uniform_bits_distribution_impl_more(
-        rng, n, r, std::integral_constant<bool, (rbits > ubits)>());
-    uniform_bits_distribution_impl_same(
-        rng, n, r, std::integral_constant<bool, (rbits == ubits)>());
 }
 
 } // namespace vsmc::internal
@@ -234,10 +169,10 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
 
     internal::uniform_bits_distribution_impl(
         rng, n, r,
-        std::integral_constant<
-            bool, (mbits == 0 && rbits == tbits &&
-                      (ubits % tbits == 0 || tbits % ubits == 0) &&
-                      (ualign % talign == 0 || talign % ualign == 0))>());
+        std::integral_constant<bool,
+            (mbits == 0 && rbits == tbits && ubits >= tbits &&
+                                   ubits % tbits == 0 && ualign >= talign &&
+                                   ualign % talign == 0)>());
 }
 
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(UniformBits, uniform_bits, UIntType)

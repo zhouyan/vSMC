@@ -31,9 +31,16 @@
 
 #include "rng_uniform_bits.hpp"
 
-int main()
+int main(int argc, char **argv)
 {
-    rng_uniform_bits_test();
+    std::size_t N = 10000;
+    if (argc > 1)
+        N = static_cast<std::size_t>(std::atoi(argv[1]));
+    std::size_t M = 100;
+    if (argc > 2)
+        M = static_cast<std::size_t>(std::atoi(argv[2]));
+
+    rng_uniform_bits(N, M);
 
     return 0;
 }

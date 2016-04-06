@@ -40,24 +40,5 @@ int main(int argc, char **argv)
     if (argc > 2)
         M = static_cast<std::size_t>(std::atoi(argv[2]));
 
-    rng_distribution_test_beta(N, M);
-    rng_distribution_test_cauchy(N, M);
-    rng_distribution_test_chi_squared(N, M);
-    rng_distribution_test_exponential(N, M);
-    rng_distribution_test_extreme_value(N, M);
-    rng_distribution_test_fisher_f(N, M);
-    rng_distribution_test_gamma(N, M);
-    rng_distribution_test_laplace(N, M);
-    rng_distribution_test_levy(N, M);
-    rng_distribution_test_logistic(N, M);
-    rng_distribution_test_lognormal(N, M);
-    rng_distribution_test_normal(N, M);
-    rng_distribution_test_pareto(N, M);
-    rng_distribution_test_rayleigh(N, M);
-    rng_distribution_test_student_t(N, M);
-    rng_distribution_test_u01(N, M);
-    rng_distribution_test_uniform_real(N, M);
-    rng_distribution_test_weibull(N, M);
-
     return 0;
 }
