@@ -96,6 +96,18 @@ inline bool is_equal(const T &a, const T &b)
 #endif
 
 template <typename T>
+inline bool is_zero(const T &a)
+{
+    return is_equal(a, static_cast<T>(0));
+}
+
+template <typename T>
+inline bool is_one(const T &a)
+{
+    return is_equal(a, static_cast<T>(1));
+}
+
+template <typename T>
 inline bool is_nullptr(T ptr, std::true_type)
 {
     return ptr == nullptr;

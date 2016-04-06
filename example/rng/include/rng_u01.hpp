@@ -35,6 +35,7 @@
 #include <vsmc/rng/engine.hpp>
 #include <vsmc/rng/u01.hpp>
 #include <vsmc/rngc/u01.h>
+#include "rng_dist.hpp"
 
 #define VSMC_DEFINE_RNGC_U01_LR_TEST(                                         \
     ubits, fsuffix, lr, Left, Right, RealType)                                \

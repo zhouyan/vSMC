@@ -43,23 +43,39 @@ inline void rng_engine_test(std::size_t n, const std::string &name)
     RNGType rng2;
     vsmc::Vector<typename RNGType::result_type> r1(n * 2, 0);
     vsmc::Vector<typename RNGType::result_type> r2(n * 2, 0);
+    vsmc::Vector<double> r3(n * 2);
+    vsmc::Vector<double> r4(n * 2);
     vsmc::StopWatch watch1;
     vsmc::StopWatch watch2;
+    vsmc::StopWatch watch3;
+    vsmc::StopWatch watch4;
     bool passed = true;
-    std::size_t number = 0;
+    std::size_t num = 0;
+
     std::uniform_int_distribution<std::size_t> runif(n, n * 2 - 1);
     for (std::size_t i = 0; i != 10; ++i) {
         std::size_t m = runif(rng);
-        number += m;
+        num += m;
 
         watch1.start();
         for (std::size_t j = 0; j != m; ++j)
             r1[j] = rng1();
         watch1.stop();
+
         watch2.start();
         vsmc::rng_rand(rng2, m, r2.data());
         watch2.stop();
         passed = passed && r1 == r2;
+
+        vsmc::U01Distribution<double> u01;
+        watch3.start();
+        for (std::size_t j = 0; j != m; ++j)
+            r3[j] = u01(rng);
+        watch3.stop();
+
+        watch4.start();
+        u01(rng, m, r4.data());
+        watch4.stop();
 
         std::stringstream ss;
         ss << rng;
@@ -82,20 +98,22 @@ inline void rng_engine_test(std::size_t n, const std::string &name)
     const int swid = 5;
     const int twid = 15;
 
-    double n1 = number / watch1.nanoseconds();
-    double n2 = number / watch2.nanoseconds();
-    double g1 =
-        number * sizeof(typename RNGType::result_type) / watch1.nanoseconds();
-    double g2 =
-        number * sizeof(typename RNGType::result_type) / watch2.nanoseconds();
+    double n1 = num / watch1.seconds();
+    double n2 = num / watch2.seconds();
+    double u1 = num / watch3.seconds();
+    double u2 = num / watch4.seconds();
+    double g1 = n1 * sizeof(typename RNGType::result_type);
+    double g2 = n2 * sizeof(typename RNGType::result_type);
     std::string pass = passed ? "Passed" : "Failed";
 
     std::cout << std::left << std::setw(nwid) << name;
     std::cout << std::right << std::setw(swid) << sizeof(RNGType);
-    std::cout << std::right << std::setw(twid) << std::fixed << n1;
-    std::cout << std::right << std::setw(twid) << std::fixed << n2;
-    std::cout << std::right << std::setw(twid) << std::fixed << g1;
-    std::cout << std::right << std::setw(twid) << std::fixed << g2;
+    std::cout << std::right << std::setw(twid) << std::fixed << n1 / 1e9;
+    std::cout << std::right << std::setw(twid) << std::fixed << n2 / 1e9;
+    std::cout << std::right << std::setw(twid) << std::fixed << u1 / 1e9;
+    std::cout << std::right << std::setw(twid) << std::fixed << u2 / 1e9;
+    std::cout << std::right << std::setw(twid) << std::fixed << g1 / 1e9;
+    std::cout << std::right << std::setw(twid) << std::fixed << g2 / 1e9;
     std::cout << std::right << std::setw(twid) << pass;
     std::cout << std::endl;
 }

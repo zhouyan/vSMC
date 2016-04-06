@@ -29,9 +29,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define RNG_DIST_STREAM(stream, n, r, param)                                  \
+    stream.uniform(static_cast<MKL_INT>(n), r.data(), 0, 1)
+
 #include "rng_u01.hpp"
 #include <vsmc/rng/u01_distribution.hpp>
-#include "rng_dist.hpp"
 
 int main(int argc, char **argv)
 {

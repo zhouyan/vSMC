@@ -272,40 +272,64 @@ inline void fma(std::size_t n, const T *a, const T *b, const T *c, T *y)
 template <typename T>
 inline void fma(std::size_t n, const T *a, const T *b, T c, T *y)
 {
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = a[i] * b[i] + c;
+    if (internal::is_zero(c)) {
+        mul(n, a, b, y);
+    } else {
+        for (std::size_t i = 0; i != n; ++i)
+            y[i] = a[i] * b[i] + c;
+    }
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i * b + c_i\f$.
 template <typename T>
 inline void fma(std::size_t n, const T *a, T b, const T *c, T *y)
 {
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = a[i] * b + c[i];
+    if (internal::is_one(b)) {
+        add(n, a, c, y);
+    } else {
+        for (std::size_t i = 0; i != n; ++i)
+            y[i] = a[i] * b + c[i];
+    }
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i * b + c\f$.
 template <typename T>
 inline void fma(std::size_t n, const T *a, T b, T c, T *y)
 {
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = a[i] * b + c;
+    if (internal::is_one(b) && internal::is_zero(c)) {
+        std::copy_n(a, n, y);
+    } else if (internal::is_one(b)) {
+        add(n, a, c, y);
+    } else if (internal::is_zero(c)) {
+        mul(n, a, b, y);
+    } else {
+        for (std::size_t i = 0; i != n; ++i)
+            y[i] = a[i] * b + c;
+    }
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a * b_i + c_i\f$.
 template <typename T>
 inline void fma(std::size_t n, T a, const T *b, const T *c, T *y)
 {
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = a * b[i] + c[i];
+    if (internal::is_one(a)) {
+        add(n, b, c, y);
+    } else {
+        for (std::size_t i = 0; i != n; ++i)
+            y[i] = a * b[i] + c[i];
+    }
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a * b_i + c\f$.
 template <typename T>
 inline void fma(std::size_t n, T a, const T *b, T c, T *y)
 {
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = a * b[i] + c;
+    if (internal::is_zero(c)) {
+        mul(n, a, b, y);
+    } else {
+        for (std::size_t i = 0; i != n; ++i)
+            y[i] = a * b[i] + c;
+    }
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a * b + c_i\f$.

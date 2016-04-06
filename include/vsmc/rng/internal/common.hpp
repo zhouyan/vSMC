@@ -528,22 +528,6 @@ class RNGMaxBitsImpl<UIntType, U, 0>
     static constexpr int value = 0;
 }; // class RNGMaxBitsImpl
 
-template <typename RealType>
-inline void distribution_impl_location_scale(
-    std::size_t n, RealType *r, RealType location, RealType scale)
-{
-    bool loca0 = is_equal(location, static_cast<RealType>(0));
-    bool scal1 = is_equal(scale, static_cast<RealType>(1));
-    if (loca0 && scal1)
-        return;
-    else if (loca0)
-        mul(n, r, scale, r);
-    else if (scal1)
-        add(n, r, location, r);
-    else
-        fma(n, r, scale, location, r);
-}
-
 } // namespace vsmc::internal
 
 /// \brief Find the largest N such that

@@ -40,13 +40,15 @@ int main(int argc, char **argv)
     const int nwid = 30;
     const int swid = 5;
     const int twid = 15;
-    const std::size_t lwid = nwid + swid + twid * 5;
+    const std::size_t lwid = nwid + swid + twid * 7;
 
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::left << std::setw(nwid) << "RNGType";
     std::cout << std::right << std::setw(swid) << "Size";
     std::cout << std::right << std::setw(twid) << "N/ns (Loop)";
     std::cout << std::right << std::setw(twid) << "N/ns (Batch)";
+    std::cout << std::right << std::setw(twid) << "U01/ns (Loop)";
+    std::cout << std::right << std::setw(twid) << "U01/ns (Batch)";
     std::cout << std::right << std::setw(twid) << "GB/s (Loop)";
     std::cout << std::right << std::setw(twid) << "GB/s (Batch)";
     std::cout << std::right << std::setw(twid) << "Deterministics";

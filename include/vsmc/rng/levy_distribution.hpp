@@ -86,7 +86,7 @@ inline void levy_distribution_impl(
         rng, n, r, static_cast<RealType>(0), static_cast<RealType>(1));
     sqr(n, r, r);
     inv(n, r, r);
-    distribution_impl_location_scale(n, r, a, b);
+    fma(n, r, b, a, r);
 }
 
 } // namespace vsmc::internal

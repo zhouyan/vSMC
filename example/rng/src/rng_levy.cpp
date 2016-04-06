@@ -39,14 +39,12 @@
             stream.gaussian(static_cast<MKL_INT>(k), ptr, 0, 1);              \
             vsmc::sqr(k, ptr, ptr);                                           \
             vsmc::inv(k, ptr, ptr);                                           \
-            vsmc::internal::distribution_impl_location_scale(                 \
-                k, ptr, param[0], param[1]);                                  \
+            vsmc::fma(k, ptr, param[1], param[0], ptr);                       \
         }                                                                     \
         stream.gaussian(static_cast<MKL_INT>(q), ptr, 0, 1);                  \
         vsmc::sqr(q, ptr, ptr);                                               \
         vsmc::inv(q, ptr, ptr);                                               \
-        vsmc::internal::distribution_impl_location_scale(                     \
-            q, ptr, param[0], param[1]);                                      \
+        vsmc::fma(q, ptr, param[1], param[0], ptr);                           \
     }
 
 #include <vsmc/rng/levy_distribution.hpp>

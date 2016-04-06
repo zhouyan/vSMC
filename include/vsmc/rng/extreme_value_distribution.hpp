@@ -87,7 +87,7 @@ inline void extreme_value_distribution_impl(
     log(n, r, r);
     mul(n, static_cast<RealType>(-1), r, r);
     log(n, r, r);
-    distribution_impl_location_scale(n, r, a, -b);
+    fma(n, r, -b, a, r);
 }
 
 } // namespace vsmc::internal

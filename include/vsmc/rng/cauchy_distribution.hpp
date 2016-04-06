@@ -87,7 +87,7 @@ inline void cauchy_distribution_impl(
     u01_co_distribution(rng, n, r);
     mul(n, const_pi<RealType>(), r, r);
     tan(n, r, r);
-    distribution_impl_location_scale(n, r, a, b);
+    fma(n, r, b, a, r);
 }
 
 } // namespace vsmc::internal

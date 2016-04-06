@@ -81,7 +81,7 @@ inline void uniform_real_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     u01_distribution<RealType>(rng, n, r);
-    distribution_impl_location_scale(n, r, a, b - a);
+    fma(n, r, b - a, a, r);
 }
 
 } // namespace vsmc::internal
