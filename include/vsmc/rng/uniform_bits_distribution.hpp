@@ -181,7 +181,7 @@ inline void uniform_bits_distribution_impl_more(
     if (l > 0) {
         r += m * rate;
         n -= m * rate;
-        unifom_bits_distribution_impl(rng, l, r, std::false_type());
+        uniform_bits_distribution_impl(rng, l, r, std::false_type());
     }
 }
 
