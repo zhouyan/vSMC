@@ -49,6 +49,10 @@ class AESNIGenerator
         "**AESNIGenerator** USED WITH ResultType OTHER THAN UNSIGNED INTEGER "
         "TYPES");
 
+    static_assert(128 >= std::numeric_limits<ResultType>::digits &&
+            128 % std::numeric_limits<ResultType>::digits == 0,
+        "**AESNIGenerator** USED WITH INVALID ResultType");
+
     static_assert(
         Blocks != 0, "**AESNIGenerator** USED WITH Blocks EQUAL TO ZERO");
 

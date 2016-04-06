@@ -310,8 +310,8 @@ class ThreefryGenerator
         "**ThreefryGenerator** USED WITH ResultType OTHER THAN UNSIGNED "
         "INTEGER TYPES");
 
-    static_assert(std::numeric_limtis<ResultType>::digits == 32 ||
-            std::numeric_limtis<ResultType>::digits == 64,
+    static_assert(std::numeric_limits<ResultType>::digits == 32 ||
+            std::numeric_limits<ResultType>::digits == 64,
         "**ThreefryGenerator** USED WITH ResultType OF SIZE OTHER THAN 32 OR "
         "64 BITS");
 
@@ -496,8 +496,8 @@ class ThreefryGeneratorSSE2
         "**ThreefryGeneratorSSE2** USED WITH ResultType OTHER THAN UNSIGNED "
         "INTEGER TYPES");
 
-    static_assert(std::numeric_limtis<ResultType>::digits == 32 ||
-            std::numeric_limtis<ResultType>::digits == 64,
+    static_assert(std::numeric_limits<ResultType>::digits == 32 ||
+            std::numeric_limits<ResultType>::digits == 64,
         "**ThreefryGeneratorSSE2** USED WITH ResultType OF SIZE OTHER THAN "
         "32 OR 64 BITS");
 
