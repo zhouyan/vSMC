@@ -295,7 +295,7 @@ class CounterEngine
     using ctr_type = typename Generator::ctr_type;
     using key_type = typename Generator::key_type;
 
-    explicit CounterEngine(result_type s = 0) : index_(M_) { seed(s); }
+    explicit CounterEngine(result_type s = 1) : index_(M_) { seed(s); }
 
     template <typename SeedSeq>
     explicit CounterEngine(SeedSeq &seq,
