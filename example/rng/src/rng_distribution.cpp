@@ -40,5 +40,7 @@ int main(int argc, char **argv)
     if (argc > 2)
         M = static_cast<std::size_t>(std::atoi(argv[2]));
 
+    rng_distribution(N, M);
+
     return 0;
 }
