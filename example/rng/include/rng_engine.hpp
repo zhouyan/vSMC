@@ -103,7 +103,7 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
 
 inline void rng_engine(std::size_t N, std::size_t M)
 {
-    const int nwid = 30;
+    const int nwid = 20;
     const int swid = 5;
     const int twid = 15;
     const std::size_t lwid = nwid + swid + twid * 5;
