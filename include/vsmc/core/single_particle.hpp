@@ -64,7 +64,7 @@ class SingleParticleBase
 
     Particle<T> *particle_ptr() const { return pptr_; }
 
-    typename Particle<T>::rng_type &rng() { return pptr_->rng(id_); }
+    typename Particle<T>::rng_type &rng() const { return pptr_->rng(id_); }
 
     private:
     typename Particle<T>::size_type id_;
