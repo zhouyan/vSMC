@@ -33,15 +33,15 @@
 
 int main(int argc, char **argv)
 {
-    std::size_t n = 1000;
+    std::size_t N = 1000;
     if (argc > 1)
-        n = static_cast<std::size_t>(std::atoi(argv[1]));
+        N = static_cast<std::size_t>(std::atoi(argv[1]));
 
-    std::size_t m = 1000;
+    std::size_t M = 1000;
     if (argc > 2)
-        m = static_cast<std::size_t>(std::atoi(argv[2]));
+        M = static_cast<std::size_t>(std::atoi(argv[2]));
 
-    rng_u01_sequence_test(n, m);
+    rng_u01_sequence(N, M);
 
     return 0;
 }
