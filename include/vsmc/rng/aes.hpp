@@ -371,7 +371,7 @@ template <typename T>
 class AES128KeySeqGenerator
 {
     public:
-    using key_type = std::array<T, 16 / sizeof(T)>;
+    using key_type = std::array<T, 128 / std::numeric_limits<T>::digits>;
 
     template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<M128I<>, Rp1> &key_seq)
@@ -418,7 +418,7 @@ template <typename T>
 class AES192KeySeqGenerator
 {
     public:
-    using key_type = std::array<T, 24 / sizeof(T)>;
+    using key_type = std::array<T, 192 / std::numeric_limits<T>::digits>;
 
     template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<M128I<>, Rp1> &key_seq)
@@ -538,14 +538,15 @@ template <typename T>
 class AES256KeySeqGenerator
 {
     public:
-    using key_type = std::array<T, 32 / sizeof(T)>;
+    using key_type = std::array<T, 256 / std::numeric_limits<T>::digits>;
 
     template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<M128I<>, Rp1> &key_seq)
     {
         std::array<__m128i, Rp1> ks;
         AESKeyInit::eval<0, 0>(key, ks, xmm1_);
-        AESKeyInit::eval<16 / sizeof(T), 1>(key, ks, xmm3_);
+        AESKeyInit::eval<128 / std::numeric_limits<T>::digits, 1>(
+            key, ks, xmm3_);
         generate_seq<2>(ks, std::integral_constant<bool, 2 < Rp1>());
         std::memcpy(key_seq.data(), ks.data(), sizeof(__m128i) * Rp1);
     }

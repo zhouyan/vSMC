@@ -243,8 +243,8 @@ class PhiloxGenerator
         "**PhiloxGenerator** USED WITH ResultType OTHER THAN UNSIGNED INTEGER "
         "TYPES");
 
-    static_assert(sizeof(ResultType) == sizeof(std::uint32_t) ||
-            sizeof(ResultType) == sizeof(std::uint64_t),
+    static_assert(std::numeric_limtis<ResultType>::digits == 32 ||
+            std::numeric_limtis<ResultType>::digits == 64,
         "**PhiloxGenerator** USED WITH ResultType OF SIZE OTHER THAN 32 OR 64 "
         "BITS");
 

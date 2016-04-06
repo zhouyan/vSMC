@@ -310,8 +310,8 @@ class ThreefryGenerator
         "**ThreefryGenerator** USED WITH ResultType OTHER THAN UNSIGNED "
         "INTEGER TYPES");
 
-    static_assert(sizeof(ResultType) == sizeof(std::uint32_t) ||
-            sizeof(ResultType) == sizeof(std::uint64_t),
+    static_assert(std::numeric_limtis<ResultType>::digits == 32 ||
+            std::numeric_limtis<ResultType>::digits == 64,
         "**ThreefryGenerator** USED WITH ResultType OF SIZE OTHER THAN 32 OR "
         "64 BITS");
 
@@ -454,8 +454,9 @@ class ThreefryCtrPackSSE2
                          M128I<ResultType>::size()> &ctr_block,
         std::array<M128I<ResultType>, K> &state, std::true_type)
     {
-        set<N>(ctr_block, state,
-            std::integral_constant<std::size_t, sizeof(ResultType)>());
+        set<N>(
+            ctr_block, state, std::integral_constant<int,
+                                  std::numeric_limits<ResultType>::digits>());
         pack<N + 1>(
             ctr_block, state, std::integral_constant<bool, N + 1 < K>());
     }
@@ -464,7 +465,7 @@ class ThreefryCtrPackSSE2
     static void set(const std::array<std::array<ResultType, K>,
                         M128I<ResultType>::size()> &ctr_block,
         std::array<M128I<ResultType>, K> &state,
-        std::integral_constant<std::size_t, 4>)
+        std::integral_constant<int, 32>)
     {
         std::get<N>(state).set(std::get<N>(std::get<0>(ctr_block)),
             std::get<N>(std::get<1>(ctr_block)),
@@ -476,7 +477,7 @@ class ThreefryCtrPackSSE2
     static void set(const std::array<std::array<ResultType, K>,
                         M128I<ResultType>::size()> &ctr_block,
         std::array<M128I<ResultType>, K> &state,
-        std::integral_constant<std::size_t, 8>)
+        std::integral_constant<int, 64>)
     {
         std::get<N>(state).set(std::get<N>(std::get<0>(ctr_block)),
             std::get<N>(std::get<1>(ctr_block)));
@@ -495,8 +496,8 @@ class ThreefryGeneratorSSE2
         "**ThreefryGeneratorSSE2** USED WITH ResultType OTHER THAN UNSIGNED "
         "INTEGER TYPES");
 
-    static_assert(sizeof(ResultType) == sizeof(std::uint32_t) ||
-            sizeof(ResultType) == sizeof(std::uint64_t),
+    static_assert(std::numeric_limtis<ResultType>::digits == 32 ||
+            std::numeric_limtis<ResultType>::digits == 64,
         "**ThreefryGeneratorSSE2** USED WITH ResultType OF SIZE OTHER THAN "
         "32 OR 64 BITS");
 
@@ -662,8 +663,9 @@ class ThreefryCtrPackAVX2
                          M256I<ResultType>::size()> &ctr_block,
         std::array<M256I<ResultType>, K> &state, std::true_type)
     {
-        set<N>(ctr_block, state,
-            std::integral_constant<std::size_t, sizeof(ResultType)>());
+        set<N>(
+            ctr_block, state, std::integral_constant<int,
+                                  std::numeric_limits<ResultType>::digits>());
         pack<N + 1>(
             ctr_block, state, std::integral_constant<bool, N + 1 < K>());
     }
@@ -672,7 +674,7 @@ class ThreefryCtrPackAVX2
     static void set(const std::array<std::array<ResultType, K>,
                         M256I<ResultType>::size()> &ctr_block,
         std::array<M256I<ResultType>, K> &state,
-        std::integral_constant<std::size_t, 4>)
+        std::integral_constant<int, 32>)
     {
         std::get<N>(state).set(std::get<N>(std::get<0>(ctr_block)),
             std::get<N>(std::get<1>(ctr_block)),
@@ -688,7 +690,7 @@ class ThreefryCtrPackAVX2
     static void set(const std::array<std::array<ResultType, K>,
                         M256I<ResultType>::size()> &ctr_block,
         std::array<M256I<ResultType>, K> &state,
-        std::integral_constant<std::size_t, 8>)
+        std::integral_constant<int, 64>)
     {
         std::get<N>(state).set(std::get<N>(std::get<0>(ctr_block)),
             std::get<N>(std::get<1>(ctr_block)),
@@ -709,8 +711,8 @@ class ThreefryGeneratorAVX2
         "**ThreefryGeneratorAVX2** USED WITH ResultType OTHER THAN UNSIGNED "
         "INTEGER TYPES");
 
-    static_assert(sizeof(ResultType) == sizeof(std::uint32_t) ||
-            sizeof(ResultType) == sizeof(std::uint64_t),
+    static_assert(std::numeric_limits<ResultType>::digits == 32 ||
+            std::numeric_limits<ResultType>::digits == 64,
         "**ThreefryGeneratorAVX2** USED WITH ResultType OF SIZE OTHER THAN "
         "32 OR 64 BITS");
 
