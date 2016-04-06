@@ -52,7 +52,7 @@ inline void rng_engine_test(
     vsmc::StopWatch watch4;
     bool passed = true;
 
-    std::uniform_int_distribution<std::size_t> runif(N / 2, N - 1);
+    std::uniform_int_distribution<std::size_t> runif(0, N);
     for (std::size_t i = 0; i != M; ++i) {
         watch1.start();
         for (std::size_t j = 0; j != N; ++j)
@@ -74,17 +74,16 @@ inline void rng_engine_test(
         u01(rng, N, r4.data());
         watch4.stop();
 
-        std::size_t k = runif(rng);
-
         std::fill(r1.begin(), r1.end(), 0);
         std::fill(r2.begin(), r2.end(), 0);
         std::stringstream ss;
         ss << rng;
-        vsmc::rng_rand(rng, k, r1.data());
+        vsmc::rng_rand(rng, N, r1.data());
         ss >> rng;
-        vsmc::rng_rand(rng, k, r2.data());
+        vsmc::rng_rand(rng, N, r2.data());
         passed = passed && r1 == r2;
 
+        std::size_t k = runif(rng);
         rng1.discard(static_cast<unsigned>(k));
         typename RNGType::result_type next = rng1();
         for (std::size_t j = 0; j != k; ++j)
@@ -103,10 +102,8 @@ inline void rng_engine_test(
     double n2 = watch2.nanoseconds() / (N * M);
     double u1 = watch3.nanoseconds() / (N * M);
     double u2 = watch4.nanoseconds() / (N * M);
-    double g1 =
-        N * M * sizeof(typename RNGType::result_type) / watch1.nanoseconds();
-    double g2 =
-        N * M * sizeof(typename RNGType::result_type) / watch2.nanoseconds();
+    double g1 = sizeof(typename RNGType::result_type) / n1;
+    double g2 = sizeof(typename RNGType::result_type) / n2;
     std::string pass = passed ? "Passed" : "Failed";
 
     std::cout << std::left << std::setw(nwid) << name;
