@@ -46,14 +46,43 @@
     }
 
 #define VSMC_RNG_U01_TEST(Left, Right)                                        \
-    rng_u01_lr<std::uint32_t, float, vsmc::Left, vsmc::Right>(argc, argv);    \
-    rng_u01_lr<std::uint64_t, float, vsmc::Left, vsmc::Right>(argc, argv);    \
-    rng_u01_lr<std::uint32_t, double, vsmc::Left, vsmc::Right>(argc, argv);   \
-    rng_u01_lr<std::uint64_t, double, vsmc::Left, vsmc::Right>(argc, argv);   \
-    rng_u01_lr<std::uint32_t, long double, vsmc::Left, vsmc::Right>(          \
-        argc, argv);                                                          \
-    rng_u01_lr<std::uint64_t, long double, vsmc::Left, vsmc::Right>(          \
-        argc, argv);
+    rng_u01_lr<std::uint32_t, float, vsmc::Left, vsmc::Right>(N, M);          \
+    rng_u01_lr<std::uint64_t, float, vsmc::Left, vsmc::Right>(N, M);          \
+    rng_u01_lr<std::uint32_t, double, vsmc::Left, vsmc::Right>(N, M);         \
+    rng_u01_lr<std::uint64_t, double, vsmc::Left, vsmc::Right>(N, M);         \
+    rng_u01_lr<std::uint32_t, long double, vsmc::Left, vsmc::Right>(N, M);    \
+    rng_u01_lr<std::uint64_t, long double, vsmc::Left, vsmc::Right>(N, M);
+
+template <typename UIntType, typename RealType, typename, typename>
+inline RealType rng_u01_lr_c(UIntType u);
+
+VSMC_DEFINE_RNGC_U01_LR_TEST(32, f, cc, Closed, Closed, float)
+VSMC_DEFINE_RNGC_U01_LR_TEST(64, f, cc, Closed, Closed, float)
+VSMC_DEFINE_RNGC_U01_LR_TEST(32, d, cc, Closed, Closed, double)
+VSMC_DEFINE_RNGC_U01_LR_TEST(64, d, cc, Closed, Closed, double)
+VSMC_DEFINE_RNGC_U01_LR_TEST(32, l, cc, Closed, Closed, long double)
+VSMC_DEFINE_RNGC_U01_LR_TEST(64, l, cc, Closed, Closed, long double)
+
+VSMC_DEFINE_RNGC_U01_LR_TEST(32, f, co, Closed, Open, float)
+VSMC_DEFINE_RNGC_U01_LR_TEST(64, f, co, Closed, Open, float)
+VSMC_DEFINE_RNGC_U01_LR_TEST(32, d, co, Closed, Open, double)
+VSMC_DEFINE_RNGC_U01_LR_TEST(64, d, co, Closed, Open, double)
+VSMC_DEFINE_RNGC_U01_LR_TEST(32, l, co, Closed, Open, long double)
+VSMC_DEFINE_RNGC_U01_LR_TEST(64, l, co, Closed, Open, long double)
+
+VSMC_DEFINE_RNGC_U01_LR_TEST(32, f, oc, Open, Closed, float)
+VSMC_DEFINE_RNGC_U01_LR_TEST(64, f, oc, Open, Closed, float)
+VSMC_DEFINE_RNGC_U01_LR_TEST(32, d, oc, Open, Closed, double)
+VSMC_DEFINE_RNGC_U01_LR_TEST(64, d, oc, Open, Closed, double)
+VSMC_DEFINE_RNGC_U01_LR_TEST(32, l, oc, Open, Closed, long double)
+VSMC_DEFINE_RNGC_U01_LR_TEST(64, l, oc, Open, Closed, long double)
+
+VSMC_DEFINE_RNGC_U01_LR_TEST(32, f, oo, Open, Open, float)
+VSMC_DEFINE_RNGC_U01_LR_TEST(64, f, oo, Open, Open, float)
+VSMC_DEFINE_RNGC_U01_LR_TEST(32, d, oo, Open, Open, double)
+VSMC_DEFINE_RNGC_U01_LR_TEST(64, d, oo, Open, Open, double)
+VSMC_DEFINE_RNGC_U01_LR_TEST(32, l, oo, Open, Open, long double)
+VSMC_DEFINE_RNGC_U01_LR_TEST(64, l, oo, Open, Open, long double)
 
 template <typename>
 inline std::string rng_u01_type_name();
@@ -88,134 +117,122 @@ inline std::string rng_u01_type_name<vsmc::Open>()
     return "Open";
 }
 
-template <typename UIntType, typename RealType, typename, typename>
-inline RealType rng_u01_lr_c(UIntType u);
-
-VSMC_DEFINE_RNGC_U01_LR_TEST(32, f, cc, Closed, Closed, float)
-VSMC_DEFINE_RNGC_U01_LR_TEST(64, f, cc, Closed, Closed, float)
-VSMC_DEFINE_RNGC_U01_LR_TEST(32, d, cc, Closed, Closed, double)
-VSMC_DEFINE_RNGC_U01_LR_TEST(64, d, cc, Closed, Closed, double)
-VSMC_DEFINE_RNGC_U01_LR_TEST(32, l, cc, Closed, Closed, long double)
-VSMC_DEFINE_RNGC_U01_LR_TEST(64, l, cc, Closed, Closed, long double)
-
-VSMC_DEFINE_RNGC_U01_LR_TEST(32, f, co, Closed, Open, float)
-VSMC_DEFINE_RNGC_U01_LR_TEST(64, f, co, Closed, Open, float)
-VSMC_DEFINE_RNGC_U01_LR_TEST(32, d, co, Closed, Open, double)
-VSMC_DEFINE_RNGC_U01_LR_TEST(64, d, co, Closed, Open, double)
-VSMC_DEFINE_RNGC_U01_LR_TEST(32, l, co, Closed, Open, long double)
-VSMC_DEFINE_RNGC_U01_LR_TEST(64, l, co, Closed, Open, long double)
-
-VSMC_DEFINE_RNGC_U01_LR_TEST(32, f, oc, Open, Closed, float)
-VSMC_DEFINE_RNGC_U01_LR_TEST(64, f, oc, Open, Closed, float)
-VSMC_DEFINE_RNGC_U01_LR_TEST(32, d, oc, Open, Closed, double)
-VSMC_DEFINE_RNGC_U01_LR_TEST(64, d, oc, Open, Closed, double)
-VSMC_DEFINE_RNGC_U01_LR_TEST(32, l, oc, Open, Closed, long double)
-VSMC_DEFINE_RNGC_U01_LR_TEST(64, l, oc, Open, Closed, long double)
-
-VSMC_DEFINE_RNGC_U01_LR_TEST(32, f, oo, Open, Open, float)
-VSMC_DEFINE_RNGC_U01_LR_TEST(64, f, oo, Open, Open, float)
-VSMC_DEFINE_RNGC_U01_LR_TEST(32, d, oo, Open, Open, double)
-VSMC_DEFINE_RNGC_U01_LR_TEST(64, d, oo, Open, Open, double)
-VSMC_DEFINE_RNGC_U01_LR_TEST(32, l, oo, Open, Open, long double)
-VSMC_DEFINE_RNGC_U01_LR_TEST(64, l, oo, Open, Open, long double)
-
-template <typename RealType>
-inline void rng_u01_lb(RealType x)
+template <typename UIntType, typename RealType, typename Left, typename Right>
+inline std::string rng_u01_function_name()
 {
-    if (vsmc::internal::is_equal(x, static_cast<RealType>(0)))
-        std::cout << "Left:  " << std::setw(37) << std::left << 0;
-    else
-        std::cout << "Left:  2^" << std::setw(35) << std::left << std::log2(x);
+    std::stringstream ss;
+    ss << "u01<uint";
+    ss << std::numeric_limits<UIntType>::digits << "_t, ";
+    ss << rng_u01_type_name<RealType>() << ", ";
+    ss << rng_u01_type_name<Left>() << ", ";
+    ss << rng_u01_type_name<Right>() << ">";
 
-    if (x < static_cast<RealType>(0))
-        std::cout << "< 0";
-    else if (x > static_cast<RealType>(0))
-        std::cout << "Open";
-    else
-        std::cout << "Closed";
-    std::cout << std::endl;
+    return ss.str();
 }
 
 template <typename RealType>
-inline void rng_u01_rb(RealType x)
+inline void rng_u01_lb(RealType x, std::string &minimum, std::string &left)
 {
-    if (vsmc::internal::is_equal(x, static_cast<RealType>(1))) {
-        std::cout << "Right: " << std::setw(37) << std::left << 1;
-    } else {
-        std::cout << "Right: 1 - 2^" << std::setw(31) << std::left
-                  << std::log2(static_cast<RealType>(1) - x);
-    }
-
-    if (x > static_cast<RealType>(1))
-        std::cout << "< 0";
-    else if (x < static_cast<RealType>(1))
-        std::cout << "Open";
+    std::stringstream ss;
+    if (vsmc::internal::is_equal(x, static_cast<RealType>(0)))
+        ss << 0;
     else
-        std::cout << "Closed";
-    std::cout << std::endl;
+        ss << "2^" << std::log2(x);
+    minimum = ss.str();
+
+    if (x < static_cast<RealType>(0))
+        left = "< 0";
+    else if (x > static_cast<RealType>(0))
+        left = "Open";
+    else
+        left = "Closed";
+}
+
+template <typename RealType>
+inline void rng_u01_rb(RealType x, std::string &maximum, std::string &right)
+{
+    std::stringstream ss;
+    if (vsmc::internal::is_equal(x, static_cast<RealType>(1)))
+        ss << 1;
+    else
+        ss << "1 - 2^" << std::log2(static_cast<RealType>(1) - x);
+    maximum = ss.str();
+    if (x > static_cast<RealType>(1))
+        right = "> 1";
+    else if (x < static_cast<RealType>(1))
+        right = "Open";
+    else
+        right = "Closed";
 }
 
 template <typename UIntType, typename RealType, typename Left, typename Right>
-inline void rng_u01_lr(int argc, char **argv)
+inline void rng_u01_lr(std::size_t N, std::size_t M)
 {
-    std::size_t n = 1000000;
-    if (argc > 1)
-        n = static_cast<std::size_t>(std::atoi(argv[1]));
-
-    std::cout << std::string(50, '=') << std::endl;
-    std::cout << "u01<uint" << std::numeric_limits<UIntType>::digits << "_t, "
-              << rng_u01_type_name<RealType>() << ", "
-              << rng_u01_type_name<Left>() << ", "
-              << rng_u01_type_name<Right>() << ">" << std::endl;
-    std::cout << std::string(50, '-') << std::endl;
-    rng_u01_lb(vsmc::u01_lr<UIntType, RealType, Left, Right>(
-        std::numeric_limits<UIntType>::min()));
-    rng_u01_rb(vsmc::u01_lr<UIntType, RealType, Left, Right>(
-        std::numeric_limits<UIntType>::max()));
-
     vsmc::ThreefryEngine<UIntType, 4> rng;
-    vsmc::Vector<UIntType> u(n * 2);
-    vsmc::Vector<RealType> r(n * 2);
-    vsmc::Vector<RealType> r1(n * 2);
-    vsmc::Vector<RealType> r2(n * 2);
+    vsmc::Vector<UIntType> u(N);
+    vsmc::Vector<RealType> r(N);
+    vsmc::Vector<RealType> r1(N);
+    vsmc::Vector<RealType> r2(N);
     bool passed1 = true;
     bool passed2 = true;
-    std::uniform_int_distribution<std::size_t> runif(n, n * 2 - 1);
-    for (std::size_t i = 0; i != 10; ++i) {
-        std::size_t m = runif(rng);
+    for (std::size_t i = 0; i != M; ++i) {
+        vsmc::rng_rand(rng, N, u.data());
 
-        if (passed1 || passed2) {
-            vsmc::rng_rand(rng, m, u.data());
-            for (std::size_t j = 0; j != m; ++j)
-                r[j] = vsmc::u01_lr<UIntType, RealType, Left, Right>(u[j]);
-        }
+        for (std::size_t j = 0; j != N; ++j)
+            r[j] = vsmc::u01_lr<UIntType, RealType, Left, Right>(u[j]);
 
-        if (passed1) {
-            for (std::size_t j = 0; j != m; ++j)
-                r1[j] = rng_u01_lr_c<UIntType, RealType, Left, Right>(u[j]);
-            for (std::size_t j = 0; j != m; ++j) {
-                if (!vsmc::internal::is_equal(r[j], r1[j])) {
-                    passed1 = false;
-                    break;
-                }
-            }
-        }
+        for (std::size_t j = 0; j != N; ++j)
+            r1[j] = rng_u01_lr_c<UIntType, RealType, Left, Right>(u[j]);
+        passed1 = passed1 && r1 == r;
 
-        if (passed2) {
-            vsmc::u01_lr<UIntType, RealType, Left, Right>(
-                m, u.data(), r2.data());
-            for (std::size_t j = 0; j != n; ++j) {
-                if (!vsmc::internal::is_equal(r[j], r2[j])) {
-                    passed2 = false;
-                    break;
-                }
-            }
-        }
+        vsmc::u01_lr<UIntType, RealType, Left, Right>(N, u.data(), r2.data());
+        passed2 = passed2 && r2 == r;
     }
-    std::cout << std::setw(44) << std::left
-              << "C API:" << (passed1 ? "Passed" : "Failed") << std::endl;
-    std::cout << std::setw(44) << std::left
-              << "Batch:" << (passed1 ? "Passed" : "Failed") << std::endl;
+
+    std::string function =
+        rng_u01_function_name<UIntType, RealType, Left, Right>();
+    std::string minimum;
+    std::string maximum;
+    std::string left;
+    std::string right;
+    rng_u01_lb(vsmc::u01_lr<UIntType, RealType, Left, Right>(
+                   std::numeric_limits<UIntType>::min()),
+        minimum, left);
+    rng_u01_rb(vsmc::u01_lr<UIntType, RealType, Left, Right>(
+                   std::numeric_limits<UIntType>::max()),
+        maximum, right);
+    std::string pass1 = passed1 ? "Passed" : "Failed";
+    std::string pass2 = passed2 ? "Passed" : "Failed";
+    std::cout << std::setw(50) << std::left << function;
+    std::cout << std::setw(15) << std::right << minimum;
+    std::cout << std::setw(15) << std::right << maximum;
+    std::cout << std::setw(10) << std::right << left;
+    std::cout << std::setw(10) << std::right << right;
+    std::cout << std::setw(10) << std::right << pass1;
+    std::cout << std::setw(10) << std::right << pass2;
+    std::cout << std::endl;
+}
+
+inline void rng_u01(std::size_t N, std::size_t M)
+{
+    std::cout << std::string(120, '=') << std::endl;
+    std::cout << std::setw(50) << std::left << "Function";
+    std::cout << std::setw(15) << std::right << "Mininum";
+    std::cout << std::setw(15) << std::right << "Maximum";
+    std::cout << std::setw(10) << std::right << "Left";
+    std::cout << std::setw(10) << std::right << "Right";
+    std::cout << std::setw(10) << std::right << "C API";
+    std::cout << std::setw(10) << std::right << "Batch";
+    std::cout << std::endl;
+    std::cout << std::string(120, '-') << std::endl;
+    VSMC_RNG_U01_TEST(Closed, Closed);
+    std::cout << std::string(120, '-') << std::endl;
+    VSMC_RNG_U01_TEST(Closed, Open);
+    std::cout << std::string(120, '-') << std::endl;
+    VSMC_RNG_U01_TEST(Open, Closed);
+    std::cout << std::string(120, '-') << std::endl;
+    VSMC_RNG_U01_TEST(Open, Open);
+    std::cout << std::string(120, '-') << std::endl;
 }
 
 #endif // VSMC_EXAMPLE_RNG_U01_HPP

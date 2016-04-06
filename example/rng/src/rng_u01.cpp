@@ -33,11 +33,14 @@
 
 int main(int argc, char **argv)
 {
-    VSMC_RNG_U01_TEST(Closed, Closed);
-    VSMC_RNG_U01_TEST(Closed, Open);
-    VSMC_RNG_U01_TEST(Open, Closed);
-    VSMC_RNG_U01_TEST(Open, Open);
-    std::cout << std::string(50, '=') << std::endl;
+    std::size_t N = 1000000;
+    if (argc > 1)
+        N = static_cast<std::size_t>(std::atoi(argv[1]));
+    std::size_t M = 100;
+    if (argc > 2)
+        M = static_cast<std::size_t>(std::atoi(argv[2]));
+
+    rng_u01(N, M);
 
     return 0;
 }
