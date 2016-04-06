@@ -793,18 +793,18 @@ class MKLEngine
     public:
     using result_type = internal::MKLResultType<Bits>;
 
-    explicit MKLEngine(MKL_UINT s = 1) : index_(M_) { seed(s); }
+    explicit MKLEngine(result_type s = 1) : index_(M_) { seed(s); }
 
     template <typename SeedSeq>
     explicit MKLEngine(SeedSeq &seq,
         typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_INT,
-            MKL_UINT, MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
+            result_type, MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
         : index_(M_)
     {
         seed(seq);
     }
 
-    MKLEngine(MKL_INT offset, MKL_UINT s) : index_(M_)
+    MKLEngine(MKL_INT offset, result_type s) : index_(M_)
     {
         static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
             "**MKLEngine** DOES NOT SUPPORT OFFSETING");
@@ -824,32 +824,34 @@ class MKLEngine
         seed(offset, seq);
     }
 
-    void seed(MKL_UINT s)
+    void seed(result_type s)
     {
+        s %= static_cast<result_type>(std::numeric_limits<MKL_UINT>::max());
         MKL_INT brng = stream_.empty() ? BRNG : stream_.get_brng();
-        stream_.reset(brng, s);
+        stream_.reset(brng, static_cast<MKL_UINT>(s));
         index_ = M_;
     }
 
     template <typename SeedSeq>
     void seed(
         SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
-                          MKL_INT, MKL_UINT>::value>::type * = nullptr)
+                          MKL_INT, result_type>::value>::type * = nullptr)
     {
         MKL_INT brng = stream_.empty() ? BRNG : stream_.get_brng();
-        Vector<unsigned> params;
+        Vector<MKL_UINT> params;
         MKL_INT n = seed_params(brng, seq, params);
         stream_.reset(brng, n, params.data());
         index_ = M_;
     }
 
-    void seed(MKL_INT offset, MKL_UINT s)
+    void seed(MKL_INT offset, result_type s)
     {
         static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
             "**MKLEngine** DOES NOT SUPPORT OFFSETING");
 
+        s %= static_cast<result_type>(std::numeric_limits<MKL_UINT>::max());
         MKL_INT brng = internal::MKLOffset<BRNG>::eval(offset);
-        stream_.reset(brng, s);
+        stream_.reset(brng, static_cast<MKL_UINT>(s));
         index_ = M_;
     }
 
