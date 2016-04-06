@@ -36,57 +36,58 @@
 #include <vsmc/utility/stop_watch.hpp>
 
 template <typename RNGType>
-inline void rng_engine_test(std::size_t n, const std::string &name)
+inline void rng_engine_test(
+    std::size_t N, std::size_t M, const std::string &name)
 {
     RNGType rng;
     RNGType rng1;
     RNGType rng2;
-    vsmc::Vector<typename RNGType::result_type> r1(n * 2, 0);
-    vsmc::Vector<typename RNGType::result_type> r2(n * 2, 0);
-    vsmc::Vector<double> r3(n * 2);
-    vsmc::Vector<double> r4(n * 2);
+    vsmc::Vector<typename RNGType::result_type> r1(N);
+    vsmc::Vector<typename RNGType::result_type> r2(N);
+    vsmc::Vector<double> r3(N);
+    vsmc::Vector<double> r4(N);
     vsmc::StopWatch watch1;
     vsmc::StopWatch watch2;
     vsmc::StopWatch watch3;
     vsmc::StopWatch watch4;
     bool passed = true;
-    std::size_t num = 0;
 
-    std::uniform_int_distribution<std::size_t> runif(n, n * 2 - 1);
-    for (std::size_t i = 0; i != 10; ++i) {
-        std::size_t m = runif(rng);
-        num += m;
-
+    std::uniform_int_distribution<std::size_t> runif(N / 2, N - 1);
+    for (std::size_t i = 0; i != M; ++i) {
         watch1.start();
-        for (std::size_t j = 0; j != m; ++j)
+        for (std::size_t j = 0; j != N; ++j)
             r1[j] = rng1();
         watch1.stop();
 
         watch2.start();
-        vsmc::rng_rand(rng2, m, r2.data());
+        vsmc::rng_rand(rng2, N, r2.data());
         watch2.stop();
         passed = passed && r1 == r2;
 
         vsmc::U01Distribution<double> u01;
         watch3.start();
-        for (std::size_t j = 0; j != m; ++j)
+        for (std::size_t j = 0; j != N; ++j)
             r3[j] = u01(rng);
         watch3.stop();
 
         watch4.start();
-        u01(rng, m, r4.data());
+        u01(rng, N, r4.data());
         watch4.stop();
 
+        std::size_t k = runif(rng);
+
+        std::fill(r1.begin(), r1.end(), 0);
+        std::fill(r2.begin(), r2.end(), 0);
         std::stringstream ss;
         ss << rng;
-        vsmc::rng_rand(rng, m, r1.data());
+        vsmc::rng_rand(rng, k, r1.data());
         ss >> rng;
-        vsmc::rng_rand(rng, m, r2.data());
+        vsmc::rng_rand(rng, k, r2.data());
         passed = passed && r1 == r2;
 
-        rng1.discard(1001);
+        rng1.discard(static_cast<unsigned>(k));
         typename RNGType::result_type next = rng1();
-        for (std::size_t j = 0; j != 1001; ++j)
+        for (std::size_t j = 0; j != k; ++j)
             rng2();
         bool find = false;
         for (std::size_t j = 0; j != 2; ++j)
@@ -98,14 +99,14 @@ inline void rng_engine_test(std::size_t n, const std::string &name)
     const int swid = 5;
     const int twid = 15;
 
-    double n1 = watch1.nanoseconds() / num;
-    double n2 = watch2.nanoseconds() / num;
-    double u1 = watch3.nanoseconds() / num;
-    double u2 = watch4.nanoseconds() / num;
+    double n1 = watch1.nanoseconds() / (N * M);
+    double n2 = watch2.nanoseconds() / (N * M);
+    double u1 = watch3.nanoseconds() / (N * M);
+    double u2 = watch4.nanoseconds() / (N * M);
     double g1 =
-        num * sizeof(typename RNGType::result_type) / watch1.nanoseconds();
+        N * M * sizeof(typename RNGType::result_type) / watch1.nanoseconds();
     double g2 =
-        num * sizeof(typename RNGType::result_type) / watch2.nanoseconds();
+        N * M * sizeof(typename RNGType::result_type) / watch2.nanoseconds();
     std::string pass = passed ? "Passed" : "Failed";
 
     std::cout << std::left << std::setw(nwid) << name;

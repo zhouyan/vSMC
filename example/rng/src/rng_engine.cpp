@@ -33,9 +33,12 @@
 
 int main(int argc, char **argv)
 {
-    std::size_t N = 1000000;
+    std::size_t N = 10000;
     if (argc > 1)
         N = static_cast<std::size_t>(std::atoi(argv[1]));
+    std::size_t M = 100;
+    if (argc > 2)
+        M = static_cast<std::size_t>(std::atoi(argv[2]));
 
     const int nwid = 30;
     const int swid = 5;
@@ -64,7 +67,7 @@ int main(int argc, char **argv)
 #endif
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    rng_engine_test<RNGType>(N, #Name);
+    rng_engine_test<RNGType>(N, M, #Name);
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 #include <vsmc/rng/internal/rng_define_macro_mkl.hpp>
