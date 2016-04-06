@@ -173,7 +173,8 @@ class ThreefryInitPar
 }; // class ThreefryInitPar
 
 template <typename T>
-class ThreefryRotateBits : public std::integral_constant<int, sizeof(T) * 8>
+class ThreefryRotateBits
+    : public std::integral_constant<int, std::numeric_limits<T>::digits>
 {
 }; // class ThreefryRotateBits
 
