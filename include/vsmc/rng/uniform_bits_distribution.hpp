@@ -198,10 +198,10 @@ inline void uniform_bits_distribution_impl(
 {
     static constexpr int rbits = RNGBits<RNGType>::value;
     static constexpr int ubits = std::numeric_limits<UIntType>::digits;
-    static constexpr std::size_t alignment =
+    static constexpr std::uintptr_t alignment =
         alignof(typename RNGType::result_type);
 
-    while (reinterpret_cast<std::uintptr_t *>(r) % alignment != 0) {
+    while (reinterpret_cast<std::uintptr_t>(r) % alignment != 0) {
         *r = UniformBits<UIntType>::eval(rng);
         ++r;
         --n;
