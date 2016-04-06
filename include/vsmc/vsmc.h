@@ -518,30 +518,6 @@ int vsmc_mkl_brng_threefry2x64(void);
 /** \brief `vsmc::mkl_brng<vsmc::Threefry4x64>` */
 int vsmc_mkl_brng_threefry4x64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::Threefry2x32SSE2>` */
-int vsmc_mkl_brng_threefry2x32sse2(void);
-
-/** \brief `vsmc::mkl_brng<vsmc::Threefry4x32SSE2>` */
-int vsmc_mkl_brng_threefry4x32sse2(void);
-
-/** \brief `vsmc::mkl_brng<vsmc::Threefry2x64SSE2>` */
-int vsmc_mkl_brng_threefry2x64sse2(void);
-
-/** \brief `vsmc::mkl_brng<vsmc::Threefry4x64SSE2>` */
-int vsmc_mkl_brng_threefry4x64sse2(void);
-
-/** \brief `vsmc::mkl_brng<vsmc::Threefry2x32AVX2>` */
-int vsmc_mkl_brng_threefry2x32avx2(void);
-
-/** \brief `vsmc::mkl_brng<vsmc::Threefry4x32AVX2>` */
-int vsmc_mkl_brng_threefry4x32avx2(void);
-
-/** \brief `vsmc::mkl_brng<vsmc::Threefry2x64AVX2>` */
-int vsmc_mkl_brng_threefry2x64avx2(void);
-
-/** \brief `vsmc::mkl_brng<vsmc::Threefry4x64AVX2>` */
-int vsmc_mkl_brng_threefry4x64avx2(void);
-
 /** \brief `vsmc::mkl_brng<vsmc::AES128_1x32>` */
 int vsmc_mkl_brng_aes128_1x32(void);
 

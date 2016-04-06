@@ -48,26 +48,6 @@ VSMC_RNG_DEFINE_MACRO(::vsmc::Threefry2x32, Threefry2x32, threefry2x32)
 VSMC_RNG_DEFINE_MACRO(::vsmc::Threefry4x32, Threefry4x32, threefry4x32)
 VSMC_RNG_DEFINE_MACRO(::vsmc::Threefry2x64, Threefry2x64, threefry2x64)
 VSMC_RNG_DEFINE_MACRO(::vsmc::Threefry4x64, Threefry4x64, threefry4x64)
-#if VSMC_HAS_SSE2
-VSMC_RNG_DEFINE_MACRO(
-    ::vsmc::Threefry2x32SSE2, Threefry2x32SSE2, threefry2x32sse2)
-VSMC_RNG_DEFINE_MACRO(
-    ::vsmc::Threefry4x32SSE2, Threefry4x32SSE2, threefry4x32sse2)
-VSMC_RNG_DEFINE_MACRO(
-    ::vsmc::Threefry2x64SSE2, Threefry2x64SSE2, threefry2x64sse2)
-VSMC_RNG_DEFINE_MACRO(
-    ::vsmc::Threefry4x64SSE2, Threefry4x64SSE2, threefry4x64sse2)
-#endif // VSMC_HAS_SSE2
-#if VSMC_HAS_AVX2
-VSMC_RNG_DEFINE_MACRO(
-    ::vsmc::Threefry2x32AVX2, Threefry2x32AVX2, threefry2x32avx2)
-VSMC_RNG_DEFINE_MACRO(
-    ::vsmc::Threefry4x32AVX2, Threefry4x32AVX2, threefry4x32avx2)
-VSMC_RNG_DEFINE_MACRO(
-    ::vsmc::Threefry2x64AVX2, Threefry2x64AVX2, threefry2x64avx2)
-VSMC_RNG_DEFINE_MACRO(
-    ::vsmc::Threefry4x64AVX2, Threefry4x64AVX2, threefry4x64avx2)
-#endif // VSMC_HAS_AVX2
 
 #if VSMC_HAS_AES_NI
 VSMC_RNG_DEFINE_MACRO(::vsmc::AES128_1x32, AES128_1x32, aes128_1x32)
