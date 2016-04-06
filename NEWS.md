@@ -5,10 +5,9 @@
   is removed. The default alignment is defined by `AlignmentTrait<T>`, which is
   `VSMC_ALIGNMENT` for scalar types and `max(alignof(T), VSMC_ALIGNMENT_MIN)`
   for others.
-* `Allocator` has an additional second template argument, `ConstructScalar`,
-  which defaults to `false`. If `false`, `construct` will leave scalar types
-  uninitialized instead of zeroing. The default behavior can be changed by
-  macro `VSMC_CONSTRUCT_SCALAR`
+* New configuration macro `VSMC_CONSTRUCT_SCALAR`. If it is zero (the default),
+  then `Allocator` will not zero initialize scalar values when `construct` is
+  called without additional arguments.
 * The HDFIO module has been rewritten. Now there are only two main functions,
   `hdf5load` and `hdf5store`. The data types are detected based on iterator
   types.
@@ -28,8 +27,9 @@
   corner of the original. The overloading `resize(N)` assumes the dimension
   does not change. The method `resize_dim` also gains this new behavior of
   preserving values.
-* `StateMatrix` can now handle the situation where the length of the input to
-  `copy`, `index` is not the same as its own size.
+* `StateMatrix` can now handle the situation where the length of the input
+  `index` to `copy` is not the same as its own size. The results is a resized
+  matrix.
 * `Particle` can now be resized by various methods
 
 ## Changed behaviors
