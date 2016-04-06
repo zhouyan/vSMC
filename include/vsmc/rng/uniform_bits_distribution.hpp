@@ -163,7 +163,7 @@ inline void uniform_bits_distribution_impl_less(
 {
     static constexpr int rbits = RNGBits<RNGType>::value;
     static constexpr int ubits = std::numeric_limits<UIntType>::digits;
-    const std::size_t rate = ubits / rbits;
+    static constexpr std::size_t rate = ubits / rbits;
     const std::size_t m = n * rate;
     rng_rand(rng, m, reinterpret_cast<typename RNGType::result_type *>(r));
 }
@@ -174,7 +174,7 @@ inline void uniform_bits_distribution_impl_more(
 {
     static constexpr int rbits = RNGBits<RNGType>::value;
     static constexpr int ubits = std::numeric_limits<UIntType>::digits;
-    const std::size_t rate = rbits / ubits;
+    static constexpr std::size_t rate = rbits / ubits;
     const std::size_t m = n / rate;
     const std::size_t l = n % rate;
     rng_rand(rng, m, reinterpret_cast<typename RNGType::result_type *>(r));
