@@ -39,10 +39,6 @@
 #ifndef VSMC_RNG_TYPE
 #if VSMC_HAS_AES_NI
 #define VSMC_RNG_TYPE ::vsmc::ARS
-#elif VSMC_HAS_AVX2
-#define VSMC_RNG_TYPE ::vsmc::ThreefryAVX2
-#elif VSMC_HAS_SSE2
-#define VSMC_RNG_TYPE ::vsmc::ThreefrySSE2
 #else
 #define VSMC_RNG_TYPE ::vsmc::Threefry
 #endif
