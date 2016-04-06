@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/rng/src/rng_laplace.cpp
+// vSMC/example/rng/src/rng_distribution.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,17 +29,35 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#define RNG_DIST_STREAM(stream, n, r, param)                                  \
-    stream.laplace(static_cast<MKL_INT>(n), r.data(), param[0], param[1])
-
-#include <vsmc/rng/laplace_distribution.hpp>
-#include "rng_dist.hpp"
+#include "rng_distribution.hpp"
 
 int main(int argc, char **argv)
 {
-    vsmc::Vector<std::array<double, 2>> params;
-    params.push_back({{0.0, 1.0}});
-    VSMC_RNG_DIST_TEST(2, Laplace, boost::random::laplace_distribution);
+    std::size_t N = 10000;
+    if (argc > 1)
+        N = static_cast<std::size_t>(std::atoi(argv[1]));
+    std::size_t M = 100;
+    if (argc > 2)
+        M = static_cast<std::size_t>(std::atoi(argv[2]));
+
+    rng_distribution_test_beta(N, M);
+    rng_distribution_test_cauchy(N, M);
+    rng_distribution_test_chi_squared(N, M);
+    rng_distribution_test_exponential(N, M);
+    rng_distribution_test_extreme_value(N, M);
+    rng_distribution_test_fisher_f(N, M);
+    rng_distribution_test_gamma(N, M);
+    rng_distribution_test_laplace(N, M);
+    rng_distribution_test_levy(N, M);
+    rng_distribution_test_logistic(N, M);
+    rng_distribution_test_lognormal(N, M);
+    rng_distribution_test_normal(N, M);
+    rng_distribution_test_pareto(N, M);
+    rng_distribution_test_rayleigh(N, M);
+    rng_distribution_test_student_t(N, M);
+    rng_distribution_test_u01(N, M);
+    rng_distribution_test_uniform_real(N, M);
+    rng_distribution_test_weibull(N, M);
 
     return 0;
 }

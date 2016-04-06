@@ -98,22 +98,24 @@ inline void rng_engine_test(std::size_t n, const std::string &name)
     const int swid = 5;
     const int twid = 15;
 
-    double n1 = num / watch1.seconds();
-    double n2 = num / watch2.seconds();
-    double u1 = num / watch3.seconds();
-    double u2 = num / watch4.seconds();
-    double g1 = n1 * sizeof(typename RNGType::result_type);
-    double g2 = n2 * sizeof(typename RNGType::result_type);
+    double n1 = watch1.nanoseconds() / num;
+    double n2 = watch2.nanoseconds() / num;
+    double u1 = watch3.nanoseconds() / num;
+    double u2 = watch4.nanoseconds() / num;
+    double g1 =
+        num * sizeof(typename RNGType::result_type) / watch1.nanoseconds();
+    double g2 =
+        num * sizeof(typename RNGType::result_type) / watch2.nanoseconds();
     std::string pass = passed ? "Passed" : "Failed";
 
     std::cout << std::left << std::setw(nwid) << name;
     std::cout << std::right << std::setw(swid) << sizeof(RNGType);
-    std::cout << std::right << std::setw(twid) << std::fixed << n1 / 1e9;
-    std::cout << std::right << std::setw(twid) << std::fixed << n2 / 1e9;
-    std::cout << std::right << std::setw(twid) << std::fixed << u1 / 1e9;
-    std::cout << std::right << std::setw(twid) << std::fixed << u2 / 1e9;
-    std::cout << std::right << std::setw(twid) << std::fixed << g1 / 1e9;
-    std::cout << std::right << std::setw(twid) << std::fixed << g2 / 1e9;
+    std::cout << std::right << std::setw(twid) << std::fixed << n1;
+    std::cout << std::right << std::setw(twid) << std::fixed << n2;
+    std::cout << std::right << std::setw(twid) << std::fixed << u1;
+    std::cout << std::right << std::setw(twid) << std::fixed << u2;
+    std::cout << std::right << std::setw(twid) << std::fixed << g1;
+    std::cout << std::right << std::setw(twid) << std::fixed << g2;
     std::cout << std::right << std::setw(twid) << pass;
     std::cout << std::endl;
 }

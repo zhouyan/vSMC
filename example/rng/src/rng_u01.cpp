@@ -29,11 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#define RNG_DIST_STREAM(stream, n, r, param)                                  \
-    stream.uniform(static_cast<MKL_INT>(n), r.data(), 0, 1)
-
 #include "rng_u01.hpp"
-#include <vsmc/rng/u01_distribution.hpp>
 
 int main(int argc, char **argv)
 {
@@ -42,13 +38,6 @@ int main(int argc, char **argv)
     VSMC_RNG_U01_TEST(Open, Closed);
     VSMC_RNG_U01_TEST(Open, Open);
     std::cout << std::string(50, '=') << std::endl;
-
-    vsmc::Vector<std::array<double, 0>> params(1);
-    VSMC_RNG_DIST_TEST(0, U01, std::uniform_real_distribution);
-    VSMC_RNG_DIST_TEST(0, U01CC, std::uniform_real_distribution);
-    VSMC_RNG_DIST_TEST(0, U01CO, std::uniform_real_distribution);
-    VSMC_RNG_DIST_TEST(0, U01OC, std::uniform_real_distribution);
-    VSMC_RNG_DIST_TEST(0, U01OO, std::uniform_real_distribution);
 
     return 0;
 }

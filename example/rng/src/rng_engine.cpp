@@ -45,10 +45,10 @@ int main(int argc, char **argv)
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::left << std::setw(nwid) << "RNGType";
     std::cout << std::right << std::setw(swid) << "Size";
-    std::cout << std::right << std::setw(twid) << "N/ns (Loop)";
-    std::cout << std::right << std::setw(twid) << "N/ns (Batch)";
-    std::cout << std::right << std::setw(twid) << "U01/ns (Loop)";
-    std::cout << std::right << std::setw(twid) << "U01/ns (Batch)";
+    std::cout << std::right << std::setw(twid) << "ns (Loop)";
+    std::cout << std::right << std::setw(twid) << "ns (Batch)";
+    std::cout << std::right << std::setw(twid) << "ns (U01, Loop)";
+    std::cout << std::right << std::setw(twid) << "ns (U01, Batch)";
     std::cout << std::right << std::setw(twid) << "GB/s (Loop)";
     std::cout << std::right << std::setw(twid) << "GB/s (Batch)";
     std::cout << std::right << std::setw(twid) << "Deterministics";
