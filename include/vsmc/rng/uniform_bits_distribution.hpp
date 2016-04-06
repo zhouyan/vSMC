@@ -229,11 +229,15 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
     static constexpr int ubits = std::numeric_limits<UIntType>::digits;
     static constexpr int tbits =
         std::numeric_limits<typename RNGType::result_type>::digits;
+    static constexpr std::size_t ualign = alignof(UIntType);
+    static constexpr std::size_t talign = alignof(UIntType);
 
-    internal::uniform_bits_distribution_impl(rng, n, r,
-        std::integral_constant<bool, (mbits == 0 && rbits == tbits &&
-                                         (rbits % ubits == 0 ||
-                                             ubits % rbits == 0))>());
+    internal::uniform_bits_distribution_impl(
+        rng, n, r,
+        std::integral_constant<
+            bool, (mbits == 0 && rbits == tbits &&
+                      (ubits % tbits == 0 || tbits % ubits == 0) &&
+                      (ualign % talign == 0 || talign % ualign == 0))>());
 }
 
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(UniformBits, uniform_bits, UIntType)
