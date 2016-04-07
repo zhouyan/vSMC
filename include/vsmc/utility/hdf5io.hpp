@@ -585,7 +585,7 @@ inline void hdf5store(const Monitor<T> &monitor, const std::string &filename,
     for (std::size_t j = 0; j != ncol; ++j, record_ptr += nrow) {
         std::string vname = monitor.name(j);
         if (vname.empty())
-            vname = "X." + internal::itos(j);
+            vname = "X." + std::to_string(j);
         hdf5store(
             nrow, record_ptr, filename, dataname + "/Record/" + vname, true);
     }

@@ -632,7 +632,7 @@ class Sampler
         *first++ = std::string("Size");
         *first++ = std::string("Resampled");
         for (std::size_t i = 0; i != accept_size(); ++i)
-            *first++ = "Accept." + internal::itos(i);
+            *first++ = "Accept." + std::to_string(i);
     }
 
     /// \brief Sampler summary header (floating point data)
@@ -648,7 +648,7 @@ class Sampler
                 unsigned md = static_cast<unsigned>(m.second.dim());
                 for (unsigned d = 0; d != md; ++d) {
                     if (m.second.name(d).empty())
-                        *first++ = m.first + "." + internal::itos(d);
+                        *first++ = m.first + "." + std::to_string(d);
                     else
                         *first++ = m.second.name(d);
                 }

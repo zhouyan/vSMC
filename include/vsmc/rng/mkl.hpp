@@ -69,7 +69,7 @@ inline int mkl_error_check(int status, const char *cpp, const char *c)
     msg += "; MKL function: ";
     msg += c;
     msg += "; Error code: ";
-    msg += itos(status);
+    msg += std::to_string(status);
 
     VSMC_RUNTIME_ASSERT((status == VSL_ERROR_OK), msg.c_str());
 

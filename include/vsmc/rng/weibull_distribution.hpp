@@ -70,8 +70,7 @@ class WeibullDistribution
     {
         U01OCDistribution<RealType> u01;
 
-        return internal::is_equal<RealType>(
-                   param.a(), static_cast<RealType>(1)) ?
+        return internal::is_one(param.a()) ?
             -param.b() * std::log(u01(rng)) :
             param.b() * std::pow(-std::log(u01(rng)), 1 / param.a());
     }
@@ -86,7 +85,7 @@ inline void weibull_distribution_impl(
 {
     u01_oc_distribution(rng, n, r);
     log(n, r, r);
-    if (is_equal<RealType>(a, static_cast<RealType>(1))) {
+    if (is_one(a)) {
         mul(n, -b, r, r);
     } else {
         mul(n, static_cast<RealType>(-1), r, r);

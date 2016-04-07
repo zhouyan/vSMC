@@ -89,15 +89,7 @@ class DiscreteDistribution
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
-            if (param1.probability_.size() != param2.probability_.size())
-                return false;
-
-            for (std::size_t i = 0; i != param1.probability_.size(); ++i)
-                if (!internal::is_equal(
-                        param1.probability_[i], param2.probability_[i]))
-                    return false;
-
-            return true;
+            return param1.probability_ == param2.probability_;
         }
 
         friend bool operator!=(

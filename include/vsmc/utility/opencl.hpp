@@ -140,7 +140,7 @@ inline ::cl_int cl_error_check(::cl_int status, const char *cpp, const char *c)
     msg += "; OpenCL function: ";
     msg += c;
     msg += "; Error code: ";
-    msg += itos(status);
+    msg += std::to_string(status);
 
     VSMC_RUNTIME_ASSERT((status == CL_SUCCESS), msg.c_str());
 

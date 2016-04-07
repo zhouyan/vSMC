@@ -74,14 +74,14 @@ class BetaDistributionConstant
         const RealType K = static_cast<RealType>(0.852);
         const RealType C = static_cast<RealType>(-0.956);
         const RealType D = beta + K * alpha * alpha + C;
-        if (is_equal<RealType>(alpha, static_cast<RealType>(0.5)) &&
-            is_equal<RealType>(beta, static_cast<RealType>(0.5)))
+        if (is_equal(alpha, static_cast<RealType>(0.5)) &&
+            is_equal(beta, static_cast<RealType>(0.5)))
             algorithm = BetaDistributionAlgorithmAS;
-        else if (is_equal<RealType>(alpha, 1) && is_equal<RealType>(beta, 1))
+        else if (is_one(alpha) && is_one(beta))
             algorithm = BetaDistributionAlgorithm11;
-        else if (is_equal<RealType>(alpha, 1))
+        else if (is_one(alpha))
             algorithm = BetaDistributionAlgorithm1X;
-        else if (is_equal<RealType>(beta, 1))
+        else if (is_one(beta))
             algorithm = BetaDistributionAlgorithmX1;
         else if (alpha > 1 && beta > 1)
             algorithm = BetaDistributionAlgorithmC;
