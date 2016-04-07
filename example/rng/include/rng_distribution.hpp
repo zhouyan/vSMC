@@ -678,7 +678,7 @@ inline void rng_distribution_summary(std::size_t N, std::size_t M,
 {
     std::size_t K = names.size();
     std::size_t R = sw.size() / K;
-    int nwid = 25;
+    int nwid = 30;
     int twid = 15;
     int Twid = static_cast<int>(R) * twid;
     std::size_t lwid = static_cast<std::size_t>(nwid + Twid);

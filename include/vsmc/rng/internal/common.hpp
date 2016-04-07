@@ -566,13 +566,24 @@ class Open;
 /// \ingroup RNG
 class Closed;
 
-/// \brief Generate random bits
+/// \brief Generate random integers
 /// \ingroup RNG
 template <typename RNGType>
 void rng_rand(RNGType &rng, std::size_t n, typename RNGType::result_type *r)
 {
     for (std::size_t i = 0; i != n; ++i)
         r[i] = rng();
+}
+
+/// \brief Generate random distribution numbers
+/// \ingroup RNG
+template <typename RNGType, typename DistributionType>
+void rng_rand(RNGType &rng, const DistributionType &distribution,
+    std::size_t n, typename DistributionType::result_type *r)
+{
+    DistributionType dist(distribution);
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = dist(rng);
 }
 
 template <typename>
