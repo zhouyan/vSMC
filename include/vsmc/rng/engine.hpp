@@ -40,7 +40,7 @@
 #if VSMC_HAS_AES_NI
 #define VSMC_RNG_TYPE ::vsmc::ARS
 #else
-#define VSMC_RNG_TYPE ::vsmc::Threefry
+#define VSMC_RNG_TYPE ::vsmc::Philox
 #endif
 #endif
 
