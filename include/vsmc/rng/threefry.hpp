@@ -35,9 +35,9 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/counter.hpp>
 
-#define VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(T, K, N, I, val)             \
-    template <>                                                               \
-    class ThreefryRotateConstant<T, K, N, I>                                  \
+#define VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(W, K, N, I, val)             \
+    template <typename T>                                                     \
+    class ThreefryRotateConstant<T, K, N, I, W>                               \
         : public std::integral_constant<int, val>                             \
     {                                                                         \
     }; // class ThreefryRotateConstant
@@ -60,105 +60,78 @@ namespace vsmc
 namespace internal
 {
 
-template <typename>
+template <typename T, int = std::numeric_limits<T>::digits>
 class ThreefryKSConstant;
 
-template <>
-class ThreefryKSConstant<std::uint32_t>
-    : public std::integral_constant<std::uint32_t, UINT32_C(0x1BD11BDA)>
+template <typename T>
+class ThreefryKSConstant<T, 32>
+    : public std::integral_constant<T, UINT32_C(0x1BD11BDA)>
 {
 }; // class ThreefryKSConstant
 
-template <>
-class ThreefryKSConstant<std::uint64_t>
-    : public std::integral_constant<std::uint64_t,
-          UINT64_C(0x1BD11BDAA9FC1A22)>
+template <typename T>
+class ThreefryKSConstant<T, 64>
+    : public std::integral_constant<T, UINT64_C(0x1BD11BDAA9FC1A22)>
 {
 }; // class ThreefryKSConstant
 
-template <typename, std::size_t, std::size_t, std::size_t>
+template <typename T, std::size_t, std::size_t, std::size_t,
+    int = std::numeric_limits<T>::digits>
 class ThreefryRotateConstant;
 
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 2, 0, 0, 13)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 2, 1, 0, 15)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 2, 2, 0, 26)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 2, 3, 0, 6)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 2, 4, 0, 17)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 2, 5, 0, 29)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 2, 6, 0, 16)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 2, 7, 0, 24)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 2, 0, 0, 13)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 2, 1, 0, 15)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 2, 2, 0, 26)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 2, 3, 0, 6)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 2, 4, 0, 17)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 2, 5, 0, 29)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 2, 6, 0, 16)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 2, 7, 0, 24)
 
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 0, 0, 10)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 1, 0, 11)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 2, 0, 13)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 3, 0, 23)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 4, 0, 6)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 5, 0, 17)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 6, 0, 25)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 7, 0, 18)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 0, 0, 10)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 1, 0, 11)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 2, 0, 13)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 3, 0, 23)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 4, 0, 6)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 5, 0, 17)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 6, 0, 25)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 7, 0, 18)
 
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 0, 1, 26)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 1, 1, 21)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 2, 1, 27)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 3, 1, 5)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 4, 1, 20)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 5, 1, 11)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 6, 1, 10)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint32_t, 4, 7, 1, 20)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 0, 1, 26)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 1, 1, 21)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 2, 1, 27)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 3, 1, 5)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 4, 1, 20)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 5, 1, 11)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 6, 1, 10)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(32, 4, 7, 1, 20)
 
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 2, 0, 0, 16)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 2, 1, 0, 42)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 2, 2, 0, 12)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 2, 3, 0, 31)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 2, 4, 0, 16)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 2, 5, 0, 32)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 2, 6, 0, 24)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 2, 7, 0, 21)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 2, 0, 0, 16)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 2, 1, 0, 42)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 2, 2, 0, 12)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 2, 3, 0, 31)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 2, 4, 0, 16)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 2, 5, 0, 32)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 2, 6, 0, 24)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 2, 7, 0, 21)
 
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 0, 0, 14)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 1, 0, 52)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 2, 0, 23)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 3, 0, 5)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 4, 0, 25)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 5, 0, 46)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 6, 0, 58)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 7, 0, 32)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 0, 0, 14)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 1, 0, 52)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 2, 0, 23)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 3, 0, 5)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 4, 0, 25)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 5, 0, 46)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 6, 0, 58)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 7, 0, 32)
 
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 0, 1, 16)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 1, 1, 57)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 2, 1, 40)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 3, 1, 37)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 4, 1, 33)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 5, 1, 12)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 6, 1, 22)
-VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(std::uint64_t, 4, 7, 1, 32)
-
-template <typename T, std::size_t K>
-class ThreefryInitPar
-{
-    public:
-    static void eval(const std::array<T, K> &key, std::array<T, K + 1> &par)
-    {
-        par.back() = ThreefryKSConstant<T>::value;
-        par_xor<0>(key, par, std::integral_constant<bool, 0 < K>());
-    }
-
-    private:
-    template <std::size_t>
-    static void par_xor(
-        const std::array<T, K> &, std::array<T, K + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void par_xor(
-        const std::array<T, K> &key, std::array<T, K + 1> &par, std::true_type)
-    {
-        std::get<N>(par) = std::get<N>(key);
-        par.back() ^= std::get<N>(key);
-        par_xor<N + 1>(key, par, std::integral_constant<bool, N + 1 < K>());
-    }
-}; // class ThreefryInitPar
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 0, 1, 16)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 1, 1, 57)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 2, 1, 40)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 3, 1, 37)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 4, 1, 33)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 5, 1, 12)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 6, 1, 22)
+VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 4, 7, 1, 32)
 
 template <typename T, int R>
 class ThreefryRotateImpl
@@ -295,14 +268,22 @@ class ThreefryGenerator
     using ctr_type = std::array<ResultType, K>;
     using key_type = std::array<ResultType, K>;
 
+    ThreefryGenerator() : par_(0) {}
+
     static constexpr std::size_t size() { return K; }
 
-    void reset(const key_type &) {}
+    void reset(const key_type &key)
+    {
+        par_ = internal::ThreefryKSConstant<result_type>::value;
+        for (std::size_t i = 0; i != key.size(); ++i)
+            par_ ^= key[i];
+    }
 
     void operator()(ctr_type &ctr, const key_type &key, ctr_type &buffer) const
     {
         std::array<ResultType, K + 1> par;
-        internal::ThreefryInitPar<ResultType, K>::eval(key, par);
+        std::copy(key.begin(), key.end(), par.begin());
+        par.back() = par_;
         increment(ctr);
         buffer = ctr;
         generate<0>(buffer, par, std::true_type());
@@ -324,6 +305,9 @@ class ThreefryGenerator
         generate<N + 1>(
             state, par, std::integral_constant<bool, (N < Rounds)>());
     }
+
+    private:
+    result_type par_;
 }; // class ThreefryGenerator
 
 /// \brief Threefry RNG engine

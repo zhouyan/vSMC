@@ -39,16 +39,10 @@
 #include <intrin.h>
 #endif
 
-#define VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(T, I, val)                       \
-    template <>                                                               \
-    class PhiloxWeylConstant<T, I> : public std::integral_constant<T, val>    \
-    {                                                                         \
-    }; // class PhiloxWeylConstant
-
-#define VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(T, K, I, val)                   \
-    template <>                                                               \
-    class PhiloxRoundConstant<T, K, I>                                        \
-        : public std::integral_constant<T, val>                               \
+#define VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(W, K, I, val)                   \
+    template <typename T>                                                     \
+    class PhiloxRoundConstant<T, K, I, W>                                     \
+        : public std::integral_constant<T, UINT##W##_C(val)>                  \
     {                                                                         \
     }; // PhiloxRoundConstant
 
@@ -70,94 +64,104 @@ namespace vsmc
 namespace internal
 {
 
-template <typename, std::size_t>
+template <typename T, std::size_t, int = std::numeric_limits<T>::digits>
 class PhiloxWeylConstant;
 
-VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(std::uint32_t, 0, UINT32_C(0x9E3779B9))
-VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(std::uint32_t, 1, UINT32_C(0xBB67AE85))
+template <typename T>
+class PhiloxWeylConstant<T, 0, 32>
+    : public std::integral_constant<T, UINT32_C(0x9E3779B9)>
+{
+}; // PhiloxWeylConstant
 
-VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(
-    std::uint64_t, 0, UINT64_C(0x9E3779B97F4A7C15))
-VSMC_DEFINE_RNG_PHILOX_WELY_CONSTANT(
-    std::uint64_t, 1, UINT64_C(0xBB67AE8584CAA73B))
+template <typename T>
+class PhiloxWeylConstant<T, 1, 32>
+    : public std::integral_constant<T, UINT32_C(0xBB67AE85)>
+{
+}; // PhiloxWeylConstant
 
-template <typename, std::size_t, std::size_t>
+template <typename T>
+class PhiloxWeylConstant<T, 0, 64>
+    : public std::integral_constant<T, UINT64_C(0x9E3779B97F4A7C15)>
+{
+}; // PhiloxWeylConstant
+
+template <typename T>
+class PhiloxWeylConstant<T, 1, 64>
+    : public std::integral_constant<T, UINT64_C(0xBB67AE8584CAA73B)>
+{
+}; // PhiloxWeylConstant
+
+template <typename T, std::size_t, std::size_t,
+    int = std::numeric_limits<T>::digits>
 class PhiloxRoundConstant;
 
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
-    std::uint32_t, 2, 0, UINT32_C(0xD256D193))
+VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(32, 2, 0, 0xD256D193)
 
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
-    std::uint32_t, 4, 0, UINT32_C(0xD2511F53))
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
-    std::uint32_t, 4, 1, UINT32_C(0xCD9E8D57))
+VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(32, 4, 0, 0xD2511F53)
+VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(32, 4, 1, 0xCD9E8D57)
 
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
-    std::uint64_t, 2, 0, UINT64_C(0xD2B74407B1CE6E93))
+VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(64, 2, 0, 0xD2B74407B1CE6E93)
 
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
-    std::uint64_t, 4, 0, UINT64_C(0xD2E7470EE14C6C93))
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(
-    std::uint64_t, 4, 1, UINT64_C(0xCA5A826395121157))
+VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(64, 4, 0, 0xD2E7470EE14C6C93)
+VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(64, 4, 1, 0xCA5A826395121157)
 
-template <std::size_t K, std::size_t I>
-inline void philox_hilo(std::uint32_t b, std::uint32_t &hi, std::uint32_t &lo)
+template <typename T, std::size_t, std::size_t,
+    int = std::numeric_limits<T>::digits>
+class PhiloxHiLo;
+
+template <typename T, std::size_t K, std::size_t I>
+class PhiloxHiLo<T, K, I, 32>
 {
-    std::uint64_t prod = static_cast<std::uint64_t>(b) *
-        static_cast<std::uint64_t>(
-                             PhiloxRoundConstant<std::uint32_t, K, I>::value);
-    hi = static_cast<std::uint32_t>(prod >> 32);
-    lo = static_cast<std::uint32_t>(prod);
-}
+    public:
+    static void eval(T b, T &hi, T &lo)
+    {
+        std::uint_fast64_t prod = static_cast<std::uint_fast64_t>(b) *
+            static_cast<std::uint_fast64_t>(
+                                      PhiloxRoundConstant<T, K, I>::value);
+        hi = static_cast<T>(prod >> 32);
+        lo = static_cast<T>(prod);
+    }
+}; // class PhiloxHiLo
 
+template <typename T, std::size_t K, std::size_t I>
+class PhiloxHiLo<T, K, I, 64>
+{
+    public:
+    static void eval(T b, T &hi, T &lo)
+    {
 #if VSMC_HAS_INT128
+        unsigned VSMC_INT128 prod = static_cast<unsigned VSMC_INT128>(b) *
+            static_cast<unsigned VSMC_INT128>(
+                                        PhiloxRoundConstant<T, K, I>::value);
+        hi = static_cast<T>(prod >> 64);
+        lo = static_cast<T>(prod);
+#elif defined(VSMC_MSVC)
+        unsigned __int64 Multiplier =
+            static_cast<unsigned __int64>(PhiloxRoundConstant<T, K, I>::value);
+        unsigned __int64 Multiplicand = static_cast<unsigned __int64>(b);
+        unsigned __int64 h = 0;
+        unsigned __int64 l = 0;
+        l = _umul128(Multiplier, Multiplicand, &h);
+        hi = static_cast<T>(h);
+        lo = static_cast<T>(l);
+#else  // VSMC_HAS_INT128
+        const T a = PhiloxRoundConstant<T, K, I>::value;
+        const T lomask = (static_cast<T>(1) << 32) - 1;
+        const T ahi = a >> 32;
+        const T alo = a & lomask;
+        const T bhi = b >> 32;
+        const T blo = b & lomask;
+        const T ahbl = ahi * blo;
+        const T albh = alo * bhi;
+        const T ahbl_albh = ((ahbl & lomask) + (albh & lomask));
 
-template <std::size_t K, std::size_t I>
-inline void philox_hilo(std::uint64_t b, std::uint64_t &hi, std::uint64_t &lo)
-{
-    unsigned VSMC_INT128 prod =
-        static_cast<unsigned VSMC_INT128>(b) *
-        static_cast<unsigned VSMC_INT128>(
-            PhiloxRoundConstant<std::uint64_t, K, I>::value);
-    hi = static_cast<std::uint64_t>(prod >> 64);
-    lo = static_cast<std::uint64_t>(prod);
-}
-
-#elif defined(VSMC_MSVC) // VSMC_HAS_INT128
-
-template <std::size_t K, std::size_t I>
-inline void philox_hilo(std::uint64_t b, std::uint64_t &hi, std::uint64_t &lo)
-{
-    lo = _umul128(PhiloxRoundConstant<std::uint64_t, K, I>::value, b, &hi);
-}
-
-#else // VSMC_HAS_INT128
-
-template <std::size_t K, std::size_t I>
-inline void philox_hilo(std::uint64_t b, std::uint64_t &hi, std::uint64_t &lo)
-{
-    const std::uint64_t a = PhiloxRoundConstant<std::uint64_t, K, I>::value;
-    const unsigned whalf = 32;
-    const std::uint64_t lomask = (static_cast<std::uint64_t>(1) << whalf) - 1;
-
-    lo = static_cast<std::uint64_t>(a * b);
-
-    const std::uint64_t ahi = a >> whalf;
-    const std::uint64_t alo = a & lomask;
-    const std::uint64_t bhi = b >> whalf;
-    const std::uint64_t blo = b & lomask;
-
-    const std::uint64_t ahbl = ahi * blo;
-    const std::uint64_t albh = alo * bhi;
-
-    const std::uint64_t ahbl_albh = ((ahbl & lomask) + (albh & lomask));
-
-    hi = ahi * bhi + (ahbl >> whalf) + (albh >> whalf);
-    hi += ahbl_albh >> whalf;
-    hi += ((lo >> whalf) < (ahbl_albh & lomask));
-}
-
+        lo = a * b;
+        hi = ahi * bhi + (ahbl >> 32) + (albh >> 32);
+        hi += ahbl_albh >> 32;
+        hi += ((lo >> 32) < (ahbl_albh & lomask));
 #endif // VSMC_HAS_INT128
+    }
+}; // class PhiloxHiLo
 
 template <typename T, std::size_t K, std::size_t N, bool = (N > 1)>
 class PhiloxBumpKey
@@ -202,7 +206,7 @@ class PhiloxRound<T, 2, N, true>
     {
         T hi = 0;
         T lo = 0;
-        philox_hilo<2, 0>(std::get<0>(state), hi, lo);
+        PhiloxHiLo<T, 2, 0>::eval(std::get<0>(state), hi, lo);
         hi ^= std::get<0>(par);
         std::get<0>(state) = hi ^ std::get<1>(state);
         std::get<1>(state) = lo;
@@ -219,8 +223,8 @@ class PhiloxRound<T, 4, N, true>
         T lo1 = 0;
         T hi2 = 0;
         T lo3 = 0;
-        philox_hilo<4, 1>(std::get<2>(state), hi0, lo1);
-        philox_hilo<4, 0>(std::get<0>(state), hi2, lo3);
+        PhiloxHiLo<T, 4, 1>::eval(std::get<2>(state), hi0, lo1);
+        PhiloxHiLo<T, 4, 0>::eval(std::get<0>(state), hi2, lo3);
 
         hi0 ^= std::get<0>(par);
         hi2 ^= std::get<1>(par);
