@@ -34,13 +34,18 @@
 int main(int argc, char **argv)
 {
     std::size_t N = 10000;
-    if (argc > 1)
-        N = static_cast<std::size_t>(std::atoi(argv[1]));
-    std::size_t M = 100;
-    if (argc > 2)
-        M = static_cast<std::size_t>(std::atoi(argv[2]));
+    std::size_t M = 10;
+    vsmc::Vector<std::string> distribution;
 
-    rng_distribution(N, M);
+    vsmc::ProgramOptionMap option;
+    option.add("N", "Number of samples in each run", &N, N);
+    option.add("M", "Number of repetitions", &M, M);
+    option.add("distribution", "Distribution to test", &distribution);
+    option.process(argc, argv);
+    if (option.count("help") > 0)
+        rng_distribution_help();
+
+    rng_distribution(N, M, distribution);
 
     return 0;
 }
