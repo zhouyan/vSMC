@@ -42,6 +42,14 @@
 
 extern "C" {
 
+int vsmc_resample_trans_residual(
+    int n, int m, const double *weight, double *resid, int *integ)
+{
+    return static_cast<int>(
+        ::vsmc::resample_trans_residual(static_cast<std::size_t>(n),
+            static_cast<std::size_t>(m), weight, resid, integ));
+}
+
 void vsmc_resample_trans_u01_rep(
     int n, int m, const double *weight, const double *u01, int *replication)
 {
@@ -54,14 +62,6 @@ void vsmc_resample_trans_rep_index(
 {
     ::vsmc::resample_trans_rep_index(static_cast<std::size_t>(n),
         static_cast<std::size_t>(m), replication, index);
-}
-
-int vsmc_resample_trans_residual(
-    int n, int m, const double *weight, double *resid, int *integ)
-{
-    return static_cast<int>(
-        ::vsmc::resample_trans_residual(static_cast<std::size_t>(n),
-            static_cast<std::size_t>(m), weight, resid, integ));
 }
 
 VSMC_DEFINE_C_API_RESAMPLE(Multinomial, multinomial)

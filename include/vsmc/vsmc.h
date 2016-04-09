@@ -655,6 +655,10 @@ double vsmc_normal_mv_proposal(vsmc_rng rng, int dim, const double *x,
 /** \brief `vsmc::Sampler::resample_type` */
 typedef void (*vsmc_resample_type)(int, int, vsmc_rng, const double *, int *);
 
+/** \brief `vsmc::resample_trans_residual` */
+int vsmc_resample_trans_residual(
+    int n, int m, const double *weight, double *resid, int *integ);
+
 /** \brief `vsmc::resample_trans_u01_rep` */
 void vsmc_resample_trans_u01_rep(
     int n, int m, const double *weight, const double *u01, int *replication);
@@ -662,10 +666,6 @@ void vsmc_resample_trans_u01_rep(
 /** \brief `vsmc::resample_trans_rep_index` */
 void vsmc_resample_trans_rep_index(
     int n, int m, const int *replication, int *index);
-
-/** \brief `vsmc::resample_trans_residual` */
-int vsmc_resample_trans_residual(
-    int n, int m, const double *weight, double *resid, int *integ);
 
 /** \brief `vsmc::ResampleMultinomial` */
 void vsmc_resample_multinomial(
