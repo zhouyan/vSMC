@@ -37,13 +37,54 @@
 namespace vsmc
 {
 
-/// \brief Transform uniform [0, 1] sequence into replication numbers
+/// \brief Transform normalized weights to normalized residual and integrals,
 /// \ingroup Resample
 ///
 /// \param N Sample size before resampling
 /// \param M Sample size after resampling
 /// \param weight N-vector of normalized weights
-/// \param u01seq M ordered uniform [0, 1] random numbers
+/// \param resid N-vector of normalized residuals
+/// \param integ N-vector of integral parts
+/// \return The number of remaining elements to be resampled
+template <typename InputIter, typename OutputIterR, typename OutputIterI>
+inline std::size_t resample_trans_residual(std::size_t N, std::size_t M,
+    InputIter weight, OutputIterR resid, OutputIterI integ)
+{
+    using resid_type = typename std::iterator_traits<OutputIterR>::value_type;
+    using integ_type = typename std::iterator_traits<OutputIterI>::value_type;
+
+    static_assert(std::is_floating_point<resid_type>::value,
+        "**resample_trans_residual** OUTPUT resid IS NOT OF FLOATING POINT "
+        "TYPES");
+
+    resid_type sum_resid = 0;
+    integ_type sum_integ = 0;
+    OutputIterR resid_i = resid;
+    OutputIterI integ_i = integ;
+    const resid_type coeff = static_cast<resid_type>(M);
+    for (std::size_t i = 0; i != N; ++i, ++weight, ++resid_i, ++integ_i) {
+        resid_type w = coeff * static_cast<resid_type>(*weight);
+        resid_type integral;
+        *resid_i = std::modf(w, &integral);
+        *integ_i = static_cast<integ_type>(integral);
+        sum_resid += *resid_i;
+        sum_integ += *integ_i;
+    }
+
+    const resid_type mul_resid = 1 / sum_resid;
+    for (std::size_t i = 0; i != N; ++i, ++resid)
+        *resid *= mul_resid;
+
+    return M - static_cast<std::size_t>(sum_integ);
+}
+
+/// \brief Transform uniform [0, 1) sequence into replication numbers
+/// \ingroup Resample
+///
+/// \param N Sample size before resampling
+/// \param M Sample size after resampling
+/// \param weight N-vector of normalized weights
+/// \param u01seq M ordered uniform [0, 1) random numbers
 /// \param replication N-vector of replication numbers
 template <typename InputIter, typename OutputIter, typename U01SeqType>
 inline OutputIter resample_trans_u01_rep(std::size_t N, std::size_t M,
@@ -134,47 +175,6 @@ inline OutputIter resample_trans_rep_index(
     }
 
     return index;
-}
-
-/// \brief Transform normalized weights to normalized residual and integrals,
-/// \ingroup Resample
-///
-/// \param N Sample size before resampling
-/// \param M Sample size after resampling
-/// \param weight N-vector of normalized weights
-/// \param resid N-vector of normalized residuals
-/// \param integ N-vector of integral parts
-/// \return The number of remaining elements to be resampled
-template <typename InputIter, typename OutputIterR, typename OutputIterI>
-inline std::size_t resample_trans_residual(std::size_t N, std::size_t M,
-    InputIter weight, OutputIterR resid, OutputIterI integ)
-{
-    using resid_type = typename std::iterator_traits<OutputIterR>::value_type;
-    using integ_type = typename std::iterator_traits<OutputIterI>::value_type;
-
-    static_assert(std::is_floating_point<resid_type>::value,
-        "**resample_trans_residual** OUTPUT resid IS NOT OF FLOATING POINT "
-        "TYPES");
-
-    resid_type sum_resid = 0;
-    integ_type sum_integ = 0;
-    OutputIterR resid_i = resid;
-    OutputIterI integ_i = integ;
-    const resid_type coeff = static_cast<resid_type>(M);
-    for (std::size_t i = 0; i != N; ++i, ++weight, ++resid_i, ++integ_i) {
-        resid_type w = coeff * static_cast<resid_type>(*weight);
-        resid_type integral;
-        *resid_i = std::modf(w, &integral);
-        *integ_i = static_cast<integ_type>(integral);
-        sum_resid += *resid_i;
-        sum_integ += *integ_i;
-    }
-
-    const resid_type mul_resid = 1 / sum_resid;
-    for (std::size_t i = 0; i != N; ++i, ++resid)
-        *resid *= mul_resid;
-
-    return M - static_cast<std::size_t>(sum_integ);
 }
 
 } // namespace vsmc
