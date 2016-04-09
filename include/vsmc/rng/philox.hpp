@@ -244,38 +244,6 @@ class PhiloxRound<T, 4, N, true, W>
     }
 }; // class PhiloxRound
 
-#if VSMC_HAS_SSE2
-template <typename T, std::size_t N>
-class PhiloxRound<T, 4, N, true, 32>
-{
-    public:
-    static void eval(std::array<T, 4> &state, const std::array<T, 2> &par)
-    {
-        M128I<T> hilo;
-        M128I<T> p;
-        union {
-            M128I<T> mm;
-            std::array<T, 4> result;
-        } s;
-
-        p.set(static_cast<T>(0), PhiloxRoundConstant<T, 4, 0>::value,
-            static_cast<T>(0), PhiloxRoundConstant<T, 4, 1>::value);
-        s.mm.set(static_cast<T>(0), std::get<0>(state), static_cast<T>(0),
-            std::get<2>(state));
-        hilo.value() = _mm_mul_epu32(p.value(), s.mm.value());
-
-        p.set(std::get<1>(par), static_cast<T>(0), std::get<0>(par),
-            static_cast<T>(0));
-        hilo ^= p;
-        s.mm.set(std::get<3>(state), static_cast<T>(0), std::get<1>(state),
-            static_cast<T>(0));
-        hilo ^= s.mm;
-        s.mm.value() = _mm_shuffle_epi32(hilo.value(), 0xB1);
-        state = s.result;
-    }
-};     // class PhiloxRound
-#endif // VSMC_HAS_SSE2
-
 } // namespace vsmc::internal
 
 /// \brief Philox RNG generator

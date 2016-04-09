@@ -36,6 +36,7 @@ ADD_CUSTOM_TARGET(rng)
 ADD_DEPENDENCIES(example rng)
 
 ADD_CUSTOM_TARGET(rng-files)
+ADD_DEPENDENCIES(rng rng-files)
 ADD_DEPENDENCIES(example-files rng-files)
 
 FUNCTION(VSMC_ADD_RNG_TEST name)
