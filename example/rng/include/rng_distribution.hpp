@@ -97,7 +97,7 @@ template <typename RealType, typename QuantileType>
 inline vsmc::Vector<RealType> rng_distribution_partition_quantile(
     std::size_t n, QuantileType &&quantile)
 {
-    const std::size_t k = n / 100; // The number of cells
+    const std::size_t k = n < 2000 ? n / 100 : 20; // The number of cells
     const RealType p = static_cast<RealType>(1) / k;
     vsmc::Vector<RealType> partition(k - 1);
     for (std::size_t i = 0; i != k - 1; ++i)
@@ -537,37 +537,37 @@ inline void rng_distribution_pval(const vsmc::Vector<RealType> &chi2,
     std::array<vsmc::Vector<RealType>, 6> &pval)
 {
     std::size_t alpha1;
-    std::size_t alpha5;
-    std::size_t alpha10;
+    std::size_t alpha2;
+    std::size_t alpha3;
 
-    alpha1 = alpha5 = alpha10 = 0;
+    alpha1 = alpha2 = alpha3 = 0;
     for (std::size_t i = 0; i != chi2.size(); ++i) {
         if (chi2[i] > static_cast<RealType>(0.0125) &&
             chi2[i] < static_cast<RealType>(1 - 0.0125))
             ++alpha1;
         if (chi2[i] > static_cast<RealType>(0.025) &&
             chi2[i] < static_cast<RealType>(1 - 0.025))
-            ++alpha5;
+            ++alpha2;
         if (chi2[i] > static_cast<RealType>(0.05) &&
             chi2[i] < static_cast<RealType>(1 - 0.05))
-            ++alpha10;
+            ++alpha3;
     }
     pval[0].push_back(static_cast<RealType>(100.0 * alpha1 / chi2.size()));
-    pval[1].push_back(static_cast<RealType>(100.0 * alpha5 / chi2.size()));
-    pval[2].push_back(static_cast<RealType>(100.0 * alpha10 / chi2.size()));
+    pval[1].push_back(static_cast<RealType>(100.0 * alpha2 / chi2.size()));
+    pval[2].push_back(static_cast<RealType>(100.0 * alpha3 / chi2.size()));
 
-    alpha1 = alpha5 = alpha10 = 0;
+    alpha1 = alpha2 = alpha3 = 0;
     for (std::size_t i = 0; i != ksad.size(); ++i) {
         if (ksad[i] < static_cast<RealType>(3.0916))
             ++alpha1;
         if (ksad[i] < static_cast<RealType>(2.4986))
-            ++alpha5;
+            ++alpha2;
         if (ksad[i] < static_cast<RealType>(1.9355))
-            ++alpha10;
+            ++alpha3;
     }
     pval[3].push_back(static_cast<RealType>(100.0 * alpha1 / ksad.size()));
-    pval[4].push_back(static_cast<RealType>(100.0 * alpha5 / ksad.size()));
-    pval[5].push_back(static_cast<RealType>(100.0 * alpha10 / ksad.size()));
+    pval[4].push_back(static_cast<RealType>(100.0 * alpha2 / ksad.size()));
+    pval[5].push_back(static_cast<RealType>(100.0 * alpha3 / ksad.size()));
 }
 
 template <typename RealType, typename vSMCDistType, typename STDDistType,
