@@ -361,34 +361,24 @@ class CounterEngine
         const std::size_t remain = M_ - index_;
 
         if (n < remain) {
-            std::memcpy(r, buffer_.data() + index_, sizeof(result_type) * n);
+            std::copy_n(buffer_.data() + index_, n, r);
             index_ += n;
             return;
         }
 
-        std::memcpy(r, buffer_.data() + index_, sizeof(result_type) * remain);
+        std::copy_n(buffer_.data() + index_, remain, r);
         r += remain;
         n -= remain;
         index_ = M_;
 
-        const std::size_t k = internal::BufferSize<result_type>::value / M_;
-        Array<result_type, M_> buffer[k];
-        if (k != 0) {
-            const std::size_t m = (n / M_) / k;
-            const std::size_t l = (n / M_) % k;
-            for (std::size_t i = 0; i != m; ++i) {
-                generator_(ctr_, key_, k, buffer);
-                std::memcpy(r, buffer, sizeof(result_type) * M_ * k);
-                r += k * M_;
-                n -= k * M_;
-            }
-            generator_(ctr_, key_, l, buffer);
-            std::memcpy(r, buffer, sizeof(result_type) * M_ * l);
-            r += l * M_;
-            n -= l * M_;
-        }
-        for (std::size_t i = 0; i != n; ++i)
-            r[i] = operator()();
+        const std::size_t m = n / M_;
+        const std::size_t l = n % M_;
+        for (std::size_t i = 0; i != m; ++i, r += M_)
+            generator_(ctr_, key_, *reinterpret_cast<buffer_type *>(r));
+
+        generator_(ctr_, key_, buffer_);
+        std::copy_n(buffer_.data(), l, r);
+        index_ = l;
     }
 
     /// \brief Discard the buffer
@@ -492,7 +482,9 @@ class CounterEngine
     private:
     static constexpr std::size_t M_ = Generator::size();
 
-    std::array<result_type, M_> buffer_;
+    using buffer_type = std::array<result_type, M_>;
+
+    buffer_type buffer_;
     std::size_t index_;
     ctr_type ctr_;
     key_type key_;

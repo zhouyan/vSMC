@@ -268,16 +268,6 @@ class PhiloxGenerator
         generate<0>(buffer, par, std::true_type());
     }
 
-    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        ctr_type *buffer) const
-    {
-        increment(ctr, n, buffer);
-        for (std::size_t i = 0; i != n; ++i) {
-            key_type par = key;
-            generate<0>(buffer[i], par, std::true_type());
-        }
-    }
-
     private:
     template <std::size_t>
     void generate(ctr_type &, key_type &, std::false_type) const

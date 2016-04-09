@@ -87,30 +87,6 @@ class AESNIGenerator
         buffer = buf.result;
     }
 
-    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        std::array<ResultType, size()> *buffer) const
-    {
-        if (n == 0)
-            return;
-
-        union {
-            std::array<M128I<>, Blocks> state;
-            std::array<ctr_type, Blocks> ctr_block;
-            std::array<ResultType, size()> result;
-        } buf;
-
-        std::array<M128I<>, Rounds + 1> rk;
-        key_seq_(key, rk);
-        for (std::size_t i = 0; i != n; ++i) {
-            increment(ctr, buf.ctr_block);
-            enc_first(buf.state, rk);
-            enc_round<1>(
-                buf.state, rk, std::integral_constant<bool, 1 < Rounds>());
-            enc_last(buf.state, rk);
-            buffer[i] = buf.result;
-        }
-    }
-
     private:
     KeySeqType key_seq_;
 

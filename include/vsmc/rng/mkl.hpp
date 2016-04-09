@@ -884,15 +884,15 @@ class MKLEngine
     {
         internal::size_check<MKL_INT>(n, "MKLEngine::operator()");
 
-        std::size_t remain = M_ - index_;
+        const std::size_t remain = M_ - index_;
 
         if (n < remain) {
-            std::memcpy(r, buffer_.data() + index_, sizeof(result_type) * n);
+            std::copy_n(buffer_.data() + index_, n, r);
             index_ += n;
             return;
         }
 
-        std::memcpy(r, buffer_.data() + index_, sizeof(result_type) * remain);
+        std::copy_n(buffer_.data() + index_, remain, r);
         r += remain;
         n -= remain;
         index_ = M_;
@@ -901,8 +901,10 @@ class MKLEngine
         const std::size_t l = n % M_;
         internal::MKLUniformBits<Bits>::eval(
             stream_, static_cast<MKL_INT>(m), r);
+        r += m;
+
         generate();
-        std::memcpy(r + m, buffer_.data(), sizeof(result_type) * l);
+        std::copy_n(buffer_.data(), l, r);
         index_ = l;
     }
 

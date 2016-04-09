@@ -308,19 +308,6 @@ class ThreefryGenerator
         generate<0>(buffer, par, std::true_type());
     }
 
-    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        ctr_type *buffer) const
-    {
-        if (n == 0)
-            return;
-
-        std::array<ResultType, K + 1> par;
-        internal::ThreefryInitPar<ResultType, K>::eval(key, par);
-        increment(ctr, n, buffer);
-        for (std::size_t i = 0; i != n; ++i)
-            generate<0>(buffer[i], par, std::true_type());
-    }
-
     private:
     template <std::size_t>
     void generate(std::array<ResultType, K> &,
