@@ -34,6 +34,7 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/counter.hpp>
+#include <vsmc/rngc/philox.h>
 
 #ifdef VSMC_MSVC
 #include <intrin.h>
@@ -113,13 +114,18 @@ template <typename T, std::size_t K, std::size_t I>
 class PhiloxHiLo<T, K, I, 32>
 {
     public:
-    static void eval(T b, T &hi, T &lo)
+    static std::array<T, 2> eval(T b)
     {
-        std::uint_fast64_t prod = static_cast<std::uint_fast64_t>(b) *
+        union {
+            std::uint_fast64_t prod;
+            std::array<T, 2> hilo;
+        } buf;
+
+        buf.prod = static_cast<std::uint_fast64_t>(b) *
             static_cast<std::uint_fast64_t>(
-                                      PhiloxRoundConstant<T, K, I>::value);
-        hi = static_cast<T>(prod >> 32);
-        lo = static_cast<T>(prod);
+                       PhiloxRoundConstant<T, K, I>::value);
+
+        return buf.hilo;
     }
 }; // class PhiloxHiLo
 
@@ -127,23 +133,29 @@ template <typename T, std::size_t K, std::size_t I>
 class PhiloxHiLo<T, K, I, 64>
 {
     public:
-    static void eval(T b, T &hi, T &lo)
+    static std::array<T, 2> eval(T b)
     {
 #if VSMC_HAS_INT128
-        unsigned VSMC_INT128 prod = static_cast<unsigned VSMC_INT128>(b) *
+        union {
+            unsigned VSMC_INT128 prod;
+            std::array<T, 2> hilo;
+        } buf;
+
+        buf.prod = static_cast<unsigned VSMC_INT128>(b) *
             static_cast<unsigned VSMC_INT128>(
-                                        PhiloxRoundConstant<T, K, I>::value);
-        hi = static_cast<T>(prod >> 64);
-        lo = static_cast<T>(prod);
+                       PhiloxRoundConstant<T, K, I>::value);
+
+        return buf.hilo;
 #elif defined(VSMC_MSVC)
         unsigned __int64 Multiplier =
             static_cast<unsigned __int64>(PhiloxRoundConstant<T, K, I>::value);
         unsigned __int64 Multiplicand = static_cast<unsigned __int64>(b);
-        unsigned __int64 h = 0;
-        unsigned __int64 l = 0;
-        l = _umul128(Multiplier, Multiplicand, &h);
-        hi = static_cast<T>(h);
-        lo = static_cast<T>(l);
+        unsigned __int64 hi = 0;
+        unsigned __int64 lo = 0;
+        lo = _umul128(Multiplier, Multiplicand, &hi);
+        std::array<T, 2> hilo = {{ static_cast<T>(lo), static_cast<T>(hi) }};
+
+        return hilo;
 #else  // VSMC_HAS_INT128
         const T a = PhiloxRoundConstant<T, K, I>::value;
         const T lomask = (static_cast<T>(1) << 32) - 1;
@@ -155,10 +167,13 @@ class PhiloxHiLo<T, K, I, 64>
         const T albh = alo * bhi;
         const T ahbl_albh = ((ahbl & lomask) + (albh & lomask));
 
-        lo = a * b;
-        hi = ahi * bhi + (ahbl >> 32) + (albh >> 32);
+        T lo = a * b;
+        T hi = ahi * bhi + (ahbl >> 32) + (albh >> 32);
         hi += ahbl_albh >> 32;
         hi += ((lo >> 32) < (ahbl_albh & lomask));
+        std::array<T, 2> hilo = {{lo, hi}};
+
+        return hilo;
 #endif // VSMC_HAS_INT128
     }
 }; // class PhiloxHiLo
@@ -191,47 +206,41 @@ class PhiloxBumpKey<T, 4, N, true>
     }
 }; // class PhiloxBumpKey
 
-template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
+template <typename T, std::size_t K, std::size_t N, bool = (N > 0),
+    int = std::numeric_limits<T>::digits>
 class PhiloxRound
 {
     public:
     static void eval(std::array<T, K> &, const std::array<T, K / 2> &) {}
 }; // class PhiloxRound
 
-template <typename T, std::size_t N>
-class PhiloxRound<T, 2, N, true>
+template <typename T, std::size_t N, int W>
+class PhiloxRound<T, 2, N, true, W>
 {
     public:
     static void eval(std::array<T, 2> &state, const std::array<T, 1> &par)
     {
-        T hi = 0;
-        T lo = 0;
-        PhiloxHiLo<T, 2, 0>::eval(std::get<0>(state), hi, lo);
-        hi ^= std::get<0>(par);
-        std::get<0>(state) = hi ^ std::get<1>(state);
-        std::get<1>(state) = lo;
+        std::array<T, 2> hilo = PhiloxHiLo<T, 2, 0>::eval(std::get<0>(state));
+        std::get<1>(hilo) ^= std::get<0>(par);
+        std::get<0>(state) = std::get<1>(hilo) ^ std::get<1>(state);
+        std::get<1>(state) = std::get<0>(hilo);
     }
 }; // class PhiloxRound
 
-template <typename T, std::size_t N>
-class PhiloxRound<T, 4, N, true>
+template <typename T, std::size_t N, int W>
+class PhiloxRound<T, 4, N, true, W>
 {
     public:
     static void eval(std::array<T, 4> &state, const std::array<T, 2> &par)
     {
-        T hi0 = 0;
-        T lo1 = 0;
-        T hi2 = 0;
-        T lo3 = 0;
-        PhiloxHiLo<T, 4, 1>::eval(std::get<2>(state), hi0, lo1);
-        PhiloxHiLo<T, 4, 0>::eval(std::get<0>(state), hi2, lo3);
-
-        hi0 ^= std::get<0>(par);
-        hi2 ^= std::get<1>(par);
-        std::get<0>(state) = hi0 ^ std::get<1>(state);
-        std::get<1>(state) = lo1;
-        std::get<2>(state) = hi2 ^ std::get<3>(state);
-        std::get<3>(state) = lo3;
+        std::array<T, 2> hilo0 = PhiloxHiLo<T, 4, 1>::eval(std::get<2>(state));
+        std::array<T, 2> hilo2 = PhiloxHiLo<T, 4, 0>::eval(std::get<0>(state));
+        std::get<1>(hilo0) ^= std::get<0>(par);
+        std::get<1>(hilo2) ^= std::get<1>(par);
+        std::get<0>(state) = std::get<1>(hilo0) ^ std::get<1>(state);
+        std::get<1>(state) = std::get<0>(hilo0);
+        std::get<2>(state) = std::get<1>(hilo2) ^ std::get<3>(state);
+        std::get<3>(state) = std::get<0>(hilo2);
     }
 }; // class PhiloxRound
 
@@ -240,7 +249,8 @@ class PhiloxRound<T, 4, N, true>
 /// \brief Philox RNG generator
 /// \ingroup Philox
 template <typename ResultType, std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
-    std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
+    std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS,
+    int = std::numeric_limits<ResultType>::digits>
 class PhiloxGenerator
 {
     static_assert(std::is_unsigned<ResultType>::value,
@@ -267,9 +277,10 @@ class PhiloxGenerator
     void operator()(ctr_type &ctr, const key_type &key, ctr_type &buffer) const
     {
         increment(ctr);
-        buffer = ctr;
+        ctr_type buf = ctr;
         key_type par = key;
-        generate<0>(buffer, par, std::true_type());
+        generate<0>(buf, par, std::true_type());
+        buffer = buf;
     }
 
     private:

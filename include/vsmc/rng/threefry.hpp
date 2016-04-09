@@ -285,8 +285,9 @@ class ThreefryGenerator
         std::copy(key.begin(), key.end(), par.begin());
         par.back() = par_;
         increment(ctr);
-        buffer = ctr;
+        ctr_type buf = ctr;
         generate<0>(buffer, par, std::true_type());
+        buffer = buf;
     }
 
     private:
