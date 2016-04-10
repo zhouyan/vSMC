@@ -118,6 +118,7 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
 
     std::cout << std::left << std::setw(nwid) << name;
     std::cout << std::right << std::setw(swid) << sizeof(RNGType);
+    std::cout << std::right << std::setw(swid) << alignof(RNGType);
     std::cout << std::right << std::setw(twid) << std::fixed << n1;
     std::cout << std::right << std::setw(twid) << std::fixed << n2;
     std::cout << std::right << std::setw(twid) << std::fixed << g1;
@@ -129,13 +130,14 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
 inline void rng_engine(std::size_t N, std::size_t M)
 {
     const int nwid = 20;
-    const int swid = 5;
+    const int swid = 10;
     const int twid = 15;
-    const std::size_t lwid = nwid + swid + twid * 5;
+    const std::size_t lwid = nwid + swid * 2 + twid * 5;
 
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::left << std::setw(nwid) << "RNGType";
     std::cout << std::right << std::setw(swid) << "Size";
+    std::cout << std::right << std::setw(swid) << "Align";
     std::cout << std::right << std::setw(twid) << "ns (Loop)";
     std::cout << std::right << std::setw(twid) << "ns (Batch)";
     std::cout << std::right << std::setw(twid) << "GB/s (Loop)";
