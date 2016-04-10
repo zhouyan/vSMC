@@ -91,6 +91,64 @@ VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(64, 2, 0, 0xD2B74407B1CE6E93)
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(64, 4, 0, 0xD2E7470EE14C6C93)
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(64, 4, 1, 0xCA5A826395121157)
 
+template <typename T, std::size_t K, int = std::numeric_limits<T>::digits>
+class PhiloxStateTypeImpl
+{
+    public:
+    using type = std::array<T, K>;
+}; // class PhiloxStateTypeImpl
+
+template <typename T, std::size_t K, int = std::numeric_limits<T>::digits>
+class PhiloxParTypeImpl
+{
+    public:
+    using type = std::array<T, K / 2>;
+}; // class PhiloxParTypeImpl
+
+#if VSMC_HAS_X86
+// template <typename T>
+// class PhiloxStateTypeImpl<T, 2, 32>
+// {
+//     using type = std::uint64_t;
+// }; // class PhiloxStateTypeImpl
+#endif
+
+#if VSMC_HAS_SSE2
+template <typename T>
+class PhiloxStateTypeImpl<T, 4, 32>
+{
+    public:
+    using type = M128I<T>;
+}; // class PhiloxStateTypeImpl
+
+template <typename T>
+class PhiloxParTypeImpl<T, 4, 32>
+{
+    public:
+    using type = M128I<T>;
+}; // class PhiloxParTypeImpl
+
+// template <typename T>
+// class PhiloxStateTypeImpl<T, 2, 64>
+// {
+//     using type = M128I<T>;
+// }; // class PhiloxStateTypeImpl
+#endif
+
+#if VSMC_HAS_AVX2
+// template <typename T>
+// class PhiloxStateTypeImpl<T, 4, 64>
+// {
+//     using type = M256I<T>;
+// }; // class PhiloxStateTypeImpl
+#endif
+
+template <typename T, std::size_t K>
+using PhiloxStateType = typename PhiloxStateTypeImpl<T, K>::type;
+
+template <typename T, std::size_t K>
+using PhiloxParType = typename PhiloxParTypeImpl<T, K>::type;
+
 template <typename T, std::size_t, std::size_t,
     int = std::numeric_limits<T>::digits>
 class PhiloxHiLo;
@@ -167,14 +225,14 @@ template <typename T, std::size_t K, std::size_t N, bool = (N > 1)>
 class PhiloxBumpKey
 {
     public:
-    static void eval(std::array<T, K / 2> &) {}
+    static void eval(PhiloxParType<T, K> &) {}
 }; // class PhiloxBumpKey
 
 template <typename T, std::size_t N>
 class PhiloxBumpKey<T, 2, N, true>
 {
     public:
-    static void eval(std::array<T, 1> &par)
+    static void eval(PhiloxParType<T, 2> &par)
     {
         std::get<0>(par) += PhiloxWeylConstant<T, 0>::value;
     }
@@ -184,29 +242,105 @@ template <typename T, std::size_t N>
 class PhiloxBumpKey<T, 4, N, true>
 {
     public:
-    static void eval(std::array<T, 2> &par)
+    static void eval(PhiloxParType<T, 4> &par)
     {
         std::get<0>(par) += PhiloxWeylConstant<T, 0>::value;
         std::get<1>(par) += PhiloxWeylConstant<T, 1>::value;
     }
 }; // class PhiloxBumpKey
 
+template <typename T, std::size_t K, int = std::numeric_limits<T>::digits>
+class PhiloxInitPar
+{
+    public:
+    template <std::size_t R>
+    static void eval(const std::array<T, K / 2> &key,
+        std::array<PhiloxParType<T, K>, R> &par)
+    {
+        std::get<0>(par) = key;
+        eval<1>(par, std::integral_constant<bool, 1 < R>());
+    }
+
+    private:
+    template <std::size_t, std::size_t R>
+    static void eval(std::array<PhiloxParType<T, K>, R> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N, std::size_t R>
+    static void eval(std::array<PhiloxParType<T, K>, R> &par, std::true_type)
+    {
+        std::get<N>(par) = std::get<N - 1>(par);
+        PhiloxBumpKey<T, K, N>::eval(std::get<N>(par));
+        eval<N + 1>(par, std::integral_constant<bool, N + 1 < R>());
+    }
+}; // class PhiloxInitPar
+
+#if VSMC_HAS_SSE2
+
+template <typename T>
+class PhiloxInitPar<T, 4, 32>
+{
+    public:
+    template <std::size_t R>
+    static void eval(const std::array<T, 2> &key, std::array<M128I<T>, R> &par)
+    {
+        M128I<T> weyl;
+        weyl.set(PhiloxWeylConstant<T, 1>::value, static_cast<T>(0),
+            PhiloxWeylConstant<T, 0>::value, static_cast<T>(0));
+        std::get<0>(par).set(std::get<1>(key), static_cast<T>(0),
+            std::get<0>(key), static_cast<T>(0));
+        eval<1>(par, weyl, std::integral_constant<bool, 1 < R>());
+    }
+
+    private:
+    template <std::size_t, std::size_t R>
+    static void eval(
+        std::array<M128I<T>, R> &, const M128I<T> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N, std::size_t R>
+    static void eval(
+        std::array<M128I<T>, R> &par, const M128I<T> &weyl, std::true_type)
+    {
+        std::get<N>(par) = std::get<N - 1>(par);
+        bumpkey(std::get<N>(par), weyl, std::integral_constant<bool, 1 < N>());
+        eval<N + 1>(par, weyl, std::integral_constant<bool, N + 1 < R>());
+    }
+
+    static void bumpkey(M128I<T> &, const M128I<T> &, std::false_type) {}
+
+    static void bumpkey(M128I<T> &par, const M128I<T> &weyl, std::true_type)
+    {
+        par += weyl;
+    }
+}; // class PhiloxInitPar
+
+#endif // VSMC_HAS_SSE2
+
 template <typename T, std::size_t K, std::size_t N, bool = (N > 0),
     int = std::numeric_limits<T>::digits>
 class PhiloxRound
 {
     public:
-    static void eval(std::array<T, K> &, const std::array<T, K / 2> &) {}
+    template <std::size_t R>
+    static void eval(
+        PhiloxStateType<T, K> &, const std::array<PhiloxParType<T, K>, R> &)
+    {
+    }
 }; // class PhiloxRound
 
 template <typename T, std::size_t N, int W>
 class PhiloxRound<T, 2, N, true, W>
 {
     public:
-    static void eval(std::array<T, 2> &state, const std::array<T, 1> &par)
+    template <std::size_t R>
+    static void eval(PhiloxStateType<T, 2> &state,
+        const std::array<PhiloxParType<T, 2>, R> &par)
     {
         std::array<T, 2> hilo = PhiloxHiLo<T, 2, 0>::eval(std::get<0>(state));
-        std::get<1>(hilo) ^= std::get<0>(par);
+        std::get<1>(hilo) ^= std::get<0>(std::get<N>(par));
         std::get<0>(state) = std::get<1>(hilo) ^ std::get<1>(state);
         std::get<1>(state) = std::get<0>(hilo);
     }
@@ -216,18 +350,54 @@ template <typename T, std::size_t N, int W>
 class PhiloxRound<T, 4, N, true, W>
 {
     public:
-    static void eval(std::array<T, 4> &state, const std::array<T, 2> &par)
+    template <std::size_t R>
+    static void eval(PhiloxStateType<T, 4> &state,
+        const std::array<PhiloxParType<T, 4>, R> &par)
     {
         std::array<T, 2> hilo0 = PhiloxHiLo<T, 4, 1>::eval(std::get<2>(state));
         std::array<T, 2> hilo2 = PhiloxHiLo<T, 4, 0>::eval(std::get<0>(state));
-        std::get<1>(hilo0) ^= std::get<0>(par);
-        std::get<1>(hilo2) ^= std::get<1>(par);
+        std::get<1>(hilo0) ^= std::get<0>(std::get<N>(par));
+        std::get<1>(hilo2) ^= std::get<1>(std::get<N>(par));
         std::get<0>(state) = std::get<1>(hilo0) ^ std::get<1>(state);
         std::get<1>(state) = std::get<0>(hilo0);
         std::get<2>(state) = std::get<1>(hilo2) ^ std::get<3>(state);
         std::get<3>(state) = std::get<0>(hilo2);
     }
 }; // class PhiloxRound
+
+#if VSMC_HAS_SSE2
+
+template <typename T, int N>
+class PhiloxRound<T, 4, N, true, 32>
+{
+    public:
+    template <std::size_t R>
+    static void eval(M128I<T> &state, const std::array<M128I<T>, R> &par)
+    {
+        M128I<T> p;
+        M128I<T> q;
+
+        p.set(static_cast<T>(0), PhiloxRoundConstant<T, 4, 0>::value,
+            static_cast<T>(0), PhiloxRoundConstant<T, 4, 1>::value);
+        q.set(std::numeric_limits<T>::max(), static_cast<T>(0),
+            std::numeric_limits<T>::max(), static_cast<T>(0));
+
+        // state = (state[3], state[0], state[1], state[2])
+        // imm8 = 11 00 01 10
+        M128I<T> s = _mm_shuffle_epi32(state.value(), 0xC6);
+        M128I<T> hilo = _mm_mul_epu32(s.value(), p.value());
+
+        hilo ^= std::get<N>(par);
+        s &= q;
+        hilo ^= s;
+
+        // state = (hilo[2], hilo[3], hilo[0], hilo[1])
+        // imm8 = 10 11 00 01
+        state.value() = _mm_shuffle_epi32(hilo.value(), 0xB1);
+    }
+}; // class PhiloxRound
+
+#endif // VSMC_HAS_SSE2
 
 } // namespace vsmc::internal
 
@@ -250,6 +420,9 @@ class PhiloxGenerator
     static_assert(
         K == 2 || K == 4, "**PhiloxGenerator** USED WITH K OTHER THAN 2 OR 4");
 
+    static_assert(
+        Rounds >= 2, "**PhiloxGenerator** USED WITH ROUNDS LESS THAN 2");
+
     public:
     using result_type = ResultType;
     using ctr_type = std::array<ResultType, K>;
@@ -261,23 +434,52 @@ class PhiloxGenerator
 
     void operator()(ctr_type &ctr, const key_type &key, ctr_type &buffer) const
     {
+        union {
+            state_type state;
+            ctr_type ctr;
+        } buf;
+
+        par_type par;
+        internal::PhiloxInitPar<ResultType, K>::eval(key, par);
+
         increment(ctr);
-        ctr_type buf = ctr;
-        key_type par = key;
-        generate<0>(buf, par, std::true_type());
-        buffer = buf;
+        buf.ctr = ctr;
+        generate<0>(buf.state, par, std::true_type());
+        buffer = buf.ctr;
+    }
+
+    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
+        ctr_type *buffer) const
+    {
+        union {
+            state_type state;
+            ctr_type ctr;
+        } buf;
+
+        par_type par;
+        internal::PhiloxInitPar<ResultType, K>::eval(key, par);
+
+        for (std::size_t i = 0; i != n; ++i) {
+            increment(ctr);
+            buf.ctr = ctr;
+            generate<0>(buf.state, par, std::true_type());
+            buffer[i] = buf.ctr;
+        }
     }
 
     private:
+    using state_type = internal::PhiloxStateType<ResultType, K>;
+    using par_type =
+        std::array<internal::PhiloxParType<ResultType, K>, Rounds + 1>;
+
     template <std::size_t>
-    void generate(ctr_type &, key_type &, std::false_type) const
+    void generate(state_type &, par_type &, std::false_type) const
     {
     }
 
     template <std::size_t N>
-    void generate(ctr_type &state, key_type &par, std::true_type) const
+    void generate(state_type &state, par_type &par, std::true_type) const
     {
-        internal::PhiloxBumpKey<ResultType, K, N>::eval(par);
         internal::PhiloxRound<ResultType, K, N>::eval(state, par);
         generate<N + 1>(
             state, par, std::integral_constant<bool, (N < Rounds)>());

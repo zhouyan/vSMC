@@ -282,10 +282,26 @@ class ThreefryGenerator
         std::array<ResultType, K + 1> par;
         std::copy(key.begin(), key.end(), par.begin());
         par.back() = par_;
+
         increment(ctr);
         ctr_type buf = ctr;
-        generate<0>(buffer, par, std::true_type());
+        generate<0>(buf, par, std::true_type());
         buffer = buf;
+    }
+
+    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
+        ctr_type *buffer) const
+    {
+        std::array<ResultType, K + 1> par;
+        std::copy(key.begin(), key.end(), par.begin());
+        par.back() = par_;
+
+        for (std::size_t i = 0; i != n; ++i) {
+            increment(ctr);
+            ctr_type buf = ctr;
+            generate<0>(buf, par, std::true_type());
+            buffer[i] = buf;
+        }
     }
 
     private:

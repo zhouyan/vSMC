@@ -372,13 +372,13 @@ class CounterEngine
         index_ = M_;
 
         const std::size_t m = n / M_;
-        const std::size_t l = n % M_;
-        for (std::size_t i = 0; i != m; ++i, r += M_)
-            generator_(ctr_, key_, *reinterpret_cast<buffer_type *>(r));
+        generator_(ctr_, key_, m, reinterpret_cast<buffer_type *>(r));
+        r += m * M_;
+        n -= m * M_;
 
         generator_(ctr_, key_, buffer_);
-        std::copy_n(buffer_.data(), l, r);
-        index_ = l;
+        std::copy_n(buffer_.data(), n, r);
+        index_ = n;
     }
 
     /// \brief Discard the buffer
