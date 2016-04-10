@@ -284,9 +284,8 @@ class ThreefryGenerator
         par.back() = par_;
 
         increment(ctr);
-        ctr_type buf = ctr;
-        generate<0>(buf, par, std::true_type());
-        buffer = buf;
+        buffer = ctr;
+        generate<0>(buffer, par, std::true_type());
     }
 
     void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
@@ -298,9 +297,8 @@ class ThreefryGenerator
 
         for (std::size_t i = 0; i != n; ++i) {
             increment(ctr);
-            ctr_type buf = ctr;
-            generate<0>(buf, par, std::true_type());
-            buffer[i] = buf;
+            buffer[i] = ctr;
+            generate<0>(buffer[i], par, std::true_type());
         }
     }
 
