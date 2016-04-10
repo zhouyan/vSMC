@@ -40,6 +40,13 @@
 #include <intrin.h>
 #endif
 
+#define VSMC_DEFINE_RNG_PHILOX_WEYL_CONSTANT(W, K, val)                       \
+    template <typename T>                                                     \
+    class PhiloxWeylConstant<T, K, W>                                         \
+        : public std::integral_constant<T, UINT##W##_C(val)>                  \
+    {                                                                         \
+    }; // PhiloxRoundConstant
+
 #define VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(W, K, I, val)                   \
     template <typename T>                                                     \
     class PhiloxRoundConstant<T, K, I, W>                                     \
@@ -68,41 +75,19 @@ namespace internal
 template <typename T, std::size_t, int = std::numeric_limits<T>::digits>
 class PhiloxWeylConstant;
 
-template <typename T>
-class PhiloxWeylConstant<T, 0, 32>
-    : public std::integral_constant<T, UINT32_C(0x9E3779B9)>
-{
-}; // PhiloxWeylConstant
-
-template <typename T>
-class PhiloxWeylConstant<T, 1, 32>
-    : public std::integral_constant<T, UINT32_C(0xBB67AE85)>
-{
-}; // PhiloxWeylConstant
-
-template <typename T>
-class PhiloxWeylConstant<T, 0, 64>
-    : public std::integral_constant<T, UINT64_C(0x9E3779B97F4A7C15)>
-{
-}; // PhiloxWeylConstant
-
-template <typename T>
-class PhiloxWeylConstant<T, 1, 64>
-    : public std::integral_constant<T, UINT64_C(0xBB67AE8584CAA73B)>
-{
-}; // PhiloxWeylConstant
+VSMC_DEFINE_RNG_PHILOX_WEYL_CONSTANT(32, 0, 0x9E3779B9)
+VSMC_DEFINE_RNG_PHILOX_WEYL_CONSTANT(32, 1, 0xBB67AE85)
+VSMC_DEFINE_RNG_PHILOX_WEYL_CONSTANT(64, 0, 0x9E3779B97F4A7C15)
+VSMC_DEFINE_RNG_PHILOX_WEYL_CONSTANT(64, 1, 0xBB67AE8584CAA73B)
 
 template <typename T, std::size_t, std::size_t,
     int = std::numeric_limits<T>::digits>
 class PhiloxRoundConstant;
 
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(32, 2, 0, 0xD256D193)
-
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(32, 4, 0, 0xD2511F53)
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(32, 4, 1, 0xCD9E8D57)
-
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(64, 2, 0, 0xD2B74407B1CE6E93)
-
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(64, 4, 0, 0xD2E7470EE14C6C93)
 VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(64, 4, 1, 0xCA5A826395121157)
 

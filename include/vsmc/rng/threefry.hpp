@@ -35,6 +35,13 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/counter.hpp>
 
+#define VSMC_DEFINE_RNG_THREEFRY_KS_CONSTANT(W, val)                          \
+    template <typename T>                                                     \
+    class ThreefryKSConstant<T, W>                                            \
+        : public std::integral_constant<T, UINT##W##_C(val)>                  \
+    {                                                                         \
+    }; // class ThreefryKSConstant
+
 #define VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(W, K, N, I, val)             \
     template <typename T>                                                     \
     class ThreefryRotateConstant<T, K, N, I, W>                               \
@@ -63,17 +70,8 @@ namespace internal
 template <typename T, int = std::numeric_limits<T>::digits>
 class ThreefryKSConstant;
 
-template <typename T>
-class ThreefryKSConstant<T, 32>
-    : public std::integral_constant<T, UINT32_C(0x1BD11BDA)>
-{
-}; // class ThreefryKSConstant
-
-template <typename T>
-class ThreefryKSConstant<T, 64>
-    : public std::integral_constant<T, UINT64_C(0x1BD11BDAA9FC1A22)>
-{
-}; // class ThreefryKSConstant
+VSMC_DEFINE_RNG_THREEFRY_KS_CONSTANT(32, 0x1BD11BDA)
+VSMC_DEFINE_RNG_THREEFRY_KS_CONSTANT(64, 0x1BD11BDAA9FC1A22)
 
 template <typename T, std::size_t, std::size_t, std::size_t,
     int = std::numeric_limits<T>::digits>
