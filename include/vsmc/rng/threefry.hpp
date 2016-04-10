@@ -261,6 +261,9 @@ class ThreefryGenerator
     static_assert(K == 2 || K == 4,
         "**ThreefryGenerator** USED WITH K OTHER THAN 2 OR 4");
 
+    static_assert(
+        Rounds != 0, "**ThreefryGenerator** USED WITH ROUNDS EQUAL TO ZERO");
+
     public:
     using result_type = ResultType;
     using ctr_type = std::array<ResultType, K>;

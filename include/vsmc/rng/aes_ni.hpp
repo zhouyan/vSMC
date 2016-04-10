@@ -54,6 +54,9 @@ class AESNIGenerator
         "**AESNIGenerator** USED WITH INVALID ResultType");
 
     static_assert(
+        Rounds != 0, "**AESNIGenerator** USED WITH ROUNDS EQUAL TO ZERO");
+
+    static_assert(
         Blocks != 0, "**AESNIGenerator** USED WITH Blocks EQUAL TO ZERO");
 
     public:

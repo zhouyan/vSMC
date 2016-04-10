@@ -283,7 +283,7 @@ class PhiloxGenerator
         K == 2 || K == 4, "**PhiloxGenerator** USED WITH K OTHER THAN 2 OR 4");
 
     static_assert(
-        Rounds >= 2, "**PhiloxGenerator** USED WITH ROUNDS LESS THAN 2");
+        Rounds != 0, "**PhiloxGenerator** USED WITH ROUNDS EQUAL TO ZERO");
 
     public:
     using result_type = ResultType;
