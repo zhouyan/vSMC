@@ -84,10 +84,7 @@ class AESNIGenerator
         key_seq_(key, rk);
 
         increment(ctr, buf.ctr_block);
-        enc_first(buf.state, rk);
-        enc_round<1>(
-            buf.state, rk, std::integral_constant<bool, 1 < Rounds>());
-        enc_last(buf.state, rk);
+        enc(buf.state, rk);
         buffer = buf.result;
     }
 
@@ -105,16 +102,22 @@ class AESNIGenerator
 
         for (std::size_t i = 0; i != n; ++i) {
             increment(ctr, buf.ctr_block);
-            enc_first(buf.state, rk);
-            enc_round<1>(
-                buf.state, rk, std::integral_constant<bool, 1 < Rounds>());
-            enc_last(buf.state, rk);
+            enc(buf.state, rk);
             buffer[i] = buf.result;
         }
     }
 
     private:
     KeySeqType key_seq_;
+
+    template <typename std::size_t K>
+    void enc(std::array<M128I<>, K> &state,
+        const std::array<M128I<>, Rounds + 1> &rk) const
+    {
+        enc_first(state, rk);
+        enc_round<1>(state, rk, std::integral_constant<bool, 1 < Rounds>());
+        enc_last(state, rk);
+    }
 
     template <std::size_t K>
     void enc_first(std::array<M128I<>, K> &state,

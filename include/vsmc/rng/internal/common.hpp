@@ -573,7 +573,8 @@ class Closed;
 /// \brief Generate random integers
 /// \ingroup RNG
 template <typename RNGType>
-void rng_rand(RNGType &rng, std::size_t n, typename RNGType::result_type *r)
+inline void rng_rand(
+    RNGType &rng, std::size_t n, typename RNGType::result_type *r)
 {
     for (std::size_t i = 0; i != n; ++i)
         r[i] = rng();
@@ -582,7 +583,7 @@ void rng_rand(RNGType &rng, std::size_t n, typename RNGType::result_type *r)
 /// \brief Generate random distribution numbers
 /// \ingroup RNG
 template <typename RNGType, typename DistributionType>
-void rng_rand(RNGType &rng, const DistributionType &distribution,
+inline void rng_rand(RNGType &rng, const DistributionType &distribution,
     std::size_t n, typename DistributionType::result_type *r)
 {
     DistributionType dist(distribution);
