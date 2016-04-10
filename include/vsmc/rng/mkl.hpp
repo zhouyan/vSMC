@@ -34,7 +34,6 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/uniform_real_distribution.hpp>
-#include <mkl.h>
 
 #define VSMC_RUNTIME_WARNING_RNG_MKL_OFFSET                                   \
     VSMC_RUNTIME_WARNING((offset < MaxOffset),                                \

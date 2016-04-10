@@ -35,6 +35,10 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/utility/simd.hpp>
 
+#if VSMC_HAS_MKL
+#include <mkl.h>
+#endif
+
 #define VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(flag, Name)                \
     VSMC_RUNTIME_ASSERT((flag),                                               \
         "**" #Name "Distribution** CONSTRUCTED WITH INVALID PARAMETERS")
