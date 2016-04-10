@@ -102,13 +102,12 @@ class PhiloxHiLo<T, K, I, 32>
     static std::array<T, 2> eval(T b)
     {
         union {
-            std::uint_fast64_t prod;
+            std::uint64_t prod;
             std::array<T, 2> hilo;
         } buf;
 
-        buf.prod = static_cast<std::uint_fast64_t>(b) *
-            static_cast<std::uint_fast64_t>(
-                       PhiloxRoundConstant<T, K, I>::value);
+        buf.prod = static_cast<std::uint64_t>(b) *
+            static_cast<std::uint64_t>(PhiloxRoundConstant<T, K, I>::value);
 
         return buf.hilo;
     }
