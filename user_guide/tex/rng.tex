@@ -108,14 +108,14 @@ counter-base \rng{}s insufficient.
     \texttt{Philox2x64}     & \verb|std::uint64_t| & $128$ & $128$ \\
     \texttt{Philox4x32}     & \verb|std::uint32_t| & $128$ & $128$ \\
     \texttt{Philox4x64}     & \verb|std::uint64_t| & $256$ & $256$ \\
-    \texttt{Threefry2x32\V} & \verb|std::uint32_t| & $64$  & $64$  \\
-    \texttt{Threefry2x64\V} & \verb|std::uint64_t| & $128$ & $128$ \\
-    \texttt{Threefry4x32\V} & \verb|std::uint32_t| & $128$ & $128$ \\
-    \texttt{Threefry4x64\V} & \verb|std::uint64_t| & $256$ & $256$ \\
+    \texttt{Threefry2x32}   & \verb|std::uint32_t| & $64$  & $64$  \\
+    \texttt{Threefry2x64}   & \verb|std::uint64_t| & $128$ & $128$ \\
+    \texttt{Threefry4x32}   & \verb|std::uint32_t| & $128$ & $128$ \\
+    \texttt{Threefry4x64}   & \verb|std::uint64_t| & $256$ & $256$ \\
     \bottomrule
   \end{tabularx}
   \caption{Counter-based \rng; \B: either \texttt{1}, \texttt{2}, \texttt{4},
-    or \texttt{8}; \V: either empty, \texttt{SSE2}, or \texttt{AVX2}.}
+    or \texttt{8}.}
   \label{tab:Counter-based RNG}
 \end{table}
 
@@ -228,29 +228,6 @@ four, and the default number of rounds. The type aliases \verb|Threefry| and
 \verb|Threefry_64| are defined similarly to \verb|ARS| and \verb|ARS_64|,
 respectively.
 
-If \sse{}2 intrinsics are supported, then a faster version is also implemented.
-This implementation can have higher performance at the cost of larger state
-size.
-\begin{cppcode}
-  template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
-      std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
-  using ThreefryEngineSSE2 =
-      CounterEngine<ThreefryGeneratorSSE2<ResultType, K, Rounds>>;
-\end{cppcode}
-The type alias \verb|ThreefrySSE2| and \verb|ThreefrySSE2_64| are defined
-similarly to \verb|ARS| and \verb|ARS_64|, respectively.
-
-If \avx{}2 intrinsics are supported, then the following version is also
-implemented.
-\begin{cppcode}
-  template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
-      std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
-  using ThreefryEngineAVX2 =
-      CounterEngine<ThreefryGeneratorAVX2<ResultType, K, Rounds>>;
-\end{cppcode}
-The type aliases \verb|ThreefryAVX2| and \verb|ThreefryAVX2_64| are defined
-similar to \verb|ARS| and \verb|ARS_64|, respectively.
-
 \subsection{Default \protect\rng}
 \label{sub:Default RNG}
 
@@ -266,10 +243,8 @@ library.
     \toprule
     Class & Availability \\
     \midrule
-    \verb|ARS|          & \verb|VSMC_HAS_AES_NI| \\
-    \verb|ThreefryAVX2| & \verb|VSMC_HAS_AVX2|   \\
-    \verb|ThreefrySSE2| & \verb|VSMC_HAS_SSE2|   \\
-    \verb|Threefry|     & Always available       \\
+    \verb|ARS|    & \verb|VSMC_HAS_AES_NI| \\
+    \verb|Philox| & Always available       \\
     \bottomrule
   \end{tabularx}
   \caption{Default RNG}
