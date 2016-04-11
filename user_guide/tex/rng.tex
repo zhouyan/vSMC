@@ -77,53 +77,43 @@ an unsigned integer with $d$ bits. Then for each $k$, the \rng has a period
 $2^b$. And there can be at most $2^d$ independent streams.
 Table~\ref{tab:Counter-based RNG} lists all counter-based \rng{}s implemented
 in this library, along with the bits of the counter and the key. They all
-conform to the \cppoo uniform \rng concept. All \rng{}s in
-\textcite{Salmon:2011um} are implemented along with a few additions. Note that,
-the actual period of an \rng can be longer. For example, \verb|Philox4x64| has
-a 256-bit counter but output 64-bit integers. And thus it has a $4 \cdot
-2^{256}$ period. Such period length may seem very small compared to many well
-known \rng{}s. For example, the famous Mersenne-Twister generator
-(\verb|std::mt19937|) has a period $2^{19937} - 1$. However, combined with
-$2^{256}$ independent streams, only the most demanding programs will find these
-counter-base \rng{}s insufficient.
+conform to the \cppoo uniform \rng concept and output 32-bit integers. For
+64-bits integer ouptut, a suffix \verb|_64| may be appended to corresponding
+\rng engine names. For example, \verb|Threefry4x64| and \verb|Threefry4x64_64|
+generate the same 256-bit patterns. The only difference is that
+\verb|operator()| of the former returns 32-bits integers one at a time while
+the later returns 64-bits intgers. All \rng{}s in \textcite{Salmon:2011um} are
+implemented along with a few additions. Note that, the actual period of an \rng
+can be longer. For example, \verb|Philox4x64| has a 256-bit counter but output
+64-bit integers. And thus it has a $4 \cdot 2^{256}$ period. Such period length
+may seem very small compared to many well known \rng{}s. For example, the
+famous Mersenne-Twister generator (\verb|std::mt19937|) has a period $2^{19937}
+- 1$. However, combined with $2^{256}$ independent streams, only the most
+demanding programs will find these counter-base \rng{}s insufficient.
 
 \begin{table}
   \def\B{\textcolor{MRed}{\textit{B}}}
   \def\V{\textcolor{MRed}{\textit{V}}}
-  \begin{tabularx}{\textwidth}{XXll}
+  \begin{tabularx}{\textwidth}{Xll}
     \toprule
-    & & \multicolumn{2}{c}{Bits} \\
-    \cmidrule{3-4}
-    Class & Result type & Counter & Key \\
+    Class & Counter bits & Key bits \\
     \midrule
-    \texttt{AES128x\B}       & \verb|std::uint32_t| & $128$ & $128$ \\
-    \texttt{AES192x\B}       & \verb|std::uint32_t| & $128$ & $192$ \\
-    \texttt{AES256x\B}       & \verb|std::uint32_t| & $128$ & $256$ \\
-    \texttt{AES128x\B\_64}   & \verb|std::uint64_t| & $128$ & $128$ \\
-    \texttt{AES192x\B\_64}   & \verb|std::uint64_t| & $128$ & $192$ \\
-    \texttt{AES256x\B\_64}   & \verb|std::uint64_t| & $128$ & $256$ \\
-    \texttt{ARSx\B}          & \verb|std::uint32_t| & $128$ & $128$ \\
-    \texttt{ARSx\B\_64}      & \verb|std::uint64_t| & $128$ & $128$ \\
-    \texttt{Philox2x32}      & \verb|std::uint32_t| & $64$  & $32$  \\
-    \texttt{Philox2x64}      & \verb|std::uint32_t| & $128$ & $64$  \\
-    \texttt{Philox4x32}      & \verb|std::uint32_t| & $128$ & $64$  \\
-    \texttt{Philox4x64}      & \verb|std::uint32_t| & $256$ & $128$ \\
-    \texttt{Philox2x32_64}   & \verb|std::uint64_t| & $64$  & $64$  \\
-    \texttt{Philox2x64_64}   & \verb|std::uint64_t| & $128$ & $128$ \\
-    \texttt{Philox4x32_64}   & \verb|std::uint64_t| & $128$ & $128$ \\
-    \texttt{Philox4x64_64}   & \verb|std::uint64_t| & $256$ & $256$ \\
-    \texttt{Threefry2x32}    & \verb|std::uint32_t| & $64$  & $64$  \\
-    \texttt{Threefry2x64}    & \verb|std::uint32_t| & $128$ & $128$ \\
-    \texttt{Threefry4x32}    & \verb|std::uint32_t| & $128$ & $128$ \\
-    \texttt{Threefry4x64}    & \verb|std::uint32_t| & $256$ & $256$ \\
-    \texttt{Threefry2x32_64} & \verb|std::uint64_t| & $64$  & $64$  \\
-    \texttt{Threefry2x64_64} & \verb|std::uint64_t| & $128$ & $128$ \\
-    \texttt{Threefry4x32_64} & \verb|std::uint64_t| & $128$ & $128$ \\
-    \texttt{Threefry4x64_64} & \verb|std::uint64_t| & $256$ & $256$ \\
+    \texttt{AES128x\B}        & $128$ & $128$ \\
+    \texttt{AES192x\B}        & $128$ & $192$ \\
+    \texttt{AES256x\B}        & $128$ & $256$ \\
+    \texttt{ARSx\B}           & $128$ & $128$ \\
+    \texttt{Philox2x32}       & $64$  & $32$  \\
+    \texttt{Philox2x64}       & $128$ & $64$  \\
+    \texttt{Philox4x32}       & $128$ & $64$  \\
+    \texttt{Philox4x64}       & $256$ & $128$ \\
+    \texttt{Threefry2x32}     & $64$  & $64$  \\
+    \texttt{Threefry2x64}     & $128$ & $128$ \\
+    \texttt{Threefry4x32}     & $128$ & $128$ \\
+    \texttt{Threefry4x64}     & $256$ & $256$ \\
     \bottomrule
   \end{tabularx}
   \caption{Counter-based \rng; \B: either \texttt{1}, \texttt{2}, \texttt{4},
-    or \texttt{8}.}
+    or \texttt{8}. Each \rng engine may have suffix \texttt{\_64}}
   \label{tab:Counter-based RNG}
 \end{table}
 
@@ -297,44 +287,25 @@ a wrapper class \verb|MKLEngine| that makes them accessible as \cppoo{}
 generators. They are listed in table~\ref{tab:MKL RNG}. Note that, \mkl{}
 \rng{}s performs best when they are used to generate vectors of random numbers.
 These wrappers use a buffer to store such vectors. And thus they have much
-larger state space than usual \rng{}s.
+larger state space than usual \rng{}s. Each \rng engines output by default
+32-bit integers. Similar to the counter-based \rng{}s, 64-bit variants are also
+defined.
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{XXX}
+  \begin{tabularx}{\textwidth}{XX}
     \toprule
-    Class & Result type & \mkl \brng \\
+    Class & \mkl \brng \\
     \midrule
-    \verb|MKL_MCG59|
-    & \verb|unsigned|           & \verb|VSL_BRNG_MCG59|         \\
-    \verb|MKL_MCG59_64|
-    & \verb|unsigned MKL_INT64| & \verb|VSL_BRNG_MCG59|         \\
-    \verb|MKL_MT19937|
-    & \verb|unsigned|           & \verb|VSL_BRNG_MT19937|       \\
-    \verb|MKL_MT19937_64|
-    & \verb|unsigned MKL_INT64| & \verb|VSL_BRNG_MT19937|       \\
-    \verb|MKL_MT2203|
-    & \verb|unsigned|           & \verb|VSL_BRNG_MT2203|        \\
-    \verb|MKL_MT2203_64|
-    & \verb|unsigned MKL_INT64| & \verb|VSL_BRNG_MT2203|        \\
-    \verb|MKL_SFMT19937|
-    & \verb|unsigned|           & \verb|VSL_BRNG_SFMT19937|     \\
-    \verb|MKL_SFMT19937_64|
-    & \verb|unsigned MKL_INT64| & \verb|VSL_BRNG_SFMT19937|     \\
-    \verb|MKL_NONDETERM|
-    & \verb|unsigned|           & \verb|VSL_BRNG_NONDETERM|     \\
-    \verb|MKL_NONDETERM_64|
-    & \verb|unsigned MKL_INT64| & \verb|VSL_BRNG_NONDETERM|     \\
-    \verb|MKL_ARS5|
-    & \verb|unsigned|           & \verb|VSL_BRNG_ARS5|          \\
-    \verb|MKL_ARS5_64|
-    & \verb|unsigned MKL_INT64| & \verb|VSL_BRNG_ARS5|          \\
-    \verb|MKL_PHILOX4X32X10|
-    & \verb|unsigned|           & \verb|VSL_BRNG_PHILOX4X32X10| \\
-    \verb|MKL_PHILOX4X32X10_64|
-    & \verb|unsigned MKL_INT64| & \verb|VSL_BRNG_PHILOX4X32X10| \\
+    \verb|MKL_MCG59|         & \verb|VSL_BRNG_MCG59|         \\
+    \verb|MKL_MT19937|       & \verb|VSL_BRNG_MT19937|       \\
+    \verb|MKL_MT2203|        & \verb|VSL_BRNG_MT2203|        \\
+    \verb|MKL_SFMT19937|     & \verb|VSL_BRNG_SFMT19937|     \\
+    \verb|MKL_NONDETERM|     & \verb|VSL_BRNG_NONDETERM|     \\
+    \verb|MKL_ARS5|          & \verb|VSL_BRNG_ARS5|          \\
+    \verb|MKL_PHILOX4X32X10| & \verb|VSL_BRNG_PHILOX4X32X10| \\
     \bottomrule
   \end{tabularx}
-  \caption{\mkl{} \rng}
+  \caption{\mkl{} \rng; Each \rng engine may have suffix \texttt{\_64}}
   \label{tab:MKL RNG}
 \end{table}
 
