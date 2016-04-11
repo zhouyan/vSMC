@@ -44,11 +44,6 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 OPTION(VSMC_ENABLE_LIBRARY "Enable building of library" ON)
 OPTION(VSMC_ENABLE_EXAMPLE "Enable building of example" ON)
 
-# User configurations
-IF(EXISTS ${PROJECT_SOURCE_DIR}/user_options.cmake)
-    INCLUDE(${PROJECT_SOURCE_DIR}/user_options.cmake)
-ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/user_options.cmake)
-
 # Configuration files
 FILE(READ ${PROJECT_SOURCE_DIR}/README.md README)
 FILE(READ ${PROJECT_SOURCE_DIR}/NEWS.md NEWS)
