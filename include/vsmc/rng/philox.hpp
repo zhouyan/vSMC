@@ -266,7 +266,7 @@ class PhiloxRound<T, 4, N, true>
 
 /// \brief Philox RNG generator
 /// \ingroup Philox
-template <typename ResultType, typename T,
+template <typename ResultType, typename T = ResultType,
     std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
 class PhiloxGenerator
@@ -363,7 +363,7 @@ class PhiloxGenerator
 
 /// \brief Philox RNG engine
 /// \ingroup Philox
-template <typename ResultType, typename T,
+template <typename ResultType, typename T = ResultType,
     std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
 using PhiloxEngine = CounterEngine<PhiloxGenerator<ResultType, T, K, Rounds>>;

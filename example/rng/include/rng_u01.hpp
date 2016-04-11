@@ -168,7 +168,7 @@ inline void rng_u01_rb(RealType x, std::string &maximum, std::string &right)
 template <typename UIntType, typename RealType, typename Left, typename Right>
 inline void rng_u01_lr(std::size_t N, std::size_t M)
 {
-    vsmc::ThreefryEngine<UIntType, 4> rng;
+    vsmc::ThreefryEngine<UIntType> rng;
     vsmc::Vector<UIntType> u(N);
     vsmc::Vector<RealType> r(N);
     vsmc::Vector<RealType> r1(N);
