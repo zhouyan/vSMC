@@ -294,6 +294,7 @@ class CounterEngine
     using result_type = typename Generator::result_type;
     using ctr_type = typename Generator::ctr_type;
     using key_type = typename Generator::key_type;
+    using skip_type = typename ctr_type::value_type;
 
     explicit CounterEngine(result_type s = 1) : index_(M_) { seed(s); }
 
@@ -311,7 +312,7 @@ class CounterEngine
     void seed(result_type s)
     {
         key_.fill(0);
-        key_.front() = s;
+        std::memcpy(key_.data(), &s, std::min(sizeof(s), sizeof(key_)));
         reset();
     }
 
@@ -390,12 +391,12 @@ class CounterEngine
         return remain;
     }
 
-    void discard(result_type nskip)
+    void discard(skip_type nskip)
     {
         if (nskip == 0)
             return;
 
-        const result_type remain = static_cast<result_type>(M_ - index_);
+        const skip_type remain = static_cast<skip_type>(M_ - index_);
         if (nskip <= remain) {
             index_ += static_cast<std::size_t>(nskip);
             return;
@@ -403,11 +404,11 @@ class CounterEngine
         nskip -= remain;
         index_ = M_;
 
-        result_type M = static_cast<result_type>(M_);
-        std::size_t buf_size = sizeof(result_type) * M_;
+        skip_type M = static_cast<skip_type>(M_);
+        std::size_t buf_size = sizeof(buffer_type);
         std::size_t ctr_size = sizeof(ctr_type);
-        result_type rate = static_cast<result_type>(buf_size / ctr_size);
-        increment(ctr_, static_cast<result_type>(nskip / M * rate));
+        skip_type rate = static_cast<skip_type>(buf_size / ctr_size);
+        increment(ctr_, nskip / M * rate);
         generator_(ctr_, key_, buffer_);
         index_ = static_cast<std::size_t>(nskip % M);
     }
@@ -484,10 +485,10 @@ class CounterEngine
 
     using buffer_type = std::array<result_type, M_>;
 
-    buffer_type buffer_;
-    std::size_t index_;
     ctr_type ctr_;
     key_type key_;
+    buffer_type buffer_;
+    std::size_t index_;
     Generator generator_;
 
     void reset()
