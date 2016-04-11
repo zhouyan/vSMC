@@ -506,6 +506,18 @@ int vsmc_mkl_brng_philox2x64(void);
 /** \brief `vsmc::mkl_brng<vsmc::Philox4x64>` */
 int vsmc_mkl_brng_philox4x64(void);
 
+/** \brief `vsmc::mkl_brng<vsmc::Philox2x32_64>` */
+int vsmc_mkl_brng_philox2x32_64(void);
+
+/** \brief `vsmc::mkl_brng<vsmc::Philox4x32_64>` */
+int vsmc_mkl_brng_philox4x32_64(void);
+
+/** \brief `vsmc::mkl_brng<vsmc::Philox2x64_64>` */
+int vsmc_mkl_brng_philox2x64_64(void);
+
+/** \brief `vsmc::mkl_brng<vsmc::Philox4x64_64>` */
+int vsmc_mkl_brng_philox4x64_64(void);
+
 /** \brief `vsmc::mkl_brng<vsmc::Threefry2x32>` */
 int vsmc_mkl_brng_threefry2x32(void);
 
@@ -518,101 +530,113 @@ int vsmc_mkl_brng_threefry2x64(void);
 /** \brief `vsmc::mkl_brng<vsmc::Threefry4x64>` */
 int vsmc_mkl_brng_threefry4x64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES128_1x32>` */
-int vsmc_mkl_brng_aes128_1x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::Threefry2x32_64>` */
+int vsmc_mkl_brng_threefry2x32_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES128_2x32>` */
-int vsmc_mkl_brng_aes128_2x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::Threefry4x32_64>` */
+int vsmc_mkl_brng_threefry4x32_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES128_4x32>` */
-int vsmc_mkl_brng_aes128_4x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::Threefry2x64_64>` */
+int vsmc_mkl_brng_threefry2x64_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES128_8x32>` */
-int vsmc_mkl_brng_aes128_8x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::Threefry4x64_64>` */
+int vsmc_mkl_brng_threefry4x64_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES128_1x64>` */
-int vsmc_mkl_brng_aes128_1x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES128x1>` */
+int vsmc_mkl_brng_aes128x1(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES128_2x64>` */
-int vsmc_mkl_brng_aes128_2x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES128x2>` */
+int vsmc_mkl_brng_aes128x2(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES128_4x64>` */
-int vsmc_mkl_brng_aes128_4x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES128x4>` */
+int vsmc_mkl_brng_aes128x4(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES128_8x64>` */
-int vsmc_mkl_brng_aes128_8x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES128x8>` */
+int vsmc_mkl_brng_aes128x8(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES192_1x32>` */
-int vsmc_mkl_brng_aes192_1x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES128x1_64>` */
+int vsmc_mkl_brng_aes128x1_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES192_2x32>` */
-int vsmc_mkl_brng_aes192_2x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES128x2_64>` */
+int vsmc_mkl_brng_aes128x2_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES192_4x32>` */
-int vsmc_mkl_brng_aes192_4x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES128x4_64>` */
+int vsmc_mkl_brng_aes128x4_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES192_8x32>` */
-int vsmc_mkl_brng_aes192_8x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES128x8_64>` */
+int vsmc_mkl_brng_aes128x8_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES192_1x64>` */
-int vsmc_mkl_brng_aes192_1x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES192x1>` */
+int vsmc_mkl_brng_aes192x1(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES192_2x64>` */
-int vsmc_mkl_brng_aes192_2x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES192x2>` */
+int vsmc_mkl_brng_aes192x2(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES192_4x64>` */
-int vsmc_mkl_brng_aes192_4x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES192x4>` */
+int vsmc_mkl_brng_aes192x4(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES192_8x64>` */
-int vsmc_mkl_brng_aes192_8x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES192x8>` */
+int vsmc_mkl_brng_aes192x8(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES256_1x32>` */
-int vsmc_mkl_brng_aes256_1x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES192x1_64>` */
+int vsmc_mkl_brng_aes192x1_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES256_2x32>` */
-int vsmc_mkl_brng_aes256_2x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES192x2_64>` */
+int vsmc_mkl_brng_aes192x2_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES256_4x32>` */
-int vsmc_mkl_brng_aes256_4x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES192x4_64>` */
+int vsmc_mkl_brng_aes192x4_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES256_8x32>` */
-int vsmc_mkl_brng_aes256_8x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES192x8_64>` */
+int vsmc_mkl_brng_aes192x8_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES256_1x64>` */
-int vsmc_mkl_brng_aes256_1x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES256x1>` */
+int vsmc_mkl_brng_aes256x1(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES256_2x64>` */
-int vsmc_mkl_brng_aes256_2x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES256x2>` */
+int vsmc_mkl_brng_aes256x2(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES256_4x64>` */
-int vsmc_mkl_brng_aes256_4x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES256x4>` */
+int vsmc_mkl_brng_aes256x4(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::AES256_8x64>` */
-int vsmc_mkl_brng_aes256_8x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES256x8>` */
+int vsmc_mkl_brng_aes256x8(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::ARS_1x32>` */
-int vsmc_mkl_brng_ars_1x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES256x1_64>` */
+int vsmc_mkl_brng_aes256x1_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::ARS_2x32>` */
-int vsmc_mkl_brng_ars_2x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES256x2_64>` */
+int vsmc_mkl_brng_aes256x2_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::ARS_4x32>` */
-int vsmc_mkl_brng_ars_4x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES256x4_64>` */
+int vsmc_mkl_brng_aes256x4_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::ARS_8x32>` */
-int vsmc_mkl_brng_ars_8x32(void);
+/** \brief `vsmc::mkl_brng<vsmc::AES256x8_64>` */
+int vsmc_mkl_brng_aes256x8_64(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::ARS_1x64>` */
-int vsmc_mkl_brng_ars_1x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::ARSx1>` */
+int vsmc_mkl_brng_arsx1(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::ARS_2x64>` */
-int vsmc_mkl_brng_ars_2x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::ARSx2>` */
+int vsmc_mkl_brng_arsx2(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::ARS_4x64>` */
-int vsmc_mkl_brng_ars_4x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::ARSx4>` */
+int vsmc_mkl_brng_arsx4(void);
 
-/** \brief `vsmc::mkl_brng<vsmc::ARS_8x64>` */
-int vsmc_mkl_brng_ars_8x64(void);
+/** \brief `vsmc::mkl_brng<vsmc::ARSx8>` */
+int vsmc_mkl_brng_arsx8(void);
+
+/** \brief `vsmc::mkl_brng<vsmc::ARSx1_64>` */
+int vsmc_mkl_brng_arsx1_64(void);
+
+/** \brief `vsmc::mkl_brng<vsmc::ARSx2_64>` */
+int vsmc_mkl_brng_arsx2_64(void);
+
+/** \brief `vsmc::mkl_brng<vsmc::ARSx4_64>` */
+int vsmc_mkl_brng_arsx4_64(void);
+
+/** \brief `vsmc::mkl_brng<vsmc::ARSx8_64>` */
+int vsmc_mkl_brng_arsx8_64(void);
 
 /** \brief `vsmc::mkl_brng<vsmc::RDRAND16>` */
 int vsmc_mkl_brng_rdrand16(void);
