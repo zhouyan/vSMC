@@ -31,20 +31,32 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 
+##############################################################################
 # Disable in source build
+##############################################################################
+
 IF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     MESSAGE(FATAL_ERROR "In-source builds not allowed")
 ENDIF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 
-PROJECT(vSMC C CXX)
+##############################################################################
+# Basics
+##############################################################################
 
+PROJECT(vSMC C CXX)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
+##############################################################################
 # Options
+##############################################################################
+
 OPTION(VSMC_ENABLE_LIBRARY "Enable building of library" ON)
 OPTION(VSMC_ENABLE_EXAMPLE "Enable building of example" ON)
 
+##############################################################################
 # Configuration files
+##############################################################################
+
 FILE(READ ${PROJECT_SOURCE_DIR}/README.md README)
 FILE(READ ${PROJECT_SOURCE_DIR}/NEWS.md NEWS)
 SET(DOC_SOURCE  ${PROJECT_SOURCE_DIR}/doc)
@@ -56,15 +68,10 @@ CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/main.md.in
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/news.md.in
     ${PROJECT_SOURCE_DIR}/doc/news.md)
 
-# Installation
-IF(NOT VSMC_INSTALL_INC_DIR)
-    SET(VSMC_INSTALL_INC_DIR include)
-ENDIF(NOT VSMC_INSTALL_INC_DIR)
-INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/include/vsmc
-    DESTINATION ${VSMC_INSTALL_INC_DIR}/vsmc
-    PATTERN ".DS_Store" EXCLUDE PATTERN "*.swp" EXCLUDE)
-
+##############################################################################
 # Documentations
+##############################################################################
+
 INCLUDE(FindDoxygen)
 FILE(GLOB_RECURSE DOC_SOURCE_FILES      ${PROJECT_SOURCE_DIR}/doc/*.*)
 FILE(GLOB_RECURSE DOC_INCLUDE_FILES_C   ${PROJECT_SOURCE_DIR}/include/*.h)
@@ -79,12 +86,26 @@ IF(DOXYGEN_FOUND)
     ADD_CUSTOM_TARGET(docs DEPENDS ${PROJECT_BINARY_DIR}/doc)
 ENDIF(DOXYGEN_FOUND)
 
-IF(NOT VSMC_ENABLE_LIBRARY AND NOT VSMC_ENABLE_EXAMPLE)
-    RETURN()
-ENDIF(NOT VSMC_ENABLE_LIBRARY AND NOT VSMC_ENABLE_EXAMPLE)
+##############################################################################
+# Installation
+##############################################################################
 
+IF(NOT DEFINED VSMC_INSTALL_INC_DIR)
+    SET(VSMC_INSTALL_INC_DIR include)
+ENDIF(NOT DEFINED VSMC_INSTALL_INC_DIR)
+INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/include/vsmc
+    DESTINATION ${VSMC_INSTALL_INC_DIR}/vsmc
+    PATTERN ".DS_Store" EXCLUDE PATTERN "*.swp" EXCLUDE)
+
+##############################################################################
 # Check features
-INCLUDE(vSMCFunction)
+##############################################################################
+
+IF(VSMC_ENABLE_LIBRARY OR VSMC_ENABLE_EXAMPLE)
+    INCLUDE(vSMCFunction)
+ELSE(VSMC_ENABLE_LIBRARY OR VSMC_ENABLE_EXAMPLE)
+    RETURN()
+ENDIF(VSMC_ENABLE_LIBRARY OR VSMC_ENABLE_EXAMPLE)
 
 IF (NOT (MKL_FOUND OR (BLAS_FOUND AND LAPACK_FOUND)))
     RETURN()
@@ -114,7 +135,7 @@ ENDFOREACH(feature ${FEATURES})
 
 IF(VSMC_ENABLE_LIBRARY)
     ADD_CUSTOM_TARGET(lib)
-    ADD_SUBDIRECTORY(lib EXCLUDE_FROM_ALL)
+    ADD_SUBDIRECTORY(lib)
 ENDIF(VSMC_ENABLE_LIBRARY)
 
 ##############################################################################
