@@ -80,9 +80,9 @@ in this library, along with the bits of the counter and the key. They all
 conform to the \cppoo uniform \rng concept. All \rng{}s in
 \textcite{Salmon:2011um} are implemented along with a few additions. Note that,
 the actual period of an \rng can be longer. For example, \verb|Philox4x64| has
-a 256-bit counter but output 64-bit integers. And thus it has a $2^{1024}$
-period. Such period length may seem very small compared to many well known
-\rng{}s. For example, the famous Mersenne-Twister generator
+a 256-bit counter but output 64-bit integers. And thus it has a $4 \cdot
+2^{256}$ period. Such period length may seem very small compared to many well
+known \rng{}s. For example, the famous Mersenne-Twister generator
 (\verb|std::mt19937|) has a period $2^{19937} - 1$. However, combined with
 $2^{256}$ independent streams, only the most demanding programs will find these
 counter-base \rng{}s insufficient.
@@ -96,22 +96,30 @@ counter-base \rng{}s insufficient.
     \cmidrule{3-4}
     Class & Result type & Counter & Key \\
     \midrule
-    \texttt{AES128\_\B x32} & \verb|std::uint32_t| & $128$ & $128$ \\
-    \texttt{AES128\_\B x64} & \verb|std::uint64_t| & $128$ & $128$ \\
-    \texttt{AES192\_\B x32} & \verb|std::uint32_t| & $128$ & $192$ \\
-    \texttt{AES192\_\B x64} & \verb|std::uint64_t| & $128$ & $192$ \\
-    \texttt{AES256\_\B x32} & \verb|std::uint32_t| & $128$ & $256$ \\
-    \texttt{AES256\_\B x64} & \verb|std::uint64_t| & $128$ & $256$ \\
-    \texttt{ARS\_\B x32}    & \verb|std::uint32_t| & $128$ & $128$ \\
-    \texttt{ARS\_\B x64}    & \verb|std::uint64_t| & $128$ & $128$ \\
-    \texttt{Philox2x32}     & \verb|std::uint32_t| & $64$  & $64$  \\
-    \texttt{Philox2x64}     & \verb|std::uint64_t| & $128$ & $128$ \\
-    \texttt{Philox4x32}     & \verb|std::uint32_t| & $128$ & $128$ \\
-    \texttt{Philox4x64}     & \verb|std::uint64_t| & $256$ & $256$ \\
-    \texttt{Threefry2x32}   & \verb|std::uint32_t| & $64$  & $64$  \\
-    \texttt{Threefry2x64}   & \verb|std::uint64_t| & $128$ & $128$ \\
-    \texttt{Threefry4x32}   & \verb|std::uint32_t| & $128$ & $128$ \\
-    \texttt{Threefry4x64}   & \verb|std::uint64_t| & $256$ & $256$ \\
+    \texttt{AES128x\B}       & \verb|std::uint32_t| & $128$ & $128$ \\
+    \texttt{AES192x\B}       & \verb|std::uint32_t| & $128$ & $192$ \\
+    \texttt{AES256x\B}       & \verb|std::uint32_t| & $128$ & $256$ \\
+    \texttt{AES128x\B\_64}   & \verb|std::uint64_t| & $128$ & $128$ \\
+    \texttt{AES192x\B\_64}   & \verb|std::uint64_t| & $128$ & $192$ \\
+    \texttt{AES256x\B\_64}   & \verb|std::uint64_t| & $128$ & $256$ \\
+    \texttt{ARSx\B}          & \verb|std::uint32_t| & $128$ & $128$ \\
+    \texttt{ARSx\B\_64}      & \verb|std::uint64_t| & $128$ & $128$ \\
+    \texttt{Philox2x32}      & \verb|std::uint32_t| & $64$  & $32$  \\
+    \texttt{Philox2x64}      & \verb|std::uint32_t| & $128$ & $64$  \\
+    \texttt{Philox4x32}      & \verb|std::uint32_t| & $128$ & $64$  \\
+    \texttt{Philox4x64}      & \verb|std::uint32_t| & $256$ & $128$ \\
+    \texttt{Philox2x32_64}   & \verb|std::uint64_t| & $64$  & $64$  \\
+    \texttt{Philox2x64_64}   & \verb|std::uint64_t| & $128$ & $128$ \\
+    \texttt{Philox4x32_64}   & \verb|std::uint64_t| & $128$ & $128$ \\
+    \texttt{Philox4x64_64}   & \verb|std::uint64_t| & $256$ & $256$ \\
+    \texttt{Threefry2x32}    & \verb|std::uint32_t| & $64$  & $64$  \\
+    \texttt{Threefry2x64}    & \verb|std::uint32_t| & $128$ & $128$ \\
+    \texttt{Threefry4x32}    & \verb|std::uint32_t| & $128$ & $128$ \\
+    \texttt{Threefry4x64}    & \verb|std::uint32_t| & $256$ & $256$ \\
+    \texttt{Threefry2x32_64} & \verb|std::uint64_t| & $64$  & $64$  \\
+    \texttt{Threefry2x64_64} & \verb|std::uint64_t| & $128$ & $128$ \\
+    \texttt{Threefry4x32_64} & \verb|std::uint64_t| & $128$ & $128$ \\
+    \texttt{Threefry4x64_64} & \verb|std::uint64_t| & $256$ & $256$ \\
     \bottomrule
   \end{tabularx}
   \caption{Counter-based \rng; \B: either \texttt{1}, \texttt{2}, \texttt{4},
@@ -124,9 +132,9 @@ counter-base \rng{}s insufficient.
     \toprule
     Macro & Default \\
     \midrule
-    \verb|VSMC_RNG_AES_BLOCKS|             & \verb|4|  \\
+    \verb|VSMC_RNG_AES_BLOCKS|             & \verb|8|  \\
     \verb|VSMC_RNG_ARS_ROUNDS|             & \verb|5|  \\
-    \verb|VSMC_RNG_ARS_BLOCKS|             & \verb|4|  \\
+    \verb|VSMC_RNG_ARS_BLOCKS|             & \verb|8|  \\
     \verb|VSMC_RNG_PHILOX_ROUNDS|          & \verb|10| \\
     \verb|VSMC_RNG_PHILOX_VECTOR_LENGTH|   & \verb|4|  \\
     \verb|VSMC_RNG_THREEFRY_ROUNDS|        & \verb|20| \\
@@ -161,27 +169,23 @@ Four types of key sequences are implemented by the library, corresponding to
 the \ars algorithm in \textcite{Salmon:2011um} and the \aes-128, \aes-192, and
 \aes-256 algorithms. The following \rng engines are defined.
 \begin{cppcode}
+  template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
+  using AES128Engine = AESNIEngine<ResultType, AES128KeySeq<10>, 10, Blocks>;
+
+  template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
+  using AES192Engine = AESNIEngine<ResultType, AES192KeySeq<12>, 12, Blocks>;
+
+  template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
+  using AES256Engine = AESNIEngine<ResultType, AES256KeySeq<14>, 14, Blocks>;
+
   template <typename ResultType, std::size_t Rounds = VSMC_RNG_ARS_ROUNDS,
       std::size_t Blocks = VSMC_RNG_ARS_BLOCKS>
-  using ARSEngine =
-      AESNIEngine<ResultType, ARSKeySeq<ResultType>, Rounds, Blocks>;
-
-  template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-  using AES128Engine =
-      AESNIEngine<ResultType, AES128KeySeq<ResultType, 10>, 10, Blocks>;
-
-  template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-  using AES192Engine =
-      AESNIEngine<ResultType, AES192KeySeq<ResultType, 12>, 12, Blocks>;
-
-  template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-  using AES256Engine =
-      AESNIEngine<ResultType, AES256KeySeq<ResultType, 14>, 14, Blocks>;
+  using ARSEngine = AESNIEngine<ResultType, ARSKeySeq, Rounds, Blocks>;
 \end{cppcode}
 The default template arguments can be changed by configuration macros listed in
 table~\ref{tab:Configuration macros for counter-based RNGs}. Type aliases are
 also defined, as listed in table~\ref{tab:Counter-based RNG}. For example,
-\verb|ARS_4x32| is \verb|ARSEngine| with result type \verb|std::uint32_t|, four
+\verb|ARSx4| is \verb|ARSEngine| with result type \verb|std::uint32_t|, four
 blocks, and the default number of rounds.
 
 The type aliases \verb|ARS|, \verb|AES128|, \verb|AES192| and \verb|AES256| are
@@ -196,18 +200,31 @@ template parameters taking their default values. Similarly, \verb|ARS_64|,
 The Philox algorithm in \textcite{Salmon:2011um} is implemented in a more
 general form,
 \begin{cppcode}
-  template <typename ResultType, std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
+  template <typename ResultType, typename T = ResultType,
+      std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
       std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
-  using PhiloxEngine = CounterEngine<PhiloxGenerator<ResultType, K, Rounds>>;
+  using PhiloxEngine = CounterEngine<PhiloxGenerator<ResultType, T, K, Rounds>>;
+
+  template <typename ResultType>
+  using Philox2x32Engine = PhiloxEngine<ResultType, std::uint32_t, 2>;
+  
+  template <typename ResultType>
+  using Philox4x32Engine = PhiloxEngine<ResultType, std::uint32_t, 4>;
+  
+  template <typename ResultType>
+  using Philox2x64Engine = PhiloxEngine<ResultType, std::uint64_t, 2>;
+  
+  template <typename ResultType>
+  using Philox4x64Engine = PhiloxEngine<ResultType, std::uint64_t, 4>;
 \end{cppcode}
 The default vector length and the number of rounds can be changed by
 configuration macros listed in table~\ref{tab:Configuration macros for
   counter-based RNGs}. Type aliases are also defined, as listed in
 table~\ref{tab:Counter-based RNG}. For example, \verb|Philox4x32| is
-\verb|PhiloxEngine| with result type \verb|std::uint32_t|, vector length four,
-and the default number of rounds. The type aliases \verb|Philox| and
-\verb|Philox_64| are defined similarly to \verb|ARS| and \verb|ARS_64|,
-respectively.
+\verb|PhiloxEngine| with result type \verb|std::uint32_t|, state type
+\verb|std::uint32_t|, vector length four, and the default number of rounds. The
+type aliases \verb|Philox| and \verb|Philox_64| are defined similarly to
+\verb|ARS| and \verb|ARS_64|, respectively.
 
 \subsection{Threefry}
 \label{sub:Threefry}
@@ -215,18 +232,32 @@ respectively.
 The Threefry algorithm in \textcite{Salmon:2011um} is implemented in a more
 general form,
 \begin{cppcode}
-  template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
+  template <typename ResultType, typename T = ResultType,
+      std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
       std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
-  using ThreefryEngine = CounterEngine<ThreefryGenerator<ResultType, K, Rounds>>;
+  using ThreefryEngine =
+      CounterEngine<ThreefryGenerator<ResultType, T, K, Rounds>>;
+
+  template <typename ResultType>
+  using Threefry2x32Engine = ThreefryEngine<ResultType, std::uint32_t, 2>;
+  
+  template <typename ResultType>
+  using Threefry4x32Engine = ThreefryEngine<ResultType, std::uint32_t, 4>;
+  
+  template <typename ResultType>
+  using Threefry2x64Engine = ThreefryEngine<ResultType, std::uint64_t, 2>;
+  
+  template <typename ResultType>
+  using Threefry4x64Engine = ThreefryEngine<ResultType, std::uint64_t, 4>;
 \end{cppcode}
 The default vector length and the number of rounds can be changed by
 configuration macros listed in table~\ref{tab:Configuration macros for
   counter-based RNGs}. Type aliases are also defined, as listed in
 table~\ref{tab:Counter-based RNG}. For example, \verb|Threefry4x32| is
-\verb|ThreefryEngine| with result type \verb|std::uint32_t|, vector length
-four, and the default number of rounds. The type aliases \verb|Threefry| and
-\verb|Threefry_64| are defined similarly to \verb|ARS| and \verb|ARS_64|,
-respectively.
+\verb|ThreefryEngine| with result type \verb|std::uint32_t|, state type
+\verb|std::uint32_t|, vector length four, and the default number of rounds. The
+type aliases \verb|Threefry| and \verb|Threefry_64| are defined similarly to
+\verb|ARS| and \verb|ARS_64|, respectively.
 
 \subsection{Default \protect\rng}
 \label{sub:Default RNG}
