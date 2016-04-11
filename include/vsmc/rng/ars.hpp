@@ -83,16 +83,15 @@ class ARSWeylConstantTrait : public internal::ARSWeylConstant<I>
 
 /// \brief Default ARSEngine key sequence generator
 /// \ingroup AESNIRNG
-template <typename T>
 class ARSKeySeq
 {
     public:
-    using key_type = std::array<T, M128I<T>::size()>;
+    using key_type = std::array<std::uint64_t, 2>;
 
     void reset(const key_type &) {}
 
-    template <typename U, std::size_t Rp1>
-    void operator()(const key_type &key, std::array<M128I<U>, Rp1> &rk) const
+    template <std::size_t Rp1>
+    void operator()(const key_type &key, std::array<M128I<>, Rp1> &rk) const
     {
         M128I<std::uint64_t> weyl;
         weyl.set(
@@ -102,14 +101,14 @@ class ARSKeySeq
     }
 
     private:
-    template <std::size_t, typename U, std::size_t Rp1>
-    void generate(std::array<M128I<U>, Rp1> &, const M128I<std::uint64_t> &,
+    template <std::size_t, std::size_t Rp1>
+    void generate(std::array<M128I<>, Rp1> &, const M128I<std::uint64_t> &,
         std::false_type) const
     {
     }
 
-    template <std::size_t N, typename U, std::size_t Rp1>
-    void generate(std::array<M128I<U>, Rp1> &rk,
+    template <std::size_t N, std::size_t Rp1>
+    void generate(std::array<M128I<>, Rp1> &rk,
         const M128I<std::uint64_t> &weyl, std::true_type) const
     {
         std::get<N>(rk) =
@@ -122,48 +121,47 @@ class ARSKeySeq
 /// \ingroup AESNIRNG
 template <typename ResultType, std::size_t Rounds = VSMC_RNG_ARS_ROUNDS,
     std::size_t Blocks = VSMC_RNG_ARS_BLOCKS>
-using ARSEngine =
-    AESNIEngine<ResultType, ARSKeySeq<ResultType>, Rounds, Blocks>;
+using ARSEngine = AESNIEngine<ResultType, ARSKeySeq, Rounds, Blocks>;
 
 /// \brief ARS RNG engine with 32-bit integers output, 1 block and default
 /// rounds
 /// \ingroup AESNIRNG
-using ARS_1x32 = ARSEngine<std::uint32_t, VSMC_RNG_ARS_ROUNDS, 1>;
+using ARSx1 = ARSEngine<std::uint32_t, VSMC_RNG_ARS_ROUNDS, 1>;
 
 /// \brief ARS RNG engine with 32-bit integers output, 2 blocks and default
 /// rounds
 /// \ingroup AESNIRNG
-using ARS_2x32 = ARSEngine<std::uint32_t, VSMC_RNG_ARS_ROUNDS, 2>;
+using ARSx2 = ARSEngine<std::uint32_t, VSMC_RNG_ARS_ROUNDS, 2>;
 
 /// \brief ARS RNG engine with 32-bit integers output, 4 blocks and default
 /// rounds
 /// \ingroup AESNIRNG
-using ARS_4x32 = ARSEngine<std::uint32_t, VSMC_RNG_ARS_ROUNDS, 4>;
+using ARSx4 = ARSEngine<std::uint32_t, VSMC_RNG_ARS_ROUNDS, 4>;
 
 /// \brief ARS RNG engine with 32-bit integers output, 8 blocks and default
 /// rounds
 /// \ingroup AESNIRNG
-using ARS_8x32 = ARSEngine<std::uint32_t, VSMC_RNG_ARS_ROUNDS, 8>;
+using ARSx8 = ARSEngine<std::uint32_t, VSMC_RNG_ARS_ROUNDS, 8>;
 
 /// \brief ARS RNG engine with 64-bit integers output, 1 block and default
 /// rounds
 /// \ingroup AESNIRNG
-using ARS_1x64 = ARSEngine<std::uint64_t, VSMC_RNG_ARS_ROUNDS, 1>;
+using ARSx1_64 = ARSEngine<std::uint64_t, VSMC_RNG_ARS_ROUNDS, 1>;
 
 /// \brief ARS RNG engine with 64-bit integers output, 2 blocks and default
 /// rounds
 /// \ingroup AESNIRNG
-using ARS_2x64 = ARSEngine<std::uint64_t, VSMC_RNG_ARS_ROUNDS, 2>;
+using ARSx2_64 = ARSEngine<std::uint64_t, VSMC_RNG_ARS_ROUNDS, 2>;
 
 /// \brief ARS RNG engine with 64-bit integers output, 4 blocks and default
 /// rounds
 /// \ingroup AESNIRNG
-using ARS_4x64 = ARSEngine<std::uint64_t, VSMC_RNG_ARS_ROUNDS, 4>;
+using ARSx4_64 = ARSEngine<std::uint64_t, VSMC_RNG_ARS_ROUNDS, 4>;
 
 /// \brief ARS RNG engine with 64-bit integers output, 8 blocks and default
 /// rounds
 /// \ingroup AESNIRNG
-using ARS_8x64 = ARSEngine<std::uint64_t, VSMC_RNG_ARS_ROUNDS, 8>;
+using ARSx8_64 = ARSEngine<std::uint64_t, VSMC_RNG_ARS_ROUNDS, 8>;
 
 /// \brief ARS RNG engine with 32-bit integers output, default blocks and
 /// default rounds

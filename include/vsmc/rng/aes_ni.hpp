@@ -49,9 +49,9 @@ class AESNIGenerator
         "**AESNIGenerator** USED WITH ResultType OTHER THAN UNSIGNED INTEGER "
         "TYPES");
 
-    static_assert(128 >= std::numeric_limits<ResultType>::digits &&
-            128 % std::numeric_limits<ResultType>::digits == 0,
-        "**AESNIGenerator** USED WITH INVALID ResultType");
+    static_assert(Blocks * sizeof(M128I<>) % sizeof(ResultType) == 0,
+        "**AESNIGenerator** USED WITH Blocks * sizeof(M128I<>) NOT DIVISIBLE "
+        "BY sizeof(ResultType)");
 
     static_assert(
         Rounds != 0, "**AESNIGenerator** USED WITH ROUNDS EQUAL TO ZERO");
@@ -61,7 +61,7 @@ class AESNIGenerator
 
     public:
     using result_type = ResultType;
-    using ctr_type = std::array<ResultType, M128I<ResultType>::size()>;
+    using ctr_type = std::array<std::uint64_t, 2>;
     using key_type = typename KeySeqType::key_type;
 
     static constexpr std::size_t size()
