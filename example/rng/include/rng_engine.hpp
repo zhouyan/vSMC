@@ -36,19 +36,15 @@
 #include <vsmc/utility/stop_watch.hpp>
 
 template <typename RNGType>
-inline bool rng_engine_kat(const RNGType &, const std::string &)
+inline bool rng_engine_kat(const RNGType &, const std::string &name)
 {
-    return true;
-}
-
-template <typename Generator>
-inline bool rng_engine_kat(
-    const vsmc::CounterEngine<Generator> &, const std::string &name)
-{
-    vsmc::CounterEngine<Generator> rng;
+    RNGType rng;
     std::ifstream kat("rng_kat_" + name + ".txt");
+    if (!kat)
+        return true;
+
     for (std::size_t i = 0; i != 1000; ++i) {
-        typename vsmc::CounterEngine<Generator>::result_type r;
+        typename RNGType::result_type r;
         kat >> r;
         if (r != rng()) {
             kat.close();
