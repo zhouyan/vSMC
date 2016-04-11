@@ -245,7 +245,8 @@ class ThreefryInsertKey<T, 4, N, true>
 
 /// \brief Threefry RNG generator
 /// \ingroup Threefry
-template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
+template <typename ResultType, typename T = ResultType,
+    std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
 class ThreefryGenerator
 {
@@ -253,10 +254,16 @@ class ThreefryGenerator
         "**ThreefryGenerator** USED WITH ResultType OTHER THAN UNSIGNED "
         "INTEGER TYPES");
 
-    static_assert(std::numeric_limits<ResultType>::digits == 32 ||
-            std::numeric_limits<ResultType>::digits == 64,
-        "**ThreefryGenerator** USED WITH ResultType OF SIZE OTHER THAN 32 OR "
-        "64 BITS");
+    static_assert(sizeof(T) * K % sizeof(ResultType) == 0,
+        "**ThreefryGenerator** USED WITH sizeof(T) * K NOT DIVISIBLE BY "
+        "sizeof(ResultType)");
+
+    static_assert(std::is_unsigned<T>::value,
+        "**ThreefryGenerator** USED WITH T OTHER THAN UNSIGNED INTEGER TYPES");
+
+    static_assert(std::numeric_limits<T>::digits == 32 ||
+            std::numeric_limits<T>::digits == 64,
+        "**ThreefryGenerator** USED WITH T OF SIZE OTHER THAN 32 OR 64 BITS");
 
     static_assert(K == 2 || K == 4,
         "**ThreefryGenerator** USED WITH K OTHER THAN 2 OR 4");
@@ -266,95 +273,152 @@ class ThreefryGenerator
 
     public:
     using result_type = ResultType;
-    using ctr_type = std::array<ResultType, K>;
-    using key_type = std::array<ResultType, K>;
+    using ctr_type =
+        std::array<std::uint64_t, sizeof(T) * K / sizeof(std::uint64_t)>;
+    using key_type = std::array<T, K>;
 
     ThreefryGenerator() : par_(0) {}
 
-    static constexpr std::size_t size() { return K; }
+    static constexpr std::size_t size()
+    {
+        return sizeof(T) * K / sizeof(ResultType);
+    }
 
     void reset(const key_type &key)
     {
-        par_ = internal::ThreefryKSConstant<result_type>::value;
+        par_ = internal::ThreefryKSConstant<T>::value;
         for (std::size_t i = 0; i != key.size(); ++i)
             par_ ^= key[i];
     }
 
-    void operator()(ctr_type &ctr, const key_type &key, ctr_type &buffer) const
+    void operator()(ctr_type &ctr, const key_type &key,
+        std::array<ResultType, size()> &buffer) const
     {
-        std::array<ResultType, K + 1> par;
+        union {
+            std::array<T, K> state;
+            ctr_type ctr;
+            std::array<ResultType, size()> result;
+        } buf;
+
+        std::array<T, K + 1> par;
         std::copy(key.begin(), key.end(), par.begin());
         par.back() = par_;
 
         increment(ctr);
-        buffer = ctr;
-        generate<0>(buffer, par, std::true_type());
+        buf.ctr = ctr;
+        generate<0>(buf.state, par, std::true_type());
+        buffer = buf.result;
     }
 
     void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        ctr_type *buffer) const
+        std::array<ResultType, size()> *buffer) const
     {
-        std::array<ResultType, K + 1> par;
+        union {
+            std::array<T, K> state;
+            ctr_type ctr;
+            std::array<ResultType, size()> result;
+        } buf;
+
+        std::array<T, K + 1> par;
         std::copy(key.begin(), key.end(), par.begin());
         par.back() = par_;
 
         for (std::size_t i = 0; i != n; ++i) {
             increment(ctr);
-            buffer[i] = ctr;
-            generate<0>(buffer[i], par, std::true_type());
+            buf.ctr = ctr;
+            generate<0>(buf.state, par, std::true_type());
+            buffer[i] = buf.result;
         }
     }
 
     private:
     template <std::size_t>
-    void generate(std::array<ResultType, K> &,
-        const std::array<ResultType, K + 1> &, std::false_type) const
+    void generate(std::array<T, K> &, const std::array<T, K + 1> &,
+        std::false_type) const
     {
     }
 
     template <std::size_t N>
-    void generate(std::array<ResultType, K> &state,
-        const std::array<ResultType, K + 1> &par, std::true_type) const
+    void generate(std::array<T, K> &state, const std::array<T, K + 1> &par,
+        std::true_type) const
     {
-        internal::ThreefryRotate<ResultType, K, N>::eval(state);
-        internal::ThreefryInsertKey<ResultType, K, N>::eval(state, par);
+        internal::ThreefryRotate<T, K, N>::eval(state);
+        internal::ThreefryInsertKey<T, K, N>::eval(state, par);
         generate<N + 1>(
             state, par, std::integral_constant<bool, (N < Rounds)>());
     }
 
     private:
-    result_type par_;
+    T par_;
 }; // class ThreefryGenerator
 
 /// \brief Threefry RNG engine
 /// \ingroup Threefry
-template <typename ResultType, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
+template <typename ResultType, typename T,
+    std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
-using ThreefryEngine = CounterEngine<ThreefryGenerator<ResultType, K, Rounds>>;
+using ThreefryEngine =
+    CounterEngine<ThreefryGenerator<ResultType, T, K, Rounds>>;
 
 /// \brief Threefry2x32 RNG engine
 /// \ingroup Threefry
-using Threefry2x32 = ThreefryEngine<std::uint32_t, 2>;
+template <typename ResultType>
+using Threefry2x32Engine = ThreefryEngine<ResultType, std::uint32_t, 2>;
 
 /// \brief Threefry4x32 RNG engine
 /// \ingroup Threefry
-using Threefry4x32 = ThreefryEngine<std::uint32_t, 4>;
+template <typename ResultType>
+using Threefry4x32Engine = ThreefryEngine<ResultType, std::uint32_t, 4>;
 
 /// \brief Threefry2x64 RNG engine
 /// \ingroup Threefry
-using Threefry2x64 = ThreefryEngine<std::uint64_t, 2>;
+template <typename ResultType>
+using Threefry2x64Engine = ThreefryEngine<ResultType, std::uint64_t, 2>;
 
 /// \brief Threefry4x64 RNG engine
 /// \ingroup Threefry
-using Threefry4x64 = ThreefryEngine<std::uint64_t, 4>;
+template <typename ResultType>
+using Threefry4x64Engine = ThreefryEngine<ResultType, std::uint64_t, 4>;
+
+/// \brief Threefry2x32 RNG engine with 32-bit integer output
+/// \ingroup Threefry
+using Threefry2x32 = Threefry2x32Engine<std::uint32_t>;
+
+/// \brief Threefry4x32 RNG engine with 32-bit integer output
+/// \ingroup Threefry
+using Threefry4x32 = Threefry4x32Engine<std::uint32_t>;
+
+/// \brief Threefry2x64 RNG engine with 32-bit integer output
+/// \ingroup Threefry
+using Threefry2x64 = Threefry2x64Engine<std::uint32_t>;
+
+/// \brief Threefry4x64 RNG engine with 32-bit integer output
+/// \ingroup Threefry
+using Threefry4x64 = Threefry4x64Engine<std::uint32_t>;
+
+/// \brief Threefry2x32 RNG engine with 64-bit integer output
+/// \ingroup Threefry
+using Threefry2x32_64 = Threefry2x32Engine<std::uint64_t>;
+
+/// \brief Threefry4x32 RNG engine with 64-bit integer output
+/// \ingroup Threefry
+using Threefry4x32_64 = Threefry4x32Engine<std::uint64_t>;
+
+/// \brief Threefry2x64 RNG engine with 64-bit integer output
+/// \ingroup Threefry
+using Threefry2x64_64 = Threefry2x64Engine<std::uint64_t>;
+
+/// \brief Threefry4x64 RNG engine with 64-bit integer output
+/// \ingroup Threefry
+using Threefry4x64_64 = Threefry4x64Engine<std::uint64_t>;
 
 /// \brief The default 32-bit Threefry engine
 /// \ingroup Threefry
-using Threefry = ThreefryEngine<std::uint32_t>;
+using Threefry = Threefry4x64Engine<std::uint32_t>;
 
 /// \brief The default 64-bit Threefry engine
 /// \ingroup Threefry
-using Threefry_64 = ThreefryEngine<std::uint64_t>;
+using Threefry_64 = Threefry4x64Engine<std::uint64_t>;
 
 } // namespace vsmc
 

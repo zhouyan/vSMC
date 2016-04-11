@@ -35,26 +35,155 @@
 #include <vsmc/rng/engine.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
-template <typename RNGType>
-inline bool rng_engine_kat(const RNGType &, const std::string &name)
+inline std::string rng_engine_test(bool pass)
 {
-    RNGType rng;
-    std::ifstream kat("rng_kat_" + name + ".txt");
-    if (!kat)
-        return true;
+    return pass ? "Passed" : "Failed";
+}
 
-    for (std::size_t i = 0; i != 1000; ++i) {
-        typename RNGType::result_type r;
-        kat >> r;
-        if (r != rng()) {
-            kat.close();
-            return false;
-        }
+template <typename RNGType>
+inline std::string rng_engine_kat(const RNGType &)
+{
+    return "N/A";
+}
+
+template <typename ResultType, typename T, std::size_t K, std::size_t Rounds>
+inline std::string rng_engine_kat(
+    vsmc::PhiloxEngine<ResultType, T, K, Rounds> &rng)
+{
+    std::string filename("rng_engine_kat_Philox");
+    filename += std::to_string(K) + "x";
+    filename += std::to_string(std::numeric_limits<T>::digits) + ".txt";
+    std::ifstream kat(filename);
+    vsmc::Vector<T> k;
+    k.reserve(1000);
+    while (kat) {
+        T x;
+        kat >> x;
+        k.push_back(x);
     }
     kat.close();
 
-    return true;
+    vsmc::Vector<ResultType> r(256);
+    rng(256, r.data());
+
+    return std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0 ?
+        "Passed" :
+        "Failed";
 }
+
+template <typename ResultType, typename T, std::size_t K, std::size_t Rounds>
+inline std::string rng_engine_kat(
+    vsmc::ThreefryEngine<ResultType, T, K, Rounds> &rng)
+{
+    std::string filename("rng_engine_kat_Threefry");
+    filename += std::to_string(K) + "x";
+    filename += std::to_string(std::numeric_limits<T>::digits) + ".txt";
+    std::ifstream kat(filename);
+    vsmc::Vector<T> k;
+    k.reserve(1000);
+    while (kat) {
+        T x;
+        kat >> x;
+        k.push_back(x);
+    }
+    kat.close();
+
+    vsmc::Vector<ResultType> r(256);
+    rng(256, r.data());
+
+    return std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0 ?
+        "Passed" :
+        "Failed";
+}
+
+#if VSMC_HAS_AES_NI
+
+template <typename ResultType, std::size_t Blocks>
+inline std::string rng_engine_kat(vsmc::AES128Engine<ResultType, Blocks> &rng)
+{
+    std::ifstream kat("rng_engine_kat_AES128.txt");
+    vsmc::Vector<std::uint64_t> k;
+    k.reserve(1000);
+    while (kat) {
+        std::uint64_t x;
+        kat >> x;
+        k.push_back(x);
+    }
+    kat.close();
+
+    vsmc::Vector<ResultType> r(256);
+    rng(256, r.data());
+
+    return std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0 ?
+        "Passed" :
+        "Failed";
+}
+
+template <typename ResultType, std::size_t Blocks>
+inline std::string rng_engine_kat(vsmc::AES192Engine<ResultType, Blocks> &rng)
+{
+    std::ifstream kat("rng_engine_kat_AES192.txt");
+    vsmc::Vector<std::uint64_t> k;
+    k.reserve(1000);
+    while (kat) {
+        std::uint64_t x;
+        kat >> x;
+        k.push_back(x);
+    }
+    kat.close();
+
+    vsmc::Vector<ResultType> r(256);
+    rng(256, r.data());
+
+    return std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0 ?
+        "Passed" :
+        "Failed";
+}
+
+template <typename ResultType, std::size_t Blocks>
+inline std::string rng_engine_kat(vsmc::AES256Engine<ResultType, Blocks> &rng)
+{
+    std::ifstream kat("rng_engine_kat_AES256.txt");
+    vsmc::Vector<std::uint64_t> k;
+    k.reserve(1000);
+    while (kat) {
+        std::uint64_t x;
+        kat >> x;
+        k.push_back(x);
+    }
+    kat.close();
+
+    vsmc::Vector<ResultType> r(256);
+    rng(256, r.data());
+
+    return std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0 ?
+        "Passed" :
+        "Failed";
+}
+
+template <typename ResultType, std::size_t Rounds, std::size_t Blocks>
+inline std::string rng_engine_kat(
+    vsmc::ARSEngine<ResultType, Rounds, Blocks> &rng)
+{
+    std::ifstream kat("rng_engine_kat_ARS.txt");
+    vsmc::Vector<std::uint64_t> k;
+    k.reserve(1000);
+    while (kat) {
+        std::uint64_t x;
+        kat >> x;
+        k.push_back(x);
+    }
+    kat.close();
+
+    vsmc::Vector<ResultType> r(256);
+    rng(256, r.data());
+
+    return std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0 ?
+        "Passed" :
+        "Failed";
+}
+
+#endif // VSMC_HAS_AES_NI
 
 template <typename RNGType>
 inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
@@ -69,7 +198,11 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
     r2.reserve(N);
     vsmc::StopWatch watch1;
     vsmc::StopWatch watch2;
-    bool passed = rng_engine_kat(rng, name);
+    std::string kat = rng_engine_kat(rng);
+
+    bool batch = true;
+    bool io = true;
+    bool discard = true;
 
     std::uniform_int_distribution<std::size_t> runif(N / 2, N);
     std::size_t num = 0;
@@ -87,14 +220,14 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
         watch2.start();
         vsmc::rng_rand(rng2, K, r2.data());
         watch2.stop();
-        passed = passed && r1 == r2;
+        batch = batch && r1 == r2;
 
         std::stringstream ss;
         ss << rng;
         vsmc::rng_rand(rng, K, r1.data());
         ss >> rng;
         vsmc::rng_rand(rng, K, r2.data());
-        passed = passed && r1 == r2;
+        io = io && r1 == r2;
 
         rng1.discard(static_cast<unsigned>(K));
         typename RNGType::result_type next = rng1();
@@ -103,14 +236,13 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
         bool find = false;
         for (std::size_t j = 0; j != 2; ++j)
             find = find || rng2() == next;
-        passed = passed && find;
+        discard = discard && find;
     }
 
     double n1 = watch1.nanoseconds() / num;
     double n2 = watch2.nanoseconds() / num;
     double g1 = sizeof(typename RNGType::result_type) / n1;
     double g2 = sizeof(typename RNGType::result_type) / n2;
-    std::string pass = passed ? "Passed" : "Failed";
 
     std::cout << std::left << std::setw(nwid) << name;
     std::cout << std::right << std::setw(swid) << sizeof(RNGType);
@@ -119,7 +251,10 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
     std::cout << std::right << std::setw(twid) << std::fixed << n2;
     std::cout << std::right << std::setw(twid) << std::fixed << g1;
     std::cout << std::right << std::setw(twid) << std::fixed << g2;
-    std::cout << std::right << std::setw(twid) << pass;
+    std::cout << std::right << std::setw(swid) << kat;
+    std::cout << std::right << std::setw(swid) << rng_engine_test(batch);
+    std::cout << std::right << std::setw(swid) << rng_engine_test(io);
+    std::cout << std::right << std::setw(swid) << rng_engine_test(discard);
     std::cout << std::endl;
 }
 
@@ -128,7 +263,7 @@ inline void rng_engine(std::size_t N, std::size_t M)
     const int nwid = 20;
     const int swid = 10;
     const int twid = 15;
-    const std::size_t lwid = nwid + swid * 2 + twid * 5;
+    const std::size_t lwid = nwid + swid * 6 + twid * 4;
 
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::left << std::setw(nwid) << "RNGType";
@@ -138,7 +273,10 @@ inline void rng_engine(std::size_t N, std::size_t M)
     std::cout << std::right << std::setw(twid) << "ns (Batch)";
     std::cout << std::right << std::setw(twid) << "GB/s (Loop)";
     std::cout << std::right << std::setw(twid) << "GB/s (Batch)";
-    std::cout << std::right << std::setw(twid) << "Deterministics";
+    std::cout << std::right << std::setw(swid) << "KAT";
+    std::cout << std::right << std::setw(swid) << "Batch";
+    std::cout << std::right << std::setw(swid) << "I/O";
+    std::cout << std::right << std::setw(swid) << "Discard";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
 

@@ -266,7 +266,8 @@ class PhiloxRound<T, 4, N, true>
 
 /// \brief Philox RNG generator
 /// \ingroup Philox
-template <typename ResultType, std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
+template <typename ResultType, typename T,
+    std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
 class PhiloxGenerator
 {
@@ -274,8 +275,15 @@ class PhiloxGenerator
         "**PhiloxGenerator** USED WITH ResultType OTHER THAN UNSIGNED INTEGER "
         "TYPES");
 
-    static_assert(std::numeric_limits<ResultType>::digits == 32 ||
-            std::numeric_limits<ResultType>::digits == 64,
+    static_assert(sizeof(T) * K % sizeof(ResultType) == 0,
+        "**PhiloxGenerator** USED WITH sizeof(T) * K NOT DIVISIBLE BY "
+        "sizeof(ResultType)");
+
+    static_assert(std::is_unsigned<T>::value,
+        "**PhiloxGenerator** USED WITH T OTHER THAN UNSIGNED INTEGER TYPES");
+
+    static_assert(std::numeric_limits<T>::digits == 32 ||
+            std::numeric_limits<T>::digits == 64,
         "**PhiloxGenerator** USED WITH ResultType OF SIZE OTHER THAN 32 OR 64 "
         "BITS");
 
@@ -287,48 +295,67 @@ class PhiloxGenerator
 
     public:
     using result_type = ResultType;
-    using ctr_type = std::array<ResultType, K>;
-    using key_type = std::array<ResultType, K / 2>;
+    using ctr_type =
+        std::array<std::uint64_t, sizeof(T) * K / sizeof(std::uint64_t)>;
+    using key_type = std::array<T, K / 2>;
 
-    static constexpr std::size_t size() { return K; }
+    static constexpr std::size_t size()
+    {
+        return sizeof(T) * K / sizeof(ResultType);
+    }
 
     void reset(const key_type &) {}
 
-    void operator()(ctr_type &ctr, const key_type &key, ctr_type &buffer) const
+    void operator()(ctr_type &ctr, const key_type &key,
+        std::array<ResultType, size()> &buffer) const
     {
+        union {
+            std::array<T, K> state;
+            ctr_type ctr;
+            std::array<ResultType, size()> result;
+        } buf;
+
         std::array<key_type, Rounds + 1> par;
-        internal::PhiloxInitPar<ResultType, K>::eval(key, par);
+        internal::PhiloxInitPar<T, K>::eval(key, par);
 
         increment(ctr);
-        buffer = ctr;
-        generate<0>(buffer, par, std::true_type());
+        buf.ctr = ctr;
+        generate<0>(buf.state, par, std::true_type());
+        buffer = buf.result;
     }
 
     void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        ctr_type *buffer) const
+        std::array<ResultType, size()> *buffer) const
     {
+        union {
+            std::array<T, K> state;
+            ctr_type ctr;
+            std::array<ResultType, size()> result;
+        } buf;
+
         std::array<key_type, Rounds + 1> par;
-        internal::PhiloxInitPar<ResultType, K>::eval(key, par);
+        internal::PhiloxInitPar<T, K>::eval(key, par);
 
         for (std::size_t i = 0; i != n; ++i) {
             increment(ctr);
-            buffer[i] = ctr;
-            generate<0>(buffer[i], par, std::true_type());
+            buf.ctr = ctr;
+            generate<0>(buf.state, par, std::true_type());
+            buffer[i] = buf.result;
         }
     }
 
     private:
     template <std::size_t>
-    void generate(
-        ctr_type &, std::array<key_type, Rounds + 1> &, std::false_type) const
+    void generate(std::array<T, K> &, std::array<key_type, Rounds + 1> &,
+        std::false_type) const
     {
     }
 
     template <std::size_t N>
-    void generate(ctr_type &state, std::array<key_type, Rounds + 1> &par,
-        std::true_type) const
+    void generate(std::array<T, K> &state,
+        std::array<key_type, Rounds + 1> &par, std::true_type) const
     {
-        internal::PhiloxRound<ResultType, K, N>::eval(state, par);
+        internal::PhiloxRound<T, K, N>::eval(state, par);
         generate<N + 1>(
             state, par, std::integral_constant<bool, (N < Rounds)>());
     }
@@ -336,33 +363,70 @@ class PhiloxGenerator
 
 /// \brief Philox RNG engine
 /// \ingroup Philox
-template <typename ResultType, std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
+template <typename ResultType, typename T,
+    std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
-using PhiloxEngine = CounterEngine<PhiloxGenerator<ResultType, K, Rounds>>;
+using PhiloxEngine = CounterEngine<PhiloxGenerator<ResultType, T, K, Rounds>>;
 
 /// \brief Philox2x32 RNG engine
 /// \ingroup Philox
-using Philox2x32 = PhiloxEngine<std::uint32_t, 2>;
+template <typename ResultType>
+using Philox2x32Engine = PhiloxEngine<ResultType, std::uint32_t, 2>;
 
 /// \brief Philox4x32 RNG engine
 /// \ingroup Philox
-using Philox4x32 = PhiloxEngine<std::uint32_t, 4>;
+template <typename ResultType>
+using Philox4x32Engine = PhiloxEngine<ResultType, std::uint32_t, 4>;
 
 /// \brief Philox2x64 RNG engine
 /// \ingroup Philox
-using Philox2x64 = PhiloxEngine<std::uint64_t, 2>;
+template <typename ResultType>
+using Philox2x64Engine = PhiloxEngine<ResultType, std::uint64_t, 2>;
 
 /// \brief Philox4x64 RNG engine
 /// \ingroup Philox
-using Philox4x64 = PhiloxEngine<std::uint64_t, 4>;
+template <typename ResultType>
+using Philox4x64Engine = PhiloxEngine<ResultType, std::uint64_t, 4>;
+
+/// \brief Philox2x32 RNG engine with 32-bit integer output
+/// \ingroup Philox
+using Philox2x32 = Philox2x32Engine<std::uint32_t>;
+
+/// \brief Philox4x32 RNG engine with 32-bit integer output
+/// \ingroup Philox
+using Philox4x32 = Philox4x32Engine<std::uint32_t>;
+
+/// \brief Philox2x64 RNG engine with 32-bit integer output
+/// \ingroup Philox
+using Philox2x64 = Philox2x64Engine<std::uint32_t>;
+
+/// \brief Philox4x64 RNG engine with 32-bit integer output
+/// \ingroup Philox
+using Philox4x64 = Philox4x64Engine<std::uint32_t>;
+
+/// \brief Philox2x32 RNG engine with 64-bit integer output
+/// \ingroup Philox
+using Philox2x32_64 = Philox2x32Engine<std::uint64_t>;
+
+/// \brief Philox4x32 RNG engine with 64-bit integer output
+/// \ingroup Philox
+using Philox4x32_64 = Philox4x32Engine<std::uint64_t>;
+
+/// \brief Philox2x64 RNG engine with 64-bit integer output
+/// \ingroup Philox
+using Philox2x64_64 = Philox2x64Engine<std::uint64_t>;
+
+/// \brief Philox4x64 RNG engine with 64-bit integer output
+/// \ingroup Philox
+using Philox4x64_64 = Philox4x64Engine<std::uint64_t>;
 
 /// \brief The default 32-bit Philox engine
 /// \ingroup Philox
-using Philox = PhiloxEngine<std::uint32_t>;
+using Philox = Philox4x64Engine<std::uint32_t>;
 
 /// \brief The default 64-bit Philox engine
 /// \ingroup Philox
-using Philox_64 = PhiloxEngine<std::uint64_t>;
+using Philox_64 = Philox4x64Engine<std::uint64_t>;
 
 } // namespace vsmc
 
