@@ -60,7 +60,7 @@ ENDIF(MKL_FOUND)
 
 IF(OPENMP_FOUND)
     SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
-        ${PROJECT_SOURCE_DIR}/src/smp/backend_tbb.cpp)
+        ${PROJECT_SOURCE_DIR}/src/smp/backend_omp.cpp)
 ENDIF(OPENMP_FOUND)
 
 IF(TBB_FOUND)
