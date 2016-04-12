@@ -315,59 +315,87 @@ inline M128I<T> m128i_sub(
 }
 
 template <typename T>
-inline M128I<T> m128i_slli(
-    const M128I<T> &a, int imm8, std::integral_constant<int, 8>)
+inline M128I<T> m128i_sll(
+    const M128I<T> &a, const M128I<T> &count, std::integral_constant<int, 16>)
 {
-    return M128I<T>(_mm_slli_epi8(a.value(), imm8));
+    return M128I<T>(_mm_sll_epi16(a.value(), count.value()));
+}
+
+template <typename T>
+inline M128I<T> m128i_sll(
+    const M128I<T> &a, const M128I<T> &count, std::integral_constant<int, 32>)
+{
+    return M128I<T>(_mm_sll_epi32(a.value(), count.value()));
+}
+
+template <typename T>
+inline M128I<T> m128i_sll(
+    const M128I<T> &a, const M128I<T> &count, std::integral_constant<int, 64>)
+{
+    return M128I<T>(_mm_sll_epi64(a.value(), count.value()));
+}
+
+template <typename T>
+inline M128I<T> m128i_srl(
+    const M128I<T> &a, const M128I<T> &count, std::integral_constant<int, 16>)
+{
+    return M128I<T>(_mm_srl_epi16(a.value(), count.value()));
+}
+
+template <typename T>
+inline M128I<T> m128i_srl(
+    const M128I<T> &a, const M128I<T> &count, std::integral_constant<int, 32>)
+{
+    return M128I<T>(_mm_srl_epi32(a.value(), count.value()));
+}
+
+template <typename T>
+inline M128I<T> m128i_srl(
+    const M128I<T> &a, const M128I<T> &count, std::integral_constant<int, 64>)
+{
+    return M128I<T>(_mm_srl_epi64(a.value(), count.value()));
 }
 
 template <typename T>
 inline M128I<T> m128i_slli(
-    const M128I<T> &a, int imm8, std::integral_constant<int, 16>)
+    const M128I<T> &a, int count, std::integral_constant<int, 16>)
 {
-    return M128I<T>(_mm_slli_epi16(a.value(), imm8));
+    return M128I<T>(_mm_slli_epi16(a.value(), count));
 }
 
 template <typename T>
 inline M128I<T> m128i_slli(
-    const M128I<T> &a, int imm8, std::integral_constant<int, 32>)
+    const M128I<T> &a, int count, std::integral_constant<int, 32>)
 {
-    return M128I<T>(_mm_slli_epi32(a.value(), imm8));
+    return M128I<T>(_mm_slli_epi32(a.value(), count));
 }
 
 template <typename T>
 inline M128I<T> m128i_slli(
-    const M128I<T> &a, int imm8, std::integral_constant<int, 64>)
+    const M128I<T> &a, int count, std::integral_constant<int, 64>)
 {
-    return M128I<T>(_mm_slli_epi64(a.value(), imm8));
+    return M128I<T>(_mm_slli_epi64(a.value(), count));
 }
 
 template <typename T>
 inline M128I<T> m128i_srli(
-    const M128I<T> &a, int imm8, std::integral_constant<int, 8>)
+    const M128I<T> &a, int count, std::integral_constant<int, 16>)
 {
-    return M128I<T>(_mm_srli_epi8(a.value(), imm8));
+    return M128I<T>(_mm_srli_epi16(a.value(), count));
 }
 
 template <typename T>
 inline M128I<T> m128i_srli(
-    const M128I<T> &a, int imm8, std::integral_constant<int, 16>)
+    const M128I<T> &a, int count, std::integral_constant<int, 32>)
 {
-    return M128I<T>(_mm_srli_epi16(a.value(), imm8));
+    return M128I<T>(_mm_srli_epi32(a.value(), count));
 }
 
 template <typename T>
 inline M128I<T> m128i_srli(
-    const M128I<T> &a, int imm8, std::integral_constant<int, 32>)
+    const M128I<T> &a, int count, std::integral_constant<int, 64>)
 {
-    return M128I<T>(_mm_srli_epi32(a.value(), imm8));
-}
-
-template <typename T>
-inline M128I<T> m128i_srli(
-    const M128I<T> &a, int imm8, std::integral_constant<int, 64>)
-{
-    return M128I<T>(_mm_srli_epi64(a.value(), imm8));
+    return M128I<T>(_mm_srli_epi64(a.value(), count));
 }
 
 } // namespace internal
@@ -482,31 +510,45 @@ inline M128I<T> operator^(const M128I<T> &a, const M128I<T> &b)
 }
 
 template <typename T>
-inline M128I<T> operator<<(const M128I<T> &a, int imm8)
+inline M128I<T> operator<<(const M128I<T> &a, const M128I<T> &count)
 {
-    return internal::m128i_slli(a, imm8,
+    return internal::m128i_sll(a, count,
         std::integral_constant<int, std::numeric_limits<T>::digits>());
 }
 
 template <typename T>
-inline M128I<T> operator<<=(M128I<T> &a, int imm8)
+inline M128I<T> operator>>(const M128I<T> &a, const M128I<T> &count)
 {
-    a = a << imm8;
+    return internal::m128i_srl(a, count,
+        std::integral_constant<int, std::numeric_limits<T>::digits>());
+}
+
+template <typename T>
+inline M128I<T> operator<<(const M128I<T> &a, int count)
+{
+    return internal::m128i_slli(a, count,
+        std::integral_constant<int, std::numeric_limits<T>::digits>());
+}
+
+template <typename T>
+inline M128I<T> &operator<<=(M128I<T> &a, int count)
+{
+    a = a << count;
 
     return a;
 }
 
 template <typename T>
-inline M128I<T> operator>>(const M128I<T> &a, int imm8)
+inline M128I<T> operator>>(const M128I<T> &a, int count)
 {
-    return internal::m128i_srli(a, imm8,
+    return internal::m128i_srli(a, count,
         std::integral_constant<int, std::numeric_limits<T>::digits>());
 }
 
 template <typename T>
-inline M128I<T> operator>>=(M128I<T> &a, int imm8)
+inline M128I<T> &operator>>=(M128I<T> &a, int count)
 {
-    a = a << imm8;
+    a = a >> count;
 
     return a;
 }
@@ -521,6 +563,10 @@ VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
     M128I<T>, T, |, operator|, operator|=)
 VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
     M128I<T>, T, ^, operator^, operator^=)
+VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
+    M128I<T>, T, <<, operator<<, operator<<=)
+VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
+    M128I<T>, T, >>, operator>>, operator>>=)
 
 /// \brief `__m128`
 /// \ingroup SIMD
@@ -1053,59 +1099,87 @@ inline M256I<T> m256i_sub(
 }
 
 template <typename T>
-inline M256I<T> m256i_slli(
-    const M256I<T> &a, int imm8, std::integral_constant<int, 8>)
+inline M256I<T> m256i_sll(
+    const M256I<T> &a, const M256I<T> &count, std::integral_constant<int, 16>)
 {
-    return M256I<T>(_mm256_slli_epi8(a.value(), imm8));
+    return M256I<T>(_mm256_sll_epi16(a.value(), count.value()));
+}
+
+template <typename T>
+inline M256I<T> m256i_sll(
+    const M256I<T> &a, const M256I<T> &count, std::integral_constant<int, 32>)
+{
+    return M256I<T>(_mm256_sll_epi32(a.value(), count.value()));
+}
+
+template <typename T>
+inline M256I<T> m256i_sll(
+    const M256I<T> &a, const M256I<T> &count, std::integral_constant<int, 64>)
+{
+    return M256I<T>(_mm256_sll_epi64(a.value(), count.value()));
+}
+
+template <typename T>
+inline M256I<T> m256i_srl(
+    const M256I<T> &a, const M256I<T> &count, std::integral_constant<int, 16>)
+{
+    return M256I<T>(_mm256_srl_epi16(a.value(), count.value()));
+}
+
+template <typename T>
+inline M256I<T> m256i_srl(
+    const M256I<T> &a, const M256I<T> &count, std::integral_constant<int, 32>)
+{
+    return M256I<T>(_mm256_srl_epi32(a.value(), count.value()));
+}
+
+template <typename T>
+inline M256I<T> m256i_srl(
+    const M256I<T> &a, const M256I<T> &count, std::integral_constant<int, 64>)
+{
+    return M256I<T>(_mm256_srl_epi64(a.value(), count.value()));
 }
 
 template <typename T>
 inline M256I<T> m256i_slli(
-    const M256I<T> &a, int imm8, std::integral_constant<int, 16>)
+    const M256I<T> &a, int count, std::integral_constant<int, 16>)
 {
-    return M256I<T>(_mm256_slli_epi16(a.value(), imm8));
+    return M256I<T>(_mm256_slli_epi16(a.value(), count));
 }
 
 template <typename T>
 inline M256I<T> m256i_slli(
-    const M256I<T> &a, int imm8, std::integral_constant<int, 32>)
+    const M256I<T> &a, int count, std::integral_constant<int, 32>)
 {
-    return M256I<T>(_mm256_slli_epi32(a.value(), imm8));
+    return M256I<T>(_mm256_slli_epi32(a.value(), count));
 }
 
 template <typename T>
 inline M256I<T> m256i_slli(
-    const M256I<T> &a, int imm8, std::integral_constant<int, 64>)
+    const M256I<T> &a, int count, std::integral_constant<int, 64>)
 {
-    return M256I<T>(_mm256_slli_epi64(a.value(), imm8));
+    return M256I<T>(_mm256_slli_epi64(a.value(), count));
 }
 
 template <typename T>
 inline M256I<T> m256i_srli(
-    const M256I<T> &a, int imm8, std::integral_constant<int, 8>)
+    const M256I<T> &a, int count, std::integral_constant<int, 16>)
 {
-    return M256I<T>(_mm256_srli_epi8(a.value(), imm8));
+    return M256I<T>(_mm256_srli_epi16(a.value(), count));
 }
 
 template <typename T>
 inline M256I<T> m256i_srli(
-    const M256I<T> &a, int imm8, std::integral_constant<int, 16>)
+    const M256I<T> &a, int count, std::integral_constant<int, 32>)
 {
-    return M256I<T>(_mm256_srli_epi16(a.value(), imm8));
+    return M256I<T>(_mm256_srli_epi32(a.value(), count));
 }
 
 template <typename T>
 inline M256I<T> m256i_srli(
-    const M256I<T> &a, int imm8, std::integral_constant<int, 32>)
+    const M256I<T> &a, int count, std::integral_constant<int, 64>)
 {
-    return M256I<T>(_mm256_srli_epi32(a.value(), imm8));
-}
-
-template <typename T>
-inline M256I<T> m256i_srli(
-    const M256I<T> &a, int imm8, std::integral_constant<int, 64>)
-{
-    return M256I<T>(_mm256_srli_epi64(a.value(), imm8));
+    return M256I<T>(_mm256_srli_epi64(a.value(), count));
 }
 
 } // namespace vsmc::internal
@@ -1220,31 +1294,45 @@ inline M256I<T> operator^(const M256I<T> &a, const M256I<T> &b)
 }
 
 template <typename T>
-inline M256I<T> operator<<(const M256I<T> &a, int imm8)
+inline M256I<T> operator<<(const M256I<T> &a, const M256I<T> &count)
 {
-    return internal::m256i_slli(a, imm8,
+    return internal::m256i_sll(a, count,
         std::integral_constant<int, std::numeric_limits<T>::digits>());
 }
 
 template <typename T>
-inline M256I<T> operator<<=(M256I<T> &a, int imm8)
+inline M256I<T> operator>>(const M256I<T> &a, const M256I<T> &count)
 {
-    a = a << imm8;
+    return internal::m256i_srl(a, count,
+        std::integral_constant<int, std::numeric_limits<T>::digits>());
+}
+
+template <typename T>
+inline M256I<T> operator<<(const M256I<T> &a, int count)
+{
+    return internal::m256i_slli(a, count,
+        std::integral_constant<int, std::numeric_limits<T>::digits>());
+}
+
+template <typename T>
+inline M256I<T> &operator<<=(M256I<T> &a, int count)
+{
+    a = a << count;
 
     return a;
 }
 
 template <typename T>
-inline M256I<T> operator>>(const M256I<T> &a, int imm8)
+inline M256I<T> operator>>(const M256I<T> &a, int count)
 {
-    return internal::m256i_srli(a, imm8,
+    return internal::m256i_srli(a, count,
         std::integral_constant<int, std::numeric_limits<T>::digits>());
 }
 
 template <typename T>
-inline M256I<T> operator>>=(M256I<T> &a, int imm8)
+inline M256I<T> &operator>>=(M256I<T> &a, int count)
 {
-    a = a << imm8;
+    a = a >> count;
 
     return a;
 }
@@ -1259,6 +1347,10 @@ VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
     M256I<T>, T, |, operator|, operator|=)
 VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
     M256I<T>, T, ^, operator^, operator^=)
+VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
+    M256I<T>, T, <<, operator<<, operator<<=)
+VSMC_DEFINE_UTILITY_SIMD_INTEGER_BINARY_OP(
+    M256I<T>, T, >>, operator>>, operator>>=)
 
 /// \brief `__m256`
 /// \ingroup SIMD
