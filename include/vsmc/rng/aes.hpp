@@ -339,8 +339,11 @@ class AESKeyInit
     static void init(const std::array<T, KeySize> &key,
         std::array<__m128i, Rp1> &ks, __m128i &xmm, std::true_type)
     {
+        static_assert(Offset < KeySize && sizeof(T) * (KeySize - Offset) >= 16,
+            "**AESKeyInit** Offset TOO BIG");
+
         M128I<> tmp;
-        tmp.load(key.data());
+        tmp.load(key.data() + Offset);
         std::get<N>(ks) = xmm = tmp.value();
     }
 }; // class AESKeyInit
