@@ -194,26 +194,27 @@ template <typename T, std::size_t K>
 class PhiloxInitPar
 {
     public:
-    template <std::size_t R>
+    template <std::size_t Rp1>
     static void eval(const std::array<T, K / 2> &key,
-        std::array<std::array<T, K / 2>, R> &par)
+        std::array<std::array<T, K / 2>, Rp1> &par)
     {
         std::get<0>(par) = key;
-        eval<1>(par, std::integral_constant<bool, 1 < R>());
+        eval<1>(par, std::integral_constant<bool, 1 < Rp1>());
     }
 
     private:
-    template <std::size_t, std::size_t R>
-    static void eval(std::array<std::array<T, K / 2>, R> &, std::false_type)
+    template <std::size_t, std::size_t Rp1>
+    static void eval(std::array<std::array<T, K / 2>, Rp1> &, std::false_type)
     {
     }
 
-    template <std::size_t N, std::size_t R>
-    static void eval(std::array<std::array<T, K / 2>, R> &par, std::true_type)
+    template <std::size_t N, std::size_t Rp1>
+    static void eval(
+        std::array<std::array<T, K / 2>, Rp1> &par, std::true_type)
     {
         std::get<N>(par) = std::get<N - 1>(par);
         PhiloxBumpKey<T, K, N>::eval(std::get<N>(par));
-        eval<N + 1>(par, std::integral_constant<bool, N + 1 < R>());
+        eval<N + 1>(par, std::integral_constant<bool, N + 1 < Rp1>());
     }
 }; // class PhiloxInitPar
 
