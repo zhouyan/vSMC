@@ -51,6 +51,11 @@ bool uniform_real_distribution_check_param(RealType a, RealType b)
 
 /// \brief Uniform real distribution
 /// \ingroup Distribution
+///
+/// \details
+/// This is identical to `std::uniform_real_distribution` only if `R == W`,
+/// where `R = RNGBits<RNGType>::value` and
+/// `W = std::numeric_limits<typename RNGType::result_type>::digits`
 template <typename RealType>
 class UniformRealDistribution
 {

@@ -74,7 +74,7 @@ class LaplaceDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01OODistribution<RealType> u01;
+        U01Distribution<RealType> u01;
         result_type u = u01(rng) - static_cast<result_type>(0.5);
 
         return u > 0 ? param.a() - param.b() * std::log(1 - 2 * u) :
@@ -90,7 +90,7 @@ inline void laplace_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     Array<RealType, K> s;
-    u01_oo_distribution(rng, n, r);
+    u01_distribution(rng, n, r);
     sub(n, r, static_cast<RealType>(0.5), r);
     for (std::size_t i = 0; i != n; ++i) {
         if (r[i] > 0) {

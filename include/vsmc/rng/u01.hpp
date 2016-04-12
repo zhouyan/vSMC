@@ -47,34 +47,42 @@ template <int P,
                     std::numeric_limits<long double>::digits) -
         1,
     bool = (Q < P)>
-class U01ImplPow2L
+class U01Pow2L
 {
     public:
     static constexpr long double value =
-        static_cast<long double>(1ULL << Q) * U01ImplPow2L<P - Q>::value;
-}; // class U01ImplPow2L
+        static_cast<long double>(1ULL << Q) * U01Pow2L<P - Q>::value;
+}; // class U01Pow2L
 
 template <int P, int Q>
-class U01ImplPow2L<P, Q, false>
+class U01Pow2L<P, Q, false>
 {
     public:
     static constexpr long double value = static_cast<long double>(1ULL << P);
-}; // class U01ImplPow2L
+}; // class U01Pow2L
 
 template <int P>
-class U01ImplPow2InvL
+class U01Pow2InvL
 {
     public:
-    static constexpr long double value = 1.0L / U01ImplPow2L<P>::value;
-}; // class U01ImplPow2InvL
+    static constexpr long double value = 1.0L / U01Pow2L<P>::value;
+}; // class U01Pow2InvL
 
 template <typename RealType, int P>
-class U01ImplPow2Inv
+class U01Pow2
 {
     public:
     static constexpr RealType value =
-        static_cast<RealType>(U01ImplPow2InvL<P>::value);
-}; // class U01ImplPow2Inv
+        static_cast<RealType>(U01Pow2L<P>::value);
+}; // class U01Pow2
+
+template <typename RealType, int P>
+class U01Pow2Inv
+{
+    public:
+    static constexpr RealType value =
+        static_cast<RealType>(U01Pow2InvL<P>::value);
+}; // class U01Pow2Inv
 
 } // namespace vsmc::internal
 
@@ -99,7 +107,7 @@ class U01LRImpl<UIntType, RealType, Closed, Closed>
     {
         return trans((u << L) >> (R + L),
                    std::integral_constant<bool, (V < W)>()) *
-            U01ImplPow2Inv<RealType, P + 1>::value;
+            U01Pow2Inv<RealType, P + 1>::value;
     }
 
     static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
@@ -108,7 +116,7 @@ class U01LRImpl<UIntType, RealType, Closed, Closed>
             r[i] = trans((u[i] << L) >> (R + L),
                 std::integral_constant<bool, (V < W)>());
         }
-        mul(n, U01ImplPow2Inv<RealType, P + 1>::value, r, r);
+        mul(n, U01Pow2Inv<RealType, P + 1>::value, r, r);
     }
 
     private:
@@ -134,15 +142,14 @@ class U01LRImpl<UIntType, RealType, Closed, Open>
     public:
     static RealType eval(UIntType u) noexcept
     {
-        return static_cast<RealType>(u >> R) *
-            U01ImplPow2Inv<RealType, P>::value;
+        return static_cast<RealType>(u >> R) * U01Pow2Inv<RealType, P>::value;
     }
 
     static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
     {
         for (std::size_t i = 0; i != n; ++i)
             r[i] = u[i] >> R;
-        mul(n, U01ImplPow2Inv<RealType, P>::value, r, r);
+        mul(n, U01Pow2Inv<RealType, P>::value, r, r);
     }
 }; // class U01LRImpl
 
@@ -157,17 +164,16 @@ class U01LRImpl<UIntType, RealType, Open, Closed>
     public:
     static RealType eval(UIntType u) noexcept
     {
-        return static_cast<RealType>(u >> R) *
-            U01ImplPow2Inv<RealType, P>::value +
-            U01ImplPow2Inv<RealType, P>::value;
+        return static_cast<RealType>(u >> R) * U01Pow2Inv<RealType, P>::value +
+            U01Pow2Inv<RealType, P>::value;
     }
 
     static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
     {
         for (std::size_t i = 0; i != n; ++i)
             r[i] = u[i] >> R;
-        fma(n, U01ImplPow2Inv<RealType, P>::value, r,
-            U01ImplPow2Inv<RealType, P>::value, r);
+        fma(n, U01Pow2Inv<RealType, P>::value, r,
+            U01Pow2Inv<RealType, P>::value, r);
     }
 }; // class U01LRImpl
 
@@ -183,16 +189,16 @@ class U01LRImpl<UIntType, RealType, Open, Open>
     static RealType eval(UIntType u) noexcept
     {
         return static_cast<RealType>(u >> R) *
-            U01ImplPow2Inv<RealType, P - 1>::value +
-            U01ImplPow2Inv<RealType, P>::value;
+            U01Pow2Inv<RealType, P - 1>::value +
+            U01Pow2Inv<RealType, P>::value;
     }
 
     static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
     {
         for (std::size_t i = 0; i != n; ++i)
             r[i] = u[i] >> R;
-        fma(n, U01ImplPow2Inv<RealType, P - 1>::value, r,
-            U01ImplPow2Inv<RealType, P>::value, r);
+        fma(n, U01Pow2Inv<RealType, P - 1>::value, r,
+            U01Pow2Inv<RealType, P>::value, r);
     }
 }; // class U01LRImpl
 
@@ -236,14 +242,6 @@ void u01_lr(std::size_t n, const UIntType *u, RealType *r) noexcept
     internal::U01LRImpl<UIntType, RealType, Left, Right>::eval(n, u, r);
 }
 
-/// \brief Convert uniform unsigned integers to floating points on [0, 1)
-/// \ingroup RNG
-template <typename UIntType, typename RealType>
-RealType u01(UIntType u) noexcept
-{
-    return u01_lr<UIntType, RealType, Closed, Open>(u);
-}
-
 /// \brief Convert uniform unsigned integers to floating points on [0, 1]
 /// \ingroup RNG
 template <typename UIntType, typename RealType>
@@ -274,14 +272,6 @@ template <typename UIntType, typename RealType>
 RealType u01_oo(UIntType u) noexcept
 {
     return u01_lr<UIntType, RealType, Open, Open>(u);
-}
-
-/// \brief Convert uniform unsigned integers to floating points on [0, 1)
-/// \ingroup RNG
-template <typename UIntType, typename RealType>
-void u01(std::size_t n, const UIntType *u, RealType *r) noexcept
-{
-    u01_lr<UIntType, RealType, Closed, Open>(n, u, r);
 }
 
 /// \brief Convert uniform unsigned integers to floating points on [0, 1]

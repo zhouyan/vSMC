@@ -71,7 +71,7 @@ inline void u01_rand_sorted_impl(RNGType &rng, std::size_t n0, std::size_t n,
     if (n0 == n)
         return;
 
-    u01_oc_distribution(rng, n - n0, r);
+    u01_distribution(rng, n - n0, r);
     u01_trans_sorted_impl<K>(n0, n, r, r, N, lmax);
 }
 
@@ -95,7 +95,7 @@ inline void u01_rand_stratified_impl(
     if (n0 == n)
         return;
 
-    u01_oc_distribution(rng, n - n0, r);
+    u01_distribution(rng, n - n0, r);
     u01_trans_stratified_impl(n0, n, r, r, delta);
 }
 
@@ -236,7 +236,7 @@ inline void u01_rand_systematic(RNGType &rng, std::size_t N, RealType *r)
         "**u01_rand_systematic** USED WITH RealType OTHER THAN FLOATING POINT "
         "TYPES");
 
-    U01OCDistribution<RealType> ru01;
+    U01Distribution<RealType> ru01;
     RealType u01 = ru01(rng);
     u01_trans_systematic(N, &u01, r);
 }
@@ -301,7 +301,7 @@ class U01SequenceSorted
         if (n == n_)
             return u_;
 
-        U01OCDistribution<result_type> u01;
+        U01Distribution<result_type> u01;
         lmax_ += std::log(u01(rng_)) / (N_ - n);
         n_ = n;
         u_ = 1 - std::exp(lmax_);
@@ -365,7 +365,7 @@ class U01SequenceStratified
         if (n == n_)
             return u_;
 
-        U01OCDistribution<result_type> u01;
+        U01Distribution<result_type> u01;
         n_ = n;
         u_ = u01(rng_) * delta_ + n * delta_;
 
@@ -415,7 +415,7 @@ class U01SequenceSystematic
     U01SequenceSystematic(std::size_t N, RNGType &rng)
         : N_(N), n_(N), u_(0), u0_(0), delta_(1 / static_cast<result_type>(N))
     {
-        U01OCDistribution<result_type> u01;
+        U01Distribution<result_type> u01;
         u0_ = u01(rng) * delta_;
     }
 
