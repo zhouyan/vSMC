@@ -360,10 +360,10 @@ class AESKeySeq
         generator(key, key_seq_);
     }
 
-    void operator()(
-        const key_type &, std::array<M128I<>, Rounds + 1> &rk) const
+    const std::array<M128I<>, Rounds + 1> &operator()(
+        const key_type &, std::array<M128I<>, Rounds + 1> &) const
     {
-        rk = key_seq_;
+        return key_seq_;
     }
 
     private:

@@ -80,8 +80,8 @@ class AESNIGenerator
             std::array<ResultType, size()> result;
         } buf;
 
-        std::array<M128I<>, Rounds + 1> rk;
-        key_seq_(key, rk);
+        std::array<M128I<>, Rounds + 1> rk_tmp;
+        const std::array<M128I<>, Rounds + 1> &rk = key_seq_(key, rk_tmp);
 
         increment(ctr, buf.ctr_block);
         enc(buf.state, rk);
@@ -97,8 +97,8 @@ class AESNIGenerator
             std::array<ResultType, size()> result;
         } buf;
 
-        std::array<M128I<>, Rounds + 1> rk;
-        key_seq_(key, rk);
+        std::array<M128I<>, Rounds + 1> rk_tmp;
+        const std::array<M128I<>, Rounds + 1> &rk = key_seq_(key, rk_tmp);
 
         for (std::size_t i = 0; i != n; ++i) {
             increment(ctr, buf.ctr_block);

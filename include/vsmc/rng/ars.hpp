@@ -91,13 +91,16 @@ class ARSKeySeq
     void reset(const key_type &) {}
 
     template <std::size_t Rp1>
-    void operator()(const key_type &key, std::array<M128I<>, Rp1> &rk) const
+    const std::array<M128I<>, Rp1> &operator()(
+        const key_type &key, std::array<M128I<>, Rp1> &rk) const
     {
         M128I<std::uint64_t> weyl;
         weyl.set(
             ARSWeylConstantTrait<1>::value, ARSWeylConstantTrait<0>::value);
         std::get<0>(rk).load(key.data());
         generate<1>(rk, weyl, std::integral_constant<bool, 1 < Rp1>());
+
+        return rk;
     }
 
     private:
