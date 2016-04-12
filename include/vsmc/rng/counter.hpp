@@ -291,9 +291,10 @@ class CounterEngine
     VSMC_DEFINE_NEW_DELETE(CounterEngine<Generator>)
 
     public:
-    using result_type = typename Generator::result_type;
-    using ctr_type = typename Generator::ctr_type;
-    using key_type = typename Generator::key_type;
+    using generator_type = Generator;
+    using result_type = typename generator_type::result_type;
+    using ctr_type = typename generator_type::ctr_type;
+    using key_type = typename generator_type::key_type;
     using skip_type = typename ctr_type::value_type;
 
     explicit CounterEngine(result_type s = 1) : index_(M_) { seed(s); }
@@ -489,7 +490,7 @@ class CounterEngine
     key_type key_;
     buffer_type buffer_;
     std::size_t index_;
-    Generator generator_;
+    generator_type generator_;
 
     void reset()
     {
