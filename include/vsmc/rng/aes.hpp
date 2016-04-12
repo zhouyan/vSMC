@@ -403,7 +403,7 @@ class AES128KeySeqGenerator
     void expand_key()
     {
         xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF); // pshufd xmm2, xmm2, 0xFF
-        xmm3_ = _mm_slli_si128(xmm1_, 0x04);    // pshufb xmm3, xmm5
+        xmm3_ = _mm_slli_si128(xmm1_, 0x04);    // pslldq xmm3, 0x04
         xmm1_ = _mm_xor_si128(xmm1_, xmm3_);    // pxor   xmm1, xmm3
         xmm3_ = _mm_slli_si128(xmm3_, 0x04);    // pslldq xmm3, 0x04
         xmm1_ = _mm_xor_si128(xmm1_, xmm3_);    // pxor   xmm1, xmm3
@@ -584,7 +584,7 @@ class AES256KeySeqGenerator
     void expand_key(std::true_type)
     {
         xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF); // pshufd xmm2, xmm2, 0xFF
-        xmm4_ = _mm_slli_si128(xmm1_, 0x04);    // pshufb xmm4, xmm5
+        xmm4_ = _mm_slli_si128(xmm1_, 0x04);    // pslldq xmm4, 0x04
         xmm1_ = _mm_xor_si128(xmm1_, xmm4_);    // pxor   xmm1, xmm4
         xmm4_ = _mm_slli_si128(xmm4_, 0x04);    // pslldq xmm4, 0x04
         xmm1_ = _mm_xor_si128(xmm1_, xmm4_);    // pxor   xmm1, xmm4
@@ -596,7 +596,7 @@ class AES256KeySeqGenerator
     void expand_key(std::false_type)
     {
         xmm2_ = _mm_shuffle_epi32(xmm4_, 0xAA); // pshufd xmm2, xmm4, 0xAA
-        xmm4_ = _mm_slli_si128(xmm3_, 0x04);    // pshufb xmm4, xmm5
+        xmm4_ = _mm_slli_si128(xmm3_, 0x04);    // pslldq xmm4, 0x04
         xmm3_ = _mm_xor_si128(xmm3_, xmm4_);    // pxor   xmm3, xmm4
         xmm4_ = _mm_slli_si128(xmm4_, 0x04);    // pslldq xmm4, 0x04
         xmm3_ = _mm_xor_si128(xmm3_, xmm4_);    // pxor   xmm3, xmm4
