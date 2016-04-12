@@ -71,6 +71,21 @@ class AESNIGenerator
 
     void reset(const key_type &key) { key_seq_.reset(key); }
 
+    void enc(const ctr_type &ctr, const key_type &key, ctr_type &buffer) const
+    {
+        union {
+            std::array<M128I<>, 1> state;
+            ctr_type result;
+        } buf;
+
+        std::array<M128I<>, Rounds + 1> rk_tmp;
+        const std::array<M128I<>, Rounds + 1> &rk = key_seq_(key, rk_tmp);
+
+        buf.result = ctr;
+        enc(buf.state, rk);
+        buffer = buf.result;
+    }
+
     void operator()(ctr_type &ctr, const key_type &key,
         std::array<ResultType, size()> &buffer) const
     {
