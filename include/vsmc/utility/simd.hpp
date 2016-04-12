@@ -419,6 +419,36 @@ inline std::basic_istream<CharT, Traits> &operator>>(
     return is;
 }
 
+template <typename CharT, typename Traits>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const M128I<> &a)
+{
+    if (!os)
+        return os;
+
+    std::array<std::uint64_t, 2> sa;
+    a.store_u(sa.data());
+    os << sa[1] << sa[0];
+
+    return os;
+}
+
+template <typename CharT, typename Traits>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, M128I<> &a)
+{
+    if (!is)
+        return is;
+
+    std::array<std::uint64_t, 2> sa;
+    is >> sa;
+
+    if (static_cast<bool>(is))
+        a.load_u(sa.data());
+
+    return is;
+}
+
 template <typename T>
 inline M128I<T> operator+(const M128I<T> &a, const M128I<T> &b)
 {
@@ -1119,6 +1149,36 @@ inline std::basic_istream<CharT, Traits> &operator>>(
         return is;
 
     std::array<T, M256I<T>::size()> sa;
+    is >> sa;
+
+    if (static_cast<bool>(is))
+        a.load_u(sa.data());
+
+    return is;
+}
+
+template <typename CharT, typename Traits>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const M256I<> &a)
+{
+    if (!os)
+        return os;
+
+    std::array<std::uint64_t, 4> sa;
+    a.store_u(sa.data());
+    os << sa;
+
+    return os;
+}
+
+template <typename CharT, typename Traits>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, M256I<> &a)
+{
+    if (!is)
+        return is;
+
+    std::array<std::uint64_t, 4> sa;
     is >> sa;
 
     if (static_cast<bool>(is))
