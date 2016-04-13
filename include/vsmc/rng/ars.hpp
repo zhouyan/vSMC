@@ -85,6 +85,11 @@ class ARSConstants
 ///
 /// \tparam Constants A trait class that defines algorithm constants, see
 /// ARSConstants
+///
+/// \details
+/// This generator implement the ARS algorithm in
+/// [Random123](http://www.deshawresearch.com/resources_random123.html),
+/// developed John K. Salmon, Mark A. Moraes, Ron O. Dror, and David E. Shaw.
 template <typename Constants>
 class ARSKeySeq
 {

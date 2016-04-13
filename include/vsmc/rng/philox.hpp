@@ -378,6 +378,11 @@ class PhiloxPBox<T, 8, N, PhiloxConstants<T, 8>, true>
 /// \tparam Rounds Number of SP rounds
 /// \tparam Constants A trait class that defines algorithm constants, see
 /// PhiloxConstants
+///
+/// \details
+/// This generator implement the Philox algorithm in
+/// [Random123](http://www.deshawresearch.com/resources_random123.html),
+/// developed John K. Salmon, Mark A. Moraes, Ron O. Dror, and David E. Shaw.
 template <typename T, std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS,
     typename Constants = PhiloxConstants<T, K>>

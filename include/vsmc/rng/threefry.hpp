@@ -473,9 +473,9 @@ class ThreefryPBox<T, 8, N, ThreefryConstants<T, 8>, true>
 /// ThreefryConstants
 ///
 /// \details
-/// For 64-bits integer type T, and K = 4, 8, 16, Rounds = 72, 72, 80,
-/// respectively, this is identical to Threefish-256, -512, -1024 with zero
-/// tweaks.
+/// This generator implement the Threefry algorithm in
+/// [Random123](http://www.deshawresearch.com/resources_random123.html),
+/// developed John K. Salmon, Mark A. Moraes, Ron O. Dror, and David E. Shaw.
 template <typename T, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS,
     typename Constants = ThreefryConstants<T, K>>
