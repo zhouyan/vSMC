@@ -410,7 +410,7 @@ class AES128KeySeqGenerator
     template <std::size_t N, std::size_t Rp1>
     void generate_seq(std::array<__m128i, Rp1> &rk, std::true_type)
     {
-        xmm2_ = AESKeyGenAssist<N>(xmm1_);
+        xmm2_ = AESKeyGenAssist<N % 256>(xmm1_);
         expand_key();
         std::get<N>(rk) = xmm1_;
         generate_seq<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
@@ -484,7 +484,7 @@ class AES192KeySeqGenerator
         // In entry, N * 24 < Rp1 * 16
         // Required Storage: N * 24 + 16;
 
-        xmm2_ = AESKeyGenAssist<N>(xmm4_);
+        xmm2_ = AESKeyGenAssist<N % 256>(xmm4_);
         generate_key_expansion();
         _mm_storeu_si128(reinterpret_cast<__m128i *>(rk_ptr + N * 24), xmm1_);
     }
@@ -581,7 +581,7 @@ class AES256KeySeqGenerator
     template <std::size_t N, std::size_t Rp1>
     void generate_key(std::array<__m128i, Rp1> &rk, std::true_type)
     {
-        xmm2_ = AESKeyGenAssist<N / 2>(xmm3_);
+        xmm2_ = AESKeyGenAssist<(N / 2) % 256>(xmm3_);
         expand_key(std::true_type());
         std::get<N>(rk) = xmm1_;
     }
