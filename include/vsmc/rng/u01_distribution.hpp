@@ -36,6 +36,12 @@
 #include <vsmc/rng/u01.hpp>
 #include <vsmc/rng/uniform_bits_distribution.hpp>
 
+/// \brief Default U01 distribution using fixed point conversion
+/// \ingroup Config
+#ifndef VSMC_U01_FIXED_POINT
+#define VSMC_U01_FIXED_POINT 1
+#endif
+
 #define VSMC_DEFINE_U01LR_DISTRIBUTION(Name, name)                            \
     template <typename RealType>                                              \
     class Name##Distribution                                                  \
@@ -83,8 +89,30 @@ using U01UIntType = typename std::conditional<(RNGBits<RNGType>::value > 32),
 
 } // namespace vsmc::internal
 
+/// \brief Standard uniform distribution on [0, 1]
+/// \ingroup Distribution
+VSMC_DEFINE_U01LR_DISTRIBUTION(U01CC, u01_cc)
+
 /// \brief Standard uniform distribution on [0, 1)
 /// \ingroup Distribution
+VSMC_DEFINE_U01LR_DISTRIBUTION(U01CO, u01_co)
+
+/// \brief Standard uniform distribution on (0, 1]
+/// \ingroup Distribution
+VSMC_DEFINE_U01LR_DISTRIBUTION(U01OC, u01_oc)
+
+/// \brief Standard uniform distribution on (0, 1)
+/// \ingroup Distribution
+VSMC_DEFINE_U01LR_DISTRIBUTION(U01OO, u01_oo)
+
+/// \brief Standard uniform distribution on [0, 1)
+/// \ingroup Distribution
+#if VSMC_U01_FIXED_POINT
+template <typename RealType>
+class U01Distribution : public U01CODistribution<RealType>
+{
+}; // class U01Distribution
+#else  // VSMC_U01_FIXED_POINT
 template <typename RealType>
 class U01Distribution
 {
@@ -125,26 +153,23 @@ class U01Distribution
             generate<N + 1>(rng, std::integral_constant<bool, N + 1 < Q>());
     }
 }; // class U01Distribution
-
-/// \brief Standard uniform distribution on [0, 1]
-/// \ingroup Distribution
-VSMC_DEFINE_U01LR_DISTRIBUTION(U01CC, u01_cc)
-
-/// \brief Standard uniform distribution on [0, 1)
-/// \ingroup Distribution
-VSMC_DEFINE_U01LR_DISTRIBUTION(U01CO, u01_co)
-
-/// \brief Standard uniform distribution on (0, 1]
-/// \ingroup Distribution
-VSMC_DEFINE_U01LR_DISTRIBUTION(U01OC, u01_oc)
-
-/// \brief Standard uniform distribution on (0, 1)
-/// \ingroup Distribution
-VSMC_DEFINE_U01LR_DISTRIBUTION(U01OO, u01_oo)
+#endif // VSMC_U01_FIXED_POINT
 
 namespace internal
 {
 
+VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(u01_cc)
+VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(u01_co)
+VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(u01_oc)
+VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(u01_oo)
+
+#if VSMC_U01_FIXED_POINT
+template <std::size_t K, typename RealType, typename RNGType>
+inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
+{
+    u01_co_distribution_impl<K>(rng, n, r);
+}
+#else  // VSMC_U01_FIXED_POINT
 template <std::size_t, typename RealType, typename UIntType>
 inline RealType u01_distribution_impl(const UIntType *, std::false_type)
 {
@@ -181,18 +206,9 @@ inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
     for (std::size_t i = 0; i != n; ++i, u += Q)
         r[i] = u01_distribution_impl<0, RealType>(u, std::true_type());
 }
-
-VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(u01_cc)
-VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(u01_co)
-VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(u01_oc)
-VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(u01_oo)
+#endif // VSMC_U01_FIXED_POINT
 
 } // namespace vsmc::internal
-
-/// \brief Generate standard uniform random variates
-/// \ingroup Distribution
-VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_0(u01)
-VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(U01, u01, RealType)
 
 /// \brief Generate standard uniform random variates on [0, 1]
 /// \ingroup Distribution
@@ -213,6 +229,11 @@ VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(U01OC, u01_oc, RealType)
 /// \ingroup Distribution
 VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_0(u01_oo)
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(U01OO, u01_oo, RealType)
+
+/// \brief Generate standard uniform random variates
+/// \ingroup Distribution
+VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_0(u01)
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(U01, u01, RealType)
 
 } // namespace vsmc
 
