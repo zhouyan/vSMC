@@ -327,9 +327,57 @@ class AESKeySeq
     }
 
     const std::array<__m128i, Rounds + 1> &operator()(
-        const key_type &, std::array<__m128i, Rounds + 1> &) const
+        std::array<__m128i, Rounds + 1> &) const
     {
         return key_seq_;
+    }
+
+    friend bool operator==(const AESKeySeq<Rounds, KeySeqGenerator> &seq1,
+        const AESKeySeq<Rounds, KeySeqGenerator> &seq2)
+    {
+        alignas(16) std::array<std::uint64_t, 2 * (Rounds + 1)> ks1;
+        alignas(16) std::array<std::uint64_t, 2 * (Rounds + 1)> ks2;
+        std::memcpy(ks1.data(), seq1.key_seq_.data(), 16 * (Rounds + 1));
+        std::memcpy(ks2.data(), seq2.key_seq_.data(), 16 * (Rounds + 1));
+
+        return ks1 == ks2;
+    }
+
+    friend bool operator!=(const AESKeySeq<Rounds, KeySeqGenerator> &seq1,
+        const AESKeySeq<Rounds, KeySeqGenerator> &seq2)
+    {
+        return !(seq1 == seq2);
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const AESKeySeq<Rounds, KeySeqGenerator> &seq)
+    {
+        if (!os)
+            return os;
+
+        alignas(16) std::array<std::uint64_t, 2 * (Rounds + 1)> ks;
+        std::memcpy(ks.data(), seq.key_seq_.data(), 16 * (Rounds + 1));
+        os << ks;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        AESKeySeq<Rounds, KeySeqGenerator> &seq)
+    {
+        if (!is)
+            return is;
+
+        alignas(16) std::array<std::uint64_t, 2 * (Rounds + 1)> ks;
+        is >> ks;
+        if (static_cast<bool>(is))
+            std::memcpy(seq.key_seq_.data(), ks.data(), 16 * (Rounds + 1));
+
+        return is;
     }
 
     private:

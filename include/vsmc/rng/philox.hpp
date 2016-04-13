@@ -267,26 +267,16 @@ class PhiloxRound<T, 4, N, true>
 
 /// \brief Philox RNG generator
 /// \ingroup Philox
-template <typename ResultType, typename T = ResultType,
-    std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
+template <typename T, std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
 class PhiloxGenerator
 {
-    static_assert(std::is_unsigned<ResultType>::value,
-        "**PhiloxGenerator** USED WITH ResultType OTHER THAN UNSIGNED INTEGER "
-        "TYPES");
-
-    static_assert(sizeof(T) * K % sizeof(ResultType) == 0,
-        "**PhiloxGenerator** USED WITH sizeof(T) * K NOT DIVISIBLE BY "
-        "sizeof(ResultType)");
-
     static_assert(std::is_unsigned<T>::value,
         "**PhiloxGenerator** USED WITH T OTHER THAN UNSIGNED INTEGER TYPES");
 
     static_assert(std::numeric_limits<T>::digits == 32 ||
             std::numeric_limits<T>::digits == 64,
-        "**PhiloxGenerator** USED WITH ResultType OF SIZE OTHER THAN 32 OR 64 "
-        "BITS");
+        "**PhiloxGenerator** USED WITH T OF SIZE OTHER THAN 32 OR 64 BITS");
 
     static_assert(
         K == 2 || K == 4, "**PhiloxGenerator** USED WITH K OTHER THAN 2 OR 4");
@@ -295,29 +285,26 @@ class PhiloxGenerator
         Rounds != 0, "**PhiloxGenerator** USED WITH ROUNDS EQUAL TO ZERO");
 
     public:
-    using result_type = ResultType;
     using ctr_type =
         std::array<std::uint64_t, sizeof(T) * K / sizeof(std::uint64_t)>;
     using key_type = std::array<T, K / 2>;
 
-    static constexpr std::size_t size()
-    {
-        return sizeof(T) * K / sizeof(ResultType);
-    }
+    static constexpr std::size_t size() { return sizeof(T) * K; }
 
-    void reset(const key_type &) {}
+    void reset(const key_type &key) { key_ = key; }
 
-    void operator()(ctr_type &ctr, const key_type &key,
-        std::array<ResultType, size()> &buffer) const
+    template <typename ResultType>
+    void operator()(ctr_type &ctr,
+        std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
     {
         union {
             std::array<T, K> state;
             ctr_type ctr;
-            std::array<ResultType, size()> result;
+            std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
 
         std::array<key_type, Rounds + 1> par;
-        internal::PhiloxInitPar<T, K>::eval(key, par);
+        internal::PhiloxInitPar<T, K>::eval(key_, par);
 
         increment(ctr);
         buf.ctr = ctr;
@@ -325,17 +312,18 @@ class PhiloxGenerator
         buffer = buf.result;
     }
 
-    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        std::array<ResultType, size()> *buffer) const
+    template <typename ResultType>
+    void operator()(ctr_type &ctr, std::size_t n,
+        std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
     {
         union {
             std::array<T, K> state;
             ctr_type ctr;
-            std::array<ResultType, size()> result;
+            std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
 
         std::array<key_type, Rounds + 1> par;
-        internal::PhiloxInitPar<T, K>::eval(key, par);
+        internal::PhiloxInitPar<T, K>::eval(key_, par);
 
         for (std::size_t i = 0; i != n; ++i) {
             increment(ctr);
@@ -345,7 +333,51 @@ class PhiloxGenerator
         }
     }
 
+    friend bool operator==(const PhiloxGenerator<T, K, Rounds> &gen1,
+        const PhiloxGenerator<T, K, Rounds> &gen2)
+    {
+        return gen1.key_ == gen2.key_;
+    }
+
+    friend bool operator!=(const PhiloxGenerator<T, K, Rounds> &gen1,
+        const PhiloxGenerator<T, K, Rounds> &gen2)
+    {
+        return !(gen1 == gen2);
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const PhiloxGenerator<T, K, Rounds> &gen)
+    {
+        if (!os)
+            return os;
+
+        os << gen.key_;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        PhiloxGenerator<T, K, Rounds> &gen)
+    {
+        if (!is)
+            return is;
+
+        PhiloxGenerator<T, K, Rounds> gen_tmp;
+        is >> std::ws >> gen_tmp.key_;
+
+        if (static_cast<bool>(is))
+            gen = std::move(gen_tmp);
+
+        return is;
+    }
+
     private:
+    key_type key_;
+
     template <std::size_t>
     void generate(std::array<T, K> &, std::array<key_type, Rounds + 1> &,
         std::false_type) const
@@ -367,7 +399,7 @@ class PhiloxGenerator
 template <typename ResultType, typename T = ResultType,
     std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
-using PhiloxEngine = CounterEngine<PhiloxGenerator<ResultType, T, K, Rounds>>;
+using PhiloxEngine = CounterEngine<ResultType, PhiloxGenerator<T, K, Rounds>>;
 
 /// \brief Philox2x32 RNG engine
 /// \ingroup Philox

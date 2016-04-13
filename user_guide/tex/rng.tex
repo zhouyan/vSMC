@@ -2,7 +2,40 @@
 \label{chap:Random number generating}
 
 The library has a comprehensive \rng system to facilitate implementation of
-Monte Carlo algorithms.
+Monte Carlo algorithms. The \rng engines defined in the library provide not
+only \verb|operator()| for generating random integers one by one, as those in
+\cppoo standard library, but also batch generating. For example
+\begin{cppcode}
+  Vector<RNG::result_type> r(n);
+  RNG rng;
+
+  // Generate one by one
+  for (std::size_t i = 0; i != n; ++r)
+      r[i] = rng();
+
+  // Generate all at once
+  rng(n, r.data());
+\end{cppcode}
+For some \rng{}s, the batch generating can be significantly faster than
+generating random integers one by one. The results of using both methods are
+always the same except for non-deterministic \rng{}s.
+
+Note that, unlike those \rng{}s in the standard library, the comparison
+operators behave differently. \verb|rng1 == rng2| is a sufficient condition for
+the two \rng{}s to output the same results in subsequent use. However, it is
+not a necessary condition. For example, consider the above batch generating
+example,
+\begin{cppcode}
+  RNG rng1;
+  for (std::size_t i = 0; i != n; ++r)
+      r[i] = rng1();
+
+  RNG rng2;
+  rng2(n, r.data());
+
+  rng1 == rng2;     // Not necessarily true 
+  rng1() == rng2(); // Always true;
+\end{cppcode}
 
 \section{Seeding}
 \label{sec:Seeding}
@@ -144,7 +177,7 @@ in a more general form,
   template <typename ResultType, typename KeySeqType, std::size_t Rounds,
       std::size_t Blocks>
   using AESNIEngine =
-      CounterEngine<AESNIGenerator<ResultType, KeySeqType, Rounds, Blocks>>;
+      CounterEngine<ResultType, AESNIGenerator<KeySeqType, Rounds, Blocks>>;
 \end{cppcode}
 where \verb|KeySeqType| is the class used to generate the sequence of round
 keys; \verb|Rounds| is the number of rounds of \aes encryption to be performed.
@@ -193,7 +226,7 @@ general form,
   template <typename ResultType, typename T = ResultType,
       std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
       std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS>
-  using PhiloxEngine = CounterEngine<PhiloxGenerator<ResultType, T, K, Rounds>>;
+  using PhiloxEngine = CounterEngine<ResultType, PhiloxGenerator<T, K, Rounds>>;
 
   template <typename ResultType>
   using Philox2x32Engine = PhiloxEngine<ResultType, std::uint32_t, 2>;
@@ -226,7 +259,7 @@ general form,
       std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
       std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
   using ThreefryEngine =
-      CounterEngine<ThreefryGenerator<ResultType, T, K, Rounds>>;
+      CounterEngine<ResultType, ThreefryGenerator<T, K, Rounds>>;
 
   template <typename ResultType>
   using Threefry2x32Engine = ThreefryEngine<ResultType, std::uint32_t, 2>;

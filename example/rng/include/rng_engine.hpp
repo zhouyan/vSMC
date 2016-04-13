@@ -221,14 +221,14 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
         watch2.start();
         vsmc::rng_rand(rng2, K, r2.data());
         watch2.stop();
-        batch = batch && r1 == r2;
+        batch = batch && (r1 == r2 || rng != rng);
 
         std::stringstream ss;
         ss << rng;
         vsmc::rng_rand(rng, K, r1.data());
         ss >> rng;
         vsmc::rng_rand(rng, K, r2.data());
-        io = io && r1 == r2;
+        io = io && (r1 == r2 || rng != rng);
 
         rng1.discard(static_cast<unsigned>(K));
         typename RNGType::result_type next = rng1();
@@ -237,7 +237,7 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
         bool find = false;
         for (std::size_t j = 0; j != 2; ++j)
             find = find || rng2() == next;
-        discard = discard && find;
+        discard = discard && (find || rng != rng);
     }
 
     double n1 = watch1.nanoseconds() / num;
@@ -291,11 +291,6 @@ inline void rng_engine(std::size_t N, std::size_t M)
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     rng_engine<RNGType>(N, M, nwid, swid, twid, #Name);
-
-    VSMC_RNG_DEFINE_MACRO(vsmc::Threefry2x32, Threefry2x32, threefry2x32)
-    VSMC_RNG_DEFINE_MACRO(vsmc::Threefry4x32, Threefry4x32, threefry4x32)
-    VSMC_RNG_DEFINE_MACRO(vsmc::Threefry2x64, Threefry2x64, threefry2x64)
-    VSMC_RNG_DEFINE_MACRO(vsmc::Threefry4x64, Threefry4x64, threefry4x64)
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 #include <vsmc/rng/internal/rng_define_macro_mkl.hpp>

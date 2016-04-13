@@ -441,19 +441,10 @@ class ThreefryInsertKey<T, K, N, true>
 /// \details
 /// For 64-bits integer type T, and K = 4, 8, 16, Rounds = 72, 72, 80,
 /// respectively, this is identical to Threefish-256, -512, -1024.
-template <typename ResultType, typename T = ResultType,
-    std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
+template <typename T, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
 class ThreefryGenerator
 {
-    static_assert(std::is_unsigned<ResultType>::value,
-        "**ThreefryGenerator** USED WITH ResultType OTHER THAN UNSIGNED "
-        "INTEGER TYPES");
-
-    static_assert(sizeof(T) * K % sizeof(ResultType) == 0,
-        "**ThreefryGenerator** USED WITH sizeof(T) * K NOT DIVISIBLE BY "
-        "sizeof(ResultType)");
-
     static_assert(std::is_unsigned<T>::value,
         "**ThreefryGenerator** USED WITH T OTHER THAN UNSIGNED INTEGER TYPES");
 
@@ -470,63 +461,94 @@ class ThreefryGenerator
         Rounds != 0, "**ThreefryGenerator** USED WITH ROUNDS EQUAL TO ZERO");
 
     public:
-    using result_type = ResultType;
     using ctr_type =
         std::array<std::uint64_t, sizeof(T) * K / sizeof(std::uint64_t)>;
     using key_type = std::array<T, K>;
 
-    ThreefryGenerator() : par_(0) {}
-
-    static constexpr std::size_t size()
-    {
-        return sizeof(T) * K / sizeof(ResultType);
-    }
+    static constexpr std::size_t size() { return sizeof(T) * K; }
 
     void reset(const key_type &key)
     {
-        par_ = internal::ThreefryKSConstant<T>::value;
+        std::copy(key.begin(), key.end(), par_.begin());
+        par_.back() = internal::ThreefryKSConstant<T>::value;
         for (std::size_t i = 0; i != key.size(); ++i)
-            par_ ^= key[i];
+            par_.back() ^= par_[i];
     }
 
-    void operator()(ctr_type &ctr, const key_type &key,
-        std::array<ResultType, size()> &buffer) const
+    template <typename ResultType>
+    void operator()(ctr_type &ctr,
+        std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
     {
         union {
             std::array<T, K> state;
             ctr_type ctr;
-            std::array<ResultType, size()> result;
+            std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
-
-        std::array<T, K + 1> par;
-        std::copy(key.begin(), key.end(), par.begin());
-        par.back() = par_;
 
         increment(ctr);
         buf.ctr = ctr;
-        generate<0>(buf.state, par, std::true_type());
+        generate<0>(buf.state, par_, std::true_type());
         buffer = buf.result;
     }
 
-    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        std::array<ResultType, size()> *buffer) const
+    template <typename ResultType>
+    void operator()(ctr_type &ctr, std::size_t n,
+        std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
     {
         union {
             std::array<T, K> state;
             ctr_type ctr;
-            std::array<ResultType, size()> result;
+            std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
-
-        std::array<T, K + 1> par;
-        std::copy(key.begin(), key.end(), par.begin());
-        par.back() = par_;
 
         for (std::size_t i = 0; i != n; ++i) {
             increment(ctr);
             buf.ctr = ctr;
-            generate<0>(buf.state, par, std::true_type());
+            generate<0>(buf.state, par_, std::true_type());
             buffer[i] = buf.result;
         }
+    }
+
+    friend bool operator==(const ThreefryGenerator<T, K, Rounds> &gen1,
+        const ThreefryGenerator<T, K, Rounds> &gen2)
+    {
+        return gen1.par_ == gen2.par_;
+    }
+
+    friend bool operator!=(const ThreefryGenerator<T, K, Rounds> &gen1,
+        const ThreefryGenerator<T, K, Rounds> &gen2)
+    {
+        return !(gen1 == gen2);
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const ThreefryGenerator<T, K, Rounds> &gen)
+    {
+        if (!os)
+            return os;
+
+        os << gen.par_;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        ThreefryGenerator<T, K, Rounds> &gen)
+    {
+        if (!is)
+            return is;
+
+        ThreefryGenerator<T, K, Rounds> gen_tmp;
+        is >> std::ws >> gen_tmp.par_;
+
+        if (static_cast<bool>(is))
+            gen = std::move(gen_tmp);
+
+        return is;
     }
 
     private:
@@ -548,7 +570,7 @@ class ThreefryGenerator
     }
 
     private:
-    T par_;
+    std::array<T, K + 1> par_;
 }; // class ThreefryGenerator
 
 /// \brief Threefry RNG engine
@@ -557,7 +579,7 @@ template <typename ResultType, typename T = ResultType,
     std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
 using ThreefryEngine =
-    CounterEngine<ThreefryGenerator<ResultType, T, K, Rounds>>;
+    CounterEngine<ResultType, ThreefryGenerator<T, K, Rounds>>;
 
 /// \brief Threefry2x32 RNG engine
 /// \ingroup Threefry

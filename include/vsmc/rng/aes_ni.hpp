@@ -41,18 +41,9 @@ namespace vsmc
 
 /// \brief RNG generator using AES-NI instructions
 /// \ingroup AESNIRNG
-template <typename ResultType, typename KeySeqType, std::size_t Rounds,
-    std::size_t Blocks>
+template <typename KeySeqType, std::size_t Rounds, std::size_t Blocks>
 class AESNIGenerator
 {
-    static_assert(std::is_unsigned<ResultType>::value,
-        "**AESNIGenerator** USED WITH ResultType OTHER THAN UNSIGNED INTEGER "
-        "TYPES");
-
-    static_assert(Blocks * sizeof(__m128i) % sizeof(ResultType) == 0,
-        "**AESNIGenerator** USED WITH Blocks * sizeof(__m128i) NOT DIVISIBLE "
-        "BY sizeof(ResultType)");
-
     static_assert(
         Rounds != 0, "**AESNIGenerator** USED WITH ROUNDS EQUAL TO ZERO");
 
@@ -60,18 +51,14 @@ class AESNIGenerator
         Blocks != 0, "**AESNIGenerator** USED WITH Blocks EQUAL TO ZERO");
 
     public:
-    using result_type = ResultType;
     using ctr_type = std::array<std::uint64_t, 2>;
     using key_type = typename KeySeqType::key_type;
 
-    static constexpr std::size_t size()
-    {
-        return Blocks * sizeof(__m128i) / sizeof(ResultType);
-    }
+    static constexpr std::size_t size() { return Blocks * sizeof(__m128i); }
 
     void reset(const key_type &key) { key_seq_.reset(key); }
 
-    void enc(const ctr_type &ctr, const key_type &key, ctr_type &buffer) const
+    void enc(const ctr_type &ctr, ctr_type &buffer) const
     {
         union {
             std::array<__m128i, 1> state;
@@ -79,47 +66,93 @@ class AESNIGenerator
         } buf;
 
         std::array<__m128i, Rounds + 1> rk_tmp;
-        const std::array<__m128i, Rounds + 1> &rk = key_seq_(key, rk_tmp);
+        const std::array<__m128i, Rounds + 1> &rk = key_seq_(rk_tmp);
 
         buf.result = ctr;
         enc(buf.state, rk);
         buffer = buf.result;
     }
 
-    void operator()(ctr_type &ctr, const key_type &key,
-        std::array<ResultType, size()> &buffer) const
+    template <typename ResultType>
+    void operator()(ctr_type &ctr,
+        std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
     {
         union {
             std::array<__m128i, Blocks> state;
             std::array<ctr_type, Blocks> ctr_block;
-            std::array<ResultType, size()> result;
+            std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
 
         std::array<__m128i, Rounds + 1> rk_tmp;
-        const std::array<__m128i, Rounds + 1> &rk = key_seq_(key, rk_tmp);
+        const std::array<__m128i, Rounds + 1> &rk = key_seq_(rk_tmp);
 
         increment(ctr, buf.ctr_block);
         enc(buf.state, rk);
         buffer = buf.result;
     }
 
-    void operator()(ctr_type &ctr, const key_type &key, std::size_t n,
-        std::array<ResultType, size()> *buffer) const
+    template <typename ResultType>
+    void operator()(ctr_type &ctr, std::size_t n,
+        std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
     {
         union {
             std::array<__m128i, Blocks> state;
             std::array<ctr_type, Blocks> ctr_block;
-            std::array<ResultType, size()> result;
+            std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
 
         std::array<__m128i, Rounds + 1> rk_tmp;
-        const std::array<__m128i, Rounds + 1> &rk = key_seq_(key, rk_tmp);
+        const std::array<__m128i, Rounds + 1> &rk = key_seq_(rk_tmp);
 
         for (std::size_t i = 0; i != n; ++i) {
             increment(ctr, buf.ctr_block);
             enc(buf.state, rk);
             buffer[i] = buf.result;
         }
+    }
+
+    friend bool operator==(
+        const AESNIGenerator<KeySeqType, Rounds, Blocks> &gen1,
+        const AESNIGenerator<KeySeqType, Rounds, Blocks> &gen2)
+    {
+        return gen1.key_seq_ == gen2.key_seq_;
+    }
+
+    friend bool operator!=(
+        const AESNIGenerator<KeySeqType, Rounds, Blocks> &gen1,
+        const AESNIGenerator<KeySeqType, Rounds, Blocks> &gen2)
+    {
+        return !(gen1 == gen2);
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const AESNIGenerator<KeySeqType, Rounds, Blocks> &gen)
+    {
+        if (!os)
+            return os;
+
+        os << gen.key_seq_;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        AESNIGenerator<KeySeqType, Rounds, Blocks> &gen)
+    {
+        if (!is)
+            return is;
+
+        AESNIGenerator<KeySeqType, Rounds, Blocks> gen_tmp;
+        is >> std::ws >> gen_tmp.key_seq_;
+
+        if (static_cast<bool>(is))
+            gen = std::move(gen_tmp);
+
+        return is;
     }
 
     private:
@@ -216,7 +249,7 @@ class AESNIGenerator
 template <typename ResultType, typename KeySeqType, std::size_t Rounds,
     std::size_t Blocks>
 using AESNIEngine =
-    CounterEngine<AESNIGenerator<ResultType, KeySeqType, Rounds, Blocks>>;
+    CounterEngine<ResultType, AESNIGenerator<KeySeqType, Rounds, Blocks>>;
 
 } // namespace vsmc
 

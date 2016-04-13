@@ -163,14 +163,40 @@ inline void increment(
 
 /// \brief Counter based RNG engine
 /// \ingroup RNG
-template <typename Generator>
+///
+/// \tparam ResultType The ouptut integer type of the counter-based RNG engine
+/// \tparam Generator The generator that transfer counter and key to random
+/// integer buffer.
+/// - Requirement
+/// ~~~{.cpp}
+/// ctr_type; // counter type
+/// key_type; // key type
+/// static constexpr std::size_t size(); // Size of buffer in bytes
+/// void reset(const key_type &key);     // reset generator key
+///
+/// // Increment counter and generate one random buffer
+/// void operator()(ctr_type &ctr,
+///     std::array<ResultType, size() / sizeof(ResultType)> &buffer);
+///
+/// // Increment counter and generate n random buffers
+/// void operator()(ctr_type &ctr, std::size_t n,
+///     std::array<ResultType, size() / sizeof(ResultType)> *buffer);
+/// ~~~
+/// - Restrictions: `size() % sizeof(ResultType) == 0`
+template <typename ResultType, typename Generator>
 class CounterEngine
 {
-    VSMC_DEFINE_NEW_DELETE(CounterEngine<Generator>)
+    static_assert(std::is_unsigned<ResultType>::value,
+        "**CounterEngine** USED WITH ResultType OTHER THAN UNSIGNED INTGER "
+        "TYPES");
+
+    static_assert(Generator::size() % sizeof(ResultType) == 0,
+        "**CounterEngine** USED WITH Generator::size() NOT DIVISIBLE BY "
+        "sizeof(ResultType)");
 
     public:
+    using result_type = ResultType;
     using generator_type = Generator;
-    using result_type = typename generator_type::result_type;
     using ctr_type = typename generator_type::ctr_type;
     using key_type = typename generator_type::key_type;
     using skip_type = typename ctr_type::value_type;
@@ -179,8 +205,9 @@ class CounterEngine
 
     template <typename SeedSeq>
     explicit CounterEngine(SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
-            key_type, CounterEngine<Generator>>::value>::type * = nullptr)
+        typename std::enable_if<internal::is_seed_seq<SeedSeq, ResultType,
+            key_type, CounterEngine<ResultType, Generator>>::value>::type * =
+            nullptr)
         : index_(M_)
     {
         seed(seq);
@@ -190,29 +217,26 @@ class CounterEngine
 
     void seed(result_type s)
     {
-        key_.fill(0);
-        std::memcpy(key_.data(), &s, std::min(sizeof(s), sizeof(key_)));
-        reset();
+        key_type key;
+        std::memset(key.data(), 0, sizeof(key_type));
+        std::memcpy(
+            key.data(), &s, std::min(sizeof(result_type), sizeof(key_type)));
+        reset(key);
     }
 
     template <typename SeedSeq>
     void seed(
         SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
-                          result_type, key_type>::value>::type * = nullptr)
+                          ResultType, key_type>::value>::type * = nullptr)
     {
-        seq.generator(key_.begin(), key_.end());
-        reset();
+        key_type key;
+        std::array<unsigned char, sizeof(key)> s;
+        seq.generator(s.begin(), s.end());
+        std::memcpy(key.data(), s.data(), sizeof(key_type));
+        reset(key);
     }
 
-    void seed(const key_type &k)
-    {
-        key_ = k;
-        reset();
-    }
-
-    const ctr_type &ctr() const { return ctr_; }
-
-    const key_type &key() const { return key_; }
+    void seed(const key_type &k) { reset(k); }
 
     void ctr(const ctr_type &c)
     {
@@ -220,16 +244,10 @@ class CounterEngine
         index_ = M_;
     }
 
-    void key(const key_type &k)
-    {
-        key_ = k;
-        reset();
-    }
-
     result_type operator()()
     {
         if (index_ == M_) {
-            generator_(ctr_, key_, buffer_);
+            generator_(ctr_, buffer_);
             index_ = 0;
         }
 
@@ -252,11 +270,11 @@ class CounterEngine
         index_ = M_;
 
         const std::size_t m = n / M_;
-        generator_(ctr_, key_, m, reinterpret_cast<buffer_type *>(r));
+        generator_(ctr_, m, reinterpret_cast<buffer_type *>(r));
         r += m * M_;
         n -= m * M_;
 
-        generator_(ctr_, key_, buffer_);
+        generator_(ctr_, buffer_);
         std::copy_n(buffer_.data(), n, r);
         index_ = n;
     }
@@ -288,7 +306,7 @@ class CounterEngine
         std::size_t ctr_size = sizeof(ctr_type);
         skip_type rate = static_cast<skip_type>(buf_size / ctr_size);
         increment(ctr_, nskip / M * rate);
-        generator_(ctr_, key_, buffer_);
+        generator_(ctr_, buffer_);
         index_ = static_cast<std::size_t>(nskip % M);
     }
 
@@ -302,22 +320,28 @@ class CounterEngine
         return std::numeric_limits<result_type>::max();
     }
 
-    friend bool operator==(const CounterEngine<Generator> &eng1,
-        const CounterEngine<Generator> &eng2)
+    /// \brief `eng1 == eng2` is a sufficent condition for subsequent call of
+    /// `operator()` output the same results. But it is not a necessary
+    /// condition.
+    friend bool operator==(const CounterEngine<ResultType, Generator> &eng1,
+        const CounterEngine<ResultType, Generator> &eng2)
     {
-        if (eng1.buffer_ != eng2.buffer_)
+        if (eng1.generator_ != eng2.generator_)
             return false;
         if (eng1.ctr_ != eng2.ctr_)
             return false;
-        if (eng1.key_ != eng2.key_)
+        if (eng1.buffer_ != eng2.buffer_)
             return false;
         if (eng1.index_ != eng2.index_)
             return false;
         return true;
     }
 
-    friend bool operator!=(const CounterEngine<Generator> &eng1,
-        const CounterEngine<Generator> &eng2)
+    /// \brief `eng1 != eng2` is a necessary condition for subsequent call of
+    /// `operator()` output different results. But it is not a sufficient
+    /// condition.
+    friend bool operator!=(const CounterEngine<ResultType, Generator> &eng1,
+        const CounterEngine<ResultType, Generator> &eng2)
     {
         return !(eng1 == eng2);
     }
@@ -325,14 +349,14 @@ class CounterEngine
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const CounterEngine<Generator> &eng)
+        const CounterEngine<ResultType, Generator> &eng)
     {
         if (!os)
             return os;
 
-        os << eng.buffer_ << ' ';
+        os << eng.generator_ << ' ';
         os << eng.ctr_ << ' ';
-        os << eng.key_ << ' ';
+        os << eng.buffer_ << ' ';
         os << eng.index_;
 
         return os;
@@ -340,47 +364,45 @@ class CounterEngine
 
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is, CounterEngine<Generator> &eng)
+        std::basic_istream<CharT, Traits> &is,
+        CounterEngine<ResultType, Generator> &eng)
     {
         if (!is)
             return is;
 
-        CounterEngine<Generator> eng_tmp;
-        is >> std::ws >> eng_tmp.buffer_;
+        CounterEngine<ResultType, Generator> eng_tmp;
+        is >> std::ws >> eng_tmp.generator_;
         is >> std::ws >> eng_tmp.ctr_;
-        is >> std::ws >> eng_tmp.key_;
+        is >> std::ws >> eng_tmp.buffer_;
         is >> std::ws >> eng_tmp.index_;
 
-        if (static_cast<bool>(is)) {
-            eng_tmp.generator_.reset(eng_tmp.key_);
+        if (static_cast<bool>(is))
             eng = std::move(eng_tmp);
-        }
 
         return is;
     }
 
     private:
-    static constexpr std::size_t M_ = Generator::size();
+    static constexpr std::size_t M_ = Generator::size() / sizeof(ResultType);
 
-    using buffer_type = std::array<result_type, M_>;
+    using buffer_type = std::array<ResultType, M_>;
 
+    generator_type generator_;
     ctr_type ctr_;
-    key_type key_;
     buffer_type buffer_;
     std::size_t index_;
-    generator_type generator_;
 
-    void reset()
+    void reset(const key_type key)
     {
         ctr_.fill(0);
-        generator_.reset(key_);
+        generator_.reset(key);
         index_ = M_;
     }
 }; // class CounterEngine
 
-template <typename Generator>
-inline void rng_rand(CounterEngine<Generator> &rng, std::size_t n,
-    typename CounterEngine<Generator>::result_type *r)
+template <typename ResultType, typename Generator>
+inline void rng_rand(
+    CounterEngine<ResultType, Generator> &rng, std::size_t n, ResultType *r)
 {
     rng(n, r);
 }

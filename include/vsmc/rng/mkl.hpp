@@ -978,42 +978,48 @@ class MKLEngine
     MKLStream &stream() { return stream_; }
     const MKLStream &stream() const { return stream_; }
 
+    /// \brief `eng1 == eng2` is a sufficent condition for subsequent call of
+    /// `operator()` output the same results. But it is not a necessary
+    /// condition.
     friend bool operator==(
-        const MKLEngine<BRNG, Bits> &gen1, const MKLEngine<BRNG, Bits> &gen2)
+        const MKLEngine<BRNG, Bits> &eng1, const MKLEngine<BRNG, Bits> &eng2)
     {
-        if (gen1.stream_ != gen2.stream_)
+        if (eng1.stream_ != eng2.stream_)
             return false;
-        if (gen1.buffer_ != gen2.buffer_)
+        if (eng1.buffer_ != eng2.buffer_)
             return false;
-        if (gen1.index_ != gen2.index_)
+        if (eng1.index_ != eng2.index_)
             return false;
         return true;
     }
 
+    /// \brief `eng1 != eng2` is a necessary condition for subsequent call of
+    /// `operator()` output different results. But it is not a sufficient
+    /// condition.
     friend bool operator!=(
-        const MKLEngine<BRNG, Bits> &gen1, const MKLEngine<BRNG, Bits> &gen2)
+        const MKLEngine<BRNG, Bits> &eng1, const MKLEngine<BRNG, Bits> &eng2)
     {
-        return !(gen1 == gen2);
+        return !(eng1 == eng2);
     }
 
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const MKLEngine<BRNG, Bits> &gen)
+        const MKLEngine<BRNG, Bits> &eng)
     {
         if (!os)
             return os;
 
-        os << gen.stream_ << ' ';
-        os << gen.buffer_ << ' ';
-        os << gen.index_;
+        os << eng.stream_ << ' ';
+        os << eng.buffer_ << ' ';
+        os << eng.index_;
 
         return os;
     }
 
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is, MKLEngine<BRNG, Bits> &gen)
+        std::basic_istream<CharT, Traits> &is, MKLEngine<BRNG, Bits> &eng)
     {
         if (!is)
             return is;
@@ -1026,9 +1032,9 @@ class MKLEngine
         is >> std::ws >> index;
 
         if (static_cast<bool>(is)) {
-            gen.stream_ = std::move(stream);
-            gen.buffer_ = std::move(buffer);
-            gen.index_ = index;
+            eng.stream_ = std::move(stream);
+            eng.buffer_ = std::move(buffer);
+            eng.index_ = index;
         }
 
         return is;

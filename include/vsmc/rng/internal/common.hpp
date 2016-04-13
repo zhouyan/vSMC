@@ -590,7 +590,7 @@ inline void rng_rand(RNGType &rng, const DistributionType &distribution,
         r[i] = dist(rng);
 }
 
-template <typename>
+template <typename, typename>
 class CounterEngine;
 
 template <typename = double, std::size_t = Dynamic>
@@ -671,9 +671,9 @@ class UniformRealDistribution;
 template <typename = double>
 class WeibullDistribution;
 
-template <typename Generator>
-inline void rng_rand(CounterEngine<Generator> &, std::size_t,
-    typename CounterEngine<Generator>::result_type *);
+template <typename ResultType, typename Generator>
+inline void rng_rand(
+    CounterEngine<ResultType, Generator> &, std::size_t, ResultType *);
 
 template <typename RealType, typename RNGType>
 inline void rng_rand(

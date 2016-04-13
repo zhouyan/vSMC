@@ -79,19 +79,67 @@ class ARSKeySeq
     public:
     using key_type = std::array<std::uint64_t, 2>;
 
-    void reset(const key_type &) {}
+    void reset(const key_type &key)
+    {
+        key_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
+    }
 
     template <std::size_t Rp1>
     const std::array<__m128i, Rp1> &operator()(
-        const key_type &key, std::array<__m128i, Rp1> &rk) const
+        std::array<__m128i, Rp1> &rk) const
     {
         __m128i weyl = _mm_set_epi64x(internal::ARSWeylConstant<1>::value,
             internal::ARSWeylConstant<0>::value);
-        std::get<0>(rk) =
-            _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
+        std::get<0>(rk) = key_;
         generate<1>(rk, weyl, std::integral_constant<bool, 1 < Rp1>());
 
         return rk;
+    }
+
+    friend bool operator==(const ARSKeySeq &seq1, const ARSKeySeq &seq2)
+    {
+        alignas(16) key_type k1;
+        alignas(16) key_type k2;
+        _mm_store_si128(reinterpret_cast<__m128i *>(k1.data()), seq1.key_);
+        _mm_store_si128(reinterpret_cast<__m128i *>(k2.data()), seq2.key_);
+
+        return k1 == k2;
+    }
+
+    friend bool operator!=(const ARSKeySeq &seq1, const ARSKeySeq &seq2)
+    {
+        return !(seq1 == seq2);
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os, const ARSKeySeq &seq)
+    {
+        if (!os)
+            return os;
+
+        alignas(16) key_type k;
+        _mm_store_si128(reinterpret_cast<__m128i *>(k.data()), seq.key_);
+        os << k;
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is, ARSKeySeq &seq)
+    {
+        if (!is)
+            return is;
+
+        alignas(16) key_type k;
+        is >> k;
+        if (static_cast<bool>(is)) {
+            seq.key_ =
+                _mm_load_si128(reinterpret_cast<const __m128i *>(k.data()));
+        }
+
+        return is;
     }
 
     private:
@@ -108,6 +156,9 @@ class ARSKeySeq
         std::get<N>(rk) = _mm_add_epi64(std::get<N - 1>(rk), weyl);
         generate<N + 1>(rk, weyl, std::integral_constant<bool, N + 1 < Rp1>());
     }
+
+    private:
+    __m128i key_;
 }; // class ARSKeySeq
 
 /// \brief ARS RNG engine
