@@ -236,7 +236,9 @@ class CounterEngine
         reset(key);
     }
 
-    void seed(const key_type &k) { reset(k); }
+    void seed(const key_type &key) { reset(key); }
+
+    void key(const key_type &k) { reset(k); }
 
     void ctr(const ctr_type &c)
     {
