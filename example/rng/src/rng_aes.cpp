@@ -117,9 +117,9 @@ int main()
 
     std::cout << std::uppercase << std::hex;
     for (std::size_t i = 0; i != 4; ++i) {
-        aes128.enc(ctr128, key_128, buf128[i]);
-        aes192.enc(ctr192, key_192, buf192[i]);
-        aes256.enc(ctr256, key_256, buf256[i]);
+        aes128.enc(ctr128, buf128[i]);
+        aes192.enc(ctr192, buf192[i]);
+        aes256.enc(ctr256, buf256[i]);
         if (i < 3) {
             for (std::size_t j = 0; j != 2; ++j) {
                 ctr128[j] = buf128[i][j] ^ plain_text[i + 1][j];

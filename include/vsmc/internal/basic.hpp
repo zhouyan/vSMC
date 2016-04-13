@@ -130,6 +130,76 @@ class BufferSize : public std::integral_constant<std::size_t, 8192 / sizeof(T)>
 {
 }; // class BufferSize;
 
+template <typename CharT, typename Traits, typename T, std::size_t N>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
+{
+    if (!os || N == 0)
+        return os;
+
+    for (std::size_t i = 0; i < N - 1; ++i)
+        os << ary[i] << ' ';
+    if (N > 0)
+        os << ary[N - 1];
+
+    return os;
+}
+
+template <typename CharT, typename Traits, typename T, std::size_t N>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, std::array<T, N> &ary)
+{
+    if (!is)
+        return is;
+
+    std::array<T, N> tmp;
+    for (std::size_t i = 0; i != N; ++i)
+        is >> std::ws >> tmp[i];
+
+    if (static_cast<bool>(is))
+        ary = std::move(tmp);
+
+    return is;
+}
+
+template <typename CharT, typename Traits, typename T, typename Alloc>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const std::vector<T, Alloc> &vec)
+{
+    if (!os)
+        return os;
+
+    os << vec.size();
+    if (!os)
+        return os;
+
+    for (const auto &v : vec)
+        os << ' ' << v;
+
+    return os;
+}
+
+template <typename CharT, typename Traits, typename T, typename Alloc>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, std::vector<T, Alloc> &vec)
+{
+    if (!is)
+        return is;
+
+    std::size_t n = 0;
+    is >> n;
+    if (!is)
+        return is;
+
+    std::vector<T, Alloc> tmp(n);
+    for (std::size_t i = 0; i != n; ++i)
+        is >> std::ws >> tmp[i];
+    if (static_cast<bool>(is))
+        vec = std::move(tmp);
+
+    return is;
+}
+
 } // namespace vsmc::internal
 
 template <typename CharT, typename Traits, typename T, std::size_t N>
