@@ -4,7 +4,7 @@
 The library has a comprehensive \rng system to facilitate implementation of
 Monte Carlo algorithms. The \rng engines defined in the library provide not
 only \verb|operator()| for generating random integers one by one, as those in
-\cppoo standard library, but also batch generating. For example
+the standard library, but also batch generating. For example
 \begin{cppcode}
   Vector<RNG::result_type> r(n);
   RNG rng;
@@ -16,9 +16,8 @@ only \verb|operator()| for generating random integers one by one, as those in
   // Generate all at once
   rng(n, r.data());
 \end{cppcode}
-For some \rng{}s, the batch generating can be significantly faster than
-generating random integers one by one. The results of using both methods are
-always the same except for non-deterministic \rng{}s.
+For some \rng{}s, the batch generating can be significantly faster. The results
+of using both methods are always the same except for non-deterministic \rng{}s.
 
 Note that, unlike those \rng{}s in the standard library, the comparison
 operators behave differently. \verb|rng1 == rng2| is a sufficient condition for
