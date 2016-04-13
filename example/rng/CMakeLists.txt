@@ -66,6 +66,8 @@ VSMC_ADD_FILE(rng rng_engine_kat_Threefry2x32.txt)
 VSMC_ADD_FILE(rng rng_engine_kat_Threefry2x64.txt)
 VSMC_ADD_FILE(rng rng_engine_kat_Threefry4x32.txt)
 VSMC_ADD_FILE(rng rng_engine_kat_Threefry4x64.txt)
+VSMC_ADD_FILE(rng rng_engine_kat_Threefry8x64.txt)
+VSMC_ADD_FILE(rng rng_engine_kat_Threefry16x64.txt)
 
 IF(AESNI_FOUND)
     VSMC_ADD_RNG_TEST(aes)

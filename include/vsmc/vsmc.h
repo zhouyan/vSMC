@@ -530,6 +530,12 @@ int vsmc_mkl_brng_threefry2x64(void);
 /** \brief `vsmc::mkl_brng<vsmc::Threefry4x64>` */
 int vsmc_mkl_brng_threefry4x64(void);
 
+/** \brief `vsmc::mkl_brng<vsmc::Threefry8x64>` */
+int vsmc_mkl_brng_threefry8x64(void);
+
+/** \brief `vsmc::mkl_brng<vsmc::Threefry16x64>` */
+int vsmc_mkl_brng_threefry16x64(void);
+
 /** \brief `vsmc::mkl_brng<vsmc::Threefry2x32_64>` */
 int vsmc_mkl_brng_threefry2x32_64(void);
 
@@ -541,6 +547,12 @@ int vsmc_mkl_brng_threefry2x64_64(void);
 
 /** \brief `vsmc::mkl_brng<vsmc::Threefry4x64_64>` */
 int vsmc_mkl_brng_threefry4x64_64(void);
+
+/** \brief `vsmc::mkl_brng<vsmc::Threefry8x64_64>` */
+int vsmc_mkl_brng_threefry8x64_64(void);
+
+/** \brief `vsmc::mkl_brng<vsmc::Threefry16x64_64>` */
+int vsmc_mkl_brng_threefry16x64_64(void);
 
 /** \brief `vsmc::mkl_brng<vsmc::AES128x1>` */
 int vsmc_mkl_brng_aes128x1(void);

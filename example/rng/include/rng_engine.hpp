@@ -79,6 +79,7 @@ inline std::string rng_engine_kat(
     filename += std::to_string(K) + "x";
     filename += std::to_string(std::numeric_limits<T>::digits) + ".txt";
     std::ifstream kat(filename);
+
     vsmc::Vector<T> k;
     k.reserve(1000);
     while (kat) {
@@ -290,6 +291,11 @@ inline void rng_engine(std::size_t N, std::size_t M)
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     rng_engine<RNGType>(N, M, nwid, swid, twid, #Name);
+
+    VSMC_RNG_DEFINE_MACRO(vsmc::Threefry2x32, Threefry2x32, threefry2x32)
+    VSMC_RNG_DEFINE_MACRO(vsmc::Threefry4x32, Threefry4x32, threefry4x32)
+    VSMC_RNG_DEFINE_MACRO(vsmc::Threefry2x64, Threefry2x64, threefry2x64)
+    VSMC_RNG_DEFINE_MACRO(vsmc::Threefry4x64, Threefry4x64, threefry4x64)
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 #include <vsmc/rng/internal/rng_define_macro_mkl.hpp>
