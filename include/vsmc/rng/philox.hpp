@@ -120,58 +120,60 @@ class PhiloxConstants
 namespace internal
 {
 
-template <typename T, std::size_t, std::size_t, typename,
-    int = std::numeric_limits<T>::digits>
+template <typename T, int = std::numeric_limits<T>::digits>
 class PhiloxHiLo;
 
-template <typename T, std::size_t K, std::size_t I, typename Constants>
-class PhiloxHiLo<T, K, I, Constants, 32>
+template <typename T>
+class PhiloxHiLo<T, 32>
 {
-    using multiplier = typename Constants::template multiplier<I>;
-
     public:
-    static std::array<T, 2> eval(T b)
+    static void eval(T a, T b, T &hi, T &lo)
     {
         union {
             std::uint64_t prod;
-            std::array<T, 2> hilo;
+            std::array<T, 2> result;
         } buf;
 
-        buf.prod = static_cast<std::uint64_t>(b) *
-            static_cast<std::uint64_t>(multiplier::value);
-
-        return buf.hilo;
+        buf.prod =
+            static_cast<std::uint64_t>(a) * static_cast<std::uint64_t>(b);
+#if VSMC_HAS_X86 // little endian
+        hi = std::get<1>(buf.result);
+        lo = std::get<0>(buf.result);
+#else  // VSMC_HAS_X86
+        hi = static_cast<T>(buf.prod >> 32);
+        lo = static_cast<T>(buf.prod);
+#endif // VSMC_HAS_X86
     }
 }; // class PhiloxHiLo
 
-template <typename T, std::size_t K, std::size_t I, typename Constants>
-class PhiloxHiLo<T, K, I, Constants, 64>
+template <typename T>
+class PhiloxHiLo<T, 64>
 {
-    using multiplier = typename Constants::template multiplier<I>;
-
     public:
-    static std::array<T, 2> eval(T b)
+    static void eval(T a, T b, T &hi, T &lo)
     {
 #if VSMC_HAS_INT128
         union {
             unsigned VSMC_INT128 prod;
-            std::array<T, 2> hilo;
+            std::array<T, 2> result;
         } buf;
 
-        buf.prod = static_cast<unsigned VSMC_INT128>(b) *
-            static_cast<unsigned VSMC_INT128>(multiplier::value);
-
-        return buf.hilo;
+        buf.prod = static_cast<unsigned VSMC_INT128>(a) *
+            static_cast<unsigned VSMC_INT128>(b);
+#if VSMC_HAS_X86 // littel endia
+        hi = std::get<1>(buf.result);
+        lo = std::get<0>(buf.result);
+#else  // VSMC_HAS_X86
+        hi = static_cast<T>(buf.prod >> 64);
+        lo = static_cast<T>(buf.prod);
+#endif // VSMC_HAS_X86
 #elif defined(VSMC_MSVC)
         unsigned __int64 Multiplier =
             static_cast<unsigned __int64>(multiplier::value);
         unsigned __int64 Multiplicand = static_cast<unsigned __int64>(b);
-        unsigned __int64 hi = 0;
-        unsigned __int64 lo = 0;
-        lo = _umul128(Multiplier, Multiplicand, &hi);
-        std::array<T, 2> hilo = {{ static_cast<T>(lo), static_cast<T>(hi) }};
-
-        return hilo;
+        unsigned __int64 hi_tmp = 0;
+        lo = static_cast<T>(_umul128(Multiplier, Multiplicand, &hi_tmp));
+        hi = static_cast<T>(hi_tmp);
 #else  // VSMC_HAS_INT128
         const T a = multiplier::value;
         const T lomask = (static_cast<T>(1) << 32) - 1;
@@ -183,8 +185,8 @@ class PhiloxHiLo<T, K, I, Constants, 64>
         const T albh = alo * bhi;
         const T ahbl_albh = ((ahbl & lomask) + (albh & lomask));
 
-        T lo = a * b;
-        T hi = ahi * bhi + (ahbl >> 32) + (albh >> 32);
+        lo = a * b;
+        hi = ahi * bhi + (ahbl >> 32) + (albh >> 32);
         hi += ahbl_albh >> 32;
         hi += ((lo >> 32) < (ahbl_albh & lomask));
         std::array<T, 2> hilo = {{lo, hi}};
@@ -280,6 +282,9 @@ class PhiloxSBox<T, K, N, Constants, true>
     }
 
     private:
+    template <std::size_t I>
+    using multiplier = typename Constants::template multiplier<I>;
+
     template <std::size_t, std::size_t Rp1>
     static void eval(std::array<T, K> &,
         const std::array<std::array<T, K / 2>, Rp1> &, std::false_type)
@@ -290,11 +295,10 @@ class PhiloxSBox<T, K, N, Constants, true>
     static void eval(std::array<T, K> &state,
         const std::array<std::array<T, K / 2>, Rp1> &par, std::true_type)
     {
-        std::array<T, 2> hilo =
-            PhiloxHiLo<T, K, I / 2, Constants>::eval(std::get<I>(state));
-        std::get<1>(hilo) ^= std::get<I / 2>(std::get<N>(par));
-        std::get<I>(state) = std::get<1>(hilo) ^ std::get<I + 1>(state);
-        std::get<I + 1>(state) = std::get<0>(hilo);
+        T x = std::get<I + 1>(state) ^ std::get<I / 2>(std::get<N>(par));
+        PhiloxHiLo<T>::eval(std::get<I>(state), multiplier<I / 2>::value,
+            std::get<I>(state), std::get<I + 1>(state));
+        std::get<I>(state) ^= x;
         eval<I + 2>(state, par, std::integral_constant<bool, I + 3 < K>());
     }
 }; // class PhiloxSBox
