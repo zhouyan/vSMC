@@ -33,7 +33,6 @@
 #define VSMC_RNG_INTERNAL_COMMON_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/utility/simd.hpp>
 
 #if VSMC_HAS_MKL
 #include <mkl.h>

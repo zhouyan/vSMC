@@ -57,29 +57,20 @@ template <std::size_t>
 class ARSWeylConstant;
 
 template <>
-class ARSWeylConstant<0> : public std::integral_constant<std::uint64_t,
-                               UINT64_C(0x9E3779B97F4A7C15)>
+class ARSWeylConstant<0>
+    : public std::integral_constant<VSMC_INT64,
+          static_cast<VSMC_INT64>(UINT64_C(0x9E3779B97F4A7C15))>
 {
 }; // class ARSWeylConstant
 
 template <>
-class ARSWeylConstant<1> : public std::integral_constant<std::uint64_t,
-                               UINT64_C(0xBB67AE8584CAA73B)>
+class ARSWeylConstant<1>
+    : public std::integral_constant<VSMC_INT64,
+          static_cast<VSMC_INT64>(UINT64_C(0xBB67AE8584CAA73B))>
 {
 }; // class ARSWeylConstant
 
 } // namespace vsmc::internal
-
-/// \brief ARSEngine Weyl sequence constants
-/// \ingroup Traits
-///
-/// \details
-/// The two specializaiton (N = 0, 1) corresponds to lower and upper 64-bit
-/// or the Weyl constant.
-template <std::size_t I>
-class ARSWeylConstantTrait : public internal::ARSWeylConstant<I>
-{
-}; // class ARSWeylConstantTrait
 
 /// \brief Default ARSEngine key sequence generator
 /// \ingroup AESNIRNG
@@ -91,13 +82,13 @@ class ARSKeySeq
     void reset(const key_type &) {}
 
     template <std::size_t Rp1>
-    const std::array<M128I<>, Rp1> &operator()(
-        const key_type &key, std::array<M128I<>, Rp1> &rk) const
+    const std::array<__m128i, Rp1> &operator()(
+        const key_type &key, std::array<__m128i, Rp1> &rk) const
     {
-        M128I<std::uint64_t> weyl;
-        weyl.set(
-            ARSWeylConstantTrait<1>::value, ARSWeylConstantTrait<0>::value);
-        std::get<0>(rk).load(key.data());
+        __m128i weyl = _mm_set_epi64x(internal::ARSWeylConstant<1>::value,
+            internal::ARSWeylConstant<0>::value);
+        std::get<0>(rk) =
+            _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
         generate<1>(rk, weyl, std::integral_constant<bool, 1 < Rp1>());
 
         return rk;
@@ -105,17 +96,16 @@ class ARSKeySeq
 
     private:
     template <std::size_t, std::size_t Rp1>
-    void generate(std::array<M128I<>, Rp1> &, const M128I<std::uint64_t> &,
-        std::false_type) const
+    void generate(
+        std::array<__m128i, Rp1> &, const __m128i &, std::false_type) const
     {
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate(std::array<M128I<>, Rp1> &rk,
-        const M128I<std::uint64_t> &weyl, std::true_type) const
+    void generate(std::array<__m128i, Rp1> &rk, const __m128i &weyl,
+        std::true_type) const
     {
-        std::get<N>(rk) =
-            _mm_add_epi64(std::get<N - 1>(rk).value(), weyl.value());
+        std::get<N>(rk) = _mm_add_epi64(std::get<N - 1>(rk), weyl);
         generate<N + 1>(rk, weyl, std::integral_constant<bool, N + 1 < Rp1>());
     }
 }; // class ARSKeySeq

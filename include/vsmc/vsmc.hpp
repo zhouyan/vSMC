@@ -154,10 +154,6 @@
 /// \ingroup Utility
 /// \brief Display progress while algorithms proceed
 
-/// \defgroup SIMD SIMD
-/// \ingroup Utility
-/// \brief SIMD
-
 /// \defgroup StaticVector Static vector
 /// \ingroup Utility
 /// \brief Static sized vector

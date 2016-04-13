@@ -37,9 +37,9 @@
 
 #define VSMC_DEFINE_RNG_AES_KEY_GEN_ASSIST(N, val)                            \
     template <>                                                               \
-    inline M128I<> AESKeyGenAssist<N>(const M128I<> &xmm)                     \
+    inline __m128i AESKeyGenAssist<N>(const __m128i &xmm)                     \
     {                                                                         \
-        return M128I<>(_mm_aeskeygenassist_si128(xmm.value(), val));          \
+        return _mm_aeskeygenassist_si128(xmm, val);                           \
     }
 
 /// \brief AESEngine default blocks
@@ -55,7 +55,7 @@ namespace internal
 {
 
 template <std::size_t>
-inline M128I<> AESKeyGenAssist(const M128I<> &);
+inline __m128i AESKeyGenAssist(const __m128i &);
 
 VSMC_DEFINE_RNG_AES_KEY_GEN_ASSIST(0x00, 0x8D)
 VSMC_DEFINE_RNG_AES_KEY_GEN_ASSIST(0x01, 0x01)
@@ -326,14 +326,14 @@ class AESKeySeq
         generator(key, key_seq_);
     }
 
-    const std::array<M128I<>, Rounds + 1> &operator()(
-        const key_type &, std::array<M128I<>, Rounds + 1> &) const
+    const std::array<__m128i, Rounds + 1> &operator()(
+        const key_type &, std::array<__m128i, Rounds + 1> &) const
     {
         return key_seq_;
     }
 
     private:
-    std::array<M128I<>, Rounds + 1> key_seq_;
+    std::array<__m128i, Rounds + 1> key_seq_;
 }; // class AESKeySeq
 
 class AES128KeySeqGenerator
@@ -342,25 +342,25 @@ class AES128KeySeqGenerator
     using key_type = std::array<std::uint64_t, 2>;
 
     template <std::size_t Rp1>
-    void operator()(const key_type &key, std::array<M128I<>, Rp1> &rk)
+    void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
     {
-        xmm1_.set(std::get<1>(key), std::get<0>(key));
+        xmm1_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
         std::get<0>(rk) = xmm1_;
         generate_seq<1>(rk, std::integral_constant<bool, 1 < Rp1>());
     }
 
     private:
-    M128I<> xmm1_;
-    M128I<> xmm2_;
-    M128I<> xmm3_;
+    __m128i xmm1_;
+    __m128i xmm2_;
+    __m128i xmm3_;
 
     template <std::size_t, std::size_t Rp1>
-    void generate_seq(std::array<M128I<>, Rp1> &, std::false_type)
+    void generate_seq(std::array<__m128i, Rp1> &, std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq(std::array<M128I<>, Rp1> &rk, std::true_type)
+    void generate_seq(std::array<__m128i, Rp1> &rk, std::true_type)
     {
         xmm2_ = AESKeyGenAssist<N>(xmm1_);
         expand_key();
@@ -370,18 +370,14 @@ class AES128KeySeqGenerator
 
     void expand_key()
     {
-        xmm2_.value() = // pshufd xmm2, xmm2, 0xFF
-            _mm_shuffle_epi32(xmm2_.value(), 0xFF);
-        xmm3_.value() = // pslldq xmm3, 0x04
-            _mm_slli_si128(xmm1_.value(), 0x04);
-        xmm1_ ^= xmm3_; // pxor   xmm1, xmm3
-        xmm3_.value() = // pslldq xmm3, 0x04
-            _mm_slli_si128(xmm3_.value(), 0x04);
-        xmm1_ ^= xmm3_; // pxor   xmm1, xmm3
-        xmm3_.value() = // pslldq xmm3, 0x04
-            _mm_slli_si128(xmm3_.value(), 0x04);
-        xmm1_ ^= xmm3_; // pxor   xmm1, xmm3
-        xmm1_ ^= xmm2_; // pxor   xmm1, xmm2
+        xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF); // pshufd xmm2, xmm2, 0xFF
+        xmm3_ = _mm_slli_si128(xmm1_, 0x04);    // pslldq xmm3, 0x04
+        xmm1_ = _mm_xor_si128(xmm1_, xmm3_);    // pxor   xmm1, xmm3
+        xmm3_ = _mm_slli_si128(xmm3_, 0x04);    // pslldq xmm3, 0x04
+        xmm1_ = _mm_xor_si128(xmm1_, xmm3_);    // pxor   xmm1, xmm3
+        xmm3_ = _mm_slli_si128(xmm3_, 0x04);    // pslldq xmm3, 0x04
+        xmm1_ = _mm_xor_si128(xmm1_, xmm3_);    // pxor   xmm1, xmm3
+        xmm1_ = _mm_xor_si128(xmm1_, xmm2_);    // pxor   xmm1, xmm2
     }
 }; // class AES128KeySeq
 
@@ -391,17 +387,17 @@ class AES192KeySeqGenerator
     using key_type = std::array<std::uint64_t, 3>;
 
     template <std::size_t Rp1>
-    void operator()(const key_type &key, std::array<M128I<>, Rp1> &rk)
+    void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
     {
-        xmm1_.set(std::get<1>(key), std::get<0>(key));
-        xmm7_.set(static_cast<std::uint64_t>(0), std::get<2>(key));
+        xmm1_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
+        xmm7_ = _mm_set_epi64x(static_cast<VSMC_INT64>(0),
+            static_cast<VSMC_INT64>(std::get<2>(key)));
         std::get<0>(rk) = xmm1_;
         std::get<1>(rk) = xmm7_;
 
-        xmm3_.set0();
-        xmm6_.set0();
-        xmm4_.value() = // pshufd xmm4, xmm7, 0x4F
-            _mm_shuffle_epi32(xmm7_.value(), 0x4F);
+        xmm3_ = _mm_setzero_si128();
+        xmm6_ = _mm_setzero_si128();
+        xmm4_ = _mm_shuffle_epi32(xmm7_, 0x4F); // pshufd xmm4, xmm7, 0x4F
 
         std::array<unsigned char, Rp1 * 16 + 16> rk_tmp;
         generate_seq<1, Rp1>(
@@ -411,13 +407,13 @@ class AES192KeySeqGenerator
     }
 
     private:
-    M128I<> xmm1_;
-    M128I<> xmm2_;
-    M128I<> xmm3_;
-    M128I<> xmm4_;
-    M128I<> xmm5_;
-    M128I<> xmm6_;
-    M128I<> xmm7_;
+    __m128i xmm1_;
+    __m128i xmm2_;
+    __m128i xmm3_;
+    __m128i xmm4_;
+    __m128i xmm5_;
+    __m128i xmm6_;
+    __m128i xmm7_;
 
     template <std::size_t, std::size_t>
     void generate_seq(unsigned char *, std::false_type)
@@ -442,7 +438,7 @@ class AES192KeySeqGenerator
 
         xmm2_ = AESKeyGenAssist<N>(xmm4_);
         generate_key_expansion();
-        xmm1_.store(rk_ptr + N * 24);
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(rk_ptr + N * 24), xmm1_);
     }
 
     template <std::size_t>
@@ -457,46 +453,42 @@ class AES192KeySeqGenerator
         // Required storage: N * 24 + 32
 
         complete_key_expansion();
-        xmm7_.store(rk_ptr + N * 24 + 16);
+        _mm_storeu_si128(
+            reinterpret_cast<__m128i *>(rk_ptr + N * 24 + 16), xmm7_);
     }
 
     void generate_key_expansion()
     {
-        xmm2_.value() = // pshufd xmm2, xmm2, 0xFF
-            _mm_shuffle_epi32(xmm2_.value(), 0xFF);
-        xmm3_.value() = _mm_castps_si128(_mm_shuffle_ps(
-            _mm_castsi128_ps(xmm3_.value()), _mm_castsi128_ps(xmm1_.value()),
-            0x10));     // shufps xmm3, xmm1, 0x10
-        xmm1_ ^= xmm3_; // pxor   xmm1, xmm3
-        xmm3_.value() = // shufps xmm3, xmm1, 0x10
-            _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(xmm3_.value()),
-                _mm_castsi128_ps(xmm1_.value()), 0x8C));
-        xmm1_ ^= xmm3_; // pxor   xmm1, xmm3
-        xmm1_ ^= xmm2_; // pxor   xmm1, xmm2
+        xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF); // pshufd xmm2, xmm2, 0xFF
+        xmm3_ = _mm_castps_si128(               // shufps xmm3, xmm1, 0x10
+            _mm_shuffle_ps(
+                _mm_castsi128_ps(xmm3_), _mm_castsi128_ps(xmm1_), 0x10));
+        xmm1_ = _mm_xor_si128(xmm1_, xmm3_);     // pxor   xmm1, xmm3
+        xmm3_ = _mm_castps_si128(_mm_shuffle_ps( // shufps xmm3, xmm1, 0x10
+            _mm_castsi128_ps(xmm3_), _mm_castsi128_ps(xmm1_), 0x8C));
+        xmm1_ = _mm_xor_si128(xmm1_, xmm3_); // pxor   xmm1, xmm3
+        xmm1_ = _mm_xor_si128(xmm1_, xmm2_); // pxor   xmm1, xmm2
     }
 
     void complete_key_expansion()
     {
-        xmm5_ = xmm4_;  // movdqa xmm5, xmm4
-        xmm5_.value() = // pslldq xmm5, 0x04
-            _mm_slli_si128(xmm5_.value(), 0x04);
-        xmm6_.value() = // shufps xmm6, xmm1, 0x10
-            _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(xmm6_.value()),
-                _mm_castsi128_ps(xmm1_.value()), 0xF0));
-        xmm6_ ^= xmm5_; // pxor   xmm6, xmm5
-        xmm4_ ^= xmm6_; // pxor   xmm4, xmm6
-        xmm7_.value() = // pshufd xmm7, xmm4, 0x0E
-            _mm_shuffle_epi32(xmm4_.value(), 0x0E);
+        xmm5_ = xmm4_;                           // movdqa xmm5, xmm4
+        xmm5_ = _mm_slli_si128(xmm5_, 0x04);     // pslldq xmm5, 0x04
+        xmm6_ = _mm_castps_si128(_mm_shuffle_ps( // shufps xmm6, xmm1, 0x10
+            _mm_castsi128_ps(xmm6_), _mm_castsi128_ps(xmm1_), 0xF0));
+        xmm6_ = _mm_xor_si128(xmm6_, xmm5_);    // pxor   xmm6, xmm5
+        xmm4_ = _mm_xor_si128(xmm4_, xmm6_);    // pxor   xmm4, xmm6
+        xmm7_ = _mm_shuffle_epi32(xmm4_, 0x0E); // pshufd xmm7, xmm4, 0x0E
     }
 
     template <std::size_t Rp1>
     void copy_key(
-        std::array<M128I<>, Rp1> &, const unsigned char *, std::false_type)
+        std::array<__m128i, Rp1> &, const unsigned char *, std::false_type)
     {
     }
 
     template <std::size_t Rp1>
-    void copy_key(std::array<M128I<>, Rp1> &rk, const unsigned char *rk_ptr,
+    void copy_key(std::array<__m128i, Rp1> &rk, const unsigned char *rk_ptr,
         std::true_type)
     {
         unsigned char *dst = reinterpret_cast<unsigned char *>(rk.data());
@@ -510,35 +502,36 @@ class AES256KeySeqGenerator
     using key_type = std::array<std::uint64_t, 4>;
 
     template <std::size_t Rp1>
-    void operator()(const key_type &key, std::array<M128I<>, Rp1> &rk)
+    void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
     {
-        xmm1_.set(std::get<1>(key), std::get<0>(key));
-        xmm3_.set(std::get<3>(key), std::get<2>(key));
+        xmm1_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
+        xmm3_ =
+            _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data() + 2));
         std::get<0>(rk) = xmm1_;
         std::get<1>(rk) = xmm3_;
         generate_seq<2>(rk, std::integral_constant<bool, 2 < Rp1>());
     }
 
     private:
-    M128I<> xmm1_;
-    M128I<> xmm2_;
-    M128I<> xmm3_;
-    M128I<> xmm4_;
+    __m128i xmm1_;
+    __m128i xmm2_;
+    __m128i xmm3_;
+    __m128i xmm4_;
 
     template <std::size_t, std::size_t Rp1>
-    void generate_seq(std::array<M128I<>, Rp1> &, std::false_type)
+    void generate_seq(std::array<__m128i, Rp1> &, std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq(std::array<M128I<>, Rp1> &rk, std::true_type)
+    void generate_seq(std::array<__m128i, Rp1> &rk, std::true_type)
     {
         generate_key<N>(rk, std::integral_constant<bool, N % 2 == 0>());
         generate_seq<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_key(std::array<M128I<>, Rp1> &rk, std::true_type)
+    void generate_key(std::array<__m128i, Rp1> &rk, std::true_type)
     {
         xmm2_ = AESKeyGenAssist<N / 2>(xmm3_);
         expand_key(std::true_type());
@@ -546,43 +539,35 @@ class AES256KeySeqGenerator
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_key(std::array<M128I<>, Rp1> &rk, std::false_type)
+    void generate_key(std::array<__m128i, Rp1> &rk, std::false_type)
     {
-        xmm4_.value() = _mm_aeskeygenassist_si128(xmm1_.value(), 0);
+        xmm4_ = _mm_aeskeygenassist_si128(xmm1_, 0);
         expand_key(std::false_type());
         std::get<N>(rk) = xmm3_;
     }
 
     void expand_key(std::true_type)
     {
-        xmm2_.value() = // pshufd xmm2, xmm2, 0xFF
-            _mm_shuffle_epi32(xmm2_.value(), 0xFF);
-        xmm4_.value() = // pslldq xmm4, 0x04
-            _mm_slli_si128(xmm1_.value(), 0x04);
-        xmm1_ ^= xmm4_; // pxor   xmm1, xmm4
-        xmm4_.value() = // pslldq xmm4, 0x04
-            _mm_slli_si128(xmm4_.value(), 0x04);
-        xmm1_ ^= xmm4_; // pxor   xmm1, xmm4
-        xmm4_.value() = // pslldq xmm4, 0x04
-            _mm_slli_si128(xmm4_.value(), 0x04);
-        xmm1_ ^= xmm4_; // pxor   xmm1, xmm4
-        xmm1_ ^= xmm2_; // pxor   xmm1, xmm2
+        xmm2_ = _mm_shuffle_epi32(xmm2_, 0xFF); // pshufd xmm2, xmm2, 0xFF
+        xmm4_ = _mm_slli_si128(xmm1_, 0x04);    // pslldq xmm4, 0x04
+        xmm1_ = _mm_xor_si128(xmm1_, xmm4_);    // pxor   xmm1, xmm4
+        xmm4_ = _mm_slli_si128(xmm4_, 0x04);    // pslldq xmm4, 0x04
+        xmm1_ = _mm_xor_si128(xmm1_, xmm4_);    // pxor   xmm1, xmm4
+        xmm4_ = _mm_slli_si128(xmm4_, 0x04);    // pslldq xmm4, 0x04
+        xmm1_ = _mm_xor_si128(xmm1_, xmm4_);    // pxor   xmm1, xmm4
+        xmm1_ = _mm_xor_si128(xmm1_, xmm2_);    // pxor   xmm1, xmm2
     }
 
     void expand_key(std::false_type)
     {
-        xmm2_.value() = // pshufd xmm2, xmm4, 0xAA
-            _mm_shuffle_epi32(xmm4_.value(), 0xAA);
-        xmm4_.value() = // pslldq xmm4, 0x04
-            _mm_slli_si128(xmm3_.value(), 0x04);
-        xmm3_ ^= xmm4_; // pxor   xmm3, xmm4
-        xmm4_.value() = // pslldq xmm4, 0x04
-            _mm_slli_si128(xmm4_.value(), 0x04);
-        xmm3_ ^= xmm4_; // pxor   xmm3, xmm4
-        xmm4_.value() = // pslldq xmm4, 0x04
-            _mm_slli_si128(xmm4_.value(), 0x04);
-        xmm3_ ^= xmm4_; // pxor   xmm3, xmm4
-        xmm3_ ^= xmm2_; // pxor   xmm1, xmm2
+        xmm2_ = _mm_shuffle_epi32(xmm4_, 0xAA); // pshufd xmm2, xmm4, 0xAA
+        xmm4_ = _mm_slli_si128(xmm3_, 0x04);    // pslldq xmm4, 0x04
+        xmm3_ = _mm_xor_si128(xmm3_, xmm4_);    // pxor   xmm3, xmm4
+        xmm4_ = _mm_slli_si128(xmm4_, 0x04);    // pslldq xmm4, 0x04
+        xmm3_ = _mm_xor_si128(xmm3_, xmm4_);    // pxor   xmm3, xmm4
+        xmm4_ = _mm_slli_si128(xmm4_, 0x04);    // pslldq xmm4, 0x04
+        xmm3_ = _mm_xor_si128(xmm3_, xmm4_);    // pxor   xmm3, xmm4
+        xmm3_ = _mm_xor_si128(xmm3_, xmm2_);    // pxor   xmm1, xmm2
     }
 }; // class AESKey256
 
