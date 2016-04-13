@@ -99,6 +99,8 @@ class ARSKeySeq
     public:
     using key_type = std::array<std::uint64_t, 2>;
 
+    ARSKeySeq() : key_(_mm_setzero_si128()) {}
+
     void reset(const key_type &key)
     {
         key_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
