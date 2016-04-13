@@ -35,12 +35,12 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/counter.hpp>
 
-#define VSMC_DEFINE_RNG_THREEFRY_KS_CONSTANT(W, val)                          \
+#define VSMC_DEFINE_RNG_THREEFRY_PARITY_CONSTANT(W, val)                      \
     template <typename T>                                                     \
-    class ThreefryKSConstant<T, W>                                            \
+    class ThreefryParityConstant<T, W>                                        \
         : public std::integral_constant<T, UINT##W##_C(val)>                  \
     {                                                                         \
-    }; // class ThreefryKSConstant
+    }; // class ThreefryParityConstant
 
 #define VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(W, K, N, I, val)             \
     template <typename T>                                                     \
@@ -75,10 +75,10 @@ namespace internal
 {
 
 template <typename T, int = std::numeric_limits<T>::digits>
-class ThreefryKSConstant;
+class ThreefryParityConstant;
 
-VSMC_DEFINE_RNG_THREEFRY_KS_CONSTANT(32, 0x1BD11BDA)
-VSMC_DEFINE_RNG_THREEFRY_KS_CONSTANT(64, 0x1BD11BDAA9FC1A22)
+VSMC_DEFINE_RNG_THREEFRY_PARITY_CONSTANT(32, 0x1BD11BDA)
+VSMC_DEFINE_RNG_THREEFRY_PARITY_CONSTANT(64, 0x1BD11BDAA9FC1A22)
 
 template <typename T, std::size_t, std::size_t, std::size_t,
     int = std::numeric_limits<T>::digits>
@@ -271,6 +271,29 @@ VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 13, 5)
 VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 14, 8)
 VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 15, 1)
 
+} // namespace internal
+
+/// \brief Default Threefry constants
+/// \ingroup Threefry
+template <typename T, std::size_t K>
+class ThreefryConstants
+{
+    public:
+    /// \brief Key parity
+    using parity = internal::ThreefryParityConstant<T>;
+
+    /// \brief Rotate constant of I-th S-box of round `(N - 1) % 8`
+    template <std::size_t N, std::size_t I>
+    using rotate = internal::ThreefryRotateConstant<T, K, N, I>;
+
+    /// \brief Permutate index of I-th element
+    template <std::size_t I>
+    using permutate = internal::ThreefryPermutateConstant<K, I>;
+}; // class ThreefryConstants
+
+namespace internal
+{
+
 template <typename T, std::size_t K, std::size_t N, bool = (N % 4 == 0)>
 class ThreefryInsertKey
 {
@@ -306,15 +329,15 @@ class ThreefryInsertKey<T, K, N, true>
     }
 }; // class ThreefryInsertKey
 
-template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
+template <typename T, std::size_t K, std::size_t N, typename, bool = (N > 0)>
 class ThreefrySBox
 {
     public:
     static void eval(std::array<T, K> &) {}
 }; // class ThreefrySBox
 
-template <typename T, std::size_t K, std::size_t N>
-class ThreefrySBox<T, K, N, true>
+template <typename T, std::size_t K, std::size_t N, typename Constants>
+class ThreefrySBox<T, K, N, Constants, true>
 {
     public:
     static void eval(std::array<T, K> &state)
@@ -325,6 +348,9 @@ class ThreefrySBox<T, K, N, true>
     }
 
     private:
+    template <std::size_t I>
+    using rotate = typename Constants::template rotate<(N - 1) % 8, I>;
+
     template <std::size_t>
     static void addi(std::array<T, K> &, std::false_type)
     {
@@ -345,8 +371,7 @@ class ThreefrySBox<T, K, N, true>
     template <std::size_t I>
     static void roti(std::array<T, K> &state, std::true_type)
     {
-        static constexpr int L =
-            ThreefryRotateConstant<T, K, (N - 1) % 8, I / 2>::value;
+        static constexpr int L = rotate<I / 2>::value;
         static constexpr int R = std::numeric_limits<T>::digits - L;
         T x = std::get<I + 1>(state);
         std::get<I + 1>(state) = (x << L) | (x >> R);
@@ -366,15 +391,15 @@ class ThreefrySBox<T, K, N, true>
     }
 }; // class ThreefrySBox
 
-template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
+template <typename T, std::size_t K, std::size_t N, typename, bool = (N > 0)>
 class ThreefryPBox
 {
     public:
     static void eval(std::array<T, K> &) {}
 }; // class ThreefryPBox
 
-template <typename T, std::size_t K, std::size_t N>
-class ThreefryPBox<T, K, N, true>
+template <typename T, std::size_t K, std::size_t N, typename Constants>
+class ThreefryPBox<T, K, N, Constants, true>
 {
     public:
     static void eval(std::array<T, K> &state)
@@ -385,6 +410,9 @@ class ThreefryPBox<T, K, N, true>
     }
 
     private:
+    template <std::size_t I>
+    using permutate = typename Constants::template permutate<I>;
+
     template <std::size_t>
     static void eval(
         const std::array<T, K> &, std::array<T, K> &, std::false_type)
@@ -395,23 +423,20 @@ class ThreefryPBox<T, K, N, true>
     static void eval(
         const std::array<T, K> &state, std::array<T, K> &tmp, std::true_type)
     {
-        static constexpr std::size_t J =
-            ThreefryPermutateConstant<K, I>::value;
-
-        std::get<I>(tmp) = std::get<J>(state);
+        std::get<I>(tmp) = std::get<permutate<I>::value>(state);
         eval<I + 1>(state, tmp, std::integral_constant<bool, I + 1 < K>());
     }
 }; // class ThreefryPBox
 
 template <typename T, std::size_t N>
-class ThreefryPBox<T, 2, N, true>
+class ThreefryPBox<T, 2, N, ThreefryConstants<T, 2>, true>
 {
     public:
     static void eval(std::array<T, 2> &) {}
 }; // class ThreefryPBox
 
 template <typename T, std::size_t N>
-class ThreefryPBox<T, 4, N, true>
+class ThreefryPBox<T, 4, N, ThreefryConstants<T, 4>, true>
 {
     public:
     static void eval(std::array<T, 4> &state)
@@ -421,7 +446,7 @@ class ThreefryPBox<T, 4, N, true>
 }; // class ThreefryPBox
 
 template <typename T, std::size_t N>
-class ThreefryPBox<T, 8, N, true>
+class ThreefryPBox<T, 8, N, ThreefryConstants<T, 8>, true>
 {
     public:
     static void eval(std::array<T, 8> &state)
@@ -440,11 +465,20 @@ class ThreefryPBox<T, 8, N, true>
 /// \brief Threefry RNG generator
 /// \ingroup Threefry
 ///
+/// \tparam T State type, must be 32- or 64-bit unsigned integers
+/// \tparam K State vector length, must be 2 or 4 (for 32- or 64-bit states) or
+/// 8 or 16 (64-bit state)
+/// \tparam Rounds Number of SP rounds
+/// \tparam Constants A trait class that defines algorithm constants, see
+/// ThreefryConstants
+///
 /// \details
 /// For 64-bits integer type T, and K = 4, 8, 16, Rounds = 72, 72, 80,
-/// respectively, this is identical to Threefish-256, -512, -1024.
+/// respectively, this is identical to Threefish-256, -512, -1024 with zero
+/// tweaks.
 template <typename T, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
-    std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
+    std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS,
+    typename Constants = ThreefryConstants<T, K>>
 class ThreefryGenerator
 {
     static_assert(std::is_unsigned<T>::value,
@@ -472,7 +506,7 @@ class ThreefryGenerator
     void reset(const key_type &key)
     {
         std::copy(key.begin(), key.end(), par_.begin());
-        par_.back() = internal::ThreefryKSConstant<T>::value;
+        par_.back() = Constants::parity::value;
         for (std::size_t i = 0; i != key.size(); ++i)
             par_.back() ^= par_[i];
     }
@@ -564,8 +598,8 @@ class ThreefryGenerator
     void generate(std::array<T, K> &state, const std::array<T, K + 1> &par,
         std::true_type) const
     {
-        internal::ThreefrySBox<T, K, N>::eval(state);
-        internal::ThreefryPBox<T, K, N>::eval(state);
+        internal::ThreefrySBox<T, K, N, Constants>::eval(state);
+        internal::ThreefryPBox<T, K, N, Constants>::eval(state);
         internal::ThreefryInsertKey<T, K, N>::eval(state, par);
         generate<N + 1>(
             state, par, std::integral_constant<bool, (N < Rounds)>());
@@ -579,9 +613,10 @@ class ThreefryGenerator
 /// \ingroup Threefry
 template <typename ResultType, typename T = ResultType,
     std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
-    std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
+    std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS,
+    typename Constants = ThreefryConstants<T, K>>
 using ThreefryEngine =
-    CounterEngine<ResultType, ThreefryGenerator<T, K, Rounds>>;
+    CounterEngine<ResultType, ThreefryGenerator<T, K, Rounds, Constants>>;
 
 /// \brief Threefry2x32 RNG engine
 /// \ingroup Threefry

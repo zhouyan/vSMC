@@ -57,25 +57,40 @@ template <std::size_t>
 class ARSWeylConstant;
 
 template <>
-class ARSWeylConstant<0>
-    : public std::integral_constant<VSMC_INT64,
-          static_cast<VSMC_INT64>(UINT64_C(0x9E3779B97F4A7C15))>
+class ARSWeylConstant<0> : public std::integral_constant<std::uint64_t,
+                               UINT64_C(0x9E3779B97F4A7C15)>
 {
 }; // class ARSWeylConstant
 
 template <>
-class ARSWeylConstant<1>
-    : public std::integral_constant<VSMC_INT64,
-          static_cast<VSMC_INT64>(UINT64_C(0xBB67AE8584CAA73B))>
+class ARSWeylConstant<1> : public std::integral_constant<std::uint64_t,
+                               UINT64_C(0xBB67AE8584CAA73B)>
 {
 }; // class ARSWeylConstant
 
 } // namespace vsmc::internal
 
+/// \brief Default ARS constants
+/// \ingroup AESNIRNG
+class ARSConstants
+{
+    public:
+    /// \brief Weyl constant of the I-th 64-bit element of the key
+    template <std::size_t I>
+    using weyl = internal::ARSWeylConstant<I>;
+}; // class ARSConstants
+
 /// \brief Default ARSEngine key sequence generator
 /// \ingroup AESNIRNG
+///
+/// \tparam Constants A trait class that defines algorithm constants, see
+/// ARSConstants
+template <typename Constants>
 class ARSKeySeq
 {
+    template <std::size_t I>
+    using weyl = typename Constants::template weyl<I>;
+
     public:
     using key_type = std::array<std::uint64_t, 2>;
 
@@ -88,10 +103,10 @@ class ARSKeySeq
     const std::array<__m128i, Rp1> &operator()(
         std::array<__m128i, Rp1> &rk) const
     {
-        __m128i weyl = _mm_set_epi64x(internal::ARSWeylConstant<1>::value,
-            internal::ARSWeylConstant<0>::value);
+        __m128i w = _mm_set_epi64x(static_cast<VSMC_INT64>(weyl<1>::value),
+            static_cast<VSMC_INT64>(weyl<0>::value));
         std::get<0>(rk) = key_;
-        generate<1>(rk, weyl, std::integral_constant<bool, 1 < Rp1>());
+        generate<1>(rk, w, std::integral_constant<bool, 1 < Rp1>());
 
         return rk;
     }
@@ -150,11 +165,11 @@ class ARSKeySeq
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate(std::array<__m128i, Rp1> &rk, const __m128i &weyl,
-        std::true_type) const
+    void generate(
+        std::array<__m128i, Rp1> &rk, const __m128i &w, std::true_type) const
     {
-        std::get<N>(rk) = _mm_add_epi64(std::get<N - 1>(rk), weyl);
-        generate<N + 1>(rk, weyl, std::integral_constant<bool, N + 1 < Rp1>());
+        std::get<N>(rk) = _mm_add_epi64(std::get<N - 1>(rk), w);
+        generate<N + 1>(rk, w, std::integral_constant<bool, N + 1 < Rp1>());
     }
 
     private:
@@ -164,8 +179,10 @@ class ARSKeySeq
 /// \brief ARS RNG engine
 /// \ingroup AESNIRNG
 template <typename ResultType, std::size_t Rounds = VSMC_RNG_ARS_ROUNDS,
-    std::size_t Blocks = VSMC_RNG_ARS_BLOCKS>
-using ARSEngine = AESNIEngine<ResultType, ARSKeySeq, Rounds, Blocks>;
+    std::size_t Blocks = VSMC_RNG_ARS_BLOCKS,
+    typename Constants = ARSConstants>
+using ARSEngine =
+    AESNIEngine<ResultType, ARSKeySeq<Constants>, Rounds, Blocks>;
 
 /// \brief ARS RNG engine with 32-bit integers output, 1 block and default
 /// rounds
