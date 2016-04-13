@@ -171,16 +171,10 @@ void vsmc_rng_assign(vsmc_rng rng, vsmc_rng other);
 void vsmc_rng_seed(vsmc_rng rng, int seed);
 
 /** \brief `vsmc::RNG::key` */
-void vsmc_rng_get_key(vsmc_rng rng, int n, int *key);
-
-/** \brief `vsmc::RNG::key` */
-void vsmc_rng_set_key(vsmc_rng rng, int n, const int *key);
+void vsmc_rng_key(vsmc_rng rng, int n, const int *key);
 
 /** \brief `vsmc::RNG::ctr` */
-void vsmc_rng_get_ctr(vsmc_rng rng, int n, int *ctr);
-
-/** \brief `vsmc::RNG::ctr` */
-void vsmc_rng_set_ctr(vsmc_rng rng, int n, const int *ctr);
+void vsmc_rng_ctr(vsmc_rng rng, int n, const int *ctr);
 
 /** \brief `vsmc::RNG::operator()` */
 int vsmc_rng_rand1(vsmc_rng rng);
