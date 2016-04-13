@@ -322,7 +322,7 @@ class ThreefryPermutate<T, K, N, true>
     {
         std::array<T, K> tmp;
         eval<0>(state, tmp, std::integral_constant<bool, 0 < K>());
-        state = tmp;
+        std::memcpy(state.data(), tmp.data(), sizeof(T) * K);
     }
 
     private:
@@ -356,6 +356,21 @@ class ThreefryPermutate<T, 4, N, true>
     static void eval(std::array<T, 4> &state)
     {
         std::swap(std::get<1>(state), std::get<3>(state));
+    }
+}; // class ThreefryPermutate
+
+template <typename T, std::size_t N>
+class ThreefryPermutate<T, 8, N, true>
+{
+    public:
+    static void eval(std::array<T, 8> &state)
+    {
+        std::swap(std::get<3>(state), std::get<7>(state));
+        T x = std::get<0>(state);
+        std::get<0>(state) = std::get<2>(state);
+        std::get<2>(state) = std::get<4>(state);
+        std::get<4>(state) = std::get<6>(state);
+        std::get<6>(state) = x;
     }
 }; // class ThreefryPermutate
 
