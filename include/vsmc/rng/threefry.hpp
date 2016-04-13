@@ -437,6 +437,10 @@ class ThreefryInsertKey<T, K, N, true>
 
 /// \brief Threefry RNG generator
 /// \ingroup Threefry
+///
+/// \details
+/// For 64-bits integer type T, and K = 4, 8, 16, Rounds = 72, 72, 80,
+/// respectively, this is identical to Threefish-256, -512, -1024.
 template <typename ResultType, typename T = ResultType,
     std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
     std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS>
