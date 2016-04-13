@@ -271,15 +271,50 @@ VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 13, 5)
 VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 14, 8)
 VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 15, 1)
 
+template <typename T, std::size_t K, std::size_t N, bool = (N % 4 == 0)>
+class ThreefryInsertKey
+{
+    public:
+    static void eval(std::array<T, K> &, const std::array<T, K + 1> &) {}
+}; // class ThreefryInsertKey
+
+template <typename T, std::size_t K, std::size_t N>
+class ThreefryInsertKey<T, K, N, true>
+{
+    public:
+    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
+    {
+        eval<0>(state, par, std::integral_constant<bool, 0 < K>());
+        state.back() += static_cast<T>(s_);
+    }
+
+    private:
+    static constexpr std::size_t s_ = N / 4;
+
+    template <std::size_t>
+    static void eval(
+        std::array<T, K> &, const std::array<T, K + 1> &, std::false_type)
+    {
+    }
+
+    template <std::size_t I>
+    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par,
+        std::true_type)
+    {
+        std::get<I>(state) += std::get<(s_ + I) % (K + 1)>(par);
+        eval<I + 1>(state, par, std::integral_constant<bool, I + 1 < K>());
+    }
+}; // class ThreefryInsertKey
+
 template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
-class ThreefryMix
+class ThreefrySBox
 {
     public:
     static void eval(std::array<T, K> &) {}
-}; // class ThreefryMix
+}; // class ThreefrySBox
 
 template <typename T, std::size_t K, std::size_t N>
-class ThreefryMix<T, K, N, true>
+class ThreefrySBox<T, K, N, true>
 {
     public:
     static void eval(std::array<T, K> &state)
@@ -329,17 +364,17 @@ class ThreefryMix<T, K, N, true>
         std::get<I + 1>(state) ^= std::get<I>(state);
         xori<I + 2>(state, std::integral_constant<bool, I + 3 < K>());
     }
-}; // class ThreefryMix
+}; // class ThreefrySBox
 
 template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
-class ThreefryPermutate
+class ThreefryPBox
 {
     public:
     static void eval(std::array<T, K> &) {}
-}; // class ThreefryPermutate
+}; // class ThreefryPBox
 
 template <typename T, std::size_t K, std::size_t N>
-class ThreefryPermutate<T, K, N, true>
+class ThreefryPBox<T, K, N, true>
 {
     public:
     static void eval(std::array<T, K> &state)
@@ -360,31 +395,33 @@ class ThreefryPermutate<T, K, N, true>
     static void eval(
         const std::array<T, K> &state, std::array<T, K> &tmp, std::true_type)
     {
-        std::get<I>(tmp) =
-            std::get<ThreefryPermutateConstant<K, I>::value>(state);
+        static constexpr std::size_t J =
+            ThreefryPermutateConstant<K, I>::value;
+
+        std::get<I>(tmp) = std::get<J>(state);
         eval<I + 1>(state, tmp, std::integral_constant<bool, I + 1 < K>());
     }
-}; // class ThreefryPermutate
+}; // class ThreefryPBox
 
 template <typename T, std::size_t N>
-class ThreefryPermutate<T, 2, N, true>
+class ThreefryPBox<T, 2, N, true>
 {
     public:
     static void eval(std::array<T, 2> &) {}
-}; // class ThreefryPermutate
+}; // class ThreefryPBox
 
 template <typename T, std::size_t N>
-class ThreefryPermutate<T, 4, N, true>
+class ThreefryPBox<T, 4, N, true>
 {
     public:
     static void eval(std::array<T, 4> &state)
     {
         std::swap(std::get<1>(state), std::get<3>(state));
     }
-}; // class ThreefryPermutate
+}; // class ThreefryPBox
 
 template <typename T, std::size_t N>
-class ThreefryPermutate<T, 8, N, true>
+class ThreefryPBox<T, 8, N, true>
 {
     public:
     static void eval(std::array<T, 8> &state)
@@ -396,42 +433,7 @@ class ThreefryPermutate<T, 8, N, true>
         std::get<4>(state) = std::get<6>(state);
         std::get<6>(state) = x;
     }
-}; // class ThreefryPermutate
-
-template <typename T, std::size_t K, std::size_t N, bool = (N % 4 == 0)>
-class ThreefryInsertKey
-{
-    public:
-    static void eval(std::array<T, K> &, const std::array<T, K + 1> &) {}
-}; // class ThreefryInsertKey
-
-template <typename T, std::size_t K, std::size_t N>
-class ThreefryInsertKey<T, K, N, true>
-{
-    public:
-    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
-    {
-        eval<0>(state, par, std::integral_constant<bool, 0 < K>());
-        state.back() += static_cast<T>(s_);
-    }
-
-    private:
-    static constexpr std::size_t s_ = N / 4;
-
-    template <std::size_t>
-    static void eval(
-        std::array<T, K> &, const std::array<T, K + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t I>
-    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par,
-        std::true_type)
-    {
-        std::get<I>(state) += std::get<(s_ + I) % (K + 1)>(par);
-        eval<I + 1>(state, par, std::integral_constant<bool, I + 1 < K>());
-    }
-}; // class ThreefryInsertKey
+}; // class ThreefryPBox
 
 } // namespace vsmc::internal
 
@@ -562,8 +564,8 @@ class ThreefryGenerator
     void generate(std::array<T, K> &state, const std::array<T, K + 1> &par,
         std::true_type) const
     {
-        internal::ThreefryMix<T, K, N>::eval(state);
-        internal::ThreefryPermutate<T, K, N>::eval(state);
+        internal::ThreefrySBox<T, K, N>::eval(state);
+        internal::ThreefryPBox<T, K, N>::eval(state);
         internal::ThreefryInsertKey<T, K, N>::eval(state, par);
         generate<N + 1>(
             state, par, std::integral_constant<bool, (N < Rounds)>());

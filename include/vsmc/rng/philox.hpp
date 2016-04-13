@@ -34,7 +34,7 @@
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/counter.hpp>
-#include <vsmc/rngc/philox.h>
+#include <vsmc/rng/threefry.hpp>
 
 #ifdef VSMC_MSVC
 #include <intrin.h>
@@ -45,14 +45,14 @@
     class PhiloxWeylConstant<T, K, W>                                         \
         : public std::integral_constant<T, UINT##W##_C(val)>                  \
     {                                                                         \
-    }; // PhiloxRoundConstant
+    }; // PhiloxMulConstant
 
-#define VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(W, K, I, val)                   \
+#define VSMC_DEFINE_RNG_PHILOX_MUL_CONSTANT(W, K, I, val)                     \
     template <typename T>                                                     \
-    class PhiloxRoundConstant<T, K, I, W>                                     \
+    class PhiloxMulConstant<T, K, I, W>                                       \
         : public std::integral_constant<T, UINT##W##_C(val)>                  \
     {                                                                         \
-    }; // PhiloxRoundConstant
+    }; // PhiloxMulConstant
 
 /// \brief PhiloxGenerator default rounds
 /// \ingroup Config
@@ -83,17 +83,17 @@ VSMC_DEFINE_RNG_PHILOX_WEYL_CONSTANT(64, 1, 0xBB67AE8584CAA73B)
 
 template <typename T, std::size_t, std::size_t,
     int = std::numeric_limits<T>::digits>
-class PhiloxRoundConstant;
+class PhiloxMulConstant;
 
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(32, 2, 0, 0xD256D193)
+VSMC_DEFINE_RNG_PHILOX_MUL_CONSTANT(32, 2, 0, 0xD256D193)
 
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(32, 4, 0, 0xD2511F53)
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(32, 4, 1, 0xCD9E8D57)
+VSMC_DEFINE_RNG_PHILOX_MUL_CONSTANT(32, 4, 0, 0xCD9E8D57)
+VSMC_DEFINE_RNG_PHILOX_MUL_CONSTANT(32, 4, 1, 0xD2511F53)
 
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(64, 2, 0, 0xD2B74407B1CE6E93)
+VSMC_DEFINE_RNG_PHILOX_MUL_CONSTANT(64, 2, 0, 0xD2B74407B1CE6E93)
 
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(64, 4, 0, 0xD2E7470EE14C6C93)
-VSMC_DEFINE_RNG_PHILOX_ROUND_CONSTANT(64, 4, 1, 0xCA5A826395121157)
+VSMC_DEFINE_RNG_PHILOX_MUL_CONSTANT(64, 4, 0, 0xCA5A826395121157)
+VSMC_DEFINE_RNG_PHILOX_MUL_CONSTANT(64, 4, 1, 0xD2E7470EE14C6C93)
 
 template <typename T, std::size_t, std::size_t,
     int = std::numeric_limits<T>::digits>
@@ -111,7 +111,7 @@ class PhiloxHiLo<T, K, I, 32>
         } buf;
 
         buf.prod = static_cast<std::uint64_t>(b) *
-            static_cast<std::uint64_t>(PhiloxRoundConstant<T, K, I>::value);
+            static_cast<std::uint64_t>(PhiloxMulConstant<T, K, I>::value);
 
         return buf.hilo;
     }
@@ -131,12 +131,12 @@ class PhiloxHiLo<T, K, I, 64>
 
         buf.prod = static_cast<unsigned VSMC_INT128>(b) *
             static_cast<unsigned VSMC_INT128>(
-                       PhiloxRoundConstant<T, K, I>::value);
+                       PhiloxMulConstant<T, K, I>::value);
 
         return buf.hilo;
 #elif defined(VSMC_MSVC)
         unsigned __int64 Multiplier =
-            static_cast<unsigned __int64>(PhiloxRoundConstant<T, K, I>::value);
+            static_cast<unsigned __int64>(PhiloxMulConstant<T, K, I>::value);
         unsigned __int64 Multiplicand = static_cast<unsigned __int64>(b);
         unsigned __int64 hi = 0;
         unsigned __int64 lo = 0;
@@ -145,7 +145,7 @@ class PhiloxHiLo<T, K, I, 64>
 
         return hilo;
 #else  // VSMC_HAS_INT128
-        const T a = PhiloxRoundConstant<T, K, I>::value;
+        const T a = PhiloxMulConstant<T, K, I>::value;
         const T lomask = (static_cast<T>(1) << 32) - 1;
         const T ahi = a >> 32;
         const T alo = a & lomask;
@@ -223,49 +223,115 @@ class PhiloxInitPar
 }; // class PhiloxInitPar
 
 template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
-class PhiloxRound
+class PhiloxSBox
 {
     public:
-    template <std::size_t R>
+    template <std::size_t Rp1>
     static void eval(
-        std::array<T, K> &, const std::array<std::array<T, K / 2>, R> &)
+        std::array<T, K> &, const std::array<std::array<T, K / 2>, Rp1> &)
     {
     }
-}; // class PhiloxRound
+}; // class PhiloxSBox
+
+template <typename T, std::size_t K, std::size_t N>
+class PhiloxSBox<T, K, N, true>
+{
+    public:
+    template <std::size_t Rp1>
+    static void eval(std::array<T, K> &state,
+        const std::array<std::array<T, K / 2>, Rp1> &par)
+    {
+        eval<0>(state, par, std::integral_constant<bool, 1 < K>());
+    }
+
+    private:
+    template <std::size_t, std::size_t Rp1>
+    static void eval(std::array<T, K> &,
+        const std::array<std::array<T, K / 2>, Rp1> &, std::false_type)
+    {
+    }
+
+    template <std::size_t I, std::size_t Rp1>
+    static void eval(std::array<T, K> &state,
+        const std::array<std::array<T, K / 2>, Rp1> &par, std::true_type)
+    {
+        std::array<T, 2> hilo =
+            PhiloxHiLo<T, K, I / 2>::eval(std::get<I>(state));
+        std::get<1>(hilo) ^= std::get<I / 2>(std::get<N>(par));
+        std::get<I>(state) = std::get<1>(hilo) ^ std::get<I + 1>(state);
+        std::get<I + 1>(state) = std::get<0>(hilo);
+        eval<I + 2>(state, par, std::integral_constant<bool, I + 3 < K>());
+    }
+}; // class PhiloxSBox
+
+template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
+class PhiloxPBox
+{
+    public:
+    static void eval(std::array<T, K> &) {}
+}; // class PhiloxPBox
+
+template <typename T, std::size_t K, std::size_t N>
+class PhiloxPBox<T, K, N, true>
+{
+    public:
+    static void eval(std::array<T, K> &state)
+    {
+        std::array<T, K> tmp;
+        eval<0>(state, tmp, std::integral_constant<bool, 0 < K>());
+        std::memcpy(state.data(), tmp.data(), sizeof(T) * K);
+    }
+
+    private:
+    template <std::size_t>
+    static void eval(
+        const std::array<T, K> &, std::array<T, K> &, std::false_type)
+    {
+    }
+
+    template <std::size_t I>
+    static void eval(
+        const std::array<T, K> &state, std::array<T, K> &tmp, std::true_type)
+    {
+        static constexpr std::size_t J =
+            K - ThreefryPermutateConstant<K, K - I - 1>::value - 1;
+
+        std::get<I>(tmp) = std::get<J>(state);
+        eval<I + 1>(state, tmp, std::integral_constant<bool, I + 1 < K>());
+    }
+}; // class PhiloxPBox
 
 template <typename T, std::size_t N>
-class PhiloxRound<T, 2, N, true>
+class PhiloxPBox<T, 2, N, true>
 {
     public:
-    template <std::size_t R>
-    static void eval(
-        std::array<T, 2> &state, const std::array<std::array<T, 1>, R> &par)
-    {
-        std::array<T, 2> hilo = PhiloxHiLo<T, 2, 0>::eval(std::get<0>(state));
-        std::get<1>(hilo) ^= std::get<0>(std::get<N>(par));
-        std::get<0>(state) = std::get<1>(hilo) ^ std::get<1>(state);
-        std::get<1>(state) = std::get<0>(hilo);
-    }
-}; // class PhiloxRound
+    static void eval(std::array<T, 2> &) {}
+}; // class PhiloxPBox
 
 template <typename T, std::size_t N>
-class PhiloxRound<T, 4, N, true>
+class PhiloxPBox<T, 4, N, true>
 {
     public:
-    template <std::size_t R>
-    static void eval(
-        std::array<T, 4> &state, const std::array<std::array<T, 2>, R> &par)
+    static void eval(std::array<T, 4> &state)
     {
-        std::array<T, 2> hilo0 = PhiloxHiLo<T, 4, 1>::eval(std::get<2>(state));
-        std::array<T, 2> hilo2 = PhiloxHiLo<T, 4, 0>::eval(std::get<0>(state));
-        std::get<1>(hilo0) ^= std::get<0>(std::get<N>(par));
-        std::get<1>(hilo2) ^= std::get<1>(std::get<N>(par));
-        std::get<0>(state) = std::get<1>(hilo0) ^ std::get<1>(state);
-        std::get<1>(state) = std::get<0>(hilo0);
-        std::get<2>(state) = std::get<1>(hilo2) ^ std::get<3>(state);
-        std::get<3>(state) = std::get<0>(hilo2);
+        std::swap(std::get<0>(state), std::get<2>(state));
     }
-}; // class PhiloxRound
+}; // class PhiloxPBox
+
+template <typename T, std::size_t N>
+class PhiloxPBox<T, 8, N, true>
+{
+    public:
+    static void eval(std::array<T, 8> &state)
+    {
+        std::swap(std::get<0>(state), std::get<4>(state));
+        T x = std::get<7>(state);
+        std::get<7>(state) = std::get<5>(state);
+        std::get<5>(state) = std::get<3>(state);
+        std::get<3>(state) = std::get<1>(state);
+        std::get<1>(state) = x;
+    }
+}; // class PhiloxPBox
 
 } // namespace vsmc::internal
 
@@ -392,7 +458,8 @@ class PhiloxGenerator
     void generate(std::array<T, K> &state,
         std::array<key_type, Rounds + 1> &par, std::true_type) const
     {
-        internal::PhiloxRound<T, K, N>::eval(state, par);
+        internal::PhiloxPBox<T, K, N>::eval(state);
+        internal::PhiloxSBox<T, K, N>::eval(state, par);
         generate<N + 1>(
             state, par, std::integral_constant<bool, (N < Rounds)>());
     }
