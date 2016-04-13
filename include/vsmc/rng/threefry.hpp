@@ -284,26 +284,50 @@ class ThreefryMix<T, K, N, true>
     public:
     static void eval(std::array<T, K> &state)
     {
-        eval<0>(state, std::integral_constant<bool, 1 < K>());
+        addi<0>(state, std::integral_constant<bool, 1 < K>());
+        roti<0>(state, std::integral_constant<bool, 1 < K>());
+        xori<0>(state, std::integral_constant<bool, 1 < K>());
     }
 
     private:
     template <std::size_t>
-    static void eval(std::array<T, K> &, std::false_type)
+    static void addi(std::array<T, K> &, std::false_type)
     {
     }
 
     template <std::size_t I>
-    static void eval(std::array<T, K> &state, std::true_type)
+    static void addi(std::array<T, K> &state, std::true_type)
+    {
+        std::get<I>(state) += std::get<I + 1>(state);
+        addi<I + 2>(state, std::integral_constant<bool, I + 3 < K>());
+    }
+
+    template <std::size_t>
+    static void roti(std::array<T, K> &, std::false_type)
+    {
+    }
+
+    template <std::size_t I>
+    static void roti(std::array<T, K> &state, std::true_type)
     {
         static constexpr int L =
             ThreefryRotateConstant<T, K, (N - 1) % 8, I / 2>::value;
         static constexpr int R = std::numeric_limits<T>::digits - L;
-
         T x = std::get<I + 1>(state);
-        std::get<I>(state) += x;
-        std::get<I + 1>(state) = std::get<I>(state) ^ ((x << L) | (x >> R));
-        eval<I + 2>(state, std::integral_constant<bool, I + 3 < K>());
+        std::get<I + 1>(state) = (x << L) | (x >> R);
+        roti<I + 2>(state, std::integral_constant<bool, I + 3 < K>());
+    }
+
+    template <std::size_t>
+    static void xori(std::array<T, K> &, std::false_type)
+    {
+    }
+
+    template <std::size_t I>
+    static void xori(std::array<T, K> &state, std::true_type)
+    {
+        std::get<I + 1>(state) ^= std::get<I>(state);
+        xori<I + 2>(state, std::integral_constant<bool, I + 3 < K>());
     }
 }; // class ThreefryMix
 
