@@ -439,9 +439,9 @@ class ProgramOptionMap
         std::size_t len[2] = {0, 0};
         Vector<std::string> str[3];
         for (const auto &option : option_vec_) {
-            str[0].push_back("--" + std::get<0>(option));
-            str[1].push_back(std::get<1>(option)->description());
-            str[2].push_back(std::get<1>(option)->default_str());
+            str[0].push_back("--" + option.name);
+            str[1].push_back(option.ptr->description());
+            str[2].push_back(option.ptr->default_str());
             len[0] = std::max(len[0], str[0].back().size());
             len[1] = std::max(len[1], str[1].back().size());
         }
@@ -459,7 +459,7 @@ class ProgramOptionMap
     {
         auto iter = option_find(name);
         if (iter != option_vec_.end())
-            return std::get<2>(*iter);
+            return iter->count;
         return 0;
     }
 
@@ -471,7 +471,7 @@ class ProgramOptionMap
     {
         auto iter = option_find(name);
         if (iter != option_vec_.end())
-            return std::get<1>(*iter);
+            return iter->ptr;
         return std::shared_ptr<ProgramOption>(
             static_cast<ProgramOption *>(nullptr));
     }
@@ -481,7 +481,7 @@ class ProgramOptionMap
     {
         auto iter = option_find(name);
         if (iter != option_vec_.end())
-            return std::get<1>(*iter);
+            return iter->ptr;
         return std::shared_ptr<const ProgramOption>(
             static_cast<const ProgramOption *>(nullptr));
     }
@@ -491,8 +491,13 @@ class ProgramOptionMap
     void silent(bool flag) { silent_ = flag; }
 
     private:
-    using option_vec_type = Vector<
-        std::tuple<std::string, std::shared_ptr<ProgramOption>, std::size_t>>;
+    struct option_type {
+        std::string name;
+        std::shared_ptr<ProgramOption> ptr;
+        std::size_t count;
+    };
+
+    using option_vec_type = Vector<option_type>;
 
     bool silent_;
     std::shared_ptr<ProgramOptionHelp> help_ptr_;
@@ -502,7 +507,7 @@ class ProgramOptionMap
     {
         auto iter = option_vec_.begin();
         for (; iter != option_vec_.end(); ++iter)
-            if (std::get<0>(*iter) == name)
+            if (iter->name == name)
                 break;
 
         return iter;
@@ -512,7 +517,7 @@ class ProgramOptionMap
     {
         auto iter = option_vec_.begin();
         for (; iter != option_vec_.end(); ++iter)
-            if (std::get<0>(*iter) == name)
+            if (iter->name == name)
                 break;
 
         return iter;
@@ -521,7 +526,7 @@ class ProgramOptionMap
     ProgramOptionMap &add_option(
         const std::string &name, std::shared_ptr<ProgramOption> optr)
     {
-        auto option = std::make_tuple(name, optr, 0);
+        option_type option = {name, optr, 0};
         auto iter = option_find(name);
         if (iter != option_vec_.end())
             *iter = option;
@@ -559,25 +564,25 @@ class ProgramOptionMap
             }
 
             bool proc = false;
-            if (nsv.second.size() == 0 && std::get<1>(*iter)->is_bool()) {
+            if (nsv.second.size() == 0 && iter->ptr->is_bool()) {
                 proc = process_option(iter, sval_true, os);
             } else if (nsv.second.size() == 0) {
                 internal::program_option_warning(
                     nsv.first, "No value found", silent_, os);
-            } else if (std::get<1>(*iter)->is_vector()) {
+            } else if (iter->ptr->is_vector()) {
                 for (const auto &sval : nsv.second)
                     proc = process_option(iter, sval, os);
             } else {
                 proc = process_option(iter, nsv.second.back(), os) || proc;
             }
             if (proc)
-                ++std::get<2>(*iter);
+                ++iter->count;
         }
 
         for (auto &option : option_vec_)
-            if (std::get<2>(option) == 0)
-                if (std::get<1>(option)->set_default())
-                    std::get<2>(option) = 1;
+            if (option.count == 0)
+                if (option.ptr->set_default())
+                    option.count = 1;
 
         if (help())
             print_help(os);
@@ -598,10 +603,10 @@ class ProgramOptionMap
     {
         if (sval.empty()) {
             internal::program_option_warning(
-                std::get<0>(*iter), "No value found", silent_, os);
+                iter->name, "No value found", silent_, os);
             return false;
         }
-        return std::get<1>(*iter)->set(std::get<0>(*iter), sval, silent_, os);
+        return iter->ptr->set(iter->name, sval, silent_, os);
     }
 
     bool is_option(const std::string &str) const
