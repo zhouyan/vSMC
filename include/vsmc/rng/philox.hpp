@@ -110,11 +110,6 @@ class PhiloxConstants
     /// \brief Multiplier of I-th S-box
     template <std::size_t I>
     using multiplier = internal::PhiloxMulConstant<T, K, I>;
-
-    /// \brief Permutate index of I-th element
-    template <std::size_t I>
-    using permutate = std::integral_constant<std::size_t,
-        K - internal::ThreefryPermutateConstant<K, K - I - 1>::value - 1>;
 }; // class PhiloxConstants
 
 namespace internal
@@ -303,15 +298,15 @@ class PhiloxSBox<T, K, N, Constants, true>
     }
 }; // class PhiloxSBox
 
-template <typename T, std::size_t K, std::size_t N, typename, bool = (N > 0)>
+template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
 class PhiloxPBox
 {
     public:
     static void eval(std::array<T, K> &) {}
 }; // class PhiloxPBox
 
-template <typename T, std::size_t K, std::size_t N, typename Constants>
-class PhiloxPBox<T, K, N, Constants, true>
+template <typename T, std::size_t K, std::size_t N>
+class PhiloxPBox<T, K, N, true>
 {
     public:
     static void eval(std::array<T, K> &state)
@@ -322,9 +317,6 @@ class PhiloxPBox<T, K, N, Constants, true>
     }
 
     private:
-    template <std::size_t I>
-    using permutate = typename Constants::template permutate<I>;
-
     template <std::size_t>
     static void eval(
         const std::array<T, K> &, std::array<T, K> &, std::false_type)
@@ -335,20 +327,23 @@ class PhiloxPBox<T, K, N, Constants, true>
     static void eval(
         const std::array<T, K> &state, std::array<T, K> &tmp, std::true_type)
     {
-        std::get<I>(tmp) = std::get<permutate<I>::value>(state);
+        static constexpr std::size_t J =
+            K - ThreefryPermuteConstant<K, K - I - 1>::value - 1;
+
+        std::get<I>(tmp) = std::get<J>(state);
         eval<I + 1>(state, tmp, std::integral_constant<bool, I + 1 < K>());
     }
 }; // class PhiloxPBox
 
 template <typename T, std::size_t N>
-class PhiloxPBox<T, 2, N, PhiloxConstants<T, 2>, true>
+class PhiloxPBox<T, 2, N, true>
 {
     public:
     static void eval(std::array<T, 2> &) {}
 }; // class PhiloxPBox
 
 template <typename T, std::size_t N>
-class PhiloxPBox<T, 4, N, PhiloxConstants<T, 4>, true>
+class PhiloxPBox<T, 4, N, true>
 {
     public:
     static void eval(std::array<T, 4> &state)
@@ -358,7 +353,7 @@ class PhiloxPBox<T, 4, N, PhiloxConstants<T, 4>, true>
 }; // class PhiloxPBox
 
 template <typename T, std::size_t N>
-class PhiloxPBox<T, 8, N, PhiloxConstants<T, 8>, true>
+class PhiloxPBox<T, 8, N, true>
 {
     public:
     static void eval(std::array<T, 8> &state)
@@ -509,7 +504,7 @@ class PhiloxGenerator
     void generate(std::array<T, K> &state,
         std::array<key_type, Rounds + 1> &par, std::true_type) const
     {
-        internal::PhiloxPBox<T, K, N, Constants>::eval(state);
+        internal::PhiloxPBox<T, K, N>::eval(state);
         internal::PhiloxSBox<T, K, N, Constants>::eval(state, par);
         generate<N + 1>(
             state, par, std::integral_constant<bool, (N < Rounds)>());

@@ -49,12 +49,12 @@
     {                                                                         \
     }; // class ThreefryRotateConstant
 
-#define VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(K, I, val)                \
+#define VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(K, I, val)                  \
     template <>                                                               \
-    class ThreefryPermutateConstant<K, I>                                     \
+    class ThreefryPermuteConstant<K, I>                                       \
         : public std::integral_constant<std::size_t, val>                     \
     {                                                                         \
-    }; // class ThreefryPermutateConstant
+    }; // class ThreefryPermuteConstant
 
 /// \brief ThreefryGenerator default rounds
 /// \ingroup Config
@@ -235,41 +235,41 @@ VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 16, 6, 7, 25)
 VSMC_DEFINE_RNG_THREEFRY_ROTATE_CONSTANT(64, 16, 7, 7, 20)
 
 template <std::size_t, std::size_t>
-class ThreefryPermutateConstant;
+class ThreefryPermuteConstant;
 
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(2, 0, 0)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(2, 1, 1)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(2, 0, 0)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(2, 1, 1)
 
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(4, 0, 0)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(4, 1, 3)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(4, 2, 2)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(4, 3, 1)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(4, 0, 0)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(4, 1, 3)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(4, 2, 2)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(4, 3, 1)
 
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(8, 0, 2)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(8, 1, 1)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(8, 2, 4)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(8, 3, 7)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(8, 4, 6)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(8, 5, 5)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(8, 6, 0)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(8, 7, 3)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(8, 0, 2)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(8, 1, 1)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(8, 2, 4)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(8, 3, 7)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(8, 4, 6)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(8, 5, 5)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(8, 6, 0)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(8, 7, 3)
 
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 0, 0)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 1, 9)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 2, 2)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 3, 13)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 4, 6)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 5, 11)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 6, 4)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 7, 15)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 8, 10)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 9, 7)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 10, 12)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 11, 3)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 12, 14)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 13, 5)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 14, 8)
-VSMC_DEFINE_RNG_THREEFRY_PERMUTATE_CONSTANT(16, 15, 1)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 0, 0)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 1, 9)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 2, 2)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 3, 13)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 4, 6)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 5, 11)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 6, 4)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 7, 15)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 8, 10)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 9, 7)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 10, 12)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 11, 3)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 12, 14)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 13, 5)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 14, 8)
+VSMC_DEFINE_RNG_THREEFRY_PERMUTE_CONSTANT(16, 15, 1)
 
 } // namespace internal
 
@@ -285,10 +285,6 @@ class ThreefryConstants
     /// \brief Rotate constant of I-th S-box of round `(N - 1) % 8`
     template <std::size_t N, std::size_t I>
     using rotate = internal::ThreefryRotateConstant<T, K, N, I>;
-
-    /// \brief Permutate index of I-th element
-    template <std::size_t I>
-    using permutate = internal::ThreefryPermutateConstant<K, I>;
 }; // class ThreefryConstants
 
 namespace internal
@@ -368,15 +364,15 @@ class ThreefrySBox<T, K, N, Constants, true>
     }
 }; // class ThreefrySBox
 
-template <typename T, std::size_t K, std::size_t N, typename, bool = (N > 0)>
+template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
 class ThreefryPBox
 {
     public:
     static void eval(std::array<T, K> &) {}
 }; // class ThreefryPBox
 
-template <typename T, std::size_t K, std::size_t N, typename Constants>
-class ThreefryPBox<T, K, N, Constants, true>
+template <typename T, std::size_t K, std::size_t N>
+class ThreefryPBox<T, K, N, true>
 {
     public:
     static void eval(std::array<T, K> &state)
@@ -387,9 +383,6 @@ class ThreefryPBox<T, K, N, Constants, true>
     }
 
     private:
-    template <std::size_t I>
-    using permutate = typename Constants::template permutate<I>;
-
     template <std::size_t>
     static void eval(
         const std::array<T, K> &, std::array<T, K> &, std::false_type)
@@ -400,20 +393,22 @@ class ThreefryPBox<T, K, N, Constants, true>
     static void eval(
         const std::array<T, K> &state, std::array<T, K> &tmp, std::true_type)
     {
-        std::get<I>(tmp) = std::get<permutate<I>::value>(state);
+        static constexpr std::size_t J = ThreefryPermuteConstant<K, I>::value;
+
+        std::get<I>(tmp) = std::get<J>(state);
         eval<I + 1>(state, tmp, std::integral_constant<bool, I + 1 < K>());
     }
 }; // class ThreefryPBox
 
 template <typename T, std::size_t N>
-class ThreefryPBox<T, 2, N, ThreefryConstants<T, 2>, true>
+class ThreefryPBox<T, 2, N, true>
 {
     public:
     static void eval(std::array<T, 2> &) {}
 }; // class ThreefryPBox
 
 template <typename T, std::size_t N>
-class ThreefryPBox<T, 4, N, ThreefryConstants<T, 4>, true>
+class ThreefryPBox<T, 4, N, true>
 {
     public:
     static void eval(std::array<T, 4> &state)
@@ -423,7 +418,7 @@ class ThreefryPBox<T, 4, N, ThreefryConstants<T, 4>, true>
 }; // class ThreefryPBox
 
 template <typename T, std::size_t N>
-class ThreefryPBox<T, 8, N, ThreefryConstants<T, 8>, true>
+class ThreefryPBox<T, 8, N, true>
 {
     public:
     static void eval(std::array<T, 8> &state)
@@ -576,7 +571,7 @@ class ThreefryGenerator
         std::true_type) const
     {
         internal::ThreefrySBox<T, K, N, Constants>::eval(state);
-        internal::ThreefryPBox<T, K, N, Constants>::eval(state);
+        internal::ThreefryPBox<T, K, N>::eval(state);
         internal::ThreefryInsertKey<T, K, N>::eval(state, par);
         generate<N + 1>(
             state, par, std::integral_constant<bool, (N < Rounds)>());
