@@ -43,11 +43,13 @@ ADD_DEPENDENCIES(example example-files)
 SET(EXAMPLES ${EXAMPLES} "vsmc")
 ADD_SUBDIRECTORY(vsmc)
 
-SET(EXAMPLES ${EXAMPLES} "gmm")
-ADD_SUBDIRECTORY(gmm)
+IF (VSMC_GOOD_COMPILER)
+    SET(EXAMPLES ${EXAMPLES} "gmm")
+    ADD_SUBDIRECTORY(gmm)
 
-SET(EXAMPLES ${EXAMPLES} "pf")
-ADD_SUBDIRECTORY(pf)
+    SET(EXAMPLES ${EXAMPLES} "pf")
+    ADD_SUBDIRECTORY(pf)
+ENDIF (VSMC_GOOD_COMPILER)
 
 SET(EXAMPLES ${EXAMPLES} "resample")
 ADD_SUBDIRECTORY(resample)
@@ -66,5 +68,3 @@ MESSAGE(STATUS "=================== Enable examples ===================")
 FOREACH(example ${EXAMPLES})
     MESSAGE(STATUS ${example})
 ENDFOREACH(example ${EXAMPLES})
-
-MESSAGE(STATUS "=======================================================")

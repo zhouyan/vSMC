@@ -46,6 +46,13 @@ ENDIF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 PROJECT(vSMC C CXX)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
+SET (VSMC_GOOD_COMPILER TRUE)
+IF (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" AND APPLE)
+    IF(${CMAKE_CXX_COMPILER_VERSION} MATCHES "16.0.2.20160204")
+        SET(VSMC_GOOD_COMPILER FALSE)
+    ENDIF(${CMAKE_CXX_COMPILER_VERSION} MATCHES "16.0.2.20160204")
+ENDIF (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" AND APPLE)
+
 ##############################################################################
 # Options
 ##############################################################################
@@ -135,7 +142,9 @@ ENDFOREACH(feature ${FEATURES})
 
 IF(VSMC_ENABLE_LIBRARY)
     ADD_CUSTOM_TARGET(lib)
-    ADD_SUBDIRECTORY(lib)
+    IF(VSMC_GOOD_COMPILER)
+        ADD_SUBDIRECTORY(lib)
+    ENDIF(VSMC_GOOD_COMPILER)
 ENDIF(VSMC_ENABLE_LIBRARY)
 
 ##############################################################################
@@ -148,3 +157,16 @@ IF(VSMC_ENABLE_EXAMPLE)
     ADD_CUSTOM_TARGET(pdf)
     ADD_SUBDIRECTORY(example EXCLUDE_FROM_ALL)
 ENDIF(VSMC_ENABLE_EXAMPLE)
+
+##############################################################################
+# Example
+##############################################################################
+
+MESSAGE(STATUS "=======================================================")
+IF (NOT VSMC_GOOD_COMPILER)
+    MESSAGE(STATUS "Runtime library and some examples are disabled due to")
+    MESSAGE(STATUS "known issues with compilers")
+    MESSAGE (STATUS
+        "C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+MESSAGE(STATUS "=======================================================")
+ENDIF (NOT VSMC_GOOD_COMPILER)
