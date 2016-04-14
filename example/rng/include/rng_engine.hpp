@@ -46,15 +46,17 @@ inline std::uint64_t rng_engine_rdtsc()
     unsigned hi = 0;
     unsigned lo = 0;
 #if VSMC_HAS_X86_64
-    asm volatile("RDTSC\n\t"
+    asm volatile("CPUID\n\t"
+                 "RDTSC\n\t"
                  "mov %%edx, %0\n\t"
                  "mov %%eax, %1\n\t"
-                 : "=r"(hi), "=r"(lo)::"%rax", "%rdx");
+                 : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
 #elif VSMC_HAS_X86
-    asm volatile("RDTSC\n\t"
+    asm volatile("CPUID\n\t"
+                 "RDTSC\n\t"
                  "mov %%edx, %0\n\t"
                  "mov %%eax, %1\n\t"
-                 : "=r"(lo), "=r"(lo)::"%eax", "%edx");
+                 : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
 #endif // VSMC_HAS_X86
     return (static_cast<std::uint64_t>(hi) << 32) + lo;
 #else  // defined(VSMC_CLANG) || defined(VSMC_GCC) || defined(VSMC_INTEL)
