@@ -2,39 +2,7 @@
 \label{chap:Random number generating}
 
 The library has a comprehensive \rng system to facilitate implementation of
-Monte Carlo algorithms. The \rng engines defined in the library provide not
-only \verb|operator()| for generating random integers one by one, as those in
-the standard library, but also batch generating. For example
-\begin{cppcode}
-  Vector<RNG::result_type> r(n);
-  RNG rng;
-
-  // Generate one by one
-  for (std::size_t i = 0; i != n; ++r)
-      r[i] = rng();
-
-  // Generate all at once
-  rng(n, r.data());
-\end{cppcode}
-For some \rng{}s, the batch generating can be significantly faster. The results
-of using both methods are always the same except for non-deterministic \rng{}s.
-
-Note that, unlike those \rng{}s in the standard library, the comparison
-operators behave differently. \verb|rng1 == rng2| is a sufficient condition for
-the two \rng{}s to output the same results in subsequent use. However, it is
-not a necessary condition. For example, consider the above batch generating
-example,
-\begin{cppcode}
-  RNG rng1;
-  for (std::size_t i = 0; i != n; ++r)
-      r[i] = rng1();
-
-  RNG rng2;
-  rng2(n, r.data());
-
-  rng1 == rng2;     // Not necessarily true 
-  rng1() == rng2(); // Always true;
-\end{cppcode}
+Monte Carlo algorithms.
 
 \section{Seeding}
 \label{sec:Seeding}
@@ -130,18 +98,20 @@ demanding programs will find these counter-base \rng{}s insufficient.
     \toprule
     Class & Counter bits & Key bits \\
     \midrule
-    \texttt{AES128x\B}        & $128$ & $128$ \\
-    \texttt{AES192x\B}        & $128$ & $192$ \\
-    \texttt{AES256x\B}        & $128$ & $256$ \\
-    \texttt{ARSx\B}           & $128$ & $128$ \\
-    \texttt{Philox2x32}       & $64$  & $32$  \\
-    \texttt{Philox2x64}       & $128$ & $64$  \\
-    \texttt{Philox4x32}       & $128$ & $64$  \\
-    \texttt{Philox4x64}       & $256$ & $128$ \\
-    \texttt{Threefry2x32}     & $64$  & $64$  \\
-    \texttt{Threefry2x64}     & $128$ & $128$ \\
-    \texttt{Threefry4x32}     & $128$ & $128$ \\
-    \texttt{Threefry4x64}     & $256$ & $256$ \\
+    \texttt{AES128x\B}     & $128$  & $128$  \\
+    \texttt{AES192x\B}     & $128$  & $192$  \\
+    \texttt{AES256x\B}     & $128$  & $256$  \\
+    \texttt{ARSx\B}        & $128$  & $128$  \\
+    \texttt{Philox2x32}    & $64$   & $32$   \\
+    \texttt{Philox2x64}    & $128$  & $64$   \\
+    \texttt{Philox4x32}    & $128$  & $64$   \\
+    \texttt{Philox4x64}    & $256$  & $128$  \\
+    \texttt{Threefry2x32}  & $64$   & $64$   \\
+    \texttt{Threefry2x64}  & $128$  & $128$  \\
+    \texttt{Threefry4x32}  & $128$  & $128$  \\
+    \texttt{Threefry4x64}  & $256$  & $256$  \\
+    \texttt{Threefry8x64}  & $512$  & $512$  \\
+    \texttt{Threefry16x64} & $1024$ & $1024$ \\
     \bottomrule
   \end{tabularx}
   \caption{Counter-based \rng; \B: either \texttt{1}, \texttt{2}, \texttt{4},
@@ -229,13 +199,13 @@ general form,
 
   template <typename ResultType>
   using Philox2x32Engine = PhiloxEngine<ResultType, std::uint32_t, 2>;
-  
+
   template <typename ResultType>
   using Philox4x32Engine = PhiloxEngine<ResultType, std::uint32_t, 4>;
-  
+
   template <typename ResultType>
   using Philox2x64Engine = PhiloxEngine<ResultType, std::uint64_t, 2>;
-  
+
   template <typename ResultType>
   using Philox4x64Engine = PhiloxEngine<ResultType, std::uint64_t, 4>;
 \end{cppcode}
@@ -262,15 +232,21 @@ general form,
 
   template <typename ResultType>
   using Threefry2x32Engine = ThreefryEngine<ResultType, std::uint32_t, 2>;
-  
+
   template <typename ResultType>
   using Threefry4x32Engine = ThreefryEngine<ResultType, std::uint32_t, 4>;
-  
+
   template <typename ResultType>
   using Threefry2x64Engine = ThreefryEngine<ResultType, std::uint64_t, 2>;
-  
+
   template <typename ResultType>
   using Threefry4x64Engine = ThreefryEngine<ResultType, std::uint64_t, 4>;
+
+  template <typename ResultType>
+  using Threefry8x64Engine = ThreefryEngine<ResultType, std::uint64_t, 8>;
+
+  template <typename ResultType>
+  using Threefry16x64Engine = ThreefryEngine<ResultType, std::uint64_t, 16>;
 \end{cppcode}
 The default vector length and the number of rounds can be changed by
 configuration macros listed in table~\ref{tab:Configuration macros for
@@ -431,25 +407,25 @@ section~\ref{sec:Sample covariance} for details.
     \toprule
     Class & Notes \\
     \midrule
-    \verb|UniformBits|
-    & No parameter, uniform on the set $\{0,\dots,2^b - 1\}$, where $b$ is the
-    number of bits of the result type, which has to be an unsigned integer
-    type. \\
-    \verb|U01|      & No parameter, uniform on $[0, 1)$                 \\
-    \verb|U01CC|    & No parameter, uniform on $[0, 1]$                 \\
-    \verb|U01CO|    & No parameter, uniform on $[0, 1)$                 \\
-    \verb|U01OC|    & No parameter, uniform on $(0, 1]$                 \\
-    \verb|U01OO|    & No parameter, uniform on $(0, 1)$                 \\
-    \verb|Laplace|  & Parameters: location \texttt{a}; scale \texttt{b} \\
-    \verb|Levy|     & Parameters: location \texttt{a}; scale \texttt{b} \\
-    \verb|Pareto|   & Parameters: shape \texttt{a}; scale \texttt{b}    \\
-    \verb|Rayleigh| & Parameters: scale \texttt{sigma}                  \\
+    \verb|LaplaceDistribution|
+    & Parameters: location \texttt{a}; scale \texttt{b} \\
+    \verb|LevyDistribution|
+    & Parameters: location \texttt{a}; scale \texttt{b} \\
+    \verb|ParetoDistribution|
+    & Parameters: shape \texttt{a}; scale \texttt{b} \\
+    \verb|RayleighDistribution|
+    & Parameters: scale \texttt{sigma} \\
     \bottomrule
   \end{tabularx}
-  \caption{Random number distributions. Note: all class names have a suffix
-    \texttt{Distribution} which is omitted in the table}
+  \caption{Random number distributions}
   \label{tab:Random number distributions}
 \end{table}
+
+\subsection{Uniform bits distribution}
+\label{sub:Uniform bits distribution}
+
+\subsection{Standard uniform distribution}
+\label{sub:Standard uniform distribution}
 
 \section{Vectorized random number generating}
 \label{sec:Vectorized random number generating}
