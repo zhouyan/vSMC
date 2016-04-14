@@ -57,8 +57,6 @@ namespace vsmc
 template <typename T>
 class Sampler
 {
-    VSMC_DEFINE_NEW_DELETE(Sampler<T>)
-
     public:
     using size_type = typename Particle<T>::size_type;
     using value_type = T;

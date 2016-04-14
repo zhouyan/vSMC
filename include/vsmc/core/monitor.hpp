@@ -62,8 +62,6 @@ enum MonitorStage {
 template <typename T>
 class Monitor
 {
-    VSMC_DEFINE_NEW_DELETE(Monitor<T>)
-
     public:
     using value_type = T;
     using eval_type =
