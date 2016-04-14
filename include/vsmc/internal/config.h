@@ -90,6 +90,29 @@
 #define VSMC_HAS_POSIX 0
 #endif
 
+// include check
+#ifdef __has_include
+
+#if __has_include(<mkl.h>)
+#ifndef VSMC_HAS_MKL
+#define VSMC_HAS_MKL 1
+#endif
+#endif
+
+#if __has_include(<tbb/tbb.h>)
+#ifndef VSMC_HAS_TBB
+#define VSMC_HAS_TBB 1
+#endif
+#endif
+
+#if __has_include(<hdf5.h>)
+#ifndef VSMC_HAS_HDF5
+#define VSMC_HAS_HDF5 1
+#endif
+#endif
+
+#endif // __has_include
+
 // Parallelization features
 
 #ifndef VSMC_HAS_OMP
