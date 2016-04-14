@@ -38,9 +38,9 @@
 /// \ingroup Config
 #ifndef VSMC_RNG_TYPE
 #if VSMC_HAS_AES_NI
-#define VSMC_RNG_TYPE ::vsmc::ARS
+#define VSMC_RNG_TYPE ARS
 #else
-#define VSMC_RNG_TYPE ::vsmc::Philox
+#define VSMC_RNG_TYPE Threefry
 #endif
 #endif
 
