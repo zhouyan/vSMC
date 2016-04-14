@@ -219,8 +219,7 @@ class CounterEngine
     {
         key_type key;
         std::memset(key.data(), 0, sizeof(key_type));
-        std::memcpy(
-            key.data(), &s, std::min(sizeof(result_type), sizeof(key_type)));
+        std::memcpy(key.data(), &s, std::min(sizeof(s), sizeof(key)));
         reset(key);
     }
 
@@ -230,9 +229,9 @@ class CounterEngine
                           ResultType, key_type>::value>::type * = nullptr)
     {
         key_type key;
-        std::array<unsigned char, sizeof(key)> s;
+        std::array<unsigned, sizeof(key) / sizeof(unsigned) + 1> s;
         seq.generator(s.begin(), s.end());
-        std::memcpy(key.data(), s.data(), sizeof(key_type));
+        std::memcpy(key.data(), s.data(), std::min(sizeof(s), sizeof(key)));
         reset(key);
     }
 
