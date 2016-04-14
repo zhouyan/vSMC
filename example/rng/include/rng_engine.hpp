@@ -200,22 +200,27 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
     int twid, const std::string &name)
 {
     RNGType rng;
+    bool pass = rng_engine_kat(rng);
+    std::size_t num = 0;
+    vsmc::UniformBitsDistribution<std::uint64_t> rbits;
+    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+
     RNGType rng1;
     RNGType rng2;
-    vsmc::Vector<typename RNGType::result_type> r1;
-    vsmc::Vector<typename RNGType::result_type> r2;
-    r1.reserve(N);
-    r2.reserve(N);
+
     vsmc::StopWatch watch1;
     vsmc::StopWatch watch2;
+
     std::uint64_t cycle1 = 0;
     std::uint64_t cycle2 = 0;
-    bool pass = rng_engine_kat(rng);
 
-    std::uniform_int_distribution<std::size_t> runif(N / 2, N);
-    std::size_t num = 0;
+    vsmc::Vector<std::uint64_t> r1;
+    vsmc::Vector<std::uint64_t> r2;
+    r1.reserve(N);
+    r2.reserve(N);
+
     for (std::size_t i = 0; i != M; ++i) {
-        std::size_t K = runif(rng);
+        std::size_t K = rsize(rng);
         num += K;
         r1.resize(K);
         r2.resize(K);
@@ -223,24 +228,17 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
         watch1.start();
         std::uint64_t b1 = rng_engine_rdtsc();
         for (std::size_t j = 0; j != K; ++j)
-            r1[j] = rng1();
+            r1[j] = rbits(rng1);
         std::uint64_t e1 = rng_engine_rdtsc();
         watch1.stop();
         cycle1 += e1 - b1;
 
         watch2.start();
         std::uint64_t b2 = rng_engine_rdtsc();
-        vsmc::rng_rand(rng2, K, r2.data());
+        rbits(rng2, K, r2.data());
         std::uint64_t e2 = rng_engine_rdtsc();
         watch2.stop();
         cycle2 += e2 - b2;
-        pass = pass && (r1 == r2 || rng != rng);
-
-        std::stringstream ss;
-        ss << rng;
-        vsmc::rng_rand(rng, K, r1.data());
-        ss >> rng;
-        vsmc::rng_rand(rng, K, r2.data());
         pass = pass && (r1 == r2 || rng != rng);
 
         rng1.discard(static_cast<unsigned>(K));
@@ -251,14 +249,20 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
         for (std::size_t j = 0; j != 2; ++j)
             find = find || rng2() == next;
         pass = pass && (find || rng != rng);
+
+        std::stringstream ss;
+        ss << rng;
+        rbits(rng, K, r1.data());
+        ss >> rng;
+        rbits(rng, K, r2.data());
+        pass = pass && (r1 == r2 || rng != rng);
     }
 
-    double s1 = sizeof(typename RNGType::result_type) * num;
-    double s2 = sizeof(typename RNGType::result_type) * num;
-    double g1 = s1 / watch1.nanoseconds();
-    double g2 = s2 / watch2.nanoseconds();
-    std::string cpB1 = cycle1 == 0 ? "N/A" : std::to_string(cycle1 / s1);
-    std::string cpB2 = cycle2 == 0 ? "N/A" : std::to_string(cycle2 / s2);
+    double bytes = sizeof(std::uint64_t) * num;
+    double g1 = bytes / watch1.nanoseconds();
+    double g2 = bytes / watch2.nanoseconds();
+    std::string cpB1 = cycle1 == 0 ? "N/A" : std::to_string(cycle1 / bytes);
+    std::string cpB2 = cycle2 == 0 ? "N/A" : std::to_string(cycle2 / bytes);
 
     std::cout << std::left << std::setw(nwid) << name;
     std::cout << std::right << std::setw(swid) << sizeof(RNGType);
