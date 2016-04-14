@@ -109,31 +109,34 @@ class StaticVectorN
 
     StaticVectorN() noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value)
-        : data_(array_.data())
+        : data_(array_.data()), size_(0)
     {
     }
 
     explicit StaticVectorN(const allocator_type &alloc) noexcept(
         std::is_nothrow_copy_constructible<allocator_type>::vlaue)
-        : vector_(alloc), data_(array_.data())
+        : vector_(alloc), data_(array_.data()), size_(0)
     {
     }
 
     explicit StaticVectorN(size_type count)
         : vector_(count <= N ? 0 : count)
         , data_(count <= N ? array_.data() : vector_.data())
+        , size_(count)
     {
     }
 
     explicit StaticVectorN(size_type count, const allocator_type &alloc)
         : vector_(count <= N ? 0 : count, alloc)
         , data_(count <= N ? array_.data() : vector_.data())
+        , size_(count)
     {
     }
 
     explicit StaticVectorN(size_type count, const_reference value)
         : vector_(count <= N ? 0 : count, value)
         , data_(count <= N ? array_.data() : vector_.data())
+        , size_(count)
     {
         if (count <= N)
             std::fill_n(array_.begin(), array_.begin() + count, value);
@@ -143,6 +146,7 @@ class StaticVectorN
         size_type count, const_reference value, const allocator_type &alloc)
         : vector_(count <= N ? 0 : count, value, alloc)
         , data_(count <= N ? array_.data() : vector_.data())
+        , size_(count)
     {
         if (count <= N)
             std::fill_n(array_.begin(), array_.begin() + count, value);
@@ -152,6 +156,7 @@ class StaticVectorN
         : array_(other.array_)
         , vector_(other.vector_)
         , data_(vector_.empty() ? array_.data() : vector_.data())
+        , size_(other.size_)
     {
     }
 
@@ -160,6 +165,7 @@ class StaticVectorN
         : array_(other.array_)
         , vector_(other.vector_, alloc)
         , data_(vector_.empty() ? array_.data() : vector_.data())
+        , size_(other.size_)
     {
     }
 
@@ -167,6 +173,7 @@ class StaticVectorN
         : array_(std::move(other.array_))
         , vector_(std::move(other.vector_))
         , data_(vector_.empty() ? array_.data() : vector_.data())
+        , size_(other.size_)
     {
     }
 
@@ -175,6 +182,7 @@ class StaticVectorN
         : array_(std::move(other.array_))
         , vector_(std::move(other.vector_), alloc)
         , data_(vector_.empty() ? array_.data() : vector_.data())
+        , size_(other.size_)
     {
     }
 
@@ -185,6 +193,7 @@ class StaticVectorN
             array_ = other.array_;
             vector_ = other.vector_;
             data_ = vector_.empty() ? array_.data() : vector_.data();
+            size_ = other.size_;
         }
 
         return *this;
@@ -196,6 +205,7 @@ class StaticVectorN
             array_ = std::move(other.array_);
             vector_ = std::move(other.vector_);
             data_ = vector_.empty() ? array_.data() : vector_.data();
+            size_ = other.size_;
         }
 
         return *this;
@@ -279,7 +289,7 @@ class StaticVectorN
 
     bool empty() const { return array_.empty() && vector_.size() == 0; }
 
-    size_type size() const { return vector_.empty() ? N : vector_.size(); }
+    size_type size() const { return size_; }
 
     size_type max_size() const { return N; }
 
@@ -296,6 +306,7 @@ class StaticVectorN
     Array<T, N, internal::AllocatorAlignment<Alloc>::value> array_;
     Vector<T, Alloc> vector_;
     pointer data_;
+    std::size_t size_;
 }; // class StaticVectorN
 
 /// \brief Swap two StaticVectorN objects
