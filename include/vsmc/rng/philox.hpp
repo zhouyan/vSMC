@@ -390,12 +390,8 @@ class PhiloxGenerator
     static_assert(std::is_unsigned<T>::value,
         "**PhiloxGenerator** USED WITH T OTHER THAN UNSIGNED INTEGER TYPES");
 
-    static_assert(std::numeric_limits<T>::digits == 32 ||
-            std::numeric_limits<T>::digits == 64,
-        "**PhiloxGenerator** USED WITH T OF SIZE OTHER THAN 32 OR 64 BITS");
-
-    static_assert(
-        K == 2 || K == 4, "**PhiloxGenerator** USED WITH K OTHER THAN 2 OR 4");
+    static_assert(K != 0 && K % 2 == 0,
+        "**PhiloxGenerator** USED WITH K OTHER THAN MULTIPLES OF 2");
 
     static_assert(
         Rounds != 0, "**PhiloxGenerator** USED WITH ROUNDS EQUAL TO ZERO");

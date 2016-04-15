@@ -456,14 +456,8 @@ class ThreefryGenerator
     static_assert(std::is_unsigned<T>::value,
         "**ThreefryGenerator** USED WITH T OTHER THAN UNSIGNED INTEGER TYPES");
 
-    static_assert(std::numeric_limits<T>::digits == 32 ||
-            std::numeric_limits<T>::digits == 64,
-        "**ThreefryGenerator** USED WITH T OF SIZE OTHER THAN 32 OR 64 BITS");
-
-    static_assert(K == 2 || K == 4 ||
-            ((K == 8 || K == 16) && (std::numeric_limits<T>::digits == 64)),
-        "**ThreefryGenerator** USED WITH K OTHER THAN 2 OR 4 (32 OR 64 BITS) "
-        "OR 8 OR 16 (64 BITS)");
+    static_assert(K != 0 && K % 2 == 0,
+        "**ThreefryGenerator** USED WITH K OTHER THAN MULTIPLES OF 2");
 
     static_assert(
         Rounds != 0, "**ThreefryGenerator** USED WITH ROUNDS EQUAL TO ZERO");
