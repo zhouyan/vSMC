@@ -146,7 +146,7 @@ int main(int argc, char **argv)
     printf("Time (ms): %lg\n", vsmc_stop_watch_milliseconds(watch));
     vsmc_stop_watch_delete(&watch);
 
-    vsmc_sampler_print_f(sampler, "pf.out");
+    vsmc_sampler_print_f(sampler, "pf.out", '\t');
 
     vsmc_sampler_delete(&sampler);
     vsmc_vector_delete(&pf_obs_x);
