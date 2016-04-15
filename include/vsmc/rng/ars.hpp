@@ -90,11 +90,11 @@ class ARSConstants
 /// This generator implement the ARS algorithm in
 /// [Random123](http://www.deshawresearch.com/resources_random123.html),
 /// developed John K. Salmon, Mark A. Moraes, Ron O. Dror, and David E. Shaw.
-template <typename Constants>
+template <typename Constants = ARSConstants>
 class ARSKeySeq
 {
     template <std::size_t I>
-    using weyl = typename Constants::template weyl<I>;
+        using weyl = typename Constants::template weyl<I>;
 
     public:
     using key_type = std::array<std::uint64_t, 2>;

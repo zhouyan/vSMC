@@ -623,19 +623,19 @@ class AES256KeySeqGenerator
 
 /// \brief AES128Engine key sequence generator
 /// \ingroup AESNIRNG
-template <std::size_t Rounds>
+template <std::size_t Rounds = 10>
 using AES128KeySeq =
     internal::AESKeySeq<Rounds, internal::AES128KeySeqGenerator>;
 
 /// \brief AES192Engine key sequence generator
 /// \ingroup AESNIRNG
-template <std::size_t Rounds>
+template <std::size_t Rounds = 12>
 using AES192KeySeq =
     internal::AESKeySeq<Rounds, internal::AES192KeySeqGenerator>;
 
 /// \brief AES256Engine key sequence generator
 /// \ingroup AESNIRNG
-template <std::size_t Rounds>
+template <std::size_t Rounds = 14>
 using AES256KeySeq =
     internal::AESKeySeq<Rounds, internal::AES256KeySeqGenerator>;
 
