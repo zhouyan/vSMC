@@ -1,0 +1,18 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{vsmc\PYGZus{}threefry4x32} \PYG{n}{rng}\PYG{p}{;}
+\PYG{n}{vsmc\PYGZus{}threefry4x32\PYGZus{}init}\PYG{p}{(}\PYG{o}{\PYGZam{}}\PYG{n}{rng}\PYG{p}{,} \PYG{n}{seed}\PYG{p}{);}
+
+\PYG{k+kt}{uint32\PYGZus{}t} \PYG{n}{u32}\PYG{p}{[}\PYG{l+m+mi}{2}\PYG{p}{];}
+\PYG{n}{u32}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{=} \PYG{n}{vsmc\PYGZus{}threefry4x32\PYGZus{}rand}\PYG{p}{(}\PYG{o}{\PYGZam{}}\PYG{n}{rng}\PYG{p}{);}
+\PYG{n}{u32}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{=} \PYG{n}{vsmc\PYGZus{}threefry4x32\PYGZus{}rand}\PYG{p}{(}\PYG{o}{\PYGZam{}}\PYG{n}{rng}\PYG{p}{);}
+
+\PYG{k+kt}{double} \PYG{n}{u01}\PYG{p}{[}\PYG{l+m+mi}{2}\PYG{p}{];}
+\PYG{n}{u01}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{=} \PYG{n}{vsmc\PYGZus{}u01\PYGZus{}oc\PYGZus{}u32d}\PYG{p}{(}\PYG{n}{u32}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]);}
+\PYG{n}{u01}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{=} \PYG{n}{vsmc\PYGZus{}u01\PYGZus{}oc\PYGZus{}u32d}\PYG{p}{(}\PYG{n}{u32}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]);}
+\PYG{n}{u01}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{=} \PYG{n}{sqrt}\PYG{p}{(}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{2} \PYG{o}{*} \PYG{n}{log}\PYG{p}{(}\PYG{n}{u01}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]));}
+\PYG{n}{u01}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{*=} \PYG{l+m+mi}{2}\PYG{p}{;}
+
+\PYG{k+kt}{double} \PYG{n}{normal01}\PYG{p}{[}\PYG{l+m+mi}{2}\PYG{p}{];}
+\PYG{n}{normal01}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{=} \PYG{n}{u01}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{*} \PYG{n}{sin}\PYG{p}{(}\PYG{n}{M\PYGZus{}PI} \PYG{o}{*} \PYG{n}{u01}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]);}
+\PYG{n}{normal01}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{=} \PYG{n}{u01}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{*} \PYG{n}{cos}\PYG{p}{(}\PYG{n}{M\PYGZus{}PI} \PYG{o}{*} \PYG{n}{u01}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]);}
+\end{Verbatim}

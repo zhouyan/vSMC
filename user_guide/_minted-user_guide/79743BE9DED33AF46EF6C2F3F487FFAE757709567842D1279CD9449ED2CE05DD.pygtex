@@ -1,0 +1,19 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{class} \PYG{n+nc}{T}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{public}\PYG{o}{:}
+    \PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{S}\PYG{o}{\PYGZgt{}}
+    \PYG{k}{class} \PYG{n+nc}{single\PYGZus{}particle\PYGZus{}type} \PYG{o}{:} \PYG{n}{SingleParticleBase}\PYG{o}{\PYGZlt{}}\PYG{n}{S}\PYG{o}{\PYGZgt{}}
+    \PYG{p}{\PYGZob{}}
+        \PYG{k}{public}\PYG{o}{:}
+        \PYG{k}{using} \PYG{n}{SingleParticleBase}\PYG{o}{\PYGZlt{}}\PYG{n}{S}\PYG{o}{\PYGZgt{}::}\PYG{n}{SingleParticleBase}\PYG{p}{;}
+
+        \PYG{k+kt}{double} \PYG{o}{\PYGZam{}}\PYG{n}{x}\PYG{p}{()} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{particle}\PYG{p}{().}\PYG{n}{x\PYGZus{}}\PYG{p}{[}\PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{id}\PYG{p}{()];} \PYG{p}{\PYGZcb{}}
+        \PYG{k+kt}{double} \PYG{o}{\PYGZam{}}\PYG{n}{u}\PYG{p}{()} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{particle}\PYG{p}{().}\PYG{n}{u\PYGZus{}}\PYG{p}{[}\PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{id}\PYG{p}{()];} \PYG{p}{\PYGZcb{}}
+    \PYG{p}{\PYGZcb{};}
+
+    \PYG{k}{private}\PYG{o}{:}
+    \PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{x\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{int}\PYG{o}{\PYGZgt{}} \PYG{n}{u\PYGZus{}}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+\end{Verbatim}

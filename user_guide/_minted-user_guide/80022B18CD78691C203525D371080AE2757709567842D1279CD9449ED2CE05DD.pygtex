@@ -1,0 +1,3 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{hdf5store}\PYG{p}{(}\PYG{n}{sampler}\PYG{p}{,} \PYG{n}{file\PYGZus{}name}\PYG{p}{,} \PYG{n}{data\PYGZus{}name}\PYG{p}{);}
+\end{Verbatim}

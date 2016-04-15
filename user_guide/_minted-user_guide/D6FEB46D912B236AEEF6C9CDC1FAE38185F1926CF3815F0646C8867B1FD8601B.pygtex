@@ -1,0 +1,5 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{typedef} \PYG{p}{\PYGZob{}}
+    \PYG{k+kt}{void} \PYG{o}{*}\PYG{n}{ptr}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}} \PYG{n}{vsmc\PYGZus{}sampler}\PYG{p}{;}
+\end{Verbatim}

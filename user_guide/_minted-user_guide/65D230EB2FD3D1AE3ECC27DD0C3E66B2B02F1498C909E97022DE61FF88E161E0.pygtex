@@ -1,0 +1,4 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
+\PYG{n}{std}\PYG{o}{::}\PYG{n}{mt19937} \PYG{n}{rng1}\PYG{p}{(}\PYG{n}{s1}\PYG{p}{);} \PYG{c+c1}{// For thread $i_1$ with seed $s_1$}
+\PYG{n}{std}\PYG{o}{::}\PYG{n}{mt19937} \PYG{n}{rng2}\PYG{p}{(}\PYG{n}{s2}\PYG{p}{);} \PYG{c+c1}{// For thread $i_2$ with seed $s_2$}
+\end{Verbatim}

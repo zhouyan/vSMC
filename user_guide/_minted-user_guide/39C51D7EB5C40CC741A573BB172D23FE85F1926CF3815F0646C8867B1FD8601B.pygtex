@@ -1,0 +1,4 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{vsmc\PYGZus{}state\PYGZus{}matrix} \PYG{n}{s} \PYG{o}{=} \PYG{n}{vsmc\PYGZus{}state\PYGZus{}matrix\PYGZus{}new}\PYG{p}{(}\PYG{n}{n}\PYG{p}{,} \PYG{n}{dim}\PYG{p}{);}
+\PYG{n}{vsmc\PYGZus{}state\PYGZus{}matrix\PYGZus{}resize}\PYG{p}{(}\PYG{n}{s}\PYG{p}{,} \PYG{n}{n}\PYG{p}{,} \PYG{n}{dim}\PYG{p}{);}
+\end{Verbatim}

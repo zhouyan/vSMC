@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
+\PYG{n}{w}\PYG{p}{.}\PYG{n}{set}\PYG{p}{(}\PYG{n}{v}\PYG{p}{);}         \PYG{c+c1}{// Set $W^{(i)} \propto v^{(i)}$}
+\PYG{n}{w}\PYG{p}{.}\PYG{n}{mul}\PYG{p}{(}\PYG{n}{v}\PYG{p}{);}         \PYG{c+c1}{// Set $W^{(i)} \propto W^{(i)} v^{(i)}$}
+\PYG{n}{w}\PYG{p}{.}\PYG{n}{set\PYGZus{}log}\PYG{p}{(}\PYG{n}{v}\PYG{p}{);}     \PYG{c+c1}{// Set $\log W^{(i)} = v^{(i)} + \text{const.}$}
+\PYG{n}{w}\PYG{p}{.}\PYG{n}{add\PYGZus{}log}\PYG{p}{(}\PYG{n}{v}\PYG{p}{);}     \PYG{c+c1}{// Set $\log W^{(i)} = \log W^{(i)} + v^{(i)} + \text{const.}$}
+\end{Verbatim}

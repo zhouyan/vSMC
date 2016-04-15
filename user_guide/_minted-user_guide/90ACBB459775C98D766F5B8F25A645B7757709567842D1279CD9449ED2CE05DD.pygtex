@@ -1,0 +1,9 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{RNGType}\PYG{o}{\PYGZgt{}}
+\PYG{k+kr}{inline} \PYG{k+kt}{void} \PYG{n}{rng\PYGZus{}rand}\PYG{p}{(}
+    \PYG{n}{RNGType} \PYG{o}{\PYGZam{}}\PYG{n}{rng}\PYG{p}{,} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{n}\PYG{p}{,} \PYG{k}{typename} \PYG{n}{RNGType}\PYG{o}{::}\PYG{n}{result\PYGZus{}type} \PYG{o}{*}\PYG{n}{r}\PYG{p}{);}
+
+\PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{RNGType}\PYG{p}{,} \PYG{k}{typename} \PYG{n}{DistributionType}\PYG{o}{\PYGZgt{}}
+\PYG{k+kr}{inline} \PYG{k+kt}{void} \PYG{n}{rng\PYGZus{}rand}\PYG{p}{(}\PYG{n}{RNGType} \PYG{o}{\PYGZam{}}\PYG{n}{rng}\PYG{p}{,} \PYG{k}{const} \PYG{n}{DistributionType} \PYG{o}{\PYGZam{}}\PYG{n}{distribution}\PYG{p}{,}
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{n}\PYG{p}{,} \PYG{k}{typename} \PYG{n}{DistributionType}\PYG{o}{::}\PYG{n}{result\PYGZus{}type} \PYG{o}{*}\PYG{n}{r}\PYG{p}{);}
+\end{Verbatim}

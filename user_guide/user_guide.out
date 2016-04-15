@@ -1,0 +1,49 @@
+\BOOKMARK [0][]{chapter.1}{Sequential Monte Carlo}{}% 1
+\BOOKMARK [1][]{section.1.1}{Introduction}{chapter.1}% 2
+\BOOKMARK [1][]{section.1.2}{Sequential importance sampling and resampling}{chapter.1}% 3
+\BOOKMARK [1][]{section.1.3}{SMC samplers}{chapter.1}% 4
+\BOOKMARK [1][]{section.1.4}{Related algorithms}{chapter.1}% 5
+\BOOKMARK [0][]{chapter.2}{Basic usage}{}% 6
+\BOOKMARK [1][]{section.2.1}{Conventions}{chapter.2}% 7
+\BOOKMARK [1][]{section.2.2}{Getting and installing the library}{chapter.2}% 8
+\BOOKMARK [1][]{section.2.3}{Concepts}{chapter.2}% 9
+\BOOKMARK [1][]{section.2.4}{A simple particle filter}{chapter.2}% 10
+\BOOKMARK [1][]{section.2.5}{Symmetric multiprocessing}{chapter.2}% 11
+\BOOKMARK [0][]{chapter.3}{Advanced usage}{}% 12
+\BOOKMARK [1][]{section.3.1}{Cloning objects}{chapter.3}% 13
+\BOOKMARK [1][]{section.3.2}{Customizing member types}{chapter.3}% 14
+\BOOKMARK [1][]{section.3.3}{Extending SingleParticle<T>}{chapter.3}% 15
+\BOOKMARK [0][]{chapter.4}{Configuration macros}{}% 16
+\BOOKMARK [0][]{chapter.5}{Mathematical operations}{}% 17
+\BOOKMARK [1][]{section.5.1}{Constants}{chapter.5}% 18
+\BOOKMARK [1][]{section.5.2}{Vectorized operations}{chapter.5}% 19
+\BOOKMARK [1][]{section.5.3}{Pack and unpack vectors}{chapter.5}% 20
+\BOOKMARK [0][]{chapter.6}{Resampling}{}% 21
+\BOOKMARK [1][]{section.6.1}{Builtin algorithms}{chapter.6}% 22
+\BOOKMARK [1][]{section.6.2}{User defined algorithms}{chapter.6}% 23
+\BOOKMARK [1][]{section.6.3}{Algorithms with increasing dimensions}{chapter.6}% 24
+\BOOKMARK [0][]{chapter.7}{Random number generating}{}% 25
+\BOOKMARK [1][]{section.7.1}{Vectorized random number generating}{chapter.7}% 26
+\BOOKMARK [1][]{section.7.2}{Counter-based RNG}{chapter.7}% 27
+\BOOKMARK [1][]{section.7.3}{Non-deterministic RNG}{chapter.7}% 28
+\BOOKMARK [1][]{section.7.4}{MKL RNG}{chapter.7}% 29
+\BOOKMARK [1][]{section.7.5}{Multiple RNG streams}{chapter.7}% 30
+\BOOKMARK [1][]{section.7.6}{Distributions}{chapter.7}% 31
+\BOOKMARK [1][]{section.7.7}{RNG in C and OpenCL}{chapter.7}% 32
+\BOOKMARK [1][]{section.7.8}{Seeding}{chapter.7}% 33
+\BOOKMARK [0][]{chapter.8}{Utilities}{}% 34
+\BOOKMARK [1][]{section.8.1}{Aligned memory allocation}{chapter.8}% 35
+\BOOKMARK [1][]{section.8.2}{Sample covariance}{chapter.8}% 36
+\BOOKMARK [1][]{section.8.3}{Store objects in 111hdf5 format}{chapter.8}% 37
+\BOOKMARK [1][]{section.8.4}{111raii classes for OpenCL pointers}{chapter.8}% 38
+\BOOKMARK [1][]{section.8.5}{Process command line program options}{chapter.8}% 39
+\BOOKMARK [1][]{section.8.6}{Display program progress}{chapter.8}% 40
+\BOOKMARK [1][]{section.8.7}{Stop watch}{chapter.8}% 41
+\BOOKMARK [0][]{chapter*.27}{Bibliography}{}% 42
+\BOOKMARK [0][]{appendix.A}{Interfacing with C and other languages}{}% 43
+\BOOKMARK [1][]{section.A.1}{Argument types}{appendix.A}% 44
+\BOOKMARK [1][]{section.A.2}{Classes and methods}{appendix.A}% 45
+\BOOKMARK [0][]{appendix.B}{Source code of complete programs}{}% 46
+\BOOKMARK [1][]{section.B.1}{A simple particle filter}{appendix.B}% 47
+\BOOKMARK [1][]{section.B.2}{Process command line program options}{appendix.B}% 48
+\BOOKMARK [1][]{section.B.3}{Display program progress}{appendix.B}% 49

@@ -1,0 +1,9 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{std}\PYG{o}{::}\PYG{n}{mt19937} \PYG{n}{rng}\PYG{p}{;}
+
+\PYG{k+kt}{void} \PYG{n+nf}{function}\PYG{p}{(}\PYG{k+kt}{double} \PYG{o}{\PYGZam{}}\PYG{n}{x}\PYG{p}{)}
+\PYG{p}{\PYGZob{}}
+    \PYG{n}{std}\PYG{o}{::}\PYG{n}{normal\PYGZus{}distribution}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{rnorm}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{);}
+    \PYG{n}{x} \PYG{o}{=} \PYG{n}{rnorm}\PYG{p}{(}\PYG{n}{rng}\PYG{p}{);}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

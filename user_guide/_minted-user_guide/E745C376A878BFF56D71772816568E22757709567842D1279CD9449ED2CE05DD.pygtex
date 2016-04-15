@@ -1,0 +1,16 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+c1}{// dst[i] = src[i * stride], i = 1 to n}
+\PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{RandomIter}\PYG{p}{,} \PYG{k}{typename} \PYG{n}{IntType}\PYG{p}{,} \PYG{k}{typename} \PYG{n}{OutputIter}\PYG{o}{\PYGZgt{}}
+\PYG{k+kr}{inline} \PYG{k+kt}{void} \PYG{n}{pack\PYGZus{}s}\PYG{p}{(}
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{n}\PYG{p}{,} \PYG{n}{RandomIter} \PYG{n}{src}\PYG{p}{,} \PYG{n}{IntType} \PYG{n}{stride}\PYG{p}{,} \PYG{n}{OutputIter} \PYG{n}{dst}\PYG{p}{);}
+
+\PYG{c+c1}{// dst[i] = src[index[i]], i = 1 to n}
+\PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{RandomIter}\PYG{p}{,} \PYG{k}{typename} \PYG{n}{InputIter}\PYG{p}{,} \PYG{k}{typename} \PYG{n}{OutputIter}\PYG{o}{\PYGZgt{}}
+\PYG{k+kr}{inline} \PYG{k+kt}{void} \PYG{n}{pack\PYGZus{}i}\PYG{p}{(}
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{n}\PYG{p}{,} \PYG{n}{RandomIter} \PYG{n}{src}\PYG{p}{,} \PYG{n}{InputIter} \PYG{n}{index}\PYG{p}{,} \PYG{n}{OutputIter} \PYG{n}{dst}\PYG{p}{);}
+
+\PYG{c+c1}{// Pack all src[i] with static\PYGZus{}cast\PYGZlt{}boo\PYGZgt{}(mask[i]) is true, i = 1 to n}
+\PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{InputIterSrc}\PYG{p}{,} \PYG{k}{typename} \PYG{n}{InputIterMask}\PYG{p}{,} \PYG{k}{typename} \PYG{n}{OutputIter}\PYG{o}{\PYGZgt{}}
+\PYG{k+kr}{inline} \PYG{k+kt}{void} \PYG{n}{pack\PYGZus{}m}\PYG{p}{(}
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{n}\PYG{p}{,} \PYG{n}{InputIterSrc} \PYG{n}{src}\PYG{p}{,} \PYG{n}{InputIterMask} \PYG{n}{mask}\PYG{p}{,} \PYG{n}{OutputIter} \PYG{n}{dst}\PYG{p}{);}
+\end{Verbatim}

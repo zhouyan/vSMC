@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{n} \PYG{o}{=} \PYG{l+m+mi}{1000}\PYG{p}{;}
+\PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{a}\PYG{p}{(}\PYG{n}{n}\PYG{p}{),} \PYG{n}{b}\PYG{p}{(}\PYG{n}{n}\PYG{p}{),} \PYG{n}{y}\PYG{p}{(}\PYG{n}{n}\PYG{p}{);}
+\PYG{c+c1}{// Fill vectors a and b}
+\PYG{n}{add}\PYG{p}{(}\PYG{n}{n}\PYG{p}{,} \PYG{n}{a}\PYG{p}{.}\PYG{n}{data}\PYG{p}{(),} \PYG{n}{b}\PYG{p}{.}\PYG{n}{data}\PYG{p}{(),} \PYG{n}{y}\PYG{p}{.}\PYG{n}{data}\PYG{p}{());}
+\end{Verbatim}

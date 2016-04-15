@@ -1,0 +1,10 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{RNGType}\PYG{p}{,} \PYG{k}{typename} \PYG{n}{RealType}\PYG{o}{\PYGZgt{}}
+\PYG{k}{class} \PYG{n+nc}{U01SeqType}
+\PYG{p}{\PYGZob{}}
+      \PYG{k}{public}\PYG{o}{:}
+      \PYG{n}{U01SeqType}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{M}\PYG{p}{,} \PYG{n}{RNGType} \PYG{o}{\PYGZam{}}\PYG{n}{rng}\PYG{p}{);}
+
+      \PYG{n}{RealType} \PYG{k}{operator}\PYG{p}{[](}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{i}\PYG{p}{);}
+\PYG{p}{\PYGZcb{};}
+\end{Verbatim}

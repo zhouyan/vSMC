@@ -1,0 +1,18 @@
+[0] Config.pm:340> INFO - This is Biber 2.4
+[1] Config.pm:343> INFO - Logfile is 'user_guide.blg'
+[85] biber-darwin:287> INFO - === Sat Apr 16, 2016, 03:35:51
+[110] Biber.pm:347> INFO - Reading 'user_guide.bcf'
+[239] Biber.pm:741> INFO - Found 12 citekeys in bib section 0
+[260] Biber.pm:3150> INFO - Processing section 0
+[314] Biber.pm:3307> INFO - Looking for bibtex format file 'user_guide.bib' for section 0
+[335] bibtex.pm:1124> INFO - Decoding LaTeX character macros into UTF-8
+[352] bibtex.pm:985> INFO - Found BibTeX data source 'user_guide.bib'
+[412] Utils.pm:147> WARN - Range field 'pages' in entry 'Doucet:2011us' is malformed, skipping
+[450] Utils.pm:147> WARN - Range field 'pages' in entry 'DelMoral:2006wv' is malformed, skipping
+[762] UCollate.pm:65> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[762] UCollate.pm:65> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[763] Biber.pm:3027> INFO - Sorting list 'nyt/global' of type 'entry' with scheme 'nyt' and locale 'en-US'
+[763] Biber.pm:3031> INFO - No sort tailoring available for locale 'en-US'
+[792] bbl.pm:519> INFO - Writing 'user_guide.bbl' with encoding 'UTF-8'
+[795] bbl.pm:615> INFO - Output to user_guide.bbl
+[795] Biber.pm:108> INFO - WARNINGS: 2

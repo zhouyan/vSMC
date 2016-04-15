@@ -1,0 +1,25 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{class} \PYG{n+nc}{PFEval}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{public}\PYG{o}{:}
+    \PYG{k+kt}{void} \PYG{k}{operator}\PYG{p}{()(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{,} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{dim}\PYG{p}{,}
+        \PYG{n}{Particle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{o}{\PYGZam{}}\PYG{n}{particle}\PYG{p}{,} \PYG{k+kt}{double} \PYG{o}{*}\PYG{n}{r}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{eval\PYGZus{}pre}\PYG{p}{(}\PYG{n}{t}\PYG{p}{,} \PYG{n}{particle}\PYG{p}{);}
+        \PYG{k}{for} \PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{!=} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{size}\PYG{p}{();} \PYG{o}{++}\PYG{n}{i}\PYG{p}{,} \PYG{n}{r} \PYG{o}{+=} \PYG{n}{dim}\PYG{p}{)}
+            \PYG{n}{eval\PYGZus{}sp}\PYG{p}{(}\PYG{n}{t}\PYG{p}{,} \PYG{n}{dim}\PYG{p}{,} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{sp}\PYG{p}{(}\PYG{n}{i}\PYG{p}{),} \PYG{n}{r}\PYG{p}{);}
+        \PYG{n}{eval\PYGZus{}post}\PYG{p}{(}\PYG{n}{t}\PYG{p}{,} \PYG{n}{particle}\PYG{p}{);}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k+kt}{void} \PYG{n}{eval\PYGZus{}pre}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{,} \PYG{n}{Particle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{o}{\PYGZam{}}\PYG{n}{particle}\PYG{p}{)} \PYG{p}{\PYGZob{}\PYGZcb{}}
+
+    \PYG{k+kt}{void} \PYG{n}{eval\PYGZus{}sp}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{,} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{dim}\PYG{p}{,}
+        \PYG{n}{SingleParticle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{n}{sp}\PYG{p}{,} \PYG{k+kt}{double} \PYG{o}{*}\PYG{n}{r}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{r}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{=} \PYG{n}{sp}\PYG{p}{.}\PYG{n}{state}\PYG{p}{(}\PYG{n}{PosX}\PYG{p}{);}
+        \PYG{n}{r}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{=} \PYG{n}{sp}\PYG{p}{.}\PYG{n}{state}\PYG{p}{(}\PYG{n}{PosY}\PYG{p}{);}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k+kt}{void} \PYG{n}{eval\PYGZus{}post}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{,} \PYG{n}{Particle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{o}{\PYGZam{}}\PYG{n}{particle}\PYG{p}{)} \PYG{p}{\PYGZob{}\PYGZcb{}}
+\PYG{p}{\PYGZcb{};}
+\end{Verbatim}

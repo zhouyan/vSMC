@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{typedef} \PYG{p}{\PYGZob{}}
+    \PYG{k+kt}{double} \PYG{o}{*}\PYG{n}{state}\PYG{p}{;}
+    \PYG{k+kt}{int} \PYG{n}{id}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}} \PYG{n}{vsmc\PYGZus{}single\PYGZus{}particle}\PYG{p}{;}
+\end{Verbatim}

@@ -1,0 +1,4 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{vsmc\PYGZus{}sampler\PYGZus{}delete}\PYG{p}{(}\PYG{n}{sampler}\PYG{p}{);}
+\PYG{n}{sampler}\PYG{p}{.}\PYG{n}{ptr} \PYG{o}{=} \PYG{n+nb}{NULL}\PYG{p}{;}
+\end{Verbatim}

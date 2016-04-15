@@ -1,0 +1,7 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
+\PYG{k+kt}{void} \PYG{n+nf}{function}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{i}\PYG{p}{)}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{auto} \PYG{o}{\PYGZam{}}\PYG{n}{rng} \PYG{o}{=} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{rng}\PYG{p}{(}\PYG{n}{i}\PYG{p}{);}
+    \PYG{c+c1}{// Process the particle i using rng}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

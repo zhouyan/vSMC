@@ -1,0 +1,5 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{T}\PYG{p}{,} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{Alignment} \PYG{o}{=} \PYG{n}{Alignment}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}::}\PYG{n}{value}\PYG{p}{,}
+    \PYG{k}{typename} \PYG{n}{Memory} \PYG{o}{=} \PYG{n}{AlignedMemory}\PYG{o}{\PYGZgt{}}
+\PYG{k}{class} \PYG{n+nc}{Allocator}\PYG{p}{;}
+\end{Verbatim}

@@ -1,0 +1,49 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
+\PYG{k}{class} \PYG{n+nc}{WeightMPI}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{public}\PYG{o}{:}
+    \PYG{k+kt}{double} \PYG{n}{ess}\PYG{p}{()}
+    \PYG{p}{\PYGZob{}}
+        \PYG{k+kt}{double} \PYG{n}{local} \PYG{o}{=} \PYG{c+cm}{/* $\sum_{i=1}^{N_r}(W_r^{(i)})^2$ */}\PYG{p}{;}
+        \PYG{k+kt}{double} \PYG{n}{global} \PYG{o}{=} \PYG{c+cm}{/* Gather local from each all nodes */}\PYG{p}{;}
+        \PYG{c+c1}{// Broadcast the value of global}
+
+        \PYG{k}{return} \PYG{l+m+mi}{1} \PYG{o}{/} \PYG{n}{global}\PYG{p}{;}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{size}\PYG{p}{()} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{c+cm}{/* $N_r$ */}\PYG{p}{;} \PYG{p}{\PYGZcb{}}
+
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{resample\PYGZus{}size}\PYG{p}{()} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{c+cm}{/* $N = \sum_{r=1}^R N_r$ */}\PYG{p}{;} \PYG{p}{\PYGZcb{}}
+
+    \PYG{k}{const} \PYG{k+kt}{double} \PYG{o}{*}\PYG{n}{data}\PYG{p}{()}
+    \PYG{p}{\PYGZob{}}
+        \PYG{k}{return} \PYG{c+cm}{/* pointer to $\{W_r^{(i)}\}_{i=1}^{N_r}$ */}\PYG{p}{;}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k}{const} \PYG{k+kt}{double} \PYG{o}{*}\PYG{n}{resample\PYGZus{}data}\PYG{p}{()}
+    \PYG{p}{\PYGZob{}}
+        \PYG{k}{if} \PYG{p}{(}\PYG{n}{rank} \PYG{o}{==} \PYG{l+m+mi}{0}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+            \PYG{c+c1}{// Gather all normalized weights into a member data on this node}
+            \PYG{c+c1}{// Say resample\_weight\_}
+            \PYG{k}{return} \PYG{n}{resample\PYGZus{}weight\PYGZus{}}\PYG{p}{.}\PYG{n}{data}\PYG{p}{();}
+        \PYG{p}{\PYGZcb{}} \PYG{k}{else} \PYG{p}{\PYGZob{}}
+            \PYG{k}{return} \PYG{k}{nullptr}\PYG{p}{;}
+        \PYG{p}{\PYGZcb{}}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k+kt}{void} \PYG{n}{set\PYGZus{}equal}\PYG{p}{()}
+    \PYG{p}{\PYGZob{}}
+        \PYG{c+c1}{// Set all weights to $1 / \sum_{r=1}^R N_r$}
+        \PYG{c+c1}{// Synchronization}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k+kt}{void} \PYG{n}{set}\PYG{p}{(}\PYG{k}{const} \PYG{k+kt}{double} \PYG{o}{*}\PYG{n}{v}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{c+c1}{// Set $W_r^{(i)} = v_i$ for $i = 1,\dots,N_r$}
+        \PYG{c+c1}{// Compute $S_r = \sum_{i=1}^{N_r} W_r^{(i)}$}
+        \PYG{c+c1}{// Gathering $S_r$, compute $S = \sum S_r$}
+        \PYG{c+c1}{// Broadcast $S$}
+        \PYG{c+c1}{// Set $W_r^{(i)} = W_r^{(i)} / S$ for $i = 1,\dots,N_r$}
+    \PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{};}
+\end{Verbatim}

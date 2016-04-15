@@ -1,0 +1,51 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
+\PYG{k}{using} \PYG{n}{StateBase} \PYG{o}{=} \PYG{n}{StateMatrix}\PYG{o}{\PYGZlt{}}\PYG{n}{ColMajor}\PYG{p}{,} \PYG{n}{Dynamic}\PYG{p}{,} \PYG{k+kt}{double}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
+
+\PYG{k}{class} \PYG{n+nc}{State} \PYG{o}{:} \PYG{n}{StateBase}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{public}\PYG{o}{:}
+    \PYG{n}{StateBase}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{N}\PYG{p}{)} \PYG{o}{:} \PYG{n}{StateBase}\PYG{p}{(}\PYG{n}{N}\PYG{p}{),} \PYG{n}{varphi\PYGZus{}}\PYG{p}{(}\PYG{n}{N}\PYG{p}{)} \PYG{p}{\PYGZob{}\PYGZcb{}}
+
+    \PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{IntType}\PYG{o}{\PYGZgt{}}
+    \PYG{k+kt}{void} \PYG{n}{copy}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{N}\PYG{p}{,} \PYG{n}{IntType} \PYG{o}{*}\PYG{n}{index}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{c+c1}{// DO NOT CALL StateBase::copy}
+        \PYG{k}{for} \PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{!=} \PYG{n}{N}\PYG{p}{;} \PYG{o}{++}\PYG{n}{i}\PYG{p}{)}
+            \PYG{n}{varphi\PYGZus{}}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{o}{=} \PYG{n}{varphi\PYGZus{}}\PYG{p}{[}\PYG{n}{index}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]];}
+        \PYG{n}{index\PYGZus{}}\PYG{p}{.}\PYG{n}{push\PYGZus{}back}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{index}\PYG{p}{);}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{c+c1}{// To be called during initialization}
+    \PYG{k+kt}{void} \PYG{n}{reset}\PYG{p}{()} \PYG{p}{\PYGZob{}} \PYG{n}{index\PYGZus{}}\PYG{p}{.}\PYG{n}{reset}\PYG{p}{();} \PYG{p}{\PYGZcb{}}
+
+    \PYG{c+c1}{// Get the resampled state up to time n}
+    \PYG{c+c1}{// Assuming that this->state(i, t) contains the marginal $X_t^{(i)}$}
+    \PYG{n}{State} \PYG{n}{trace\PYGZus{}back}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{n}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{c+c1}{// idxmat is an $N$ by $n + 1$ matrix, say $B$, such that}
+        \PYG{c+c1}{// $B_{i,j} = b_j^{(i)}$}
+        \PYG{k}{auto} \PYG{n}{idxmat} \PYG{o}{=} \PYG{n}{index\PYGZus{}}\PYG{p}{.}\PYG{n}{index\PYGZus{}matrix}\PYG{p}{(}\PYG{n}{ColMajor}\PYG{p}{,} \PYG{n}{n}\PYG{p}{);}
+        \PYG{n}{State} \PYG{n+nf}{rs}\PYG{p}{(}\PYG{o}{*}\PYG{k}{this}\PYG{p}{);}
+        \PYG{k}{for} \PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{j} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{j} \PYG{o}{\PYGZlt{}=} \PYG{n}{n}\PYG{p}{;} \PYG{o}{++}\PYG{n}{j}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+            \PYG{k}{auto} \PYG{n}{dst} \PYG{o}{=} \PYG{n}{rs}\PYG{p}{.}\PYG{n}{col\PYGZus{}data}\PYG{p}{(}\PYG{n}{j}\PYG{p}{);}
+            \PYG{k}{auto} \PYG{n}{src} \PYG{o}{=} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{col\PYGZus{}data}\PYG{p}{(}\PYG{n}{j}\PYG{p}{);}
+            \PYG{k}{auto} \PYG{n}{idx} \PYG{o}{=} \PYG{n}{idxmat}\PYG{p}{.}\PYG{n}{data}\PYG{p}{()} \PYG{o}{+} \PYG{n}{j} \PYG{o}{*} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{size}\PYG{p}{();}
+            \PYG{k}{for} \PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{!=} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{size}\PYG{p}{();} \PYG{o}{++}\PYG{n}{i}\PYG{p}{)}
+                \PYG{n}{dst}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{o}{=} \PYG{n}{src}\PYG{p}{[}\PYG{n}{idx}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]];}
+        \PYG{p}{\PYGZcb{}}
+
+        \PYG{k}{return} \PYG{n}{rs}\PYG{p}{;}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k}{private}\PYG{o}{:}
+    \PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{varphi\PYGZus{}}\PYG{p}{;} \PYG{c+c1}{// the values of $\varphi(X_t^{(i)})$}
+    \PYG{n}{ResampleIndex} \PYG{n}{index\PYGZus{}}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+
+\PYG{n}{Sampler}\PYG{o}{\PYGZlt{}}\PYG{n}{State}\PYG{o}{\PYGZgt{}} \PYG{n}{sampler}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{Multinomial}\PYG{p}{);} \PYG{c+c1}{// Always resampling}
+\PYG{n}{sampler}\PYG{p}{.}\PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{resize\PYGZus{}dim}\PYG{p}{(}\PYG{n}{n} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{);}
+\PYG{c+c1}{// configure the sampler}
+\PYG{n}{sampler}\PYG{p}{.}\PYG{n}{initialize}\PYG{p}{(}\PYG{n}{param}\PYG{p}{);}
+\PYG{n}{sampler}\PYG{p}{.}\PYG{n}{iterate}\PYG{p}{(}\PYG{n}{n}\PYG{p}{);}
+\PYG{k}{auto} \PYG{n}{state} \PYG{o}{=} \PYG{n}{sampler}\PYG{p}{.}\PYG{n}{particle}\PYG{p}{().}\PYG{n}{value}\PYG{p}{().}\PYG{n}{trace\PYGZus{}back}\PYG{p}{(}\PYG{n}{n}\PYG{p}{);}
+\end{Verbatim}

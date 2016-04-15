@@ -1,0 +1,418 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 2.6 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \sortlist[entry]{nyt/global}
+    \entry{stpf}{article}{}
+      \name{author}{5}{}{%
+        {{uniquename=0,hash=186859e22e2e1ac331b5cee1113d988b}{%
+           family={{Beskos}},
+           family_i={B\bibinitperiod},
+           given={A.},
+           given_i={A\bibinitperiod}}}%
+        {{uniquename=0,hash=74373dbf8b710ecbfe4d03eef1f9cd8c}{%
+           family={{Crisan}},
+           family_i={C\bibinitperiod},
+           given={D.},
+           given_i={D\bibinitperiod}}}%
+        {{uniquename=0,hash=03b299ba5c74c31f7dc24d4b318c960d}{%
+           family={{Jasra}},
+           family_i={J\bibinitperiod},
+           given={A.},
+           given_i={A\bibinitperiod}}}%
+        {{uniquename=0,hash=3a79d54213bbdb38b5c2943242d82392}{%
+           family={{Kamatani}},
+           family_i={K\bibinitperiod},
+           given={K.},
+           given_i={K\bibinitperiod}}}%
+        {{uniquename=0,hash=176dfdc8c249a5c60dc7f1190b046975}{%
+           family={{Zhou}},
+           family_i={Z\bibinitperiod},
+           given={Y.},
+           given_i={Y\bibinitperiod}}}%
+      }
+      \strng{namehash}{00bca15a6106fa8e2fc64b20be067690}
+      \strng{fullhash}{28652745a05de0d5e95422b1080a3229}
+      \field{sortinit}{B}
+      \field{sortinithash}{4ecbea03efd0532989d3836d1a048c32}
+      \field{labelyear}{2014}
+      \field{labelmonth}{12}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprinttype}{arXiv}
+      \field{journaltitle}{ArXiv e-prints}
+      \field{month}{12}
+      \field{title}{{A Stable Particle Filter in High-Dimensions}}
+      \field{year}{2014}
+      \verb{eprint}
+      \verb 1412.3501
+      \endverb
+    \endentry
+    \entry{Cappe:2007hz}{article}{}
+      \name{author}{3}{}{%
+        {{uniquename=0,hash=f2ffb0fcf2473b1619d2032fd10cead7}{%
+           family={Cappé},
+           family_i={C\bibinitperiod},
+           given={Olivier},
+           given_i={O\bibinitperiod}}}%
+        {{uniquename=0,hash=5a26ee5828e66a41d0386a264c7580ff}{%
+           family={Godsill},
+           family_i={G\bibinitperiod},
+           given={Simon\bibnamedelima J.},
+           given_i={S\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+        {{uniquename=0,hash=32b961a3e53c735ea5488bf0af14a6da}{%
+           family={Moulines},
+           family_i={M\bibinitperiod},
+           given={Eric},
+           given_i={E\bibinitperiod}}}%
+      }
+      \strng{namehash}{4e8e90d64b1ea8d9a9bbf7d93bbafa46}
+      \strng{fullhash}{4e8e90d64b1ea8d9a9bbf7d93bbafa46}
+      \field{sortinit}{C}
+      \field{sortinithash}{59f25d509f3381b07695554a9f35ecb2}
+      \field{labelyear}{2007}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Proceedings of the IEEE}
+      \field{number}{5}
+      \field{title}{{An overview of existing methods and recent advances in sequential Monte Carlo}}
+      \field{volume}{95}
+      \field{year}{2007}
+      \field{pages}{899\bibrangedash 924}
+      \range{pages}{26}
+    \endentry
+    \entry{DelMoral:2006wv}{incollection}{}
+      \name{author}{3}{}{%
+        {{uniquename=0,hash=d771d04fc13831e7ab9152984eaa0d86}{%
+           family={Del\bibnamedelima Moral},
+           family_i={D\bibinitperiod\bibinitdelim M\bibinitperiod},
+           given={Pierre},
+           given_i={P\bibinitperiod}}}%
+        {{uniquename=0,hash=aca5faad8b57b96b59c12fc59d0b6eb4}{%
+           family={Doucet},
+           family_i={D\bibinitperiod},
+           given={Arnaud},
+           given_i={A\bibinitperiod}}}%
+        {{uniquename=0,hash=fd2c45b545dcce044e994f763abfcd70}{%
+           family={Jasra},
+           family_i={J\bibinitperiod},
+           given={Ajay},
+           given_i={A\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Oxford University Press}%
+      }
+      \strng{namehash}{cb5c5bbefca1c68512be6e2dd77b36d9}
+      \strng{fullhash}{cb5c5bbefca1c68512be6e2dd77b36d9}
+      \field{sortinit}{D}
+      \field{sortinithash}{78f7c4753a2004675f316a80bdb31742}
+      \field{extrayear}{1}
+      \field{labelyear}{2006}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Bayesian Statistics 8}
+      \field{title}{{Sequential Monte Carlo methods for Bayesian computation}}
+      \field{year}{2006}
+      \field{pages}{}
+      \range{pages}{-1}
+      \warn{\item Range field 'pages' in entry 'DelMoral:2006wv' is malformed, skipping}
+    \endentry
+    \entry{DelMoral:2006hc}{article}{}
+      \name{author}{3}{}{%
+        {{uniquename=0,hash=d771d04fc13831e7ab9152984eaa0d86}{%
+           family={Del\bibnamedelima Moral},
+           family_i={D\bibinitperiod\bibinitdelim M\bibinitperiod},
+           given={Pierre},
+           given_i={P\bibinitperiod}}}%
+        {{uniquename=0,hash=aca5faad8b57b96b59c12fc59d0b6eb4}{%
+           family={Doucet},
+           family_i={D\bibinitperiod},
+           given={Arnaud},
+           given_i={A\bibinitperiod}}}%
+        {{uniquename=0,hash=fd2c45b545dcce044e994f763abfcd70}{%
+           family={Jasra},
+           family_i={J\bibinitperiod},
+           given={Ajay},
+           given_i={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{cb5c5bbefca1c68512be6e2dd77b36d9}
+      \strng{fullhash}{cb5c5bbefca1c68512be6e2dd77b36d9}
+      \field{sortinit}{D}
+      \field{sortinithash}{78f7c4753a2004675f316a80bdb31742}
+      \field{extrayear}{2}
+      \field{labelyear}{2006}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of Royal Statistical Society B}
+      \field{number}{3}
+      \field{title}{{Sequential Monte Carlo samplers}}
+      \field{volume}{68}
+      \field{year}{2006}
+      \field{pages}{411\bibrangedash 436}
+      \range{pages}{26}
+    \endentry
+    \entry{Douc:2005wa}{inproceedings}{}
+      \name{author}{3}{}{%
+        {{uniquename=0,hash=8016e20ffe53cd289b6f027afc9eab01}{%
+           family={Douc},
+           family_i={D\bibinitperiod},
+           given={Randal},
+           given_i={R\bibinitperiod}}}%
+        {{uniquename=0,hash=f2ffb0fcf2473b1619d2032fd10cead7}{%
+           family={Cappé},
+           family_i={C\bibinitperiod},
+           given={Olivier},
+           given_i={O\bibinitperiod}}}%
+        {{uniquename=0,hash=32b961a3e53c735ea5488bf0af14a6da}{%
+           family={Moulines},
+           family_i={M\bibinitperiod},
+           given={Eric},
+           given_i={E\bibinitperiod}}}%
+      }
+      \strng{namehash}{dec45ecb094865df8f62a6af3c77a410}
+      \strng{fullhash}{dec45ecb094865df8f62a6af3c77a410}
+      \field{sortinit}{D}
+      \field{sortinithash}{78f7c4753a2004675f316a80bdb31742}
+      \field{labelyear}{2005}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the 4th International Symposium on Imange and Signal Processing and Analysis}
+      \field{title}{{Comparison of resampling schemes for particle filtering}}
+      \field{year}{2005}
+      \field{pages}{1\bibrangedash 6}
+      \range{pages}{6}
+    \endentry
+    \entry{Doucet:2011us}{incollection}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,hash=aca5faad8b57b96b59c12fc59d0b6eb4}{%
+           family={Doucet},
+           family_i={D\bibinitperiod},
+           given={Arnaud},
+           given_i={A\bibinitperiod}}}%
+        {{uniquename=0,hash=17d1caa8d265744784c2779daffb0a90}{%
+           family={Johansen},
+           family_i={J\bibinitperiod},
+           given={Adam\bibnamedelima M.},
+           given_i={A\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Oxford University Press}%
+      }
+      \strng{namehash}{e023bba3ac0075634464dc6fed59cf44}
+      \strng{fullhash}{e023bba3ac0075634464dc6fed59cf44}
+      \field{sortinit}{D}
+      \field{sortinithash}{78f7c4753a2004675f316a80bdb31742}
+      \field{labelyear}{2011}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{The Oxford Handbook of Non-linear Filtering}
+      \field{title}{{A tutorial on particle filtering and smoothing: Fifteen years later}}
+      \field{year}{2011}
+      \field{pages}{}
+      \range{pages}{-1}
+      \warn{\item Range field 'pages' in entry 'Doucet:2011us' is malformed, skipping}
+    \endentry
+    \entry{Johansen:2009wd}{article}{}
+      \name{author}{1}{}{%
+        {{uniquename=0,hash=17d1caa8d265744784c2779daffb0a90}{%
+           family={Johansen},
+           family_i={J\bibinitperiod},
+           given={Adam\bibnamedelima M.},
+           given_i={A\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
+      }
+      \strng{namehash}{17d1caa8d265744784c2779daffb0a90}
+      \strng{fullhash}{17d1caa8d265744784c2779daffb0a90}
+      \field{sortinit}{J}
+      \field{sortinithash}{ec3950a647c092421b9fcca6d819504a}
+      \field{labelyear}{2009}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of Statistical Software}
+      \field{number}{6}
+      \field{title}{{SMCTC: sequential Monte Carlo in C++}}
+      \field{volume}{30}
+      \field{year}{2009}
+      \field{pages}{1\bibrangedash 41}
+      \range{pages}{41}
+    \endentry
+    \entry{Lee:2010fm}{article}{}
+      \name{author}{5}{}{%
+        {{uniquename=0,hash=b03496173658ac066e649b50540c712e}{%
+           family={Lee},
+           family_i={L\bibinitperiod},
+           given={Anthony},
+           given_i={A\bibinitperiod}}}%
+        {{uniquename=0,hash=51b85f640c5a83033c4a75e713661c1d}{%
+           family={Yau},
+           family_i={Y\bibinitperiod},
+           given={Christopher},
+           given_i={C\bibinitperiod}}}%
+        {{uniquename=0,hash=c6cd20384ca328d9dec4b0c591fbb28f}{%
+           family={Giles},
+           family_i={G\bibinitperiod},
+           given={Michael\bibnamedelima B.},
+           given_i={M\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+        {{uniquename=0,hash=aca5faad8b57b96b59c12fc59d0b6eb4}{%
+           family={Doucet},
+           family_i={D\bibinitperiod},
+           given={Arnaud},
+           given_i={A\bibinitperiod}}}%
+        {{uniquename=0,hash=f7f4371beaec9ed5f6ed658bb2a9f9f5}{%
+           family={Holmes},
+           family_i={H\bibinitperiod},
+           given={Christopher\bibnamedelima C.},
+           given_i={C\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+      }
+      \strng{namehash}{a40305f93ef6b90ea2fb7d45361ea66c}
+      \strng{fullhash}{55be7a8da18702bd7bd4c3de692cb57b}
+      \field{sortinit}{L}
+      \field{sortinithash}{872351f18d0f736066eda0bf18bfa4f7}
+      \field{labelyear}{2010}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of Computational and Graphical Statistics}
+      \field{number}{4}
+      \field{title}{{On the utility of graphics cards to perform massively parallel simulation of advanced Monte Carlo methods}}
+      \field{volume}{19}
+      \field{year}{2010}
+      \field{pages}{769\bibrangedash 789}
+      \range{pages}{21}
+    \endentry
+    \entry{Liu:1998iu}{article}{}
+      \name{author}{2}{}{%
+        {{uniquename=0,hash=58b6ab30975eca2201e264d805607d70}{%
+           family={Liu},
+           family_i={L\bibinitperiod},
+           given={Jun\bibnamedelima S.},
+           given_i={J\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+        {{uniquename=0,hash=5bb19d0f142e7bd52543c9c4cf45c4c7}{%
+           family={Chen},
+           family_i={C\bibinitperiod},
+           given={Rong},
+           given_i={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{275c4d33650964af2ec6fc120d815c7d}
+      \strng{fullhash}{275c4d33650964af2ec6fc120d815c7d}
+      \field{sortinit}{L}
+      \field{sortinithash}{872351f18d0f736066eda0bf18bfa4f7}
+      \field{labelyear}{1998}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of the American Statistical Association}
+      \field{number}{443}
+      \field{title}{{Sequential Monte Carlo methods for dynamic systems}}
+      \field{volume}{93}
+      \field{year}{1998}
+      \field{pages}{1032\bibrangedash 1044}
+      \range{pages}{13}
+    \endentry
+    \entry{Neal:2001we}{article}{}
+      \name{author}{1}{}{%
+        {{uniquename=0,hash=65d7fa5657a0bb6a58702171f1d98cf0}{%
+           family={Neal},
+           family_i={N\bibinitperiod},
+           given={Radford\bibnamedelima M.},
+           given_i={R\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
+      }
+      \strng{namehash}{65d7fa5657a0bb6a58702171f1d98cf0}
+      \strng{fullhash}{65d7fa5657a0bb6a58702171f1d98cf0}
+      \field{sortinit}{N}
+      \field{sortinithash}{925374ca63e7594de7fafdb83e64d41d}
+      \field{labelyear}{2001}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Statistics and Computing}
+      \field{number}{2}
+      \field{title}{{Annealed importance sampling}}
+      \field{volume}{11}
+      \field{year}{2001}
+      \field{pages}{125\bibrangedash 139}
+      \range{pages}{15}
+    \endentry
+    \entry{Peters:2005wh}{thesis}{}
+      \name{author}{1}{}{%
+        {{uniquename=0,hash=95bde81465e071dba2657e1bc287f3f9}{%
+           family={Peters},
+           family_i={P\bibinitperiod},
+           given={Gareth\bibnamedelima W},
+           given_i={G\bibinitperiod\bibinitdelim W\bibinitperiod}}}%
+      }
+      \strng{namehash}{95bde81465e071dba2657e1bc287f3f9}
+      \strng{fullhash}{95bde81465e071dba2657e1bc287f3f9}
+      \field{sortinit}{P}
+      \field{sortinithash}{c0a4896d0e424f9ca4d7f14f2b3428e7}
+      \field{labelyear}{2005}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{{Topics in sequential Monte Carlo samplers}}
+      \field{type}{mathesis}
+      \field{year}{2005}
+    \endentry
+    \entry{Salmon:2011um}{article}{}
+      \name{author}{4}{}{%
+        {{uniquename=0,hash=1eb6b9ab25eb9b3e51c52c42536bab9b}{%
+           family={Salmon},
+           family_i={S\bibinitperiod},
+           given={John\bibnamedelima K.},
+           given_i={J\bibinitperiod\bibinitdelim K\bibinitperiod}}}%
+        {{uniquename=0,hash=2fc9a5e66cff1a39cc282638f4bde261}{%
+           family={Moraes},
+           family_i={M\bibinitperiod},
+           given={Mark\bibnamedelima A.},
+           given_i={M\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+        {{uniquename=0,hash=ef1119cae3bc33191d86239f179d9c18}{%
+           family={Dror},
+           family_i={D\bibinitperiod},
+           given={Ron\bibnamedelima O.},
+           given_i={R\bibinitperiod\bibinitdelim O\bibinitperiod}}}%
+        {{uniquename=0,hash=d14c2080ec5f9fa3e2c7dad904c9cc89}{%
+           family={Shaw},
+           family_i={S\bibinitperiod},
+           given={David\bibnamedelima E.},
+           given_i={D\bibinitperiod\bibinitdelim E\bibinitperiod}}}%
+      }
+      \strng{namehash}{3f8b392fd44c4ea929e3e94a01dccd4b}
+      \strng{fullhash}{25796022242b6302442d505fa781597a}
+      \field{sortinit}{S}
+      \field{sortinithash}{fd1e7c5ab79596b13dbbb67f8d70fb5a}
+      \field{labelyear}{2011}
+      \field{datelabelsource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Proceedings of 2011 International Conference for High Performance Computing, Networking, Storage and Analysis}
+      \field{title}{{Parallel random numbers: As easy as 1, 2, 3}}
+      \field{year}{2011}
+      \field{pages}{1\bibrangedash 12}
+      \range{pages}{12}
+    \endentry
+  \endsortlist
+\endrefsection
+\endinput
+

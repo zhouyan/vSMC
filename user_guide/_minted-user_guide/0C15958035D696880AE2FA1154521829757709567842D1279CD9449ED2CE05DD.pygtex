@@ -1,0 +1,5 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{auto} \PYG{o}{\PYGZam{}}\PYG{n}{seed} \PYG{o}{=} \PYG{n}{SeedGenerator}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{void}\PYG{p}{,} \PYG{k+kt}{unsigned}\PYG{o}{\PYGZgt{}::}\PYG{n}{instance}\PYG{p}{();}
+\PYG{n}{RNG} \PYG{n+nf}{rng1}\PYG{p}{(}\PYG{n}{seed}\PYG{p}{.}\PYG{n}{get}\PYG{p}{());} \PYG{c+c1}{// Construct rng1}
+\PYG{n}{RNG} \PYG{n+nf}{rng2}\PYG{p}{(}\PYG{n}{seed}\PYG{p}{.}\PYG{n}{get}\PYG{p}{());} \PYG{c+c1}{// Construct rng2 with another seed}
+\end{Verbatim}

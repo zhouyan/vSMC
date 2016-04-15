@@ -1,0 +1,5 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{for} \PYG{p}{(}\PYG{k}{auto} \PYG{n+nl}{sp} \PYG{p}{:} \PYG{n}{particle}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+    \PYG{c+c1}{// operations on sp}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

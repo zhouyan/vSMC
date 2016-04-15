@@ -1,0 +1,33 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
+\PYG{k}{using} \PYG{n}{PFStateBase} \PYG{o}{=} \PYG{n}{StateMatrix}\PYG{o}{\PYGZlt{}}\PYG{n}{RowMajor}\PYG{p}{,} \PYG{l+m+mi}{4}\PYG{p}{,} \PYG{k+kt}{double}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
+
+\PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{T}\PYG{o}{\PYGZgt{}}
+\PYG{k}{using} \PYG{n}{PFStateSPBase} \PYG{o}{=} \PYG{n}{PFStateBase}\PYG{o}{::}\PYG{n}{single\PYGZus{}particle\PYGZus{}type}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
+
+\PYG{k}{class} \PYG{n+nc}{PFState} \PYG{o}{:} \PYG{k}{public} \PYG{n}{PFStateBase}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{public}\PYG{o}{:}
+    \PYG{k}{using} \PYG{n}{PFStateBase}\PYG{o}{::}\PYG{n}{StateMatrix}\PYG{p}{;}
+
+    \PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{S}\PYG{o}{\PYGZgt{}}
+    \PYG{k}{class} \PYG{n+nc}{single\PYGZus{}particle\PYGZus{}type} \PYG{o}{:} \PYG{k}{public} \PYG{n}{PFStateSPBase}\PYG{o}{\PYGZlt{}}\PYG{n}{S}\PYG{o}{\PYGZgt{}}
+    \PYG{p}{\PYGZob{}}
+        \PYG{k}{public}\PYG{o}{:}
+        \PYG{k}{using} \PYG{n}{PFStateSPBase}\PYG{o}{\PYGZlt{}}\PYG{n}{S}\PYG{o}{\PYGZgt{}::}\PYG{n}{single\PYGZus{}particle\PYGZus{}type}\PYG{p}{;}
+
+        \PYG{k+kt}{double} \PYG{o}{\PYGZam{}}\PYG{n}{pos\PYGZus{}x}\PYG{p}{()} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{state}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{);} \PYG{p}{\PYGZcb{}}
+        \PYG{k+kt}{double} \PYG{o}{\PYGZam{}}\PYG{n}{pos\PYGZus{}y}\PYG{p}{()} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{state}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{);} \PYG{p}{\PYGZcb{}}
+        \PYG{k+kt}{double} \PYG{o}{\PYGZam{}}\PYG{n}{vel\PYGZus{}x}\PYG{p}{()} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{state}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{);} \PYG{p}{\PYGZcb{}}
+        \PYG{k+kt}{double} \PYG{o}{\PYGZam{}}\PYG{n}{vel\PYGZus{}y}\PYG{p}{()} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{state}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{);} \PYG{p}{\PYGZcb{}}
+
+        \PYG{c+c1}{// Return $\ell(X_t^{(i)}|Y_t)$}
+        \PYG{k+kt}{double} \PYG{n}{log\PYGZus{}likelihood}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{);}
+    \PYG{p}{\PYGZcb{};}
+
+    \PYG{k+kt}{void} \PYG{n+nf}{read\PYGZus{}data}\PYG{p}{(}\PYG{k}{const} \PYG{k+kt}{char} \PYG{o}{*}\PYG{n}{param}\PYG{p}{);}
+
+    \PYG{k}{private}\PYG{o}{:}
+    \PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{obs\PYGZus{}x\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{obs\PYGZus{}y\PYGZus{}}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+\end{Verbatim}

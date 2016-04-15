@@ -1,0 +1,4 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{ResampleType}\PYG{o}{\PYGZgt{}}
+\PYG{k+kt}{void} \PYG{n}{resize\PYGZus{}by\PYGZus{}resample}\PYG{p}{(}\PYG{n}{size\PYGZus{}type} \PYG{n}{N}\PYG{p}{,} \PYG{n}{ResampleType} \PYG{o}{\PYGZam{}\PYGZam{}}\PYG{n}{op}\PYG{p}{);}
+\end{Verbatim}

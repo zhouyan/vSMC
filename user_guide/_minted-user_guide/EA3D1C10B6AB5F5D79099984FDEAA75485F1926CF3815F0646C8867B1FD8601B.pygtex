@@ -1,0 +1,3 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{typedef} \PYG{n+nf}{int} \PYG{p}{(}\PYG{o}{*}\PYG{n}{vsmc\PYGZus{}sampler\PYGZus{}move\PYGZus{}type}\PYG{p}{)(}\PYG{k+kt}{int}\PYG{p}{,} \PYG{n}{vsmc\PYGZus{}particle}\PYG{p}{);}
+\end{Verbatim}

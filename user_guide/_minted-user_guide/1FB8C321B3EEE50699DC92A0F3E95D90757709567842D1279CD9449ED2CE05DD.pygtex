@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{RNGSet}\PYG{o}{\PYGZlt{}}\PYG{n}{RNG}\PYG{o}{\PYGZgt{}} \PYG{n}{rng\PYGZus{}set}\PYG{p}{(}\PYG{n}{N}\PYG{p}{);} \PYG{c+c1}{// A set of N RNGs}
+\PYG{n}{rng\PYGZus{}set}\PYG{p}{.}\PYG{n}{resize}\PYG{p}{(}\PYG{n}{n}\PYG{p}{);}      \PYG{c+c1}{// Change the size of the set}
+\PYG{n}{rng\PYGZus{}set}\PYG{p}{.}\PYG{n}{seed}\PYG{p}{();}         \PYG{c+c1}{// Seed each RNG in the set with Seed::instance()}
+\PYG{n}{rng\PYGZus{}set}\PYG{p}{[}\PYG{n}{i}\PYG{p}{];}             \PYG{c+c1}{// Get a reference to the i\PYGZhy{}th RNG}
+\end{Verbatim}

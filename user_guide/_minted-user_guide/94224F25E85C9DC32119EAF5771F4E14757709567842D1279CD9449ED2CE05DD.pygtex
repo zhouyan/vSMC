@@ -1,0 +1,4 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{InputIter}\PYG{o}{\PYGZgt{}}
+\PYG{k+kt}{void} \PYG{n}{resize\PYGZus{}by\PYGZus{}mask}\PYG{p}{(}\PYG{n}{size\PYGZus{}type} \PYG{n}{N}\PYG{p}{,} \PYG{n}{InputIter} \PYG{n}{mask}\PYG{p}{);}
+\end{Verbatim}

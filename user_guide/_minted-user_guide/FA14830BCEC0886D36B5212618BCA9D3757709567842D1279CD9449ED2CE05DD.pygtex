@@ -1,0 +1,262 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}vsmc/vsmc.hpp\PYGZgt{}}
+
+\PYG{k}{static} \PYG{k}{constexpr} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{N} \PYG{o}{=} \PYG{l+m+mi}{10000}\PYG{p}{;} \PYG{c+c1}{// Number of particles}
+\PYG{k}{static} \PYG{k}{constexpr} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{n} \PYG{o}{=} \PYG{l+m+mi}{100}\PYG{p}{;}   \PYG{c+c1}{// Number of data points}
+\PYG{k}{static} \PYG{k}{constexpr} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{PosX} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}
+\PYG{k}{static} \PYG{k}{constexpr} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{PosY} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{;}
+\PYG{k}{static} \PYG{k}{constexpr} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{VelX} \PYG{o}{=} \PYG{l+m+mi}{2}\PYG{p}{;}
+\PYG{k}{static} \PYG{k}{constexpr} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{VelY} \PYG{o}{=} \PYG{l+m+mi}{3}\PYG{p}{;}
+
+\PYG{k}{static} \PYG{k}{constexpr} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{G} \PYG{o}{=} \PYG{l+m+mi}{10240}\PYG{p}{;}
+\PYG{k}{static} \PYG{k}{constexpr} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{L} \PYG{o}{=} \PYG{l+m+mi}{256}\PYG{p}{;}
+
+\PYG{k}{typedef} \PYG{k}{struct} \PYG{p}{\PYGZob{}}
+    \PYG{n}{cl\PYGZus{}float} \PYG{n}{pos\PYGZus{}x}\PYG{p}{;}
+    \PYG{n}{cl\PYGZus{}float} \PYG{n}{pos\PYGZus{}y}\PYG{p}{;}
+    \PYG{n}{cl\PYGZus{}float} \PYG{n}{vel\PYGZus{}x}\PYG{p}{;}
+    \PYG{n}{cl\PYGZus{}float} \PYG{n}{vel\PYGZus{}y}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}} \PYG{n}{cl\PYGZus{}pf\PYGZus{}sp}\PYG{p}{;}
+
+\PYG{k}{using} \PYG{n}{PFStateBase} \PYG{o}{=} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{StateMatrix}\PYG{o}{\PYGZlt{}}\PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{RowMajor}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{cl\PYGZus{}pf\PYGZus{}sp}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
+
+\PYG{k}{class} \PYG{n+nc}{PFState} \PYG{o}{:} \PYG{k}{public} \PYG{n}{PFStateBase}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{public}\PYG{o}{:}
+    \PYG{k}{using} \PYG{n}{size\PYGZus{}type} \PYG{o}{=} \PYG{n}{cl\PYGZus{}int}\PYG{p}{;}
+    \PYG{k}{using} \PYG{n}{PFStateBase}\PYG{o}{::}\PYG{n}{StateMatrix}\PYG{p}{;}
+
+    \PYG{k+kt}{void} \PYG{n+nf}{initialize}\PYG{p}{(}\PYG{k}{const} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLContext} \PYG{o}{\PYGZam{}}\PYG{n}{context}\PYG{p}{,}
+        \PYG{k}{const} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLCommandQueue} \PYG{o}{\PYGZam{}}\PYG{n}{command\PYGZus{}queue}\PYG{p}{,}
+        \PYG{k}{const} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLKernel} \PYG{o}{\PYGZam{}}\PYG{n}{kernel}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{command\PYGZus{}queue\PYGZus{}} \PYG{o}{=} \PYG{n}{command\PYGZus{}queue}\PYG{p}{;}
+        \PYG{n}{kernel\PYGZus{}} \PYG{o}{=} \PYG{n}{kernel}\PYG{p}{;}
+
+        \PYG{n}{dev\PYGZus{}data\PYGZus{}} \PYG{o}{=}
+            \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory}\PYG{p}{(}\PYG{n}{context}\PYG{p}{,} \PYG{n}{CL\PYGZus{}MEM\PYGZus{}READ\PYGZus{}WRITE} \PYG{o}{|} \PYG{n}{CL\PYGZus{}MEM\PYGZus{}HOST\PYGZus{}READ\PYGZus{}ONLY}\PYG{p}{,}
+                \PYG{k}{sizeof}\PYG{p}{(}\PYG{n}{cl\PYGZus{}pf\PYGZus{}sp}\PYG{p}{)} \PYG{o}{*} \PYG{n}{size}\PYG{p}{());}
+        \PYG{n}{dev\PYGZus{}weight\PYGZus{}} \PYG{o}{=}
+            \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory}\PYG{p}{(}\PYG{n}{context}\PYG{p}{,} \PYG{n}{CL\PYGZus{}MEM\PYGZus{}WRITE\PYGZus{}ONLY} \PYG{o}{|} \PYG{n}{CL\PYGZus{}MEM\PYGZus{}HOST\PYGZus{}READ\PYGZus{}ONLY}\PYG{p}{,}
+                \PYG{k}{sizeof}\PYG{p}{(}\PYG{n}{cl\PYGZus{}float}\PYG{p}{)} \PYG{o}{*} \PYG{n}{size}\PYG{p}{());}
+        \PYG{n}{dev\PYGZus{}rng\PYGZus{}set\PYGZus{}} \PYG{o}{=}
+            \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory}\PYG{p}{(}\PYG{n}{context}\PYG{p}{,} \PYG{n}{CL\PYGZus{}MEM\PYGZus{}WRITE\PYGZus{}ONLY} \PYG{o}{|} \PYG{n}{CL\PYGZus{}MEM\PYGZus{}HOST\PYGZus{}READ\PYGZus{}ONLY}\PYG{p}{,}
+                \PYG{k}{sizeof}\PYG{p}{(}\PYG{n}{vsmc\PYGZus{}threefry4x32}\PYG{p}{)} \PYG{o}{*} \PYG{n}{size}\PYG{p}{());}
+        \PYG{n}{dev\PYGZus{}index\PYGZus{}} \PYG{o}{=}
+            \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory}\PYG{p}{(}\PYG{n}{context}\PYG{p}{,} \PYG{n}{CL\PYGZus{}MEM\PYGZus{}READ\PYGZus{}ONLY} \PYG{o}{|} \PYG{n}{CL\PYGZus{}MEM\PYGZus{}HOST\PYGZus{}WRITE\PYGZus{}ONLY}\PYG{p}{,}
+                \PYG{k}{sizeof}\PYG{p}{(}\PYG{n}{cl\PYGZus{}int}\PYG{p}{)} \PYG{o}{*} \PYG{n}{size}\PYG{p}{());}
+        \PYG{n}{dev\PYGZus{}obs\PYGZus{}x\PYGZus{}} \PYG{o}{=} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory}\PYG{p}{(}\PYG{n}{context}\PYG{p}{,}
+            \PYG{n}{CL\PYGZus{}MEM\PYGZus{}READ\PYGZus{}ONLY} \PYG{o}{|} \PYG{n}{CL\PYGZus{}MEM\PYGZus{}HOST\PYGZus{}WRITE\PYGZus{}ONLY}\PYG{p}{,} \PYG{k}{sizeof}\PYG{p}{(}\PYG{n}{cl\PYGZus{}float}\PYG{p}{)} \PYG{o}{*} \PYG{n}{n}\PYG{p}{);}
+        \PYG{n}{dev\PYGZus{}obs\PYGZus{}y\PYGZus{}} \PYG{o}{=} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory}\PYG{p}{(}\PYG{n}{context}\PYG{p}{,}
+            \PYG{n}{CL\PYGZus{}MEM\PYGZus{}READ\PYGZus{}ONLY} \PYG{o}{|} \PYG{n}{CL\PYGZus{}MEM\PYGZus{}HOST\PYGZus{}WRITE\PYGZus{}ONLY}\PYG{p}{,} \PYG{k}{sizeof}\PYG{p}{(}\PYG{n}{cl\PYGZus{}float}\PYG{p}{)} \PYG{o}{*} \PYG{n}{n}\PYG{p}{);}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k+kt}{void} \PYG{n+nf}{copy}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{N}\PYG{p}{,} \PYG{k}{const} \PYG{n}{cl\PYGZus{}int} \PYG{o}{*}\PYG{n}{index}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{.}\PYG{n}{enqueue\PYGZus{}write\PYGZus{}buffer}\PYG{p}{(}\PYG{n}{dev\PYGZus{}index\PYGZus{}}\PYG{p}{,} \PYG{n}{CL\PYGZus{}TRUE}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{,}
+            \PYG{k}{sizeof}\PYG{p}{(}\PYG{n}{cl\PYGZus{}int}\PYG{p}{)} \PYG{o}{*} \PYG{n}{N}\PYG{p}{,} \PYG{k}{const\PYGZus{}cast}\PYG{o}{\PYGZlt{}}\PYG{n}{cl\PYGZus{}int} \PYG{o}{*\PYGZgt{}}\PYG{p}{(}\PYG{n}{index}\PYG{p}{));}
+
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{k}{static\PYGZus{}cast}\PYG{o}{\PYGZlt{}}\PYG{n}{cl\PYGZus{}int}\PYG{o}{\PYGZgt{}}\PYG{p}{(}\PYG{n}{size}\PYG{p}{()));}
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{dev\PYGZus{}data\PYGZus{}}\PYG{p}{);}
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{dev\PYGZus{}index\PYGZus{}}\PYG{p}{);}
+
+        \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{.}\PYG{n}{enqueue\PYGZus{}nd\PYGZus{}range\PYGZus{}kernel}\PYG{p}{(}\PYG{n}{kernel\PYGZus{}}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLNDRange}\PYG{p}{(),}
+            \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLNDRange}\PYG{p}{(}\PYG{n}{G}\PYG{p}{),} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLNDRange}\PYG{p}{(}\PYG{n}{L}\PYG{p}{));}
+        \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{.}\PYG{n}{finish}\PYG{p}{();}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k+kt}{void} \PYG{n+nf}{copy\PYGZus{}to\PYGZus{}host}\PYG{p}{()}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{.}\PYG{n}{enqueue\PYGZus{}read\PYGZus{}buffer}\PYG{p}{(}
+            \PYG{n}{dev\PYGZus{}data\PYGZus{}}\PYG{p}{,} \PYG{n}{CL\PYGZus{}TRUE}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{k}{sizeof}\PYG{p}{(}\PYG{n}{cl\PYGZus{}pf\PYGZus{}sp}\PYG{p}{)} \PYG{o}{*} \PYG{n}{size}\PYG{p}{(),} \PYG{n}{data}\PYG{p}{());}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k+kt}{void} \PYG{n+nf}{read\PYGZus{}data}\PYG{p}{(}\PYG{k}{const} \PYG{k+kt}{char} \PYG{o}{*}\PYG{n}{param}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{k}{if} \PYG{p}{(}\PYG{n}{param} \PYG{o}{==} \PYG{k}{nullptr}\PYG{p}{)}
+            \PYG{k}{return}\PYG{p}{;}
+
+        \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{n}{cl\PYGZus{}float}\PYG{o}{\PYGZgt{}} \PYG{n}{obs\PYGZus{}x}\PYG{p}{(}\PYG{n}{n}\PYG{p}{);}
+        \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{n}{cl\PYGZus{}float}\PYG{o}{\PYGZgt{}} \PYG{n}{obs\PYGZus{}y}\PYG{p}{(}\PYG{n}{n}\PYG{p}{);}
+        \PYG{n}{std}\PYG{o}{::}\PYG{n}{ifstream} \PYG{n}{data}\PYG{p}{(}\PYG{n}{param}\PYG{p}{);}
+        \PYG{k}{for} \PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{!=} \PYG{n}{n}\PYG{p}{;} \PYG{o}{++}\PYG{n}{i}\PYG{p}{)}
+            \PYG{n}{data} \PYG{o}{\PYGZgt{}\PYGZgt{}} \PYG{n}{obs\PYGZus{}x}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{o}{\PYGZgt{}\PYGZgt{}} \PYG{n}{obs\PYGZus{}y}\PYG{p}{[}\PYG{n}{i}\PYG{p}{];}
+        \PYG{n}{data}\PYG{p}{.}\PYG{n}{close}\PYG{p}{();}
+
+        \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{.}\PYG{n}{enqueue\PYGZus{}write\PYGZus{}buffer}\PYG{p}{(}
+            \PYG{n}{dev\PYGZus{}obs\PYGZus{}x\PYGZus{}}\PYG{p}{,} \PYG{n}{CL\PYGZus{}TRUE}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{k}{sizeof}\PYG{p}{(}\PYG{n}{cl\PYGZus{}float}\PYG{p}{)} \PYG{o}{*} \PYG{n}{n}\PYG{p}{,} \PYG{n}{obs\PYGZus{}x}\PYG{p}{.}\PYG{n}{data}\PYG{p}{());}
+        \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{.}\PYG{n}{enqueue\PYGZus{}write\PYGZus{}buffer}\PYG{p}{(}
+            \PYG{n}{dev\PYGZus{}obs\PYGZus{}y\PYGZus{}}\PYG{p}{,} \PYG{n}{CL\PYGZus{}TRUE}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{k}{sizeof}\PYG{p}{(}\PYG{n}{cl\PYGZus{}float}\PYG{p}{)} \PYG{o}{*} \PYG{n}{n}\PYG{p}{,} \PYG{n}{obs\PYGZus{}y}\PYG{p}{.}\PYG{n}{data}\PYG{p}{());}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k}{const} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory} \PYG{o}{\PYGZam{}}\PYG{n}{dev\PYGZus{}data}\PYG{p}{()} \PYG{k}{const} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{n}{dev\PYGZus{}data\PYGZus{}}\PYG{p}{;} \PYG{p}{\PYGZcb{}}
+    \PYG{k}{const} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory} \PYG{o}{\PYGZam{}}\PYG{n}{dev\PYGZus{}weight}\PYG{p}{()} \PYG{k}{const} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{n}{dev\PYGZus{}weight\PYGZus{}}\PYG{p}{;} \PYG{p}{\PYGZcb{}}
+    \PYG{k}{const} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory} \PYG{o}{\PYGZam{}}\PYG{n}{dev\PYGZus{}rng\PYGZus{}set}\PYG{p}{()} \PYG{k}{const} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{n}{dev\PYGZus{}rng\PYGZus{}set\PYGZus{}}\PYG{p}{;} \PYG{p}{\PYGZcb{}}
+    \PYG{k}{const} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory} \PYG{o}{\PYGZam{}}\PYG{n}{dev\PYGZus{}obs\PYGZus{}x}\PYG{p}{()} \PYG{k}{const} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{n}{dev\PYGZus{}obs\PYGZus{}x\PYGZus{}}\PYG{p}{;} \PYG{p}{\PYGZcb{}}
+    \PYG{k}{const} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory} \PYG{o}{\PYGZam{}}\PYG{n}{dev\PYGZus{}obs\PYGZus{}y}\PYG{p}{()} \PYG{k}{const} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{n}{dev\PYGZus{}obs\PYGZus{}y\PYGZus{}}\PYG{p}{;} \PYG{p}{\PYGZcb{}}
+
+    \PYG{k}{private}\PYG{o}{:}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLCommandQueue} \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLKernel} \PYG{n}{kernel\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory} \PYG{n}{dev\PYGZus{}data\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory} \PYG{n}{dev\PYGZus{}rng\PYGZus{}set\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory} \PYG{n}{dev\PYGZus{}weight\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory} \PYG{n}{dev\PYGZus{}index\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory} \PYG{n}{dev\PYGZus{}obs\PYGZus{}x\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLMemory} \PYG{n}{dev\PYGZus{}obs\PYGZus{}y\PYGZus{}}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+
+\PYG{k}{class} \PYG{n+nc}{PFInit}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{public}\PYG{o}{:}
+    \PYG{n}{PFInit}\PYG{p}{(}\PYG{k}{const} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLCommandQueue} \PYG{o}{\PYGZam{}}\PYG{n}{command\PYGZus{}queue}\PYG{p}{,}
+        \PYG{k}{const} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLKernel} \PYG{o}{\PYGZam{}}\PYG{n}{kernel}\PYG{p}{)}
+        \PYG{o}{:} \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{(}\PYG{n}{command\PYGZus{}queue}\PYG{p}{),} \PYG{n}{kernel\PYGZus{}}\PYG{p}{(}\PYG{n}{kernel}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{k}{operator}\PYG{p}{()(}\PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Particle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{o}{\PYGZam{}}\PYG{n}{particle}\PYG{p}{,} \PYG{k+kt}{void} \PYG{o}{*}\PYG{n}{param}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{read\PYGZus{}data}\PYG{p}{(}\PYG{k}{static\PYGZus{}cast}\PYG{o}{\PYGZlt{}}\PYG{k}{const} \PYG{k+kt}{char} \PYG{o}{*\PYGZgt{}}\PYG{p}{(}\PYG{n}{param}\PYG{p}{));}
+
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{k}{static\PYGZus{}cast}\PYG{o}{\PYGZlt{}}\PYG{n}{cl\PYGZus{}int}\PYG{o}{\PYGZgt{}}\PYG{p}{(}\PYG{n}{particle}\PYG{p}{.}\PYG{n}{size}\PYG{p}{()));}
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{dev\PYGZus{}data}\PYG{p}{());}
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{dev\PYGZus{}rng\PYGZus{}set}\PYG{p}{());}
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{dev\PYGZus{}weight}\PYG{p}{());}
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{p}{,} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{dev\PYGZus{}obs\PYGZus{}x}\PYG{p}{());}
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{5}\PYG{p}{,} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{dev\PYGZus{}obs\PYGZus{}y}\PYG{p}{());}
+
+        \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{.}\PYG{n}{enqueue\PYGZus{}nd\PYGZus{}range\PYGZus{}kernel}\PYG{p}{(}\PYG{n}{kernel\PYGZus{}}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLNDRange}\PYG{p}{(),}
+            \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLNDRange}\PYG{p}{(}\PYG{n}{G}\PYG{p}{),} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLNDRange}\PYG{p}{(}\PYG{n}{L}\PYG{p}{));}
+        \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{.}\PYG{n}{finish}\PYG{p}{();}
+
+        \PYG{n}{weight\PYGZus{}}\PYG{p}{.}\PYG{n}{resize}\PYG{p}{(}\PYG{n}{particle}\PYG{p}{.}\PYG{n}{size}\PYG{p}{());}
+        \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{.}\PYG{n}{enqueue\PYGZus{}read\PYGZus{}buffer}\PYG{p}{(}\PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{dev\PYGZus{}weight}\PYG{p}{(),}
+            \PYG{n}{CL\PYGZus{}TRUE}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{k}{sizeof}\PYG{p}{(}\PYG{n}{cl\PYGZus{}float}\PYG{p}{)} \PYG{o}{*} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{size}\PYG{p}{(),} \PYG{n}{weight\PYGZus{}}\PYG{p}{.}\PYG{n}{data}\PYG{p}{());}
+        \PYG{n}{particle}\PYG{p}{.}\PYG{n}{weight}\PYG{p}{().}\PYG{n}{set\PYGZus{}log}\PYG{p}{(}\PYG{n}{weight\PYGZus{}}\PYG{p}{.}\PYG{n}{data}\PYG{p}{());}
+
+        \PYG{k}{return} \PYG{l+m+mi}{0}\PYG{p}{;}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k}{private}\PYG{o}{:}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLCommandQueue} \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLKernel} \PYG{n}{kernel\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{n}{cl\PYGZus{}float}\PYG{o}{\PYGZgt{}} \PYG{n}{weight\PYGZus{}}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+
+\PYG{k}{class} \PYG{n+nc}{PFMove}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{public}\PYG{o}{:}
+    \PYG{n}{PFMove}\PYG{p}{(}\PYG{k}{const} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLCommandQueue} \PYG{o}{\PYGZam{}}\PYG{n}{command\PYGZus{}queue}\PYG{p}{,}
+        \PYG{k}{const} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLKernel} \PYG{o}{\PYGZam{}}\PYG{n}{kernel}\PYG{p}{)}
+        \PYG{o}{:} \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{(}\PYG{n}{command\PYGZus{}queue}\PYG{p}{),} \PYG{n}{kernel\PYGZus{}}\PYG{p}{(}\PYG{n}{kernel}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{k}{operator}\PYG{p}{()(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{,} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Particle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{o}{\PYGZam{}}\PYG{n}{particle}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{k}{static\PYGZus{}cast}\PYG{o}{\PYGZlt{}}\PYG{n}{cl\PYGZus{}int}\PYG{o}{\PYGZgt{}}\PYG{p}{(}\PYG{n}{t}\PYG{p}{));}
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{k}{static\PYGZus{}cast}\PYG{o}{\PYGZlt{}}\PYG{n}{cl\PYGZus{}int}\PYG{o}{\PYGZgt{}}\PYG{p}{(}\PYG{n}{particle}\PYG{p}{.}\PYG{n}{size}\PYG{p}{()));}
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{dev\PYGZus{}data}\PYG{p}{());}
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{,} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{dev\PYGZus{}rng\PYGZus{}set}\PYG{p}{());}
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{4}\PYG{p}{,} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{dev\PYGZus{}weight}\PYG{p}{());}
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{5}\PYG{p}{,} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{dev\PYGZus{}obs\PYGZus{}x}\PYG{p}{());}
+        \PYG{n}{kernel\PYGZus{}}\PYG{p}{.}\PYG{n}{set\PYGZus{}arg}\PYG{p}{(}\PYG{l+m+mi}{6}\PYG{p}{,} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{dev\PYGZus{}obs\PYGZus{}y}\PYG{p}{());}
+
+        \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{.}\PYG{n}{enqueue\PYGZus{}nd\PYGZus{}range\PYGZus{}kernel}\PYG{p}{(}\PYG{n}{kernel\PYGZus{}}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLNDRange}\PYG{p}{(),}
+            \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLNDRange}\PYG{p}{(}\PYG{n}{G}\PYG{p}{),} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLNDRange}\PYG{p}{(}\PYG{n}{L}\PYG{p}{));}
+        \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{.}\PYG{n}{finish}\PYG{p}{();}
+
+        \PYG{n}{weight\PYGZus{}}\PYG{p}{.}\PYG{n}{resize}\PYG{p}{(}\PYG{n}{particle}\PYG{p}{.}\PYG{n}{size}\PYG{p}{());}
+        \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{.}\PYG{n}{enqueue\PYGZus{}read\PYGZus{}buffer}\PYG{p}{(}\PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{dev\PYGZus{}weight}\PYG{p}{(),}
+            \PYG{n}{CL\PYGZus{}TRUE}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{,} \PYG{k}{sizeof}\PYG{p}{(}\PYG{n}{cl\PYGZus{}float}\PYG{p}{)} \PYG{o}{*} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{size}\PYG{p}{(),} \PYG{n}{weight\PYGZus{}}\PYG{p}{.}\PYG{n}{data}\PYG{p}{());}
+        \PYG{n}{particle}\PYG{p}{.}\PYG{n}{weight}\PYG{p}{().}\PYG{n}{add\PYGZus{}log}\PYG{p}{(}\PYG{n}{weight\PYGZus{}}\PYG{p}{.}\PYG{n}{data}\PYG{p}{());}
+
+        \PYG{k}{return} \PYG{l+m+mi}{0}\PYG{p}{;}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k}{private}\PYG{o}{:}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLCommandQueue} \PYG{n}{command\PYGZus{}queue\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLKernel} \PYG{n}{kernel\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{n}{cl\PYGZus{}float}\PYG{o}{\PYGZgt{}} \PYG{n}{weight\PYGZus{}}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+
+\PYG{k}{class} \PYG{n+nc}{PFEval} \PYG{o}{:} \PYG{k}{public} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{MonitorEvalTBB}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{p}{,} \PYG{n}{PFEval}\PYG{o}{\PYGZgt{}}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{public}\PYG{o}{:}
+    \PYG{k+kt}{void} \PYG{n}{eval\PYGZus{}pre}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{,} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Particle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{o}{\PYGZam{}}\PYG{n}{particle}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{copy\PYGZus{}to\PYGZus{}host}\PYG{p}{();}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k+kt}{void} \PYG{n}{eval\PYGZus{}sp}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{,} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{dim}\PYG{p}{,}
+        \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{SingleParticle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{n}{sp}\PYG{p}{,} \PYG{k+kt}{double} \PYG{o}{*}\PYG{n}{r}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{r}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{=} \PYG{n}{sp}\PYG{p}{.}\PYG{n}{state}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{).}\PYG{n}{pos\PYGZus{}x}\PYG{p}{;}
+        \PYG{n}{r}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{=} \PYG{n}{sp}\PYG{p}{.}\PYG{n}{state}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{).}\PYG{n}{pos\PYGZus{}y}\PYG{p}{;}
+    \PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{};}
+
+\PYG{k+kt}{int} \PYG{n+nf}{main}\PYG{p}{()}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{auto} \PYG{n}{platform} \PYG{o}{=} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{cl\PYGZus{}get\PYGZus{}platform}\PYG{p}{().}\PYG{n}{front}\PYG{p}{();}
+    \PYG{n}{std}\PYG{o}{::}\PYG{n}{string} \PYG{n}{platform\PYGZus{}name}\PYG{p}{;}
+    \PYG{n}{platform}\PYG{p}{.}\PYG{n}{get\PYGZus{}info}\PYG{p}{(}\PYG{n}{CL\PYGZus{}PLATFORM\PYGZus{}NAME}\PYG{p}{,} \PYG{n}{platform\PYGZus{}name}\PYG{p}{);}
+    \PYG{n}{std}\PYG{o}{::}\PYG{n}{cout} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{l+s}{\PYGZdq{}Platform: \PYGZdq{}} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{platform\PYGZus{}name} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{std}\PYG{o}{::}\PYG{n}{endl}\PYG{p}{;}
+
+    \PYG{k}{auto} \PYG{n}{device} \PYG{o}{=} \PYG{n}{platform}\PYG{p}{.}\PYG{n}{get\PYGZus{}device}\PYG{p}{(}\PYG{n}{CL\PYGZus{}DEVICE\PYGZus{}TYPE\PYGZus{}DEFAULT}\PYG{p}{).}\PYG{n}{front}\PYG{p}{();}
+    \PYG{n}{std}\PYG{o}{::}\PYG{n}{string} \PYG{n}{device\PYGZus{}name}\PYG{p}{;}
+    \PYG{n}{device}\PYG{p}{.}\PYG{n}{get\PYGZus{}info}\PYG{p}{(}\PYG{n}{CL\PYGZus{}DEVICE\PYGZus{}NAME}\PYG{p}{,} \PYG{n}{device\PYGZus{}name}\PYG{p}{);}
+    \PYG{n}{std}\PYG{o}{::}\PYG{n}{cout} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{l+s}{\PYGZdq{}Device:   \PYGZdq{}} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{device\PYGZus{}name} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{std}\PYG{o}{::}\PYG{n}{endl}\PYG{p}{;}
+
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLContext} \PYG{n}{context}\PYG{p}{(}\PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLContextProperties}\PYG{p}{(}\PYG{n}{platform}\PYG{p}{),} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{o}{\PYGZam{}}\PYG{n}{device}\PYG{p}{);}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLCommandQueue} \PYG{n}{command\PYGZus{}queue}\PYG{p}{(}\PYG{n}{context}\PYG{p}{,} \PYG{n}{device}\PYG{p}{);}
+
+    \PYG{n}{std}\PYG{o}{::}\PYG{n}{ifstream} \PYG{n}{source\PYGZus{}cl}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}pf\PYGZus{}ocl.cl\PYGZdq{}}\PYG{p}{);}
+    \PYG{n}{std}\PYG{o}{::}\PYG{n}{string} \PYG{n}{source}\PYG{p}{((}\PYG{n}{std}\PYG{o}{::}\PYG{n}{istreambuf\PYGZus{}iterator}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{char}\PYG{o}{\PYGZgt{}}\PYG{p}{(}\PYG{n}{source\PYGZus{}cl}\PYG{p}{)),}
+        \PYG{n}{std}\PYG{o}{::}\PYG{n}{istreambuf\PYGZus{}iterator}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{char}\PYG{o}{\PYGZgt{}}\PYG{p}{());}
+    \PYG{n}{source\PYGZus{}cl}\PYG{p}{.}\PYG{n}{close}\PYG{p}{();}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLProgram} \PYG{n}{program}\PYG{p}{(}\PYG{n}{context}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{o}{\PYGZam{}}\PYG{n}{source}\PYG{p}{);}
+    \PYG{n}{program}\PYG{p}{.}\PYG{n}{build}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{o}{\PYGZam{}}\PYG{n}{device}\PYG{p}{,} \PYG{l+s}{\PYGZdq{}\PYGZhy{}I ../../include\PYGZdq{}}\PYG{p}{);}
+
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLKernel} \PYG{n}{kernel\PYGZus{}copy}\PYG{p}{(}\PYG{n}{program}\PYG{p}{,} \PYG{l+s}{\PYGZdq{}copy\PYGZdq{}}\PYG{p}{);}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLKernel} \PYG{n}{kernel\PYGZus{}init}\PYG{p}{(}\PYG{n}{program}\PYG{p}{,} \PYG{l+s}{\PYGZdq{}init\PYGZdq{}}\PYG{p}{);}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{CLKernel} \PYG{n}{kernel\PYGZus{}move}\PYG{p}{(}\PYG{n}{program}\PYG{p}{,} \PYG{l+s}{\PYGZdq{}move\PYGZdq{}}\PYG{p}{);}
+
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{pwgsm\PYGZus{}copy} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{pwgsm\PYGZus{}init} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{pwgsm\PYGZus{}move} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}
+
+    \PYG{n}{kernel\PYGZus{}copy}\PYG{p}{.}\PYG{n}{get\PYGZus{}work\PYGZus{}group\PYGZus{}info}\PYG{p}{(}
+        \PYG{n}{device}\PYG{p}{,} \PYG{n}{CL\PYGZus{}KERNEL\PYGZus{}PREFERRED\PYGZus{}WORK\PYGZus{}GROUP\PYGZus{}SIZE\PYGZus{}MULTIPLE}\PYG{p}{,} \PYG{n}{pwgsm\PYGZus{}copy}\PYG{p}{);}
+    \PYG{n}{kernel\PYGZus{}init}\PYG{p}{.}\PYG{n}{get\PYGZus{}work\PYGZus{}group\PYGZus{}info}\PYG{p}{(}
+        \PYG{n}{device}\PYG{p}{,} \PYG{n}{CL\PYGZus{}KERNEL\PYGZus{}PREFERRED\PYGZus{}WORK\PYGZus{}GROUP\PYGZus{}SIZE\PYGZus{}MULTIPLE}\PYG{p}{,} \PYG{n}{pwgsm\PYGZus{}init}\PYG{p}{);}
+    \PYG{n}{kernel\PYGZus{}move}\PYG{p}{.}\PYG{n}{get\PYGZus{}work\PYGZus{}group\PYGZus{}info}\PYG{p}{(}
+        \PYG{n}{device}\PYG{p}{,} \PYG{n}{CL\PYGZus{}KERNEL\PYGZus{}PREFERRED\PYGZus{}WORK\PYGZus{}GROUP\PYGZus{}SIZE\PYGZus{}MULTIPLE}\PYG{p}{,} \PYG{n}{pwgsm\PYGZus{}move}\PYG{p}{);}
+
+    \PYG{n}{std}\PYG{o}{::}\PYG{n}{cout} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{l+s}{\PYGZdq{}Kernel copy preferred work group size multiple: \PYGZdq{}}
+              \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{pwgsm\PYGZus{}copy} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{std}\PYG{o}{::}\PYG{n}{endl}\PYG{p}{;}
+    \PYG{n}{std}\PYG{o}{::}\PYG{n}{cout} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{l+s}{\PYGZdq{}Kernel init preferred work group size multiple: \PYGZdq{}}
+              \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{pwgsm\PYGZus{}init} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{std}\PYG{o}{::}\PYG{n}{endl}\PYG{p}{;}
+    \PYG{n}{std}\PYG{o}{::}\PYG{n}{cout} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{l+s}{\PYGZdq{}Kernel move preferred work group size multiple: \PYGZdq{}}
+              \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{pwgsm\PYGZus{}move} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{std}\PYG{o}{::}\PYG{n}{endl}\PYG{p}{;}
+
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Sampler}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{n}{sampler}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Multinomial}\PYG{p}{,} \PYG{l+m+mf}{0.5}\PYG{p}{);}
+    \PYG{n}{sampler}\PYG{p}{.}\PYG{n}{particle}\PYG{p}{().}\PYG{n}{value}\PYG{p}{().}\PYG{n}{initialize}\PYG{p}{(}\PYG{n}{context}\PYG{p}{,} \PYG{n}{command\PYGZus{}queue}\PYG{p}{,} \PYG{n}{kernel\PYGZus{}copy}\PYG{p}{);}
+    \PYG{n}{sampler}\PYG{p}{.}\PYG{n}{init}\PYG{p}{(}\PYG{n}{PFInit}\PYG{p}{(}\PYG{n}{command\PYGZus{}queue}\PYG{p}{,} \PYG{n}{kernel\PYGZus{}init}\PYG{p}{));}
+    \PYG{n}{sampler}\PYG{p}{.}\PYG{n}{move}\PYG{p}{(}\PYG{n}{PFMove}\PYG{p}{(}\PYG{n}{command\PYGZus{}queue}\PYG{p}{,} \PYG{n}{kernel\PYGZus{}move}\PYG{p}{),} \PYG{n+nb}{false}\PYG{p}{);}
+    \PYG{n}{sampler}\PYG{p}{.}\PYG{n}{monitor}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}pos\PYGZdq{}}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{PFEval}\PYG{p}{());}
+
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{StopWatch} \PYG{n}{watch}\PYG{p}{;}
+    \PYG{n}{watch}\PYG{p}{.}\PYG{n}{start}\PYG{p}{();}
+    \PYG{n}{sampler}\PYG{p}{.}\PYG{n}{initialize}\PYG{p}{(}\PYG{k}{const\PYGZus{}cast}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{char} \PYG{o}{*\PYGZgt{}}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}pf.data\PYGZdq{}}\PYG{p}{)).}\PYG{n}{iterate}\PYG{p}{(}\PYG{n}{n} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{);}
+    \PYG{n}{watch}\PYG{p}{.}\PYG{n}{stop}\PYG{p}{();}
+    \PYG{n}{std}\PYG{o}{::}\PYG{n}{cout} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{l+s}{\PYGZdq{}Time (ms): \PYGZdq{}} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{watch}\PYG{p}{.}\PYG{n}{milliseconds}\PYG{p}{()} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{std}\PYG{o}{::}\PYG{n}{endl}\PYG{p}{;}
+
+    \PYG{n}{std}\PYG{o}{::}\PYG{n}{ofstream} \PYG{n}{output}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}pf.out\PYGZdq{}}\PYG{p}{);}
+    \PYG{n}{output} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{sampler}\PYG{p}{;}
+    \PYG{n}{output}\PYG{p}{.}\PYG{n}{close}\PYG{p}{();}
+
+    \PYG{k}{return} \PYG{l+m+mi}{0}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

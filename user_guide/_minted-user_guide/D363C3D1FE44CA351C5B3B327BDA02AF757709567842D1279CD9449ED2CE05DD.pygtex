@@ -1,0 +1,4 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kt}{double} \PYG{n}{thres} \PYG{o}{=} \PYG{n}{sampler}\PYG{p}{.}\PYG{n}{threshold}\PYG{p}{();}
+\PYG{n}{sampler}\PYG{p}{.}\PYG{n}{threshold}\PYG{p}{(}\PYG{n}{thres}\PYG{p}{);}
+\end{Verbatim}

@@ -1,0 +1,3 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{sampler} \PYG{o}{=} \PYG{n}{other\PYGZus{}sampler}\PYG{p}{;}
+\end{Verbatim}

@@ -1,0 +1,17 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
+\PYG{k}{class} \PYG{n+nc}{PFState} \PYG{o}{:} \PYG{k}{public} \PYG{n}{PFStateBase}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{public}\PYG{o}{:}
+    \PYG{k}{using} \PYG{n}{PFStateBase}\PYG{o}{::}\PYG{n}{PFStateBase}\PYG{p}{;}
+
+    \PYG{c+c1}{// Return $\ell(X_t^{(i)}|Y_t)$}
+    \PYG{k+kt}{double} \PYG{n+nf}{log\PYGZus{}likelihood}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{,} \PYG{n}{size\PYGZus{}type} \PYG{n}{i}\PYG{p}{)} \PYG{k}{const}\PYG{p}{;}
+
+    \PYG{c+c1}{// Read data from an external file}
+    \PYG{k+kt}{void} \PYG{n+nf}{read\PYGZus{}data}\PYG{p}{(}\PYG{k}{const} \PYG{k+kt}{char} \PYG{o}{*}\PYG{n}{param}\PYG{p}{);}
+
+    \PYG{k}{private}\PYG{o}{:}
+    \PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{obs\PYGZus{}x\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{obs\PYGZus{}y\PYGZus{}}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+\end{Verbatim}

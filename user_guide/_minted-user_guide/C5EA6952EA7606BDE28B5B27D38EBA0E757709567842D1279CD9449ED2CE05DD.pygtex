@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{option\PYGZus{}map}
+    \PYG{p}{.}\PYG{n}{add}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}str\PYGZdq{}}\PYG{p}{,} \PYG{l+s}{\PYGZdq{}A string option with a default value\PYGZdq{}}\PYG{p}{,} \PYG{o}{\PYGZam{}}\PYG{n}{str}\PYG{p}{,} \PYG{l+s}{\PYGZdq{}default\PYGZdq{}}\PYG{p}{)}
+    \PYG{p}{.}\PYG{n}{add}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}n\PYGZdq{}}\PYG{p}{,} \PYG{l+s}{\PYGZdq{}An integer option\PYGZdq{}}\PYG{p}{,} \PYG{o}{\PYGZam{}}\PYG{n}{n}\PYG{p}{)}
+    \PYG{p}{.}\PYG{n}{add}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}vec\PYGZdq{}}\PYG{p}{,} \PYG{l+s}{\PYGZdq{}A vector option\PYGZdq{}}\PYG{p}{,} \PYG{o}{\PYGZam{}}\PYG{n}{vec}\PYG{p}{);}
+\end{Verbatim}

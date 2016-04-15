@@ -1,0 +1,3 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kt}{void} \PYG{n+nf}{resize\PYGZus{}by\PYGZus{}uniform}\PYG{p}{(}\PYG{n}{size\PYGZus{}type} \PYG{n}{N}\PYG{p}{);}
+\end{Verbatim}

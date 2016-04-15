@@ -1,0 +1,13 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{n}{RNGType}\PYG{o}{::}\PYG{n}{result\PYGZus{}type}\PYG{o}{\PYGZgt{}} \PYG{n}{r1}\PYG{p}{(}\PYG{n}{n}\PYG{p}{);}
+\PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{n}{RNGType}\PYG{o}{::}\PYG{n}{result\PYGZus{}type}\PYG{o}{\PYGZgt{}} \PYG{n}{r2}\PYG{p}{(}\PYG{n}{n}\PYG{p}{);}
+\PYG{n}{RNGType} \PYG{n}{rng1}\PYG{p}{;}
+\PYG{n}{RNGType} \PYG{n}{rng2}\PYG{p}{;}
+
+\PYG{k}{for} \PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{!=} \PYG{n}{n}\PYG{p}{;} \PYG{o}{++}\PYG{n}{i}\PYG{p}{)}
+    \PYG{n}{r1}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{o}{=} \PYG{n}{rng1}\PYG{p}{();}
+
+\PYG{n}{rng\PYGZus{}rand}\PYG{p}{(}\PYG{n}{rng2}\PYG{p}{,} \PYG{n}{n}\PYG{p}{,} \PYG{n}{r2}\PYG{p}{.}\PYG{n}{data}\PYG{p}{());}
+
+\PYG{n}{r1} \PYG{o}{==} \PYG{n}{r2}\PYG{p}{;} \PYG{c+c1}{// always true}
+\end{Verbatim}

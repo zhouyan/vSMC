@@ -1,0 +1,20 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{using} \PYG{n}{PFStateBase} \PYG{o}{=} \PYG{n}{StateMatrix}\PYG{o}{\PYGZlt{}}\PYG{n}{RowMajor}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{PFStateSP}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
+
+\PYG{k}{class} \PYG{n+nc}{PFState} \PYG{o}{:} \PYG{k}{public} \PYG{n}{PFStateBase}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{public}\PYG{o}{:}
+    \PYG{k}{using} \PYG{n}{PFStateBase}\PYG{o}{::}\PYG{n}{StateMatrix}\PYG{p}{;}
+
+    \PYG{k+kt}{double} \PYG{n+nf}{log\PYGZus{}likelihood}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{,} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{i}\PYG{p}{)} \PYG{k}{const}
+    \PYG{p}{\PYGZob{}}
+        \PYG{k}{return} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{state}\PYG{p}{(}\PYG{n}{i}\PYG{p}{,} \PYG{l+m+mi}{0}\PYG{p}{).}\PYG{n}{log\PYGZus{}likelihood}\PYG{p}{(}\PYG{n}{obs\PYGZus{}x\PYGZus{}}\PYG{p}{[}\PYG{n}{t}\PYG{p}{],} \PYG{n}{obs\PYGZus{}y\PYGZus{}}\PYG{p}{[}\PYG{n}{t}\PYG{p}{]);}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k+kt}{void} \PYG{n+nf}{read\PYGZus{}data}\PYG{p}{(}\PYG{k}{const} \PYG{k+kt}{char} \PYG{o}{*}\PYG{n}{param}\PYG{p}{);}
+
+    \PYG{k}{private}\PYG{o}{:}
+    \PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{obs\PYGZus{}x\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{obs\PYGZus{}y\PYGZus{}}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+\end{Verbatim}

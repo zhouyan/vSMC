@@ -1,0 +1,8 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{eval\PYGZus{}pre}\PYG{p}{(}\PYG{n}{SingleParticle}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}} \PYG{n}{sp}\PYG{p}{)}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{auto} \PYG{o}{\PYGZam{}}\PYG{n}{rng} \PYG{o}{=} \PYG{n}{sp}\PYG{p}{.}\PYG{n}{rng}\PYG{p}{();}
+    \PYG{c+c1}{// using rng to initialize state}
+    \PYG{c+c1}{// do some computation, likely far more costly than TLS}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

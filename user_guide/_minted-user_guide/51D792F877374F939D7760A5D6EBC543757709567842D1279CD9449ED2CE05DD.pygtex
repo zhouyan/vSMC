@@ -1,0 +1,5 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kt}{int} \PYG{n}{n}\PYG{p}{;}
+\PYG{n}{std}\PYG{o}{::}\PYG{n}{string} \PYG{n}{str}\PYG{p}{;}
+\PYG{n}{std}\PYG{o}{::}\PYG{n}{vector}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{vec}\PYG{p}{;}
+\end{Verbatim}

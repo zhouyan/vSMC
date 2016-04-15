@@ -1,0 +1,170 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c+cp}{\PYGZsh{}include} \PYG{c+cpf}{\PYGZlt{}vsmc/vsmc.hpp\PYGZgt{}}
+
+\PYG{k}{using} \PYG{n}{PFStateBase} \PYG{o}{=} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{StateMatrix}\PYG{o}{\PYGZlt{}}\PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{RowMajor}\PYG{p}{,} \PYG{l+m+mi}{4}\PYG{p}{,} \PYG{k+kt}{double}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
+
+\PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{T}\PYG{o}{\PYGZgt{}}
+\PYG{k}{using} \PYG{n}{PFStateSPBase} \PYG{o}{=} \PYG{n}{PFStateBase}\PYG{o}{::}\PYG{n}{single\PYGZus{}particle\PYGZus{}type}\PYG{o}{\PYGZlt{}}\PYG{n}{T}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
+
+\PYG{k}{class} \PYG{n+nc}{PFState} \PYG{o}{:} \PYG{k}{public} \PYG{n}{PFStateBase}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{public}\PYG{o}{:}
+    \PYG{k}{using} \PYG{n}{PFStateBase}\PYG{o}{::}\PYG{n}{StateMatrix}\PYG{p}{;}
+
+    \PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{S}\PYG{o}{\PYGZgt{}}
+    \PYG{k}{class} \PYG{n+nc}{single\PYGZus{}particle\PYGZus{}type} \PYG{o}{:} \PYG{k}{public} \PYG{n}{PFStateSPBase}\PYG{o}{\PYGZlt{}}\PYG{n}{S}\PYG{o}{\PYGZgt{}}
+    \PYG{p}{\PYGZob{}}
+        \PYG{k}{public}\PYG{o}{:}
+        \PYG{k}{using} \PYG{n}{PFStateSPBase}\PYG{o}{\PYGZlt{}}\PYG{n}{S}\PYG{o}{\PYGZgt{}::}\PYG{n}{single\PYGZus{}particle\PYGZus{}type}\PYG{p}{;}
+
+        \PYG{k+kt}{double} \PYG{o}{\PYGZam{}}\PYG{n}{pos\PYGZus{}x}\PYG{p}{()} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{state}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{);} \PYG{p}{\PYGZcb{}}
+        \PYG{k+kt}{double} \PYG{o}{\PYGZam{}}\PYG{n}{pos\PYGZus{}y}\PYG{p}{()} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{state}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{);} \PYG{p}{\PYGZcb{}}
+        \PYG{k+kt}{double} \PYG{o}{\PYGZam{}}\PYG{n}{vel\PYGZus{}x}\PYG{p}{()} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{state}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{);} \PYG{p}{\PYGZcb{}}
+        \PYG{k+kt}{double} \PYG{o}{\PYGZam{}}\PYG{n}{vel\PYGZus{}y}\PYG{p}{()} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{state}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{);} \PYG{p}{\PYGZcb{}}
+
+        \PYG{k+kt}{double} \PYG{n}{log\PYGZus{}likelihood}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{)}
+        \PYG{p}{\PYGZob{}}
+            \PYG{k+kt}{double} \PYG{n}{llh\PYGZus{}x} \PYG{o}{=} \PYG{l+m+mi}{10} \PYG{o}{*} \PYG{p}{(}\PYG{n}{pos\PYGZus{}x}\PYG{p}{()} \PYG{o}{\PYGZhy{}} \PYG{n}{obs\PYGZus{}x}\PYG{p}{(}\PYG{n}{t}\PYG{p}{));}
+            \PYG{k+kt}{double} \PYG{n}{llh\PYGZus{}y} \PYG{o}{=} \PYG{l+m+mi}{10} \PYG{o}{*} \PYG{p}{(}\PYG{n}{pos\PYGZus{}y}\PYG{p}{()} \PYG{o}{\PYGZhy{}} \PYG{n}{obs\PYGZus{}y}\PYG{p}{(}\PYG{n}{t}\PYG{p}{));}
+            \PYG{n}{llh\PYGZus{}x} \PYG{o}{=} \PYG{n}{std}\PYG{o}{::}\PYG{n}{log}\PYG{p}{(}\PYG{l+m+mi}{1} \PYG{o}{+} \PYG{n}{llh\PYGZus{}x} \PYG{o}{*} \PYG{n}{llh\PYGZus{}x} \PYG{o}{/} \PYG{l+m+mi}{10}\PYG{p}{);}
+            \PYG{n}{llh\PYGZus{}y} \PYG{o}{=} \PYG{n}{std}\PYG{o}{::}\PYG{n}{log}\PYG{p}{(}\PYG{l+m+mi}{1} \PYG{o}{+} \PYG{n}{llh\PYGZus{}y} \PYG{o}{*} \PYG{n}{llh\PYGZus{}y} \PYG{o}{/} \PYG{l+m+mi}{10}\PYG{p}{);}
+
+            \PYG{k}{return} \PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{0.5} \PYG{o}{*} \PYG{p}{(}\PYG{l+m+mi}{10} \PYG{o}{+} \PYG{l+m+mi}{1}\PYG{p}{)} \PYG{o}{*} \PYG{p}{(}\PYG{n}{llh\PYGZus{}x} \PYG{o}{+} \PYG{n}{llh\PYGZus{}y}\PYG{p}{);}
+        \PYG{p}{\PYGZcb{}}
+
+        \PYG{k}{private}\PYG{o}{:}
+        \PYG{k+kt}{double} \PYG{n}{obs\PYGZus{}x}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{)}
+        \PYG{p}{\PYGZob{}}
+            \PYG{k}{return} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{particle}\PYG{p}{().}\PYG{n}{value}\PYG{p}{().}\PYG{n}{obs\PYGZus{}x\PYGZus{}}\PYG{p}{[}\PYG{n}{t}\PYG{p}{];}
+        \PYG{p}{\PYGZcb{}}
+
+        \PYG{k+kt}{double} \PYG{n}{obs\PYGZus{}y}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{)}
+        \PYG{p}{\PYGZob{}}
+            \PYG{k}{return} \PYG{k}{this}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{particle}\PYG{p}{().}\PYG{n}{value}\PYG{p}{().}\PYG{n}{obs\PYGZus{}y\PYGZus{}}\PYG{p}{[}\PYG{n}{t}\PYG{p}{];}
+        \PYG{p}{\PYGZcb{}}
+    \PYG{p}{\PYGZcb{};}
+
+    \PYG{k+kt}{void} \PYG{n+nf}{read\PYGZus{}data}\PYG{p}{(}\PYG{k}{const} \PYG{k+kt}{char} \PYG{o}{*}\PYG{n}{param}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{k}{if} \PYG{p}{(}\PYG{n}{param} \PYG{o}{==} \PYG{k}{nullptr}\PYG{p}{)}
+            \PYG{k}{return}\PYG{p}{;}
+
+        \PYG{n}{std}\PYG{o}{::}\PYG{n}{ifstream} \PYG{n}{data}\PYG{p}{(}\PYG{n}{param}\PYG{p}{);}
+        \PYG{k}{while} \PYG{p}{(}\PYG{n}{data}\PYG{p}{.}\PYG{n}{good}\PYG{p}{())} \PYG{p}{\PYGZob{}}
+            \PYG{k+kt}{double} \PYG{n}{x}\PYG{p}{;}
+            \PYG{k+kt}{double} \PYG{n}{y}\PYG{p}{;}
+            \PYG{n}{data} \PYG{o}{\PYGZgt{}\PYGZgt{}} \PYG{n}{x} \PYG{o}{\PYGZgt{}\PYGZgt{}} \PYG{n}{y}\PYG{p}{;}
+            \PYG{k}{if} \PYG{p}{(}\PYG{n}{data}\PYG{p}{.}\PYG{n}{good}\PYG{p}{())} \PYG{p}{\PYGZob{}}
+                \PYG{n}{obs\PYGZus{}x\PYGZus{}}\PYG{p}{.}\PYG{n}{push\PYGZus{}back}\PYG{p}{(}\PYG{n}{x}\PYG{p}{);}
+                \PYG{n}{obs\PYGZus{}y\PYGZus{}}\PYG{p}{.}\PYG{n}{push\PYGZus{}back}\PYG{p}{(}\PYG{n}{y}\PYG{p}{);}
+            \PYG{p}{\PYGZcb{}}
+        \PYG{p}{\PYGZcb{}}
+        \PYG{n}{data}\PYG{p}{.}\PYG{n}{close}\PYG{p}{();}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{data\PYGZus{}size}\PYG{p}{()} \PYG{k}{const} \PYG{p}{\PYGZob{}} \PYG{k}{return} \PYG{n}{obs\PYGZus{}x\PYGZus{}}\PYG{p}{.}\PYG{n}{size}\PYG{p}{();} \PYG{p}{\PYGZcb{}}
+
+    \PYG{k}{private}\PYG{o}{:}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{obs\PYGZus{}x\PYGZus{}}\PYG{p}{;}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{obs\PYGZus{}y\PYGZus{}}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+
+\PYG{k}{class} \PYG{n+nc}{PFInit} \PYG{o}{:} \PYG{k}{public} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{InitializeTBB}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{p}{,} \PYG{n}{PFInit}\PYG{o}{\PYGZgt{}}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{public}\PYG{o}{:}
+    \PYG{k+kt}{void} \PYG{n}{eval\PYGZus{}param}\PYG{p}{(}\PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Particle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{o}{\PYGZam{}}\PYG{n}{particle}\PYG{p}{,} \PYG{k+kt}{void} \PYG{o}{*}\PYG{n}{param}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{particle}\PYG{p}{.}\PYG{n}{value}\PYG{p}{().}\PYG{n}{read\PYGZus{}data}\PYG{p}{(}\PYG{k}{static\PYGZus{}cast}\PYG{o}{\PYGZlt{}}\PYG{k}{const} \PYG{k+kt}{char} \PYG{o}{*\PYGZgt{}}\PYG{p}{(}\PYG{n}{param}\PYG{p}{));}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k+kt}{void} \PYG{n}{eval\PYGZus{}pre}\PYG{p}{(}\PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Particle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{o}{\PYGZam{}}\PYG{n}{particle}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{weight\PYGZus{}}\PYG{p}{.}\PYG{n}{resize}\PYG{p}{(}\PYG{n}{particle}\PYG{p}{.}\PYG{n}{size}\PYG{p}{());}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{eval\PYGZus{}sp}\PYG{p}{(}\PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{SingleParticle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{n}{sp}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{NormalDistribution}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{norm\PYGZus{}pos}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{);}
+        \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{NormalDistribution}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{norm\PYGZus{}vel}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{l+m+mi}{1}\PYG{p}{);}
+        \PYG{n}{sp}\PYG{p}{.}\PYG{n}{pos\PYGZus{}x}\PYG{p}{()} \PYG{o}{=} \PYG{n}{norm\PYGZus{}pos}\PYG{p}{(}\PYG{n}{sp}\PYG{p}{.}\PYG{n}{rng}\PYG{p}{());}
+        \PYG{n}{sp}\PYG{p}{.}\PYG{n}{pos\PYGZus{}y}\PYG{p}{()} \PYG{o}{=} \PYG{n}{norm\PYGZus{}pos}\PYG{p}{(}\PYG{n}{sp}\PYG{p}{.}\PYG{n}{rng}\PYG{p}{());}
+        \PYG{n}{sp}\PYG{p}{.}\PYG{n}{vel\PYGZus{}x}\PYG{p}{()} \PYG{o}{=} \PYG{n}{norm\PYGZus{}vel}\PYG{p}{(}\PYG{n}{sp}\PYG{p}{.}\PYG{n}{rng}\PYG{p}{());}
+        \PYG{n}{sp}\PYG{p}{.}\PYG{n}{vel\PYGZus{}y}\PYG{p}{()} \PYG{o}{=} \PYG{n}{norm\PYGZus{}vel}\PYG{p}{(}\PYG{n}{sp}\PYG{p}{.}\PYG{n}{rng}\PYG{p}{());}
+        \PYG{n}{weight\PYGZus{}}\PYG{p}{[}\PYG{n}{sp}\PYG{p}{.}\PYG{n}{id}\PYG{p}{()]} \PYG{o}{=} \PYG{n}{sp}\PYG{p}{.}\PYG{n}{log\PYGZus{}likelihood}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{);}
+
+        \PYG{k}{return} \PYG{l+m+mi}{0}\PYG{p}{;}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k+kt}{void} \PYG{n}{eval\PYGZus{}post}\PYG{p}{(}\PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Particle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{o}{\PYGZam{}}\PYG{n}{particle}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{particle}\PYG{p}{.}\PYG{n}{weight}\PYG{p}{().}\PYG{n}{set\PYGZus{}log}\PYG{p}{(}\PYG{n}{weight\PYGZus{}}\PYG{p}{.}\PYG{n}{data}\PYG{p}{());}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k}{private}\PYG{o}{:}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{weight\PYGZus{}}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+
+\PYG{k}{class} \PYG{n+nc}{PFMove} \PYG{o}{:} \PYG{k}{public} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{MoveTBB}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{p}{,} \PYG{n}{PFMove}\PYG{o}{\PYGZgt{}}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{public}\PYG{o}{:}
+    \PYG{k+kt}{void} \PYG{n}{eval\PYGZus{}pre}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{,} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Particle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{o}{\PYGZam{}}\PYG{n}{particle}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{weight\PYGZus{}}\PYG{p}{.}\PYG{n}{resize}\PYG{p}{(}\PYG{n}{particle}\PYG{p}{.}\PYG{n}{size}\PYG{p}{());}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{eval\PYGZus{}sp}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{,} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{SingleParticle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{n}{sp}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{NormalDistribution}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{norm\PYGZus{}pos}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{std}\PYG{o}{::}\PYG{n}{sqrt}\PYG{p}{(}\PYG{l+m+mf}{0.02}\PYG{p}{));}
+        \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{NormalDistribution}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{norm\PYGZus{}vel}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{std}\PYG{o}{::}\PYG{n}{sqrt}\PYG{p}{(}\PYG{l+m+mf}{0.001}\PYG{p}{));}
+        \PYG{n}{sp}\PYG{p}{.}\PYG{n}{pos\PYGZus{}x}\PYG{p}{()} \PYG{o}{+=} \PYG{n}{norm\PYGZus{}pos}\PYG{p}{(}\PYG{n}{sp}\PYG{p}{.}\PYG{n}{rng}\PYG{p}{())} \PYG{o}{+} \PYG{l+m+mf}{0.1} \PYG{o}{*} \PYG{n}{sp}\PYG{p}{.}\PYG{n}{vel\PYGZus{}x}\PYG{p}{();}
+        \PYG{n}{sp}\PYG{p}{.}\PYG{n}{pos\PYGZus{}y}\PYG{p}{()} \PYG{o}{+=} \PYG{n}{norm\PYGZus{}pos}\PYG{p}{(}\PYG{n}{sp}\PYG{p}{.}\PYG{n}{rng}\PYG{p}{())} \PYG{o}{+} \PYG{l+m+mf}{0.1} \PYG{o}{*} \PYG{n}{sp}\PYG{p}{.}\PYG{n}{vel\PYGZus{}y}\PYG{p}{();}
+        \PYG{n}{sp}\PYG{p}{.}\PYG{n}{vel\PYGZus{}x}\PYG{p}{()} \PYG{o}{+=} \PYG{n}{norm\PYGZus{}vel}\PYG{p}{(}\PYG{n}{sp}\PYG{p}{.}\PYG{n}{rng}\PYG{p}{());}
+        \PYG{n}{sp}\PYG{p}{.}\PYG{n}{vel\PYGZus{}y}\PYG{p}{()} \PYG{o}{+=} \PYG{n}{norm\PYGZus{}vel}\PYG{p}{(}\PYG{n}{sp}\PYG{p}{.}\PYG{n}{rng}\PYG{p}{());}
+        \PYG{n}{weight\PYGZus{}}\PYG{p}{[}\PYG{n}{sp}\PYG{p}{.}\PYG{n}{id}\PYG{p}{()]} \PYG{o}{=} \PYG{n}{sp}\PYG{p}{.}\PYG{n}{log\PYGZus{}likelihood}\PYG{p}{(}\PYG{n}{t}\PYG{p}{);}
+
+        \PYG{k}{return} \PYG{l+m+mi}{0}\PYG{p}{;}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k+kt}{void} \PYG{n}{eval\PYGZus{}post}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{,} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Particle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{o}{\PYGZam{}}\PYG{n}{particle}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{particle}\PYG{p}{.}\PYG{n}{weight}\PYG{p}{().}\PYG{n}{add\PYGZus{}log}\PYG{p}{(}\PYG{n}{weight\PYGZus{}}\PYG{p}{.}\PYG{n}{data}\PYG{p}{());}
+    \PYG{p}{\PYGZcb{}}
+
+    \PYG{k}{private}\PYG{o}{:}
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Vector}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{weight\PYGZus{}}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+
+\PYG{k}{class} \PYG{n+nc}{PFEval} \PYG{o}{:} \PYG{k}{public} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{MonitorEvalTBB}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{p}{,} \PYG{n}{PFEval}\PYG{o}{\PYGZgt{}}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{public}\PYG{o}{:}
+    \PYG{k+kt}{void} \PYG{n}{eval\PYGZus{}sp}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{t}\PYG{p}{,} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{dim}\PYG{p}{,}
+        \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{SingleParticle}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{n}{sp}\PYG{p}{,} \PYG{k+kt}{double} \PYG{o}{*}\PYG{n}{r}\PYG{p}{)}
+    \PYG{p}{\PYGZob{}}
+        \PYG{n}{r}\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{p}{]} \PYG{o}{=} \PYG{n}{sp}\PYG{p}{.}\PYG{n}{pos\PYGZus{}x}\PYG{p}{();}
+        \PYG{n}{r}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]} \PYG{o}{=} \PYG{n}{sp}\PYG{p}{.}\PYG{n}{pos\PYGZus{}y}\PYG{p}{();}
+    \PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{};}
+
+\PYG{k+kt}{int} \PYG{n+nf}{main}\PYG{p}{(}\PYG{k+kt}{int} \PYG{n}{argc}\PYG{p}{,} \PYG{k+kt}{char} \PYG{o}{**}\PYG{n}{argv}\PYG{p}{)}
+\PYG{p}{\PYGZob{}}
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{N} \PYG{o}{=} \PYG{l+m+mi}{10000}\PYG{p}{;}
+    \PYG{k}{if} \PYG{p}{(}\PYG{n}{argc} \PYG{o}{\PYGZgt{}} \PYG{l+m+mi}{1}\PYG{p}{)}
+        \PYG{n}{N} \PYG{o}{=} \PYG{k}{static\PYGZus{}cast}\PYG{o}{\PYGZlt{}}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t}\PYG{o}{\PYGZgt{}}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{n}{atoi}\PYG{p}{(}\PYG{n}{argv}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]));}
+
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Sampler}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{n}{sampler}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{Multinomial}\PYG{p}{,} \PYG{l+m+mf}{0.5}\PYG{p}{);}
+    \PYG{n}{sampler}\PYG{p}{.}\PYG{n}{init}\PYG{p}{(}\PYG{n}{PFInit}\PYG{p}{()).}\PYG{n}{move}\PYG{p}{(}\PYG{n}{PFMove}\PYG{p}{(),} \PYG{n+nb}{false}\PYG{p}{).}\PYG{n}{monitor}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}pos\PYGZdq{}}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{PFEval}\PYG{p}{());}
+
+    \PYG{n}{vsmc}\PYG{o}{::}\PYG{n}{StopWatch} \PYG{n}{watch}\PYG{p}{;}
+    \PYG{n}{watch}\PYG{p}{.}\PYG{n}{start}\PYG{p}{();}
+    \PYG{n}{sampler}\PYG{p}{.}\PYG{n}{initialize}\PYG{p}{(}\PYG{k}{const\PYGZus{}cast}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{char} \PYG{o}{*\PYGZgt{}}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}pf.data\PYGZdq{}}\PYG{p}{));}
+    \PYG{n}{sampler}\PYG{p}{.}\PYG{n}{iterate}\PYG{p}{(}\PYG{n}{sampler}\PYG{p}{.}\PYG{n}{particle}\PYG{p}{().}\PYG{n}{value}\PYG{p}{().}\PYG{n}{data\PYGZus{}size}\PYG{p}{()} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{);}
+    \PYG{n}{watch}\PYG{p}{.}\PYG{n}{stop}\PYG{p}{();}
+    \PYG{n}{std}\PYG{o}{::}\PYG{n}{cout} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{l+s}{\PYGZdq{}Time (ms): \PYGZdq{}} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{watch}\PYG{p}{.}\PYG{n}{milliseconds}\PYG{p}{()} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{std}\PYG{o}{::}\PYG{n}{endl}\PYG{p}{;}
+
+    \PYG{n}{std}\PYG{o}{::}\PYG{n}{ofstream} \PYG{n}{output}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}pf.out\PYGZdq{}}\PYG{p}{);}
+    \PYG{n}{output} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{sampler}\PYG{p}{;}
+    \PYG{n}{output}\PYG{p}{.}\PYG{n}{close}\PYG{p}{();}
+
+    \PYG{k}{return} \PYG{l+m+mi}{0}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

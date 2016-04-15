@@ -1,0 +1,10 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{Sampler}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{o}{\PYGZgt{}} \PYG{n}{sampler}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{Multinomial}\PYG{p}{,} \PYG{l+m+mf}{0.5}\PYG{p}{);}
+\PYG{n}{sampler}\PYG{p}{.}\PYG{n}{init}\PYG{p}{(}\PYG{n}{PFInit}\PYG{p}{()).}\PYG{n}{move}\PYG{p}{(}\PYG{n}{PFMove}\PYG{p}{(),} \PYG{n+nb}{false}\PYG{p}{).}\PYG{n}{monitor}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}pos\PYGZdq{}}\PYG{p}{,} \PYG{l+m+mi}{2}\PYG{p}{,} \PYG{n}{PFEval}\PYG{p}{());}
+
+\PYG{n}{sampler}\PYG{p}{.}\PYG{n}{initialize}\PYG{p}{(}\PYG{k}{const\PYGZus{}cast}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{char} \PYG{o}{*\PYGZgt{}}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}pf.data\PYGZdq{}}\PYG{p}{)).}\PYG{n}{iterate}\PYG{p}{(}\PYG{n}{n} \PYG{o}{\PYGZhy{}} \PYG{l+m+mi}{1}\PYG{p}{);}
+
+\PYG{n}{std}\PYG{o}{::}\PYG{n}{ofstream} \PYG{n}{output}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}pf.out\PYGZdq{}}\PYG{p}{);}
+\PYG{n}{output} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{sampler}\PYG{p}{;}
+\PYG{n}{output}\PYG{p}{.}\PYG{n}{close}\PYG{p}{();}
+\end{Verbatim}

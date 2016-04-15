@@ -1,0 +1,4 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{static} \PYG{k+kt}{void} \PYG{o}{*}\PYG{n+nf}{aligned\PYGZus{}malloc}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{n}\PYG{p}{,} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{alignment}\PYG{p}{);}
+\PYG{k}{static} \PYG{k+kt}{void} \PYG{n+nf}{aligned\PYGZus{}free}\PYG{p}{(}\PYG{k+kt}{void} \PYG{o}{*}\PYG{n}{ptr}\PYG{p}{);}
+\end{Verbatim}

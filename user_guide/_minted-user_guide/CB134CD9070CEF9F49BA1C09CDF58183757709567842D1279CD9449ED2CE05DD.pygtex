@@ -1,0 +1,4 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{sp}\PYG{p}{.}\PYG{n}{dim}\PYG{p}{();}    \PYG{c+c1}{// =\PYGZgt{} sp.particle().value().dim();}
+\PYG{n}{sp}\PYG{p}{.}\PYG{n}{state}\PYG{p}{(}\PYG{n}{j}\PYG{p}{);} \PYG{c+c1}{// =\PYGZgt{} sp.particle().value().state(sp.id(), j);}
+\end{Verbatim}

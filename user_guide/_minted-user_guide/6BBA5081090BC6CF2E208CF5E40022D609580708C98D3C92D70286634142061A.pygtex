@@ -1,0 +1,4 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+pf \PYG{o}{\PYGZlt{}\PYGZhy{}} read.table\PYG{p}{(}\PYG{l+s}{\PYGZdq{}pf.out\PYGZdq{}}\PYG{p}{,} header \PYG{o}{=} \PYG{k+kc}{TRUE}\PYG{p}{)}
+\PYG{k+kp}{print}\PYG{p}{(}pf\PYG{p}{[}\PYG{l+m}{1}\PYG{o}{:}\PYG{l+m}{5}\PYG{p}{,])}
+\end{Verbatim}

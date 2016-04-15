@@ -1,0 +1,17 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{pack\PYGZus{}s}\PYG{p}{(}\PYG{n}{n}\PYG{p}{,} \PYG{n}{src}\PYG{p}{,} \PYG{n}{stride}\PYG{p}{,} \PYG{n}{tmp}\PYG{p}{);}
+\PYG{n}{unpack\PYGZus{}s}\PYG{p}{(}\PYG{n}{n}\PYG{p}{,} \PYG{n}{tmp}\PYG{p}{,} \PYG{n}{stride}\PYG{p}{,} \PYG{n}{dst}\PYG{p}{);}
+\PYG{k}{for} \PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{!=} \PYG{n}{n}\PYG{p}{;} \PYG{o}{++}\PYG{n}{i}\PYG{p}{)}
+    \PYG{n}{assert}\PYG{p}{(}\PYG{n}{src}\PYG{p}{[}\PYG{n}{i} \PYG{o}{*} \PYG{n}{stride}\PYG{p}{]} \PYG{o}{==} \PYG{n}{dst}\PYG{p}{[}\PYG{n}{i} \PYG{o}{*} \PYG{n}{stride}\PYG{p}{]);}
+
+\PYG{n}{pack\PYGZus{}i}\PYG{p}{(}\PYG{n}{n}\PYG{p}{,} \PYG{n}{src}\PYG{p}{,} \PYG{n}{index}\PYG{p}{,} \PYG{n}{tmp}\PYG{p}{);}
+\PYG{n}{unpack\PYGZus{}i}\PYG{p}{(}\PYG{n}{n}\PYG{p}{,} \PYG{n}{tmp}\PYG{p}{,} \PYG{n}{index}\PYG{p}{,} \PYG{n}{dst}\PYG{p}{);}
+\PYG{k}{for} \PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{!=} \PYG{n}{n}\PYG{p}{;} \PYG{o}{++}\PYG{n}{i}\PYG{p}{)}
+    \PYG{n}{assert}\PYG{p}{(}\PYG{n}{src}\PYG{p}{[}\PYG{n}{index}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]]} \PYG{o}{==} \PYG{n}{dst}\PYG{p}{[}\PYG{n}{index}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]]);}
+
+\PYG{n}{pack\PYGZus{}m}\PYG{p}{(}\PYG{n}{n}\PYG{p}{,} \PYG{n}{src}\PYG{p}{,} \PYG{n}{mask}\PYG{p}{,} \PYG{n}{tmp}\PYG{p}{);}
+\PYG{n}{unpack\PYGZus{}m}\PYG{p}{(}\PYG{n}{n}\PYG{p}{,} \PYG{n}{tmp}\PYG{p}{,} \PYG{n}{mask}\PYG{p}{,} \PYG{n}{src}\PYG{p}{);}
+\PYG{k}{for} \PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{!=} \PYG{n}{n}\PYG{p}{;} \PYG{o}{++}\PYG{n}{i}\PYG{p}{)}
+    \PYG{k}{if} \PYG{p}{(}\PYG{n}{mask}\PYG{p}{[}\PYG{n}{i}\PYG{p}{])}
+        \PYG{n}{assert}\PYG{p}{(}\PYG{n}{src}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]} \PYG{o}{==} \PYG{n}{dst}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]);}
+\end{Verbatim}

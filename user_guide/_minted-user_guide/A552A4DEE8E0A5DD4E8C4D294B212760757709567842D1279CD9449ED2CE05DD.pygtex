@@ -1,0 +1,6 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{class} \PYG{n+nc}{T}
+\PYG{p}{\PYGZob{}}
+    \PYG{k}{using} \PYG{n}{rng\PYGZus{}set\PYGZus{}type} \PYG{o}{=} \PYG{n}{RNGSetScalar}\PYG{o}{\PYGZlt{}}\PYG{n}{RNG}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
+\PYG{p}{\PYGZcb{};}
+\end{Verbatim}

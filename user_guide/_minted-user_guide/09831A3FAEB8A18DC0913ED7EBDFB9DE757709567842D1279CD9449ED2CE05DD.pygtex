@@ -1,0 +1,9 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{KeySeqType}\PYG{p}{,} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{Rounds}\PYG{p}{,} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{Blocks}\PYG{o}{\PYGZgt{}}
+\PYG{k}{class} \PYG{n+nc}{AESNIGenerator}\PYG{p}{;}
+
+\PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{ResultType}\PYG{p}{,} \PYG{k}{typename} \PYG{n}{KeySeqType}\PYG{p}{,} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{Rounds}\PYG{p}{,}
+    \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{Blocks}\PYG{o}{\PYGZgt{}}
+\PYG{k}{using} \PYG{n}{AESNIEngine} \PYG{o}{=}
+    \PYG{n}{CounterEngine}\PYG{o}{\PYGZlt{}}\PYG{n}{ResultType}\PYG{p}{,} \PYG{n}{AESNIGenerator}\PYG{o}{\PYGZlt{}}\PYG{n}{KeySeqType}\PYG{p}{,} \PYG{n}{Rounds}\PYG{p}{,} \PYG{n}{Blocks}\PYG{o}{\PYGZgt{}\PYGZgt{}}\PYG{p}{;}
+\end{Verbatim}

@@ -1,0 +1,5 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{sp}\PYG{p}{.}\PYG{n}{id}\PYG{p}{();}       \PYG{c+c1}{// Get the value i that sp was constructed with}
+\PYG{n}{sp}\PYG{p}{.}\PYG{n}{particle}\PYG{p}{();} \PYG{c+c1}{// Get a reference to the Particle\PYGZlt{}T\PYGZgt{} object sp belongs to}
+\PYG{n}{sp}\PYG{p}{.}\PYG{n}{rng}\PYG{p}{();}      \PYG{c+c1}{// =\PYGZgt{} sp.particle().rng(sp.id());}
+\end{Verbatim}

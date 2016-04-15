@@ -1,0 +1,5 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{auto} \PYG{n}{pi\PYGZus{}f} \PYG{o}{=} \PYG{n}{const\PYGZus{}pi}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{float}\PYG{o}{\PYGZgt{}}\PYG{p}{();}
+\PYG{k}{auto} \PYG{n}{pi\PYGZus{}d} \PYG{o}{=} \PYG{n}{const\PYGZus{}pi}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}}\PYG{p}{();}
+\PYG{k}{auto} \PYG{n}{pi\PYGZus{}l} \PYG{o}{=} \PYG{n}{const\PYGZus{}pi}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{long} \PYG{k+kt}{double}\PYG{o}{\PYGZgt{}}\PYG{p}{();}
+\end{Verbatim}
