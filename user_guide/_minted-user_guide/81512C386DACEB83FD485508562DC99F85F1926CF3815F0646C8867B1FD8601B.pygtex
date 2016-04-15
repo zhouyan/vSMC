@@ -1,3 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{k+kt}{int} \PYG{n+nf}{vsmc\PYGZus{}seed\PYGZus{}get}\PYG{p}{(}\PYG{k+kt}{void}\PYG{p}{);}
-\end{Verbatim}

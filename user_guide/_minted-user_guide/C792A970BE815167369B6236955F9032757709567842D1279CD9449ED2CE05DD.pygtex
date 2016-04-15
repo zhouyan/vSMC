@@ -1,6 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{k}{static} \PYG{k}{constexpr} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{PosX} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}
-\PYG{k}{static} \PYG{k}{constexpr} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{PosY} \PYG{o}{=} \PYG{l+m+mi}{1}\PYG{p}{;}
-\PYG{k}{static} \PYG{k}{constexpr} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{VelX} \PYG{o}{=} \PYG{l+m+mi}{2}\PYG{p}{;}
-\PYG{k}{static} \PYG{k}{constexpr} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{VelY} \PYG{o}{=} \PYG{l+m+mi}{3}\PYG{p}{;}
-\end{Verbatim}

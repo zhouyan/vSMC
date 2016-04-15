@@ -1,3 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{n}{option\PYGZus{}map}\PYG{p}{.}\PYG{n}{process}\PYG{p}{(}\PYG{n}{argc}\PYG{p}{,} \PYG{n}{argv}\PYG{p}{);}
-\end{Verbatim}

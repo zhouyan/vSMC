@@ -1,5 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{k}{class} \PYG{n+nc}{PFInit} \PYG{o}{:} \PYG{k}{public} \PYG{n}{InitializationTBB}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{p}{,} \PYG{n}{PFInit}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
-\PYG{k}{class} \PYG{n+nc}{PFMove} \PYG{o}{:} \PYG{k}{public} \PYG{n}{MoveTBB}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{p}{,} \PYG{n}{PFMove}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
-\PYG{k}{class} \PYG{n+nc}{PFEval} \PYG{o}{:} \PYG{k}{public} \PYG{n}{MonitorEvalTBB}\PYG{o}{\PYGZlt{}}\PYG{n}{PFState}\PYG{p}{,} \PYG{n}{PFEval}\PYG{o}{\PYGZgt{}}\PYG{p}{;}
-\end{Verbatim}

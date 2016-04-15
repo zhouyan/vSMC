@@ -1,3 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{k+kt}{void} \PYG{n+nf}{resize\PYGZus{}by\PYGZus{}range}\PYG{p}{(}\PYG{n}{size\PYGZus{}type} \PYG{n}{N}\PYG{p}{,} \PYG{n}{size\PYGZus{}type} \PYG{n}{first}\PYG{p}{,} \PYG{n}{size\PYGZus{}type} \PYG{n}{last}\PYG{p}{);}
-\end{Verbatim}

@@ -1,4 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{k+kn}{library}\PYG{p}{(}rhdf5\PYG{p}{)}
-pf \PYG{o}{\PYGZlt{}\PYGZhy{}} \PYG{k+kp}{as.data.frame}\PYG{p}{(}h5read\PYG{p}{(}\PYG{l+s}{\PYGZdq{}pf.h5\PYGZdq{}}\PYG{p}{,} \PYG{l+s}{\PYGZdq{}sampler\PYGZdq{}}\PYG{p}{))}
-\end{Verbatim}

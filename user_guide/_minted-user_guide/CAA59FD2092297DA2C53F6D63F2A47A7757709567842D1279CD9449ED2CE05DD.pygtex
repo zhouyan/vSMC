@@ -1,5 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{n}{StateMatrix}\PYG{o}{\PYGZlt{}}\PYG{n}{RowMajor}\PYG{p}{,} \PYG{n}{Dynamic}\PYG{p}{,} \PYG{k+kt}{double}\PYG{o}{\PYGZgt{}} \PYG{n}{s}\PYG{p}{;}
-\PYG{n}{s}\PYG{p}{.}\PYG{n}{resize}\PYG{p}{(}\PYG{n}{n}\PYG{p}{);}
-\PYG{n}{s}\PYG{p}{.}\PYG{n}{resize}\PYG{p}{(}\PYG{n}{n}\PYG{p}{,} \PYG{n}{dim}\PYG{p}{);}
-\end{Verbatim}

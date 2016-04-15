@@ -1,6 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{k}{for} \PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{i} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;} \PYG{n}{i} \PYG{o}{!=} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{size}\PYG{p}{();} \PYG{o}{++}\PYG{n}{i}\PYG{p}{)} \PYG{p}{\PYGZob{}}
-    \PYG{k}{auto} \PYG{n}{sp} \PYG{o}{=} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{sp}\PYG{p}{(}\PYG{n}{i}\PYG{p}{);}
-    \PYG{c+c1}{// operations on sp}
-\PYG{p}{\PYGZcb{}}
-\end{Verbatim}

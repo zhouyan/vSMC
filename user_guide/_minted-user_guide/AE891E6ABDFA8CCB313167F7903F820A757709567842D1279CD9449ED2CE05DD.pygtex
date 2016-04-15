@@ -1,5 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{k}{template} \PYG{o}{\PYGZlt{}}\PYG{k}{typename} \PYG{n}{IntType1}\PYG{p}{,} \PYG{k}{typename} \PYG{n}{IntType2}\PYG{o}{\PYGZgt{}}
-\PYG{k+kt}{void} \PYG{n}{resample\PYGZus{}trans\PYGZus{}rep\PYGZus{}index}\PYG{p}{(}\PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{N}\PYG{p}{,} \PYG{n}{std}\PYG{o}{::}\PYG{k+kt}{size\PYGZus{}t} \PYG{n}{M}\PYG{p}{,}
-    \PYG{k}{const} \PYG{n}{IntType1} \PYG{o}{*}\PYG{n}{replication}\PYG{p}{,} \PYG{n}{IntType2} \PYG{o}{*}\PYG{n}{index}\PYG{p}{);}
-\end{Verbatim}

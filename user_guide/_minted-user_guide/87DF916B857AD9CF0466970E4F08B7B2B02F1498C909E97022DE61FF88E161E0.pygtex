@@ -1,4 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
-\PYG{k}{auto} \PYG{o}{\PYGZam{}}\PYG{n}{rng1} \PYG{o}{=} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{rng}\PYG{p}{(}\PYG{n}{i1}\PYG{p}{);} \PYG{c+c1}{// Called from thread $i_1$}
-\PYG{k}{auto} \PYG{o}{\PYGZam{}}\PYG{n}{rng2} \PYG{o}{=} \PYG{n}{particle}\PYG{p}{.}\PYG{n}{rng}\PYG{p}{(}\PYG{n}{i2}\PYG{p}{);} \PYG{c+c1}{// Called from thread $i_2$}
-\end{Verbatim}

@@ -1,3 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{n}{sampler}\PYG{p}{.}\PYG{n}{clone}\PYG{p}{(}\PYG{n}{other\PYGZus{}sampler}\PYG{p}{,} \PYG{n}{retain\PYGZus{}rng}\PYG{p}{);}
-\end{Verbatim}

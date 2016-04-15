@@ -1,6 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8}]
-\PYG{n}{w}\PYG{p}{.}\PYG{n}{ess}\PYG{p}{();}           \PYG{c+c1}{// Get $\text{\normalfont\textsc{ess}}$}
-\PYG{n}{w}\PYG{p}{.}\PYG{n}{set\PYGZus{}equal}\PYG{p}{();}     \PYG{c+c1}{// Set $W^{(i)} = 1/N$}
-\PYG{n}{w}\PYG{p}{.}\PYG{n}{resample\PYGZus{}size}\PYG{p}{();} \PYG{c+c1}{// Get the sample size $N$.}
-\PYG{n}{w}\PYG{p}{.}\PYG{n}{resample\PYGZus{}data}\PYG{p}{();} \PYG{c+c1}{// Get a pointer to normalized weights}
-\end{Verbatim}

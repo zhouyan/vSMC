@@ -1,4 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{n}{sampler}\PYG{p}{.}\PYG{n}{init}\PYG{p}{(}\PYG{n}{init}\PYG{p}{).}\PYG{n}{initialize}\PYG{p}{(}\PYG{n}{param}\PYG{p}{);}
-\PYG{n}{sampler}\PYG{p}{.}\PYG{n}{move}\PYG{p}{(}\PYG{n}{move}\PYG{p}{,} \PYG{n+nb}{false}\PYG{p}{).}\PYG{n}{mcmc}\PYG{p}{(}\PYG{n}{mcmc}\PYG{p}{,} \PYG{n+nb}{false}\PYG{p}{).}\PYG{n}{iterate}\PYG{p}{(}\PYG{n}{n}\PYG{p}{);}
-\end{Verbatim}

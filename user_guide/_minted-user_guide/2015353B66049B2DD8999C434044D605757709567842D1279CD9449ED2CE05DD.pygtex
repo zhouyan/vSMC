@@ -1,4 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{n}{particle}\PYG{p}{.}\PYG{n}{weight}\PYG{p}{().}\PYG{n}{set\PYGZus{}equal}\PYG{p}{();}
-\PYG{n}{particle}\PYG{p}{.}\PYG{n}{resize\PYGZus{}by\PYGZus{}resample}\PYG{p}{(}\PYG{n}{N}\PYG{p}{,} \PYG{n}{ResampleMultinomial}\PYG{p}{());}
-\end{Verbatim}
