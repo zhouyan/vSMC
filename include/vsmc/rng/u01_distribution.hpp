@@ -38,8 +38,8 @@
 
 /// \brief Default U01 distribution using fixed point conversion
 /// \ingroup Config
-#ifndef VSMC_U01_FIXED_POINT
-#define VSMC_U01_FIXED_POINT 1
+#ifndef VSMC_U01_USE_FIXED_POINT
+#define VSMC_U01_USE_FIXED_POINT 0
 #endif
 
 #define VSMC_DEFINE_U01LR_DISTRIBUTION(Name, name)                            \
@@ -107,12 +107,12 @@ VSMC_DEFINE_U01LR_DISTRIBUTION(U01OO, u01_oo)
 
 /// \brief Standard uniform distribution on [0, 1)
 /// \ingroup Distribution
-#if VSMC_U01_FIXED_POINT
+#if VSMC_U01_USE_FIXED_POINT
 template <typename RealType>
 class U01Distribution : public U01CODistribution<RealType>
 {
-}; // class U01Distribution
-#else  // VSMC_U01_FIXED_POINT
+};     // class U01Distribution
+#else  // VSMC_U01_USE_FIXED_POINT
 template <typename RealType>
 class U01Distribution
 {
@@ -153,7 +153,7 @@ class U01Distribution
             generate<N + 1>(rng, std::integral_constant<bool, N + 1 < Q>());
     }
 }; // class U01Distribution
-#endif // VSMC_U01_FIXED_POINT
+#endif // VSMC_U01_USE_FIXED_POINT
 
 namespace internal
 {
@@ -163,13 +163,13 @@ VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(u01_co)
 VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(u01_oc)
 VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(u01_oo)
 
-#if VSMC_U01_FIXED_POINT
+#if VSMC_U01_USE_FIXED_POINT
 template <std::size_t K, typename RealType, typename RNGType>
 inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
 {
     u01_co_distribution_impl<K>(rng, n, r);
 }
-#else  // VSMC_U01_FIXED_POINT
+#else  // VSMC_U01_USE_FIXED_POINT
 template <std::size_t, typename RealType, typename UIntType>
 inline RealType u01_distribution_impl(const UIntType *, std::false_type)
 {
@@ -206,7 +206,7 @@ inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
     for (std::size_t i = 0; i != n; ++i, u += Q)
         r[i] = u01_distribution_impl<0, RealType>(u, std::true_type());
 }
-#endif // VSMC_U01_FIXED_POINT
+#endif // VSMC_U01_USE_FIXED_POINT
 
 } // namespace vsmc::internal
 
