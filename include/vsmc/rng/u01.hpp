@@ -90,10 +90,10 @@ namespace internal
 {
 
 template <typename, typename, typename, typename>
-class U01LRImpl;
+class U01Impl;
 
 template <typename UIntType, typename RealType>
-class U01LRImpl<UIntType, RealType, Closed, Closed>
+class U01Impl<UIntType, RealType, Closed, Closed>
 {
     static constexpr int W = std::numeric_limits<UIntType>::digits;
     static constexpr int M = std::numeric_limits<RealType>::digits;
@@ -129,10 +129,10 @@ class U01LRImpl<UIntType, RealType, Closed, Closed>
     {
         return static_cast<RealType>(u & 1) + static_cast<RealType>(u);
     }
-}; // class U01LRImpl
+}; // class U01Impl
 
 template <typename UIntType, typename RealType>
-class U01LRImpl<UIntType, RealType, Closed, Open>
+class U01Impl<UIntType, RealType, Closed, Open>
 {
     static constexpr int W = std::numeric_limits<UIntType>::digits;
     static constexpr int M = std::numeric_limits<RealType>::digits;
@@ -151,10 +151,10 @@ class U01LRImpl<UIntType, RealType, Closed, Open>
             r[i] = u[i] >> R;
         mul(n, U01Pow2Inv<RealType, P>::value, r, r);
     }
-}; // class U01LRImpl
+}; // class U01Impl
 
 template <typename UIntType, typename RealType>
-class U01LRImpl<UIntType, RealType, Open, Closed>
+class U01Impl<UIntType, RealType, Open, Closed>
 {
     static constexpr int W = std::numeric_limits<UIntType>::digits;
     static constexpr int M = std::numeric_limits<RealType>::digits;
@@ -175,10 +175,10 @@ class U01LRImpl<UIntType, RealType, Open, Closed>
         fma(n, U01Pow2Inv<RealType, P>::value, r,
             U01Pow2Inv<RealType, P>::value, r);
     }
-}; // class U01LRImpl
+}; // class U01Impl
 
 template <typename UIntType, typename RealType>
-class U01LRImpl<UIntType, RealType, Open, Open>
+class U01Impl<UIntType, RealType, Open, Open>
 {
     static constexpr int W = std::numeric_limits<UIntType>::digits;
     static constexpr int M = std::numeric_limits<RealType>::digits;
@@ -200,7 +200,7 @@ class U01LRImpl<UIntType, RealType, Open, Open>
         fma(n, U01Pow2Inv<RealType, P - 1>::value, r,
             U01Pow2Inv<RealType, P>::value, r);
     }
-}; // class U01LRImpl
+}; // class U01Impl
 
 } // namespace vsmc::internal
 
@@ -215,31 +215,31 @@ class U01LRImpl<UIntType, RealType, Open, Open>
 /// \f$[0,1]\f$ or one of its (half-)open interval variant. The exact output
 /// depend on the template parameter `Left` and `Right`.
 template <typename UIntType, typename RealType, typename Left, typename Right>
-RealType u01_lr(UIntType u) noexcept
+RealType u01(UIntType u) noexcept
 {
     static_assert(std::is_unsigned<UIntType>::value,
-        "**u01_lr** USED WITH UIntType OTHER THAN UNSIGNED INTEGER "
+        "**u01** USED WITH UIntType OTHER THAN UNSIGNED INTEGER "
         "TYPES");
     static_assert(std::is_floating_point<RealType>::value,
-        "**u01_lr** USED WITH RealType OTHER THAN FLOATING POINT "
+        "**u01** USED WITH RealType OTHER THAN FLOATING POINT "
         "TYPES");
 
-    return internal::U01LRImpl<UIntType, RealType, Left, Right>::eval(u);
+    return internal::U01Impl<UIntType, RealType, Left, Right>::eval(u);
 }
 
 /// \brief Convert uniform unsigned integers to floating points within [0, 1]
 /// \ingroup RNG
 template <typename UIntType, typename RealType, typename Left, typename Right>
-void u01_lr(std::size_t n, const UIntType *u, RealType *r) noexcept
+void u01(std::size_t n, const UIntType *u, RealType *r) noexcept
 {
     static_assert(std::is_unsigned<UIntType>::value,
-        "**u01_lr** USED WITH UIntType OTHER THAN UNSIGNED INTEGER "
+        "**u01** USED WITH UIntType OTHER THAN UNSIGNED INTEGER "
         "TYPES");
     static_assert(std::is_floating_point<RealType>::value,
-        "**u01_lr** USED WITH RealType OTHER THAN FLOATING POINT "
+        "**u01** USED WITH RealType OTHER THAN FLOATING POINT "
         "TYPES");
 
-    internal::U01LRImpl<UIntType, RealType, Left, Right>::eval(n, u, r);
+    internal::U01Impl<UIntType, RealType, Left, Right>::eval(n, u, r);
 }
 
 /// \brief Convert uniform unsigned integers to floating points on [0, 1]
@@ -247,7 +247,7 @@ void u01_lr(std::size_t n, const UIntType *u, RealType *r) noexcept
 template <typename UIntType, typename RealType>
 RealType u01_cc(UIntType u) noexcept
 {
-    return u01_lr<UIntType, RealType, Closed, Closed>(u);
+    return u01<UIntType, RealType, Closed, Closed>(u);
 }
 
 /// \brief Convert uniform unsigned integers to floating points on [0, 1)
@@ -255,7 +255,7 @@ RealType u01_cc(UIntType u) noexcept
 template <typename UIntType, typename RealType>
 RealType u01_co(UIntType u) noexcept
 {
-    return u01_lr<UIntType, RealType, Closed, Open>(u);
+    return u01<UIntType, RealType, Closed, Open>(u);
 }
 
 /// \brief Convert uniform unsigned integers to floating points on (0, 1]
@@ -263,7 +263,7 @@ RealType u01_co(UIntType u) noexcept
 template <typename UIntType, typename RealType>
 RealType u01_oc(UIntType u) noexcept
 {
-    return u01_lr<UIntType, RealType, Open, Closed>(u);
+    return u01<UIntType, RealType, Open, Closed>(u);
 }
 
 /// \brief Convert uniform unsigned integers to floating points on (0, 1)
@@ -271,7 +271,7 @@ RealType u01_oc(UIntType u) noexcept
 template <typename UIntType, typename RealType>
 RealType u01_oo(UIntType u) noexcept
 {
-    return u01_lr<UIntType, RealType, Open, Open>(u);
+    return u01<UIntType, RealType, Open, Open>(u);
 }
 
 /// \brief Convert uniform unsigned integers to floating points on [0, 1]
@@ -279,7 +279,7 @@ RealType u01_oo(UIntType u) noexcept
 template <typename UIntType, typename RealType>
 void u01_cc(std::size_t n, const UIntType *u, RealType *r) noexcept
 {
-    u01_lr<UIntType, RealType, Closed, Closed>(n, u, r);
+    u01<UIntType, RealType, Closed, Closed>(n, u, r);
 }
 
 /// \brief Convert uniform unsigned integers to floating points on [0, 1)
@@ -287,7 +287,7 @@ void u01_cc(std::size_t n, const UIntType *u, RealType *r) noexcept
 template <typename UIntType, typename RealType>
 void u01_co(std::size_t n, const UIntType *u, RealType *r) noexcept
 {
-    u01_lr<UIntType, RealType, Closed, Open>(n, u, r);
+    u01<UIntType, RealType, Closed, Open>(n, u, r);
 }
 
 /// \brief Convert uniform unsigned integers to floating points on (0, 1]
@@ -295,7 +295,7 @@ void u01_co(std::size_t n, const UIntType *u, RealType *r) noexcept
 template <typename UIntType, typename RealType>
 void u01_oc(std::size_t n, const UIntType *u, RealType *r) noexcept
 {
-    u01_lr<UIntType, RealType, Open, Closed>(n, u, r);
+    u01<UIntType, RealType, Open, Closed>(n, u, r);
 }
 
 /// \brief Convert uniform unsigned integers to floating points on (0, 1)
@@ -303,7 +303,7 @@ void u01_oc(std::size_t n, const UIntType *u, RealType *r) noexcept
 template <typename UIntType, typename RealType>
 void u01_oo(std::size_t n, const UIntType *u, RealType *r) noexcept
 {
-    u01_lr<UIntType, RealType, Open, Open>(n, u, r);
+    u01<UIntType, RealType, Open, Open>(n, u, r);
 }
 
 } // namespace vsmc

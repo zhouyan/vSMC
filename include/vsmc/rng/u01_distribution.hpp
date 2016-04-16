@@ -42,7 +42,7 @@
 #define VSMC_U01_USE_FIXED_POINT 0
 #endif
 
-#define VSMC_DEFINE_U01LR_DISTRIBUTION(Name, name)                            \
+#define VSMC_DEFINE_U01_DISTRIBUTION(Name, name)                              \
     template <typename RealType>                                              \
     class Name##Distribution                                                  \
     {                                                                         \
@@ -65,7 +65,7 @@
         }                                                                     \
     };
 
-#define VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(name)                             \
+#define VSMC_DEFINE_U01_DISTRIBUTION_IMPL(name)                               \
     template <std::size_t K, typename RealType, typename RNGType>             \
     inline void name##_distribution_impl(                                     \
         RNGType &rng, std::size_t n, RealType *r)                             \
@@ -91,19 +91,19 @@ using U01UIntType = typename std::conditional<(RNGBits<RNGType>::value > 32),
 
 /// \brief Standard uniform distribution on [0, 1]
 /// \ingroup Distribution
-VSMC_DEFINE_U01LR_DISTRIBUTION(U01CC, u01_cc)
+VSMC_DEFINE_U01_DISTRIBUTION(U01CC, u01_cc)
 
 /// \brief Standard uniform distribution on [0, 1)
 /// \ingroup Distribution
-VSMC_DEFINE_U01LR_DISTRIBUTION(U01CO, u01_co)
+VSMC_DEFINE_U01_DISTRIBUTION(U01CO, u01_co)
 
 /// \brief Standard uniform distribution on (0, 1]
 /// \ingroup Distribution
-VSMC_DEFINE_U01LR_DISTRIBUTION(U01OC, u01_oc)
+VSMC_DEFINE_U01_DISTRIBUTION(U01OC, u01_oc)
 
 /// \brief Standard uniform distribution on (0, 1)
 /// \ingroup Distribution
-VSMC_DEFINE_U01LR_DISTRIBUTION(U01OO, u01_oo)
+VSMC_DEFINE_U01_DISTRIBUTION(U01OO, u01_oo)
 
 /// \brief Standard uniform distribution on [0, 1)
 /// \ingroup Distribution
@@ -158,10 +158,10 @@ class U01Distribution
 namespace internal
 {
 
-VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(u01_cc)
-VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(u01_co)
-VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(u01_oc)
-VSMC_DEFINE_U01LR_DISTRIBUTION_IMPL(u01_oo)
+VSMC_DEFINE_U01_DISTRIBUTION_IMPL(u01_cc)
+VSMC_DEFINE_U01_DISTRIBUTION_IMPL(u01_co)
+VSMC_DEFINE_U01_DISTRIBUTION_IMPL(u01_oc)
+VSMC_DEFINE_U01_DISTRIBUTION_IMPL(u01_oo)
 
 #if VSMC_U01_USE_FIXED_POINT
 template <std::size_t K, typename RealType, typename RNGType>
