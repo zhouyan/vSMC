@@ -83,13 +83,14 @@ dummy example,
   // Method 4
   rng_rand(rng_mkl, rnorm_vsmc, n, r.data());
 \end{cppcode}
-On the author's computer, on average method 1 costs 68 nanoseconds to generate
-one standard Normal random number. Method 2 costs 52 nanoseconds while method 3
-costs only 11 nanoseconds. The last, when the \rng{} engine is an \mkl{} \rng
-wrapper, the \mkl library's routines are used and it costs only 8 nanoseconds
-per element. Normal distribution is relatively simple. For other distributions,
-such as the Gamma distribution, the difference can be even more dramatic. And
-the library even beats \mkl in performance for some distributions.
+On the author's computer, on average method 1 costs 39.7 nanoseconds to
+generate one standard Normal random number. Method 2 costs 22.3 nanoseconds
+while method 3 costs only 5.8 nanoseconds. The last, when the \rng{} engine is
+an \mkl{} \rng wrapper, the \mkl library's routines are used and it costs only
+4.2 nanoseconds per element. Normal distribution is relatively simple. For
+other distributions, such as the Gamma distribution, the difference can be even
+more dramatic. And the library even beats \mkl in performance for some
+distributions.
 
 \section{Counter-based RNG}
 \label{sec:Counter-based RNG}
@@ -195,7 +196,6 @@ table~\ref{tab:Configuration macros for counter-based RNGs}.
     \verb|VSMC_RNG_PHILOX_VECTOR_LENGTH|   & \verb|4|  \\
     \verb|VSMC_RNG_THREEFRY_ROUNDS|        & \verb|20| \\
     \verb|VSMC_RNG_THREEFRY_VECTOR_LENGTH| & \verb|4|  \\
-    \verb|VSMC_RNG_RDRAND_NTRIAL_MAX|      & \verb|0|  \\
     \bottomrule
   \end{tabularx}
   \caption{Configuration macros for counter-based \rng{}s}
@@ -230,15 +230,15 @@ implemented by this library,
   template <std::size_t Rounds>
   using AES128KeySeq =
       internal::AESKeySeq<Rounds, internal::AES128KeySeqGenerator>;
-  
+
   template <std::size_t Rounds>
   using AES192KeySeq =
       internal::AESKeySeq<Rounds, internal::AES192KeySeqGenerator>;
-  
+
   template <std::size_t Rounds>
   using AES256KeySeq =
       internal::AESKeySeq<Rounds, internal::AES256KeySeqGenerator>;
-  
+
   template <typename Constants = ARSConstants>
   using ARSKeySeq = internal::ARSKeySeqImpl<Constants>;
 \end{cppcode}
@@ -248,17 +248,17 @@ and correspondingly four \rng engines,
       std::size_t Blocks = VSMC_RNG_AES_NI_BLOCKS>
   using AES128Engine =
       AESNIEngine<ResultType, AES128KeySeq<Rounds>, Rounds, Blocks>;
-  
+
   template <typename ResultType, std::size_t Rounds = VSMC_RNG_AES192_ROUNDS,
       std::size_t Blocks = VSMC_RNG_AES_NI_BLOCKS>
   using AES192Engine =
       AESNIEngine<ResultType, AES192KeySeq<Rounds>, Rounds, Blocks>;
-  
+
   template <typename ResultType, std::size_t Rounds = VSMC_RNG_AES256_ROUNDS,
       std::size_t Blocks = VSMC_RNG_AES_NI_BLOCKS>
   using AES256Engine =
       AESNIEngine<ResultType, AES256KeySeq<Rounds>, Rounds, Blocks>;
-  
+
   template <typename ResultType, std::size_t Rounds = VSMC_RNG_ARS_ROUNDS,
       std::size_t Blocks = VSMC_RNG_AES_NI_BLOCKS,
       typename Constants = ARSConstants>
@@ -562,11 +562,228 @@ following sections we introduce each distributions included in the library.
   \label{tab:Random number distributions}
 \end{table}
 
-\subsection{Uniform distributions}
-\label{sub:Uniform distributions}
+\subsection{Uniform bits distribution}
+\label{sub:Uniform bits distribution}
 
-\subsection{Normal and related distribution} 
-\label{sub:Normal and related distribuiton} 
+The class template,
+\begin{cppcode}
+  template <typename UIntType>
+  class UniformBitsDistribution;
+\end{cppcode}
+is similar to the standard library's \verb|std::independent_bits_engine|,
+except that it always generate full size random integers. That is, let $W$ be
+the number of bits of \verb|UIntType|, then the output is uniform on the set
+$S_W = \{0,\dots,2^W - 1\}$. For example,
+\begin{cppcode}
+  RNG rng;
+  UniformBitsDistribution<std::uint32_t> dist;
+  dist(rng); // Return 32-bits random integers
+\end{cppcode}
+Let $\rmin$ and $\rmax$ be the minimum and maximum of the output random
+integers of the \rng. Let $R = \rmax - \rmin + 1$. Let $r_i$ be consecutive
+output of \verb|rng()|. If there exists an integer $M > 0$ such that $R = 2^M$,
+the output is,
+\begin{equation*}
+  U = \sum_{k = 0}^{K - 1} (r_k - \rmin) 2^{kM} \bmod 2^W
+\end{equation*}
+where $K = \Ceil{W / M}$. To see that it produces the desired results, note
+that there is an one-to-one mapping between $(r_0,\dots,r_{K + 1})$ and
+$\sum_{k=0}^{K-1}r_k^{kM}$, and $2^{KM}\equiv0\mod2^W$. Or a more intuitive way
+is that, for $r_i - \rmin$ to be i.i.d.\ random integers on the set $S_M =
+\{0,\dots,2^M - 1\}$, the \rng shall produce $M$ independent random bits. And
+$U$ is formed by the lower $W$ bits of each $KM$ random bits produced by the
+\rng. Unlike \verb|std::independent_bits_engine|, the calculation can be
+vectorized, which leads to better performance. Note that, all constants in the
+algorithm are computed at compile-time and the summation is fully unrolled, and
+thus there is no runtime overhead. In the case $\rmin = 0$ and $M = W$, most
+optimizing compilers shall be able to generate instructions such that the
+distribution does exactly nothing and returns the results of \verb|rng()|
+directly.
+
+If there does not exist an integer $M > 0$ such that $R = 2^M$, then
+\verb|std::indepdent_bits_engine| is used, and hence lower performance.
+
+\subsection{Standard uniform distribution}
+\label{sub:Standard uniform distribution}
+
+All continuous distributions are built upon the standard uniform distribution.
+And thus the performance and quality of the algorithm transferring random
+integers to random floating point numbers on the set $[0, 1]$ are of critical
+importance. The library provides five distributions for this purpose,
+\begin{cppcode}
+  template <typename RealType>
+  class U01CCDistribution;
+
+  template <typename RealType>
+  class U01CODistribution;
+
+  template <typename RealType>
+  class U01OCDistribution;
+
+  template <typename RealType>
+  class U01OODistribution;
+
+  template <typename RealType>
+  class U01Distribution;
+\end{cppcode}
+The last \verb|U01Distribution| is used by all other distributions discussed
+later. If the configuration macro \verb|VSMC_RNG_U01_USE_FIXED_POINT| is zero,
+then it behaves similarly to \verb|std::generate_canonical| and thus
+\verb|std::uniform_real_distribution|, otherwise it is the same as
+\verb|U01CODistribution|. We now discuss the details of each distribution and
+the implication of the configuration macros, which are listed in
+table~\ref{tab:Configuraiton macros for standard uniform distributions}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{XX}
+    \toprule
+    Macro & Default \\
+    \midrule
+    \verb|VSMC_RNG_U01_USE_FIXED_POINT|    & \verb|1|  \\
+    \verb|VSMC_RNG_U01_USE_64BITS_DOUBLE|  & \verb|0|  \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Configuration macros for standard uniform distributions}
+  \label{tab:Configuration macros for standard uniform distributions}
+\end{table}
+
+First of all, the random integers produced by \rng{}s are transferred to 32- or
+64-bits intermediate random integers through \verb|UniformBitsDistribution|
+before they are further converted to floating numbers. If \verb|RealType| is
+\verb|long double| or the \rng{} produce random integers with at least 64 bits,
+then 64-bits integers are used. If the configuration macro
+\verb|VSMC_RNG_U01_USE_64BITS_DOUBLE| is defined to be an non-zero value and
+\verb|RealType| is \verb|double|, then 64-bits integers are also used.
+Otherwise, 32-bits random integers are used. Below, we let $W$ be the number of
+bits of the random integers, and $M$ be the number of significant bits of
+\verb|RealType|, which is usually 24 for \verb|float|, 53 for \verb|double|.
+The situation for \verb|long double| is more complicated. On x86 and some other
+platforms, it is 63. We also denote the input random integers as $U$ and the
+output random real numbers as $Y$. Intermediate integer $V$ and real $X$ might
+also be used.
+
+\subsubsection{\texttt{U01CCDistribution}}
+
+This distribution produce random real numbers on $[0, 1]$, with the lower and
+upper bounds inclusive. The specific algorithm is as the following,
+\begin{align*}
+  P &= \min\{W - 1, M\} \\
+  V &= \begin{cases}
+    U &\text{if } P + 1 < W \\
+    \Floor{(U \bmod 2^{W - 1}) / 2^{W - P -2}} &\text{otherwise}
+  \end{cases} \\
+  X &= (V \bmod 1) + V \\
+  Y &= 2^{-(P + 1)} X
+\end{align*}
+
+\subsubsection{\texttt{U01CODistribution}}
+
+This distribution produce random real numbers on $[0, 1)$, with the lower bound
+inclusive and the upper bound never produced. The specific algorithm is as the
+following,
+\begin{align*}
+  P &= \min\{W, M\} \\
+  V &= \Floor{U / 2^{W - P}} \\
+  X &= 2^{-P} V
+\end{align*}
+
+\subsubsection{\texttt{U01OCDistribution}}
+
+This distribution produce random real numbers on $(0, 1]$, with the upper bound
+inclusive and the lower bound never produced. The specific algorithm is as the
+following,
+\begin{align*}
+  P &= \min\{W, M\} \\
+  V &= \Floor{U / 2^{W - P}} \\
+  X &= 2^{-P} V + 2^{-P}
+\end{align*}
+
+\subsubsection{\texttt{U01OODistribution}}
+
+This distribution produce random real numbers on $(0, 1)$, with the lower and
+upper bounds never produced. The specific algorithm is as the following,
+\begin{align*}
+  P &= \min\{W + 1, M\} \\
+  V &= \Floor{U / 2^{W + 1 - P}} \\
+  X &= 2^{-(P - 1)} V + 2^{-P}
+\end{align*}
+
+\subsubsection{\texttt{U01Distribution}}
+
+It is now clear that the above four distributions actually produce ``fixed
+point'' instead of ``floating point'' numbers. The output $X$ can be
+represented exactly by the target \verb|RealType|. They have two advantages.
+First, when it is important that the lower or upper bound is never produced, to
+avoid underflow, overflow or other undefined behaviors in subsequent
+calculations, they provide such assurance. Second, they usually can be executed
+with only a couple of instructions by modern processors. And thus can have
+better performance. Consider the following dummy example,
+\begin{cppcode}
+  std::size_t n = 10000;
+  RNG rng;
+  std::uniform_real_distribution<double> runif_std;
+  U01CODistribution<double> runif_vsmc;
+  Vector<double> r(n);
+
+  // Method 1
+  for (std::size_t i = 0; i != n; ++i)
+      r[i] = runif_std(rng);
+
+  // Method 2
+  for (std::size_t i = 0; i != n; ++i)
+      r[i] = runif_vsmc(rng);
+
+  // Method 3
+  rng_rand(rng, runif_vsmc, n, r.data());
+\end{cppcode}
+On the author's computer, on average method 1 costs 11.4 nanoseconds to
+generate one standard uniform random number. Method 2 costs 2.2 nanoseconds
+while method 3 costs only 0.96 nanoseconds. The best performance is obtained
+when the output of \rng are either 32 or 64 random bits. All \rng{}s in this
+library satisfy this condition.
+
+The main drawback is accuracy. If \verb|RealType| is \verb|float| or
+\verb|long double|, then the difference is minimal, since the intermediate
+random integers have more bits than the significant of the target floating
+point type. In fact, if the \rng produces 32 random bits, then the results are
+identical to the standard library for \verb|float|. If it produces 64 random
+bits, then the results are also identical for \verb|double| or
+\verb|long double|.
+
+The situation is a bit more tricky in the case of \verb|double| and the
+intermediate random integers are 32-bits. In this case,
+\verb|U01CODistribution| can only produce $2^{32}$ distinctive values while
+\verb|double| can represent much more values exactly within the range $[0, 1)$.
+In contrast, the standard library will use at least 53 random bits. This will
+not matter in most realistic applications. In fact, random numbers produced by
+\verb|U01CODistribution| passes all tests in the
+{\lnfigures\tbfigures TestU01}%
+\footnote{\url{http://www.iro.umontreal.ca/~simardr/testu01/tu01.html}}
+library that \verb|std::uniform_real_distribution| would pass, for a good \rng.
+In other words, the quality of the \rng is the dominating factor.
+
+However, there are situations where one do want the extra precision. For
+example, the library implement the Normal distribution using the standard
+Box-Muller method \parencite{Box:1958hv}, for performance consideration. Better
+accuracy at the tail can only be archived by using procedures that can produce
+values closer to zero than $2^{-32}$. In this case, there are two solutions.
+The first is to define the configuration macro
+\verb|VSMC_RNG_U01_USE_FIXED_POINT| to zero, and thus \verb|U01Distribution| is
+no longer the same as \verb|U01CODistribution|.  Instead, it behaves similarly
+to \verb|std::generate_canonical|. More specifically,
+\begin{align*}
+  P &= \Floor{(W + M - 1) / W} \\
+  K &= \max\{1, P\} \\
+  X &= \sum_{k=0}^{K - 1} U_k 2^{-(K - k)W}
+\end{align*}
+The other solution is to define the configuration macro
+\verb|VSMC_RNG_U01_USE_64BITS_DOUBLE| to a non-zero value, such that the
+intermediate random integers will always be 64-bits for \verb|double| output.
+This configuration macro also affects all other four distributions discussed
+earlier.
+
+\subsection{Normal and related distribution}
+\label{sub:Normal and related distribuiton}
 
 \subsection{Gamma and related distribution}
 \label{sub:Gamma and related distribution}
@@ -574,8 +791,8 @@ following sections we introduce each distributions included in the library.
 \subsection{Beta distribution}
 \label{sub:Beta distribution}
 
-\subsection{Distributions using inverse method}
-\label{sub:Distributions using inverse method}
+\subsection{Distributions using the inverse method}
+\label{sub:Distributions using the inverse method}
 
 \section{Seeding}
 \label{sec:Seeding}
@@ -625,4 +842,4 @@ method of \verb|SeedGenerator|. For example,
 \end{cppcode}
 where $n$ is the number of processes and $r$ is the rank of the current node.
 After this call, all seeds generated will belong to the equivalent class $s
-\equiv r\mod{n}$. Therefore, no two nodes will ever generate the same seeds.
+\equiv r \mod n$. Therefore, no two nodes will ever generate the same seeds.
