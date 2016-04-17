@@ -769,7 +769,7 @@ accuracy at the tail can only be archived by using procedures that can produce
 values closer to zero than $2^{-32}$. In this case, there are two solutions.
 The first is to define the configuration macro
 \verb|VSMC_RNG_U01_USE_FIXED_POINT| to zero, and thus \verb|U01Distribution| is
-no longer the same as \verb|U01CODistribution|.  Instead, it behaves similarly
+no longer the same as \verb|U01CODistribution|. Instead, it behaves similarly
 to \verb|std::generate_canonical|. More specifically,
 \begin{align*}
   P &= \Floor{(W + M - 1) / W} \\
@@ -782,17 +782,153 @@ intermediate random integers will always be 64-bits for \verb|double| output.
 This configuration macro also affects all other four distributions discussed
 earlier.
 
+\subsection{Distributions using the inverse method}
+\label{sub:Distributions using the inverse method}
+
+The following class templates implement distributions using the inverse method.
+Their distribution functions are shown in the comments on each class template.
+\begin{cppcode*}{texcomments}
+  // $F(x) = \frac{1}{\pi}\arctan\Round[Big]{\frac{x - a}{b}} + \frac{1}{2}$
+  template <typename RealType>
+  class CauchyDistribution;
+
+  // $F(x) = 1 - \EE^{-\lambda x}$
+  template <typename RealType>
+  class ExponentialDistribution;
+
+  // $F(x) = \exp\Curly[Big]{-\exp\Round[Big]{-\frac{x - a}{b}}}$
+  template <typename RealType>
+  class ExtremeValueDistribution;
+
+  // $F(x) = \frac{1}{2} + \frac{1}{2}\mathrm{sgn}(x - a)\Round[Big]{1 - \exp\Curly[Big]{-\frac{\Abs{x - a}}{b}}}$
+  template <typename RealType>
+  class LaplaceDistribution;
+
+  // $F(x) = \Round[Big]{1 + \exp\Curly[Big]{-\frac{x - a}{b}}}^{-1}$
+  template <typename RealType>
+  class LogisticDistribution;
+
+  // $F(x) = 1 - \Round[Big]{\frac{b}{x}}^a$
+  template <typename RealType>
+  class ParetoDistribution;
+
+  // $F(x) = 1 - \exp\Curly[Big]{-\frac{x^2}{2\sigma^2}}$
+  template <typename RealType>
+  class RayleighDistribution;
+
+  // $F(x) = \frac{x - a}{b - a}$
+  template <typename RealType>
+  class UniformRealDistribution;
+
+  // $F(x) = 1 - \exp\Curly[Big]{-\Round[Big]{\frac{x}{b}}^a}$
+  template <typename RealType>
+  class WeibullDistribution;
+\end{cppcode*}
+
 \subsection{Normal and related distribution}
 \label{sub:Normal and related distribuiton}
+
+The class template
+\begin{cppcode*}{texcomments}
+  // $f(x) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp\Curly[Big]{-\frac{(x-\mu)^2}{2\sigma^2}}$
+  template <typename RealType>
+  class NormalDistribution;
+\end{cppcode*}
+implements the Normal distribution with the Box-Muller method
+\parencite{Box:1958hv}. It is also used to implement the Log-Normal
+and Levy distributions. Below in the comments, $z$ is a the standard Normal
+random number and $x$ is the target distribution random number,
+\begin{cppcode*}{texcomments}
+  // $x = \EE^{m + s z}$
+  template <typename RealType>
+  class LognormalDistribution;
+
+  // $x = a + \frac{b}{z^2}$
+  template <typename RealType>
+  class LevyDistribution;
+\end{cppcode*}
+In addition, the library implement the multivariate Normal distribution.
+\begin{cppcode}
+  template <typename RealType, std::size_t Dim>
+  class NormalMVDistribution;
+\end{cppcode}
+If \verb|Dim| is zero (\verb|Dynamic|), then the distribution can be
+constructed with,
+\begin{cppcode}
+  explicit NormalMVDistribution(std::size_t dim,
+      const result_type *mean = nullptr, const result_type *chol = nullptr);
+\end{cppcode}
+Otherwise, if \verb|Dim| is positive integer, it can be constructed with static
+size,
+\begin{cppcode}
+  explicit NormalMVDistribution(
+      const result_type *mean = nullptr, const result_type *chol = nullptr);
+\end{cppcode}
+In either case, the parameter \verb|mean| is the mean vector. If it is a null
+pointer, then it is assumed it is a zero vector. The parameter \verb|chol| is a
+$d(d + 1)/2$-vector, where $d$ is dimension. The vector is the lower triangular
+elements of the Cholesky decomposition of the covariance matrix, packed row by
+row. Libraries such as \lapack has routines to generate such a matrix.
+Alternatively, one can use the covariance functionalities in the library. See
+section~\ref{sec:Sample covariance}, which also provides a concrete example of
+using the multivariate Normal distribution.
 
 \subsection{Gamma and related distribution}
 \label{sub:Gamma and related distribution}
 
+The class template
+\begin{cppcode*}{texcomments}
+  // $f(x) = \frac{\EE^{-x/\beta}}{\Gamma(\alpha)}\beta^{-\alpha}x^{\alpha-1}$
+  template <typename RealType>
+  class GammaDistribution;
+\end{cppcode*}
+implements the Gamma distribution. The specific algorithms depends on the
+parameters. If $\alpha = 1$, it becomes the exponential distribution.
+Otherwise, if $\alpha < 0.6$, it is generated through transformation of
+exponential power distribution \parencite[sec~2.6]{Devroye:1986gi}. If
+$0.6\le\alpha<1$, then rejection method from the Weibull distribution is used
+\parencite[sec.~3.4]{Devroye:1986gi}. If $\alpha > 1$, then the method in
+\textcite{Marsaglia:2000vq} is used. There are three related distributions,
+\begin{cppcode}
+  // GammaDistribution<RealType> rgamma(n / 2, 2);
+  // x = rgamma(rng);
+  template <typename RealType>
+  class ChiSquaredDistribution;
+
+  // ChiSquaredDistribution<RealType> rchi1(m);
+  // ChiSquaredDistribution<RealType> rchi2(n);
+  // x = (rchi1(rng) / m) / (rchi2(rng) / n);
+  template <typename RealType>
+  class FisherFDistribution;
+
+  // NormalDistribution<RealType> rnorm(0, 1);
+  // ChiSquaredDistribution<RealType> rchi(n);
+  // x = rnorm(rng) * std::sqrt(n / rchi(rng()));
+  template <typename RealType>
+  class StudentTDistribution;
+\end{cppcode}
+They implement the $\chi^2$-distribution, the Fisher $F$-distribution, and the
+student's $t$-distribution, respectively.
+
 \subsection{Beta distribution}
 \label{sub:Beta distribution}
 
-\subsection{Distributions using the inverse method}
-\label{sub:Distributions using the inverse method}
+The class template
+\begin{cppcode*}{texcomments}
+  // $f(x) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)}x^{\alpha - 1}(1 - x)^{\beta - 1}$
+  template <typename RealType>
+  class BetaDistribution;
+\end{cppcode*}
+implements the Beta distribution. The specific algorithm used depend on the
+parameters. If $\alpha = 1/2$ and $\beta = 1/2$, or $\alpha = 1$ or $\beta =
+1$, then the inverse method is used.  If $\alpha > 1$ and $\beta > 1$, the
+method in \textcite{Cheng:1978jl} is used. Otherwise, let $K = 0.852$, $C =
+-0.956$, and $D = \beta + K\alpha^2 + C$. If $\alpha < 1$, $\beta < 1$ and $D
+\le 0$, then Jöhnk's method \parencite[sec.~3.5]{Devroye:1986gi} is used.  In
+all other cases, one of the switching algorithms in \textcite{Atkinson:1979es}
+is used. Note that, there is no vectorized implementation at the moment for the
+switching algorithms. In other cases, the vectorized generating shall provide
+considerable speedup.
 
 \section{Seeding}
 \label{sec:Seeding}
