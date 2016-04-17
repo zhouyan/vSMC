@@ -55,23 +55,40 @@ class UniformBits
     template <typename RNGType>
     static UIntType eval(RNGType &rng)
     {
-        static constexpr int w = std::numeric_limits<UIntType>::digits;
-        static constexpr int p = RNGBits<RNGType>::value;
-
-        return eval(rng, std::integral_constant<bool, w <= p>());
+        return eval(rng,
+            std::integral_constant<bool, RNGTraits<RNGType>::is_full_range>());
     }
 
     private:
     template <typename RNGType>
-    static UIntType eval(RNGType &rng, std::true_type)
+    static UIntType eval(RNGType &rng, std::false_type)
     {
-        static constexpr int r = RNGMinBits<RNGType>::value;
+        std::independent_bits_engine<RNGType,
+            std::numeric_limits<UIntType>::digits, UIntType>
+            eng(std::move(rng));
+        UIntType u = eng();
+        rng = std::move(eng.base());
 
-        return static_cast<UIntType>(rng() >> r);
+        return u;
     }
 
     template <typename RNGType>
-    static UIntType eval(RNGType &rng, std::false_type)
+    static UIntType eval(RNGType &rng, std::true_type)
+    {
+        static constexpr int w = std::numeric_limits<UIntType>::digits;
+        static constexpr int r = RNGTraits<RNGType>::bits;
+
+        return eval_patch(rng, std::integral_constant<bool, (w <= r)>());
+    }
+
+    template <typename RNGType>
+    static UIntType eval_patch(RNGType &rng, std::true_type)
+    {
+        return static_cast<UIntType>(rng() - RNGType::min());
+    }
+
+    template <typename RNGType>
+    static UIntType eval_patch(RNGType &rng, std::false_type)
     {
         return patch<0>(rng, std::true_type());
     }
@@ -86,17 +103,14 @@ class UniformBits
     static UIntType patch(RNGType &rng, std::true_type)
     {
         static constexpr int w = std::numeric_limits<UIntType>::digits;
-        static constexpr int v =
-            std::numeric_limits<typename RNGType::result_type>::digits;
-        static constexpr int l = v - RNGMaxBits<RNGType>::value;
-        static constexpr int r = l + RNGMinBits<RNGType>::value;
-        static constexpr int p = N * RNGBits<RNGType>::value;
-        static constexpr int q = p + RNGBits<RNGType>::value;
+        static constexpr int r = RNGTraits<RNGType>::bits;
+        static constexpr int p = r * N;
+        static constexpr int q = r * N + r;
 
-        UIntType u = static_cast<UIntType>((rng() << l) >> r);
+        UIntType u = static_cast<UIntType>(rng() - RNGType::min())
+            << static_cast<UIntType>(p);
 
-        return (u << p) +
-            patch<N + 1>(rng, std::integral_constant<bool, (q < w)>());
+        return u + patch<N + 1>(rng, std::integral_constant<bool, (q < w)>());
     }
 }; // class UniformBits
 
@@ -143,7 +157,7 @@ template <typename UIntType, typename RNGType>
 inline void uniform_bits_distribution_impl(
     RNGType &rng, std::size_t n, UIntType *r, std::true_type)
 {
-    static constexpr int rbits = RNGBits<RNGType>::value;
+    static constexpr int rbits = RNGTraits<RNGType>::bits;
     static constexpr int ubits = std::numeric_limits<UIntType>::digits;
     static constexpr std::size_t rate = ubits / rbits;
     const std::size_t m = n * rate;
@@ -159,8 +173,7 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
         "**uniform_bits_distribution** USED WITH UIntType OTHER THAN UNSIGNED "
         "TYPES");
 
-    static constexpr int mbits = RNGMinBits<RNGType>::value;
-    static constexpr int rbits = RNGBits<RNGType>::value;
+    static constexpr int rbits = RNGTraits<RNGType>::bits;
     static constexpr int ubits = std::numeric_limits<UIntType>::digits;
     static constexpr int tbits =
         std::numeric_limits<typename RNGType::result_type>::digits;
@@ -169,10 +182,10 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
 
     internal::uniform_bits_distribution_impl(
         rng, n, r,
-        std::integral_constant<bool,
-            (mbits == 0 && rbits == tbits && ubits >= tbits &&
-                                   ubits % tbits == 0 && ualign >= talign &&
-                                   ualign % talign == 0)>());
+        std::integral_constant<
+            bool, (RNGType::min() == 0 && RNGTraits<RNGType>::is_full_range &&
+                      rbits == tbits && ubits >= tbits && ubits % tbits == 0 &&
+                      ualign >= talign && ualign % talign == 0)>());
 }
 
 VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(UniformBits, uniform_bits, UIntType)

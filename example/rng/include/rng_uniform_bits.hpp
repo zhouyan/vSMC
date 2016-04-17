@@ -68,7 +68,8 @@ inline void rng_uniform_bits(std::size_t N, std::size_t M, int nwid, int swid,
         passed = passed && r1 == r2;
     }
 
-    int rbits = vsmc::RNGBits<RNGType>::value;
+    bool full = vsmc::RNGTraits<RNGType>::is_full_range;
+    int rbits = vsmc::RNGTraits<RNGType>::bits;
     int tbits = std::numeric_limits<typename RNGType::result_type>::digits;
     int ubits = std::numeric_limits<UIntType>::digits;
     double n1 = watch1.nanoseconds() / num;
@@ -78,6 +79,7 @@ inline void rng_uniform_bits(std::size_t N, std::size_t M, int nwid, int swid,
     std::string pass = passed ? "Passed" : "Failed";
 
     std::cout << std::left << std::setw(nwid) << name;
+    std::cout << std::right << std::setw(swid) << (full ? "Yes" : "No");
     std::cout << std::right << std::setw(swid) << rbits;
     std::cout << std::right << std::setw(swid) << tbits;
     std::cout << std::right << std::setw(swid) << ubits;
@@ -94,10 +96,11 @@ inline void rng_uniform_bits(std::size_t N, std::size_t M)
     const int nwid = 20;
     const int swid = 5;
     const int twid = 15;
-    const std::size_t lwid = nwid + swid * 3 + twid * 5;
+    const std::size_t lwid = nwid + swid * 4 + twid * 5;
 
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::left << std::setw(nwid) << "RNGType";
+    std::cout << std::right << std::setw(swid) << "Full";
     std::cout << std::right << std::setw(swid) << "R";
     std::cout << std::right << std::setw(swid) << "T";
     std::cout << std::right << std::setw(swid) << "U";
