@@ -124,6 +124,35 @@ inline bool is_nullptr(T ptr)
     return is_nullptr(ptr, std::is_pointer<T>());
 }
 
+template <unsigned long long U,
+    int N = std::numeric_limits<unsigned long long>::digits - 1>
+class Log2L
+{
+    static constexpr unsigned long long M = 1ULL << N;
+
+    public:
+    static constexpr int value = M <= U ? N : Log2L<U, N - 1>::value;
+}; // class Log2L
+
+template <unsigned long long U>
+class Log2L<U, 0>
+{
+    public:
+    static constexpr int value = 0;
+}; // class Log2L
+
+template <int N>
+class Log2L<0, N>
+{
+    public:
+    static constexpr int value = N + 1;
+}; // class Log2L
+
+template <typename UIntType, UIntType U>
+class Log2 : public Log2L<U, std::numeric_limits<UIntType>::digits - 1>
+{
+}; // class Log2
+
 template <typename T>
 class BufferSize : public std::integral_constant<std::size_t, 8192 / sizeof(T)>
 {
