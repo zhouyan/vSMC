@@ -36,21 +36,21 @@
 #include <vsmc/rng/u01.hpp>
 #include <vsmc/rngc/u01.h>
 
-#define VSMC_DEFINE_RNGC_U01_TEST(ubits, fsuffix, lr, Left, Right, RealType)  \
+#define VSMC_DEFINE_RNGC_U01_TEST(ubits, fsuffix, lr, Lower, Upper, RealType) \
     template <>                                                               \
-    inline RealType rng_u01_c<std::uint##ubits##_t, RealType, vsmc::Left,     \
-        vsmc::Right>(std::uint##ubits##_t u)                                  \
+    inline RealType rng_u01_c<std::uint##ubits##_t, RealType, vsmc::Lower,    \
+        vsmc::Upper>(std::uint##ubits##_t u)                                  \
     {                                                                         \
         return vsmc_u01_##lr##_u##ubits##fsuffix(u);                          \
     }
 
-#define VSMC_RNG_U01_TEST(Left, Right)                                        \
-    rng_u01<std::uint32_t, float, vsmc::Left, vsmc::Right>(N, M);             \
-    rng_u01<std::uint64_t, float, vsmc::Left, vsmc::Right>(N, M);             \
-    rng_u01<std::uint32_t, double, vsmc::Left, vsmc::Right>(N, M);            \
-    rng_u01<std::uint64_t, double, vsmc::Left, vsmc::Right>(N, M);            \
-    rng_u01<std::uint32_t, long double, vsmc::Left, vsmc::Right>(N, M);       \
-    rng_u01<std::uint64_t, long double, vsmc::Left, vsmc::Right>(N, M);
+#define VSMC_RNG_U01_TEST(Lower, Upper)                                       \
+    rng_u01<std::uint32_t, float, vsmc::Lower, vsmc::Upper>(N, M);            \
+    rng_u01<std::uint64_t, float, vsmc::Lower, vsmc::Upper>(N, M);            \
+    rng_u01<std::uint32_t, double, vsmc::Lower, vsmc::Upper>(N, M);           \
+    rng_u01<std::uint64_t, double, vsmc::Lower, vsmc::Upper>(N, M);           \
+    rng_u01<std::uint32_t, long double, vsmc::Lower, vsmc::Upper>(N, M);      \
+    rng_u01<std::uint64_t, long double, vsmc::Lower, vsmc::Upper>(N, M);
 
 template <typename UIntType, typename RealType, typename, typename>
 inline RealType rng_u01_c(UIntType u);
@@ -116,15 +116,15 @@ inline std::string rng_u01_type_name<vsmc::Open>()
     return "Open";
 }
 
-template <typename UIntType, typename RealType, typename Left, typename Right>
+template <typename UIntType, typename RealType, typename Lower, typename Upper>
 inline std::string rng_u01_function_name()
 {
     std::stringstream ss;
     ss << "u01<uint";
     ss << std::numeric_limits<UIntType>::digits << "_t, ";
     ss << rng_u01_type_name<RealType>() << ", ";
-    ss << rng_u01_type_name<Left>() << ", ";
-    ss << rng_u01_type_name<Right>() << ">";
+    ss << rng_u01_type_name<Lower>() << ", ";
+    ss << rng_u01_type_name<Upper>() << ">";
 
     return ss.str();
 }
@@ -164,7 +164,7 @@ inline void rng_u01_rb(RealType x, std::string &maximum, std::string &right)
         right = "Closed";
 }
 
-template <typename UIntType, typename RealType, typename Left, typename Right>
+template <typename UIntType, typename RealType, typename Lower, typename Upper>
 inline void rng_u01(std::size_t N, std::size_t M)
 {
     vsmc::ThreefryEngine<UIntType> rng;
@@ -178,26 +178,26 @@ inline void rng_u01(std::size_t N, std::size_t M)
         vsmc::rng_rand(rng, N, u.data());
 
         for (std::size_t j = 0; j != N; ++j)
-            r[j] = vsmc::u01<UIntType, RealType, Left, Right>(u[j]);
+            r[j] = vsmc::u01<UIntType, RealType, Lower, Upper>(u[j]);
 
         for (std::size_t j = 0; j != N; ++j)
-            r1[j] = rng_u01_c<UIntType, RealType, Left, Right>(u[j]);
+            r1[j] = rng_u01_c<UIntType, RealType, Lower, Upper>(u[j]);
         passed1 = passed1 && r1 == r;
 
-        vsmc::u01<UIntType, RealType, Left, Right>(N, u.data(), r2.data());
+        vsmc::u01<UIntType, RealType, Lower, Upper>(N, u.data(), r2.data());
         passed2 = passed2 && r2 == r;
     }
 
     std::string function =
-        rng_u01_function_name<UIntType, RealType, Left, Right>();
+        rng_u01_function_name<UIntType, RealType, Lower, Upper>();
     std::string minimum;
     std::string maximum;
     std::string left;
     std::string right;
-    rng_u01_lb(vsmc::u01<UIntType, RealType, Left, Right>(
+    rng_u01_lb(vsmc::u01<UIntType, RealType, Lower, Upper>(
                    std::numeric_limits<UIntType>::min()),
         minimum, left);
-    rng_u01_rb(vsmc::u01<UIntType, RealType, Left, Right>(
+    rng_u01_rb(vsmc::u01<UIntType, RealType, Lower, Upper>(
                    std::numeric_limits<UIntType>::max()),
         maximum, right);
     std::string pass1 = passed1 ? "Passed" : "Failed";
@@ -218,8 +218,8 @@ inline void rng_u01(std::size_t N, std::size_t M)
     std::cout << std::setw(50) << std::left << "Function";
     std::cout << std::setw(15) << std::right << "Mininum";
     std::cout << std::setw(15) << std::right << "Maximum";
-    std::cout << std::setw(10) << std::right << "Left";
-    std::cout << std::setw(10) << std::right << "Right";
+    std::cout << std::setw(10) << std::right << "Lower";
+    std::cout << std::setw(10) << std::right << "Upper";
     std::cout << std::setw(10) << std::right << "C API";
     std::cout << std::setw(10) << std::right << "Batch";
     std::cout << std::endl;

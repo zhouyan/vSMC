@@ -689,8 +689,8 @@ template <typename RealType, typename RNGType>
 inline void rng_rand(
     RNGType &, U01Distribution<RealType> &, std::size_t, RealType *);
 
-template <typename RealType, typename RNGType, typename Left, typename Right>
-inline void rng_rand(RNGType &, U01LRDistribution<RealType, Left, Right> &,
+template <typename RealType, typename RNGType, typename Lower, typename Upper>
+inline void rng_rand(RNGType &, U01LRDistribution<RealType, Lower, Upper> &,
     std::size_t, RealType *);
 
 template <typename UIntType, typename RNGType>
