@@ -35,8 +35,8 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <immintrin.h>
 
-#ifndef VSMC_RDRAND_NTRIAL_MAX
-#define VSMC_RDRAND_NTRIAL_MAX 0
+#ifndef VSMC_RNG_RDRAND_NTRIAL_MAX
+#define VSMC_RNG_RDRAND_NTRIAL_MAX 0
 #endif
 
 #define VSMC_RUNTIME_WARNING_RNG_RDRAND_ENGINE_NTRIAL(ntrial, NTrialMax)      \
@@ -49,13 +49,12 @@ namespace vsmc
 /// \brief Invoke the RDRAND instruction and return the carry flag
 /// \ingroup RDRAND
 template <typename UIntType, std::size_t W>
-inline bool rdrand(UIntType *, std::integral_constant<std::size_t, W>);
+inline bool rdrand(UIntType *, std::integral_constant<int, W>);
 
 /// \brief Invoke the 16-bit RDRAND instruction and return the carry flag
 /// \ingroup RDRAND
 template <typename UIntType>
-inline bool rdrand(
-    UIntType *rand, std::integral_constant<std::size_t, sizeof(std::uint16_t)>)
+inline bool rdrand(UIntType *rand, std::integral_constant<int, 16>)
 {
     unsigned short r;
     int cf = _rdrand16_step(&r);
@@ -67,8 +66,7 @@ inline bool rdrand(
 /// \brief Invoke the 32-bit RDRAND instruction and return the carry flag
 /// \ingroup RDRAND
 template <typename UIntType>
-inline bool rdrand(
-    UIntType *rand, std::integral_constant<std::size_t, sizeof(std::uint32_t)>)
+inline bool rdrand(UIntType *rand, std::integral_constant<int, 32>)
 {
     unsigned r;
     int cf = _rdrand32_step(&r);
@@ -80,8 +78,7 @@ inline bool rdrand(
 /// \brief Invoke the 64-bit RDRAND instruction and return the carry flag
 /// \ingroup RDRAND
 template <typename UIntType>
-inline bool rdrand(
-    UIntType *rand, std::integral_constant<std::size_t, sizeof(std::uint64_t)>)
+inline bool rdrand(UIntType *rand, std::integral_constant<int, 64>)
 {
 #if defined(VSMC_MSVC) || (defined(VSMC_INTEL) && VSMC_INTEL_VERSION < 1600)
     unsigned __int64 r;
@@ -96,16 +93,17 @@ inline bool rdrand(
 
 /// \brief RDRAND generator
 /// \ingroup RDRAND
-template <typename ResultType, std::size_t NTrialMax = VSMC_RDRAND_NTRIAL_MAX>
+template <typename ResultType,
+    std::size_t NTrialMax = VSMC_RNG_RDRAND_NTRIAL_MAX>
 class RDRANDEngine
 {
     static_assert(std::is_unsigned<ResultType>::value,
         "**RDRANDEngine** USED WITH ResultType OTHER THAN UNSIGNED INTEGER "
         "TYPES");
 
-    static_assert(sizeof(ResultType) == sizeof(std::uint16_t) ||
-            sizeof(ResultType) == sizeof(std::uint32_t) ||
-            sizeof(ResultType) == sizeof(std::uint64_t),
+    static_assert(std::numeric_limits<ResultType>::digits == 16 ||
+            std::numeric_limits<ResultType>::digits == 32 ||
+            std::numeric_limits<ResultType>::digits == 64,
         "**RDRANDEngine** USED WITH ResultType OF SIZE OTHER THAN 16, 32 OR "
         "64 BITS");
 
@@ -181,8 +179,9 @@ class RDRANDEngine
         std::size_t ntrial = 0;
         while (true) {
             ++ntrial;
-            bool success = rdrand<result_type>(&r,
-                std::integral_constant<std::size_t, sizeof(result_type)>());
+            bool success = rdrand<result_type>(
+                &r, std::integral_constant<int,
+                        std::numeric_limits<result_type>::digits>());
             if (success || ntrial > NTrialMax)
                 break;
         }
@@ -195,8 +194,9 @@ class RDRANDEngine
     {
         result_type r;
         while (true) {
-            bool success = rdrand<result_type>(&r,
-                std::integral_constant<std::size_t, sizeof(result_type)>());
+            bool success = rdrand<result_type>(
+                &r, std::integral_constant<int,
+                        std::numeric_limits<result_type>::digits>());
             if (success)
                 break;
         }

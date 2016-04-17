@@ -9,6 +9,16 @@ provided, such that they can be used as \cppoo \rng engines. Some continuous
 distributions, including all those in the standard library, are implemented.
 Some of them are considerably faster than their standard library counter-parts.
 
+Section~\ref{sec:Vectorized random number generating} introduces the library's
+interface for vectorized random number generating.
+Section~\ref{sec:Counter-based RNG} details the counter-based \rng{}s
+implemented in the library. Section~\ref{sec:Non-deterministic RNG} briefly
+discuss the non-deterministic \rng{}s using \rdrand instructions and
+section~\ref{sec:MKL RNG} shows how to use \rng{}s in the \mkl library as
+\cppoo engines. Section~\ref{sec:Distributions} discusses the distributions
+implemented by this library. Section~\ref{sec:Seeding} discusses how to seed
+counter-based \rng{}s.
+
 \section{Vectorized random number generating}
 \label{sec:Vectorized random number generating}
 
@@ -38,7 +48,7 @@ example,
 
   r1 == r2; // always true
 \end{cppcode}
-The second overloading version of \verb|rng_rand| is similar to the loop,
+The second version of \verb|rng_rand| is similar to the loop,
 \begin{cppcode}
   for (std::size_t i = 0; i != n; ++i)
       r[i] = distribution(rng);
@@ -103,35 +113,33 @@ in this library, along with the bits of the counter and the key. They all
 conform to the \cppoo uniform \rng concept and output 32-bits integers. For
 64-bits integer output, a suffix \verb|_64| may be appended to corresponding
 \rng engine names. For example, \verb|Threefry4x64| and \verb|Threefry4x64_64|
-generate the same 256-bits patterns. The only difference is that
-\verb|operator()| of the former returns 32-bits integers while the later
+generate the same 256-bits random integers internally. The only difference is
+that \verb|operator()| of the former returns 32-bits integers while the later
 returns 64-bits integers.
 
 \begin{table}
-  \def\B{\textcolor{MRed}{\textit{B}}}
-  \def\V{\textcolor{MRed}{\textit{V}}}
-  \begin{tabularx}{\textwidth}{Xrr}
+  \begin{tabularx}{\textwidth}{lXX}
     \toprule
     Class & Counter bits & Key bits \\
     \midrule
-    \texttt{AES128x1}, \texttt{ARS128x2}, \texttt{AES128x4}, \texttt{AES128x8}
+    \verb|AES128x1|, \verb|ARS128x2|, \verb|AES128x4|, \verb|AES128x8|
     & $128$  & $128$  \\
-    \texttt{AES192x1}, \texttt{ARS192x2}, \texttt{AES192x4}, \texttt{AES192x8}
+    \verb|AES192x1|, \verb|ARS192x2|, \verb|AES192x4|, \verb|AES192x8|
     & $128$  & $192$  \\
-    \texttt{AES256x1}, \texttt{ARS256x2}, \texttt{AES256x4}, \texttt{AES256x8}
+    \verb|AES256x1|, \verb|ARS256x2|, \verb|AES256x4|, \verb|AES256x8|
     & $128$  & $256$  \\
-    \texttt{ARSx1}, \texttt{ARS256x2}, \texttt{ARSx4}, \texttt{ARSx8}
+    \verb|ARSx1|, \verb|ARS256x2|, \verb|ARSx4|, \verb|ARSx8|
     & $128$  & $128$  \\
-    \texttt{Philox2x32}    & $64$   & $32$   \\
-    \texttt{Philox2x64}    & $128$  & $64$   \\
-    \texttt{Philox4x32}    & $128$  & $64$   \\
-    \texttt{Philox4x64}    & $256$  & $128$  \\
-    \texttt{Threefry2x32}  & $64$   & $64$   \\
-    \texttt{Threefry2x64}  & $128$  & $128$  \\
-    \texttt{Threefry4x32}  & $128$  & $128$  \\
-    \texttt{Threefry4x64}  & $256$  & $256$  \\
-    \texttt{Threefry8x64}  & $512$  & $512$  \\
-    \texttt{Threefry16x64} & $1024$ & $1024$ \\
+    \verb|Philox2x32|    & $64$   & $32$   \\
+    \verb|Philox2x64|    & $128$  & $64$   \\
+    \verb|Philox4x32|    & $128$  & $64$   \\
+    \verb|Philox4x64|    & $256$  & $128$  \\
+    \verb|Threefry2x32|  & $64$   & $64$   \\
+    \verb|Threefry2x64|  & $128$  & $128$  \\
+    \verb|Threefry4x32|  & $128$  & $128$  \\
+    \verb|Threefry4x64|  & $256$  & $256$  \\
+    \verb|Threefry8x64|  & $512$  & $512$  \\
+    \verb|Threefry16x64| & $1024$ & $1024$ \\
     \bottomrule
   \end{tabularx}
   \caption{Counter-based \rng; Each \rng engine may have suffix \texttt{\_64}}
@@ -139,7 +147,8 @@ returns 64-bits integers.
 \end{table}
 
 All \rng{}s in table~\ref{tab:Counter-based RNG} are actually type aliases.
-More generally the library defines the following class,
+More generally the library defines the following class template as the
+interface,
 \begin{cppcode}
   template <typename ResultType, typename Generator>
   class CounterEngine;
@@ -147,7 +156,7 @@ More generally the library defines the following class,
 where \verb|ResultType| shall be an unsigned integer type and \verb|Generator|
 is the class that actually implement the algorithm. It has at least two member
 types, \verb|ctr_type| and \verb|key_type|, the types of the counter and key.
-Four methods are required,
+In addition, four methods are required,
 \begin{cppcode}
   // The size of output in bytes
   static constexpr std::size_t size();
@@ -167,9 +176,9 @@ Four methods are required,
 \end{cppcode}
 The operators are not restricted to increment the counter only once for each
 random buffer. The only restriction is that \verb|size()| is divisible by
-\verb|sizeof(ResultType)|. This rule will enforced at compile-time. In the
-remaining of this section, we introduce a few generators implemented by this
-class. A few configuration macros of these \rng{}s are listed in
+\verb|sizeof(ResultType)|. This rule is enforced at compile-time. In the
+remaining of this section, we introduce a few generators implemented by the
+library. A few configuration macros of these \rng{}s are listed in
 table~\ref{tab:Configuration macros for counter-based RNGs}.
 
 \begin{table}
@@ -177,13 +186,16 @@ table~\ref{tab:Configuration macros for counter-based RNGs}.
     \toprule
     Macro & Default \\
     \midrule
-    \verb|VSMC_RNG_AES_BLOCKS|             & \verb|8|  \\
+    \verb|VSMC_RNG_AES128_ROUNDS|          & \verb|10| \\
+    \verb|VSMC_RNG_AES192_ROUNDS|          & \verb|12| \\
+    \verb|VSMC_RNG_AES256_ROUNDS|          & \verb|14| \\
     \verb|VSMC_RNG_ARS_ROUNDS|             & \verb|5|  \\
-    \verb|VSMC_RNG_ARS_BLOCKS|             & \verb|8|  \\
+    \verb|VSMC_RNG_AES_NI_BLOCKS|          & \verb|8|  \\
     \verb|VSMC_RNG_PHILOX_ROUNDS|          & \verb|10| \\
     \verb|VSMC_RNG_PHILOX_VECTOR_LENGTH|   & \verb|4|  \\
     \verb|VSMC_RNG_THREEFRY_ROUNDS|        & \verb|20| \\
     \verb|VSMC_RNG_THREEFRY_VECTOR_LENGTH| & \verb|4|  \\
+    \verb|VSMC_RNG_RDRAND_NTRIAL_MAX|      & \verb|0|  \\
     \bottomrule
   \end{tabularx}
   \caption{Configuration macros for counter-based \rng{}s}
@@ -207,56 +219,60 @@ implemented in a more general form,
 where \verb|KeySeqType| is the class used to generate the sequence of round
 keys; \verb|Rounds| is the number of rounds of \aes encryption to be performed.
 See the reference manual for details of how to define the key sequence class.
-The \aesni instructions have a latency of seven or eight cycles, while they can
-be issued at every cycle. Therefore better performance can be achieved if
-multiple 128-bits random integers are generated at the same time. This is
-specified by the template parameter \verb|Blocks|. Larger blocks, up to eight,
-can improve performance but this is at the cost of larger state size. Without
-going into details, there are four types of sequence of round keys implemented
-by this library,
+The \aesni encryption instructions have a latency of seven or eight cycles,
+while they can be issued at every cycle. Therefore better performance can be
+achieved if multiple 128-bits random integers are generated at the same time.
+This is specified by the template parameter \verb|Blocks|. Larger blocks, up to
+eight, might improve performance but this is at the cost of larger state size.
+Without going into details, there are four types of sequence of round keys
+implemented by this library,
 \begin{cppcode}
-  template <std::size_t Rounds = 10>
+  template <std::size_t Rounds>
   using AES128KeySeq =
       internal::AESKeySeq<Rounds, internal::AES128KeySeqGenerator>;
-
-  template <std::size_t Rounds = 12>
+  
+  template <std::size_t Rounds>
   using AES192KeySeq =
       internal::AESKeySeq<Rounds, internal::AES192KeySeqGenerator>;
-
-  template <std::size_t Rounds = 14>
+  
+  template <std::size_t Rounds>
   using AES256KeySeq =
       internal::AESKeySeq<Rounds, internal::AES256KeySeqGenerator>;
-
+  
   template <typename Constants = ARSConstants>
-  class ARSKeySeq;
+  using ARSKeySeq = internal::ARSKeySeqImpl<Constants>;
 \end{cppcode}
 and correspondingly four \rng engines,
 \begin{cppcode}
-  template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-  using AES128Engine = AESNIEngine<ResultType, AES128KeySeq<10>, 10, Blocks>;
-
-  template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-  using AES192Engine = AESNIEngine<ResultType, AES192KeySeq<12>, 12, Blocks>;
-
-  template <typename ResultType, std::size_t Blocks = VSMC_RNG_AES_BLOCKS>
-  using AES256Engine = AESNIEngine<ResultType, AES256KeySeq<14>, 14, Blocks>;
-
+  template <typename ResultType, std::size_t Rounds = VSMC_RNG_AES128_ROUNDS,
+      std::size_t Blocks = VSMC_RNG_AES_NI_BLOCKS>
+  using AES128Engine =
+      AESNIEngine<ResultType, AES128KeySeq<Rounds>, Rounds, Blocks>;
+  
+  template <typename ResultType, std::size_t Rounds = VSMC_RNG_AES192_ROUNDS,
+      std::size_t Blocks = VSMC_RNG_AES_NI_BLOCKS>
+  using AES192Engine =
+      AESNIEngine<ResultType, AES192KeySeq<Rounds>, Rounds, Blocks>;
+  
+  template <typename ResultType, std::size_t Rounds = VSMC_RNG_AES256_ROUNDS,
+      std::size_t Blocks = VSMC_RNG_AES_NI_BLOCKS>
+  using AES256Engine =
+      AESNIEngine<ResultType, AES256KeySeq<Rounds>, Rounds, Blocks>;
+  
   template <typename ResultType, std::size_t Rounds = VSMC_RNG_ARS_ROUNDS,
-      std::size_t Blocks = VSMC_RNG_ARS_BLOCKS,
+      std::size_t Blocks = VSMC_RNG_AES_NI_BLOCKS,
       typename Constants = ARSConstants>
   using ARSEngine =
       AESNIEngine<ResultType, ARSKeySeq<Constants>, Rounds, Blocks>;
 \end{cppcode}
 The first three are equivalent to \aes-128, \aes-192 and \aes-256 block ciphers
 used in counter mode. The last is the \ars algorithm introduced by
-\textcite{Salmon:2011um}. The default number of blocks can be changed through
-the configuration macros. The default values are \verb|8|. The default number
-of rounds of the \ars engine can also be changed by the configuration macro.
-The default value is \verb|5|. The last template parameter \verb|Constants| of
+\textcite{Salmon:2011um}. The last template parameter \verb|Constants| of
 \verb|ARSKeySeq| and \verb|ARSEngine| is a trait class that defines the
 constants of the Weyl's sequence. See \textcite{Salmon:2011um} for details. The
-defaults are taken from the paper. To use an alternative set 64-bits integers
-for the constants, one can define and use a trait class as the following,
+defaults are taken from the paper. To use an alternative pair of 64-bits
+integers for the constants, one can define and use a trait class as the
+following,
 \begin{cppcode}
   template <std::size_t>
   struct NewWeylConstant;
@@ -290,29 +306,29 @@ following expression,
 shall define a type that has a static constant expression member data
 \verb|value| that is the \verb|I|\ith Weyl constant.
 
-A few type alias are defined for convenience. For example,
+A few type aliases are defined for convenience. For example,
 \begin{cppcode}
   using ARSx8    = ARSEngine<std::uint32_t, VSMC_RNG_ARS_ROUNDS, 8>;
   using ARSx8_64 = ARSEngine<std::uint64_t, VSMC_RNG_ARS_ROUNDS, 8>;
   using ARS      = ARSEngine<std::uint32_t>;
   using ARS_64   = ARSEngine<std::uint64_t>;
 \end{cppcode}
-The engine \verb|ARS| is the library's default \rng if \aesni is supported.
-Aliases for block sizes 1, 2, 4, 8 are defined for all four algorithms, as well
-as both 32- and 64-bits versions. These aliases are listed in
-table~\ref{tab:Counter-based RNG}.
+The engine \verb|ARS| is the library's default \rng if \aesni instructions as
+supported. Aliases for block sizes 1, 2, 4 and 8 are defined for all four
+algorithms, as well as both 32- and 64-bits versions. These aliases are listed
+in table~\ref{tab:Counter-based RNG}.
 
-The performance of these engines depend on a few factors, such as \cpu types,
+The performance of these engines depends on a few factors, such as \cpu types,
 compilers, operating systems, etc. For example, the theoretical peak
-performance for \verb|ARSx8| is $0.32$ cycles per byte (cpB) on recent \cpu{}s.
-In realistic situations, depending on the compiler on the same computer, values
-ranging from $0.44$ to $1.2$ cpB were observed by the author. In any case, such
+performance for \verb|ARSx8| is 0.32 cycles per byte (cpB) on recent \cpu{}s.
+In realistic situations, depending on the compiler, on the same computer values
+ranging from 0.44 to 1.2 cpB were observed by the author. In any case, such
 performance is good enough even for the most demanding applications. The
 library does not attempt to optimize the algorithm for any particular platform.
 In realistic applications, the performance of \rng is unlikely to become a
 bottle neck. Note that, the best performance is obtained with the vectorized
 \verb|rng_rand| function (see section~\ref{sec:Vectorized random number
-  generating}. If the \rng{} is used to generate random integer one at a time,
+  generating}). If the \rng{} is used to generate random integer one at a time,
 the performance is about a half of the vectorized operation.
 
 \subsection{Philox}
@@ -423,9 +439,15 @@ library.
 \section{Non-deterministic RNG}
 \label{sec:Non-deterministic RNG}
 
-If the \rdrand intrinsics are supported, the library also implements three
+If the \rdrand instructions are supported, the library also implements three
 \rng{}s, \verb|RDRAND16|, \verb|RDRAND32| and \verb|RDRAND64|. They output 16-,
-32-, and 64-bits random integers, respectively.
+32-, and 64-bits random integers, respectively. The \rdrand instruction may not
+return a random integers at all. The engines will keep trying until it
+succeeds. One can limit the maximum number of trials by define the
+configuration macro \verb|VSMC_RNG_RDRAND_NTRIAL_MAX|. A value of zero, the
+default, means the number of trials is unlimited. If it is a positive number,
+and if after the specified number of trials no random integer is return by the
+\rdrand instruction, zero is returned.
 
 \section{MKL RNG}
 \label{sec:MKL RNG}
@@ -515,32 +537,11 @@ all conforms to the \cppoo random number distribution concepts. Some of them
 are the same as those in the \cppoo standard library, with \verb|CamelCase|
 names. For example, \verb|NormalDistribuiton| can be used as a drop-in
 replacement of \verb|std::normal_distribuiton|. This includes all of the
-continuous distributions defined in the standard library. Their benefits
-compared to the standard library will be discussed later.
+continuous distributions defined in the standard library.
 Table~\ref{tab:Random number distributions} lists all the additional
-distributions implemented. The library also implement the multivariate Normal
-distribution. Its usable is shown by the following example,
-\begin{cppcode*}{texcomments}
-  double mean[2] = { /* the mean vector */ };
-  double cov[4] = { /* the covariance matrix */ };
-  double chol[3];
-  double r[2];
-  // Compute the lower triangular of the Cholesky decomposition
-  cov_chol(2, cov, chol);
-  RNG rng;
-  NormalMVDistribution<double, 2> norm2(mean, chol); // Bivariate Normal
-  NormalMVDistribution<double, Dynamic> normd(2, mean, chol); // Same as above
-  norm2(rng, r); // Generate a bivariate Normal
-  normd(rng, r); // Same as above
-\end{cppcode*}
-We shall mention here that the static form (\verb|norm2|), where the dimension
-is specified as a template parameter is more efficient. The distribution accept
-the lower triangular of the Choleskey decomposition of the covariance matrix as
-input, instead of the covariance matrix itself. The input matrix shall be in
-packed format, with row major storage layout. A function \verb|cov_chol| is
-provided to compute this decomposition from a covariance matrix stored in
-various format. The output is suitable as direct input to the distribution. See
-section~\ref{sec:Sample covariance} for details.
+distributions implemented. As stated in section~\ref{sec:Vectorized random
+  number generating}, they support vectorized random number generating. In the
+following sections we introduce each distributions included in the library.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{lX}
@@ -548,79 +549,33 @@ section~\ref{sec:Sample covariance} for details.
     Class & Notes \\
     \midrule
     \verb|LaplaceDistribution|
-    & Parameters: location \texttt{a}; scale \texttt{b} \\
+    & Parameters: location \verb|a|; scale \verb|b| \\
     \verb|LevyDistribution|
-    & Parameters: location \texttt{a}; scale \texttt{b} \\
+    & Parameters: location \verb|a|; scale \verb|b| \\
     \verb|ParetoDistribution|
-    & Parameters: shape \texttt{a}; scale \texttt{b} \\
+    & Parameters: shape \verb|a|; scale \verb|b| \\
     \verb|RayleighDistribution|
-    & Parameters: scale \texttt{sigma} \\
+    & Parameters: scale \verb|sigma| \\
     \bottomrule
   \end{tabularx}
   \caption{Random number distributions}
   \label{tab:Random number distributions}
 \end{table}
 
-\subsection{Uniform bits distribution}
-\label{sub:Uniform bits distribution}
+\subsection{Uniform distributions}
+\label{sub:Uniform distributions}
 
-\subsection{Standard uniform distribution}
-\label{sub:Standard uniform distribution}
+\subsection{Normal and related distribution} 
+\label{sub:Normal and related distribuiton} 
 
-\section{RNG in C and OpenCL}
-\label{sec:RNG in C and OpenCL}
+\subsection{Gamma and related distribution}
+\label{sub:Gamma and related distribution}
 
-The Philox and Threefry engines, together with a set of functions that transfer
-random integers to floating points numbers, are also implemented with only a
-subset of \cnn features. They can be used in both \cnn and OpenCL 1.2 device
-programs. See appendix~\appref{app:sub:Parallelized implementation using
-  OpenCL} for an example of such an OpenCL program. Here we provide a minimal
-example that generates two standard Normal random numbers using the Box-Muller
-method,
-\begin{ccode}
-    vsmc_threefry4x32 rng;
-    vsmc_threefry4x32_init(&rng, seed);
+\subsection{Beta distribution}
+\label{sub:Beta distribution}
 
-    uint32_t u32[2];
-    u32[0] = vsmc_threefry4x32_rand(&rng);
-    u32[1] = vsmc_threefry4x32_rand(&rng);
-
-    double u01[2];
-    u01[0] = vsmc_u01_oc_u32d(u32[0]);
-    u01[1] = vsmc_u01_oc_u32d(u32[1]);
-    u01[0] = sqrt(-2 * log(u01[0]));
-    u01[1] *= 2;
-
-    double normal01[2];
-    normal01[0] = u01[0] * sin(M_PI * u01[1]);
-    normal01[1] = u01[0] * cos(M_PI * u01[1]);
-\end{ccode}
-For each engine type, there are two primary functions. One is used to
-initialize the state. These functions take the form of the engine name suffixed
-with \verb|_init|. They take a pointer to the \rng and an unsigned integer as
-input. The other function is used to increment the counter and generate
-random integers. These functions take the form of the engine name suffixed with
-\verb|_rand|. They take a pointer to the \rng as input and return an unsigned
-integer.
-
-The functions that convert random integers to floating points uniform on $[0,
-1]$ take the form
-\texttt{vsmc\_u01\_%
-  \textcolor{MRed}{\textit{l}}%
-  \textcolor{MRed}{\textit{r}}\_u%
-  \textcolor{MRed}{\textit{bits}}%
-  \textcolor{MRed}{\textit{fp}}},
-where \texttt{\textcolor{MRed}{\textit{l}}} specify the lower bound of the
-interval to be closed (\verb|c|) or open (\verb|o|); similarly
-\texttt{\textcolor{MRed}{\textit{r}}} specify the upper bound of the interval;
-\texttt{\textcolor{MRed}{\textit{bits}}} can be either \verb|32| or \verb|64|,
-which specifies the input type to be \verb|uint32_t| or \verb|uint64_t|,
-respectively; and last \texttt{\textcolor{MRed}{\textit{fp}}} can be either
-\verb|f|, \verb|d|, or \verb|l|, which specifies the output type to be
-\verb|float|, \verb|double|, or \verb|long double|, respectively. Note that, if
-used in OpenCL device programs, the \verb|long double| versions are not
-defined. And the \verb|double| versions are only defined if the macro
-\verb|VSMC_HAS_OPENCL_DOUBLE| is defined to a non-zero value.
+\subsection{Distributions using inverse method}
+\label{sub:Distributions using inverse method}
 
 \section{Seeding}
 \label{sec:Seeding}
