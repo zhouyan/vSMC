@@ -487,13 +487,15 @@ VSMC_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
 template <typename RNGType>
 class RNGTraits
 {
-    static constexpr typename RNGType::result_type R_ = RNGType::max() -
-        RNGType::min() + static_cast<typename RNGType::result_type>(1);
-
-    public:
     using result_type = typename RNGType::result_type;
 
-    /// \brief The random integers are uniform on the the set
+    static constexpr typename RNGType::result_type R_ = RNGType::min() == 0 &&
+            RNGType::max() == std::numeric_limits<result_type>::max() ?
+        0 :
+        RNGType::max() - RNGType::min() + static_cast<result_type>(1);
+
+    public:
+    /// \brief If the random integers are uniform on the set
     /// \f$\{0,\dots,2^W - 1\}\f$ for some \f$W > 0\f$.
     static constexpr bool is_full_range =
         RNGType::min() == 0 && (R_ & (R_ - 1)) == 0;
