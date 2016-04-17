@@ -34,6 +34,10 @@
 
 #include <vsmc/internal/common.hpp>
 
+#ifdef VSMC_MSVC
+#include <intrin.h>
+#endif
+
 /// \brief Default C++11 clock used as StopWatch
 /// \ingroup Config
 #ifndef VSMC_STOP_WATCH_CLOCK_TYPE
@@ -42,6 +46,43 @@
 
 namespace vsmc
 {
+
+namespace internal
+{
+
+inline std::uint64_t rdtsc()
+{
+#if VSMC_HAS_X86
+
+#if defined(VSMC_CLANG) || defined(VSMC_GCC) || defined(VSMC_INTEL)
+    unsigned hi = 0;
+    unsigned lo = 0;
+#if VSMC_HAS_X86_64
+    asm volatile("CPUID\n\t"
+                 "RDTSC\n\t"
+                 "mov %%edx, %0\n\t"
+                 "mov %%eax, %1\n\t"
+                 : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
+#else  // VSMC_HAS_X64_64
+    asm volatile("CPUID\n\t"
+                 "RDTSC\n\t"
+                 "mov %%edx, %0\n\t"
+                 "mov %%eax, %1\n\t"
+                 : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
+#endif // VSMC_HAS_X86_64
+    return (static_cast<std::uint64_t>(hi) << 32) + lo;
+#elif defined(VSMC_MSVC)
+    return static_cast<std::uint64_t>(__rdtsc());
+#else  // defined(VSMC_CLANG) || defined(VSMC_GCC) || defined(VSMC_INTEL)
+    return 0;
+#endif // defined(VSMC_CLANG) || defined(VSMC_GCC) || defined(VSMC_INTEL)
+
+#else  // VSMC_HAS_X86
+    return 0;
+#endif // VSMC_HAS_X86
+}
+
+} // namespace vsmc::internal
 
 /// \brief Start and stop a StopWatch in scope (similiar to a mutex lock
 /// guard)
@@ -78,7 +119,11 @@ class StopWatchClockAdapter
     public:
     using clock_type = ClockType;
 
-    StopWatchClockAdapter() : elapsed_(0), running_(false) { reset(); }
+    StopWatchClockAdapter()
+        : time_(0), cycles_(0), cycles_start_(0), running_(false)
+    {
+        reset();
+    }
 
     /// \brief If the watch is running
     ///
@@ -99,7 +144,8 @@ class StopWatchClockAdapter
             return false;
 
         running_ = true;
-        start_time_ = clock_type::now();
+        time_start_ = clock_type::now();
+        cycles_start_ = internal::rdtsc();
 
         return true;
     }
@@ -114,8 +160,9 @@ class StopWatchClockAdapter
         if (!running_)
             return false;
 
-        typename clock_type::time_point stop_time = clock_type::now();
-        elapsed_ += stop_time - start_time_;
+        cycles_ += static_cast<double>(internal::rdtsc() - cycles_start_);
+        typename clock_type::time_point time_stop = clock_type::now();
+        time_ += time_stop - time_start_;
         running_ = false;
 
         return true;
@@ -125,15 +172,19 @@ class StopWatchClockAdapter
     void reset()
     {
         start();
-        elapsed_ = typename clock_type::duration(0);
+        time_ = typename clock_type::duration(0);
+        cycles_ = 0;
         running_ = false;
     }
+
+    /// \brief Return the accumulated cycles
+    double cycles() const { return cycles_; }
 
     /// \brief Return the accumulated elapsed time in nanoseconds
     double nanoseconds() const
     {
         return std::chrono::duration_cast<
-                   std::chrono::duration<double, std::nano>>(elapsed_)
+                   std::chrono::duration<double, std::nano>>(time_)
             .count();
     }
 
@@ -141,7 +192,7 @@ class StopWatchClockAdapter
     double microseconds() const
     {
         return std::chrono::duration_cast<
-                   std::chrono::duration<double, std::micro>>(elapsed_)
+                   std::chrono::duration<double, std::micro>>(time_)
             .count();
     }
 
@@ -149,7 +200,7 @@ class StopWatchClockAdapter
     double milliseconds() const
     {
         return std::chrono::duration_cast<
-                   std::chrono::duration<double, std::milli>>(elapsed_)
+                   std::chrono::duration<double, std::milli>>(time_)
             .count();
     }
 
@@ -157,7 +208,7 @@ class StopWatchClockAdapter
     double seconds() const
     {
         return std::chrono::duration_cast<
-                   std::chrono::duration<double, std::ratio<1>>>(elapsed_)
+                   std::chrono::duration<double, std::ratio<1>>>(time_)
             .count();
     }
 
@@ -165,7 +216,7 @@ class StopWatchClockAdapter
     double minutes() const
     {
         return std::chrono::duration_cast<
-                   std::chrono::duration<double, std::ratio<60>>>(elapsed_)
+                   std::chrono::duration<double, std::ratio<60>>>(time_)
             .count();
     }
 
@@ -173,13 +224,15 @@ class StopWatchClockAdapter
     double hours() const
     {
         return std::chrono::duration_cast<
-                   std::chrono::duration<double, std::ratio<3600>>>(elapsed_)
+                   std::chrono::duration<double, std::ratio<3600>>>(time_)
             .count();
     }
 
     private:
-    typename clock_type::duration elapsed_;
-    typename clock_type::time_point start_time_;
+    typename clock_type::duration time_;
+    typename clock_type::time_point time_start_;
+    double cycles_;
+    std::uint64_t cycles_start_;
     bool running_;
 }; // class StopWatchClockAdapter
 

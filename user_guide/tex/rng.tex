@@ -322,14 +322,16 @@ The performance of these engines depends on a few factors, such as \cpu types,
 compilers, operating systems, etc. For example, the theoretical peak
 performance for \verb|ARSx8| is 0.32 cycles per byte (cpB) on recent \cpu{}s.
 In realistic situations, depending on the compiler, on the same computer values
-ranging from 0.44 to 1.2 cpB were observed by the author. In any case, such
-performance is good enough even for the most demanding applications. The
-library does not attempt to optimize the algorithm for any particular platform.
-In realistic applications, the performance of \rng is unlikely to become a
-bottle neck. Note that, the best performance is obtained with the vectorized
-\verb|rng_rand| function (see section~\ref{sec:Vectorized random number
-  generating}). If the \rng{} is used to generate random integer one at a time,
-the performance is about a half of the vectorized operation.
+ranging from 0.44 to 1.2 cpB were observed by the author (the 64-bis version
+\verb|ARSx8_64| was observed to have a 0.34 cpB, which is very close to the
+peak performance). In any case, such performance is good enough even for the
+most demanding applications. The library does not attempt to optimize the
+algorithm for any particular platform. In realistic applications, the
+performance of \rng is unlikely to become a bottle neck. Note that, the best
+performance is obtained with the vectorized \verb|rng_rand| function (see
+section~\ref{sec:Vectorized random number generating}). If the \rng{} is used
+to generate random integer one at a time, the performance is about a half of
+the vectorized operation.
 
 \subsection{Philox}
 \label{sub:Philox}

@@ -70,6 +70,11 @@ void vsmc_stop_watch_reset(vsmc_stop_watch stop_watch)
     ::vsmc::cast(stop_watch).reset();
 }
 
+double vsmc_stop_watch_cycles(vsmc_stop_watch stop_watch)
+{
+    return ::vsmc::cast(stop_watch).cycles();
+}
+
 double vsmc_stop_watch_nanoseconds(vsmc_stop_watch stop_watch)
 {
     return ::vsmc::cast(stop_watch).nanoseconds();

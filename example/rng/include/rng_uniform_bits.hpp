@@ -29,9 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/engine.hpp>
-#include <vsmc/rng/uniform_bits_distribution.hpp>
-#include <vsmc/utility/stop_watch.hpp>
+#include "rng_common.hpp"
 
 template <typename RNGType, typename UIntType>
 inline void rng_uniform_bits(std::size_t N, std::size_t M, int nwid, int swid,
@@ -46,7 +44,7 @@ inline void rng_uniform_bits(std::size_t N, std::size_t M, int nwid, int swid,
     r2.reserve(N);
     vsmc::StopWatch watch1;
     vsmc::StopWatch watch2;
-    bool passed = true;
+    bool pass = true;
 
     std::uniform_int_distribution<std::size_t> runif(N / 2, N);
     std::size_t num = 0;
@@ -65,29 +63,29 @@ inline void rng_uniform_bits(std::size_t N, std::size_t M, int nwid, int swid,
         watch2.start();
         vsmc::rng_rand(rng2, rubits, K, r2.data());
         watch2.stop();
-        passed = passed && r1 == r2;
+        pass = pass && (r1 == r2 || rng != rng);
     }
 
     bool full = vsmc::RNGTraits<RNGType>::is_full_range;
     int rbits = vsmc::RNGTraits<RNGType>::bits;
     int tbits = std::numeric_limits<typename RNGType::result_type>::digits;
     int ubits = std::numeric_limits<UIntType>::digits;
-    double n1 = watch1.nanoseconds() / num;
-    double n2 = watch2.nanoseconds() / num;
-    double g1 = sizeof(UIntType) / n1;
-    double g2 = sizeof(UIntType) / n2;
-    std::string pass = passed ? "Passed" : "Failed";
+    double bytes = sizeof(UIntType) * num;
+    double g1 = bytes / watch1.nanoseconds();
+    double g2 = bytes / watch2.nanoseconds();
+    double c1 = watch1.cycles() / bytes;
+    double c2 = watch2.cycles() / bytes;
 
     std::cout << std::left << std::setw(nwid) << name;
     std::cout << std::right << std::setw(swid) << (full ? "Yes" : "No");
     std::cout << std::right << std::setw(swid) << rbits;
     std::cout << std::right << std::setw(swid) << tbits;
     std::cout << std::right << std::setw(swid) << ubits;
-    std::cout << std::right << std::setw(twid) << std::fixed << n1;
-    std::cout << std::right << std::setw(twid) << std::fixed << n2;
     std::cout << std::right << std::setw(twid) << std::fixed << g1;
     std::cout << std::right << std::setw(twid) << std::fixed << g2;
-    std::cout << std::right << std::setw(twid) << pass;
+    std::cout << std::right << std::setw(twid) << std::fixed << c1;
+    std::cout << std::right << std::setw(twid) << std::fixed << c2;
+    std::cout << std::right << std::setw(twid) << rng_pass(pass);
     std::cout << std::endl;
 }
 
@@ -104,10 +102,10 @@ inline void rng_uniform_bits(std::size_t N, std::size_t M)
     std::cout << std::right << std::setw(swid) << "R";
     std::cout << std::right << std::setw(swid) << "T";
     std::cout << std::right << std::setw(swid) << "U";
-    std::cout << std::right << std::setw(twid) << "ns (Loop)";
-    std::cout << std::right << std::setw(twid) << "ns (Batch)";
     std::cout << std::right << std::setw(twid) << "GB/s (Loop)";
     std::cout << std::right << std::setw(twid) << "GB/s (Batch)";
+    std::cout << std::right << std::setw(twid) << "cpB (Loop)";
+    std::cout << std::right << std::setw(twid) << "cpB (Batch)";
     std::cout << std::right << std::setw(twid) << "Deterministics";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;

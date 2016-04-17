@@ -32,9 +32,7 @@
 #ifndef VSMC_EXAMPLE_RNG_U01_SEQUENCE_HPP
 #define VSMC_EXAMPLE_RNG_U01_SEQUENCE_HPP
 
-#include <vsmc/rng/engine.hpp>
-#include <vsmc/rng/u01_sequence.hpp>
-#include <vsmc/utility/stop_watch.hpp>
+#include "rng_common.hpp"
 
 template <typename RealType>
 inline std::string rng_u01_sequence_err(RealType x)
@@ -71,7 +69,7 @@ inline void rng_u01_sequence(std::size_t N, std::size_t K, std::size_t M,
         rng.seed(s);
         watch_t.start();
         vsmc::Vector<RealType> r2(N);
-        vsmc::u01_oc_distribution(rng, K, r2.data());
+        vsmc::u01_distribution(rng, K, r2.data());
         u01seq.transform(N, r2.data(), r2.data());
         watch_t.stop();
         for (std::size_t j = 0; j != N; ++j)

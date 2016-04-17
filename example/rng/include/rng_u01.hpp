@@ -32,9 +32,8 @@
 #ifndef VSMC_EXAMPLE_RNG_U01_HPP
 #define VSMC_EXAMPLE_RNG_U01_HPP
 
-#include <vsmc/rng/engine.hpp>
-#include <vsmc/rng/u01.hpp>
 #include <vsmc/rngc/u01.h>
+#include "rng_common.hpp"
 
 #define VSMC_DEFINE_RNGC_U01_TEST(ubits, fsuffix, lr, Lower, Upper, RealType) \
     template <>                                                               \
@@ -83,48 +82,15 @@ VSMC_DEFINE_RNGC_U01_TEST(64, d, oo, Open, Open, double)
 VSMC_DEFINE_RNGC_U01_TEST(32, l, oo, Open, Open, long double)
 VSMC_DEFINE_RNGC_U01_TEST(64, l, oo, Open, Open, long double)
 
-template <typename>
-inline std::string rng_u01_type_name();
-
-template <>
-inline std::string rng_u01_type_name<float>()
-{
-    return "float";
-}
-
-template <>
-inline std::string rng_u01_type_name<double>()
-{
-    return "double";
-}
-
-template <>
-inline std::string rng_u01_type_name<long double>()
-{
-    return "long double";
-}
-
-template <>
-inline std::string rng_u01_type_name<vsmc::Closed>()
-{
-    return "Closed";
-}
-
-template <>
-inline std::string rng_u01_type_name<vsmc::Open>()
-{
-    return "Open";
-}
-
 template <typename UIntType, typename RealType, typename Lower, typename Upper>
 inline std::string rng_u01_function_name()
 {
     std::stringstream ss;
     ss << "u01<uint";
     ss << std::numeric_limits<UIntType>::digits << "_t, ";
-    ss << rng_u01_type_name<RealType>() << ", ";
-    ss << rng_u01_type_name<Lower>() << ", ";
-    ss << rng_u01_type_name<Upper>() << ">";
+    ss << rng_type_name<RealType>() << ", ";
+    ss << rng_type_name<Lower>() << ", ";
+    ss << rng_type_name<Upper>() << ">";
 
     return ss.str();
 }
@@ -172,8 +138,8 @@ inline void rng_u01(std::size_t N, std::size_t M)
     vsmc::Vector<RealType> r(N);
     vsmc::Vector<RealType> r1(N);
     vsmc::Vector<RealType> r2(N);
-    bool passed1 = true;
-    bool passed2 = true;
+    bool pass1 = true;
+    bool pass2 = true;
     for (std::size_t i = 0; i != M; ++i) {
         vsmc::rng_rand(rng, N, u.data());
 
@@ -182,10 +148,10 @@ inline void rng_u01(std::size_t N, std::size_t M)
 
         for (std::size_t j = 0; j != N; ++j)
             r1[j] = rng_u01_c<UIntType, RealType, Lower, Upper>(u[j]);
-        passed1 = passed1 && r1 == r;
+        pass1 = pass1 && r1 == r;
 
         vsmc::u01<UIntType, RealType, Lower, Upper>(N, u.data(), r2.data());
-        passed2 = passed2 && r2 == r;
+        pass2 = pass2 && r2 == r;
     }
 
     std::string function =
@@ -200,15 +166,13 @@ inline void rng_u01(std::size_t N, std::size_t M)
     rng_u01_rb(vsmc::u01<UIntType, RealType, Lower, Upper>(
                    std::numeric_limits<UIntType>::max()),
         maximum, right);
-    std::string pass1 = passed1 ? "Passed" : "Failed";
-    std::string pass2 = passed2 ? "Passed" : "Failed";
     std::cout << std::setw(50) << std::left << function;
     std::cout << std::setw(15) << std::right << minimum;
     std::cout << std::setw(15) << std::right << maximum;
     std::cout << std::setw(10) << std::right << left;
     std::cout << std::setw(10) << std::right << right;
-    std::cout << std::setw(10) << std::right << pass1;
-    std::cout << std::setw(10) << std::right << pass2;
+    std::cout << std::setw(10) << std::right << rng_pass(pass1);
+    std::cout << std::setw(10) << std::right << rng_pass(pass2);
     std::cout << std::endl;
 }
 

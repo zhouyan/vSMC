@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/rng/src/rng_uniform_bits.cpp
+// vSMC/example/rng/include/rng_common.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,6 +29,58 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "rng_uniform_bits.hpp"
+#ifndef VSMC_EXAMPLE_RNG_COMMON_HPP
+#define VSMC_EXAMPLE_RNG_COMMON_HPP
 
-VSMC_EXAMPLE_RNG_MAIN(uniform_bits, 10000, 100)
+#include <vsmc/rng/rng.hpp>
+#include <vsmc/utility/program_option.hpp>
+#include <vsmc/utility/stop_watch.hpp>
+
+#define VSMC_EXAMPLE_RNG_MAIN(prg, NVal, MVal)                                \
+    int main(int argc, char **argv)                                           \
+    {                                                                         \
+        std::size_t N = NVal;                                                 \
+        std::size_t M = MVal;                                                 \
+        vsmc::ProgramOptionMap option;                                        \
+        option.add("N", "Number of samples in each run", &N, N);              \
+        option.add("M", "Number of repetitions", &M, M);                      \
+        option.process(argc, argv);                                           \
+        rng_##prg(N, M);                                                      \
+    }
+
+template <typename>
+inline std::string rng_type_name();
+
+template <>
+inline std::string rng_type_name<float>()
+{
+    return "float";
+}
+
+template <>
+inline std::string rng_type_name<double>()
+{
+    return "double";
+}
+
+template <>
+inline std::string rng_type_name<long double>()
+{
+    return "long double";
+}
+
+template <>
+inline std::string rng_type_name<vsmc::Closed>()
+{
+    return "Closed";
+}
+
+template <>
+inline std::string rng_type_name<vsmc::Open>()
+{
+    return "Open";
+}
+
+inline std::string rng_pass(bool pass) { return pass ? "Passed" : "Failed"; }
+
+#endif // VSMC_EXAMPLE_RNG_COMMON_HPP

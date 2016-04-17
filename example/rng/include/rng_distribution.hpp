@@ -32,12 +32,9 @@
 #ifndef VSMC_EXAMPLE_RNG_DISTRIBUTION_HPP
 #define VSMC_EXAMPLE_RNG_DISTRIBUTION_HPP
 
-#include <vsmc/rng/distribution.hpp>
-#include <vsmc/rng/engine.hpp>
-#include <vsmc/utility/program_option.hpp>
-#include <vsmc/utility/stop_watch.hpp>
 #include <boost/math/distributions.hpp>
 #include <boost/random.hpp>
+#include "rng_common.hpp"
 
 #define VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(K, Name, STD)                      \
     rng_distribution_test<float, K, vsmc::Name##Distribution<float>,          \
@@ -57,14 +54,7 @@ inline std::string rng_distribution_name(
     const std::string &name, const std::array<RealType, K> &param)
 {
     std::stringstream ss;
-    ss << name << '<';
-    if (sizeof(RealType) == sizeof(float))
-        ss << "float";
-    if (sizeof(RealType) == sizeof(double))
-        ss << "double";
-    if (sizeof(RealType) == sizeof(long double))
-        ss << "long double";
-    ss << '>';
+    ss << name << '<' << rng_type_name<RealType>() << '>';
     if (K > 0)
         ss << "(" << param[0];
     for (std::size_t k = 1; k < K; ++k)
@@ -698,10 +688,10 @@ inline void rng_distribution_summary(std::size_t N, std::size_t M,
         std::cout << std::endl;
         std::cout << std::string(lwid, '-') << std::endl;
 
-        std::cout << std::left << std::setw(nwid) << "Time (ns) per element";
+        std::cout << std::left << std::setw(nwid) << "Cycles per element";
         for (std::size_t r = 0; r != R; ++r, ++w) {
-            std::cout << std::right << std::setw(twid)
-                      << w->nanoseconds() / (N * M);
+            std::cout << std::setw(twid) << std::right << std::fixed
+                      << w->cycles() / (N * M);
         }
         std::cout << std::endl;
 

@@ -31,16 +31,4 @@
 
 #include "rng_engine.hpp"
 
-int main(int argc, char **argv)
-{
-    std::size_t N = 10000;
-    if (argc > 1)
-        N = static_cast<std::size_t>(std::atoi(argv[1]));
-    std::size_t M = 100;
-    if (argc > 2)
-        M = static_cast<std::size_t>(std::atoi(argv[2]));
-
-    rng_engine(N, M);
-
-    return 0;
-}
+VSMC_EXAMPLE_RNG_MAIN(engine, 10000, 100)

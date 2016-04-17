@@ -1550,6 +1550,9 @@ int vsmc_stop_watch_stop(vsmc_stop_watch stop_watch);
 /** \brief `vsmc::StopWatch::reset` */
 void vsmc_stop_watch_reset(vsmc_stop_watch stop_watch);
 
+/** \brief `vsmc::StopWatch::cycles` */
+double vsmc_stop_watch_cycles(vsmc_stop_watch stop_watch);
+
 /** \brief `vsmc::StopWatch::nanoseconds` */
 double vsmc_stop_watch_nanoseconds(vsmc_stop_watch stop_watch);
 
