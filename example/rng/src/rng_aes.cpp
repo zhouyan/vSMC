@@ -29,7 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/aes.hpp>
+#include <vsmc/rng/aes_ni.hpp>
 
 int main()
 {

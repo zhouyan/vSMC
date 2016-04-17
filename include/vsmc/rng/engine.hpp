@@ -48,17 +48,15 @@
 #include <vsmc/rng/threefry.hpp>
 
 #if VSMC_HAS_AES_NI
-#include <vsmc/rng/aes.hpp>
 #include <vsmc/rng/aes_ni.hpp>
-#include <vsmc/rng/ars.hpp>
-#endif
-
-#if VSMC_HAS_RDRAND
-#include <vsmc/rng/rdrand.hpp>
 #endif
 
 #if VSMC_HAS_MKL
 #include <vsmc/rng/mkl.hpp>
+#endif
+
+#if VSMC_HAS_RDRAND
+#include <vsmc/rng/rdrand.hpp>
 #endif
 
 namespace vsmc
