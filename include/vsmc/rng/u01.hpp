@@ -84,11 +84,6 @@ class U01Pow2Inv
         static_cast<RealType>(U01Pow2InvL<P>::value);
 }; // class U01Pow2Inv
 
-} // namespace vsmc::internal
-
-namespace internal
-{
-
 template <typename, typename, typename, typename>
 class U01Impl;
 
