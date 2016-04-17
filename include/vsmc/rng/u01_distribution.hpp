@@ -38,8 +38,14 @@
 
 /// \brief Default U01 distribution using fixed point conversion
 /// \ingroup Config
-#ifndef VSMC_U01_USE_FIXED_POINT
-#define VSMC_U01_USE_FIXED_POINT 0
+#ifndef VSMC_RNG_U01_USE_FIXED_POINT
+#define VSMC_RNG_U01_USE_FIXED_POINT 1
+#endif
+
+/// \brief Use 64-bits intermediate random integers for double precison output
+/// \ingroup Config
+#ifndef VSMC_RNG_U01_USE_64BITS_DOUBLE
+#define VSMC_RNG_U01_USE_64BITS_DOUBLE 0
 #endif
 
 #define VSMC_DEFINE_U01_DISTRIBUTION(Name, name)                              \
@@ -86,11 +92,24 @@ namespace vsmc
 namespace internal
 {
 
+#if VSMC_RNG_U01_USE_64BITS_DOUBLE
+
 template <typename RNGType, typename RealType>
 using U01UIntType =
-    typename std::conditional<(RNGTraits<RNGType>::bits > 32 ||
+    typename std::conditional<(RNGTraits<RNGType>::bits >= 64 ||
+                                  std::is_same<RealType, long double>::value ||
+                                  std::is_same<RealType, double>::value),
+        std::uint64_t, std::uint32_t>::type;
+
+#else // VSMC_RNG_U01_USE_64BITS_DOUBLE
+
+template <typename RNGType, typename RealType>
+using U01UIntType =
+    typename std::conditional<(RNGTraits<RNGType>::bits >= 64 ||
                                   std::is_same<RealType, long double>::value),
         std::uint64_t, std::uint32_t>::type;
+
+#endif // VSMC_RNG_U01_USE_64BITS_DOUBLE
 
 } // namespace vsmc::internal
 
@@ -110,17 +129,17 @@ VSMC_DEFINE_U01_DISTRIBUTION(U01OC, u01_oc)
 /// \ingroup Distribution
 VSMC_DEFINE_U01_DISTRIBUTION(U01OO, u01_oo)
 
-/// \brief Standard uniform distribution on [0, 1)
-/// \ingroup Distribution
-#if VSMC_U01_USE_FIXED_POINT
+#if VSMC_RNG_U01_USE_FIXED_POINT
 
 template <typename RealType>
 class U01Distribution : public U01CODistribution<RealType>
 {
 }; // class U01Distribution
 
-#else // VSMC_U01_USE_FIXED_POINT
+#else // VSMC_RNG_U01_USE_FIXED_POINT
 
+/// \brief Standard uniform distribution on [0, 1)
+/// \ingroup Distribution
 template <typename RealType>
 class U01Distribution
 {
@@ -153,7 +172,7 @@ class U01Distribution
 
         static constexpr int W = std::numeric_limits<UIntType>::digits;
         static constexpr int M = std::numeric_limits<RealType>::digits;
-        static constexpr int P = (M + W - 1) / W;
+        static constexpr int P = (W + M - 1) / W;
         static constexpr int Q = 1 > P ? 1 : P;
 
         return static_cast<RealType>(UniformBits<UIntType>::eval(rng)) *
@@ -162,7 +181,7 @@ class U01Distribution
     }
 }; // class U01Distribution
 
-#endif // VSMC_U01_USE_FIXED_POINT
+#endif // VSMC_RNG_U01_USE_FIXED_POINT
 
 namespace internal
 {
@@ -172,7 +191,7 @@ VSMC_DEFINE_U01_DISTRIBUTION_IMPL(u01_co)
 VSMC_DEFINE_U01_DISTRIBUTION_IMPL(u01_oc)
 VSMC_DEFINE_U01_DISTRIBUTION_IMPL(u01_oo)
 
-#if VSMC_U01_USE_FIXED_POINT
+#if VSMC_RNG_U01_USE_FIXED_POINT
 
 template <std::size_t K, typename RealType, typename RNGType>
 inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
@@ -180,7 +199,7 @@ inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
     u01_co_distribution_impl<K>(rng, n, r);
 }
 
-#else // VSMC_U01_USE_FIXED_POINT
+#else // VSMC_RNG_U01_USE_FIXED_POINT
 
 template <std::size_t, typename RealType, typename UIntType>
 inline RealType u01_distribution_impl(const UIntType *, std::false_type)
@@ -219,7 +238,7 @@ inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
         r[i] = u01_distribution_impl<0, RealType>(u, std::true_type());
 }
 
-#endif // VSMC_U01_USE_FIXED_POINT
+#endif // VSMC_RNG_U01_USE_FIXED_POINT
 
 } // namespace vsmc::internal
 

@@ -208,8 +208,8 @@ class U01Impl<UIntType, RealType, Open, Open>
 /// `RealType`. Assuming the input is a uniform random number on the set
 /// \f$\{0,1,\dots,2^W - 1\f$, the output is uniform over the interval
 /// \f$[0,1]\f$ or one of its (half-)open interval variant. The exact output
-/// depend on the template parameter `Left` and `Right`.
-template <typename UIntType, typename RealType, typename Left, typename Right>
+/// depend on the template parameter `Lower` and `Upper`.
+template <typename UIntType, typename RealType, typename Lower, typename Upper>
 RealType u01(UIntType u) noexcept
 {
     static_assert(std::is_unsigned<UIntType>::value,
@@ -219,12 +219,12 @@ RealType u01(UIntType u) noexcept
         "**u01** USED WITH RealType OTHER THAN FLOATING POINT "
         "TYPES");
 
-    return internal::U01Impl<UIntType, RealType, Left, Right>::eval(u);
+    return internal::U01Impl<UIntType, RealType, Lower, Upper>::eval(u);
 }
 
 /// \brief Convert uniform unsigned integers to floating points within [0, 1]
 /// \ingroup RNG
-template <typename UIntType, typename RealType, typename Left, typename Right>
+template <typename UIntType, typename RealType, typename Lower, typename Upper>
 void u01(std::size_t n, const UIntType *u, RealType *r) noexcept
 {
     static_assert(std::is_unsigned<UIntType>::value,
@@ -234,7 +234,7 @@ void u01(std::size_t n, const UIntType *u, RealType *r) noexcept
         "**u01** USED WITH RealType OTHER THAN FLOATING POINT "
         "TYPES");
 
-    internal::U01Impl<UIntType, RealType, Left, Right>::eval(n, u, r);
+    internal::U01Impl<UIntType, RealType, Lower, Upper>::eval(n, u, r);
 }
 
 /// \brief Convert uniform unsigned integers to floating points on [0, 1]
