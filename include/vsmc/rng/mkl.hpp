@@ -625,7 +625,11 @@ class MKLStream
 /// \ingroup MKLRNG
 inline bool operator==(const MKLStream &stream1, const MKLStream &stream2)
 {
-    if (stream1.get_brng() != stream2.get_brng())
+    int brng1 = stream1.get_brng();
+    int brng2 = stream2.get_brng();
+    if (brng1 != brng2)
+        return false;
+    if (brng1 == VSL_BRNG_NONDETERM)
         return false;
 
     std::size_t n = static_cast<std::size_t>(stream1.get_size());
