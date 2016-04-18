@@ -69,8 +69,9 @@
             using UIntType =                                                  \
                 typename internal::U01UIntType<RNGType, RealType>;            \
                                                                               \
-            return name<UIntType, result_type>(                               \
-                UniformBits<UIntType>::eval(rng));                            \
+            UniformBitsDistribution<UIntType> ubits;                          \
+                                                                              \
+            return name<UIntType, result_type>(ubits(rng));                   \
         }                                                                     \
     };
 
@@ -170,12 +171,14 @@ class U01Distribution
     {
         using UIntType = internal::U01UIntType<RNGType, RealType>;
 
+        UniformBitsDistribution<UIntType> ubits;
+
         static constexpr int W = std::numeric_limits<UIntType>::digits;
         static constexpr int M = std::numeric_limits<RealType>::digits;
         static constexpr int P = (W + M - 1) / W;
         static constexpr int Q = 1 > P ? 1 : P;
 
-        return static_cast<RealType>(UniformBits<UIntType>::eval(rng)) *
+        return static_cast<RealType>(ubits(rng)) *
             internal::U01Pow2Inv<RealType, (Q - N) * W>::value +
             generate<N + 1>(rng, std::integral_constant<bool, N + 1 < Q>());
     }
