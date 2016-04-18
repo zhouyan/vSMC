@@ -93,9 +93,26 @@ Some of the following sections provide performance data. All performance data
 in this chapter is measured in single core cycles per bytes (cpB) for \rng{}s,
 or cycles per element for distributions (\verb|double| precision). The
 processor used to measure the performance is an Intel Core i7-4960\textsc{hg}
-\cpu.
-For the performance of \rng{}s, we measure two situations. The first is using
-the random integers one by one,
+\cpu. Three compilers are tested. The \llvm clang, the \gnu{} \gcc, and the
+Intel \cpp compiler. The version information is shown below,
+\begin{Verbatim}
+  $ clang++ --version
+  Apple LLVM version 7.3.0 (clang-703.0.29)
+  Target: x86_64-apple-darwin15.4.0
+
+  $ g++- --version
+  g++-5 (Homebrew gcc 5.3.0) 5.3.0
+
+  $ icpc --version
+  icpc (ICC) 16.0.2 20160204
+\end{Verbatim}
+When multiple compilers are tested, they are labeled ``\llvm'', ``\gnu'', and
+``Intel'', respectively in the tables. If only results from one compiler is
+shown, then unless stated otherwise, it is the \llvm clang compiler. The
+operating system is Mac OS~X~10.11.4.
+
+For the performance of \rng{}s, we measure two situations. The first is
+using the random integers one by one,
 \begin{cppcode}
   RNG rng;
   UniformBitsDistribution<std::uint64_t> rbits;
@@ -162,19 +179,21 @@ much more accessible.
 
 \begin{table}
   \tbfigures
-  \begin{tabularx}{\textwidth}{p{2in}XXXX}
+  \begin{tabularx}{\textwidth}{p{2in}XXXXXX}
     \toprule
-    \rng & Size & Alignment & Loop & \verb|rng_rand| \\
+    & \multicolumn{3}{c}{Loop} & \multicolumn{3}{c}{\verb|rng_rand|} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+    \rng  & \llvm & \gnu & Intel & \llvm & \gnu & Intel \\
     \midrule
-    \verb|mt19937|       & 2504 & 8 & 3.02   & 3.21 \\
-    \verb|mt19937_64|    & 2504 & 8 & 1.86   & 2.04 \\
-    \verb|minstd_rand0|  &    4 & 4 & 4.95   & 4.99 \\
-    \verb|minstd_rand|   &    4 & 4 & 4.25   & 4.22 \\
-    \verb|ranlux24_base| &  112 & 8 & 6.35   & 6.31 \\
-    \verb|ranlux48_base| &  112 & 8 & 4.14   & 4.22 \\
-    \verb|ranlux24|      &  120 & 8 & 68.3   & 68.4 \\
-    \verb|ranlux48|      &  120 & 8 & 165    & 174  \\
-    \verb|knuth_b|       & 1032 & 4 & 14.3   & 14.6 \\
+    \verb|mt19937|       & 2.94 & 2.60 & 3.77 & 3.14 & 2.62 & 4.43 \\
+    \verb|mt19937_64|    & 1.64 & 1.42 & 1.83 & 1.80 & 1.41 & 1.77 \\
+    \verb|minstd_rand0|  & 5.11 & 5.41 & 8.02 & 5.10 & 5.40 & 6.94 \\
+    \verb|minstd_rand|   & 3.92 & 4.69 & 6.48 & 3.91 & 5.32 & 5.82 \\
+    \verb|ranlux24_base| & 6.83 & 6.55 & 7.73 & 6.77 & 6.48 & 7.49 \\
+    \verb|ranlux48_base| & 4.13 & 3.91 & 4.92 & 4.20 & 3.87 & 5.15 \\
+    \verb|ranlux24|      & 68.4 & 64.0 & 77.7 & 68.8 & 63.9 & 66.1 \\
+    \verb|ranlux48|      & 156  & 141  & 181  & 158  & 139  & 155  \\
+    \verb|knuth_b|       & 16.1 & 20.8 & 13.5 & 12.3 & 20.8 & 14.5 \\
     \bottomrule
   \end{tabularx}
   \caption{Performance of standard library RNG}
@@ -262,7 +281,7 @@ random buffer. The only restriction is that \verb|size()| is divisible by
 \verb|sizeof(ResultType)|. This rule is enforced at compile-time. In the
 remaining of this section, we introduce a few generators implemented by the
 library. A few configuration macros of these \rng{}s are listed in
-table~\ref{tab:Configuration macros for counter-based RNGs}.
+table~\ref{tab:Configuration macros for counter-based RNG}.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{XX}
@@ -280,8 +299,8 @@ table~\ref{tab:Configuration macros for counter-based RNGs}.
     \verb|VSMC_RNG_THREEFRY_VECTOR_LENGTH| & \verb|4|  \\
     \bottomrule
   \end{tabularx}
-  \caption{Configuration macros for counter-based \rng{}s}
-  \label{tab:Configuration macros for counter-based RNGs}
+  \caption{Configuration macros for counter-based \rng{}}
+  \label{tab:Configuration macros for counter-based RNG}
 \end{table}
 
 \subsection{\protect\aesni instructions based \protect\rng}
@@ -415,18 +434,20 @@ performance data of all these \rng{}s are in table~\ref{tab:Performance of
 
 \begin{table}
   \tbfigures
-  \begin{tabularx}{\textwidth}{p{2in}XXXX}
+  \begin{tabularx}{\textwidth}{p{2in}XXXXXX}
     \toprule
-    \rng & Size & Alignment & Loop & \verb|rng_rand| \\
+    & \multicolumn{3}{c}{Loop} & \multicolumn{3}{c}{\verb|rng_rand|} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+    \rng  & \llvm & \gnu & Intel & \llvm & \gnu & Intel \\
     \midrule
-    \verb|AES128x1|    & 224 & 16 & 1.07 & 0.78 \\
-    \verb|AES128x2|    & 240 & 16 & 1.21 & 0.71 \\
-    \verb|AES128x4|    & 272 & 16 & 0.85 & 0.66 \\
-    \verb|AES128x8|    & 336 & 16 & 1.62 & 1.09 \\
-    \verb|AES128x1_64| & 224 & 16 & 0.89 & 0.80 \\
-    \verb|AES128x2_64| & 240 & 16 & 0.81 & 0.71 \\
-    \verb|AES128x4_64| & 272 & 16 & 0.94 & 0.81 \\
-    \verb|AES128x8_64| & 336 & 16 & 1.34 & 1.00 \\
+    \verb|AES128x1|    & 1.09 & 5.54 & 4.59 & 0.79 & 4.19 & 4.09 \\
+    \verb|AES128x2|    & 1.25 & 2.79 & 3.33 & 0.70 & 2.33 & 2.78 \\
+    \verb|AES128x4|    & 0.87 & 1.72 & 1.84 & 0.67 & 1.30 & 1.45 \\
+    \verb|AES128x8|    & 1.55 & 1.24 & 1.43 & 1.07 & 0.83 & 0.84 \\
+    \verb|AES128x1_64| & 0.85 & 4.97 & 4.70 & 0.77 & 3.95 & 4.34 \\
+    \verb|AES128x2_64| & 0.80 & 2.54 & 3.22 & 0.70 & 2.31 & 2.87 \\
+    \verb|AES128x4_64| & 0.76 & 1.56 & 1.62 & 0.65 & 1.30 & 1.38 \\
+    \verb|AES128x8_64| & 1.15 & 1.10 & 1.28 & 0.87 & 0.82 & 0.86 \\
     \bottomrule
   \end{tabularx}
   \caption{Performance of \texttt{AES128Engine}}
@@ -435,18 +456,20 @@ performance data of all these \rng{}s are in table~\ref{tab:Performance of
 
 \begin{table}
   \tbfigures
-  \begin{tabularx}{\textwidth}{p{2in}XXXX}
+  \begin{tabularx}{\textwidth}{p{2in}XXXXXX}
     \toprule
-    \rng & Size & Alignment & Loop & \verb|rng_rand| \\
+    & \multicolumn{3}{c}{Loop} & \multicolumn{3}{c}{\verb|rng_rand|} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+    \rng  & \llvm & \gnu & Intel & \llvm & \gnu & Intel \\
     \midrule
-    \verb|AES192x1|    & 256 & 16 & 1.68 & 0.89 \\
-    \verb|AES192x2|    & 272 & 16 & 1.41 & 0.83 \\
-    \verb|AES192x4|    & 304 & 16 & 0.98 & 0.77 \\
-    \verb|AES192x8|    & 368 & 16 & 1.32 & 0.96 \\
-    \verb|AES192x1_64| & 256 & 16 & 1.12 & 0.92 \\
-    \verb|AES192x2_64| & 272 & 16 & 1.22 & 1.09 \\
-    \verb|AES192x4_64| & 304 & 16 & 0.96 & 0.83 \\
-    \verb|AES192x8_64| & 368 & 16 & 1.25 & 0.95 \\
+    \verb|AES192x1|    & 1.70 & 5.22 & 5.24 & 0.92 & 4.58 & 4.67 \\
+    \verb|AES192x2|    & 1.38 & 3.06 & 3.25 & 0.82 & 2.63 & 2.78 \\
+    \verb|AES192x4|    & 0.98 & 1.87 & 1.91 & 0.76 & 1.45 & 1.54 \\
+    \verb|AES192x8|    & 1.32 & 1.32 & 1.44 & 0.93 & 0.91 & 0.93 \\
+    \verb|AES192x1_64| & 1.07 & 5.03 & 5.75 & 0.89 & 4.55 & 5.06 \\
+    \verb|AES192x2_64| & 0.94 & 2.83 & 3.13 & 0.83 & 2.61 & 2.80 \\
+    \verb|AES192x4_64| & 0.88 & 1.69 & 1.82 & 0.76 & 1.44 & 1.56 \\
+    \verb|AES192x8_64| & 1.26 & 1.19 & 2.04 & 1.00 & 0.91 & 1.21 \\
     \bottomrule
   \end{tabularx}
   \caption{Performance of \texttt{AES192Engine}}
@@ -455,18 +478,20 @@ performance data of all these \rng{}s are in table~\ref{tab:Performance of
 
 \begin{table}
   \tbfigures
-  \begin{tabularx}{\textwidth}{p{2in}XXXX}
+  \begin{tabularx}{\textwidth}{p{2in}XXXXXX}
     \toprule
-    \rng & Size & Alignment & Loop & \verb|rng_rand| \\
+    & \multicolumn{3}{c}{Loop} & \multicolumn{3}{c}{\verb|rng_rand|} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+    \rng  & \llvm & \gnu & Intel & \llvm & \gnu & Intel \\
     \midrule
-    \verb|AES256x1|    & 288 & 16 & 1.93 & 1.07 \\
-    \verb|AES256x2|    & 304 & 16 & 1.35 & 0.95 \\
-    \verb|AES256x4|    & 336 & 16 & 1.15 & 0.89 \\
-    \verb|AES256x8|    & 400 & 16 & 1.43 & 1.04 \\
-    \verb|AES256x1_64| & 288 & 16 & 1.38 & 1.14 \\
-    \verb|AES256x2_64| & 304 & 16 & 1.13 & 0.98 \\
-    \verb|AES256x4_64| & 336 & 16 & 1.28 & 1.11 \\
-    \verb|AES256x8_64| & 400 & 16 & 1.40 & 1.10 \\
+    \verb|AES256x1|    & 1.96 & 5.80 & 5.96 & 1.05 & 5.16 & 5.35 \\
+    \verb|AES256x2|    & 1.33 & 3.37 & 3.64 & 0.94 & 2.92 & 3.15 \\
+    \verb|AES256x4|    & 1.12 & 2.01 & 2.06 & 0.89 & 1.62 & 1.71 \\
+    \verb|AES256x8|    & 1.40 & 1.41 & 1.68 & 1.04 & 1.01 & 1.01 \\
+    \verb|AES256x1_64| & 1.32 & 5.65 & 6.12 & 1.07 & 5.14 & 5.33 \\
+    \verb|AES256x2_64| & 1.07 & 3.12 & 3.47 & 0.94 & 2.91 & 3.12 \\
+    \verb|AES256x4_64| & 1.05 & 1.85 & 1.92 & 0.89 & 1.60 & 1.69 \\
+    \verb|AES256x8_64| & 1.32 & 1.28 & 1.46 & 1.02 & 1.00 & 1.03 \\
     \bottomrule
   \end{tabularx}
   \caption{Performance of \texttt{AES256Engine}}
@@ -475,18 +500,20 @@ performance data of all these \rng{}s are in table~\ref{tab:Performance of
 
 \begin{table}
   \tbfigures
-  \begin{tabularx}{\textwidth}{p{2in}XXXX}
+  \begin{tabularx}{\textwidth}{p{2in}XXXXXX}
     \toprule
-    \rng & Size & Alignment & Loop & \verb|rng_rand| \\
+    & \multicolumn{3}{c}{Loop} & \multicolumn{3}{c}{\verb|rng_rand|} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+    \rng  & \llvm & \gnu & Intel & \llvm & \gnu & Intel \\
     \midrule
-    \verb|ARSx1|    &  64 & 16 & 0.67 & 0.55 \\
-    \verb|ARSx2|    &  80 & 16 & 0.93 & 0.44 \\
-    \verb|ARSx4|    & 112 & 16 & 0.56 & 0.39 \\
-    \verb|ARSx8|    & 176 & 16 & 0.69 & 0.35 \\
-    \verb|ARSx1_64| &  64 & 16 & 0.56 & 0.55 \\
-    \verb|ARSx2_64| &  80 & 16 & 0.75 & 0.70 \\
-    \verb|ARSx4_64| & 112 & 16 & 0.62 & 0.52 \\
-    \verb|ARSx8_64| & 176 & 16 & 0.62 & 0.44 \\
+    \verb|ARSx1|    & 0.66 & 3.08 & 3.86 & 0.54 & 2.46 & 2.92 \\
+    \verb|ARSx2|    & 0.92 & 2.13 & 2.69 & 0.43 & 1.61 & 1.98 \\
+    \verb|ARSx4|    & 0.56 & 1.37 & 1.46 & 0.39 & 0.93 & 1.01 \\
+    \verb|ARSx8|    & 0.66 & 1.05 & 1.07 & 0.34 & 0.63 & 0.69 \\
+    \verb|ARSx1_64| & 0.55 & 2.97 & 3.18 & 0.54 & 2.46 & 2.51 \\
+    \verb|ARSx2_64| & 0.46 & 1.99 & 2.24 & 0.43 & 1.60 & 1.76 \\
+    \verb|ARSx4_64| & 0.48 & 1.27 & 1.62 & 0.40 & 0.92 & 1.20 \\
+    \verb|ARSx8_64| & 0.49 & 0.94 & 1.04 & 0.34 & 0.61 & 0.75 \\
     \bottomrule
   \end{tabularx}
   \caption{Performance of \texttt{ARSEngine}}
@@ -525,7 +552,7 @@ general form,
 \end{cppcode}
 The default vector length and the number of rounds can be changed by
 configuration macros listed in table~\ref{tab:Configuration macros for
-  counter-based RNGs}. Type aliases are also defined, as listed in
+  counter-based RNG}. Type aliases are also defined, as listed in
 table~\ref{tab:Counter-based RNG}. The template parameter \verb|Counstants| is
 similar to that of \verb|ARSEngine|. It defines the round constants of the
 algorithm. The defaults are taken from the paper. See the reference manual for
@@ -534,18 +561,20 @@ details. The performance data is in table~\ref{tab:Performance of
 
 \begin{table}
   \tbfigures
-  \begin{tabularx}{\textwidth}{p{2in}XXXX}
+  \begin{tabularx}{\textwidth}{p{2in}XXXXXX}
     \toprule
-    \rng & Size & Alignment & Loop & \verb|rng_rand| \\
+    & \multicolumn{3}{c}{Loop} & \multicolumn{3}{c}{\verb|rng_rand|} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+    \rng  & \llvm & \gnu & Intel & \llvm & \gnu & Intel \\
     \midrule
-    \verb|Philox2x32|    & 32 & 8 & 3.95 & 2.50 \\
-    \verb|Philox4x32|    & 48 & 8 & 3.41 & 2.25 \\
-    \verb|Philox2x64|    & 48 & 8 & 2.38 & 1.29 \\
-    \verb|Philox4x64|    & 88 & 8 & 1.80 & 0.98 \\
-    \verb|Philox2x32_64| & 32 & 8 & 3.13 & 2.28 \\
-    \verb|Philox4x32_64| & 48 & 8 & 3.00 & 2.10 \\
-    \verb|Philox2x64_64| & 48 & 8 & 1.71 & 1.02 \\
-    \verb|Philox4x64_64| & 88 & 8 & 1.92 & 1.17 \\
+    \verb|Philox2x32|    & 3.17 & 5.68 & 3.36 & 2.06 & 3.82 & 2.19 \\
+    \verb|Philox4x32|    & 2.84 & 11.9 & 5.30 & 1.90 & 1.81 & 1.94 \\
+    \verb|Philox2x64|    & 1.83 & 3.32 & 2.50 & 1.00 & 1.96 & 1.49 \\
+    \verb|Philox4x64|    & 1.66 & 4.05 & 5.96 & 0.91 & 1.75 & 1.09 \\
+    \verb|Philox2x32_64| & 2.83 & 5.52 & 2.91 & 2.06 & 3.82 & 2.13 \\
+    \verb|Philox4x32_64| & 2.72 & 11.8 & 4.91 & 1.89 & 1.86 & 2.67 \\
+    \verb|Philox2x64_64| & 1.63 & 3.11 & 3.02 & 0.99 & 1.97 & 2.20 \\
+    \verb|Philox4x64_64| & 1.52 & 3.94 & 6.24 & 0.92 & 1.75 & 1.58 \\
     \bottomrule
   \end{tabularx}
   \caption{Performance of \texttt{PhiloxEngine}}
@@ -590,7 +619,7 @@ general form,
 \end{cppcode}
 The default vector length and the number of rounds can be changed by
 configuration macros listed in table~\ref{tab:Configuration macros for
-  counter-based RNGs}. Type aliases are also defined, as listed in
+  counter-based RNG}. Type aliases are also defined, as listed in
 table~\ref{tab:Counter-based RNG}. The template parameter \verb|Counstants| is
 similar to that of \verb|ARSEngine|. It defines the round constants of the
 algorithm. The defaults are taken from the paper. See the reference manual for
@@ -599,22 +628,24 @@ details. The performance data is in table~\ref{tab:Performance of
 
 \begin{table}
   \tbfigures
-  \begin{tabularx}{\textwidth}{p{2in}XXXX}
+  \begin{tabularx}{\textwidth}{p{2in}XXXXXX}
     \toprule
-    \rng & Size & Alignment & Loop & \verb|rng_rand| \\
+    & \multicolumn{3}{c}{Loop} & \multicolumn{3}{c}{\verb|rng_rand|} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+    \rng  & \llvm & \gnu & Intel & \llvm & \gnu & Intel \\
     \midrule
-    \verb|Threefry2x32|     &  40 & 8 & 6.79 & 5.61 \\
-    \verb|Threefry4x32|     &  64 & 8 & 7.74 & 6.49 \\
-    \verb|Threefry2x64|     &  64 & 8 & 6.40 & 5.16 \\
-    \verb|Threefry4x64|     & 112 & 8 & 3.71 & 3.21 \\
-    \verb|Threefry8x64|     & 208 & 8 & 3.97 & 2.66 \\
-    \verb|Threefry16x64|    & 400 & 8 & 3.06 & 2.80 \\
-    \verb|Threefry2x32_64|  &  40 & 8 & 4.89 & 4.79 \\
-    \verb|Threefry4x32_64|  &  64 & 8 & 7.24 & 6.38 \\
-    \verb|Threefry2x64_64|  &  64 & 8 & 6.15 & 5.66 \\
-    \verb|Threefry4x64_64|  & 112 & 8 & 3.38 & 3.05 \\
-    \verb|Threefry8x64_64|  & 208 & 8 & 3.32 & 2.61 \\
-    \verb|Threefry16x64_64| & 400 & 8 & 3.62 & 3.41 \\
+    \verb|Threefry2x32|     & 5.60 & 5.45 & 20.3 & 4.64 & 4.87 & 3.90 \\
+    \verb|Threefry4x32|     & 7.06 & 3.99 & 7.13 & 5.85 & 3.61 & 6.41 \\
+    \verb|Threefry2x64|     & 5.59 & 3.15 & 3.18 & 4.67 & 2.56 & 2.23 \\
+    \verb|Threefry4x64|     & 3.53 & 2.20 & 3.91 & 2.98 & 1.85 & 3.38 \\
+    \verb|Threefry8x64|     & 3.79 & 1.80 & 2.73 & 2.38 & 1.46 & 2.29 \\
+    \verb|Threefry16x64|    & 2.91 & 4.93 & 7.44 & 2.52 & 4.57 & 6.99 \\
+    \verb|Threefry2x32_64|  & 4.69 & 5.15 & 19.9 & 4.66 & 4.87 & 3.84 \\
+    \verb|Threefry4x32_64|  & 6.69 & 3.88 & 6.97 & 5.81 & 3.59 & 6.42 \\
+    \verb|Threefry2x64_64|  & 5.01 & 3.04 & 2.70 & 4.65 & 2.54 & 2.22 \\
+    \verb|Threefry4x64_64|  & 3.37 & 2.11 & 3.71 & 2.97 & 1.85 & 3.35 \\
+    \verb|Threefry8x64_64|  & 3.06 & 1.66 & 2.65 & 2.41 & 1.47 & 2.29 \\
+    \verb|Threefry16x64_64| & 2.83 & 4.84 & 7.16 & 2.53 & 4.55 & 6.93 \\
     \bottomrule
   \end{tabularx}
   \caption{Performance of \texttt{ThreefryEngine}}
@@ -690,26 +721,27 @@ also defined. The performance data is in table~\ref{tab:Performance of MKL
 
 \begin{table}
   \tbfigures
-  \begin{tabularx}{\textwidth}{p{2in}XXXX}
+  \begin{tabularx}{\textwidth}{p{2in}XXXXXX}
     \toprule
-    \rng & Size & Alignment & Loop & \verb|rng_rand| \\
+    & \multicolumn{3}{c}{Loop} & \multicolumn{3}{c}{\verb|rng_rand|} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}
+    \rng  & \llvm & \gnu & Intel & \llvm & \gnu & Intel \\
     \midrule
-    \verb|MKL_MCG59|            & 40 & 8 & 1.39 & 0.36 \\
-    \verb|MKL_MCG59_64|         & 40 & 8 & 0.70 & 0.34 \\
-    \verb|MKL_MT19937|          & 40 & 8 & 1.19 & 0.29 \\
-    \verb|MKL_MT19937_64|       & 40 & 8 & 0.57 & 0.28 \\
-    \verb|MKL_MT2203|           & 40 & 8 & 1.12 & 0.22 \\
-    \verb|MKL_MT2203_64|        & 40 & 8 & 0.52 & 0.18 \\
-    \verb|MKL_STMT19937|        & 40 & 8 & 1.17 & 0.17 \\
-    \verb|MKL_STMT19937_64|     & 40 & 8 & 0.53 & 0.16 \\
-    \verb|MKL_ARS5|             & 40 & 8 & 1.28 & 0.30 \\
-    \verb|MKL_ARS5_64|          & 40 & 8 & 0.74 & 0.31 \\
-    \verb|MKL_PHILOX4X32X10|    & 40 & 8 & 1.51 & 0.55 \\
-    \verb|MKL_PHILOX4X32X10_64| & 40 & 8 & 0.91 & 0.55 \\
+    \verb|MKL_MCG59|           & 1.24 & 0.77 & 1.03 & 0.32 & 0.32 & 0.33 \\
+    \verb|MKL_MCG59_64|        & 0.64 & 0.64 & 0.93 & 0.32 & 0.32 & 0.34 \\
+    \verb|MKL_MT19937|         & 1.13 & 0.64 & 0.87 & 0.27 & 0.27 & 0.27 \\
+    \verb|MKL_MT19937_64|      & 0.54 & 0.56 & 0.77 & 0.27 & 0.27 & 0.27 \\
+    \verb|MKL_MT2203|          & 1.13 & 0.63 & 0.95 & 0.22 & 0.18 & 0.23 \\
+    \verb|MKL_MT2203_64|       & 0.52 & 0.51 & 0.82 & 0.25 & 0.19 & 0.22 \\
+    \verb|MKL_STMT19937|       & 1.12 & 0.63 & 0.92 & 0.16 & 0.16 & 0.18 \\
+    \verb|MKL_STMT19937_64|    & 0.53 & 0.52 & 0.82 & 0.17 & 0.17 & 0.19 \\
+    \verb|MKL_ARS5|            & 1.28 & 0.84 & 1.03 & 0.31 & 0.32 & 0.30 \\
+    \verb|MKL_ARS5_64|         & 0.68 & 0.72 & 0.90 & 0.30 & 0.32 & 0.30 \\
+    \verb|MKL_PHILOX4X32X10|   & 1.51 & 1.05 & 1.29 & 0.54 & 0.58 & 0.58 \\
+    \verb|MKL_PHILOX4X32X10_64|& 0.90 & 0.95 & 1.19 & 0.54 & 0.59 & 0.58 \\
     \bottomrule
   \end{tabularx}
-  \caption{Performance of \mkl{} \rng; Note that the engines will use dynamic
-    memories for buffer storage.}
+  \caption{Performance of \mkl{} \rng}
   \label{tab:Performance of MKL RNG}
 \end{table}
 
@@ -873,8 +905,8 @@ table~\ref{tab:Configuraiton macros for standard uniform distributions}
     \toprule
     Macro & Default \\
     \midrule
-    \verb|VSMC_RNG_U01_USE_FIXED_POINT|    & \verb|1|  \\
-    \verb|VSMC_RNG_U01_USE_64BITS_DOUBLE|  & \verb|0|  \\
+    \verb|VSMC_RNG_U01_USE_FIXED_POINT|   & \verb|1| \\
+    \verb|VSMC_RNG_U01_USE_64BITS_DOUBLE| & \verb|0| \\
     \bottomrule
   \end{tabularx}
   \caption{Configuration macros for standard uniform distributions}
