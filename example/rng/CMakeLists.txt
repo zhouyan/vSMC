@@ -30,31 +30,20 @@
 # ============================================================================
 
 PROJECT(vSMCExample-rng CXX)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
-ADD_CUSTOM_TARGET(rng)
-ADD_DEPENDENCIES(example rng)
+VSMC_ADD_EXAMPLE(rng)
 
-ADD_CUSTOM_TARGET(rng-files)
-ADD_DEPENDENCIES(rng rng-files)
-ADD_DEPENDENCIES(example-files rng-files)
-
-FUNCTION(VSMC_ADD_RNG_TEST name)
-    VSMC_ADD_EXECUTABLE(rng_${name} ${PROJECT_SOURCE_DIR}/src/rng_${name}.cpp)
-    ADD_DEPENDENCIES(rng rng_${name})
-ENDFUNCTION(VSMC_ADD_RNG_TEST)
-
-VSMC_ADD_RNG_TEST(engine)
-VSMC_ADD_RNG_TEST(u01)
-VSMC_ADD_RNG_TEST(u01_sequence)
-VSMC_ADD_RNG_TEST(uniform_bits)
+VSMC_ADD_TEST(rng engine)
+VSMC_ADD_TEST(rng u01)
+VSMC_ADD_TEST(rng u01_sequence)
+VSMC_ADD_TEST(rng uniform_bits)
 
 IF(MKL_FOUND)
-    VSMC_ADD_RNG_TEST(mkl_brng)
+    VSMC_ADD_TEST(rng mkl_brng)
 ENDIF(MKL_FOUND)
 
 IF(Boost_FOUND)
-    VSMC_ADD_RNG_TEST(distribution)
+    VSMC_ADD_TEST(rng distribution)
 ENDIF(Boost_FOUND)
 
 VSMC_ADD_FILE(rng rng_engine_kat_Philox2x32.txt)
@@ -70,7 +59,7 @@ VSMC_ADD_FILE(rng rng_engine_kat_Threefry8x64.txt)
 VSMC_ADD_FILE(rng rng_engine_kat_Threefry16x64.txt)
 
 IF(AESNI_FOUND)
-    VSMC_ADD_RNG_TEST(aes)
+    VSMC_ADD_TEST(rng aes)
     VSMC_ADD_FILE(rng rng_engine_kat_AES128.txt)
     VSMC_ADD_FILE(rng rng_engine_kat_AES192.txt)
     VSMC_ADD_FILE(rng rng_engine_kat_AES256.txt)

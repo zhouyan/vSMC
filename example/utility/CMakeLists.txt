@@ -30,22 +30,11 @@
 # ============================================================================
 
 PROJECT(vSMCExample-utility CXX)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
-ADD_CUSTOM_TARGET(utility)
-ADD_DEPENDENCIES(example utility)
+VSMC_ADD_EXAMPLE(utility)
 
-ADD_CUSTOM_TARGET(utility-files)
-ADD_DEPENDENCIES(example-files utility-files)
-
-FUNCTION(VSMC_ADD_UTILITY_TEST name)
-    VSMC_ADD_EXECUTABLE(utility_${name}
-        ${PROJECT_SOURCE_DIR}/src/utility_${name}.cpp)
-    ADD_DEPENDENCIES(utility utility_${name})
-ENDFUNCTION(VSMC_ADD_UTILITY_TEST)
-
-VSMC_ADD_UTILITY_TEST(aligned_memory)
+VSMC_ADD_TEST(utility aligned_memory)
 
 IF(HDF5_FOUND)
-    VSMC_ADD_UTILITY_TEST(hdf5io)
+    VSMC_ADD_TEST(utility hdf5io)
 ENDIF(HDF5_FOUND)

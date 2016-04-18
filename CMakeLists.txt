@@ -141,7 +141,7 @@ ENDFOREACH(feature ${FEATURES})
 ##############################################################################
 
 IF(VSMC_ENABLE_LIBRARY)
-    ADD_CUSTOM_TARGET(lib)
+    ADD_CUSTOM_TARGET(lib ALL)
     IF(VSMC_GOOD_COMPILER)
         ADD_SUBDIRECTORY(lib)
     ENDIF(VSMC_GOOD_COMPILER)
@@ -152,10 +152,9 @@ ENDIF(VSMC_ENABLE_LIBRARY)
 ##############################################################################
 
 IF(VSMC_ENABLE_EXAMPLE)
-    ADD_CUSTOM_TARGET(example)
+    ADD_CUSTOM_TARGET(example ALL)
     ADD_CUSTOM_TARGET(check)
-    ADD_CUSTOM_TARGET(pdf)
-    ADD_SUBDIRECTORY(example EXCLUDE_FROM_ALL)
+    ADD_SUBDIRECTORY(example)
 ENDIF(VSMC_ENABLE_EXAMPLE)
 
 ##############################################################################

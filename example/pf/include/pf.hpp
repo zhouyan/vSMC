@@ -306,34 +306,4 @@ inline void pf_run(std::size_t N, const std::string &datafile,
     pf_run(N, vsmc::ResidualSystematic, datafile, implname, store, os);
 }
 
-inline int pf_main(int argc, char **argv)
-{
-    if (argc < 3) {
-        std::cout << "Usage: " << argv[0] << " <input file>"
-                  << " <output file>" << std::endl;
-        return -1;
-    }
-    std::string datafile(argv[1]);
-    std::string implname(argv[2]);
-
-    std::string pf_time("pf.");
-    pf_time += argv[2];
-    std::ofstream time(pf_time);
-    time << std::setw(20) << std::left << "N";
-    time << std::setw(20) << std::left << "Implementation";
-    time << std::setw(20) << std::left << "ResampleScheme";
-    time << std::setw(20) << std::left << "MatrixLayout";
-    time << std::setw(20) << std::left << "RNGSet";
-    time << std::setw(20) << std::left << "Time";
-    time << std::endl;
-    pf_run(ParticleNum, datafile, implname, true, time);
-    std::size_t N = 1;
-    while (N < ParticleNum) {
-        N *= 2;
-        pf_run(N, datafile, implname, false, time);
-    }
-
-    return 0;
-}
-
 #endif // VSMC_EXAMPLE_PF_@SMP@_HPP

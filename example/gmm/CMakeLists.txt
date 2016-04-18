@@ -30,8 +30,7 @@
 # ============================================================================
 
 PROJECT(vSMCExample-gmm CXX)
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/include)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
 VSMC_ADD_SMP_EXAMPLE(gmm)
+
 VSMC_ADD_FILE(gmm gmm.data)

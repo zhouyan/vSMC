@@ -30,19 +30,8 @@
 # ============================================================================
 
 PROJECT(vSMCExample-resample CXX)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
-ADD_CUSTOM_TARGET(resample)
-ADD_DEPENDENCIES(example resample)
+VSMC_ADD_EXAMPLE(resample)
 
-ADD_CUSTOM_TARGET(resample-files)
-ADD_DEPENDENCIES(example-files resample-files)
-
-FUNCTION(VSMC_ADD_RESAMPLE_TEST name)
-    VSMC_ADD_EXECUTABLE(resample_${name}
-        ${PROJECT_SOURCE_DIR}/src/resample_${name}.cpp)
-    ADD_DEPENDENCIES(resample resample_${name})
-ENDFUNCTION(VSMC_ADD_RESAMPLE_TEST)
-
-VSMC_ADD_RESAMPLE_TEST(index)
-VSMC_ADD_RESAMPLE_TEST(transform)
+VSMC_ADD_TEST(resample index)
+VSMC_ADD_TEST(resample transform)

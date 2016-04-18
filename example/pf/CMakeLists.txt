@@ -30,33 +30,14 @@
 # ============================================================================
 
 PROJECT(vSMCExample-pf CXX)
-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/include)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
-FUNCTION(VSMC_ADD_PF_SMP_CHECK backend)
-    STRING(TOUPPER "${backend}" BACKEND)
-    ADD_CUSTOM_TARGET(pf_${backend}-check
-        DEPENDS pf_${backend} pf-files
-        COMMAND pf_${backend} "pf.data" "${BACKEND}"
-        COMMENT "Running pf_${backend}"
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-    ADD_DEPENDENCIES(pf-check pf_${backend}-check)
-ENDFUNCTION(VSMC_ADD_PF_SMP_CHECK)
+VSMC_ADD_SMP_EXAMPLE(pf)
 
-VSMC_ADD_SMP_EXAMPLE(pf "HDF5")
-VSMC_ADD_FILE(pf pf.data)
 VSMC_ADD_FILE(pf pf.R)
-
-ADD_CUSTOM_TARGET(pf-check)
-ADD_DEPENDENCIES(check pf-check)
-
-FOREACH(backend ${SMP_EXECUTABLES})
-    VSMC_ADD_PF_SMP_CHECK(${backend})
-ENDFOREACH(backend ${SMP_EXECUTABLES})
+VSMC_ADD_FILE(pf pf.data)
 
 ADD_CUSTOM_TARGET(pf-pdf
     DEPENDS pf-files pf-check
     COMMAND Rscript "${PROJECT_BINARY_DIR}/pf.R"
     COMMENT "Plotting pf-check results"
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-ADD_DEPENDENCIES(pdf pf-pdf)

@@ -46,14 +46,12 @@ FUNCTION(VSMC_ADD_EXECUTABLE exe src)
         UNSET(link_flags)
     ENDIF(NOT link_flags)
 
-    FOREACH(arg ${ARGN})
-        IF(${arg} STREQUAL "OMP" AND OPENMP_FOUND)
-            SET(compile_flags "${compile_flags} ${OpenMP_CXX_FLAGS}")
-            IF(NOT MSVC)
-                SET(link_flags "${link_flags} ${OpenMP_CXX_FLAGS}")
-            ENDIF(NOT MSVC)
-        ENDIF(${arg} STREQUAL "OMP" AND OPENMP_FOUND)
-    ENDFOREACH(arg ${ARGN})
+    IF(OPENMP_FOUND)
+        SET(compile_flags "${compile_flags} ${OpenMP_CXX_FLAGS}")
+        IF(NOT MSVC)
+            SET(link_flags "${link_flags} ${OpenMP_CXX_FLAGS}")
+        ENDIF(NOT MSVC)
+    ENDIF(OPENMP_FOUND)
 
     IF(compile_flags)
         SET_TARGET_PROPERTIES(${exe} PROPERTIES COMPILE_FLAGS
@@ -66,34 +64,56 @@ FUNCTION(VSMC_ADD_EXECUTABLE exe src)
     ENDIF(link_flags)
 ENDFUNCTION(VSMC_ADD_EXECUTABLE)
 
-FUNCTION(VSMC_ADD_SMP_EXECUTABLE base header source smp_name)
-    STRING(TOUPPER "${smp_name}" SMP)
-    STRING(TOLOWER "${smp_name}" smp)
+FUNCTION(VSMC_ADD_EXAMPLE basename)
+    INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
-    IF(EXISTS ${PROJECT_SOURCE_DIR}/include/${header}.hpp)
+    ADD_CUSTOM_TARGET(${basename})
+    ADD_DEPENDENCIES(example ${basename})
+
+    ADD_CUSTOM_TARGET(${basename}-check)
+    ADD_DEPENDENCIES(check ${basename}-check)
+
+    ADD_CUSTOM_TARGET(${basename}-files)
+    ADD_DEPENDENCIES(${basename} ${basename}-files)
+ENDFUNCTION(VSMC_ADD_EXAMPLE)
+
+FUNCTION(VSMC_ADD_SMP_EXAMPLE basename)
+    INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/include)
+    VSMC_ADD_EXAMPLE(${basename})
+
+    FOREACH(smpname ${SMP_EXECUTABLES})
+        STRING(TOUPPER "${smpname}" SMP)
+        STRING(TOLOWER "${smpname}" smp)
         CONFIGURE_FILE(
-            ${PROJECT_SOURCE_DIR}/include/${header}.hpp
-            ${PROJECT_BINARY_DIR}/include/${header}_${smp}.hpp)
-    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/include/${header}.hpp)
-    CONFIGURE_FILE(
-        ${PROJECT_SOURCE_DIR}/src/${source}.cpp
-        ${PROJECT_BINARY_DIR}/src/${source}_${smp}.cpp)
-    VSMC_ADD_EXECUTABLE(${source}_${smp}
-        ${PROJECT_BINARY_DIR}/src/${source}_${smp}.cpp "${SMP}" ${ARGN})
-    ADD_DEPENDENCIES(${base} ${source}_${smp})
-    ADD_DEPENDENCIES(example_${smp} ${source}_${smp})
-ENDFUNCTION(VSMC_ADD_SMP_EXECUTABLE)
+            ${PROJECT_SOURCE_DIR}/include/${basename}.hpp
+            ${PROJECT_BINARY_DIR}/include/${basename}_${smp}.hpp)
+        CONFIGURE_FILE(
+            ${PROJECT_SOURCE_DIR}/src/${basename}.cpp
+            ${PROJECT_BINARY_DIR}/src/${basename}_${smp}.cpp)
+        VSMC_ADD_EXECUTABLE(${basename}_${smp}
+            ${PROJECT_BINARY_DIR}/src/${basename}_${smp}.cpp)
+        ADD_DEPENDENCIES(${basename} ${basename}_${smp})
 
-FUNCTION(VSMC_ADD_SMP_EXAMPLE base)
-    ADD_CUSTOM_TARGET(${base})
-    ADD_CUSTOM_TARGET(${base}-files)
-    ADD_DEPENDENCIES(${base} ${base}-files)
-    ADD_DEPENDENCIES(example ${base})
-    FOREACH(smp ${SMP_EXECUTABLES})
-        VSMC_ADD_SMP_EXECUTABLE(${base} ${base} ${base} ${smp} ${ARGN})
-        ADD_DEPENDENCIES(${base} ${base}_${smp})
-    ENDFOREACH(smp)
+        ADD_CUSTOM_TARGET(${basename}_${smp}-check
+            DEPENDS ${basename}_${smp} ${basename}-files
+            COMMAND ${basename}_${smp}
+            COMMENT "Running ${basename}_${smp}"
+            WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+        ADD_DEPENDENCIES(${basename}-check ${basename}_${smp}-check)
+    ENDFOREACH(smpname ${SMP_EXECUTABLES})
 ENDFUNCTION(VSMC_ADD_SMP_EXAMPLE)
+
+FUNCTION(VSMC_ADD_TEST basename testname)
+    VSMC_ADD_EXECUTABLE(${basename}_${testname}
+        ${PROJECT_SOURCE_DIR}/src/${basename}_${testname}.cpp)
+    ADD_DEPENDENCIES(${basename} ${basename}_${testname})
+    ADD_CUSTOM_TARGET(${basename}_${testname}-check
+        DEPENDS ${basename}_${testname} ${basename}-files
+        COMMAND ${basename}_${testname}
+        COMMENT "Running ${basename}_${testname}"
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+    ADD_DEPENDENCIES(${basename}-check ${basename}_${testname}-check)
+ENDFUNCTION(VSMC_ADD_TEST)
 
 FUNCTION(VSMC_ADD_FILE basename filename)
     IF(UNIX)
@@ -115,22 +135,6 @@ FUNCTION(VSMC_ADD_FILE basename filename)
         DEPENDS ${PROJECT_BINARY_DIR}/${filename})
     ADD_DEPENDENCIES(${basename}-files ${basename}-${filename})
 ENDFUNCTION(VSMC_ADD_FILE)
-
-FUNCTION(VSMC_ADD_HEADER_EXECUTABLE basepath cond)
-    IF(${cond})
-        STRING(REPLACE "/" "_" basename "${basepath}")
-        IF(EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
-            VSMC_ADD_EXECUTABLE(${basename}_hpp
-                ${PROJECT_SOURCE_DIR}/src/${basename}.cpp ${ARGN})
-        ELSE(EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
-            CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/vsmc.cpp
-                ${PROJECT_BINARY_DIR}/src/${basename}.cpp)
-            VSMC_ADD_EXECUTABLE(${basename}_hpp
-                ${PROJECT_BINARY_DIR}/src/${basename}.cpp ${ARGN})
-        ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/src/${basename}.cpp)
-        ADD_DEPENDENCIES(vsmc ${basename}_hpp)
-    ENDIF(${cond})
-ENDFUNCTION(VSMC_ADD_HEADER_EXECUTABLE)
 
 ##############################################################################
 # Essential
