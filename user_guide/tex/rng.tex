@@ -83,42 +83,128 @@ dummy example,
   // Method 4
   rng_rand(rng_mkl, rnorm_vsmc, n, r.data());
 \end{cppcode}
-On the author's computer, on average method 1 costs 39.7 nanoseconds to
-generate one standard Normal random number. Method 2 costs 22.3 nanoseconds
-while method 3 costs only 5.8 nanoseconds. The last, when the \rng{} engine is
-an \mkl{} \rng wrapper, the \mkl library's routines are used and it costs only
-4.2 nanoseconds per element. Normal distribution is relatively simple. For
-other distributions, such as the Gamma distribution, the difference can be even
-more dramatic. And the library even beats \mkl in performance for some
-distributions.
+On the author's computer, on average method 1 costs 102 cycles to generate one
+standard Normal random number. Method 2 costs 61 cycles while method 3 costs
+only 14 cycles. The last, when the \rng{} engine is an \mkl{} \rng wrapper, the
+\mkl library's routines are used and it costs only 10 cycles. Normal
+distribution is relatively simple. For other distributions, such as the Gamma
+distribution, the difference can be even more dramatic. And the library even
+beats \mkl in performance for some distributions.
+
+\section{Notes on performance data}
+\label{sec:Notes on performance data}
+
+Some sections provides performance data. All performance data in this chapter
+is measured in single core cycles per bytes for \rng{}s, or cycles per element
+for distributions (double precision). The processor used to measure the
+performance is an Intel Core i7-4960\textsc{hg} \cpu.
+
+For the performance of \rng{}s, we measure two situations. The first is the
+using the random integers one by one,
+\begin{cppcode}
+  RNG rng;
+  UniformBitsDistribution<std::uint64_t> rbits;
+  Vector<std::uint64_t> r(n);
+  for (std:size_t i = 0; i != n; ++i)
+      r[i] = rbits(rng);
+\end{cppcode}
+See section~\ref{sub:Uniform bits distribution} for details of
+\verb|UniformBitsDistributions|. In short, it generate 64 random bits each time
+\verb|rbits(rng)| is executed. The second is vectorized performance,
+\begin{cppcode}
+  rng_rand(rng, rbits, n, r.data());
+\end{cppcode}
+see section~\ref{sec:Vectorized random number generating} for details of
+\verb|rng_rand|. The two performance data are labeled ``Loop'' and
+``\verb|rng_rand|'', respectively, in tables~\ref{tab:Performance of standard
+  library RNG} to~\ref{tab:Performance of MKL RNG}. These measurement are in
+the unit cycles per bytes (cpB). In these tables, the size and alignment
+requirement of the \rng engines are also listed.
+
+For the performance of distributions, we measure four situations. Take the
+Normal distribution as an example, first, if the distribution is available in
+the standard library, we measure the following case,
+\begin{cppcode}
+  RNG rng;
+  std::normal_distribution<double> rnorm_std(0, 1);
+  Vector<double> r(n);
+  for (std::size_t i = 0; i = n; ++i)
+      r[i] = rnorm_std(rng);
+\end{cppcode}
+Second, we measure the performance of the \vsmc library's implementation,
+\begin{cppcode}
+  NormalDistribution<double> rnorm_vsmc(0, 1);
+  for (std::size_t i = 0; i = n; ++i)
+      r[i] = rnorm_vsmc(rng);
+\end{cppcode}
+The third is the vectorized performance,
+\begin{cppcode}
+  rng_rand(rng, rnorm_vsmc, n, r.data());
+\end{cppcode}
+For all the three above, the \rng is \verb|ARSx8| (section~\ref{sub:AES-NI
+  instructions based RNG}. The last measurement is the situation when \rng is
+\verb|MKL_SFMT19937| (section~\ref{sec:MKL RNG}).
+\begin{cppcode}
+  MKL_SFMT19937 rng_mkl;
+  rng_rand(rng_mkl, rnorm_vsmc, n, r.data());
+\end{cppcode}
+In this case, not only the \rng itself is faster, the distribution might also
+use \mkl routines. The four performance data are labeled ``\std'', ``\vsmc'',
+``\verb|rng_rand|'' and ``\mkl'', respectively, in tables~\ref{tab:Performance
+  of distributions using the inverse method} to~\ref{tab:Performance of Beta
+  distribution}. These measurements are in the unit cycles per double precision
+element.
 
 \section{Counter-based RNG}
 \label{sec:Counter-based RNG}
 
-The standard library provides a set of \rng engines. Unfortunately, none of
+The standard library provides a set of \rng engines (performance data in
+table~\ref{tab:Performance of standard library RNG}). Unfortunately, none of
 them are suitable for parallel computing without considerable efforts. The
 development by \textcite{Salmon:2011um} made high performance parallel \rng
-much more accessible. The \rng{}s introduced in the paper use deterministic
-functions $f_k$, such that, for a sequence $\{c_i = i\}_{i\ge0}$, the sequence
-$\{y_i\}_{i\ge0}$, $y_i = f_k(c_i)$, appears as random. In addition, for $k_1
-\ne k_2$, $f_{k_1}$ and $f_{k_2}$ will generate two sequences that appear
-statistically independent. Compared to more conventional \rng{}s which use
-recursions $y_i = f_k(y_{i - 1})$, these counter-based \rng{}s are much easier
-to setup in a parallelized environment.
-
-If $c$, the counter, is an unsigned integer with $b$ bits, and $k$, the key, is
-an unsigned integer with $d$ bits. Then for each $k$, the \rng has a period
-$2^b$. And there can be at most $2^d$ independent streams.
-Table~\ref{tab:Counter-based RNG} lists all counter-based \rng{}s implemented
-in this library, along with the bits of the counter and the key. They all
-conform to the \cppoo uniform \rng concept and output 32-bits integers. For
-64-bits integer output, a suffix \verb|_64| may be appended to corresponding
-\rng engine names. For example, \verb|Threefry4x64| and \verb|Threefry4x64_64|
-generate the same 256-bits random integers internally. The only difference is
-that \verb|operator()| of the former returns 32-bits integers while the later
-returns 64-bits integers.
+much more accessible.
 
 \begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{XXXXX}
+    \toprule
+    \rng Size & Alignment & Loop & \verb|rng_rand| \\
+    \midrule
+    \verb|mt19937|       & 2504 & 8 & 3.02   & 3.21 \\
+    \verb|mt19937_64|    & 2504 & 8 & 1.86   & 2.04 \\
+    \verb|minstd_rand0|  &    4 & 4 & 4.95   & 4.99 \\
+    \verb|minstd_rand|   &    4 & 4 & 4.25   & 4.22 \\
+    \verb|ranlux24_base| &  112 & 8 & 6.35   & 6.31 \\
+    \verb|ranlux48_base| &  112 & 8 & 4.14   & 4.22 \\
+    \verb|ranlux24|      &  120 & 8 & 68.3   & 68.4 \\
+    \verb|ranlux48|      &  120 & 8 & 165    & 174  \\
+    \verb|knuth_b|       & 1032 & 4 & 14.3   & 14.6 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Performance of standard library RNG}
+  \label{tab:Performance of standard library RNG}
+\end{table}
+
+The \rng{}s introduced in the paper use deterministic functions $f_k$, such
+that, for a sequence $\{c_i = i\}_{i\ge0}$, the sequence $\{y_i\}_{i\ge0}$,
+$y_i = f_k(c_i)$, appears as random. In addition, for $k_1 \ne k_2$, $f_{k_1}$
+and $f_{k_2}$ will generate two sequences that appear statistically
+independent. Compared to more conventional \rng{}s which use recursions $y_i =
+f_k(y_{i - 1})$, these counter-based \rng{}s are much easier to setup in a
+parallelized environment. If $c$, the counter, is an unsigned integer with $b$
+bits, and $k$, the key, is an unsigned integer with $d$ bits. Then for each
+$k$, the \rng has a period $2^b$. And there can be at most $2^d$ independent
+streams. Table~\ref{tab:Counter-based RNG} lists all counter-based \rng{}s
+implemented in this library, along with the bits of the counter and the key.
+They all conform to the \cppoo uniform \rng concept and output 32-bits
+integers. For 64-bits integer output, a suffix \verb|_64| may be appended to
+corresponding \rng engine names. For example, \verb|Threefry4x64| and
+\verb|Threefry4x64_64| generate the same 256-bits random integers internally.
+The only difference is that \verb|operator()| of the former returns 32-bits
+integers while the later returns 64-bits integers.
+
+\begin{table}
+  \tbfigures
   \begin{tabularx}{\textwidth}{lXX}
     \toprule
     Class & Counter bits & Key bits \\
@@ -320,18 +406,98 @@ in table~\ref{tab:Counter-based RNG}.
 
 The performance of these engines depends on a few factors, such as \cpu types,
 compilers, operating systems, etc. For example, the theoretical peak
-performance for \verb|ARSx8| is 0.32 cycles per byte (cpB) on recent \cpu{}s.
-In realistic situations, depending on the compiler, on the same computer values
-ranging from 0.44 to 1.2 cpB were observed by the author (the 64-bis version
-\verb|ARSx8_64| was observed to have a 0.34 cpB, which is very close to the
-peak performance). In any case, such performance is good enough even for the
-most demanding applications. The library does not attempt to optimize the
-algorithm for any particular platform. In realistic applications, the
-performance of \rng is unlikely to become a bottle neck. Note that, the best
-performance is obtained with the vectorized \verb|rng_rand| function (see
-section~\ref{sec:Vectorized random number generating}). If the \rng{} is used
-to generate random integer one at a time, the performance is about a half of
-the vectorized operation.
+performance for \verb|ARSx8| is 0.32 cpB on recent \cpu{}s. In realistic
+situations, depending on the compiler, on the same computer values ranging from
+0.44 to 1.2 cpB were observed by the author (the 64-bis version \verb|ARSx8_64|
+was observed to have a 0.34 cpB, which is very close to the peak performance).
+In any case, such performance is good enough even for the most demanding
+applications. The library does not attempt to optimize the algorithm for any
+particular platform. In realistic applications, the performance of \rng is
+unlikely to become a bottle neck. Note that, the best performance is obtained
+with the vectorized \verb|rng_rand| function (see section~\ref{sec:Vectorized
+  random number generating}). The performance data of all these \rng{}s are in
+table~\ref{tab:Performance of AES128Engine} to~\ref{tab:Performance of
+  ARSEngine}.
+
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{XXXXX}
+    \toprule
+    \rng & Size & Alignment & Loop & \verb|rng_rand| \\
+    \midrule
+    \verb|AES128x1|    & 224 & 16 & 1.07 & 0.78 \\
+    \verb|AES128x2|    & 240 & 16 & 1.21 & 0.71 \\
+    \verb|AES128x4|    & 272 & 16 & 0.85 & 0.66 \\
+    \verb|AES128x8|    & 336 & 16 & 1.62 & 1.09 \\
+    \verb|AES128x1_64| & 224 & 16 & 0.89 & 0.80 \\
+    \verb|AES128x2_64| & 240 & 16 & 0.81 & 0.71 \\
+    \verb|AES128x4_64| & 272 & 16 & 0.94 & 0.81 \\
+    \verb|AES128x8_64| & 336 & 16 & 1.34 & 1.00 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Performance of \texttt{AES128Engine}}
+  \label{tab:Performance of AES128Engine}
+\end{table}
+
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{XXXXX}
+    \toprule
+    \rng & Size & Alignment & Loop & \verb|rng_rand| \\
+    \midrule
+    \verb|AES192x1|    & 256 & 16 & 1.68 & 0.89 \\
+    \verb|AES192x2|    & 272 & 16 & 1.41 & 0.83 \\
+    \verb|AES192x4|    & 304 & 16 & 0.98 & 0.77 \\
+    \verb|AES192x8|    & 368 & 16 & 1.32 & 0.96 \\
+    \verb|AES192x1_64| & 256 & 16 & 1.12 & 0.92 \\
+    \verb|AES192x2_64| & 272 & 16 & 1.22 & 1.09 \\
+    \verb|AES192x4_64| & 304 & 16 & 0.96 & 0.83 \\
+    \verb|AES192x8_64| & 368 & 16 & 1.25 & 0.95 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Performance of \texttt{AES192Engine}}
+  \label{tab:Performance of AES192Engine}
+\end{table}
+
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{XXXXX}
+    \toprule
+    \rng & Size & Alignment & Loop & \verb|rng_rand| \\
+    \midrule
+    \verb|AES256x1|    & 288 & 16 & 1.93 & 1.07 \\
+    \verb|AES256x2|    & 304 & 16 & 1.35 & 0.95 \\
+    \verb|AES256x4|    & 336 & 16 & 1.15 & 0.89 \\
+    \verb|AES256x8|    & 400 & 16 & 1.43 & 1.04 \\
+    \verb|AES256x1_64| & 288 & 16 & 1.38 & 1.14 \\
+    \verb|AES256x2_64| & 304 & 16 & 1.13 & 0.98 \\
+    \verb|AES256x4_64| & 336 & 16 & 1.28 & 1.11 \\
+    \verb|AES256x8_64| & 400 & 16 & 1.40 & 1.10 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Performance of \texttt{AES256Engine}}
+  \label{tab:Performance of AES256Engine}
+\end{table}
+
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{XXXXX}
+    \toprule
+    \rng & Size & Alignment & Loop & \verb|rng_rand| \\
+    \midrule
+    \verb|ARSx1|    &  64 & 16 & 0.67 & 0.55 \\
+    \verb|ARSx2|    &  80 & 16 & 0.93 & 0.44 \\
+    \verb|ARSx4|    & 112 & 16 & 0.56 & 0.39 \\
+    \verb|ARSx8|    & 176 & 16 & 0.69 & 0.35 \\
+    \verb|ARSx1_64| &  64 & 16 & 0.56 & 0.55 \\
+    \verb|ARSx2_64| &  80 & 16 & 0.75 & 0.70 \\
+    \verb|ARSx4_64| & 112 & 16 & 0.62 & 0.52 \\
+    \verb|ARSx8_64| & 176 & 16 & 0.62 & 0.44 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Performance of \texttt{ARSEngine}}
+  \label{tab:Performance of ARSEngine}
+\end{table}
 
 \subsection{Philox}
 \label{sub:Philox}
@@ -369,7 +535,28 @@ configuration macros listed in table~\ref{tab:Configuration macros for
 table~\ref{tab:Counter-based RNG}. The template parameter \verb|Counstants| is
 similar to that of \verb|ARSEngine|. It defines the round constants of the
 algorithm. The defaults are taken from the paper. See the reference manual for
-details.
+details. The performance data is in table~\ref{tab:Performance of
+  PhiloxEngine}.
+
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{XXXXX}
+    \toprule
+    \rng & Size & Alignment & Loop & \verb|rng_rand| \\
+    \midrule
+    \verb|Philox2x32|    & 32 & 8 & 3.95 & 2.50 \\
+    \verb|Philox4x32|    & 48 & 8 & 3.41 & 2.25 \\
+    \verb|Philox2x64|    & 48 & 8 & 2.38 & 1.29 \\
+    \verb|Philox4x64|    & 88 & 8 & 1.80 & 0.98 \\
+    \verb|Philox2x32_64| & 32 & 8 & 3.13 & 2.28 \\
+    \verb|Philox4x32_64| & 48 & 8 & 3.00 & 2.10 \\
+    \verb|Philox2x64_64| & 48 & 8 & 1.71 & 1.02 \\
+    \verb|Philox4x64_64| & 88 & 8 & 1.92 & 1.17 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Performance of \texttt{PhiloxEngine}}
+  \label{tab:Performance of PhiloxEngine}
+\end{table}
 
 \subsection{Threefry}
 \label{sub:Threefry}
@@ -413,7 +600,32 @@ configuration macros listed in table~\ref{tab:Configuration macros for
 table~\ref{tab:Counter-based RNG}. The template parameter \verb|Counstants| is
 similar to that of \verb|ARSEngine|. It defines the round constants of the
 algorithm. The defaults are taken from the paper. See the reference manual for
-details.
+details. The performance data is in table~\ref{tab:Performance of
+  ThreefryEngine}.
+
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{XXXXX}
+    \toprule
+    \rng & Size & Alignment & Loop & \verb|rng_rand| \\
+    \midrule
+    \verb|Threefry2x32|     &  40 & 8 & 6.79 & 5.61 \\
+    \verb|Threefry4x32|     &  64 & 8 & 7.74 & 6.49 \\
+    \verb|Threefry2x64|     &  64 & 8 & 6.40 & 5.16 \\
+    \verb|Threefry4x64|     & 112 & 8 & 3.71 & 3.21 \\
+    \verb|Threefry8x64|     & 208 & 8 & 3.97 & 2.66 \\
+    \verb|Threefry16x64|    & 400 & 8 & 3.06 & 2.80 \\
+    \verb|Threefry2x32_64|  &  40 & 8 & 4.89 & 4.79 \\
+    \verb|Threefry4x32_64|  &  64 & 8 & 7.24 & 6.38 \\
+    \verb|Threefry2x64_64|  &  64 & 8 & 6.15 & 5.66 \\
+    \verb|Threefry4x64_64|  & 112 & 8 & 3.38 & 3.05 \\
+    \verb|Threefry8x64_64|  & 208 & 8 & 3.32 & 2.61 \\
+    \verb|Threefry16x64_64| & 400 & 8 & 3.62 & 3.41 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Performance of \texttt{ThreefryEngine}}
+  \label{tab:Performance of ThreefryEngine}
+\end{table}
 
 \subsection{Default \protect\rng}
 \label{sub:Default RNG}
@@ -461,7 +673,8 @@ generators. They are listed in table~\ref{tab:MKL RNG}. Note that, \mkl{}
 These wrappers use a buffer to store such vectors. And thus they have much
 larger state space than usual \rng{}s. Each \rng engines output by default
 32-bits integers. Similar to the counter-based \rng{}s, 64-bits variants are
-also defined.
+also defined. The performance data is in table~\ref{tab:Performance of MKL
+  RNG}.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{XX}
@@ -479,6 +692,31 @@ also defined.
   \end{tabularx}
   \caption{\mkl{} \rng; Each \rng engine may have suffix \texttt{\_64}}
   \label{tab:MKL RNG}
+\end{table}
+
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{XXXXX}
+    \toprule
+    \rng & Size & Alignment & Loop & \verb|rng_rand| \\
+    \midrule
+    \verb|MKL_MCG59|            & 40 & 8 & 1.39 & 0.36 \\
+    \verb|MKL_MCG59_64|         & 40 & 8 & 0.70 & 0.34 \\
+    \verb|MKL_MT19937|          & 40 & 8 & 1.19 & 0.29 \\
+    \verb|MKL_MT19937_64|       & 40 & 8 & 0.57 & 0.28 \\
+    \verb|MKL_MT2203|           & 40 & 8 & 1.12 & 0.22 \\
+    \verb|MKL_MT2203_64|        & 40 & 8 & 0.52 & 0.18 \\
+    \verb|MKL_STMT19937|        & 40 & 8 & 1.17 & 0.17 \\
+    \verb|MKL_STMT19937_64|     & 40 & 8 & 0.53 & 0.16 \\
+    \verb|MKL_ARS5|             & 40 & 8 & 1.28 & 0.30 \\
+    \verb|MKL_ARS5_64|          & 40 & 8 & 0.74 & 0.31 \\
+    \verb|MKL_PHILOX4X32X10|    & 40 & 8 & 1.51 & 0.55 \\
+    \verb|MKL_PHILOX4X32X10_64| & 40 & 8 & 0.91 & 0.55 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Performance of \mkl{} \rng; Note that the engines will use dynamic
+    memories for buffer storage.}
+  \label{tab:Performance of MKL RNG}
 \end{table}
 
 \section{Multiple RNG streams}
@@ -738,11 +976,11 @@ better performance. Consider the following dummy example,
   // Method 3
   rng_rand(rng, runif_vsmc, n, r.data());
 \end{cppcode}
-On the author's computer, on average method 1 costs 11.4 nanoseconds to
-generate one standard uniform random number. Method 2 costs 2.2 nanoseconds
-while method 3 costs only 0.96 nanoseconds. The best performance is obtained
-when the output of \rng are either 32 or 64 random bits. All \rng{}s in this
-library satisfy this condition.
+On the author's computer, on average method 1 costs 29 cycles to generate one
+standard uniform random number. Method 2 costs 6.1 cycles while method 3 costs
+only 2.4 cycles. The best performance is obtained when the output of \rng are
+either 32 or 64 random bits. All \rng{}s in this library satisfy this
+condition.
 
 The main drawback is accuracy. If \verb|RealType| is \verb|float| or
 \verb|long double|, then the difference is minimal, since the intermediate
@@ -826,6 +1064,34 @@ Their distribution functions are shown in the comments on each class template.
   template <typename RealType>
   class WeibullDistribution;
 \end{cppcode*}
+The performance data of these distributions is in table~\ref{tab:Performance of
+  distributions using the inverse method}. The first column list the
+distribution name and the parameters. The next two measure the performance of
+the standard library. The fourth measures the performance of vectorized random
+number generating through \verb|rng_rand|. For all these three the \rng is
+\verb|ARSx8|. Last measure the performance of \verb|rng_rand| when the \rng is
+\verb|MKL_SFMT19937|.
+
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{p{2in}XXXX}
+    \toprule
+    Distribution & \std & \vsmc & \verb|rng_rand| & \mkl \\
+    \midrule
+    Cauchy(0,1)           & 100  & 72.7 & 14.4 & 10.5 \\
+    Exponential(1)        & 70.1 & 58.5 & 7.72 & 5.98 \\
+    ExtremeValue(0,1)     & 119  & 66.4 & 12.4 & 11.0 \\
+    Laplace(0,1)          & --   & 75.5 & 9.38 & 9.37 \\
+    Logistic(0,1)         & --   & 38.7 & 16.6 & 12.6 \\
+    Pareto(1,1)           & --   & 95.1 & 17.4 & 11.0 \\
+    Rayleigh(1)           & --   & 73.5 & 11.5 & 9.21 \\
+    UniformReal(-0.5,0.5) & 30.1 & 10.9 & 2.65 & 1.03 \\
+    Weibull(1,1)          & 144  & 27.8 & 7.58 & 6.18 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Performance of distributions using the inverse method}
+  \label{tab:Performance of distributions using the inverse method}
+\end{table}
 
 \subsection{Normal and related distribution}
 \label{sub:Normal and related distribuiton}
@@ -849,7 +1115,25 @@ random number and $x$ is the target distribution random number,
   template <typename RealType>
   class LevyDistribution;
 \end{cppcode*}
-In addition, the library implement the multivariate Normal distribution.
+The performance data of these distributions is in table~\ref{ref:Performance of
+  Normal and related distributions}.
+
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{p{2in}XXXX}
+    \toprule
+    Distribution & \std & \vsmc & \verb|rng_rand| & \mkl \\
+    \midrule
+    Normal(0,1)    & 102  & 61.6 & 14.3 & 9.59 \\
+    Lognormal(0,1) & 124  & 79.8 & 18.4 & 15.2 \\
+    Levy(0,1)      & --   & 68.1 & 21.5 & 16.3 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Performance of Normal and related distributions}
+  \label{tab:Performance of Normal and related distributions}
+\end{table}
+
+The library also implements the multivariate Normal distribution.
 \begin{cppcode}
   template <typename RealType, std::size_t Dim>
   class NormalMVDistribution;
@@ -910,7 +1194,95 @@ $0.6\le\alpha<1$, then rejection method from the Weibull distribution is used
   class StudentTDistribution;
 \end{cppcode}
 They implement the $\chi^2$-distribution, the Fisher $F$-distribution, and the
-student's $t$-distribution, respectively.
+Student's $t$-distribution, respectively. The performance data of these
+distributions, for different parameters is in table~\ref{tab:Performance of
+  Gamma distribution} to~\ref{tab:Performance of Student's t-distribution}.
+
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{p{2in}XXXX}
+    \toprule
+    Distribution & \std & \vsmc & \verb|rng_rand| & \mkl \\
+    \midrule
+    Gamma(1,1)       & 78.4 & 33.9 & 7.56 & 6.45 \\
+    Gamma(0.1,1)     & 175  & 112  & 30.4 & 32.5 \\
+    Gamma(0.5,1)     & 217  & 150  & 54.3 & 46.3 \\
+    Gamma(0.7,1)     & 224  & 165  & 42.9 & 37.2 \\
+    Gamma(0.9,1)     & 219  & 137  & 33.1 & 27.9 \\
+    Gamma(1.5,1)     & 273  & 130  & 32.0 & 27.0 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Performance of Gamma distributions}
+  \label{tab:Performance of Gamma distributions}
+\end{table}
+
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{p{2in}XXXX}
+    \toprule
+    Distribution & \std & \vsmc & \verb|rng_rand| & \mkl \\
+    \midrule
+    ChiSquared(0.2)  & 180  & 134  & 31.2 & 32.9 \\
+    ChiSquared(1)    & 218  & 164  & 54.3 & 46.4 \\
+    ChiSquared(1.5)  & 232  & 162  & 40.2 & 34.3 \\
+    ChiSquared(2)    & 101  & 38.3 & 7.55 & 6.44 \\
+    ChiSquared(3)    & 275  & 141  & 78.2 & 27.4 \\
+    ChiSquared(30)   & 240  & 138  & 29.9 & 24.6 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Performance of $\chi^2$ distributions}
+  \label{tab:Performance of chi-squared distributions}
+\end{table}
+
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{p{2in}XXXX}
+    \toprule
+    Distribution & \std & \vsmc & \verb|rng_rand| & \mkl \\
+    \midrule
+    FisherF(0.2,0.2) & 349  & 277  & 77.6 & 82.1 \\
+    FisherF(0.2,1)   & 388  & 344  & 114  & 98.6 \\
+    FisherF(0.2,1.5) & 404  & 354  & 105  & 86.3 \\
+    FisherF(0.2,2)   & 266  & 183  & 48.3 & 51.5 \\
+    FisherF(0.2,3)   & 459  & 319  & 77.9 & 75.7 \\
+    FisherF(1,0.2)   & 388  & 311  & 107  & 97.9 \\
+    FisherF(1,1)     & 427  & 337  & 134  & 111  \\
+    FisherF(1,1.5)   & 488  & 345  & 130  & 99.2 \\
+    FisherF(1,2)     & 308  & 222  & 78.3 & 66.4 \\
+    FisherF(1,3)     & 472  & 379  & 108  & 92.0 \\
+    FisherF(2,0.2)   & 254  & 188  & 48.4 & 50.4 \\
+    FisherF(2,1)     & 298  & 221  & 78.6 & 66.5 \\
+    FisherF(2,1.5)   & 304  & 236  & 71.9 & 50.4 \\
+    FisherF(2,2)     & 159  & 104  & 21.1 & 19.8 \\
+    FisherF(2,3)     & 344  & 209  & 48.3 & 43.8 \\
+    FisherF(3,0.2)   & 433  & 299  & 77.4 & 75.3 \\
+    FisherF(3,1)     & 473  & 325  & 107  & 91.4 \\
+    FisherF(3,1.5)   & 503  & 377  & 107  & 74.9 \\
+    FisherF(3,2)     & 350  & 199  & 47.9 & 42.4 \\
+    FisherF(3,3)     & 528  & 358  & 77.7 & 67.2 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Performance of Fisher's $F$-distributions}
+  \label{tab:Performance of Fisher's F-distributions}
+\end{table}
+
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{p{2in}XXXX}
+    \toprule
+    Distribution & \std & \vsmc & \verb|rng_rand| & \mkl \\
+    \midrule
+    StudentT(0.2)    & 309  & 209  & 61.4 & 59.6 \\
+    StudentT(1)      & 338  & 260  & 93.3 & 73.9 \\
+    StudentT(1.5)    & 377  & 249  & 102  & 59.5 \\
+    StudentT(2)      & 187  & 117  & 32.1 & 26.7 \\
+    StudentT(3)      & 372  & 234  & 59.6 & 59.7 \\
+    StudentT(30)     & 333  & 232  & 57.2 & 57.2 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Performance of Student's $t$-distributions}
+  \label{tab:Performance of Student's $t$-distributions}
+\end{table}
 
 \subsection{Beta distribution}
 \label{sub:Beta distribution}
@@ -923,14 +1295,38 @@ The class template
 \end{cppcode*}
 implements the Beta distribution. The specific algorithm used depend on the
 parameters. If $\alpha = 1/2$ and $\beta = 1/2$, or $\alpha = 1$ or $\beta =
-1$, then the inverse method is used.  If $\alpha > 1$ and $\beta > 1$, the
+1$, then the inverse method is used. If $\alpha > 1$ and $\beta > 1$, the
 method in \textcite{Cheng:1978jl} is used. Otherwise, let $K = 0.852$, $C =
 -0.956$, and $D = \beta + K\alpha^2 + C$. If $\alpha < 1$, $\beta < 1$ and $D
-\le 0$, then Jöhnk's method \parencite[sec.~3.5]{Devroye:1986gi} is used.  In
+\le 0$, then Jöhnk's method \parencite[sec.~3.5]{Devroye:1986gi} is used. In
 all other cases, one of the switching algorithms in \textcite{Atkinson:1979es}
 is used. Note that, there is no vectorized implementation at the moment for the
 switching algorithms. In other cases, the vectorized generating shall provide
-considerable speedup.
+considerable speedup. The performance data is in table~\ref{tab:Performance of
+  Beta distribution}
+
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{p{1in}XXXX}
+    \toprule
+    Distribution & \std & \vsmc & \verb|rng_rand| & \mkl \\
+    \midrule
+    Beta(0.5,0.5) & 431  & 42.9 & 10.3 & 37.4 \\
+    Beta(1,1)     & 144  & 16.2 & 2.48 & 8.73 \\
+    Beta(1,0.5)   & 288  & 65.1 & 12.2 & 8.63 \\
+    Beta(1,1.5)   & 406  & 65.0 & 11.8 & 8.61 \\
+    Beta(0.5,1)   & 288  & 62.4 & 11.7 & 8.61 \\
+    Beta(1.5,1)   & 388  & 62.4 & 11.6 & 8.59 \\
+    Beta(1.5,1.5) & 632  & 174  & 45.9 & 41.2 \\
+    Beta(0.3,0.3) & 418  & 148  & 54.0 & 35.4 \\
+    Beta(0.9,0.9) & 469  & 172  & 172  & 47.8 \\
+    Beta(1.5,0.5) & 554  & 203  & 202  & 73.3 \\
+    Beta(0.5,1.5) & 534  & 203  & 202  & 57.4 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Performance of Beta distribution}
+  \label{tab:Performance of Beta distribution}
+\end{table}
 
 \section{Seeding}
 \label{sec:Seeding}
