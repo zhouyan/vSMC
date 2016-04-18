@@ -10,11 +10,11 @@ distributions, including all those in the standard library, are implemented.
 Some of them are considerably faster than their standard library counter-parts.
 
 Section~\ref{sec:Vectorized random number generating} introduces the library's
-interface for vectorized random number generating. Section~\ref{sec:Notes on
-  performance data} discusses the simple benchmark procedures later used in
-this chapter. Section~\ref{sec:Counter-based RNG} details the counter-based
-\rng{}s implemented in the library. Section~\ref{sec:Non-deterministic RNG}
-briefly discusses the non-deterministic \rng{}s using \rdrand instructions and
+interface for vectorized random number generating. Section~\ref{sec:Performance
+  measurement} discusses the simple benchmark procedures later used in this
+chapter. Section~\ref{sec:Counter-based RNG} details the counter-based \rng{}s
+implemented in the library. Section~\ref{sec:Non-deterministic RNG} briefly
+discusses the non-deterministic \rng{}s using \rdrand instructions and
 section~\ref{sec:MKL RNG} shows how to use \rng{}s in the \mkl library as
 \cppoo engines. Section~\ref{sec:Distributions} discusses the distributions
 implemented by this library. Section~\ref{sec:Seeding} discusses how to seed
@@ -86,8 +86,8 @@ standard Normal random number. Method 2 costs 61 cycles while method 3 costs
 only 14 cycles. The last, when the \rng{} engine is an \mkl{} \rng wrapper, the
 \mkl library's routines are used and it costs only 10 cycles.
 
-\section{Notes on performance data}
-\label{sec:Notes on performance data}
+\section{Performance measurement}
+\label{sec:Performance measurement}
 
 Some of the following sections provide performance data. All performance data
 in this chapter is measured in single core cycles per bytes (cpB) for \rng{}s,
@@ -801,16 +801,12 @@ following sections we introduce each distributions included in the library.
 \begin{table}
   \begin{tabularx}{\textwidth}{lX}
     \toprule
-    Class & Notes \\
+    Class & Parameters \\
     \midrule
-    \verb|LaplaceDistribution|
-    & Parameters: location \verb|a|; scale \verb|b| \\
-    \verb|LevyDistribution|
-    & Parameters: location \verb|a|; scale \verb|b| \\
-    \verb|ParetoDistribution|
-    & Parameters: shape \verb|a|; scale \verb|b| \\
-    \verb|RayleighDistribution|
-    & Parameters: scale \verb|sigma| \\
+    \verb|LaplaceDistribution|  & location \verb|a|; scale \verb|b| \\
+    \verb|LevyDistribution|     & location \verb|a|; scale \verb|b| \\
+    \verb|ParetoDistribution|   & shape \verb|a|; scale \verb|b| \\
+    \verb|RayleighDistribution| & scale \verb|sigma| \\
     \bottomrule
   \end{tabularx}
   \caption{Random number distributions}
@@ -886,21 +882,7 @@ later. If the configuration macro \verb|VSMC_RNG_U01_USE_FIXED_POINT| is zero,
 then it behaves similarly to \verb|std::generate_canonical| and thus
 \verb|std::uniform_real_distribution|, otherwise it is the same as
 \verb|U01CODistribution|. We now discuss the details of each distribution and
-the implication of the configuration macros, which are listed in
-table~\ref{tab:Configuraiton macros for standard uniform distributions}
-
-\begin{table}
-  \begin{tabularx}{\textwidth}{XX}
-    \toprule
-    Macro & Default \\
-    \midrule
-    \verb|VSMC_RNG_U01_USE_FIXED_POINT|   & \verb|1| \\
-    \verb|VSMC_RNG_U01_USE_64BITS_DOUBLE| & \verb|0| \\
-    \bottomrule
-  \end{tabularx}
-  \caption{Configuration macros for standard uniform distributions}
-  \label{tab:Configuration macros for standard uniform distributions}
-\end{table}
+the implication of configuration macros.
 
 First of all, the random integers produced by \rng{}s are transferred to 32- or
 64-bits intermediate random integers through \verb|UniformBitsDistribution|
