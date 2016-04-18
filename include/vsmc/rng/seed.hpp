@@ -64,12 +64,6 @@ namespace vsmc
 ///
 /// The method `operator()(RNGType &rng)` is equivalent to
 /// `rng.seed(static_cast<typename RNGType::result_type>(get()))`.
-///
-/// The only thread-safe mutable method is `operator()`. Seeding RNGs from
-/// multiple threads at the same time using this method is possible. Any other
-/// mutable methods are not thread-safe. In particular, if this singleton is
-/// going to be used in a multi-threaded environment, make sure `instance()` is
-/// called at least once in a single threaded environment.
 template <typename ID, typename ResultType = VSMC_SEED_RESULT_TYPE>
 class SeedGenerator
 {
@@ -96,7 +90,6 @@ class SeedGenerator
     template <typename RNGType>
     void operator()(RNGType &rng)
     {
-        std::lock_guard<std::mutex> lock(mtx_);
         rng.seed(static_cast<typename RNGType::result_type>(get()));
     }
 
@@ -106,7 +99,6 @@ class SeedGenerator
     {
         using RNGType = typename std::iterator_traits<OutputIter>::value_type;
 
-        std::lock_guard<std::mutex> lock(mtx_);
         for (std::size_t i = 0; i != n; ++i, ++first)
             first->seed(static_cast<typename RNGType::result_type>(get()));
 
@@ -119,9 +111,8 @@ class SeedGenerator
     /// \brief Get a seed
     result_type get()
     {
-        if (seed_ < max_)
-            ++seed_;
-        else
+        ++seed_;
+        if (seed_ >= max_)
             seed_ = 1;
 
         return seed_ * divisor_ + remainder_;
@@ -194,11 +185,10 @@ class SeedGenerator
     }
 
     private:
-    result_type seed_;
+    std::atomic<result_type> seed_;
     result_type max_;
     result_type divisor_;
     result_type remainder_;
-    std::mutex mtx_;
 
     SeedGenerator() : seed_(0), max_(0), divisor_(1), remainder_(0)
     {
