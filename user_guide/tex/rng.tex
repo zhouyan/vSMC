@@ -10,10 +10,11 @@ distributions, including all those in the standard library, are implemented.
 Some of them are considerably faster than their standard library counter-parts.
 
 Section~\ref{sec:Vectorized random number generating} introduces the library's
-interface for vectorized random number generating.
-Section~\ref{sec:Counter-based RNG} details the counter-based \rng{}s
-implemented in the library. Section~\ref{sec:Non-deterministic RNG} briefly
-discuss the non-deterministic \rng{}s using \rdrand instructions and
+interface for vectorized random number generating. Section~\ref{sec:Notes on
+  performance data} discusses the simple benchmark procedures later used in
+this chapter. Section~\ref{sec:Counter-based RNG} details the counter-based
+\rng{}s implemented in the library. Section~\ref{sec:Non-deterministic RNG}
+briefly discusses the non-deterministic \rng{}s using \rdrand instructions and
 section~\ref{sec:MKL RNG} shows how to use \rng{}s in the \mkl library as
 \cppoo engines. Section~\ref{sec:Distributions} discusses the distributions
 implemented by this library. Section~\ref{sec:Seeding} discusses how to seed
@@ -36,25 +37,22 @@ Before we discuss other features, we first introduce a generic function
 The first is equivalent to generating random integers through a loop. For
 example,
 \begin{cppcode}
-  Vector<RNGType::result_type> r1(n);
-  Vector<RNGType::result_type> r2(n);
-  RNGType rng1;
-  RNGType rng2;
-
+  rng_rand(rng, n, r.data());
+  // is equivalent to
   for (std::size_t i = 0; i != n; ++i)
-      r1[i] = rng1();
-
-  rng_rand(rng2, n, r2.data());
-
-  r1 == r2; // always true
+      r[i] = rng();
 \end{cppcode}
-The second version of \verb|rng_rand| is similar to the loop,
+The results of the two will always be exactly the same unless \rng{} is
+non-deterministic. The second version of \verb|rng_rand| is also similar to the
+loop,
 \begin{cppcode}
+  rng_rand(rng, distribution, n, r.data())
+  // is similar to
   for (std::size_t i = 0; i != n; ++i)
       r[i] = distribution(rng);
 \end{cppcode}
 However, the results will not always be exactly the same, though the vectorized
-version will generate random numbers with the same distributions as expected.
+version will generate random numbers with the same distribution as expected.
 
 The advantage of using \verb|rng_rand| is that, if \verb|RNGType| or
 \verb|DistributionType| are classes defined by this library, then vectorized
@@ -64,7 +62,7 @@ dummy example,
 \begin{cppcode}
   std::size_t n = 10000;
   RNG rng_vsmc;
-  MKL_MT19937 rng_mkl;
+  MKL_SFMT19937 rng_mkl;
   std::normal_distribution<double> rnorm_std;
   NormalDistribution<double> rnorm_vsmc;
   Vector<double> r(n);
@@ -86,21 +84,18 @@ dummy example,
 On the author's computer, on average method 1 costs 102 cycles to generate one
 standard Normal random number. Method 2 costs 61 cycles while method 3 costs
 only 14 cycles. The last, when the \rng{} engine is an \mkl{} \rng wrapper, the
-\mkl library's routines are used and it costs only 10 cycles. Normal
-distribution is relatively simple. For other distributions, such as the Gamma
-distribution, the difference can be even more dramatic. And the library even
-beats \mkl in performance for some distributions.
+\mkl library's routines are used and it costs only 10 cycles.
 
 \section{Notes on performance data}
 \label{sec:Notes on performance data}
 
-Some sections provides performance data. All performance data in this chapter
-is measured in single core cycles per bytes for \rng{}s, or cycles per element
-for distributions (double precision). The processor used to measure the
-performance is an Intel Core i7-4960\textsc{hg} \cpu.
-
-For the performance of \rng{}s, we measure two situations. The first is the
-using the random integers one by one,
+Some of the following sections provide performance data. All performance data
+in this chapter is measured in single core cycles per bytes (cpB) for \rng{}s,
+or cycles per element for distributions (\verb|double| precision). The
+processor used to measure the performance is an Intel Core i7-4960\textsc{hg}
+\cpu.
+For the performance of \rng{}s, we measure two situations. The first is using
+the random integers one by one,
 \begin{cppcode}
   RNG rng;
   UniformBitsDistribution<std::uint64_t> rbits;
@@ -109,17 +104,16 @@ using the random integers one by one,
       r[i] = rbits(rng);
 \end{cppcode}
 See section~\ref{sub:Uniform bits distribution} for details of
-\verb|UniformBitsDistributions|. In short, it generate 64 random bits each time
-\verb|rbits(rng)| is executed. The second is vectorized performance,
+\verb|UniformBitsDistributions|. In short, it generates 64 random bits each
+time \verb|rbits(rng)| is executed. The second is vectorized performance,
 \begin{cppcode}
   rng_rand(rng, rbits, n, r.data());
 \end{cppcode}
-see section~\ref{sec:Vectorized random number generating} for details of
-\verb|rng_rand|. The two performance data are labeled ``Loop'' and
-``\verb|rng_rand|'', respectively, in tables~\ref{tab:Performance of standard
-  library RNG} to~\ref{tab:Performance of MKL RNG}. These measurement are in
-the unit cycles per bytes (cpB). In these tables, the size and alignment
-requirement of the \rng engines are also listed.
+See section~\ref{sec:Vectorized random number generating} for details of
+\verb|rng_rand|. In both cases, we repeat the experiments 100 times, each time
+with the number of elements $n$ chosen randomly between 5,000 and 10,000. The
+performance is measured in cpB. The two performance data are labeled ``Loop''
+and ``\verb|rng_rand|'', respectively.
 
 For the performance of distributions, we measure four situations. Take the
 Normal distribution as an example, first, if the distribution is available in
@@ -142,7 +136,7 @@ The third is the vectorized performance,
   rng_rand(rng, rnorm_vsmc, n, r.data());
 \end{cppcode}
 For all the three above, the \rng is \verb|ARSx8| (section~\ref{sub:AES-NI
-  instructions based RNG}. The last measurement is the situation when \rng is
+  instructions based RNG}). The last measurement is the situation when \rng is
 \verb|MKL_SFMT19937| (section~\ref{sec:MKL RNG}).
 \begin{cppcode}
   MKL_SFMT19937 rng_mkl;
@@ -150,10 +144,8 @@ For all the three above, the \rng is \verb|ARSx8| (section~\ref{sub:AES-NI
 \end{cppcode}
 In this case, not only the \rng itself is faster, the distribution might also
 use \mkl routines. The four performance data are labeled ``\std'', ``\vsmc'',
-``\verb|rng_rand|'' and ``\mkl'', respectively, in tables~\ref{tab:Performance
-  of distributions using the inverse method} to~\ref{tab:Performance of Beta
-  distribution}. These measurements are in the unit cycles per double precision
-element.
+``\verb|rng_rand|'' and ``\mkl'', respectively. These measurements are in the
+unit cycles per \verb|double| precision element.
 
 Note that these performance data, especially those for \rng{}s, are for
 reference only. The actual performance can differ considerably given different
@@ -190,9 +182,9 @@ much more accessible.
 \end{table}
 
 The \rng{}s introduced in the paper use deterministic functions $f_k$, such
-that, for a sequence $\{c_i = i\}_{i\ge0}$, the sequence $\{y_i\}_{i\ge0}$,
-$y_i = f_k(c_i)$, appears as random. In addition, for $k_1 \ne k_2$, $f_{k_1}$
-and $f_{k_2}$ will generate two sequences that appear statistically
+that, for a sequence $\{c_i = i\}_{i\ge0}$, the sequence $\{y_i =
+f_k(c_i)\}_{i\ge0}$ appears as random. In addition, for $k_1 \ne k_2$,
+$f_{k_1}$ and $f_{k_2}$ will generate two sequences that appear statistically
 independent. Compared to more conventional \rng{}s which use recursions $y_i =
 f_k(y_{i - 1})$, these counter-based \rng{}s are much easier to setup in a
 parallelized environment. If $c$, the counter, is an unsigned integer with $b$
@@ -200,9 +192,9 @@ bits, and $k$, the key, is an unsigned integer with $d$ bits. Then for each
 $k$, the \rng has a period $2^b$. And there can be at most $2^d$ independent
 streams. Table~\ref{tab:Counter-based RNG} lists all counter-based \rng{}s
 implemented in this library, along with the bits of the counter and the key.
-They all conform to the \cppoo uniform \rng concept and output 32-bits
+They all conform to the \cppoo uniform \rng engine concept and output 32-bits
 integers. For 64-bits integer output, a suffix \verb|_64| may be appended to
-corresponding \rng engine names. For example, \verb|Threefry4x64| and
+the corresponding \rng engine names. For example, \verb|Threefry4x64| and
 \verb|Threefry4x64_64| generate the same 256-bits random integers internally.
 The only difference is that \verb|operator()| of the former returns 32-bits
 integers while the later returns 64-bits integers.
@@ -245,9 +237,9 @@ interface,
   class CounterEngine;
 \end{cppcode}
 where \verb|ResultType| shall be an unsigned integer type and \verb|Generator|
-is the class that actually implement the algorithm. It has at least two member
-types, \verb|ctr_type| and \verb|key_type|, the types of the counter and key.
-In addition, four methods are required,
+is the class that actually implement the algorithm. \verb|Generator| has at
+least two member types, \verb|ctr_type| and \verb|key_type|, the types of the
+counter and key. In addition, four methods are required,
 \begin{cppcode}
   // The size of output in bytes
   static constexpr std::size_t size();
@@ -361,7 +353,7 @@ used in counter mode. The last is the \ars algorithm introduced by
 \verb|ARSKeySeq| and \verb|ARSEngine| is a trait class that defines the
 constants of the Weyl's sequence. See \textcite{Salmon:2011um} for details. The
 defaults are taken from the paper. To use an alternative pair of 64-bits
-integers for the constants, one can define and use a trait class as the
+integers as the constants, one can define and use a trait class as the
 following,
 \begin{cppcode}
   template <std::size_t>
@@ -658,8 +650,8 @@ library.
 If the \rdrand instructions are supported, the library also implements three
 \rng{}s, \verb|RDRAND16|, \verb|RDRAND32| and \verb|RDRAND64|. They output 16-,
 32-, and 64-bits random integers, respectively. The \rdrand instruction may not
-return a random integers at all. The engines will keep trying until it
-succeeds. One can limit the maximum number of trials by define the
+return a random integer at all. The \rng engine will keep trying until it
+succeeds. One can limit the maximum number of trials by defining the
 configuration macro \verb|VSMC_RNG_RDRAND_NTRIAL_MAX|. A value of zero, the
 default, means the number of trials is unlimited. If it is a positive number,
 and if after the specified number of trials no random integer is return by the
