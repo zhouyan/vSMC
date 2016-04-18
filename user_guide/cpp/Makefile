@@ -1,7 +1,7 @@
 .PHONY : all clean libvsmc
 
 CC := clang
-CFLAGS := $(CFLAGS) -std=c99 -O3 -DNDEBUG
+CFLAGS := $(CFLAGS) -std=c11 -O3 -DNDEBUG
 CFLAGS := $(CFLAGS) -I ../../include
 CFLAGS := $(CFLAGS) -L ../../build/clang-Release/lib
 CFLAGS := $(CFLAGS) -Wl,-rpath -Wl,../../build/clang-Release/lib
@@ -12,7 +12,7 @@ CXXFLAGS := $(CXXFLAGS) -I ../../include
 CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_MKL
 CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_TBB
 
-LDFLAGS := -lmkl_rt -ltbb -ltbbmalloc
+LDFLAGS := $(LDFLAGS) -lmkl_rt -ltbb -ltbbmalloc -lm
 
 all : pf_ocl pf_tbb pf_seq pf_tbb_c pf_seq_c program_option progress
 
@@ -33,10 +33,10 @@ pf_seq : pf_seq.cpp
 	$(CXX) $(CXXFLAGS) -o pf_seq pf_seq.cpp $(LDFLAGS)
 
 pf_tbb_c : pf_tbb.c libvsmc
-	$(CC) $(CFLAGS) -o pf_tbb_c pf_tbb.c -lvsmc
+	$(CC) $(CFLAGS) -o pf_tbb_c pf_tbb.c -lvsmc $(LDFLAGS)
 
 pf_seq_c : pf_seq.c libvsmc
-	$(CC) $(CFLAGS) -o pf_seq_c pf_seq.c -lvsmc
+	$(CC) $(CFLAGS) -o pf_seq_c pf_seq.c -lvsmc $(LDFLAGS)
 
 pf_bench : pf_tbb pf_seq pf_tbb_c pf_seq_c
 	./pf_tbb
