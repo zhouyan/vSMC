@@ -76,7 +76,7 @@ class ParetoDistribution
 namespace internal
 {
 
-template <std::size_t K, typename RealType, typename RNGType>
+template <std::size_t, typename RealType, typename RNGType>
 inline void pareto_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {

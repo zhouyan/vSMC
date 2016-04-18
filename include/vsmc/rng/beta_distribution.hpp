@@ -423,7 +423,7 @@ inline std::size_t beta_distribution_impl_x1(RNGType &rng, std::size_t n,
     return n;
 }
 
-template <std::size_t K, typename RealType, typename RNGType>
+template <std::size_t, typename RealType, typename RNGType>
 inline std::size_t beta_distribution_impl_c(RNGType &rng, std::size_t n,
     RealType *r, RealType alpha, RealType beta,
     const BetaDistributionConstant<RealType> &constant)
@@ -433,7 +433,7 @@ inline std::size_t beta_distribution_impl_c(RNGType &rng, std::size_t n,
     const RealType t = constant.t;
     const RealType p = constant.p;
     const RealType ln_4 = 2 * const_ln_2<RealType>();
-    Array<RealType, K * 5> s;
+    VSMC_BUFFER(s, RealType, n * 5);
     RealType *const u1 = s.data();
     RealType *const u2 = s.data() + n;
     RealType *const v = s.data() + n * 2;
@@ -464,14 +464,14 @@ inline std::size_t beta_distribution_impl_c(RNGType &rng, std::size_t n,
     return m;
 }
 
-template <std::size_t K, typename RealType, typename RNGType>
+template <std::size_t, typename RealType, typename RNGType>
 inline std::size_t beta_distribution_impl_j(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType,
     const BetaDistributionConstant<RealType> &constant)
 {
     const RealType a = constant.a;
     const RealType b = constant.b;
-    Array<RealType, K * 3> s;
+    VSMC_BUFFER(s, RealType, n * 3);
     RealType *const x = s.data();
     RealType *const y = s.data() + n;
     RealType *const u = s.data() + n * 2;
