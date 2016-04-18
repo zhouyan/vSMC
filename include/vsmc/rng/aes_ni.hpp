@@ -949,7 +949,7 @@ class ARSKeySeqImpl
         if (!is)
             return is;
 
-        alignas(16) key_type k;
+        alignas(16) key_type k = {{0}};
         is >> k;
         if (static_cast<bool>(is)) {
             seq.key_ =
