@@ -40,6 +40,11 @@
 #include <stdexcept>
 #include <string>
 
+#ifdef VSMC_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wweak-vtables"
+#endif
+
 #if VSMC_NO_RUNTIME_ASSERT
 #define VSMC_RUNTIME_ASSERT(cond, msg)
 #else // VSMC_NO_RUNTIME_ASSERT
@@ -130,5 +135,9 @@ inline void size_check(SizeType n, const char *f)
 } // namespace vsmc::internal
 
 } // namespace vsmc
+
+#ifdef VSMC_CLANG
+#pragma clang diagnostic pop
+#endif
 
 #endif // VSMC_INTERNAL_ASSERT_HPP

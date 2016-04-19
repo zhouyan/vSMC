@@ -34,6 +34,11 @@
 
 #include <vsmc/internal/common.hpp>
 
+#ifdef VSMC_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wweak-vtables"
+#endif
+
 #define VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, func)         \
     VSMC_RUNTIME_ASSERT((ptr != nullptr),                                     \
         "**ProgramOption::" #func                                             \
@@ -625,5 +630,9 @@ class ProgramOptionMap
 }; // class ProgramOptionMap
 
 } // namespace vsmc
+
+#ifdef VSMC_CLANG
+#pragma clang diagnostic pop
+#endif
 
 #endif // VSMC_UTILITY_PROGRAM_OPTION_HPP

@@ -34,10 +34,9 @@
 
 #include <vsmc/internal/common.hpp>
 
-#if VSMC_NO_RUNTIME_ASSERT
-#define VSMC_BACKEND_BASE_DESTRUCTOR_PREFIX
-#else
-#define VSMC_BACKEND_BASE_DESTRUCTOR_PREFIX virtual
+#ifdef VSMC_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wweak-vtables"
 #endif
 
 #define VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL(Name)                            \
@@ -46,8 +45,7 @@
     Name##Base<T, Derived> &operator=(const Name##Base<T, Derived> &) =       \
         default;                                                              \
     Name##Base(Name##Base<T, Derived> &&) = default;                          \
-    Name##Base<T, Derived> &operator=(Name##Base<T, Derived> &&) = default;   \
-    VSMC_BACKEND_BASE_DESTRUCTOR_PREFIX ~Name##Base() {}
+    Name##Base<T, Derived> &operator=(Name##Base<T, Derived> &&) = default;
 
 #define VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(Name)                    \
     Name##Base() = default;                                                   \
@@ -63,8 +61,7 @@
     Name##SMP(const Name##SMP<T, Derived> &) = default;                       \
     Name##SMP<T, Derived> &operator=(Name##SMP<T, Derived> &) = default;      \
     Name##SMP(Name##SMP<T, Derived> &&) = default;                            \
-    Name##SMP<T, Derived> &operator=(Name##SMP<T, Derived> &&) = default;     \
-    ~Name##SMP() {}
+    Name##SMP<T, Derived> &operator=(Name##SMP<T, Derived> &&) = default;
 
 #define VSMC_DEFINE_SMP_BACKEND_FORWARD(Name)                                 \
     template <typename T, typename = Virtual>                                 \
@@ -73,11 +70,6 @@
     class Move##Name;                                                         \
     template <typename T, typename = Virtual>                                 \
     class MonitorEval##Name;
-
-#define VSMC_RUNTIME_ASSERT_SMP_BACKEND_BASE_DERIVED(basename)                \
-    VSMC_RUNTIME_ASSERT((dynamic_cast<Derived *>(this) != nullptr),           \
-        "DERIVED FROM " #basename                                             \
-        " WITH INCORRECT **Derived** TEMPLATE PARAMTER");
 
 namespace vsmc
 {
@@ -494,5 +486,9 @@ class MonitorEvalBase<T, Virtual>
 }; // class MonitorEvalBase<T, Virtual>
 
 } // namespace vsmc
+
+#ifdef VSMC_CLANG
+#pragma clang diagnostic pop
+#endif
 
 #endif // VSMC_SMP_BACKEND_BASE_HPP
