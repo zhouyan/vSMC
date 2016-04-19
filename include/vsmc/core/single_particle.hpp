@@ -180,7 +180,7 @@ SingleParticle<T> &operator++(SingleParticle<T> &sp)
 template <typename T>
 SingleParticle<T> operator++(SingleParticle<T> &sp, int)
 {
-    auto sp_tmp = sp;
+    SingleParticle<T> sp_tmp(sp);
     sp = SingleParticle<T>(sp.id() + 1, sp.particle_ptr());
 
     return sp_tmp;
@@ -197,7 +197,7 @@ SingleParticle<T> &operator--(SingleParticle<T> &sp)
 template <typename T>
 SingleParticle<T> operator--(SingleParticle<T> &sp, int)
 {
-    auto sp_tmp = sp;
+    SingleParticle<T> sp_tmp(sp);
     sp = SingleParticle<T>(sp.id() - 1, sp.particle_ptr());
 
     return sp_tmp;

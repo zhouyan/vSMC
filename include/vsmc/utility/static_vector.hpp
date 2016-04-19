@@ -45,11 +45,8 @@
 
 #if VSMC_USE_TBB_TLS
 #define VSMC_BUFFER(var, T, n)                                                \
-    static ::tbb::combinable<Vector<T,                                        \
-        Allocator<T, (AlignmentTrait<T>::value < 64 ? 64 : AlignmentTrait<    \
-                                                               T>::value)>>>  \
-        var##_tls;                                                            \
-    auto &var = var##_tls.local();                                            \
+    static ::tbb::combinable<Vector<T>> var##_tls;                            \
+    Vector<T> &var = var##_tls.local();                                       \
     var.resize(static_cast<std::size_t>(n));
 #else // VSMC_USE_TBB_TLS
 #define VSMC_BUFFER(var, T, n)                                                \
@@ -61,6 +58,7 @@ namespace vsmc
 {
 
 #if VSMC_USE_TBB_TLS
+
 namespace internal
 {
 
@@ -76,6 +74,7 @@ inline Vector<T> &buffer(std::size_t n)
 }
 
 } // namespace internal
+
 #endif // VSMC_USE_TBB_TLS
 
 /// \brief Vector with statically allocated space
