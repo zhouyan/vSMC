@@ -51,7 +51,7 @@
 
 template <typename RealType>
 inline std::string rng_distribution_name(
-    const std::string &name, const std::array<RealType, 0> &param)
+    const std::string &name, const std::array<RealType, 0> &)
 {
     std::stringstream ss;
     ss << name << '<' << rng_type_name<RealType>() << '>';
@@ -497,9 +497,9 @@ inline RealType rng_distribution_chi2(
             ++c;
             ++j;
         }
-        count[i] = c;
+        count[i] = static_cast<RealType>(c);
     }
-    count.back() = rval.size() - j;
+    count.back() = static_cast<RealType>(rval.size() - j);
 
     const RealType np = n * static_cast<RealType>(1) / k;
     RealType s = 0;

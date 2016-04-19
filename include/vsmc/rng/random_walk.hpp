@@ -376,7 +376,7 @@ inline bool normal_mv_proposal_check_param(
 }
 
 template <typename RealType>
-RealType normal_proposal_q(RealType x, RealType &y, RealType z)
+inline RealType normal_proposal_q(RealType x, RealType &y, RealType z)
 {
     y = x + z;
 
@@ -384,7 +384,8 @@ RealType normal_proposal_q(RealType x, RealType &y, RealType z)
 }
 
 template <typename RealType>
-RealType normal_proposal_qa(RealType x, RealType &y, RealType z, RealType a)
+inline RealType normal_proposal_qa(
+    RealType x, RealType &y, RealType z, RealType a)
 {
     y = a + (x - a) * std::exp(z);
 
@@ -392,7 +393,8 @@ RealType normal_proposal_qa(RealType x, RealType &y, RealType z, RealType a)
 }
 
 template <typename RealType>
-RealType normal_proposal_qb(RealType x, RealType &y, RealType z, RealType b)
+inline RealType normal_proposal_qb(
+    RealType x, RealType &y, RealType z, RealType b)
 {
     y = b - (b - x) * std::exp(z);
 
@@ -400,7 +402,7 @@ RealType normal_proposal_qb(RealType x, RealType &y, RealType z, RealType b)
 }
 
 template <typename RealType>
-RealType normal_proposal_qab(
+inline RealType normal_proposal_qab(
     RealType x, RealType &y, RealType z, RealType a, RealType b)
 {
     RealType r = std::exp(z) * (x - a) / (b - x);

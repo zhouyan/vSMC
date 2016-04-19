@@ -221,7 +221,7 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
         pass = pass && (r1 == r2 || rng != rng);
     }
 
-    double bytes = sizeof(std::uint64_t) * num;
+    double bytes = static_cast<double>(sizeof(std::uint64_t) * num);
     double g1 = bytes / watch1.nanoseconds();
     double g2 = bytes / watch2.nanoseconds();
     double c1 = watch1.cycles() / bytes;

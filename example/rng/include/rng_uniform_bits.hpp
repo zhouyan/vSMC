@@ -70,7 +70,7 @@ inline void rng_uniform_bits(std::size_t N, std::size_t M, int nwid, int swid,
     int rbits = vsmc::RNGTraits<RNGType>::bits;
     int tbits = std::numeric_limits<typename RNGType::result_type>::digits;
     int ubits = std::numeric_limits<UIntType>::digits;
-    double bytes = sizeof(UIntType) * num;
+    double bytes = static_cast<double>(sizeof(UIntType) * num);
     double g1 = bytes / watch1.nanoseconds();
     double g2 = bytes / watch2.nanoseconds();
     double c1 = watch1.cycles() / bytes;

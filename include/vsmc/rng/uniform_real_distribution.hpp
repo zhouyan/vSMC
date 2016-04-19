@@ -42,7 +42,7 @@ namespace internal
 {
 
 template <typename RealType>
-bool uniform_real_distribution_check_param(RealType a, RealType b)
+inline bool uniform_real_distribution_check_param(RealType a, RealType b)
 {
     return a <= b;
 }

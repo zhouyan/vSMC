@@ -79,20 +79,23 @@ namespace vsmc
 namespace internal
 {
 
-#ifdef VSMC_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wfloat-equal"
-#endif
+template <typename T>
+inline bool is_equal(const T &a, const T &b, std::true_type)
+{
+    return !(a < b || a > b);
+}
 
 template <typename T>
-inline bool is_equal(const T &a, const T &b)
+inline bool is_equal(const T &a, const T &b, std::false_type)
 {
     return a == b;
 }
 
-#ifdef VSMC_CLANG
-#pragma clang diagnostic pop
-#endif
+template <typename T>
+inline bool is_equal(const T &a, const T &b)
+{
+    return is_equal(a, b, std::is_floating_point<T>());
+}
 
 template <typename T>
 inline bool is_zero(const T &a)

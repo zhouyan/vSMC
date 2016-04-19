@@ -1503,7 +1503,7 @@ inline int mkl_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
 /// Only engines defined in this library and the standard library are
 /// specialized. This function requires the C runtime of the library.
 template <typename RNGType>
-int mkl_brng()
+inline int mkl_brng()
 {
     static ::VSLBRngProperties properties = {
         sizeof(internal::MKLStreamState<RNGType>),

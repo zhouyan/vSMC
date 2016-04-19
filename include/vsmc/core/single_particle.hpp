@@ -122,7 +122,8 @@ class SingleParticle : public SingleParticleBaseType<T>
 }; // class SingleParticle
 
 template <typename T>
-bool operator==(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
+inline bool operator==(
+    const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
 {
     VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_COMPARE(sp1, sp2);
 
@@ -130,7 +131,8 @@ bool operator==(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
 }
 
 template <typename T>
-bool operator!=(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
+inline bool operator!=(
+    const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
 {
     VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_COMPARE(sp1, sp2);
 
@@ -138,7 +140,8 @@ bool operator!=(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
 }
 
 template <typename T>
-bool operator<(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
+inline bool operator<(
+    const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
 {
     VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_COMPARE(sp1, sp2);
 
@@ -146,7 +149,8 @@ bool operator<(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
 }
 
 template <typename T>
-bool operator>(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
+inline bool operator>(
+    const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
 {
     VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_COMPARE(sp1, sp2);
 
@@ -154,7 +158,8 @@ bool operator>(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
 }
 
 template <typename T>
-bool operator<=(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
+inline bool operator<=(
+    const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
 {
     VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_COMPARE(sp1, sp2);
 
@@ -162,7 +167,8 @@ bool operator<=(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
 }
 
 template <typename T>
-bool operator>=(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
+inline bool operator>=(
+    const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
 {
     VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_COMPARE(sp1, sp2);
 
@@ -170,7 +176,7 @@ bool operator>=(const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
 }
 
 template <typename T>
-SingleParticle<T> &operator++(SingleParticle<T> &sp)
+inline SingleParticle<T> &operator++(SingleParticle<T> &sp)
 {
     sp = SingleParticle<T>(sp.id() + 1, sp.particle_ptr());
 
@@ -178,7 +184,7 @@ SingleParticle<T> &operator++(SingleParticle<T> &sp)
 }
 
 template <typename T>
-SingleParticle<T> operator++(SingleParticle<T> &sp, int)
+inline SingleParticle<T> operator++(SingleParticle<T> &sp, int)
 {
     SingleParticle<T> sp_tmp(sp);
     sp = SingleParticle<T>(sp.id() + 1, sp.particle_ptr());
@@ -187,7 +193,7 @@ SingleParticle<T> operator++(SingleParticle<T> &sp, int)
 }
 
 template <typename T>
-SingleParticle<T> &operator--(SingleParticle<T> &sp)
+inline SingleParticle<T> &operator--(SingleParticle<T> &sp)
 {
     sp = SingleParticle<T>(sp.id() - 1, sp.particle_ptr());
 
@@ -195,7 +201,7 @@ SingleParticle<T> &operator--(SingleParticle<T> &sp)
 }
 
 template <typename T>
-SingleParticle<T> operator--(SingleParticle<T> &sp, int)
+inline SingleParticle<T> operator--(SingleParticle<T> &sp, int)
 {
     SingleParticle<T> sp_tmp(sp);
     sp = SingleParticle<T>(sp.id() - 1, sp.particle_ptr());
@@ -204,7 +210,7 @@ SingleParticle<T> operator--(SingleParticle<T> &sp, int)
 }
 
 template <typename T, typename IntType>
-SingleParticle<T> operator+(const SingleParticle<T> &sp, IntType n)
+inline SingleParticle<T> operator+(const SingleParticle<T> &sp, IntType n)
 {
     return SingleParticle<T>(static_cast<typename Particle<T>::size_type>(
                                  static_cast<std::ptrdiff_t>(sp.id()) +
@@ -213,7 +219,7 @@ SingleParticle<T> operator+(const SingleParticle<T> &sp, IntType n)
 }
 
 template <typename T, typename IntType>
-SingleParticle<T> operator+(IntType n, const SingleParticle<T> &sp)
+inline SingleParticle<T> operator+(IntType n, const SingleParticle<T> &sp)
 {
     return SingleParticle<T>(static_cast<typename Particle<T>::size_type>(
                                  static_cast<std::ptrdiff_t>(sp.id()) +
@@ -222,7 +228,7 @@ SingleParticle<T> operator+(IntType n, const SingleParticle<T> &sp)
 }
 
 template <typename T, typename IntType>
-SingleParticle<T> operator-(const SingleParticle<T> &sp, IntType n)
+inline SingleParticle<T> operator-(const SingleParticle<T> &sp, IntType n)
 {
     return SingleParticle<T>(static_cast<typename Particle<T>::size_type>(
                                  static_cast<std::ptrdiff_t>(sp.id()) -
@@ -231,7 +237,7 @@ SingleParticle<T> operator-(const SingleParticle<T> &sp, IntType n)
 }
 
 template <typename T, typename IntType>
-SingleParticle<T> &operator+=(SingleParticle<T> &sp, IntType n)
+inline SingleParticle<T> &operator+=(SingleParticle<T> &sp, IntType n)
 {
     sp = sp + n;
 
@@ -239,7 +245,7 @@ SingleParticle<T> &operator+=(SingleParticle<T> &sp, IntType n)
 }
 
 template <typename T, typename IntType>
-SingleParticle<T> &operator-=(SingleParticle<T> &sp, IntType n)
+inline SingleParticle<T> &operator-=(SingleParticle<T> &sp, IntType n)
 {
     sp = sp - n;
 
@@ -247,7 +253,7 @@ SingleParticle<T> &operator-=(SingleParticle<T> &sp, IntType n)
 }
 
 template <typename T>
-std::ptrdiff_t operator-(
+inline std::ptrdiff_t operator-(
     const SingleParticle<T> &sp1, const SingleParticle<T> &sp2)
 {
     VSMC_RUNTIME_ASSERT_SINGLE_PARTICLE_DIFFERENCE(sp1, sp2);

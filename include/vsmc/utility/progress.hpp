@@ -253,11 +253,11 @@ class Progress
                 uint_to_char(display_hour, cstr, offset);
                 cstr[offset++] = ':';
             }
-            cstr[offset++] = '0' + static_cast<char>(display_minute / 10);
-            cstr[offset++] = '0' + static_cast<char>(display_minute % 10);
+            cstr[offset++] = static_cast<char>('0' + display_minute / 10);
+            cstr[offset++] = static_cast<char>('0' + display_minute % 10);
             cstr[offset++] = ':';
-            cstr[offset++] = '0' + static_cast<char>(display_second / 10);
-            cstr[offset++] = '0' + static_cast<char>(display_second % 10);
+            cstr[offset++] = static_cast<char>('0' + display_second / 10);
+            cstr[offset++] = static_cast<char>('0' + display_second % 10);
             cstr[offset++] = ']';
             cstr[offset++] = '\0';
         }
@@ -302,7 +302,7 @@ class Progress
         char utmp[32];
         std::size_t unum = 0;
         while (num) {
-            utmp[unum++] = '0' + static_cast<char>(num % 10);
+            utmp[unum++] = static_cast<char>('0' + num % 10);
             num /= 10;
         }
         for (std::size_t i = unum; i != 0; --i)

@@ -164,10 +164,17 @@ inline bool hdf5io_use_int(std::size_t n, IntType *r, std::true_type)
 inline ::hid_t hdf5io_datafile(
     const std::string &filename, bool append, bool read_only)
 {
-    return append ?
-        ::H5Fopen(filename.c_str(), read_only ? H5F_ACC_RDONLY : H5F_ACC_RDWR,
-            H5P_DEFAULT) :
-        ::H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    if (!append)
+        return ::H5Fcreate(
+            filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    unsigned flag = 0;
+    if (read_only)
+        flag = H5F_ACC_RDONLY;
+    else
+        flag = H5F_ACC_RDWR;
+
+    return ::H5Fopen(filename.c_str(), flag, H5P_DEFAULT);
 }
 
 } // namespace vsmc::internal

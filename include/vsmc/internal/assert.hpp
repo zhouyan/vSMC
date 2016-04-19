@@ -91,23 +91,8 @@
 namespace vsmc
 {
 
-class RuntimeAssert : public std::runtime_error
-{
-    public:
-    explicit RuntimeAssert(const char *msg) : std::runtime_error(msg) {}
-
-    explicit RuntimeAssert(const std::string &msg) : std::runtime_error(msg) {}
-}; // class RuntimeAssert
-
-class RuntimeWarning : public std::runtime_error
-{
-    public:
-    explicit RuntimeWarning(const char *msg) : std::runtime_error(msg) {}
-
-    explicit RuntimeWarning(const std::string &msg) : std::runtime_error(msg)
-    {
-    }
-}; // class RuntimeWarning
+using RuntimeAssert = std::runtime_error;
+using RuntimeWarning = std::runtime_error;
 
 namespace internal
 {

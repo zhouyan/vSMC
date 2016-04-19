@@ -84,7 +84,7 @@ inline void u01_trans_stratified_impl(std::size_t n0, std::size_t n,
 
     std::size_t j = 0;
     for (std::size_t i = n0; i != n; ++i, ++j)
-        r[j] = u01[j] + i;
+        r[j] = u01[j] + static_cast<RealType>(i);
     mul(n - n0, delta, r, r);
 }
 
@@ -108,7 +108,7 @@ inline void u01_trans_systematic_impl(
 
     std::size_t j = 0;
     for (std::size_t i = n0; i != n; ++i, ++j)
-        r[j] = i;
+        r[j] = static_cast<RealType>(i);
     fma(n - n0, r, delta, u, r);
 }
 
