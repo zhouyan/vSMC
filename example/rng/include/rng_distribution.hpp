@@ -688,7 +688,7 @@ inline void rng_distribution_summary(std::size_t N, std::size_t M,
         std::cout << std::endl;
         std::cout << std::string(lwid, '-') << std::endl;
 
-        std::cout << std::left << std::setw(nwid) << "Cycles per element";
+        std::cout << std::left << std::setw(nwid) << "cpE";
         for (std::size_t r = 0; r != R; ++r, ++w) {
             std::cout << std::setw(twid) << std::right << std::fixed
                       << w->cycles() / (N * M);

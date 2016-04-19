@@ -228,14 +228,14 @@ class GammaDistribution
 namespace internal
 {
 
-template <std::size_t, typename RealType, typename RNGType>
+template <std::size_t K, typename RealType, typename RNGType>
 inline std::size_t gamma_distribution_impl_t(RNGType &rng, std::size_t n,
     RealType *r, RealType alpha, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
     const RealType d = constant.d;
     const RealType c = constant.c;
-    VSMC_BUFFER(s, RealType, n * 3);
+    Array<RealType, K * 3> s;
     RealType *const u = s.data();
     RealType *const e = s.data() + n;
     RealType *const x = s.data() + n * 2;
@@ -264,14 +264,14 @@ inline std::size_t gamma_distribution_impl_t(RNGType &rng, std::size_t n,
     return m;
 }
 
-template <std::size_t, typename RealType, typename RNGType>
+template <std::size_t K, typename RealType, typename RNGType>
 inline std::size_t gamma_distribution_impl_w(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
     const RealType d = constant.d;
     const RealType c = constant.c;
-    VSMC_BUFFER(s, RealType, n * 3);
+    Array<RealType, K * 3> s;
     RealType *const u = s.data();
     RealType *const e = s.data() + n;
     RealType *const x = s.data() + n * 2;
@@ -294,14 +294,14 @@ inline std::size_t gamma_distribution_impl_w(RNGType &rng, std::size_t n,
     return m;
 }
 
-template <std::size_t, typename RealType, typename RNGType>
+template <std::size_t K, typename RealType, typename RNGType>
 inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
     const RealType d = constant.d;
     const RealType c = constant.c;
-    VSMC_BUFFER(s, RealType, n * 5);
+    Array<RealType, K * 5> s;
     RealType *const u = s.data();
     RealType *const e = s.data() + n;
     RealType *const v = s.data() + n * 2;

@@ -154,10 +154,6 @@
 /// \ingroup Utility
 /// \brief Display progress while algorithms proceed
 
-/// \defgroup StaticVector Static vector
-/// \ingroup Utility
-/// \brief Static sized vector
-
 /// \defgroup StopWatch Stop watch
 /// \ingroup Utility
 /// \brief Time measurement

@@ -35,6 +35,19 @@
 #include <vsmc/internal/basic.hpp>
 #include <vsmc/math/math.hpp>
 #include <vsmc/utility/aligned_memory.hpp>
-#include <vsmc/utility/static_vector.hpp>
+
+namespace vsmc
+{
+
+namespace internal
+{
+
+template <typename T, std::size_t N>
+using StaticVector =
+    typename std::conditional<N == Dynamic, Vector<T>, std::array<T, N>>::type;
+
+} // namespace vsmc::internal
+
+} // namespace vsmc
 
 #endif // VSMC_INTERNAL_COMMON_HPP

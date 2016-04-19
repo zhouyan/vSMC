@@ -91,7 +91,7 @@ only 14 cycles. The last, when the \rng{} engine is an \mkl{} \rng wrapper, the
 
 Some of the following sections provide performance data. All performance data
 in this chapter is measured in single core cycles per bytes (cpB) for \rng{}s,
-or cycles per element for distributions (\verb|double| precision). The
+or cycles per element (cpE) for distributions (\verb|double| precision). The
 processor used to measure the performance is an Intel Core i7-4960\textsc{hg}
 \cpu. Three compilers are tested. The \llvm clang (Apple version~7.3.0), the
 \gnu{} \gcc (version~5.3.0), and the Intel \cpp compiler (2016 update 2). The
@@ -149,9 +149,9 @@ For all the three above, the \rng is \verb|ARSx8| (section~\ref{sub:AES-NI
   rng_rand(rng_mkl, rnorm_vsmc, n, r.data());
 \end{cppcode}
 In this case, not only the \rng itself is faster, the distribution might also
-use \mkl routines. The four performance data are labeled ``\std'', ``\vsmc'',
-``\verb|rng_rand|'' and ``\mkl'', respectively. These measurements are in the
-unit cycles per \verb|double| precision element.
+use \mkl routines. The performance is measured in cpE.  The four performance
+data are labeled ``\std'', ``\vsmc'', ``\verb|rng_rand|'' and ``\mkl'',
+respectively.
 
 Note that these performance data, especially those for \rng{}s, are for
 reference only. The actual performance can differ considerably given different

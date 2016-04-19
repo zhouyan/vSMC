@@ -41,7 +41,7 @@ namespace vsmc
 
 /// \brief Resampling algorithm
 /// \ingroup Resample
-template <template <typename, typename> class U01SeqType, bool Residual>
+template <typename U01SeqType, bool Residual>
 class ResampleAlgorithm
 {
     public:
@@ -53,48 +53,43 @@ class ResampleAlgorithm
     /// \param weight N-vector of normalized weights
     /// \param replication N-vector of replication numbers
     template <typename RNGType, typename InputIter, typename OutputIter>
-    static OutputIter eval(std::size_t N, std::size_t M, RNGType &rng,
-        InputIter weight, OutputIter replication)
+    OutputIter operator()(std::size_t N, std::size_t M, RNGType &rng,
+        InputIter weight, OutputIter replication) const
     {
         return eval(N, M, rng, weight, replication,
             std::integral_constant<bool, Residual>());
     }
 
-    /// \brief Same as `eval`
-    template <typename RNGType, typename InputIter, typename OutputIter>
-    OutputIter operator()(std::size_t N, std::size_t M, RNGType &rng,
-        InputIter weight, OutputIter replication) const
-    {
-        return eval(N, M, rng, weight, replication);
-    }
-
     private:
+    U01SeqType u01seq_;
+
     template <typename RNGType, typename InputIter, typename OutputIter>
-    static OutputIter eval(std::size_t N, std::size_t M, RNGType &rng,
-        InputIter weight, OutputIter replication, std::false_type)
+    OutputIter eval(std::size_t N, std::size_t M, RNGType &rng,
+        InputIter weight, OutputIter replication, std::false_type) const
     {
         using real_type = typename std::iterator_traits<InputIter>::value_type;
 
-        VSMC_BUFFER(u01, real_type, M);
-        U01SeqType<RNGType, real_type>::generate(rng, M, u01.data());
+        Vector<real_type> u01(M);
+        u01seq_(rng, M, u01.data());
 
         return resample_trans_u01_rep(N, M, weight, u01.data(), replication);
     }
 
     template <typename RNGType, typename InputIter, typename OutputIter>
-    static OutputIter eval(std::size_t N, std::size_t M, RNGType &rng,
-        InputIter weight, OutputIter replication, std::true_type)
+    OutputIter eval(std::size_t N, std::size_t M, RNGType &rng,
+        InputIter weight, OutputIter replication, std::true_type) const
     {
         using real_type = typename std::iterator_traits<InputIter>::value_type;
         using rep_type = typename std::iterator_traits<OutputIter>::value_type;
 
-        VSMC_BUFFER(resid, real_type, N);
-        VSMC_BUFFER(integ, rep_type, N);
-        std::size_t R = resample_trans_residual(
-            N, M, weight, resid.begin(), integ.begin());
-        VSMC_BUFFER(u01, real_type, R);
-        U01SeqType<RNGType, real_type>::generate(rng, R, u01.data());
-        resample_trans_u01_rep(N, R, resid.begin(), u01.data(), replication);
+        Vector<real_type> resid(N);
+        Vector<rep_type> integ(N);
+        std::size_t R =
+            resample_trans_residual(N, M, weight, resid.data(), integ.data());
+
+        Vector<real_type> u01(R);
+        u01seq_(rng, R, u01.data());
+        resample_trans_u01_rep(N, R, resid.data(), u01.data(), replication);
         for (std::size_t i = 0; i != N; ++i, ++replication)
             *replication += integ[i];
 

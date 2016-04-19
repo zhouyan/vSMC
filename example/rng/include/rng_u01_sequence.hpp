@@ -34,73 +34,55 @@
 
 #include "rng_common.hpp"
 
-template <typename RealType>
-inline std::string rng_u01_sequence_err(RealType x)
-{
-    std::stringstream ss;
-    ss << x / std::numeric_limits<RealType>::epsilon() << " eps";
-
-    return ss.str();
-}
-
-template <template <typename, typename> class U01SeqType, typename RealType>
-inline void rng_u01_sequence(std::size_t N, std::size_t K, std::size_t M,
+template <typename U01SeqType, typename RealType>
+inline void rng_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
     int nwid, int twid, const std::string &name)
 {
     vsmc::RNG rng;
-    vsmc::StopWatch watch_1;
-    vsmc::StopWatch watch_t;
-    vsmc::StopWatch watch_g;
-    RealType abs_err_t = 0;
-    RealType abs_err_g = 0;
+    std::size_t num = 0;
+    RealType error = 0;
+    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+    U01SeqType u01seq;
 
-    std::uniform_int_distribution<unsigned> runif(0, 100);
+    vsmc::RNG rng1;
+    vsmc::RNG rng2;
+
+    vsmc::StopWatch watch1;
+    vsmc::StopWatch watch2;
+
+    vsmc::Vector<RealType> r1;
+    vsmc::Vector<RealType> r2;
+    r1.reserve(N);
+    r2.reserve(N);
+
     for (std::size_t i = 0; i != M; ++i) {
-        unsigned s = runif(rng);
+        std::size_t K = rsize(rng);
+        num += K;
+        r1.resize(K);
+        r2.resize(K);
 
-        rng.seed(s);
-        vsmc::Vector<RealType> r1(N);
-        watch_1.start();
-        U01SeqType<vsmc::RNG, RealType> u01seq(N, rng);
-        for (std::size_t j = 0; j != N; ++j)
-            r1[j] = u01seq[j];
-        watch_1.stop();
+        watch1.start();
+        vsmc::u01_distribution(rng1, std::min(L, K), r1.data());
+        u01seq(N, r1.data(), r1.data());
+        watch1.stop();
 
-        rng.seed(s);
-        watch_t.start();
-        vsmc::Vector<RealType> r2(N);
-        vsmc::u01_distribution(rng, K, r2.data());
-        u01seq.transform(N, r2.data(), r2.data());
-        watch_t.stop();
-        for (std::size_t j = 0; j != N; ++j)
-            abs_err_t = std::max(abs_err_t, std::abs(r1[j] - r2[j]));
+        watch2.start();
+        u01seq(rng2, K, r2.data());
+        watch2.stop();
 
-        rng.seed(s);
-        watch_g.start();
-        vsmc::Vector<RealType> r3(N);
-        u01seq.generate(rng, N, r3.data());
-        watch_g.stop();
         for (std::size_t j = 0; j != N; ++j)
-            abs_err_g = std::max(abs_err_g, std::abs(r1[j] - r3[j]));
+            error = std::max(error, std::abs(r1[j] - r2[j]));
     }
+    std::stringstream ss;
+    ss << error / std::numeric_limits<RealType>::epsilon() << " eps";
 
-    double n_1 = watch_1.nanoseconds() / (N * M);
-    double n_t = watch_t.nanoseconds() / (N * M);
-    double n_g = watch_g.nanoseconds() / (N * M);
-    std::string abs_err_t_str = rng_u01_sequence_err(abs_err_t);
-    std::string abs_err_g_str = rng_u01_sequence_err(abs_err_g);
-    if (sizeof(RealType) == sizeof(float))
-        std::cout << std::setw(twid) << std::left << "float";
-    if (sizeof(RealType) == sizeof(double))
-        std::cout << std::setw(twid) << std::left << "double";
-    if (sizeof(RealType) == sizeof(long double))
-        std::cout << std::setw(twid) << std::left << "long double";
+    double c1 = watch1.cycles() / num;
+    double c2 = watch2.cycles() / num;
+    std::cout << std::setw(twid) << std::left << rng_type_name<RealType>();
     std::cout << std::setw(nwid) << std::left << name;
-    std::cout << std::setw(twid) << std::right << std::fixed << n_1;
-    std::cout << std::setw(twid) << std::right << std::fixed << n_t;
-    std::cout << std::setw(twid) << std::right << std::fixed << n_g;
-    std::cout << std::setw(twid) << std::right << abs_err_t_str;
-    std::cout << std::setw(twid) << std::right << abs_err_g_str;
+    std::cout << std::setw(twid) << std::right << std::fixed << c1;
+    std::cout << std::setw(twid) << std::right << std::fixed << c2;
+    std::cout << std::setw(twid) << std::right << ss.str();
     std::cout << std::endl;
 }
 
@@ -108,27 +90,25 @@ template <typename RealType>
 inline void rng_u01_sequence(std::size_t N, std::size_t M, int nwid, int twid)
 {
     rng_u01_sequence<vsmc::U01SequenceSorted, RealType>(
-        N, N, M, nwid, twid, "Sorted");
+        N, M, N, nwid, twid, "Sorted");
     rng_u01_sequence<vsmc::U01SequenceStratified, RealType>(
-        N, N, M, nwid, twid, "Stratified");
+        N, M, N, nwid, twid, "Stratified");
     rng_u01_sequence<vsmc::U01SequenceSystematic, RealType>(
-        N, 1, M, nwid, twid, "Systematic");
+        N, M, 1, nwid, twid, "Systematic");
 }
 
 inline void rng_u01_sequence(std::size_t N, std::size_t M)
 {
     const int nwid = 30;
     const int twid = 15;
-    const std::size_t lwid = nwid + twid * 6;
+    const std::size_t lwid = nwid + twid * 4;
 
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::setw(twid) << std::left << "Precision";
     std::cout << std::setw(nwid) << std::left << "Algorithm";
-    std::cout << std::setw(twid) << std::right << "ns (operator[])";
-    std::cout << std::setw(twid) << std::right << "ns (t)";
-    std::cout << std::setw(twid) << std::right << "ns (g)";
-    std::cout << std::setw(twid) << std::right << "abs.err (t)";
-    std::cout << std::setw(twid) << std::right << "abs.err (g)";
+    std::cout << std::setw(twid) << std::right << "cpE (Transform)";
+    std::cout << std::setw(twid) << std::right << "cpE (Generate)";
+    std::cout << std::setw(twid) << std::right << "Error";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
     rng_u01_sequence<float>(N, M, nwid, twid);

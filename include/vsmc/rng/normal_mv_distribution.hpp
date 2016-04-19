@@ -157,8 +157,8 @@ class NormalMVDistribution
             if (!is)
                 return is;
 
-            StaticVector<result_type, Dim> mean(dim);
-            StaticVector<result_type, Dim *(Dim + 1) / 2> chol(
+            internal::StaticVector<result_type, Dim> mean(dim);
+            internal::StaticVector<result_type, Dim *(Dim + 1) / 2> chol(
                 dim * (dim + 1) / 2);
             bool null_mean;
             bool null_chol;
@@ -170,8 +170,8 @@ class NormalMVDistribution
 
             if (static_cast<bool>(is)) {
                 param.rnorm_ = std::move(rnorm);
-                param.mean_ = std::move(mean);
-                param.chol_ = std::move(chol);
+                std::move(mean.begin(), mean.end(), param.mean_.begin());
+                std::move(chol.begin(), chol.end(), param.chol_.begin());
                 param.null_mean_ = null_mean;
                 param.null_chol_ = null_chol;
             } else {
@@ -183,8 +183,8 @@ class NormalMVDistribution
 
         private:
         NormalDistribution<RealType> rnorm_;
-        StaticVector<result_type, Dim> mean_;
-        StaticVector<result_type, Dim *(Dim + 1) / 2> chol_;
+        internal::StaticVector<result_type, Dim> mean_;
+        internal::StaticVector<result_type, Dim *(Dim + 1) / 2> chol_;
         bool null_mean_;
         bool null_chol_;
 
