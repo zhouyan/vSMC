@@ -49,18 +49,34 @@
         rng_distribution_##name(N, M);                                        \
     }
 
-template <typename RealType, std::size_t K>
+template <typename RealType>
 inline std::string rng_distribution_name(
-    const std::string &name, const std::array<RealType, K> &param)
+    const std::string &name, const std::array<RealType, 0> &param)
 {
     std::stringstream ss;
     ss << name << '<' << rng_type_name<RealType>() << '>';
-    if (K > 0)
-        ss << "(" << param[0];
-    for (std::size_t k = 1; k < K; ++k)
-        ss << "," << param[k];
-    if (K > 0)
-        ss << ")";
+
+    return ss.str();
+}
+
+template <typename RealType>
+inline std::string rng_distribution_name(
+    const std::string &name, const std::array<RealType, 1> &param)
+{
+    std::stringstream ss;
+    ss << name << '<' << rng_type_name<RealType>() << '>';
+    ss << "(" << param[0] << ")";
+
+    return ss.str();
+}
+
+template <typename RealType>
+inline std::string rng_distribution_name(
+    const std::string &name, const std::array<RealType, 2> &param)
+{
+    std::stringstream ss;
+    ss << name << '<' << rng_type_name<RealType>() << '>';
+    ss << "(" << param[0] << "," << param[1] << ")";
 
     return ss.str();
 }

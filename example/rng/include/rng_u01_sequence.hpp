@@ -63,7 +63,7 @@ inline void rng_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
 
         watch1.start();
         vsmc::u01_distribution(rng1, std::min(L, K), r1.data());
-        u01seq(N, r1.data(), r1.data());
+        u01seq(K, r1.data(), r1.data());
         watch1.stop();
 
         watch2.start();

@@ -158,17 +158,88 @@ class BufferSize : public std::integral_constant<std::size_t, 8192 / sizeof(T)>
 {
 }; // class BufferSize;
 
+template <std::size_t, typename CharT, typename Traits, typename T,
+    std::size_t N>
+inline void ostream_ary_space(std::basic_ostream<CharT, Traits> &,
+    const std::array<T, N> &, std::false_type)
+{
+}
+
+template <std::size_t, typename CharT, typename Traits, typename T,
+    std::size_t N>
+inline void ostream_ary_space(std::basic_ostream<CharT, Traits> &os,
+    const std::array<T, N> &, std::true_type)
+{
+    os << ' ';
+}
+
+template <std::size_t, typename CharT, typename Traits, typename T,
+    std::size_t N>
+inline void ostream_ary(std::basic_ostream<CharT, Traits> &,
+    const std::array<T, N> &, std::false_type)
+{
+}
+
+template <std::size_t K, typename CharT, typename Traits, typename T,
+    std::size_t N>
+inline void ostream_ary(std::basic_ostream<CharT, Traits> &os,
+    const std::array<T, N> &ary, std::true_type)
+{
+    os << std::get<K>(ary);
+    ostream_ary_space<K>(os, ary, std::integral_constant<bool, K + 1 != N>());
+    ostream_ary<K + 1>(os, ary, std::integral_constant<bool, K + 1 < N>());
+}
+
+template <std::size_t, typename CharT, typename Traits, typename T,
+    std::size_t N>
+inline void istream_ary(
+    std::basic_istream<CharT, Traits> &, std::array<T, N> &, std::false_type)
+{
+}
+
+template <std::size_t K, typename CharT, typename Traits, typename T,
+    std::size_t N>
+inline void istream_ary(std::basic_istream<CharT, Traits> &is,
+    std::array<T, N> &ary, std::true_type)
+{
+    is >> std::ws >> std::get<K>(ary);
+    istream_ary<K + 1>(is, ary, std::integral_constant<bool, K + 1 < N>());
+}
+
+template <typename CharT, typename Traits, typename T, typename Alloc>
+inline void ostream_vec(
+    std::basic_ostream<CharT, Traits> &os, const std::vector<T, Alloc> &vec)
+{
+    os << vec.size();
+    if (!os)
+        return;
+
+    for (const auto &v : vec)
+        os << ' ' << v;
+}
+
+template <typename CharT, typename Traits, typename T, typename Alloc>
+inline void istream_vec(
+    std::basic_istream<CharT, Traits> &is, std::vector<T, Alloc> &vec)
+{
+    std::size_t n = 0;
+    is >> n;
+    if (!is)
+        return;
+
+    vec.resize(n);
+    for (std::size_t i = 0; i != n; ++i)
+        is >> std::ws >> vec[i];
+}
+
 template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
 {
-    if (!os || N == 0)
+    if (!os)
         return os;
 
-    for (std::size_t i = 0; i < N - 1; ++i)
-        os << ary[i] << ' ';
-    if (N > 0)
-        os << ary[N - 1];
+    ostream_ary<0>(os, ary, std::integral_constant<bool, 0 < N>());
 
     return os;
 }
@@ -181,9 +252,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
         return is;
 
     std::array<T, N> tmp;
-    for (std::size_t i = 0; i != N; ++i)
-        is >> std::ws >> tmp[i];
-
+    istream_ary<0>(is, tmp, std::integral_constant<bool, 0 < N>());
     if (static_cast<bool>(is))
         ary = std::move(tmp);
 
@@ -197,12 +266,7 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
     if (!os)
         return os;
 
-    os << vec.size();
-    if (!os)
-        return os;
-
-    for (const auto &v : vec)
-        os << ' ' << v;
+    ostream_vec(os, vec);
 
     return os;
 }
@@ -214,14 +278,8 @@ inline std::basic_istream<CharT, Traits> &operator>>(
     if (!is)
         return is;
 
-    std::size_t n = 0;
-    is >> n;
-    if (!is)
-        return is;
-
-    std::vector<T, Alloc> tmp(n);
-    for (std::size_t i = 0; i != n; ++i)
-        is >> std::ws >> tmp[i];
+    std::vector<T, Alloc> tmp;
+    istream_vec(is, tmp);
     if (static_cast<bool>(is))
         vec = std::move(tmp);
 
@@ -234,13 +292,10 @@ template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
 {
-    if (!os || N == 0)
+    if (!os)
         return os;
 
-    for (std::size_t i = 0; i < N - 1; ++i)
-        os << ary[i] << ' ';
-    if (N > 0)
-        os << ary[N - 1];
+    internal::ostream_ary<0>(os, ary, std::integral_constant<bool, 0 < N>());
 
     return os;
 }
@@ -253,9 +308,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
         return is;
 
     std::array<T, N> tmp;
-    for (std::size_t i = 0; i != N; ++i)
-        is >> std::ws >> tmp[i];
-
+    internal::istream_ary<0>(is, tmp, std::integral_constant<bool, 0 < N>());
     if (static_cast<bool>(is))
         ary = std::move(tmp);
 
@@ -269,12 +322,7 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
     if (!os)
         return os;
 
-    os << vec.size();
-    if (!os)
-        return os;
-
-    for (const auto &v : vec)
-        os << ' ' << v;
+    internal::ostream_vec(os, vec);
 
     return os;
 }
@@ -286,14 +334,8 @@ inline std::basic_istream<CharT, Traits> &operator>>(
     if (!is)
         return is;
 
-    std::size_t n = 0;
-    is >> n;
-    if (!is)
-        return is;
-
-    std::vector<T, Alloc> tmp(n);
-    for (std::size_t i = 0; i != n; ++i)
-        is >> std::ws >> tmp[i];
+    std::vector<T, Alloc> tmp;
+    internal::istream_vec(is, tmp);
     if (static_cast<bool>(is))
         vec = std::move(tmp);
 
