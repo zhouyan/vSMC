@@ -148,6 +148,10 @@ class PhiloxHiLo<T, 64>
     static void eval(T a, T b, T &hi, T &lo)
     {
 #if VSMC_HAS_INT128
+#ifdef VSMC_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#endif // VSMC_GCC
         union {
             unsigned VSMC_INT128 prod;
             std::array<T, 2> result;
@@ -155,6 +159,9 @@ class PhiloxHiLo<T, 64>
 
         buf.prod = static_cast<unsigned VSMC_INT128>(a) *
             static_cast<unsigned VSMC_INT128>(b);
+#ifdef VSMC_GCC
+#pragma GCC diagnostic pop
+#endif // VSMC_GCC
 #if VSMC_HAS_X86 // littel endia
         hi = std::get<1>(buf.result);
         lo = std::get<0>(buf.result);
