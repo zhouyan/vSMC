@@ -49,10 +49,7 @@ int *vsmc_hdf5load_int(const char *filename, const char *dataname, int *first)
     return ::vsmc::hdf5load(filename, dataname, first);
 }
 
-void vsmc_hdf5store_file(const char *filename)
-{
-    ::vsmc::hdf5store(filename);
-}
+void vsmc_hdf5store_file(const char *filename) { ::vsmc::hdf5store(filename); }
 
 void vsmc_hdf5store_group(
     const char *filename, const char *dataname, int append)

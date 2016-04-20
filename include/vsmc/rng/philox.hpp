@@ -148,6 +148,7 @@ class PhiloxHiLo<T, 64>
     static void eval(T a, T b, T &hi, T &lo)
     {
 #if VSMC_HAS_INT128
+
 #ifdef VSMC_GCC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -162,6 +163,7 @@ class PhiloxHiLo<T, 64>
 #ifdef VSMC_GCC
 #pragma GCC diagnostic pop
 #endif // VSMC_GCC
+
 #if VSMC_HAS_X86 // littel endia
         hi = std::get<1>(buf.result);
         lo = std::get<0>(buf.result);
@@ -169,14 +171,18 @@ class PhiloxHiLo<T, 64>
         hi = static_cast<T>(buf.prod >> 64);
         lo = static_cast<T>(buf.prod);
 #endif // VSMC_HAS_X86
+
 #elif defined(VSMC_MSVC)
+
         unsigned __int64 Multiplier =
             static_cast<unsigned __int64>(multiplier::value);
         unsigned __int64 Multiplicand = static_cast<unsigned __int64>(b);
         unsigned __int64 hi_tmp = 0;
         lo = static_cast<T>(_umul128(Multiplier, Multiplicand, &hi_tmp));
         hi = static_cast<T>(hi_tmp);
-#else  // VSMC_HAS_INT128
+
+#else // VSMC_HAS_INT128
+
         const T a = multiplier::value;
         const T lomask = (static_cast<T>(1) << 32) - 1;
         const T ahi = a >> 32;
@@ -194,6 +200,7 @@ class PhiloxHiLo<T, 64>
         std::array<T, 2> hilo = {{lo, hi}};
 
         return hilo;
+
 #endif // VSMC_HAS_INT128
     }
 }; // class PhiloxHiLo

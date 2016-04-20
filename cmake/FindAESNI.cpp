@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <wmmintrin.h>
 #include <iostream>
+#include <wmmintrin.h>
 
 int main()
 {

@@ -72,4 +72,3 @@ VSMC_DEFINE_C_API_RESAMPLE(ResidualStratified, residual_stratified)
 VSMC_DEFINE_C_API_RESAMPLE(ResidualSystematic, residual_systematic)
 
 } // extern "C"
-
