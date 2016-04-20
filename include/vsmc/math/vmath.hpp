@@ -641,7 +641,7 @@ inline void pack_m(
     std::size_t n, InputIterSrc src, InputIterMask mask, OutputIter dst)
 {
     for (std::size_t i = 0; i != n; ++i, ++src, ++mask) {
-        if (static_cast<bool>(*mask)) {
+        if (*mask) {
             *dst++ = static_cast<
                 typename std::iterator_traits<OutputIter>::value_type>(*src);
         }
@@ -685,7 +685,7 @@ inline void unpack_m(
     std::size_t n, InputIterSrc src, InputIterMask mask, OutputIter dst)
 {
     for (std::size_t i = 0; i != n; ++i, ++mask, ++dst) {
-        if (static_cast<bool>(*mask)) {
+        if (*mask) {
             *dst = static_cast<
                 typename std::iterator_traits<OutputIter>::value_type>(*src++);
         }

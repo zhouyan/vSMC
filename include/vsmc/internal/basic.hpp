@@ -256,7 +256,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
 
     std::array<T, N> tmp;
     istream_ary<0>(is, tmp, std::integral_constant<bool, 0 < N>());
-    if (static_cast<bool>(is))
+    if (is)
         ary = std::move(tmp);
 
     return is;
@@ -283,7 +283,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
 
     std::vector<T, Alloc> tmp;
     istream_vec(is, tmp);
-    if (static_cast<bool>(is))
+    if (is)
         vec = std::move(tmp);
 
     return is;
@@ -312,7 +312,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
 
     std::array<T, N> tmp;
     internal::istream_ary<0>(is, tmp, std::integral_constant<bool, 0 < N>());
-    if (static_cast<bool>(is))
+    if (is)
         ary = std::move(tmp);
 
     return is;
@@ -339,7 +339,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
 
     std::vector<T, Alloc> tmp;
     internal::istream_vec(is, tmp);
-    if (static_cast<bool>(is))
+    if (is)
         vec = std::move(tmp);
 
     return is;

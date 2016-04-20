@@ -120,7 +120,7 @@ class DiscreteDistribution
             Vector<double> probability;
             is >> std::ws >> probability;
 
-            if (static_cast<bool>(is)) {
+            if (is) {
                 double sum = 0;
                 if (is_positive(probability, sum)) {
                     mul(probability.size(), 1 / sum, probability.data(),
@@ -296,7 +296,7 @@ class DiscreteDistribution
         std::basic_istream<CharT, Traits> &is, distribution_type &dist)
     {
         is >> std::ws >> dist.param_;
-        if (static_cast<bool>(is))
+        if (is)
             dist.reset();
 
         return is;

@@ -43,8 +43,7 @@
         "**Monitor::" #func "** INVALID ITERATION NUMBER ARGUMENT")
 
 #define VSMC_RUNTIME_ASSERT_CORE_MONITOR_EVAL                                 \
-    VSMC_RUNTIME_ASSERT(static_cast<bool>(eval_),                             \
-        "**Monitor::eval** INVALID EVALUATION OBJECT")
+    VSMC_RUNTIME_ASSERT(eval_, "**Monitor::eval** INVALID EVALUATION OBJECT")
 
 namespace vsmc
 {
@@ -99,7 +98,7 @@ class Monitor
     }
 
     /// \brief Whether the evaluation object is valid
-    bool empty() const { return !static_cast<bool>(eval_); }
+    bool empty() const { return !eval_; }
 
     /// \brief Read and write access to the names of variables
     ///

@@ -150,7 +150,7 @@ class Particle
         Vector<size_type> mask_index(static_cast<std::size_t>(size_));
         std::size_t M = 0;
         for (size_type i = 0; i != size_; ++i, ++mask)
-            if (static_cast<bool>(*mask))
+            if (*mask)
                 mask_index[M++] = i;
         resize_copy_index(
             static_cast<std::size_t>(N), M, mask_index.data(), idx.data());

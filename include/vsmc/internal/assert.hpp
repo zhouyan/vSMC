@@ -51,14 +51,14 @@
 #if VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 #define VSMC_RUNTIME_ASSERT(cond, msg)                                        \
     {                                                                         \
-        if (!(cond)) {                                                        \
+        if (!(cond)) {                                       \
             throw vsmc::RuntimeAssert(msg);                                   \
         };                                                                    \
     }
 #else // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
 #define VSMC_RUNTIME_ASSERT(cond, msg)                                        \
     {                                                                         \
-        if (!(cond)) {                                                        \
+        if (!(cond)) {                                       \
             std::fprintf(stderr, "vSMC runtime assertion failed:%s\n", msg);  \
             std::fflush(stderr);                                              \
         };                                                                    \

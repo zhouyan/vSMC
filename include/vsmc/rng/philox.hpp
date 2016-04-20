@@ -488,7 +488,7 @@ class PhiloxGenerator
         PhiloxGenerator<T, K, Rounds> gen_tmp;
         is >> std::ws >> gen_tmp.key_;
 
-        if (static_cast<bool>(is))
+        if (is)
             gen = std::move(gen_tmp);
 
         return is;

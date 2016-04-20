@@ -168,7 +168,7 @@ class NormalMVDistribution
             is >> std::ws >> null_mean;
             is >> std::ws >> null_chol;
 
-            if (static_cast<bool>(is)) {
+            if (is) {
                 param.rnorm_ = std::move(rnorm);
                 std::move(mean.begin(), mean.end(), param.mean_.begin());
                 std::move(chol.begin(), chol.end(), param.chol_.begin());
@@ -328,7 +328,7 @@ class NormalMVDistribution
 
         param_type param;
         is >> std::ws >> param;
-        if (static_cast<bool>(is))
+        if (is)
             dist.param_ = std::move(param);
 
         return is;

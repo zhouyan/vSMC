@@ -138,7 +138,7 @@
             result_type p1 = 0;                                               \
             is >> std::ws >> p1;                                              \
                                                                               \
-            if (static_cast<bool>(is)) {                                      \
+            if (is) {                                                         \
                 if (internal::name##_distribution_check_param(p1))            \
                     param.p1##_ = p1;                                         \
                 else                                                          \
@@ -217,7 +217,7 @@
             is >> std::ws >> p1;                                              \
             is >> std::ws >> p2;                                              \
                                                                               \
-            if (static_cast<bool>(is)) {                                      \
+            if (is) {                                                         \
                 if (internal::name##_distribution_check_param(p1, p2)) {      \
                     param.p1##_ = p1;                                         \
                     param.p2##_ = p2;                                         \
@@ -352,7 +352,7 @@
         std::basic_istream<CharT, Traits> &is, distribution_type &dist)       \
     {                                                                         \
         is >> std::ws >> dist.param_;                                         \
-        if (static_cast<bool>(is))                                            \
+        if (is)                                                               \
             dist.reset();                                                     \
                                                                               \
         return is;                                                            \

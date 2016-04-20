@@ -687,7 +687,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
     is >> std::ws >> brng;
     is >> std::ws >> s;
 
-    if (static_cast<bool>(is)) {
+    if (is) {
         MKLStream tmp;
         tmp.load_m(reinterpret_cast<const char *>(s.data()));
         stream = std::move(tmp);
@@ -1035,7 +1035,7 @@ class MKLEngine
         is >> std::ws >> buffer;
         is >> std::ws >> index;
 
-        if (static_cast<bool>(is)) {
+        if (is) {
             eng.stream_ = std::move(stream);
             eng.buffer_ = std::move(buffer);
             eng.index_ = index;

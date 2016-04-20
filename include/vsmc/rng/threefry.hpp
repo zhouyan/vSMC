@@ -547,7 +547,7 @@ class ThreefryGenerator
         ThreefryGenerator<T, K, Rounds> gen_tmp;
         is >> std::ws >> gen_tmp.par_;
 
-        if (static_cast<bool>(is))
+        if (is)
             gen = std::move(gen_tmp);
 
         return is;

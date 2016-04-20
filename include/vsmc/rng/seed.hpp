@@ -174,7 +174,7 @@ class SeedGenerator
         is >> std::ws >> divisor;
         is >> std::ws >> remainder;
 
-        if (static_cast<bool>(is)) {
+        if (is) {
             sg.seed_ = seed;
             sg.max_ = max;
             sg.divisor_ = divisor;

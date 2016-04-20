@@ -420,7 +420,7 @@ inline void hdf5store(
 {
     internal::HDF5File datafile(
         internal::hdf5io_datafile(filename, append, false));
-    if (static_cast<bool>(datafile)) {
+    if (datafile) {
         internal::HDF5Group datagroup(::H5Gcreate2(datafile.id(),
             dataname.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
     }

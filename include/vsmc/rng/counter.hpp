@@ -377,7 +377,7 @@ class CounterEngine
         is >> std::ws >> eng_tmp.buffer_;
         is >> std::ws >> eng_tmp.index_;
 
-        if (static_cast<bool>(is))
+        if (is)
             eng = std::move(eng_tmp);
 
         return is;

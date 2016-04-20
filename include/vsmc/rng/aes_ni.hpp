@@ -183,7 +183,7 @@ class AESNIGenerator
         AESNIGenerator<KeySeqType, Rounds, Blocks> gen_tmp;
         is >> std::ws >> gen_tmp.key_seq_;
 
-        if (static_cast<bool>(is))
+        if (is)
             gen = std::move(gen_tmp);
 
         return is;
@@ -638,7 +638,7 @@ class AESKeySeq
 
         alignas(16) std::array<std::uint64_t, 2 * (Rounds + 1)> ks;
         is >> ks;
-        if (static_cast<bool>(is))
+        if (is)
             std::memcpy(seq.key_seq_.data(), ks.data(), 16 * (Rounds + 1));
 
         return is;
@@ -951,7 +951,7 @@ class ARSKeySeqImpl
 
         alignas(16) key_type k = {{0}};
         is >> k;
-        if (static_cast<bool>(is)) {
+        if (is) {
             seq.key_ =
                 _mm_load_si128(reinterpret_cast<const __m128i *>(k.data()));
         }

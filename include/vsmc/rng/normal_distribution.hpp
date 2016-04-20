@@ -182,7 +182,7 @@ class NormalDistribution
         is >> std::ws >> param;
         is >> std::ws >> v;
         is >> std::ws >> saved;
-        if (static_cast<bool>(is)) {
+        if (is) {
             dist.param_ = param;
             dist.v_ = v;
             dist.saved_ = saved;
