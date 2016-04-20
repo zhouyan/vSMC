@@ -70,7 +70,7 @@ inline void rng_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
         u01seq(rng2, K, r2.data());
         watch2.stop();
 
-        for (std::size_t j = 0; j != N; ++j)
+        for (std::size_t j = 0; j != K; ++j)
             error = std::max(error, std::abs(r1[j] - r2[j]));
     }
     std::stringstream ss;
@@ -111,7 +111,9 @@ inline void rng_u01_sequence(std::size_t N, std::size_t M)
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
     rng_u01_sequence<float>(N, M, twid);
+    std::cout << std::string(lwid, '-') << std::endl;
     rng_u01_sequence<double>(N, M, twid);
+    std::cout << std::string(lwid, '-') << std::endl;
     rng_u01_sequence<long double>(N, M, twid);
     std::cout << std::string(lwid, '-') << std::endl;
 }

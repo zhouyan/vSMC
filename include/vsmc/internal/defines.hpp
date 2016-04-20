@@ -38,6 +38,8 @@
 namespace vsmc
 {
 
+/// \brief A placeholder type
+/// \ingroup Definitions
 class NullType;
 
 /// \brief Dynamic dimension

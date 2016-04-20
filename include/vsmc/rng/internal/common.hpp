@@ -503,13 +503,13 @@ class RNGTraits
     static constexpr int bits = internal::Log2<result_type, R_>::value;
 }; // class RNGTraits;
 
-/// \brief Parameter type for open interval
-/// \ingroup RNG
-class Open;
-
 /// \brief Parameter type for closed interval
 /// \ingroup RNG
 class Closed;
+
+/// \brief Parameter type for open interval
+/// \ingroup RNG
+class Open;
 
 /// \brief Generate random integers
 /// \ingroup RNG
