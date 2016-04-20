@@ -33,7 +33,17 @@
 #define VSMC_UTILITY_HDF5IO_HPP
 
 #include <vsmc/internal/common.hpp>
+
+#ifdef VSMC_INTEL
+#pragma warning(push)
+#pragma warning(disable : 2282)
+#endif
+
 #include <hdf5.h>
+
+#ifdef VSMC_INTEL
+#pragma warning(pop)
+#endif
 
 #define VSMC_DEFINE_HDF5TYPE(CPPName, CName)                                  \
     class HDF5##CPPName : public HDF5ID<HDF5##CPPName>                        \
