@@ -39,6 +39,13 @@ FUNCTION(VSMC_ADD_HEADER_TEST basepath cond)
         VSMC_ADD_EXECUTABLE(${basename}_hpp
             ${PROJECT_BINARY_DIR}/src/${basename}.cpp)
         ADD_DEPENDENCIES(vsmc ${basename}_hpp)
+
+        ADD_CUSTOM_TARGET(${basename}_hpp-check
+            DEPENDS ${basename}_hpp vsmc-files
+            COMMAND ${basename}_hpp
+            COMMENT "Running ${basename}_hpp"
+            WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+        ADD_DEPENDENCIES(vsmc-check ${basename}_hpp-check)
     ENDIF(${cond})
 ENDFUNCTION(VSMC_ADD_HEADER_TEST)
 
