@@ -32,8 +32,6 @@
 #ifndef VSMC_INTERNAL_COMPILER_CLANG_H
 #define VSMC_INTERNAL_COMPILER_CLANG_H
 
-#define VSMC_CLANG_NONEXIST 0xFFFFFFFFUL
-
 #define VSMC_CLANG_VERSION                                                    \
     (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 
