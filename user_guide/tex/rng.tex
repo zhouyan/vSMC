@@ -1320,57 +1320,6 @@ considerable speedup. The performance data is in table~\ref{tab:Performance of
   \label{tab:Performance of Beta distribution}
 \end{table}
 
-\section{Ordered standard uniform distribution}
-\label{sec:Ordered standard uniform distribution}
-
-In resampling and other algorithms, one often need generate a set of standard
-uniform random numbers and them have them sorted. For example,
-\begin{cppcode}
-  RNG rng;
-  U01Distribution dist;
-  Vector<double> r(n);
-  rng_rand(rng, dist, n, r.data());
-  std::sort(r.begin(), r.end());
-\end{cppcode}
-This method has $O(n)$ memory cost and $O(n\log n)$ runtime cost. This can be
-problematic if $n$ is large enough. It shall be clear that, given $n$,
-generating $\{U_i\}_{i=1}^N$ such that the set has the same distribution of $N$
-sorted standard uniform random numbers can be done with $O(1)$ memory cost and
-$O(N)$ runtime cost using order statistics. The library implement such
-algorithms with the following class template,
-\begin{cppcode}
-  template <typename RNGType, typename RealType>
-  class U01SequenceSorted;
-\end{cppcode}
-It can be used as the following,
-\begin{cppcode}
-  U01SequenceSorted<RNG, double> u01seq(n, rng);
-  for (std::size_t i = 0; i != n; ++i)
-      r[i] = u01seq[i];
-\end{cppcode}
-There are some restrictions on this class. The index argument has to be
-non-decreasing. That is, if \verb|operator[]| is called with $i_1$ first and
-then $i_2 < i_1$, the behavior is undefined. In addition, the first time it is
-called, the argument must be zero, and it can not be called with index larger
-than $n - 1$. These are some severe restrictions. In fact, the sole purpose of
-this class is the situation where one need to process such a sequence from the
-first to the last. For instance, a common operation in resampling algorithms is
-that, given normalized weights $\{W_i\}_{i=1}^N$, for each
-$U_j\in\{U_j\}_{j=1}^M$, find $i$ such that $\sum_{k=0}^{i - 1}W_i \le U_j <
-\sum_{k=0}^iW_i$, where $W_0 = 0$. This can be done with the above algorithm
-with $O(1)$ memory cost and $O(M)$ runtime cost. See section~\ref{sec:User
-  defined algorithms} for example use of the sequence class.
-
-In other situations, one may want to use the function template,
-\begin{cppcode}
-  template <typename RealType, typename RNGType>
-  inline void u01_rand_sorted(RNGType &rng, std::size_t N, RealType *r);
-\end{cppcode}
-which will generate $\{U_i\}_{i=1}^N$ with $O(N)$ runtime cost.
-
-Other sequences, such as stratified and systematic sequences, are also
-implemented. See the reference manual for details.
-
 \section{Seeding}
 \label{sec:Seeding}
 
