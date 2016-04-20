@@ -36,7 +36,7 @@
 
 template <typename U01SeqType, typename RealType>
 inline void rng_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
-    int nwid, int twid, const std::string &name)
+    int twid, const std::string &name)
 {
     vsmc::RNG rng;
     std::size_t num = 0;
@@ -79,7 +79,7 @@ inline void rng_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
     double c1 = watch1.cycles() / num;
     double c2 = watch2.cycles() / num;
     std::cout << std::setw(twid) << std::left << rng_type_name<RealType>();
-    std::cout << std::setw(nwid) << std::left << name;
+    std::cout << std::setw(twid) << std::left << name;
     std::cout << std::setw(twid) << std::right << std::fixed << c1;
     std::cout << std::setw(twid) << std::right << std::fixed << c2;
     std::cout << std::setw(twid) << std::right << ss.str();
@@ -87,33 +87,32 @@ inline void rng_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
 }
 
 template <typename RealType>
-inline void rng_u01_sequence(std::size_t N, std::size_t M, int nwid, int twid)
+inline void rng_u01_sequence(std::size_t N, std::size_t M, int twid)
 {
     rng_u01_sequence<vsmc::U01SequenceSorted, RealType>(
-        N, M, N, nwid, twid, "Sorted");
+        N, M, N, twid, "Sorted");
     rng_u01_sequence<vsmc::U01SequenceStratified, RealType>(
-        N, M, N, nwid, twid, "Stratified");
+        N, M, N, twid, "Stratified");
     rng_u01_sequence<vsmc::U01SequenceSystematic, RealType>(
-        N, M, 1, nwid, twid, "Systematic");
+        N, M, 1, twid, "Systematic");
 }
 
 inline void rng_u01_sequence(std::size_t N, std::size_t M)
 {
-    const int nwid = 30;
     const int twid = 15;
-    const std::size_t lwid = nwid + twid * 4;
+    const std::size_t lwid = twid * 5;
 
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::setw(twid) << std::left << "Precision";
-    std::cout << std::setw(nwid) << std::left << "Algorithm";
+    std::cout << std::setw(twid) << std::left << "Algorithm";
     std::cout << std::setw(twid) << std::right << "cpE (Transform)";
     std::cout << std::setw(twid) << std::right << "cpE (Generate)";
     std::cout << std::setw(twid) << std::right << "Error";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
-    rng_u01_sequence<float>(N, M, nwid, twid);
-    rng_u01_sequence<double>(N, M, nwid, twid);
-    rng_u01_sequence<long double>(N, M, nwid, twid);
+    rng_u01_sequence<float>(N, M, twid);
+    rng_u01_sequence<double>(N, M, twid);
+    rng_u01_sequence<long double>(N, M, twid);
     std::cout << std::string(lwid, '-') << std::endl;
 }
 

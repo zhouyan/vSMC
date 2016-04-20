@@ -44,12 +44,18 @@
     }
 
 #define VSMC_RNG_U01_TEST(Lower, Upper)                                       \
-    rng_u01<std::uint32_t, float, vsmc::Lower, vsmc::Upper>(N, M);            \
-    rng_u01<std::uint64_t, float, vsmc::Lower, vsmc::Upper>(N, M);            \
-    rng_u01<std::uint32_t, double, vsmc::Lower, vsmc::Upper>(N, M);           \
-    rng_u01<std::uint64_t, double, vsmc::Lower, vsmc::Upper>(N, M);           \
-    rng_u01<std::uint32_t, long double, vsmc::Lower, vsmc::Upper>(N, M);      \
-    rng_u01<std::uint64_t, long double, vsmc::Lower, vsmc::Upper>(N, M);
+    rng_u01<std::uint32_t, float, vsmc::Lower, vsmc::Upper>(                  \
+        N, M, nwid, swid, twid);                                              \
+    rng_u01<std::uint64_t, float, vsmc::Lower, vsmc::Upper>(                  \
+        N, M, nwid, swid, twid);                                              \
+    rng_u01<std::uint32_t, double, vsmc::Lower, vsmc::Upper>(                 \
+        N, M, nwid, swid, twid);                                              \
+    rng_u01<std::uint64_t, double, vsmc::Lower, vsmc::Upper>(                 \
+        N, M, nwid, swid, twid);                                              \
+    rng_u01<std::uint32_t, long double, vsmc::Lower, vsmc::Upper>(            \
+        N, M, nwid, swid, twid);                                              \
+    rng_u01<std::uint64_t, long double, vsmc::Lower, vsmc::Upper>(            \
+        N, M, nwid, swid, twid);
 
 template <typename UIntType, typename RealType, typename, typename>
 inline RealType rng_u01_c(UIntType u);
@@ -131,7 +137,7 @@ inline void rng_u01_rb(RealType x, std::string &maximum, std::string &right)
 }
 
 template <typename UIntType, typename RealType, typename Lower, typename Upper>
-inline void rng_u01(std::size_t N, std::size_t M)
+inline void rng_u01(std::size_t N, std::size_t M, int nwid, int swid, int twid)
 {
     vsmc::ThreefryEngine<UIntType> rng;
     vsmc::Vector<UIntType> u(N);
@@ -166,36 +172,41 @@ inline void rng_u01(std::size_t N, std::size_t M)
     rng_u01_rb(vsmc::u01<UIntType, RealType, Lower, Upper>(
                    std::numeric_limits<UIntType>::max()),
         maximum, right);
-    std::cout << std::setw(50) << std::left << function;
-    std::cout << std::setw(15) << std::right << minimum;
-    std::cout << std::setw(15) << std::right << maximum;
-    std::cout << std::setw(10) << std::right << left;
-    std::cout << std::setw(10) << std::right << right;
-    std::cout << std::setw(10) << std::right << rng_pass(pass1);
-    std::cout << std::setw(10) << std::right << rng_pass(pass2);
+    std::cout << std::setw(nwid) << std::left << function;
+    std::cout << std::setw(swid) << std::right << minimum;
+    std::cout << std::setw(swid) << std::right << maximum;
+    std::cout << std::setw(twid) << std::right << left;
+    std::cout << std::setw(twid) << std::right << right;
+    std::cout << std::setw(twid) << std::right << rng_pass(pass1);
+    std::cout << std::setw(twid) << std::right << rng_pass(pass2);
     std::cout << std::endl;
 }
 
 inline void rng_u01(std::size_t N, std::size_t M)
 {
-    std::cout << std::string(120, '=') << std::endl;
-    std::cout << std::setw(50) << std::left << "Function";
-    std::cout << std::setw(15) << std::right << "Mininum";
-    std::cout << std::setw(15) << std::right << "Maximum";
-    std::cout << std::setw(10) << std::right << "Lower";
-    std::cout << std::setw(10) << std::right << "Upper";
-    std::cout << std::setw(10) << std::right << "C API";
-    std::cout << std::setw(10) << std::right << "Batch";
+    const int nwid = 45;
+    const int swid = 15;
+    const int twid = 10;
+    const std::size_t lwid = nwid + swid * 2 + twid * 4;
+
+    std::cout << std::string(lwid, '=') << std::endl;
+    std::cout << std::setw(nwid) << std::left << "Function";
+    std::cout << std::setw(swid) << std::right << "Mininum";
+    std::cout << std::setw(swid) << std::right << "Maximum";
+    std::cout << std::setw(twid) << std::right << "Lower";
+    std::cout << std::setw(twid) << std::right << "Upper";
+    std::cout << std::setw(twid) << std::right << "C API";
+    std::cout << std::setw(twid) << std::right << "Batch";
     std::cout << std::endl;
-    std::cout << std::string(120, '-') << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
     VSMC_RNG_U01_TEST(Closed, Closed);
-    std::cout << std::string(120, '-') << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
     VSMC_RNG_U01_TEST(Closed, Open);
-    std::cout << std::string(120, '-') << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
     VSMC_RNG_U01_TEST(Open, Closed);
-    std::cout << std::string(120, '-') << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
     VSMC_RNG_U01_TEST(Open, Open);
-    std::cout << std::string(120, '-') << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
 }
 
 #endif // VSMC_EXAMPLE_RNG_U01_HPP

@@ -34,47 +34,56 @@
 
 #include <vsmc/rng/engine.hpp>
 
-#define VSMC_RNG_MKL_BRNG_FEATURES(BRNG) rng_mkl_brng_features(BRNG, #BRNG)
+#define VSMC_RNG_MKL_BRNG_FEATURES(BRNG)                                      \
+    rng_mkl_brng_features(BRNG, #BRNG, nwid, twid)
 
-#define VSMC_RNG_MKL_BRNG_PROPERTIES(BRNG) rng_mkl_brng_properties(BRNG, #BRNG)
+#define VSMC_RNG_MKL_BRNG_PROPERTIES(BRNG)                                    \
+    rng_mkl_brng_properties(BRNG, #BRNG, nwid, twid)
 
-inline void rng_mkl_brng_features(int brng, const std::string &name)
+inline void rng_mkl_brng_features(
+    int brng, const std::string &name, int nwid, int twid)
 {
     bool has_u32 = vsmc::MKLStream::has_uniform_bits32(brng);
     bool has_u64 = vsmc::MKLStream::has_uniform_bits64(brng);
     bool has_skip_ahead = vsmc::MKLStream::has_skip_ahead(brng);
     bool has_leap_frog = vsmc::MKLStream::has_leap_frog(brng);
-    std::cout << std::setw(30) << std::left << name;
-    std::cout << std::setw(20) << std::right << (has_leap_frog ? "Yes" : "No");
-    std::cout << std::setw(20) << std::right
+    std::cout << std::setw(nwid) << std::left << name;
+    std::cout << std::setw(twid) << std::right
+              << (has_leap_frog ? "Yes" : "No");
+    std::cout << std::setw(twid) << std::right
               << (has_skip_ahead ? "Yes" : "No");
-    std::cout << std::setw(20) << std::right << (has_u32 ? "Yes" : "No");
-    std::cout << std::setw(20) << std::right << (has_u64 ? "Yes" : "No");
+    std::cout << std::setw(twid) << std::right << (has_u32 ? "Yes" : "No");
+    std::cout << std::setw(twid) << std::right << (has_u64 ? "Yes" : "No");
     std::cout << std::endl;
 }
 
-inline void rng_mkl_brng_properties(int brng, const std::string &name)
+inline void rng_mkl_brng_properties(
+    int brng, const std::string &name, int nwid, int twid)
 {
     VSLBRngProperties properties;
     vsmc::MKLStream::get_brng_properties(brng, &properties);
-    std::cout << std::setw(30) << std::left << name;
-    std::cout << std::setw(20) << std::right << properties.NSeeds;
-    std::cout << std::setw(20) << std::right << properties.IncludesZero;
-    std::cout << std::setw(20) << std::right << properties.WordSize;
-    std::cout << std::setw(20) << std::right << properties.NBits;
+    std::cout << std::setw(nwid) << std::left << name;
+    std::cout << std::setw(twid) << std::right << properties.NSeeds;
+    std::cout << std::setw(twid) << std::right << properties.IncludesZero;
+    std::cout << std::setw(twid) << std::right << properties.WordSize;
+    std::cout << std::setw(twid) << std::right << properties.NBits;
     std::cout << std::endl;
 }
 
 inline void rng_mkl_brng()
 {
-    std::cout << std::string(110, '=') << std::endl;
-    std::cout << std::setw(30) << std::left << "BRNG";
-    std::cout << std::setw(20) << std::right << "vslLeapfrogStream";
-    std::cout << std::setw(20) << std::right << "vslSkipAheadStream";
-    std::cout << std::setw(20) << std::right << "viRngUniformBits32";
-    std::cout << std::setw(20) << std::right << "viRngUniformBits64";
+    const int nwid = 25;
+    const int twid = 10;
+    const std::size_t lwid = nwid + twid * 4;
+
+    std::cout << std::string(lwid, '=') << std::endl;
+    std::cout << std::setw(nwid) << std::left << "BRNG";
+    std::cout << std::setw(twid) << std::right << "leap";
+    std::cout << std::setw(twid) << std::right << "skip";
+    std::cout << std::setw(twid) << std::right << "ubits32";
+    std::cout << std::setw(twid) << std::right << "ubits64";
     std::cout << std::endl;
-    std::cout << std::string(110, '-') << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
     VSMC_RNG_MKL_BRNG_FEATURES(VSL_BRNG_MCG31);
     VSMC_RNG_MKL_BRNG_FEATURES(VSL_BRNG_R250);
     VSMC_RNG_MKL_BRNG_FEATURES(VSL_BRNG_MRG32K3A);
@@ -92,16 +101,16 @@ inline void rng_mkl_brng()
 #endif
     VSMC_RNG_MKL_BRNG_FEATURES(VSL_BRNG_PHILOX4X32X10);
 #endif
-    std::cout << std::string(110, '-') << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
 
-    std::cout << std::string(110, '=') << std::endl;
-    std::cout << std::setw(30) << std::left << "BRNG";
-    std::cout << std::setw(20) << std::right << "NSeeds";
-    std::cout << std::setw(20) << std::right << "IncludesZero";
-    std::cout << std::setw(20) << std::right << "WordSize";
-    std::cout << std::setw(20) << std::right << "NBits";
+    std::cout << std::string(lwid, '=') << std::endl;
+    std::cout << std::setw(nwid) << std::left << "BRNG";
+    std::cout << std::setw(twid) << std::right << "NSeeds";
+    std::cout << std::setw(twid) << std::right << "Zero";
+    std::cout << std::setw(twid) << std::right << "WordSize";
+    std::cout << std::setw(twid) << std::right << "NBits";
     std::cout << std::endl;
-    std::cout << std::string(110, '-') << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
     VSMC_RNG_MKL_BRNG_PROPERTIES(VSL_BRNG_MCG31);
     VSMC_RNG_MKL_BRNG_PROPERTIES(VSL_BRNG_R250);
     VSMC_RNG_MKL_BRNG_PROPERTIES(VSL_BRNG_MRG32K3A);
@@ -119,16 +128,7 @@ inline void rng_mkl_brng()
 #endif
     VSMC_RNG_MKL_BRNG_PROPERTIES(VSL_BRNG_PHILOX4X32X10);
 #endif
-    std::cout << std::string(110, '-') << std::endl;
-
-    std::cout << std::string(110, '=') << std::endl;
-    std::cout << std::setw(30) << std::left << "RNGType";
-    std::cout << std::setw(20) << std::right << "NSeeds";
-    std::cout << std::setw(20) << std::right << "IncludesZero";
-    std::cout << std::setw(20) << std::right << "WordSize";
-    std::cout << std::setw(20) << std::right << "NBits";
-    std::cout << std::endl;
-    std::cout << std::string(110, '-') << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -137,12 +137,12 @@ inline void rng_mkl_brng()
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     {                                                                         \
         int brng = vsmc::mkl_brng<RNGType>();                                 \
-        rng_mkl_brng_properties(brng, #Name);                                 \
+        rng_mkl_brng_properties(brng, #Name, nwid, twid);                     \
     }
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-    std::cout << std::string(110, '-') << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
 }
 
 #endif // VSMC_EXAMPLE_RNG_MKL_BRNG_HPP
