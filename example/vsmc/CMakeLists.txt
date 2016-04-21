@@ -51,6 +51,8 @@ ENDFUNCTION(VSMC_ADD_HEADER_TEST)
 
 VSMC_ADD_EXAMPLE(vsmc)
 
+VSMC_ADD_HEADER_TEST(vsmc/vsmc TRUE)
+
 VSMC_ADD_HEADER_TEST(vsmc/core/core TRUE)
 VSMC_ADD_HEADER_TEST(vsmc/core/monitor         TRUE)
 VSMC_ADD_HEADER_TEST(vsmc/core/particle        TRUE)
