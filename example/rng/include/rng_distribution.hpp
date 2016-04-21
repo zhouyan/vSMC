@@ -1177,7 +1177,7 @@ inline void rng_distribution_test_perf(std::size_t N, std::size_t M,
         vsmc::StopWatch watch4;
         vsmc::StopWatch watch5;
 #endif
-        for (std::size_t i = 0; i != M / 10; ++i) {
+        for (std::size_t i = 0; i != M; ++i) {
             std::size_t K = rsize(rng);
             num += K;
             r1.resize(K);

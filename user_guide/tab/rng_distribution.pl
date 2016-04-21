@@ -15,15 +15,12 @@ my %distribution;
 my %cpB;
 open RAWFILE, '<', 'rng_distribution.txt';
 while (<RAWFILE>) {
-    if (/<double>\(/) {
-        s/(.*)<double>(\(.*?\)).*/$1$2/;
-        chomp;
-        my $name = '\verb|' . $_ . "|\n";
-        my $basename = $1;
-        $_ = <RAWFILE>;
-        $_ = <RAWFILE>;
+    if (/<double>\(.*Passed/) {
         my @record = split;
-        shift @record;
+        my $name = shift @record;
+        $name =~ s/(.*)<double>(.*)/$1$2/;
+        $name = '\verb|' . $name . "|\n";
+        my $basename = $1;
         my $cpB;
         if ($nostd =~ /$basename/) {
             shift @record;
@@ -31,9 +28,7 @@ while (<RAWFILE>) {
         } else {
             $cpB .= format_cpB(shift @record);
         }
-        foreach (@record[0..2]) {
-            $cpB .= format_cpB($_);
-        }
+        $cpB .= format_cpB($_) foreach (@record[0..2]);
         $cpB .= "\n";
         if ($normal =~ /$basename/) {
             $distribution{'normal'} .= $name;
