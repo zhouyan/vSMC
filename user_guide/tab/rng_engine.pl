@@ -20,18 +20,19 @@ $family .= " ars";
 $family .= " rdrand";
 $family .= " mkl";
 
-my $raw_clang = `ninja -C ../../build/clang-Release rng_engine-check`;
-my $raw_gcc = `ninja -C ../../build/gcc-Release rng_engine-check`;
-my $raw_intel = `ninja -C ../../build/intel-Release rng_engine-check`;
+open RAWFILE, '<', "rng_engine_clang.txt";
+my @raw_clang = <RAWFILE>;
 
-my $tex_clang = &print_tex("philox", $raw_clang);
-my $tex_gcc = &print_tex("philox", $raw_gcc);
-my $tex_intel = &print_tex("philox", $raw_intel);
+open RAWFILE, '<', "rng_engine_gcc.txt";
+my @raw_gcc = <RAWFILE>;
+
+open RAWFILE, '<', "rng_engine_intel.txt";
+my @raw_intel = <RAWFILE>;
 
 foreach (split ' ', $family) {
-    my $tex_clang = &print_tex($_, $raw_clang);
-    my $tex_gcc = &print_tex($_, $raw_gcc);
-    my $tex_intel = &print_tex($_, $raw_intel);
+    my $tex_clang = &print_tex($_, @raw_clang);
+    my $tex_gcc = &print_tex($_, @raw_gcc);
+    my $tex_intel = &print_tex($_, @raw_intel);
     my $table = &print_table($tex_clang, $tex_gcc, $tex_intel);
     my $texfile = "rng_perf_$_.tex";
     open TEXFILE, '>', $texfile;
@@ -47,8 +48,8 @@ sub print_table
     my $wid = 0;
     foreach my $tex (@_) {
         my @lines = split "\n", $tex;
-        while (my ($index, $_) = each @lines) {
-            my @record = split;
+        while (my ($index, $val) = each @lines) {
+            my @record = split ' ', $val;
             $rng[$index] = $record[0];
             $cpB1[$index] .= &print_cpB($record[2]);
             $cpB2[$index] .= &print_cpB($record[4]);
@@ -70,7 +71,7 @@ sub print_table
     $table .= ' ' x 2;
     $table .= '\rng & \llvm & \gnu & Intel & \llvm & \gnu & Intel ' . "\\\\\n";
     $table .= ' ' x 2 . '\midrule' . "\n";
-    while (my ($index, $_) = each @rng) {
+    while (my ($index, $val) = each @rng) {
         $table .= ' ' x 2;
         $table .= sprintf "%-${wid}s", $rng[$index];
         $table .= $cpB1[$index];
@@ -84,19 +85,22 @@ sub print_table
 
 sub print_tex
 {
-    my ($engine, $raw) = @_;
+    my $engine = shift @_;
     my @rng;
     my @cpB;
     my $wid = 0;
-    foreach (split("\n", $raw)) {
+    foreach (@_) {
         next if (!/Passed/);
 
         my @raw = split;
         my ($rng, $cpB1, $cpB2) = ($raw[0], $raw[5], $raw[6]);
         if ($engine =~ /std/i) {
             next if (!($engine_std =~ /$rng/i));
+        } elsif ($engine =~ /mkl/i) {
+            next if (!($rng =~ /mkl/i));
         } else {
             next if (!($rng =~ /$engine/i));
+            next if ($rng =~ /mkl/i);
         }
 
         push @rng , '\verb|' . $rng . '|';
@@ -107,7 +111,7 @@ sub print_tex
     }
 
     my $tex;
-    while (my ($index, $_) = each @cpB) {
+    while (my ($index, $val) = each @cpB) {
         $tex .= ' ' x 2;
         $tex .= sprintf "%-${wid}s", $rng[$index];
         $tex .= $cpB[$index];

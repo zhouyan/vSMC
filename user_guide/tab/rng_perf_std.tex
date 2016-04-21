@@ -1,17 +1,18 @@
+\tbfigures
 \begin{tabularx}{\textwidth}{p{2in}XXXXXX}
   \toprule
   & \multicolumn{3}{c}{Loop} & \multicolumn{3}{c}{\verb|rng_rand|} \\
   \cmidrule(lr){2-4}\cmidrule(lr){5-7}
   \rng & \llvm & \gnu & Intel & \llvm & \gnu & Intel \\
   \midrule
-  \verb|mt19937|       & 9.60 & 5.31 & 5.35 & 9.68 & 5.26 & 5.34 \\
-  \verb|mt19937_64|    & 3.71 & 2.34 & 2.26 & 3.76 & 2.22 & 2.23 \\
-  \verb|minstd_rand0|  & 8.12 & 9.08 & 10.7 & 8.13 & 9.08 & 9.51 \\
-  \verb|minstd_rand|   & 8.05 & 8.85 & 9.99 & 8.04 & 8.84 & 8.88 \\
-  \verb|ranlux24_base| & 11.0 & 8.52 & 3.75 & 11.6 & 8.56 & 6.03 \\
-  \verb|ranlux48_base| & 7.23 & 5.53 & 3.01 & 7.53 & 5.46 & 4.00 \\
-  \verb|ranlux24|      & 110  & 88.0 & 45.8 & 110  & 88.2 & 74.3 \\
-  \verb|ranlux48|      & 255  & 201  & 103  & 253  & 201  & 177  \\
-  \verb|knuth_b|       & 69.9 & 79.2 & 59.9 & 42.8 & 55.3 & 59.2 \\
+  \verb|mt19937|       & 3.35 & 3.22 & 3.84 & 3.63 & 3.22 & 4.44 \\
+  \verb|mt19937_64|    & 1.77 & 1.67 & 1.98 & 1.94 & 1.63 & 1.93 \\
+  \verb|minstd_rand0|  & 5.52 & 6.41 & 7.76 & 5.44 & 6.27 & 7.07 \\
+  \verb|minstd_rand|   & 4.35 & 5.07 & 6.51 & 4.29 & 5.14 & 5.95 \\
+  \verb|ranlux24_base| & 7.29 & 7.25 & 7.95 & 7.15 & 7.20 & 7.71 \\
+  \verb|ranlux48_base| & 5.07 & 4.47 & 5.34 & 5.47 & 4.58 & 5.65 \\
+  \verb|ranlux24|      & 77.0 & 73.1 & 86.9 & 78.5 & 74.1 & 72.6 \\
+  \verb|ranlux48|      & 190  & 159  & 206  & 186  & 161  & 184  \\
+  \verb|knuth_b|       & 18.2 & 25.4 & 15.1 & 14.5 & 24.6 & 16.3 \\
   \bottomrule
 \end{tabularx}

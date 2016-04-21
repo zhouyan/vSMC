@@ -1,8 +1,12 @@
+\tbfigures
 \begin{tabularx}{\textwidth}{p{2in}XXXXXX}
   \toprule
   & \multicolumn{3}{c}{Loop} & \multicolumn{3}{c}{\verb|rng_rand|} \\
   \cmidrule(lr){2-4}\cmidrule(lr){5-7}
   \rng & \llvm & \gnu & Intel & \llvm & \gnu & Intel \\
   \midrule
+  \verb|RDRAND16| & 126  & 127  & 126  & 127  & 127  & 125  \\
+  \verb|RDRAND32| & 64.9 & 66.0 & 65.4 & 63.1 & 69.2 & 63.5 \\
+  \verb|RDRAND64| & 34.1 & 31.7 & 33.6 & 31.8 & 31.9 & 31.6 \\
   \bottomrule
 \end{tabularx}

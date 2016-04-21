@@ -1,8 +1,17 @@
+\tbfigures
 \begin{tabularx}{\textwidth}{p{2in}XXXXXX}
   \toprule
   & \multicolumn{3}{c}{Loop} & \multicolumn{3}{c}{\verb|rng_rand|} \\
   \cmidrule(lr){2-4}\cmidrule(lr){5-7}
   \rng & \llvm & \gnu & Intel & \llvm & \gnu & Intel \\
   \midrule
+  \verb|AES192x1|    & 1.93 & 5.65 & 6.26 & 1.06 & 4.98 & 5.60 \\
+  \verb|AES192x2|    & 1.62 & 3.32 & 3.53 & 0.95 & 2.91 & 3.01 \\
+  \verb|AES192x4|    & 1.38 & 2.40 & 2.11 & 1.07 & 1.85 & 1.69 \\
+  \verb|AES192x8|    & 1.47 & 1.54 & 1.63 & 1.04 & 1.06 & 1.02 \\
+  \verb|AES192x1_64| & 1.26 & 5.65 & 6.16 & 1.06 & 5.12 & 5.36 \\
+  \verb|AES192x2_64| & 1.08 & 3.18 & 3.66 & 0.96 & 2.91 & 3.27 \\
+  \verb|AES192x4_64| & 1.00 & 1.90 & 1.91 & 0.86 & 1.63 & 1.64 \\
+  \verb|AES192x8_64| & 1.40 & 1.29 & 1.53 & 1.05 & 0.99 & 1.10 \\
   \bottomrule
 \end{tabularx}
