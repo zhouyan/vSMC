@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use v5.14.0;
+use v5.16.0;
 
 my $engine_std;
 $engine_std .= "mt19937 mt19937_64";
@@ -20,9 +20,9 @@ $family .= " ars";
 $family .= " rdrand";
 $family .= " mkl";
 
-my $raw_clang = `ninja -C ../build/clang-Release rng_engine-check`;
-my $raw_gcc = `ninja -C ../build/gcc-Release rng_engine-check`;
-my $raw_intel = `ninja -C ../build/intel-Release rng_engine-check`;
+my $raw_clang = `ninja -C ../../build/clang-Release rng_engine-check`;
+my $raw_gcc = `ninja -C ../../build/gcc-Release rng_engine-check`;
+my $raw_intel = `ninja -C ../../build/intel-Release rng_engine-check`;
 
 my $tex_clang = &print_tex("philox", $raw_clang);
 my $tex_gcc = &print_tex("philox", $raw_gcc);
@@ -33,8 +33,8 @@ foreach (split ' ', $family) {
     my $tex_gcc = &print_tex($_, $raw_gcc);
     my $tex_intel = &print_tex($_, $raw_intel);
     my $table = &print_table($tex_clang, $tex_gcc, $tex_intel);
-    my $texname = "tab/rng_perf_$_.tex";
-    open TEXFILE, '>', $texname;
+    my $texfile = "rng_perf_$_.tex";
+    open TEXFILE, '>', $texfile;
     print TEXFILE $table;
     close TEXFILE;
 }
