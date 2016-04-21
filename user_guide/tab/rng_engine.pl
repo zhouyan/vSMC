@@ -34,7 +34,7 @@ foreach (split ' ', $family) {
     my $tex_gcc = &print_tex($_, @raw_gcc);
     my $tex_intel = &print_tex($_, @raw_intel);
     my $table = &print_table($tex_clang, $tex_gcc, $tex_intel);
-    my $texfile = "rng_perf_$_.tex";
+    my $texfile = "rng_engine_$_.tex";
     open TEXFILE, '>', $texfile;
     print TEXFILE $table;
     close TEXFILE;
