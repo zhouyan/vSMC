@@ -55,6 +55,7 @@ template <typename RealType>
 class ExponentialDistribution
 {
     VSMC_DEFINE_RNG_DISTRIBUTION_1(Exponential, exponential, lambda, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_0
 
     public:
     result_type min() const { return 0; }

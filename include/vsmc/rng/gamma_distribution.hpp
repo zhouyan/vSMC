@@ -117,6 +117,28 @@ class GammaDistribution
     private:
     internal::GammaDistributionConstant<RealType> constant_;
 
+    bool is_equal(const distribution_type &other) const
+    {
+        if (!is_equal(constant_.d, other.constant_.d))
+            return false;
+        if (!is_equal(constant_.c, other.constant_.c))
+            return false;
+        if (!is_equal(constant_.algorithm, other.constant_.algorithm))
+            return false;
+        return true;
+    }
+
+    template <typename CharT, typename Traits>
+    void ostream(std::basic_ostream<CharT, Traits> &) const
+    {
+    }
+
+    template <typename CharT, typename Traits>
+    void istream(std::basic_istream<CharT, Traits> &)
+    {
+        reset();
+    }
+
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {

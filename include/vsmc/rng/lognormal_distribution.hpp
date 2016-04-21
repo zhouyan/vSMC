@@ -55,6 +55,8 @@ template <typename RealType>
 class LognormalDistribution
 {
     VSMC_DEFINE_RNG_DISTRIBUTION_2(Lognormal, lognormal, m, 0, s, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_1(
+        NormalDistribution<RealType>, normal_)
 
     public:
     result_type min() const { return 0; }
@@ -64,8 +66,6 @@ class LognormalDistribution
     void reset() { normal_ = NormalDistribution<RealType>(0, 1); }
 
     private:
-    NormalDistribution<RealType> normal_;
-
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {

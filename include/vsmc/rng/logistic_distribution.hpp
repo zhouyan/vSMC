@@ -55,6 +55,7 @@ template <typename RealType>
 class LogisticDistribution
 {
     VSMC_DEFINE_RNG_DISTRIBUTION_2(Logistic, logistic, a, 0, b, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_0
 
     public:
     result_type min() const

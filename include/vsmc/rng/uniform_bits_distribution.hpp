@@ -49,6 +49,7 @@ class UniformBitsDistribution
 {
     VSMC_DEFINE_RNG_DISTRIBUTION_0(
         UniformBits, uniform_bits, UIntType, unsigned, UNSIGNED)
+    VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_0
 
     public:
     result_type min() const { return std::numeric_limits<result_type>::min(); }

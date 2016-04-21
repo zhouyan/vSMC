@@ -55,6 +55,7 @@ template <typename RealType>
 class ParetoDistribution
 {
     VSMC_DEFINE_RNG_DISTRIBUTION_2(Pareto, pareto, a, 1, b, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_0
 
     public:
     result_type min() const { return a(); }

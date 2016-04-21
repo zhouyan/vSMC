@@ -55,6 +55,7 @@ template <typename RealType>
 class UniformRealDistribution
 {
     VSMC_DEFINE_RNG_DISTRIBUTION_2(UniformReal, uniform_real, a, 0, b, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_0
 
     public:
     result_type min() const { return a(); }

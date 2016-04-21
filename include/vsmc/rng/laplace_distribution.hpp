@@ -59,6 +59,7 @@ template <typename RealType>
 class LaplaceDistribution
 {
     VSMC_DEFINE_RNG_DISTRIBUTION_2(Laplace, laplace, a, 0, b, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_0
 
     public:
     result_type min() const

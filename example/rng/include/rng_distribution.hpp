@@ -1227,9 +1227,6 @@ inline void rng_distribution_test_perf(std::size_t N, std::size_t M,
             for (std::size_t j = 0; j != K; ++j)
                 r2[j] = dist_vsmc(rng2);
             pass = pass && r1 == r2;
-            if (r1 != r2) {
-                std::cout << dist_vsmc << std::endl;
-            }
         }
         c1 = std::min(c1, watch1.cycles() / num);
         c2 = std::min(c2, watch2.cycles() / num);

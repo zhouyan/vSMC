@@ -56,6 +56,7 @@ template <typename RealType>
 class WeibullDistribution
 {
     VSMC_DEFINE_RNG_DISTRIBUTION_2(Weibull, weibull, a, 1, b, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_0
 
     public:
     result_type min() const { return 0; }

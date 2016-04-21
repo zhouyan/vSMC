@@ -56,6 +56,8 @@ template <typename RealType>
 class StudentTDistribution
 {
     VSMC_DEFINE_RNG_DISTRIBUTION_1(StudentT, student_t, n, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_2(ChiSquaredDistribution<RealType>,
+        chi_squared_, NormalDistribution<RealType>, normal_)
 
     public:
     result_type min() const
@@ -72,9 +74,6 @@ class StudentTDistribution
     }
 
     private:
-    ChiSquaredDistribution<RealType> chi_squared_;
-    NormalDistribution<RealType> normal_;
-
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {

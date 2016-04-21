@@ -55,6 +55,8 @@ template <typename RealType>
 class FisherFDistribution
 {
     VSMC_DEFINE_RNG_DISTRIBUTION_2(FisherF, fisher_f, m, 1, n, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_2(ChiSquaredDistribution<RealType>,
+        chi_squared_m_, ChiSquaredDistribution<RealType>, chi_squared_n_)
 
     public:
     result_type min() const { return 0; }
@@ -68,9 +70,6 @@ class FisherFDistribution
     }
 
     private:
-    ChiSquaredDistribution<RealType> chi_squared_m_;
-    ChiSquaredDistribution<RealType> chi_squared_n_;
-
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {

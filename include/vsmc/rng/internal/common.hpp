@@ -329,7 +329,7 @@
     friend bool operator==(                                                   \
         const distribution_type &dist1, const distribution_type &dist2)       \
     {                                                                         \
-        return dist1.param_ == dist2.param_;                                  \
+        return dist1.param_ == dist2.param_ && dist1.is_equal(dist2);         \
     }                                                                         \
                                                                               \
     friend bool operator!=(                                                   \
@@ -342,7 +342,11 @@
     friend std::basic_ostream<CharT, Traits> &operator<<(                     \
         std::basic_ostream<CharT, Traits> &os, const distribution_type &dist) \
     {                                                                         \
+        if (!os)                                                              \
+            return os;                                                        \
+                                                                              \
         os << dist.param_;                                                    \
+        dist.ostream(os);                                                     \
                                                                               \
         return os;                                                            \
     }                                                                         \
@@ -351,15 +355,98 @@
     friend std::basic_istream<CharT, Traits> &operator>>(                     \
         std::basic_istream<CharT, Traits> &is, distribution_type &dist)       \
     {                                                                         \
+        if (!is)                                                              \
+            return is;                                                        \
+                                                                              \
         is >> std::ws >> dist.param_;                                         \
         if (is)                                                               \
-            dist.reset();                                                     \
+            dist.istream(is);                                                 \
                                                                               \
         return is;                                                            \
     }                                                                         \
                                                                               \
     private:                                                                  \
     param_type param_;
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_0                                 \
+    private:                                                                  \
+    bool is_equal(const distribution_type &) const { return true; }           \
+                                                                              \
+    template <typename CharT, typename Traits>                                \
+    void ostream(std::basic_ostream<CharT, Traits> &) const                   \
+    {                                                                         \
+    }                                                                         \
+                                                                              \
+    template <typename CharT, typename Traits>                                \
+    void istream(std::basic_istream<CharT, Traits> &)                         \
+    {                                                                         \
+    }
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_1(T1, m1)                         \
+    private:                                                                  \
+    T1 m1;                                                                    \
+                                                                              \
+    bool is_equal(const distribution_type &other) const                       \
+    {                                                                         \
+        return m1 == other.m1;                                                \
+    }                                                                         \
+                                                                              \
+    template <typename CharT, typename Traits>                                \
+    void ostream(std::basic_ostream<CharT, Traits> &os) const                 \
+    {                                                                         \
+        if (!os)                                                              \
+            return;                                                           \
+                                                                              \
+        os << ' ' << m1;                                                      \
+    }                                                                         \
+                                                                              \
+    template <typename CharT, typename Traits>                                \
+    void istream(std::basic_istream<CharT, Traits> &is)                       \
+    {                                                                         \
+        if (!is)                                                              \
+            return;                                                           \
+                                                                              \
+        T1 tmp1;                                                              \
+        is >> std::ws >> tmp1;                                                \
+        if (is)                                                               \
+            m1 = std::move(tmp1);                                             \
+    }
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_2(T1, m1, T2, m2)                 \
+    private:                                                                  \
+    T1 m1;                                                                    \
+    T2 m2;                                                                    \
+                                                                              \
+    bool is_equal(const distribution_type &other) const                       \
+    {                                                                         \
+        return m1 == other.m1 && m2 == other.m2;                              \
+    }                                                                         \
+                                                                              \
+    template <typename CharT, typename Traits>                                \
+    void ostream(std::basic_ostream<CharT, Traits> &os) const                 \
+    {                                                                         \
+        if (!os)                                                              \
+            return;                                                           \
+                                                                              \
+        os << ' ' << m1;                                                      \
+        os << ' ' << m2;                                                      \
+    }                                                                         \
+                                                                              \
+    template <typename CharT, typename Traits>                                \
+    void istream(std::basic_istream<CharT, Traits> &is)                       \
+    {                                                                         \
+        if (!is)                                                              \
+            return;                                                           \
+                                                                              \
+        T1 tmp1;                                                              \
+        T2 tmp2;                                                              \
+        is >> std::ws >> tmp1;                                                \
+        is >> std::ws >> tmp2;                                                \
+        if (is) {                                                             \
+            m1 = std::move(tmp1);                                             \
+            m2 = std::move(tmp2);                                             \
+        }                                                                     \
+    }
 
 #define VSMC_DEFINE_RNG_DISTRIBUTION_0(Name, name, T, t, Type)                \
     VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_0(Name, T, t, Type)               \

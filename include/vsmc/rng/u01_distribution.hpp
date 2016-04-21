@@ -54,6 +54,7 @@
     {                                                                         \
         VSMC_DEFINE_RNG_DISTRIBUTION_0(                                       \
             Name, name, RealType, floating_point, FLOATING_POINT)             \
+        VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_0                                 \
                                                                               \
         public:                                                               \
         result_type min() const { return 0; }                                 \

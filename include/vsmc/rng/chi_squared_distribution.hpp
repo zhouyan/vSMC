@@ -55,6 +55,7 @@ template <typename RealType>
 class ChiSquaredDistribution
 {
     VSMC_DEFINE_RNG_DISTRIBUTION_1(ChiSquared, chi_squared, n, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_1(GammaDistribution<RealType>, gamma_)
 
     public:
     result_type min() const { return 0; }
@@ -64,8 +65,6 @@ class ChiSquaredDistribution
     void reset() { gamma_ = GammaDistribution<RealType>(n() / 2, 2); }
 
     private:
-    GammaDistribution<RealType> gamma_;
-
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {

@@ -168,6 +168,32 @@ class BetaDistribution
     private:
     internal::BetaDistributionConstant<RealType> constant_;
 
+    bool is_equal(const distribution_type &other) const
+    {
+        if (!is_equal(constant_.a, other.constant_.a))
+            return false;
+        if (!is_equal(constant_.b, other.constant_.b))
+            return false;
+        if (!is_equal(constant_.t, other.constant_.t))
+            return false;
+        if (!is_equal(constant_.p, other.constant_.p))
+            return false;
+        if (!is_equal(constant_.algorithm, other.constant_.algorithm))
+            return false;
+        return true;
+    }
+
+    template <typename CharT, typename Traits>
+    void ostream(std::basic_ostream<CharT, Traits> &) const
+    {
+    }
+
+    template <typename CharT, typename Traits>
+    void istream(std::basic_istream<CharT, Traits> &)
+    {
+        reset();
+    }
+
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {

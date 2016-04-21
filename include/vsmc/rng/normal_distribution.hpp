@@ -55,29 +55,10 @@ inline bool normal_distribution_check_param(RealType, RealType stddev)
 template <typename RealType>
 class NormalDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_2(
-        Normal, normal, mean, 0, stddev, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Normal, normal, mean, 0, stddev, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_2(result_type, v_, bool, saved_)
 
     public:
-    using result_type = RealType;
-    using distribution_type = NormalDistribution<RealType>;
-
-    explicit NormalDistribution(result_type mean = 0, result_type stddev = 1)
-        : param_(mean, stddev), v_(0), saved_(false)
-    {
-        reset();
-    }
-
-    explicit NormalDistribution(const param_type &param)
-        : param_(param), v_(0), saved_(false)
-    {
-        reset();
-    }
-
-    result_type mean() const { return param_.mean(); }
-
-    result_type stddev() const { return param_.stddev(); }
-
     result_type min() const
     {
         return std::numeric_limits<result_type>::lowest();
@@ -91,111 +72,7 @@ class NormalDistribution
         saved_ = false;
     }
 
-    const param_type &param() const { return param_; }
-
-    void param(const param_type &param)
-    {
-        param_ = param;
-        reset();
-    }
-
-    void pram(param_type &&param)
-    {
-        param_ = std::move(param);
-        reset();
-    }
-
-    template <typename RNGType>
-    result_type operator()(RNGType &rng)
-    {
-        return operator()(rng, param_);
-    }
-
-    template <typename RNGType>
-    result_type operator()(RNGType &rng, const param_type &param)
-    {
-        return generate(rng, param);
-    }
-
-    template <typename RNGType>
-    void operator()(RNGType &rng, std::size_t n, result_type *r)
-    {
-        operator()(rng, n, r, param_);
-    }
-
-    template <typename RNGType>
-    void operator()(
-        RNGType &rng, std::size_t n, result_type *r, const param_type &param)
-    {
-        if (n < 100) {
-            for (std::size_t i = 0; i != n; ++i)
-                r[i] = operator()(rng, param);
-        } else {
-            normal_distribution(rng, n, r, param);
-        }
-    }
-
-    friend bool operator==(
-        const distribution_type &dist1, const distribution_type &dist2)
-    {
-        if (dist1.param_ != dist2.param_)
-            return false;
-        if (!internal::is_equal(dist1.v_, dist2.v_))
-            return false;
-        if (dist1.saved_ && !dist2.saved_)
-            return false;
-        if (!dist1.saved_ && dist2.saved_)
-            return false;
-        return true;
-    }
-
-    friend bool operator!=(
-        const distribution_type &dist1, const distribution_type &dist2)
-    {
-        return !(dist1 == dist2);
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os, const distribution_type &dist)
-    {
-        if (!os)
-            return os;
-
-        os << dist.param_ << ' ';
-        os << dist.v_ << ' ';
-        os << dist.saved_;
-
-        return os;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is, distribution_type &dist)
-    {
-        if (!is)
-            return is;
-
-        param_type param;
-        result_type v;
-        bool saved;
-        is >> std::ws >> param;
-        is >> std::ws >> v;
-        is >> std::ws >> saved;
-        if (is) {
-            dist.param_ = param;
-            dist.v_ = v;
-            dist.saved_ = saved;
-        }
-
-        return is;
-    }
-
     private:
-    param_type param_;
-    result_type v_;
-    bool saved_;
-
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
