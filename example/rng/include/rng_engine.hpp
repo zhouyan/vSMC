@@ -173,59 +173,63 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
 {
     RNGType rng;
     bool pass = rng_engine_kat(rng);
-    std::size_t num = 0;
     vsmc::UniformBitsDistribution<std::uint64_t> rbits;
     std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
 
     RNGType rng1;
     RNGType rng2;
 
-    vsmc::StopWatch watch1;
-    vsmc::StopWatch watch2;
-
     vsmc::Vector<std::uint64_t> r1;
     vsmc::Vector<std::uint64_t> r2;
     r1.reserve(N);
     r2.reserve(N);
 
-    for (std::size_t i = 0; i != M; ++i) {
-        std::size_t K = rsize(rng);
-        num += K;
-        r1.resize(K);
-        r2.resize(K);
+    double g1 = 0;
+    double g2 = 0;
+    double c1 = std::numeric_limits<double>::max();
+    double c2 = std::numeric_limits<double>::max();
+    for (std::size_t k = 0; k != 10; ++k) {
+        std::size_t num = 0;
+        vsmc::StopWatch watch1;
+        vsmc::StopWatch watch2;
+        for (std::size_t i = 0; i != M; ++i) {
+            std::size_t K = rsize(rng);
+            num += K;
+            r1.resize(K);
+            r2.resize(K);
 
-        watch1.start();
-        for (std::size_t j = 0; j != K; ++j)
-            r1[j] = rbits(rng1);
-        watch1.stop();
+            watch1.start();
+            for (std::size_t j = 0; j != K; ++j)
+                r1[j] = rbits(rng1);
+            watch1.stop();
 
-        watch2.start();
-        rbits(rng2, K, r2.data());
-        watch2.stop();
-        pass = pass && (r1 == r2 || rng != rng);
+            watch2.start();
+            rbits(rng2, K, r2.data());
+            watch2.stop();
+            pass = pass && (r1 == r2 || rng != rng);
 
-        rng1.discard(static_cast<unsigned>(K));
-        typename RNGType::result_type next = rng1();
-        for (std::size_t j = 0; j != K; ++j)
-            rng2();
-        bool find = false;
-        for (std::size_t j = 0; j != 2; ++j)
-            find = find || rng2() == next;
-        pass = pass && (find || rng != rng);
+            rng1.discard(static_cast<unsigned>(K));
+            typename RNGType::result_type next = rng1();
+            for (std::size_t j = 0; j != K; ++j)
+                rng2();
+            bool find = false;
+            for (std::size_t j = 0; j != 2; ++j)
+                find = find || rng2() == next;
+            pass = pass && (find || rng != rng);
 
-        std::stringstream ss;
-        ss << rng;
-        rbits(rng, K, r1.data());
-        ss >> rng;
-        rbits(rng, K, r2.data());
-        pass = pass && (r1 == r2 || rng != rng);
+            std::stringstream ss;
+            ss << rng;
+            rbits(rng, K, r1.data());
+            ss >> rng;
+            rbits(rng, K, r2.data());
+            pass = pass && (r1 == r2 || rng != rng);
+        }
+        double bytes = static_cast<double>(sizeof(std::uint64_t) * num);
+        g1 = std::max(g1, bytes / watch1.nanoseconds());
+        g2 = std::max(g2, bytes / watch2.nanoseconds());
+        c1 = std::min(c1, watch1.cycles() / bytes);
+        c2 = std::min(c2, watch2.cycles() / bytes);
     }
-
-    double bytes = static_cast<double>(sizeof(std::uint64_t) * num);
-    double g1 = bytes / watch1.nanoseconds();
-    double g2 = bytes / watch2.nanoseconds();
-    double c1 = watch1.cycles() / bytes;
-    double c2 = watch2.cycles() / bytes;
 
     std::cout << std::left << std::setw(nwid) << name;
     std::cout << std::right << std::setw(swid) << sizeof(RNGType);
@@ -240,6 +244,9 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
 
 inline void rng_engine(std::size_t N, std::size_t M)
 {
+    N = std::max(N, static_cast<std::size_t>(10000));
+    M = std::max(M, static_cast<std::size_t>(10));
+
     const int nwid = 20;
     const int swid = 6;
     const int twid = 15;
