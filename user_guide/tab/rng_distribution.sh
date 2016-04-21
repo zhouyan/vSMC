@@ -1,4 +1,4 @@
 #!/bin/bash
 
-../../build/clang-Release/example/rng/rng_distribution \
-    --distribution All > rng_distribution.txt
+ninja -C ../../build/clang-Release rng_distribution-check > rng_distribution.txt
+./rng_distribution.pl

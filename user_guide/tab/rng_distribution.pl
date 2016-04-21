@@ -9,7 +9,7 @@ my $normal = join ' ', qw(Normal Lognormal Levy);
 my $inverse = join ' ', qw(Cauchy Exponential ExtremeValue Laplace Logistic
 Pareto Rayleigh UniformReal Weibull);
 
-my $nostd = join ' ', qw(Laplace Logistic Pareto Rayleigh Levy);
+my $nostd = join ' ', qw(Logistic Pareto Rayleigh Levy);
 
 my %distribution;
 my %cpB;
@@ -23,8 +23,15 @@ while (<RAWFILE>) {
         $_ = <RAWFILE>;
         $_ = <RAWFILE>;
         my @record = split;
+        shift @record;
         my $cpB;
-        foreach (@record[1..4]) {
+        if ($nostd =~ /$basename/) {
+            shift @record;
+            $cpB .= sprintf ' & %-4s', '--';
+        } else {
+            $cpB .= format_cpB(shift @record);
+        }
+        foreach (@record[0..2]) {
             $cpB .= format_cpB($_);
         }
         $cpB .= "\n";
@@ -56,7 +63,7 @@ while (my ($basename, $name) = each %distribution) {
     $table .= '\begin{tabularx}{\textwidth}{p{2in}XXXX}' . "\n";
     $table .= ' ' x 2 . '\toprule' . "\n";
     $table .= ' ' x 2;
-    $table .= 'Distribution & \std & \vsmc & \verb|rng_rand| & \mkl \\\\';
+    $table .= 'Distribution & \std/Boost & \vsmc & \verb|rng_rand| & \mkl \\\\';
     $table .= "\n";
     $table .= ' ' x 2 . '\midrule' . "\n";
     my $index = 0;

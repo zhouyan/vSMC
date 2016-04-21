@@ -123,7 +123,8 @@ and ``\verb|rng_rand|'', respectively.
 
 For the performance of distributions, we measure four situations. Take the
 Normal distribution as an example, first, if the distribution is available in
-the standard library, we measure the following case,
+the standard library or the Boost\footnote{\url{http://www.boost.org}} library,
+we measure the following case,
 \begin{cppcode}
   RNG rng;
   std::normal_distribution<double> rnorm_std(0, 1);
@@ -150,7 +151,7 @@ For all the three above, the \rng is \verb|ARSx8| (section~\ref{sub:AES-NI
 \end{cppcode}
 In this case, not only the \rng itself is faster, the distribution might also
 use \mkl routines. The performance is measured in cpE. The four performance
-data are labeled ``\std'', ``\vsmc'', ``\verb|rng_rand|'' and ``\mkl'',
+data are labeled ``\std/Boost'', ``\vsmc'', ``\verb|rng_rand|'' and ``\mkl'',
 respectively.
 
 Note that these performance data, especially those for \rng{}s, are for

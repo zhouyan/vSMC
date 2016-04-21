@@ -1,5 +1,6 @@
 #!/bin/bash
 
-../../build/clang-Release/example/rng/rng_engine > rng_engine_clang.txt
-../../build/gcc-Release/example/rng/rng_engine   > rng_engine_gcc.txt
-../../build/intel-Release/example/rng/rng_engine > rng_engine_intel.txt
+ninja -C ../../build/clang-Release rng_engine-check > rng_engine_clang.txt
+ninja -C ../../build/gcc-Release   rng_engine-check > rng_engine_gcc.txt
+ninja -C ../../build/intel-Release rng_engine-check > rng_engine_intel.txt
+./rng_engine.pl
