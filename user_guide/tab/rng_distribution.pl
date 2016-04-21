@@ -2,6 +2,8 @@
 
 use v5.16.0;
 
+do 'tab.pl';
+
 my $normal = join ' ', qw(Normal Lognormal Levy); 
 
 my $inverse = join ' ', qw(Cauchy Exponential ExtremeValue Laplace Logistic
@@ -70,20 +72,4 @@ while (my ($basename, $name) = each %distribution) {
     my $texfile = "rng_distribution_\L$basename.tex";
     open TEXFILE, '>', $texfile;
     print TEXFILE $table;
-}
-
-sub format_cpB
-{
-    my $cpB = $_[0];
-    my $line = ' & ';
-    if ($cpB > 100) {
-        $line .= sprintf '%-4.0f', $cpB;
-    } elsif ($cpB > 10) {
-        $line .= sprintf '%-4.1f', $cpB;
-    } elsif ($cpB > 1) {
-        $line .= sprintf '%-4.2f', $cpB;
-    } else {
-        $line .= sprintf '%-4.2f', $cpB;
-    }
-    $line
 }
