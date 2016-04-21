@@ -204,7 +204,7 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
             watch1.stop();
 
             watch2.start();
-            rbits(rng2, K, r2.data());
+            vsmc::rng_rand(rng2, rbits, K, r2.data());
             watch2.stop();
             pass = pass && (r1 == r2 || rng != rng);
 
@@ -219,9 +219,9 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
 
             std::stringstream ss;
             ss << rng;
-            rbits(rng, K, r1.data());
+            vsmc::rng_rand(rng, rbits, K, r1.data());
             ss >> rng;
-            rbits(rng, K, r2.data());
+            vsmc::rng_rand(rng, rbits, K, r2.data());
             pass = pass && (r1 == r2 || rng != rng);
         }
         double bytes = static_cast<double>(sizeof(std::uint64_t) * num);
