@@ -937,8 +937,8 @@ class MKLEngine
 
         ::VSLBRngProperties properties;
         MKLStream::get_brng_properties(stream_.get_brng(), &properties);
-        int bits = properties.NBits;
-        long long M = static_cast<long long>(M_);
+        const int bits = properties.NBits;
+        const long long M = static_cast<long long>(M_);
         long long m = nskip / M * M;
         if (Bits >= bits)
             m *= Bits / bits + (Bits % bits == 0 ? 0 : 1);
@@ -956,11 +956,7 @@ class MKLEngine
             case VSL_BRNG_ARS5: stream_.skip_ahead(m); break;
 #endif
             default:
-                if (MKLStream::has_skip_ahead(stream_.get_brng())) {
-                    stream_.skip_ahead(m);
-                    break;
-                }
-                while (nskip > M) {
+                while (nskip >= M) {
                     generate();
                     nskip -= M;
                 }
