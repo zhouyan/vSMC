@@ -193,6 +193,18 @@ inline void ostream_ary(std::basic_ostream<CharT, Traits> &os,
     ostream_ary<K + 1>(os, ary, std::integral_constant<bool, K + 1 < N>());
 }
 
+template <typename CharT, typename Traits, typename T, std::size_t N>
+inline std::basic_ostream<CharT, Traits> &ostream(
+    std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
+{
+    if (!os)
+        return os;
+
+    ostream_ary<0>(os, ary, std::integral_constant<bool, 0 < N>());
+
+    return os;
+}
+
 template <std::size_t, typename CharT, typename Traits, typename T,
     std::size_t N>
 inline void istream_ary(
@@ -209,46 +221,8 @@ inline void istream_ary(std::basic_istream<CharT, Traits> &is,
     istream_ary<K + 1>(is, ary, std::integral_constant<bool, K + 1 < N>());
 }
 
-template <typename CharT, typename Traits, typename T, typename Alloc>
-inline void ostream_vec(
-    std::basic_ostream<CharT, Traits> &os, const std::vector<T, Alloc> &vec)
-{
-    os << vec.size();
-    if (!os)
-        return;
-
-    for (const auto &v : vec)
-        os << ' ' << v;
-}
-
-template <typename CharT, typename Traits, typename T, typename Alloc>
-inline void istream_vec(
-    std::basic_istream<CharT, Traits> &is, std::vector<T, Alloc> &vec)
-{
-    std::size_t n = 0;
-    is >> n;
-    if (!is)
-        return;
-
-    vec.resize(n);
-    for (std::size_t i = 0; i != n; ++i)
-        is >> std::ws >> vec[i];
-}
-
 template <typename CharT, typename Traits, typename T, std::size_t N>
-inline std::basic_ostream<CharT, Traits> &operator<<(
-    std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
-{
-    if (!os)
-        return os;
-
-    ostream_ary<0>(os, ary, std::integral_constant<bool, 0 < N>());
-
-    return os;
-}
-
-template <typename CharT, typename Traits, typename T, std::size_t N>
-inline std::basic_istream<CharT, Traits> &operator>>(
+inline std::basic_istream<CharT, Traits> &istream(
     std::basic_istream<CharT, Traits> &is, std::array<T, N> &ary)
 {
     if (!is)
@@ -263,30 +237,69 @@ inline std::basic_istream<CharT, Traits> &operator>>(
 }
 
 template <typename CharT, typename Traits, typename T, typename Alloc>
-inline std::basic_ostream<CharT, Traits> &operator<<(
+inline std::basic_ostream<CharT, Traits> &ostream(
     std::basic_ostream<CharT, Traits> &os, const std::vector<T, Alloc> &vec)
 {
     if (!os)
         return os;
 
-    ostream_vec(os, vec);
+    os << vec.size();
+    if (!os)
+        return os;
+
+    for (const auto &v : vec)
+        os << ' ' << v;
 
     return os;
+}
+
+template <typename CharT, typename Traits, typename T, typename Alloc>
+inline std::basic_istream<CharT, Traits> &istream(
+    std::basic_istream<CharT, Traits> &is, std::vector<T, Alloc> &vec)
+{
+    if (!is)
+        return is;
+
+    std::size_t n = 0;
+    is >> n;
+    if (!is)
+        return is;
+
+    std::vector<T, Alloc> tmp(n);
+    for (std::size_t i = 0; i != n; ++i)
+        is >> std::ws >> tmp[i];
+    if (is)
+        vec = std::move(tmp);
+
+    return is;
+}
+
+template <typename CharT, typename Traits, typename T, std::size_t N>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
+{
+    return ostream(os, ary);
+}
+
+template <typename CharT, typename Traits, typename T, std::size_t N>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, std::array<T, N> &ary)
+{
+    return istream(is, ary);
+}
+
+template <typename CharT, typename Traits, typename T, typename Alloc>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const std::vector<T, Alloc> &vec)
+{
+    return ostream(os, vec);
 }
 
 template <typename CharT, typename Traits, typename T, typename Alloc>
 inline std::basic_istream<CharT, Traits> &operator>>(
     std::basic_istream<CharT, Traits> &is, std::vector<T, Alloc> &vec)
 {
-    if (!is)
-        return is;
-
-    std::vector<T, Alloc> tmp;
-    istream_vec(is, tmp);
-    if (is)
-        vec = std::move(tmp);
-
-    return is;
+    return istream(is, vec);
 }
 
 } // namespace vsmc::internal
@@ -295,54 +308,28 @@ template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
 {
-    if (!os)
-        return os;
-
-    internal::ostream_ary<0>(os, ary, std::integral_constant<bool, 0 < N>());
-
-    return os;
+    return internal::ostream(os, ary);
 }
 
 template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_istream<CharT, Traits> &operator>>(
     std::basic_istream<CharT, Traits> &is, std::array<T, N> &ary)
 {
-    if (!is)
-        return is;
-
-    std::array<T, N> tmp;
-    internal::istream_ary<0>(is, tmp, std::integral_constant<bool, 0 < N>());
-    if (is)
-        ary = std::move(tmp);
-
-    return is;
+    return internal::istream(is, ary);
 }
 
 template <typename CharT, typename Traits, typename T, typename Alloc>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const std::vector<T, Alloc> &vec)
 {
-    if (!os)
-        return os;
-
-    internal::ostream_vec(os, vec);
-
-    return os;
+    return internal::ostream(os, vec);
 }
 
 template <typename CharT, typename Traits, typename T, typename Alloc>
 inline std::basic_istream<CharT, Traits> &operator>>(
     std::basic_istream<CharT, Traits> &is, std::vector<T, Alloc> &vec)
 {
-    if (!is)
-        return is;
-
-    std::vector<T, Alloc> tmp;
-    internal::istream_vec(is, tmp);
-    if (is)
-        vec = std::move(tmp);
-
-    return is;
+    return internal::istream(is, vec);
 }
 
 } // namespace vsmc
