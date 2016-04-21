@@ -36,240 +36,580 @@
 #include <boost/random.hpp>
 #include "rng_common.hpp"
 
-#define VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(K, Name, STD)                      \
-    rng_distribution_test<RealType, K, vsmc::Name##Distribution<RealType>,    \
-        STD<RealType>>(N, M, #Name, params);
+template <std::size_t ParamNum>
+class DistTraitBase
+{
+    public:
+    DistTraitBase() = default;
+    DistTraitBase(const DistTraitBase<ParamNum> &) = default;
+    DistTraitBase<ParamNum> &operator=(
+        const DistTraitBase<ParamNum> &) = default;
+    virtual ~DistTraitBase() {}
+
+    static const std::size_t param_num = ParamNum;
+
+    virtual std::string dist_name() = 0;
+
+    template <typename RealType>
+    std::string name(const std::array<RealType, ParamNum> &param)
+    {
+        return name_dispatch(dist_name(), param);
+    }
+
+    protected:
+    template <typename RealType, typename QuantileType>
+    vsmc::Vector<RealType> partition_quantile(
+        std::size_t n, QuantileType &&quantile) const
+    {
+        const std::size_t k = n < 2000 ? n / 100 : 20; // The number of cells
+        const RealType p = static_cast<RealType>(1) / k;
+        vsmc::Vector<RealType> partition(k - 1);
+        for (std::size_t i = 0; i != k - 1; ++i)
+            partition[i] = quantile(p * (i + 1));
+
+        return partition;
+    }
+
+    template <typename RealType, typename BoostDistType>
+    vsmc::Vector<RealType> partition_boost(
+        std::size_t n, BoostDistType &&dist) const
+    {
+        return partition_quantile<RealType>(n, [&](RealType p) {
+            return boost::math::quantile(std::forward<BoostDistType>(dist), p);
+        });
+    }
+
+    template <typename RealType>
+    static void add_param(vsmc::Vector<std::array<RealType, 0>> &params)
+    {
+        params.resize(1);
+    }
+
+    template <typename RealType, typename ValueType1>
+    static void add_param(
+        vsmc::Vector<std::array<RealType, 1>> &param, ValueType1 p1)
+    {
+        param.push_back({{static_cast<RealType>(p1)}});
+    }
+
+    template <typename RealType, typename ValueType1, typename ValueType2>
+    static void add_param(vsmc::Vector<std::array<RealType, 2>> &param,
+        ValueType1 p1, ValueType2 p2)
+    {
+        param.push_back(
+            {{static_cast<RealType>(p1), static_cast<RealType>(p2)}});
+    }
+
+    private:
+    template <typename RealType>
+    static std::string name_dispatch(
+        const std::string &dist_name, const std::array<RealType, 0> &)
+    {
+        std::stringstream ss;
+        ss << dist_name << '<' << rng_type_name<RealType>() << '>';
+
+        return ss.str();
+    }
+
+    template <typename RealType>
+    static std::string name_dispatch(
+        const std::string &dist_name, const std::array<RealType, 1> &param)
+    {
+        std::stringstream ss;
+        ss << dist_name << '<' << rng_type_name<RealType>() << '>';
+        ss << "(" << param[0] << ")";
+
+        return ss.str();
+    }
+
+    template <typename RealType>
+    static std::string name_dispatch(
+        const std::string &dist_name, const std::array<RealType, 2> &param)
+    {
+        std::stringstream ss;
+        ss << dist_name << '<' << rng_type_name<RealType>() << '>';
+        ss << "(" << param[0] << "," << param[1] << ")";
+
+        return ss.str();
+    }
+};
+
+template <typename DistType>
+class DistTrait;
 
 template <typename RealType>
-inline std::string rng_distribution_name(
-    const std::string &name, const std::array<RealType, 0> &)
+class DistTrait<vsmc::BetaDistribution<RealType>> : public DistTraitBase<2>
 {
-    std::stringstream ss;
-    ss << name << '<' << rng_type_name<RealType>() << '>';
+    public:
+    using dist_type = vsmc::BetaDistribution<RealType>;
+    using std_type = boost::random::beta_distribution<RealType>;
 
-    return ss.str();
-}
+    std::string dist_name() { return "Beta"; }
+
+    vsmc::Vector<RealType> partition(
+        std::size_t n, const dist_type &dist) const
+    {
+        return partition_boost<RealType>(
+            n, boost::math::beta_distribution<RealType>(
+                   dist.alpha(), dist.beta()));
+    }
+
+    vsmc::Vector<std::array<RealType, 2>> params() const
+    {
+        vsmc::Vector<std::array<RealType, 2>> params;
+        add_param(params, 0.5, 0.5);
+        add_param(params, 1, 1);
+        add_param(params, 1, 0.5);
+        add_param(params, 1, 1.5);
+        add_param(params, 0.5, 1);
+        add_param(params, 1.5, 1);
+        add_param(params, 1.5, 1.5);
+        add_param(params, 0.3, 0.3);
+        add_param(params, 0.9, 0.9);
+        add_param(params, 1.5, 0.5);
+        add_param(params, 0.5, 1.5);
+
+        return params;
+    }
+};
 
 template <typename RealType>
-inline std::string rng_distribution_name(
-    const std::string &name, const std::array<RealType, 1> &param)
+class DistTrait<vsmc::CauchyDistribution<RealType>> : public DistTraitBase<2>
 {
-    std::stringstream ss;
-    ss << name << '<' << rng_type_name<RealType>() << '>';
-    ss << "(" << param[0] << ")";
+    public:
+    using dist_type = vsmc::CauchyDistribution<RealType>;
+    using std_type = std::cauchy_distribution<RealType>;
 
-    return ss.str();
-}
+    std::string dist_name() { return "Cauchy"; }
+
+    vsmc::Vector<RealType> partition(
+        std::size_t n, const dist_type &dist) const
+    {
+        return partition_quantile<RealType>(n, [&](RealType p) {
+            return dist.a() +
+                dist.b() * std::tan(vsmc::const_pi<RealType>() *
+                               (p - static_cast<RealType>(0.5)));
+        });
+    }
+
+    vsmc::Vector<std::array<RealType, 2>> params() const
+    {
+        vsmc::Vector<std::array<RealType, 2>> params;
+        add_param(params, 0, 1);
+
+        return params;
+    }
+};
 
 template <typename RealType>
-inline std::string rng_distribution_name(
-    const std::string &name, const std::array<RealType, 2> &param)
+class DistTrait<vsmc::GammaDistribution<RealType>> : public DistTraitBase<2>
 {
-    std::stringstream ss;
-    ss << name << '<' << rng_type_name<RealType>() << '>';
-    ss << "(" << param[0] << "," << param[1] << ")";
+    public:
+    using dist_type = vsmc::GammaDistribution<RealType>;
+    using std_type = std::gamma_distribution<RealType>;
 
-    return ss.str();
-}
+    std::string dist_name() { return "Gamma"; }
 
-template <typename RealType, typename DistType>
-inline DistType rng_distribution_init(const std::array<RealType, 0> &)
-{
-    return DistType();
-}
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return partition_boost<RealType>(
+            n, boost::math::gamma_distribution<RealType>(
+                   dist.alpha(), dist.beta()));
+    }
 
-template <typename RealType, typename DistType>
-inline DistType rng_distribution_init(const std::array<RealType, 1> &param)
-{
-    return DistType(param[0]);
-}
+    vsmc::Vector<std::array<RealType, 2>> params() const
+    {
+        vsmc::Vector<std::array<RealType, 2>> params;
+        add_param(params, 1, 1);
+        add_param(params, 0.1, 1);
+        add_param(params, 0.5, 1);
+        add_param(params, 0.7, 1);
+        add_param(params, 0.9, 1);
+        add_param(params, 1.5, 1);
+        add_param(params, 15, 1);
 
-template <typename RealType, typename DistType>
-inline DistType rng_distribution_init(const std::array<RealType, 2> &param)
-{
-    return DistType(param[0], param[1]);
-}
-
-template <typename RealType, typename QuantileType>
-inline vsmc::Vector<RealType> rng_distribution_partition_quantile(
-    std::size_t n, QuantileType &&quantile)
-{
-    const std::size_t k = n < 2000 ? n / 100 : 20; // The number of cells
-    const RealType p = static_cast<RealType>(1) / k;
-    vsmc::Vector<RealType> partition(k - 1);
-    for (std::size_t i = 0; i != k - 1; ++i)
-        partition[i] = quantile(p * (i + 1));
-
-    return partition;
-}
-
-template <typename RealType, typename BoostDistType>
-inline vsmc::Vector<RealType> rng_distribution_partition_boost(
-    std::size_t n, BoostDistType &&dist)
-{
-    return rng_distribution_partition_quantile<RealType>(n, [&](RealType p) {
-        return boost::math::quantile(std::forward<BoostDistType>(dist), p);
-    });
-}
+        return params;
+    }
+};
 
 template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::BetaDistribution<RealType> &dist)
+class DistTrait<vsmc::ChiSquaredDistribution<RealType>>
+    : public DistTraitBase<1>
 {
-    return rng_distribution_partition_boost<RealType>(n,
-        boost::math::beta_distribution<RealType>(dist.alpha(), dist.beta()));
-}
+    public:
+    using dist_type = vsmc::ChiSquaredDistribution<RealType>;
+    using std_type = std::chi_squared_distribution<RealType>;
+
+    std::string dist_name() { return "ChiSquared"; }
+
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return partition_boost<RealType>(
+            n, boost::math::chi_squared_distribution<RealType>(dist.n()));
+    }
+
+    vsmc::Vector<std::array<RealType, 1>> params() const
+    {
+        DistTrait<vsmc::GammaDistribution<RealType>> gamma_traits;
+        vsmc::Vector<std::array<RealType, 2>> pgamma = gamma_traits.params();
+        vsmc::Vector<std::array<RealType, 1>> params;
+        for (std::size_t i = 0; i != pgamma.size(); ++i)
+            add_param(params, pgamma[i][0] * 2);
+
+        return params;
+    }
+};
 
 template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::CauchyDistribution<RealType> &dist)
+class DistTrait<vsmc::ExponentialDistribution<RealType>>
+    : public DistTraitBase<1>
 {
-    return rng_distribution_partition_quantile<RealType>(n, [&](RealType p) {
-        return dist.a() +
-            dist.b() * std::tan(vsmc::const_pi<RealType>() *
-                           (p - static_cast<RealType>(0.5)));
-    });
-}
+    public:
+    using dist_type = vsmc::ExponentialDistribution<RealType>;
+    using std_type = std::exponential_distribution<RealType>;
+
+    std::string dist_name() { return "Exponential"; }
+
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return partition_quantile<RealType>(
+            n, [&](RealType p) { return -std::log(1 - p) / dist.lambda(); });
+    }
+
+    vsmc::Vector<std::array<RealType, 1>> params() const
+    {
+        vsmc::Vector<std::array<RealType, 1>> params;
+        add_param(params, 1);
+
+        return params;
+    }
+};
 
 template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::ChiSquaredDistribution<RealType> &dist)
+class DistTrait<vsmc::ExtremeValueDistribution<RealType>>
+    : public DistTraitBase<2>
 {
-    return rng_distribution_partition_boost<RealType>(
-        n, boost::math::chi_squared_distribution<RealType>(dist.n()));
-}
+    public:
+    using dist_type = vsmc::ExtremeValueDistribution<RealType>;
+    using std_type = std::extreme_value_distribution<RealType>;
+
+    std::string dist_name() { return "ExtremeValue"; }
+
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return partition_quantile<RealType>(n, [&](RealType p) {
+            return dist.a() - dist.b() * std::log(-std::log(p));
+        });
+    }
+
+    vsmc::Vector<std::array<RealType, 2>> params() const
+    {
+        vsmc::Vector<std::array<RealType, 2>> params;
+        add_param(params, 0, 1);
+
+        return params;
+    }
+};
 
 template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::ExponentialDistribution<RealType> &dist)
+class DistTrait<vsmc::FisherFDistribution<RealType>> : public DistTraitBase<2>
 {
-    return rng_distribution_partition_quantile<RealType>(
-        n, [&](RealType p) { return -std::log(1 - p) / dist.lambda(); });
-}
+    public:
+    using dist_type = vsmc::FisherFDistribution<RealType>;
+    using std_type = std::fisher_f_distribution<RealType>;
+
+    std::string dist_name() { return "FisherF"; }
+
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return partition_boost<RealType>(n,
+            boost::math::fisher_f_distribution<RealType>(dist.m(), dist.n()));
+    }
+
+    vsmc::Vector<std::array<RealType, 2>> params() const
+    {
+        DistTrait<vsmc::ChiSquaredDistribution<RealType>> chi_traits;
+        vsmc::Vector<std::array<RealType, 1>> pchi = chi_traits.params();
+        vsmc::Vector<std::array<RealType, 2>> params;
+        for (std::size_t i = 0; i != pchi.size(); ++i)
+            for (std::size_t j = 0; j != pchi.size(); ++j)
+                add_param(params, pchi[i][0], pchi[j][0]);
+
+        return params;
+    }
+};
 
 template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::ExtremeValueDistribution<RealType> &dist)
+class DistTrait<vsmc::LaplaceDistribution<RealType>> : public DistTraitBase<2>
 {
-    return rng_distribution_partition_quantile<RealType>(n, [&](RealType p) {
-        return dist.a() - dist.b() * std::log(-std::log(p));
-    });
-}
+    public:
+    using dist_type = vsmc::LaplaceDistribution<RealType>;
+    using std_type = boost::random::laplace_distribution<RealType>;
+
+    std::string dist_name() { return "Laplace"; }
+
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return partition_quantile<RealType>(n, [&](RealType p) {
+            RealType q = p - static_cast<RealType>(0.5);
+            return q > 0 ? dist.a() - dist.b() * std::log(1 - 2 * q) :
+                           dist.a() + dist.b() * std::log(1 + 2 * q);
+        });
+    }
+
+    vsmc::Vector<std::array<RealType, 2>> params() const
+    {
+        vsmc::Vector<std::array<RealType, 2>> params;
+        add_param(params, 0, 1);
+
+        return params;
+    }
+};
 
 template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::FisherFDistribution<RealType> &dist)
+class DistTrait<vsmc::LevyDistribution<RealType>> : public DistTraitBase<2>
 {
-    return rng_distribution_partition_boost<RealType>(
-        n, boost::math::fisher_f_distribution<RealType>(dist.m(), dist.n()));
-}
+    public:
+    using dist_type = vsmc::LevyDistribution<RealType>;
+    using std_type = vsmc::NullType;
+
+    std::string dist_name() { return "Levy"; }
+
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        boost::math::normal_distribution<RealType> normal(0, 1);
+        return partition_quantile<RealType>(n, [&](RealType p) {
+            RealType q = boost::math::quantile(normal, 1 - p / 2);
+            return dist.a() + dist.b() / (q * q);
+        });
+    }
+
+    vsmc::Vector<std::array<RealType, 2>> params() const
+    {
+        vsmc::Vector<std::array<RealType, 2>> params;
+        add_param(params, 0, 1);
+
+        return params;
+    }
+};
 
 template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::GammaDistribution<RealType> &dist)
+class DistTrait<vsmc::LogisticDistribution<RealType>> : public DistTraitBase<2>
 {
-    return rng_distribution_partition_boost<RealType>(n,
-        boost::math::gamma_distribution<RealType>(dist.alpha(), dist.beta()));
-}
+    public:
+    using dist_type = vsmc::LogisticDistribution<RealType>;
+    using std_type = vsmc::NullType;
+
+    std::string dist_name() { return "Logistic"; }
+
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return partition_quantile<RealType>(n, [&](RealType p) {
+            return dist.a() + dist.b() * std::log(p / (1 - p));
+        });
+    }
+
+    vsmc::Vector<std::array<RealType, 2>> params() const
+    {
+        vsmc::Vector<std::array<RealType, 2>> params;
+        add_param(params, 0, 1);
+
+        return params;
+    }
+};
 
 template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::LaplaceDistribution<RealType> &dist)
+class DistTrait<vsmc::LognormalDistribution<RealType>>
+    : public DistTraitBase<2>
 {
-    return rng_distribution_partition_quantile<RealType>(n, [&](RealType p) {
-        RealType q = p - static_cast<RealType>(0.5);
-        return q > 0 ? dist.a() - dist.b() * std::log(1 - 2 * q) :
-                       dist.a() + dist.b() * std::log(1 + 2 * q);
-    });
-}
+    public:
+    using dist_type = vsmc::LognormalDistribution<RealType>;
+    using std_type = std::lognormal_distribution<RealType>;
+
+    std::string dist_name() { return "Lognormal"; }
+
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return partition_boost<RealType>(n,
+            boost::math::lognormal_distribution<RealType>(dist.m(), dist.s()));
+    }
+
+    vsmc::Vector<std::array<RealType, 2>> params() const
+    {
+        vsmc::Vector<std::array<RealType, 2>> params;
+        add_param(params, 0, 1);
+
+        return params;
+    }
+};
 
 template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::LevyDistribution<RealType> &dist)
+class DistTrait<vsmc::NormalDistribution<RealType>> : public DistTraitBase<2>
 {
-    boost::math::normal_distribution<RealType> normal(0, 1);
-    return rng_distribution_partition_quantile<RealType>(n, [&](RealType p) {
-        RealType q = boost::math::quantile(normal, 1 - p / 2);
-        return dist.a() + dist.b() / (q * q);
-    });
-}
+    public:
+    using dist_type = vsmc::NormalDistribution<RealType>;
+    using std_type = std::normal_distribution<RealType>;
+
+    std::string dist_name() { return "Normal"; }
+
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return partition_boost<RealType>(
+            n, boost::math::normal_distribution<RealType>(
+                   dist.mean(), dist.stddev()));
+    }
+
+    vsmc::Vector<std::array<RealType, 2>> params() const
+    {
+        vsmc::Vector<std::array<RealType, 2>> params;
+        add_param(params, 0, 1);
+
+        return params;
+    }
+};
 
 template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::LogisticDistribution<RealType> &dist)
+class DistTrait<vsmc::ParetoDistribution<RealType>> : public DistTraitBase<2>
 {
-    return rng_distribution_partition_quantile<RealType>(n, [&](RealType p) {
-        return dist.a() + dist.b() * std::log(p / (1 - p));
-    });
-}
+    public:
+    using dist_type = vsmc::ParetoDistribution<RealType>;
+    using std_type = vsmc::NullType;
+
+    std::string dist_name() { return "Pareto"; }
+
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return partition_quantile<RealType>(n, [&](RealType p) {
+            return dist.b() / std::exp(std::log(1 - p) / dist.a());
+        });
+    }
+
+    vsmc::Vector<std::array<RealType, 2>> params() const
+    {
+        vsmc::Vector<std::array<RealType, 2>> params;
+        add_param(params, 1, 1);
+
+        return params;
+    }
+};
 
 template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::LognormalDistribution<RealType> &dist)
+class DistTrait<vsmc::RayleighDistribution<RealType>> : public DistTraitBase<1>
 {
-    return rng_distribution_partition_boost<RealType>(
-        n, boost::math::lognormal_distribution<RealType>(dist.m(), dist.s()));
-}
+    public:
+    using dist_type = vsmc::RayleighDistribution<RealType>;
+    using std_type = vsmc::NullType;
+
+    std::string dist_name() { return "Rayleigh"; }
+
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return partition_quantile<RealType>(n, [&](RealType p) {
+            return std::sqrt(
+                -2 * std::log(1 - p) * dist.sigma() * dist.sigma());
+        });
+    }
+
+    vsmc::Vector<std::array<RealType, 1>> params() const
+    {
+        vsmc::Vector<std::array<RealType, 1>> params;
+        add_param(params, 1);
+
+        return params;
+    }
+};
 
 template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::NormalDistribution<RealType> &dist)
+class DistTrait<vsmc::StudentTDistribution<RealType>> : public DistTraitBase<1>
 {
-    return rng_distribution_partition_boost<RealType>(
-        n, boost::math::normal_distribution<RealType>(
-               dist.mean(), dist.stddev()));
-}
+    public:
+    using dist_type = vsmc::StudentTDistribution<RealType>;
+    using std_type = std::student_t_distribution<RealType>;
+
+    std::string dist_name() { return "StudentT"; }
+
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return partition_boost<RealType>(
+            n, boost::math::students_t_distribution<RealType>(dist.n()));
+    }
+
+    vsmc::Vector<std::array<RealType, 1>> params() const
+    {
+        DistTrait<vsmc::ChiSquaredDistribution<RealType>> chi_traits;
+        return chi_traits.params();
+    }
+};
 
 template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::ParetoDistribution<RealType> &dist)
+class DistTrait<vsmc::U01Distribution<RealType>> : public DistTraitBase<0>
 {
-    return rng_distribution_partition_quantile<RealType>(n, [&](RealType p) {
-        return dist.b() / std::exp(std::log(1 - p) / dist.a());
-    });
-}
+    public:
+    using dist_type = vsmc::U01Distribution<RealType>;
+    using std_type = std::uniform_real_distribution<RealType>;
+
+    std::string dist_name() { return "U01"; }
+
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &)
+    {
+        return partition_quantile<RealType>(n, [&](RealType p) { return p; });
+    }
+
+    vsmc::Vector<std::array<RealType, 0>> params() const
+    {
+        return vsmc::Vector<std::array<RealType, 0>>(1);
+    }
+};
 
 template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::RayleighDistribution<RealType> &dist)
+class DistTrait<vsmc::UniformRealDistribution<RealType>>
+    : public DistTraitBase<2>
 {
-    return rng_distribution_partition_quantile<RealType>(n, [&](RealType p) {
-        return std::sqrt(-2 * std::log(1 - p) * dist.sigma() * dist.sigma());
-    });
-}
+    public:
+    using dist_type = vsmc::UniformRealDistribution<RealType>;
+    using std_type = std::uniform_real_distribution<RealType>;
+
+    std::string dist_name() { return "UniformReal"; }
+
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return partition_quantile<RealType>(n,
+            [&](RealType p) { return dist.a() + p * (dist.b() - dist.a()); });
+    }
+
+    vsmc::Vector<std::array<RealType, 2>> params() const
+    {
+        vsmc::Vector<std::array<RealType, 2>> params;
+        add_param(params, -0.5, 0.5);
+
+        return params;
+    }
+};
 
 template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::StudentTDistribution<RealType> &dist)
+class DistTrait<vsmc::WeibullDistribution<RealType>> : public DistTraitBase<2>
 {
-    return rng_distribution_partition_boost<RealType>(
-        n, boost::math::students_t_distribution<RealType>(dist.n()));
-}
+    public:
+    using dist_type = vsmc::WeibullDistribution<RealType>;
+    using std_type = std::weibull_distribution<RealType>;
 
-template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::U01Distribution<RealType> &)
-{
-    return rng_distribution_partition_quantile<RealType>(
-        n, [&](RealType p) { return p; });
-}
+    std::string dist_name() { return "Weibull"; }
 
-template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::UniformRealDistribution<RealType> &dist)
-{
-    return rng_distribution_partition_quantile<RealType>(
-        n, [&](RealType p) { return dist.a() + p * (dist.b() - dist.a()); });
-}
+    vsmc::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return partition_quantile<RealType>(n, [&](RealType p) {
+            return dist.b() * std::pow(-std::log(1 - p), 1 / dist.a());
+        });
+    }
 
-template <typename RealType>
-inline vsmc::Vector<RealType> rng_distribution_partition(
-    std::size_t n, const vsmc::WeibullDistribution<RealType> &dist)
-{
-    return rng_distribution_partition_quantile<RealType>(n, [&](RealType p) {
-        return dist.b() * std::pow(-std::log(1 - p), 1 / dist.a());
-    });
-}
+    vsmc::Vector<std::array<RealType, 2>> params() const
+    {
+        vsmc::Vector<std::array<RealType, 2>> params;
+        add_param(params, 1, 1);
+
+        return params;
+    }
+};
 
 #if VSMC_HAS_MKL
 
@@ -470,14 +810,33 @@ inline void rng_distribution_stream(vsmc::MKLStream &stream,
 
 #endif // VSMC_HAS_MKL
 
-template <typename RealType, typename DistType>
+template <typename DistType, typename RealType>
+inline DistType rng_distribution_init(const std::array<RealType, 0> &)
+{
+    return DistType();
+}
+
+template <typename DistType, typename RealType>
+inline DistType rng_distribution_init(const std::array<RealType, 1> &param)
+{
+    return DistType(param[0]);
+}
+
+template <typename DistType, typename RealType>
+inline DistType rng_distribution_init(const std::array<RealType, 2> &param)
+{
+    return DistType(param[0], param[1]);
+}
+
+template <typename RealType, typename vSMCDistType>
 inline RealType rng_distribution_chi2(
-    std::size_t n, const RealType *r, const DistType &dist)
+    std::size_t n, const RealType *r, const vSMCDistType &dist)
 {
     vsmc::Vector<RealType> rval(r, r + n);
     std::sort(rval.begin(), rval.end());
 
-    vsmc::Vector<RealType> partition(rng_distribution_partition(n, dist));
+    DistTrait<vSMCDistType> traits;
+    vsmc::Vector<RealType> partition(traits.partition(n, dist));
 
     const std::size_t k = partition.size() + 1;
     vsmc::Vector<RealType> count(k);
@@ -503,9 +862,9 @@ inline RealType rng_distribution_chi2(
     return boost::math::cdf(chi2, s);
 }
 
-template <typename RealType, typename DistType>
+template <typename RealType, typename vSMCDistType>
 inline RealType rng_distribution_ksad(
-    std::size_t n, const RealType *r, const DistType &dist)
+    std::size_t n, const RealType *r, const vSMCDistType &dist)
 {
     const std::size_t k = 10;
     const std::size_t m = n / k;
@@ -567,91 +926,6 @@ inline void rng_distribution_pval(const vsmc::Vector<RealType> &chi2,
     pval[5].push_back(static_cast<RealType>(100.0 * alpha3 / ksad.size()));
 }
 
-template <typename RealType, typename vSMCDistType, typename STDDistType,
-    std::size_t K>
-inline void rng_distribution_test(std::size_t N, std::size_t M,
-    const std::array<RealType, K> &param, const std::string &name,
-    vsmc::Vector<std::string> &names,
-    std::array<vsmc::Vector<RealType>, 6> &pval,
-    vsmc::Vector<vsmc::StopWatch> &sw)
-{
-    names.push_back(rng_distribution_name(name, param));
-
-    vsmc::RNG rng_vsmc;
-    vSMCDistType dist_vsmc(
-        rng_distribution_init<RealType, vSMCDistType>(param));
-
-    std::mt19937 rng_std;
-    STDDistType dist_std(rng_distribution_init<RealType, STDDistType>(param));
-
-    vsmc::Vector<RealType> r(N);
-    vsmc::Vector<RealType> chi2(M);
-    vsmc::Vector<RealType> ksad(M);
-    vsmc::StopWatch watch;
-
-    watch.reset();
-    for (std::size_t i = 0; i != M; ++i) {
-        watch.start();
-        for (std::size_t j = 0; j != N; ++j)
-            r[j] = dist_std(rng_std);
-        watch.stop();
-        chi2[i] = rng_distribution_chi2(N, r.data(), dist_vsmc);
-        ksad[i] = rng_distribution_ksad(N, r.data(), dist_vsmc);
-    }
-    sw.push_back(watch);
-    rng_distribution_pval(chi2, ksad, pval);
-
-    watch.reset();
-    for (std::size_t i = 0; i != M; ++i) {
-        watch.start();
-        for (std::size_t j = 0; j != N; ++j)
-            r[j] = dist_vsmc(rng_vsmc);
-        watch.stop();
-        chi2[i] = rng_distribution_chi2(N, r.data(), dist_vsmc);
-        ksad[i] = rng_distribution_ksad(N, r.data(), dist_vsmc);
-    }
-    sw.push_back(watch);
-    rng_distribution_pval(chi2, ksad, pval);
-
-    watch.reset();
-    for (std::size_t i = 0; i != M; ++i) {
-        watch.start();
-        vsmc::rng_rand(rng_vsmc, dist_vsmc, N, r.data());
-        watch.stop();
-        chi2[i] = rng_distribution_chi2(N, r.data(), dist_vsmc);
-        ksad[i] = rng_distribution_ksad(N, r.data(), dist_vsmc);
-    }
-    sw.push_back(watch);
-    rng_distribution_pval(chi2, ksad, pval);
-
-#if VSMC_HAS_MKL
-    vsmc::MKL_SFMT19937 rng_mkl;
-    watch.reset();
-    for (std::size_t i = 0; i != M; ++i) {
-        watch.start();
-        vsmc::rng_rand(rng_mkl, dist_vsmc, N, r.data());
-        watch.stop();
-        chi2[i] = rng_distribution_chi2(N, r.data(), dist_vsmc);
-        ksad[i] = rng_distribution_ksad(N, r.data(), dist_vsmc);
-    }
-    sw.push_back(watch);
-    rng_distribution_pval(chi2, ksad, pval);
-
-    int brng = vsmc::mkl_brng<vsmc::RNG>();
-    vsmc::MKLStream stream(brng, 101);
-    watch.reset();
-    for (std::size_t i = 0; i != M; ++i) {
-        watch.start();
-        rng_distribution_stream(stream, dist_vsmc, N, r.data());
-        watch.stop();
-        chi2[i] = rng_distribution_chi2(N, r.data(), dist_vsmc);
-        ksad[i] = rng_distribution_ksad(N, r.data(), dist_vsmc);
-    }
-    sw.push_back(watch);
-    rng_distribution_pval(chi2, ksad, pval);
-#endif // VSMC_HAS_MKL
-}
-
 template <typename RealType>
 inline void rng_distribution_summary_pval(RealType pval)
 {
@@ -663,26 +937,25 @@ inline void rng_distribution_summary_pval(RealType pval)
 }
 
 template <typename RealType>
-inline void rng_distribution_summary(std::size_t N, std::size_t M,
+inline void rng_distribution_summary_pval(
     const vsmc::Vector<std::string> &names,
-    const std::array<vsmc::Vector<RealType>, 6> &pval,
-    const vsmc::Vector<vsmc::StopWatch> &sw)
+    const std::array<vsmc::Vector<RealType>, 6> &pval, int nwid, int twid)
 {
-    std::size_t K = names.size();
-    std::size_t R = sw.size() / K;
-    int nwid = 30;
-    int twid = 15;
-    int Twid = static_cast<int>(R) * twid;
-    std::size_t lwid = static_cast<std::size_t>(nwid + Twid);
+    std::size_t D = names.size();
+    std::size_t R = pval[0].size() / D;
+#if VSMC_HAS_MKL
+    std::size_t lwid = static_cast<std::size_t>(nwid + twid * 5);
+#else
+    std::size_t lwid = static_cast<std::size_t>(nwid + twid * 3);
+#endif
 
-    const vsmc::StopWatch *w = sw.data();
     const RealType *p0 = pval[0].data();
     const RealType *p1 = pval[1].data();
     const RealType *p2 = pval[2].data();
     const RealType *p3 = pval[3].data();
     const RealType *p4 = pval[4].data();
     const RealType *p5 = pval[5].data();
-    for (std::size_t i = 0; i != K; ++i) {
+    for (std::size_t i = 0; i != D; ++i) {
         std::cout << std::string(lwid, '=') << std::endl;
         std::cout << std::left << std::setw(nwid) << names[i];
         std::cout << std::right << std::setw(twid) << "STD";
@@ -694,13 +967,6 @@ inline void rng_distribution_summary(std::size_t N, std::size_t M,
 #endif
         std::cout << std::endl;
         std::cout << std::string(lwid, '-') << std::endl;
-
-        std::cout << std::left << std::setw(nwid) << "cpE";
-        for (std::size_t r = 0; r != R; ++r, ++w) {
-            std::cout << std::setw(twid) << std::right << std::fixed
-                      << w->cycles() / (N * M);
-        }
-        std::cout << std::endl;
 
         std::cout << std::left << std::setw(nwid) << "One level test (2.5%)";
         for (std::size_t r = 0; r != R; ++r)
@@ -735,250 +1001,346 @@ inline void rng_distribution_summary(std::size_t N, std::size_t M,
     std::cout << std::string(lwid, '-') << std::endl;
 }
 
-template <typename RealType, std::size_t K, typename vSMCDistType,
-    typename STDDistType, typename ParamType>
-inline void rng_distribution_test(std::size_t N, std::size_t M,
-    const std::string &name, const ParamType &params)
+template <typename vSMCDistType, typename RealType, std::size_t ParamNum>
+inline void rng_distribution_test_pval(std::size_t N, std::size_t M,
+    const std::array<RealType, ParamNum> &param,
+    vsmc::Vector<std::string> &names,
+    std::array<vsmc::Vector<RealType>, 6> &pval)
 {
-    vsmc::Vector<std::string> names;
-    std::array<vsmc::Vector<RealType>, 6> pval;
-    vsmc::Vector<vsmc::StopWatch> sw;
-    for (const auto &p : params) {
-        std::array<RealType, K> param;
-        for (std::size_t i = 0; i != p.size(); ++i)
-            param[i] = static_cast<RealType>(p[i]);
-        rng_distribution_test<RealType, vSMCDistType, STDDistType>(
-            N, M, param, name, names, pval, sw);
+    using trait_type = DistTrait<vSMCDistType>;
+    using std_type = typename trait_type::std_type;
+    using std_dist_type = typename std::conditional<
+        std::is_same<std_type, vsmc::NullType>::value, vSMCDistType,
+        std_type>::type;
+
+    trait_type trait;
+    names.push_back(trait.name(param));
+
+    vsmc::RNG rng;
+    vSMCDistType dist_vsmc(rng_distribution_init<vSMCDistType>(param));
+    std_dist_type dist_std(rng_distribution_init<std_dist_type>(param));
+
+    vsmc::Vector<RealType> r(N);
+    vsmc::Vector<RealType> chi2(M);
+    vsmc::Vector<RealType> ksad(M);
+
+    for (std::size_t i = 0; i != M; ++i) {
+        for (std::size_t j = 0; j != N; ++j)
+            r[j] = dist_std(rng);
+        chi2[i] = rng_distribution_chi2(N, r.data(), dist_vsmc);
+        ksad[i] = rng_distribution_ksad(N, r.data(), dist_vsmc);
     }
-    rng_distribution_summary(N, M, names, pval, sw);
+    rng_distribution_pval(chi2, ksad, pval);
+
+    for (std::size_t i = 0; i != M; ++i) {
+        for (std::size_t j = 0; j != N; ++j)
+            r[j] = dist_vsmc(rng);
+        chi2[i] = rng_distribution_chi2(N, r.data(), dist_vsmc);
+        ksad[i] = rng_distribution_ksad(N, r.data(), dist_vsmc);
+    }
+    rng_distribution_pval(chi2, ksad, pval);
+
+    for (std::size_t i = 0; i != M; ++i) {
+        vsmc::rng_rand(rng, dist_vsmc, N, r.data());
+        chi2[i] = rng_distribution_chi2(N, r.data(), dist_vsmc);
+        ksad[i] = rng_distribution_ksad(N, r.data(), dist_vsmc);
+    }
+    rng_distribution_pval(chi2, ksad, pval);
+
+#if VSMC_HAS_MKL
+    vsmc::MKL_SFMT19937 rng_mkl;
+    for (std::size_t i = 0; i != M; ++i) {
+        vsmc::rng_rand(rng_mkl, dist_vsmc, N, r.data());
+        chi2[i] = rng_distribution_chi2(N, r.data(), dist_vsmc);
+        ksad[i] = rng_distribution_ksad(N, r.data(), dist_vsmc);
+    }
+    rng_distribution_pval(chi2, ksad, pval);
+
+    int brng = vsmc::mkl_brng<vsmc::RNG>();
+    vsmc::MKLStream stream(brng, 101);
+    for (std::size_t i = 0; i != M; ++i) {
+        rng_distribution_stream(stream, dist_vsmc, N, r.data());
+        chi2[i] = rng_distribution_chi2(N, r.data(), dist_vsmc);
+        ksad[i] = rng_distribution_ksad(N, r.data(), dist_vsmc);
+    }
+    rng_distribution_pval(chi2, ksad, pval);
+#endif // VSMC_HAS_MKL
+}
+
+template <typename vSMCDistType>
+inline void rng_distribution_test_pval(
+    std::size_t N, std::size_t M, int nwid, int twid)
+{
+    using result_type = typename vSMCDistType::result_type;
+
+    DistTrait<vSMCDistType> trait;
+    auto params = trait.params();
+
+    vsmc::Vector<std::string> names;
+    std::array<vsmc::Vector<result_type>, 6> pval;
+    for (const auto &param : params)
+        rng_distribution_test_pval<vSMCDistType>(N, M, param, names, pval);
+    rng_distribution_summary_pval(names, pval, nwid, twid);
 }
 
 template <typename RealType>
-inline void rng_distribution_beta(std::size_t N, std::size_t M)
+inline void rng_distribution_pval(
+    std::size_t N, std::size_t M, int nwid, int twid)
 {
-    vsmc::Vector<std::array<double, 2>> params;
-    params.push_back({{0.5, 0.5}});
-    params.push_back({{1.0, 1.0}});
-    params.push_back({{1.0, 0.5}});
-    params.push_back({{1.0, 1.5}});
-    params.push_back({{0.5, 1.0}});
-    params.push_back({{1.5, 1.0}});
-    params.push_back({{1.5, 1.5}});
-    params.push_back({{0.3, 0.3}});
-    params.push_back({{0.9, 0.9}});
-    params.push_back({{1.5, 0.5}});
-    params.push_back({{0.5, 1.5}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(
-        2, Beta, boost::random::beta_distribution);
+    rng_distribution_test_pval<vsmc::BetaDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::CauchyDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::ChiSquaredDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::ExponentialDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::ExtremeValueDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::FisherFDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::GammaDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::LaplaceDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::LevyDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::LogisticDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::LognormalDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::NormalDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::ParetoDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::RayleighDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::StudentTDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::U01Distribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::UniformRealDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_pval<vsmc::WeibullDistribution<RealType>>(
+        N, M, nwid, twid);
+}
+
+template <typename vSMCDistType, typename RealType, std::size_t ParamNum>
+inline void rng_distribution_test_perf(std::size_t N, std::size_t M,
+    const std::array<RealType, ParamNum> &param, int nwid, int twid)
+{
+    using trait_type = DistTrait<vSMCDistType>;
+    using std_type = typename trait_type::std_type;
+    using std_dist_type = typename std::conditional<
+        std::is_same<std_type, vsmc::NullType>::value, vSMCDistType,
+        std_type>::type;
+
+    vsmc::RNG rng;
+#if VSMC_HAS_MKL
+    vsmc::MKL_SFMT19937 rng_mkl;
+    int brng = vsmc::mkl_brng<vsmc::RNG>();
+    vsmc::MKLStream stream(brng, 1);
+#endif
+    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+    vSMCDistType dist_vsmc(rng_distribution_init<vSMCDistType>(param));
+    std_dist_type dist_std(rng_distribution_init<std_dist_type>(param));
+    bool pass = true;
+
+    vsmc::Vector<RealType> r1;
+    vsmc::Vector<RealType> r2;
+    vsmc::Vector<RealType> r3;
+#if VSMC_HAS_MKL
+    vsmc::Vector<RealType> r4;
+    vsmc::Vector<RealType> r5;
+#endif
+    r1.reserve(N);
+    r2.reserve(N);
+    r3.reserve(N);
+#if VSMC_HAS_MKL
+    r4.reserve(N);
+    r5.reserve(N);
+#endif
+
+    double c1 = std::numeric_limits<double>::max();
+    double c2 = std::numeric_limits<double>::max();
+    double c3 = std::numeric_limits<double>::max();
+#if VSMC_HAS_MKL
+    double c4 = std::numeric_limits<double>::max();
+    double c5 = std::numeric_limits<double>::max();
+#endif
+    for (std::size_t k = 0; k != 10; ++k) {
+        std::size_t num = 0;
+        vsmc::StopWatch watch1;
+        vsmc::StopWatch watch2;
+        vsmc::StopWatch watch3;
+#if VSMC_HAS_MKL
+        vsmc::StopWatch watch4;
+        vsmc::StopWatch watch5;
+#endif
+        for (std::size_t i = 0; i != M / 10; ++i) {
+            std::size_t K = rsize(rng);
+            num += K;
+            r1.resize(K);
+            r2.resize(K);
+            r3.resize(K);
+#if VSMC_HAS_MKL
+            r4.resize(K);
+            r5.resize(K);
+#endif
+
+            watch1.start();
+            for (std::size_t j = 0; j != K; ++j)
+                r1[j] = dist_std(rng);
+            watch1.stop();
+
+            watch2.start();
+            for (std::size_t j = 0; j != K; ++j)
+                r2[j] = dist_vsmc(rng);
+            watch2.stop();
+            pass = pass && r1 != r2;
+
+            watch3.start();
+            vsmc::rng_rand(rng, dist_vsmc, K, r3.data());
+            watch3.stop();
+            pass = pass && r1 != r3;
+
+#if VSMC_HAS_MKL
+            watch4.start();
+            vsmc::rng_rand(rng_mkl, dist_vsmc, K, r4.data());
+            watch4.stop();
+            pass = pass && r1 != r4;
+
+            watch5.start();
+            rng_distribution_stream(stream, dist_vsmc, K, r5.data());
+            watch5.stop();
+            pass = pass && r1 != r5;
+#endif
+            vsmc::RNG rng1(rng);
+            vsmc::RNG rng2(rng);
+            std::stringstream ss;
+            ss.flags(std::ios_base::dec | std::ios_base::fixed |
+                std::ios_base::scientific);
+            ss << dist_vsmc;
+            for (std::size_t j = 0; j != K; ++j)
+                r1[j] = dist_vsmc(rng1);
+            ss >> dist_vsmc;
+            for (std::size_t j = 0; j != K; ++j)
+                r2[j] = dist_vsmc(rng2);
+            pass = pass && r1 == r2;
+            if (r1 != r2) {
+                std::cout << dist_vsmc << std::endl;
+            }
+        }
+        c1 = std::min(c1, watch1.cycles() / num);
+        c2 = std::min(c2, watch2.cycles() / num);
+        c3 = std::min(c3, watch3.cycles() / num);
+#if VSMC_HAS_MKL
+        c4 = std::min(c4, watch4.cycles() / num);
+        c5 = std::min(c5, watch5.cycles() / num);
+#endif
+    }
+
+    trait_type trait;
+    std::cout << std::left << std::setw(nwid) << trait.name(param);
+    std::cout << std::right << std::setw(twid) << std::fixed << c1;
+    std::cout << std::right << std::setw(twid) << std::fixed << c2;
+    std::cout << std::right << std::setw(twid) << std::fixed << c3;
+#if VSMC_HAS_MKL
+    std::cout << std::right << std::setw(twid) << std::fixed << c4;
+    std::cout << std::right << std::setw(twid) << std::fixed << c5;
+#endif
+    std::cout << std::right << std::setw(twid) << rng_pass(pass);
+    std::cout << std::endl;
+}
+
+template <typename vSMCDistType>
+inline void rng_distribution_test_perf(
+    std::size_t N, std::size_t M, int nwid, int twid)
+{
+    using result_type = typename vSMCDistType::result_type;
+
+    DistTrait<vSMCDistType> trait;
+    auto params = trait.params();
+
+    vsmc::Vector<std::string> names;
+    std::array<vsmc::Vector<result_type>, 6> pval;
+    for (const auto &param : params)
+        rng_distribution_test_perf<vSMCDistType>(N, M, param, nwid, twid);
 }
 
 template <typename RealType>
-inline void rng_distribution_cauchy(std::size_t N, std::size_t M)
+inline void rng_distribution_perf(
+    std::size_t N, std::size_t M, int nwid, int twid)
 {
-    vsmc::Vector<std::array<double, 2>> params;
-    params.push_back({{0.0, 1.0}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(2, Cauchy, std::cauchy_distribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_chi_squared(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 1>> params;
-    params.push_back({{0.2}});
-    params.push_back({{1.0}});
-    params.push_back({{1.5}});
-    params.push_back({{2.0}});
-    params.push_back({{3.0}});
-    params.push_back({{30.0}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(
-        1, ChiSquared, std::chi_squared_distribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_exponential(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 1>> params;
-    params.push_back({{1.0}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(
-        1, Exponential, std::exponential_distribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_extreme_value(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 2>> params;
-    params.push_back({{0.0, 1.0}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(
-        2, ExtremeValue, std::extreme_value_distribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_fisher_f(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 2>> params;
-    params.push_back({{0.2, 0.2}});
-    params.push_back({{0.2, 1.0}});
-    params.push_back({{0.2, 1.5}});
-    params.push_back({{0.2, 2.0}});
-    params.push_back({{0.2, 3.0}});
-    params.push_back({{1.0, 0.2}});
-    params.push_back({{1.0, 1.0}});
-    params.push_back({{1.0, 1.5}});
-    params.push_back({{1.0, 2.0}});
-    params.push_back({{1.0, 3.0}});
-    params.push_back({{2.0, 0.2}});
-    params.push_back({{2.0, 1.0}});
-    params.push_back({{2.0, 1.5}});
-    params.push_back({{2.0, 2.0}});
-    params.push_back({{2.0, 3.0}});
-    params.push_back({{3.0, 0.2}});
-    params.push_back({{3.0, 1.0}});
-    params.push_back({{3.0, 1.5}});
-    params.push_back({{3.0, 2.0}});
-    params.push_back({{3.0, 3.0}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(2, FisherF, std::fisher_f_distribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_gamma(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 2>> params;
-    params.push_back({{1.0, 1.0}});
-    params.push_back({{0.1, 1.0}});
-    params.push_back({{0.5, 1.0}});
-    params.push_back({{0.7, 1.0}});
-    params.push_back({{0.9, 1.0}});
-    params.push_back({{1.5, 1.0}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(2, Gamma, std::gamma_distribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_laplace(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 2>> params;
-    params.push_back({{0.0, 1.0}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(
-        2, Laplace, boost::random::laplace_distribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_levy(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 2>> params;
-    params.push_back({{0.0, 1.0}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(2, Levy, vsmc::LevyDistribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_logistic(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 2>> params;
-    params.push_back({{0.0, 1.0}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(
-        2, Logistic, vsmc::LogisticDistribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_lognormal(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 2>> params;
-    params.push_back({{0.0, 1.0}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(
-        2, Lognormal, std::lognormal_distribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_normal(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 2>> params;
-    params.push_back({{0.0, 1.0}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(2, Normal, std::normal_distribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_pareto(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 2>> params;
-    params.push_back({{1.0, 1.0}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(2, Pareto, vsmc::ParetoDistribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_rayleigh(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 1>> params;
-    params.push_back({{1.0}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(
-        1, Rayleigh, vsmc::RayleighDistribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_student_t(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 1>> params;
-    params.push_back({{0.2}});
-    params.push_back({{1.0}});
-    params.push_back({{1.5}});
-    params.push_back({{2.0}});
-    params.push_back({{3.0}});
-    params.push_back({{30.0}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(
-        1, StudentT, std::student_t_distribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_u01(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 0>> params(1);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(0, U01, std::uniform_real_distribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_uniform_real(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 2>> params;
-    params.push_back({{-0.5, 0.5}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(
-        2, UniformReal, std::uniform_real_distribution);
-}
-
-template <typename RealType>
-inline void rng_distribution_weibull(std::size_t N, std::size_t M)
-{
-    vsmc::Vector<std::array<double, 2>> params;
-    params.push_back({{1.0, 1.0}});
-    VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(2, Weibull, std::weibull_distribution);
-}
-
-template <typename RealType>
-inline void rng_distribution(std::size_t N, std::size_t M)
-{
-    rng_distribution_beta<RealType>(N, M);
-    rng_distribution_cauchy<RealType>(N, M);
-    rng_distribution_chi_squared<RealType>(N, M);
-    rng_distribution_exponential<RealType>(N, M);
-    rng_distribution_extreme_value<RealType>(N, M);
-    rng_distribution_fisher_f<RealType>(N, M);
-    rng_distribution_gamma<RealType>(N, M);
-    rng_distribution_laplace<RealType>(N, M);
-    rng_distribution_levy<RealType>(N, M);
-    rng_distribution_logistic<RealType>(N, M);
-    rng_distribution_lognormal<RealType>(N, M);
-    rng_distribution_normal<RealType>(N, M);
-    rng_distribution_pareto<RealType>(N, M);
-    rng_distribution_rayleigh<RealType>(N, M);
-    rng_distribution_student_t<RealType>(N, M);
-    rng_distribution_u01<RealType>(N, M);
-    rng_distribution_uniform_real<RealType>(N, M);
-    rng_distribution_weibull<RealType>(N, M);
+    rng_distribution_test_perf<vsmc::BetaDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::CauchyDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::ChiSquaredDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::ExponentialDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::ExtremeValueDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::FisherFDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::GammaDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::LaplaceDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::LevyDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::LogisticDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::LognormalDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::NormalDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::ParetoDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::RayleighDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::StudentTDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::U01Distribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::UniformRealDistribution<RealType>>(
+        N, M, nwid, twid);
+    rng_distribution_test_perf<vsmc::WeibullDistribution<RealType>>(
+        N, M, nwid, twid);
 }
 
 inline void rng_distribution(std::size_t N, std::size_t M)
 {
     N = std::max(N, static_cast<std::size_t>(10000));
     M = std::max(M, static_cast<std::size_t>(10));
-    rng_distribution<float>(N, M);
-    rng_distribution<double>(N, M);
+
+    int nwid = 30;
+    int twid = 15;
+#if VSMC_HAS_MKL
+    std::size_t lwid = static_cast<std::size_t>(nwid + twid * 6);
+#else
+    std::size_t lwid = static_cast<std::size_t>(nwid + twid * 4);
+#endif
+
+    rng_distribution_pval<float>(N, M, nwid, twid);
+    rng_distribution_pval<double>(N, M, nwid, twid);
+
+    std::cout << std::string(lwid, '=') << std::endl;
+    std::cout << std::left << std::setw(nwid) << "Distribution";
+    std::cout << std::right << std::setw(twid) << "STD";
+    std::cout << std::right << std::setw(twid) << "vSMC";
+    std::cout << std::right << std::setw(twid) << "Batch";
+#if VSMC_HAS_MKL
+    std::cout << std::right << std::setw(twid) << "MKL";
+    std::cout << std::right << std::setw(twid) << "MKL (vSMC)";
+#endif
+    std::cout << std::right << std::setw(twid) << "Determinstics";
+    std::cout << std::endl;
+    std::cout << std::string(lwid, '-') << std::endl;
+    rng_distribution_perf<float>(N, M, nwid, twid);
+    rng_distribution_perf<double>(N, M, nwid, twid);
+    std::cout << std::string(lwid, '-') << std::endl;
 }
 
 #endif // VSMC_EXAMPLE_RNG_DISTRIBUTION_HPP
