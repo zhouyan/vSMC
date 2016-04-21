@@ -7,7 +7,7 @@ do 'tab.pl';
 my $normal = join ' ', qw(Normal Lognormal Levy); 
 
 my $inverse = join ' ', qw(Cauchy Exponential ExtremeValue Laplace Logistic
-Pareto Rayleigh U01 UniformReal Weibull);
+Pareto Rayleigh UniformReal Weibull);
 
 my $nostd = join ' ', qw(Laplace Logistic Pareto Rayleigh Levy);
 
@@ -15,8 +15,8 @@ my %distribution;
 my %cpB;
 open RAWFILE, '<', 'rng_distribution.txt';
 while (<RAWFILE>) {
-    if (/<double>/) {
-        s/(.*)<double>(\(.*?\))?.*/$1$2/;
+    if (/<double>\(/) {
+        s/(.*)<double>(\(.*?\)).*/$1$2/;
         chomp;
         my $name = '\verb|' . $_ . "|\n";
         my $basename = $1;
