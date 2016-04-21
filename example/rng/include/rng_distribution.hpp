@@ -37,17 +37,8 @@
 #include "rng_common.hpp"
 
 #define VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(K, Name, STD)                      \
-    rng_distribution_test<float, K, vsmc::Name##Distribution<float>,          \
-        STD<float>>(N, M, #Name, params);                                     \
-    rng_distribution_test<double, K, vsmc::Name##Distribution<double>,        \
-        STD<double>>(N, M, #Name, params);
-
-#define VSMC_EXAMPLE_RNG_DISTRIBUTION(Name, name)                             \
-    if (all ||                                                                \
-        std::find(distribution.begin(), distribution.end(),                   \
-            std::string(#Name)) != distribution.end()) {                      \
-        rng_distribution_##name(N, M);                                        \
-    }
+    rng_distribution_test<RealType, K, vsmc::Name##Distribution<RealType>,    \
+        STD<RealType>>(N, M, #Name, params);
 
 template <typename RealType>
 inline std::string rng_distribution_name(
@@ -762,6 +753,7 @@ inline void rng_distribution_test(std::size_t N, std::size_t M,
     rng_distribution_summary(N, M, names, pval, sw);
 }
 
+template <typename RealType>
 inline void rng_distribution_beta(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 2>> params;
@@ -780,6 +772,7 @@ inline void rng_distribution_beta(std::size_t N, std::size_t M)
         2, Beta, boost::random::beta_distribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_cauchy(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 2>> params;
@@ -787,6 +780,7 @@ inline void rng_distribution_cauchy(std::size_t N, std::size_t M)
     VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(2, Cauchy, std::cauchy_distribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_chi_squared(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 1>> params;
@@ -800,6 +794,7 @@ inline void rng_distribution_chi_squared(std::size_t N, std::size_t M)
         1, ChiSquared, std::chi_squared_distribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_exponential(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 1>> params;
@@ -808,6 +803,7 @@ inline void rng_distribution_exponential(std::size_t N, std::size_t M)
         1, Exponential, std::exponential_distribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_extreme_value(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 2>> params;
@@ -816,6 +812,7 @@ inline void rng_distribution_extreme_value(std::size_t N, std::size_t M)
         2, ExtremeValue, std::extreme_value_distribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_fisher_f(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 2>> params;
@@ -842,6 +839,7 @@ inline void rng_distribution_fisher_f(std::size_t N, std::size_t M)
     VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(2, FisherF, std::fisher_f_distribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_gamma(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 2>> params;
@@ -854,6 +852,7 @@ inline void rng_distribution_gamma(std::size_t N, std::size_t M)
     VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(2, Gamma, std::gamma_distribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_laplace(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 2>> params;
@@ -862,6 +861,7 @@ inline void rng_distribution_laplace(std::size_t N, std::size_t M)
         2, Laplace, boost::random::laplace_distribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_levy(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 2>> params;
@@ -869,6 +869,7 @@ inline void rng_distribution_levy(std::size_t N, std::size_t M)
     VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(2, Levy, vsmc::LevyDistribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_logistic(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 2>> params;
@@ -877,6 +878,7 @@ inline void rng_distribution_logistic(std::size_t N, std::size_t M)
         2, Logistic, vsmc::LogisticDistribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_lognormal(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 2>> params;
@@ -885,6 +887,7 @@ inline void rng_distribution_lognormal(std::size_t N, std::size_t M)
         2, Lognormal, std::lognormal_distribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_normal(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 2>> params;
@@ -892,6 +895,7 @@ inline void rng_distribution_normal(std::size_t N, std::size_t M)
     VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(2, Normal, std::normal_distribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_pareto(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 2>> params;
@@ -899,6 +903,7 @@ inline void rng_distribution_pareto(std::size_t N, std::size_t M)
     VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(2, Pareto, vsmc::ParetoDistribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_rayleigh(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 1>> params;
@@ -907,6 +912,7 @@ inline void rng_distribution_rayleigh(std::size_t N, std::size_t M)
         1, Rayleigh, vsmc::RayleighDistribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_student_t(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 1>> params;
@@ -920,12 +926,14 @@ inline void rng_distribution_student_t(std::size_t N, std::size_t M)
         1, StudentT, std::student_t_distribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_u01(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 0>> params(1);
     VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(0, U01, std::uniform_real_distribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_uniform_real(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 2>> params;
@@ -934,6 +942,7 @@ inline void rng_distribution_uniform_real(std::size_t N, std::size_t M)
         2, UniformReal, std::uniform_real_distribution);
 }
 
+template <typename RealType>
 inline void rng_distribution_weibull(std::size_t N, std::size_t M)
 {
     vsmc::Vector<std::array<double, 2>> params;
@@ -941,65 +950,35 @@ inline void rng_distribution_weibull(std::size_t N, std::size_t M)
     VSMC_EXAMPLE_RNG_DISTRIBUTION_TEST(2, Weibull, std::weibull_distribution);
 }
 
-inline void rng_distribution_help()
+template <typename RealType>
+inline void rng_distribution(std::size_t N, std::size_t M)
 {
-    vsmc::Vector<std::string> distribution;
-    distribution.push_back("All");
-    distribution.push_back("Beta");
-    distribution.push_back("Cauchy");
-    distribution.push_back("ChiSquared");
-    distribution.push_back("Exponential");
-    distribution.push_back("ExtremeValue");
-    distribution.push_back("FisherF");
-    distribution.push_back("Gamma");
-    distribution.push_back("Laplace");
-    distribution.push_back("Levy");
-    distribution.push_back("Logistic");
-    distribution.push_back("Lognormal");
-    distribution.push_back("Normal");
-    distribution.push_back("Pareto");
-    distribution.push_back("Rayleigh");
-    distribution.push_back("StudentT");
-    distribution.push_back("U01");
-    distribution.push_back("UniformReal");
-    distribution.push_back("Weibull");
-    std::cout << std::string(80, '=') << std::endl;
-    std::cout << "Possible values for --distribution" << std::endl;
-    std::cout << std::string(80, '-') << std::endl;
-    for (std::size_t i = 0; i != distribution.size(); ++i) {
-        std::cout << std::setw(20) << std::left << distribution[i];
-        if ((i + 1) % 4 == 0 || i + 1 == distribution.size())
-            std::cout << std::endl;
-    }
-    std::cout << std::string(80, '-') << std::endl;
+    rng_distribution_beta<RealType>(N, M);
+    rng_distribution_cauchy<RealType>(N, M);
+    rng_distribution_chi_squared<RealType>(N, M);
+    rng_distribution_exponential<RealType>(N, M);
+    rng_distribution_extreme_value<RealType>(N, M);
+    rng_distribution_fisher_f<RealType>(N, M);
+    rng_distribution_gamma<RealType>(N, M);
+    rng_distribution_laplace<RealType>(N, M);
+    rng_distribution_levy<RealType>(N, M);
+    rng_distribution_logistic<RealType>(N, M);
+    rng_distribution_lognormal<RealType>(N, M);
+    rng_distribution_normal<RealType>(N, M);
+    rng_distribution_pareto<RealType>(N, M);
+    rng_distribution_rayleigh<RealType>(N, M);
+    rng_distribution_student_t<RealType>(N, M);
+    rng_distribution_u01<RealType>(N, M);
+    rng_distribution_uniform_real<RealType>(N, M);
+    rng_distribution_weibull<RealType>(N, M);
 }
 
-inline void rng_distribution(std::size_t N, std::size_t M,
-    const vsmc::Vector<std::string> &distribution)
+inline void rng_distribution(std::size_t N, std::size_t M)
 {
     N = std::max(N, static_cast<std::size_t>(10000));
     M = std::max(M, static_cast<std::size_t>(10));
-    bool all = std::find(distribution.begin(), distribution.end(),
-                   std::string("All")) != distribution.end();
-
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(Beta, beta);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(Cauchy, cauchy);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(ChiSquared, chi_squared);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(Exponential, exponential);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(ExtremeValue, extreme_value);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(FisherF, fisher_f);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(Gamma, gamma);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(Laplace, laplace);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(Levy, levy);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(Logistic, logistic);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(Lognormal, lognormal);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(Normal, normal);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(Pareto, pareto);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(Rayleigh, rayleigh);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(StudentT, student_t);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(U01, u01);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(UniformReal, uniform_real);
-    VSMC_EXAMPLE_RNG_DISTRIBUTION(Weibull, weibull);
+    rng_distribution<float>(N, M);
+    rng_distribution<double>(N, M);
 }
 
 #endif // VSMC_EXAMPLE_RNG_DISTRIBUTION_HPP
