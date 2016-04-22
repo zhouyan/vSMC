@@ -82,22 +82,27 @@ class DistTraitBase
     template <typename RealType>
     static void add_param(vsmc::Vector<std::array<RealType, 0>> &params)
     {
-        params.resize(1);
+        std::array<RealType, 0> tmp;
+        params.push_back(tmp);
     }
 
     template <typename RealType, typename ValueType1>
     static void add_param(
         vsmc::Vector<std::array<RealType, 1>> &param, ValueType1 p1)
     {
-        param.push_back({{static_cast<RealType>(p1)}});
+        std::array<RealType, 1> tmp;
+        tmp[0] = static_cast<RealType>(p1);
+        param.push_back(tmp);
     }
 
     template <typename RealType, typename ValueType1, typename ValueType2>
     static void add_param(vsmc::Vector<std::array<RealType, 2>> &param,
         ValueType1 p1, ValueType2 p2)
     {
-        param.push_back(
-            {{static_cast<RealType>(p1), static_cast<RealType>(p2)}});
+        std::array<RealType, 2> tmp;
+        tmp[0] = static_cast<RealType>(p1);
+        tmp[1] = static_cast<RealType>(p2);
+        param.push_back(tmp);
     }
 
     private:
@@ -328,12 +333,11 @@ class DistTrait<vsmc::FisherFDistribution<RealType>> : public DistTraitBase<2>
 
     vsmc::Vector<std::array<RealType, 2>> params() const
     {
-        DistTrait<vsmc::ChiSquaredDistribution<RealType>> chi_traits;
-        vsmc::Vector<std::array<RealType, 1>> pchi = chi_traits.params();
+        std::array<double, 5> df = {{1, 0.5, 1.5, 3, 30}};
         vsmc::Vector<std::array<RealType, 2>> params;
-        for (std::size_t i = 0; i != pchi.size(); ++i)
-            for (std::size_t j = 0; j != pchi.size(); ++j)
-                add_param(params, pchi[i][0], pchi[j][0]);
+        for (std::size_t i = 0; i != df.size(); ++i)
+            for (std::size_t j = 0; j != df.size(); ++j)
+                add_param(params, df[i], df[j]);
 
         return params;
     }

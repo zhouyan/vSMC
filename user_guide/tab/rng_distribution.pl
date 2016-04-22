@@ -67,7 +67,7 @@ while (my ($basename, $name) = each %distribution) {
         $table .= sprintf "%-${wid}s", $dist[$index];
         $table .= $cpB[$index];
         $table .= " \\\\\n";
-        $index += 1;
+        $index++;
     }
     $table .= ' ' x 2 . '\bottomrule' . "\n";
     $table .= '\end{tabularx}' . "\n";

@@ -52,7 +52,7 @@ sub tex_table
             if ($wid < length($rng[-1])) {
                 $wid = length($rng[-1]);
             }
-            $index += 1;
+            $index++;
         }
     }
 
@@ -75,7 +75,7 @@ sub tex_table
         $table .= $cpB1[$index];
         $table .= $cpB2[$index];
         $table .= " \\\\\n";
-        $index += 1;
+        $index++;
     }
     $table .= ' ' x 2 . '\bottomrule' . "\n";
     $table .= '\end{tabularx}' . "\n";
