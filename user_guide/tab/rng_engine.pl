@@ -1,41 +1,60 @@
 #!/usr/bin/perl
 
-use v5.16.0;
+use v5.16;
 
 do 'tab.pl';
 
-my $std = join ' ', qw(
-mt19937 mt19937_64
-minstd_rand0
-minstd_rand
-ranlux24_base
-ranlux48_base
-ranlux24
-ranlux48
-knuth_b);
+my @std = qw(mt19937 mt19937_64 minstd_rand0 minstd_rand ranlux24_base
+ranlux48_base ranlux24 ranlux48 knuth_b);
 
-my @family = qw(
-std
-philox
-threefry
-aes128
-aes192
-aes256
-ars
-rdrand
-mkl);
+my @engines = qw(STD Philox Threefry AES128 AES192 AES256 ARS RDRAND MKL);
 
-foreach (@family) {
-    my $clang = &filter($_, 'clang');
-    my $gcc = &filter($_, 'gcc');
-    my $intel = &filter($_, 'intel');
-    my $table = &tex_table($clang, $gcc, $intel);
-    my $texfile = "rng_engine_$_.tex";
-    open TEXFILE, '>', $texfile;
-    print TEXFILE $table;
+my @clang_txt = &read('clang');
+my @gcc_txt = &read('gcc');
+my @intel_txt = &read('intel');
+
+foreach (@engines) {
+    my $clang = &filter($_, @clang_txt);
+    my $gcc = &filter($_, @gcc_txt);
+    my $intel = &filter($_, @intel_txt);
+    my $table = &table($clang, $gcc, $intel);
+    open my $texfile, '>', "rng_engine_\L$_.tex";
+    print $texfile $table;
 }
 
-sub tex_table
+sub read
+{
+    open my $txtfile, '<', "rng_engine_$_[0].txt";
+    my @txt = <$txtfile>;
+    @txt
+}
+
+sub filter
+{
+    my $engine = shift @_;
+    my $record;
+    foreach (@_) {
+        next if (!/Passed/);
+
+        my @line = split;
+        my ($rng, $cpB1, $cpB2) = ($line[0], $line[5], $line[6]);
+        if ($engine eq 'STD') {
+            next unless "@std" =~ /$rng/;
+        } elsif ($engine eq 'MKL') {
+            next unless $rng =~ /MKL/;
+        } else {
+            next unless $rng =~ /$engine/;
+            next if $rng =~ /MKL/;
+        }
+
+        $record .= $rng . ' ';
+        $record .= $cpB1 . ' ';
+        $record .= $cpB2 . "\n";
+    }
+    $record
+}
+
+sub table
 {
     my @rng;
     my @cpB1;
@@ -66,7 +85,8 @@ sub tex_table
     $table .= ' ' x 2;
     $table .= '\cmidrule(lr){2-4}\cmidrule(lr){5-7}' . "\n";
     $table .= ' ' x 2;
-    $table .= '\rng & \llvm & \gnu & Intel & \llvm & \gnu & Intel \\\\' . "\n";
+    $table .= '\rng & \llvm & \gnu & Intel & \llvm & \gnu & Intel';
+    $table .= " \\\\\n";
     $table .= ' ' x 2 . '\midrule' . "\n";
     my $index = 0;
     foreach (@rng) {
@@ -80,32 +100,4 @@ sub tex_table
     $table .= ' ' x 2 . '\bottomrule' . "\n";
     $table .= '\end{tabularx}' . "\n";
     $table;
-}
-
-sub filter
-{
-    my ($engine, $compiler) = @_;
-    open RAWFILE, '<', "rng_engine_$compiler.txt";
-    my @raw = <RAWFILE>;
-
-    my $record;
-    foreach (@raw) {
-        next if (!/Passed/);
-
-        my @line = split;
-        my ($rng, $cpB1, $cpB2) = ($line[0], $line[5], $line[6]);
-        if ($engine =~ /std/i) {
-            next if (!($std =~ /$rng/i));
-        } elsif ($engine =~ /mkl/i) {
-            next if (!($rng =~ /mkl/i));
-        } else {
-            next if (!($rng =~ /$engine/i));
-            next if ($rng =~ /mkl/i);
-        }
-
-        $record .= $rng . ' ';
-        $record .= $cpB1 . ' ';
-        $record .= $cpB2 . "\n";
-    }
-    $record
 }

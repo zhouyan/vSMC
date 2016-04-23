@@ -1,20 +1,20 @@
 #!/usr/bin/perl
 
-use v5.16.0;
+use v5.16;
 
 do 'tab.pl';
 
-my $normal = join ' ', qw(Normal Lognormal Levy); 
+my @inverse = qw(Cauchy Exponential ExtremeValue Laplace Logistic Pareto
+Rayleigh UniformReal Weibull);
 
-my $inverse = join ' ', qw(Cauchy Exponential ExtremeValue Laplace Logistic
-Pareto Rayleigh UniformReal Weibull);
+my @normal = qw(Normal Lognormal Levy);
 
-my $nostd = join ' ', qw(Logistic Pareto Rayleigh Levy);
+my @nostd = qw(Logistic Pareto Rayleigh Levy);
 
 my %distribution;
 my %cpB;
-open RAWFILE, '<', 'rng_distribution.txt';
-while (<RAWFILE>) {
+open my $txtfile, '<', 'rng_distribution.txt';
+while (<$txtfile>) {
     if (/<double>\(.*Passed/) {
         my @record = split;
         my $name = shift @record;
@@ -22,20 +22,22 @@ while (<RAWFILE>) {
         $name = '\verb|' . $name . "|\n";
         my $basename = $1;
         my $cpB;
-        if ($nostd =~ /$basename/) {
+        if ("@nostd" =~ /$basename/) {
             shift @record;
             $cpB .= sprintf ' & %-4s', '--';
         } else {
-            $cpB .= format_cpB(shift @record);
+            $cpB .= &format_cpB(shift @record);
         }
-        $cpB .= format_cpB($_) foreach (@record[0..2]);
+        foreach (@record[0..2]) {
+            $cpB .= &format_cpB($_)
+        }
         $cpB .= "\n";
-        if ($normal =~ /$basename/) {
-            $distribution{'normal'} .= $name;
-            $cpB{'normal'} .= $cpB;
-        } elsif ($inverse =~ /$basename/) {
+        if ("@inverse" =~ /$basename/) {
             $distribution{'inverse'} .= $name;
             $cpB{'inverse'} .= $cpB;
+        } elsif ("@normal" =~ /$basename/) {
+            $distribution{'normal'} .= $name;
+            $cpB{'normal'} .= $cpB;
         } else {
             $distribution{$basename} .= $name;
             $cpB{$basename} .= $cpB;
@@ -58,8 +60,8 @@ while (my ($basename, $name) = each %distribution) {
     $table .= '\begin{tabularx}{\textwidth}{p{2in}XXXX}' . "\n";
     $table .= ' ' x 2 . '\toprule' . "\n";
     $table .= ' ' x 2;
-    $table .= 'Distribution & \std/Boost & \vsmc & \verb|rng_rand| & \mkl \\\\';
-    $table .= "\n";
+    $table .= 'Distribution & \std/Boost & \vsmc & \verb|rng_rand| & \mkl';
+    $table .= " \\\\\n";
     $table .= ' ' x 2 . '\midrule' . "\n";
     my $index = 0;
     foreach (@dist) {
