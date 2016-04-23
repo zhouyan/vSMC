@@ -24,7 +24,8 @@ pf.pdf : pf_tbb pf.R
 	Rscript pf.R
 
 pf_ocl : pf_ocl.cpp
-	$(CXX) $(CXXFLAGS) -DVSMC_HAS_OPENCL -o pf_ocl pf_ocl.cpp $(LDFLAGS) $(OPENCL_LIBRARY)
+	$(CXX) $(CXXFLAGS) -DVSMC_HAS_OPENCL -o pf_ocl pf_ocl.cpp $(LDFLAGS) \
+	    $(OPENCL_LIBRARY)
 
 pf_tbb : pf_tbb.cpp
 	$(CXX) $(CXXFLAGS) -o pf_tbb pf_tbb.cpp $(LDFLAGS)
