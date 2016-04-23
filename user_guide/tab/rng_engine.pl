@@ -14,12 +14,11 @@ my @gcc_txt = &read('gcc');
 my @intel_txt = &read('intel');
 
 foreach (@engines) {
-    my $clang = &filter($_, @clang_txt);
-    my $gcc = &filter($_, @gcc_txt);
-    my $intel = &filter($_, @intel_txt);
-    my $table = &table($clang, $gcc, $intel);
     open my $texfile, '>', "rng_engine_\L$_.tex";
-    print $texfile $table;
+    print $texfile &table(
+        &filter($_, @clang_txt),
+        &filter($_, @gcc_txt),
+        &filter($_, @intel_txt));
 }
 
 sub read
@@ -36,8 +35,7 @@ sub filter
     foreach (@_) {
         next if (!/Passed/);
 
-        my @line = split;
-        my ($rng, $cpB1, $cpB2) = ($line[0], $line[5], $line[6]);
+        my ($rng, $cpB1, $cpB2) = (split)[0, 5, 6];
         if ($engine eq 'STD') {
             next unless "@std" =~ /$rng/;
         } elsif ($engine eq 'MKL') {
@@ -80,12 +78,10 @@ sub table
     $table .= '\begin{tabularx}{\textwidth}{p{2in}XXXXXX}' . "\n";
     $table .= ' ' x 2 . '\toprule' . "\n";
     $table .= ' ' x 2;
-    $table .= '& \multicolumn{3}{c}{Loop} ';
-    $table .= '& \multicolumn{3}{c}{\verb|rng_rand|} \\\\' . "\n";
-    $table .= ' ' x 2;
-    $table .= '\cmidrule(lr){2-4}\cmidrule(lr){5-7}' . "\n";
-    $table .= ' ' x 2;
-    $table .= '\rng & \llvm & \gnu & Intel & \llvm & \gnu & Intel';
+    $table .= '& \multicolumn{3}{c}{Loop} & \multicolumn{3}{c}{\verb|rng_rand|}';
+    $table .= " \\\\\n";
+    $table .= ' ' x 2 . '\cmidrule(lr){2-4}\cmidrule(lr){5-7}' . "\n";
+    $table .= ' ' x 2 . '\rng & \llvm & \gnu & Intel & \llvm & \gnu & Intel';
     $table .= " \\\\\n";
     $table .= ' ' x 2 . '\midrule' . "\n";
     my $index = 0;

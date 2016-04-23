@@ -73,7 +73,6 @@ while (my ($basename, $name) = each %distribution) {
     }
     $table .= ' ' x 2 . '\bottomrule' . "\n";
     $table .= '\end{tabularx}' . "\n";
-    my $texfile = "rng_distribution_\L$basename.tex";
-    open TEXFILE, '>', $texfile;
-    print TEXFILE $table;
+    open my $texfile, '>', "rng_distribution_\L$basename.tex";
+    print $texfile $table;
 }
