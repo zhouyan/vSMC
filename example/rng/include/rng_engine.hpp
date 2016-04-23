@@ -150,7 +150,7 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
     double g2 = 0;
     double c1 = std::numeric_limits<double>::max();
     double c2 = std::numeric_limits<double>::max();
-    for (std::size_t k = 0; k != 1; ++k) {
+    for (std::size_t k = 0; k != 10; ++k) {
         std::size_t num = 0;
         vsmc::StopWatch watch1;
         vsmc::StopWatch watch2;

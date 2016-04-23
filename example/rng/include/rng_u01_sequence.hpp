@@ -80,8 +80,8 @@ inline void rng_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
     double c2 = watch2.cycles() / num;
     std::cout << std::setw(twid) << std::left << rng_type_name<RealType>();
     std::cout << std::setw(twid) << std::left << name;
-    std::cout << std::setw(twid) << std::right << std::fixed << c1;
-    std::cout << std::setw(twid) << std::right << std::fixed << c2;
+    std::cout << std::setw(twid) << std::right << c1;
+    std::cout << std::setw(twid) << std::right << c2;
     std::cout << std::setw(twid) << std::right << ss.str();
     std::cout << std::endl;
 }
@@ -109,6 +109,8 @@ inline void rng_u01_sequence(std::size_t N, std::size_t M)
     std::cout << std::setw(twid) << std::right << "cpE (Generate)";
     std::cout << std::setw(twid) << std::right << "Error";
     std::cout << std::endl;
+
+    std::cout << std::fixed << std::setprecision(2);
     std::cout << std::string(lwid, '-') << std::endl;
     rng_u01_sequence<float>(N, M, twid);
     std::cout << std::string(lwid, '-') << std::endl;

@@ -931,13 +931,13 @@ inline void rng_distribution_pval(const vsmc::Vector<RealType> &chi2,
 }
 
 template <typename RealType>
-inline void rng_distribution_summary_pval(RealType pval)
+inline void rng_distribution_summary_pval(RealType pval, int twid)
 {
     std::stringstream ss;
     if (pval < 50)
         ss << '*';
     ss << pval << '%';
-    std::cout << std::right << std::setw(15) << ss.str();
+    std::cout << std::setw(twid) << std::right << ss.str();
 }
 
 template <typename RealType>
@@ -961,45 +961,45 @@ inline void rng_distribution_summary_pval(
     const RealType *p5 = pval[5].data();
     for (std::size_t i = 0; i != D; ++i) {
         std::cout << std::string(lwid, '=') << std::endl;
-        std::cout << std::left << std::setw(nwid) << names[i];
-        std::cout << std::right << std::setw(twid) << "STD";
-        std::cout << std::right << std::setw(twid) << "vSMC";
-        std::cout << std::right << std::setw(twid) << "Batch";
+        std::cout << std::setw(nwid) << std::left << names[i];
+        std::cout << std::setw(twid) << std::right << "STD";
+        std::cout << std::setw(twid) << std::right << "vSMC";
+        std::cout << std::setw(twid) << std::right << "Batch";
 #if VSMC_HAS_MKL
-        std::cout << std::right << std::setw(twid) << "MKL";
-        std::cout << std::right << std::setw(twid) << "MKL (vSMC)";
+        std::cout << std::setw(twid) << std::right << "MKL";
+        std::cout << std::setw(twid) << std::right << "MKL (vSMC)";
 #endif
         std::cout << std::endl;
         std::cout << std::string(lwid, '-') << std::endl;
 
-        std::cout << std::left << std::setw(nwid) << "One level test (2.5%)";
+        std::cout << std::setw(nwid) << std::left << "One level test (2.5%)";
         for (std::size_t r = 0; r != R; ++r)
-            rng_distribution_summary_pval(*p0++);
+            rng_distribution_summary_pval(*p0++, twid);
         std::cout << std::endl;
 
-        std::cout << std::left << std::setw(nwid) << "One level test (5%)";
+        std::cout << std::setw(nwid) << std::left << "One level test (5%)";
         for (std::size_t r = 0; r != R; ++r)
-            rng_distribution_summary_pval(*p1++);
+            rng_distribution_summary_pval(*p1++, twid);
         std::cout << std::endl;
 
-        std::cout << std::left << std::setw(nwid) << "One level test (10%)";
+        std::cout << std::setw(nwid) << std::left << "One level test (10%)";
         for (std::size_t r = 0; r != R; ++r)
-            rng_distribution_summary_pval(*p2++);
+            rng_distribution_summary_pval(*p2++, twid);
         std::cout << std::endl;
 
-        std::cout << std::left << std::setw(nwid) << "Two level test (2.5%)";
+        std::cout << std::setw(nwid) << std::left << "Two level test (2.5%)";
         for (std::size_t r = 0; r != R; ++r)
-            rng_distribution_summary_pval(*p3++);
+            rng_distribution_summary_pval(*p3++, twid);
         std::cout << std::endl;
 
-        std::cout << std::left << std::setw(nwid) << "Two level test (5%)";
+        std::cout << std::setw(nwid) << std::left << "Two level test (5%)";
         for (std::size_t r = 0; r != R; ++r)
-            rng_distribution_summary_pval(*p4++);
+            rng_distribution_summary_pval(*p4++, twid);
         std::cout << std::endl;
 
-        std::cout << std::left << std::setw(nwid) << "Two level test (10%)";
+        std::cout << std::setw(nwid) << std::left << "Two level test (10%)";
         for (std::size_t r = 0; r != R; ++r)
-            rng_distribution_summary_pval(*p5++);
+            rng_distribution_summary_pval(*p5++, twid);
         std::cout << std::endl;
     }
     std::cout << std::string(lwid, '-') << std::endl;
@@ -1242,15 +1242,15 @@ inline void rng_distribution_test_perf(std::size_t N, std::size_t M,
     }
 
     trait_type trait;
-    std::cout << std::left << std::setw(nwid) << trait.name(param);
-    std::cout << std::right << std::setw(twid) << std::fixed << c1;
-    std::cout << std::right << std::setw(twid) << std::fixed << c2;
-    std::cout << std::right << std::setw(twid) << std::fixed << c3;
+    std::cout << std::setw(nwid) << std::left << trait.name(param);
+    std::cout << std::setw(twid) << std::right << c1;
+    std::cout << std::setw(twid) << std::right << c2;
+    std::cout << std::setw(twid) << std::right << c3;
 #if VSMC_HAS_MKL
-    std::cout << std::right << std::setw(twid) << std::fixed << c4;
-    std::cout << std::right << std::setw(twid) << std::fixed << c5;
+    std::cout << std::setw(twid) << std::right << c4;
+    std::cout << std::setw(twid) << std::right << c5;
 #endif
-    std::cout << std::right << std::setw(twid) << rng_pass(pass);
+    std::cout << std::setw(twid) << std::right << rng_pass(pass);
     std::cout << std::endl;
 }
 
@@ -1273,6 +1273,7 @@ template <typename RealType>
 inline void rng_distribution_perf(
     std::size_t N, std::size_t M, int nwid, int twid)
 {
+    std::cout << std::fixed << std::setprecision(2);
     rng_distribution_test_perf<vsmc::BetaDistribution<RealType>>(
         N, M, nwid, twid);
     rng_distribution_test_perf<vsmc::CauchyDistribution<RealType>>(
@@ -1317,7 +1318,7 @@ inline void rng_distribution(std::size_t N, std::size_t M)
     M = std::max(M, static_cast<std::size_t>(10));
 
     int nwid = 30;
-    int twid = 15;
+    int twid = 12;
 #if VSMC_HAS_MKL
     std::size_t lwid = static_cast<std::size_t>(nwid + twid * 6);
 #else
@@ -1328,15 +1329,15 @@ inline void rng_distribution(std::size_t N, std::size_t M)
     rng_distribution_pval<double>(N, M, nwid, twid);
 
     std::cout << std::string(lwid, '=') << std::endl;
-    std::cout << std::left << std::setw(nwid) << "Distribution";
-    std::cout << std::right << std::setw(twid) << "STD";
-    std::cout << std::right << std::setw(twid) << "vSMC";
-    std::cout << std::right << std::setw(twid) << "Batch";
+    std::cout << std::setw(nwid) << std::left << "Distribution";
+    std::cout << std::setw(twid) << std::right << "STD";
+    std::cout << std::setw(twid) << std::right << "vSMC";
+    std::cout << std::setw(twid) << std::right << "Batch";
 #if VSMC_HAS_MKL
-    std::cout << std::right << std::setw(twid) << "MKL";
-    std::cout << std::right << std::setw(twid) << "MKL (vSMC)";
+    std::cout << std::setw(twid) << std::right << "MKL";
+    std::cout << std::setw(twid) << std::right << "MKL (vSMC)";
 #endif
-    std::cout << std::right << std::setw(twid) << "Determinstics";
+    std::cout << std::setw(twid) << std::right << "I/O";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
     rng_distribution_perf<float>(N, M, nwid, twid);

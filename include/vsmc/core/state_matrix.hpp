@@ -199,14 +199,14 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     void resize(size_type N, std::size_t dim)
     {
-        static_assert(Dim == Dynamic, "**StateMatrix::resize**  USED WITH AN "
+        static_assert(Dim == Dynamic, "**StateMatrix::resize** USED WITH AN "
                                       "OBJECT WITH FIXED DIMENSION");
         resize_both(N, dim);
     }
 
     void resize_dim(std::size_t dim)
     {
-        static_assert(Dim == Dynamic, "**StateMatrix::resize_dim**  USED WITH "
+        static_assert(Dim == Dynamic, "**StateMatrix::resize_dim** USED WITH "
                                       "AN OBJECT WITH FIXED DIMENSION");
         resize_both(this->size(), dim);
     }
@@ -372,14 +372,14 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     void resize(size_type N, std::size_t dim)
     {
-        static_assert(Dim == Dynamic, "**StateMatrix::resize**  USED WITH AN "
+        static_assert(Dim == Dynamic, "**StateMatrix::resize** USED WITH AN "
                                       "OBJECT WITH FIXED DIMENSION");
         resize_both(N, dim);
     }
 
     void resize_dim(std::size_t dim)
     {
-        static_assert(Dim == Dynamic, "**StateMatrix::resize_dim**  USED WITH "
+        static_assert(Dim == Dynamic, "**StateMatrix::resize_dim** USED WITH "
                                       "AN OBJECT WITH FIXED DIMENSION");
         resize_both(this->size(), dim);
     }

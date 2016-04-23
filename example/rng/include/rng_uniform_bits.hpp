@@ -76,16 +76,16 @@ inline void rng_uniform_bits(std::size_t N, std::size_t M, int nwid, int swid,
     double c1 = watch1.cycles() / bytes;
     double c2 = watch2.cycles() / bytes;
 
-    std::cout << std::left << std::setw(nwid) << name;
-    std::cout << std::right << std::setw(swid) << (full ? "Yes" : "No");
-    std::cout << std::right << std::setw(swid) << rbits;
-    std::cout << std::right << std::setw(swid) << tbits;
-    std::cout << std::right << std::setw(swid) << ubits;
-    std::cout << std::right << std::setw(twid) << std::fixed << g1;
-    std::cout << std::right << std::setw(twid) << std::fixed << g2;
-    std::cout << std::right << std::setw(twid) << std::fixed << c1;
-    std::cout << std::right << std::setw(twid) << std::fixed << c2;
-    std::cout << std::right << std::setw(twid) << rng_pass(pass);
+    std::cout << std::setw(nwid) << std::left << name;
+    std::cout << std::setw(swid) << std::right << (full ? "Yes" : "No");
+    std::cout << std::setw(swid) << std::right << rbits;
+    std::cout << std::setw(swid) << std::right << tbits;
+    std::cout << std::setw(swid) << std::right << ubits;
+    std::cout << std::setw(twid) << std::right << g1;
+    std::cout << std::setw(twid) << std::right << g2;
+    std::cout << std::setw(twid) << std::right << c1;
+    std::cout << std::setw(twid) << std::right << c2;
+    std::cout << std::setw(twid) << std::right << rng_pass(pass);
     std::cout << std::endl;
 }
 
@@ -97,18 +97,17 @@ inline void rng_uniform_bits(std::size_t N, std::size_t M)
     const std::size_t lwid = nwid + swid * 4 + twid * 5;
 
     std::cout << std::string(lwid, '=') << std::endl;
-    std::cout << std::left << std::setw(nwid) << "RNGType";
-    std::cout << std::right << std::setw(swid) << "Full";
-    std::cout << std::right << std::setw(swid) << "R";
-    std::cout << std::right << std::setw(swid) << "T";
-    std::cout << std::right << std::setw(swid) << "U";
-    std::cout << std::right << std::setw(twid) << "GB/s (Loop)";
-    std::cout << std::right << std::setw(twid) << "GB/s (Batch)";
-    std::cout << std::right << std::setw(twid) << "cpB (Loop)";
-    std::cout << std::right << std::setw(twid) << "cpB (Batch)";
-    std::cout << std::right << std::setw(twid) << "Deterministics";
+    std::cout << std::setw(nwid) << std::left << "RNGType";
+    std::cout << std::setw(swid) << std::right << "Full";
+    std::cout << std::setw(swid) << std::right << "R";
+    std::cout << std::setw(swid) << std::right << "T";
+    std::cout << std::setw(swid) << std::right << "U";
+    std::cout << std::setw(twid) << std::right << "GB/s (Loop)";
+    std::cout << std::setw(twid) << std::right << "GB/s (Batch)";
+    std::cout << std::setw(twid) << std::right << "cpB (Loop)";
+    std::cout << std::setw(twid) << std::right << "cpB (Batch)";
+    std::cout << std::setw(twid) << std::right << "Deterministics";
     std::cout << std::endl;
-    std::cout << std::string(lwid, '-') << std::endl;
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -124,8 +123,9 @@ inline void rng_uniform_bits(std::size_t N, std::size_t M)
     rng_uniform_bits<RNGType, std::uint32_t>(N, M, nwid, swid, twid, #Name);  \
     rng_uniform_bits<RNGType, std::uint64_t>(N, M, nwid, swid, twid, #Name);
 
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << std::string(lwid, '-') << std::endl;
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 #include <vsmc/rng/internal/rng_define_macro_mkl.hpp>
-
     std::cout << std::string(lwid, '-') << std::endl;
 }
