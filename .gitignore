@@ -13,6 +13,8 @@ user_guide/cpp/pf_tbb
 user_guide/cpp/pf_tbb_c
 user_guide/cpp/program_option
 user_guide/cpp/progress
+user_guide/tab/rng_distribution_*.tex
+user_guide/tab/rng_engine_*.tex
 user_guide/tex/*.aux
 user_guide/user_guide.aux
 user_guide/user_guide.bbl
