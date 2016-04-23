@@ -1172,7 +1172,7 @@ inline void rng_distribution_test_perf(std::size_t N, std::size_t M,
     double c4 = std::numeric_limits<double>::max();
     double c5 = std::numeric_limits<double>::max();
 #endif
-    for (std::size_t k = 0; k != 10; ++k) {
+    for (std::size_t k = 0; k != 100; ++k) {
         std::size_t num = 0;
         vsmc::StopWatch watch1;
         vsmc::StopWatch watch2;

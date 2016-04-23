@@ -78,7 +78,8 @@ sub table
     $table .= '\begin{tabularx}{\textwidth}{p{2in}XXXXXX}' . "\n";
     $table .= ' ' x 2 . '\toprule' . "\n";
     $table .= ' ' x 2;
-    $table .= '& \multicolumn{3}{c}{Loop} & \multicolumn{3}{c}{\verb|rng_rand|}';
+    $table .= '& \multicolumn{3}{c}{Loop} ';
+    $table .= '& \multicolumn{3}{c}{\verb|rng_rand|}';
     $table .= " \\\\\n";
     $table .= ' ' x 2 . '\cmidrule(lr){2-4}\cmidrule(lr){5-7}' . "\n";
     $table .= ' ' x 2 . '\rng & \llvm & \gnu & Intel & \llvm & \gnu & Intel';
