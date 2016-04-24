@@ -508,12 +508,9 @@ inline void hdf5store(const std::vector<T, Alloc> &vector,
 /// # [3,]    3    6
 /// #
 /// ~~~
-/// That is, when the data is stored in column major layout in C++ memory,
-/// then
-/// the read in R produces exactly the same output. If the data is stored
-/// as
-/// row major matrix in C++ memory, the read in R produces the transpose
-/// the
+/// That is, when the data is stored in column major layout in C++ memory, then
+/// the read in R produces exactly the same output. If the data is stored as
+/// row major matrix in C++ memory, the read in R produces the transpose the
 /// original matrix though they are identical in memory.
 template <typename InputIter>
 inline void hdf5store(MatrixLayout layout, std::size_t nrow, std::size_t ncol,
