@@ -234,7 +234,7 @@ storage,
   inline void pack_i(
       std::size_t n, RandomIter src, InputIter index, OutputIter dst);
 
-  // Pack all src[i] with static_cast<boo>(mask[i]) is true, i = 1 to n
+  // Pack all src[i] with mask[i] is true, i = 1 to n
   template <typename InputIterSrc, typename InputIterMask, typename OutputIter>
   inline void pack_m(
       std::size_t n, InputIterSrc src, InputIterMask mask, OutputIter dst);
@@ -252,7 +252,7 @@ There are also three corresponding unpack functions,
       std::size_t n, InputIterSrc src, InputIterIndex index, RandomIter dst);
 
   // dst[j] = src[i], where mask[j] is the i-th element of mask such that
-  // static_cast<bool>(mask[j]) is true, i = 1 to n
+  // mask[j] is true, i = 1 to n
   template <typename InputIterSrc, typename InputIterMask, typename OutputIter>
   inline void unpack_m(
       std::size_t n, InputIterSrc src, InputIterMask mask, OutputIter dst);
