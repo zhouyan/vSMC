@@ -108,7 +108,20 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         }
     }; // class single_particle_type
 
+    /// \brief The numbrer of particles
     size_type size() const { return size_; }
+
+    /// \brief Reserve space for specified number of particles
+    void reserve(size_type N) { data_.reserve(N * this->dim()); }
+
+    /// \brief Reserve space for specified number of particles and dimensions
+    ///
+    /// \details
+    /// `dim` is ignored if `Dim > 0`.
+    void reserve(size_type N, std::size_t dim)
+    {
+        data_.reserve(N * (Dim == Dynamic ? dim : this->dim()));
+    }
 
     void shrink_to_fit() { data_.shrink_to_fit(); }
 

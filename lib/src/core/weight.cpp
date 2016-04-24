@@ -57,6 +57,21 @@ int vsmc_weight_size(vsmc_weight weight)
     return static_cast<int>(::vsmc::cast(weight).size());
 }
 
+void vsmc_weight_resize(vsmc_weight weight, int N)
+{
+    ::vsmc::cast(weight).resize(static_cast<std::size_t>(N));
+}
+
+void vsmc_weight_reserve(vsmc_weight weight, int N)
+{
+    ::vsmc::cast(weight).reserve(static_cast<std::size_t>(N));
+}
+
+void vsmc_weight_shrink_to_fit(vsmc_weight weight)
+{
+    ::vsmc::cast(weight).shrink_to_fit();
+}
+
 double vsmc_weight_ess(vsmc_weight weight)
 {
     return ::vsmc::cast(weight).ess();

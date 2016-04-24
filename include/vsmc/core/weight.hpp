@@ -91,6 +91,12 @@ class Weight
         set_equal();
     }
 
+    /// \brief Reserve space
+    void reserve(size_type N) { data_.reserve(N); }
+
+    /// \brief Shrink to fit
+    void shrink_to_fit() { data_.shrink_to_fit(); }
+
     /// \brief Return the ESS of the particle system
     double ess() const { return ess_; }
 

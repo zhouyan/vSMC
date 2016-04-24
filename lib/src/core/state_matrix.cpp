@@ -75,6 +75,17 @@ int vsmc_state_matrix_size(vsmc_state_matrix state_matrix)
     return static_cast<int>(::vsmc::cast(state_matrix).size());
 }
 
+void vsmc_state_matrix_reserve(vsmc_state_matrix state_matrix, int N, int dim)
+{
+    ::vsmc::cast(state_matrix)
+        .reserve(static_cast<std::size_t>(N), static_cast<std::size_t>(dim));
+}
+
+void vsmc_state_matrix_shrink_to_fit(vsmc_state_matrix state_matrix)
+{
+    ::vsmc::cast(state_matrix).shrink_to_fit();
+}
+
 double vsmc_state_matrix_get(vsmc_state_matrix state_matrix, int id, int pos)
 {
     return ::vsmc::cast(state_matrix)

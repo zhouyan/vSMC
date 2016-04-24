@@ -753,6 +753,12 @@ void vsmc_state_matrix_resize_dim(vsmc_state_matrix state_matrix, int n);
 /** \brief `vsmc::StateMatrix::size` */
 int vsmc_state_matrix_size(vsmc_state_matrix state_matrix);
 
+/** \brief `vsmc::StateMatrix::reserve` */
+void vsmc_state_matrix_reserve(vsmc_state_matrix state_matrix, int N, int dim);
+
+/** \brief `vsmc::StateMatrix::shrink_to_fit` */
+void vsmc_state_matrix_shrink_to_fit(vsmc_state_matrix state_matrix);
+
 /** \brief `vsmc::StateMatrix::state` */
 double vsmc_state_matrix_get(vsmc_state_matrix state_matrix, int id, int pos);
 
@@ -803,6 +809,15 @@ void vsmc_weight_assign(vsmc_weight weight, vsmc_weight other);
 
 /** \brief `vsmc::Weight::size` */
 int vsmc_weight_size(vsmc_weight weight);
+
+/** \brief `vsmc::Weight::resize` */
+void vsmc_weight_resize(vsmc_weight weight, int N);
+
+/** \brief `vsmc::Weight::reserve` */
+void vsmc_weight_reserve(vsmc_weight weight, int N);
+
+/** \brief `vsmc::Weight::shrink_to_fit` */
+void vsmc_weight_shrink_to_fit(vsmc_weight weight);
 
 /** \brief `vsmc::Weight::ess` */
 double vsmc_weight_ess(vsmc_weight weight);
