@@ -28,14 +28,11 @@ class PFState : public PFStateBase
             return;
 
         std::ifstream data(param);
-        while (data.good()) {
-            double x;
-            double y;
-            data >> x >> y;
-            if (data.good()) {
-                obs_x_.push_back(x);
-                obs_y_.push_back(y);
-            }
+        double x;
+        double y;
+        while (data >> x >> y) {
+            obs_x_.push_back(x);
+            obs_y_.push_back(y);
         }
         data.close();
     }
