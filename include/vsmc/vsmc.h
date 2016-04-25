@@ -129,23 +129,26 @@ extern "C" {
 /** @{ */
 
 /** \brief `vsmc::MatrixLayout` */
-typedef enum { vSMCRowMajor = 101, vSMCColMajor = 102 } vSMCMatrixLayout;
+typedef enum {
+    vSMCRowMajor = 101, ///< `vsmc::RowMajor`
+    vSMCColMajor = 102  ///< `vsmc::ColMajor`
+} vSMCMatrixLayout;
 
 /** \brief `vsmc::ResampleScheme` */
 typedef enum {
-    vSMCMultinomial,
-    vSMCStratified,
-    vSMCSystematic,
-    vSMCResidual,
-    vSMCResidualStratified,
-    vSMCResidualSystematic
+    vSMCMultinomial,        ///< `vsmc::Multinomial`
+    vSMCStratified,         ///< `vsmc::Stratified`
+    vSMCSystematic,         ///< `vsmc::Systematic`
+    vSMCResidual,           ///< `vsmc::Residual`
+    vSMCResidualStratified, ///< `vsmc::ResidualStratified`
+    vSMCResidualSystematic  ///< `vsmc::ResidualSystematic`
 } vSMCResampleScheme;
 
 /** \brief `vsmc::MonitorStage` */
 typedef enum {
-    vSMCMonitorMove,
-    vSMCMonitorResample,
-    vSMCMonitorMCMC
+    vSMCMonitorMove,     ///< `vsmc::MonitorMove`
+    vSMCMonitorResample, ///< `vsmc::MonitorResample`
+    vSMCMonitorMCMC      ///< `vsmc::MonitorMCMC`
 } vSMCMonitorStage;
 
 /** @} */ /* C_API_Definitions */
@@ -156,6 +159,7 @@ typedef enum {
 /** \brief `vsmc::RNG` */
 typedef struct {
     void *ptr;
+    vSMCRNGType type;
 } vsmc_rng;
 
 /** \brief `vsmc::RNG::RNG` */

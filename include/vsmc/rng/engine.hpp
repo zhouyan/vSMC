@@ -34,13 +34,22 @@
 
 #include <vsmc/internal/config.h>
 
-/// \brief Default RNG type
+/// \brief Default `RNG` type
 /// \ingroup Config
 #ifndef VSMC_RNG_TYPE
 #if VSMC_HAS_AES_NI
 #define VSMC_RNG_TYPE ARS
 #else
 #define VSMC_RNG_TYPE Threefry
+#endif
+#endif
+
+/// \brief Default `RNG_64` type
+#ifndef VSMC_RNG_64_TYPE
+#if VSMC_HAS_AES_NI
+#define VSMC_RNG_64_TYPE ARS_64
+#else
+#define VSMC_RNG_64_TYPE Threefry_64
 #endif
 #endif
 
@@ -63,6 +72,8 @@ namespace vsmc
 {
 
 using RNG = VSMC_RNG_TYPE;
+
+using RNG_64 = VSMC_RNG_64_TYPE;
 
 } // namespace vsmc
 
