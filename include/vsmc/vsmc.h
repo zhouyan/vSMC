@@ -159,7 +159,6 @@ typedef enum {
 /** \brief `vsmc::RNG` */
 typedef struct {
     void *ptr;
-    vSMCRNGType type;
 } vsmc_rng;
 
 /** \brief `vsmc::RNG::RNG` */
