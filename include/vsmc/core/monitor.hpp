@@ -199,14 +199,33 @@ class Monitor
             return std::copy(record_.begin(), record_.end(), first);
 
         if (layout == ColMajor) {
-            const std::size_t N = iter_size();
-            for (std::size_t d = 0; d != dim_; ++d) {
-                const double *riter = record_.data() + d;
-                for (std::size_t i = 0; i != N; ++i, ++first, riter += dim_)
-                    *first = *riter;
-            }
+            for (std::size_t d = 0; d != dim_; ++d)
+                for (std::size_t i = 0; i != iter_size(); ++i)
+                    *first++ = record(d, i);
         }
+
         return first;
+    }
+
+    /// \brief Summary of monitor history
+    std::map<std::string, Vector<double>> summary() const
+    {
+        std::map<std::string, Vector<double>> df;
+        Vector<double> data(iter_size());
+
+        std::copy(index_.begin(), index_.end(), data.begin());
+        df["Index"] = data;
+
+        for (std::size_t d = 0; d != dim_; ++d) {
+            for (std::size_t i = 0; i != iter_size(); ++i)
+                data[i] = record(d, i);
+            if (name_[d].empty())
+                df["X." + std::to_string(d)] = data;
+            else
+                df[name_[d]] = data;
+        }
+
+        return df;
     }
 
     /// \brief Set a new evaluation object of type eval_type

@@ -94,7 +94,7 @@ pf_est <- function() {
             dat <- rbind(dat, tmp$dat)
 
             pf.m <- paste(pf.h5, "(Monitor)")
-            tmp <- pf(pf.m, as.data.frame(h5read(pf.h5, "Monitor/Record")))
+            tmp <- pf(pf.m, as.data.frame(h5read(pf.h5, "Monitor")))
             plt.list[[pf.m]] <- tmp$plt
             dat <- rbind(dat, tmp$dat)
 

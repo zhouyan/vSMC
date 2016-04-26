@@ -597,99 +597,49 @@ class Sampler
         return *this;
     }
 
-    /// \brief The size of Sampler summary header (integer data, size etc.)
-    std::size_t summary_header_size_int() const
+    /// \brief Summary of sampler history
+    std::map<std::string, Vector<double>> summary() const
     {
-        if (iter_size() == 0)
-            return 0;
+        std::map<std::string, Vector<double>> df;
+        Vector<double> data(iter_size());
 
-        return accept_size() + 2;
-    }
+        std::copy(size_history_.begin(), size_history_.end(), data.begin());
+        df["Size"] = data;
 
-    /// \brief The size of Sampler summary header (floating point data)
-    std::size_t summary_header_size() const
-    {
-        if (iter_size() == 0)
-            return 0;
+        std::copy(resampled_history_.begin(), resampled_history_.end(),
+            data.begin());
+        df["Resampled"] = data;
 
-        std::size_t header_size = 1;
-        for (const auto &m : monitor_)
-            if (m.second.iter_size() > 0)
-                header_size += m.second.dim();
+        for (std::size_t i = 0; i != accept_size(); ++i) {
+            std::copy(accept_history_[i].begin(), accept_history_[i].end(),
+                data.begin());
+            df["Accept." + std::to_string(i)] = data;
+        }
 
-        return header_size;
-    }
+        df["ESS"] = ess_history_;
 
-    /// \brief Sampler summary header (integer data)
-    template <typename OutputIter>
-    void summary_header_int(OutputIter first) const
-    {
-        if (summary_header_size_int() == 0)
-            return;
-
-        *first++ = std::string("Size");
-        *first++ = std::string("Resampled");
-        for (std::size_t i = 0; i != accept_size(); ++i)
-            *first++ = "Accept." + std::to_string(i);
-    }
-
-    /// \brief Sampler summary header (floating point data)
-    template <typename OutputIter>
-    void summary_header(OutputIter first) const
-    {
-        if (summary_header_size() == 0)
-            return;
-
-        *first++ = std::string("ESS");
+        const double missing_data = std::numeric_limits<double>::quiet_NaN();
         for (const auto &m : monitor_) {
             if (m.second.iter_size() > 0) {
-                unsigned md = static_cast<unsigned>(m.second.dim());
-                for (unsigned d = 0; d != md; ++d) {
+                for (std::size_t d = 0; d != m.second.dim(); ++d) {
+                    std::size_t miter = 0;
+                    for (std::size_t i = 0; i != iter_size(); ++i) {
+                        if (miter != m.second.iter_size() &&
+                            i == m.second.index(miter)) {
+                            data[i] = m.second.record(d, miter++);
+                        } else {
+                            data[i] = missing_data;
+                        }
+                    }
                     if (m.second.name(d).empty())
-                        *first++ = m.first + "." + std::to_string(d);
+                        df[m.first + "." + std::to_string(d)] = data;
                     else
-                        *first++ = m.second.name(d);
+                        df[m.second.name(d)] = data;
                 }
             }
         }
-    }
 
-    /// \brief The size of Sampler summary data (integer data)
-    std::size_t summary_data_size_int() const
-    {
-        return summary_header_size_int() * iter_size();
-    }
-
-    /// \brief The size of Sampler summary data (floating point data)
-    std::size_t summary_data_size() const
-    {
-        return summary_header_size() * iter_size();
-    }
-
-    /// \brief Sampler summary data (integer data)
-    template <typename OutputIter>
-    void summary_data_int(MatrixLayout layout, OutputIter first) const
-    {
-        if (summary_data_size_int() == 0)
-            return;
-
-        if (layout == RowMajor)
-            summary_data_row_int(first);
-        if (layout == ColMajor)
-            summary_data_col_int(first);
-    }
-
-    /// \brief Sampler summary data (floating point data)
-    template <typename OutputIter>
-    void summary_data(MatrixLayout layout, OutputIter first) const
-    {
-        if (summary_data_size() == 0)
-            return;
-
-        if (layout == RowMajor)
-            summary_data_row(first);
-        if (layout == ColMajor)
-            summary_data_col(first);
+        return df;
     }
 
     /// \brief Print the history of the Sampler
@@ -703,33 +653,14 @@ class Sampler
         if (!os || iter_size() == 0)
             return os;
 
-        std::size_t nrow = iter_size();
+        const std::map<std::string, Vector<double>> df = summary();
 
-        std::size_t ncol_int = summary_header_size_int();
-        Vector<std::string> header_int(ncol_int);
-        Vector<size_type> data_int(nrow * ncol_int);
-        summary_header_int(header_int.begin());
-        summary_data_int(RowMajor, data_int.begin());
-
-        std::size_t ncol = summary_header_size();
-        Vector<std::string> header(ncol);
-        Vector<double> data(nrow * ncol);
-        summary_header(header.begin());
-        summary_data(RowMajor, data.begin());
-
-        for (const auto &h : header_int)
-            os << h << sepchar;
-        for (const auto &h : header)
-            os << h << sepchar;
+        for (const auto &v : df)
+            os << v.first << sepchar;
         os << '\n';
-
-        std::size_t offset_int = 0;
-        std::size_t offset = 0;
-        for (std::size_t r = 0; r != nrow; ++r) {
-            for (std::size_t c = 0; c != ncol_int; ++c)
-                os << data_int[offset_int++] << sepchar;
-            for (std::size_t c = 0; c != ncol; ++c)
-                os << data[offset++] << sepchar;
+        for (std::size_t i = 0; i != iter_size(); ++i) {
+            for (const auto &v : df)
+                os << v.second[i] << sepchar;
             os << '\n';
         }
 
@@ -830,79 +761,6 @@ class Sampler
         for (auto &m : monitor_)
             if (!m.second.empty())
                 m.second.eval(iter_num_, particle_, stage);
-    }
-
-    template <typename OutputIter>
-    void summary_data_row_int(OutputIter first) const
-    {
-        using int_type = typename std::iterator_traits<OutputIter>::value_type;
-        for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-            *first++ = static_cast<int_type>(size_history_[iter]);
-            *first++ = static_cast<int_type>(resampled_history_[iter]);
-            for (std::size_t i = 0; i != accept_size(); ++i)
-                *first++ = static_cast<int_type>(accept_history_[i][iter]);
-        }
-    }
-
-    template <typename OutputIter>
-    void summary_data_col_int(OutputIter first) const
-    {
-        first = std::copy(size_history_.begin(), size_history_.end(), first);
-        first = std::copy(
-            resampled_history_.begin(), resampled_history_.end(), first);
-        for (std::size_t i = 0; i != accept_size(); ++i) {
-            first = std::copy(
-                accept_history_[i].begin(), accept_history_[i].end(), first);
-        }
-    }
-
-    template <typename OutputIter>
-    void summary_data_row(OutputIter first) const
-    {
-        double missing_data = std::numeric_limits<double>::quiet_NaN();
-
-        Vector<std::pair<std::size_t, const Monitor<T> *>> miter;
-        for (const auto &m : monitor_)
-            if (m.second.iter_size() > 0)
-                miter.push_back(std::make_pair(0, &m.second));
-
-        for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-            *first++ = ess_history_[iter];
-            for (auto &m : miter) {
-                std::size_t md = m.second->dim();
-                if (m.first != m.second->iter_size() &&
-                    iter == m.second->index(m.first)) {
-                    for (std::size_t id = 0; id != md; ++id, ++first)
-                        *first = m.second->record(id, m.first);
-                    ++m.first;
-                } else {
-                    first = std::fill_n(first, md, missing_data);
-                }
-            }
-        }
-    }
-
-    template <typename OutputIter>
-    void summary_data_col(OutputIter first) const
-    {
-        double missing_data = std::numeric_limits<double>::quiet_NaN();
-
-        first = std::copy(ess_history_.begin(), ess_history_.end(), first);
-        for (const auto &m : monitor_) {
-            if (m.second.iter_size() > 0) {
-                for (std::size_t d = 0; d != m.second.dim(); ++d) {
-                    std::size_t miter = 0;
-                    for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-                        if (miter != m.second.iter_size() ||
-                            iter == m.second.index(miter)) {
-                            *first++ = m.second.record(d, miter++);
-                        } else {
-                            *first++ = missing_data;
-                        }
-                    }
-                }
-            }
-        }
     }
 }; // class Sampler
 

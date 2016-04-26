@@ -575,34 +575,10 @@ template <typename T>
 inline void hdf5store(const Monitor<T> &monitor, const std::string &filename,
     const std::string &dataname, bool append)
 {
-    std::size_t nrow = monitor.iter_size();
-    std::size_t ncol = monitor.dim();
-
+    std::map<std::string, Vector<double>> df = monitor.summary();
     hdf5store(filename, dataname, append);
-    Vector<std::size_t> index(nrow);
-    monitor.read_index(index.data());
-    bool use_int = internal::hdf5io_use_int(
-        index.size(), index.data(), std::is_signed<std::size_t>());
-    if (use_int) {
-        Vector<int> index_small(index.size());
-        std::copy(index.begin(), index.end(), index_small.begin());
-        hdf5store(
-            nrow, index_small.data(), filename, dataname + "/Index", true);
-    } else {
-        hdf5store(nrow, index.data(), filename, dataname + "/Index", true);
-    }
-
-    hdf5store(filename, dataname + "/Record", true);
-    Vector<double> record(nrow * ncol);
-    monitor.read_record_matrix(ColMajor, record.data());
-    const double *record_ptr = record.data();
-    for (std::size_t j = 0; j != ncol; ++j, record_ptr += nrow) {
-        std::string vname = monitor.name(j);
-        if (vname.empty())
-            vname = "X." + std::to_string(j);
-        hdf5store(
-            nrow, record_ptr, filename, dataname + "/Record/" + vname, true);
-    }
+    for (const auto &v : df)
+        hdf5store(v.second, filename, dataname + "/" + v.first, append);
 }
 
 /// \brief Store a Sampler in the HDF5 format
@@ -611,46 +587,10 @@ template <typename T>
 inline void hdf5store(const Sampler<T> &sampler, const std::string &filename,
     const std::string &dataname, bool append)
 {
-    using size_type = typename Sampler<T>::size_type;
-
-    std::size_t nrow = sampler.iter_size();
-
-    if (nrow == 0)
-        return;
-
+    std::map<std::string, Vector<double>> df = sampler.summary();
     hdf5store(filename, dataname, append);
-
-    std::size_t ncol_int = sampler.summary_header_size_int();
-    Vector<std::string> header_int(ncol_int);
-    Vector<size_type> data_int(nrow * ncol_int);
-    sampler.summary_header_int(header_int.begin());
-    sampler.summary_data_int(ColMajor, data_int.begin());
-    bool use_int = internal::hdf5io_use_int(
-        data_int.size(), data_int.data(), std::is_signed<size_type>());
-    if (use_int) {
-        Vector<int> data_int_small(data_int.size());
-        std::copy(data_int.begin(), data_int.end(), data_int_small.begin());
-        const int *ptr = data_int_small.data();
-        for (std::size_t j = 0; j != ncol_int; ++j, ptr += nrow) {
-            hdf5store(
-                nrow, ptr, filename, dataname + "/" + header_int[j], true);
-        }
-    } else {
-        const size_type *ptr = data_int.data();
-        for (std::size_t j = 0; j != ncol_int; ++j, ptr += nrow) {
-            hdf5store(
-                nrow, ptr, filename, dataname + "/" + header_int[j], true);
-        }
-    }
-
-    std::size_t ncol = sampler.summary_header_size();
-    Vector<std::string> header(ncol);
-    Vector<double> data(nrow * ncol);
-    sampler.summary_header(header.begin());
-    sampler.summary_data(ColMajor, data.begin());
-    const double *ptr = data.data();
-    for (std::size_t j = 0; j != ncol; ++j, ptr += nrow)
-        hdf5store(nrow, ptr, filename, dataname + "/" + header[j], true);
+    for (const auto &v : df)
+        hdf5store(v.second, filename, dataname + "/" + v.first, append);
 }
 
 } // namespace vsmc
