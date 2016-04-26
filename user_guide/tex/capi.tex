@@ -19,13 +19,13 @@ For all C interfaces, \verb|int| is always used for integer types, regardless
 of the \cpp interfaces, except for memory functions. And \verb|double| is
 always used for floating points. For example, the following method of
 \verb|Seed|,
-\begin{cppcode}
+\begin{Verbatim}
   unsigned get();
-\end{cppcode}
+\end{Verbatim}
 is exposed to C as
-\begin{ccode}
+\begin{Verbatim}
   int vsmc_seed_get(void);
-\end{ccode}
+\end{Verbatim}
 And \rng methods where \verb|unsigned| was expected in \cpp, an \verb|int| is
 expected in C. If a function is a template, then only the specialization for
 \verb|double| is exposed to C. In some cases, specializations for \verb|int|
@@ -54,9 +54,9 @@ enumerator types are \verb|vSMCMatrixLayout| and \verb|vSMCMonitorStage|.
 Last, when a function object is expected in the \cpp interface, a function
 pointer will be expected in the C interface. For example,
 \verb|Sampler::move_type| is translated to,
-\begin{ccode}
+\begin{Verbatim}
   typedef int (*vsmc_sampler_move_type)(int, vsmc_particle);
-\end{ccode}
+\end{Verbatim}
 
 \section{Classes and methods}
 \label{app:sec:Classes and methods}
@@ -65,35 +65,35 @@ A few core classes are accessible from this \api. They are listed in
 table~\appref{app:tab:capi types}. Table~\appref{app:tab:capi} lists additional
 features of the library exposed to the C \api apart from the core classes
 listed above. With the exception of
-\begin{ccode}
+\begin{Verbatim}
   typedef {
       double *state;
       int id;
   } vsmc_single_particle;
-\end{ccode}
+\end{Verbatim}
 all the C types in the table are only wrappers around a pointer. For example,
-\begin{ccode}
+\begin{Verbatim}
   typedef {
       void *ptr;
   } vsmc_sampler;
-\end{ccode}
+\end{Verbatim}
 The pointer points to the address of a \cpp object of the corresponding type.
 
 Each C type objects can be created by an allocation function and destroyed by a
 deallocation function. For example,
-\begin{ccode}
+\begin{Verbatim}
   vsmc_sampler sampler = vsmc_sampler_new(n, dim, vSMCMultinomial, 0.5);
-\end{ccode}
+\end{Verbatim}
 corresponds to the \cpp calls,
-\begin{cppcode}
+\begin{Verbatim}
   Sampler<T> sampler(n, Multinomial, 0.5);
   sampler.particle.value().resize_dim(dim);
-\end{cppcode}
+\end{Verbatim}
 The memory can later be freed by
-\begin{ccode}
+\begin{Verbatim}
   vsmc_sampler_delete(sampler);
   sampler.ptr = NULL;
-\end{ccode}
+\end{Verbatim}
 Most non-static methods can be accesses through C. The corresponding functions
 names takes the form
 \texttt{\textcolor{MRed}{\textit{class}}\_\textcolor{MRed}{\textit{method}}},
@@ -103,27 +103,27 @@ of the method. The first argument will be a
 \texttt{\textcolor{MRed}{\textit{class}}} type object, and the following
 arguments are the same as in \cpp. When there are multiple overloading of a
 method, the most general form is provided. For example,
-\begin{cppcode}
+\begin{Verbatim}
   StateMatrix<RowMajor, Dynamic, double> s;
   s.resize(n);
   s.resize(n, dim);
-\end{cppcode}
+\end{Verbatim}
 are two overloading of the \verb|resize| method. In C, only
-\begin{ccode}
+\begin{Verbatim}
   vsmc_state_matrix s = vsmc_state_matrix_new(n, dim);
   vsmc_state_matrix_resize(s, n, dim);
-\end{ccode}
+\end{Verbatim}
 are accessible. In a few cases, when a getter and a setter are overloaded,
 \verb|get| and \verb|set| are inserted into the method name. For example,
-\begin{cppcode}
+\begin{Verbatim}
   double thres = sampler.threshold();
   sampler.threshold(thres);
-\end{cppcode}
+\end{Verbatim}
 are translated to C as
-\begin{ccode}
+\begin{Verbatim}
   double thres = vsmc_sampler_get_threshold(sampler);
   vsmc_sampler_set_threshold(sampler, thres);
-\end{ccode}
+\end{Verbatim}
 
 \begin{table}
   \begin{tabularx}{\textwidth}{lX}

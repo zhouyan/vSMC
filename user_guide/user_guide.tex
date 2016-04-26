@@ -8,13 +8,9 @@
 \newlength\fixedchar
 \settowidth{\fixedchar}{\texttt{\normalsize 0}}
 \geometry{textwidth=80\fixedchar}
-\gdef\topfraction{0.9}
-\gdef\bottomfraction{0.9}
-\gdef\floatpagefraction{0.9}
 
 \NewMinted{cpp}
 \NewMinted{c}
-\NewMinted{r}
 
 \UseAbbr{aes}
 \UseAbbr{ais}
@@ -23,6 +19,7 @@
 \UseAbbr{avx}
 \UseAbbr{blas}
 \UseAbbr{brng}
+\UseAbbr{cdf}
 \UseAbbr{cpu}
 \UseAbbr{crtp}
 \UseAbbr{ess}
@@ -35,6 +32,7 @@
 \UseAbbr{mkl}
 \UseAbbr{msvc}
 \UseAbbr{os}
+\UseAbbr{pdf}
 \UseAbbr{posix}
 \UseAbbr{raii}
 \UseAbbr{rdrand}
@@ -84,7 +82,7 @@
 \include{tex/front}
 
 \mainmatter
-\include{tex/smc}
+\include{tex/intro}
 \include{tex/basic}
 \include{tex/advanced}
 \include{tex/config}

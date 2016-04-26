@@ -23,10 +23,10 @@ constructed with user defined resampling operations. A user defined resampling
 algorithm can be any type that is convertible to
 \verb|Sampler<T>::resample_type|,
 following function call,
-\begin{cppcode}
+\begin{Verbatim}
   using resample_type = std::function<void(std::size_t, std::size_t,
       typename Particle<T>::rng_type &, const double *, size_type *)>;
-\end{cppcode}
+\end{Verbatim}
 where the first argument is $N$, the sample size before resampling; the second
 is $M$, the sample size after resampling; the third is a \cppoo{} \rng type,
 the fourth is a pointer to normalized weight, and the last is a pointer to the
@@ -53,11 +53,11 @@ listed in table~\ref{tab:Resampling schemes}
 
 To transform $\{r_i\}_{i=1}^N$ into $\{a_i\}_{i=1}^M$, one can call the
 following function,
-\begin{cppcode}
+\begin{Verbatim}
   template <typename IntType1, typename IntType2>
   void resample_trans_rep_index(std::size_t N, std::size_t M,
       const IntType1 *replication, IntType2 *index);
-\end{cppcode}
+\end{Verbatim}
 where the last parameter is the output vector $\{a_i\}_{i=1}^M$. This function
 guarantees that $a_i = i$ if $r_i > 0$, for $i = 0,\dots,\min\{N, M\}$.
 However, its output may not be optimal for all applications. The last step of a
@@ -84,20 +84,20 @@ numbers be $\{s_i\}_{i=1}^N$, then $r_i = p_i + s_i$.
 
 The library provides the following class template for implementing such
 algorithms,
-\begin{cppcode}
+\begin{Verbatim}
   template <typename U01SeqType, bool Residual>
   class ResampleAlgorithm;
-\end{cppcode}
+\end{Verbatim}
 where \verb|U01SeqType| will be discussed later. The second parameter
 \verb|Residual| determines if the resampling shall be applied to residuals.
 
 The template template parameter \verb|U01SeqType| shall be a class with default
 construct that defines the following an \verb|operator()| that is compatible
 with the following,
-\begin{cppcode}
+\begin{Verbatim}
   template <typename RNGType>
   void operator()(RNGType &rng, std::size_t N, double *r);
-\end{cppcode}
+\end{Verbatim}
 which will generate $N$ random numbers within $[0, 1]$ such, say
 $\{U_i\}_{i=1}^N$, such that $U_1 \le U_2 \le \dots \le U_N$.
 
@@ -108,10 +108,10 @@ library defines three such sequences. The first is equivalent to sorted i.i.d.\
 random numbers. The second and the third are stratified and systematic,
 respectively. The builtin resampling algorithms are implemented using these
 sequences. For example,
-\begin{cppcode}
+\begin{Verbatim}
   using ResampleMultinomial = ResampleAlgorithm<U01SequenceSorted, false>;
   using ResampleResidual = ResampleAlgorithm<U01SequenceSorted, true>;
-\end{cppcode}
+\end{Verbatim}
 If the user is able to define a new ordered random sequence, either through
 sorting or otherwise, then using the \verb|ResampleAlgorithm| template, a new
 resampling algorithm can easily be implemented. Note that, the algorithm
@@ -121,8 +121,7 @@ random sequence has a greater cost.
 \section{Algorithms with increasing dimensions}
 \label{sec:Algorithms with increasing dimensions}
 
-Recall section~\ref{sec:Sequential importance sampling and resampling}, in
-general an \sis algorithm operates on increasing dimensions. Assume that the
+In general an \sis algorithm operates on increasing dimensions. Assume that the
 storage cost of a single particle at the marginal ($X_t^{(i)}$) is of order
 $O(1)$. At each iterations $t$, the path $X_{0:t-1}^{(i)}$ is extended to
 $X_{0:t}^{(i)}$. The resampling algorithms operate on the space
@@ -170,13 +169,13 @@ examples of such algorithms.
 
 The library provides the following class template for implementing such an
 algorithm.
-\begin{cppcode}
+\begin{Verbatim}
 template <typename IntType = std::size_t>
 class ResampleIndex;
-\end{cppcode}
+\end{Verbatim}
 Its usage is demonstrated by the following example (assuming
 $X_t^{(i)}\in\Real$, and $\phi_t$ is the same as $\varphi_t$),
-\begin{cppcode*}{texcomments}
+\begin{Verbatim}
   using StateBase = StateMatrix<ColMajor, Dynamic, double>;
 
   class State : StateBase
@@ -226,7 +225,7 @@ $X_t^{(i)}\in\Real$, and $\phi_t$ is the same as $\varphi_t$),
   sampler.initialize(param);
   sampler.iterate(n);
   auto state = sampler.particle().value().trace_back(n);
-\end{cppcode*}
+\end{Verbatim}
 The method call \verb|index_.push_back(N, index)| append a new resampling index
 vector to the history being recorded by \verb|index_|. If called without the
 second argument, i.e., \verb|index_.push_back(N)|, then it is assumed $a_i = i$

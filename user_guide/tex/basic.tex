@@ -6,9 +6,8 @@
 
 All classes that are accessible to users are within the name space \verb|vsmc|.
 Class names are in \verb|CamelCase| and function names and class members are in
-\verb|small_cases|. In the remaining of this guide, we will omit the
-\verb|vsmc::| name space qualifiers. We will use ``function'' for referring to
-name space scope functions and ``method'' for class member functions.
+\verb|small_cases|. We will use ``function'' for referring to name space scope
+functions and ``method'' for class member functions.
 
 \section{Getting and installing the library}
 \label{sec:Getting and installing the library}
@@ -72,7 +71,7 @@ The library gives users the maximum flexibility of how the states
 $\{X^{(i)}\}_{i=1}^N$ shall be stored and structured. Any class type with a
 constructor that takes a single integer value, the number of particles, as its
 argument, and a method named \verb|copy| is acceptable. For example,
-\begin{cppcode*}{texcomments}
+\begin{Verbatim}
   class T
   {
       public:
@@ -86,7 +85,7 @@ argument, and a method named \verb|copy| is acceptable. For example,
           }
       }
   };
-\end{cppcode*}
+\end{Verbatim}
 How the state values are actually stored and accessed are entirely up to the
 user. The method \verb|copy| is necessary since the library assumes no
 knowledge of the internal structure of the state. And thus it cannot perform
@@ -98,19 +97,19 @@ larger weights and eliminate those with smaller weights.
 For most applications, the values can be stored within an $N$ by $d$ matrix,
 where $d$ is the dimension of the state. The library provides a convenient
 class template for this situation,
-\begin{cppcode}
+\begin{Verbatim}
   template <MatrixLayout Layout, std::size_t Dim, typename T>
   class StateMatrix;
-\end{cppcode}
+\end{Verbatim}
 where \verb|Layout| is either \verb|RowMajor| or \verb|ColMajor|, which
 specifies the matrix storage layout; \verb|Dim| is a non-negative integer
 value. If \verb|Dim| is zero, then the dimension may be changed at runtime. If
 it is positive, then the dimension is fixed and cannot be changed at runtime.
 The last template parameter \verb|T| is the \cpp type of state space. The
 following constructs an object of this class,
-\begin{cppcode}
+\begin{Verbatim}
   StateMatrix<ColMajor, Dynamic, double> s(N);
-\end{cppcode}
+\end{Verbatim}
 where \verb|Dynamic| is just an enumerator with value zero. We can specify the
 dimension at runtime through the method \verb|s.resize_dim(d)|. Note that, if
 the template parameter \verb|Dim| is positive, then this call results in a
@@ -155,21 +154,21 @@ the performance depends on the original and new sizes.
 
 The vector of weights $\{W^{(i)}\}_{i=1}^N$ is abstracted in the library by the
 \verb|Weight| class. The following constructs an object of this class,
-\begin{cppcode}
+\begin{Verbatim}
   Weight w(N);
-\end{cppcode}
+\end{Verbatim}
 There are a few methods for accessing the weights,
-\begin{cppcode*}{texcomments}
+\begin{Verbatim}
   w.ess();          // Get {\normalfont\textsc{ess}}
   w.set_equal();    // Set $W^{(i)} = 1/N$
-\end{cppcode*}
+\end{Verbatim}
 The weights can be manipulated, given a vector of length $N$, say $v$,
-\begin{cppcode*}{texcomments}
+\begin{Verbatim}
   w.set(v);         // Set $W^{(i)} \propto v^{(i)}$
   w.mul(v);         // Set $W^{(i)} \propto W^{(i)} v^{(i)}$
   w.set_log(v);     // Set $\log W^{(i)} = v^{(i)} + \text{const.}$
   w.add_log(v);     // Set $\log W^{(i)} = \log W^{(i)} + v^{(i)} + \text{const.}$
-\end{cppcode*}
+\end{Verbatim}
 The method \verb|w.data()| returns a pointer to the normalized weights. It is
 important to note that the weights are always normalized and all mutable
 methods only allow access to $\{W^{(i)}\}_{i=1}^N$ as a whole.
@@ -180,9 +179,9 @@ methods only allow access to $\{W^{(i)}\}_{i=1}^N$ as a whole.
 A particle system is composed of both the state values, which is of user
 defined type, say \verb|T|, and the weights. The following constructs an object
 of class \verb|Particle<T>|,
-\begin{cppcode}
+\begin{Verbatim}
   Particle<T> particle(N);
-\end{cppcode}
+\end{Verbatim}
 The method \verb|particle.value()| returns the type \verb|T| object. The object
 containing the weights is returned by \verb|particle.weight()|. Its type is
 \verb|Particle<T>::weight_type|, whose definition depends on the type \verb|T|.
@@ -196,18 +195,18 @@ frequently. The user is free to use whatever \rng mechanism as they see fit.
 However, one common issue encountered in practice is how to maintain
 independence of the \rng streams between function calls. For example, consider
 below a function that manipulates some state values,
-\begin{cppcode}
+\begin{Verbatim}
   void function(double &x)
   {
       std::mt19937 rng;
       std::normal_distribution<double> rnorm(0, 1);
       x = rnorm(rng);
   }
-\end{cppcode}
+\end{Verbatim}
 Every call of this function will give \verb|x| exactly the same value. This is
 hardly what the user intended. One might consider an global \rng or one as
 class member data. For example,
-\begin{cppcode}
+\begin{Verbatim}
   std::mt19937 rng;
 
   void function(double &x)
@@ -215,17 +214,17 @@ class member data. For example,
       std::normal_distribution<double> rnorm(0, 1);
       x = rnorm(rng);
   }
-\end{cppcode}
+\end{Verbatim}
 This will work fine as long as the function is never called by two threads at
 the same time. However, \smc algorithms are natural candidates to
 parallelization. Therefore, the user will need to either lock the \rng, which
 degenerates the performance, or construct different \rng{}s for different
 threads. The later, though ensures thread-safety, has other issues. For
 example, consider
-\begin{cppcode*}{texcomments}
+\begin{Verbatim}
   std::mt19937 rng1(s1); // For thread $i_1$ with seed $s_1$
   std::mt19937 rng2(s2); // For thread $i_2$ with seed $s_2$
-\end{cppcode*}
+\end{Verbatim}
 where the seeds $s_1 \ne s_2$. It is difficult to ensure that the two streams
 generated by the two \rng{}s are independent. Common practice for parallel \rng
 is to use sub-streams or leap-frog algorithms. Without going into any further
@@ -236,24 +235,25 @@ The library provides a simple solution to this issue. The method
 \verb|particle.rng(i)| returns a reference to an \rng that conforms to the
 \cppoo uniform \rng concept. It can be called from different threads at the
 same time, for example,
-\begin{cppcode*}{texcomments}
+\begin{Verbatim}
   auto &rng1 = particle.rng(i1); // Called from thread $i_1$
   auto &rng2 = particle.rng(i2); // Called from thread $i_2$
-\end{cppcode*}
+\end{Verbatim}
 If $i_1 \ne i_2$, then the subsequent use of the two \rng{}s are guaranteed to
 be thread-safe. In addition, they will produce independent streams. If \tbb is
 available to the library, then it is also thread-safe even if $i_1 = i_2$. One
 can write functions that process each particle, for example,
-\begin{cppcode*}{texcomments}
+\begin{Verbatim}
   void function(std::size_t i)
   {
       auto &rng = particle.rng(i);
       // Process the particle i using rng
   }
-\end{cppcode*}
+\end{Verbatim}
 And if later this function is called from a parallelized environment, it is
 still thread-safe and produce desired statistical results. The details of the
-\rng system are documented later in chapter~\ref{chap:Random number generating}.
+\rng system are documented later in chapter~\ref{chap:Random number
+  generating}.
 
 \subsubsection{Resize the particle system}
 
@@ -270,10 +270,10 @@ its original size. After the resizing, the weights are set to be equal.
 
 \paragraph{Resize by selecting according to a user supplied index vector}
 
-\begin{cppcode}
+\begin{Verbatim}
   template <typename InputIter>
   void resize_by_index(size_type N, InputIter index);
-\end{cppcode}
+\end{Verbatim}
 The input iterator \verb|index| shall point to a length $N$ vector. Each
 element is the parent index of the corresponding new particle. The new system
 is formed by $\bar{X}^{(i)} = X^{(a_i)}$ where $a_i$ is the $i$\ith element of
@@ -281,10 +281,10 @@ the index vector.
 
 \paragraph{Resize by selecting according to a user supplied mask vector}
 
-\begin{cppcode}
+\begin{Verbatim}
   template <typename InputIter>
   void resize_by_mask(size_type N, InputIter mask);
-\end{cppcode}
+\end{Verbatim}
 The input iterator \verb|mask| shall point to a length $n$ vector, where $n$ is
 the original sample size. For each element, when converted to \verb|bool|, if
 it is \verb|true|, then the corresponding particle is preserved. Otherwise it
@@ -295,16 +295,16 @@ repeatedly until there are enough particles to fill the new system.
 
 \paragraph{Resize by resampling}
 
-\begin{cppcode}
+\begin{Verbatim}
   template <typename ResampleType>
   void resize_by_resample(size_type N, ResampleType &&op);
-\end{cppcode}
+\end{Verbatim}
 The details of the resampling operation function object is discussed in
 chapter~\ref{chap:Resampling}. For now, it is sufficient to say that, to use
 any of the builtin schemes, one can call the method like the following,
-\begin{cppcode}
+\begin{Verbatim}
   particle.resize_by_resample(N, ResampleMultinomial());
-\end{cppcode}
+\end{Verbatim}
 This method produce a new particle system by using the specified resampling
 algorithm. Note that, this is different from resampling a particle system in
 that, all operations are local. That is, if the particle is in a distributed
@@ -312,20 +312,20 @@ system, only local weights are used, and re-normalized.
 
 \paragraph{Resize by uniformly selecting from all particles}
 
-\begin{cppcode}
+\begin{Verbatim}
   void resize_by_uniform(size_type N);
-\end{cppcode}
+\end{Verbatim}
 This is equivalent to,
-\begin{cppcode}
+\begin{Verbatim}
   particle.weight().set_equal();
   particle.resize_by_resample(N, ResampleMultinomial());
-\end{cppcode}
+\end{Verbatim}
 
 \paragraph{Resize by selecting a range of particles}
 
-\begin{cppcode}
+\begin{Verbatim}
   void resize_by_range(size_type N, size_type first, size_type last);
-\end{cppcode}
+\end{Verbatim}
 This is the most destructive resizing method. Let $n = \text{last} -
 \text{first}$. If $n < N$, the particles in the range $[\text{first},
 \text{last})$ are copied repeatedly until there are enough particles to fill
@@ -346,25 +346,25 @@ $\{X^{(i)}\}_{i=1}^N$ as a whole through \verb|particle.value()|. To allow
 direct access to $X^{(i)}$, the library uses a class \verb|SingeParticle<T>|.
 An object of this class is constructed from the index $i$ of the particle, and
 a pointer to the particle system it belongs to,
-\begin{cppcode}
+\begin{Verbatim}
   SingleParticle<T> sp(i, &particle);
-\end{cppcode}
+\end{Verbatim}
 or more conveniently,
-\begin{cppcode}
+\begin{Verbatim}
   auto sp = particle.sp(i);
-\end{cppcode}
+\end{Verbatim}
 In its most basic form, it has the following methods,
-\begin{cppcode}
+\begin{Verbatim}
   sp.id();       // Get the value i that sp was constructed with
   sp.particle(); // Get a reference to the Particle<T> object sp belongs to
   sp.rng();      // => sp.particle().rng(sp.id());
-\end{cppcode}
+\end{Verbatim}
 If \verb|T| is a derived class of \verb|StateMatrix|, then it has two
 additional methods,
-\begin{cppcode}
+\begin{Verbatim}
   sp.dim();    // => sp.particle().value().dim();
   sp.state(j); // => sp.particle().value().state(sp.id(), j);
-\end{cppcode}
+\end{Verbatim}
 It is clear now that the interface of \verb|SingleParticle<T>| depends on the
 type \verb|T|. Later in section~\ref{sec:Extending SP} we will show how to
 insert additional methods into this class.
@@ -374,18 +374,18 @@ supports almost all of the operations of a random access iterator with two
 exceptions. First dereferencing a \verb|SingleParticle<T>| object returns
 itself. The support of \verb|operator*| allows the range-based for loop to be
 applied on a \verb|Particle<T>| object, for example,
-\begin{cppcode}
+\begin{Verbatim}
   for (auto sp : particle) {
       // operations on sp
   }
-\end{cppcode}
+\end{Verbatim}
 is equivalent to
-\begin{cppcode}
+\begin{Verbatim}
   for (std::size_t i = 0; i != particle.size(); ++i) {
       auto sp = particle.sp(i);
       // operations on sp
   }
-\end{cppcode}
+\end{Verbatim}
 The above range-based loop does make some sense. However trying to
 dereferencing a \verb|SingleParticle<T>| object in other contexts does not make
 much sense.  Recall that it is an \emph{index}, not a \emph{pointer}. The
@@ -399,21 +399,21 @@ object to obtain such a value. Similarly, the expression \verb|sp[n]| returns
 \label{sub:Sampler}
 
 A sampler can be constructed in a few ways,
-\begin{cppcode}
+\begin{Verbatim}
   Sampler<T> sampler(N);
-\end{cppcode}
+\end{Verbatim}
 constructs a sampler that is never resampled, while
-\begin{cppcode}
+\begin{Verbatim}
   Sampler<T> sampler(N, Multinomial);
-\end{cppcode}
+\end{Verbatim}
 constructs a sampler that is resampled every iteration, using the Multinomial
 algorithm. Other resampling schemes are also implemented, see
 chapter~\ref{chap:Resampling}. Last, one can also construct a sampler that is
 only resampled when $\ess < \alpha N$, where $\alpha\in[0, 1]$, by the
 following,
-\begin{cppcode}
+\begin{Verbatim}
   Sampler<T> sampler(N, Multinomial, alpha);
-\end{cppcode}
+\end{Verbatim}
 If $\alpha > 1$, then it has the same effect as the first constructor, since
 $\ess \le N$. If $\alpha < 0$, then it has the same effect as the second
 constructor, since $\ess > 0$.
@@ -430,16 +430,16 @@ to \verb|sampler.particle().size()|.
 
 A sampler can be initialized by user defined function objects that are
 convertible to the following type,
-\begin{cppcode}
+\begin{Verbatim}
   using init_type = std::function<std::size_t(Particle<T> &, void *)>;
-\end{cppcode}
+\end{Verbatim}
 For example,
-\begin{cppcode}
+\begin{Verbatim}
   auto init = [](Particle<T> &particle, void *param) {
       // Process initialization parameter param
       // Initialize the particle system particle
   };
-\end{cppcode}
+\end{Verbatim}
 is a \cppoo lambda expression that can be used for this purpose. One can add it
 to a sampler by calling \verb|sampler.init(init)|. Upon calling
 \verb|sampler.initialize(param)|, the user defined \verb|init| will be called
@@ -448,9 +448,9 @@ and the argument \verb|param| will be passed to it.
 Similarly, after initialization, at each iteration, the particle system can be
 manipulated by user defined function objects that are convertible to the
 following types,
-\begin{cppcode}
+\begin{Verbatim}
   using move_type = std::function<std::size_t(std::size_t, Particle<T> &)>;
-\end{cppcode}
+\end{Verbatim}
 Multiple moves can be added to a sampler. The call
 \verb|sampler.move(move, append)| adds a \verb|move_type| object to the
 sampler, where \verb|append| is a boolean value. If it is \verb|false|, it will
@@ -465,18 +465,18 @@ Note that the possible resampling will also be performed after the user defined
 initialization function is called by \verb|sampler.initialize(param)|. And
 after that, the sequence of \mcmc moves will be called. If it desired not to
 perform mutations during initialization, then following can be used,
-\begin{cppcode}
+\begin{Verbatim}
   sampler.init(init).initialize(param);
   sampler.move(move, false).mcmc(mcmc, false).iterate(n);
-\end{cppcode}
+\end{Verbatim}
 The above code also demonstrates that most methods of \verb|Sampler<T>| return
 a reference to the sampler itself and thus method calls can be chained. In
 addition, method \verb|sampler.iterate(n)| accepts an optional argument that
 specifies the number of iterations. It is a shortcut for
-\begin{cppcode}
+\begin{Verbatim}
   for (std::size_t i = 0; i != n; ++i)
       sampler.iterate();
-\end{cppcode}
+\end{Verbatim}
 
 \subsection{Monitor}
 \label{sub:Monitor}
@@ -485,12 +485,12 @@ Inferences using a \smc algorithm usually require the calculation of the
 quantity $\sum_{i=1}^NW^{(i)}\varphi(X^{(i)})$ at each iteration for some
 function $\varphi$. One can define function objects that are convertible to the
 following type,
-\begin{cppcode}
+\begin{Verbatim}
   using eval_type =
       std::function<void(std::size_t, std::size_t, Particle<T> &, double *);
-\end{cppcode}
+\end{Verbatim}
 For example,
-\begin{cppcode*}{texcomments}
+\begin{Verbatim}
   void eval(std::size_t iter, std::size_t d, Particle<T> &particle, double *r)
   {
       for (std::size_t i = 0; i != particle.size(); ++i, r += dim) {
@@ -500,14 +500,14 @@ For example,
           r[d - 1] = /* $\varphi_d(X^{(i)})$ */;
       }
   }
-\end{cppcode*}
+\end{Verbatim}
 The argument \verb|d| is the dimension of the vector function $\varphi$. The
 output is an $N$ by $d$ matrix in row major layout, with each row corresponding
 to the value of $\varphi(X^{(i)})$. Then one can add this function to a sampler
 by calling,
-\begin{cppcode}
+\begin{Verbatim}
   sampler.monitor("name", d, eval);
-\end{cppcode}
+\end{Verbatim}
 where the first argument is the name for the monitor; the second is the
 dimension to be passed to the user defined function; and the third is the
 evaluation function. At each iteration, after all the initialization, possible
@@ -515,14 +515,14 @@ resampling, moves and \mcmc moves are done, the sampler will calculate
 $\sum_{i=1}^NW^{(i)}\varphi(X^{(i)})$. This method has two optional arguments.
 The first is a boolean value \verb|record_only|. If it is \verb|true|, it is
 assumed that no summation is needed. For example,
-\begin{cppcode*}{texcomments}
+\begin{Verbatim}
   void eval(std::size_t iter, std::size_t d, Particle<T> &particle, double *r)
   {
       r[0] = /* $\varphi_1(\{X^{(i)}\}_{i=1}^N)$ */;
       // ...
       r[d - 1] = /* $\varphi_d(\{X^{(i)}\}_{i=1}^N)$ */;
   }
-\end{cppcode*}
+\end{Verbatim}
 In this case, the monitor acts merely as a storage facility. The second
 optional argument is \verb|stage| which specifies at which point the monitoring
 shall happen. It can be \verb|MonitorMove|, which specifies that the monitoring
@@ -534,15 +534,15 @@ everything.
 
 The output of a sampler, together with the records of any monitors it has can
 be output in plain text forms through a \cpp output stream. For example,
-\begin{cppcode}
+\begin{Verbatim}
   std::cout << sampler;
-\end{cppcode}
+\end{Verbatim}
 We will see how this works later with a concrete particle filter example. If
 the \hdf library is available, it is also possible to write such output to \hdf
 format, for example,
-\begin{cppcode}
+\begin{Verbatim}
   hdf5store(sampler, file_name, data_name);
-\end{cppcode}
+\end{Verbatim}
 Details can be found in section~\ref{sec:Store objects in HDF5 format}. More
 sophisticated methods for retrieving monitor records are defined by the
 \verb|Monitor<T>| class. An object of this class can be retrieved by
@@ -628,7 +628,7 @@ The complete program is shown in appendix~\appref{app:sub:Sequential
 
 \subsubsection{The main program}
 
-\begin{cppcode}
+\begin{Verbatim}
     Sampler<PFState> sampler(N, Multinomial, 0.5);
     sampler.init(PFInit()).move(PFMove(), false).monitor("pos", 2, PFEval());
 
@@ -637,7 +637,7 @@ The complete program is shown in appendix~\appref{app:sub:Sequential
     std::ofstream output("pf.out");
     output << sampler;
     output.close();
-\end{cppcode}
+\end{Verbatim}
 \verb|Sampler<PFState>| object is constructed first. Then the initialization
 \verb|PFInit|, move \verb|PFMove| and a monitor \verb|PFEval| that records
 $\xpos^t$ and $\ypos^t$ are added to the sampler. The monitor is named
@@ -646,10 +646,10 @@ $\xpos^t$ and $\ypos^t$ are added to the sampler. The monitor is named
 points. At last, the output is written into a text file \verb|"pf.out"|. Below
 is a short R\footnote{\url{http://r-project.org}} script that can be used to
 process the output
-\begin{rcode}
+\begin{Verbatim}
   pf <- read.table("pf.out", header = TRUE)
   print(pf[1:5,])
-\end{rcode}
+\end{Verbatim}
 The \verb|print(pf[1:5,])| statement shows the first five lines of the output,
 \begin{Verbatim}
     Size Resampled Accept.0      ESS    pos.0   pos.1
@@ -678,16 +678,16 @@ Before diving into the details of the implementation of \verb|PFState|, etc.,
 we will first define a few constants and types. The state space is of dimension
 $4$. And it is natural to use a \verb|StateMatrix| as the base class of
 \verb|PFState|,
-\begin{cppcode}
+\begin{Verbatim}
   using PFStateBase = StateMatrix<RowMajor, 4, double>;
-\end{cppcode}
+\end{Verbatim}
 We define the following constants as the indices of each state component.
-\begin{cppcode}
+\begin{Verbatim}
   static constexpr std::size_t PosX = 0;
   static constexpr std::size_t PosY = 1;
   static constexpr std::size_t VelX = 2;
   static constexpr std::size_t VelY = 3;
-\end{cppcode}
+\end{Verbatim}
 
 \subsubsection{State: \texttt{PFState}}
 
@@ -696,7 +696,7 @@ As noted earlier, \verb|StateMatrix| will be used as the base class of
 the data within this class. And methods will be provided to read the data from
 an external file, and compute the log-likelihood $\ell(X^{(i)})$, which
 accesses the data. Below the declaration of the class \verb|PFState| is shown,
-\begin{cppcode*}{texcomments}
+\begin{Verbatim}
   class PFState : public PFStateBase
   {
       public:
@@ -712,12 +712,12 @@ accesses the data. Below the declaration of the class \verb|PFState| is shown,
       Vector<double> obs_x_;
       Vector<double> obs_y_;
   };
-\end{cppcode*}
+\end{Verbatim}
 
 \subsubsection{Initialization: \texttt{PFInit}}
 
 The initialization step is implemented as below,
-\begin{cppcode}
+\begin{Verbatim}
   class PFInit
   {
       public:
@@ -764,7 +764,7 @@ The initialization step is implemented as below,
       private:
       Vector<double> weight_;
   };
-\end{cppcode}
+\end{Verbatim}
 An object of this class is convertible to \verb|Sampler<PFState>::init_type|.
 In the main method, \verb|operator()|, \verb|eval_param| is called first to
 initialize the data. Then \verb|eval_pre| is called to allocated any resource
@@ -780,7 +780,7 @@ become clear why we structured the implementation this way.
 \subsubsection{Move: \texttt{PFMove}}
 
 The move step is similar to the initialization. We show the declaration here,
-\begin{cppcode}
+\begin{Verbatim}
   class PFMove
   {
       public:
@@ -792,12 +792,12 @@ The move step is similar to the initialization. We show the declaration here,
       private:
       Vector<double> w_;
   };
-\end{cppcode}
+\end{Verbatim}
 
 \subsubsection{Monitor: \texttt{PFEval}}
 
 Last we define \verb|PFEval|, which simply copies the values of the positions.
-\begin{cppcode}
+\begin{Verbatim}
   class PFEval
   {
       public:
@@ -821,7 +821,7 @@ Last we define \verb|PFEval|, which simply copies the values of the positions.
 
       void eval_post(std::size_t t, Particle<PFState> &particle) {}
   };
-\end{cppcode}
+\end{Verbatim}
 
 \section{Symmetric multiprocessing}
 \label{sec:Symmetric multiprocessing}
@@ -832,11 +832,11 @@ parallelized. The library provides basic support of multicore parallelization
 through its \smp module. Two widely used backends, OpenMP and \tbb are
 available. Here we demonstrate how to use the \tbb backend. First we will
 declare the implementation classes as derived classes,
-\begin{cppcode}
+\begin{Verbatim}
   class PFInit : public InitializationTBB<PFState>;
   class PFMove : public MoveTBB<PFState>;
   class PFEval : public MonitorEvalTBB<PFState>;
-\end{cppcode}
+\end{Verbatim}
 And remove \verb|operator()| from their implementations. After these changes,
 the implementation will be parallelized using \tbb. The complete program can be
 found in section The complete program is shown in
@@ -877,11 +877,11 @@ optimizing compilers can usually devirtualize the method calls in trivial
 situations. However, it is not always possible. In this situation, the library
 will need a little help from the user to make compile-time dispatch. For each
 implementation class, we will declare it in the following way,
-\begin{cppcode}
+\begin{Verbatim}
   class PFInit : public InitializationTBB<PFState, PFInit>;
   class PFMove : public MoveTBB<PFState, PFMove>;
   class PFEval : public MonitorEvalTBB<PFState, PFEval>;
-\end{cppcode}
+\end{Verbatim}
 The second template argument of the base class need to be exactly the same as
 the derived class. For interested users, this is called Curiously Recurring
 Template

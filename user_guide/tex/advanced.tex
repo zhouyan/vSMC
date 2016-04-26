@@ -19,27 +19,27 @@ defined operations, one of these \rng will be used for resampling by the
 lead to multiple local filters start generating exactly the same random numbers
 in the next iteration. This is an undesired side effect. In this situation, one
 can clone the sampler with the following method,
-\begin{cppcode}
+\begin{Verbatim}
   auto new_sampler = sampler.clone(new_rng);
-\end{cppcode}
+\end{Verbatim}
 where \verb|new_rng| is a boolean value. If it is \verb|true|, then an exact
 copy of \verb|sampler| will be returned, except it will have the \rng system
 re-seeded. If it is \verb|false|, then the above assignemnt behaves exactly the
 same as
-\begin{cppcode}
+\begin{Verbatim}
   auto new_sampler = sampler;
-\end{cppcode}
+\end{Verbatim}
 Alternatively, the contents of an existing \verb|Sampler<T>| object can be
 replaced from another one by the following method,
-\begin{cppcode}
+\begin{Verbatim}
   sampler.clone(other_sampler, retain_rng);
-\end{cppcode}
+\end{Verbatim}
 where \verb|retain_rng| is a boolean value. If it is \verb|true|, then the \rng
 system of \verb|other_sampler| is not copied and the original is retained. If
 it is \verb|false|, then the above call behaves exactly the same as
-\begin{cppcode}
+\begin{Verbatim}
   sampler = other_sampler;
-\end{cppcode}
+\end{Verbatim}
 The above method also supports move semantics. Similar \verb|clone| methods
 exist for the \verb|Particle<T>| class.
 
@@ -50,7 +50,7 @@ The \verb|Particle<T>| class has a few member types that can be replaced by the
 user. If the class \verb|T| has the corresponding types, then the member type
 of \verb|Particle<T>| will be replaced. For example, given the following
 declarations inside class \verb|T|,
-\begin{cppcode}
+\begin{Verbatim}
   class T
   {
       public:
@@ -58,7 +58,7 @@ declarations inside class \verb|T|,
       using weight_type = /* User defined type */;
       using rng_set_type = RNGSetTBB<AES256_4x32>;
   };
-\end{cppcode}
+\end{Verbatim}
 The corresponding \verb|Particle<T>::size_type|, etc., will have their defaults
 replaced with the above types.
 
@@ -66,19 +66,19 @@ replaced with the above types.
 \label{sub:Replacing wtype}
 
 The class for managing the weights needs to provide the following methods,
-\begin{cppcode*}{texcomments}
+\begin{Verbatim}
   w.ess();           // Get $\text{\normalfont\textsc{ess}}$
   w.set_equal();     // Set $W^{(i)} = 1/N$
   w.resample_size(); // Get the sample size $N$.
   w.resample_data(); // Get a pointer to normalized weights
-\end{cppcode*}
+\end{Verbatim}
 For the library's default class \verb|Weight|, the last two calls are the same
 as \verb|w.size()| and \verb|w.data()|. However, this does not need to be so.
 For example, below is the outline of an implementation of \verb|weight_type|
 for distributed systems, assuming there are $R$ computing nodes and the node
 with rank $r$ has been allocated $N_r$ particles. Let
 $\{W_r^{(i)}\}_{i=1}^{N_r}$ denote the weights at the node with rank $r$.
-\begin{cppcode*}{texcomments}
+\begin{Verbatim}
   class WeightMPI
   {
       public:
@@ -126,7 +126,7 @@ $\{W_r^{(i)}\}_{i=1}^{N_r}$ denote the weights at the node with rank $r$.
           // Set $W_r^{(i)} = W_r^{(i)} / S$ for $i = 1,\dots,N_r$
       }
   };
-\end{cppcode*}
+\end{Verbatim}
 When \verb|Particle<T>| performs resampling, it checks if the pointer returned
 by \verb|w.resample_data()| is a null pointer. It will only generate the vector
 $\{a_i\}_{i=1}^N$ (see section~\ref{sub:State}) when it is not a null pointer,
@@ -146,7 +146,7 @@ access the state. This class can be extended by defining a member class
 template inside class \verb|T|. For example, for the simple particle filter in
 section~\ref{sec:A simple particle filter}, we can redefine the \verb|PFState|
 as the following,
-\begin{cppcode*}{texcomments}
+\begin{Verbatim}
   using PFStateBase = StateMatrix<RowMajor, 4, double>;
 
   template <typename T>
@@ -178,9 +178,9 @@ as the following,
       Vector<double> obs_x_;
       Vector<double> obs_y_;
   };
-\end{cppcode*}
+\end{Verbatim}
 And later, we can use these methods when implement \verb|PFInit| etc.,
-\begin{cppcode}
+\begin{Verbatim}
   class PFInit : public InitializeTBB<PFState, PFInit>
   {
       public:
@@ -206,7 +206,7 @@ And later, we can use these methods when implement \verb|PFInit| etc.,
       private:
       Vector<double> w_;
   };
-\end{cppcode}
+\end{Verbatim}
 It shall be noted that, it is important to keep \verb|single_particle_type|
 small and copying the object efficient. The library will frequently pass
 argument of \verb|SingleParticle<T>| type by value.
@@ -215,7 +215,7 @@ argument of \verb|SingleParticle<T>| type by value.
 \label{sub:Compared to custom state type}
 
 One can also write a custom state type. For example,
-\begin{cppcode}
+\begin{Verbatim}
   class PFStateSP
   {
       public:
@@ -232,9 +232,9 @@ One can also write a custom state type. For example,
       double vel_x_;
       double vel_y_;
   };
-\end{cppcode}
+\end{Verbatim}
 And the \verb|PFState| class will be defined as,
-\begin{cppcode}
+\begin{Verbatim}
   using PFStateBase = StateMatrix<RowMajor, 1, PFStateSP>;
 
   class PFState : public PFStateBase
@@ -253,7 +253,7 @@ And the \verb|PFState| class will be defined as,
       Vector<double> obs_x_;
       Vector<double> obs_y_;
   };
-\end{cppcode}
+\end{Verbatim}
 The implementation of \verb|PFInit|, etc., will be similar. Compared to
 extending the \verb|SingleParticle<T>| type, this method is perhaps more
 intuitive. Functionality-wise, they are almost identical. However, there are a
@@ -261,7 +261,7 @@ few advantages of extending \verb|SingleParticle<T>|. First, it allows more
 compact data storage. Consider a situation where the state space is best
 represented by a real and an integer. The most intuitive way might be the
 following,
-\begin{cppcode}
+\begin{Verbatim}
   class S
   {
       public:
@@ -274,13 +274,13 @@ following,
   };
 
   class T : StateMatrix<RowMajor, 1, S>;
-\end{cppcode}
+\end{Verbatim}
 However, the type \verb|S| will need to satisfy the alignment requirement of
 \verb|double|, which is 8-bytes on most platforms. However, its size might not
 be a multiple of 8-bytes. Therefore the type will be padded and the storage of
 a vector of such type will not be as compact as possible. This can affect
 performance in some situations. An alternative approach would be the following,
-\begin{cppcode}
+\begin{Verbatim}
   class T
   {
       public:
@@ -298,7 +298,7 @@ performance in some situations. An alternative approach would be the following,
       Vector<double> x_;
       Vector<int> u_;
   };
-\end{cppcode}
+\end{Verbatim}
 By extending \verb|SingleParticle<T>|, it provides the same easy access to each
 particle. However, now the state values are stored as two compact vectors.
 
@@ -308,7 +308,7 @@ rather redundant to copy each value of the two positions, just so later we can
 compute weighted sums from them. Recall that in section~\ref{sub:Monitor} we
 showed that a monitor that compute the final results directly can also be added
 to a sampler. Therefore, we might implement \verb|PFEval| as the following,
-\begin{cppcode*}{texcomments}
+\begin{Verbatim}
   class PFEval
   {
       public:
@@ -320,11 +320,11 @@ to a sampler. Therefore, we might implement \verb|PFEval| as the following,
               particle.weight().data(), 1, 0, r, 1);
       }
   };
-\end{cppcode*}
+\end{Verbatim}
 And it can be added to a sampler as,
-\begin{cppcode}
+\begin{Verbatim}
   sampler.monitor("pos", 2, PFEval(), true);
-\end{cppcode}
+\end{Verbatim}
 This is only possible if the \verb|PFState| was implemented with contiguous
 storage of the states. For this particular case, the performance benefit is
 small. But the possibility of accessing compact vector as raw data allows

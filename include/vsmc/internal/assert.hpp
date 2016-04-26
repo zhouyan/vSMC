@@ -52,7 +52,7 @@
 #define VSMC_RUNTIME_ASSERT(cond, msg)                                        \
     {                                                                         \
         if (!(cond)) {                                                        \
-            throw vsmc::RuntimeAssert(msg);                                   \
+            throw ::vsmc::RuntimeAssert(msg);                                 \
         };                                                                    \
     }
 #else // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
@@ -74,7 +74,7 @@
 #define VSMC_RUNTIME_WARNING(cond, msg)                                       \
     {                                                                         \
         if (!(cond)) {                                                        \
-            throw vsmc::RuntimeWarning(msg);                                  \
+            throw ::vsmc::RuntimeWarning(msg);                                \
         };                                                                    \
     }
 #else // VSMC_RUNTIME_WARNING_AS_EXCEPTION

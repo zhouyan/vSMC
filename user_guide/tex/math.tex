@@ -7,11 +7,11 @@
 The library defines some mathematical constants in the form of \verb|constexpr|
 functions. For example, to get the value of $\pi$ with a desired precision, one
 can call the following,
-\begin{cppcode}
+\begin{Verbatim}
   auto pi_f = const_pi<float>();
   auto pi_d = const_pi<double>();
   auto pi_l = const_pi<long double>();
-\end{cppcode}
+\end{Verbatim}
 The compiler will evaluate these values at compile-time and thus there is no
 performance difference from hard-coding the constants in the program, while the
 readability is improved. All defined constants are listed in
@@ -85,17 +85,17 @@ table~\ref{tab:Mathematical constants}.
 
 The library provides a set of functions for vectorized mathematical operations.
 For example,
-\begin{cppcode}
+\begin{Verbatim}
   std::size_t n = 1000;
   Vector<double> a(n), b(n), y(n);
   // Fill vectors a and b
   add(n, a.data(), b.data(), y.data());
-\end{cppcode}
+\end{Verbatim}
 performs addition for vectors. It is equivalent to
-\begin{cppcode}
+\begin{Verbatim}
   for (std::size_t i = 0; i != n; ++i)
       y[i] = a[i] + b[i];
-\end{cppcode}
+\end{Verbatim}
 The functions defined are listed in table~\ref{tab:Arithmetic functions}
 to~\ref{tab:Special functions}. For each function, the first parameter is
 always the length of the vector, and the last is a pointer to the output vector
@@ -223,7 +223,7 @@ a pointer to a vector.
 The vectorized operations in the last section only operates on contiguous
 vectors. The library provides three functions to pack general vector into such
 storage,
-\begin{cppcode}
+\begin{Verbatim}
   // dst[i] = src[i * stride], i = 1 to n
   template <typename RandomIter, typename IntType, typename OutputIter>
   inline void pack_s(
@@ -238,9 +238,9 @@ storage,
   template <typename InputIterSrc, typename InputIterMask, typename OutputIter>
   inline void pack_m(
       std::size_t n, InputIterSrc src, InputIterMask mask, OutputIter dst);
-\end{cppcode}
+\end{Verbatim}
 There are also three corresponding unpack functions,
-\begin{cppcode}
+\begin{Verbatim}
   // dst[i * stride] = src[i], i = 1 to n
   template <typename InputIter, typename IntType, typename RandomIter>
   inline void unpack_s(
@@ -256,10 +256,10 @@ There are also three corresponding unpack functions,
   template <typename InputIterSrc, typename InputIterMask, typename OutputIter>
   inline void unpack_m(
       std::size_t n, InputIterSrc src, InputIterMask mask, OutputIter dst);
-\end{cppcode}
+\end{Verbatim}
 These functions guarantee that the three assertions in the following program
 will never fail,
-\begin{cppcode}
+\begin{Verbatim}
   pack_s(n, src, stride, tmp);
   unpack_s(n, tmp, stride, dst);
   for (std::size_t i = 0; i != n; ++i)
@@ -275,4 +275,4 @@ will never fail,
   for (std::size_t i = 0; i != n; ++i)
       if (mask[i])
           assert(src[i] == dst[i]);
-\end{cppcode}
+\end{Verbatim}
