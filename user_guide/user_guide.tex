@@ -1,16 +1,19 @@
-\documentclass[11pt,bib,mint,hyper,altcolor,showoverfull,toclevel=2]{mbook}
+\documentclass[
+12pt, lines=36, chars=70,
+mainfont=Arno,
+sansfont=Cronos, sansscale=Null,
+monofont=Consolas, monoscale=MatchLowercase,
+mathfont=Minion, mathscale=Null,
+bib, mint, hyper, altcolor, showoverfull, toclevel=2]{mbook}
 
 \title{vSMC -- Scalable Monte Carlo}
 \author{Yan Zhou}
 \date{Release v2.3.0}
 
 \addbibresource{user_guide.bib}
-\newlength\fixedchar
-\settowidth{\fixedchar}{\texttt{\normalsize 0}}
-\geometry{textwidth=80\fixedchar}
 
-\NewMinted{cpp}
 \NewMinted{c}
+\NewMinted{cpp}
 
 \UseAbbr{aes}
 \UseAbbr{ais}
@@ -58,7 +61,6 @@
 \UseAbbr[\vsmc][]{vSMC}
 
 \UseMathBB{I}
-
 \UseMathCal{N}
 
 \def\rmin{r_{\mathrm{min}}}

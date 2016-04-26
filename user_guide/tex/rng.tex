@@ -4,7 +4,7 @@
 The library has a comprehensive \rng system to facilitate implementation of
 Monte Carlo algorithms. A set of counter-based \rng{}s developed in
 \textcite{Salmon:2011um} are re-implemented in the library with some
-extensions. In addition wrappers for high performance \rng{}s in \mkl are also
+extensions. In addition, wrappers for high performance \rng{}s in \mkl are also
 provided, such that they can be used as \cppoo \rng engines. Some continuous
 distributions, including all those in the standard library, are implemented.
 Some of them are considerably faster than their standard library counter-parts.
@@ -14,51 +14,56 @@ interface for vectorized random number generating. Section~\ref{sec:Performance
   measurement} discusses the simple benchmark procedures later used in this
 chapter. Section~\ref{sec:Counter-based RNG} details the counter-based \rng{}s
 implemented in the library. Section~\ref{sec:Non-deterministic RNG} briefly
-discusses the non-deterministic \rng{}s using \rdrand instructions and
+discusses the non-deterministic \rng{}s using
+\rdrand\footnote{\url{https://en.wikipedia.org/wiki/RdRand}} instructions and
 section~\ref{sec:MKL RNG} shows how to use \rng{}s in the \mkl library as
 \cppoo engines. Section~\ref{sec:Distributions} discusses the distributions
-implemented by this library. Section~\ref{sec:Seeding} discusses how to seed
-counter-based \rng{}s.
+implemented by this library.
 
 \section{Vectorized random number generating}
 \label{sec:Vectorized random number generating}
 
 Before we discuss other features, we first introduce a generic function
-\verb|rng_rand|, which provides vectorized random number generating.
+\verb|rng_rand|, which provides vectorized random number generating. The first
+operates on \rng engines and generate raw random integers,
 \begin{Verbatim}
   template <typename RNGType>
   inline void rng_rand(
       RNGType &rng, std::size_t n, typename RNGType::result_type *r);
-
+\end{Verbatim}
+The effect of the function call,
+\begin{Verbatim}
+  rng_rand(rng, n, r);
+\end{Verbatim}
+is equivalent to the loop,
+\begin{Verbatim}
+  for (std::size_t i = 0; i != n; ++i)
+      r[i] = rng();
+\end{Verbatim}
+The results will always be the same unless a non-deterministic \rng is used.
+For some \rng{}s implemented in the library, the vectorized version may have
+considerable superior performance. The second interface of this generic
+function is for generating distribution random numbers,
+\begin{Verbatim}
   template <typename RNGType, typename DistributionType>
   inline void rng_rand(RNGType &rng, const DistributionType &distribution,
       std::size_t n, typename DistributionType::result_type *r);
 \end{Verbatim}
-The first is equivalent to generating random integers through a loop. For
-example,
+For example,
 \begin{Verbatim}
-  rng_rand(rng, n, r.data());
-  // is equivalent to
-  for (std::size_t i = 0; i != n; ++i)
-      r[i] = rng();
+  NormalDistribution<double> normal;
+  rng_rand(rng, normal, n, r);
 \end{Verbatim}
-The results of the two will always be exactly the same unless \rng{} is
-non-deterministic. The second version of \verb|rng_rand| is also similar to the
-loop,
+This is similar to the following loop,
 \begin{Verbatim}
-  rng_rand(rng, distribution, n, r.data())
-  // is similar to
   for (std::size_t i = 0; i != n; ++i)
-      r[i] = distribution(rng);
+      r[i] = normal(rng);
 \end{Verbatim}
-However, the results will not always be exactly the same, though the vectorized
-version will generate random numbers with the same distribution as expected.
-
-The advantage of using \verb|rng_rand| is that, if \verb|RNGType| or
-\verb|DistributionType| are classes defined by this library, then vectorized
-implementations might be used instead of using the loop. For some
-distributions, the performance gain can be significant. Consider the following
-dummy example,
+Depending on the type of the \rng engine and the distribution (and its
+parameters), the vectorized version may have superior performance. However, in
+this case, the results will not be exactly the same as using a loop. For
+example, comparing the following five methods for generating $n$ standard
+Normal distribution random numbers,
 \begin{Verbatim}
   std::size_t n = 10000;
   RNG rng_vsmc;
@@ -76,15 +81,21 @@ dummy example,
       r[i] = rnorm_vsmc(rng_vsmc);
 
   // Method 3
-  rng_rand(rng_vsmc, rnorm_vsmc, n, r.data());
+  rng_rand(rng_vsmc, rnorm_std, n, r.data());
 
   // Method 4
+  rng_rand(rng_vsmc, rnorm_vsmc, n, r.data());
+
+  // Method 5
   rng_rand(rng_mkl, rnorm_vsmc, n, r.data());
 \end{Verbatim}
-On the author's computer, on average method 1 costs 102 cycles to generate one
-standard Normal random number. Method 2 costs 61 cycles while method 3 costs
-only 14 cycles. The last, when the \rng{} engine is an \mkl{} \rng wrapper, the
-\mkl library's routines are used and it costs only 10 cycles.
+On the author's computer, on average method~1 costs 68 cycles to generate one
+standard Normal random number. Method~2 costs 56 cycles. Method~3 behaves
+exactly the same as method~1. Method~4 costs only 14 cycles. However, the
+results will not be exactly the same as method~2. The last, when the \rng{}
+engine is an \mkl{} \rng wrapper, and the distribution is the library's version
+instead of the standard library one, the \mkl library's routines are used and
+it costs only 10 cycles.
 
 \section{Performance measurement}
 \label{sec:Performance measurement}
@@ -94,14 +105,14 @@ in this chapter is measured in single core cycles per bytes (cpB) for \rng{}s,
 or cycles per element (cpE) for distributions (\verb|double| precision). The
 processor used to measure the performance is an Intel Core i7-4960\textsc{hg}
 \cpu. Three compilers are tested. The \llvm clang (Apple version~7.3.0), the
-\gnu{} \gcc (version~5.3.0), and the Intel \cpp compiler (2016 update 2). The
-version information is shown below,When multiple compilers are tested, they are
-labeled ``\llvm'', ``\gnu'', and ``Intel'', respectively in the tables. If only
-results from one compiler is shown, then unless stated otherwise, it is the
-\llvm clang compiler. The operating system is Mac OS~X~10.11.4.
+\gnu{} \gcc (version~5.3.0), and the Intel \cpp compiler (2016 update 2). When
+multiple compilers are tested, they are labeled ``\llvm'', ``\gnu'', and
+``Intel'', respectively in the tables. If only results from one compiler is
+shown, then unless stated otherwise, it is the \llvm clang compiler. The
+operating system is Mac OS~X~10.11.4.
 
-For the performance of \rng{}s, we measure two situations. The first is
-using the random integers one by one,
+For the performance of \rng{}s, we measure two situations. The first is the
+performance of generating random integers one by one,
 \begin{Verbatim}
   RNG rng;
   UniformBitsDistribution<std::uint64_t> rbits;
@@ -110,19 +121,19 @@ using the random integers one by one,
       r[i] = rbits(rng);
 \end{Verbatim}
 See section~\ref{sub:Uniform bits distribution} for details of
-\verb|UniformBitsDistributions|. In short, it generates 64 random bits each
-time \verb|rbits(rng)| is executed. The second is vectorized performance,
+\verb|UniformBitsDistributions|. In short, here we generate 64 random bits each
+time \verb|rbits(rng)| is executed. The second is the vectorized performance,
 \begin{Verbatim}
   rng_rand(rng, rbits, n, r.data());
 \end{Verbatim}
 See section~\ref{sec:Vectorized random number generating} for details of
 \verb|rng_rand|. In both cases, we repeat the simulations 100 times, each time
 with the number of elements $n$ chosen randomly between 5,000 and 10,000. The
-total numbers of cycles of the 100 simulations are recorded, and then divided
-by the to the total number of bytes generated. This give the performance
-measurement in cpB. This experiment is repeated ten times, and the best results
-is shown in tables later. The two performance data are labeled ``Loop'' and
-``\verb|rng_rand|'', respectively.
+total number of cycles of the 100 simulations are recorded, and then divided by
+the total number of bytes generated. This gives the performance measurement in
+cpB. This experiment is repeated ten times, and the best results is shown in
+tables later. The two situations are labeled ``Loop'' and ``\verb|rng_rand|'',
+respectively.
 
 For the performance of distributions, we measure four situations. The
 procedures is similar, except now we measure the performance in cpE. Take the
@@ -148,14 +159,14 @@ The third is the vectorized performance,
 \end{Verbatim}
 For all the three above, the \rng is \verb|ARSx8| (section~\ref{sub:AES-NI
   instructions based RNG}). The last measurement is the situation when \rng is
-\verb|MKL_SFMT19937| (section~\ref{sec:MKL RNG}).
+\verb|MKL_SFMT19937| (section~\ref{sec:MKL RNG}),
 \begin{Verbatim}
   MKL_SFMT19937 rng_mkl;
   rng_rand(rng_mkl, rnorm_vsmc, n, r.data());
 \end{Verbatim}
 In this case, not only the \rng itself is faster, the distribution might also
-use \mkl routines. The performance is measured in cpE. The four performance
-data are labeled ``\std/Boost'', ``\vsmc'', ``\verb|rng_rand|'' and ``\mkl'',
+use \mkl routines. The performance is measured in cpE. The four situations are
+labeled ``\std/Boost'', ``\vsmc'', ``\verb|rng_rand|'' and ``\mkl'',
 respectively.
 
 Note that these performance data, especially those for \rng{}s, are for
@@ -283,8 +294,9 @@ table~\ref{tab:Configuration macros for counter-based RNG}.
 \subsection{\protect\aesni instructions based \protect\rng}
 \label{sub:AES-NI instructions based RNG}
 
-The \aesni instructions based \rng{}s in \textcite{Salmon:2011um} are
-implemented in a more general form,
+The \aesni\footnote{\url{https://en.wikipedia.org/wiki/AES_instruction_set}}
+instructions based \rng{}s in \textcite{Salmon:2011um} are implemented in a
+more general form,
 \begin{Verbatim}
   template <typename KeySeqType, std::size_t Rounds, std::size_t Blocks>
   class AESNIGenerator;
@@ -551,6 +563,62 @@ library.
   \caption{Default RNG}
   \label{tab:Default RNG}
 \end{table}
+
+\subsection{Seeding counter-based RNG}
+\label{sub:Seeding counter-based RNG}
+
+The singleton class template \verb|SeedGenerator| can be used to generate
+distinctive seed sequentially. For example,
+\begin{Verbatim}
+  auto &seed = SeedGenerator<void, unsigned>::instance();
+  RNG rng1(seed.get()); // Construct rng1
+  RNG rng2(seed.get()); // Construct rng2 with another seed
+\end{Verbatim}
+The first argument to the template can be any type. For different types,
+different instances of \verb|SeedGenerator| will be created. Thus, the seeds
+generated by \verb|SeedGenerator<T1>| and \verb|SeedGenerator<T2>| will be
+independent. The second parameter is the type of the seed values. It can be any
+unsigned integer type. Classes such as \verb|Particle<T>| will use the
+generator of the following type,
+\begin{Verbatim}
+  using Seed = SeedGenerator<NullType, VSMC_SEED_RESULT_TYPE>;
+\end{Verbatim}
+where \verb|VSMC_SEED_RESULT_TYPE| is a configuration macro which is defined to
+\verb|unsigned| by default.
+
+One can save and set the seed generator using standard \cpp streams. For
+example
+\begin{Verbatim}
+  std::ifstream seed_txt("seed.txt");
+  if (seed_txt.good())
+      seed_txt >> Seed::instance(); // Read seed from a file
+  else
+      Seed::instance().set(101);    // The default seed
+  seed_txt.close();
+  // The program
+  std::ofstream seed_txt("seed.txt");
+  seed_txt << Seed::instance();     // Write the seed to a file
+  seed_txt.close();
+\end{Verbatim}
+This way, if the simulation program need to be repeated multiple times, each
+time is will use a different set of seeds.
+
+A single seed generator is enough for a single computer program. However, it is
+more difficult to ensure that each computing node has a distinctive set of
+seeds in a distributed system. A simple solution is to use the \verb|modulo|
+method of \verb|SeedGenerator|. For example,
+\begin{Verbatim}
+  Seed::instance().modulo(n, r);
+\end{Verbatim}
+where $n$ is the number of processes and $r$ is the rank of the current node.
+After this call, all seeds generated will belong to the equivalent class $s
+\equiv r \mod n$. Therefore, no two nodes will ever generate the same seeds.
+
+Note that, the seeds generated are not random at all. For any deterministic
+\rng{}s, the same seeds always produce identical streams. However, distinctive
+seeds does not always lead to independent streams (seed
+section~\ref{sec:Counter-based RNG}. This seed generator is only suitable for
+counter-based \rng{}s.
 
 \section{Non-deterministic RNG}
 \label{sec:Non-deterministic RNG}
@@ -1085,59 +1153,3 @@ performance data is in table~\ref{tab:Performance of Beta distribution}
   \caption{Performance of Beta distribution}
   \label{tab:Performance of Beta distribution}
 \end{table}
-
-\section{Seeding}
-\label{sec:Seeding}
-
-The singleton class template \verb|SeedGenerator| can be used to generate
-distinctive seed sequentially. For example,
-\begin{Verbatim}
-  auto &seed = SeedGenerator<void, unsigned>::instance();
-  RNG rng1(seed.get()); // Construct rng1
-  RNG rng2(seed.get()); // Construct rng2 with another seed
-\end{Verbatim}
-The first argument to the template can be any type. For different types,
-different instances of \verb|SeedGenerator| will be created. Thus, the seeds
-generated by \verb|SeedGenerator<T1>| and \verb|SeedGenerator<T2>| will be
-independent. The second parameter is the type of the seed values. It can be any
-unsigned integer type. Classes such as \verb|Particle<T>| will use the
-generator of the following type,
-\begin{Verbatim}
-  using Seed = SeedGenerator<NullType, VSMC_SEED_RESULT_TYPE>;
-\end{Verbatim}
-where \verb|VSMC_SEED_RESULT_TYPE| is a configuration macro which is defined to
-\verb|unsigned| by default.
-
-One can save and set the seed generator using standard \cpp streams. For
-example
-\begin{Verbatim}
-  std::ifstream seed_txt("seed.txt");
-  if (seed_txt.good())
-      seed_txt >> Seed::instance(); // Read seed from a file
-  else
-      Seed::instance().set(101);    // The default seed
-  seed_txt.close();
-  // The program
-  std::ofstream seed_txt("seed.txt");
-  seed_txt << Seed::instance();     // Write the seed to a file
-  seed_txt.close();
-\end{Verbatim}
-This way, if the simulation program need to be repeated multiple times, each
-time is will use a different set of seeds.
-
-A single seed generator is enough for a single computer program. However, it is
-more difficult to ensure that each computing node has a distinctive set of
-seeds in a distributed system. A simple solution is to use the \verb|modulo|
-method of \verb|SeedGenerator|. For example,
-\begin{Verbatim}
-  Seed::instance().modulo(n, r);
-\end{Verbatim}
-where $n$ is the number of processes and $r$ is the rank of the current node.
-After this call, all seeds generated will belong to the equivalent class $s
-\equiv r \mod n$. Therefore, no two nodes will ever generate the same seeds.
-
-Note that, the seeds generated are not random at all. For any deterministic
-\rng{}s, the same seeds always produce identical streams. However, distinctive
-seeds does not always lead to independent streams (seed
-section~\ref{sec:Counter-based RNG}. This seed generator is only suitable for
-counter-based \rng{}s.

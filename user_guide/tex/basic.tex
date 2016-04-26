@@ -4,10 +4,12 @@
 \section{Conventions}
 \label{sec:Conventions}
 
-All classes that are accessible to users are within the name space \verb|vsmc|.
-Class names are in \verb|CamelCase| and function names and class members are in
-\verb|small_cases|. We will use ``function'' for referring to name space scope
-functions and ``method'' for class member functions.
+All classes and functions that are accessible to users are within the name
+space \verb|vsmc|. Class names are in \verb|CamelCase| and function names and
+class members are in \verb|small_cases|. We will use ``function'' for referring
+to name space scope functions and ``method'' for class member functions. For
+brevity, we will omit the ``\verb|vsmc::|'' qualifier in the remaining of this
+document except in showing complete examples.
 
 \section{Getting and installing the library}
 \label{sec:Getting and installing the library}
@@ -388,7 +390,7 @@ is equivalent to
 \end{Verbatim}
 The above range-based loop does make some sense. However trying to
 dereferencing a \verb|SingleParticle<T>| object in other contexts does not make
-much sense.  Recall that it is an \emph{index}, not a \emph{pointer}. The
+much sense. Recall that it is an \emph{index}, not a \emph{pointer}. The
 library does not require the user defined type \verb|T| to provide access to
 individual values, and thus it cannot dereference a \verb|SingleParticle<T>|
 object to obtain such a value. Similarly, the expression \verb|sp[n]| returns
