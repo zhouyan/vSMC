@@ -188,6 +188,35 @@ much more accessible.
   \label{tab:Performance of standard library RNG}
 \end{table}
 
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{lXX}
+    \toprule
+    Class & Counter bits & Key bits \\
+    \midrule
+    \verb|AES128x1|, \verb|ARS128x2|, \verb|AES128x4|, \verb|AES128x8|
+    & 128 & 128 \\
+    \verb|AES192x1|, \verb|ARS192x2|, \verb|AES192x4|, \verb|AES192x8|
+    & 128 & 192 \\
+    \verb|AES256x1|, \verb|ARS256x2|, \verb|AES256x4|, \verb|AES256x8|
+    & 128 & 256 \\
+    \verb|ARSx1|, \verb|ARS256x2|, \verb|ARSx4|, \verb|ARSx8| & 128 & 128 \\
+    \verb|Philox2x32|    & 64   & 32   \\
+    \verb|Philox2x64|    & 128  & 64   \\
+    \verb|Philox4x32|    & 128  & 64   \\
+    \verb|Philox4x64|    & 256  & 128  \\
+    \verb|Threefry2x32|  & 64   & 64   \\
+    \verb|Threefry2x64|  & 128  & 128  \\
+    \verb|Threefry4x32|  & 128  & 128  \\
+    \verb|Threefry4x64|  & 256  & 256  \\
+    \verb|Threefry8x64|  & 512  & 512  \\
+    \verb|Threefry16x64| & 1024 & 1024 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Counter-based \rng; Each \rng engine may have suffix \texttt{\_64}}
+  \label{tab:Counter-based RNG}
+\end{table}
+
 The \rng{}s introduced in the paper use deterministic functions $f_k$, such
 that, for a sequence $\{c_i = i\}_{i\ge0}$, the sequence $\{y_i =
 f_k(c_i)\}_{i\ge0}$ appears as random. In addition, for $k_1 \ne k_2$,
@@ -204,72 +233,20 @@ integers. For 64-bits integer output, a suffix \verb|_64| may be appended to
 the corresponding \rng engine names. For example, \verb|Threefry4x64| and
 \verb|Threefry4x64_64| generate the same 256-bits random integers internally.
 The only difference is that \verb|operator()| of the former returns 32-bits
-integers while the later returns 64-bits integers.
-
-\begin{table}
-  \tbfigures
-  \begin{tabularx}{\textwidth}{lXX}
-    \toprule
-    Class & Counter bits & Key bits \\
-    \midrule
-    \verb|AES128x1|, \verb|ARS128x2|, \verb|AES128x4|, \verb|AES128x8|
-    & $128$  & $128$  \\
-    \verb|AES192x1|, \verb|ARS192x2|, \verb|AES192x4|, \verb|AES192x8|
-    & $128$  & $192$  \\
-    \verb|AES256x1|, \verb|ARS256x2|, \verb|AES256x4|, \verb|AES256x8|
-    & $128$  & $256$  \\
-    \verb|ARSx1|, \verb|ARS256x2|, \verb|ARSx4|, \verb|ARSx8|
-    & $128$  & $128$  \\
-    \verb|Philox2x32|    & $64$   & $32$   \\
-    \verb|Philox2x64|    & $128$  & $64$   \\
-    \verb|Philox4x32|    & $128$  & $64$   \\
-    \verb|Philox4x64|    & $256$  & $128$  \\
-    \verb|Threefry2x32|  & $64$   & $64$   \\
-    \verb|Threefry2x64|  & $128$  & $128$  \\
-    \verb|Threefry4x32|  & $128$  & $128$  \\
-    \verb|Threefry4x64|  & $256$  & $256$  \\
-    \verb|Threefry8x64|  & $512$  & $512$  \\
-    \verb|Threefry16x64| & $1024$ & $1024$ \\
-    \bottomrule
-  \end{tabularx}
-  \caption{Counter-based \rng; Each \rng engine may have suffix \texttt{\_64}}
-  \label{tab:Counter-based RNG}
-\end{table}
-
-All \rng{}s in table~\ref{tab:Counter-based RNG} are actually type aliases.
-More generally the library defines the following class template as the
-interface,
+integers while the later returns 64-bits integers. All \rng{}s in
+table~\ref{tab:Counter-based RNG} are actually type aliases. More generally the
+library defines the following class template as the interface,
 \begin{Verbatim}
   template <typename ResultType, typename Generator>
   class CounterEngine;
 \end{Verbatim}
 where \verb|ResultType| shall be an unsigned integer type and \verb|Generator|
-is the class that actually implement the algorithm. \verb|Generator| has at
-least two member types, \verb|ctr_type| and \verb|key_type|, the types of the
-counter and key. In addition, four methods are required,
-\begin{Verbatim}
-  // The size of output in bytes
-  static constexpr std::size_t size();
-
-  // Reset the key of the generator
-  void reset(const key_type &key);
-
-  // Increment counter and generate a new random buffer
-  template <typename ResultType>
-  void operator()(ctr_type &ctr,
-      std::array<ResultType, size() / sizeof(ResultType)> &buffer);
-
-  // Increment counter and generate n new random buffers
-  template <typename ResultType>
-  void operator()(ctr_type &ctr, std::size_t n,
-      std::array<ResultType, size() / sizeof(ResultType)> *buffer);
-\end{Verbatim}
-The operators are not restricted to increment the counter only once for each
-random buffer. The only restriction is that \verb|size()| is divisible by
-\verb|sizeof(ResultType)|. This rule is enforced at compile-time. In the
-remaining of this section, we introduce a few generators implemented by the
-library. A few configuration macros of these \rng{}s are listed in
-table~\ref{tab:Configuration macros for counter-based RNG}.
+is the class that actually implement the algorithm. See the reference manual
+for details of the generator type. For most users, those implemented in the
+library are sufficient. They are introduced in the next few sections. A few
+configuration macros of these generators are listed in
+table~\ref{tab:Configuration macros for counter-based RNG} and will be referred
+to later.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{XX}
@@ -295,12 +272,14 @@ table~\ref{tab:Configuration macros for counter-based RNG}.
 \label{sub:AES-NI instructions based RNG}
 
 The \aesni\footnote{\url{https://en.wikipedia.org/wiki/AES_instruction_set}}
-instructions based \rng{}s in \textcite{Salmon:2011um} are implemented in a
-more general form,
+instructions based \rng{}s in \textcite{Salmon:2011um} are implemented in the
+following generator,
 \begin{Verbatim}
   template <typename KeySeqType, std::size_t Rounds, std::size_t Blocks>
   class AESNIGenerator;
-
+\end{Verbatim}
+The corresponding \rng engine is,
+\begin{Verbatim}
   template <typename ResultType, typename KeySeqType, std::size_t Rounds,
       std::size_t Blocks>
   using AESNIEngine =
@@ -313,7 +292,7 @@ The \aesni encryption instructions have a latency of seven or eight cycles,
 while they can be issued at every cycle. Therefore better performance can be
 achieved if multiple 128-bits random integers are generated at the same time.
 This is specified by the template parameter \verb|Blocks|. Larger blocks, up to
-eight, might improve performance but this is at the cost of larger state size.
+eight, might improve performance. But this is at the cost of larger state size.
 Without going into details, there are four types of sequence of round keys
 implemented by this library,
 \begin{Verbatim}
@@ -388,38 +367,32 @@ following,
   using NewARS = ARSEngine<ResultType, Rounds, NewConstants>;
 \end{Verbatim}
 Alternative methods are also possible. The only requirement is that, the
-following expression,
+following statement,
 \begin{Verbatim}
   template <std::size_t I>
   using weyl = typename Constants::template weyl<I>;
 \end{Verbatim}
-shall define a type that has a static constant expression member data
-\verb|value| that is the \verb|I|\ith Weyl constant.
-
-A few type aliases are defined for convenience. For example,
+shall define the type \verb|weyl| such that it has a static constant expression
+member data \verb|value| that is the \verb|I|\ith Weyl constant. A few type
+aliases are defined for convenience. For example,
 \begin{Verbatim}
   using ARSx8    = ARSEngine<std::uint32_t, VSMC_RNG_ARS_ROUNDS, 8>;
   using ARSx8_64 = ARSEngine<std::uint64_t, VSMC_RNG_ARS_ROUNDS, 8>;
   using ARS      = ARSEngine<std::uint32_t>;
   using ARS_64   = ARSEngine<std::uint64_t>;
 \end{Verbatim}
-The engine \verb|ARS| is the library's default \rng if \aesni instructions as
+The engine \verb|ARS| is the library's default \rng if \aesni instructions are
 supported. Aliases for block sizes 1, 2, 4 and 8 are defined for all four
 algorithms, as well as both 32- and 64-bits versions. These aliases are listed
-in table~\ref{tab:Counter-based RNG}.
-
-The performance of these engines depends on a few factors, such as \cpu types,
-compilers, operating systems, etc. For example, the theoretical peak
-performance for \verb|ARSx8| is 0.32 cpB on recent \cpu{}s. In realistic
-situations, depending on the compiler, on the same computer values ranging from
-0.35 to 1.2 cpB were observed by the author. In any case, such performance is
-good enough even for the most demanding applications. The library does not
-attempt to optimize the algorithm for any particular platform. In realistic
-applications, the performance of \rng is unlikely to become a bottle neck. Note
-that, the best performance is obtained with the vectorized \verb|rng_rand|
-function (see section~\ref{sec:Vectorized random number generating}). The
-performance data of all these \rng{}s are in table~\ref{tab:Performance of
-  AES128Engine} to~\ref{tab:Performance of ARSEngine}.
+in table~\ref{tab:Counter-based RNG}. The performance of these engines depends
+on a few factors, such as \cpu types, compilers, operating systems, etc. See
+tables~\ref{tab:Performance of AES128Engine} to~\ref{tab:Performance of
+  ARSEngine} for performance data. In any case, the performance is good enough
+even for the most demanding applications. The library does not attempt to
+optimize the algorithm for any particular platform. In realistic applications,
+the performance of \rng is unlikely to become a bottle neck. Note that, the
+best performance is obtained with the vectorized \verb|rng_rand| function (see
+section~\ref{sec:Vectorized random number generating}).
 
 \begin{table}
   \input{tab/rng_engine_aes128}%
@@ -448,21 +421,32 @@ performance data of all these \rng{}s are in table~\ref{tab:Performance of
 \subsection{Philox}
 \label{sub:Philox}
 
-The Philox algorithm in \textcite{Salmon:2011um} is implemented in a more
-general form,
+The Philox algorithm in \textcite{Salmon:2011um} is implemented in the
+following generator
 \begin{Verbatim}
   template <typename T, std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
       std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS,
       typename Constants = PhiloxConstants<T, K>>
   class PhiloxGenerator;
-
+\end{Verbatim}
+The corresponding \rng engine is,
+\begin{Verbatim}
   template <typename ResultType, typename T = ResultType,
       std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
       std::size_t Rounds = VSMC_RNG_PHILOX_ROUNDS,
       typename Constants = PhiloxConstants<T, K>>
   using PhiloxEngine =
       CounterEngine<ResultType, PhiloxGenerator<T, K, Rounds, Constants>>;
-
+\end{Verbatim}
+The default vector length and the number of rounds can be changed by
+configuration macros listed in table~\ref{tab:Configuration macros for
+  counter-based RNG}. There is no limit on the template parameter \verb|K| or
+\verb|Rounds|, nor any limitation on \verb|T| except that it has to be an
+unsigned integer type. See \textcite{Salmon:2011um} on the most general form of
+the algorithm. However, the library only provides default constants for 32- and
+64-bits unsigned integer type \verb|T| and \verb|K| taking the values \verb|2|
+or \verb|4|. These four engines are defined as type aliases for convenience,
+\begin{Verbatim}
   template <typename ResultType>
   using Philox2x32Engine = PhiloxEngine<ResultType, std::uint32_t, 2>;
 
@@ -475,14 +459,13 @@ general form,
   template <typename ResultType>
   using Philox4x64Engine = PhiloxEngine<ResultType, std::uint64_t, 4>;
 \end{Verbatim}
-The default vector length and the number of rounds can be changed by
-configuration macros listed in table~\ref{tab:Configuration macros for
-  counter-based RNG}. Type aliases are also defined, as listed in
-table~\ref{tab:Counter-based RNG}. The template parameter \verb|Counstants| is
-similar to that of \verb|ARSEngine|. It defines the round constants of the
-algorithm. The defaults are taken from the paper. See the reference manual for
-details. The performance data is in table~\ref{tab:Performance of
-  PhiloxEngine}.
+Type aliases for 32- and 64-bits \verb|ResultType| are also defined, as listed
+in table~\ref{tab:Counter-based RNG}. To use the engine with \verb|K| taking
+values larger than four, or \verb|T| being unsigned integer type with bits
+other than 32 or 64, one needs to provide a suitable trait class,
+\verb|Constant|. It is similar to that for \verb|ARSEngine|. See the reference
+manual of \verb|PhiloxConstants| for an example of how to define it. The
+performance data is in table~\ref{tab:Performance of PhiloxEngine}.
 
 \begin{table}
   \input{tab/rng_engine_philox}%
@@ -493,21 +476,36 @@ details. The performance data is in table~\ref{tab:Performance of
 \subsection{Threefry}
 \label{sub:Threefry}
 
-The Threefry algorithm in \textcite{Salmon:2011um} is implemented in a more
-general form,
+The Threefry algorithm in \textcite{Salmon:2011um} is implemented in the
+following generator,
 \begin{Verbatim}
   template <typename T, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
       std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS,
       typename Constants = ThreefryConstants<T, K>>
   class ThreefryGenerator;
-
+\end{Verbatim}
+The corresponding \rng engine is,
+\begin{Verbatim}
   template <typename ResultType, typename T = ResultType,
       std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
       std::size_t Rounds = VSMC_RNG_THREEFRY_ROUNDS,
       typename Constants = ThreefryConstants<T, K>>
   using ThreefryEngine =
       CounterEngine<ResultType, ThreefryGenerator<T, K, Rounds, Constants>>;
-
+\end{Verbatim}
+The default vector length and the number of rounds can be changed by
+configuration macros listed in table~\ref{tab:Configuration macros for
+  counter-based RNG}. Similar to the implementation of the Philox algorithm,
+there is no limit on the template parameter \verb|K| or \verb|Rounds| as long
+as a suitable trait class \verb|Constant| is provided. The library provides
+default constants for 64-bits unsigned integer type \verb|T| and \verb|K|
+taking the values \verb|4|, \verb|8| and \verb|16|, taken from the
+skein\footnote{\url{http://www.skein-hash.info}} has algorithm, for which the
+Threefish algorithm was originally developed for. Defaults for 32-bits \verb|T|
+and \verb|K| taking the value \verb|2| are also provided, taken from
+\textcite{Salmon:2011um}. Type aliases for these configurations are defined for
+convenience,
+\begin{Verbatim}
   template <typename ResultType>
   using Threefry2x32Engine = ThreefryEngine<ResultType, std::uint32_t, 2>;
 
@@ -526,14 +524,9 @@ general form,
   template <typename ResultType>
   using Threefry16x64Engine = ThreefryEngine<ResultType, std::uint64_t, 16>;
 \end{Verbatim}
-The default vector length and the number of rounds can be changed by
-configuration macros listed in table~\ref{tab:Configuration macros for
-  counter-based RNG}. Type aliases are also defined, as listed in
-table~\ref{tab:Counter-based RNG}. The template parameter \verb|Counstants| is
-similar to that of \verb|ARSEngine|. It defines the round constants of the
-algorithm. The defaults are taken from the paper. See the reference manual for
-details. The performance data is in table~\ref{tab:Performance of
-  ThreefryEngine}.
+Type aliases for 32- and 64-bits \verb|ResultType| are also defined, as listed
+in table~\ref{tab:Counter-based RNG}. The performance data is in
+table~\ref{tab:Performance of ThreefryEngine}.
 
 \begin{table}
   \input{tab/rng_engine_threefry}%
@@ -544,20 +537,22 @@ details. The performance data is in table~\ref{tab:Performance of
 \subsection{Default \protect\rng}
 \label{sub:Default RNG}
 
-Note that, not all \rng{}s defined by the library is available on all
-platforms. The library also defines a type alias \verb|RNG| which is one of the
-\rng{}s listed in table~\ref{tab:Counter-based RNG}. The preference is in the
-order listed in table~\ref{tab:Default RNG}. The user can define the
-configuration macro \verb|VSMC_RNG_TYPE| to override the choice made by the
-library.
+Note that, not all \rng{}s implemented by the library is available on all
+platforms. The library also defines two type aliases \verb|RNG| and
+\verb|RNG_64|, which are one of the \rng{}s listed in
+table~\ref{tab:Counter-based RNG}. The preference is in the order listed in
+table~\ref{tab:Default RNG}. The user can define the configuration macro
+\verb|VSMC_RNG_TYPE| to override the choice made by the library.
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{XX}
+  \begin{tabularx}{\textwidth}{XXX}
     \toprule
-    Class & Availability \\
+    Default  & Class & Availability \\
     \midrule
-    \verb|ARS|      & \verb|VSMC_HAS_AES_NI| \\
-    \verb|Threefry| & Always available       \\
+    \verb|RNG|    & \verb|ARS|         & \verb|VSMC_HAS_AES_NI| \\
+                  & \verb|Threefry|    & Always available       \\
+    \verb|RNG_64| & \verb|ARS_64|      & \verb|VSMC_HAS_AES_NI| \\
+                  & \verb|Threefry_64| & Always available       \\
     \bottomrule
   \end{tabularx}
   \caption{Default RNG}
@@ -576,49 +571,44 @@ distinctive seed sequentially. For example,
 \end{Verbatim}
 The first argument to the template can be any type. For different types,
 different instances of \verb|SeedGenerator| will be created. Thus, the seeds
-generated by \verb|SeedGenerator<T1>| and \verb|SeedGenerator<T2>| will be
-independent. The second parameter is the type of the seed values. It can be any
-unsigned integer type. Classes such as \verb|Particle<T>| will use the
-generator of the following type,
+generated by two generators, \verb|SeedGenerator<T1>| and
+\verb|SeedGenerator<T2>|, will be independent. The second parameter is the type
+of the seed values. It can be any unsigned integer type. Classes such as
+\verb|Particle<T>| will use the generator of the following type,
 \begin{Verbatim}
   using Seed = SeedGenerator<NullType, VSMC_SEED_RESULT_TYPE>;
 \end{Verbatim}
 where \verb|VSMC_SEED_RESULT_TYPE| is a configuration macro which is defined to
-\verb|unsigned| by default.
-
-One can save and set the seed generator using standard \cpp streams. For
-example
+\verb|unsigned| by default. One can save and set the seed generator using
+standard \cpp streams. For example,
 \begin{Verbatim}
-  std::ifstream seed_txt("seed.txt");
-  if (seed_txt.good())
-      seed_txt >> Seed::instance(); // Read seed from a file
+  std::ifstream is("seed.txt");
+  if (is)
+      is >> Seed::instance();    // Read seed from a file
   else
-      Seed::instance().set(101);    // The default seed
-  seed_txt.close();
-  // The program
-  std::ofstream seed_txt("seed.txt");
-  seed_txt << Seed::instance();     // Write the seed to a file
-  seed_txt.close();
+      Seed::instance().set(101); // Set it manually
+  is.close();
+  // Using Seed
+  std::ofstream os("seed.txt");
+  os << Seed::instance();        // Write the seed to a file
+  os.close();
 \end{Verbatim}
 This way, if the simulation program need to be repeated multiple times, each
-time is will use a different set of seeds.
-
-A single seed generator is enough for a single computer program. However, it is
-more difficult to ensure that each computing node has a distinctive set of
-seeds in a distributed system. A simple solution is to use the \verb|modulo|
-method of \verb|SeedGenerator|. For example,
+time is will use a different set of seeds. A single seed generator is enough
+for a single program. However, it is more difficult to ensure that each
+computing node has a distinctive set of seeds in a distributed system. A simple
+solution is to use the \verb|modulo| method of \verb|SeedGenerator|. For
+example,
 \begin{Verbatim}
   Seed::instance().modulo(n, r);
 \end{Verbatim}
 where $n$ is the number of processes and $r$ is the rank of the current node.
 After this call, all seeds generated will belong to the equivalent class $s
 \equiv r \mod n$. Therefore, no two nodes will ever generate the same seeds.
-
 Note that, the seeds generated are not random at all. For any deterministic
 \rng{}s, the same seeds always produce identical streams. However, distinctive
-seeds does not always lead to independent streams (seed
-section~\ref{sec:Counter-based RNG}. This seed generator is only suitable for
-counter-based \rng{}s.
+seeds does not always lead to independent streams. This seed generator is only
+suitable for counter-based \rng{}s.
 
 \section{Non-deterministic RNG}
 \label{sec:Non-deterministic RNG}
