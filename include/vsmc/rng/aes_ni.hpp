@@ -36,6 +36,13 @@
 #include <vsmc/rng/counter.hpp>
 #include <wmmintrin.h>
 
+#ifdef VSMC_GCC
+#if __GNUC__ >= 6
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
+
 #define VSMC_DEFINE_RNG_AES_KEY_GEN_ASSIST(N, val)                            \
     template <>                                                               \
     inline __m128i AESKeyGenAssist<N>(const __m128i &xmm)                     \
@@ -1210,5 +1217,11 @@ using ARS = ARSEngine<std::uint32_t>;
 using ARS_64 = ARSEngine<std::uint64_t>;
 
 } // namespace vsmc
+
+#ifdef VSMC_GCC
+#if __GNUC__ >= 6
+#pragma GCC diagnostic pop
+#endif
+#endif
 
 #endif // VSMC_RNG_AES_NI_HPP
