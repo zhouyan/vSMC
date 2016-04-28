@@ -492,11 +492,11 @@ class PhiloxGenerator
         if (!is)
             return is;
 
-        PhiloxGenerator<T, K, Rounds> gen_tmp;
-        is >> std::ws >> gen_tmp.key_;
+        key_type key = {{0}};
+        is >> std::ws >> key;
 
         if (is)
-            gen = std::move(gen_tmp);
+            gen.key_ = std::move(key);
 
         return is;
     }
