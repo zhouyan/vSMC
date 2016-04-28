@@ -73,7 +73,7 @@ class Sampler
         , resample_threshold_(resample_threshold_never())
         , iter_num_(0)
     {
-        resample_scheme(Multinomial);
+        resample_method(Multinomial);
     }
 
     /// \brief Construct a Sampler with a built-in resampling scheme
@@ -86,20 +86,33 @@ class Sampler
         , resample_threshold_(resample_threshold_always())
         , iter_num_(0)
     {
-        resample_scheme(scheme);
+        resample_method(scheme);
     }
 
-    /// \brief Construct a Sampler with a user defined resampling operation
+    /// \brief Construct a Sampler with a user defined resampling algorithm
     ///
     /// \details
     /// By default, resampling will be performed at every iteration.
-    Sampler(size_type N, const resample_type &res_op)
+    Sampler(size_type N, const resample_type &res_alg)
         : particle_(N)
         , init_by_iter_(false)
         , resample_threshold_(resample_threshold_always())
         , iter_num_(0)
     {
-        resample_scheme(res_op);
+        resample_method(res_alg);
+    }
+
+    /// \brief Construct a Sampler with a user defined resampling move
+    ///
+    /// \details
+    /// By default, resampling will be performed at every iteration.
+    Sampler(size_type N, const move_type &res_move)
+        : particle_(N)
+        , init_by_iter_(false)
+        , resample_threshold_(resample_threshold_always())
+        , iter_num_(0)
+    {
+        resample_method(res_move);
     }
 
     /// \brief Construct a Sampler with a built-in resampling scheme and a
@@ -110,19 +123,30 @@ class Sampler
         , resample_threshold_(resample_threshold)
         , iter_num_(0)
     {
-        resample_scheme(scheme);
+        resample_method(scheme);
     }
 
-    /// \brief Construct a Sampler with a user defined resampling scheme and a
-    /// threshold for resampling
+    /// \brief Construct a Sampler with a user defined resampling algorithm and
+    /// a threshold for resampling
     Sampler(
-        size_type N, const resample_type &res_op, double resample_threshold)
+        size_type N, const resample_type &res_alg, double resample_threshold)
         : particle_(N)
         , init_by_iter_(false)
         , resample_threshold_(resample_threshold)
         , iter_num_(0)
     {
-        resample_scheme(res_op);
+        resample_method(res_alg);
+    }
+
+    /// \brief Construct a Sampler with a user defined resampling move and a
+    /// threshold for resampling
+    Sampler(size_type N, const move_type &res_move, double resample_threshold)
+        : particle_(N)
+        , init_by_iter_(false)
+        , resample_threshold_(resample_threshold)
+        , iter_num_(0)
+    {
+        resample_method(res_move);
     }
 
     /// \brief Clone the sampler system except the RNG engines
@@ -153,13 +177,13 @@ class Sampler
             init_ = other.init_;
             move_queue_ = other.move_queue_;
             mcmc_queue_ = other.mcmc_queue_;
-            resample_op_ = other.resample_op_;
+            resample_move_ = other.resample_move_;
             resample_threshold_ = other.resample_threshold_;
             iter_num_ = other.iter_num_;
             size_history_ = other.size_history_;
             ess_history_ = other.ess_history_;
             resampled_history_ = other.resampled_history_;
-            accept_history_ = other.accept_history_;
+            status_history_ = other.status_history_;
         }
 
         return *this;
@@ -173,13 +197,13 @@ class Sampler
             init_ = std::move(other.init_);
             move_queue_ = std::move(other.move_queue_);
             mcmc_queue_ = std::move(other.mcmc_queue_);
-            resample_op_ = std::move(other.resample_op_);
+            resample_move_ = std::move(other.resample_move_);
             resample_threshold_ = other.resample_threshold_;
             iter_num_ = other.iter_num_;
             size_history_ = std::move(other.size_history_);
             ess_history_ = std::move(other.ess_history_);
             resampled_history_ = std::move(other.resampled_history_);
-            accept_history_ = std::move(other.accept_history_);
+            status_history_ = std::move(other.status_history_);
         }
 
         return *this;
@@ -194,11 +218,13 @@ class Sampler
         size_history_.reserve(num);
         ess_history_.reserve(num);
         resampled_history_.reserve(num);
-        for (auto &a : accept_history_)
-            a.reserve(num);
+
+        do_status();
+        for (auto &s : status_history_)
+            s.reserve(num);
+
         for (auto &m : monitor_)
-            if (!m.second.empty())
-                m.second.reserve(num);
+            m.second.reserve(num);
     }
 
     /// \brief Number of iterations (including initialization)
@@ -207,47 +233,63 @@ class Sampler
     /// \brief Current iteration number (initialization count as zero)
     std::size_t iter_num() const { return iter_num_; }
 
-    /// \brief Number of acceptance count histories
+    /// \brief Move status history
     ///
     /// \details
     /// At each iterations, including the initialization step, let `M` be the
     /// size of the move queue (or 1 for initialization step) plus the size of
     /// the mcmc queue. The value return by this method is the maximum of `M`
     /// for all iterations already performed.
-    std::size_t accept_size() const { return accept_history_.size(); }
+    std::size_t status_size() const { return status_history_.size(); }
 
     /// \brief Force resample
     Sampler<T> &resample()
     {
-        particle_.resample(resample_op_, resample_threshold_always());
-
-        return *this;
-    }
-
-    /// \brief Set resampling method by a resample_type object
-    Sampler<T> &resample_scheme(const resample_type &res_op)
-    {
-        resample_op_ = res_op;
+        do_resample(resample_threshold_always());
 
         return *this;
     }
 
     /// \brief Set resampling method by a built-in ResampleScheme scheme
     /// name
-    Sampler<T> &resample_scheme(ResampleScheme scheme)
+    Sampler<T> &resample_method(ResampleScheme scheme)
     {
         switch (scheme) {
-            case Multinomial: resample_op_ = ResampleMultinomial(); break;
-            case Residual: resample_op_ = ResampleResidual(); break;
-            case Stratified: resample_op_ = ResampleStratified(); break;
-            case Systematic: resample_op_ = ResampleSystematic(); break;
+            case Multinomial:
+                resample_move_ = ResampleMove<T>(ResampleMultinomial());
+                break;
+            case Residual:
+                resample_move_ = ResampleMove<T>(ResampleResidual());
+                break;
+            case Stratified:
+                resample_move_ = ResampleMove<T>(ResampleStratified());
+                break;
+            case Systematic:
+                resample_move_ = ResampleMove<T>(ResampleSystematic());
+                break;
             case ResidualStratified:
-                resample_op_ = ResampleResidualStratified();
+                resample_move_ = ResampleMove<T>(ResampleResidualStratified());
                 break;
             case ResidualSystematic:
-                resample_op_ = ResampleResidualSystematic();
+                resample_move_ = ResampleMove<T>(ResampleResidualSystematic());
                 break;
         }
+
+        return *this;
+    }
+
+    /// \brief Set resampling method by a `resample_type` object
+    Sampler<T> &resample_method(const resample_type &res_alg)
+    {
+        resample_move_ = ResampleMove<T>(res_alg);
+
+        return *this;
+    }
+
+    /// \brief Set resampling method by a `move_type` object
+    Sampler<T> &resample_method(const move_type &res_move)
+    {
+        resample_move_ = res_move;
 
         return *this;
     }
@@ -314,41 +356,41 @@ class Sampler
             resampled_history_.begin(), resampled_history_.end(), first);
     }
 
-    /// \brief Get the acceptance count of a given move id and the iteration
-    std::size_t accept_history(std::size_t id, std::size_t iter) const
+    /// \brief Get the status of a given move id and the iteration
+    std::size_t status_history(std::size_t id, std::size_t iter) const
     {
-        return accept_history_[id][iter];
+        return status_history_[id][iter];
     }
 
-    /// \brief Read acceptance count history for a given move id through an
+    /// \brief Read status history for a given move id through an
     /// output it ertor
     template <typename OutputIter>
-    OutputIter read_accept_history(std::size_t id, OutputIter first) const
+    OutputIter read_status_history(std::size_t id, OutputIter first) const
     {
         return std::copy(
-            accept_history_[id].begin(), accept_history_[id].end(), first);
+            status_history_[id].begin(), status_history_[id].end(), first);
     }
 
     /// \brief Read the record history of all moves as a matrix through an
     /// output iterator
     template <typename OutputIter>
-    OutputIter read_accept_history_matrix(
+    OutputIter read_status_history_matrix(
         MatrixLayout layout, OutputIter first) const
     {
         if (layout == RowMajor) {
             for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-                for (std::size_t id = 0; id != accept_size(); ++id, ++first) {
+                for (std::size_t id = 0; id != status_size(); ++id, ++first) {
                     *first = static_cast<
                         typename std::iterator_traits<OutputIter>::value_type>(
-                        accept_history(id, iter));
+                        status_history(id, iter));
                 }
             }
         }
 
         if (layout == ColMajor) {
-            for (std::size_t id = 0; id != accept_size(); ++id) {
-                first = std::copy(accept_history_[id].begin(),
-                    accept_history_[id].end(), first);
+            for (std::size_t id = 0; id != status_size(); ++id) {
+                first = std::copy(status_history_[id].begin(),
+                    status_history_[id].end(), first);
             }
         }
 
@@ -485,20 +527,20 @@ class Sampler
     /// \param param Additional parameters passed to the initialization object
     /// of type init_type
     ///
-    /// All histories (ESS, resampled, acceptance count, Monitor) are clared
+    /// All histories (ESS, resampled, move status, Monitor) are clared
     /// before callling the initialization object. Monitors evaluation objects
     /// are untouched.
     Sampler<T> &initialize(void *param = nullptr)
     {
         do_reset();
-        do_acch();
+        do_status();
         if (init_by_iter_) {
             VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER;
             do_iter();
         } else {
             do_init(param);
         }
-        do_acch();
+        do_status();
 
         return *this;
     }
@@ -511,14 +553,14 @@ class Sampler
     /// monitors are computed
     Sampler<T> &iterate(std::size_t num = 1)
     {
-        do_acch();
+        do_status();
         if (num > 1)
             reserve(iter_size() + num);
         for (std::size_t i = 0; i != num; ++i) {
             ++iter_num_;
             do_iter();
         }
-        do_acch();
+        do_status();
 
         return *this;
     }
@@ -610,10 +652,10 @@ class Sampler
             data.begin());
         df["Resampled"] = data;
 
-        for (std::size_t i = 0; i != accept_size(); ++i) {
-            std::copy(accept_history_[i].begin(), accept_history_[i].end(),
+        for (std::size_t i = 0; i != status_size(); ++i) {
+            std::copy(status_history_[i].begin(), status_history_[i].end(),
                 data.begin());
-            df["Accept." + std::to_string(i)] = data;
+            df["Status." + std::to_string(i)] = data;
         }
 
         df["ESS"] = ess_history_;
@@ -674,29 +716,28 @@ class Sampler
     init_type init_;
     Vector<move_type> move_queue_;
     Vector<move_type> mcmc_queue_;
-
-    resample_type resample_op_;
+    move_type resample_move_;
     double resample_threshold_;
 
     std::size_t iter_num_;
     Vector<size_type> size_history_;
     Vector<double> ess_history_;
     Vector<bool> resampled_history_;
-    Vector<Vector<std::size_t>> accept_history_;
+    Vector<Vector<std::size_t>> status_history_;
     monitor_map_type monitor_;
 
-    void do_acch()
+    void do_status()
     {
-        if (accept_history_.empty())
-            accept_history_.push_back(Vector<std::size_t>());
-        std::size_t acc_size = move_queue_.size() + mcmc_queue_.size();
-        if (accept_size() < acc_size) {
-            std::size_t diff = acc_size - accept_size();
+        if (status_history_.empty())
+            status_history_.push_back(Vector<std::size_t>());
+        std::size_t size = move_queue_.size() + mcmc_queue_.size();
+        if (status_size() < size) {
+            std::size_t diff = size - status_size();
             for (std::size_t d = 0; d != diff; ++d)
-                accept_history_.push_back(Vector<std::size_t>());
+                status_history_.push_back(Vector<std::size_t>());
         }
-        for (std::size_t i = 0; i != accept_size(); ++i)
-            accept_history_[i].resize(iter_size());
+        for (std::size_t i = 0; i != status_size(); ++i)
+            status_history_[i].resize(iter_size());
     }
 
     void do_reset()
@@ -704,7 +745,7 @@ class Sampler
         size_history_.clear();
         ess_history_.clear();
         resampled_history_.clear();
-        accept_history_.clear();
+        status_history_.clear();
         for (auto &m : monitor_)
             m.second.clear();
         iter_num_ = 0;
@@ -714,9 +755,9 @@ class Sampler
     void do_init(void *param)
     {
         VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(init_, initialize, INIT);
-        accept_history_[0].push_back(init_(particle_, param));
+        status_history_[0].push_back(init_(particle_, param));
         do_monitor(MonitorMove);
-        do_resample();
+        do_resample(resample_threshold_);
         do_monitor(MonitorResample);
         do_mcmc(1);
         do_monitor(MonitorMCMC);
@@ -726,7 +767,7 @@ class Sampler
     {
         std::size_t ia = do_move(0);
         do_monitor(MonitorMove);
-        do_resample();
+        do_resample(resample_threshold_);
         do_monitor(MonitorResample);
         do_mcmc(ia);
         do_monitor(MonitorMCMC);
@@ -735,7 +776,7 @@ class Sampler
     std::size_t do_move(std::size_t ia)
     {
         for (auto &m : move_queue_)
-            accept_history_[ia++].push_back(m(iter_num_, particle_));
+            status_history_[ia++].push_back(m(iter_num_, particle_));
 
         return ia;
     }
@@ -743,17 +784,23 @@ class Sampler
     std::size_t do_mcmc(std::size_t ia)
     {
         for (auto &m : mcmc_queue_)
-            accept_history_[ia++].push_back(m(iter_num_, particle_));
+            status_history_[ia++].push_back(m(iter_num_, particle_));
 
         return ia;
     }
 
-    void do_resample()
+    void do_resample(double threshold)
     {
         size_history_.push_back(size());
         ess_history_.push_back(particle_.weight().ess());
-        resampled_history_.push_back(
-            particle_.resample(resample_op_, resample_threshold_));
+
+        if (ess_history_.back() > size() * threshold) {
+            resampled_history_.push_back(false);
+            return;
+        }
+
+        resampled_history_.push_back(true);
+        resample_move_(iter_num_, particle_);
     }
 
     void do_monitor(MonitorStage stage)

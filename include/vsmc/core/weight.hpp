@@ -76,8 +76,6 @@ class Weight
     /// \brief Size of this Weight object
     size_type size() const { return data_.size(); }
 
-    size_type resample_size() const { return size(); }
-
     /// \brief Resize the Weight object
     ///
     /// \details
@@ -103,8 +101,6 @@ class Weight
     /// \brief Pointer to data of the normalized weight
     const double *data() const { return data_.data(); }
 
-    const double *resample_data() const { return data_.data(); }
-
     /// \brief Read all normalized weights to an output iterator
     template <typename OutputIter>
     OutputIter read_weight(OutputIter first) const
@@ -122,16 +118,10 @@ class Weight
         return first;
     }
 
-    template <typename OutputIter>
-    OutputIter read_resample_weight(OutputIter first) const
-    {
-        return read_weight(first);
-    }
-
     /// \brief Set \f$W_i = 1/N\f$
     void set_equal()
     {
-        std::fill(data_.begin(), data_.end(), 1.0 / resample_size());
+        std::fill(data_.begin(), data_.end(), 1.0 / size());
         post_set();
     }
 
@@ -311,11 +301,7 @@ class WeightNull
 
     size_type size() const { return 0; }
 
-    size_type resample_size() const { return 0; }
-
     double ess() const { return std::numeric_limits<double>::quiet_NaN(); }
-
-    const double *resample_data() const { return nullptr; }
 
     const double *data() const { return nullptr; }
 
@@ -326,11 +312,6 @@ class WeightNull
 
     template <typename RandomIter>
     void read_weight(RandomIter, int) const
-    {
-    }
-
-    template <typename OutputIter>
-    void read_resample_weight(OutputIter) const
     {
     }
 

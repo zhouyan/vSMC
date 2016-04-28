@@ -12,7 +12,6 @@
   `hdf5load` and `hdf5store`. The data types are detected based on iterator
   types.
 
-
 ## New features
 
 * New C++ OpenCL RAII classes
@@ -31,6 +30,8 @@
   `index` to `copy` is not the same as its own size. The results is a resized
   matrix.
 * `Particle` can now be resized by various methods
+* One can now use resampling algorithms as a `Sampler::move_type` object
+  through `ResampleMove`
 
 ## Changed behaviors
 
@@ -39,6 +40,8 @@
 * Most methods that takes output iterators, (including pointers that used in
   this fashion), now returns an iterator in the same way as `std::copy` etc.
 * `Vector` is now defined to be `std::vector<T, Allocator<T>>`
+* `Sampler::resample_scheme` is now renamed `resample_method`
+* `Particle::resample` is removed
 
 ## Removed features
 

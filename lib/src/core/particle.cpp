@@ -121,10 +121,4 @@ vsmc_single_particle vsmc_particle_sp(vsmc_particle particle, int id)
     return sp;
 }
 
-void vsmc_particle_resample(
-    const vsmc_particle particle, vsmc_resample_type op, double threshold)
-{
-    ::vsmc::cast(particle).resample(::vsmc::cast(op), threshold);
-}
-
 } // extern "C"
