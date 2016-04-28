@@ -62,9 +62,9 @@ pointer will be expected in the C interface. For example,
 \label{app:sec:Classes and methods}
 
 A few core classes are accessible from this \api. They are listed in
-table~\appref{app:tab:capi types}. Table~\appref{app:tab:capi} lists additional
-features of the library exposed to the C \api apart from the core classes
-listed above. With the exception of
+table~\appref{app:tab:C API types}. Table~\appref{app:tab:Features accessible
+  form C} lists additional features of the library exposed to the C \api apart
+from the core classes listed above. With the exception of
 \begin{Verbatim}
   typedef {
       double *state;
@@ -139,9 +139,8 @@ are translated to C as
     \verb|RNG|               & \verb|vsmc_rng|             \\
     \bottomrule
   \end{tabularx}
-  \caption{C types . Note that, all template parameter \texttt{T} are of type
-    \texttt{StateMatrix<RowMajor, Dynamic, double>}}
-  \label{app:tab:capi types}
+  \caption{C \protect\api types}
+  \label{app:tab:C API types}
 \end{table}
 
 \begin{table}
@@ -176,5 +175,5 @@ are translated to C as
     \bottomrule
   \end{tabularx}
   \caption{Features accessible from C}
-  \label{app:tab:capi}
+  \label{app:tab:Features accessible from C}
 \end{table}

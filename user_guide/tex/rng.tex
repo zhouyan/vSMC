@@ -184,7 +184,7 @@ much more accessible.
 
 \begin{table}
   \input{tab/rng_engine_std}%
-  \caption{Performance of standard library RNG}
+  \caption{Performance of standard library \protect\rng}
   \label{tab:Performance of standard library RNG}
 \end{table}
 
@@ -213,7 +213,7 @@ much more accessible.
     \verb|Threefry16x64| & 1024 & 1024 \\
     \bottomrule
   \end{tabularx}
-  \caption{Counter-based \rng; Each \rng engine may have suffix \texttt{\_64}}
+  \caption{Counter-based \protect\rng}
   \label{tab:Counter-based RNG}
 \end{table}
 
@@ -236,6 +236,7 @@ The only difference is that \verb|operator()| of the former returns 32-bits
 integers while the later returns 64-bits integers. All \rng{}s in
 table~\ref{tab:Counter-based RNG} are actually type aliases. More generally the
 library defines the following class template as the interface,
+\hrule
 \begin{Verbatim}
   template <typename ResultType, typename Generator>
   class CounterEngine;
@@ -264,7 +265,7 @@ to later.
     \verb|VSMC_RNG_THREEFRY_VECTOR_LENGTH| & \verb|4|  \\
     \bottomrule
   \end{tabularx}
-  \caption{Configuration macros for counter-based \rng{}}
+  \caption{Configuration macros for counter-based \protect\rng}
   \label{tab:Configuration macros for counter-based RNG}
 \end{table}
 
@@ -396,25 +397,25 @@ section~\ref{sec:Vectorized random number generating}).
 
 \begin{table}
   \input{tab/rng_engine_aes128}%
-  \caption{Performance of \texttt{AES128Engine}}
+  \caption{Performance of \protect\texttt{AES128Engine}}
   \label{tab:Performance of AES128Engine}
 \end{table}
 
 \begin{table}
   \input{tab/rng_engine_aes192}%
-  \caption{Performance of \texttt{AES192Engine}}
+  \caption{Performance of \protect\texttt{AES192Engine}}
   \label{tab:Performance of AES192Engine}
 \end{table}
 
 \begin{table}
   \input{tab/rng_engine_aes256}%
-  \caption{Performance of \texttt{AES256Engine}}
+  \caption{Performance of \protect\texttt{AES256Engine}}
   \label{tab:Performance of AES256Engine}
 \end{table}
 
 \begin{table}
   \input{tab/rng_engine_ars}%
-  \caption{Performance of \texttt{ARSEngine}}
+  \caption{Performance of \protect\texttt{ARSEngine}}
   \label{tab:Performance of ARSEngine}
 \end{table}
 
@@ -469,7 +470,7 @@ performance data is in table~\ref{tab:Performance of PhiloxEngine}.
 
 \begin{table}
   \input{tab/rng_engine_philox}%
-  \caption{Performance of \texttt{PhiloxEngine}}
+  \caption{Performance of \protect\texttt{PhiloxEngine}}
   \label{tab:Performance of PhiloxEngine}
 \end{table}
 
@@ -530,7 +531,7 @@ table~\ref{tab:Performance of ThreefryEngine}.
 
 \begin{table}
   \input{tab/rng_engine_threefry}%
-  \caption{Performance of \texttt{ThreefryEngine}}
+  \caption{Performance of \protect\texttt{ThreefryEngine}}
   \label{tab:Performance of ThreefryEngine}
 \end{table}
 
@@ -555,7 +556,7 @@ table~\ref{tab:Default RNG}. The user can define the configuration macro
                   & \verb|Threefry_64| & Always available       \\
     \bottomrule
   \end{tabularx}
-  \caption{Default RNG}
+  \caption{Default \protect\rng}
   \label{tab:Default RNG}
 \end{table}
 
@@ -626,7 +627,7 @@ table~\ref{tab:Performance of non-deterministic RNG}.
 
 \begin{table}
   \input{tab/rng_engine_mkl}%
-  \caption{Performance of non-deterministic \rng}
+  \caption{Performance of non-deterministic \protect\rng}
   \label{tab:Performance of non-determinstic RNG}
 \end{table}
 
@@ -657,13 +658,13 @@ also defined. The performance data is in table~\ref{tab:Performance of MKL
     \verb|MKL_PHILOX4X32X10| & \verb|VSL_BRNG_PHILOX4X32X10| \\
     \bottomrule
   \end{tabularx}
-  \caption{\mkl{} \rng; Each \rng engine may have suffix \texttt{\_64}}
+  \caption{\protect\mkl{} \protect\rng}
   \label{tab:MKL RNG}
 \end{table}
 
 \begin{table}
   \input{tab/rng_engine_mkl}%
-  \caption{Performance of \mkl{} \rng}
+  \caption{Performance of \protect\mkl{} \protect\rng}
   \label{tab:Performance of MKL RNG}
 \end{table}
 
