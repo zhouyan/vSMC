@@ -349,16 +349,16 @@ class NormalMVDistribution
 
     void mulchol(float *r, const param_type &param)
     {
-        ::cblas_stpmv(::CblasRowMajor, ::CblasLower, ::CblasNoTrans,
-            ::CblasNonUnit, static_cast<VSMC_CBLAS_INT>(dim()), param.chol(),
-            r, 1);
+        internal::cblas_stpmv(internal::CblasRowMajor, internal::CblasLower,
+            internal::CblasNoTrans, internal::CblasNonUnit,
+            static_cast<VSMC_CBLAS_INT>(dim()), param.chol(), r, 1);
     }
 
     void mulchol(double *r, const param_type &param)
     {
-        ::cblas_dtpmv(::CblasRowMajor, ::CblasLower, ::CblasNoTrans,
-            ::CblasNonUnit, static_cast<VSMC_CBLAS_INT>(dim()), param.chol(),
-            r, 1);
+        internal::cblas_dtpmv(internal::CblasRowMajor, internal::CblasLower,
+            internal::CblasNoTrans, internal::CblasNonUnit,
+            static_cast<VSMC_CBLAS_INT>(dim()), param.chol(), r, 1);
     }
 }; // class NormalMVDistribution
 
@@ -368,8 +368,8 @@ namespace internal
 inline void normal_mv_distribution_mulchol(
     std::size_t n, float *r, std::size_t dim, const float *chol)
 {
-    ::cblas_strmm(::CblasRowMajor, ::CblasRight, ::CblasLower, ::CblasTrans,
-        ::CblasNonUnit, static_cast<VSMC_CBLAS_INT>(n),
+    cblas_strmm(CblasRowMajor, CblasRight, CblasLower, CblasTrans,
+        CblasNonUnit, static_cast<VSMC_CBLAS_INT>(n),
         static_cast<VSMC_CBLAS_INT>(dim), 1, chol,
         static_cast<VSMC_CBLAS_INT>(dim), r, static_cast<VSMC_CBLAS_INT>(dim));
 }
@@ -377,8 +377,8 @@ inline void normal_mv_distribution_mulchol(
 inline void normal_mv_distribution_mulchol(
     std::size_t n, double *r, std::size_t dim, const double *chol)
 {
-    ::cblas_dtrmm(::CblasRowMajor, ::CblasRight, ::CblasLower, ::CblasTrans,
-        ::CblasNonUnit, static_cast<VSMC_CBLAS_INT>(n),
+    cblas_dtrmm(CblasRowMajor, CblasRight, CblasLower, CblasTrans,
+        CblasNonUnit, static_cast<VSMC_CBLAS_INT>(n),
         static_cast<VSMC_CBLAS_INT>(dim), 1, chol,
         static_cast<VSMC_CBLAS_INT>(dim), r, static_cast<VSMC_CBLAS_INT>(dim));
 }

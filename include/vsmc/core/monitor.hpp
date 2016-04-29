@@ -256,7 +256,7 @@ class Monitor
         const std::size_t N = static_cast<std::size_t>(particle.size());
         buffer_.resize(N * dim_);
         eval_(iter, dim_, particle, buffer_.data());
-        ::cblas_dgemv(::CblasColMajor, ::CblasNoTrans,
+        internal::cblas_dgemv(internal::CblasColMajor, internal::CblasNoTrans,
             static_cast<VSMC_CBLAS_INT>(dim_), static_cast<VSMC_CBLAS_INT>(N),
             1.0, buffer_.data(), static_cast<VSMC_CBLAS_INT>(dim_),
             particle.weight().data(), 1, 0.0, result_.data(), 1);
