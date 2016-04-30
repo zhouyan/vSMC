@@ -13,9 +13,11 @@ my @nostd = qw(Logistic Pareto Rayleigh Levy);
 
 my %distribution;
 my %cpB;
+my $txt;
 open my $txtfile, '<', 'rng_distribution.txt';
 while (<$txtfile>) {
     if (/<double>\(.*Passed/) {
+        $txt .= $_;
         my @record = split;
         my $name = shift @record;
         $name =~ s/(.*)<double>(.*)/$1$2/;
@@ -44,6 +46,8 @@ while (<$txtfile>) {
         }
     }
 }
+open $txtfile, '>', 'rng_distribution.txt';
+print $txtfile $txt;
 
 while (my ($basename, $name) = each %distribution) {
     my @dist = split "\n", $distribution{$basename};
