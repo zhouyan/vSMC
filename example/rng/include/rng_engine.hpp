@@ -259,9 +259,8 @@ inline void rng_engine(std::size_t N, std::size_t M)
 
     std::cout << std::fixed << std::setprecision(2);
     std::cout << std::string(lwid, '-') << std::endl;
-    VSMC_RNG_DEFINE_MACRO(vsmc::Philox2x32, Philox2x32, philox2x32)
 #include <vsmc/rng/internal/rng_define_macro.hpp>
-    // #include <vsmc/rng/internal/rng_define_macro_mkl.hpp>
+#include <vsmc/rng/internal/rng_define_macro_mkl.hpp>
     std::cout << std::string(lwid, '-') << std::endl;
 }
 
