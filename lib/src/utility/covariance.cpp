@@ -33,13 +33,6 @@
 
 extern "C" {
 
-int vsmc_chol(int dim, const double *a, double *chol, vSMCMatrixLayout layout,
-    int upper, int packed)
-{
-    return ::vsmc::chol(static_cast<std::size_t>(dim), a, chol,
-        static_cast<::vsmc::MatrixLayout>(layout), upper != 0, packed != 0);
-}
-
 vsmc_covariance vsmc_covariance_new(void)
 {
     auto ptr = new ::vsmc::Covariance<double>();
@@ -60,12 +53,12 @@ void vsmc_covariance_assign(vsmc_covariance covariance, vsmc_covariance other)
 }
 
 void vsmc_covariance_compute(vsmc_covariance covariance,
-    vSMCMatrixLayout layout, int n, int dim, const double *x, const double *w,
+    vSMCMatrixLayout layout, int n, int p, const double *x, const double *w,
     double *mean, double *cov, vSMCMatrixLayout cov_layout, int cov_upper,
     int cov_packed)
 {
     ::vsmc::cast(covariance)(static_cast<::vsmc::MatrixLayout>(layout),
-        static_cast<std::size_t>(n), static_cast<std::size_t>(dim), x, w, mean,
+        static_cast<std::size_t>(n), static_cast<std::size_t>(p), x, w, mean,
         cov, static_cast<::vsmc::MatrixLayout>(cov_layout), cov_upper != 0,
         cov_packed != 0);
 }

@@ -14,12 +14,12 @@ allocate memory. It works fine in most cases. However, sometime it is desirable
 to allocate memory aligned by a certain boundary. The library provides the
 class template,
 \begin{Verbatim}
-  template <typename T, std::size_t Alignment = Alignment<T>::value,
+  template <typename T, std::size_t Alignment = AlignmentTrait<T>::value,
       typename Memory = AlignedMemory>
   class Allocator;
 \end{Verbatim}
 which conforms to the \verb|std::allocator| interface. The address of the
-pointer return by the \verb|allocate| method will be a multiple of
+pointer returned by the \verb|allocate| method will be a multiple of
 \verb|Alignment|. The value of alignment has to be positive, larger than
 \verb|sizeof(void *)|, and a power of two. Violating any of these conditions
 will result in compile-time error. The last template parameter \verb|Memory|
@@ -44,37 +44,34 @@ The default alignment depends on the type \verb|T|. If it is a scalar type
 (\verb|std::is_scalar<T>|), then the alignment is \verb|VSMC_ALIGNMENT|, whose
 default is 32. This alignment is sufficient for modern \simd operations, such
 as \avx{}2. For other types, the alignment is the maximum of \verb|alignof(T)|
-and \verb|VSMC_ALIGNMENT_MIN|, whose default is 16.
-
-Some classes in the library are over-aligned to make efficient use of \simd
-operations. Those classes' \verb|operator new| and related methods are
-overloaded using \verb|AlignedMemory|.
-
-Last, a type alias \verb|Vector| is defined,
+and \verb|VSMC_ALIGNMENT_MIN|, whose default is 16. Two container types are
+defined for convenience,
 \begin{Verbatim}
   template <typename T>
   using Vector = std::vector<T, Allocator<T>>;
+
+  template <typename T, std::size_t N,
+      std::size_t Alignment = AlignmentTrait<T>::value>
+  class alignas(Alignment) Array;
 \end{Verbatim}
-This vector type is used throughout the library.
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{lX}
+  \begin{tabularx}{\textwidth}{lXX}
     \toprule
-    Class & Notes \\
+    Class & Implementation & Availability \\
     \midrule
     \verb|AlignedMemoryTBB|
-    & Use \verb|scalable_aligned_malloc| and \verb|scalable_aligned_free|.
-    Defined if \verb|VSMC_HAS_TBB_MALLOC| is defined to a non-zero value. \\
+    & \tbb memory allocation functions
+    & \verb|VSMC_HAS_TBB_MALLOC|  \\
     \verb|AlignedMemorySYS|
-    & Use \verb|posix_memalign| and \verb|free| on \posix platforms. Use
-    \verb|_aligned_malloc| and \verb|_aligned_free| if using \msvc. Defined if
-    \verb|VSMC_HAS_POSIX| is defined to a non-zero value, or the \msvc compiler
-    is detected. \\
+    & Operating system libraries
+    & \verb|VSMC_HAS_POSIX|, or using \msvc \\
     \verb|AlignedMemoryMKL|
-    & Use \verb|mkl_malloc| and \verb|mkl_free|. Defined if \verb|VSMC_HAS_MKL|
-    is defined to a non-zero value. \\
+    & \mkl memory allocation functions
+    & \verb|VSMC_HAS_MKL| \\
     \verb|AlignedMemorySTD|
-    & Use \verb|std::malloc| and \verb|std::free|. Always defined. \\
+    & Standard library
+    & Always available \\
     \bottomrule
   \end{tabularx}
   \caption{Aligned memory allocation}
@@ -84,48 +81,73 @@ This vector type is used throughout the library.
 \section{Sample covariance}
 \label{sec:Sample covariance}
 
-The library provides some basic functionality to estimate sample covariance.
-For example,
+The library provides some basic functionality to estimate sample covariance
+through the following class template,
 \begin{Verbatim}
-  constexpr std::size_t d = /* Dimension */;
-  using T = StateMatrix<RowMajor, d, double>;
-  Sampler<T> sampler(N);
-  // operations on the sampler
-  double mean[d];
-  double cov[d * d];
+  template <typename RealType>
+  class Covariance;
+\end{Verbatim}
+At the time of writting, only \verb|float| and \verb|double| are supported.
+The class has the following operator as its interface,
+\begin{Verbatim}
+  void operator()(MatrixLayout layout, std::size_t n, std::size_t p,
+      const RealType *x, const RealType *w, RealType *mean,
+      RealType *cov, MatrixLayout cov_layout = RowMajor,
+      bool cov_upper = false, bool cov_packed = false)
+\end{Verbatim}
+It computes the sample covariance matrix $\Sigma$,
+\begin{align*}
+  \Sigma_{i,j} &= \frac{\sum_{i=1}^N w_i}
+  {(\sum_{i=1}^N w_i)^2 - \sum_{i=1}^n w_i^2}
+  \sum_{k=1}^N w_k (x_{k,i} - \bar{x}_i)(x_{k,j} - \bar{x}_j) \\
+  \bar{x}_i &= \frac{1}{\sum_{i=1}^N w_i}\sum_{k=1}^N w_k x_{k,i}
+\end{align*}
+where $x$ is the $n$ by $p$ matrix of samples, and $w$ is the $n$-vector of
+weights. Below we given detailed description of each of the parameters,
+\begin{description}
+  \item[\texttt{layout}] The storage layout of sample matrix $x$. It is assumed
+    to be an $n$ by $p$ matrix.
+  \item[\texttt{n}] The number of samples.
+  \item[\texttt{p}] The dimension of each sample.
+  \item[\texttt{x}] The sample matrix. If it is a null pointer, then no
+    computation is carried out.
+  \item[\texttt{w}] The weight vector. If it is a null pointer, then all
+    samples are assigned weight $1$.
+  \item[\texttt{mean}] Output storage of the mean. If it is a null pointer,
+    then it is ignored.
+  \item[\texttt{cov}] Output storage of the covariance matrix. If it is a null
+    pointer, then it is ignored.
+  \item[\texttt{cov\_layout}] The storage layout of the covariance matrix.
+  \item[\texttt{cov\_upper}] If \verb|true|, then the upper triangular of the
+    covariance matrix is packed, otherwise the lower triangular is packed.
+    Ignored if \verb|cov_pack| is \verb|false|.
+  \item[\texttt{cov\_packed}] If \verb|true|, then the covariance matrix is
+    packed.
+\end{description}
+The last three parameters specify the storage scheme of the covariance matrix.
+See any reference of \blas or \lapack for explanation of the scheme. Below is
+an example of the class in use,
+\begin{Verbatim}
+  using T = StateMatrix<RowMajor, p, double>;
+  Sampler<T> sampler(n);
+  // Iterate the sampler
+  double mean[p];
+  double cov[p * (p + 1) / 2];
   Covariance eval;
   auto x = sampler.particle().value().data();
   auto w = sampler.particle().weight().data();
-  eval(RowMajor, N, d, x, w, mean, cov);
+  eval(RowMajor, n, p, x, w, mean, cov, RowMajor, false, true);
 \end{Verbatim}
-The sample covariance matrix will be computed and stored in \verb|cov|. The
-mean vector is stored in \verb|mean|. Note that, if any of them is a null
-pointer, then the corresponding output is not computed. The sample \verb|x| is
-assumed to be stored in an $N$ by $d$ matrix. The first argument passed to
-\verb|eval| is the storage layout of this matrix. If \verb|x| is a null
-pointer, then no computation will be done. If \verb|w| is a null pointer, then
-the weight is assumed to be equal for all samples. This method has three
-optional parameters. The first is \verb|cov_layout|, which specifies the
-storage layout of \verb|cov|. The second is \verb|cov_upper| and the third is
-\verb|cov_packed|, both are \verb|false| by default. If the later is
-\verb|true|, a packed vector of length $d(d+1)/2$ is written into
-\verb|cov|. If \verb|cov_upper| is \verb|true|, then the upper triangular is
-packed, otherwise the lower triangular is packed.
-
-The estimated covariance matrix is often used to construct multivariate Normal
-distribution for the purpose of generating random walk proposals. The
-\verb|NormalMVDistribution| in section~\ref{sec:Distributions} accepts the
-lower triangular of the Cholesky decomposition of the covariance matrix instead
-of itself. The following function \verb|chol| will compute this decomposition,
+One can later compute the Cholesky decomposition using \lapack or other linear
+algebra libraries. Below is an example of using the covariance matrix to
+generate multivariate Normal proposals,
 \begin{Verbatim}
-  double chol_mat[d * (d + 1) / 2];
-  chol(d, cov, chol_mat);
-  NormalMVDistribution<double> normal_mv(d, nullptr, chol_mat); // zero mean
+  double chol[p * (p + 1) / 2];
+  double y[p];
+  LAPACKE_dpptrf(LAPACK_ROW_MAJOR, 'L', p, chol);
+  NormalMVDistribution<double, p> normal_mv(nullptr, chol); // zero mean
+  normal_mv(rng, y);
 \end{Verbatim}
-The output \verb|chol_mat| is a packed vector in row major storage. This
-function also has three optional parameters, which are the same as those of
-\verb|Covariance::operator()|, except that they are now used to specify the
-storage scheme of the input parameter \verb|cov|.
 
 \section{Store objects in \protect\hdf format}
 \label{sec:Store objects in HDF5 format}
