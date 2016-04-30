@@ -130,6 +130,27 @@ inline bool rng_engine_kat(vsmc::ARSEngine<ResultType, Rounds, Blocks> &rng)
 #endif // VSMC_HAS_AES_NI
 
 template <typename RNGType>
+inline std::string rng_engine_size(const RNGType &)
+{
+    return std::to_string(sizeof(RNGType));
+}
+
+template <typename ResultType, typename Generator>
+inline std::string rng_engine_size(
+    const vsmc::CounterEngine<ResultType, Generator> &)
+{
+    using RNGType = vsmc::CounterEngine<ResultType, Generator>;
+
+    std::size_t align = std::max(alignof(ResultType), alignof(Generator));
+    std::size_t size = sizeof(Generator) +
+        sizeof(typename Generator::ctr_type) + Generator::size() + 1;
+    if (size % align != 0)
+        size += align - size % align;
+
+    return std::to_string(size) + "/" + std::to_string(sizeof(RNGType));
+}
+
+template <typename RNGType>
 inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
     int twid, const std::string &name)
 {
@@ -194,7 +215,7 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
     }
 
     std::cout << std::setw(nwid) << std::left << name;
-    std::cout << std::setw(swid) << std::right << sizeof(RNGType);
+    std::cout << std::setw(swid) << std::right << rng_engine_size(rng);
     std::cout << std::setw(swid) << std::right << alignof(RNGType);
     std::cout << std::setw(twid) << std::right << g1;
     std::cout << std::setw(twid) << std::right << g2;
@@ -210,7 +231,7 @@ inline void rng_engine(std::size_t N, std::size_t M)
     M = std::max(M, static_cast<std::size_t>(10));
 
     const int nwid = 20;
-    const int swid = 6;
+    const int swid = 8;
     const int twid = 15;
     const std::size_t lwid = nwid + swid * 2 + twid * 5;
 
@@ -238,8 +259,9 @@ inline void rng_engine(std::size_t N, std::size_t M)
 
     std::cout << std::fixed << std::setprecision(2);
     std::cout << std::string(lwid, '-') << std::endl;
+    VSMC_RNG_DEFINE_MACRO(vsmc::Philox2x32, Philox2x32, philox2x32)
 #include <vsmc/rng/internal/rng_define_macro.hpp>
-#include <vsmc/rng/internal/rng_define_macro_mkl.hpp>
+    // #include <vsmc/rng/internal/rng_define_macro_mkl.hpp>
     std::cout << std::string(lwid, '-') << std::endl;
 }
 

@@ -252,16 +252,16 @@ class CounterEngine
             index_ = 0;
         }
 
-        return buffer_[index_++];
+        return buffer_[static_cast<std::size_t>(index_++)];
     }
 
     void operator()(std::size_t n, result_type *r)
     {
-        const std::size_t remain = M_ - index_;
+        const std::size_t remain = static_cast<std::size_t>(M_ - index_);
 
         if (n < remain) {
             std::copy_n(buffer_.data() + index_, n, r);
-            index_ += n;
+            index_ += static_cast<unsigned>(n);
             return;
         }
 
@@ -277,13 +277,13 @@ class CounterEngine
 
         generator_(ctr_, buffer_);
         std::copy_n(buffer_.data(), n, r);
-        index_ = n;
+        index_ = static_cast<unsigned>(n);
     }
 
     /// \brief Discard the buffer
     std::size_t discard()
     {
-        const std::size_t remain = M_ - index_;
+        const std::size_t remain = static_cast<std::size_t>(M_ - index_);
         index_ = M_;
 
         return remain;
@@ -296,7 +296,7 @@ class CounterEngine
 
         const skip_type remain = static_cast<skip_type>(M_ - index_);
         if (nskip <= remain) {
-            index_ += static_cast<std::size_t>(nskip);
+            index_ += static_cast<unsigned>(nskip);
             return;
         }
         nskip -= remain;
@@ -308,7 +308,7 @@ class CounterEngine
         skip_type rate = static_cast<skip_type>(buf_size / ctr_size);
         increment(ctr_, nskip / M * rate);
         generator_(ctr_, buffer_);
-        index_ = static_cast<std::size_t>(nskip % M);
+        index_ = static_cast<unsigned>(nskip % M);
     }
 
     static constexpr result_type min()
@@ -327,11 +327,11 @@ class CounterEngine
     friend bool operator==(const CounterEngine<ResultType, Generator> &eng1,
         const CounterEngine<ResultType, Generator> &eng2)
     {
-        if (eng1.generator_ != eng2.generator_)
+        if (eng1.buffer_ != eng2.buffer_)
             return false;
         if (eng1.ctr_ != eng2.ctr_)
             return false;
-        if (eng1.buffer_ != eng2.buffer_)
+        if (eng1.generator_ != eng2.generator_)
             return false;
         if (eng1.index_ != eng2.index_)
             return false;
@@ -355,9 +355,9 @@ class CounterEngine
         if (!os)
             return os;
 
-        os << eng.generator_ << ' ';
-        os << eng.ctr_ << ' ';
         os << eng.buffer_ << ' ';
+        os << eng.ctr_ << ' ';
+        os << eng.generator_ << ' ';
         os << eng.index_;
 
         return os;
@@ -372,9 +372,9 @@ class CounterEngine
             return is;
 
         CounterEngine<ResultType, Generator> eng_tmp;
-        is >> std::ws >> eng_tmp.generator_;
-        is >> std::ws >> eng_tmp.ctr_;
         is >> std::ws >> eng_tmp.buffer_;
+        is >> std::ws >> eng_tmp.ctr_;
+        is >> std::ws >> eng_tmp.generator_;
         is >> std::ws >> eng_tmp.index_;
 
         if (is)
@@ -384,14 +384,14 @@ class CounterEngine
     }
 
     private:
-    static constexpr std::size_t M_ = Generator::size() / sizeof(ResultType);
+    static constexpr unsigned M_ = Generator::size() / sizeof(ResultType);
 
     using buffer_type = std::array<ResultType, M_>;
 
-    generator_type generator_;
-    ctr_type ctr_;
     buffer_type buffer_;
-    std::size_t index_;
+    ctr_type ctr_;
+    generator_type generator_;
+    unsigned index_;
 
     void reset(const key_type key)
     {
