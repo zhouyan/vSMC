@@ -244,7 +244,7 @@ class Weight
         double *w = data_.data();
         double accw = 0;
         double essw = 0;
-        const double lmax = use_log ? max_element(size(), data_.data()) : 0;
+        const double lmax = use_log ? max_element(size(), w) : 0;
         const std::size_t k = internal::BufferSize<double>::value;
         const std::size_t m = size() / k;
         const std::size_t l = size() % k;

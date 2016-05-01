@@ -68,7 +68,7 @@ class UniformRealDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01Distribution<RealType> u01;
+        U01CODistribution<RealType> u01;
 
         return param.a() + (param.b() - param.a()) * u01(rng);
     }
@@ -81,7 +81,7 @@ template <std::size_t, typename RealType, typename RNGType>
 inline void uniform_real_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    u01_distribution<RealType>(rng, n, r);
+    u01_co_distribution<RealType>(rng, n, r);
     fma(n, r, b - a, a, r);
 }
 
