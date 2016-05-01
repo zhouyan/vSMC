@@ -158,7 +158,7 @@ class Sampler
         Sampler<T> sampler(*this);
         if (new_rng) {
             sampler.particle().rng_set().seed();
-            Seed::instance()(sampler.particle().resample_rng());
+            Seed::instance()(sampler.particle().rng());
         }
 
         return sampler;
