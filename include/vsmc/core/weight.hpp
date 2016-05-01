@@ -96,7 +96,7 @@ class Weight
     void set_equal()
     {
         std::fill(data_.begin(), data_.end(), 1.0 / size());
-        ess_ = size();
+        ess_ = static_cast<double>(size());
     }
 
     /// \brief Set \f$W_i \propto w_i\f$
@@ -263,8 +263,8 @@ class Weight
             exp(n, w, w);
         }
         accw = std::accumulate(w, w + n, accw);
-        essw += internal::cblas_ddot(
-            static_cast<VSMC_CBLAS_INT>(size()), w, 1, w, 1);
+        essw +=
+            internal::cblas_ddot(static_cast<VSMC_CBLAS_INT>(n), w, 1, w, 1);
     }
 }; // class Weight
 
