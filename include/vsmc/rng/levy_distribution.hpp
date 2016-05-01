@@ -69,7 +69,9 @@ class LevyDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        result_type r = normal_(rng);
+        result_type r = 0;
+        while (internal::is_zero(r))
+            r = normal_(rng);
 
         return param.a() + param.b() / (r * r);
     }
@@ -87,6 +89,11 @@ inline void levy_distribution_impl(
     sqr(n, r, r);
     inv(n, r, r);
     fma(n, r, b, a, r);
+
+    LevyDistribution<RealType> dist;
+    for (std::size_t i = 0; i != n; ++i)
+        if (!std::isfinite(r[i]))
+            r[i] = dist(rng);
 }
 
 } // namespace vsmc::internal

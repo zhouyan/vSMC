@@ -36,6 +36,30 @@
 #include <boost/random.hpp>
 #include "rng_common.hpp"
 
+template <typename RNGType>
+class DistRNG : public RNGType
+{
+    public:
+    using result_type = typename RNGType::result_type;
+
+    result_type operator()()
+    {
+        result_type u = RNGType::operator()();
+        result_type r = u % 3;
+        if (r == 0)
+            return 0;
+        if (r == 1)
+            return std::numeric_limits<result_type>::max();
+        return u;
+    }
+
+    void operator()(std::size_t n, result_type *r)
+    {
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = operator()();
+    }
+}; // class DistRNG
+
 template <std::size_t ParamNum>
 class DistTraitBase
 {
@@ -1140,6 +1164,7 @@ inline void rng_distribution_test_perf(std::size_t N, std::size_t M,
         std_type>::type;
 
     vsmc::RNG rng;
+    DistRNG<vsmc::RNG> dist_rng;
 #if VSMC_HAS_MKL
     vsmc::MKL_SFMT19937 rng_mkl;
     int brng = vsmc::mkl_brng<vsmc::RNG>();
@@ -1149,6 +1174,13 @@ inline void rng_distribution_test_perf(std::size_t N, std::size_t M,
     vSMCDistType dist_vsmc(rng_distribution_init<vSMCDistType>(param));
     std_dist_type dist_std(rng_distribution_init<std_dist_type>(param));
     bool pass = true;
+
+    vsmc::Vector<RealType> r(N);
+    vsmc::rng_rand(dist_rng, dist_vsmc, N, r.data());
+    for (std::size_t i = 0; i != N; ++i) {
+        pass = pass && std::isfinite(r[i]);
+        pass = pass && std::isfinite(dist_vsmc(dist_rng));
+    }
 
     vsmc::Vector<RealType> r1;
     vsmc::Vector<RealType> r2;
@@ -1250,7 +1282,7 @@ inline void rng_distribution_test_perf(std::size_t N, std::size_t M,
     std::cout << std::setw(twid) << std::right << c4;
     std::cout << std::setw(twid) << std::right << c5;
 #endif
-    std::cout << std::setw(twid) << std::right << rng_pass(pass);
+    std::cout << std::setw(twid + 3) << std::right << rng_pass(pass);
     std::cout << std::endl;
 }
 
@@ -1319,14 +1351,15 @@ inline void rng_distribution(std::size_t N, std::size_t M)
 
     int nwid = 30;
     int twid = 12;
-#if VSMC_HAS_MKL
-    std::size_t lwid = static_cast<std::size_t>(nwid + twid * 6);
-#else
-    std::size_t lwid = static_cast<std::size_t>(nwid + twid * 4);
-#endif
 
     rng_distribution_pval<float>(N, M, nwid, twid);
     rng_distribution_pval<double>(N, M, nwid, twid);
+
+#if VSMC_HAS_MKL
+    std::size_t lwid = static_cast<std::size_t>(nwid + twid * 6 + 3);
+#else
+    std::size_t lwid = static_cast<std::size_t>(nwid + twid * 4 + 3);
+#endif
 
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::setw(nwid) << std::left << "Distribution";
@@ -1337,7 +1370,7 @@ inline void rng_distribution(std::size_t N, std::size_t M)
     std::cout << std::setw(twid) << std::right << "MKL";
     std::cout << std::setw(twid) << std::right << "MKL (vSMC)";
 #endif
-    std::cout << std::setw(twid) << std::right << "I/O";
+    std::cout << std::setw(twid + 3) << std::right << "Deterministics";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
     rng_distribution_perf<float>(N, M, nwid, twid);

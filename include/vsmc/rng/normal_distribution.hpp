@@ -144,7 +144,7 @@ inline void normal_distribution(
         RealType u = u01(rng);
         RealType v = u01(rng);
         r[l - 1] = mean +
-            stddev * std::sqrt(-2 * std::log(1 - u)) *
+            stddev * std::sqrt(-2 * std::log(u)) *
                 std::cos(const_pi_2<RealType>() * v);
     }
 }

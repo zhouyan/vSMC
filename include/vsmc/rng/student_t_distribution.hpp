@@ -78,12 +78,14 @@ class StudentTDistribution
     result_type generate(RNGType &rng, const param_type &param)
     {
         result_type z = normal_(rng);
-        result_type u = 0;
-        if (param == param_) {
-            u = n() / chi_squared_(rng);
+        result_type u = std::numeric_limits<result_type>::infinity();
+        if (internal::is_equal(param.n(), param_.n())) {
+            while (!std::isfinite(u))
+                u = n() / chi_squared_(rng);
         } else {
             ChiSquaredDistribution<RealType> chi_squared(param.n());
-            u = param.n() / chi_squared(rng);
+            while (!std::isfinite(u))
+                u = param.n() / chi_squared(rng);
         }
 
         return z * std::sqrt(u);
@@ -104,6 +106,11 @@ inline void student_t_distribution_impl(
     normal_distribution(
         rng, n, s.data(), static_cast<RealType>(0), static_cast<RealType>(1));
     div(n, s.data(), r, r);
+
+    StudentTDistribution<RealType> dist(df);
+    for (std::size_t i = 0; i != n; ++i)
+        if (!std::isfinite(r[i]))
+            r[i] = dist(rng);
 }
 
 } // namespace vsmc::internal
