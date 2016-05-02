@@ -38,10 +38,14 @@
 namespace vsmc
 {
 
+/// \brief SMP implementation ID for OpenMP
+/// \ingroup OMP
+class BackendOMP;
+
 /// \brief Sampler<T>::init_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-class InitializeSMP<OMP, T, Derived> : public InitializeBase<T, Derived>
+class InitializeSMP<BackendOMP, T, Derived> : public InitializeBase<T, Derived>
 {
     public:
     std::size_t operator()(Particle<T> &particle, void *param)
@@ -66,7 +70,7 @@ class InitializeSMP<OMP, T, Derived> : public InitializeBase<T, Derived>
 /// \brief Sampler<T>::move_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-class MoveSMP<OMP, T, Derived> : public MoveBase<T, Derived>
+class MoveSMP<BackendOMP, T, Derived> : public MoveBase<T, Derived>
 {
     public:
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
@@ -90,7 +94,8 @@ class MoveSMP<OMP, T, Derived> : public MoveBase<T, Derived>
 /// \brief Monitor<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-class MonitorEvalSMP<OMP, T, Derived> : public MonitorEvalBase<T, Derived>
+class MonitorEvalSMP<BackendOMP, T, Derived>
+    : public MonitorEvalBase<T, Derived>
 {
     public:
     void operator()(
@@ -114,17 +119,17 @@ class MonitorEvalSMP<OMP, T, Derived> : public MonitorEvalBase<T, Derived>
 /// \brief Sampler<T>::init_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-using InitializeOMP = InitializeSMP<OMP, T, Derived>;
+using InitializeOMP = InitializeSMP<BackendOMP, T, Derived>;
 
 /// \brief Sampler<T>::move_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-using MoveOMP = MoveSMP<OMP, T, Derived>;
+using MoveOMP = MoveSMP<BackendOMP, T, Derived>;
 
 /// \brief Monitor<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-using MonitorEvalOMP = MonitorEvalSMP<OMP, T, Derived>;
+using MonitorEvalOMP = MonitorEvalSMP<BackendOMP, T, Derived>;
 
 } // namespace vsmc
 

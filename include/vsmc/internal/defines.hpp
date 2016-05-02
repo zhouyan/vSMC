@@ -65,14 +65,6 @@ enum ResampleScheme {
     ResidualSystematic  ///< Systematic resampling on residuals
 };                      // enum ResampleScheme
 
-/// \brief SMP implementation backends
-/// \ingroup Definitions
-enum SMPBackend {
-    OMP, ///< OpenMP
-    SEQ, ///< Sequential
-    TBB  ///< Intel Threading Building Blocks
-};       // enum SMPBackend
-
 } // namespace vsmc
 
 #endif // VSMC_INTERNAL_DEFINES_HPP

@@ -61,10 +61,14 @@
 namespace vsmc
 {
 
+/// \brief SMP implementation ID for Intel Threading Building Blocks
+/// \ingroup TBB
+class BackendTBB;
+
 /// \brief Sampler<T>::init_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
 template <typename T, typename Derived>
-class InitializeSMP<TBB, T, Derived> : public InitializeBase<T, Derived>
+class InitializeSMP<BackendTBB, T, Derived> : public InitializeBase<T, Derived>
 {
     public:
     std::size_t operator()(Particle<T> &particle, void *param)
@@ -80,7 +84,8 @@ class InitializeSMP<TBB, T, Derived> : public InitializeBase<T, Derived>
         public:
         using size_type = typename Particle<T>::size_type;
 
-        work_type(InitializeSMP<TBB, T, Derived> *wptr, Particle<T> *pptr)
+        work_type(
+            InitializeSMP<BackendTBB, T, Derived> *wptr, Particle<T> *pptr)
             : wptr_(wptr), pptr_(pptr), accept_(0)
         {
         }
@@ -101,7 +106,7 @@ class InitializeSMP<TBB, T, Derived> : public InitializeBase<T, Derived>
         std::size_t accept() const { return accept_; }
 
         private:
-        InitializeSMP<TBB, T, Derived> *const wptr_;
+        InitializeSMP<BackendTBB, T, Derived> *const wptr_;
         Particle<T> *const pptr_;
         std::size_t accept_;
     }; // class work_type
@@ -127,7 +132,7 @@ class InitializeSMP<TBB, T, Derived> : public InitializeBase<T, Derived>
 /// \brief Sampler<T>::move_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
 template <typename T, typename Derived>
-class MoveSMP<TBB, T, Derived> : public MoveBase<T, Derived>
+class MoveSMP<BackendTBB, T, Derived> : public MoveBase<T, Derived>
 {
     public:
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
@@ -143,7 +148,7 @@ class MoveSMP<TBB, T, Derived> : public MoveBase<T, Derived>
         public:
         using size_type = typename Particle<T>::size_type;
 
-        work_type(MoveSMP<TBB, T, Derived> *wptr, std::size_t iter,
+        work_type(MoveSMP<BackendTBB, T, Derived> *wptr, std::size_t iter,
             Particle<T> *pptr)
             : wptr_(wptr), iter_(iter), pptr_(pptr), accept_(0)
         {
@@ -168,7 +173,7 @@ class MoveSMP<TBB, T, Derived> : public MoveBase<T, Derived>
         std::size_t accept() const { return accept_; }
 
         private:
-        MoveSMP<TBB, T, Derived> *const wptr_;
+        MoveSMP<BackendTBB, T, Derived> *const wptr_;
         const std::size_t iter_;
         Particle<T> *const pptr_;
         std::size_t accept_;
@@ -195,7 +200,8 @@ class MoveSMP<TBB, T, Derived> : public MoveBase<T, Derived>
 /// \brief Monitor<T>::eval_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
 template <typename T, typename Derived>
-class MonitorEvalSMP<TBB, T, Derived> : public MonitorEvalBase<T, Derived>
+class MonitorEvalSMP<BackendTBB, T, Derived>
+    : public MonitorEvalBase<T, Derived>
 {
     public:
     void operator()(
@@ -212,8 +218,8 @@ class MonitorEvalSMP<TBB, T, Derived> : public MonitorEvalBase<T, Derived>
         public:
         using size_type = typename Particle<T>::size_type;
 
-        work_type(MonitorEvalSMP<TBB, T, Derived> *wptr, std::size_t iter,
-            std::size_t dim, Particle<T> *pptr, double *r)
+        work_type(MonitorEvalSMP<BackendTBB, T, Derived> *wptr,
+            std::size_t iter, std::size_t dim, Particle<T> *pptr, double *r)
             : wptr_(wptr), iter_(iter), dim_(dim), pptr_(pptr), r_(r)
         {
         }
@@ -227,7 +233,7 @@ class MonitorEvalSMP<TBB, T, Derived> : public MonitorEvalBase<T, Derived>
         }
 
         private:
-        MonitorEvalSMP<TBB, T, Derived> *const wptr_;
+        MonitorEvalSMP<BackendTBB, T, Derived> *const wptr_;
         const std::size_t iter_;
         const std::size_t dim_;
         Particle<T> *const pptr_;
@@ -256,17 +262,17 @@ class MonitorEvalSMP<TBB, T, Derived> : public MonitorEvalBase<T, Derived>
 /// \brief Sampler<T>::init_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
 template <typename T, typename Derived>
-using InitializeTBB = InitializeSMP<TBB, T, Derived>;
+using InitializeTBB = InitializeSMP<BackendTBB, T, Derived>;
 
 /// \brief Sampler<T>::move_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
 template <typename T, typename Derived>
-using MoveTBB = MoveSMP<TBB, T, Derived>;
+using MoveTBB = MoveSMP<BackendTBB, T, Derived>;
 
 /// \brief Monitor<T>::eval_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
 template <typename T, typename Derived>
-using MonitorEvalTBB = MonitorEvalSMP<TBB, T, Derived>;
+using MonitorEvalTBB = MonitorEvalSMP<BackendTBB, T, Derived>;
 
 } // namespace vsmc
 

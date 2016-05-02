@@ -34,26 +34,30 @@
 
 #include <vsmc/vsmc.hpp>
 
-template <vsmc::SMPBackend>
+template <typename>
 std::string gmm_smp_name();
 
 template <>
-std::string gmm_smp_name<vsmc::OMP>()
+std::string gmm_smp_name<vsmc::BackendSEQ>()
 {
-    return "OMP";
+    return "BackendSEQ";
 }
 
+#if VSMC_HAS_OMP
 template <>
-std::string gmm_smp_name<vsmc::SEQ>()
+std::string gmm_smp_name<vsmc::BackendOMP>()
 {
-    return "SEQ";
+    return "BackendOMP";
 }
+#endif
 
+#if VSMC_HAS_TBB
 template <>
-std::string gmm_smp_name<vsmc::TBB>()
+std::string gmm_smp_name<vsmc::BackendTBB>()
 {
-    return "TBB";
+    return "BackendTBB";
 }
+#endif
 
 class GMMState
 {
@@ -349,7 +353,7 @@ class GMM : public GMMBase
     vsmc::Vector<double> obs_;
 }; // class GMM
 
-template <vsmc::SMPBackend SMP>
+template <typename SMP>
 class GMMInit : public vsmc::InitializeSMP<SMP, GMM, GMMInit<SMP>>
 {
     public:
@@ -421,7 +425,7 @@ class GMMMoveSMC
     vsmc::Vector<double> w_;
 }; // class GMMMoveSMC
 
-template <vsmc::SMPBackend SMP>
+template <typename SMP>
 class GMMMoveMu : public vsmc::MoveSMP<SMP, GMM, GMMMoveMu<SMP>>
 {
     public:
@@ -445,7 +449,7 @@ class GMMMoveMu : public vsmc::MoveSMP<SMP, GMM, GMMMoveMu<SMP>>
     }
 }; // class GMMMoveMu
 
-template <vsmc::SMPBackend SMP>
+template <typename SMP>
 class GMMMoveLambda : public vsmc::MoveSMP<SMP, GMM, GMMMoveLambda<SMP>>
 {
     public:
@@ -469,7 +473,7 @@ class GMMMoveLambda : public vsmc::MoveSMP<SMP, GMM, GMMMoveLambda<SMP>>
     }
 }; // class GMMMoveLambda
 
-template <vsmc::SMPBackend SMP>
+template <typename SMP>
 class GMMMoveWeight : public vsmc::MoveSMP<SMP, GMM, GMMMoveWeight<SMP>>
 {
     public:
@@ -502,7 +506,7 @@ class GMMMoveWeight : public vsmc::MoveSMP<SMP, GMM, GMMMoveWeight<SMP>>
     }
 }; // class GMMMoveWeight
 
-template <vsmc::SMPBackend SMP>
+template <typename SMP>
 class GMMPathIntegrand
     : public vsmc::MonitorEvalSMP<SMP, GMM, GMMPathIntegrand<SMP>>
 {

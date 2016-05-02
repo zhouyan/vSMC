@@ -34,26 +34,30 @@
 
 #include <vsmc/vsmc.hpp>
 
-template <vsmc::SMPBackend>
+template <typename>
 std::string pf_smp_name();
 
 template <>
-std::string pf_smp_name<vsmc::OMP>()
+std::string pf_smp_name<vsmc::BackendSEQ>()
 {
-    return "OMP";
+    return "BackendSEQ";
 }
 
+#if VSMC_HAS_OMP
 template <>
-std::string pf_smp_name<vsmc::SEQ>()
+std::string pf_smp_name<vsmc::BackendOMP>()
 {
-    return "SEQ";
+    return "BackendOMP";
 }
+#endif
 
+#if VSMC_HAS_TBB
 template <>
-std::string pf_smp_name<vsmc::TBB>()
+std::string pf_smp_name<vsmc::BackendTBB>()
 {
-    return "TBB";
+    return "BackendTBB";
 }
+#endif
 
 template <vsmc::ResampleScheme>
 std::string pf_res_name();

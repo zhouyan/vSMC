@@ -102,9 +102,9 @@ class PFCV : public PFCVBase<Layout>
     vsmc::Vector<double> obs_y_;
 }; // class PFCV
 
-template <vsmc::MatrixLayout Layout, typename RNGSetType, vsmc::SMPBackend SMP>
+template <typename SMP, vsmc::MatrixLayout Layout, typename RNGSetType>
 class PFCVInit : public vsmc::InitializeSMP<SMP, PFCV<Layout, RNGSetType>,
-                     PFCVInit<Layout, RNGSetType, SMP>>
+                     PFCVInit<SMP, Layout, RNGSetType>>
 {
     public:
     void eval_pre(vsmc::Particle<PFCV<Layout, RNGSetType>> &particle)
@@ -139,9 +139,9 @@ class PFCVInit : public vsmc::InitializeSMP<SMP, PFCV<Layout, RNGSetType>,
     vsmc::Vector<double> w_;
 }; // PFCVInit
 
-template <vsmc::MatrixLayout Layout, typename RNGSetType, vsmc::SMPBackend SMP>
+template <typename SMP, vsmc::MatrixLayout Layout, typename RNGSetType>
 class PFCVMove : public vsmc::MoveSMP<SMP, PFCV<Layout, RNGSetType>,
-                     PFCVMove<Layout, RNGSetType, SMP>>
+                     PFCVMove<SMP, Layout, RNGSetType>>
 {
     public:
     void eval_pre(
@@ -179,9 +179,9 @@ class PFCVMove : public vsmc::MoveSMP<SMP, PFCV<Layout, RNGSetType>,
     vsmc::Vector<double> w_;
 }; // class PFCVMove
 
-template <vsmc::MatrixLayout Layout, typename RNGSetType, vsmc::SMPBackend SMP>
+template <typename SMP, vsmc::MatrixLayout Layout, typename RNGSetType>
 class PFCVEval : public vsmc::MonitorEvalSMP<SMP, PFCV<Layout, RNGSetType>,
-                     PFCVEval<Layout, RNGSetType, SMP>>
+                     PFCVEval<SMP, Layout, RNGSetType>>
 {
     public:
     void eval_sp(std::size_t, std::size_t,
@@ -192,15 +192,15 @@ class PFCVEval : public vsmc::MonitorEvalSMP<SMP, PFCV<Layout, RNGSetType>,
     }
 }; // class PFCVEval
 
-template <vsmc::SMPBackend SMP, vsmc::ResampleScheme Scheme,
-    vsmc::MatrixLayout Layout, typename RNGSetType>
+template <typename SMP, vsmc::ResampleScheme Scheme, vsmc::MatrixLayout Layout,
+    typename RNGSetType>
 inline void pf_cv_run(std::size_t N, int nwid, int twid)
 {
     vsmc::Seed::instance().set(101);
     vsmc::Sampler<PFCV<Layout, RNGSetType>> sampler(N, Scheme, 0.5);
-    sampler.init(PFCVInit<Layout, RNGSetType, SMP>());
-    sampler.move(PFCVMove<Layout, RNGSetType, SMP>(), false);
-    sampler.monitor("pos", 2, PFCVEval<Layout, RNGSetType, SMP>());
+    sampler.init(PFCVInit<SMP, Layout, RNGSetType>());
+    sampler.move(PFCVMove<SMP, Layout, RNGSetType>(), false);
+    sampler.monitor("pos", 2, PFCVEval<SMP, Layout, RNGSetType>());
     sampler.monitor("pos").name(0) = "pos.x";
     sampler.monitor("pos").name(1) = "pos.y";
     sampler.initialize();
@@ -272,8 +272,7 @@ inline void pf_cv_run(std::size_t N, int nwid, int twid)
     std::cout << std::endl;
 }
 
-template <vsmc::SMPBackend SMP, vsmc::ResampleScheme Scheme,
-    vsmc::MatrixLayout Layout>
+template <typename SMP, vsmc::ResampleScheme Scheme, vsmc::MatrixLayout Layout>
 inline void pf_cv_run(std::size_t N, int nwid, int twid)
 {
     pf_cv_run<SMP, Scheme, Layout, vsmc::RNGSetVector<>>(N, nwid, twid);
@@ -282,14 +281,14 @@ inline void pf_cv_run(std::size_t N, int nwid, int twid)
 #endif
 }
 
-template <vsmc::SMPBackend SMP, vsmc::ResampleScheme Scheme>
+template <typename SMP, vsmc::ResampleScheme Scheme>
 inline void pf_cv_run(std::size_t N, int nwid, int twid)
 {
     pf_cv_run<SMP, Scheme, vsmc::RowMajor>(N, nwid, twid);
     pf_cv_run<SMP, Scheme, vsmc::ColMajor>(N, nwid, twid);
 }
 
-template <vsmc::SMPBackend SMP>
+template <typename SMP>
 inline void pf_cv_run(std::size_t N, int nwid, int twid)
 {
     pf_cv_run<SMP, vsmc::Multinomial>(N, nwid, twid);
@@ -302,12 +301,12 @@ inline void pf_cv_run(std::size_t N, int nwid, int twid)
 
 inline void pf_cv_run(std::size_t N, int nwid, int twid)
 {
-    pf_cv_run<vsmc::SEQ>(N, nwid, twid);
+    pf_cv_run<vsmc::BackendSEQ>(N, nwid, twid);
 #if VSMC_HAS_OMP
-    pf_cv_run<vsmc::OMP>(N, nwid, twid);
+    pf_cv_run<vsmc::BackendOMP>(N, nwid, twid);
 #endif
 #if VSMC_HAS_TBB
-    pf_cv_run<vsmc::TBB>(N, nwid, twid);
+    pf_cv_run<vsmc::BackendTBB>(N, nwid, twid);
 #endif
 }
 
@@ -319,7 +318,7 @@ inline void pf_cv(std::size_t N)
 
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::setw(nwid) << std::left << "N";
-    std::cout << std::setw(twid) << std::left << "SMPBackend";
+    std::cout << std::setw(twid) << std::left << "Backend";
     std::cout << std::setw(twid + 5) << std::left << "ResampleScheme";
     std::cout << std::setw(twid) << std::left << "MatrixLayout";
     std::cout << std::setw(twid) << std::left << "rng_set_type";

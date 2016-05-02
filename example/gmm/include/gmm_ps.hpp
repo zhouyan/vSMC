@@ -34,7 +34,7 @@
 
 #include "gmm.hpp"
 
-template <vsmc::SMPBackend SMP>
+template <typename SMP>
 inline void gmm_ps_run(
     std::size_t N, std::size_t n, std::size_t c, std::size_t power, int twid)
 {
@@ -80,12 +80,12 @@ inline void gmm_ps_run(
 inline void gmm_ps_run(
     std::size_t N, std::size_t n, std::size_t c, std::size_t power, int twid)
 {
-    gmm_ps_run<vsmc::SEQ>(N, n, c, power, twid);
+    gmm_ps_run<vsmc::BackendSEQ>(N, n, c, power, twid);
 #if VSMC_HAS_OMP
-    gmm_ps_run<vsmc::OMP>(N, n, c, power, twid);
+    gmm_ps_run<vsmc::BackendOMP>(N, n, c, power, twid);
 #endif
 #if VSMC_HAS_TBB
-    gmm_ps_run<vsmc::TBB>(N, n, c, power, twid);
+    gmm_ps_run<vsmc::BackendTBB>(N, n, c, power, twid);
 #endif
 }
 
