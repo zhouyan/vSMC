@@ -38,6 +38,22 @@
 namespace vsmc
 {
 
+namespace internal
+{
+
+template <typename IntType>
+inline void backend_omp_range(IntType N, IntType &begin, IntType &end)
+{
+    const IntType np = static_cast<IntType>(::omp_get_num_threads());
+    const IntType id = static_cast<IntType>(::omp_get_thread_num());
+    const IntType r = N % np;
+    const IntType n = N / np + (id < r ? 1 : 0);
+    begin = id < r ? n * id : (n + 1) * r + n * (id - r);
+    end = begin + n;
+}
+
+} // namespace vsmc::internal
+
 /// \brief SMP implementation ID for OpenMP
 /// \ingroup OMP
 class BackendOMP;
@@ -51,13 +67,22 @@ class InitializeSMP<BackendOMP, T, Derived> : public InitializeBase<T, Derived>
     std::size_t operator()(Particle<T> &particle, void *param)
     {
         using size_type = typename Particle<T>::size_type;
-        const size_type N = particle.size();
+
         this->eval_param(particle, param);
         this->eval_pre(particle);
         std::size_t accept = 0;
-#pragma omp parallel for reduction(+ : accept) default(shared)
-        for (size_type i = 0; i < N; ++i)
-            accept += this->eval_sp(particle.sp(i));
+        Particle<T> *pptr = &particle;
+#pragma omp parallel default(none) shared(accept) firstprivate(pptr)
+        {
+            std::size_t acc = 0;
+            size_type begin = 0;
+            size_type end = 0;
+            internal::backend_omp_range(pptr->size(), begin, end);
+            for (size_type i = begin; i != end; ++i)
+                acc += this->eval_sp(pptr->sp(i));
+#pragma omp atomic
+            accept += acc;
+        }
         this->eval_post(particle);
 
         return accept;
@@ -76,12 +101,21 @@ class MoveSMP<BackendOMP, T, Derived> : public MoveBase<T, Derived>
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
     {
         using size_type = typename Particle<T>::size_type;
-        const size_type N = particle.size();
+
         this->eval_pre(iter, particle);
         std::size_t accept = 0;
-#pragma omp parallel for reduction(+ : accept) default(shared)
-        for (size_type i = 0; i < N; ++i)
-            accept += this->eval_sp(iter, particle.sp(i));
+        Particle<T> *pptr = &particle;
+#pragma omp parallel default(none) shared(accept) firstprivate(pptr, iter)
+        {
+            std::size_t acc = 0;
+            size_type begin = 0;
+            size_type end = 0;
+            internal::backend_omp_range(pptr->size(), begin, end);
+            for (size_type i = begin; i != end; ++i)
+                acc += this->eval_sp(iter, pptr->sp(i));
+#pragma omp atomic
+            accept += acc;
+        }
         this->eval_post(iter, particle);
 
         return accept;
@@ -102,12 +136,17 @@ class MonitorEvalSMP<BackendOMP, T, Derived>
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
     {
         using size_type = typename Particle<T>::size_type;
-        const size_type N = particle.size();
+
         this->eval_pre(iter, particle);
-#pragma omp parallel for default(shared)
-        for (size_type i = 0; i < N; ++i) {
-            this->eval_sp(iter, dim, particle.sp(i),
-                r + static_cast<std::size_t>(i) * dim);
+        Particle<T> *pptr = &particle;
+#pragma omp parallel default(none) firstprivate(pptr, iter, dim, r)
+        {
+            size_type begin = 0;
+            size_type end = 0;
+            internal::backend_omp_range(pptr->size(), begin, end);
+            r += begin;
+            for (size_type i = begin; i != end; ++i, r += dim)
+                this->eval_sp(iter, dim, pptr->sp(i), r);
         }
         this->eval_post(iter, particle);
     }
