@@ -49,13 +49,9 @@ class InitializeSMP<BackendSEQ, T, Derived> : public InitializeBase<T, Derived>
     public:
     std::size_t operator()(Particle<T> &particle, void *param)
     {
-        using size_type = typename Particle<T>::size_type;
-        const size_type N = particle.size();
         this->eval_param(particle, param);
         this->eval_pre(particle);
-        std::size_t accept = 0;
-        for (size_type i = 0; i != N; ++i)
-            accept += this->eval_sp(SingleParticle<T>(i, &particle));
+        std::size_t accept = this->eval_range(particle.range());
         this->eval_post(particle);
 
         return accept;
@@ -73,12 +69,8 @@ class MoveSMP<BackendSEQ, T, Derived> : public MoveBase<T, Derived>
     public:
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
     {
-        using size_type = typename Particle<T>::size_type;
-        const size_type N = particle.size();
         this->eval_pre(iter, particle);
-        std::size_t accept = 0;
-        for (size_type i = 0; i != N; ++i)
-            accept += this->eval_sp(iter, SingleParticle<T>(i, &particle));
+        std::size_t accept = this->eval_range(iter, particle.range());
         this->eval_post(iter, particle);
 
         return accept;
@@ -98,13 +90,8 @@ class MonitorEvalSMP<BackendSEQ, T, Derived>
     void operator()(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
     {
-        using size_type = typename Particle<T>::size_type;
-        const size_type N = particle.size();
         this->eval_pre(iter, particle);
-        for (size_type i = 0; i != N; ++i) {
-            this->eval_sp(iter, dim, SingleParticle<T>(i, &particle),
-                r + static_cast<std::size_t>(i) * dim);
-        }
+        this->eval_range(iter, dim, particle.range(), r);
         this->eval_post(iter, particle);
     }
 

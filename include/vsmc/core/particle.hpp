@@ -46,6 +46,37 @@
 namespace vsmc
 {
 
+/// \brief A subset of particles
+/// \ingroup Core
+template <typename T>
+class ParticleRange
+{
+    public:
+    using size_type = typename Particle<T>::size_type;
+
+    ParticleRange(size_type begin, size_type end, Particle<T> *pptr)
+        : begin_(begin), end_(end), pptr_(pptr)
+    {
+    }
+
+    size_type size() const { return end_ - begin_; }
+
+    size_type begin() const { return begin_; }
+
+    size_type end() const { return end_; }
+
+    Particle<T> &particle() const { return *pptr_; }
+
+    Particle<T> *particle_ptr() const { return pptr_; }
+
+    typename Particle<T>::rng_type &rng() const { return pptr_->rng(begin_); }
+
+    private:
+    size_type begin_;
+    size_type end_;
+    Particle<T> *pptr_;
+}; // class ParticleRange
+
 /// \brief Particle class representing the whole particle set
 /// \ingroup Core
 template <typename T>
@@ -58,6 +89,7 @@ class Particle
     using rng_set_type = RNGSetType<T>;
     using rng_type = typename rng_set_type::rng_type;
     using sp_type = SingleParticle<T>;
+    using range_type = ParticleRange<T>;
 
     explicit Particle(size_type N = 0)
         : size_(N)
@@ -269,6 +301,15 @@ class Particle
 
     /// \brief Get a SingleParticle<T> object
     sp_type sp(size_type id) { return SingleParticle<T>(id, this); }
+
+    /// \brief Get a ParticleRange<T> object
+    range_type range(size_type begin, size_type end)
+    {
+        return ParticleRange<T>(begin, end, this);
+    }
+
+    /// \brief Get a ParticleRange<T> object with `begin == 0`, `end == size()`
+    range_type range() { return ParticleRange<T>(0, size(), this); }
 
     /// \brief Get a SingleParticle<T> object for the first particle
     sp_type begin() { return sp(0); }

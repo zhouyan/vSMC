@@ -68,9 +68,9 @@ class PFCV : public PFCVBase<Layout>
             const double nu = 10;
 
             double llh_x =
-                scale * (pos_x() - this->particle().value().obs_x_[iter]);
+                scale * (pos_x() - this->particle().value().obs_x(iter));
             double llh_y =
-                scale * (pos_y() - this->particle().value().obs_y_[iter]);
+                scale * (pos_y() - this->particle().value().obs_y(iter));
 
             llh_x = std::log(1 + llh_x * llh_x / nu);
             llh_y = std::log(1 + llh_y * llh_y / nu);
@@ -82,6 +82,9 @@ class PFCV : public PFCVBase<Layout>
     PFCV(std::size_t N) : PFCVBase<Layout>(N) {}
 
     std::size_t n() const { return obs_x_.size(); }
+
+    double obs_x(std::size_t iter) { return obs_x_[iter]; }
+    double obs_y(std::size_t iter) { return obs_y_[iter]; }
 
     void initialize()
     {
@@ -177,6 +180,102 @@ class PFCVMove : public vsmc::MoveSMP<SMP, PFCV<Layout, RNGSetType>,
 
     private:
     vsmc::Vector<double> w_;
+}; // class PFCVMove
+
+template <typename SMP, typename RNGSetType>
+class PFCVMove<SMP, vsmc::ColMajor, RNGSetType>
+    : public vsmc::MoveSMP<SMP, PFCV<vsmc::ColMajor, RNGSetType>,
+          PFCVMove<SMP, vsmc::ColMajor, RNGSetType>>
+{
+    public:
+    std::size_t operator()(std::size_t iter,
+        vsmc::Particle<PFCV<vsmc::ColMajor, RNGSetType>> &particle)
+    {
+        return run_dispatch(
+            iter, particle, std::is_same<SMP, vsmc::BackendTBB>());
+    }
+
+    void eval_pre(std::size_t,
+        vsmc::Particle<PFCV<vsmc::ColMajor, RNGSetType>> &particle)
+    {
+        w_.resize(particle.size());
+        v_.resize(particle.size());
+    }
+
+    std::size_t eval_range(std::size_t iter,
+        vsmc::ParticleRange<PFCV<vsmc::ColMajor, RNGSetType>> range)
+    {
+        const double sd_pos = std::sqrt(0.02);
+        const double sd_vel = std::sqrt(0.001);
+        const double delta = 0.1;
+        vsmc::NormalDistribution<double> normal_pos(0, sd_pos);
+        vsmc::NormalDistribution<double> normal_vel(0, sd_vel);
+
+        double *const pos_x =
+            range.particle().value().col_data(0) + range.begin();
+        double *const pos_y =
+            range.particle().value().col_data(1) + range.begin();
+        double *const vel_x =
+            range.particle().value().col_data(2) + range.begin();
+        double *const vel_y =
+            range.particle().value().col_data(3) + range.begin();
+        double *const w = w_.data() + range.begin();
+        double *const v = v_.data() + range.begin();
+
+        auto &rng = range.rng();
+        const std::size_t n = range.size();
+        normal_pos(rng, n, w);
+        normal_pos(rng, n, v);
+        vsmc::add(n, w, pos_x, pos_x);
+        vsmc::add(n, v, pos_y, pos_y);
+        vsmc::fma(n, delta, vel_x, pos_x, pos_x);
+        vsmc::fma(n, delta, vel_y, pos_y, pos_y);
+        normal_vel(rng, n, w);
+        normal_vel(rng, n, v);
+        vsmc::add(n, w, vel_x, vel_x);
+        vsmc::add(n, v, vel_y, vel_y);
+
+        const double scale = 10;
+        const double nu = 10;
+        vsmc::sub(n, pos_x, range.particle().value().obs_x(iter), w);
+        vsmc::sub(n, pos_y, range.particle().value().obs_y(iter), v);
+        vsmc::mul(n, scale, w, w);
+        vsmc::mul(n, scale, v, v);
+        vsmc::sqr(n, w, w);
+        vsmc::sqr(n, v, v);
+        vsmc::fma(n, 1 / nu, w, 1.0, w);
+        vsmc::fma(n, 1 / nu, v, 1.0, v);
+        vsmc::add(n, w, v, w);
+        vsmc::mul(n, -0.5 * (nu + 1), w, w);
+
+        return 0;
+    }
+
+    void eval_post(std::size_t,
+        vsmc::Particle<PFCV<vsmc::ColMajor, RNGSetType>> &particle)
+    {
+        particle.weight().add_log(w_.data());
+    }
+
+    private:
+    vsmc::Vector<double> w_;
+    vsmc::Vector<double> v_;
+
+    std::size_t run_dispatch(std::size_t iter,
+        vsmc::Particle<PFCV<vsmc::ColMajor, RNGSetType>> &particle,
+        std::true_type)
+    {
+        return this->run(iter, particle, 512);
+    }
+
+    std::size_t run_dispatch(std::size_t iter,
+        vsmc::Particle<PFCV<vsmc::ColMajor, RNGSetType>> &particle,
+        std::false_type)
+    {
+        return vsmc::MoveSMP<SMP, PFCV<vsmc::ColMajor, RNGSetType>,
+            PFCVMove<SMP, vsmc::ColMajor, RNGSetType>>::operator()(iter,
+            particle);
+    }
 }; // class PFCVMove
 
 template <typename SMP, vsmc::MatrixLayout Layout, typename RNGSetType>

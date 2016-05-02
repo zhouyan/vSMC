@@ -99,6 +99,11 @@ class InitializeBase
         return eval_sp_dispatch(sp, &Derived::eval_sp);
     }
 
+    std::size_t eval_range(ParticleRange<T> range)
+    {
+        return eval_range_dispatch(range, &Derived::eval_range);
+    }
+
     void eval_param(Particle<T> &particle, void *param)
     {
         eval_param_dispatch(particle, param, &Derived::eval_param);
@@ -125,6 +130,13 @@ class InitializeBase
         SingleParticle<T> sp, std::size_t (D::*)(SingleParticle<T>))
     {
         return static_cast<Derived *>(this)->eval_sp(sp);
+    }
+
+    template <typename D>
+    std::size_t eval_range_dispatch(
+        ParticleRange<T> range, std::size_t (D::*)(ParticleRange<T>))
+    {
+        return static_cast<Derived *>(this)->eval_range(range);
     }
 
     template <typename D>
@@ -156,6 +168,13 @@ class InitializeBase
     }
 
     template <typename D>
+    std::size_t eval_range_dispatch(
+        ParticleRange<T> range, std::size_t (D::*)(ParticleRange<T>) const)
+    {
+        return static_cast<Derived *>(this)->eval_range(range);
+    }
+
+    template <typename D>
     void eval_param_dispatch(Particle<T> &particle, void *param,
         void (D::*)(Particle<T> &, void *) const)
     {
@@ -184,6 +203,12 @@ class InitializeBase
         return Derived::eval_sp(sp);
     }
 
+    std::size_t eval_range_dispatch(
+        ParticleRange<T> range, std::size_t (*)(ParticleRange<T>))
+    {
+        return Derived::eval_range(range);
+    }
+
     void eval_param_dispatch(
         Particle<T> &particle, void *param, void (*)(Particle<T> &, void *))
     {
@@ -206,6 +231,18 @@ class InitializeBase
         SingleParticle<T>, std::size_t (InitializeBase::*)(SingleParticle<T>))
     {
         return 0;
+    }
+
+    std::size_t eval_range_dispatch(ParticleRange<T> range,
+        std::size_t (InitializeBase::*)(ParticleRange<T>))
+    {
+        using size_type = typename ParticleRange<T>::size_type;
+
+        std::size_t accept = 0;
+        for (size_type i = range.begin(); i != range.end(); ++i)
+            accept += eval_sp(range.particle().sp(i));
+
+        return accept;
     }
 
     void eval_param_dispatch(
@@ -231,8 +268,22 @@ class InitializeBase<T, Virtual>
 {
     public:
     virtual std::size_t eval_sp(SingleParticle<T>) { return 0; }
+
+    virtual std::size_t eval_range(ParticleRange<T> range)
+    {
+        using size_type = typename ParticleRange<T>::size_type;
+
+        std::size_t accept = 0;
+        for (size_type i = range.begin(); i != range.end(); ++i)
+            accept += eval_sp(range.particle().sp(i));
+
+        return accept;
+    }
+
     virtual void eval_param(Particle<T> &, void *) {}
+
     virtual void eval_pre(Particle<T> &) {}
+
     virtual void eval_post(Particle<T> &) {}
 
     protected:
@@ -248,6 +299,11 @@ class MoveBase
     std::size_t eval_sp(std::size_t iter, SingleParticle<T> sp)
     {
         return eval_sp_dispatch(iter, sp, &Derived::eval_sp);
+    }
+
+    std::size_t eval_range(std::size_t iter, ParticleRange<T> range)
+    {
+        return eval_range_dispatch(iter, range, &Derived::eval_range);
     }
 
     void eval_pre(std::size_t iter, Particle<T> &particle)
@@ -274,6 +330,13 @@ class MoveBase
     }
 
     template <typename D>
+    std::size_t eval_range_dispatch(std::size_t iter, ParticleRange<T> range,
+        std::size_t (D::*)(std::size_t, ParticleRange<T>))
+    {
+        return static_cast<Derived *>(this)->eval_range(iter, range);
+    }
+
+    template <typename D>
     void eval_pre_dispatch(std::size_t iter, Particle<T> &particle,
         void (D::*)(std::size_t, Particle<T> &))
     {
@@ -294,6 +357,13 @@ class MoveBase
         std::size_t (D::*)(std::size_t, SingleParticle<T>) const)
     {
         return static_cast<Derived *>(this)->eval_sp(iter, sp);
+    }
+
+    template <typename D>
+    std::size_t eval_range_dispatch(std::size_t iter, ParticleRange<T> range,
+        std::size_t (D::*)(std::size_t, ParticleRange<T>) const)
+    {
+        return static_cast<Derived *>(this)->eval_range(iter, range);
     }
 
     template <typename D>
@@ -318,6 +388,12 @@ class MoveBase
         return Derived::eval_sp(iter, sp);
     }
 
+    std::size_t eval_range_dispatch(std::size_t iter, ParticleRange<T> range,
+        std::size_t (*)(std::size_t, ParticleRange<T>))
+    {
+        return Derived::eval_range(iter, range);
+    }
+
     void eval_pre_dispatch(std::size_t iter, Particle<T> &particle,
         void (*)(std::size_t, Particle<T> &))
     {
@@ -338,6 +414,18 @@ class MoveBase
         return 0;
     }
 
+    std::size_t eval_range_dispatch(std::size_t iter, ParticleRange<T> range,
+        std::size_t (MoveBase::*)(std::size_t, ParticleRange<T>))
+    {
+        using size_type = typename ParticleRange<T>::size_type;
+
+        std::size_t accept = 0;
+        for (size_type i = range.begin(); i != range.end(); ++i)
+            accept += eval_sp(iter, range.particle().sp(i));
+
+        return accept;
+    }
+
     void eval_pre_dispatch(std::size_t, Particle<T> &,
         void (MoveBase::*)(std::size_t, Particle<T> &))
     {
@@ -356,7 +444,20 @@ class MoveBase<T, Virtual>
 {
     public:
     virtual std::size_t eval_sp(std::size_t, SingleParticle<T>) { return 0; }
+
+    virtual std::size_t eval_range(std::size_t iter, ParticleRange<T> range)
+    {
+        using size_type = typename ParticleRange<T>::size_type;
+
+        std::size_t accept = 0;
+        for (size_type i = range.begin(); i != range.end(); ++i)
+            accept += eval_sp(iter, range.particle().sp(i));
+
+        return accept;
+    }
+
     virtual void eval_pre(std::size_t, Particle<T> &) {}
+
     virtual void eval_post(std::size_t, Particle<T> &) {}
 
     protected:
@@ -373,6 +474,12 @@ class MonitorEvalBase
         std::size_t iter, std::size_t dim, SingleParticle<T> sp, double *r)
     {
         eval_sp_dispatch(iter, dim, sp, r, &Derived::eval_sp);
+    }
+
+    void eval_range(
+        std::size_t iter, std::size_t dim, ParticleRange<T> range, double *r)
+    {
+        eval_range_dispatch(iter, dim, range, r, &Derived::eval_range);
     }
 
     void eval_pre(std::size_t iter, Particle<T> &particle)
@@ -397,6 +504,14 @@ class MonitorEvalBase
         void (D::*)(std::size_t, std::size_t, SingleParticle<T>, double *))
     {
         static_cast<Derived *>(this)->eval_sp(iter, dim, sp, r);
+    }
+
+    template <typename D>
+    void eval_range_dispatch(std::size_t iter, std::size_t dim,
+        ParticleRange<T> range, double *r,
+        void (D::*)(std::size_t, std::size_t, ParticleRange<T>, double *))
+    {
+        static_cast<Derived *>(this)->eval_range(iter, dim, range, r);
     }
 
     template <typename D>
@@ -425,6 +540,15 @@ class MonitorEvalBase
     }
 
     template <typename D>
+    void eval_range_dispatch(std::size_t iter, std::size_t dim,
+        ParticleRange<T> range, double *r,
+        void (D::*)(std::size_t, std::size_t, ParticleRange<T>, double *)
+            const)
+    {
+        static_cast<Derived *>(this)->eval_range(iter, dim, range, r);
+    }
+
+    template <typename D>
     void eval_pre_dispatch(std::size_t iter, Particle<T> &particle,
         void (D::*)(std::size_t, Particle<T> &) const)
     {
@@ -447,6 +571,13 @@ class MonitorEvalBase
         Derived::eval_sp(iter, dim, sp, r);
     }
 
+    void eval_range_dispatch(std::size_t iter, std::size_t dim,
+        ParticleRange<T> range, double *r,
+        void (*)(std::size_t, std::size_t, ParticleRange<T>, double *))
+    {
+        Derived::eval_range(iter, dim, range, r);
+    }
+
     void eval_pre_dispatch(std::size_t iter, Particle<T> &particle,
         void (*)(std::size_t, Particle<T> &))
     {
@@ -465,6 +596,17 @@ class MonitorEvalBase
         double *, void (MonitorEvalBase::*)(std::size_t, std::size_t,
                               SingleParticle<T>, double *))
     {
+    }
+
+    void eval_range_dispatch(std::size_t iter, std::size_t dim,
+        ParticleRange<T> range, double *r,
+        void (MonitorEvalBase::*)(std::size_t, std::size_t, ParticleRange<T>,
+                                 double *))
+    {
+        using size_type = typename ParticleRange<T>::size_type;
+
+        for (size_type i = range.begin(); i != range.end(); ++i, r += dim)
+            eval_sp(iter, dim, range.particle().sp(i), r);
     }
 
     void eval_pre_dispatch(std::size_t, Particle<T> &,
@@ -487,7 +629,18 @@ class MonitorEvalBase<T, Virtual>
     virtual void eval_sp(std::size_t, std::size_t, SingleParticle<T>, double *)
     {
     }
+
+    virtual void eval_range(
+        std::size_t iter, std::size_t dim, ParticleRange<T> range, double *r)
+    {
+        using size_type = typename ParticleRange<T>::size_type;
+
+        for (size_type i = range.begin(); i != range.end(); ++i, r += dim)
+            eval_sp(iter, dim, range.particle().sp(i), r);
+    }
+
     virtual void eval_pre(std::size_t, Particle<T> &) {}
+
     virtual void eval_post(std::size_t, Particle<T> &) {}
 
     protected:

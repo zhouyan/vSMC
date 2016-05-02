@@ -97,8 +97,8 @@ class InitializeSMP<BackendTBB, T, Derived> : public InitializeBase<T, Derived>
 
         void operator()(const ::tbb::blocked_range<size_type> &range)
         {
-            for (size_type i = range.begin(); i != range.end(); ++i)
-                accept_ += wptr_->eval_sp(pptr_->sp(i));
+            accept_ +=
+                wptr_->eval_range(pptr_->range(range.begin(), range.end()));
         }
 
         void join(const work_type &other) { accept_ += other.accept_; }
@@ -164,8 +164,8 @@ class MoveSMP<BackendTBB, T, Derived> : public MoveBase<T, Derived>
 
         void operator()(const ::tbb::blocked_range<size_type> &range)
         {
-            for (size_type i = range.begin(); i != range.end(); ++i)
-                accept_ += wptr_->eval_sp(iter_, pptr_->sp(i));
+            accept_ += wptr_->eval_range(
+                iter_, pptr_->range(range.begin(), range.end()));
         }
 
         void join(const work_type &other) { accept_ += other.accept_; }
@@ -226,10 +226,9 @@ class MonitorEvalSMP<BackendTBB, T, Derived>
 
         void operator()(const ::tbb::blocked_range<size_type> &range) const
         {
-            for (size_type i = range.begin(); i != range.end(); ++i) {
-                wptr_->eval_sp(iter_, dim_, pptr_->sp(i),
-                    r_ + static_cast<std::size_t>(i) * dim_);
-            }
+            wptr_->eval_range(iter_, dim_,
+                pptr_->range(range.begin(), range.end()),
+                r_ + static_cast<std::size_t>(range.begin()) * dim_);
         }
 
         private:
