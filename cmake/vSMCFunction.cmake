@@ -77,32 +77,6 @@ FUNCTION(VSMC_ADD_EXAMPLE basename)
     ADD_DEPENDENCIES(${basename} ${basename}-files)
 ENDFUNCTION(VSMC_ADD_EXAMPLE)
 
-FUNCTION(VSMC_ADD_SMP_EXAMPLE basename)
-    INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/include)
-    VSMC_ADD_EXAMPLE(${basename})
-
-    FOREACH(smpname ${SMP_EXECUTABLES})
-        STRING(TOUPPER "${smpname}" SMP)
-        STRING(TOLOWER "${smpname}" smp)
-        CONFIGURE_FILE(
-            ${PROJECT_SOURCE_DIR}/include/${basename}.hpp
-            ${PROJECT_BINARY_DIR}/include/${basename}_${smp}.hpp)
-        CONFIGURE_FILE(
-            ${PROJECT_SOURCE_DIR}/src/${basename}.cpp
-            ${PROJECT_BINARY_DIR}/src/${basename}_${smp}.cpp)
-        VSMC_ADD_EXECUTABLE(${basename}_${smp}
-            ${PROJECT_BINARY_DIR}/src/${basename}_${smp}.cpp)
-        ADD_DEPENDENCIES(${basename} ${basename}_${smp})
-
-        ADD_CUSTOM_TARGET(${basename}_${smp}-check
-            DEPENDS ${basename}_${smp} ${basename}-files
-            COMMAND ${basename}_${smp}
-            COMMENT "Running ${basename}_${smp}"
-            WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-        ADD_DEPENDENCIES(${basename}-check ${basename}_${smp}-check)
-    ENDFOREACH(smpname ${SMP_EXECUTABLES})
-ENDFUNCTION(VSMC_ADD_SMP_EXAMPLE)
-
 FUNCTION(VSMC_ADD_TEST basename testname)
     VSMC_ADD_EXECUTABLE(${basename}_${testname}
         ${PROJECT_SOURCE_DIR}/src/${basename}_${testname}.cpp)
@@ -157,11 +131,8 @@ INCLUDE_DIRECTORIES(${VSMC_INCLUDE_DIR})
 # Check backends
 ##############################################################################
 
-SET(SMP_EXECUTABLES)
-
 # Sequential
 SET(BACKENDS "Sequential")
-SET(SMP_EXECUTABLES ${SMP_EXECUTABLES} seq)
 
 # Thread
 INCLUDE(FindThread)
@@ -173,7 +144,6 @@ ENDIF(THREAD_FOUND)
 INCLUDE(FindTBB)
 IF(TBB_FOUND)
     SET(BACKENDS ${BACKENDS} "Intel TBB")
-    SET(SMP_EXECUTABLES ${SMP_EXECUTABLES} tbb)
     SET(VSMC_DEFINITIONS ${VSMC_DEFINITIONS} ${TBB_DEFINITIONS})
     SET(VSMC_DEFINITIONS ${VSMC_DEFINITIONS} -DVSMC_HAS_TBB=1)
     SET(VSMC_INCLUDE_DIRS ${VSMC_INCLUDE_DIRS} ${TBB_INCLUDE_DIR})
@@ -189,17 +159,11 @@ IF(NOT DEFINED OPENMP_FOUND)
 ENDIF(NOT DEFINED OPENMP_FOUND)
 IF(OPENMP_FOUND)
     SET(BACKENDS ${BACKENDS} "OpenMP")
-    SET(SMP_EXECUTABLES ${SMP_EXECUTABLES} omp)
     SET(OPENMP_FOUND TRUE CACHE BOOL "Found OpenMP")
 ELSE(OPENMP_FOUND)
     UNSET(OPENMP_FOUND CACHE)
     SET(OPENMP_FOUND FALSE CACHE BOOL "NOT Found OpenMP")
 ENDIF(OPENMP_FOUND)
-
-# SMP executables
-FOREACH(smp ${SMP_EXECUTABLES})
-    ADD_CUSTOM_TARGET(example_${smp})
-ENDFOREACH(smp)
 
 ##############################################################################
 # Check features

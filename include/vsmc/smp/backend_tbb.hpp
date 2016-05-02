@@ -37,7 +37,7 @@
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_reduce.h>
 
-#define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_INITIALIZE(args)             \
+#define VSMC_DEFINE_SMP_BACKEND_TBB_RUN_INITIALIZE(args)                      \
     this->eval_param(particle, param);                                        \
     this->eval_pre(particle);                                                 \
     work_type work(this, &particle);                                          \
@@ -45,14 +45,14 @@
     this->eval_post(particle);                                                \
     return work.accept();
 
-#define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MOVE(args)                   \
+#define VSMC_DEFINE_SMP_BACKEND_TBB_RUN_MOVE(args)                            \
     this->eval_pre(iter, particle);                                           \
     work_type work(this, iter, &particle);                                    \
     ::tbb::parallel_reduce args;                                              \
     this->eval_post(iter, particle);                                          \
     return work.accept();
 
-#define VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MONITOR_EVAL(args)           \
+#define VSMC_DEFINE_SMP_BACKEND_TBB_RUN_MONITOR_EVAL(args)                    \
     this->eval_pre(iter, particle);                                           \
     work_type work(this, iter, dim, &particle, r);                            \
     ::tbb::parallel_for args;                                                 \
@@ -61,19 +61,15 @@
 namespace vsmc
 {
 
-VSMC_DEFINE_SMP_BACKEND_FORWARD(TBB)
-
 /// \brief Sampler<T>::init_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
 template <typename T, typename Derived>
-class InitializeTBB : public InitializeBase<T, Derived>
+class InitializeSMP<TBB, T, Derived> : public InitializeBase<T, Derived>
 {
     public:
     std::size_t operator()(Particle<T> &particle, void *param)
     {
-        return parallel_run(particle, param,
-            ::tbb::blocked_range<typename Particle<T>::size_type>(
-                                0, particle.size()));
+        return run(particle, param);
     }
 
     protected:
@@ -84,7 +80,7 @@ class InitializeTBB : public InitializeBase<T, Derived>
         public:
         using size_type = typename Particle<T>::size_type;
 
-        work_type(InitializeTBB<T, Derived> *wptr, Particle<T> *pptr)
+        work_type(InitializeSMP<TBB, T, Derived> *wptr, Particle<T> *pptr)
             : wptr_(wptr), pptr_(pptr), accept_(0)
         {
         }
@@ -105,82 +101,38 @@ class InitializeTBB : public InitializeBase<T, Derived>
         std::size_t accept() const { return accept_; }
 
         private:
-        InitializeTBB<T, Derived> *const wptr_;
+        InitializeSMP<TBB, T, Derived> *const wptr_;
         Particle<T> *const pptr_;
         std::size_t accept_;
     }; // class work_type
 
-    std::size_t parallel_run(Particle<T> &particle, void *param,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range)
+    std::size_t run(Particle<T> &particle, void *param)
     {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_INITIALIZE((range, work));
+        const ::tbb::blocked_range<typename Particle<T>::size_type> range(
+            0, particle.size());
+        VSMC_DEFINE_SMP_BACKEND_TBB_RUN_INITIALIZE((range, work));
     }
 
-    std::size_t parallel_run(Particle<T> &particle, void *param,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        const ::tbb::auto_partitioner &partitioner)
+    template <typename... Args>
+    std::size_t run(Particle<T> &particle, void *param,
+        typename Particle<T>::size_type grainsize, Args &&... args)
     {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_INITIALIZE(
-            (range, work, partitioner));
+        const ::tbb::blocked_range<typename Particle<T>::size_type> range(
+            0, particle.size(), grainsize);
+        VSMC_DEFINE_SMP_BACKEND_TBB_RUN_INITIALIZE(
+            (range, work, std::forward<Args>(args)...));
     }
-
-    std::size_t parallel_run(Particle<T> &particle, void *param,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        const ::tbb::simple_partitioner &partitioner)
-    {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_INITIALIZE(
-            (range, work, partitioner));
-    }
-
-    std::size_t parallel_run(Particle<T> &particle, void *param,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        ::tbb::affinity_partitioner &partitioner)
-    {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_INITIALIZE(
-            (range, work, partitioner));
-    }
-
-#if __TBB_TASK_GROUP_CONTEXT
-    std::size_t parallel_run(Particle<T> &particle, void *param,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        const ::tbb::auto_partitioner &partitioner,
-        ::tbb::task_group_context &context)
-    {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_INITIALIZE(
-            (range, work, partitioner, context));
-    }
-
-    std::size_t parallel_run(Particle<T> &particle, void *param,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        const ::tbb::simple_partitioner &partitioner,
-        ::tbb::task_group_context &context)
-    {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_INITIALIZE(
-            (range, work, partitioner, context));
-    }
-
-    std::size_t parallel_run(Particle<T> &particle, void *param,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        ::tbb::affinity_partitioner &partitioner,
-        ::tbb::task_group_context &context)
-    {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_INITIALIZE(
-            (range, work, partitioner, context));
-    }
-#endif // __TBB_TASK_GROUP_CONTEXT
-};     // class InitializeTBB
+}; // class InitializeSMP
 
 /// \brief Sampler<T>::move_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
 template <typename T, typename Derived>
-class MoveTBB : public MoveBase<T, Derived>
+class MoveSMP<TBB, T, Derived> : public MoveBase<T, Derived>
 {
     public:
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
     {
-        return parallel_run(iter, particle,
-            ::tbb::blocked_range<typename Particle<T>::size_type>(
-                                0, particle.size()));
+        return run(iter, particle);
     }
 
     protected:
@@ -191,8 +143,8 @@ class MoveTBB : public MoveBase<T, Derived>
         public:
         using size_type = typename Particle<T>::size_type;
 
-        work_type(
-            MoveTBB<T, Derived> *wptr, std::size_t iter, Particle<T> *pptr)
+        work_type(MoveSMP<TBB, T, Derived> *wptr, std::size_t iter,
+            Particle<T> *pptr)
             : wptr_(wptr), iter_(iter), pptr_(pptr), accept_(0)
         {
         }
@@ -216,84 +168,40 @@ class MoveTBB : public MoveBase<T, Derived>
         std::size_t accept() const { return accept_; }
 
         private:
-        MoveTBB<T, Derived> *const wptr_;
+        MoveSMP<TBB, T, Derived> *const wptr_;
         const std::size_t iter_;
         Particle<T> *const pptr_;
         std::size_t accept_;
     }; // class work_type
 
-    std::size_t parallel_run(std::size_t iter, Particle<T> &particle,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range)
+    std::size_t run(std::size_t iter, Particle<T> &particle)
     {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MOVE((range, work));
+        const ::tbb::blocked_range<typename Particle<T>::size_type> range(
+            0, particle.size());
+        VSMC_DEFINE_SMP_BACKEND_TBB_RUN_MOVE((range, work));
     }
 
-    std::size_t parallel_run(std::size_t iter, Particle<T> &particle,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        const ::tbb::auto_partitioner &partitioner)
+    template <typename... Args>
+    std::size_t run(std::size_t iter, Particle<T> &particle,
+        typename Particle<T>::size_type grainsize, Args &&... args)
     {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MOVE(
-            (range, work, partitioner));
+        const ::tbb::blocked_range<typename Particle<T>::size_type> range(
+            0, particle.size(), grainsize);
+        VSMC_DEFINE_SMP_BACKEND_TBB_RUN_MOVE(
+            (range, work, std::forward<Args>(args)...));
     }
-
-    std::size_t parallel_run(std::size_t iter, Particle<T> &particle,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        const ::tbb::simple_partitioner &partitioner)
-    {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MOVE(
-            (range, work, partitioner));
-    }
-
-    std::size_t parallel_run(std::size_t iter, Particle<T> &particle,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        ::tbb::affinity_partitioner &partitioner)
-    {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MOVE(
-            (range, work, partitioner));
-    }
-
-#if __TBB_TASK_GROUP_CONTEXT
-    std::size_t parallel_run(std::size_t iter, Particle<T> &particle,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        const ::tbb::auto_partitioner &partitioner,
-        ::tbb::task_group_context &context)
-    {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MOVE(
-            (range, work, partitioner, context));
-    }
-
-    std::size_t parallel_run(std::size_t iter, Particle<T> &particle,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        const ::tbb::simple_partitioner &partitioner,
-        ::tbb::task_group_context &context)
-    {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MOVE(
-            (range, work, partitioner, context));
-    }
-
-    std::size_t parallel_run(std::size_t iter, Particle<T> &particle,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        ::tbb::affinity_partitioner &partitioner,
-        ::tbb::task_group_context &context)
-    {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MOVE(
-            (range, work, partitioner, context));
-    }
-#endif // __TBB_TASK_GROUP_CONTEXT
-};     // class MoveTBB
+}; // class MoveSMP
 
 /// \brief Monitor<T>::eval_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
 template <typename T, typename Derived>
-class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
+class MonitorEvalSMP<TBB, T, Derived> : public MonitorEvalBase<T, Derived>
 {
     public:
     void operator()(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
     {
-        parallel_run(iter, dim, particle, r,
-            ::tbb::blocked_range<typename Particle<T>::size_type>(
-                         0, particle.size()));
+        run(iter, dim, particle, r);
     }
 
     protected:
@@ -304,7 +212,7 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         public:
         using size_type = typename Particle<T>::size_type;
 
-        work_type(MonitorEvalTBB<T, Derived> *wptr, std::size_t iter,
+        work_type(MonitorEvalSMP<TBB, T, Derived> *wptr, std::size_t iter,
             std::size_t dim, Particle<T> *pptr, double *r)
             : wptr_(wptr), iter_(iter), dim_(dim), pptr_(pptr), r_(r)
         {
@@ -319,79 +227,46 @@ class MonitorEvalTBB : public MonitorEvalBase<T, Derived>
         }
 
         private:
-        MonitorEvalTBB<T, Derived> *const wptr_;
+        MonitorEvalSMP<TBB, T, Derived> *const wptr_;
         const std::size_t iter_;
         const std::size_t dim_;
         Particle<T> *const pptr_;
         double *const r_;
     }; // class work_type
 
-    void parallel_run(std::size_t iter, std::size_t dim, Particle<T> &particle,
-        double *r,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range)
+    void run(
+        std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
     {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MONITOR_EVAL((range, work));
+        const ::tbb::blocked_range<typename Particle<T>::size_type> range(
+            0, particle.size());
+        VSMC_DEFINE_SMP_BACKEND_TBB_RUN_MONITOR_EVAL((range, work));
     }
 
-    void parallel_run(std::size_t iter, std::size_t dim, Particle<T> &particle,
-        double *r,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        const ::tbb::auto_partitioner &partitioner)
+    template <typename... Args>
+    void run(std::size_t iter, std::size_t dim, Particle<T> &particle,
+        double *r, typename Particle<T>::size_type grainsize, Args &&... args)
     {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MONITOR_EVAL(
-            (range, work, partitioner));
+        const ::tbb::blocked_range<typename Particle<T>::size_type> range(
+            0, particle.size(), grainsize);
+        VSMC_DEFINE_SMP_BACKEND_TBB_RUN_MONITOR_EVAL(
+            (range, work, std::forward<Args>(args)...));
     }
+}; // class MonitorEvalSMP
 
-    void parallel_run(std::size_t iter, std::size_t dim, Particle<T> &particle,
-        double *r,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        const ::tbb::simple_partitioner &partitioner)
-    {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MONITOR_EVAL(
-            (range, work, partitioner));
-    }
+/// \brief Sampler<T>::init_type subtype using Intel Threading Building Blocks
+/// \ingroup TBB
+template <typename T, typename Derived>
+using InitializeTBB = InitializeSMP<TBB, T, Derived>;
 
-    void parallel_run(std::size_t iter, std::size_t dim, Particle<T> &particle,
-        double *r,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        ::tbb::affinity_partitioner &partitioner)
-    {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MONITOR_EVAL(
-            (range, work, partitioner));
-    }
+/// \brief Sampler<T>::move_type subtype using Intel Threading Building Blocks
+/// \ingroup TBB
+template <typename T, typename Derived>
+using MoveTBB = MoveSMP<TBB, T, Derived>;
 
-#if __TBB_TASK_GROUP_CONTEXT
-    void parallel_run(std::size_t iter, std::size_t dim, Particle<T> &particle,
-        double *r,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        const ::tbb::auto_partitioner &partitioner,
-        ::tbb::task_group_context &context)
-    {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MONITOR_EVAL(
-            (range, work, partitioner, context));
-    }
-
-    void parallel_run(std::size_t iter, std::size_t dim, Particle<T> &particle,
-        double *r,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        const ::tbb::simple_partitioner &partitioner,
-        ::tbb::task_group_context &context)
-    {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MONITOR_EVAL(
-            (range, work, partitioner, context));
-    }
-
-    void parallel_run(std::size_t iter, std::size_t dim, Particle<T> &particle,
-        double *r,
-        const ::tbb::blocked_range<typename Particle<T>::size_type> &range,
-        ::tbb::affinity_partitioner &partitioner,
-        ::tbb::task_group_context &context)
-    {
-        VSMC_DEFINE_SMP_BACKEND_TBB_PARALLEL_RUN_MONITOR_EVAL(
-            (range, work, partitioner, context));
-    }
-#endif // __TBB_TASK_GROUP_CONTEXT
-};     // class MonitorEvalTBB
+/// \brief Monitor<T>::eval_type subtype using Intel Threading Building Blocks
+/// \ingroup TBB
+template <typename T, typename Derived>
+using MonitorEvalTBB = MonitorEvalSMP<TBB, T, Derived>;
 
 } // namespace vsmc
 

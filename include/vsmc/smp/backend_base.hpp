@@ -56,20 +56,14 @@
     Name##Base<T, Virtual> &operator=(Name##Base<T, Virtual> &&) = default;   \
     virtual ~Name##Base() {}
 
-#define VSMC_DEFINE_SMP_BACKEND_SPECIAL(SMP, Name)                            \
+#define VSMC_DEFINE_SMP_BACKEND_SPECIAL(Impl, Name)                           \
     Name##SMP() = default;                                                    \
-    Name##SMP(const Name##SMP<T, Derived> &) = default;                       \
-    Name##SMP<T, Derived> &operator=(Name##SMP<T, Derived> &) = default;      \
-    Name##SMP(Name##SMP<T, Derived> &&) = default;                            \
-    Name##SMP<T, Derived> &operator=(Name##SMP<T, Derived> &&) = default;
-
-#define VSMC_DEFINE_SMP_BACKEND_FORWARD(Name)                                 \
-    template <typename T, typename = Virtual>                                 \
-    class Initialize##Name;                                                   \
-    template <typename T, typename = Virtual>                                 \
-    class Move##Name;                                                         \
-    template <typename T, typename = Virtual>                                 \
-    class MonitorEval##Name;
+    Name##SMP(const Name##SMP<Impl, T, Derived> &) = default;                 \
+    Name##SMP<Impl, T, Derived> &operator=(Name##SMP<Impl, T, Derived> &) =   \
+        default;                                                              \
+    Name##SMP(Name##SMP<Impl, T, Derived> &&) = default;                      \
+    Name##SMP<Impl, T, Derived> &operator=(Name##SMP<Impl, T, Derived> &&) =  \
+        default;
 
 namespace vsmc
 {
@@ -78,6 +72,21 @@ namespace vsmc
 /// dispatch
 /// \ingroup SMP
 class Virtual;
+
+/// \brief Sampler<T>::init_type
+/// \ingroup TBB
+template <SMPBackend Impl, typename T, typename = Virtual>
+class InitializeSMP;
+
+/// \brief Sampler<T>::move_type
+/// \ingroup TBB
+template <SMPBackend Impl, typename T, typename = Virtual>
+class MoveSMP;
+
+/// \brief Monitor<T>::eval_type
+/// \ingroup TBB
+template <SMPBackend Impl, typename T, typename = Virtual>
+class MonitorEvalSMP;
 
 /// \brief Initialize base dispatch class
 /// \ingroup SMP

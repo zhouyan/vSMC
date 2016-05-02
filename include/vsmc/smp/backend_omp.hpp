@@ -38,12 +38,10 @@
 namespace vsmc
 {
 
-VSMC_DEFINE_SMP_BACKEND_FORWARD(OMP)
-
 /// \brief Sampler<T>::init_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-class InitializeOMP : public InitializeBase<T, Derived>
+class InitializeSMP<OMP, T, Derived> : public InitializeBase<T, Derived>
 {
     public:
     std::size_t operator()(Particle<T> &particle, void *param)
@@ -63,12 +61,12 @@ class InitializeOMP : public InitializeBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, Initialize)
-}; // class InitializeOMP
+}; // class InitializeSMP
 
 /// \brief Sampler<T>::move_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-class MoveOMP : public MoveBase<T, Derived>
+class MoveSMP<OMP, T, Derived> : public MoveBase<T, Derived>
 {
     public:
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
@@ -87,12 +85,12 @@ class MoveOMP : public MoveBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, Move)
-}; // class MoveOMP
+}; // class MoveSMP
 
 /// \brief Monitor<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
+class MonitorEvalSMP<OMP, T, Derived> : public MonitorEvalBase<T, Derived>
 {
     public:
     void operator()(
@@ -111,7 +109,22 @@ class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, MonitorEval)
-}; // class MonitorEvalOMP
+}; // class MonitorEvalSMP
+
+/// \brief Sampler<T>::init_type subtype using OpenMP
+/// \ingroup OMP
+template <typename T, typename Derived>
+using InitializeOMP = InitializeSMP<OMP, T, Derived>;
+
+/// \brief Sampler<T>::move_type subtype using OpenMP
+/// \ingroup OMP
+template <typename T, typename Derived>
+using MoveOMP = MoveSMP<OMP, T, Derived>;
+
+/// \brief Monitor<T>::eval_type subtype using OpenMP
+/// \ingroup OMP
+template <typename T, typename Derived>
+using MonitorEvalOMP = MonitorEvalSMP<OMP, T, Derived>;
 
 } // namespace vsmc
 

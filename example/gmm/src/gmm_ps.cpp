@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/gmm/src/gmm.cpp
+// vSMC/example/gmm/src/gmm_ps.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,6 +29,23 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "gmm_@smp@.hpp"
+#include "gmm_ps.hpp"
 
-int main(int argc, char **argv) { gmm_main(argc, argv); }
+int main(int argc, char **argv)
+{
+    std::size_t N = 0;
+    std::size_t n = 0;
+    std::size_t c = 0;
+    std::size_t power = 0;
+
+    vsmc::ProgramOptionMap option;
+    option.add("N", "Number of particles", &N, 1000);
+    option.add("n", "Number of iterations", &n, 100);
+    option.add("c", "Number of components", &c, 4);
+    option.add("power", "Power of the prior annealing", &power, 2);
+    option.process(argc, argv);
+
+    gmm_ps(N, n, c, power);
+
+    return 0;
+}

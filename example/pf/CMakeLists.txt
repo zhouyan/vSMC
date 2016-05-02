@@ -31,13 +31,16 @@
 
 PROJECT(vSMCExample-pf CXX)
 
-VSMC_ADD_SMP_EXAMPLE(pf)
+VSMC_ADD_EXAMPLE(pf)
 
-VSMC_ADD_FILE(pf pf.R)
-VSMC_ADD_FILE(pf pf.data)
+vSMC_ADD_TEST(pf cv)
 
-ADD_CUSTOM_TARGET(pf-pdf
-    DEPENDS pf-files pf-check
-    COMMAND Rscript "${PROJECT_BINARY_DIR}/pf.R"
-    COMMENT "Plotting pf-check results"
+VSMC_ADD_FILE(pf pf_cv.R)
+VSMC_ADD_FILE(pf pf_cv.data)
+VSMC_ADD_FILE(pf pf_cv.truth)
+
+ADD_CUSTOM_TARGET(pf_cv-pdf
+    DEPENDS pf-files pf_cv-check
+    COMMAND Rscript "${PROJECT_BINARY_DIR}/pf_cv.R"
+    COMMENT "Plotting pf_cv-check results"
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
