@@ -730,7 +730,11 @@ class Sampler
     {
         if (status_history_.empty())
             status_history_.push_back(Vector<std::size_t>());
-        std::size_t size = move_queue_.size() + mcmc_queue_.size();
+        std::size_t size =
+            mcmc_queue_.size() +
+            ((iter_num_ == 0 && !init_by_iter_) ?
+                    std::max(static_cast<std::size_t>(1), move_queue_.size()) :
+                    move_queue_.size());
         if (status_size() < size) {
             std::size_t diff = size - status_size();
             for (std::size_t d = 0; d != diff; ++d)
@@ -794,13 +798,12 @@ class Sampler
         size_history_.push_back(size());
         ess_history_.push_back(particle_.weight().ess());
 
-        if (ess_history_.back() > size() * threshold) {
+        if (ess_history_.back() < size() * threshold) {
+            resampled_history_.push_back(true);
+            resample_move_(iter_num_, particle_);
+        } else {
             resampled_history_.push_back(false);
-            return;
         }
-
-        resampled_history_.push_back(true);
-        resample_move_(iter_num_, particle_);
     }
 
     void do_monitor(MonitorStage stage)
