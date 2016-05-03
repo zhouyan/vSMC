@@ -96,6 +96,9 @@ extern "C" {
  * \defgroup C_API_SMP_SEQ Sequential
  * \ingroup C_API_SMP
  *
+ * \defgroup C_API_SMP_STD Standard library
+ * \ingroup C_API_SMP
+ *
  * \defgroup C_API_SMP_OMP OpenMP
  * \ingroup C_API_SMP
  *
@@ -1243,6 +1246,39 @@ void vsmc_sampler_set_monitor_seq(vsmc_sampler sampler, const char *name,
     int record_only, vSMCMonitorStage stage);
 
 /** @} */ /* C_API_SMP_SEQ */
+
+/** \addtogroup C_API_SMP_STD */
+/** @{ */
+
+/** \brief `vsmc::Sampler::init` with `vsmc::InitializeSTD` as input */
+void vsmc_sampler_init_std(vsmc_sampler sampler,
+    vsmc_initialize_eval_sp_type eval_sp,
+    vsmc_initialize_eval_param_type eval_param,
+    vsmc_initialize_eval_pre_type eval_pre,
+    vsmc_initialize_eval_post_type eval_post);
+
+/** \brief `vsmc::Sampler::init_by_move` with `vsmc::MoveSTD` as input */
+void vsmc_sampler_init_by_move_std(vsmc_sampler sampler,
+    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
+    vsmc_move_eval_post_type eval_post);
+
+/** \brief `vsmc::Sampler::move` with `vsmc::MoveSTD` as input */
+void vsmc_sampler_move_std(vsmc_sampler sampler,
+    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
+    vsmc_move_eval_post_type eval_post, int append);
+
+/** \brief `vsmc::Sampler::mcmc` with `vsmc::MoveSTD` as input */
+void vsmc_sampler_mcmc_std(vsmc_sampler sampler,
+    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
+    vsmc_move_eval_post_type eval_post, int append);
+
+/** \brief `vsmc::Sampler::monitor` with `vsmc::MonitorEvalSTD` as input */
+void vsmc_sampler_set_monitor_std(vsmc_sampler sampler, const char *name,
+    int dim, vsmc_monitor_eval_sp_type eval_sp,
+    vsmc_monitor_eval_pre_type eval_pre, vsmc_monitor_eval_post_type eval_post,
+    int record_only, vSMCMonitorStage stage);
+
+/** @} */ /* C_API_SMP_STD */
 
 /** \addtogroup C_API_SMP_OMP */
 /** @{ */
