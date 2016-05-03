@@ -82,9 +82,10 @@ class InitializeSMP<BackendSTD, T, Derived> : public InitializeBase<T, Derived>
         for (std::size_t i = 0; i != begin.size(); ++i) {
             const size_type b = begin[i];
             const size_type e = end[i];
-            task_group.push_back(std::async([this, &particle, b, e]() {
-                return this->eval_range(particle.range(b, e));
-            }));
+            task_group.push_back(
+                std::async(std::launch::async, [this, &particle, b, e]() {
+                    return this->eval_range(particle.range(b, e));
+                }));
         }
         std::size_t accept = 0;
         for (auto &task : task_group)
@@ -116,9 +117,10 @@ class MoveSMP<BackendSTD, T, Derived> : public MoveBase<T, Derived>
         for (std::size_t i = 0; i != begin.size(); ++i) {
             const size_type b = begin[i];
             const size_type e = end[i];
-            task_group.push_back(std::async([this, iter, &particle, b, e]() {
-                return this->eval_range(iter, particle.range(b, e));
-            }));
+            task_group.push_back(std::async(
+                std::launch::async, [this, iter, &particle, b, e]() {
+                    return this->eval_range(iter, particle.range(b, e));
+                }));
         }
         std::size_t accept = 0;
         for (auto &task : task_group)
@@ -152,8 +154,8 @@ class MonitorEvalSMP<BackendSTD, T, Derived>
         for (std::size_t i = 0; i != begin.size(); ++i) {
             const size_type b = begin[i];
             const size_type e = end[i];
-            task_group.push_back(
-                std::async([this, iter, dim, &particle, r, b, e]() {
+            task_group.push_back(std::async(
+                std::launch::async, [this, iter, dim, &particle, r, b, e]() {
                     this->eval_range(iter, dim, particle.range(b, e),
                         r + static_cast<std::size_t>(b) * dim);
                 }));
