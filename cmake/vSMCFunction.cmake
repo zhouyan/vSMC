@@ -132,7 +132,10 @@ INCLUDE_DIRECTORIES(${VSMC_INCLUDE_DIR})
 ##############################################################################
 
 # Sequential
-SET(BACKENDS "Sequential")
+SET(BACKENDS ${BACKENDS} "Sequential")
+
+# Standard library
+SET(BACKENDS ${BACKENDS} "Standard library")
 
 # Thread
 INCLUDE(FindThread)
