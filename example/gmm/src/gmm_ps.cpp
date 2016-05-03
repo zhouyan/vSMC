@@ -33,7 +33,7 @@
 
 int main(int argc, char **argv)
 {
-    std::size_t N = 10000;
+    std::size_t N = 1000;
     std::size_t n = 100;
     std::size_t c = 4;
     std::size_t power = 0;
