@@ -135,8 +135,8 @@
 #define VSMC_HAS_RDRAND 0
 #endif
 
-#if defined(_OPENMP) && _OPENMP >= 200805
 #ifndef VSMC_HAS_OMP
+#ifdef _OPENMP
 #define VSMC_HAS_OMP 1
 #endif
 #endif
