@@ -43,6 +43,12 @@ std::string gmm_smp_name<vsmc::BackendSEQ>()
     return "BackendSEQ";
 }
 
+template <>
+std::string gmm_smp_name<vsmc::BackendSTD>()
+{
+    return "BackendSTD";
+}
+
 #if VSMC_HAS_OMP
 template <>
 std::string gmm_smp_name<vsmc::BackendOMP>()

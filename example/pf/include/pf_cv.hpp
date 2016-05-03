@@ -401,6 +401,7 @@ inline void pf_cv_run(std::size_t N, int nwid, int twid)
 inline void pf_cv_run(std::size_t N, int nwid, int twid)
 {
     pf_cv_run<vsmc::BackendSEQ>(N, nwid, twid);
+    pf_cv_run<vsmc::BackendSTD>(N, nwid, twid);
 #if VSMC_HAS_OMP
     pf_cv_run<vsmc::BackendOMP>(N, nwid, twid);
 #endif

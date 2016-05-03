@@ -46,8 +46,9 @@ inline void backend_omp_range(IntType N, IntType &begin, IntType &end)
 {
     const IntType np = static_cast<IntType>(::omp_get_num_threads());
     const IntType id = static_cast<IntType>(::omp_get_thread_num());
+    const IntType m = N / np;
     const IntType r = N % np;
-    const IntType n = N / np + (id < r ? 1 : 0);
+    const IntType n = m + (id < r ? 1 : 0);
     begin = id < r ? n * id : (n + 1) * r + n * (id - r);
     end = begin + n;
 }

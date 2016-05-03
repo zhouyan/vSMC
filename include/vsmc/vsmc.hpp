@@ -50,13 +50,17 @@
 /// \defgroup SMP Symmetric multiprocessing
 /// \brief Parallel samplers using multi-threading on SMP architecture
 
-/// \defgroup OMP OpenMP
-/// \ingroup SMP
-/// \brief Parallel samplers using OpenMP
-
 /// \defgroup SEQ Sequential
 /// \ingroup SMP
 /// \brief Sequential samplers
+
+/// \defgroup STD Standard library
+/// \ingroup SMP
+/// \brief Parallel samplers using the standard library
+
+/// \defgroup OMP OpenMP
+/// \ingroup SMP
+/// \brief Parallel samplers using OpenMP
 
 /// \defgroup TBB Intel Threading Building Blocks
 /// \ingroup SMP

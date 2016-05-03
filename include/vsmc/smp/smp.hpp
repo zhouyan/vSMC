@@ -35,6 +35,7 @@
 #include <vsmc/internal/config.h>
 #include <vsmc/smp/backend_base.hpp>
 #include <vsmc/smp/backend_seq.hpp>
+#include <vsmc/smp/backend_std.hpp>
 #if VSMC_HAS_OMP
 #include <vsmc/smp/backend_omp.hpp>
 #endif
