@@ -37,27 +37,6 @@
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_reduce.h>
 
-#define VSMC_DEFINE_SMP_BACKEND_TBB_RUN_INITIALIZE(args)                      \
-    this->eval_param(particle, param);                                        \
-    this->eval_pre(particle);                                                 \
-    work_type work(this, &particle);                                          \
-    ::tbb::parallel_reduce args;                                              \
-    this->eval_post(particle);                                                \
-    return work.accept();
-
-#define VSMC_DEFINE_SMP_BACKEND_TBB_RUN_MOVE(args)                            \
-    this->eval_pre(iter, particle);                                           \
-    work_type work(this, iter, &particle);                                    \
-    ::tbb::parallel_reduce args;                                              \
-    this->eval_post(iter, particle);                                          \
-    return work.accept();
-
-#define VSMC_DEFINE_SMP_BACKEND_TBB_RUN_MONITOR_EVAL(args)                    \
-    this->eval_pre(iter, particle);                                           \
-    work_type work(this, iter, dim, &particle, r);                            \
-    ::tbb::parallel_for args;                                                 \
-    this->eval_post(iter, particle);
-
 namespace vsmc
 {
 
@@ -111,21 +90,24 @@ class InitializeSMP<BackendTBB, T, Derived> : public InitializeBase<T, Derived>
         std::size_t accept_;
     }; // class work_type
 
-    std::size_t run(Particle<T> &particle, void *param)
-    {
-        const ::tbb::blocked_range<typename Particle<T>::size_type> range(
-            0, particle.size());
-        VSMC_DEFINE_SMP_BACKEND_TBB_RUN_INITIALIZE((range, work));
-    }
-
     template <typename... Args>
     std::size_t run(Particle<T> &particle, void *param,
         typename Particle<T>::size_type grainsize, Args &&... args)
     {
+        this->eval_param(particle, param);
+        this->eval_pre(particle);
         const ::tbb::blocked_range<typename Particle<T>::size_type> range(
             0, particle.size(), grainsize);
-        VSMC_DEFINE_SMP_BACKEND_TBB_RUN_INITIALIZE(
-            (range, work, std::forward<Args>(args)...));
+        work_type work(this, &particle);
+        ::tbb::parallel_reduce(range, work, std::forward<Args>(args)...);
+        this->eval_post(particle);
+
+        return work.accept();
+    }
+
+    std::size_t run(Particle<T> &particle, void *param)
+    {
+        return run(particle, param, 1);
     }
 }; // class InitializeSMP
 
@@ -179,21 +161,23 @@ class MoveSMP<BackendTBB, T, Derived> : public MoveBase<T, Derived>
         std::size_t accept_;
     }; // class work_type
 
-    std::size_t run(std::size_t iter, Particle<T> &particle)
-    {
-        const ::tbb::blocked_range<typename Particle<T>::size_type> range(
-            0, particle.size());
-        VSMC_DEFINE_SMP_BACKEND_TBB_RUN_MOVE((range, work));
-    }
-
     template <typename... Args>
     std::size_t run(std::size_t iter, Particle<T> &particle,
         typename Particle<T>::size_type grainsize, Args &&... args)
     {
+        this->eval_pre(iter, particle);
         const ::tbb::blocked_range<typename Particle<T>::size_type> range(
             0, particle.size(), grainsize);
-        VSMC_DEFINE_SMP_BACKEND_TBB_RUN_MOVE(
-            (range, work, std::forward<Args>(args)...));
+        work_type work(this, iter, &particle);
+        ::tbb::parallel_reduce(range, work, std::forward<Args>(args)...);
+        this->eval_post(iter, particle);
+
+        return work.accept();
+    }
+
+    std::size_t run(std::size_t iter, Particle<T> &particle)
+    {
+        return run(iter, particle, 1);
     }
 }; // class MoveSMP
 
@@ -239,22 +223,22 @@ class MonitorEvalSMP<BackendTBB, T, Derived>
         double *const r_;
     }; // class work_type
 
-    void run(
-        std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
-    {
-        const ::tbb::blocked_range<typename Particle<T>::size_type> range(
-            0, particle.size());
-        VSMC_DEFINE_SMP_BACKEND_TBB_RUN_MONITOR_EVAL((range, work));
-    }
-
     template <typename... Args>
     void run(std::size_t iter, std::size_t dim, Particle<T> &particle,
         double *r, typename Particle<T>::size_type grainsize, Args &&... args)
     {
+        this->eval_pre(iter, particle);
         const ::tbb::blocked_range<typename Particle<T>::size_type> range(
             0, particle.size(), grainsize);
-        VSMC_DEFINE_SMP_BACKEND_TBB_RUN_MONITOR_EVAL(
-            (range, work, std::forward<Args>(args)...));
+        work_type work(this, iter, dim, &particle, r);
+        ::tbb::parallel_for(range, work, std::forward<Args>(args)...);
+        this->eval_post(iter, particle);
+    }
+
+    void run(
+        std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
+    {
+        run(iter, dim, particle, r, 1);
     }
 }; // class MonitorEvalSMP
 
