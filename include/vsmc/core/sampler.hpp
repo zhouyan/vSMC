@@ -45,9 +45,9 @@
         (func), "**Sampler::" #caller "** INVALID " #name " OBJECT")
 
 #define VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER                        \
-    VSMC_RUNTIME_WARNING((!init_),                                            \
-        "**Sampler::initialize** A VALID INIT OBJECT IS SET "                 \
-        "BUT INITILIALIZED BY ITERATING")
+    VSMC_RUNTIME_WARNING((init_queue_.empty() || !init_by_iter_),             \
+        "**Sampler::initialize** INIT QUEUE IS NOT EMPTY BUT INITILIALIZED "  \
+        "BY ITERATING")
 
 namespace vsmc
 {
@@ -174,7 +174,7 @@ class Sampler
         if (this != &other) {
             particle_.clone(other.particle_, retain_rng);
             init_by_iter_ = other.init_by_iter_;
-            init_ = other.init_;
+            init_queue_ = other.init_queue_;
             move_queue_ = other.move_queue_;
             mcmc_queue_ = other.mcmc_queue_;
             resample_move_ = other.resample_move_;
@@ -194,7 +194,7 @@ class Sampler
         if (this != &other) {
             particle_.clone(std::move(other.particle_), retain_rng);
             init_by_iter_ = other.init_by_iter_;
-            init_ = std::move(other.init_);
+            init_queue_ = std::move(other.init_queue_);
             move_queue_ = std::move(other.move_queue_);
             mcmc_queue_ = std::move(other.mcmc_queue_);
             resample_move_ = std::move(other.resample_move_);
@@ -237,9 +237,9 @@ class Sampler
     ///
     /// \details
     /// At each iterations, including the initialization step, let `M` be the
-    /// size of the move queue (or 1 for initialization step) plus the size of
-    /// the mcmc queue. The value return by this method is the maximum of `M`
-    /// for all iterations already performed.
+    /// size of the move/init queue plus the size of the mcmc queue. The value
+    /// return by this method is the maximum of `M` for all iterations already
+    /// performed.
     std::size_t status_size() const { return status_history_.size(); }
 
     /// \brief Force resample
@@ -332,7 +332,8 @@ class Sampler
         return std::copy(size_history_.begin(), size_history_.end(), first);
     }
 
-    /// \brief Get ESS of a given iteration, initialization count as iter 0
+    /// \brief Get ESS of a given iteration, (initialization count as iter
+    /// zero)
     double ess_history(std::size_t iter) const { return ess_history_[iter]; }
 
     /// \brief Read ESS history through an output iterator
@@ -403,16 +404,6 @@ class Sampler
     /// \brief Read only access to the Particle<T> object
     const Particle<T> &particle() const { return particle_; }
 
-    /// \brief Set the initialization object of type init_type
-    Sampler<T> &init(const init_type &new_init)
-    {
-        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_init, init, INIT);
-
-        init_ = new_init;
-
-        return *this;
-    }
-
     /// \brief Set if initialization should use the move and mcmc queue
     ///
     /// \details
@@ -426,17 +417,43 @@ class Sampler
         return *this;
     }
 
-    /// \brief Set the initialization object with a type move_type object
-    ///
-    /// \details
-    /// When called, the iteration parameter passed to this object will be 0
-    /// and the `void *` parameter will be ignored.
-    Sampler<T> &init_by_move(const move_type &new_init)
+    /// \brief Clear the init queue
+    Sampler<T> &init_queue_clear()
     {
-        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_init, init_by_move, MOVE);
+        init_queue_.clear();
 
-        init_ = [new_init](
-            Particle<T> &particle, void *) { return new_init(0, particle); };
+        return *this;
+    }
+
+    /// \brief Check if init queue is empty
+    bool init_queue_empty() const { return init_queue_.empty(); }
+
+    /// \brief Check the size of the init queue
+    std::size_t init_queue_size() const { return init_queue_.size(); }
+
+    /// \brief Add a new init
+    Sampler<T> &init(const init_type &new_init, bool append = true)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_init, init, INIT);
+
+        if (!append)
+            init_queue_.clear();
+        init_queue_.push_back(new_init);
+
+        return *this;
+    }
+
+    /// \brief Add a sequence of new inits
+    template <typename InputIter>
+    Sampler<T> &init(InputIter first, InputIter last, bool append = true)
+    {
+        if (!append)
+            init_queue_.clear();
+        while (first != last) {
+            VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(*first, init, INIT);
+            init_queue_.push_back(*first);
+            ++first;
+        }
 
         return *this;
     }
@@ -455,7 +472,7 @@ class Sampler
     std::size_t move_queue_size() const { return move_queue_.size(); }
 
     /// \brief Add a new move
-    Sampler<T> &move(const move_type &new_move, bool append)
+    Sampler<T> &move(const move_type &new_move, bool append = true)
     {
         VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_move, move, MOVE);
 
@@ -468,7 +485,7 @@ class Sampler
 
     /// \brief Add a sequence of new moves
     template <typename InputIter>
-    Sampler<T> &move(InputIter first, InputIter last, bool append)
+    Sampler<T> &move(InputIter first, InputIter last, bool append = true)
     {
         if (!append)
             move_queue_.clear();
@@ -496,7 +513,7 @@ class Sampler
     std::size_t mcmc_queue_size() const { return mcmc_queue_.size(); }
 
     /// \brief Add a new mcmc
-    Sampler<T> &mcmc(const move_type &new_mcmc, bool append)
+    Sampler<T> &mcmc(const move_type &new_mcmc, bool append = true)
     {
         VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_mcmc, mcmc, MCMC);
 
@@ -509,7 +526,7 @@ class Sampler
 
     /// \brief Add a sequence of new mcmcs
     template <typename InputIter>
-    Sampler<T> &mcmc(InputIter first, InputIter last, bool append)
+    Sampler<T> &mcmc(InputIter first, InputIter last, bool append = true)
     {
         if (!append)
             mcmc_queue_.clear();
@@ -532,14 +549,14 @@ class Sampler
     /// are untouched.
     Sampler<T> &initialize(void *param = nullptr)
     {
+        VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER;
+
         do_reset();
         do_status();
-        if (init_by_iter_) {
-            VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER;
-            do_iter();
-        } else {
-            do_init(param);
-        }
+        if (init_by_iter_)
+            do_iterate();
+        else
+            do_initialize(param);
         do_status();
 
         return *this;
@@ -558,7 +575,7 @@ class Sampler
             reserve(iter_size() + num);
         for (std::size_t i = 0; i != num; ++i) {
             ++iter_num_;
-            do_iter();
+            do_iterate();
         }
         do_status();
 
@@ -713,7 +730,7 @@ class Sampler
     Particle<T> particle_;
 
     bool init_by_iter_;
-    init_type init_;
+    Vector<init_type> init_queue_;
     Vector<move_type> move_queue_;
     Vector<move_type> mcmc_queue_;
     move_type resample_move_;
@@ -756,25 +773,25 @@ class Sampler
         particle_.weight().set_equal();
     }
 
-    void do_init(void *param)
-    {
-        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(init_, initialize, INIT);
-        status_history_[0].push_back(init_(particle_, param));
-        do_monitor(MonitorMove);
-        do_resample(resample_threshold_);
-        do_monitor(MonitorResample);
-        do_mcmc(1);
-        do_monitor(MonitorMCMC);
-    }
+    void do_initialize(void *param) { do_common(do_init(0, param)); }
 
-    void do_iter()
+    void do_iterate() { do_common(do_move(0)); }
+
+    void do_common(std::size_t ia)
     {
-        std::size_t ia = do_move(0);
         do_monitor(MonitorMove);
         do_resample(resample_threshold_);
         do_monitor(MonitorResample);
         do_mcmc(ia);
         do_monitor(MonitorMCMC);
+    }
+
+    std::size_t do_init(std::size_t ia, void *param)
+    {
+        for (auto &m : init_queue_)
+            status_history_[ia++].push_back(m(particle_, param));
+
+        return ia;
     }
 
     std::size_t do_move(std::size_t ia)

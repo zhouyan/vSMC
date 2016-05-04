@@ -91,8 +91,8 @@ class InitializeSMP<BackendTBB, T, Derived> : public InitializeBase<T, Derived>
     }; // class work_type
 
     template <typename... Args>
-    std::size_t run(Particle<T> &particle, void *param,
-        typename Particle<T>::size_type grainsize, Args &&... args)
+    std::size_t run(Particle<T> &particle, void *param, std::size_t grainsize,
+        Args &&... args)
     {
         this->eval_param(particle, param);
         this->eval_pre(particle);
@@ -163,7 +163,7 @@ class MoveSMP<BackendTBB, T, Derived> : public MoveBase<T, Derived>
 
     template <typename... Args>
     std::size_t run(std::size_t iter, Particle<T> &particle,
-        typename Particle<T>::size_type grainsize, Args &&... args)
+        std::size_t grainsize, Args &&... args)
     {
         this->eval_pre(iter, particle);
         const ::tbb::blocked_range<typename Particle<T>::size_type> range(
@@ -225,7 +225,7 @@ class MonitorEvalSMP<BackendTBB, T, Derived>
 
     template <typename... Args>
     void run(std::size_t iter, std::size_t dim, Particle<T> &particle,
-        double *r, typename Particle<T>::size_type grainsize, Args &&... args)
+        double *r, std::size_t grainsize, Args &&... args)
     {
         this->eval_pre(iter, particle);
         const ::tbb::blocked_range<typename Particle<T>::size_type> range(

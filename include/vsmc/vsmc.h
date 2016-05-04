@@ -1109,16 +1109,22 @@ int *vsmc_sampler_read_status_history_matrix(
 /** \brief `vsmc::Sampler::particle` */
 vsmc_particle vsmc_sampler_particle(vsmc_sampler sampler);
 
-/** \brief `vsmc::Sampler::init` */
-void vsmc_sampler_init(vsmc_sampler sampler, vsmc_sampler_init_type new_init);
-
 /** \brief `vsmc::Sampler::init_by_iter` */
 void vsmc_sampler_init_by_iter(
     vsmc_sampler sampler, int initialize_by_iterate);
 
-/** \brief `vsmc::Sampler::init_by_move` */
-void vsmc_sampler_init_by_move(
-    vsmc_sampler sampler, vsmc_sampler_move_type new_init);
+/** \brief `vsmc::Sampler::init_queue_clear` */
+void vsmc_sampler_init_queue_clear(vsmc_sampler sampler);
+
+/** \brief `vsmc::Sampler::init_queue_empty` */
+int vsmc_sampler_init_queue_empty(vsmc_sampler sampler);
+
+/** \brief `vsmc::Sampler::init_queue_size` */
+int vsmc_sampler_init_queue_size(vsmc_sampler sampler);
+
+/** \brief `vsmc::Sampler::init` */
+void vsmc_sampler_init(
+    vsmc_sampler sampler, vsmc_sampler_init_type new_init, int append);
 
 /** \brief `vsmc::Sampler::move_queue_clear` */
 void vsmc_sampler_move_queue_clear(vsmc_sampler sampler);
@@ -1224,11 +1230,6 @@ void vsmc_sampler_init_seq(vsmc_sampler sampler,
     vsmc_initialize_eval_pre_type eval_pre,
     vsmc_initialize_eval_post_type eval_post);
 
-/** \brief `vsmc::Sampler::init_by_move` with `vsmc::MoveSEQ` as input */
-void vsmc_sampler_init_by_move_seq(vsmc_sampler sampler,
-    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
-    vsmc_move_eval_post_type eval_post);
-
 /** \brief `vsmc::Sampler::move` with `vsmc::MoveSEQ` as input */
 void vsmc_sampler_move_seq(vsmc_sampler sampler,
     vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
@@ -1256,11 +1257,6 @@ void vsmc_sampler_init_std(vsmc_sampler sampler,
     vsmc_initialize_eval_param_type eval_param,
     vsmc_initialize_eval_pre_type eval_pre,
     vsmc_initialize_eval_post_type eval_post);
-
-/** \brief `vsmc::Sampler::init_by_move` with `vsmc::MoveSTD` as input */
-void vsmc_sampler_init_by_move_std(vsmc_sampler sampler,
-    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
-    vsmc_move_eval_post_type eval_post);
 
 /** \brief `vsmc::Sampler::move` with `vsmc::MoveSTD` as input */
 void vsmc_sampler_move_std(vsmc_sampler sampler,
@@ -1290,11 +1286,6 @@ void vsmc_sampler_init_omp(vsmc_sampler sampler,
     vsmc_initialize_eval_pre_type eval_pre,
     vsmc_initialize_eval_post_type eval_post);
 
-/** \brief `vsmc::Sampler::init_by_move` with `vsmc::MoveOMP` as input */
-void vsmc_sampler_init_by_move_omp(vsmc_sampler sampler,
-    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
-    vsmc_move_eval_post_type eval_post);
-
 /** \brief `vsmc::Sampler::move` with `vsmc::MoveOMP` as input */
 void vsmc_sampler_move_omp(vsmc_sampler sampler,
     vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
@@ -1322,11 +1313,6 @@ void vsmc_sampler_init_tbb(vsmc_sampler sampler,
     vsmc_initialize_eval_param_type eval_param,
     vsmc_initialize_eval_pre_type eval_pre,
     vsmc_initialize_eval_post_type eval_post);
-
-/** \brief `vsmc::Sampler::init_by_move` with `vsmc::MoveTBB` as input */
-void vsmc_sampler_init_by_move_tbb(vsmc_sampler sampler,
-    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
-    vsmc_move_eval_post_type eval_post);
 
 /** \brief `vsmc::Sampler::move` with `vsmc::MoveTBB` as input */
 void vsmc_sampler_move_tbb(vsmc_sampler sampler,

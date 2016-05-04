@@ -43,14 +43,6 @@ void vsmc_sampler_init_seq(vsmc_sampler sampler,
         eval_sp, eval_param, eval_pre, eval_post));
 }
 
-void vsmc_sampler_init_by_move_seq(vsmc_sampler sampler,
-    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
-    vsmc_move_eval_post_type eval_post)
-{
-    ::vsmc::cast(sampler).init_by_move(
-        ::vsmc::cast<::vsmc::MoveSEQ>(eval_sp, eval_pre, eval_post));
-}
-
 void vsmc_sampler_move_seq(vsmc_sampler sampler,
     vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
     vsmc_move_eval_post_type eval_post, int append)

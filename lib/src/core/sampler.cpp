@@ -188,20 +188,30 @@ vsmc_particle vsmc_sampler_particle(vsmc_sampler sampler)
     return particle;
 }
 
-void vsmc_sampler_init(vsmc_sampler sampler, vsmc_sampler_init_type new_init)
-{
-    ::vsmc::cast(sampler).init(::vsmc::cast(new_init));
-}
-
 void vsmc_sampler_init_by_iter(vsmc_sampler sampler, int initialize_by_iterate)
 {
     ::vsmc::cast(sampler).init_by_iter(initialize_by_iterate != 0);
 }
 
-void vsmc_sampler_init_by_move(
-    vsmc_sampler sampler, vsmc_sampler_move_type new_init)
+void vsmc_sampler_init_queue_clear(vsmc_sampler sampler)
 {
-    ::vsmc::cast(sampler).init_by_move(::vsmc::cast(new_init));
+    ::vsmc::cast(sampler).init_queue_clear();
+}
+
+int vsmc_sampler_init_queue_empty(vsmc_sampler sampler)
+{
+    return ::vsmc::cast(sampler).init_queue_empty();
+}
+
+int vsmc_sampler_init_queue_size(vsmc_sampler sampler)
+{
+    return static_cast<int>(::vsmc::cast(sampler).init_queue_size());
+}
+
+void vsmc_sampler_init(
+    vsmc_sampler sampler, vsmc_sampler_init_type new_init, int append)
+{
+    ::vsmc::cast(sampler).init(::vsmc::cast(new_init), append != 0);
 }
 
 void vsmc_sampler_move_queue_clear(vsmc_sampler sampler)
