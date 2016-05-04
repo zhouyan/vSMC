@@ -53,24 +53,19 @@ namespace vsmc
 namespace internal
 {
 
-using CBLAS_LAYOUT = ::CBLAS_ORDER;
 using ::CblasRowMajor;
 using ::CblasColMajor;
 
-using ::CBLAS_TRANSPOSE;
 using ::CblasNoTrans;
 using ::CblasTrans;
 using ::CblasConjTrans;
 
-using ::CBLAS_UPLO;
 using ::CblasUpper;
 using ::CblasLower;
 
-using ::CBLAS_DIAG;
 using ::CblasNonUnit;
 using ::CblasUnit;
 
-using ::CBLAS_SIDE;
 using ::CblasLeft;
 using ::CblasRight;
 
@@ -79,13 +74,16 @@ using ::cblas_ddot;
 
 using ::cblas_sgemv;
 using ::cblas_dgemv;
+
 using ::cblas_stpmv;
 using ::cblas_dtpmv;
+
 using ::cblas_ssyr;
 using ::cblas_dsyr;
 
 using ::cblas_strmm;
 using ::cblas_dtrmm;
+
 using ::cblas_ssyrk;
 using ::cblas_dsyrk;
 
