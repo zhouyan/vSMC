@@ -41,7 +41,13 @@
 #include <Accelerate/Accelerate.h>
 #define VSMC_CBLAS_INT int
 #else
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <cblas.h>
+#ifdef __cplusplus
+} // extern "C"
+#endif
 #ifndef VSMC_CBLAS_INT
 #define VSMC_CBLAS_INT int
 #endif
