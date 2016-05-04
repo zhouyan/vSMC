@@ -75,13 +75,7 @@ FOREACH(type ${VSMC_LIB_TYPE})
     STRING(TOUPPER "${type}" TYPE)
     ADD_LIBRARY(libvsmc_${type} ${TYPE} ${VSMC_LIB_SOURCE})
     SET_TARGET_PROPERTIES(libvsmc_${type} PROPERTIES OUTPUT_NAME vsmc)
-    TARGET_LINK_LIBRARIES(libvsmc_${type} ${VSMC_LINK_LIBRARIES})
-    IF(OPENMP_FOUND)
-        SET_TARGET_PROPERTIES(libvsmc_${type} PROPERTIES COMPILE_FLAGS
-            "${OpenMP_CXX_FLAGS}")
-        SET_TARGET_PROPERTIES(libvsmc_${type} PROPERTIES LINK_FLAGS
-            "${OpenMP_CXX_FLAGS}")
-    ENDIF(OPENMP_FOUND)
+    VSMC_LINK_TARGET(libvsmc_${type})
     ADD_DEPENDENCIES(lib libvsmc_${type})
 ENDFOREACH(type ${VSMC_LIB_TYPE})
 
