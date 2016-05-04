@@ -37,104 +37,6 @@
 namespace vsmc
 {
 
-namespace internal
-{
-
-template <typename RealType>
-inline void chol_pack(std::size_t dim, const RealType *orig, RealType *chol,
-    MatrixLayout layout, bool upper, bool packed)
-{
-    unsigned l = layout == RowMajor ? 0 : 1;
-    unsigned u = upper ? 1 : 0;
-    unsigned p = packed ? 1 : 0;
-    unsigned c = (l << 2) + (u << 1) + p;
-    switch (c) {
-        case 0: // Row, Lower, Full
-            for (std::size_t i = 0; i != dim; ++i)
-                for (std::size_t j = 0; j <= i; ++j)
-                    *chol++ = orig[i * dim + j];
-            break;
-        case 1: // Row, Lower, Pack
-            std::copy_n(orig, dim * (dim + 1) / 2, chol);
-            break;
-        case 2: // Row, Upper, Full
-            for (std::size_t i = 0; i != dim; ++i)
-                for (std::size_t j = 0; j <= i; ++j)
-                    *chol++ = orig[j * dim + i];
-            break;
-        case 3: // Row, Upper, Pack
-            for (std::size_t i = 0; i != dim; ++i)
-                for (std::size_t j = 0; j <= i; ++j)
-                    *chol++ = orig[dim * j - j * (j + 1) / 2 + i];
-            break;
-        case 4: // Col, Lower, Full
-            for (std::size_t i = 0; i != dim; ++i)
-                for (std::size_t j = 0; j <= i; ++j)
-                    *chol++ = orig[j * dim + i];
-            break;
-        case 5: // Col, Lower, Pack
-            for (std::size_t i = 0; i != dim; ++i)
-                for (std::size_t j = 0; j <= i; ++j)
-                    *chol++ = orig[dim * j - j * (j + 1) / 2 + i];
-            break;
-        case 6: // Col, Upper, Full
-            for (std::size_t j = 0; j != dim; ++j)
-                for (std::size_t i = 0; i <= j; ++i)
-                    *chol++ = orig[j * dim + i];
-            break;
-        case 7: // Col, Upper, Pack
-            std::copy_n(orig, dim * (dim + 1) / 2, chol);
-            break;
-        default: break;
-    }
-}
-
-inline int chol(std::size_t dim, float *chol)
-{
-    return static_cast<int>(::LAPACKE_spptrf(
-        LAPACK_ROW_MAJOR, 'L', static_cast<lapack_int>(dim), chol));
-}
-
-inline int chol(std::size_t dim, double *chol)
-{
-    return static_cast<int>(::LAPACKE_dpptrf(
-        LAPACK_ROW_MAJOR, 'L', static_cast<lapack_int>(dim), chol));
-}
-
-} // namespace vsmc::internal
-
-/// \brief Compute Cholesky decomposition of the covariance matrix
-/// \ingroup Covariance
-///
-/// \param dim The number of rows of the covariance matrix
-/// \param a The input matrix
-/// \param chol The output lower triangular elements of the Cholesky
-/// decomposition, packed row by row. This can be directly used as the input
-/// parameter of the NormalMVDistribution constructors.
-/// \param layout The storage layout of the covariance matrix
-/// \param upper If `true`, the upper triangular of the covariance matrix shall
-/// be used. Otherwise the lower triangular shall be used.
-/// \param packed If the upper or lower triangular of covariance matrix is
-/// packed, row by row if `layout == RowMajor`, or column by column if `layout
-/// == ColMajor`.
-///
-/// \return
-/// - `0` If successful
-/// - Positive value `i` if the `i`th minor of the covariance matrix is not
-/// psotive-definite.
-template <typename RealType>
-inline int chol(std::size_t dim, const RealType *a, RealType *chol,
-    MatrixLayout layout = RowMajor, bool upper = false, bool packed = false)
-{
-    static_assert(internal::is_one_of<RealType, float, double>::value,
-        "**chol** USED WITH RealType OTHER THAN float OR double");
-
-    internal::size_check<lapack_int>(dim, "chol");
-    internal::chol_pack(dim, a, chol, layout, upper, packed);
-
-    return internal::chol(dim, chol);
-}
-
 /// \brief Covariance
 /// \ingroup Covariance
 template <typename RealType = double>
@@ -148,30 +50,30 @@ class Covariance
 
     /// \brief Compute the sample covariance matrix
     ///
-    /// \param layout The storage layout of the data `x`. The data is considere
-    /// to be `N` by `dim` matrix. In `RowMajor` storage.
-    /// \param n Sample size. If `N == 0` then no computation is carried out.
-    /// \param dim Dimension of the random variable. If `dim == 0` then no
+    /// \param layout The storage layout of sample `x`. It is assumed to be an
+    /// `n` by `p` matrix.
+    /// \param n Sample size. If `n == 0` then no computation is carried out.
+    /// \param p Dimension of the random variable. If `p == 0` then no
     /// computation carried out.
-    /// \param x The samples. If it is a null pointer, then no computation is
-    /// carried out.
-    /// \param w The weights. If it is a null pointer, then all samples are
-    /// assigned weight 1.
+    /// \param x The sample matrix. If it is a null pointer, then no
+    /// computation is carried out.
+    /// \param w The weight vector. If it is a null pointer, then all samples
+    /// are assigned weight 1.
     /// \param mean Output storage of the mean. If it is a null pointer, then
     /// it is ignored.
     /// \param cov Output storage of the covarianc matrix. If it is a null
     /// pointer, then it is ignored.
     /// \param cov_layout The storage layout of the covariance matrix.
-    /// \param cov_upper If true, the upper triangular of the covariance matrix
-    /// is packed, otherwise the lower triangular is packed. Ignored if
+    /// \param cov_upper If true, then the upper triangular of the covariance
+    /// matrix is packed, otherwise the lower triangular is packed. Ignored if
     /// `cov_pack` is `false`.
-    /// \param cov_packed If true, the matrix is packed.
-    void operator()(MatrixLayout layout, std::size_t n, std::size_t dim,
+    /// \param cov_packed If true, then the covariance matrix is packed.
+    void operator()(MatrixLayout layout, std::size_t n, std::size_t p,
         const result_type *x, const result_type *w, result_type *mean,
         result_type *cov, MatrixLayout cov_layout = RowMajor,
         bool cov_upper = false, bool cov_packed = false)
     {
-        if (n * dim == 0)
+        if (n * p == 0)
             return;
 
         if (x == nullptr)
@@ -180,28 +82,28 @@ class Covariance
         if (mean == nullptr && cov == nullptr)
             return;
 
-        internal::size_check<VSMC_CBLAS_INT>(dim, "Covariance::operator()");
+        internal::size_check<VSMC_CBLAS_INT>(p, "Covariance::operator()");
         internal::size_check<VSMC_CBLAS_INT>(n, "Covariance::operator()");
 
         result_type sw = w == nullptr ?
             static_cast<result_type>(n) :
             std::accumulate(w, w + n, static_cast<result_type>(0));
-        mean_.resize(dim);
+        mean_.resize(p);
         if (w == nullptr) {
             if (layout == RowMajor) {
                 std::fill(mean_.begin(), mean_.end(), 0);
                 for (std::size_t i = 0; i != n; ++i)
-                    add(dim, x + i * dim, mean_.data(), mean_.data());
+                    add(p, x + i * p, mean_.data(), mean_.data());
             } else {
-                for (std::size_t i = 0; i != dim; ++i) {
+                for (std::size_t i = 0; i != p; ++i) {
                     mean_[i] = std::accumulate(x + i * n, x + (i + 1) * n,
                         static_cast<result_type>(0));
                 }
             }
         } else {
-            mean_init(layout, n, dim, x, w);
+            mean_init(layout, n, p, x, w);
         }
-        div(dim, mean_.data(), sw, mean_.data());
+        div(p, mean_.data(), sw, mean_.data());
         if (mean != nullptr)
             std::copy(mean_.begin(), mean_.end(), mean);
         if (cov == nullptr)
@@ -211,25 +113,25 @@ class Covariance
             w == nullptr ? static_cast<result_type>(n) : swsqr(n, w);
         result_type B = sw / (sw * sw - sw2);
         result_type BW = B * sw;
-        cov_.resize(dim * dim);
+        cov_.resize(p * p);
         std::fill(cov_.begin(), cov_.end(), 0);
-        cov_init(layout, dim, static_cast<result_type *>(nullptr));
+        cov_init(layout, p, static_cast<result_type *>(nullptr));
         if (w == nullptr) {
-            cov_update(layout, n, dim, x, B, BW);
+            cov_update(layout, n, p, x, B, BW);
         } else {
             wsqrt_.resize(n);
-            buffer_.resize(n * dim);
+            buffer_.resize(n * p);
             sqrt(n, w, wsqrt_.data());
             if (layout == RowMajor) {
                 for (std::size_t i = 0; i != n; ++i)
-                    mul(dim, x + i * dim, wsqrt_[i], buffer_.data() + i * dim);
+                    mul(p, x + i * p, wsqrt_[i], buffer_.data() + i * p);
             } else {
-                for (std::size_t i = 0; i != dim; ++i)
+                for (std::size_t i = 0; i != p; ++i)
                     mul(n, x + i * n, wsqrt_.data(), buffer_.data() + i * n);
             }
-            cov_update(layout, n, dim, buffer_.data(), B, BW);
+            cov_update(layout, n, p, buffer_.data(), B, BW);
         }
-        cov_pack(dim, cov, layout, cov_layout, cov_upper, cov_packed);
+        cov_pack(p, cov, layout, cov_layout, cov_upper, cov_packed);
     }
 
     private:
@@ -238,82 +140,90 @@ class Covariance
     Vector<result_type> wsqrt_;
     Vector<result_type> buffer_;
 
-    void mean_init(MatrixLayout layout, std::size_t n, std::size_t dim,
+    void mean_init(MatrixLayout layout, std::size_t n, std::size_t p,
         const float *x, const float *w)
     {
-        ::cblas_sgemv(layout == RowMajor ? ::CblasRowMajor : ::CblasColMajor,
-            ::CblasTrans, static_cast<VSMC_CBLAS_INT>(n),
-            static_cast<VSMC_CBLAS_INT>(dim), 1.0, x,
-            static_cast<VSMC_CBLAS_INT>(layout == RowMajor ? dim : n), w, 1,
-            0.0, mean_.data(), 1);
+        internal::cblas_sgemv(layout == RowMajor ? internal::CblasRowMajor :
+                                                   internal::CblasColMajor,
+            internal::CblasTrans, static_cast<VSMC_CBLAS_INT>(n),
+            static_cast<VSMC_CBLAS_INT>(p), 1.0, x,
+            static_cast<VSMC_CBLAS_INT>(layout == RowMajor ? p : n), w, 1, 0.0,
+            mean_.data(), 1);
     }
 
-    void mean_init(MatrixLayout layout, std::size_t n, std::size_t dim,
+    void mean_init(MatrixLayout layout, std::size_t n, std::size_t p,
         const double *x, const double *w)
     {
-        ::cblas_dgemv(layout == RowMajor ? ::CblasRowMajor : ::CblasColMajor,
-            ::CblasTrans, static_cast<VSMC_CBLAS_INT>(n),
-            static_cast<VSMC_CBLAS_INT>(dim), 1.0, x,
-            static_cast<VSMC_CBLAS_INT>(layout == RowMajor ? dim : n), w, 1,
-            0.0, mean_.data(), 1);
+        internal::cblas_dgemv(layout == RowMajor ? internal::CblasRowMajor :
+                                                   internal::CblasColMajor,
+            internal::CblasTrans, static_cast<VSMC_CBLAS_INT>(n),
+            static_cast<VSMC_CBLAS_INT>(p), 1.0, x,
+            static_cast<VSMC_CBLAS_INT>(layout == RowMajor ? p : n), w, 1, 0.0,
+            mean_.data(), 1);
     }
 
     static float swsqr(std::size_t n, const float *w)
     {
-        return ::cblas_sdot(static_cast<VSMC_CBLAS_INT>(n), w, 1, w, 1);
+        return internal::cblas_sdot(
+            static_cast<VSMC_CBLAS_INT>(n), w, 1, w, 1);
     }
 
     static double swsqr(std::size_t n, const double *w)
     {
-        return ::cblas_ddot(static_cast<VSMC_CBLAS_INT>(n), w, 1, w, 1);
+        return internal::cblas_ddot(
+            static_cast<VSMC_CBLAS_INT>(n), w, 1, w, 1);
     }
 
-    void cov_init(MatrixLayout layout, std::size_t dim, float *)
+    void cov_init(MatrixLayout layout, std::size_t p, float *)
     {
-        ::cblas_ssyr(layout == RowMajor ? ::CblasRowMajor : ::CblasColMajor,
-            ::CblasLower, static_cast<VSMC_CBLAS_INT>(dim), 1, mean_.data(), 1,
-            cov_.data(), static_cast<VSMC_CBLAS_INT>(dim));
+        internal::cblas_ssyr(layout == RowMajor ? internal::CblasRowMajor :
+                                                  internal::CblasColMajor,
+            internal::CblasLower, static_cast<VSMC_CBLAS_INT>(p), 1,
+            mean_.data(), 1, cov_.data(), static_cast<VSMC_CBLAS_INT>(p));
     }
 
-    void cov_init(MatrixLayout layout, std::size_t dim, double *)
+    void cov_init(MatrixLayout layout, std::size_t p, double *)
     {
-        ::cblas_dsyr(layout == RowMajor ? ::CblasRowMajor : ::CblasColMajor,
-            ::CblasLower, static_cast<VSMC_CBLAS_INT>(dim), 1, mean_.data(), 1,
-            cov_.data(), static_cast<VSMC_CBLAS_INT>(dim));
+        internal::cblas_dsyr(layout == RowMajor ? internal::CblasRowMajor :
+                                                  internal::CblasColMajor,
+            internal::CblasLower, static_cast<VSMC_CBLAS_INT>(p), 1,
+            mean_.data(), 1, cov_.data(), static_cast<VSMC_CBLAS_INT>(p));
     }
 
-    void cov_update(MatrixLayout layout, std::size_t n, std::size_t dim,
+    void cov_update(MatrixLayout layout, std::size_t n, std::size_t p,
         const float *x, float B, float BW)
     {
-        ::cblas_ssyrk(layout == RowMajor ? ::CblasRowMajor : ::CblasColMajor,
-            ::CblasLower, ::CblasTrans, static_cast<VSMC_CBLAS_INT>(dim),
-            static_cast<VSMC_CBLAS_INT>(n), B, x,
-            static_cast<VSMC_CBLAS_INT>(layout == RowMajor ? dim : n), -BW,
-            cov_.data(), static_cast<VSMC_CBLAS_INT>(dim));
+        internal::cblas_ssyrk(layout == RowMajor ? internal::CblasRowMajor :
+                                                   internal::CblasColMajor,
+            internal::CblasLower, internal::CblasTrans,
+            static_cast<VSMC_CBLAS_INT>(p), static_cast<VSMC_CBLAS_INT>(n), B,
+            x, static_cast<VSMC_CBLAS_INT>(layout == RowMajor ? p : n), -BW,
+            cov_.data(), static_cast<VSMC_CBLAS_INT>(p));
     }
 
-    void cov_update(MatrixLayout layout, std::size_t n, std::size_t dim,
+    void cov_update(MatrixLayout layout, std::size_t n, std::size_t p,
         const double *x, double B, double BW)
     {
-        ::cblas_dsyrk(layout == RowMajor ? ::CblasRowMajor : ::CblasColMajor,
-            ::CblasLower, ::CblasTrans, static_cast<VSMC_CBLAS_INT>(dim),
-            static_cast<VSMC_CBLAS_INT>(n), B, x,
-            static_cast<VSMC_CBLAS_INT>(layout == RowMajor ? dim : n), -BW,
-            cov_.data(), static_cast<VSMC_CBLAS_INT>(dim));
+        internal::cblas_dsyrk(layout == RowMajor ? internal::CblasRowMajor :
+                                                   internal::CblasColMajor,
+            internal::CblasLower, internal::CblasTrans,
+            static_cast<VSMC_CBLAS_INT>(p), static_cast<VSMC_CBLAS_INT>(n), B,
+            x, static_cast<VSMC_CBLAS_INT>(layout == RowMajor ? p : n), -BW,
+            cov_.data(), static_cast<VSMC_CBLAS_INT>(p));
     }
 
-    void cov_pack(std::size_t dim, result_type *cov, MatrixLayout layout,
+    void cov_pack(std::size_t p, result_type *cov, MatrixLayout layout,
         MatrixLayout cov_layout, bool cov_upper, bool cov_packed)
     {
         if (layout == RowMajor)
-            for (std::size_t i = 0; i != dim; ++i)
+            for (std::size_t i = 0; i != p; ++i)
                 for (std::size_t j = 0; j != i; ++j)
-                    cov_[j * dim + i] = cov_[i * dim + j];
+                    cov_[j * p + i] = cov_[i * p + j];
 
         if (layout == ColMajor)
-            for (std::size_t i = 0; i != dim; ++i)
+            for (std::size_t i = 0; i != p; ++i)
                 for (std::size_t j = 0; j != i; ++j)
-                    cov_[i * dim + j] = cov_[j * dim + i];
+                    cov_[i * p + j] = cov_[j * p + i];
 
         if (!cov_packed) {
             std::copy(cov_.begin(), cov_.end(), cov);
@@ -325,24 +235,24 @@ class Covariance
         unsigned c = (l << 1) + u;
         switch (c) {
             case 0: // Row, Lower, Pack
-                for (size_t i = 0; i != dim; ++i)
+                for (size_t i = 0; i != p; ++i)
                     for (std::size_t j = 0; j <= i; ++j)
-                        *cov++ = cov_[i * dim + j];
+                        *cov++ = cov_[i * p + j];
                 break;
             case 1: // Row, Upper, Pack
-                for (std::size_t i = 0; i != dim; ++i)
-                    for (std::size_t j = i; j != dim; ++j)
-                        *cov++ = cov_[i * dim + j];
+                for (std::size_t i = 0; i != p; ++i)
+                    for (std::size_t j = i; j != p; ++j)
+                        *cov++ = cov_[i * p + j];
                 break;
             case 2: // Col, Lower, Pack
-                for (std::size_t j = 0; j != dim; ++j)
-                    for (std::size_t i = j; i != dim; ++i)
-                        *cov++ = cov_[j * dim + i];
+                for (std::size_t j = 0; j != p; ++j)
+                    for (std::size_t i = j; i != p; ++i)
+                        *cov++ = cov_[j * p + i];
                 break;
             case 3: // Col, Upper, Pack
-                for (std::size_t j = 0; j != dim; ++j)
+                for (std::size_t j = 0; j != p; ++j)
                     for (std::size_t i = 0; i <= j; ++i)
-                        *cov++ = cov_[j * dim + i];
+                        *cov++ = cov_[j * p + i];
                 break;
             default: break;
         }

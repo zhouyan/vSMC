@@ -35,7 +35,6 @@
 #include <vsmc/internal/config.h>
 #include <vsmc/math/cblas.h>
 #include <vsmc/math/constants.hpp>
-#include <vsmc/math/lapacke.h>
 #include <vsmc/math/vmath.hpp>
 
 #endif // VSMC_MATH_MATH_HPP

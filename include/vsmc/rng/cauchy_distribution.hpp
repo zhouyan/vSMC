@@ -71,7 +71,7 @@ class CauchyDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01Distribution<RealType> u01;
+        U01CODistribution<RealType> u01;
 
         return param.a() +
             param.b() * std::tan(const_pi<result_type>() * u01(rng));
@@ -85,7 +85,7 @@ template <std::size_t, typename RealType, typename RNGType>
 inline void cauchy_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    u01_distribution(rng, n, r);
+    u01_co_distribution(rng, n, r);
     mul(n, const_pi<RealType>(), r, r);
     tan(n, r, r);
     fma(n, r, b, a, r);

@@ -4,13 +4,13 @@
 \section{Constants}
 \label{sec:Constants}
 
-The library defines some mathematical constants in the form of \verb|constexpr|
-functions. For example, to get the value of $\pi$ with a desired precision, one
-can call the following,
+The library defines some mathematical constants in the form of constant
+expression functions. For example, to get the value of $\pi$ with a desired
+precision, one can use the following,
 \begin{Verbatim}
-  auto pi_f = const_pi<float>();
-  auto pi_d = const_pi<double>();
-  auto pi_l = const_pi<long double>();
+  constexpr float pi_f = const_pi<float>();
+  constexpr double pi_d = const_pi<double>();
+  constexpr long double pi_l = const_pi<long double>();
 \end{Verbatim}
 The compiler will evaluate these values at compile-time and thus there is no
 performance difference from hard-coding the constants in the program, while the
@@ -105,7 +105,21 @@ some of them, but not all, can be scalars. For example, for the function call
 \verb|fma(n, a, b, c, y)| in table~\ref{tab:Arithmetic functions}, the input
 parameters are \verb|a|, \verb|b|, and \verb|c|. Some of them, not all, can be
 scalars instead of pointers to vectors. The output parameter \verb|y| has to be
-a pointer to a vector.
+a pointer to a vector. Therefore, there are $2^3 - 1$ versions of this function
+for each type of the value. Note that, mixed precision is not allowed. For
+example,
+\begin{Verbatim}
+  Vector<double> a(n);
+  Vector<double> b(n);
+  Vector<double> y(n);
+  fma(n, a.data(), b.data(), 2, y.data());
+\end{Verbatim}
+will results in compile-time error because the third argument is of type
+\verb|int| while the others are of \verb|double| precision. The correct call
+shall be,
+\begin{Verbatim}
+  fma(n, a.data(), b.data(), 2.0, y.data());
+\end{Verbatim}
 
 \begin{table}
   \begin{tabularx}{\textwidth}{XX}

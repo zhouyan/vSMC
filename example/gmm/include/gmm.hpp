@@ -29,32 +29,46 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-// clang-format off
-#ifndef VSMC_EXAMPLE_GMM_@SMP@_HPP
-#define VSMC_EXAMPLE_GMM_@SMP@_HPP
-// clang-format on
+#ifndef VSMC_EXAMPLE_GMM_HPP
+#define VSMC_EXAMPLE_GMM_HPP
 
-#include <vsmc/core/sampler.hpp>
-#include <vsmc/core/state_matrix.hpp>
-#include <vsmc/smp/backend_@smp@.hpp>
-#include <vsmc/utility/program_option.hpp>
-#include <vsmc/utility/stop_watch.hpp>
+#include <vsmc/vsmc.hpp>
 
-// clang-format off
-template <typename T, typename Derived>
-using InitializeSMP = vsmc::Initialize@SMP@<T, Derived>;
+template <typename>
+std::string gmm_smp_name();
 
-template <typename T, typename Derived>
-using MoveSMP = vsmc::Move@SMP@<T, Derived>;
+template <>
+std::string gmm_smp_name<vsmc::BackendSEQ>()
+{
+    return "BackendSEQ";
+}
 
-template <typename T, typename Derived>
-using MonitorEvalSMP = vsmc::MonitorEval@SMP@<T, Derived>;
-// clang-format on
+template <>
+std::string gmm_smp_name<vsmc::BackendSTD>()
+{
+    return "BackendSTD";
+}
 
-class gmm_param
+#if VSMC_HAS_OMP
+template <>
+std::string gmm_smp_name<vsmc::BackendOMP>()
+{
+    return "BackendOMP";
+}
+#endif
+
+#if VSMC_HAS_TBB
+template <>
+std::string gmm_smp_name<vsmc::BackendTBB>()
+{
+    return "BackendTBB";
+}
+#endif
+
+class GMMState
 {
     public:
-    gmm_param()
+    GMMState()
         : comp_num_(0)
         , log_prior_(0)
         , log_likelihood_(0)
@@ -182,23 +196,6 @@ class gmm_param
         }
     }
 
-    template <typename Archive>
-    void serialize(Archive &ar, const unsigned)
-    {
-        int num = static_cast<int>(comp_num_);
-        ar &num;
-        comp_num(static_cast<std::size_t>(num));
-
-        ar &log_prior_;
-        ar &log_likelihood_;
-        for (std::size_t i = 0; i != comp_num_; ++i) {
-            ar &mu_[i];
-            ar &lambda_[i];
-            ar &weight_[i];
-            ar &log_lambda_[i];
-        }
-    }
-
     private:
     std::size_t comp_num_;
 
@@ -217,17 +214,15 @@ class gmm_param
     vsmc::Vector<double> weight_old_;
 
     vsmc::Vector<double> log_lambda_;
-};
+}; // class GMM
 
-using StateBase = vsmc::StateMatrix<vsmc::RowMajor, 1, gmm_param>;
+using GMMBase = vsmc::StateMatrix<vsmc::RowMajor, 1, GMMState>;
 
-class gmm_state : public StateBase
+class GMM : public GMMBase
 {
     public:
-    using size_type = StateBase::size_type;
-
-    gmm_state(size_type N)
-        : StateBase(N)
+    GMM(std::size_t N)
+        : GMMBase(N)
         , comp_num_(0)
         , alpha_(0)
         , alpha_inc_(0)
@@ -287,50 +282,49 @@ class gmm_state : public StateBase
     void comp_num(std::size_t num)
     {
         comp_num_ = num;
-        for (size_type i = 0; i != this->size(); ++i)
+        for (std::size_t i = 0; i != this->size(); ++i)
             this->state(i, 0).comp_num(num);
     }
 
-    double update_log_prior(gmm_param &param) const
+    double update_log_prior(GMMState &state) const
     {
         double lp = 0;
         for (std::size_t i = 0; i != comp_num_; ++i) {
-            double resid = param.mu(i) - mu0_;
+            double resid = state.mu(i) - mu0_;
             lp += -0.5 * (resid * resid) / (sd0_ * sd0_);
-            lp += (shape0_ - 1) * std::log(param.lambda(i)) -
-                param.lambda(i) / scale0_;
+            lp += (shape0_ - 1) * std::log(state.lambda(i)) -
+                state.lambda(i) / scale0_;
         }
 
-        return param.log_prior() = lp;
+        return state.log_prior() = lp;
     }
 
-    double update_log_likelihood(gmm_param &param) const
+    double update_log_likelihood(GMMState &state) const
     {
         double ll = -0.5 * obs_.size() * vsmc::const_ln_pi_2<double>();
-        param.update_log_lambda();
+        state.update_log_lambda();
         for (std::size_t k = 0; k != obs_.size(); ++k) {
             double lli = 0;
-            for (std::size_t i = 0; i != param.comp_num(); ++i) {
-                double resid = obs_[k] - param.mu(i);
-                lli += param.weight(i) *
-                    std::exp(0.5 * param.log_lambda(i) -
-                           0.5 * param.lambda(i) * resid * resid);
+            for (std::size_t i = 0; i != state.comp_num(); ++i) {
+                double resid = obs_[k] - state.mu(i);
+                lli += state.weight(i) *
+                    std::exp(0.5 * state.log_lambda(i) -
+                           0.5 * state.lambda(i) * resid * resid);
             }
             ll += std::log(lli + 1e-13); // lli can be numerically zero!
         }
 
-        return param.log_likelihood() = ll;
+        return state.log_likelihood() = ll;
     }
 
-    void read_data(const char *filename)
+    void initialize()
     {
         obs_.clear();
-        std::ifstream data(filename);
+        std::ifstream data("gmm.data");
         double tmp;
         while (data >> tmp)
             obs_.push_back(tmp);
         data.close();
-        data.clear();
 
         double xmax = obs_[0];
         double xmin = obs_[0];
@@ -363,59 +357,57 @@ class gmm_state : public StateBase
     double weight_sd_;
 
     vsmc::Vector<double> obs_;
-};
+}; // class GMM
 
-class gmm_init : public InitializeSMP<gmm_state, gmm_init>
+template <typename SMP>
+class GMMInit : public vsmc::InitializeSMP<SMP, GMM, GMMInit<SMP>>
 {
     public:
-    std::size_t eval_sp(vsmc::SingleParticle<gmm_state> sp)
+    void eval_pre(vsmc::Particle<GMM> &particle)
     {
-        const gmm_state &state = sp.particle().value();
-        gmm_param &param = sp.state(0);
-
-        std::normal_distribution<double> rmu(state.mu0(), state.sd0());
-        std::gamma_distribution<double> rlambda(
-            state.shape0(), state.scale0());
-        std::gamma_distribution<double> rweight(1, 1);
-
-        double sum = 0;
-        for (std::size_t i = 0; i != param.comp_num(); ++i) {
-            param.mu(i) = rmu(sp.rng());
-            param.lambda(i) = rlambda(sp.rng());
-            param.weight(i) = rweight(sp.rng());
-            sum += param.weight(i);
-        }
-        for (std::size_t i = 0; i != param.comp_num(); ++i)
-            param.weight(i) /= sum;
-
-        state.update_log_prior(param);
-        state.update_log_likelihood(param);
-
-        return 1;
-    }
-
-    void eval_param(vsmc::Particle<gmm_state> &particle, void *filename)
-    {
-        if (filename)
-            particle.value().read_data(static_cast<const char *>(filename));
+        particle.value().initialize();
         particle.value().alpha(0);
         particle.weight().set_equal();
     }
-};
 
-class gmm_move_smc
+    std::size_t eval_sp(vsmc::SingleParticle<GMM> sp)
+    {
+        const GMM &gmm = sp.particle().value();
+        GMMState &state = sp.state(0);
+
+        std::normal_distribution<double> rmu(gmm.mu0(), gmm.sd0());
+        std::gamma_distribution<double> rlambda(gmm.shape0(), gmm.scale0());
+        std::gamma_distribution<double> rweight(1, 1);
+
+        double sum = 0;
+        for (std::size_t i = 0; i != state.comp_num(); ++i) {
+            state.mu(i) = rmu(sp.rng());
+            state.lambda(i) = rlambda(sp.rng());
+            state.weight(i) = rweight(sp.rng());
+            sum += state.weight(i);
+        }
+        for (std::size_t i = 0; i != state.comp_num(); ++i)
+            state.weight(i) /= sum;
+
+        gmm.update_log_prior(state);
+        gmm.update_log_likelihood(state);
+
+        return 0;
+    }
+}; // class GMMInit
+
+class GMMMoveSMC
 {
     public:
-    typedef std::function<void(std::size_t, vsmc::Particle<gmm_state> &)>
+    typedef std::function<void(std::size_t, vsmc::Particle<GMM> &)>
         alpha_setter_type;
 
-    gmm_move_smc(const alpha_setter_type &alpha_setter)
+    GMMMoveSMC(const alpha_setter_type &alpha_setter)
         : alpha_setter_(alpha_setter)
     {
     }
 
-    std::size_t operator()(
-        std::size_t iter, vsmc::Particle<gmm_state> &particle)
+    std::size_t operator()(std::size_t iter, vsmc::Particle<GMM> &particle)
     {
         alpha_setter_(iter, particle);
 
@@ -437,131 +429,134 @@ class gmm_move_smc
     private:
     alpha_setter_type alpha_setter_;
     vsmc::Vector<double> w_;
-};
+}; // class GMMMoveSMC
 
-class gmm_move_mu : public MoveSMP<gmm_state, gmm_move_mu>
+template <typename SMP>
+class GMMMoveMu : public vsmc::MoveSMP<SMP, GMM, GMMMoveMu<SMP>>
 {
     public:
-    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<gmm_state> sp)
+    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
     {
-        const gmm_state &state = sp.particle().value();
-        gmm_param &param = sp.state(0);
+        const GMM &gmm = sp.particle().value();
+        GMMState &state = sp.state(0);
 
-        std::normal_distribution<double> rmu(0, state.mu_sd());
+        std::normal_distribution<double> rmu(0, gmm.mu_sd());
         std::uniform_real_distribution<double> runif(0, 1);
 
-        double p = param.log_prior() + state.alpha() * param.log_likelihood();
-        param.save_old();
-        for (std::size_t i = 0; i != param.comp_num(); ++i)
-            param.mu(i) += rmu(sp.rng());
-        p = state.update_log_prior(param) +
-            state.alpha() * state.update_log_likelihood(param) - p;
+        double p = state.log_prior() + gmm.alpha() * state.log_likelihood();
+        state.save_old();
+        for (std::size_t i = 0; i != state.comp_num(); ++i)
+            state.mu(i) += rmu(sp.rng());
+        p = gmm.update_log_prior(state) +
+            gmm.alpha() * gmm.update_log_likelihood(state) - p;
         double u = std::log(runif(sp.rng()));
 
-        return param.mh_reject_mu(p, u);
+        return state.mh_reject_mu(p, u);
     }
-};
+}; // class GMMMoveMu
 
-class gmm_move_lambda : public MoveSMP<gmm_state, gmm_move_lambda>
+template <typename SMP>
+class GMMMoveLambda : public vsmc::MoveSMP<SMP, GMM, GMMMoveLambda<SMP>>
 {
     public:
-    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<gmm_state> sp)
+    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
     {
-        const gmm_state &state = sp.particle().value();
-        gmm_param &param = sp.state(0);
+        const GMM &gmm = sp.particle().value();
+        GMMState &state = sp.state(0);
 
-        std::lognormal_distribution<double> rlambda(0, state.lambda_sd());
+        std::lognormal_distribution<double> rlambda(0, gmm.lambda_sd());
         std::uniform_real_distribution<double> runif(0, 1);
 
-        double p = param.log_prior() + state.alpha() * param.log_likelihood();
-        param.save_old();
-        for (std::size_t i = 0; i != param.comp_num(); ++i)
-            param.lambda(i) *= rlambda(sp.rng());
-        p = param.log_lambda_diff() + state.update_log_prior(param) +
-            state.alpha() * state.update_log_likelihood(param) - p;
+        double p = state.log_prior() + gmm.alpha() * state.log_likelihood();
+        state.save_old();
+        for (std::size_t i = 0; i != state.comp_num(); ++i)
+            state.lambda(i) *= rlambda(sp.rng());
+        p = state.log_lambda_diff() + gmm.update_log_prior(state) +
+            gmm.alpha() * gmm.update_log_likelihood(state) - p;
         double u = std::log(runif(sp.rng()));
 
-        return param.mh_reject_lambda(p, u);
+        return state.mh_reject_lambda(p, u);
     }
-};
+}; // class GMMMoveLambda
 
-class gmm_move_weight : public MoveSMP<gmm_state, gmm_move_weight>
+template <typename SMP>
+class GMMMoveWeight : public vsmc::MoveSMP<SMP, GMM, GMMMoveWeight<SMP>>
 {
     public:
-    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<gmm_state> sp)
+    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
     {
-        const gmm_state &state = sp.particle().value();
-        gmm_param &param = sp.state(0);
+        const GMM &gmm = sp.particle().value();
+        GMMState &state = sp.state(0);
 
-        std::normal_distribution<double> rweight(0, state.weight_sd());
+        std::normal_distribution<double> rweight(0, gmm.weight_sd());
         std::uniform_real_distribution<double> runif(0, 1);
 
-        double p = param.log_prior() + state.alpha() * param.log_likelihood();
-        param.save_old();
+        double p = state.log_prior() + gmm.alpha() * state.log_likelihood();
+        state.save_old();
         double sum = 1;
-        for (std::size_t i = 0; i != param.comp_num() - 1; ++i) {
-            param.weight(i) =
-                std::log(param.weight(i) / param.weight(param.comp_num() - 1));
-            param.weight(i) += rweight(sp.rng());
-            param.weight(i) = std::exp(param.weight(i));
-            sum += param.weight(i);
+        for (std::size_t i = 0; i != state.comp_num() - 1; ++i) {
+            state.weight(i) =
+                std::log(state.weight(i) / state.weight(state.comp_num() - 1));
+            state.weight(i) += rweight(sp.rng());
+            state.weight(i) = std::exp(state.weight(i));
+            sum += state.weight(i);
         }
-        param.weight(param.comp_num() - 1) = 1;
-        for (std::size_t i = 0; i != param.comp_num(); ++i)
-            param.weight(i) /= sum;
-        p = param.logit_weight_diff() + state.update_log_prior(param) +
-            state.alpha() * state.update_log_likelihood(param) - p;
+        state.weight(state.comp_num() - 1) = 1;
+        for (std::size_t i = 0; i != state.comp_num(); ++i)
+            state.weight(i) /= sum;
+        p = state.logit_weight_diff() + gmm.update_log_prior(state) +
+            gmm.alpha() * gmm.update_log_likelihood(state) - p;
         double u = std::log(runif(sp.rng()));
 
-        return param.mh_reject_weight(p, u);
+        return state.mh_reject_weight(p, u);
     }
-};
+}; // class GMMMoveWeight
 
-class gmm_path_integrand : public MonitorEvalSMP<gmm_state, gmm_path_integrand>
+template <typename SMP>
+class GMMPathIntegrand
+    : public vsmc::MonitorEvalSMP<SMP, GMM, GMMPathIntegrand<SMP>>
 {
     public:
-    void eval_sp(std::size_t, std::size_t, vsmc::SingleParticle<gmm_state> sp,
-        double *res)
+    void eval_sp(
+        std::size_t, std::size_t, vsmc::SingleParticle<GMM> sp, double *res)
     {
         *res = sp.state(0).log_likelihood();
     }
-};
+}; // class GMMPathIntegrand
 
-class gmm_path_grid
+class GMMPathGrid
 {
     public:
-    void operator()(std::size_t, std::size_t,
-        vsmc::Particle<gmm_state> &particle, double *res)
+    void operator()(
+        std::size_t, std::size_t, vsmc::Particle<GMM> &particle, double *res)
     {
         *res = particle.value().alpha();
     }
-};
+}; // class GMMPathGrid
 
-class gmm_alpha_linear
+class GMMAlphaLinear
 {
     public:
-    gmm_alpha_linear(const std::size_t iter_num) : iter_num_(iter_num) {}
+    GMMAlphaLinear(const std::size_t iter_num) : iter_num_(iter_num) {}
 
-    void operator()(
-        std::size_t iter, vsmc::Particle<gmm_state> &particle) const
+    void operator()(std::size_t iter, vsmc::Particle<GMM> &particle) const
     {
         particle.value().alpha(static_cast<double>(iter) / iter_num_);
     }
 
     private:
     std::size_t iter_num_;
-};
+}; // GMMAlphaLinear
 
-class gmm_alpha_prior
+class GMMAlphaPrior
 {
     public:
-    gmm_alpha_prior(std::size_t iter_num, std::size_t power)
+    GMMAlphaPrior(std::size_t iter_num, std::size_t power)
         : iter_num_(iter_num), power_(power)
     {
     }
 
-    void operator()(
-        std::size_t iter, vsmc::Particle<gmm_state> &particle) const
+    void operator()(std::size_t iter, vsmc::Particle<GMM> &particle) const
     {
         double base = static_cast<double>(iter) / iter_num_;
         double alpha = 1;
@@ -573,58 +568,6 @@ class gmm_alpha_prior
     private:
     std::size_t iter_num_;
     std::size_t power_;
-};
+}; // class GMMAlphaPrior
 
-inline int gmm_main(int argc, char **argv)
-{
-    std::size_t N = 0;
-    std::size_t n = 0;
-    std::size_t c = 0;
-    std::size_t power = 0;
-    std::string datafile("gmm.data");
-
-    vsmc::ProgramOptionMap option;
-    option.add("N", "Number of particles", &N, 10000)
-        .add("n", "Number of iterations", &n, 100)
-        .add("c", "Number of components", &c, 4)
-        .add("power", "Power of the prior annealing (0 for linear)", &power, 2)
-        .add("datafile", "File name of the data", &datafile, "gmm.data");
-    option.process(argc, argv);
-
-    gmm_move_smc::alpha_setter_type alpha_setter;
-    if (power == 0)
-        alpha_setter = gmm_alpha_linear(n);
-    else
-        alpha_setter = gmm_alpha_prior(n, power);
-
-    vsmc::Seed::instance().set(101);
-    vsmc::Sampler<gmm_state> sampler(N, vsmc::Stratified, 0.5);
-    sampler.particle().value().comp_num(c);
-    sampler.init(gmm_init())
-        .move(gmm_move_smc(alpha_setter), false)
-        .mcmc(gmm_move_mu(), false)
-        .mcmc(gmm_move_lambda(), true)
-        .mcmc(gmm_move_weight(), true)
-        .monitor("path_integrand", 1, gmm_path_integrand())
-        .monitor("path_grid", 1, gmm_path_grid(), true);
-
-    vsmc::StopWatch watch;
-    watch.start();
-    sampler.initialize(const_cast<char *>(datafile.c_str())).iterate(n);
-    double ps = 0;
-    auto ps_integrand = sampler.monitor("path_integrand");
-    auto ps_grid = sampler.monitor("path_grid");
-    for (std::size_t iter = 1; iter < sampler.iter_size(); ++iter) {
-        ps += 0.5 *
-            (ps_integrand.record(0, iter) + ps_integrand.record(0, iter - 1)) *
-            (ps_grid.record(0, iter) - ps_grid.record(0, iter - 1));
-    }
-    watch.stop();
-
-    std::cout << "Path sampling estimate: " << ps << std::endl;
-    std::cout << "Wallclock Time: " << watch.seconds() << "s" << std::endl;
-
-    return 0;
-}
-
-#endif // VSMC_EXAMPLE_GMM_@SMP@_HPP
+#endif // VSMC_EXAMPLE_GMM_HPP

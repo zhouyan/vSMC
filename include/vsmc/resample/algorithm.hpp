@@ -36,6 +36,10 @@
 #include <vsmc/resample/transform.hpp>
 #include <vsmc/rng/u01_sequence.hpp>
 
+#define VSMC_RUNTIME_ASSERT_RESAMPLE_ALGORITHM_EVAL                           \
+    VSMC_RUNTIME_ASSERT(                                                      \
+        eval_, "**ResampleMove::operator()** INVALID ALGORITHM OBJECT")
+
 namespace vsmc
 {
 
@@ -96,6 +100,61 @@ class ResampleAlgorithm
         return replication;
     }
 }; // class ResampleAlgorithm
+
+/// \brief Resample algorithm acting as a Sampler move
+template <typename T>
+class ResampleMove
+{
+    public:
+    using eval_type = std::function<void(std::size_t, std::size_t,
+        typename Particle<T>::rng_type &, const double *,
+        typename Particle<T>::size_type *)>;
+
+    /// \brief Construct a `Sampler::move_type` object
+    ///
+    /// \param eval A resampling algorithm evaluation object, see interface of
+    /// ResampleAlgorithm
+    explicit ResampleMove(const eval_type &eval) : eval_(eval) {}
+
+    static constexpr double always()
+    {
+        return std::numeric_limits<double>::infinity();
+    }
+
+    static constexpr double never()
+    {
+        return -std::numeric_limits<double>::infinity();
+    }
+
+    /// \brief Set a new evaluation object of type eval_type
+    void set_eval(const eval_type &new_eval) { eval_ = new_eval; }
+
+    /// \brief Returns how many particles having non-zero replication number
+    std::size_t operator()(std::size_t, Particle<T> &particle) const
+    {
+        VSMC_RUNTIME_ASSERT_RESAMPLE_ALGORITHM_EVAL;
+
+        using size_type = typename Particle<T>::size_type;
+
+        const std::size_t N = static_cast<std::size_t>(particle.size());
+        Vector<size_type> rep(N);
+        Vector<size_type> idx(N);
+        eval_(N, N, particle.rng(), particle.weight().data(), rep.data());
+        resample_trans_rep_index(N, N, rep.data(), idx.data());
+        particle.value().copy(N, idx.data());
+        particle.weight().set_equal();
+
+        std::size_t R = 0;
+        for (auto r : rep)
+            if (r != 0)
+                ++R;
+
+        return R;
+    }
+
+    private:
+    eval_type eval_;
+}; // class ResampleMove
 
 /// \brief Multinomial resampling
 /// \ingroup Resample

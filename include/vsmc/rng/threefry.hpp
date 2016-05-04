@@ -463,8 +463,7 @@ class ThreefryGenerator
         Rounds != 0, "**ThreefryGenerator** USED WITH ROUNDS EQUAL TO ZERO");
 
     public:
-    using ctr_type =
-        std::array<std::uint64_t, sizeof(T) * K / sizeof(std::uint64_t)>;
+    using ctr_type = std::array<T, K>;
     using key_type = std::array<T, K>;
 
     static constexpr std::size_t size() { return sizeof(T) * K; }

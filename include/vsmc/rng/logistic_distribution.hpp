@@ -71,7 +71,7 @@ class LogisticDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01Distribution<RealType> u01;
+        U01OODistribution<RealType> u01;
         result_type u = u01(rng);
 
         return param.a() + param.b() * std::log(u / (1 - u));
@@ -86,7 +86,7 @@ inline void logistic_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     Array<RealType, K> s;
-    u01_distribution(rng, n, r);
+    u01_oo_distribution(rng, n, r);
     sub(n, static_cast<RealType>(1), r, s.data());
     div(n, r, s.data(), r);
     log(n, r, r);

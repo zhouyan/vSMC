@@ -35,7 +35,7 @@
 #include <vsmc/internal/common.hpp>
 #include <vsmc/core/single_particle.hpp>
 #include <vsmc/core/weight.hpp>
-#include <vsmc/resample/resample.hpp>
+#include <vsmc/resample/algorithm.hpp>
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
 
@@ -45,6 +45,37 @@
 
 namespace vsmc
 {
+
+/// \brief A subset of particles
+/// \ingroup Core
+template <typename T>
+class ParticleRange
+{
+    public:
+    using size_type = typename Particle<T>::size_type;
+
+    ParticleRange(size_type begin, size_type end, Particle<T> *pptr)
+        : begin_(begin), end_(end), pptr_(pptr)
+    {
+    }
+
+    size_type size() const { return end_ - begin_; }
+
+    size_type begin() const { return begin_; }
+
+    size_type end() const { return end_; }
+
+    Particle<T> &particle() const { return *pptr_; }
+
+    Particle<T> *particle_ptr() const { return pptr_; }
+
+    typename Particle<T>::rng_type &rng() const { return pptr_->rng(begin_); }
+
+    private:
+    size_type begin_;
+    size_type end_;
+    Particle<T> *pptr_;
+}; // class ParticleRange
 
 /// \brief Particle class representing the whole particle set
 /// \ingroup Core
@@ -58,6 +89,7 @@ class Particle
     using rng_set_type = RNGSetType<T>;
     using rng_type = typename rng_set_type::rng_type;
     using sp_type = SingleParticle<T>;
+    using range_type = ParticleRange<T>;
 
     explicit Particle(size_type N = 0)
         : size_(N)
@@ -76,8 +108,8 @@ class Particle
     {
         Particle<T> particle(*this);
         if (new_rng) {
-            particle.rng_set().seed();
-            Seed::instance()(particle.rng());
+            particle.rng_set_.seed();
+            Seed::instance()(particle.rng_);
         }
 
         return particle;
@@ -165,18 +197,13 @@ class Particle
     /// \details
     /// The particle system is resampled to a new system with possibly
     /// different size. The system will be changed even if `N == size()`.
-    ///
-    /// This is different from `resample` in the sense that the operation is
-    /// always local. Only the local weights are used, and re-normalized.
     template <typename ResampleType>
     void resize_by_resample(size_type N, ResampleType &&op)
     {
         Vector<size_type> rep(static_cast<std::size_t>(size_));
         Vector<size_type> idx(static_cast<std::size_t>(N));
-        Weight w(static_cast<SizeType<weight_type>>(size_));
-        w.set(weight_.data());
         op(static_cast<std::size_t>(size_), static_cast<std::size_t>(N), rng_,
-            w.data(), rep.data());
+            weight_.data(), rep.data());
         resample_trans_rep_index(static_cast<std::size_t>(size_),
             static_cast<std::size_t>(N), rep.data(), idx.data());
         resize(N, idx.data());
@@ -275,40 +302,20 @@ class Particle
     /// \brief Get a SingleParticle<T> object
     sp_type sp(size_type id) { return SingleParticle<T>(id, this); }
 
+    /// \brief Get a ParticleRange<T> object
+    range_type range(size_type begin, size_type end)
+    {
+        return ParticleRange<T>(begin, end, this);
+    }
+
+    /// \brief Get a ParticleRange<T> object with `begin == 0`, `end == size()`
+    range_type range() { return ParticleRange<T>(0, size(), this); }
+
     /// \brief Get a SingleParticle<T> object for the first particle
     sp_type begin() { return sp(0); }
 
     /// \brief Get a SingleParticle<T> object for the first particle
     sp_type end() { return sp(size_); }
-
-    /// \brief Performing resampling if ESS/N < threshold
-    ///
-    /// \param op The resampling operation functor
-    /// \param threshold The threshold of ESS/N below which resampling will be
-    /// performed
-    ///
-    /// \return true if resampling was performed
-    template <typename ResampleType>
-    bool resample(ResampleType &&op, double threshold)
-    {
-        std::size_t N = static_cast<std::size_t>(weight_.resample_size());
-        bool resampled = weight_.ess() < threshold * N;
-        if (resampled) {
-            const double *const rwptr = weight_.resample_data();
-            if (rwptr != nullptr) {
-                Vector<size_type> rep(static_cast<std::size_t>(N));
-                Vector<size_type> idx(static_cast<std::size_t>(N));
-                op(N, N, rng_, rwptr, rep.data());
-                resample_trans_rep_index(N, N, rep.data(), idx.data());
-                value_.copy(N, idx.data());
-            } else {
-                value_.copy(N, static_cast<const size_type *>(nullptr));
-            }
-            weight_.set_equal();
-        }
-
-        return resampled;
-    }
 
     private:
     static constexpr std::size_t M_ = internal::BufferSize<size_type>::value;

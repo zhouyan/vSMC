@@ -38,32 +38,6 @@
 namespace vsmc
 {
 
-/// \brief Compute the ess given normalized weights
-/// \ingroup Core
-inline double weight_ess(std::size_t N, const double *first)
-{
-    internal::size_check<VSMC_CBLAS_INT>(N, "weight_ess");
-
-    return 1 /
-        ::cblas_ddot(static_cast<VSMC_CBLAS_INT>(N), first, 1, first, 1);
-}
-
-/// \brief Normalize weights such that the summation is one
-/// \ingroup Core
-inline void weight_normalize(std::size_t N, double *first)
-{
-    mul(N, 1 / std::accumulate(first, first + N, 0.0), first, first);
-}
-
-/// \brief Normalize logarithm weights such that the maximum is zero
-/// \ingroup Core
-inline void weight_normalize_log(std::size_t N, double *first)
-{
-    double wmax = *(std::max_element(first, first + N));
-    for (std::size_t i = 0; i != N; ++i)
-        first[i] -= wmax;
-}
-
 /// \brief Weight class
 /// \ingroup Core
 class Weight
@@ -75,8 +49,6 @@ class Weight
 
     /// \brief Size of this Weight object
     size_type size() const { return data_.size(); }
-
-    size_type resample_size() const { return size(); }
 
     /// \brief Resize the Weight object
     ///
@@ -103,8 +75,6 @@ class Weight
     /// \brief Pointer to data of the normalized weight
     const double *data() const { return data_.data(); }
 
-    const double *resample_data() const { return data_.data(); }
-
     /// \brief Read all normalized weights to an output iterator
     template <typename OutputIter>
     OutputIter read_weight(OutputIter first) const
@@ -116,23 +86,17 @@ class Weight
     template <typename RandomIter>
     RandomIter read_weight(RandomIter first, int stride) const
     {
-        for (size_type i = 0; i != size(); ++i, first += stride)
+        for (std::size_t i = 0; i != size(); ++i, first += stride)
             *first = data_[i];
 
         return first;
     }
 
-    template <typename OutputIter>
-    OutputIter read_resample_weight(OutputIter first) const
-    {
-        return read_weight(first);
-    }
-
     /// \brief Set \f$W_i = 1/N\f$
     void set_equal()
     {
-        std::fill(data_.begin(), data_.end(), 1.0 / resample_size());
-        post_set();
+        std::fill(data_.begin(), data_.end(), 1.0 / size());
+        ess_ = static_cast<double>(size());
     }
 
     /// \brief Set \f$W_i \propto w_i\f$
@@ -140,7 +104,7 @@ class Weight
     void set(InputIter first)
     {
         std::copy_n(first, size(), data_.begin());
-        post_set();
+        normalize(false);
     }
 
     /// \brief Set \f$W_i \propto w_i\f$
@@ -152,25 +116,25 @@ class Weight
             return;
         }
 
-        for (size_type i = 0; i != size(); ++i, first += stride)
+        for (std::size_t i = 0; i != size(); ++i, first += stride)
             data_[i] = *first;
-        post_set();
+        normalize(false);
     }
 
     /// \brief Set \f$W_i \propto W_i w_i\f$
     template <typename InputIter>
     void mul(InputIter first)
     {
-        for (size_type i = 0; i != size(); ++i, ++first)
+        for (std::size_t i = 0; i != size(); ++i, ++first)
             data_[i] *= *first;
-        post_set();
+        normalize(false);
     }
 
     /// \brief Set \f$W_i \propto W_i w_i\f$
     void mul(const double *first)
     {
         ::vsmc::mul(size(), first, data_.data(), data_.data());
-        post_set();
+        normalize(false);
     }
 
     /// \brief Set \f$W_i \propto W_i w_i\f$
@@ -185,9 +149,9 @@ class Weight
             return;
         }
 
-        for (size_type i = 0; i != size(); ++i, first += stride)
+        for (std::size_t i = 0; i != size(); ++i, first += stride)
             data_[i] *= *first;
-        post_set();
+        normalize(false);
     }
 
     /// \brief Set \f$\log W_i = v_i + \mathrm{const.}\f$
@@ -195,7 +159,7 @@ class Weight
     void set_log(InputIter first)
     {
         std::copy_n(first, size(), data_.begin());
-        post_set_log();
+        normalize(true);
     }
 
     /// \brief Set \f$\log W_i = v_i + \mathrm{const.}\f$
@@ -207,9 +171,9 @@ class Weight
             return;
         }
 
-        for (size_type i = 0; i != size(); ++i, first += stride)
+        for (std::size_t i = 0; i != size(); ++i, first += stride)
             data_[i] = *first;
-        post_set_log();
+        normalize(true);
     }
 
     /// \brief Set \f$\log W_i = \log W_i + v_i + \mathrm{const.}\f$
@@ -217,17 +181,17 @@ class Weight
     void add_log(InputIter first)
     {
         log(size(), data_.data(), data_.data());
-        for (size_type i = 0; i != size(); ++i, ++first)
+        for (std::size_t i = 0; i != size(); ++i)
             data_[i] += *first;
-        post_set_log();
+        normalize(true);
     }
 
     /// \brief Set \f$\log W_i = \log W_i + v_i + \mathrm{const.}\f$
     void add_log(const double *first)
     {
         log(size(), data_.data(), data_.data());
-        add(size(), data_.data(), first, data_.data());
-        post_set_log();
+        add(size(), first, data_.data(), data_.data());
+        normalize(true);
     }
 
     /// \brief Set \f$\log W_i = \log W_i + v_i + \mathrm{const.}\f$
@@ -243,9 +207,9 @@ class Weight
         }
 
         log(size(), data_.data(), data_.data());
-        for (size_type i = 0; i != size(); ++i, first += stride)
+        for (std::size_t i = 0; i != size(); ++i, first += stride)
             data_[i] += *first;
-        post_set_log();
+        normalize(true);
     }
 
     /// \brief Draw integer index in the range \f$[0, N)\f$ according to the
@@ -261,35 +225,46 @@ class Weight
     Vector<double> data_;
     DiscreteDistribution<size_type> draw_;
 
-    void post_set() { ess_ = normalize(false); }
-
-    void post_set_log()
+    template <typename InputIter>
+    double max_element(std::size_t n, InputIter first)
     {
-        weight_normalize_log(size(), data_.data());
-        ess_ = normalize(true);
+        using value_type =
+            typename std::iterator_traits<InputIter>::value_type;
+
+        value_type v = -std::numeric_limits<value_type>::infinity();
+        for (std::size_t i = 0; i != n; ++i, ++first)
+            if (v < *first)
+                v = *first;
+
+        return static_cast<double>(v);
     }
 
-    double normalize(bool use_log)
+    void normalize(bool use_log)
     {
         double *w = data_.data();
         double accw = 0;
+        double essw = 0;
+        const double lmax = use_log ? max_element(size(), w) : 0;
         const std::size_t k = internal::BufferSize<double>::value;
         const std::size_t m = size() / k;
         const std::size_t l = size() % k;
         for (std::size_t i = 0; i != m; ++i, w += k)
-            normalize_eval(k, w, accw, use_log);
-        normalize_eval(l, w, accw, use_log);
+            normalize(k, w, accw, essw, use_log, lmax);
+        normalize(l, w, accw, essw, use_log, lmax);
         ::vsmc::mul(size(), 1 / accw, data_.data(), data_.data());
-
-        return 1 / cblas_ddot(static_cast<VSMC_CBLAS_INT>(size()),
-                       data_.data(), 1, data_.data(), 1);
+        ess_ = accw * accw / essw;
     }
 
-    void normalize_eval(std::size_t n, double *w, double &accw, bool use_log)
+    void normalize(std::size_t n, double *w, double &accw, double &essw,
+        bool use_log, double lmax)
     {
-        if (use_log)
+        if (use_log) {
+            sub(n, w, lmax, w);
             exp(n, w, w);
+        }
         accw = std::accumulate(w, w + n, accw);
+        essw +=
+            internal::cblas_ddot(static_cast<VSMC_CBLAS_INT>(n), w, 1, w, 1);
     }
 }; // class Weight
 
@@ -311,11 +286,13 @@ class WeightNull
 
     size_type size() const { return 0; }
 
-    size_type resample_size() const { return 0; }
+    void resize(size_type) {}
+
+    void reserve(size_type) {}
+
+    void shrink_to_fit() {}
 
     double ess() const { return std::numeric_limits<double>::quiet_NaN(); }
-
-    const double *resample_data() const { return nullptr; }
 
     const double *data() const { return nullptr; }
 
@@ -326,11 +303,6 @@ class WeightNull
 
     template <typename RandomIter>
     void read_weight(RandomIter, int) const
-    {
-    }
-
-    template <typename OutputIter>
-    void read_resample_weight(OutputIter) const
     {
     }
 

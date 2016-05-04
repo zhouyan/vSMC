@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/pf/src/pf.cpp
+// vSMC/example/pf/src/pf_cv.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,29 +29,19 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "pf_@smp@.hpp"
+#include "pf_cv.hpp"
 
-int main()
+int main(int argc, char **argv)
 {
-    std::string datafile("pf.data");
-    std::string implname("@SMP@");
+    std::size_t N = 1000;
 
-    std::string pf_time("pf.");
-    pf_time += "@SMP@";
-    std::ofstream time(pf_time);
-    time << std::setw(20) << std::left << "N";
-    time << std::setw(20) << std::left << "Implementation";
-    time << std::setw(20) << std::left << "ResampleScheme";
-    time << std::setw(20) << std::left << "MatrixLayout";
-    time << std::setw(20) << std::left << "RNGSet";
-    time << std::setw(20) << std::left << "Time";
-    time << std::endl;
-    pf_run(ParticleNum, datafile, implname, true, time);
-    std::size_t N = 1;
-    while (N < ParticleNum) {
-        N *= 2;
-        pf_run(N, datafile, implname, false, time);
-    }
+    vsmc::ProgramOptionMap option;
+    option.add("N", "Number of particles", &N, N);
+    option.process(argc, argv);
+    if (option.count("help"))
+        return 0;
+
+    pf_cv(N);
 
     return 0;
 }

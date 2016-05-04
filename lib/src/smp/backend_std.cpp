@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/math/lapacke.h
+// vSMC/lib/src/smp/backend_std.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,15 +29,46 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_MATH_LAPACKE_H
-#define VSMC_MATH_LAPACKE_H
+#include "libvsmc.hpp"
 
-#include <vsmc/internal/config.h>
+extern "C" {
 
-#if VSMC_USE_MKL_LAPACKE
-#include <mkl_lapacke.h>
-#else
-#include <lapacke.h>
-#endif
+void vsmc_sampler_init_std(vsmc_sampler sampler,
+    vsmc_initialize_eval_sp_type eval_sp,
+    vsmc_initialize_eval_param_type eval_param,
+    vsmc_initialize_eval_pre_type eval_pre,
+    vsmc_initialize_eval_post_type eval_post)
+{
+    ::vsmc::cast(sampler).init(::vsmc::cast<::vsmc::InitializeSTD>(
+        eval_sp, eval_param, eval_pre, eval_post));
+}
 
-#endif // VSMC_MATH_LAPACKE_H
+void vsmc_sampler_move_std(vsmc_sampler sampler,
+    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
+    vsmc_move_eval_post_type eval_post, int append)
+{
+    ::vsmc::cast(sampler).move(
+        ::vsmc::cast<::vsmc::MoveSTD>(eval_sp, eval_pre, eval_post),
+        append != 0);
+}
+
+void vsmc_sampler_mcmc_std(vsmc_sampler sampler,
+    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
+    vsmc_move_eval_post_type eval_post, int append)
+{
+    ::vsmc::cast(sampler).mcmc(
+        ::vsmc::cast<::vsmc::MoveSTD>(eval_sp, eval_pre, eval_post),
+        append != 0);
+}
+
+void vsmc_sampler_set_monitor_std(vsmc_sampler sampler, const char *name,
+    int dim, vsmc_monitor_eval_sp_type eval_sp,
+    vsmc_monitor_eval_pre_type eval_pre, vsmc_monitor_eval_post_type eval_post,
+    int record_only, vSMCMonitorStage stage)
+{
+    ::vsmc::cast(sampler).monitor(name, static_cast<std::size_t>(dim),
+        ::vsmc::cast<::vsmc::MonitorEvalSTD>(eval_sp, eval_pre, eval_post),
+        record_only != 0, static_cast<::vsmc::MonitorStage>(stage));
+}
+
+} // extern "C"

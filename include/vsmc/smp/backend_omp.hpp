@@ -38,24 +38,50 @@
 namespace vsmc
 {
 
-VSMC_DEFINE_SMP_BACKEND_FORWARD(OMP)
+namespace internal
+{
+
+template <typename IntType>
+inline void backend_omp_range(IntType N, IntType &begin, IntType &end)
+{
+    const IntType np = static_cast<IntType>(::omp_get_num_threads());
+    const IntType id = static_cast<IntType>(::omp_get_thread_num());
+    const IntType m = N / np;
+    const IntType r = N % np;
+    const IntType n = m + (id < r ? 1 : 0);
+    begin = id < r ? n * id : (n + 1) * r + n * (id - r);
+    end = begin + n;
+}
+
+} // namespace vsmc::internal
+
+/// \brief SMP implementation ID for OpenMP
+/// \ingroup OMP
+class BackendOMP;
 
 /// \brief Sampler<T>::init_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-class InitializeOMP : public InitializeBase<T, Derived>
+class InitializeSMP<BackendOMP, T, Derived> : public InitializeBase<T, Derived>
 {
     public:
     std::size_t operator()(Particle<T> &particle, void *param)
     {
         using size_type = typename Particle<T>::size_type;
-        const size_type N = particle.size();
+
         this->eval_param(particle, param);
         this->eval_pre(particle);
         std::size_t accept = 0;
-#pragma omp parallel for reduction(+ : accept) default(shared)
-        for (size_type i = 0; i < N; ++i)
-            accept += this->eval_sp(particle.sp(i));
+        Particle<T> *pptr = &particle;
+#pragma omp parallel default(none) shared(accept) firstprivate(pptr)
+        {
+            size_type begin = 0;
+            size_type end = 0;
+            internal::backend_omp_range(pptr->size(), begin, end);
+            std::size_t acc = this->eval_range(pptr->range(begin, end));
+#pragma omp atomic
+            accept += acc;
+        }
         this->eval_post(particle);
 
         return accept;
@@ -63,23 +89,30 @@ class InitializeOMP : public InitializeBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, Initialize)
-}; // class InitializeOMP
+}; // class InitializeSMP
 
 /// \brief Sampler<T>::move_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-class MoveOMP : public MoveBase<T, Derived>
+class MoveSMP<BackendOMP, T, Derived> : public MoveBase<T, Derived>
 {
     public:
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
     {
         using size_type = typename Particle<T>::size_type;
-        const size_type N = particle.size();
+
         this->eval_pre(iter, particle);
         std::size_t accept = 0;
-#pragma omp parallel for reduction(+ : accept) default(shared)
-        for (size_type i = 0; i < N; ++i)
-            accept += this->eval_sp(iter, particle.sp(i));
+        Particle<T> *pptr = &particle;
+#pragma omp parallel default(none) shared(accept) firstprivate(pptr, iter)
+        {
+            size_type begin = 0;
+            size_type end = 0;
+            internal::backend_omp_range(pptr->size(), begin, end);
+            std::size_t acc = this->eval_range(iter, pptr->range(begin, end));
+#pragma omp atomic
+            accept += acc;
+        }
         this->eval_post(iter, particle);
 
         return accept;
@@ -87,31 +120,51 @@ class MoveOMP : public MoveBase<T, Derived>
 
     protected:
     VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, Move)
-}; // class MoveOMP
+}; // class MoveSMP
 
 /// \brief Monitor<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-class MonitorEvalOMP : public MonitorEvalBase<T, Derived>
+class MonitorEvalSMP<BackendOMP, T, Derived>
+    : public MonitorEvalBase<T, Derived>
 {
     public:
     void operator()(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
     {
         using size_type = typename Particle<T>::size_type;
-        const size_type N = particle.size();
+
         this->eval_pre(iter, particle);
-#pragma omp parallel for default(shared)
-        for (size_type i = 0; i < N; ++i) {
-            this->eval_sp(iter, dim, particle.sp(i),
-                r + static_cast<std::size_t>(i) * dim);
+        Particle<T> *pptr = &particle;
+#pragma omp parallel default(none) firstprivate(pptr, iter, dim, r)
+        {
+            size_type begin = 0;
+            size_type end = 0;
+            internal::backend_omp_range(pptr->size(), begin, end);
+            this->eval_range(iter, dim, pptr->range(begin, end),
+                r + static_cast<std::size_t>(begin) * dim);
         }
         this->eval_post(iter, particle);
     }
 
     protected:
     VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, MonitorEval)
-}; // class MonitorEvalOMP
+}; // class MonitorEvalSMP
+
+/// \brief Sampler<T>::init_type subtype using OpenMP
+/// \ingroup OMP
+template <typename T, typename Derived>
+using InitializeOMP = InitializeSMP<BackendOMP, T, Derived>;
+
+/// \brief Sampler<T>::move_type subtype using OpenMP
+/// \ingroup OMP
+template <typename T, typename Derived>
+using MoveOMP = MoveSMP<BackendOMP, T, Derived>;
+
+/// \brief Monitor<T>::eval_type subtype using OpenMP
+/// \ingroup OMP
+template <typename T, typename Derived>
+using MonitorEvalOMP = MonitorEvalSMP<BackendOMP, T, Derived>;
 
 } // namespace vsmc
 

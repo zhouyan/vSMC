@@ -1,5 +1,5 @@
 # ============================================================================
-#  vSMC/example/pf/pf.R
+#  vSMC/example/pf/pf_cv.R
 # ----------------------------------------------------------------------------
 #                          vSMC: Scalable Monte Carlo
 # ----------------------------------------------------------------------------
@@ -34,8 +34,8 @@ suppressPackageStartupMessages(library(rhdf5))
 
 theme_set(theme_bw())
 
-prg <- c("SEQ", "OMP", "TBB")
-exe <- paste("pf", prg, sep = ".")
+smp <- c("OMP", "SEQ", "TBB")
+exe <- paste("pf_cv", smp, sep = ".")
 res <- c(
     "Multinomial",
     "Stratified",
@@ -44,20 +44,20 @@ res <- c(
     "ResidualStratified",
     "ResidualSystematic")
 rc <- c("RowMajor", "ColMajor")
-rs <- c("Vector", "TBB")
+rs <- c("RNGSetVector", "RNGSetTBB")
 runs <- expand.grid(exe, res, rc, rs)
 runs <- paste(runs$Var1, runs$Var2, runs$Var3, runs$Var4, sep = ".")
 
-pf_est <- function() {
+pf_cv_est <- function() {
     src.level <- c("Estimates", "Observation")
-    obs <- read.table("pf.data", header = FALSE)
+    obs <- read.table("pf_cv.data", header = FALSE)
     dat <- data.frame(
         Position.X = obs[,1], Position.Y = obs[,2],
         Group = rep("Observation", dim(obs)[1]),
         Source = rep("Observation", dim(obs)[1]))
     plt.list <- list()
 
-    pf <- function (filename, est)
+    pf_cv <- function (filename, est)
     {
         dat <- data.frame(
             Position.X = c(obs[,1], est$pos.x),
@@ -79,44 +79,43 @@ pf_est <- function() {
     }
 
     for (run in runs) {
-        pf.txt <- paste0(run, ".txt")
-        if (file.exists(pf.txt)) {
-            tmp <- pf(pf.txt, read.table(pf.txt, header = TRUE))
-            plt.list[[pf.txt]] <- tmp$plt
+        pf_cv.txt <- paste0(run, ".txt")
+        if (file.exists(pf_cv.txt)) {
+            tmp <- pf_cv(pf_cv.txt, read.table(pf_cv.txt, header = TRUE))
+            plt.list[[pf_cv.txt]] <- tmp$plt
             dat <- rbind(dat, tmp$dat)
         }
 
-        pf.h5 <- paste0(run, ".h5")
-        if (file.exists(pf.h5)) {
-            pf.s <- paste(pf.h5, "(Sampler)")
-            tmp <- pf(pf.s, as.data.frame(h5read(pf.h5, "Sampler")))
-            plt.list[[pf.s]] <- tmp$plt
+        pf_cv.h5 <- paste0(run, ".h5")
+        if (file.exists(pf_cv.h5)) {
+            pf_cv.s <- paste(pf_cv.h5, "(Sampler)")
+            tmp <- pf_cv(pf_cv.s, as.data.frame(h5read(pf_cv.h5, "Sampler")))
+            plt.list[[pf_cv.s]] <- tmp$plt
             dat <- rbind(dat, tmp$dat)
 
-            pf.m <- paste(pf.h5, "(Monitor)")
-            tmp <- pf(pf.m, as.data.frame(h5read(pf.h5, "Monitor")))
-            plt.list[[pf.m]] <- tmp$plt
+            pf_cv.m <- paste(pf_cv.h5, "(Monitor)")
+            tmp <- pf_cv(pf_cv.m, as.data.frame(h5read(pf_cv.h5, "Monitor")))
+            plt.list[[pf_cv.m]] <- tmp$plt
             dat <- rbind(dat, tmp$dat)
 
-            pf.p <- paste(pf.h5, "(Particle)")
-            particle <- h5read(pf.h5, "Particle")
+            pf_cv.p <- paste(pf_cv.h5, "(Particle)")
+            particle <- h5read(pf_cv.h5, "Particle")
             pos.x <- numeric()
             pos.y <- numeric()
             for (i in 0:(length(particle) - 1)) {
                 name <- paste0("Iter.", i)
                 w <- particle[[name]]$Weight
                 s <- particle[[name]]$Value
-                if (dim(s)[1] == 5) {
+                if (dim(s)[1] > dim(s)[2]) {
+                    pos.x <- c(pos.x, sum(w * s[,1]))
+                    pos.y <- c(pos.y, sum(w * s[,2]))
+                } else {
                     pos.x <- c(pos.x, sum(w * s[1,]))
                     pos.y <- c(pos.y, sum(w * s[2,]))
                 }
-                if (dim(s)[2] == 5) {
-                    pos.x <- c(pos.x, sum(w * s[,1]))
-                    pos.y <- c(pos.y, sum(w * s[,2]))
-                }
             }
-            tmp <- pf(pf.p, as.data.frame(cbind(pos.x, pos.y)))
-            plt.list[[pf.p]] <- tmp$plt
+            tmp <- pf_cv(pf_cv.p, as.data.frame(cbind(pos.x, pos.y)))
+            plt.list[[pf_cv.p]] <- tmp$plt
             dat <- rbind(dat, tmp$dat)
         }
     }
@@ -124,42 +123,13 @@ pf_est <- function() {
     dat$Source <- factor(dat$Source, ordered = TRUE, levels = src.level)
     plt <- qplot(x = Position.X, y = Position.Y, data = dat,
         group = Group, color = Source, linetype= Source, geom = "path")
-    plt <- plt + ggtitle("pf")
+    plt <- plt + ggtitle("pf_cv")
 
     list(plot = plt, plot.list = plt.list)
 }
 
-pf_time <- function()
-{
-    dat <- numeric()
-    for (smp in prg) {
-        pf.time <- paste0("pf.", smp)
-        if (file.exists(pf.time)) {
-            dat <- rbind(dat, read.table(pf.time, header = TRUE))
-        }
-    }
-    dat$Group = paste(
-        dat$Implementation, dat$RNGSet, dat$MatrixLayout)
-    plt <- qplot(x = N, y = Time, data = dat, group = Group,
-        geom = c("point", "line"))
-    plt <- plt + aes(color = Implementation)
-    plt <- plt + aes(linetype = RNGSet)
-    plt <- plt + aes(shape = MatrixLayout)
-    plt <- plt + scale_x_log10()
-    plt <- plt + scale_y_log10()
-    plt <- plt + facet_wrap(~ResampleScheme, ncol = 3)
-    plt <- plt + ggtitle("pf.time")
-
-    list(data = dat, plot = plt)
-}
-
-pdf("pf.pdf", width = 14.4, height = 9)
-est <- pf_est()
+pdf("pf_cv.pdf", width = 14.4, height = 9)
+est <- pf_cv_est()
 print(est$plot)
 for (p in est$plot.list) print(p)
-garbage <- dev.off()
-
-pdf("pf_time.pdf", width = 14.4, height = 9)
-time <- pf_time()
-print(time$plot)
 garbage <- dev.off()

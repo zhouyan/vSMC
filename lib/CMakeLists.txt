@@ -29,7 +29,7 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT(vSMCLib C CXX)
+PROJECT(vSMCLib CXX)
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 

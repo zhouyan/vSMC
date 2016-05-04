@@ -267,6 +267,16 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         return this->data() + id * this->dim();
     }
 
+    /// \brief Copy particles
+    ///
+    /// \param N The new sample size
+    /// \param index N-vector of parent index
+    ///
+    /// \details
+    /// Let \f$a_i\f$ denote the value of `index[i]`, and
+    /// \f$r_i = \sum_{j=1}^N \mathbb{I}_{a_j = i}\f$. Then it is required that
+    /// \f$a_i = i\f$ for all \f$r_i > 0\f$. This condition is always satisfied
+    /// if `index` comes from `resamle_trans_rep_index`.
     template <typename IntType, typename InputIter>
     InputIter copy(IntType N, InputIter index)
     {
@@ -437,6 +447,16 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         return this->data() + pos * this->size();
     }
 
+    /// \brief Copy particles
+    ///
+    /// \param N The new sample size
+    /// \param index N-vector of parent index
+    ///
+    /// \details
+    /// Let \f$a_i\f$ denote the value of `index[i]`, and
+    /// \f$r_i = \sum_{j=1}^N \mathbb{I}_{a_j = i}\f$. Then it is required that
+    /// \f$a_i = i\f$ for all \f$r_i > 0\f$. This condition is always satisfied
+    /// if `index` comes from `resamle_trans_rep_index`.
     template <typename InputIter>
     InputIter copy(size_type N, InputIter index)
     {

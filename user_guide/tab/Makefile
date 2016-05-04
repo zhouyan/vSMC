@@ -1,4 +1,6 @@
 all : rng_distribution rng_engine_clang rng_engine_gcc rng_engine_intel
+	./rng_distribution.pl
+	./rng_engine.pl
 
 rng_distribution :
 	ninja -C ../../build/clang-Release rng_distribution

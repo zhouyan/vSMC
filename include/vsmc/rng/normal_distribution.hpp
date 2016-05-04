@@ -81,7 +81,7 @@ class NormalDistribution
             z = v_;
             saved_ = false;
         } else {
-            U01Distribution<RealType> u01;
+            U01OCDistribution<RealType> u01;
             result_type u1 = std::sqrt(-2 * std::log(u01(rng)));
             result_type u2 = const_pi_2<result_type>() * u01(rng);
             z = u1 * std::cos(u2);
@@ -104,7 +104,7 @@ inline void normal_distribution_impl(
     const std::size_t nu = n / 2;
     RealType *const u1 = r;
     RealType *const u2 = r + nu;
-    u01_distribution(rng, n, r);
+    u01_oc_distribution(rng, n, r);
     log(nu, u1, s.data());
     mul(nu, static_cast<RealType>(-2), s.data(), s.data());
     sqrt(nu, s.data(), s.data());
@@ -140,7 +140,7 @@ inline void normal_distribution(
         internal::normal_distribution_impl<k>(rng, k, r, mean, stddev);
     internal::normal_distribution_impl<k>(rng, l, r, mean, stddev);
     if (n % 2 != 0) {
-        U01Distribution<RealType> u01;
+        U01OCDistribution<RealType> u01;
         RealType u = u01(rng);
         RealType v = u01(rng);
         r[l - 1] = mean +

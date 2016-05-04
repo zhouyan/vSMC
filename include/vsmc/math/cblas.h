@@ -34,26 +34,63 @@
 
 #include <vsmc/internal/config.h>
 
-/// \brief Integer type of CBLAS routines
-/// \ingroup Config
-///
-/// \details
-/// Define this macro if the CBLAS interface has unusual integer types. For
-/// example, the CBLAS library use ILP64 while the rest of the program use
-/// LP64.
-#ifndef VSMC_CBLAS_INT_TYPE
-#define VSMC_CBLAS_INT_TYPE int
-#endif
-
 #if VSMC_USE_MKL_CBLAS
 #include <mkl_cblas.h>
 #define VSMC_CBLAS_INT MKL_INT
 #elif VSMC_USE_ACCELERATE
 #include <Accelerate/Accelerate.h>
-#define VSMC_CBLAS_INT VSMC_CBLAS_INT_TYPE
+#define VSMC_CBLAS_INT int
 #else
 #include <cblas.h>
-#define VSMC_CBLAS_INT VSMC_CBLAS_INT_TYPE
+#ifndef VSMC_CBLAS_INT
+#define VSMC_CBLAS_INT int
 #endif
+#endif
+
+namespace vsmc
+{
+
+namespace internal
+{
+
+using ::CBLAS_LAYOUT;
+using ::CblasRowMajor;
+using ::CblasColMajor;
+
+using ::CBLAS_TRANSPOSE;
+using ::CblasNoTrans;
+using ::CblasTrans;
+using ::CblasConjTrans;
+
+using ::CBLAS_UPLO;
+using ::CblasUpper;
+using ::CblasLower;
+
+using ::CBLAS_DIAG;
+using ::CblasNonUnit;
+using ::CblasUnit;
+
+using ::CBLAS_SIDE;
+using ::CblasLeft;
+using ::CblasRight;
+
+using ::cblas_sdot;
+using ::cblas_ddot;
+
+using ::cblas_sgemv;
+using ::cblas_dgemv;
+using ::cblas_stpmv;
+using ::cblas_dtpmv;
+using ::cblas_ssyr;
+using ::cblas_dsyr;
+
+using ::cblas_strmm;
+using ::cblas_dtrmm;
+using ::cblas_ssyrk;
+using ::cblas_dsyrk;
+
+} // namespace vsmc::internal
+
+} // namespace vsmc
 
 #endif // VSMC_MATH_CBLAS_H

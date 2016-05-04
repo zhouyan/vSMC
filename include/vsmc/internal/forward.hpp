@@ -48,6 +48,9 @@ template <typename>
 class Monitor;
 
 template <typename>
+class ParticleRange;
+
+template <typename>
 class SingleParticle;
 
 template <typename>

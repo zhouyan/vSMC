@@ -411,8 +411,7 @@ class PhiloxGenerator
         Rounds != 0, "**PhiloxGenerator** USED WITH ROUNDS EQUAL TO ZERO");
 
     public:
-    using ctr_type =
-        std::array<std::uint64_t, sizeof(T) * K / sizeof(std::uint64_t)>;
+    using ctr_type = std::array<T, K>;
     using key_type = std::array<T, K / 2>;
 
     static constexpr std::size_t size() { return sizeof(T) * K; }

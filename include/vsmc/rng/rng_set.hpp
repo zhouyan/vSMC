@@ -43,9 +43,9 @@
 /// \ingroup Config
 #ifndef VSMC_RNG_SET_TYPE
 #if VSMC_USE_TBB_TLS
-#define VSMC_RNG_SET_TYPE RNGSetTBB
+#define VSMC_RNG_SET_TYPE ::vsmc::RNGSetTBB
 #else
-#define VSMC_RNG_SET_TYPE RNGSetVector
+#define VSMC_RNG_SET_TYPE ::vsmc::RNGSetVector
 #endif
 #endif
 
@@ -54,7 +54,7 @@ namespace vsmc
 
 /// \brief Scalar RNG set
 /// \ingroup RNG
-template <typename RNGType>
+template <typename RNGType = RNG>
 class RNGSetScalar
 {
     VSMC_DEFINE_NEW_DELETE(RNGSetScalar<RNGType>)
@@ -80,7 +80,7 @@ class RNGSetScalar
 
 /// \brief Vector RNG set
 /// \ingroup RNG
-template <typename RNGType>
+template <typename RNGType = RNGMini>
 class RNGSetVector
 {
     public:
@@ -116,7 +116,7 @@ class RNGSetVector
 
 /// \brief Thread-local storage RNG set using tbb::combinable
 /// \ingroup RNG
-template <typename RNGType>
+template <typename RNGType = RNG>
 class RNGSetTBB
 {
     public:
@@ -148,12 +148,16 @@ class RNGSetTBB
 
 #endif // VSMC_USE_TBB_TLS
 
-template <typename RNGType>
+/// \brief Default RNG set
+/// \ingroup RNG
+template <typename RNGType = typename std::conditional<
+              std::is_same<VSMC_RNG_SET_TYPE<RNG>, RNGSetVector<RNG>>::value,
+              RNGMini, RNG>::type>
 using RNGSet = VSMC_RNG_SET_TYPE<RNGType>;
 
 /// \brief Particle::rng_set_type trait
 /// \ingroup Traits
-VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RNGSetType, rng_set_type, RNGSet<RNG>)
+VSMC_DEFINE_TYPE_DISPATCH_TRAIT(RNGSetType, rng_set_type, RNGSet<>)
 
 } // namespace vsmc
 

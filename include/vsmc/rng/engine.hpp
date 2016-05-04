@@ -71,9 +71,21 @@
 namespace vsmc
 {
 
+/// \brief The default 32-bits RNG
+/// \ingroup RNG
 using RNG = VSMC_RNG_TYPE;
 
+/// \brief The default 64-bits RNG
+/// \ingroup RNG
 using RNG_64 = VSMC_RNG_64_TYPE;
+
+/// \brief The 32-bits RNG with smallest state
+/// \ingroup RNG
+using RNGMini = Philox2x32;
+
+/// \brief The 64-bits RNG with smallest state
+/// \ingroup RNG
+using RNGMini_64 = Philox2x32_64;
 
 } // namespace vsmc
 
