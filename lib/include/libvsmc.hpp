@@ -38,12 +38,18 @@
 namespace vsmc
 {
 
+using RNGC = RNG;
+
+using WeightC = Weight;
+
 using StateMatrixCBase = StateMatrix<RowMajor, Dynamic, double>;
 
 class StateMatrixC : public StateMatrixCBase
 {
     public:
+    using rng_set_type = RNGSet<RNGC>;
     using size_type = int;
+    using weight_type = WeightC;
 
     StateMatrixC(int N) : StateMatrixCBase(static_cast<std::size_t>(N)) {}
 }; // class StateMatrixC
@@ -55,6 +61,8 @@ using SingleParticleC = SingleParticle<StateMatrixC>;
 using SamplerC = Sampler<StateMatrixC>;
 
 using MonitorC = Monitor<StateMatrixC>;
+
+using CovarianceC = Covariance<double>;
 
 template <template <typename, typename> class Base>
 class InitializeC : public Base<StateMatrixC, InitializeC<Base>>
@@ -203,14 +211,14 @@ class MonitorEvalC : public Base<StateMatrixC, MonitorEvalC<Base>>
     vsmc_monitor_eval_post_type eval_post_;
 }; // class MonitorEvalC
 
-inline Covariance<double> &cast(const vsmc_covariance &covariance)
+inline CovarianceC &cast(const vsmc_covariance &covariance)
 {
-    return *(reinterpret_cast<Covariance<double> *>(covariance.ptr));
+    return *(reinterpret_cast<CovarianceC *>(covariance.ptr));
 }
 
-inline Covariance<double> *cast(const vsmc_covariance *covariance_ptr)
+inline CovarianceC *cast(const vsmc_covariance *covariance_ptr)
 {
-    return reinterpret_cast<Covariance<double> *>(covariance_ptr->ptr);
+    return reinterpret_cast<CovarianceC *>(covariance_ptr->ptr);
 }
 
 inline ProgramOptionMap &cast(
@@ -235,14 +243,14 @@ inline Progress *cast(const vsmc_progress *progress_ptr)
     return reinterpret_cast<Progress *>(progress_ptr->ptr);
 }
 
-inline RNG &cast(const vsmc_rng &rng)
+inline RNGC &cast(const vsmc_rng &rng)
 {
-    return *(reinterpret_cast<RNG *>(rng.ptr));
+    return *(reinterpret_cast<RNGC *>(rng.ptr));
 }
 
-inline RNG *cast(const vsmc_rng *rng_ptr)
+inline RNGC *cast(const vsmc_rng *rng_ptr)
 {
-    return reinterpret_cast<RNG *>(rng_ptr->ptr);
+    return reinterpret_cast<RNGC *>(rng_ptr->ptr);
 }
 
 inline StopWatch &cast(const vsmc_stop_watch &stop_watch)
@@ -265,14 +273,14 @@ inline StateMatrixC *cast(const vsmc_state_matrix *state_matrix_ptr)
     return reinterpret_cast<StateMatrixC *>(state_matrix_ptr->ptr);
 }
 
-inline Weight &cast(const vsmc_weight &weight)
+inline WeightC &cast(const vsmc_weight &weight)
 {
-    return *(reinterpret_cast<Weight *>(weight.ptr));
+    return *(reinterpret_cast<WeightC *>(weight.ptr));
 }
 
-inline Weight *cast(const vsmc_weight *weight_ptr)
+inline WeightC *cast(const vsmc_weight *weight_ptr)
 {
-    return reinterpret_cast<Weight *>(weight_ptr->ptr);
+    return reinterpret_cast<WeightC *>(weight_ptr->ptr);
 }
 
 inline ParticleC &cast(const vsmc_particle &particle)
@@ -308,7 +316,7 @@ inline SamplerC *cast(const vsmc_sampler *sampler_ptr)
 inline SamplerC::resample_type cast(vsmc_resample_type fptr)
 {
     return [fptr](
-        std::size_t M, std::size_t N, RNG &rng, const double *w, int *rep) {
+        std::size_t M, std::size_t N, RNGC &rng, const double *w, int *rep) {
         vsmc_rng c_rng = {&rng};
         fptr(static_cast<int>(M), static_cast<int>(N), c_rng, w, rep);
     };

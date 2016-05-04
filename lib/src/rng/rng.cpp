@@ -35,7 +35,7 @@ extern "C" {
 
 vsmc_rng vsmc_rng_new(int seed)
 {
-    auto ptr = new ::vsmc::RNG(static_cast<::vsmc::RNG::result_type>(seed));
+    auto ptr = new ::vsmc::RNGC(static_cast<::vsmc::RNGC::result_type>(seed));
     vsmc_rng rng = {ptr};
 
     return rng;
@@ -54,14 +54,14 @@ void vsmc_rng_assign(vsmc_rng rng, vsmc_rng other)
 
 void vsmc_rng_seed(vsmc_rng rng, int seed)
 {
-    ::vsmc::cast(rng).seed(static_cast<::vsmc::RNG::result_type>(seed));
+    ::vsmc::cast(rng).seed(static_cast<::vsmc::RNGC::result_type>(seed));
 }
 
 void vsmc_rng_key(vsmc_rng rng, int n, const int *key)
 {
-    typename ::vsmc::RNG::key_type k;
+    typename ::vsmc::RNGC::key_type k;
     const std::size_t src_size = static_cast<std::size_t>(n) * sizeof(int);
-    const std::size_t dst_size = sizeof(typename ::vsmc::RNG::key_type);
+    const std::size_t dst_size = sizeof(typename ::vsmc::RNGC::key_type);
     const std::size_t size = src_size < dst_size ? src_size : dst_size;
     std::memcpy(k.data(), key, size);
     ::vsmc::cast(rng).key(k);
@@ -69,9 +69,9 @@ void vsmc_rng_key(vsmc_rng rng, int n, const int *key)
 
 void vsmc_rng_ctr(vsmc_rng rng, int n, const int *ctr)
 {
-    typename ::vsmc::RNG::ctr_type c;
+    typename ::vsmc::RNGC::ctr_type c;
     std::size_t src_size = static_cast<std::size_t>(n) * sizeof(int);
-    std::size_t dst_size = sizeof(typename ::vsmc::RNG::ctr_type);
+    std::size_t dst_size = sizeof(typename ::vsmc::RNGC::ctr_type);
     std::size_t size = src_size < dst_size ? src_size : dst_size;
     std::memcpy(c.data(), ctr, size);
     ::vsmc::cast(rng).ctr(c);
@@ -90,7 +90,7 @@ void vsmc_rng_rand(vsmc_rng rng, int n, int *r)
 
 void vsmc_rng_discard(vsmc_rng rng, int nskip)
 {
-    ::vsmc::cast(rng).discard(static_cast<::vsmc::RNG::result_type>(nskip));
+    ::vsmc::cast(rng).discard(static_cast<::vsmc::RNGC::result_type>(nskip));
 }
 
 int vsmc_rng_is_eq(vsmc_rng rng1, vsmc_rng rng2)
@@ -105,7 +105,7 @@ int vsmc_rng_is_neq(vsmc_rng rng1, vsmc_rng rng2)
 
 size_t vsmc_rng_save(vsmc_rng rng, void *mem)
 {
-    std::size_t size = sizeof(::vsmc::RNG);
+    std::size_t size = sizeof(::vsmc::RNGC);
     if (mem != nullptr)
         std::memcpy(mem, rng.ptr, size);
 
@@ -114,7 +114,7 @@ size_t vsmc_rng_save(vsmc_rng rng, void *mem)
 
 void vsmc_rng_load(vsmc_rng rng, void *mem)
 {
-    std::memcpy(rng.ptr, mem, sizeof(::vsmc::RNG));
+    std::memcpy(rng.ptr, mem, sizeof(::vsmc::RNGC));
 }
 
 void vsmc_rng_save_f(vsmc_rng rng, const char *filename)

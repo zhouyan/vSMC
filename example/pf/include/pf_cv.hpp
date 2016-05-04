@@ -188,12 +188,14 @@ class PFCVMove<SMP, vsmc::ColMajor, RNGSetType>
           PFCVMove<SMP, vsmc::ColMajor, RNGSetType>>
 {
     public:
+#if VSMC_HAS_TBB
     std::size_t operator()(std::size_t iter,
         vsmc::Particle<PFCV<vsmc::ColMajor, RNGSetType>> &particle)
     {
         return run_dispatch(
             iter, particle, std::is_same<SMP, vsmc::BackendTBB>());
     }
+#endif
 
     void eval_pre(std::size_t,
         vsmc::Particle<PFCV<vsmc::ColMajor, RNGSetType>> &particle)
@@ -261,6 +263,7 @@ class PFCVMove<SMP, vsmc::ColMajor, RNGSetType>
     vsmc::Vector<double> w_;
     vsmc::Vector<double> v_;
 
+#if VSMC_HAS_TBB
     std::size_t run_dispatch(std::size_t iter,
         vsmc::Particle<PFCV<vsmc::ColMajor, RNGSetType>> &particle,
         std::true_type)
@@ -276,6 +279,7 @@ class PFCVMove<SMP, vsmc::ColMajor, RNGSetType>
             PFCVMove<SMP, vsmc::ColMajor, RNGSetType>>::operator()(iter,
             particle);
     }
+#endif
 }; // class PFCVMove
 
 template <typename SMP, vsmc::MatrixLayout Layout, typename RNGSetType>

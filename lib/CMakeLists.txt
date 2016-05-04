@@ -46,6 +46,7 @@ SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
     ${PROJECT_SOURCE_DIR}/src/rng/seed.cpp
     ${PROJECT_SOURCE_DIR}/src/rng/u01_sequence.cpp
     ${PROJECT_SOURCE_DIR}/src/smp/backend_seq.cpp
+    ${PROJECT_SOURCE_DIR}/src/smp/backend_std.cpp
     ${PROJECT_SOURCE_DIR}/src/utility/aligned_memory.cpp
     ${PROJECT_SOURCE_DIR}/src/utility/covariance.cpp
     ${PROJECT_SOURCE_DIR}/src/utility/hdf5io.cpp

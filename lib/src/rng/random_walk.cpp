@@ -43,7 +43,7 @@ int vsmc_random_walk(vsmc_rng rng, int dim, double *x, double *ltx,
     auto lt = [log_target, dim](
         std::size_t, const double *lx) { return log_target(dim, lx); };
 
-    auto prop = [proposal, rng, dim](::vsmc::RNG &, std::size_t,
+    auto prop = [proposal, rng, dim](::vsmc::RNGC &, std::size_t,
         const double *px, double *py) { return proposal(rng, dim, px, py); };
 
     return static_cast<int>(rw(::vsmc::cast(rng), x, ltx, lt, prop));
@@ -61,7 +61,7 @@ int vsmc_random_walk_g(vsmc_rng rng, int dim_x, int dim_g, double *x,
         const double *lx,
         double *lg) { return log_target(dim_x, dim_g, lx, lg); };
 
-    auto prop = [proposal, rng, dim_x](::vsmc::RNG &, std::size_t,
+    auto prop = [proposal, rng, dim_x](::vsmc::RNGC &, std::size_t,
         const double *px, double *py) { return proposal(rng, dim_x, px, py); };
 
     return static_cast<int>(rw(::vsmc::cast(rng), x, ltx, g, lt, prop));

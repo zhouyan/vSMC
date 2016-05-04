@@ -32,7 +32,7 @@
 #include "libvsmc.hpp"
 
 #define VSMC_DEFINE_RNG_DIST                                                  \
-    ::vsmc::RNG &cpp_rng = ::vsmc::cast(rng);                                 \
+    ::vsmc::RNGC &cpp_rng = ::vsmc::cast(rng);                                \
     for (int i = 0; i != n; ++i)                                              \
         r[i] = dist(cpp_rng);
 
@@ -93,7 +93,7 @@ void vsmc_discrete_rand(
     vsmc_rng rng, int n, int *r, int m, const double *weight, int normalized)
 {
     ::vsmc::DiscreteDistribution<int> dist;
-    ::vsmc::RNG &cpp_rng = ::vsmc::cast(rng);
+    ::vsmc::RNGC &cpp_rng = ::vsmc::cast(rng);
     bool norm = normalized != 0;
     const double *first = weight;
     const double *last = weight + m;

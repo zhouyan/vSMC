@@ -53,7 +53,7 @@ namespace vsmc
 namespace internal
 {
 
-using ::CBLAS_LAYOUT;
+using CBLAS_LAYOUT = ::CBLAS_ORDER;
 using ::CblasRowMajor;
 using ::CblasColMajor;
 
