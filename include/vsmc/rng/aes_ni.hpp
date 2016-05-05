@@ -708,7 +708,7 @@ class AES192KeySeqGenerator
     template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
     {
-        std::array<std::uint64_t> tmp = {{std::get<2>(key), 0}};
+        std::array<std::uint64_t, 2> tmp = {{0, std::get<2>(key)}};
         xmm1_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
         xmm7_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(tmp.data()));
         std::get<0>(rk) = xmm1_;
@@ -910,7 +910,7 @@ class ARSKeySeqImpl
     const std::array<__m128i, Rp1> &operator()(
         std::array<__m128i, Rp1> &rk) const
     {
-        std::array<std::uint64_t> tmp = {{weyl<1>::value, weyl<0>::value}};
+        std::array<std::uint64_t, 2> tmp = {{weyl<0>::value, weyl<1>::value}};
         __m128i w =
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(tmp.data()));
         std::get<0>(rk) = key_;
