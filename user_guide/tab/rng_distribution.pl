@@ -16,7 +16,7 @@ my %cpB;
 my $txt;
 open my $txtfile, '<', 'rng_distribution.txt';
 while (<$txtfile>) {
-    if (/<double>\(.*Passed/) {
+    if (/<double>\(.*(Passed|Failed)/) {
         $txt .= $_;
         my @record = split;
         my $name = shift @record;

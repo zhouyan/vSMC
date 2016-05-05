@@ -33,7 +33,7 @@ sub filter
     my $engine = shift @_;
     my $record;
     foreach (@_) {
-        next if (!/Passed/);
+        next if (!/Passed|Failed/);
 
         my ($rng, $cpB1, $cpB2) = (split)[0, 5, 6];
         if ($engine eq 'STD') {
