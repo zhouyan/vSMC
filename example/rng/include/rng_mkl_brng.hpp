@@ -140,6 +140,8 @@ inline void rng_mkl_brng()
         rng_mkl_brng_properties(brng, #Name, nwid, twid);                     \
     }
 
+#include <vsmc/rng/internal/rng_define_macro_std.hpp>
+
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
     std::cout << std::string(lwid, '-') << std::endl;

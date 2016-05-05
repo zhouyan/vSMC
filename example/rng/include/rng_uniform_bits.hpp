@@ -125,7 +125,12 @@ inline void rng_uniform_bits(std::size_t N, std::size_t M)
 
     std::cout << std::fixed << std::setprecision(2);
     std::cout << std::string(lwid, '-') << std::endl;
+
+#include <vsmc/rng/internal/rng_define_macro_std.hpp>
+
 #include <vsmc/rng/internal/rng_define_macro.hpp>
+
 #include <vsmc/rng/internal/rng_define_macro_mkl.hpp>
+
     std::cout << std::string(lwid, '-') << std::endl;
 }
