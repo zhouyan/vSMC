@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/rng.cpp
+// vSMC/lib/src/rng/rng_seed.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,37 +29,47 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/rng.h>
-#include <vsmc/rng/rng.hpp>
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
 
-#define VSMC_RUNTIME_ASSERT_LIB_RNG_TYPE(rng1, rng2, func)                    \
-    VSMC_RUNTIME_ASSERT((rng1.type == rng2.type),                             \
-        "**vsmc_rng_" #func "CALLED WITH TWO RNG OF DIFFERENT TYPES")
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
+#endif
 
-extern "C" {
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    inline void vsmc_rng_seed_##name(vsmc_rng rng, unsigned seed)             \
+    {                                                                         \
+        reinterpret_cast<RNGType *>(rng.ptr)->seed(                           \
+            static_cast<RNGType::result_type>(seed));                         \
+    }
 
-#include "rng_new.cpp"
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
-#include "rng_delete.cpp"
+#include <vsmc/rng/internal/rng_define_macro.hpp>
 
-#include "rng_assign.cpp"
+using vsmc_rng_seed_type = void (*)(vsmc_rng, unsigned);
 
-#include "rng_seed.cpp"
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
 
-#include "rng_rand.cpp"
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
+#endif
 
-#include "rng_discard.cpp"
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rng_seed_##name,
+#define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
 
-#include "rng_is_eq.cpp"
+static vsmc_rng_seed_type vsmc_rng_seed_dispatch[] = {
 
-#include "rng_is_neq.cpp"
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
-#include "rng_load.cpp"
+#include <vsmc/rng/internal/rng_define_macro.hpp>
 
-#include "rng_load_f.cpp"
+    nullptr}; // vsmc_rng_seed_dispatch
 
-#include "rng_save.cpp"
-
-#include "rng_save_f.cpp"
-
-} // extern "C"
+void vsmc_rng_seed(vsmc_rng rng, unsigned seed)
+{
+    vsmc_rng_seed_dispatch[static_cast<std::size_t>(rng.type)](rng, seed);
+}

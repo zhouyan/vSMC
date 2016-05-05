@@ -11,5 +11,7 @@ user_guide/prg/pf_tbb
 user_guide/prg/pf_tbb_c
 user_guide/prg/program_option
 user_guide/prg/progress
+user_guide/prg/rng
+user_guide/prg/rng_c
 user_guide/tab/rng_distribution_*.tex
 user_guide/tab/rng_engine_*.tex

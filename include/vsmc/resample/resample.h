@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/rng.cpp
+// vSMC/include/vsmc/resample/resample.h
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,37 +29,58 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/rng.h>
-#include <vsmc/rng/rng.hpp>
+#ifndef VSMC_RESAMPLE_RESAMPLE_H
+#define VSMC_RESAMPLE_RESAMPLE_H
 
-#define VSMC_RUNTIME_ASSERT_LIB_RNG_TYPE(rng1, rng2, func)                    \
-    VSMC_RUNTIME_ASSERT((rng1.type == rng2.type),                             \
-        "**vsmc_rng_" #func "CALLED WITH TWO RNG OF DIFFERENT TYPES")
+#include <vsmc/internal/common.h>
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
-#include "rng_new.cpp"
+/// \addtogroup C_API_Resample
+/// @{
 
-#include "rng_delete.cpp"
+/// \brief `vsmc::resample_trans_residual`
+int vsmc_resample_trans_residual(
+    int n, int m, const double *weight, double *resid, int *integ);
 
-#include "rng_assign.cpp"
+/// \brief `vsmc::resample_trans_u01_rep`
+void vsmc_resample_trans_u01_rep(
+    int n, int m, const double *weight, const double *u01, int *replication);
 
-#include "rng_seed.cpp"
+/// \brief `vsmc::resample_trans_rep_index`
+void vsmc_resample_trans_rep_index(
+    int n, int m, const int *replication, int *index);
 
-#include "rng_rand.cpp"
+/// \brief `vsmc::ResampleMultinomial`
+void vsmc_resample_multinomial(
+    int n, int m, vsmc_rng rng, const double *weight, int *replication);
 
-#include "rng_discard.cpp"
+/// \brief `vsmc::ResampleStratified`
+void vsmc_resample_stratified(
+    int n, int m, vsmc_rng rng, const double *weight, int *replication);
 
-#include "rng_is_eq.cpp"
+/// \brief `vsmc::ResampleSystematic`
+void vsmc_resample_systematic(
+    int n, int m, vsmc_rng rng, const double *weight, int *replication);
 
-#include "rng_is_neq.cpp"
+/// \brief `vsmc::ResampleResidual`
+void vsmc_resample_residual(
+    int n, int m, vsmc_rng rng, const double *weight, int *replication);
 
-#include "rng_load.cpp"
+/// \brief `vsmc::ResampleResidualStratified`
+void vsmc_resample_residual_stratified(
+    int n, int m, vsmc_rng rng, const double *weight, int *replication);
 
-#include "rng_load_f.cpp"
+/// \brief `vsmc::ResampleSystematic`
+void vsmc_resample_residual_systematic(
+    int n, int m, vsmc_rng rng, const double *weight, int *replication);
 
-#include "rng_save.cpp"
+/// @} C_API_Resample
 
-#include "rng_save_f.cpp"
-
+#ifdef __cplusplus
 } // extern "C"
+#endif
+
+#endif // VSMC_RESAMPLE_RESAMPLE_H

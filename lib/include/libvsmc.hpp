@@ -317,7 +317,7 @@ inline SamplerC::resample_type cast(vsmc_resample_type fptr)
 {
     return [fptr](
         std::size_t M, std::size_t N, RNGC &rng, const double *w, int *rep) {
-        vsmc_rng c_rng = {&rng};
+        vsmc_rng c_rng = {&rng, vSMCRNG};
         fptr(static_cast<int>(M), static_cast<int>(N), c_rng, w, rep);
     };
 }

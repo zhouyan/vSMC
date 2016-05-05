@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/rng.cpp
+// vSMC/lib/src/rng/rng_is_eq.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,37 +29,50 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/rng.h>
-#include <vsmc/rng/rng.hpp>
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
 
-#define VSMC_RUNTIME_ASSERT_LIB_RNG_TYPE(rng1, rng2, func)                    \
-    VSMC_RUNTIME_ASSERT((rng1.type == rng2.type),                             \
-        "**vsmc_rng_" #func "CALLED WITH TWO RNG OF DIFFERENT TYPES")
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
+#endif
 
-extern "C" {
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    inline int vsmc_rng_is_eq_##name(vsmc_rng rng1, vsmc_rng rng2)            \
+    {                                                                         \
+        VSMC_RUNTIME_ASSERT_LIB_RNG_TYPE(rng1, rng2, vsmc_rng_is_eq);         \
+                                                                              \
+        return static_cast<int>(*reinterpret_cast<RNGType *>(rng1.ptr) ==     \
+            *reinterpret_cast<RNGType *>(rng2.ptr));                          \
+    }
 
-#include "rng_new.cpp"
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
-#include "rng_delete.cpp"
+#include <vsmc/rng/internal/rng_define_macro.hpp>
 
-#include "rng_assign.cpp"
+using vsmc_rng_is_eq_type = int (*)(vsmc_rng, vsmc_rng);
 
-#include "rng_seed.cpp"
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
 
-#include "rng_rand.cpp"
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
+#endif
 
-#include "rng_discard.cpp"
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rng_is_eq_##name,
+#define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
 
-#include "rng_is_eq.cpp"
+static vsmc_rng_is_eq_type vsmc_rng_is_eq_dispatch[] = {
 
-#include "rng_is_neq.cpp"
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
-#include "rng_load.cpp"
+#include <vsmc/rng/internal/rng_define_macro.hpp>
 
-#include "rng_load_f.cpp"
+    nullptr}; // vsmc_rng_is_eq_dispatch
 
-#include "rng_save.cpp"
-
-#include "rng_save_f.cpp"
-
-} // extern "C"
+int vsmc_rng_is_eq(vsmc_rng rng1, vsmc_rng rng2)
+{
+    return vsmc_rng_is_eq_dispatch[static_cast<std::size_t>(rng1.type)](
+        rng1, rng2);
+}

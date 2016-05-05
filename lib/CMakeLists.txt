@@ -34,40 +34,41 @@ PROJECT(vSMCLib CXX)
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
 SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
-    ${PROJECT_SOURCE_DIR}/src/core/monitor.cpp
-    ${PROJECT_SOURCE_DIR}/src/core/particle.cpp
-    ${PROJECT_SOURCE_DIR}/src/core/sampler.cpp
-    ${PROJECT_SOURCE_DIR}/src/core/state_matrix.cpp
-    ${PROJECT_SOURCE_DIR}/src/core/weight.cpp
-    ${PROJECT_SOURCE_DIR}/src/resample/resample.cpp
-    ${PROJECT_SOURCE_DIR}/src/rng/distribution.cpp
+    # ${PROJECT_SOURCE_DIR}/src/core/monitor.cpp
+    # ${PROJECT_SOURCE_DIR}/src/core/particle.cpp
+    # ${PROJECT_SOURCE_DIR}/src/core/sampler.cpp
+    # ${PROJECT_SOURCE_DIR}/src/core/state_matrix.cpp
+    # ${PROJECT_SOURCE_DIR}/src/core/weight.cpp
+    # ${PROJECT_SOURCE_DIR}/src/resample/resample.cpp
+    # ${PROJECT_SOURCE_DIR}/src/rng/distribution.cpp
     ${PROJECT_SOURCE_DIR}/src/rng/rng.cpp
-    ${PROJECT_SOURCE_DIR}/src/rng/random_walk.cpp
-    ${PROJECT_SOURCE_DIR}/src/rng/seed.cpp
-    ${PROJECT_SOURCE_DIR}/src/rng/u01_sequence.cpp
-    ${PROJECT_SOURCE_DIR}/src/smp/backend_seq.cpp
-    ${PROJECT_SOURCE_DIR}/src/smp/backend_std.cpp
-    ${PROJECT_SOURCE_DIR}/src/utility/aligned_memory.cpp
-    ${PROJECT_SOURCE_DIR}/src/utility/covariance.cpp
-    ${PROJECT_SOURCE_DIR}/src/utility/hdf5io.cpp
-    ${PROJECT_SOURCE_DIR}/src/utility/program_option.cpp
-    ${PROJECT_SOURCE_DIR}/src/utility/progress.cpp
-    ${PROJECT_SOURCE_DIR}/src/utility/stop_watch.cpp)
+    # ${PROJECT_SOURCE_DIR}/src/rng/random_walk.cpp
+    # ${PROJECT_SOURCE_DIR}/src/rng/seed.cpp
+    # ${PROJECT_SOURCE_DIR}/src/rng/u01_sequence.cpp
+    # ${PROJECT_SOURCE_DIR}/src/smp/backend_seq.cpp
+    # ${PROJECT_SOURCE_DIR}/src/smp/backend_std.cpp
+    # ${PROJECT_SOURCE_DIR}/src/utility/aligned_memory.cpp
+    # ${PROJECT_SOURCE_DIR}/src/utility/covariance.cpp
+    # ${PROJECT_SOURCE_DIR}/src/utility/hdf5io.cpp
+    # ${PROJECT_SOURCE_DIR}/src/utility/program_option.cpp
+    # ${PROJECT_SOURCE_DIR}/src/utility/progress.cpp
+    # ${PROJECT_SOURCE_DIR}/src/utility/stop_watch.cpp
+    )
 
 IF(MKL_FOUND)
     SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
         ${PROJECT_SOURCE_DIR}/src/rng/mkl_brng.cpp)
 ENDIF(MKL_FOUND)
 
-IF(OPENMP_FOUND)
-    SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
-        ${PROJECT_SOURCE_DIR}/src/smp/backend_omp.cpp)
-ENDIF(OPENMP_FOUND)
+# IF(OPENMP_FOUND)
+#     SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
+#         ${PROJECT_SOURCE_DIR}/src/smp/backend_omp.cpp)
+# ENDIF(OPENMP_FOUND)
 
-IF(TBB_FOUND)
-    SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
-        ${PROJECT_SOURCE_DIR}/src/smp/backend_tbb.cpp)
-ENDIF(TBB_FOUND)
+# IF(TBB_FOUND)
+#     SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
+#         ${PROJECT_SOURCE_DIR}/src/smp/backend_tbb.cpp)
+# ENDIF(TBB_FOUND)
 
 SET(VSMC_LIB_TYPE ${VSMC_LIB_TYPE} shared)
 SET(VSMC_LIB_TYPE ${VSMC_LIB_TYPE} static)

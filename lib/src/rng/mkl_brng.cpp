@@ -40,6 +40,8 @@
 
 extern "C" {
 
+#include <vsmc/rng/internal/rng_define_macro_std.hpp>
+
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
 } // extern "C"

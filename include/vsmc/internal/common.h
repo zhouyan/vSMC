@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/rng.cpp
+// vSMC/include/vsmc/internal/common.h
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,37 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/rng.h>
-#include <vsmc/rng/rng.hpp>
+#ifndef VSMC_INTERNAL_COMMON_H
+#define VSMC_INTERNAL_COMMON_H
 
-#define VSMC_RUNTIME_ASSERT_LIB_RNG_TYPE(rng1, rng2, func)                    \
-    VSMC_RUNTIME_ASSERT((rng1.type == rng2.type),                             \
-        "**vsmc_rng_" #func "CALLED WITH TWO RNG OF DIFFERENT TYPES")
+#include <vsmc/internal/defines.h>
+#include <stddef.h>
 
-extern "C" {
-
-#include "rng_new.cpp"
-
-#include "rng_delete.cpp"
-
-#include "rng_assign.cpp"
-
-#include "rng_seed.cpp"
-
-#include "rng_rand.cpp"
-
-#include "rng_discard.cpp"
-
-#include "rng_is_eq.cpp"
-
-#include "rng_is_neq.cpp"
-
-#include "rng_load.cpp"
-
-#include "rng_load_f.cpp"
-
-#include "rng_save.cpp"
-
-#include "rng_save_f.cpp"
-
-} // extern "C"
+#endif // VSMC_INTERNAL_COMMON_H
