@@ -40,6 +40,19 @@
 namespace vsmc
 {
 
+namespace internal
+{
+
+template <typename IntType>
+inline ::tbb::blocked_range<IntType> backend_tbb_range(
+    IntType N, std::size_t grainsize)
+{
+    return grainsize == 0 ? ::tbb::blocked_range<IntType>(0, N) :
+                            ::tbb::blocked_range<IntType>(0, N, grainsize);
+}
+
+} // namespace internal
+
 /// \brief SMP implementation ID for Intel Threading Building Blocks
 /// \ingroup TBB
 class BackendTBB;
@@ -96,10 +109,10 @@ class InitializeSMP<BackendTBB, T, Derived> : public InitializeBase<T, Derived>
     {
         this->eval_param(particle, param);
         this->eval_pre(particle);
-        const ::tbb::blocked_range<typename Particle<T>::size_type> range(
-            0, particle.size(), grainsize);
         work_type work(this, &particle);
-        ::tbb::parallel_reduce(range, work, std::forward<Args>(args)...);
+        ::tbb::parallel_reduce(
+            internal::backend_tbb_range(particle.size(), grainsize), work,
+            std::forward<Args>(args)...);
         this->eval_post(particle);
 
         return work.accept();
@@ -166,10 +179,10 @@ class MoveSMP<BackendTBB, T, Derived> : public MoveBase<T, Derived>
         std::size_t grainsize, Args &&... args)
     {
         this->eval_pre(iter, particle);
-        const ::tbb::blocked_range<typename Particle<T>::size_type> range(
-            0, particle.size(), grainsize);
         work_type work(this, iter, &particle);
-        ::tbb::parallel_reduce(range, work, std::forward<Args>(args)...);
+        ::tbb::parallel_reduce(
+            internal::backend_tbb_range(particle.size(), grainsize), work,
+            std::forward<Args>(args)...);
         this->eval_post(iter, particle);
 
         return work.accept();
@@ -177,7 +190,7 @@ class MoveSMP<BackendTBB, T, Derived> : public MoveBase<T, Derived>
 
     std::size_t run(std::size_t iter, Particle<T> &particle)
     {
-        return run(iter, particle, 1);
+        return run(iter, particle, 0);
     }
 }; // class MoveSMP
 
@@ -228,10 +241,10 @@ class MonitorEvalSMP<BackendTBB, T, Derived>
         double *r, std::size_t grainsize, Args &&... args)
     {
         this->eval_pre(iter, particle);
-        const ::tbb::blocked_range<typename Particle<T>::size_type> range(
-            0, particle.size(), grainsize);
         work_type work(this, iter, dim, &particle, r);
-        ::tbb::parallel_for(range, work, std::forward<Args>(args)...);
+        ::tbb::parallel_for(
+            internal::backend_tbb_range(particle.size(), grainsize), work,
+            std::forward<Args>(args)...);
         this->eval_post(iter, particle);
     }
 
