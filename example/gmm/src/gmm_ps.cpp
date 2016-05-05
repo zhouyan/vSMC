@@ -44,6 +44,8 @@ int main(int argc, char **argv)
     option.add("c", "Number of components", &c, c);
     option.add("power", "Power of the prior annealing", &power, 2);
     option.process(argc, argv);
+    if (option.count("help"))
+        return 0;
 
     gmm_ps(N, n, c, power);
 
