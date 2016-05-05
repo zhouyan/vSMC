@@ -1,6 +1,28 @@
 \chapter{Mathematical operations}
 \label{chap:Mathemtical operations}
 
+\section{Using the BLAS library}
+\label{sec:Using the BLAS library}
+
+The library requires a working \blas implementation. Internally, the library
+use the standard C interface, such as \verb|cblas_dgemv|. Though this interface
+has been standardized for years, it is not universally available. If the
+\verb|cblas.h| header is not available or the runtime library does not have the
+required functions defined, then one should define the configuration macro
+\verb|VSMC_HAS_CBLAS| to zero. By default, this macro is defined to one if
+either \verb|VSMC_USE_MKL_CBLAS| or \verb|VSMC_USE_ACCELERATE| (see
+table~\ref{tab:Configuration macros for feature usability}) are non-zero.
+
+When the C interface is not available, the library declares the standard
+Fortran subroutines in C itself, such as \verb|dgemv_|. If there should be no
+underscore appending the function name, then one can define the macro
+\verb|VSMC_BLAS_NAME_NO_UNDERSCORE|. Alternatively, one can define the macro
+\verb|VSMC_BLAS_NAME| directly. For example, if the name C function name has
+an underscore in front of the Fortran subroutine name,
+\begin{Verbatim}
+  #define VSMC_BLAS_NAME(x) _##x##_
+\end{Verbatim}
+
 \section{Constants}
 \label{sec:Constants}
 

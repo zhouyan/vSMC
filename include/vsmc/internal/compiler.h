@@ -91,10 +91,6 @@
 #error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
 #endif
 
-#ifndef VSMC_INT64
-#define VSMC_INT64 long long
-#endif
-
 #ifndef VSMC_HAS_X86
 #if defined(i386) || defined(__i386) || defined(__i386__) ||                  \
     defined(_M_IX86) || defined(_X86_) || defined(__x86_64) ||                \

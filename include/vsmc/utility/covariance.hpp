@@ -82,8 +82,8 @@ class Covariance
         if (mean == nullptr && cov == nullptr)
             return;
 
-        internal::size_check<VSMC_CBLAS_INT>(p, "Covariance::operator()");
-        internal::size_check<VSMC_CBLAS_INT>(n, "Covariance::operator()");
+        internal::size_check<VSMC_BLAS_INT>(p, "Covariance::operator()");
+        internal::size_check<VSMC_BLAS_INT>(n, "Covariance::operator()");
 
         result_type sw = w == nullptr ?
             static_cast<result_type>(n) :
@@ -145,9 +145,9 @@ class Covariance
     {
         internal::cblas_sgemv(layout == RowMajor ? internal::CblasRowMajor :
                                                    internal::CblasColMajor,
-            internal::CblasTrans, static_cast<VSMC_CBLAS_INT>(n),
-            static_cast<VSMC_CBLAS_INT>(p), 1.0, x,
-            static_cast<VSMC_CBLAS_INT>(layout == RowMajor ? p : n), w, 1, 0.0,
+            internal::CblasTrans, static_cast<VSMC_BLAS_INT>(n),
+            static_cast<VSMC_BLAS_INT>(p), 1.0, x,
+            static_cast<VSMC_BLAS_INT>(layout == RowMajor ? p : n), w, 1, 0.0,
             mean_.data(), 1);
     }
 
@@ -156,38 +156,36 @@ class Covariance
     {
         internal::cblas_dgemv(layout == RowMajor ? internal::CblasRowMajor :
                                                    internal::CblasColMajor,
-            internal::CblasTrans, static_cast<VSMC_CBLAS_INT>(n),
-            static_cast<VSMC_CBLAS_INT>(p), 1.0, x,
-            static_cast<VSMC_CBLAS_INT>(layout == RowMajor ? p : n), w, 1, 0.0,
+            internal::CblasTrans, static_cast<VSMC_BLAS_INT>(n),
+            static_cast<VSMC_BLAS_INT>(p), 1.0, x,
+            static_cast<VSMC_BLAS_INT>(layout == RowMajor ? p : n), w, 1, 0.0,
             mean_.data(), 1);
     }
 
     static float swsqr(std::size_t n, const float *w)
     {
-        return internal::cblas_sdot(
-            static_cast<VSMC_CBLAS_INT>(n), w, 1, w, 1);
+        return internal::cblas_sdot(static_cast<VSMC_BLAS_INT>(n), w, 1, w, 1);
     }
 
     static double swsqr(std::size_t n, const double *w)
     {
-        return internal::cblas_ddot(
-            static_cast<VSMC_CBLAS_INT>(n), w, 1, w, 1);
+        return internal::cblas_ddot(static_cast<VSMC_BLAS_INT>(n), w, 1, w, 1);
     }
 
     void cov_init(MatrixLayout layout, std::size_t p, float *)
     {
         internal::cblas_ssyr(layout == RowMajor ? internal::CblasRowMajor :
                                                   internal::CblasColMajor,
-            internal::CblasLower, static_cast<VSMC_CBLAS_INT>(p), 1,
-            mean_.data(), 1, cov_.data(), static_cast<VSMC_CBLAS_INT>(p));
+            internal::CblasLower, static_cast<VSMC_BLAS_INT>(p), 1,
+            mean_.data(), 1, cov_.data(), static_cast<VSMC_BLAS_INT>(p));
     }
 
     void cov_init(MatrixLayout layout, std::size_t p, double *)
     {
         internal::cblas_dsyr(layout == RowMajor ? internal::CblasRowMajor :
                                                   internal::CblasColMajor,
-            internal::CblasLower, static_cast<VSMC_CBLAS_INT>(p), 1,
-            mean_.data(), 1, cov_.data(), static_cast<VSMC_CBLAS_INT>(p));
+            internal::CblasLower, static_cast<VSMC_BLAS_INT>(p), 1,
+            mean_.data(), 1, cov_.data(), static_cast<VSMC_BLAS_INT>(p));
     }
 
     void cov_update(MatrixLayout layout, std::size_t n, std::size_t p,
@@ -196,9 +194,9 @@ class Covariance
         internal::cblas_ssyrk(layout == RowMajor ? internal::CblasRowMajor :
                                                    internal::CblasColMajor,
             internal::CblasLower, internal::CblasTrans,
-            static_cast<VSMC_CBLAS_INT>(p), static_cast<VSMC_CBLAS_INT>(n), B,
-            x, static_cast<VSMC_CBLAS_INT>(layout == RowMajor ? p : n), -BW,
-            cov_.data(), static_cast<VSMC_CBLAS_INT>(p));
+            static_cast<VSMC_BLAS_INT>(p), static_cast<VSMC_BLAS_INT>(n), B, x,
+            static_cast<VSMC_BLAS_INT>(layout == RowMajor ? p : n), -BW,
+            cov_.data(), static_cast<VSMC_BLAS_INT>(p));
     }
 
     void cov_update(MatrixLayout layout, std::size_t n, std::size_t p,
@@ -207,9 +205,9 @@ class Covariance
         internal::cblas_dsyrk(layout == RowMajor ? internal::CblasRowMajor :
                                                    internal::CblasColMajor,
             internal::CblasLower, internal::CblasTrans,
-            static_cast<VSMC_CBLAS_INT>(p), static_cast<VSMC_CBLAS_INT>(n), B,
-            x, static_cast<VSMC_CBLAS_INT>(layout == RowMajor ? p : n), -BW,
-            cov_.data(), static_cast<VSMC_CBLAS_INT>(p));
+            static_cast<VSMC_BLAS_INT>(p), static_cast<VSMC_BLAS_INT>(n), B, x,
+            static_cast<VSMC_BLAS_INT>(layout == RowMajor ? p : n), -BW,
+            cov_.data(), static_cast<VSMC_BLAS_INT>(p));
     }
 
     void cov_pack(std::size_t p, result_type *cov, MatrixLayout layout,

@@ -84,7 +84,7 @@
 #endif
 #endif // _XOPEN_SOURCE >= 600
 #endif // VSMC_MACOSX
-#endif
+#endif // VSMC_OPENCL
 
 #ifndef VSMC_HAS_POSIX
 #define VSMC_HAS_POSIX 0
@@ -152,6 +152,14 @@
 #else
 #define VSMC_USE_ACCELERATE 0
 #endif
-#endif // VSMC_USE_ACCELERATE
+#endif
+
+#ifndef VSMC_HAS_CBLAS
+#if VSMC_USE_MKL_CBLAS || VSMC_USE_ACCELERATE
+#define VSMC_HAS_CBLAS 1
+#else
+#define VSMC_HAS_CBLAS 0
+#endif
+#endif
 
 #endif // VSMC_INTERNAL_CONFIG_H

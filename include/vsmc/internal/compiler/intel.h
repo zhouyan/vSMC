@@ -34,10 +34,6 @@
 
 #define VSMC_INTEL_VERSION __INTEL_COMPILER
 
-#ifndef VSMC_INT64
-#define VSMC_INT64 __int64
-#endif
-
 #ifdef __x86_64__
 #ifndef VSMC_HAS_INT128
 #define VSMC_HAS_INT128 1

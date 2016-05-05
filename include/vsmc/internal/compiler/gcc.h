@@ -35,10 +35,6 @@
 #define VSMC_GCC_VERSION                                                      \
     (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 
-#ifndef VSMC_INT64
-#define VSMC_INT64 long long
-#endif
-
 #ifdef __x86_64__
 #ifndef VSMC_HAS_INT128
 #define VSMC_HAS_INT128 1

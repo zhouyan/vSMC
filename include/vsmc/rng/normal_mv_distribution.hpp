@@ -219,7 +219,7 @@ class NormalMVDistribution
         const result_type *mean = nullptr, const result_type *chol = nullptr)
         : param_(mean, chol)
     {
-        internal::size_check<VSMC_CBLAS_INT>(
+        internal::size_check<VSMC_BLAS_INT>(
             Dim, "NormalMVDistribution::NormalMVDistribution");
         reset();
     }
@@ -229,7 +229,7 @@ class NormalMVDistribution
         const result_type *mean = nullptr, const result_type *chol = nullptr)
         : param_(dim, mean, chol)
     {
-        internal::size_check<VSMC_CBLAS_INT>(
+        internal::size_check<VSMC_BLAS_INT>(
             dim, "NormalMVDistribution::NormalMVDistribution");
         reset();
     }
@@ -351,14 +351,14 @@ class NormalMVDistribution
     {
         internal::cblas_stpmv(internal::CblasRowMajor, internal::CblasLower,
             internal::CblasNoTrans, internal::CblasNonUnit,
-            static_cast<VSMC_CBLAS_INT>(dim()), param.chol(), r, 1);
+            static_cast<VSMC_BLAS_INT>(dim()), param.chol(), r, 1);
     }
 
     void mulchol(double *r, const param_type &param)
     {
         internal::cblas_dtpmv(internal::CblasRowMajor, internal::CblasLower,
             internal::CblasNoTrans, internal::CblasNonUnit,
-            static_cast<VSMC_CBLAS_INT>(dim()), param.chol(), r, 1);
+            static_cast<VSMC_BLAS_INT>(dim()), param.chol(), r, 1);
     }
 }; // class NormalMVDistribution
 
@@ -369,18 +369,18 @@ inline void normal_mv_distribution_mulchol(
     std::size_t n, float *r, std::size_t dim, const float *chol)
 {
     cblas_strmm(CblasRowMajor, CblasRight, CblasLower, CblasTrans,
-        CblasNonUnit, static_cast<VSMC_CBLAS_INT>(n),
-        static_cast<VSMC_CBLAS_INT>(dim), 1, chol,
-        static_cast<VSMC_CBLAS_INT>(dim), r, static_cast<VSMC_CBLAS_INT>(dim));
+        CblasNonUnit, static_cast<VSMC_BLAS_INT>(n),
+        static_cast<VSMC_BLAS_INT>(dim), 1, chol,
+        static_cast<VSMC_BLAS_INT>(dim), r, static_cast<VSMC_BLAS_INT>(dim));
 }
 
 inline void normal_mv_distribution_mulchol(
     std::size_t n, double *r, std::size_t dim, const double *chol)
 {
     cblas_dtrmm(CblasRowMajor, CblasRight, CblasLower, CblasTrans,
-        CblasNonUnit, static_cast<VSMC_CBLAS_INT>(n),
-        static_cast<VSMC_CBLAS_INT>(dim), 1, chol,
-        static_cast<VSMC_CBLAS_INT>(dim), r, static_cast<VSMC_CBLAS_INT>(dim));
+        CblasNonUnit, static_cast<VSMC_BLAS_INT>(n),
+        static_cast<VSMC_BLAS_INT>(dim), 1, chol,
+        static_cast<VSMC_BLAS_INT>(dim), r, static_cast<VSMC_BLAS_INT>(dim));
 }
 
 } // namespace vsmc::internal
@@ -395,8 +395,8 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
         "**normal_mv_distribution** USED WITH RealType OTHER THAN float OR "
         "double");
 
-    internal::size_check<VSMC_CBLAS_INT>(n, "normal_mv_distribution");
-    internal::size_check<VSMC_CBLAS_INT>(dim, "normal_mv_distribution");
+    internal::size_check<VSMC_BLAS_INT>(n, "normal_mv_distribution");
+    internal::size_check<VSMC_BLAS_INT>(dim, "normal_mv_distribution");
 
     normal_distribution(rng, n * dim, r, 0.0, 1.0);
     if (chol != nullptr) {

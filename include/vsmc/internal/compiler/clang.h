@@ -35,10 +35,6 @@
 #define VSMC_CLANG_VERSION                                                    \
     (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 
-#ifndef VSMC_INT64
-#define VSMC_INT64 long long
-#endif
-
 #ifdef __x86_64__
 #ifndef VSMC_HAS_INT128
 #define VSMC_HAS_INT128 1

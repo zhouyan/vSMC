@@ -29,28 +29,26 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_MATH_CBLAS_H
-#define VSMC_MATH_CBLAS_H
+#ifndef VSMC_MATH_CBLAS_HPP
+#define VSMC_MATH_CBLAS_HPP
 
 #include <vsmc/internal/config.h>
 
+#if VSMC_HAS_CBLAS
+
 #if VSMC_USE_MKL_CBLAS
 #include <mkl_cblas.h>
-#define VSMC_CBLAS_INT MKL_INT
+#ifndef VSMC_BLAS_INT
+#define VSMC_BLAS_INT MKL_INT
+#endif
 #elif VSMC_USE_ACCELERATE
 #include <Accelerate/Accelerate.h>
-#define VSMC_CBLAS_INT int
 #else
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include <cblas.h>
-#ifdef __cplusplus
-} // extern "C"
 #endif
-#ifndef VSMC_CBLAS_INT
-#define VSMC_CBLAS_INT int
-#endif
+
+#ifndef VSMC_BLAS_INT
+#define VSMC_BLAS_INT int
 #endif
 
 namespace vsmc
@@ -97,4 +95,287 @@ using ::cblas_dsyrk;
 
 } // namespace vsmc
 
-#endif // VSMC_MATH_CBLAS_H
+#else // VSMC_HAS_CBLAS
+
+#ifndef VSMC_BLAS_NAME
+#ifdef VSMC_BLAS_NAME_NO_UNDERSCORE
+#define VSMC_BLAS_NAME(x) x
+#else
+#define VSMC_BLAS_NAME(x) x##_
+#endif
+#endif
+
+#ifndef VSMC_BLAS_INT
+#define VSMC_BLAS_INT int
+#endif
+
+extern "C" {
+
+void VSMC_BLAS_NAME(sgemv)(const char *trans, const VSMC_BLAS_INT *m,
+    const VSMC_BLAS_INT *n, const float *alpha, const float *a,
+    const VSMC_BLAS_INT *lda, const float *x, const VSMC_BLAS_INT *incx,
+    const float *beta, float *y, const VSMC_BLAS_INT *incy);
+
+void VSMC_BLAS_NAME(dgemv)(const char *trans, const VSMC_BLAS_INT *m,
+    const VSMC_BLAS_INT *n, const double *alpha, const double *a,
+    const VSMC_BLAS_INT *lda, const double *x, const VSMC_BLAS_INT *incx,
+    const double *beta, double *y, const VSMC_BLAS_INT *incy);
+
+void VSMC_BLAS_NAME(stpmv)(const char *uplo, const char *trans,
+    const char *diag, const VSMC_BLAS_INT *n, const float *ap, float *x,
+    const VSMC_BLAS_INT *incx);
+
+void VSMC_BLAS_NAME(dtpmv)(const char *uplo, const char *trans,
+    const char *diag, const VSMC_BLAS_INT *n, const double *ap, double *x,
+    const VSMC_BLAS_INT *incx);
+
+void VSMC_BLAS_NAME(ssyr)(const char *uplo, const VSMC_BLAS_INT *n,
+    const float *alpha, const float *x, const VSMC_BLAS_INT *incx, float *a,
+    const VSMC_BLAS_INT *lda);
+
+void VSMC_BLAS_NAME(dsyr)(const char *uplo, const VSMC_BLAS_INT *n,
+    const double *alpha, const double *x, const VSMC_BLAS_INT *incx, double *a,
+    const VSMC_BLAS_INT *lda);
+
+void VSMC_BLAS_NAME(strmm)(const char *side, const char *uplo,
+    const char *transa, const char *diag, const VSMC_BLAS_INT *m,
+    const VSMC_BLAS_INT *n, const float *alpha, const float *a,
+    const VSMC_BLAS_INT *lda, float *b, const VSMC_BLAS_INT *ldb);
+
+void VSMC_BLAS_NAME(dtrmm)(const char *side, const char *uplo,
+    const char *transa, const char *diag, const VSMC_BLAS_INT *m,
+    const VSMC_BLAS_INT *n, const double *alpha, const double *a,
+    const VSMC_BLAS_INT *lda, double *b, const VSMC_BLAS_INT *ldb);
+
+void VSMC_BLAS_NAME(ssyrk)(const char *uplo, const char *trans,
+    const VSMC_BLAS_INT *n, const VSMC_BLAS_INT *k, const float *alpha,
+    const float *a, const VSMC_BLAS_INT *lda, const float *beta, float *c,
+    const VSMC_BLAS_INT *ldc);
+
+void VSMC_BLAS_NAME(dsyrk)(const char *uplo, const char *trans,
+    const VSMC_BLAS_INT *n, const VSMC_BLAS_INT *k, const double *alpha,
+    const double *a, const VSMC_BLAS_INT *lda, const double *beta, double *c,
+    const VSMC_BLAS_INT *ldc);
+
+} // extern "C"
+
+namespace vsmc
+{
+
+namespace internal
+{
+
+enum CBLAS_LAYOUT { CblasRowMajor = 101, CblasColMajor = 102 };
+
+using CBLAS_ORDER = CBLAS_LAYOUT;
+
+enum CBLAS_TRANSPOSE {
+    CblasNoTrans = 111,
+    CblasTrans = 112,
+    CblasConjTrans = 113
+};
+
+enum CBLAS_UPLO { CblasUpper = 121, CblasLower = 122 };
+
+enum CBLAS_DIAG { CblasNonUnit = 131, CblasUnit = 132 };
+
+enum CBLAS_SIDE { CblasLeft = 141, CblasRight = 142 };
+
+inline char cblas_trans(const CBLAS_LAYOUT layout, const CBLAS_TRANSPOSE trans)
+{
+    if (layout == CblasColMajor) {
+        if (trans == CblasNoTrans)
+            return 'N';
+        else if (trans == CblasTrans)
+            return 'T';
+        else if (trans == CblasConjTrans)
+            return 'C';
+    }
+    if (layout == CblasRowMajor) {
+        if (trans == CblasNoTrans)
+            return 'T';
+        else if (trans == CblasTrans)
+            return 'N';
+        else if (trans == CblasConjTrans)
+            return 'N';
+    }
+    return 'N';
+}
+
+inline char cblas_uplo(const CBLAS_LAYOUT layout, const CBLAS_UPLO uplo)
+{
+    if (layout == CblasColMajor) {
+        if (uplo == CblasUpper)
+            return 'U';
+        if (uplo == CblasLower)
+            return 'L';
+    }
+    if (layout == CblasRowMajor) {
+        if (uplo == CblasUpper)
+            return 'L';
+        if (uplo == CblasLower)
+            return 'U';
+    }
+    return 'U';
+}
+
+inline char cblas_diag(const CBLAS_DIAG diag)
+{
+    if (diag == CblasUnit)
+        return 'U';
+    if (diag == CblasNonUnit)
+        return 'N';
+    return 'N';
+}
+
+inline char cblas_side(const CBLAS_LAYOUT layout, const CBLAS_SIDE side)
+{
+    if (layout == CblasColMajor) {
+        if (side == CblasLeft)
+            return 'L';
+        if (side == CblasRight)
+            return 'R';
+    }
+    if (layout == CblasRowMajor) {
+        if (side == CblasLeft)
+            return 'R';
+        if (side == CblasRight)
+            return 'L';
+    }
+    return 'L';
+}
+
+inline float cblas_sdot(const VSMC_BLAS_INT n, const float *x,
+    const VSMC_BLAS_INT incx, const float *y, const VSMC_BLAS_INT incy)
+{
+    float s = 0;
+    for (VSMC_BLAS_INT i = 0; i != n; ++i, x += incx, y += incy)
+        s += (*x) * (*y);
+
+    return s;
+}
+
+inline double cblas_ddot(const VSMC_BLAS_INT n, const double *x,
+    const VSMC_BLAS_INT incx, const double *y, const VSMC_BLAS_INT incy)
+{
+    double s = 0;
+    for (VSMC_BLAS_INT i = 0; i != n; ++i, x += incx, y += incy)
+        s += (*x) * (*y);
+
+    return s;
+}
+
+inline void cblas_sgemv(const CBLAS_LAYOUT layout, const CBLAS_TRANSPOSE trans,
+    const VSMC_BLAS_INT m, const VSMC_BLAS_INT n, const float alpha,
+    const float *a, const VSMC_BLAS_INT lda, const float *x,
+    const VSMC_BLAS_INT incx, const float beta, float *y,
+    const VSMC_BLAS_INT incy)
+{
+    const char transf = cblas_trans(layout, trans);
+    VSMC_BLAS_NAME(sgemv)
+    (&transf, &m, &n, &alpha, a, &lda, x, &incx, &beta, y, &incy);
+}
+
+inline void cblas_dgemv(const CBLAS_LAYOUT layout, const CBLAS_TRANSPOSE trans,
+    const VSMC_BLAS_INT m, const VSMC_BLAS_INT n, const double alpha,
+    const double *a, const VSMC_BLAS_INT lda, const double *x,
+    const VSMC_BLAS_INT incx, const double beta, double *y,
+    const VSMC_BLAS_INT incy)
+{
+    const char transf = cblas_trans(layout, trans);
+    VSMC_BLAS_NAME(dgemv)
+    (&transf, &m, &n, &alpha, a, &lda, x, &incx, &beta, y, &incy);
+}
+
+inline void cblas_stpmv(const CBLAS_LAYOUT layout, const CBLAS_UPLO uplo,
+    const CBLAS_TRANSPOSE trans, const CBLAS_DIAG diag, const VSMC_BLAS_INT n,
+    const float *ap, float *x, const VSMC_BLAS_INT incx)
+{
+    const char uplof = cblas_uplo(layout, uplo);
+    const char transf = cblas_trans(layout, trans);
+    const char diagf = cblas_diag(diag);
+    VSMC_BLAS_NAME(stpmv)(&uplof, &transf, &diagf, &n, ap, x, &incx);
+}
+
+inline void cblas_dtpmv(CBLAS_LAYOUT layout, const CBLAS_UPLO uplo,
+    const CBLAS_TRANSPOSE trans, const CBLAS_DIAG diag, const VSMC_BLAS_INT n,
+    const double *ap, double *x, const VSMC_BLAS_INT incx)
+{
+    const char uplof = cblas_uplo(layout, uplo);
+    const char transf = cblas_trans(layout, trans);
+    const char diagf = cblas_diag(diag);
+    VSMC_BLAS_NAME(dtpmv)(&uplof, &transf, &diagf, &n, ap, x, &incx);
+}
+
+inline void cblas_ssyr(const CBLAS_LAYOUT layout, const CBLAS_UPLO uplo,
+    const VSMC_BLAS_INT n, const float alpha, const float *x,
+    const VSMC_BLAS_INT incx, float *a, const VSMC_BLAS_INT lda)
+{
+    const char uplof = cblas_uplo(layout, uplo);
+    VSMC_BLAS_NAME(ssyr)(&uplof, &n, &alpha, x, &incx, a, &lda);
+}
+
+inline void cblas_dsyr(const CBLAS_LAYOUT layout, const CBLAS_UPLO uplo,
+    const VSMC_BLAS_INT n, const double alpha, const double *x,
+    const VSMC_BLAS_INT incx, double *a, const VSMC_BLAS_INT lda)
+{
+    const char uplof = cblas_uplo(layout, uplo);
+    VSMC_BLAS_NAME(dsyr)(&uplof, &n, &alpha, x, &incx, a, &lda);
+}
+
+inline void cblas_strmm(const CBLAS_LAYOUT layout, const CBLAS_SIDE side,
+    const CBLAS_UPLO uplo, const CBLAS_TRANSPOSE trans, const CBLAS_DIAG diag,
+    const VSMC_BLAS_INT m, const VSMC_BLAS_INT n, const float alpha,
+    const float *a, const VSMC_BLAS_INT lda, float *b, const VSMC_BLAS_INT ldb)
+{
+    const char sidef = cblas_side(layout, side);
+    const char uplof = cblas_uplo(layout, uplo);
+    const char transf = cblas_trans(CblasColMajor, trans);
+    const char diagf = cblas_diag(diag);
+    VSMC_BLAS_NAME(strmm)
+    (&sidef, &uplof, &transf, &diagf, &m, &n, &alpha, a, &lda, b, &ldb);
+}
+
+inline void cblas_dtrmm(const CBLAS_LAYOUT layout, const CBLAS_SIDE side,
+    const CBLAS_UPLO uplo, const CBLAS_TRANSPOSE trans, const CBLAS_DIAG diag,
+    const VSMC_BLAS_INT m, const VSMC_BLAS_INT n, const double alpha,
+    const double *a, const VSMC_BLAS_INT lda, double *b,
+    const VSMC_BLAS_INT ldb)
+{
+    const char sidef = cblas_side(layout, side);
+    const char uplof = cblas_uplo(layout, uplo);
+    const char transf = cblas_trans(CblasColMajor, trans);
+    const char diagf = cblas_diag(diag);
+    VSMC_BLAS_NAME(dtrmm)
+    (&sidef, &uplof, &transf, &diagf, &m, &n, &alpha, a, &lda, b, &ldb);
+}
+
+inline void cblas_ssyrk(const CBLAS_LAYOUT layout, const CBLAS_UPLO uplo,
+    const CBLAS_TRANSPOSE trans, const VSMC_BLAS_INT n, const VSMC_BLAS_INT k,
+    const float alpha, const float *a, const VSMC_BLAS_INT lda,
+    const float beta, float *c, const VSMC_BLAS_INT ldc)
+{
+    const char uplof = cblas_uplo(layout, uplo);
+    const char transf = cblas_trans(layout, trans);
+    VSMC_BLAS_NAME(ssyrk)
+    (&uplof, &transf, &n, &k, &alpha, a, &lda, &beta, c, &ldc);
+}
+
+inline void cblas_dsyrk(const CBLAS_LAYOUT layout, const CBLAS_UPLO uplo,
+    const CBLAS_TRANSPOSE trans, const VSMC_BLAS_INT n, const VSMC_BLAS_INT k,
+    const double alpha, const double *a, const VSMC_BLAS_INT lda,
+    const double beta, double *c, const VSMC_BLAS_INT ldc)
+{
+    const char uplof = cblas_uplo(layout, uplo);
+    const char transf = cblas_trans(layout, trans);
+    VSMC_BLAS_NAME(dsyrk)
+    (&uplof, &transf, &n, &k, &alpha, a, &lda, &beta, c, &ldc);
+}
+
+} // namespace vsmc::internal
+
+} // namespace vsmc
+
+#endif // VSMC_HAS_CBLAS
+
+#endif // VSMC_MATH_CBLAS_HPP

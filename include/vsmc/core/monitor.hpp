@@ -75,7 +75,7 @@ class Monitor
         , stage_(stage)
         , name_(dim)
     {
-        internal::size_check<VSMC_CBLAS_INT>(dim_, "Monitor::Monitor");
+        internal::size_check<VSMC_BLAS_INT>(dim_, "Monitor::Monitor");
     }
 
     /// \brief The dimension of the Monitor
@@ -235,7 +235,7 @@ class Monitor
     /// object.
     void eval(std::size_t iter, Particle<T> &particle, MonitorStage stage)
     {
-        internal::size_check<VSMC_CBLAS_INT>(particle.size(), "Monitor::eval");
+        internal::size_check<VSMC_BLAS_INT>(particle.size(), "Monitor::eval");
 
         if (!recording_)
             return;
@@ -257,8 +257,8 @@ class Monitor
         buffer_.resize(N * dim_);
         eval_(iter, dim_, particle, buffer_.data());
         internal::cblas_dgemv(internal::CblasColMajor, internal::CblasNoTrans,
-            static_cast<VSMC_CBLAS_INT>(dim_), static_cast<VSMC_CBLAS_INT>(N),
-            1.0, buffer_.data(), static_cast<VSMC_CBLAS_INT>(dim_),
+            static_cast<VSMC_BLAS_INT>(dim_), static_cast<VSMC_BLAS_INT>(N),
+            1.0, buffer_.data(), static_cast<VSMC_BLAS_INT>(dim_),
             particle.weight().data(), 1, 0.0, result_.data(), 1);
         push_back(iter);
     }

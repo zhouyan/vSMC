@@ -34,10 +34,6 @@
 
 #define VSMC_MSVC_VERSION _MSC_VER
 
-#ifndef VSMC_INT64
-#define VSMC_INT64 __int64
-#endif
-
 #ifdef __SSE2__
 #ifndef VSMC_HAS_SSE2
 #define VSMC_HAS_SSE2 1

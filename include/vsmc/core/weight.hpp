@@ -264,7 +264,7 @@ class Weight
         }
         accw = std::accumulate(w, w + n, accw);
         essw +=
-            internal::cblas_ddot(static_cast<VSMC_CBLAS_INT>(n), w, 1, w, 1);
+            internal::cblas_ddot(static_cast<VSMC_BLAS_INT>(n), w, 1, w, 1);
     }
 }; // class Weight
 
