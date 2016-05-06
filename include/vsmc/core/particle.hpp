@@ -52,29 +52,28 @@ template <typename T>
 class ParticleRange
 {
     public:
-    using size_type = typename Particle<T>::size_type;
-
-    ParticleRange(size_type begin, size_type end, Particle<T> *pptr)
-        : begin_(begin), end_(end), pptr_(pptr)
+    ParticleRange(typename Particle<T>::size_type begin,
+        typename Particle<T>::size_type end, Particle<T> *pptr)
+        : pptr_(pptr), begin_(begin), end_(end)
     {
     }
-
-    size_type size() const { return end_ - begin_; }
-
-    size_type begin() const { return begin_; }
-
-    size_type end() const { return end_; }
 
     Particle<T> &particle() const { return *pptr_; }
 
     Particle<T> *particle_ptr() const { return pptr_; }
 
+    typename Particle<T>::size_type size() const { return end_ - begin_; }
+
+    typename Particle<T>::size_type begin() const { return begin_; }
+
+    typename Particle<T>::size_type end() const { return end_; }
+
     typename Particle<T>::rng_type &rng() const { return pptr_->rng(begin_); }
 
     private:
-    size_type begin_;
-    size_type end_;
     Particle<T> *pptr_;
+    typename Particle<T>::size_type begin_;
+    typename Particle<T>::size_type end_;
 }; // class ParticleRange
 
 /// \brief Particle class representing the whole particle set

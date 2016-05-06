@@ -32,8 +32,9 @@
 #ifndef VSMC_INTERNAL_DEFINES_H
 #define VSMC_INTERNAL_DEFINES_H
 
-#ifdef __cplusplus
+#include <stddef.h>
 
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -171,7 +172,7 @@ typedef struct {
 /// \brief vsmc::SingleParticle
 typedef struct {
     double *state;
-    int id;
+    size_t id;
 } vsmc_single_particle;
 
 /// \brief vsmc::Particle
@@ -194,32 +195,20 @@ typedef struct {
     void *ptr;
 } vsmc_covariance;
 
-/// \brief vsmc::ProgramOptionMap
-typedef struct {
-    void *ptr;
-} vsmc_program_option_map;
-
-/// \brief vsmc::Progress
-typedef struct {
-    void *ptr;
-} vsmc_progress;
-
 /// \brief vsmc::StopWatch
 typedef struct {
     void *ptr;
 } vsmc_stop_watch;
 
-/// \brief vsmc::Sampler::resample_type
-typedef void (*vsmc_resample_type)(int, int, vsmc_rng, const double *, int *);
-
-/// \brief vsmc::Monitor::eval_type
-typedef void (*vsmc_monitor_eval_type)(int, int, vsmc_particle, double *);
-
 /// \brief vsmc::Sampler::init_type
-typedef int (*vsmc_sampler_init_type)(vsmc_particle, void *);
+typedef size_t (*vsmc_sampler_init_type)(vsmc_particle, void *);
 
 /// \brief vsmc::Sampler::move_type
-typedef int (*vsmc_sampler_move_type)(int, vsmc_particle);
+typedef size_t (*vsmc_sampler_move_type)(size_t, vsmc_particle);
+
+/// \brief vsmc::Monitor::eval_type
+typedef void (*vsmc_monitor_eval_type)(
+    size_t, size_t, vsmc_particle, double *);
 
 /// \brief vsmc::InitializeBase::eval_sp
 typedef int (*vsmc_initialize_eval_sp_type)(vsmc_single_particle);

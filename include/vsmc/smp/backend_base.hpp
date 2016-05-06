@@ -236,7 +236,7 @@ class InitializeBase
     std::size_t eval_range_dispatch(ParticleRange<T> range,
         std::size_t (InitializeBase::*)(ParticleRange<T>))
     {
-        using size_type = typename ParticleRange<T>::size_type;
+        using size_type = typename Particle<T>::size_type;
 
         std::size_t accept = 0;
         for (size_type i = range.begin(); i != range.end(); ++i)
@@ -271,7 +271,7 @@ class InitializeBase<T, Virtual>
 
     virtual std::size_t eval_range(ParticleRange<T> range)
     {
-        using size_type = typename ParticleRange<T>::size_type;
+        using size_type = typename Particle<T>::size_type;
 
         std::size_t accept = 0;
         for (size_type i = range.begin(); i != range.end(); ++i)
@@ -417,7 +417,7 @@ class MoveBase
     std::size_t eval_range_dispatch(std::size_t iter, ParticleRange<T> range,
         std::size_t (MoveBase::*)(std::size_t, ParticleRange<T>))
     {
-        using size_type = typename ParticleRange<T>::size_type;
+        using size_type = typename Particle<T>::size_type;
 
         std::size_t accept = 0;
         for (size_type i = range.begin(); i != range.end(); ++i)
@@ -447,7 +447,7 @@ class MoveBase<T, Virtual>
 
     virtual std::size_t eval_range(std::size_t iter, ParticleRange<T> range)
     {
-        using size_type = typename ParticleRange<T>::size_type;
+        using size_type = typename Particle<T>::size_type;
 
         std::size_t accept = 0;
         for (size_type i = range.begin(); i != range.end(); ++i)
@@ -603,7 +603,7 @@ class MonitorEvalBase
         void (MonitorEvalBase::*)(std::size_t, std::size_t, ParticleRange<T>,
                                  double *))
     {
-        using size_type = typename ParticleRange<T>::size_type;
+        using size_type = typename Particle<T>::size_type;
 
         for (size_type i = range.begin(); i != range.end(); ++i, r += dim)
             eval_sp(iter, dim, range.particle().sp(i), r);
@@ -633,7 +633,7 @@ class MonitorEvalBase<T, Virtual>
     virtual void eval_range(
         std::size_t iter, std::size_t dim, ParticleRange<T> range, double *r)
     {
-        using size_type = typename ParticleRange<T>::size_type;
+        using size_type = typename Particle<T>::size_type;
 
         for (size_type i = range.begin(); i != range.end(); ++i, r += dim)
             eval_sp(iter, dim, range.particle().sp(i), r);

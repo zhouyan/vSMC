@@ -29,16 +29,30 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <vsmc/core/core.h>
 #include "libvsmc.hpp"
+
+namespace vsmc
+{
+
+inline MonitorC::eval_type cast(vsmc_monitor_eval_type fptr)
+{
+    return [fptr](
+        std::size_t iter, std::size_t dim, ParticleC &particle, double *r) {
+        vsmc_particle c_particle = {&particle};
+        fptr(iter, dim, c_particle, r);
+    };
+}
+
+} // namespace vsmc
 
 extern "C" {
 
-vsmc_monitor vsmc_monitor_new(int dim, vsmc_monitor_eval_type eval,
+vsmc_monitor vsmc_monitor_new(size_t dim, vsmc_monitor_eval_type eval,
     int record_only, vSMCMonitorStage stage)
 {
-    auto ptr =
-        new ::vsmc::MonitorC(static_cast<std::size_t>(dim), ::vsmc::cast(eval),
-            record_only != 0, static_cast<::vsmc::MonitorStage>(stage));
+    auto ptr = new ::vsmc::MonitorC(dim, ::vsmc::cast(eval), record_only != 0,
+        static_cast<::vsmc::MonitorStage>(stage));
     vsmc_monitor monitor = {ptr};
 
     return monitor;
@@ -55,9 +69,9 @@ void vsmc_monitor_assign(vsmc_monitor monitor, vsmc_monitor other)
     ::vsmc::cast(monitor) = ::vsmc::cast(other);
 }
 
-int vsmc_monitor_dim(vsmc_monitor monitor)
+size_t vsmc_monitor_dim(vsmc_monitor monitor)
 {
-    return static_cast<int>(::vsmc::cast(monitor).dim());
+    return ::vsmc::cast(monitor).dim();
 }
 
 int vsmc_monitor_record_only(vsmc_monitor monitor)
@@ -70,14 +84,14 @@ vSMCMonitorStage vsmc_monitor_stage(vsmc_monitor monitor)
     return static_cast<vSMCMonitorStage>(::vsmc::cast(monitor).stage());
 }
 
-int vsmc_monitor_iter_size(vsmc_monitor monitor)
+size_t vsmc_monitor_iter_size(vsmc_monitor monitor)
 {
-    return static_cast<int>(::vsmc::cast(monitor).iter_size());
+    return ::vsmc::cast(monitor).iter_size();
 }
 
-void vsmc_monitor_reserve(vsmc_monitor monitor, int num)
+void vsmc_monitor_reserve(vsmc_monitor monitor, size_t num)
 {
-    ::vsmc::cast(monitor).reserve(static_cast<std::size_t>(num));
+    ::vsmc::cast(monitor).reserve(num);
 }
 
 int vsmc_monitor_empty(vsmc_monitor monitor)
@@ -85,51 +99,45 @@ int vsmc_monitor_empty(vsmc_monitor monitor)
     return ::vsmc::cast(monitor).empty();
 }
 
-void vsmc_monitor_set_name(vsmc_monitor monitor, int id, const char *name)
+void vsmc_monitor_set_name(vsmc_monitor monitor, size_t id, const char *name)
 {
-    ::vsmc::cast(monitor).name(static_cast<std::size_t>(id)) = name;
+    ::vsmc::cast(monitor).name(id) = name;
 }
 
-int vsmc_monitor_get_name(vsmc_monitor monitor, int id, char *name)
+size_t vsmc_monitor_get_name(vsmc_monitor monitor, size_t id, char *name)
 {
-    std::string str(::vsmc::cast(monitor).name(static_cast<std::size_t>(id)));
+    std::string str(::vsmc::cast(monitor).name(id));
     std::size_t size = (str.size() + 1) * sizeof(char);
     if (name != nullptr)
         std::memcpy(name, str.c_str(), size);
 
-    return static_cast<int>(size);
+    return size;
 }
 
-int vsmc_monitor_index(vsmc_monitor monitor, int iter)
+size_t vsmc_monitor_index(vsmc_monitor monitor, size_t iter)
 {
-    return iter < 0 ? static_cast<int>(::vsmc::cast(monitor).index()) :
-                      static_cast<int>(::vsmc::cast(monitor).index(
-                          static_cast<std::size_t>(iter)));
+    return ::vsmc::cast(monitor).index(iter);
 }
 
-int *vsmc_monitor_read_index(vsmc_monitor monitor, int *first)
+void vsmc_monitor_read_index(vsmc_monitor monitor, size_t *first)
 {
-    return ::vsmc::cast(monitor).read_index(first);
+    ::vsmc::cast(monitor).read_index(first);
 }
 
-double vsmc_monitor_record(vsmc_monitor monitor, int id, int iter)
+double vsmc_monitor_record(vsmc_monitor monitor, size_t id, size_t iter)
 {
-    return iter < 0 ?
-        ::vsmc::cast(monitor).record(static_cast<std::size_t>(id)) :
-        ::vsmc::cast(monitor).record(
-            static_cast<std::size_t>(id), static_cast<std::size_t>(iter));
+    return ::vsmc::cast(monitor).record(id, iter);
 }
 
-double *vsmc_monitor_read_record(vsmc_monitor monitor, int id, double *first)
+void vsmc_monitor_read_record(vsmc_monitor monitor, size_t id, double *first)
 {
-    return ::vsmc::cast(monitor).read_record(
-        static_cast<std::size_t>(id), first);
+    ::vsmc::cast(monitor).read_record(id, first);
 }
 
-double *vsmc_monitor_read_record_matrix(
+void vsmc_monitor_read_record_matrix(
     vsmc_monitor monitor, vSMCMatrixLayout layout, double *first)
 {
-    return ::vsmc::cast(monitor).read_record_matrix(
+    ::vsmc::cast(monitor).read_record_matrix(
         static_cast<::vsmc::MatrixLayout>(layout), first);
 }
 
@@ -139,11 +147,11 @@ void vsmc_monitor_set_eval(
     ::vsmc::cast(monitor).set_eval(::vsmc::cast(new_eval));
 }
 
-void vsmc_monitor_eval(vsmc_monitor monitor, int iter, vsmc_particle particle,
-    vSMCMonitorStage stage)
+void vsmc_monitor_eval(vsmc_monitor monitor, size_t iter,
+    vsmc_particle particle, vSMCMonitorStage stage)
 {
-    ::vsmc::cast(monitor).eval(static_cast<std::size_t>(iter),
-        ::vsmc::cast(particle), static_cast<::vsmc::MonitorStage>(stage));
+    ::vsmc::cast(monitor).eval(iter, ::vsmc::cast(particle),
+        static_cast<::vsmc::MonitorStage>(stage));
 }
 
 void vsmc_monitor_clear(vsmc_monitor monitor)

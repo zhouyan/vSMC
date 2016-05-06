@@ -39,9 +39,9 @@
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline void vsmc_geometric_rand_##name(                                   \
-        vsmc_rng rng, size_t n, int *r, double p)                             \
+        vsmc_rng rng, size_t n, unsigned long long *r, double p)              \
     {                                                                         \
-        std::geometric_distribution<int> dist(p);                             \
+        std::geometric_distribution<unsigned long long> dist(p);              \
         VSMC_DEFINE_LIB_RNG_DIST(RNGType);                                    \
     }
 
@@ -49,7 +49,8 @@
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-using vsmc_geometric_rand_type = void (*)(vsmc_rng, size_t, int *, double);
+using vsmc_geometric_rand_type = void (*)(
+    vsmc_rng, size_t, unsigned long long *, double);
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -70,7 +71,8 @@ static vsmc_geometric_rand_type vsmc_geometric_rand_dispatch[] = {
 
     nullptr}; // vsmc_geometric_rand_dispatch
 
-void vsmc_geometric_rand(vsmc_rng rng, size_t n, int *r, double p)
+void vsmc_geometric_rand(
+    vsmc_rng rng, size_t n, unsigned long long *r, double p)
 {
     vsmc_geometric_rand_dispatch[static_cast<std::size_t>(rng.type)](
         rng, n, r, p);

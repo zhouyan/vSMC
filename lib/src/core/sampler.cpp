@@ -29,16 +29,38 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <vsmc/core/core.h>
 #include "libvsmc.hpp"
+
+namespace vsmc
+{
+
+inline SamplerC::init_type cast(vsmc_sampler_init_type fptr)
+{
+    return [fptr](ParticleC &particle, void *param) {
+        vsmc_particle particle_c = {&particle};
+        return fptr(particle_c, param);
+    };
+}
+
+inline SamplerC::move_type cast(vsmc_sampler_move_type fptr)
+{
+    return [fptr](std::size_t iter, ParticleC &particle) {
+        vsmc_particle particle_c = {&particle};
+        return fptr(iter, particle_c);
+    };
+}
+
+} // namespace vsmc
 
 extern "C" {
 
 vsmc_sampler vsmc_sampler_new(
-    int n, int dim, vSMCResampleScheme scheme, double threshold)
+    size_t n, size_t dim, vSMCResampleScheme scheme, double threshold)
 {
     auto ptr = new ::vsmc::SamplerC(
         n, static_cast<::vsmc::ResampleScheme>(scheme), threshold);
-    ptr->particle().value().resize_dim(static_cast<std::size_t>(dim));
+    ptr->particle().value().resize_dim(dim);
     vsmc_sampler sampler = {ptr};
 
     return sampler;
@@ -55,35 +77,37 @@ void vsmc_sampler_assign(vsmc_sampler sampler, vsmc_sampler other)
     ::vsmc::cast(sampler) = ::vsmc::cast(other);
 }
 
-void vsmc_sampler_clone(
-    vsmc_sampler sampler, vsmc_sampler other, int retain_rng)
+vsmc_sampler vsmc_sampler_clone(vsmc_sampler sampler, int new_rng)
 {
-    ::vsmc::cast(sampler).clone(::vsmc::cast(other), retain_rng != 0);
+    vsmc_sampler clone = vsmc_sampler_new(0, 0, vSMCMultinomial, 0);
+    ::vsmc::cast(clone) = ::vsmc::cast(sampler).clone(new_rng != 0);
+
+    return clone;
 }
 
-int vsmc_sampler_size(vsmc_sampler sampler)
+size_t vsmc_sampler_size(vsmc_sampler sampler)
 {
-    return static_cast<int>(::vsmc::cast(sampler).size());
+    return ::vsmc::cast(sampler).size();
 }
 
-void vsmc_sampler_reserve(vsmc_sampler sampler, int num)
+void vsmc_sampler_reserve(vsmc_sampler sampler, size_t num)
 {
-    ::vsmc::cast(sampler).reserve(static_cast<std::size_t>(num));
+    ::vsmc::cast(sampler).reserve(num);
 }
 
-int vsmc_sampler_iter_size(vsmc_sampler sampler)
+size_t vsmc_sampler_iter_size(vsmc_sampler sampler)
 {
-    return static_cast<int>(::vsmc::cast(sampler).iter_size());
+    return ::vsmc::cast(sampler).iter_size();
 }
 
-int vsmc_sampler_iter_num(vsmc_sampler sampler)
+size_t vsmc_sampler_iter_num(vsmc_sampler sampler)
 {
-    return static_cast<int>(::vsmc::cast(sampler).iter_num());
+    return ::vsmc::cast(sampler).iter_num();
 }
 
-int vsmc_sampler_status_size(vsmc_sampler sampler)
+size_t vsmc_sampler_status_size(vsmc_sampler sampler)
 {
-    return static_cast<int>(::vsmc::cast(sampler).status_size());
+    return ::vsmc::cast(sampler).status_size();
 }
 
 void vsmc_sampler_resample(vsmc_sampler sampler)
@@ -96,12 +120,6 @@ void vsmc_sampler_resample_scheme(
 {
     ::vsmc::cast(sampler).resample_method(
         static_cast<::vsmc::ResampleScheme>(scheme));
-}
-
-void vsmc_sampler_resample_algorithm(
-    vsmc_sampler sampler, vsmc_resample_type res_alg)
-{
-    ::vsmc::cast(sampler).resample_method(::vsmc::cast(res_alg));
 }
 
 void vsmc_sampler_resample_move(
@@ -130,54 +148,52 @@ double vsmc_sampler_resample_threshold_always()
     return ::vsmc::SamplerC::resample_threshold_always();
 }
 
-int vsmc_sampler_size_history(vsmc_sampler sampler, int iter)
+size_t vsmc_sampler_size_history(vsmc_sampler sampler, size_t iter)
 {
-    return static_cast<int>(
-        ::vsmc::cast(sampler).size_history(static_cast<std::size_t>(iter)));
+    return ::vsmc::cast(sampler).size_history(iter);
 }
 
-int *vsmc_sampler_read_size_history(vsmc_sampler sampler, int *first)
+void vsmc_sampler_read_size_history(vsmc_sampler sampler, size_t *first)
 {
-    return ::vsmc::cast(sampler).read_size_history(first);
+    ::vsmc::cast(sampler).read_size_history(first);
 }
 
-double vsmc_sampler_ess_history(vsmc_sampler sampler, int iter)
+double vsmc_sampler_ess_history(vsmc_sampler sampler, size_t iter)
 {
     return ::vsmc::cast(sampler).ess_history(static_cast<std::size_t>(iter));
 }
 
-double *vsmc_sampler_read_ess_history(vsmc_sampler sampler, double *first)
+void vsmc_sampler_read_ess_history(vsmc_sampler sampler, double *first)
 {
-    return ::vsmc::cast(sampler).read_ess_history(first);
+    ::vsmc::cast(sampler).read_ess_history(first);
 }
 
-int vsmc_sampler_resampled_history(vsmc_sampler sampler, int iter)
+int vsmc_sampler_resampled_history(vsmc_sampler sampler, size_t iter)
 {
-    return ::vsmc::cast(sampler).resampled_history(
-        static_cast<std::size_t>(iter));
+    return ::vsmc::cast(sampler).resampled_history(iter);
 }
 
-int *vsmc_sampler_read_resampled_history(vsmc_sampler sampler, int *first)
+void vsmc_sampler_read_resampled_history(vsmc_sampler sampler, int *first)
 {
-    return ::vsmc::cast(sampler).read_resampled_history(first);
+    ::vsmc::cast(sampler).read_resampled_history(first);
 }
 
-int vsmc_sampler_status_history(vsmc_sampler sampler, int id, int iter)
+size_t vsmc_sampler_status_history(
+    vsmc_sampler sampler, size_t id, size_t iter)
 {
-    return static_cast<int>(::vsmc::cast(sampler).status_history(
-        static_cast<std::size_t>(id), static_cast<std::size_t>(iter)));
+    return ::vsmc::cast(sampler).status_history(id, iter);
 }
 
-int *vsmc_sampler_read_status_history(vsmc_sampler sampler, int id, int *first)
+void vsmc_sampler_read_status_history(
+    vsmc_sampler sampler, size_t id, size_t *first)
 {
-    return ::vsmc::cast(sampler).read_status_history(
-        static_cast<std::size_t>(id), first);
+    ::vsmc::cast(sampler).read_status_history(id, first);
 }
 
-int *vsmc_sampler_read_status_history_matrix(
-    vsmc_sampler sampler, vSMCMatrixLayout layout, int *first)
+void vsmc_sampler_read_status_history_matrix(
+    vsmc_sampler sampler, vSMCMatrixLayout layout, size_t *first)
 {
-    return ::vsmc::cast(sampler).read_status_history_matrix(
+    ::vsmc::cast(sampler).read_status_history_matrix(
         static_cast<::vsmc::MatrixLayout>(layout), first);
 }
 
@@ -203,9 +219,9 @@ int vsmc_sampler_init_queue_empty(vsmc_sampler sampler)
     return ::vsmc::cast(sampler).init_queue_empty();
 }
 
-int vsmc_sampler_init_queue_size(vsmc_sampler sampler)
+size_t vsmc_sampler_init_queue_size(vsmc_sampler sampler)
 {
-    return static_cast<int>(::vsmc::cast(sampler).init_queue_size());
+    return ::vsmc::cast(sampler).init_queue_size();
 }
 
 void vsmc_sampler_init(
@@ -224,9 +240,9 @@ int vsmc_sampler_move_queue_empty(vsmc_sampler sampler)
     return ::vsmc::cast(sampler).move_queue_empty();
 }
 
-int vsmc_sampler_move_queue_size(vsmc_sampler sampler)
+size_t vsmc_sampler_move_queue_size(vsmc_sampler sampler)
 {
-    return static_cast<int>(::vsmc::cast(sampler).move_queue_size());
+    return ::vsmc::cast(sampler).move_queue_size();
 }
 
 void vsmc_sampler_move(
@@ -245,9 +261,9 @@ int vsmc_sampler_mcmc_queue_empty(vsmc_sampler sampler)
     return ::vsmc::cast(sampler).mcmc_queue_empty();
 }
 
-int vsmc_sampler_mcmc_queue_size(vsmc_sampler sampler)
+size_t vsmc_sampler_mcmc_queue_size(vsmc_sampler sampler)
 {
-    return static_cast<int>(::vsmc::cast(sampler).mcmc_queue_size());
+    return ::vsmc::cast(sampler).mcmc_queue_size();
 }
 
 void vsmc_sampler_mcmc(
@@ -261,23 +277,15 @@ void vsmc_sampler_initialize(vsmc_sampler sampler, void *param)
     ::vsmc::cast(sampler).initialize(param);
 }
 
-void vsmc_sampler_iterate(vsmc_sampler sampler, int num)
+void vsmc_sampler_iterate(vsmc_sampler sampler, size_t num)
 {
-    ::vsmc::cast(sampler).iterate(static_cast<std::size_t>(num));
+    ::vsmc::cast(sampler).iterate(num);
 }
 
-void vsmc_sampler_set_monitor_direct(
+void vsmc_sampler_set_monitor(
     vsmc_sampler sampler, const char *name, vsmc_monitor mon)
 {
     ::vsmc::cast(sampler).monitor(name, ::vsmc::cast(mon));
-}
-
-void vsmc_sampler_set_monitor(vsmc_sampler sampler, const char *name, int dim,
-    vsmc_monitor_eval_type eval, int record_only, vSMCMonitorStage stage)
-{
-    ::vsmc::cast(sampler).monitor(name, static_cast<std::size_t>(dim),
-        ::vsmc::cast(eval), record_only != 0,
-        static_cast<vsmc::MonitorStage>(stage));
 }
 
 vsmc_monitor vsmc_sampler_get_monitor(vsmc_sampler sampler, const char *name)
@@ -287,9 +295,9 @@ vsmc_monitor vsmc_sampler_get_monitor(vsmc_sampler sampler, const char *name)
     return monitor;
 }
 
-void vsmc_sampler_clear_monitor(vsmc_sampler sampler, const char *name)
+int vsmc_sampler_clear_monitor(vsmc_sampler sampler, const char *name)
 {
-    ::vsmc::cast(sampler).clear_monitor(name);
+    return ::vsmc::cast(sampler).clear_monitor(name);
 }
 
 void vsmc_sampler_clear_monitor_all(vsmc_sampler sampler)

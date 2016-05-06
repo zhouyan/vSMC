@@ -38,10 +38,10 @@
 #endif
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    inline void vsmc_binomial_rand_##name(                                    \
-        vsmc_rng rng, size_t n, int *r, int t, double p)                      \
+    inline void vsmc_binomial_rand_##name(vsmc_rng rng, size_t n,             \
+        unsigned long long *r, unsigned long long t, double p)                \
     {                                                                         \
-        std::binomial_distribution<int> dist(t, p);                           \
+        std::binomial_distribution<unsigned long long> dist(t, p);            \
         VSMC_DEFINE_LIB_RNG_DIST(RNGType);                                    \
     }
 
@@ -49,7 +49,8 @@
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-using vsmc_binomial_rand_type = void (*)(vsmc_rng, size_t, int *, int, double);
+using vsmc_binomial_rand_type = void (*)(
+    vsmc_rng, size_t, unsigned long long *, unsigned long long, double);
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -70,7 +71,8 @@ static vsmc_binomial_rand_type vsmc_binomial_rand_dispatch[] = {
 
     nullptr}; // vsmc_binomial_rand_dispatch
 
-void vsmc_binomial_rand(vsmc_rng rng, size_t n, int *r, int t, double p)
+void vsmc_binomial_rand(vsmc_rng rng, size_t n, unsigned long long *r,
+    unsigned long long t, double p)
 {
     vsmc_binomial_rand_dispatch[static_cast<std::size_t>(rng.type)](
         rng, n, r, t, p);

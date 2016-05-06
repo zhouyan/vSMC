@@ -38,10 +38,10 @@
 #endif
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    inline void vsmc_discrete_rand_##name(vsmc_rng rng, size_t n, int *r,     \
-        size_t m, const double *weight, int normalized)                       \
+    inline void vsmc_discrete_rand_##name(vsmc_rng rng, size_t n,             \
+        long long *r, size_t m, const double *weight, int normalized)         \
     {                                                                         \
-        ::vsmc::DiscreteDistribution<int> dist;                               \
+        ::vsmc::DiscreteDistribution<long long> dist;                         \
         RNGType &rng_cpp = *reinterpret_cast<RNGType *>(rng.ptr);             \
         const bool norm = normalized != 0;                                    \
         const double *first = weight;                                         \
@@ -55,7 +55,7 @@
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
 using vsmc_discrete_rand_type = void (*)(
-    vsmc_rng, size_t, int *, size_t, const double *, int);
+    vsmc_rng, size_t, long long *, size_t, const double *, int);
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -76,7 +76,7 @@ static vsmc_discrete_rand_type vsmc_discrete_rand_dispatch[] = {
 
     nullptr}; // vsmc_discrete_rand_dispatch
 
-void vsmc_discrete_rand(vsmc_rng rng, size_t n, int *r, size_t m,
+void vsmc_discrete_rand(vsmc_rng rng, size_t n, long long *r, size_t m,
     const double *weight, int normalized)
 {
     vsmc_discrete_rand_dispatch[static_cast<std::size_t>(rng.type)](

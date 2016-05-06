@@ -54,21 +54,21 @@ class SingleParticleBase
 {
     public:
     SingleParticleBase(typename Particle<T>::size_type id, Particle<T> *pptr)
-        : id_(id), pptr_(pptr)
+        : pptr_(pptr), id_(id)
     {
     }
-
-    typename Particle<T>::size_type id() const { return id_; }
 
     Particle<T> &particle() const { return *pptr_; }
 
     Particle<T> *particle_ptr() const { return pptr_; }
 
+    typename Particle<T>::size_type id() const { return id_; }
+
     typename Particle<T>::rng_type &rng() const { return pptr_->rng(id_); }
 
     private:
-    typename Particle<T>::size_type id_;
     Particle<T> *pptr_;
+    typename Particle<T>::size_type id_;
 }; // class SingleParticleBase
 
 /// \brief SingleParticle base class trait

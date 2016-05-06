@@ -214,10 +214,10 @@ class Weight
 
     /// \brief Draw integer index in the range \f$[0, N)\f$ according to the
     /// weights
-    template <typename URNG>
-    size_type draw(URNG &eng) const
+    template <typename RNGType>
+    size_type draw(RNGType &rng) const
     {
-        return draw_(eng, data_.begin(), data_.end(), true);
+        return draw_(rng, data_.begin(), data_.end(), true);
     }
 
     private:
@@ -348,8 +348,8 @@ class WeightNull
     {
     }
 
-    template <typename URNG>
-    size_type draw(URNG &) const
+    template <typename RNGType>
+    size_type draw(RNGType &) const
     {
         return 0;
     }

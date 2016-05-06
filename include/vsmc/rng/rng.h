@@ -41,40 +41,40 @@ extern "C" {
 /// \addtogroup C_API_RNG_RNG
 /// @{
 
-/// \brief `vsmc::RNG::RNG`
+/// \brief `RNGType::RNGType`
 vsmc_rng vsmc_rng_new(unsigned seed, vSMCRNGType type);
 
-/// \brief `vsmc::RNG::~RNG`
+/// \brief `RNGType::~RNGType`
 void vsmc_rng_delete(vsmc_rng *rng_ptr);
 
-/// \brief `vsmc::RNG::operator=`
+/// \brief `RNGType::operator=`
 void vsmc_rng_assign(vsmc_rng rng, vsmc_rng other);
 
-/// \brief `vsmc::RNG::seed`
+/// \brief `RNGType::seed`
 void vsmc_rng_seed(vsmc_rng rng, unsigned seed);
 
 /// \brief `vsmc::uniform_bits_distribution`
 void vsmc_rng_rand(vsmc_rng rng, size_t n, unsigned *r);
 
-/// \brief `vsmc::RNG::discard`
+/// \brief `RNGType::discard`
 void vsmc_rng_discard(vsmc_rng rng, unsigned nskip);
 
-/// \brief `vsmc::RNG::operator==`
+/// \brief `RNGType::operator==`
 int vsmc_rng_is_eq(vsmc_rng rng1, vsmc_rng rng2);
 
-/// \brief `vsmc::RNG::operator!=`
+/// \brief `RNGType::operator!=`
 int vsmc_rng_is_neq(vsmc_rng rng1, vsmc_rng rng2);
 
-/// \brief `vsmc::RNG::operator<<`
+/// \brief `RNGType::operator<<`
 size_t vsmc_rng_save(vsmc_rng rng, void *mem);
 
-/// \brief `vsmc::RNG::operator>>`
+/// \brief `RNGType::operator>>`
 void vsmc_rng_load(vsmc_rng rng, void *mem);
 
-/// \brief `vsmc::RNG::operator<<` directly to an external file
+/// \brief `RNGType::operator<<` directly to an external file
 void vsmc_rng_save_f(vsmc_rng rng, const char *filename);
 
-/// \brief `vsmc::RNG::operator>>` directly from an external file*/
+/// \brief `RNGType::operator>>` directly from an external file*/
 void vsmc_rng_load_f(vsmc_rng rng, const char *filename);
 
 /// @} C_API_RNG_RNG
@@ -134,28 +134,32 @@ void vsmc_u01_rand_systematic(vsmc_rng rng, size_t n, double *r);
 /// \addtogroup C_API_RNG_DISTRIBUITON
 /// @{
 
-/// \brief `vsmc::DiscreteDistribution<int>`
-void vsmc_discrete_rand(vsmc_rng rng, size_t n, int *r, size_t m,
+/// \brief `vsmc::DiscreteDistribution<long long>`
+void vsmc_discrete_rand(vsmc_rng rng, size_t n, long long *r, size_t m,
     const double *weight, int normalized);
 
-/// \brief `std::uniform_int_distribution<int>`
-void vsmc_uniform_int_rand(vsmc_rng rng, size_t n, int *r, int a, int b);
+/// \brief `std::uniform_int_distribution<long long>`
+void vsmc_uniform_int_rand(
+    vsmc_rng rng, size_t n, long long *r, long long a, long long b);
 
 /// \brief `std::bernoulli_distribution`
 void vsmc_bernoulli_rand(vsmc_rng rng, size_t n, int *r, double p);
 
-/// \brief `std::binomial_distribution<int>`
-void vsmc_binomial_rand(vsmc_rng rng, size_t n, int *r, int t, double p);
+/// \brief `std::binomial_distribution<unsigned long long>`
+void vsmc_binomial_rand(vsmc_rng rng, size_t n, unsigned long long *r,
+    unsigned long long t, double p);
 
-/// \brief `std::negative_binomial_distribution<int>`
-void vsmc_negative_binomial_rand(
-    vsmc_rng rng, size_t n, int *r, int k, double p);
+/// \brief `std::negative_binomial_distribution<unsigned long long>`
+void vsmc_negative_binomial_rand(vsmc_rng rng, size_t n, unsigned long long *r,
+    unsigned long long k, double p);
 
-/// \brief `std::geometric_distribution<int>`
-void vsmc_geometric_rand(vsmc_rng rng, size_t n, int *r, double p);
+/// \brief `std::geometric_distribution<unsigned long long>`
+void vsmc_geometric_rand(
+    vsmc_rng rng, size_t n, unsigned long long *r, double p);
 
-/// \brief `std::poisson_distribution<int>`
-void vsmc_poisson_rand(vsmc_rng rng, size_t n, int *r, double mean);
+/// \brief `std::poisson_distribution<unsigned long long>`
+void vsmc_poisson_rand(
+    vsmc_rng rng, size_t n, unsigned long long *r, double mean);
 
 /// \brief `vsmc::beta_distribution<double>`
 void vsmc_beta_rand(

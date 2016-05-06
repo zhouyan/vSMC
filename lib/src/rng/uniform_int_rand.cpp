@@ -39,9 +39,9 @@
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline void vsmc_uniform_int_rand_##name(                                 \
-        vsmc_rng rng, size_t n, int *r, int a, int b)                         \
+        vsmc_rng rng, size_t n, long long *r, long long a, long long b)       \
     {                                                                         \
-        std::uniform_int_distribution<int> dist(a, b);                        \
+        std::uniform_int_distribution<long long> dist(a, b);                  \
         VSMC_DEFINE_LIB_RNG_DIST(RNGType);                                    \
     }
 
@@ -49,7 +49,8 @@
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-using vsmc_uniform_int_rand_type = void (*)(vsmc_rng, size_t, int *, int, int);
+using vsmc_uniform_int_rand_type = void (*)(
+    vsmc_rng, size_t, long long *, long long, long long);
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -71,7 +72,8 @@ static vsmc_uniform_int_rand_type vsmc_uniform_int_rand_dispatch[] = {
 
     nullptr}; // vsmc_uniform_int_rand_dispatch
 
-void vsmc_uniform_int_rand(vsmc_rng rng, size_t n, int *r, int a, int b)
+void vsmc_uniform_int_rand(
+    vsmc_rng rng, size_t n, long long *r, long long a, long long b)
 {
     vsmc_uniform_int_rand_dispatch[static_cast<std::size_t>(rng.type)](
         rng, n, r, a, b);

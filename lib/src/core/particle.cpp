@@ -29,14 +29,15 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <vsmc/core/core.h>
 #include "libvsmc.hpp"
 
 extern "C" {
 
-vsmc_particle vsmc_particle_new(int n, int dim)
+vsmc_particle vsmc_particle_new(size_t n, size_t dim)
 {
     auto ptr = new ::vsmc::ParticleC(n);
-    ptr->value().resize_dim(static_cast<std::size_t>(dim));
+    ptr->value().resize_dim(dim);
     vsmc_particle particle = {ptr};
 
     return particle;
@@ -53,42 +54,70 @@ void vsmc_particle_assign(vsmc_particle particle, vsmc_particle other)
     ::vsmc::cast(particle) = ::vsmc::cast(other);
 }
 
-void vsmc_particle_clone(
-    vsmc_particle particle, vsmc_particle other, int retain_rng)
+vsmc_particle vsmc_particle_clone(vsmc_particle particle, int new_rng)
 {
-    ::vsmc::cast(particle).clone(::vsmc::cast(other), retain_rng != 0);
+    vsmc_particle clone = vsmc_particle_new(0, 0);
+    ::vsmc::cast(clone) = ::vsmc::cast(particle).clone(new_rng != 0);
+
+    return clone;
 }
 
-int vsmc_particle_size(vsmc_particle particle)
+size_t vsmc_particle_size(vsmc_particle particle)
 {
     return ::vsmc::cast(particle).size();
 }
 
-void vsmc_particle_resize_by_index(vsmc_particle particle, int N, int *index)
+void vsmc_particle_resize_by_index(
+    vsmc_particle particle, size_t n, const size_t *index)
 {
-    ::vsmc::cast(particle).resize_by_index(N, index);
+    ::vsmc::cast(particle).resize_by_index(n, index);
 }
 
-void vsmc_particle_resize_by_mask(vsmc_particle particle, int N, int *mask)
+void vsmc_particle_resize_by_mask(vsmc_particle particle, size_t n, int *mask)
 {
-    ::vsmc::cast(particle).resize_by_mask(N, mask);
+    ::vsmc::cast(particle).resize_by_mask(n, mask);
 }
 
 void vsmc_particle_resize_by_resample(
-    vsmc_particle particle, int N, vsmc_resample_type op)
+    vsmc_particle particle, size_t n, vSMCResampleScheme scheme)
 {
-    ::vsmc::cast(particle).resize_by_resample(N, ::vsmc::cast(op));
+    switch (scheme) {
+        case vSMCMultinomial:
+            ::vsmc::cast(particle).resize_by_resample(
+                n, ::vsmc::ResampleMultinomial());
+            break;
+        case vSMCResidual:
+            ::vsmc::cast(particle).resize_by_resample(
+                n, ::vsmc::ResampleResidual());
+            break;
+        case vSMCStratified:
+            ::vsmc::cast(particle).resize_by_resample(
+                n, ::vsmc::ResampleStratified());
+            break;
+        case vSMCSystematic:
+            ::vsmc::cast(particle).resize_by_resample(
+                n, ::vsmc::ResampleSystematic());
+            break;
+        case vSMCResidualStratified:
+            ::vsmc::cast(particle).resize_by_resample(
+                n, ::vsmc::ResampleResidualStratified());
+            break;
+        case vSMCResidualSystematic:
+            ::vsmc::cast(particle).resize_by_resample(
+                n, ::vsmc::ResampleResidualSystematic());
+            break;
+    }
 }
 
-void vsmc_particle_resize_by_uniform(vsmc_particle particle, int N)
+void vsmc_particle_resize_by_uniform(vsmc_particle particle, size_t n)
 {
-    ::vsmc::cast(particle).resize_by_uniform(N);
+    ::vsmc::cast(particle).resize_by_uniform(n);
 }
 
 void vsmc_particle_resize_by_ragne(
-    vsmc_particle particle, int N, int first, int last)
+    vsmc_particle particle, size_t n, size_t first, size_t last)
 {
-    ::vsmc::cast(particle).resize_by_range(N, first, last);
+    ::vsmc::cast(particle).resize_by_range(n, first, last);
 }
 
 vsmc_state_matrix vsmc_particle_value(vsmc_particle particle)
@@ -105,18 +134,18 @@ vsmc_weight vsmc_particle_weight(vsmc_particle particle)
     return weight;
 }
 
-vsmc_rng vsmc_particle_rng(vsmc_particle particle, int id)
+vsmc_rng vsmc_particle_rng(vsmc_particle particle, size_t id)
 {
-    vsmc_rng rng = {&::vsmc::cast(particle).rng(id)};
+    vsmc_rng rng = {&::vsmc::cast(particle).rng(id),
+        ::vsmc::rng_type<::vsmc::ParticleC::rng_type>()};
 
     return rng;
 }
 
-vsmc_single_particle vsmc_particle_sp(vsmc_particle particle, int id)
+vsmc_single_particle vsmc_particle_sp(vsmc_particle particle, size_t id)
 {
     vsmc_single_particle sp = {
-        ::vsmc::cast(particle).value().row_data(static_cast<std::size_t>(id)),
-        id};
+        ::vsmc::cast(particle).value().row_data(id), id};
 
     return sp;
 }
