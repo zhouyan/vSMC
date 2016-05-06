@@ -1254,8 +1254,7 @@ inline void rng_distribution_test_perf(std::size_t N, std::size_t M,
             vsmc::RNG rng1(rng);
             vsmc::RNG rng2(rng);
             std::stringstream ss;
-            ss.flags(std::ios_base::dec | std::ios_base::fixed |
-                std::ios_base::scientific);
+            ss.precision(20);
             ss << dist_vsmc;
             for (std::size_t j = 0; j != K; ++j)
                 r1[j] = dist_vsmc(rng1);
