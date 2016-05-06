@@ -190,6 +190,21 @@ VSMC_DEFINE_MATH_VMATH_VML_1(CdfNormInv, cdfnorminv)
 VSMC_DEFINE_MATH_VMATH_VML_1(LGamma, lgamma)
 VSMC_DEFINE_MATH_VMATH_VML_1(TGamma, tgamm)
 
+VSMC_DEFINE_MATH_VMATH_VML_1(Floor, floor)
+VSMC_DEFINE_MATH_VMATH_VML_1(Ceil, ceil)
+VSMC_DEFINE_MATH_VMATH_VML_1(Trunc, trunc)
+VSMC_DEFINE_MATH_VMATH_VML_1(Round, round)
+inline void modf(std::size_t n, const float *a, float *y, float *z)
+{
+    internal::size_check<MKL_INT>(n, "modf");
+    ::vsModf(static_cast<MKL_INT>(n), a, y, z);
+}
+inline void modf(std::size_t n, const double *a, double *y, double *z)
+{
+    internal::size_check<MKL_INT>(n, "modf");
+    ::vdModf(static_cast<MKL_INT>(n), a, y, z);
+}
+
 } // namespace vsmc
 
 #endif // VSMC_USE_MKL_VML
@@ -595,6 +610,27 @@ VSMC_DEFINE_MATH_VMATH_1(std::lgamma, lgamma)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \Gamma(a_i)\f$
 VSMC_DEFINE_MATH_VMATH_1(std::tgamma, tgamma)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \lfloor a_i \rfloor\f$
+VSMC_DEFINE_MATH_VMATH_1(std::floor, floor)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \lceil a_i \rceil\f$
+VSMC_DEFINE_MATH_VMATH_1(std::ceil, ceil)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = \mathrm{sgn}(a_i})\lfloor |a_i| \rfoor\f$
+VSMC_DEFINE_MATH_VMATH_1(std::trunc, trunc)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute rounding
+VSMC_DEFINE_MATH_VMATH_1(std::round, round)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute integeral and fraction parts
+template <typename T>
+inline void modf(std::size_t n, const T *a, T *y, T *z)
+{
+    for (std::size_t i = 0; i != n; ++i, ++a, ++y, ++z)
+        *z = std::modf(*a, y);
+}
 
 /// @}
 // vSpecial
