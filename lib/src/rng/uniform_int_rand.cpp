@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/seed.cpp
+// vSMC/lib/src/rng/uniform_int_rand.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,18 +29,27 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/engine.hpp>
-#include <vsmc/rng/rng.h>
-#include <vsmc/rng/seed.hpp>
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
 
-namespace vsmc
-{
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
+#endif
 
-using SeedC = SeedGenerator<NullType, unsigned>;
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    inline void vsmc_uniform_int_rand_##name(                                 \
+        vsmc_rng rng, size_t n, int *r, int a, int b)                         \
+    {                                                                         \
+        std::uniform_int_distribution<int> dist(a, b);                        \
+        VSMC_DEFINE_LIB_RNG_DIST(RNGType);                                    \
+    }
 
-} // namespace vsmc
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
-extern "C" {
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+using vsmc_uniform_int_rand_type = void (*)(vsmc_rng, size_t, int *, int, int);
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -51,76 +60,19 @@ extern "C" {
 #endif
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    inline void vsmc_seed_##name(vsmc_rng rng)                                \
-    {                                                                         \
-        ::vsmc::SeedC::instance()(*reinterpret_cast<RNGType *>(rng.ptr));     \
-    }
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-using vsmc_seed_type = void (*)(vsmc_rng);
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#ifdef VSMC_RNG_DEFINE_MACRO_NA
-#undef VSMC_RNG_DEFINE_MACRO_NA
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_seed_##name,
+    vsmc_uniform_int_rand_##name,
 #define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
 
-static vsmc_seed_type vsmc_seed_dispatch[] = {
+static vsmc_uniform_int_rand_type vsmc_uniform_int_rand_dispatch[] = {
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-    nullptr}; // vsmc_seed_dispatch
+    nullptr}; // vsmc_uniform_int_rand_dispatch
 
-void vsmc_seed(vsmc_rng rng)
+void vsmc_uniform_int_rand(vsmc_rng rng, size_t n, int *r, int a, int b)
 {
-    vsmc_seed_dispatch[static_cast<std::size_t>(rng.type)](rng);
+    vsmc_uniform_int_rand_dispatch[static_cast<std::size_t>(rng.type)](
+        rng, n, r, a, b);
 }
-
-unsigned vsmc_seed_get(void) { return ::vsmc::SeedC::instance().get(); }
-
-void vsmc_seed_set(unsigned seed) { ::vsmc::SeedC::instance().set(seed); }
-
-void vsmc_seed_modulo(unsigned div, unsigned rem)
-{
-    ::vsmc::SeedC::instance().modulo(div, rem);
-}
-
-size_t vsmc_seed_save(void *mem)
-{
-    std::size_t size = sizeof(::vsmc::SeedC);
-    if (mem != nullptr)
-        std::memcpy(mem, &::vsmc::SeedC::instance(), size);
-
-    return size;
-}
-
-void vsmc_seed_load(const void *mem)
-{
-    std::memcpy(&::vsmc::SeedC::instance(), mem, sizeof(::vsmc::SeedC));
-}
-
-void vsmc_seed_save_f(const char *filename)
-{
-    std::ofstream os(filename);
-    os << ::vsmc::SeedC::instance() << std::endl;
-    os.close();
-}
-
-void vsmc_seed_load_f(const char *filename)
-{
-    std::ifstream is(filename);
-    is >> ::vsmc::SeedC::instance();
-    is.close();
-}
-
-} // extern "C"

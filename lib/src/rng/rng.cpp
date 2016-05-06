@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <vsmc/rng/engine.hpp>
 #include <vsmc/rng/rng.h>
-#include <vsmc/rng/rng.hpp>
 
 #define VSMC_RUNTIME_ASSERT_LIB_RNG_TYPE(rng1, rng2, func)                    \
     VSMC_RUNTIME_ASSERT((rng1.type == rng2.type),                             \

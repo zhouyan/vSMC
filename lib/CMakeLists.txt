@@ -40,11 +40,11 @@ SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
     # ${PROJECT_SOURCE_DIR}/src/core/state_matrix.cpp
     # ${PROJECT_SOURCE_DIR}/src/core/weight.cpp
     # ${PROJECT_SOURCE_DIR}/src/resample/resample.cpp
-    # ${PROJECT_SOURCE_DIR}/src/rng/distribution.cpp
+    ${PROJECT_SOURCE_DIR}/src/rng/distribution.cpp
     ${PROJECT_SOURCE_DIR}/src/rng/rng.cpp
     # ${PROJECT_SOURCE_DIR}/src/rng/random_walk.cpp
-    # ${PROJECT_SOURCE_DIR}/src/rng/seed.cpp
-    # ${PROJECT_SOURCE_DIR}/src/rng/u01_sequence.cpp
+    ${PROJECT_SOURCE_DIR}/src/rng/seed.cpp
+    ${PROJECT_SOURCE_DIR}/src/rng/u01_sequence.cpp
     # ${PROJECT_SOURCE_DIR}/src/smp/backend_seq.cpp
     # ${PROJECT_SOURCE_DIR}/src/smp/backend_std.cpp
     # ${PROJECT_SOURCE_DIR}/src/utility/aligned_memory.cpp

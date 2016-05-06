@@ -29,19 +29,54 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libvsmc.hpp"
+#include <vsmc/rng/engine.hpp>
+#include <vsmc/rng/mkl.hpp>
+#include <vsmc/rng/rng.h>
+
+extern "C" {
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
 
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
+#endif
+
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    int vsmc_mkl_brng_##name() { return ::vsmc::mkl_brng<RNGType>(); }
+    inline int vsmc_mkl_brng_##name(void)                                     \
+    {                                                                         \
+        return ::vsmc::mkl_brng<RNGType>();                                   \
+    }
 
-extern "C" {
-
-#include <vsmc/rng/internal/rng_define_macro_std.hpp>
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
+
+using vsmc_mkl_brng_type = int (*)(void);
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_mkl_brng_##name,
+#define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
+
+static vsmc_mkl_brng_type vsmc_mkl_brng_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_mkl_brng_dispatch
+
+int vsmc_mkl_brng(vSMCRNGType type)
+{
+    return vsmc_mkl_brng_dispatch[static_cast<std::size_t>(type)]();
+}
 
 } // extern "C"

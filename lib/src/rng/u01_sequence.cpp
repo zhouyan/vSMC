@@ -29,40 +29,31 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libvsmc.hpp"
+#include <vsmc/rng/engine.hpp>
+#include <vsmc/rng/rng.h>
+#include <vsmc/rng/u01_sequence.hpp>
 
 extern "C" {
 
-void vsmc_u01_trans_sorted(int n, const double *u01, double *r)
+void vsmc_u01_trans_sorted(size_t n, const double *u01, double *r)
 {
-    ::vsmc::u01_trans_sorted(static_cast<std::size_t>(n), u01, r);
+    ::vsmc::u01_trans_sorted(n, u01, r);
 }
 
-void vsmc_u01_trans_stratified(int n, const double *u01, double *r)
+void vsmc_u01_trans_stratified(size_t n, const double *u01, double *r)
 {
-    ::vsmc::u01_trans_stratified(static_cast<std::size_t>(n), u01, r);
+    ::vsmc::u01_trans_stratified(n, u01, r);
 }
 
-void vsmc_u01_trans_systematic(int n, const double *u01, double *r)
+void vsmc_u01_trans_systematic(size_t n, const double *u01, double *r)
 {
-    ::vsmc::u01_trans_systematic(static_cast<std::size_t>(n), u01, r);
+    ::vsmc::u01_trans_systematic(n, u01, r);
 }
 
-void vsmc_u01_rand_sorted(vsmc_rng rng, int n, double *r)
-{
-    ::vsmc::u01_rand_sorted(::vsmc::cast(rng), static_cast<std::size_t>(n), r);
-}
+#include "u01_rand_sorted.cpp"
 
-void vsmc_u01_rand_stratified(vsmc_rng rng, int n, double *r)
-{
-    ::vsmc::u01_rand_stratified(
-        ::vsmc::cast(rng), static_cast<std::size_t>(n), r);
-}
+#include "u01_rand_stratified.cpp"
 
-void vsmc_u01_rand_systematic(vsmc_rng rng, int n, double *r)
-{
-    ::vsmc::u01_rand_systematic(
-        ::vsmc::cast(rng), static_cast<std::size_t>(n), r);
-}
+#include "u01_rand_systematic.cpp"
 
 } // extern "C"
