@@ -11,7 +11,9 @@ has been standardized for years, it is not universally available. If the
 required functions defined, then one should define the configuration macro
 \verb|VSMC_HAS_CBLAS| to zero. By default, this macro is defined to one if
 either \verb|VSMC_USE_MKL_CBLAS| or \verb|VSMC_USE_ACCELERATE| (see
-table~\ref{tab:Configuration macros for feature usability}) are non-zero.
+table~\ref{tab:Configuration macros for feature usability}) are non-zero. The
+user can also manually define this macro to zero if it is undesirable to
+include the C interface header.
 
 When the C interface is not available, the library declares the standard
 Fortran subroutines in C itself, such as \verb|dgemv_|. If there should be no
@@ -142,6 +144,13 @@ shall be,
 \begin{Verbatim}
   fma(n, a.data(), b.data(), 2.0, y.data());
 \end{Verbatim}
+
+Without any third-party libraries, these functions does not provide performance
+gain compared to the simple loop. When \mkl or Apple Accelerate framework is
+present, some functions can have substantial performance improvement when all
+input arguments are vectors. Vectorized random number generating
+introduced later (section~\ref{sec:Vectorized random number generating})
+performance heavily depends on these functions.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{XX}
