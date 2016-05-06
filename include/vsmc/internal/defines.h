@@ -33,6 +33,7 @@
 #define VSMC_INTERNAL_DEFINES_H
 
 #ifdef __cplusplus
+
 extern "C" {
 #endif
 

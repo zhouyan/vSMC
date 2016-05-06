@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/utility/src/utility_hdf5io.hpp
+// vSMC/example/utility/src/utility_hdf5.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,7 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "utility_hdf5io.hpp"
+#include "utility_hdf5.hpp"
 
 int main(int argc, char **argv)
 {
@@ -48,15 +48,15 @@ int main(int argc, char **argv)
               << std::fixed << "Time (ms) load" << std::setw(20) << std::right
               << "Test" << std::endl;
     std::cout << std::string(100, '-') << std::endl;
-    VSMC_HDF5IO_TEST(float, float);
-    VSMC_HDF5IO_TEST(float, double);
-    VSMC_HDF5IO_TEST(float, long double);
-    VSMC_HDF5IO_TEST(double, float);
-    VSMC_HDF5IO_TEST(double, double);
-    VSMC_HDF5IO_TEST(double, long double);
-    VSMC_HDF5IO_TEST(long double, float);
-    VSMC_HDF5IO_TEST(long double, float);
-    VSMC_HDF5IO_TEST(long double, long double);
+    VSMC_HDF5_TEST(float, float);
+    VSMC_HDF5_TEST(float, double);
+    VSMC_HDF5_TEST(float, long double);
+    VSMC_HDF5_TEST(double, float);
+    VSMC_HDF5_TEST(double, double);
+    VSMC_HDF5_TEST(double, long double);
+    VSMC_HDF5_TEST(long double, float);
+    VSMC_HDF5_TEST(long double, float);
+    VSMC_HDF5_TEST(long double, long double);
 
     return 0;
 }

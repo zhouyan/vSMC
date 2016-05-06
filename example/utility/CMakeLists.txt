@@ -36,5 +36,5 @@ VSMC_ADD_EXAMPLE(utility)
 VSMC_ADD_TEST(utility aligned_memory)
 
 IF(HDF5_FOUND)
-    VSMC_ADD_TEST(utility hdf5io)
+    VSMC_ADD_TEST(utility hdf5)
 ENDIF(HDF5_FOUND)

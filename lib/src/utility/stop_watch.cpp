@@ -29,7 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libvsmc.hpp"
+#include <vsmc/utility/stop_watch.hpp>
+#include <vsmc/utility/utility.h>
 
 vsmc_stop_watch vsmc_stop_watch_new(void)
 {
@@ -41,66 +42,70 @@ vsmc_stop_watch vsmc_stop_watch_new(void)
 
 void vsmc_stop_watch_delete(vsmc_stop_watch *stop_watch_ptr)
 {
-    delete ::vsmc::cast(stop_watch_ptr);
+    delete reinterpret_cast<::vsmc::StopWatch *>(stop_watch_ptr->ptr);
     stop_watch_ptr->ptr = nullptr;
 }
 
 void vsmc_stop_watch_assign(vsmc_stop_watch stop_watch, vsmc_stop_watch other)
 {
-    ::vsmc::cast(stop_watch) = ::vsmc::cast(other);
+    *reinterpret_cast<::vsmc::StopWatch *>(stop_watch.ptr) =
+        *reinterpret_cast<::vsmc::StopWatch *>(other.ptr);
 }
 
 int vsmc_stop_watch_running(vsmc_stop_watch stop_watch)
 {
-    return ::vsmc::cast(stop_watch).running();
+    return reinterpret_cast<::vsmc::StopWatch *>(stop_watch.ptr)->running();
 }
 
 int vsmc_stop_watch_start(vsmc_stop_watch stop_watch)
 {
-    return ::vsmc::cast(stop_watch).start();
+    return reinterpret_cast<::vsmc::StopWatch *>(stop_watch.ptr)->start();
 }
 
 int vsmc_stop_watch_stop(vsmc_stop_watch stop_watch)
 {
-    return ::vsmc::cast(stop_watch).stop();
+    return reinterpret_cast<::vsmc::StopWatch *>(stop_watch.ptr)->stop();
 }
 
 void vsmc_stop_watch_reset(vsmc_stop_watch stop_watch)
 {
-    ::vsmc::cast(stop_watch).reset();
+    reinterpret_cast<::vsmc::StopWatch *>(stop_watch.ptr)->reset();
 }
 
 double vsmc_stop_watch_cycles(vsmc_stop_watch stop_watch)
 {
-    return ::vsmc::cast(stop_watch).cycles();
+    return reinterpret_cast<::vsmc::StopWatch *>(stop_watch.ptr)->cycles();
 }
 
 double vsmc_stop_watch_nanoseconds(vsmc_stop_watch stop_watch)
 {
-    return ::vsmc::cast(stop_watch).nanoseconds();
+    return reinterpret_cast<::vsmc::StopWatch *>(stop_watch.ptr)
+        ->nanoseconds();
 }
 
 double vsmc_stop_watch_microseconds(vsmc_stop_watch stop_watch)
 {
-    return ::vsmc::cast(stop_watch).microseconds();
+    return reinterpret_cast<::vsmc::StopWatch *>(stop_watch.ptr)
+        ->microseconds();
 }
 
 double vsmc_stop_watch_milliseconds(vsmc_stop_watch stop_watch)
 {
-    return ::vsmc::cast(stop_watch).milliseconds();
+    return reinterpret_cast<::vsmc::StopWatch *>(stop_watch.ptr)
+        ->milliseconds();
 }
 
 double vsmc_stop_watch_seconds(vsmc_stop_watch stop_watch)
 {
-    return ::vsmc::cast(stop_watch).seconds();
+    return reinterpret_cast<::vsmc::StopWatch *>(stop_watch.ptr)->seconds();
 }
 
 double vsmc_stop_watch_minutes(vsmc_stop_watch stop_watch)
 {
-    return ::vsmc::cast(stop_watch).minutes();
+    return reinterpret_cast<::vsmc::StopWatch *>(stop_watch.ptr)->minutes();
 }
 
 double vsmc_stop_watch_hours(vsmc_stop_watch stop_watch)
 {
-    return ::vsmc::cast(stop_watch).hours();
+    return reinterpret_cast<::vsmc::StopWatch *>(stop_watch.ptr)->hours();
 }

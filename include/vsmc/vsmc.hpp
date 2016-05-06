@@ -142,7 +142,7 @@
 /// \ingroup Utility
 /// \brief Covariance matrix estimation and manipulation
 
-/// \defgroup HDF5IO HDF5 objects IO
+/// \defgroup HDF5 HDF5 objects I/O
 /// \ingroup Utility
 /// \brief Load and store objects in the HDF5 format
 

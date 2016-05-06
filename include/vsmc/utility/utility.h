@@ -42,7 +42,7 @@ extern "C" {
 /// @{
 
 /// \brief `vsmc::AlignedMemory::aligned_malloc`
-void *vsmc_malloc(size_t n, int alignment);
+void *vsmc_malloc(size_t n, size_t alignment);
 
 /// \brief `vsmc::AlignedMemory::aligned_free`
 void vsmc_free(void *ptr);
@@ -63,48 +63,14 @@ void vsmc_covariance_assign(vsmc_covariance covariance, vsmc_covariance other);
 
 /// \brief `vsmc::Covariance::operator()`
 void vsmc_covariance_compute(vsmc_covariance covariance,
-    vSMCMatrixLayout layout, int n, int p, const double *x, const double *w,
-    double *mean, double *cov, vSMCMatrixLayout cov_layout, int cov_upper,
-    int cov_packed);
+    vSMCMatrixLayout layout, size_t n, size_t p, const double *x,
+    const double *w, double *mean, double *cov, vSMCMatrixLayout cov_layout,
+    int cov_upper, int cov_packed);
 
 /// @} C_API_Utility_Covariance
 
-/// \addtogroup C_API_Utility_HDF5IO
+/// \addtogroup C_API_Utility_HDF5
 /// @{
-
-/// \brief `vsmc::hdf5load_size`
-int vsmc_hdf5load_size(const char *filename, const char *dataname);
-
-/// \brief `vsmc::hdf5load`
-double *vsmc_hdf5load(
-    const char *filename, const char *dataname, double *first);
-
-/// \brief `vsmc::hdf5load`
-int *vsmc_hdf5load_int(const char *filename, const char *dataname, int *first);
-
-/// \brief `vsmc::hdf5store`
-void vsmc_hdf5store_file(const char *filename);
-
-/// \brief `vsmc::hdf5store`
-void vsmc_hdf5store_group(
-    const char *filename, const char *dataname, int append);
-
-/// \brief `vsmc::hdf5store`
-void vsmc_hdf5store_vector(int n, const double *first, const char *filename,
-    const char *dataname, int append);
-
-/// \brief `vsmc::hdf5store`
-void vsmc_hdf5store_vector_int(int n, const int *first, const char *filename,
-    const char *dataname, int append);
-
-/// \brief `vsmc::hdf5store`
-void vsmc_hdf5store_matrix(vSMCMatrixLayout layout, int nrow, int ncol,
-    const double *first, const char *filename, const char *dataname,
-    int append);
-
-/// \brief `vsmc::hdf5store`
-void vsmc_hdf5store_matrix_int(vSMCMatrixLayout layout, int nrow, int ncol,
-    const int *first, const char *filename, const char *dataname, int append);
 
 /// \brief `vsmc::hdf5store`
 void vsmc_hdf5store_state_matrix(vsmc_state_matrix state_matrix,
@@ -122,7 +88,7 @@ void vsmc_hdf5store_monitor(vsmc_monitor monitor, const char *filename,
 void vsmc_hdf5store_sampler(vsmc_sampler sampler, const char *filename,
     const char *dataname, int append);
 
-/// @} C_API_Utility_HDF5IO
+/// @} C_API_Utility_HDF5
 
 /// \addtogroup C_API_Utility_ProgramOption
 /// @{

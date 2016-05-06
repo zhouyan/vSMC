@@ -29,91 +29,16 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libvsmc.hpp"
+#include <vsmc/utility/aligned_memory.hpp>
+#include <vsmc/utility/utility.h>
 
 extern "C" {
 
-void *vsmc_malloc(size_t n, int alignment)
+void *vsmc_malloc(size_t n, size_t alignment)
 {
-    return ::vsmc::AlignedMemory::aligned_malloc(
-        n, static_cast<std::size_t>(alignment));
+    return ::vsmc::AlignedMemory::aligned_malloc(n, alignment);
 }
 
 void vsmc_free(void *ptr) { ::vsmc::AlignedMemory::aligned_free(ptr); }
-
-vsmc_vector vsmc_vector_new(int size)
-{
-    vsmc_vector vector = {
-        static_cast<double *>(
-            vsmc_malloc(static_cast<std::size_t>(size) * sizeof(double), 32)),
-        size};
-
-    return vector;
-}
-
-void vsmc_vector_delete(vsmc_vector *vector_ptr)
-{
-    vsmc_free(vector_ptr->data);
-    vector_ptr->data = nullptr;
-    vector_ptr->size = 0;
-}
-
-void vsmc_vector_resize(vsmc_vector *vector_ptr, int size)
-{
-    if (vector_ptr->size != size) {
-        vsmc_vector_delete(vector_ptr);
-        *vector_ptr = vsmc_vector_new(size);
-    }
-}
-
-vsmc_vector_int vsmc_vector_int_new(int size)
-{
-    vsmc_vector_int vector_int = {
-        static_cast<int *>(
-            vsmc_malloc(static_cast<std::size_t>(size) * sizeof(int), 32)),
-        size};
-
-    return vector_int;
-}
-
-void vsmc_vector_int_delete(vsmc_vector_int *vector_int_ptr)
-{
-    vsmc_free(vector_int_ptr->data);
-    vector_int_ptr->data = nullptr;
-    vector_int_ptr->size = 0;
-}
-
-void vsmc_vector_int_resize(vsmc_vector_int *vector_int_ptr, int size)
-{
-    if (vector_int_ptr->size != size) {
-        vsmc_vector_int_delete(vector_int_ptr);
-        *vector_int_ptr = vsmc_vector_int_new(size);
-    }
-}
-
-vsmc_vector_raw vsmc_vector_raw_new(int size)
-{
-    vsmc_vector_raw vector_raw = {
-        static_cast<unsigned char *>(vsmc_malloc(
-            static_cast<std::size_t>(size) * sizeof(unsigned char), 32)),
-        size};
-
-    return vector_raw;
-}
-
-void vsmc_vector_raw_delete(vsmc_vector_raw *vector_raw_ptr)
-{
-    vsmc_free(vector_raw_ptr->data);
-    vector_raw_ptr->data = nullptr;
-    vector_raw_ptr->size = 0;
-}
-
-void vsmc_vector_raw_resize(vsmc_vector_raw *vector_raw_ptr, int size)
-{
-    if (vector_raw_ptr->size != size) {
-        vsmc_vector_raw_delete(vector_raw_ptr);
-        *vector_raw_ptr = vsmc_vector_raw_new(size);
-    }
-}
 
 } // extern "C"

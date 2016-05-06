@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/utility/progress.cpp
+// vSMC/lib/src/utility/hdf5.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,45 +29,34 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <vsmc/utility/utility.h>
 #include "libvsmc.hpp"
 
 extern "C" {
 
-vsmc_progress vsmc_progress_new(void)
+void vsmc_hdf5store_state_matrix(vsmc_state_matrix state_matrix,
+    const char *filename, const char *dataname, int append)
 {
-    auto ptr = new ::vsmc::Progress(std::cout);
-    vsmc_progress progress = {ptr};
-
-    return progress;
+    ::vsmc::hdf5store(
+        ::vsmc::cast(state_matrix), filename, dataname, append != 0);
 }
 
-void vsmc_progress_delete(vsmc_progress *progress_ptr)
+void vsmc_hdf5store_particle(vsmc_particle particle, const char *filename,
+    const char *dataname, int append)
 {
-    delete ::vsmc::cast(progress_ptr);
-    progress_ptr->ptr = nullptr;
+    ::vsmc::hdf5store(::vsmc::cast(particle), filename, dataname, append != 0);
 }
 
-void vsmc_progress_start(vsmc_progress progress, int total, const char *msg,
-    int length, int show_iter, double interval_s)
+void vsmc_hdf5store_monitor(vsmc_monitor monitor, const char *filename,
+    const char *dataname, int append)
 {
-    ::vsmc::cast(progress).start(static_cast<std::size_t>(total),
-        msg == nullptr ? std::string() : msg, static_cast<std::size_t>(length),
-        show_iter != 0, interval_s);
+    ::vsmc::hdf5store(::vsmc::cast(monitor), filename, dataname, append != 0);
 }
 
-void vsmc_progress_stop(vsmc_progress progress, int finished)
+void vsmc_hdf5store_sampler(vsmc_sampler sampler, const char *filename,
+    const char *dataname, int append)
 {
-    ::vsmc::cast(progress).stop(finished != 0);
-}
-
-void vsmc_progress_increment(vsmc_progress progress, int step)
-{
-    ::vsmc::cast(progress).increment(static_cast<std::size_t>(step));
-}
-
-void vsmc_progress_message(vsmc_progress progress, const char *msg)
-{
-    ::vsmc::cast(progress).message(msg == nullptr ? std::string() : msg);
+    ::vsmc::hdf5store(::vsmc::cast(sampler), filename, dataname, append != 0);
 }
 
 } // extern "C"

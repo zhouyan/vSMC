@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/example/utility/include/utility_hdf5io.hpp
+// vSMC/example/utility/include/utility_hdf5.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,17 +29,17 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_EXAMPLE_UTILITY_HDF5IO_HPP
-#define VSMC_EXAMPLE_UTILITY_HDF5IO_HPP
+#ifndef VSMC_EXAMPLE_UTILITY_HDF5_HPP
+#define VSMC_EXAMPLE_UTILITY_HDF5_HPP
 
-#include <vsmc/utility/hdf5io.hpp>
+#include <vsmc/utility/hdf5.hpp>
 #include <vsmc/utility/stop_watch.hpp>
 
-#define VSMC_HDF5IO_TEST(orig, load)                                          \
-    hdf5io_test<orig, load>(nrow, ncol, #orig, #load);
+#define VSMC_HDF5_TEST(orig, load)                                            \
+    hdf5_test<orig, load>(nrow, ncol, #orig, #load);
 
 template <typename OrigType, typename LoadType>
-inline bool hdf5io_check(
+inline bool hdf5_check(
     const vsmc::Vector<OrigType> &orig, const vsmc::Vector<LoadType> &load)
 {
     for (std::size_t i = 0; i != orig.size(); ++i)
@@ -49,13 +49,13 @@ inline bool hdf5io_check(
 }
 
 template <typename OrigType, typename LoadType>
-inline void hdf5io_test(std::size_t nrow, std::size_t ncol,
+inline void hdf5_test(std::size_t nrow, std::size_t ncol,
     const std::string &orig_type, const std::string &load_type)
 {
     std::cout << std::setw(20) << std::left << orig_type << std::setw(20)
               << std::left << load_type;
 
-    const std::string filename("hdf5io.h5");
+    const std::string filename("hdf5.h5");
     const std::size_t n = nrow * ncol;
 
     vsmc::Vector<OrigType> orig(n);
@@ -88,17 +88,17 @@ inline void hdf5io_test(std::size_t nrow, std::size_t ncol,
     passed = passed && n == vsmc::hdf5load_size(filename, "data/m3");
     passed = passed && n == vsmc::hdf5load_size(filename, "data/m4");
     vsmc::hdf5load(filename, "data/x1", load.begin());
-    passed = passed && hdf5io_check(orig, load);
+    passed = passed && hdf5_check(orig, load);
     vsmc::hdf5load(filename, "data/x2", load.data());
-    passed = passed && hdf5io_check(orig, load);
+    passed = passed && hdf5_check(orig, load);
     vsmc::hdf5load(filename, "data/m1", load.begin());
-    passed = passed && hdf5io_check(orig, load);
+    passed = passed && hdf5_check(orig, load);
     vsmc::hdf5load(filename, "data/m2", load.data());
-    passed = passed && hdf5io_check(orig, load);
+    passed = passed && hdf5_check(orig, load);
     vsmc::hdf5load(filename, "data/m3", load.begin());
-    passed = passed && hdf5io_check(orig, load);
+    passed = passed && hdf5_check(orig, load);
     vsmc::hdf5load(filename, "data/m4", load.data());
-    passed = passed && hdf5io_check(orig, load);
+    passed = passed && hdf5_check(orig, load);
     watch_load.stop();
 
     std::cout << std::setw(20) << std::right << std::fixed
@@ -108,4 +108,4 @@ inline void hdf5io_test(std::size_t nrow, std::size_t ncol,
     std::cout << std::string(100, '-') << std::endl;
 }
 
-#endif // VSMC_EXAMPLE_UTILITY_HDF5IO_HPP
+#endif // VSMC_EXAMPLE_UTILITY_HDF5_HPP

@@ -29,13 +29,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libvsmc.hpp"
+#include <vsmc/utility/covariance.hpp>
+#include <vsmc/utility/utility.h>
 
 extern "C" {
 
 vsmc_covariance vsmc_covariance_new(void)
 {
-    auto ptr = new ::vsmc::CovarianceC();
+    auto ptr = new ::vsmc::Covariance<double>();
     vsmc_covariance covariance = {ptr};
 
     return covariance;
@@ -43,23 +44,24 @@ vsmc_covariance vsmc_covariance_new(void)
 
 void vsmc_covariance_delete(vsmc_covariance *covariance_ptr)
 {
-    delete ::vsmc::cast(covariance_ptr);
+    delete reinterpret_cast<::vsmc::Covariance<double> *>(covariance_ptr->ptr);
     covariance_ptr->ptr = nullptr;
 }
 
 void vsmc_covariance_assign(vsmc_covariance covariance, vsmc_covariance other)
 {
-    ::vsmc::cast(covariance) = ::vsmc::cast(other);
+    *reinterpret_cast<::vsmc::Covariance<double> *>(covariance.ptr) =
+        *reinterpret_cast<::vsmc::Covariance<double> *>(other.ptr);
 }
 
 void vsmc_covariance_compute(vsmc_covariance covariance,
-    vSMCMatrixLayout layout, int n, int p, const double *x, const double *w,
-    double *mean, double *cov, vSMCMatrixLayout cov_layout, int cov_upper,
-    int cov_packed)
+    vSMCMatrixLayout layout, size_t n, size_t p, const double *x,
+    const double *w, double *mean, double *cov, vSMCMatrixLayout cov_layout,
+    int cov_upper, int cov_packed)
 {
-    ::vsmc::cast(covariance)(static_cast<::vsmc::MatrixLayout>(layout),
-        static_cast<std::size_t>(n), static_cast<std::size_t>(p), x, w, mean,
-        cov, static_cast<::vsmc::MatrixLayout>(cov_layout), cov_upper != 0,
+    (*reinterpret_cast<::vsmc::Covariance<double> *>(covariance.ptr))(
+        static_cast<::vsmc::MatrixLayout>(layout), n, p, x, w, mean, cov,
+        static_cast<::vsmc::MatrixLayout>(cov_layout), cov_upper != 0,
         cov_packed != 0);
 }
 

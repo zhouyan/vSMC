@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/utility/hdf5io.hpp
+// vSMC/include/vsmc/utility/hdf5.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_UTILITY_HDF5IO_HPP
-#define VSMC_UTILITY_HDF5IO_HPP
+#ifndef VSMC_UTILITY_HDF5_HPP
+#define VSMC_UTILITY_HDF5_HPP
 
 #include <vsmc/internal/common.hpp>
 
@@ -120,7 +120,7 @@ class HDF5StoreDataPtr
     }
 }; // class HDF5StoreDataPtr
 
-inline void hdf5io_dim(
+inline void hdf5_dim(
     MatrixLayout layout, std::size_t nrow, std::size_t ncol, ::hsize_t *dim)
 {
     if (layout == RowMajor) {
@@ -134,7 +134,7 @@ inline void hdf5io_dim(
 }
 
 template <typename IntType>
-inline bool hdf5io_use_int(std::size_t n, IntType *r, std::false_type)
+inline bool hdf5_use_int(std::size_t n, IntType *r, std::false_type)
 {
     if (sizeof(int) > sizeof(IntType))
         return true;
@@ -151,7 +151,7 @@ inline bool hdf5io_use_int(std::size_t n, IntType *r, std::false_type)
 }
 
 template <typename IntType>
-inline bool hdf5io_use_int(std::size_t n, IntType *r, std::true_type)
+inline bool hdf5_use_int(std::size_t n, IntType *r, std::true_type)
 {
     if (sizeof(int) > sizeof(IntType))
         return true;
@@ -171,7 +171,7 @@ inline bool hdf5io_use_int(std::size_t n, IntType *r, std::true_type)
     return flag;
 }
 
-inline ::hid_t hdf5io_datafile(
+inline ::hid_t hdf5_datafile(
     const std::string &filename, bool append, bool read_only)
 {
     if (!append)
@@ -190,132 +190,132 @@ inline ::hid_t hdf5io_datafile(
 } // namespace vsmc::internal
 
 /// \brief HDF5 data type
-/// \ingroup HDFIO
+/// \ingroup HDF5
 template <typename>
-inline ::hid_t hdf5io_datatype()
+inline ::hid_t hdf5_datatype()
 {
     return -1;
 }
 
 /// \brief HDF5 data type specialization for char
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <>
-inline ::hid_t hdf5io_datatype<char>()
+inline ::hid_t hdf5_datatype<char>()
 {
     return ::H5Tcopy(H5T_NATIVE_CHAR);
 }
 
 /// \brief HDF5 data type specialization for signed char
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <>
-inline ::hid_t hdf5io_datatype<signed char>()
+inline ::hid_t hdf5_datatype<signed char>()
 {
     return ::H5Tcopy(H5T_NATIVE_SCHAR);
 }
 
 /// \brief HDF5 data type specialization for unsigned char
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <>
-inline ::hid_t hdf5io_datatype<unsigned char>()
+inline ::hid_t hdf5_datatype<unsigned char>()
 {
     return ::H5Tcopy(H5T_NATIVE_UCHAR);
 }
 
 /// \brief HDF5 data type specialization for short
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <>
-inline ::hid_t hdf5io_datatype<short>()
+inline ::hid_t hdf5_datatype<short>()
 {
     return ::H5Tcopy(H5T_NATIVE_SHORT);
 }
 
 /// \brief HDF5 data type specialization for unsigned short
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <>
-inline ::hid_t hdf5io_datatype<unsigned short>()
+inline ::hid_t hdf5_datatype<unsigned short>()
 {
     return ::H5Tcopy(H5T_NATIVE_UCHAR);
 }
 
 /// \brief HDF5 data type specialization for int
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <>
-inline ::hid_t hdf5io_datatype<int>()
+inline ::hid_t hdf5_datatype<int>()
 {
     return ::H5Tcopy(H5T_NATIVE_INT);
 }
 
 /// \brief HDF5 data type specialization for unsigned int
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <>
-inline ::hid_t hdf5io_datatype<unsigned int>()
+inline ::hid_t hdf5_datatype<unsigned int>()
 {
     return ::H5Tcopy(H5T_NATIVE_UINT);
 }
 
 /// \brief HDF5 data type specialization for long
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <>
-inline ::hid_t hdf5io_datatype<long>()
+inline ::hid_t hdf5_datatype<long>()
 {
     return ::H5Tcopy(H5T_NATIVE_LONG);
 }
 
 /// \brief HDF5 data type specialization for unsigned long
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <>
-inline ::hid_t hdf5io_datatype<unsigned long>()
+inline ::hid_t hdf5_datatype<unsigned long>()
 {
     return ::H5Tcopy(H5T_NATIVE_ULONG);
 }
 
 /// \brief HDF5 data type specialization for long long
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <>
-inline ::hid_t hdf5io_datatype<long long>()
+inline ::hid_t hdf5_datatype<long long>()
 {
     return ::H5Tcopy(H5T_NATIVE_LLONG);
 }
 
 /// \brief HDF5 data type specialization for unsigned long
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <>
-inline ::hid_t hdf5io_datatype<unsigned long long>()
+inline ::hid_t hdf5_datatype<unsigned long long>()
 {
     return ::H5Tcopy(H5T_NATIVE_ULLONG);
 }
 
 /// \brief HDF5 data type specialization for float
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <>
-inline ::hid_t hdf5io_datatype<float>()
+inline ::hid_t hdf5_datatype<float>()
 {
     return ::H5Tcopy(H5T_NATIVE_FLOAT);
 }
 
 /// \brief HDF5 data type specialization for double
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <>
-inline ::hid_t hdf5io_datatype<double>()
+inline ::hid_t hdf5_datatype<double>()
 {
     return ::H5Tcopy(H5T_NATIVE_DOUBLE);
 }
 
 /// \brief HDF5 data type specialization for long double
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <>
-inline ::hid_t hdf5io_datatype<long double>()
+inline ::hid_t hdf5_datatype<long double>()
 {
     return ::H5Tcopy(H5T_NATIVE_LDOUBLE);
 }
 
 /// \brief The number of elements in HDF5 data
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 inline std::size_t hdf5load_size(
     const std::string &filename, const std::string &dataname)
 {
     internal::HDF5File datafile(
-        internal::hdf5io_datafile(filename, true, true));
+        internal::hdf5_datafile(filename, true, true));
     if (!datafile)
         return 0;
 
@@ -336,13 +336,13 @@ inline std::size_t hdf5load_size(
 }
 
 /// \brief Load HDF5 data
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <typename OutputIter>
 inline OutputIter hdf5load(
     const std::string &filename, const std::string &dataname, OutputIter first)
 {
     internal::HDF5File datafile(
-        internal::hdf5io_datafile(filename, true, true));
+        internal::hdf5_datafile(filename, true, true));
     if (!datafile)
         return first;
 
@@ -367,7 +367,7 @@ inline OutputIter hdf5load(
     if (!src_datatype)
         return first;
 
-    internal::HDF5DataType dst_datatype(hdf5io_datatype<T>());
+    internal::HDF5DataType dst_datatype(hdf5_datatype<T>());
     if (!dst_datatype)
         return first;
 
@@ -406,20 +406,20 @@ inline Vector<T> hdf5load(
 }
 
 /// \brief Create a new HDF5 file
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 inline void hdf5store(const std::string &filename)
 {
     internal::HDF5File datafile(
-        internal::hdf5io_datafile(filename, false, false));
+        internal::hdf5_datafile(filename, false, false));
 }
 
 /// \brief Create a new HDF5 group
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 inline void hdf5store(
     const std::string &filename, const std::string dataname, bool append)
 {
     internal::HDF5File datafile(
-        internal::hdf5io_datafile(filename, append, false));
+        internal::hdf5_datafile(filename, append, false));
     if (datafile) {
         internal::HDF5Group datagroup(::H5Gcreate2(datafile.id(),
             dataname.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
@@ -427,7 +427,7 @@ inline void hdf5store(
 }
 
 /// \brief Store one dimensional vector
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <typename InputIter>
 inline void hdf5store(std::size_t N, InputIter first,
     const std::string &filename, const std::string &dataname, bool append)
@@ -438,11 +438,11 @@ inline void hdf5store(std::size_t N, InputIter first,
         return;
 
     internal::HDF5File datafile(
-        internal::hdf5io_datafile(filename, append, false));
+        internal::hdf5_datafile(filename, append, false));
     if (!datafile)
         return;
 
-    internal::HDF5DataType datatype(hdf5io_datatype<T>());
+    internal::HDF5DataType datatype(hdf5_datatype<T>());
     if (!datatype)
         return;
 
@@ -462,7 +462,7 @@ inline void hdf5store(std::size_t N, InputIter first,
 }
 
 /// \brief Store one dimensional vector
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <typename T, typename Alloc>
 inline void hdf5store(const std::vector<T, Alloc> &vector,
     const std::string &filename, const std::string &dataname, bool append)
@@ -471,7 +471,7 @@ inline void hdf5store(const std::vector<T, Alloc> &vector,
 }
 
 /// \brief Store a matrix in the HDF5 format from an input iterator
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 ///
 /// \note
 /// HDF5 store data in row major layout. For example,
@@ -523,16 +523,16 @@ inline void hdf5store(MatrixLayout layout, std::size_t nrow, std::size_t ncol,
         return;
 
     internal::HDF5File datafile(
-        internal::hdf5io_datafile(filename, append, false));
+        internal::hdf5_datafile(filename, append, false));
     if (!datafile)
         return;
 
-    internal::HDF5DataType datatype(hdf5io_datatype<T>());
+    internal::HDF5DataType datatype(hdf5_datatype<T>());
     if (!datatype)
         return;
 
     ::hsize_t dim[2];
-    internal::hdf5io_dim(layout, nrow, ncol, dim);
+    internal::hdf5_dim(layout, nrow, ncol, dim);
     internal::HDF5DataSpace dataspace(::H5Screate_simple(2, dim, nullptr));
     if (!dataspace)
         return;
@@ -548,7 +548,7 @@ inline void hdf5store(MatrixLayout layout, std::size_t nrow, std::size_t ncol,
 }
 
 /// \brief Store a StateMatrix in the HDF5 format
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <MatrixLayout Layout, std::size_t Dim, typename T>
 inline void hdf5store(const StateMatrix<Layout, Dim, T> &state_matrix,
     const std::string &filename, const std::string &dataname, bool append)
@@ -558,7 +558,7 @@ inline void hdf5store(const StateMatrix<Layout, Dim, T> &state_matrix,
 }
 
 /// \brief Store a Particle in the HDF5 format
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <typename T>
 inline void hdf5store(const Particle<T> &particle, const std::string &filename,
     const std::string &dataname, bool append)
@@ -570,7 +570,7 @@ inline void hdf5store(const Particle<T> &particle, const std::string &filename,
 }
 
 /// \brief Store a Monitor in the HDF5 format
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <typename T>
 inline void hdf5store(const Monitor<T> &monitor, const std::string &filename,
     const std::string &dataname, bool append)
@@ -582,7 +582,7 @@ inline void hdf5store(const Monitor<T> &monitor, const std::string &filename,
 }
 
 /// \brief Store a Sampler in the HDF5 format
-/// \ingroup HDF5IO
+/// \ingroup HDF5
 template <typename T>
 inline void hdf5store(const Sampler<T> &sampler, const std::string &filename,
     const std::string &dataname, bool append)
@@ -595,4 +595,4 @@ inline void hdf5store(const Sampler<T> &sampler, const std::string &filename,
 
 } // namespace vsmc
 
-#endif // VSMC_UTILITY_HDF5IO_HPP
+#endif // VSMC_UTILITY_HDF5_HPP

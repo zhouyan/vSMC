@@ -104,7 +104,7 @@
 /// \defgroup C_API_Utility_Covariance Covariance
 /// \ingroup C_API_Utility
 ///
-/// \defgroup C_API_Utility_HDF5IO HDF5 objects IO
+/// \defgroup C_API_Utility_HDF5 HDF5 objects IO
 /// \ingroup C_API_Utility
 ///
 /// \defgroup C_API_Utility_ProgramOption Program option

@@ -40,7 +40,7 @@
 #include <vsmc/utility/stop_watch.hpp>
 
 #if VSMC_HAS_HDF5
-#include <vsmc/utility/hdf5io.hpp>
+#include <vsmc/utility/hdf5.hpp>
 #endif
 
 #if VSMC_HAS_OPENCL

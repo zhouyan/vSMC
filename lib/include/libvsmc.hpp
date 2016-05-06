@@ -32,13 +32,12 @@
 #ifndef VSMC_LIBVSMC_HPP
 #define VSMC_LIBVSMC_HPP
 
-#include <vsmc/vsmc.h>
 #include <vsmc/vsmc.hpp>
 
 namespace vsmc
 {
 
-using RNGC = RNG;
+using RNGC = RNGSet<>::rng_type;
 
 using WeightC = Weight;
 
@@ -47,7 +46,7 @@ using StateMatrixCBase = StateMatrix<RowMajor, Dynamic, double>;
 class StateMatrixC : public StateMatrixCBase
 {
     public:
-    using rng_set_type = RNGSet<RNGC>;
+    using rng_set_type = RNGSet<>;
     using size_type = int;
     using weight_type = WeightC;
 
@@ -61,8 +60,6 @@ using SingleParticleC = SingleParticle<StateMatrixC>;
 using SamplerC = Sampler<StateMatrixC>;
 
 using MonitorC = Monitor<StateMatrixC>;
-
-using CovarianceC = Covariance<double>;
 
 template <template <typename, typename> class Base>
 class InitializeC : public Base<StateMatrixC, InitializeC<Base>>
@@ -210,58 +207,6 @@ class MonitorEvalC : public Base<StateMatrixC, MonitorEvalC<Base>>
     vsmc_monitor_eval_pre_type eval_pre_;
     vsmc_monitor_eval_post_type eval_post_;
 }; // class MonitorEvalC
-
-inline CovarianceC &cast(const vsmc_covariance &covariance)
-{
-    return *(reinterpret_cast<CovarianceC *>(covariance.ptr));
-}
-
-inline CovarianceC *cast(const vsmc_covariance *covariance_ptr)
-{
-    return reinterpret_cast<CovarianceC *>(covariance_ptr->ptr);
-}
-
-inline ProgramOptionMap &cast(
-    const vsmc_program_option_map &program_option_map)
-{
-    return *(reinterpret_cast<ProgramOptionMap *>(program_option_map.ptr));
-}
-
-inline ProgramOptionMap *cast(
-    const vsmc_program_option_map *program_option_map_ptr)
-{
-    return reinterpret_cast<ProgramOptionMap *>(program_option_map_ptr->ptr);
-}
-
-inline Progress &cast(const vsmc_progress &progress)
-{
-    return *(reinterpret_cast<Progress *>(progress.ptr));
-}
-
-inline Progress *cast(const vsmc_progress *progress_ptr)
-{
-    return reinterpret_cast<Progress *>(progress_ptr->ptr);
-}
-
-inline RNGC &cast(const vsmc_rng &rng)
-{
-    return *(reinterpret_cast<RNGC *>(rng.ptr));
-}
-
-inline RNGC *cast(const vsmc_rng *rng_ptr)
-{
-    return reinterpret_cast<RNGC *>(rng_ptr->ptr);
-}
-
-inline StopWatch &cast(const vsmc_stop_watch &stop_watch)
-{
-    return *(reinterpret_cast<StopWatch *>(stop_watch.ptr));
-}
-
-inline StopWatch *cast(const vsmc_stop_watch *stop_watch_ptr)
-{
-    return reinterpret_cast<StopWatch *>(stop_watch_ptr->ptr);
-}
 
 inline StateMatrixC &cast(const vsmc_state_matrix &state_matrix)
 {
