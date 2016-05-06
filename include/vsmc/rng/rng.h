@@ -41,6 +41,13 @@ extern "C" {
 /// \addtogroup C_API_RNG_RNG
 /// @{
 
+/// \brief The maximum of an integer that can be passed to where `vSMCRNGType`
+/// value is expected
+int vsmc_rng_type_max();
+
+/// \brief Check if a given RNGType is defined within the library
+int vsmc_rng_type_check(vSMCRNGType type);
+
 /// \brief `RNGType::RNGType`
 vsmc_rng vsmc_rng_new(unsigned seed, vSMCRNGType type);
 

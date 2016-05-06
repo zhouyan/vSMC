@@ -56,14 +56,14 @@ extern "C" {
 
 #include "normal_mv_rand.cpp"
 
-#define VSMC_DEFINE_LIB_RNG_DIST_0(RNGType, Name, name, dist)                 \
+#define VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_0(RNGType, Name, name, dist)   \
     inline void vsmc_##dist##_rand_##name(vsmc_rng rng, size_t n, double *r)  \
     {                                                                         \
         ::vsmc::dist##_distribution(                                          \
             *reinterpret_cast<RNGType *>(rng.ptr), n, r);                     \
     }
 
-#define VSMC_DEFINE_LIB_RNG_DIST_1(RNGType, Name, name, dist)                 \
+#define VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_1(RNGType, Name, name, dist)   \
     inline void vsmc_##dist##_rand_##name(                                    \
         vsmc_rng rng, size_t n, double *r, double p1)                         \
     {                                                                         \
@@ -71,7 +71,7 @@ extern "C" {
             *reinterpret_cast<RNGType *>(rng.ptr), n, r, p1);                 \
     }
 
-#define VSMC_DEFINE_LIB_RNG_DIST_2(RNGType, Name, name, dist)                 \
+#define VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_2(RNGType, Name, name, dist)   \
     inline void vsmc_##dist##_rand_##name(                                    \
         vsmc_rng rng, size_t n, double *r, double p1, double p2)              \
     {                                                                         \
@@ -79,16 +79,370 @@ extern "C" {
             *reinterpret_cast<RNGType *>(rng.ptr), n, r, p1, p2);             \
     }
 
-#define VSMC_DEFINE_LIB_RNG_DIST_TYPE_0(dist)                                 \
-    using vsmc_##dist##_rand_type = void (*)(vsmc_rng, size_t, double *);
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
 
-#define VSMC_DEFINE_LIB_RNG_DIST_TYPE_1(dist)                                 \
-    using vsmc_##dist##_rand_type =                                           \
-        void (*)(vsmc_rng, size_t, double *, double);
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
+#endif
 
-#define VSMC_DEFINE_LIB_RNG_DIST_TYPE_2(dist)                                 \
-    using vsmc_##dist##_rand_type =                                           \
-        void (*)(vsmc_rng, size_t, double *, double, double);
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_0(RNGType, Name, name, u01)        \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_0(RNGType, Name, name, u01_cc)     \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_0(RNGType, Name, name, u01_co)     \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_0(RNGType, Name, name, u01_oc)     \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_0(RNGType, Name, name, u01_oo)     \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_1(                                 \
+        RNGType, Name, name, chi_squared)                                     \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_1(                                 \
+        RNGType, Name, name, exponential)                                     \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_1(RNGType, Name, name, rayleigh)   \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_1(RNGType, Name, name, student_t)  \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_2(RNGType, Name, name, beta)       \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_2(RNGType, Name, name, cauchy)     \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_2(                                 \
+        RNGType, Name, name, extreme_value)                                   \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_2(RNGType, Name, name, fisher_f)   \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_2(RNGType, Name, name, gamma)      \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_2(RNGType, Name, name, laplace)    \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_2(RNGType, Name, name, levy)       \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_2(RNGType, Name, name, logistic)   \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_2(RNGType, Name, name, lognormal)  \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_2(RNGType, Name, name, normal)     \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_2(RNGType, Name, name, pareto)     \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_2(                                 \
+        RNGType, Name, name, uniform_real)                                    \
+    VSMC_DEFINE_LIB_RNG_DIST_RAND_DISPATCH_2(RNGType, Name, name, weibull)
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+using vsmc_rng_rand_type_0 = void (*)(vsmc_rng, size_t, double *);
+
+using vsmc_rng_rand_type_1 = void (*)(vsmc_rng, size_t, double *, double);
+
+using vsmc_rng_rand_type_2 = void (*)(
+    vsmc_rng, size_t, double *, double, double);
+
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_u01_rand_##name,
+
+static vsmc_rng_rand_type_0 vsmc_u01_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_u01_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_u01_cc_rand_##name,
+
+static vsmc_rng_rand_type_0 vsmc_u01_cc_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_u01_cc_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_u01_co_rand_##name,
+
+static vsmc_rng_rand_type_0 vsmc_u01_co_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_u01_co_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_u01_oc_rand_##name,
+
+static vsmc_rng_rand_type_0 vsmc_u01_oc_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_u01_oc_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_u01_oo_rand_##name,
+
+static vsmc_rng_rand_type_0 vsmc_u01_oo_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_u01_oo_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    vsmc_chi_squared_rand_##name,
+
+static vsmc_rng_rand_type_1 vsmc_chi_squared_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_chi_squared_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    vsmc_exponential_rand_##name,
+
+static vsmc_rng_rand_type_1 vsmc_exponential_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_exponential_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rayleigh_rand_##name,
+
+static vsmc_rng_rand_type_1 vsmc_rayleigh_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_rayleigh_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_student_t_rand_##name,
+
+static vsmc_rng_rand_type_1 vsmc_student_t_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_student_t_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_beta_rand_##name,
+
+static vsmc_rng_rand_type_2 vsmc_beta_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_beta_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_cauchy_rand_##name,
+
+static vsmc_rng_rand_type_2 vsmc_cauchy_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_cauchy_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    vsmc_extreme_value_rand_##name,
+
+static vsmc_rng_rand_type_2 vsmc_extreme_value_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_extreme_value_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_fisher_f_rand_##name,
+
+static vsmc_rng_rand_type_2 vsmc_fisher_f_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_fisher_f_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_gamma_rand_##name,
+
+static vsmc_rng_rand_type_2 vsmc_gamma_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_gamma_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_laplace_rand_##name,
+
+static vsmc_rng_rand_type_2 vsmc_laplace_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_laplace_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_levy_rand_##name,
+
+static vsmc_rng_rand_type_2 vsmc_levy_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_levy_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_logistic_rand_##name,
+
+static vsmc_rng_rand_type_2 vsmc_logistic_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_logistic_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_lognormal_rand_##name,
+
+static vsmc_rng_rand_type_2 vsmc_lognormal_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_lognormal_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_normal_rand_##name,
+
+static vsmc_rng_rand_type_2 vsmc_normal_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_normal_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_pareto_rand_##name,
+
+static vsmc_rng_rand_type_2 vsmc_pareto_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_pareto_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    vsmc_uniform_real_rand_##name,
+
+static vsmc_rng_rand_type_2 vsmc_uniform_real_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_uniform_real_rand_dispatch
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_weibull_rand_##name,
+
+static vsmc_rng_rand_type_2 vsmc_weibull_rand_dispatch[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_weibull_rand_dispatch
 
 #define VSMC_DEFINE_LIB_RNG_DIST_RAND_0(dist)                                 \
     void vsmc_##dist##_rand(vsmc_rng rng, size_t n, double *r)                \
@@ -111,383 +465,6 @@ extern "C" {
         vsmc_##dist##_rand_dispatch[static_cast<std::size_t>(rng.type)](      \
             rng, n, r, p1, p2);                                               \
     }
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#ifdef VSMC_RNG_DEFINE_MACRO_NA
-#undef VSMC_RNG_DEFINE_MACRO_NA
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    VSMC_DEFINE_LIB_RNG_DIST_0(RNGType, Name, name, u01)                      \
-    VSMC_DEFINE_LIB_RNG_DIST_0(RNGType, Name, name, u01_cc)                   \
-    VSMC_DEFINE_LIB_RNG_DIST_0(RNGType, Name, name, u01_co)                   \
-    VSMC_DEFINE_LIB_RNG_DIST_0(RNGType, Name, name, u01_oc)                   \
-    VSMC_DEFINE_LIB_RNG_DIST_0(RNGType, Name, name, u01_oo)                   \
-    VSMC_DEFINE_LIB_RNG_DIST_1(RNGType, Name, name, chi_squared)              \
-    VSMC_DEFINE_LIB_RNG_DIST_1(RNGType, Name, name, exponential)              \
-    VSMC_DEFINE_LIB_RNG_DIST_1(RNGType, Name, name, rayleigh)                 \
-    VSMC_DEFINE_LIB_RNG_DIST_1(RNGType, Name, name, student_t)                \
-    VSMC_DEFINE_LIB_RNG_DIST_2(RNGType, Name, name, beta)                     \
-    VSMC_DEFINE_LIB_RNG_DIST_2(RNGType, Name, name, cauchy)                   \
-    VSMC_DEFINE_LIB_RNG_DIST_2(RNGType, Name, name, extreme_value)            \
-    VSMC_DEFINE_LIB_RNG_DIST_2(RNGType, Name, name, fisher_f)                 \
-    VSMC_DEFINE_LIB_RNG_DIST_2(RNGType, Name, name, gamma)                    \
-    VSMC_DEFINE_LIB_RNG_DIST_2(RNGType, Name, name, laplace)                  \
-    VSMC_DEFINE_LIB_RNG_DIST_2(RNGType, Name, name, levy)                     \
-    VSMC_DEFINE_LIB_RNG_DIST_2(RNGType, Name, name, logistic)                 \
-    VSMC_DEFINE_LIB_RNG_DIST_2(RNGType, Name, name, lognormal)                \
-    VSMC_DEFINE_LIB_RNG_DIST_2(RNGType, Name, name, normal)                   \
-    VSMC_DEFINE_LIB_RNG_DIST_2(RNGType, Name, name, pareto)                   \
-    VSMC_DEFINE_LIB_RNG_DIST_2(RNGType, Name, name, uniform_real)             \
-    VSMC_DEFINE_LIB_RNG_DIST_2(RNGType, Name, name, weibull)
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_0(u01)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_0(u01_cc)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_0(u01_co)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_0(u01_oc)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_0(u01_oo)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_1(chi_squared)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_1(exponential)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_1(rayleigh)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_1(student_t)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_2(beta)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_2(cauchy)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_2(extreme_value)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_2(fisher_f)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_2(gamma)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_2(laplace)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_2(levy)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_2(logistic)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_2(lognormal)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_2(normal)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_2(pareto)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_2(uniform_real)
-VSMC_DEFINE_LIB_RNG_DIST_TYPE_2(weibull)
-
-#ifdef VSMC_RNG_DEFINE_MACRO_NA
-#undef VSMC_RNG_DEFINE_MACRO_NA
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_u01_rand_##name,
-
-static vsmc_u01_rand_type vsmc_u01_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_u01_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_u01_cc_rand_##name,
-
-static vsmc_u01_cc_rand_type vsmc_u01_cc_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_u01_cc_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_u01_co_rand_##name,
-
-static vsmc_u01_co_rand_type vsmc_u01_co_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_u01_co_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_u01_oc_rand_##name,
-
-static vsmc_u01_oc_rand_type vsmc_u01_oc_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_u01_oc_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_u01_oo_rand_##name,
-
-static vsmc_u01_oo_rand_type vsmc_u01_oo_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_u01_oo_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    vsmc_chi_squared_rand_##name,
-
-static vsmc_chi_squared_rand_type vsmc_chi_squared_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_chi_squared_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    vsmc_exponential_rand_##name,
-
-static vsmc_exponential_rand_type vsmc_exponential_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_exponential_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rayleigh_rand_##name,
-
-static vsmc_rayleigh_rand_type vsmc_rayleigh_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_rayleigh_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_student_t_rand_##name,
-
-static vsmc_student_t_rand_type vsmc_student_t_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_student_t_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_beta_rand_##name,
-
-static vsmc_beta_rand_type vsmc_beta_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_beta_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_cauchy_rand_##name,
-
-static vsmc_cauchy_rand_type vsmc_cauchy_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_cauchy_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    vsmc_extreme_value_rand_##name,
-
-static vsmc_extreme_value_rand_type vsmc_extreme_value_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_extreme_value_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_fisher_f_rand_##name,
-
-static vsmc_fisher_f_rand_type vsmc_fisher_f_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_fisher_f_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_gamma_rand_##name,
-
-static vsmc_gamma_rand_type vsmc_gamma_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_gamma_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_laplace_rand_##name,
-
-static vsmc_laplace_rand_type vsmc_laplace_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_laplace_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_levy_rand_##name,
-
-static vsmc_levy_rand_type vsmc_levy_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_levy_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_logistic_rand_##name,
-
-static vsmc_logistic_rand_type vsmc_logistic_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_logistic_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_lognormal_rand_##name,
-
-static vsmc_lognormal_rand_type vsmc_lognormal_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_lognormal_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_normal_rand_##name,
-
-static vsmc_normal_rand_type vsmc_normal_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_normal_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_pareto_rand_##name,
-
-static vsmc_pareto_rand_type vsmc_pareto_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_pareto_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    vsmc_uniform_real_rand_##name,
-
-static vsmc_uniform_real_rand_type vsmc_uniform_real_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_uniform_real_rand_dispatch
-
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_weibull_rand_##name,
-
-static vsmc_weibull_rand_type vsmc_weibull_rand_dispatch[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    nullptr}; // vsmc_weibull_rand_dispatch
 
 VSMC_DEFINE_LIB_RNG_DIST_RAND_0(u01)
 VSMC_DEFINE_LIB_RNG_DIST_RAND_0(u01_cc)

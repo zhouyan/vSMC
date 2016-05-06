@@ -42,40 +42,40 @@ extern "C" {
 /// @{
 
 /// \brief `vsmc::resample_trans_residual`
-int vsmc_resample_trans_residual(
-    int n, int m, const double *weight, double *resid, int *integ);
+size_t vsmc_resample_trans_residual(
+    size_t n, size_t m, const double *weight, double *resid, size_t *integ);
 
 /// \brief `vsmc::resample_trans_u01_rep`
-void vsmc_resample_trans_u01_rep(
-    int n, int m, const double *weight, const double *u01, int *replication);
+void vsmc_resample_trans_u01_rep(size_t n, size_t m, const double *weight,
+    const double *u01, size_t *replication);
 
 /// \brief `vsmc::resample_trans_rep_index`
 void vsmc_resample_trans_rep_index(
-    int n, int m, const int *replication, int *index);
+    size_t n, size_t m, const size_t *replication, size_t *index);
 
 /// \brief `vsmc::ResampleMultinomial`
-void vsmc_resample_multinomial(
-    int n, int m, vsmc_rng rng, const double *weight, int *replication);
+void vsmc_resample_multinomial(size_t n, size_t m, vsmc_rng rng,
+    const double *weight, size_t *replication);
 
 /// \brief `vsmc::ResampleStratified`
-void vsmc_resample_stratified(
-    int n, int m, vsmc_rng rng, const double *weight, int *replication);
+void vsmc_resample_stratified(size_t n, size_t m, vsmc_rng rng,
+    const double *weight, size_t *replication);
 
 /// \brief `vsmc::ResampleSystematic`
-void vsmc_resample_systematic(
-    int n, int m, vsmc_rng rng, const double *weight, int *replication);
+void vsmc_resample_systematic(size_t n, size_t m, vsmc_rng rng,
+    const double *weight, size_t *replication);
 
 /// \brief `vsmc::ResampleResidual`
-void vsmc_resample_residual(
-    int n, int m, vsmc_rng rng, const double *weight, int *replication);
+void vsmc_resample_residual(size_t n, size_t m, vsmc_rng rng,
+    const double *weight, size_t *replication);
 
 /// \brief `vsmc::ResampleResidualStratified`
-void vsmc_resample_residual_stratified(
-    int n, int m, vsmc_rng rng, const double *weight, int *replication);
+void vsmc_resample_residual_stratified(size_t n, size_t m, vsmc_rng rng,
+    const double *weight, size_t *replication);
 
 /// \brief `vsmc::ResampleSystematic`
-void vsmc_resample_residual_systematic(
-    int n, int m, vsmc_rng rng, const double *weight, int *replication);
+void vsmc_resample_residual_systematic(size_t n, size_t m, vsmc_rng rng,
+    const double *weight, size_t *replication);
 
 /// @} C_API_Resample
 

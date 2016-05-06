@@ -17,7 +17,7 @@ LDFLAGS := $(LDFLAGS) -lmkl_rt -ltbb -ltbbmalloc -lm
 all : pf_ocl pf_tbb pf_seq pf_tbb_c pf_seq_c program_option progress
 
 libvsmc :
-	ninja -C ../../build/clang-Release libvsmc_shared
+	ninja -C ../../build/clang-Release lib
 
 rng : rng.cpp
 	$(CXX) $(CXXFLAGS) -o rng rng.cpp $(LDFLAGS)

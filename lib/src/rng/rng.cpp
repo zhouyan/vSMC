@@ -62,4 +62,39 @@ extern "C" {
 
 #include "rng_save_f.cpp"
 
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) 1,
+#define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) 0,
+
+static int vsmc_rng_type_table[] = {
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    0}; // vsmc_rng_new_dispatch
+
+int vsmc_rng_type_max()
+{
+    return static_cast<int>(sizeof(vsmc_rng_type_table) / sizeof(int)) - 1;
+}
+
+int vsmc_rng_type_check(vSMCRNGType type)
+{
+    if (static_cast<int>(type) < 0)
+        return 0;
+
+    if (static_cast<int>(type) > vsmc_rng_type_max())
+        return 0;
+
+    return vsmc_rng_type_table[static_cast<std::size_t>(type)];
+}
+
 } // extern "C"

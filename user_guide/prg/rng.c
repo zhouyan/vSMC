@@ -13,5 +13,9 @@ int main()
         printf("%u\t", r[i]);
     printf("\n");
 
+    printf("Maximum type index: %d\n", vsmc_rng_type_max());
+    printf("Has ARS engine: %d\n", vsmc_rng_type_check(vSMCARS));
+    printf("Has Philox engine: %d\n", vsmc_rng_type_check(vSMCPhilox));
+
     return 0;
 }
