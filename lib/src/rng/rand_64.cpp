@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/rng_rand.cpp
+// vSMC/lib/src/rng/rand_64.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include "libvsmcrng.hpp"
+
+extern "C" {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -38,7 +42,8 @@
 #endif
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    inline void vsmc_rng_rand_##name(vsmc_rng rng, size_t n, unsigned *r)     \
+    inline void vsmc_rand_64_##name(                                          \
+        vsmc_rng rng, size_t n, unsigned long long *r)                        \
     {                                                                         \
         ::vsmc::uniform_bits_distribution(                                    \
             *reinterpret_cast<RNGType *>(rng.ptr), n, r);                     \
@@ -48,7 +53,9 @@
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-using vsmc_rng_rand_type = void (*)(vsmc_rng, size_t, unsigned *);
+using vsmc_rand_64_type = void (*)(vsmc_rng, size_t, unsigned long long *);
+
+static vsmc_rand_64_type vsmc_rand_64_dispatch[] = {
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -58,18 +65,18 @@ using vsmc_rng_rand_type = void (*)(vsmc_rng, size_t, unsigned *);
 #undef VSMC_RNG_DEFINE_MACRO_NA
 #endif
 
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rng_rand_##name,
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rand_64_##name,
 #define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
-
-static vsmc_rng_rand_type vsmc_rng_rand_dispatch[] = {
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-    nullptr}; // vsmc_rng_rand_dispatch
+    nullptr}; // vsmc_rand_64_dispatch
 
-void vsmc_rng_rand(vsmc_rng rng, size_t n, unsigned *r)
+void vsmc_rand_64(vsmc_rng rng, size_t n, unsigned long long *r)
 {
-    vsmc_rng_rand_dispatch[static_cast<std::size_t>(rng.type)](rng, n, r);
+    vsmc_rand_64_dispatch[static_cast<std::size_t>(rng.type)](rng, n, r);
 }
+
+} // extern "C"

@@ -61,7 +61,7 @@ inline void rng_uniform_bits(std::size_t N, std::size_t M, int nwid, int swid,
         watch1.stop();
 
         watch2.start();
-        vsmc::rng_rand(rng2, rubits, K, r2.data());
+        vsmc::rand(rng2, rubits, K, r2.data());
         watch2.stop();
         pass = pass && (r1 == r2 || rng != rng);
     }

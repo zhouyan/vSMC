@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/binomial_rand.cpp
+// vSMC/lib/src/rng/rand_fisher_f.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include "libvsmcrng.hpp"
+
+extern "C" {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -38,19 +42,21 @@
 #endif
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    inline void vsmc_binomial_rand_##name(vsmc_rng rng, size_t n,             \
-        unsigned long long *r, unsigned long long t, double p)                \
+    inline void vsmc_rand_fisher_f_##name(                                    \
+        vsmc_rng rng, size_t n, double *r, double df1, double df2)            \
     {                                                                         \
-        std::binomial_distribution<unsigned long long> dist(t, p);            \
-        VSMC_DEFINE_LIB_RNG_DIST(RNGType);                                    \
+        ::vsmc::fisher_f_distribution(                                        \
+            *reinterpret_cast<RNGType *>(rng.ptr), n, r, df1, df2);           \
     }
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-using vsmc_binomial_rand_type = void (*)(
-    vsmc_rng, size_t, unsigned long long *, unsigned long long, double);
+using vsmc_rand_fisher_f_type = void (*)(
+    vsmc_rng, size_t, double *, double, double);
+
+static vsmc_rand_fisher_f_type vsmc_rand_fisher_f_dispatch[] = {
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -60,20 +66,20 @@ using vsmc_binomial_rand_type = void (*)(
 #undef VSMC_RNG_DEFINE_MACRO_NA
 #endif
 
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_binomial_rand_##name,
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rand_fisher_f_##name,
 #define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
-
-static vsmc_binomial_rand_type vsmc_binomial_rand_dispatch[] = {
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-    nullptr}; // vsmc_binomial_rand_dispatch
+    nullptr}; // vsmc_rand_fisher_f_dispatch
 
-void vsmc_binomial_rand(vsmc_rng rng, size_t n, unsigned long long *r,
-    unsigned long long t, double p)
+void vsmc_rand_fisher_f(
+    vsmc_rng rng, size_t n, double *r, double df1, double df2)
 {
-    vsmc_binomial_rand_dispatch[static_cast<std::size_t>(rng.type)](
-        rng, n, r, t, p);
+    vsmc_rand_fisher_f_dispatch[static_cast<std::size_t>(rng.type)](
+        rng, n, r, df1, df2);
 }
+
+} // extern "C"

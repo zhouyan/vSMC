@@ -314,8 +314,7 @@ inline ::hid_t hdf5_datatype<long double>()
 inline std::size_t hdf5load_size(
     const std::string &filename, const std::string &dataname)
 {
-    internal::HDF5File datafile(
-        internal::hdf5_datafile(filename, true, true));
+    internal::HDF5File datafile(internal::hdf5_datafile(filename, true, true));
     if (!datafile)
         return 0;
 
@@ -341,8 +340,7 @@ template <typename OutputIter>
 inline OutputIter hdf5load(
     const std::string &filename, const std::string &dataname, OutputIter first)
 {
-    internal::HDF5File datafile(
-        internal::hdf5_datafile(filename, true, true));
+    internal::HDF5File datafile(internal::hdf5_datafile(filename, true, true));
     if (!datafile)
         return first;
 

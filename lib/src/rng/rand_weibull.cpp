@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/poisson_rand.cpp
+// vSMC/lib/src/rng/rand_weibull.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include "libvsmcrng.hpp"
+
+extern "C" {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -38,19 +42,21 @@
 #endif
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    inline void vsmc_poisson_rand_##name(                                     \
-        vsmc_rng rng, size_t n, unsigned long long *r, double mean)           \
+    inline void vsmc_rand_weibull_##name(                                     \
+        vsmc_rng rng, size_t n, double *r, double a, double b)                \
     {                                                                         \
-        std::poisson_distribution<unsigned long long> dist(mean);             \
-        VSMC_DEFINE_LIB_RNG_DIST(RNGType);                                    \
+        ::vsmc::weibull_distribution(                                         \
+            *reinterpret_cast<RNGType *>(rng.ptr), n, r, a, b);               \
     }
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-using vsmc_poisson_rand_type = void (*)(
-    vsmc_rng, size_t, unsigned long long *, double);
+using vsmc_rand_weibull_type = void (*)(
+    vsmc_rng, size_t, double *, double, double);
+
+static vsmc_rand_weibull_type vsmc_rand_weibull_dispatch[] = {
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -60,20 +66,19 @@ using vsmc_poisson_rand_type = void (*)(
 #undef VSMC_RNG_DEFINE_MACRO_NA
 #endif
 
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_poisson_rand_##name,
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rand_weibull_##name,
 #define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
-
-static vsmc_poisson_rand_type vsmc_poisson_rand_dispatch[] = {
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-    nullptr}; // vsmc_poisson_rand_dispatch
+    nullptr}; // vsmc_rand_weibull_dispatch
 
-void vsmc_poisson_rand(
-    vsmc_rng rng, size_t n, unsigned long long *r, double mean)
+void vsmc_rand_weibull(vsmc_rng rng, size_t n, double *r, double a, double b)
 {
-    vsmc_poisson_rand_dispatch[static_cast<std::size_t>(rng.type)](
-        rng, n, r, mean);
+    vsmc_rand_weibull_dispatch[static_cast<std::size_t>(rng.type)](
+        rng, n, r, a, b);
 }
+
+} // extern "C"

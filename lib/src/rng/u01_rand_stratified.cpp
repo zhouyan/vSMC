@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include "libvsmcrng.hpp"
+
+extern "C" {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -51,6 +55,8 @@
 
 using vsmc_u01_rand_stratified_type = void (*)(vsmc_rng, size_t, double *);
 
+static vsmc_u01_rand_stratified_type vsmc_u01_rand_stratified_dispatch[] = {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -63,8 +69,6 @@ using vsmc_u01_rand_stratified_type = void (*)(vsmc_rng, size_t, double *);
     vsmc_u01_rand_stratified_##name,
 #define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
 
-static vsmc_u01_rand_stratified_type vsmc_u01_rand_stratified_dispatch[] = {
-
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
@@ -76,3 +80,5 @@ void vsmc_u01_rand_stratified(vsmc_rng rng, size_t n, double *r)
     vsmc_u01_rand_stratified_dispatch[static_cast<std::size_t>(rng.type)](
         rng, n, r);
 }
+
+} // extern "C"

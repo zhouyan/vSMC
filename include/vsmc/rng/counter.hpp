@@ -402,7 +402,7 @@ class CounterEngine
 }; // class CounterEngine
 
 template <typename ResultType, typename Generator>
-inline void rng_rand(
+inline void rand(
     CounterEngine<ResultType, Generator> &rng, std::size_t n, ResultType *r)
 {
     rng(n, r);

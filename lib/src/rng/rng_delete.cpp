@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include "libvsmcrng.hpp"
+
+extern "C" {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -50,6 +54,8 @@
 
 using vsmc_rng_delete_type = void (*)(vsmc_rng *);
 
+static vsmc_rng_delete_type vsmc_rng_delete_dispatch[] = {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -61,8 +67,6 @@ using vsmc_rng_delete_type = void (*)(vsmc_rng *);
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rng_delete_##name,
 #define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
 
-static vsmc_rng_delete_type vsmc_rng_delete_dispatch[] = {
-
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
@@ -73,3 +77,5 @@ void vsmc_rng_delete(vsmc_rng *rng_ptr)
 {
     vsmc_rng_delete_dispatch[static_cast<std::size_t>(rng_ptr->type)](rng_ptr);
 }
+
+} // extern "C"

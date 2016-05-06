@@ -29,9 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/engine.hpp>
-#include <vsmc/rng/rng.h>
-#include <vsmc/rng/seed.hpp>
+#include "libvsmcrng.hpp"
 
 namespace vsmc
 {
@@ -62,6 +60,8 @@ extern "C" {
 
 using vsmc_seed_type = void (*)(vsmc_rng);
 
+static vsmc_seed_type vsmc_seed_dispatch[] = {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -72,8 +72,6 @@ using vsmc_seed_type = void (*)(vsmc_rng);
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_seed_##name,
 #define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
-
-static vsmc_seed_type vsmc_seed_dispatch[] = {
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 

@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/bernoulli_rand.cpp
+// vSMC/lib/src/rng/rand_binomial_64.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include "libvsmcrng.hpp"
+
+extern "C" {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -38,10 +42,10 @@
 #endif
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    inline void vsmc_bernoulli_rand_##name(                                   \
-        vsmc_rng rng, size_t n, int *r, double p)                             \
+    inline void vsmc_rand_binomial_64_##name(                                 \
+        vsmc_rng rng, size_t n, long long *r, long long t, double p)          \
     {                                                                         \
-        std::bernoulli_distribution dist(p);                                  \
+        std::binomial_distribution<long long> dist(t, p);                     \
         VSMC_DEFINE_LIB_RNG_DIST(RNGType);                                    \
     }
 
@@ -49,7 +53,10 @@
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-using vsmc_bernoulli_rand_type = void (*)(vsmc_rng, size_t, int *, double);
+using vsmc_rand_binomial_64_type = void (*)(
+    vsmc_rng, size_t, long long *, long long, double);
+
+static vsmc_rand_binomial_64_type vsmc_rand_binomial_64_dispatch[] = {
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -59,19 +66,21 @@ using vsmc_bernoulli_rand_type = void (*)(vsmc_rng, size_t, int *, double);
 #undef VSMC_RNG_DEFINE_MACRO_NA
 #endif
 
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_bernoulli_rand_##name,
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    vsmc_rand_binomial_64_##name,
 #define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
-
-static vsmc_bernoulli_rand_type vsmc_bernoulli_rand_dispatch[] = {
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-    nullptr}; // vsmc_bernoulli_rand_dispatch
+    nullptr}; // vsmc_rand_binomial_64_dispatch
 
-void vsmc_bernoulli_rand(vsmc_rng rng, size_t n, int *r, double p)
+void vsmc_rand_binomial_64(
+    vsmc_rng rng, size_t n, long long *r, long long t, double p)
 {
-    vsmc_bernoulli_rand_dispatch[static_cast<std::size_t>(rng.type)](
-        rng, n, r, p);
+    vsmc_rand_binomial_64_dispatch[static_cast<std::size_t>(rng.type)](
+        rng, n, r, t, p);
 }
+
+} // extern "C"

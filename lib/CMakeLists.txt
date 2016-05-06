@@ -33,51 +33,34 @@ PROJECT(vSMCLib CXX)
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
-SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
+SET(VSMC_LIB_SOURCE_VSMCRNG ${PROJECT_SOURCE_DIR}/src/rng/rng.cpp)
+
+SET(VSMC_LIB_SOURCE_VSMC ${VSMC_LIB_SOURCE_VSMCRNG}
     ${PROJECT_SOURCE_DIR}/src/core/monitor.cpp
     ${PROJECT_SOURCE_DIR}/src/core/particle.cpp
     ${PROJECT_SOURCE_DIR}/src/core/sampler.cpp
     ${PROJECT_SOURCE_DIR}/src/core/state_matrix.cpp
     ${PROJECT_SOURCE_DIR}/src/core/weight.cpp
-    # ${PROJECT_SOURCE_DIR}/src/resample/resample.cpp
-    ${PROJECT_SOURCE_DIR}/src/rng/distribution.cpp
-    ${PROJECT_SOURCE_DIR}/src/rng/rng.cpp
-    # ${PROJECT_SOURCE_DIR}/src/rng/random_walk.cpp
-    ${PROJECT_SOURCE_DIR}/src/rng/seed.cpp
-    ${PROJECT_SOURCE_DIR}/src/rng/u01_sequence.cpp
-    # ${PROJECT_SOURCE_DIR}/src/smp/backend_seq.cpp
-    # ${PROJECT_SOURCE_DIR}/src/smp/backend_std.cpp
+    ${PROJECT_SOURCE_DIR}/src/resample/resample.cpp
+    ${PROJECT_SOURCE_DIR}/src/smp/backend_seq.cpp
+    ${PROJECT_SOURCE_DIR}/src/smp/backend_std.cpp
     ${PROJECT_SOURCE_DIR}/src/utility/aligned_memory.cpp
     ${PROJECT_SOURCE_DIR}/src/utility/covariance.cpp
     ${PROJECT_SOURCE_DIR}/src/utility/hdf5.cpp
-    ${PROJECT_SOURCE_DIR}/src/utility/stop_watch.cpp
-    )
+    ${PROJECT_SOURCE_DIR}/src/utility/stop_watch.cpp)
 
-IF(MKL_FOUND)
-    SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
-        ${PROJECT_SOURCE_DIR}/src/rng/mkl_brng.cpp)
-ENDIF(MKL_FOUND)
+IF(OPENMP_FOUND)
+    SET(VSMC_LIB_SOURCE_VSMC ${VSMC_LIB_SOURCE_VSMC}
+        ${PROJECT_SOURCE_DIR}/src/smp/backend_omp.cpp)
+ENDIF(OPENMP_FOUND)
 
-# IF(OPENMP_FOUND)
-#     SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
-#         ${PROJECT_SOURCE_DIR}/src/smp/backend_omp.cpp)
-# ENDIF(OPENMP_FOUND)
+IF(TBB_FOUND)
+    SET(VSMC_LIB_SOURCE_VSMC ${VSMC_LIB_SOURCE_VSMC}
+        ${PROJECT_SOURCE_DIR}/src/smp/backend_tbb.cpp)
+ENDIF(TBB_FOUND)
 
-# IF(TBB_FOUND)
-#     SET(VSMC_LIB_SOURCE ${VSMC_LIB_SOURCE}
-#         ${PROJECT_SOURCE_DIR}/src/smp/backend_tbb.cpp)
-# ENDIF(TBB_FOUND)
-
-SET(VSMC_LIB_TYPE ${VSMC_LIB_TYPE} shared)
-SET(VSMC_LIB_TYPE ${VSMC_LIB_TYPE} static)
-
-FOREACH(type ${VSMC_LIB_TYPE})
-    STRING(TOUPPER "${type}" TYPE)
-    ADD_LIBRARY(libvsmc_${type} ${TYPE} ${VSMC_LIB_SOURCE})
-    SET_TARGET_PROPERTIES(libvsmc_${type} PROPERTIES OUTPUT_NAME vsmc)
-    VSMC_LINK_TARGET(libvsmc_${type})
-    ADD_DEPENDENCIES(lib libvsmc_${type})
-ENDFOREACH(type ${VSMC_LIB_TYPE})
+SET(VSMC_LIB_TYPE shared static)
+SET(VSMC_LIB_NAME vsmc vsmcrng)
 
 IF(NOT DEFINED VSMC_INSTALL_LIB_DIR)
     IF(EXISTS ${CMAKE_INSTALL_PREFIX}/lib64)
@@ -86,5 +69,18 @@ IF(NOT DEFINED VSMC_INSTALL_LIB_DIR)
         SET(VSMC_INSTALL_LIB_DIR lib)
     ENDIF(EXISTS ${CMAKE_INSTALL_PREFIX}/lib64)
 ENDIF(NOT DEFINED VSMC_INSTALL_LIB_DIR)
-INSTALL(TARGETS libvsmc_shared DESTINATION ${VSMC_INSTALL_LIB_DIR})
-INSTALL(TARGETS libvsmc_static DESTINATION ${VSMC_INSTALL_LIB_DIR})
+
+FOREACH(name ${VSMC_LIB_NAME})
+    ADD_CUSTOM_TARGET(lib${name})
+    ADD_DEPENDENCIES(lib lib${name})
+    FOREACH(type ${VSMC_LIB_TYPE})
+        STRING(TOUPPER "${name}" NAME)
+        STRING(TOUPPER "${type}" TYPE)
+        ADD_LIBRARY(lib${name}_${type} ${TYPE} ${VSMC_LIB_SOURCE_${NAME}})
+        SET_TARGET_PROPERTIES(lib${name}_${type}
+            PROPERTIES OUTPUT_NAME ${name})
+        VSMC_LINK_TARGET(lib${name}_${type})
+        ADD_DEPENDENCIES(lib${name} lib${name}_${type})
+        INSTALL(TARGETS lib${name}_${type} DESTINATION ${VSMC_INSTALL_LIB_DIR})
+    ENDFOREACH(type ${VSMC_LIB_TYPE})
+ENDFOREACH(name ${VSMC_LIB_NAME})

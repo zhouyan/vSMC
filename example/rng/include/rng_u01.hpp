@@ -147,7 +147,7 @@ inline void rng_u01(std::size_t N, std::size_t M, int nwid, int swid, int twid)
     bool pass1 = true;
     bool pass2 = true;
     for (std::size_t i = 0; i != M; ++i) {
-        vsmc::rng_rand(rng, N, u.data());
+        vsmc::rand(rng, N, u.data());
 
         for (std::size_t j = 0; j != N; ++j)
             r[j] = vsmc::u01<UIntType, RealType, Lower, Upper>(u[j]);

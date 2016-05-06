@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/vsmc_mkl.cpp
+// vSMC/lib/src/rng/mkl_brng.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,9 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/engine.hpp>
-#include <vsmc/rng/mkl.hpp>
-#include <vsmc/rng/rng.h>
+#include "libvsmcrng.hpp"
 
 extern "C" {
 
@@ -55,6 +53,8 @@ extern "C" {
 
 using vsmc_mkl_brng_type = int (*)(void);
 
+static vsmc_mkl_brng_type vsmc_mkl_brng_dispatch[] = {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -65,8 +65,6 @@ using vsmc_mkl_brng_type = int (*)(void);
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_mkl_brng_##name,
 #define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
-
-static vsmc_mkl_brng_type vsmc_mkl_brng_dispatch[] = {
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 

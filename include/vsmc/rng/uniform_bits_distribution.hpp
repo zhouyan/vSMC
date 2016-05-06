@@ -140,7 +140,7 @@ inline void uniform_bits_distribution_impl(
     static constexpr int ubits = std::numeric_limits<UIntType>::digits;
     static constexpr std::size_t rate = ubits / rbits;
     const std::size_t m = n * rate;
-    rng_rand(rng, m, reinterpret_cast<typename RNGType::result_type *>(r));
+    rand(rng, m, reinterpret_cast<typename RNGType::result_type *>(r));
 }
 
 } // namespace vsmc::internal

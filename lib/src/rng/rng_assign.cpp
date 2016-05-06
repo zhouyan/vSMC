@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include "libvsmcrng.hpp"
+
+extern "C" {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -52,6 +56,8 @@
 
 using vsmc_rng_assign_type = void (*)(vsmc_rng, vsmc_rng);
 
+static vsmc_rng_assign_type vsmc_rng_assign_dispatch[] = {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -63,8 +69,6 @@ using vsmc_rng_assign_type = void (*)(vsmc_rng, vsmc_rng);
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rng_assign_##name,
 #define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
 
-static vsmc_rng_assign_type vsmc_rng_assign_dispatch[] = {
-
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
@@ -75,3 +79,5 @@ void vsmc_rng_assign(vsmc_rng rng, vsmc_rng other)
 {
     vsmc_rng_assign_dispatch[static_cast<std::size_t>(rng.type)](rng, other);
 }
+
+} // extern "C"

@@ -1130,7 +1130,7 @@ using MKL_PHILOX4X32X10_64 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 64>;
 #endif // INTEL_MKL_VERSION >= 110300
 
 template <MKL_INT BRNG, int Bits>
-inline void rng_rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
+inline void rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     typename MKLEngine<BRNG, Bits>::result_type *r)
 {
     rng(n, r);

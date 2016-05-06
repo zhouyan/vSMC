@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/discrete_rand.cpp
+// vSMC/lib/src/rng/rand_beta.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include "libvsmcrng.hpp"
+
+extern "C" {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -38,24 +42,21 @@
 #endif
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    inline void vsmc_discrete_rand_##name(vsmc_rng rng, size_t n,             \
-        long long *r, size_t m, const double *weight, int normalized)         \
+    inline void vsmc_rand_beta_##name(                                        \
+        vsmc_rng rng, size_t n, double *r, double alpha, double beta)         \
     {                                                                         \
-        ::vsmc::DiscreteDistribution<long long> dist;                         \
-        RNGType &rng_cpp = *reinterpret_cast<RNGType *>(rng.ptr);             \
-        const bool norm = normalized != 0;                                    \
-        const double *first = weight;                                         \
-        const double *last = weight + m;                                      \
-        for (size_t i = 0; i != n; ++i)                                       \
-            r[i] = dist(rng_cpp, first, last, norm);                          \
+        ::vsmc::beta_distribution(                                            \
+            *reinterpret_cast<RNGType *>(rng.ptr), n, r, alpha, beta);        \
     }
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-using vsmc_discrete_rand_type = void (*)(
-    vsmc_rng, size_t, long long *, size_t, const double *, int);
+using vsmc_rand_beta_type = void (*)(
+    vsmc_rng, size_t, double *, double, double);
+
+static vsmc_rand_beta_type vsmc_rand_beta_dispatch[] = {
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -65,20 +66,20 @@ using vsmc_discrete_rand_type = void (*)(
 #undef VSMC_RNG_DEFINE_MACRO_NA
 #endif
 
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_discrete_rand_##name,
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rand_beta_##name,
 #define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
-
-static vsmc_discrete_rand_type vsmc_discrete_rand_dispatch[] = {
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-    nullptr}; // vsmc_discrete_rand_dispatch
+    nullptr}; // vsmc_rand_beta_dispatch
 
-void vsmc_discrete_rand(vsmc_rng rng, size_t n, long long *r, size_t m,
-    const double *weight, int normalized)
+void vsmc_rand_beta(
+    vsmc_rng rng, size_t n, double *r, double alpha, double beta)
 {
-    vsmc_discrete_rand_dispatch[static_cast<std::size_t>(rng.type)](
-        rng, n, r, m, weight, normalized);
+    vsmc_rand_beta_dispatch[static_cast<std::size_t>(rng.type)](
+        rng, n, r, alpha, beta);
 }
+
+} // extern "C"

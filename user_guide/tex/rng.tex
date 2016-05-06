@@ -15,16 +15,16 @@ multiple \rng{}s in parallel programs (section~\ref{sec:Multiple RNG streams}).
 \label{sec:Vectorized random number generating}
 
 Before we discuss other features, we first introduce a generic function
-\verb|rng_rand|, which provides vectorized random number generating. There are
-two versions. The first operates on \rng engines and generates random integers,
+\verb|rand|, which provides vectorized random number generating. There are two
+versions. The first operates on \rng engines and generates random integers,
 \begin{Verbatim}
   template <typename RNGType>
-  inline void rng_rand(
+  inline void rand(
       RNGType &rng, std::size_t n, typename RNGType::result_type *r);
 \end{Verbatim}
 The effect of the function call,
 \begin{Verbatim}
-  rng_rand(rng, n, r);
+  rand(rng, n, r);
 \end{Verbatim}
 is equivalent to the loop,
 \begin{Verbatim}
@@ -35,17 +35,17 @@ The results will always be the same unless a non-deterministic \rng is used.
 For some \rng{}s implemented in the library, the vectorized version may have
 considerable performance advantage.
 
-The second version of \verb|rng_rand| is for generating distribution random
+The second version of \verb|rand| is for generating distribution random
 numbers,
 \begin{Verbatim}
   template <typename RNGType, typename DistributionType>
-  inline void rng_rand(RNGType &rng, const DistributionType &distribution,
+  inline void rand(RNGType &rng, const DistributionType &distribution,
       std::size_t n, typename DistributionType::result_type *r);
 \end{Verbatim}
 For example,
 \begin{Verbatim}
   NormalDistribution<double> normal;
-  rng_rand(rng, normal, n, r);
+  rand(rng, normal, n, r);
 \end{Verbatim}
 This is similar to the following loop,
 \begin{Verbatim}
@@ -90,14 +90,14 @@ random integers one by one,
 \end{Verbatim}
 The second is the vectorized performance,
 \begin{Verbatim}
-  rng_rand(rng, rbits, n, r.data());
+  rand(rng, rbits, n, r.data());
 \end{Verbatim}
 In both cases, we repeat the simulations 100 times, each time with the number
 of elements $n$ chosen randomly between 5,000 and 10,000. The total number of
 cycles of the 100 simulations are recorded, and then divided by the total
 number of bytes generated. This gives the performance measurement in cpB. This
 experiment is repeated ten times, and the best results are shown. The two cases
-are labeled ``Loop'' and ``\verb|rng_rand|'', respectively.
+are labeled ``Loop'' and ``\verb|rand|'', respectively.
 
 For the performance of distributions, we measure four methods of drawing random
 numbers from the same distribution. The procedures is similar, except now we
@@ -117,18 +117,18 @@ Second, we measure the performance of the library's implementation,
 \end{Verbatim}
 The third is the vectorized performance,
 \begin{Verbatim}
-  rng_rand(rng, rnorm_vsmc, n, r.data());
+  rand(rng, rnorm_vsmc, n, r.data());
 \end{Verbatim}
 For all the three above, the \rng is \verb|ARSx8| (section~\ref{sub:AES-NI
   instructions based RNG}). The last is when \rng is \verb|MKL_SFMT19937|
 (section~\ref{sec:MKL RNG}),
 \begin{Verbatim}
   MKL_SFMT19937 rng_mkl;
-  rng_rand(rng_mkl, rnorm_vsmc, n, r.data());
+  rand(rng_mkl, rnorm_vsmc, n, r.data());
 \end{Verbatim}
 In this case, not only the \rng itself is faster, the distribution might also
 use \mkl routines. The four cases are labeled ``\std/Boost'', ``\vsmc'',
-``\verb|rng_rand|'' and ``\mkl'', respectively.
+``\verb|rand|'' and ``\mkl'', respectively.
 
 \section{Counter-based RNG}
 \label{sec:Counter-based RNG}
@@ -396,7 +396,7 @@ tables~\ref{tab:Performance of AES128Engine} to~\ref{tab:Performance of
 even for the most demanding applications. The library does not attempt to
 optimize the algorithm for any particular platform. In realistic applications,
 the performance of \rng is unlikely to become a bottle neck. Note that, the
-best performance is obtained with the vectorized \verb|rng_rand| function (see
+best performance is obtained with the vectorized \verb|rand| function (see
 section~\ref{sec:Vectorized random number generating}).
 
 \begin{table}

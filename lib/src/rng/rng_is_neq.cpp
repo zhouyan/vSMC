@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include "libvsmcrng.hpp"
+
+extern "C" {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -52,6 +56,8 @@
 
 using vsmc_rng_is_neq_type = int (*)(vsmc_rng, vsmc_rng);
 
+static vsmc_rng_is_neq_type vsmc_rng_is_neq_dispatch[] = {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -62,8 +68,6 @@ using vsmc_rng_is_neq_type = int (*)(vsmc_rng, vsmc_rng);
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rng_is_neq_##name,
 #define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
-
-static vsmc_rng_is_neq_type vsmc_rng_is_neq_dispatch[] = {
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
@@ -76,3 +80,5 @@ int vsmc_rng_is_neq(vsmc_rng rng1, vsmc_rng rng2)
     return vsmc_rng_is_neq_dispatch[static_cast<std::size_t>(rng1.type)](
         rng1, rng2);
 }
+
+} // extern "C"

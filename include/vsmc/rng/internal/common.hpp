@@ -522,7 +522,7 @@
     }                                                                         \
                                                                               \
     template <typename T, typename RNGType>                                   \
-    inline void rng_rand(                                                     \
+    inline void rand(                                                         \
         RNGType &rng, Name##Distribution<T> &dist, std::size_t N, T *r)       \
     {                                                                         \
         dist(rng, N, r);                                                      \
@@ -537,7 +537,7 @@
     }                                                                         \
                                                                               \
     template <typename RealType, typename RNGType>                            \
-    inline void rng_rand(RNGType &rng, Name##Distribution<RealType> &dist,    \
+    inline void rand(RNGType &rng, Name##Distribution<RealType> &dist,        \
         std::size_t N, RealType *r)                                           \
     {                                                                         \
         dist(rng, N, r);                                                      \
@@ -552,7 +552,7 @@
     }                                                                         \
                                                                               \
     template <typename RealType, typename RNGType>                            \
-    inline void rng_rand(RNGType &rng, Name##Distribution<RealType> &dist,    \
+    inline void rand(RNGType &rng, Name##Distribution<RealType> &dist,        \
         std::size_t N, RealType *r)                                           \
     {                                                                         \
         dist(rng, N, r);                                                      \
@@ -601,8 +601,7 @@ class Open;
 /// \brief Generate random integers
 /// \ingroup RNG
 template <typename RNGType>
-inline void rng_rand(
-    RNGType &rng, std::size_t n, typename RNGType::result_type *r)
+inline void rand(RNGType &rng, std::size_t n, typename RNGType::result_type *r)
 {
     for (std::size_t i = 0; i != n; ++i)
         r[i] = rng();
@@ -611,7 +610,7 @@ inline void rng_rand(
 /// \brief Generate random distribution numbers
 /// \ingroup RNG
 template <typename RNGType, typename DistributionType>
-inline void rng_rand(RNGType &rng, const DistributionType &distribution,
+inline void rand(RNGType &rng, const DistributionType &distribution,
     std::size_t n, typename DistributionType::result_type *r)
 {
     DistributionType dist(distribution);
@@ -701,95 +700,95 @@ template <typename = double>
 class WeibullDistribution;
 
 template <typename ResultType, typename Generator>
-inline void rng_rand(
+inline void rand(
     CounterEngine<ResultType, Generator> &, std::size_t, ResultType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, BetaDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, CauchyDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, ChiSquaredDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, DiscreteDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, ExponentialDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, ExtremeValueDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, FisherFDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, GammaDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, LaplaceDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, LevyDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, LogisticDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, LognormalDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, NormalDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, std::size_t Dim, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, NormalMVDistribution<RealType, Dim> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, ParetoDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, RayleighDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, StudentTDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, U01Distribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType, typename Lower, typename Upper>
-inline void rng_rand(RNGType &, U01LRDistribution<RealType, Lower, Upper> &,
+inline void rand(RNGType &, U01LRDistribution<RealType, Lower, Upper> &,
     std::size_t, RealType *);
 
 template <typename UIntType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, UniformBitsDistribution<UIntType> &, std::size_t, UIntType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, UniformRealDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
-inline void rng_rand(
+inline void rand(
     RNGType &, WeibullDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
@@ -881,7 +880,7 @@ template <MKL_INT, int>
 class MKLEngine;
 
 template <MKL_INT BRNG, int Bits>
-inline void rng_rand(MKLEngine<BRNG, Bits> &, std::size_t,
+inline void rand(MKLEngine<BRNG, Bits> &, std::size_t,
     typename MKLEngine<BRNG, Bits>::result_type *);
 
 template <MKL_INT BRNG, int Bits>

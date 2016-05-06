@@ -1069,7 +1069,7 @@ inline void rng_distribution_test_pval(std::size_t N, std::size_t M,
     rng_distribution_pval(chi2, ksad, pval);
 
     for (std::size_t i = 0; i != M; ++i) {
-        vsmc::rng_rand(rng, dist_vsmc, N, r.data());
+        vsmc::rand(rng, dist_vsmc, N, r.data());
         chi2[i] = rng_distribution_chi2(N, r.data(), dist_vsmc);
         ksad[i] = rng_distribution_ksad(N, r.data(), dist_vsmc);
     }
@@ -1078,7 +1078,7 @@ inline void rng_distribution_test_pval(std::size_t N, std::size_t M,
 #if VSMC_HAS_MKL
     vsmc::MKL_SFMT19937 rng_mkl;
     for (std::size_t i = 0; i != M; ++i) {
-        vsmc::rng_rand(rng_mkl, dist_vsmc, N, r.data());
+        vsmc::rand(rng_mkl, dist_vsmc, N, r.data());
         chi2[i] = rng_distribution_chi2(N, r.data(), dist_vsmc);
         ksad[i] = rng_distribution_ksad(N, r.data(), dist_vsmc);
     }
@@ -1176,7 +1176,7 @@ inline void rng_distribution_test_perf(std::size_t N, std::size_t M,
     bool pass = true;
 
     vsmc::Vector<RealType> r(N);
-    vsmc::rng_rand(dist_rng, dist_vsmc, N, r.data());
+    vsmc::rand(dist_rng, dist_vsmc, N, r.data());
     for (std::size_t i = 0; i != N; ++i) {
         pass = pass && std::isfinite(r[i]);
         pass = pass && std::isfinite(dist_vsmc(dist_rng));
@@ -1236,13 +1236,13 @@ inline void rng_distribution_test_perf(std::size_t N, std::size_t M,
             pass = pass && r1 != r2;
 
             watch3.start();
-            vsmc::rng_rand(rng, dist_vsmc, K, r3.data());
+            vsmc::rand(rng, dist_vsmc, K, r3.data());
             watch3.stop();
             pass = pass && r1 != r3;
 
 #if VSMC_HAS_MKL
             watch4.start();
-            vsmc::rng_rand(rng_mkl, dist_vsmc, K, r4.data());
+            vsmc::rand(rng_mkl, dist_vsmc, K, r4.data());
             watch4.stop();
             pass = pass && r1 != r4;
 

@@ -67,7 +67,7 @@ inline vsmc::Vector<vsmc::Vector<int>> resample_value(
         const std::size_t N = size[d];
         vsmc::Vector<typename RNGType::result_type> tmpr(N);
         vsmc::Vector<int> tmpi(N);
-        vsmc::rng_rand(rng, N, tmpr.data());
+        vsmc::rand(rng, N, tmpr.data());
         std::copy(tmpr.begin(), tmpr.end(), tmpi.begin());
         value.push_back(std::move(tmpi));
     }

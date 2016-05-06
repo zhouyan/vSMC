@@ -153,6 +153,14 @@ typedef enum {
     vSMCRDRAND64  ///< vsmc::RDRAND64
 } vSMCRNGType;
 
+/// \brief SMP backends
+typedef enum {
+    vSMCBackendSEQ,
+    vSMCBackendSTD,
+    vSMCBackendOMP,
+    vSMCBackendTBB
+} vSMCBackendSMP;
+
 /// \brief vSMC RNG types
 typedef struct {
     void *ptr;
@@ -210,36 +218,30 @@ typedef size_t (*vsmc_sampler_move_type)(size_t, vsmc_particle);
 typedef void (*vsmc_monitor_eval_type)(
     size_t, size_t, vsmc_particle, double *);
 
-/// \brief vsmc::InitializeBase::eval_sp
-typedef int (*vsmc_initialize_eval_sp_type)(vsmc_single_particle);
+/// \brief vsmc::InitializeSMP
+typedef struct {
+    size_t (*eval_sp)(vsmc_single_particle);
+    void (*eval_param)(vsmc_particle, void *);
+    void (*eval_pre)(vsmc_particle);
+    void (*eval_post)(vsmc_particle);
+    vSMCBackendSMP backend;
+} vsmc_sampler_init_smp_type;
 
-/// \brief vsmc::InitializeBase::eval_param
-typedef void (*vsmc_initialize_eval_param_type)(vsmc_particle, void *);
+/// \brief vsmc::MoveSMP
+typedef struct {
+    size_t (*eval_sp)(size_t, vsmc_single_particle);
+    void (*eval_pre)(size_t, vsmc_particle);
+    void (*eval_post)(size_t, vsmc_particle);
+    vSMCBackendSMP backend;
+} vsmc_sampler_move_smp_type;
 
-/// \brief vsmc::InitializeBase::eval_pre
-typedef void (*vsmc_initialize_eval_pre_type)(vsmc_particle);
-
-/// \brief vsmc::InitializeBase::eval_post
-typedef void (*vsmc_initialize_eval_post_type)(vsmc_particle);
-
-/// \brief vsmc::MoveBase::eval_sp
-typedef int (*vsmc_move_eval_sp_type)(int, vsmc_single_particle);
-
-/// \brief vsmc::MoveBase::eval_pre
-typedef void (*vsmc_move_eval_pre_type)(int, vsmc_particle);
-
-/// \brief vsmc::MoveBase::eval_post
-typedef void (*vsmc_move_eval_post_type)(int, vsmc_particle);
-
-/// \brief vsmc::MonitorEvalBase::eval_sp
-typedef void (*vsmc_monitor_eval_sp_type)(
-    int, int, vsmc_single_particle, double *);
-
-/// \brief vsmc::MonitorEvalBase::eval_pre
-typedef void (*vsmc_monitor_eval_pre_type)(int, vsmc_particle);
-
-/// \brief vsmc::MonitorEvalBase::eval_post
-typedef void (*vsmc_monitor_eval_post_type)(int, vsmc_particle);
+/// \brief vsmc::MonitorEvalSMP
+typedef struct {
+    void (*eval_sp)(size_t, size_t, vsmc_single_particle, double *);
+    void (*eval_pre)(size_t, vsmc_particle);
+    void (*eval_post)(size_t, vsmc_particle);
+    vSMCBackendSMP backend;
+} vsmc_monitor_eval_smp_type;
 
 /// @} C_API_Definitions
 

@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/geometric_rand.cpp
+// vSMC/lib/src/rng/rand_laplace.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include "libvsmcrng.hpp"
+
+extern "C" {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -38,19 +42,21 @@
 #endif
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    inline void vsmc_geometric_rand_##name(                                   \
-        vsmc_rng rng, size_t n, unsigned long long *r, double p)              \
+    inline void vsmc_rand_laplace_##name(                                     \
+        vsmc_rng rng, size_t n, double *r, double a, double b)                \
     {                                                                         \
-        std::geometric_distribution<unsigned long long> dist(p);              \
-        VSMC_DEFINE_LIB_RNG_DIST(RNGType);                                    \
+        ::vsmc::laplace_distribution(                                         \
+            *reinterpret_cast<RNGType *>(rng.ptr), n, r, a, b);               \
     }
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-using vsmc_geometric_rand_type = void (*)(
-    vsmc_rng, size_t, unsigned long long *, double);
+using vsmc_rand_laplace_type = void (*)(
+    vsmc_rng, size_t, double *, double, double);
+
+static vsmc_rand_laplace_type vsmc_rand_laplace_dispatch[] = {
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -60,20 +66,19 @@ using vsmc_geometric_rand_type = void (*)(
 #undef VSMC_RNG_DEFINE_MACRO_NA
 #endif
 
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_geometric_rand_##name,
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rand_laplace_##name,
 #define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
-
-static vsmc_geometric_rand_type vsmc_geometric_rand_dispatch[] = {
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-    nullptr}; // vsmc_geometric_rand_dispatch
+    nullptr}; // vsmc_rand_laplace_dispatch
 
-void vsmc_geometric_rand(
-    vsmc_rng rng, size_t n, unsigned long long *r, double p)
+void vsmc_rand_laplace(vsmc_rng rng, size_t n, double *r, double a, double b)
 {
-    vsmc_geometric_rand_dispatch[static_cast<std::size_t>(rng.type)](
-        rng, n, r, p);
+    vsmc_rand_laplace_dispatch[static_cast<std::size_t>(rng.type)](
+        rng, n, r, a, b);
 }
+
+} // extern "C"

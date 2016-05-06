@@ -419,7 +419,7 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
 }
 
 template <typename RealType, std::size_t Dim, typename RNGType>
-inline void rng_rand(RNGType &rng, NormalMVDistribution<RealType, Dim> &dist,
+inline void rand(RNGType &rng, NormalMVDistribution<RealType, Dim> &dist,
     std::size_t n, RealType *r)
 {
     dist(rng, n, r);

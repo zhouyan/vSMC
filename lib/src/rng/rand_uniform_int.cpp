@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/negative_binomial_rand.cpp
+// vSMC/lib/src/rng/rand_uniform_int.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include "libvsmcrng.hpp"
+
+extern "C" {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -38,10 +42,10 @@
 #endif
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    inline void vsmc_negative_binomial_rand_##name(vsmc_rng rng, size_t n,    \
-        unsigned long long *r, unsigned long long k, double p)                \
+    inline void vsmc_rand_uniform_int_##name(                                 \
+        vsmc_rng rng, size_t n, int *r, int a, int b)                         \
     {                                                                         \
-        std::negative_binomial_distribution<unsigned long long> dist(k, p);   \
+        std::uniform_int_distribution<int> dist(a, b);                        \
         VSMC_DEFINE_LIB_RNG_DIST(RNGType);                                    \
     }
 
@@ -49,8 +53,9 @@
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-using vsmc_negative_binomial_rand_type = void (*)(
-    vsmc_rng, size_t, unsigned long long *, unsigned long long, double);
+using vsmc_rand_uniform_int_type = void (*)(vsmc_rng, size_t, int *, int, int);
+
+static vsmc_rand_uniform_int_type vsmc_rand_uniform_int_dispatch[] = {
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -61,21 +66,19 @@ using vsmc_negative_binomial_rand_type = void (*)(
 #endif
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    vsmc_negative_binomial_rand_##name,
+    vsmc_rand_uniform_int_##name,
 #define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
-
-static vsmc_negative_binomial_rand_type
-    vsmc_negative_binomial_rand_dispatch[] = {
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-        nullptr}; // vsmc_negative_binomial_rand_dispatch
+    nullptr}; // vsmc_rand_uniform_int_dispatch
 
-void vsmc_negative_binomial_rand(vsmc_rng rng, size_t n, unsigned long long *r,
-    unsigned long long k, double p)
+void vsmc_rand_uniform_int(vsmc_rng rng, size_t n, int *r, int a, int b)
 {
-    vsmc_negative_binomial_rand_dispatch[static_cast<std::size_t>(rng.type)](
-        rng, n, r, k, p);
+    vsmc_rand_uniform_int_dispatch[static_cast<std::size_t>(rng.type)](
+        rng, n, r, a, b);
 }
+
+} // extern "C"

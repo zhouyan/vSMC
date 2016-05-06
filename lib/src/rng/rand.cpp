@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/u01_sequence.cpp
+// vSMC/lib/src/rng/rand.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,31 +29,53 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/engine.hpp>
-#include <vsmc/rng/rng.h>
-#include <vsmc/rng/u01_sequence.hpp>
+#include "libvsmcrng.hpp"
 
 extern "C" {
 
-void vsmc_u01_trans_sorted(size_t n, const double *u01, double *r)
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    inline void vsmc_rand_##name(vsmc_rng rng, size_t n, unsigned *r)         \
+    {                                                                         \
+        ::vsmc::uniform_bits_distribution(                                    \
+            *reinterpret_cast<RNGType *>(rng.ptr), n, r);                     \
+    }
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+using vsmc_rand_type = void (*)(vsmc_rng, size_t, unsigned *);
+
+static vsmc_rand_type vsmc_rand_dispatch[] = {
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rand_##name,
+#define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_rand_dispatch
+
+void vsmc_rand(vsmc_rng rng, size_t n, unsigned *r)
 {
-    ::vsmc::u01_trans_sorted(n, u01, r);
+    vsmc_rand_dispatch[static_cast<std::size_t>(rng.type)](rng, n, r);
 }
-
-void vsmc_u01_trans_stratified(size_t n, const double *u01, double *r)
-{
-    ::vsmc::u01_trans_stratified(n, u01, r);
-}
-
-void vsmc_u01_trans_systematic(size_t n, const double *u01, double *r)
-{
-    ::vsmc::u01_trans_systematic(n, u01, r);
-}
-
-#include "u01_rand_sorted.cpp"
-
-#include "u01_rand_stratified.cpp"
-
-#include "u01_rand_systematic.cpp"
 
 } // extern "C"

@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/lib/src/rng/uniform_int_rand.cpp
+// vSMC/lib/src/rng/rand_geometric.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include "libvsmcrng.hpp"
+
+extern "C" {
+
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
 #endif
@@ -38,10 +42,10 @@
 #endif
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    inline void vsmc_uniform_int_rand_##name(                                 \
-        vsmc_rng rng, size_t n, long long *r, long long a, long long b)       \
+    inline void vsmc_rand_geometric_##name(                                   \
+        vsmc_rng rng, size_t n, int *r, double p)                             \
     {                                                                         \
-        std::uniform_int_distribution<long long> dist(a, b);                  \
+        std::geometric_distribution<int> dist(p);                             \
         VSMC_DEFINE_LIB_RNG_DIST(RNGType);                                    \
     }
 
@@ -49,8 +53,9 @@
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-using vsmc_uniform_int_rand_type = void (*)(
-    vsmc_rng, size_t, long long *, long long, long long);
+using vsmc_rand_geometric_type = void (*)(vsmc_rng, size_t, int *, double);
+
+static vsmc_rand_geometric_type vsmc_rand_geometric_dispatch[] = {
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -60,21 +65,19 @@ using vsmc_uniform_int_rand_type = void (*)(
 #undef VSMC_RNG_DEFINE_MACRO_NA
 #endif
 
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    vsmc_uniform_int_rand_##name,
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rand_geometric_##name,
 #define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
-
-static vsmc_uniform_int_rand_type vsmc_uniform_int_rand_dispatch[] = {
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
 
-    nullptr}; // vsmc_uniform_int_rand_dispatch
+    nullptr}; // vsmc_rand_geometric_dispatch
 
-void vsmc_uniform_int_rand(
-    vsmc_rng rng, size_t n, long long *r, long long a, long long b)
+void vsmc_rand_geometric(vsmc_rng rng, size_t n, int *r, double p)
 {
-    vsmc_uniform_int_rand_dispatch[static_cast<std::size_t>(rng.type)](
-        rng, n, r, a, b);
+    vsmc_rand_geometric_dispatch[static_cast<std::size_t>(rng.type)](
+        rng, n, r, p);
 }
+
+} // extern "C"

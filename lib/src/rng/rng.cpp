@@ -29,72 +29,68 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <vsmc/rng/engine.hpp>
-#include <vsmc/rng/rng.h>
+#include "libvsmcrng.hpp"
 
-#define VSMC_RUNTIME_ASSERT_LIB_RNG_TYPE(rng1, rng2, func)                    \
-    VSMC_RUNTIME_ASSERT((rng1.type == rng2.type),                             \
-        "**vsmc_rng_" #func "CALLED WITH TWO RNG OF DIFFERENT TYPES")
+#include "rand.cpp"
+#include "rand_64.cpp"
+#include "rand_bernoulli.cpp"
+#include "rand_binomial.cpp"
+#include "rand_binomial_64.cpp"
+#include "rand_discrete.cpp"
+#include "rand_discrete_64.cpp"
+#include "rand_geometric.cpp"
+#include "rand_geometric_64.cpp"
+#include "rand_negative_binomial.cpp"
+#include "rand_negative_binomial_64.cpp"
+#include "rand_poisson.cpp"
+#include "rand_poisson_64.cpp"
+#include "rand_uniform_int.cpp"
+#include "rand_uniform_int_64.cpp"
 
-extern "C" {
-
-#include "rng_new.cpp"
-
-#include "rng_delete.cpp"
+#include "rand_beta.cpp"
+#include "rand_cauchy.cpp"
+#include "rand_chi_squared.cpp"
+#include "rand_exponential.cpp"
+#include "rand_extreme_value.cpp"
+#include "rand_fisher_f.cpp"
+#include "rand_gamma.cpp"
+#include "rand_laplace.cpp"
+#include "rand_levy.cpp"
+#include "rand_logistic.cpp"
+#include "rand_lognormal.cpp"
+#include "rand_normal.cpp"
+#include "rand_normal_mv.cpp"
+#include "rand_pareto.cpp"
+#include "rand_rayleigh.cpp"
+#include "rand_student_t.cpp"
+#include "rand_u01.cpp"
+#include "rand_u01_cc.cpp"
+#include "rand_u01_co.cpp"
+#include "rand_u01_oc.cpp"
+#include "rand_u01_oo.cpp"
+#include "rand_uniform_real.cpp"
+#include "rand_weibull.cpp"
 
 #include "rng_assign.cpp"
-
-#include "rng_seed.cpp"
-
-#include "rng_rand.cpp"
-
+#include "rng_delete.cpp"
 #include "rng_discard.cpp"
-
 #include "rng_is_eq.cpp"
-
 #include "rng_is_neq.cpp"
-
 #include "rng_load.cpp"
-
 #include "rng_load_f.cpp"
-
+#include "rng_new.cpp"
 #include "rng_save.cpp"
-
 #include "rng_save_f.cpp"
+#include "rng_seed.cpp"
+#include "rng_type.cpp"
 
-#ifdef VSMC_RNG_DEFINE_MACRO
-#undef VSMC_RNG_DEFINE_MACRO
+#include "seed.cpp"
+
+#include "u01_rand_sorted.cpp"
+#include "u01_rand_stratified.cpp"
+#include "u01_rand_systematic.cpp"
+#include "u01_trans.cpp"
+
+#if VSMC_HAS_MKL
+#include "mkl_brng.cpp"
 #endif
-
-#ifdef VSMC_RNG_DEFINE_MACRO_NA
-#undef VSMC_RNG_DEFINE_MACRO_NA
-#endif
-
-#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) 1,
-#define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) 0,
-
-static int vsmc_rng_type_table[] = {
-
-#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
-
-#include <vsmc/rng/internal/rng_define_macro.hpp>
-
-    0}; // vsmc_rng_new_dispatch
-
-int vsmc_rng_type_max()
-{
-    return static_cast<int>(sizeof(vsmc_rng_type_table) / sizeof(int)) - 1;
-}
-
-int vsmc_rng_type_check(vSMCRNGType type)
-{
-    if (static_cast<int>(type) < 0)
-        return 0;
-
-    if (static_cast<int>(type) > vsmc_rng_type_max())
-        return 0;
-
-    return vsmc_rng_type_table[static_cast<std::size_t>(type)];
-}
-
-} // extern "C"
