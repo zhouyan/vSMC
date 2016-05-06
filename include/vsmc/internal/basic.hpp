@@ -110,6 +110,24 @@ inline bool is_one(const T &a)
 }
 
 template <typename T>
+inline bool is_negative(const T &, std::true_type)
+{
+    return false;
+}
+
+template <typename T>
+inline bool is_negative(const T &a, std::false_type)
+{
+    return a < 0;
+}
+
+template <typename T>
+inline bool is_negative(const T &a)
+{
+    return is_negative(a, std::is_unsigned<T>());
+}
+
+template <typename T>
 inline bool is_nullptr(T ptr, std::true_type)
 {
     return ptr == nullptr;

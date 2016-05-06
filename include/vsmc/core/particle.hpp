@@ -40,7 +40,8 @@
 #include <vsmc/rng/seed.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RESIZE_BY_RANGE                     \
-    VSMC_RUNTIME_ASSERT((first >= 0 && first < last && last <= size_),        \
+    VSMC_RUNTIME_ASSERT(                                                      \
+        (!internal::is_negative(first) && first < last && last <= size_),     \
         "**Particle::resize_by_range** INDICES OUT OF RANGE")
 
 namespace vsmc

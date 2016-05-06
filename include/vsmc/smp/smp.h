@@ -38,117 +38,33 @@
 extern "C" {
 #endif
 
-/// \addtogroup C_API_SMP_SEQ
+/// \addtogroup C_API_SMP
 /// @{
 
-/// \brief `vsmc::Sampler::init` with `vsmc::InitializeSEQ` as input
-void vsmc_sampler_init_seq(vsmc_sampler sampler,
-    vsmc_initialize_eval_sp_type eval_sp,
-    vsmc_initialize_eval_param_type eval_param,
-    vsmc_initialize_eval_pre_type eval_pre,
-    vsmc_initialize_eval_post_type eval_post);
+/// \brief The maximum of an integer that can be passed to where
+/// `vSMCBackendSMP` value is expected
+int vsmc_backend_smp_max();
 
-/// \brief `vsmc::Sampler::move` with `vsmc::MoveSEQ` as input
-void vsmc_sampler_move_seq(vsmc_sampler sampler,
-    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
-    vsmc_move_eval_post_type eval_post, int append);
+/// \brief Check if a given SMP backend is defined within the library
+int vsmc_backend_smp_check(vSMCBackendSMP backend);
 
-/// \brief `vsmc::Sampler::mcmc` with `vsmc::MoveSEQ` as input
-void vsmc_sampler_mcmc_seq(vsmc_sampler sampler,
-    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
-    vsmc_move_eval_post_type eval_post, int append);
+/// \brief `vsmc::Sampler::init` with `vsmc::InitializeSMP` as input
+void vsmc_sampler_init_smp(vSMCBackendSMP backend, vsmc_sampler sampler,
+    vsmc_sampler_init_smp_type new_init, int append);
 
-/// \brief `vsmc::Sampler::monitor` with `vsmc::MonitorEvalSEQ` as input
-void vsmc_sampler_set_monitor_seq(vsmc_sampler sampler, const char *name,
-    int dim, vsmc_monitor_eval_sp_type eval_sp,
-    vsmc_monitor_eval_pre_type eval_pre, vsmc_monitor_eval_post_type eval_post,
-    int record_only, vSMCMonitorStage stage);
+/// \brief `vsmc::Sampler::move` with `vsmc::MoveSMP` as input
+void vsmc_sampler_move_smp(vSMCBackendSMP backend, vsmc_sampler sampler,
+    vsmc_sampler_move_smp_type new_move, int append);
+
+/// \brief `vsmc::Sampler::mcmc` with `vsmc::MoveSMP` as input
+void vsmc_sampler_mcmc_smp(vSMCBackendSMP backend, vsmc_sampler sampler,
+    vsmc_sampler_move_smp_type new_mcmc, int append);
+
+/// \brief `vsmc::Monitor` with `vsmc::MonitorEvalSMP` as input
+vsmc_monitor vsmc_monitor_new_smp(vSMCBackendSMP backend, size_t dim,
+    vsmc_monitor_eval_smp_type eval, int record_only, vSMCMonitorStage stage);
 
 /// @} C_API_SMP_SEQ
-
-/// \addtogroup C_API_SMP_STD
-/// @{
-
-/// \brief `vsmc::Sampler::init` with `vsmc::InitializeSTD` as input
-void vsmc_sampler_init_std(vsmc_sampler sampler,
-    vsmc_initialize_eval_sp_type eval_sp,
-    vsmc_initialize_eval_param_type eval_param,
-    vsmc_initialize_eval_pre_type eval_pre,
-    vsmc_initialize_eval_post_type eval_post);
-
-/// \brief `vsmc::Sampler::move` with `vsmc::MoveSTD` as input
-void vsmc_sampler_move_std(vsmc_sampler sampler,
-    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
-    vsmc_move_eval_post_type eval_post, int append);
-
-/// \brief `vsmc::Sampler::mcmc` with `vsmc::MoveSTD` as input
-void vsmc_sampler_mcmc_std(vsmc_sampler sampler,
-    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
-    vsmc_move_eval_post_type eval_post, int append);
-
-/// \brief `vsmc::Sampler::monitor` with `vsmc::MonitorEvalSTD` as input
-void vsmc_sampler_set_monitor_std(vsmc_sampler sampler, const char *name,
-    int dim, vsmc_monitor_eval_sp_type eval_sp,
-    vsmc_monitor_eval_pre_type eval_pre, vsmc_monitor_eval_post_type eval_post,
-    int record_only, vSMCMonitorStage stage);
-
-/// @} C_API_SMP_STD
-
-/// \addtogroup C_API_SMP_OMP
-/// @{
-
-/// \brief `vsmc::Sampler::init` with `vsmc::InitializeOMP` as input
-void vsmc_sampler_init_omp(vsmc_sampler sampler,
-    vsmc_initialize_eval_sp_type eval_sp,
-    vsmc_initialize_eval_param_type eval_param,
-    vsmc_initialize_eval_pre_type eval_pre,
-    vsmc_initialize_eval_post_type eval_post);
-
-/// \brief `vsmc::Sampler::move` with `vsmc::MoveOMP` as input
-void vsmc_sampler_move_omp(vsmc_sampler sampler,
-    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
-    vsmc_move_eval_post_type eval_post, int append);
-
-/// \brief `vsmc::Sampler::mcmc` with `vsmc::MoveOMP` as input
-void vsmc_sampler_mcmc_omp(vsmc_sampler sampler,
-    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
-    vsmc_move_eval_post_type eval_post, int append);
-
-/// \brief `vsmc::Sampler::monitor` with `vsmc::MonitorEvalOMP` as input
-void vsmc_sampler_set_monitor_omp(vsmc_sampler sampler, const char *name,
-    int dim, vsmc_monitor_eval_sp_type eval_sp,
-    vsmc_monitor_eval_pre_type eval_pre, vsmc_monitor_eval_post_type eval_post,
-    int record_only, vSMCMonitorStage stage);
-
-/// @} C_API_SMP_OMP
-
-/// \addtogroup C_API_SMP_TBB
-/// @{
-
-/// \brief `vsmc::Sampler::init` with `vsmc::InitializeTBB` as input
-void vsmc_sampler_init_tbb(vsmc_sampler sampler,
-    vsmc_initialize_eval_sp_type eval_sp,
-    vsmc_initialize_eval_param_type eval_param,
-    vsmc_initialize_eval_pre_type eval_pre,
-    vsmc_initialize_eval_post_type eval_post);
-
-/// \brief `vsmc::Sampler::move` with `vsmc::MoveTBB` as input
-void vsmc_sampler_move_tbb(vsmc_sampler sampler,
-    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
-    vsmc_move_eval_post_type eval_post, int append);
-
-/// \brief `vsmc::Sampler::mcmc` with `vsmc::MoveTBB` as input
-void vsmc_sampler_mcmc_tbb(vsmc_sampler sampler,
-    vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
-    vsmc_move_eval_post_type eval_post, int append);
-
-/// \brief `vsmc::Sampler::monitor` with `vsmc::MonitorEvalTBB` as input
-void vsmc_sampler_set_monitor_tbb(vsmc_sampler sampler, const char *name,
-    int dim, vsmc_monitor_eval_sp_type eval_sp,
-    vsmc_monitor_eval_pre_type eval_pre, vsmc_monitor_eval_post_type eval_post,
-    int record_only, vSMCMonitorStage stage);
-
-/// @} C_API_SMP_TBB
 
 #ifdef __cplusplus
 } // extern "C"

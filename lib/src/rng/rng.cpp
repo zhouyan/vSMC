@@ -29,8 +29,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libvsmcrng.hpp"
-
 #include "rand.cpp"
 #include "rand_64.cpp"
 #include "rand_bernoulli.cpp"

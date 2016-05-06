@@ -101,7 +101,7 @@ inline SamplerC *cast(const vsmc_sampler *sampler_ptr)
 }
 
 template <typename>
-inline vSMCRNGType rng_type();
+inline constexpr vSMCRNGType rng_type();
 
 #ifdef VSMC_RNG_DEFINE_MACRO
 #undef VSMC_RNG_DEFINE_MACRO
@@ -113,194 +113,12 @@ inline vSMCRNGType rng_type();
 
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     template <>                                                               \
-    inline vSMCRNGType rng_type<RNGType>()                                    \
+    inline constexpr vSMCRNGType rng_type<RNGType>()                          \
     {                                                                         \
         return vSMC##Name;                                                    \
     }
 
 #include <vsmc/rng/internal/rng_define_macro.hpp>
-
-// template <template <typename, typename> class Base>
-// class InitializeC : public Base<StateMatrixC, InitializeC<Base>>
-// {
-//     public:
-//     InitializeC(vsmc_initialize_eval_sp_type eval_sp,
-//         vsmc_initialize_eval_param_type eval_param,
-//         vsmc_initialize_eval_pre_type eval_pre,
-//         vsmc_initialize_eval_post_type eval_post)
-//         : eval_sp_(eval_sp)
-//         , eval_param_(eval_param)
-//         , eval_pre_(eval_pre)
-//         , eval_post_(eval_post)
-//     {
-//     }
-//
-//     std::size_t eval_sp(SingleParticleC sp)
-//     {
-//         if (eval_sp_ == nullptr)
-//             return 0;
-//
-//         vsmc_single_particle c_sp = {&sp.state(0), sp.id()};
-//         return static_cast<std::size_t>(eval_sp_(c_sp));
-//     }
-//
-//     void eval_param(ParticleC &particle, void *param)
-//     {
-//         if (eval_param_ == nullptr)
-//             return;
-//
-//         vsmc_particle c_particle = {&particle};
-//         eval_param_(c_particle, param);
-//     }
-//
-//     void eval_pre(ParticleC &particle)
-//     {
-//         if (eval_pre_ == nullptr)
-//             return;
-//
-//         vsmc_particle c_particle = {&particle};
-//         eval_pre_(c_particle);
-//     }
-//
-//     void eval_post(ParticleC &particle)
-//     {
-//         if (eval_post_ == nullptr)
-//             return;
-//
-//         vsmc_particle c_particle = {&particle};
-//         eval_post_(c_particle);
-//     }
-//
-//     private:
-//     vsmc_initialize_eval_sp_type eval_sp_;
-//     vsmc_initialize_eval_param_type eval_param_;
-//     vsmc_initialize_eval_pre_type eval_pre_;
-//     vsmc_initialize_eval_post_type eval_post_;
-// }; // class InitializeC
-//
-// template <template <typename, typename> class Base>
-// class MoveC : public Base<StateMatrixC, MoveC<Base>>
-// {
-//     public:
-//     MoveC(vsmc_move_eval_sp_type eval_sp, vsmc_move_eval_pre_type eval_pre,
-//         vsmc_move_eval_post_type eval_post)
-//         : eval_sp_(eval_sp), eval_pre_(eval_pre), eval_post_(eval_post)
-//     {
-//     }
-//
-//     std::size_t eval_sp(std::size_t iter, SingleParticleC sp)
-//     {
-//         if (eval_sp_ == nullptr)
-//             return 0;
-//
-//         vsmc_single_particle c_sp = {&sp.state(0), sp.id()};
-//         return static_cast<std::size_t>(
-//             eval_sp_(static_cast<int>(iter), c_sp));
-//     }
-//
-//     void eval_pre(std::size_t iter, ParticleC &particle)
-//     {
-//         if (eval_pre_ == nullptr)
-//             return;
-//
-//         vsmc_particle c_particle = {&particle};
-//         eval_pre_(static_cast<int>(iter), c_particle);
-//     }
-//
-//     void eval_post(std::size_t iter, ParticleC &particle)
-//     {
-//         if (eval_post_ == nullptr)
-//             return;
-//
-//         vsmc_particle c_particle = {&particle};
-//         eval_post_(static_cast<int>(iter), c_particle);
-//     }
-//
-//     private:
-//     vsmc_move_eval_sp_type eval_sp_;
-//     vsmc_move_eval_pre_type eval_pre_;
-//     vsmc_move_eval_post_type eval_post_;
-// }; // class MoveC
-//
-// template <template <typename, typename> class Base>
-// class MonitorEvalC : public Base<StateMatrixC, MonitorEvalC<Base>>
-// {
-//     public:
-//     MonitorEvalC(vsmc_monitor_eval_sp_type eval_sp,
-//         vsmc_monitor_eval_pre_type eval_pre,
-//         vsmc_monitor_eval_post_type eval_post)
-//         : eval_sp_(eval_sp), eval_pre_(eval_pre), eval_post_(eval_post)
-//     {
-//     }
-//
-//     void eval_sp(
-//         std::size_t iter, std::size_t dim, SingleParticleC sp, double *r)
-//     {
-//         if (eval_sp_ == nullptr)
-//             return;
-//
-//         vsmc_single_particle c_sp = {&sp.state(0), sp.id()};
-//         eval_sp_(static_cast<int>(iter), static_cast<int>(dim), c_sp, r);
-//     }
-//
-//     void eval_pre(std::size_t iter, ParticleC &particle)
-//     {
-//         if (eval_pre_ == nullptr)
-//             return;
-//
-//         vsmc_particle c_particle = {&particle};
-//         eval_pre_(static_cast<int>(iter), c_particle);
-//     }
-//
-//     void eval_post(std::size_t iter, ParticleC &particle)
-//     {
-//         if (eval_post_ == nullptr)
-//             return;
-//
-//         vsmc_particle c_particle = {&particle};
-//         eval_post_(static_cast<int>(iter), c_particle);
-//     }
-//
-//     private:
-//     vsmc_monitor_eval_sp_type eval_sp_;
-//     vsmc_monitor_eval_pre_type eval_pre_;
-//     vsmc_monitor_eval_post_type eval_post_;
-// }; // class MonitorEvalC
-//
-// inline SamplerC::resample_type cast(vsmc_resample_type fptr)
-// {
-//     return [fptr](
-//         std::size_t M, std::size_t N, RNGC &rng, const double *w, int *rep)
-//         {
-//         vsmc_rng c_rng = {&rng, vSMCRNG};
-//         fptr(static_cast<int>(M), static_cast<int>(N), c_rng, w, rep);
-//     };
-// }
-//
-//
-// template <template <typename, typename> class Base>
-// inline SamplerC::init_type cast(vsmc_initialize_eval_sp_type eval_sp,
-//     vsmc_initialize_eval_param_type eval_param,
-//     vsmc_initialize_eval_pre_type eval_pre,
-//     vsmc_initialize_eval_post_type eval_post)
-// {
-//     return InitializeC<Base>(eval_sp, eval_param, eval_pre, eval_post);
-// }
-//
-// template <template <typename, typename> class Base>
-// inline SamplerC::move_type cast(vsmc_move_eval_sp_type eval_sp,
-//     vsmc_move_eval_pre_type eval_pre, vsmc_move_eval_post_type eval_post)
-// {
-//     return MoveC<Base>(eval_sp, eval_pre, eval_post);
-// }
-//
-// template <template <typename, typename> class Base>
-// inline MonitorC::eval_type cast(vsmc_monitor_eval_sp_type eval_sp,
-//     vsmc_monitor_eval_pre_type eval_pre, vsmc_monitor_eval_post_type
-//     eval_post)
-// {
-//     return MonitorEvalC<Base>(eval_sp, eval_pre, eval_post);
-// }
 
 } // namespace vsmc
 

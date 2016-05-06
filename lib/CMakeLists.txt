@@ -33,31 +33,15 @@ PROJECT(vSMCLib CXX)
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
-SET(VSMC_LIB_SOURCE_VSMCRNG ${PROJECT_SOURCE_DIR}/src/rng/rng.cpp)
-
-SET(VSMC_LIB_SOURCE_VSMC ${VSMC_LIB_SOURCE_VSMCRNG}
-    ${PROJECT_SOURCE_DIR}/src/core/monitor.cpp
-    ${PROJECT_SOURCE_DIR}/src/core/particle.cpp
-    ${PROJECT_SOURCE_DIR}/src/core/sampler.cpp
-    ${PROJECT_SOURCE_DIR}/src/core/state_matrix.cpp
-    ${PROJECT_SOURCE_DIR}/src/core/weight.cpp
+SET(VSMC_LIB_SOURCE_VSMC
+    ${PROJECT_SOURCE_DIR}/src/core/core.cpp
     ${PROJECT_SOURCE_DIR}/src/resample/resample.cpp
-    ${PROJECT_SOURCE_DIR}/src/smp/backend_seq.cpp
-    ${PROJECT_SOURCE_DIR}/src/smp/backend_std.cpp
-    ${PROJECT_SOURCE_DIR}/src/utility/aligned_memory.cpp
-    ${PROJECT_SOURCE_DIR}/src/utility/covariance.cpp
-    ${PROJECT_SOURCE_DIR}/src/utility/hdf5.cpp
-    ${PROJECT_SOURCE_DIR}/src/utility/stop_watch.cpp)
+    ${PROJECT_SOURCE_DIR}/src/rng/rng.cpp
+    ${PROJECT_SOURCE_DIR}/src/smp/smp.cpp
+    ${PROJECT_SOURCE_DIR}/src/utility/utility.cpp)
 
-IF(OPENMP_FOUND)
-    SET(VSMC_LIB_SOURCE_VSMC ${VSMC_LIB_SOURCE_VSMC}
-        ${PROJECT_SOURCE_DIR}/src/smp/backend_omp.cpp)
-ENDIF(OPENMP_FOUND)
-
-IF(TBB_FOUND)
-    SET(VSMC_LIB_SOURCE_VSMC ${VSMC_LIB_SOURCE_VSMC}
-        ${PROJECT_SOURCE_DIR}/src/smp/backend_tbb.cpp)
-ENDIF(TBB_FOUND)
+SET(VSMC_LIB_SOURCE_VSMCRNG
+    ${PROJECT_SOURCE_DIR}/src/rng/rng.cpp)
 
 SET(VSMC_LIB_TYPE shared static)
 SET(VSMC_LIB_NAME vsmc vsmcrng)

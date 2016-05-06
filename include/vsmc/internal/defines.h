@@ -224,7 +224,6 @@ typedef struct {
     void (*eval_param)(vsmc_particle, void *);
     void (*eval_pre)(vsmc_particle);
     void (*eval_post)(vsmc_particle);
-    vSMCBackendSMP backend;
 } vsmc_sampler_init_smp_type;
 
 /// \brief vsmc::MoveSMP
@@ -232,7 +231,6 @@ typedef struct {
     size_t (*eval_sp)(size_t, vsmc_single_particle);
     void (*eval_pre)(size_t, vsmc_particle);
     void (*eval_post)(size_t, vsmc_particle);
-    vSMCBackendSMP backend;
 } vsmc_sampler_move_smp_type;
 
 /// \brief vsmc::MonitorEvalSMP
@@ -240,7 +238,6 @@ typedef struct {
     void (*eval_sp)(size_t, size_t, vsmc_single_particle, double *);
     void (*eval_pre)(size_t, vsmc_particle);
     void (*eval_post)(size_t, vsmc_particle);
-    vSMCBackendSMP backend;
 } vsmc_monitor_eval_smp_type;
 
 /// @} C_API_Definitions

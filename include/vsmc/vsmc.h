@@ -83,18 +83,6 @@
 /// \defgroup C_API_SMP Symmetric multiprocessing
 /// \ingroup C_API
 ///
-/// \defgroup C_API_SMP_SEQ Sequential
-/// \ingroup C_API_SMP
-///
-/// \defgroup C_API_SMP_STD Standard library
-/// \ingroup C_API_SMP
-///
-/// \defgroup C_API_SMP_OMP OpenMP
-/// \ingroup C_API_SMP
-///
-/// \defgroup C_API_SMP_TBB Intel Threading Building Blocks
-/// \ingroup C_API_SMP
-///
 /// \defgroup C_API_Utility Utility
 /// \ingroup C_API
 ///
