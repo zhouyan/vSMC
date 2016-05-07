@@ -34,7 +34,7 @@
 
 #include <vsmc/internal/config.h>
 
-#if VSMC_HAS_CBLAS
+#if VSMC_USE_CBLAS
 
 #if VSMC_USE_MKL_CBLAS
 #include <mkl_cblas.h>
@@ -95,7 +95,7 @@ using ::cblas_dsyrk;
 
 } // namespace vsmc
 
-#else // VSMC_HAS_CBLAS
+#else // VSMC_USE_CBLAS
 
 #ifndef VSMC_BLAS_NAME
 #ifdef VSMC_BLAS_NAME_NO_UNDERSCORE
@@ -376,6 +376,6 @@ inline void cblas_dsyrk(const CBLAS_LAYOUT layout, const CBLAS_UPLO uplo,
 
 } // namespace vsmc
 
-#endif // VSMC_HAS_CBLAS
+#endif // VSMC_USE_CBLAS
 
 #endif // VSMC_MATH_CBLAS_HPP

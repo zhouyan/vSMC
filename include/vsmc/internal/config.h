@@ -154,12 +154,8 @@
 #endif
 #endif
 
-#ifndef VSMC_HAS_CBLAS
-#if VSMC_USE_MKL_CBLAS || VSMC_USE_ACCELERATE
-#define VSMC_HAS_CBLAS 1
-#else
-#define VSMC_HAS_CBLAS 0
-#endif
+#ifndef VSMC_USE_CBLAS
+#define VSMC_USE_CBLAS (VSMC_USE_MKL_CBLAS || VSMC_USE_ACCELERATE)
 #endif
 
 #endif // VSMC_INTERNAL_CONFIG_H
