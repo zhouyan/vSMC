@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/cauchy_distribution.hpp
+// vSMC/include/vsmc/rng/arcsine_distribution.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_CAUCHY_DISTRIBUTION_HPP
-#define VSMC_RNG_CAUCHY_DISTRIBUTION_HPP
+#ifndef VSMC_RNG_ARCSINE_DISTRIBUTION_HPP
+#define VSMC_RNG_ARCSINE_DISTRIBUTION_HPP
 
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
@@ -42,28 +42,25 @@ namespace internal
 {
 
 template <typename RealType>
-inline bool cauchy_distribution_check_param(RealType, RealType b)
+inline bool arcsine_distribution_check_param(RealType a, RealType b)
 {
-    return b > 0;
+    return a < b;
 }
 
 } // namespace vsmc::internal
 
-/// \brief Cauchy distribution
+/// \brief Arcsine distribution
 /// \ingroup Distribution
 template <typename RealType>
-class CauchyDistribution
+class ArcsineDistribution
 {
-    VSMC_DEFINE_RNG_DISTRIBUTION_2(Cauchy, cauchy, a, 0, b, 1)
+    VSMC_DEFINE_RNG_DISTRIBUTION_2(Arcsine, arcsine, a, 0, b, 1)
     VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_0
 
     public:
-    result_type min() const
-    {
-        return std::numeric_limits<result_type>::lowest();
-    }
+    result_type min() const { return a(); }
 
-    result_type max() const { return std::numeric_limits<result_type>::max(); }
+    result_type max() const { return b(); }
 
     void reset() {}
 
@@ -73,31 +70,33 @@ class CauchyDistribution
     {
         U01CODistribution<RealType> u01;
 
-        return param.a() +
-            param.b() * std::tan(const_pi<result_type>() * u01(rng));
+        result_type r = std::sin(const_pi_by2<result_type>() * u01(rng));
+
+        return param.a() + (param.b() - param.a()) * (r * r);
     }
-}; // class CauchyDistribution
+}; // class ArcsineDistribution
 
 namespace internal
 {
 
 template <std::size_t, typename RealType, typename RNGType>
-inline void cauchy_distribution_impl(
+inline void arcsine_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     u01_co_distribution(rng, n, r);
-    mul(n, const_pi<RealType>(), r, r);
-    tan(n, r, r);
-    fma(n, r, b, a, r);
+    mul(n, const_pi_by2<RealType>(), r, r);
+    sin(n, r, r);
+    sqr(n, r, r);
+    fma(n, r, b - a, a, r);
 }
 
 } // namespace vsmc::internal
 
-/// \brief Generating Cauchy random variates
+/// \brief Generating Arcsine random variates
 /// \ingroup Distribution
-VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_2(cauchy, a, b)
-VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Cauchy, cauchy, a, b)
+VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_2(arcsine, a, b)
+VSMC_DEFINE_RNG_DISTRIBUTION_RAND_2(Arcsine, arcsine, a, b)
 
 } // namespace vsmc
 
-#endif // VSMC_RNG_CAUCHY_DISTRIBUTION_HPP
+#endif // VSMC_RNG_ARCSINE_DISTRIBUTION_HPP
