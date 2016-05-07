@@ -66,31 +66,31 @@ OPTION(VSMC_ENABLE_EXAMPLE "Enable building of example" ON)
 
 FILE(READ ${PROJECT_SOURCE_DIR}/README.md README)
 FILE(READ ${PROJECT_SOURCE_DIR}/NEWS.md NEWS)
-SET(DOC_SOURCE  ${PROJECT_SOURCE_DIR}/doc)
+SET(DOC_SOURCE  ${PROJECT_SOURCE_DIR}/docs)
 SET(DOC_INCLUDE ${PROJECT_SOURCE_DIR}/include)
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/Doxyfile.in
     ${PROJECT_BINARY_DIR}/Doxyfile)
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/main.md.in
-    ${PROJECT_SOURCE_DIR}/doc/main.md)
+    ${PROJECT_SOURCE_DIR}/docs/main.md)
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/news.md.in
-    ${PROJECT_SOURCE_DIR}/doc/news.md)
+    ${PROJECT_SOURCE_DIR}/docs/news.md)
 
 ##############################################################################
 # Documentations
 ##############################################################################
 
 INCLUDE(FindDoxygen)
-FILE(GLOB_RECURSE DOC_SOURCE_FILES      ${PROJECT_SOURCE_DIR}/doc/*.*)
+FILE(GLOB_RECURSE DOC_SOURCE_FILES      ${PROJECT_SOURCE_DIR}/docs/*.*)
 FILE(GLOB_RECURSE DOC_INCLUDE_FILES_C   ${PROJECT_SOURCE_DIR}/include/*.h)
 FILE(GLOB_RECURSE DOC_INCLUDE_FILES_CPP ${PROJECT_SOURCE_DIR}/include/*.hpp)
 IF(DOXYGEN_FOUND)
     ADD_CUSTOM_COMMAND(
-        OUTPUT  ${PROJECT_BINARY_DIR}/doc
+        OUTPUT  ${PROJECT_BINARY_DIR}/docs
         DEPENDS ${PROJECT_BINARY_DIR}/Doxyfile
         ${DOC_SOURCE_FILES} ${DOC_INCLUDE_FILES_C} ${DOC_INCLUDE_FILES_CPP}
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         COMMAND ${DOXYGEN_EXECUTABLE} ARGS Doxyfile)
-    ADD_CUSTOM_TARGET(docs DEPENDS ${PROJECT_BINARY_DIR}/doc)
+    ADD_CUSTOM_TARGET(doc DEPENDS ${PROJECT_BINARY_DIR}/docs)
 ENDIF(DOXYGEN_FOUND)
 
 ##############################################################################

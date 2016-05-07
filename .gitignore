@@ -1,6 +1,6 @@
 build
-doc/main.md
-doc/news.md
+docs/main.md
+docs/news.md
 user_guide/prg/pf
 user_guide/prg/pf.pdf
 user_guide/prg/pf.rout
