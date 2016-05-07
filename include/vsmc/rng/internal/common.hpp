@@ -140,10 +140,11 @@
             is >> std::ws >> p1;                                              \
                                                                               \
             if (is) {                                                         \
-                if (internal::name##_distribution_check_param(p1))            \
+                if (internal::name##_distribution_check_param(p1)) {          \
                     param.p1##_ = p1;                                         \
-                else                                                          \
+                } else {                                                      \
                     is.setstate(std::ios_base::failbit);                      \
+                }                                                             \
             }                                                                 \
                                                                               \
             return is;                                                        \
@@ -343,7 +344,7 @@
         using distribution_type = Name##Distribution<RealType>;               \
                                                                               \
         explicit param_type(result_type p1 = v1, result_type p2 = v2,         \
-            reuslt_type p3 = v3, p4 = v4)                                     \
+            result_type p3 = v3, result_type p4 = v4)                         \
             : p1##_(p1), p2##_(p2), p3##_(p3), p4##_(p4)                      \
         {                                                                     \
             VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(                       \
@@ -412,8 +413,8 @@
                         p1, p2, p3, p4)) {                                    \
                     param.p1##_ = p1;                                         \
                     param.p2##_ = p2;                                         \
-                    param.p2##_ = p3;                                         \
-                    param.p2##_ = p4;                                         \
+                    param.p3##_ = p3;                                         \
+                    param.p4##_ = p4;                                         \
                 } else {                                                      \
                     is.setstate(std::ios_base::failbit);                      \
                 }                                                             \
@@ -504,7 +505,7 @@
     using distribution_type = Name##Distribution<RealType>;                   \
                                                                               \
     explicit Name##Distribution(result_type p1 = v1, result_type p2 = v2,     \
-        result_type p3 = v3, p4 = v4)                                         \
+        result_type p3 = v3, result_type p4 = v4)                             \
         : param_(p1, p2, p3, p4)                                              \
     {                                                                         \
         reset();                                                              \
@@ -650,8 +651,9 @@
                                                                               \
         T1 tmp1;                                                              \
         is >> std::ws >> tmp1;                                                \
-        if (is)                                                               \
+        if (is) {                                                             \
             m1 = std::move(tmp1);                                             \
+        }                                                                     \
     }
 
 #define VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_2(T1, m1, T2, m2)                 \
