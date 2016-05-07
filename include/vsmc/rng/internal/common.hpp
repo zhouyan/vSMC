@@ -236,6 +236,200 @@
         friend distribution_type;                                             \
     }; // class param_type
 
+#define VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_3(                            \
+    Name, name, p1, v1, p2, v2, p3, v3)                                       \
+    public:                                                                   \
+    class param_type                                                          \
+    {                                                                         \
+        static_assert(std::is_floating_point<RealType>::value,                \
+            "**" #Name "Distribution::param_type** USED WITH RealType OTHER " \
+            "THAN FLOATING POINT TYPES");                                     \
+                                                                              \
+        public:                                                               \
+        using result_type = RealType;                                         \
+        using distribution_type = Name##Distribution<RealType>;               \
+                                                                              \
+        explicit param_type(                                                  \
+            result_type p1 = v1, result_type p2 = v2, result_type p3 = v3)    \
+            : p1##_(p1), p2##_(p2), p3##_(p3)                                 \
+        {                                                                     \
+            VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(                       \
+                internal::name##_distribution_check_param(p1, p2, p3), Name); \
+        }                                                                     \
+                                                                              \
+        result_type p1() const { return p1##_; }                              \
+        result_type p2() const { return p2##_; }                              \
+        result_type p3() const { return p3##_; }                              \
+                                                                              \
+        friend bool operator==(                                               \
+            const param_type &param1, const param_type &param2)               \
+        {                                                                     \
+            if (!internal::is_equal(param1.p1##_, param2.p1##_))              \
+                return false;                                                 \
+            if (!internal::is_equal(param1.p2##_, param2.p2##_))              \
+                return false;                                                 \
+            if (!internal::is_equal(param1.p3##_, param2.p3##_))              \
+                return false;                                                 \
+            return true;                                                      \
+        }                                                                     \
+                                                                              \
+        friend bool operator!=(                                               \
+            const param_type &param1, const param_type &param2)               \
+        {                                                                     \
+            return !(param1 == param2);                                       \
+        }                                                                     \
+                                                                              \
+        template <typename CharT, typename Traits>                            \
+        friend std::basic_ostream<CharT, Traits> &operator<<(                 \
+            std::basic_ostream<CharT, Traits> &os, const param_type &param)   \
+        {                                                                     \
+            if (!os)                                                          \
+                return os;                                                    \
+                                                                              \
+            os << param.p1##_ << ' ';                                         \
+            os << param.p2##_ << ' ';                                         \
+            os << param.p3##_;                                                \
+                                                                              \
+            return os;                                                        \
+        }                                                                     \
+                                                                              \
+        template <typename CharT, typename Traits>                            \
+        friend std::basic_istream<CharT, Traits> &operator>>(                 \
+            std::basic_istream<CharT, Traits> &is, param_type &param)         \
+        {                                                                     \
+            if (!is)                                                          \
+                return is;                                                    \
+                                                                              \
+            result_type p1 = 0;                                               \
+            result_type p2 = 0;                                               \
+            result_type p3 = 0;                                               \
+            is >> std::ws >> p1;                                              \
+            is >> std::ws >> p2;                                              \
+            is >> std::ws >> p3;                                              \
+                                                                              \
+            if (is) {                                                         \
+                if (internal::name##_distribution_check_param(p1, p2, p3)) {  \
+                    param.p1##_ = p1;                                         \
+                    param.p2##_ = p2;                                         \
+                    param.p3##_ = p3;                                         \
+                } else {                                                      \
+                    is.setstate(std::ios_base::failbit);                      \
+                }                                                             \
+            }                                                                 \
+                                                                              \
+            return is;                                                        \
+        }                                                                     \
+                                                                              \
+        private:                                                              \
+        result_type p1##_;                                                    \
+        result_type p2##_;                                                    \
+        result_type p3##_;                                                    \
+                                                                              \
+        friend distribution_type;                                             \
+    }; // class param_type
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_4(                            \
+    Name, name, p1, v1, p2, v2, p3, v3, p4, v4)                               \
+    public:                                                                   \
+    class param_type                                                          \
+    {                                                                         \
+        static_assert(std::is_floating_point<RealType>::value,                \
+            "**" #Name "Distribution::param_type** USED WITH RealType OTHER " \
+            "THAN FLOATING POINT TYPES");                                     \
+                                                                              \
+        public:                                                               \
+        using result_type = RealType;                                         \
+        using distribution_type = Name##Distribution<RealType>;               \
+                                                                              \
+        explicit param_type(result_type p1 = v1, result_type p2 = v2,         \
+            reuslt_type p3 = v3, p4 = v4)                                     \
+            : p1##_(p1), p2##_(p2), p3##_(p3), p4##_(p4)                      \
+        {                                                                     \
+            VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(                       \
+                internal::name##_distribution_check_param(p1, p2, p3, p4),    \
+                Name);                                                        \
+        }                                                                     \
+                                                                              \
+        result_type p1() const { return p1##_; }                              \
+        result_type p2() const { return p2##_; }                              \
+        result_type p3() const { return p3##_; }                              \
+        result_type p4() const { return p4##_; }                              \
+                                                                              \
+        friend bool operator==(                                               \
+            const param_type &param1, const param_type &param2)               \
+        {                                                                     \
+            if (!internal::is_equal(param1.p1##_, param2.p1##_))              \
+                return false;                                                 \
+            if (!internal::is_equal(param1.p2##_, param2.p2##_))              \
+                return false;                                                 \
+            if (!internal::is_equal(param1.p3##_, param2.p3##_))              \
+                return false;                                                 \
+            if (!internal::is_equal(param1.p4##_, param2.p4##_))              \
+                return false;                                                 \
+            return true;                                                      \
+        }                                                                     \
+                                                                              \
+        friend bool operator!=(                                               \
+            const param_type &param1, const param_type &param2)               \
+        {                                                                     \
+            return !(param1 == param2);                                       \
+        }                                                                     \
+                                                                              \
+        template <typename CharT, typename Traits>                            \
+        friend std::basic_ostream<CharT, Traits> &operator<<(                 \
+            std::basic_ostream<CharT, Traits> &os, const param_type &param)   \
+        {                                                                     \
+            if (!os)                                                          \
+                return os;                                                    \
+                                                                              \
+            os << param.p1##_ << ' ';                                         \
+            os << param.p2##_ << ' ';                                         \
+            os << param.p3##_ << ' ';                                         \
+            os << param.p4##_;                                                \
+                                                                              \
+            return os;                                                        \
+        }                                                                     \
+                                                                              \
+        template <typename CharT, typename Traits>                            \
+        friend std::basic_istream<CharT, Traits> &operator>>(                 \
+            std::basic_istream<CharT, Traits> &is, param_type &param)         \
+        {                                                                     \
+            if (!is)                                                          \
+                return is;                                                    \
+                                                                              \
+            result_type p1 = 0;                                               \
+            result_type p2 = 0;                                               \
+            result_type p3 = 0;                                               \
+            result_type p4 = 0;                                               \
+            is >> std::ws >> p1;                                              \
+            is >> std::ws >> p2;                                              \
+            is >> std::ws >> p3;                                              \
+            is >> std::ws >> p4;                                              \
+                                                                              \
+            if (is) {                                                         \
+                if (internal::name##_distribution_check_param(                \
+                        p1, p2, p3, p4)) {                                    \
+                    param.p1##_ = p1;                                         \
+                    param.p2##_ = p2;                                         \
+                    param.p2##_ = p3;                                         \
+                    param.p2##_ = p4;                                         \
+                } else {                                                      \
+                    is.setstate(std::ios_base::failbit);                      \
+                }                                                             \
+            }                                                                 \
+                                                                              \
+            return is;                                                        \
+        }                                                                     \
+                                                                              \
+        private:                                                              \
+        result_type p1##_;                                                    \
+        result_type p2##_;                                                    \
+        result_type p3##_;                                                    \
+        result_type p4##_;                                                    \
+                                                                              \
+        friend distribution_type;                                             \
+    }; // class param_type
+
 #define VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_0(Name, T)                   \
     public:                                                                   \
     using result_type = T;                                                    \
@@ -279,6 +473,51 @@
                                                                               \
     result_type p1() const { return param_.p1(); }                            \
     result_type p2() const { return param_.p2(); }
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_3(                           \
+    Name, p1, v1, p2, v2, p3, v3)                                             \
+    public:                                                                   \
+    using result_type = RealType;                                             \
+    using distribution_type = Name##Distribution<RealType>;                   \
+                                                                              \
+    explicit Name##Distribution(                                              \
+        result_type p1 = v1, result_type p2 = v2, result_type p3 = v3)        \
+        : param_(p1, p2, p3)                                                  \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    explicit Name##Distribution(const param_type &param) : param_(param)      \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    result_type p1() const { return param_.p1(); }                            \
+    result_type p2() const { return param_.p2(); }                            \
+    result_type p3() const { return param_.p3(); }
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_4(                           \
+    Name, p1, v1, p2, v2, p3, v3, p4, v4)                                     \
+    public:                                                                   \
+    using result_type = RealType;                                             \
+    using distribution_type = Name##Distribution<RealType>;                   \
+                                                                              \
+    explicit Name##Distribution(result_type p1 = v1, result_type p2 = v2,     \
+        result_type p3 = v3, p4 = v4)                                         \
+        : param_(p1, p2, p3, p4)                                              \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    explicit Name##Distribution(const param_type &param) : param_(param)      \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    result_type p1() const { return param_.p1(); }                            \
+    result_type p2() const { return param_.p2(); }                            \
+    result_type p3() const { return param_.p3(); }                            \
+    result_type p4() const { return param_.p4(); }
 
 #define VSMC_DEFINE_RNG_DISTRIBUTION_OPERATOR(Name, name)                     \
     public:                                                                   \
@@ -388,7 +627,9 @@
                                                                               \
     bool is_equal(const distribution_type &other) const                       \
     {                                                                         \
-        return m1 == other.m1;                                                \
+        if (!internal::is_equal(m1, other.m1))                                \
+            return false;                                                     \
+        return true;                                                          \
     }                                                                         \
                                                                               \
     template <typename CharT, typename Traits>                                \
@@ -419,7 +660,11 @@
                                                                               \
     bool is_equal(const distribution_type &other) const                       \
     {                                                                         \
-        return m1 == other.m1 && m2 == other.m2;                              \
+        if (!internal::is_equal(m1, other.m1))                                \
+            return false;                                                     \
+        if (!internal::is_equal(m2, other.m2))                                \
+            return false;                                                     \
+        return true;                                                          \
     }                                                                         \
                                                                               \
     template <typename CharT, typename Traits>                                \
@@ -448,6 +693,107 @@
         }                                                                     \
     }
 
+#define VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_3(T1, m1, T2, m2, T3, m3)         \
+    private:                                                                  \
+    T1 m1;                                                                    \
+    T2 m2;                                                                    \
+    T3 m3;                                                                    \
+                                                                              \
+    bool is_equal(const distribution_type &other) const                       \
+    {                                                                         \
+        if (!internal::is_equal(m1, other.m1))                                \
+            return false;                                                     \
+        if (!internal::is_equal(m2, other.m2))                                \
+            return false;                                                     \
+        if (!internal::is_equal(m3, other.m3))                                \
+            return false;                                                     \
+        return true;                                                          \
+    }                                                                         \
+                                                                              \
+    template <typename CharT, typename Traits>                                \
+    void ostream(std::basic_ostream<CharT, Traits> &os) const                 \
+    {                                                                         \
+        if (!os)                                                              \
+            return;                                                           \
+                                                                              \
+        os << ' ' << m1;                                                      \
+        os << ' ' << m2;                                                      \
+        os << ' ' << m3;                                                      \
+    }                                                                         \
+                                                                              \
+    template <typename CharT, typename Traits>                                \
+    void istream(std::basic_istream<CharT, Traits> &is)                       \
+    {                                                                         \
+        if (!is)                                                              \
+            return;                                                           \
+                                                                              \
+        T1 tmp1;                                                              \
+        T2 tmp2;                                                              \
+        T3 tmp3;                                                              \
+        is >> std::ws >> tmp1;                                                \
+        is >> std::ws >> tmp2;                                                \
+        is >> std::ws >> tmp3;                                                \
+        if (is) {                                                             \
+            m1 = std::move(tmp1);                                             \
+            m2 = std::move(tmp2);                                             \
+            m3 = std::move(tmp3);                                             \
+        }                                                                     \
+    }
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_MEMBER_4(T1, m1, T2, m2, T3, m3, T4, m4) \
+    private:                                                                  \
+    T1 m1;                                                                    \
+    T2 m2;                                                                    \
+    T3 m3;                                                                    \
+    T4 m4;                                                                    \
+                                                                              \
+    bool is_equal(const distribution_type &other) const                       \
+    {                                                                         \
+        if (!internal::is_equal(m1, other.m1))                                \
+            return false;                                                     \
+        if (!internal::is_equal(m2, other.m2))                                \
+            return false;                                                     \
+        if (!internal::is_equal(m3, other.m3))                                \
+            return false;                                                     \
+        if (!internal::is_equal(m4, other.m4))                                \
+            return false;                                                     \
+        return true;                                                          \
+    }                                                                         \
+                                                                              \
+    template <typename CharT, typename Traits>                                \
+    void ostream(std::basic_ostream<CharT, Traits> &os) const                 \
+    {                                                                         \
+        if (!os)                                                              \
+            return;                                                           \
+                                                                              \
+        os << ' ' << m1;                                                      \
+        os << ' ' << m2;                                                      \
+        os << ' ' << m3;                                                      \
+        os << ' ' << m4;                                                      \
+    }                                                                         \
+                                                                              \
+    template <typename CharT, typename Traits>                                \
+    void istream(std::basic_istream<CharT, Traits> &is)                       \
+    {                                                                         \
+        if (!is)                                                              \
+            return;                                                           \
+                                                                              \
+        T1 tmp1;                                                              \
+        T2 tmp2;                                                              \
+        T3 tmp3;                                                              \
+        T4 tmp4;                                                              \
+        is >> std::ws >> tmp1;                                                \
+        is >> std::ws >> tmp2;                                                \
+        is >> std::ws >> tmp3;                                                \
+        is >> std::ws >> tmp4;                                                \
+        if (is) {                                                             \
+            m1 = std::move(tmp1);                                             \
+            m2 = std::move(tmp2);                                             \
+            m3 = std::move(tmp3);                                             \
+            m4 = std::move(tmp4);                                             \
+        }                                                                     \
+    }
+
 #define VSMC_DEFINE_RNG_DISTRIBUTION_0(Name, name, T, t, Type)                \
     VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_0(Name, T, t, Type)               \
     VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_0(Name, T)                       \
@@ -461,6 +807,20 @@
 #define VSMC_DEFINE_RNG_DISTRIBUTION_2(Name, name, p1, v1, p2, v2)            \
     VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_2(Name, name, p1, v1, p2, v2)     \
     VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_2(Name, p1, v1, p2, v2)          \
+    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATOR(Name, name)
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_3(Name, name, p1, v1, p2, v2, p3, v3)    \
+    VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_3(                                \
+        Name, name, p1, v1, p2, v2, p3, v3)                                   \
+    VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_3(Name, p1, v1, p2, v2, p3, v3)  \
+    VSMC_DEFINE_RNG_DISTRIBUTION_OPERATOR(Name, name)
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_4(                                       \
+    Name, name, p1, v1, p2, v2, p3, v3, p4, v4)                               \
+    VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_4(                                \
+        Name, name, p1, v1, p2, v2, p3, v3, p4, v4)                           \
+    VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_3(                               \
+        Name, p1, v1, p2, v2, p3, v3, p4, v4)                                 \
     VSMC_DEFINE_RNG_DISTRIBUTION_OPERATOR(Name, name)
 
 #define VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_0(name)                             \
@@ -513,6 +873,40 @@
         internal::name##_distribution_impl<K>(rng, L, r, p1, p2);             \
     }
 
+#define VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_3(name, p1, p2, p3)                 \
+    template <typename RealType, typename RNGType>                            \
+    inline void name##_distribution(RNGType &rng, std::size_t N, RealType *r, \
+        RealType p1, RealType p2, RealType p3)                                \
+    {                                                                         \
+        static_assert(std::is_floating_point<RealType>::value,                \
+            "**" #name "_distribution** USED WITH RealType OTHER THAN "       \
+            "FLOATING POINT TYPES");                                          \
+                                                                              \
+        const std::size_t K = internal::BufferSize<RealType>::value;          \
+        const std::size_t M = N / K;                                          \
+        const std::size_t L = N % K;                                          \
+        for (std::size_t i = 0; i != M; ++i, r += K)                          \
+            internal::name##_distribution_impl<K>(rng, K, r, p1, p2, p3);     \
+        internal::name##_distribution_impl<K>(rng, L, r, p1, p2, p3);         \
+    }
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_IMPL_4(name, p1, p2, p3, p4)             \
+    template <typename RealType, typename RNGType>                            \
+    inline void name##_distribution(RNGType &rng, std::size_t N, RealType *r, \
+        RealType p1, RealType p2, RealType p3, RealType p4)                   \
+    {                                                                         \
+        static_assert(std::is_floating_point<RealType>::value,                \
+            "**" #name "_distribution** USED WITH RealType OTHER THAN "       \
+            "FLOATING POINT TYPES");                                          \
+                                                                              \
+        const std::size_t K = internal::BufferSize<RealType>::value;          \
+        const std::size_t M = N / K;                                          \
+        const std::size_t L = N % K;                                          \
+        for (std::size_t i = 0; i != M; ++i, r += K)                          \
+            internal::name##_distribution_impl<K>(rng, K, r, p1, p2, p3, p4); \
+        internal::name##_distribution_impl<K>(rng, L, r, p1, p2, p3, p4);     \
+    }
+
 #define VSMC_DEFINE_RNG_DISTRIBUTION_RAND_0(Name, name, T)                    \
     template <typename T, typename RNGType>                                   \
     inline void name##_distribution(RNGType &rng, std::size_t N, T *r,        \
@@ -549,6 +943,37 @@
         const typename Name##Distribution<RealType>::param_type &param)       \
     {                                                                         \
         name##_distribution(rng, N, r, param.p1(), param.p2());               \
+    }                                                                         \
+                                                                              \
+    template <typename RealType, typename RNGType>                            \
+    inline void rand(RNGType &rng, Name##Distribution<RealType> &dist,        \
+        std::size_t N, RealType *r)                                           \
+    {                                                                         \
+        dist(rng, N, r);                                                      \
+    }
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_RAND_3(Name, name, p1, p2, p3)           \
+    template <typename RealType, typename RNGType>                            \
+    inline void name##_distribution(RNGType &rng, std::size_t N, RealType *r, \
+        const typename Name##Distribution<RealType>::param_type &param)       \
+    {                                                                         \
+        name##_distribution(rng, N, r, param.p1(), param.p2(), param.p3());   \
+    }                                                                         \
+                                                                              \
+    template <typename RealType, typename RNGType>                            \
+    inline void rand(RNGType &rng, Name##Distribution<RealType> &dist,        \
+        std::size_t N, RealType *r)                                           \
+    {                                                                         \
+        dist(rng, N, r);                                                      \
+    }
+
+#define VSMC_DEFINE_RNG_DISTRIBUTION_RAND_4(Name, name, p1, p2, p3, p4)       \
+    template <typename RealType, typename RNGType>                            \
+    inline void name##_distribution(RNGType &rng, std::size_t N, RealType *r, \
+        const typename Name##Distribution<RealType>::param_type &param)       \
+    {                                                                         \
+        name##_distribution(                                                  \
+            rng, N, r, param.p1(), param.p2(), param.p3, p4());               \
     }                                                                         \
                                                                               \
     template <typename RealType, typename RNGType>                            \
