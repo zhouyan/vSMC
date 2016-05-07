@@ -75,7 +75,7 @@ sub table
 
     my $table;
     $table .= '\tbfigures' . "\n";
-    $table .= '\begin{tabularx}{\textwidth}{p{2in}YYYYYY}' . "\n";
+    $table .= '\begin{tabularx}{\textwidth}{p{2in}RRRRRR}' . "\n";
     $table .= ' ' x 2 . '\toprule' . "\n";
     $table .= ' ' x 2;
     $table .= '& \multicolumn{3}{c}{Loop} ';

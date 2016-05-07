@@ -61,7 +61,7 @@ while (my ($basename, $name) = each %distribution) {
 
     my $table;
     $table .= '\tbfigures' . "\n";
-    $table .= '\begin{tabularx}{\textwidth}{p{2in}YYYY}' . "\n";
+    $table .= '\begin{tabularx}{\textwidth}{p{2in}RRRR}' . "\n";
     $table .= ' ' x 2 . '\toprule' . "\n";
     $table .= ' ' x 2;
     $table .= 'Distribution & \std/Boost & \vsmc & \verb|rand| & \mkl';

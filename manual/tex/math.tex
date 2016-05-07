@@ -11,7 +11,7 @@ has been standardized for years, it is not universally available. If the
 required functions defined, then one should define the configuration macro
 \verb|VSMC_HAS_CBLAS| to zero. By default, this macro is defined to one if
 either \verb|VSMC_USE_MKL_CBLAS| or \verb|VSMC_USE_ACCELERATE| (see
-table~\ref{tab:Configuration macros for feature usability}) are non-zero. The
+Table~\ref{tab:Configuration macros for feature usability}) are non-zero. The
 user can also manually define this macro to zero if it is undesirable to
 include the C interface header.
 
@@ -39,10 +39,10 @@ precision, one can use the following,
 The compiler will evaluate these values at compile-time and thus there is no
 performance difference from hard-coding the constants in the program, while the
 readability is improved. All defined constants are listed in
-table~\ref{tab:Mathematical constants}.
+Table~\ref{tab:Mathematical constants}.
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{XXXX}
+  \begin{tabularx}{\textwidth}{LLLL}
     \toprule
     Function & Value & Function & Value \\
     \midrule
@@ -120,13 +120,13 @@ performs addition for vectors. It is equivalent to
   for (std::size_t i = 0; i != n; ++i)
       y[i] = a[i] + b[i];
 \end{Verbatim}
-The functions defined are listed in table~\ref{tab:Arithmetic functions}
+The functions defined are listed in Table~\ref{tab:Arithmetic functions}
 to~\ref{tab:Special functions}. For each function, the first parameter is
 always the length of the vector, and the last is a pointer to the output vector
 (except \verb|sincos| which has two output parameters). For all functions, the
 output is always a vector. If there are more than one input parameters, then
 some of them, but not all, can be scalars. For example, for the function call
-\verb|fma(n, a, b, c, y)| in table~\ref{tab:Arithmetic functions}, the input
+\verb|fma(n, a, b, c, y)| in Table~\ref{tab:Arithmetic functions}, the input
 parameters are \verb|a|, \verb|b|, and \verb|c|. Some of them, not all, can be
 scalars instead of pointers to vectors. The output parameter \verb|y| has to be
 a pointer to a vector. Therefore, there are $2^3 - 1$ versions of this function
@@ -153,7 +153,7 @@ introduced later (section~\ref{sec:Vectorized random number generating})
 performance heavily depends on these functions.
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{XX}
+  \begin{tabularx}{\textwidth}{LL}
     \toprule
     Function & Operation \\
     \midrule
@@ -170,7 +170,7 @@ performance heavily depends on these functions.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{XX}
+  \begin{tabularx}{\textwidth}{LL}
     \toprule
     Function & Operation \\
     \midrule
@@ -191,7 +191,7 @@ performance heavily depends on these functions.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{XX}
+  \begin{tabularx}{\textwidth}{LL}
     \toprule
     Function & Operation \\
     \midrule
@@ -210,7 +210,7 @@ performance heavily depends on these functions.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{XX}
+  \begin{tabularx}{\textwidth}{LL}
     \toprule
     Function & Operation \\
     \midrule
@@ -230,7 +230,7 @@ performance heavily depends on these functions.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{XX}
+  \begin{tabularx}{\textwidth}{LL}
     \toprule
     Function & Operation \\
     \midrule
@@ -247,7 +247,7 @@ performance heavily depends on these functions.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{XX}
+  \begin{tabularx}{\textwidth}{LL}
     \toprule
     Function & Operation \\
     \midrule

@@ -134,7 +134,7 @@ use \mkl routines. The four cases are labeled ``\std/Boost'', ``\vsmc'',
 \label{sec:Counter-based RNG}
 
 The standard library provides a set of \rng engines (performance data in
-table~\ref{tab:Performance of standard library RNG}). Unfortunately, none of
+Table~\ref{tab:Performance of standard library RNG}). Unfortunately, none of
 them are suitable for parallel computing without considerable efforts. To
 illustrate the problem, consider the situation where there are two threads that
 need to generate random numbers. And thus two \rng engine instances need to be
@@ -209,7 +209,7 @@ internally. The only difference is that \verb|operator()| of the former
 returns 32 or those 256 bits each time it is executed, while the later returns
 64 bits.
 
-All \rng{}s in table~\ref{tab:Counter-based RNG} are actually type aliases.
+All \rng{}s in Table~\ref{tab:Counter-based RNG} are actually type aliases.
 More generally the library defines the following class template as the
 interface,
 \begin{Verbatim}
@@ -221,12 +221,12 @@ is the class that actually implement the algorithm. See the reference manual
 for details of the generator type. For most users, those implemented in the
 library are sufficient. They are introduced in the next few sections. A few
 configuration macros of these generators are listed in
-table~\ref{tab:Configuration macros for counter-based RNG} and will be referred
+Table~\ref{tab:Configuration macros for counter-based RNG} and will be referred
 to later.
 
 \begin{table}
   \tbfigures
-  \begin{tabularx}{\textwidth}{p{3in}YY}
+  \begin{tabularx}{\textwidth}{p{3in}RR}
     \toprule
     Class & Counter bits & Key bits \\
     \midrule
@@ -254,7 +254,7 @@ to later.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{XX}
+  \begin{tabularx}{\textwidth}{LL}
     \toprule
     Macro & Default \\
     \midrule
@@ -389,7 +389,7 @@ aliases are defined for convenience. For example,
 The engine \verb|ARS| is the library's default \rng if \aesni instructions are
 supported. Aliases for block sizes 1, 2, 4 and 8 are defined for all four
 algorithms, as well as both 32- and 64-bits versions. These aliases are listed
-in table~\ref{tab:Counter-based RNG}. The performance of these engines depends
+in Table~\ref{tab:Counter-based RNG}. The performance of these engines depends
 on a few factors, such as \cpu types, compilers, operating systems, etc. See
 tables~\ref{tab:Performance of AES128Engine} to~\ref{tab:Performance of
   ARSEngine} for performance data. In any case, the performance is good enough
@@ -444,7 +444,7 @@ The corresponding \rng engine is,
       CounterEngine<ResultType, PhiloxGenerator<T, K, Rounds, Constants>>;
 \end{Verbatim}
 The default vector length and the number of rounds can be changed by
-configuration macros listed in table~\ref{tab:Configuration macros for
+configuration macros listed in Table~\ref{tab:Configuration macros for
   counter-based RNG}. There is no limit on the template parameter \verb|K| or
 \verb|Rounds|, nor any limitation on \verb|T| except that it has to be an
 unsigned integer type. See \textcite{Salmon:2011um} on the most general form of
@@ -465,12 +465,12 @@ or \verb|4|. These four engines are defined as type aliases for convenience,
   using Philox4x64Engine = PhiloxEngine<ResultType, std::uint64_t, 4>;
 \end{Verbatim}
 Type aliases for 32- and 64-bits \verb|ResultType| are also defined, as listed
-in table~\ref{tab:Counter-based RNG}. To use the engine with \verb|K| taking
+in Table~\ref{tab:Counter-based RNG}. To use the engine with \verb|K| taking
 values larger than four, or \verb|T| being unsigned integer type with bits
 other than 32 or 64, one needs to provide a suitable trait class,
 \verb|Constant|. It is similar to that of \verb|ARSEngine|. See the reference
 manual of \verb|PhiloxConstants| for an example of how to define it. The
-performance data is in table~\ref{tab:Performance of PhiloxEngine}.
+performance data is in Table~\ref{tab:Performance of PhiloxEngine}.
 
 \begin{table}
   \input{tab/rng_engine_philox}%
@@ -499,7 +499,7 @@ The corresponding \rng engine is,
       CounterEngine<ResultType, ThreefryGenerator<T, K, Rounds, Constants>>;
 \end{Verbatim}
 The default vector length and the number of rounds can be changed by
-configuration macros listed in table~\ref{tab:Configuration macros for
+configuration macros listed in Table~\ref{tab:Configuration macros for
   counter-based RNG}. Similar to the implementation of the Philox algorithm,
 there is no limit on the template parameter \verb|K| or \verb|Rounds| as long
 as a suitable trait class \verb|Constant| is provided. The library provides
@@ -530,8 +530,8 @@ convenience,
   using Threefry16x64Engine = ThreefryEngine<ResultType, std::uint64_t, 16>;
 \end{Verbatim}
 Type aliases for 32- and 64-bits \verb|ResultType| are also defined, as listed
-in table~\ref{tab:Counter-based RNG}. The performance data is in
-table~\ref{tab:Performance of ThreefryEngine}.
+in Table~\ref{tab:Counter-based RNG}. The performance data is in
+Table~\ref{tab:Performance of ThreefryEngine}.
 
 \begin{table}
   \input{tab/rng_engine_threefry}%
@@ -545,12 +545,12 @@ table~\ref{tab:Performance of ThreefryEngine}.
 Note that, not all \rng{}s implemented by the library is available on all
 platforms. The library also defines two type aliases \verb|RNG| and
 \verb|RNG_64|, which are one of the \rng{}s listed in
-table~\ref{tab:Counter-based RNG}. The preference is in the order listed in
-table~\ref{tab:Default RNG}. The user can define the configuration macro
+Table~\ref{tab:Counter-based RNG}. The preference is in the order listed in
+Table~\ref{tab:Default RNG}. The user can define the configuration macro
 \verb|VSMC_RNG_TYPE| to override the choice made by the library.
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{XXX}
+  \begin{tabularx}{\textwidth}{LLL}
     \toprule
     Alias  & Class & Availability \\
     \midrule
@@ -629,7 +629,7 @@ configuration macro \verb|VSMC_RNG_RDRAND_NTRIAL_MAX|. A value of zero, the
 default, means the number of trials is unlimited. If it is a positive number,
 and if after the specified number of trials no random integer is return by the
 \rdrand instruction, zero is returned. The performance data is in
-table~\ref{tab:Performance of non-deterministic RNG}.
+Table~\ref{tab:Performance of non-deterministic RNG}.
 
 \begin{table}
   \input{tab/rng_engine_rdrand}%
@@ -642,15 +642,15 @@ table~\ref{tab:Performance of non-deterministic RNG}.
 
 The \mkl library provides some high performance \rng{}s. The library implements
 a wrapper class \verb|MKLEngine| that makes them accessible as \cppoo engines.
-They are listed in table~\ref{tab:MKL RNG}. Note that, \mkl{} \rng{}s perform
+They are listed in Table~\ref{tab:MKL RNG}. Note that, \mkl{} \rng{}s perform
 the best when they are used to generate vectors of random numbers. These
 wrappers use a buffer to store such vectors. And thus they have much larger
 state space than usual \rng{}s. Each \rng engines output by default 32-bits
 integers. Similar to the counter-based \rng{}s, 64-bits variants are also
-defined. The performance data is in table~\ref{tab:Performance of MKL RNG}.
+defined. The performance data is in Table~\ref{tab:Performance of MKL RNG}.
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{XX}
+  \begin{tabularx}{\textwidth}{LL}
     \toprule
     Class & \mkl \brng \\
     \midrule
@@ -813,7 +813,7 @@ All continuous distributions are built upon the standard uniform distribution.
 And thus the performance and quality of the algorithm transferring random
 integers to random floating point numbers on the set $[0, 1]$ are of critical
 importance. The library provides five distributions, listed in
-table~\ref{tab:Standard uniform distributions}. They are all class template
+Table~\ref{tab:Standard uniform distributions}. They are all class template
 with a single template type parameter \verb|RealType|, which is the floating
 point result type. For each distribution, the random integers produced by
 \rng{}s are transferred to 32- or 64-bits intermediate random integers through
@@ -821,14 +821,14 @@ point result type. For each distribution, the random integers produced by
 numbers. The integer type depends on \verb|RealType|, the range of the integers
 produced by the \rng{}, $R$, and the configuration macros
 \verb|VSMC_RNG_U01_USE_64BITS_DOUBLE|. The exact relations are listed in
-table~\ref{tab:Intermediate integer types of standard uniform distributions}.
+Table~\ref{tab:Intermediate integer types of standard uniform distributions}.
 In the remaining of this section, let $W$ be the number of bits of the
 intermediate random integers, and $M$ be the number of significant bits
 (including the implicit one) of \verb|RealType|. We also denote the input
 random integers as $U$ and the output random real numbers as $X$.
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{XX}
+  \begin{tabularx}{\textwidth}{LL}
     \toprule
     Distribution & Support \\
     \midrule
@@ -844,7 +844,7 @@ random integers as $U$ and the output random real numbers as $X$.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{XlX}
+  \begin{tabularx}{\textwidth}{LlL}
     \toprule
     \verb|RealType| & Conditions & Integer type \\
     \midrule
@@ -961,7 +961,7 @@ earlier.
 
 Table~\ref{tab:Distributions using the inverse method} lists all the
 distributions implemented with the inverse method. The performance data of
-these distributions is in table~\ref{tab:Performance of distributions using the
+these distributions is in Table~\ref{tab:Performance of distributions using the
   inverse method}. Note that, in this and other tables in the remaining of this
 section, we shortened the class name for brevity. For example, in the table the
 Cauchy distribution is listed as \verb|Cauchy| while the full declaration of
@@ -972,7 +972,7 @@ the class template is,
 \end{Verbatim}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{lllX}
+  \begin{tabularx}{\textwidth}{lllL}
     \toprule
     Distribution & Parameters & Support & \cdf \\
     \midrule
@@ -1032,7 +1032,7 @@ and the Levy distribution, $X = a + b / Z^2$,
   template <typename RealType>
   class LevyDistribution;
 \end{Verbatim}
-The performance data of these distributions is in table~\ref{tab:Performance of
+The performance data of these distributions is in Table~\ref{tab:Performance of
   Normal and related distributions}.
 
 \begin{table}
@@ -1148,7 +1148,7 @@ $\alpha < 1$, $\beta < 1$ and $D \le 0$, then Jöhnk's method
 switching algorithms in \textcite{Atkinson:1979es} is used. Note that, there is
 no vectorized implementation at the moment for the switching algorithms. In
 other cases, the vectorized generating shall provide considerable speedup. The
-performance data is in table~\ref{tab:Performance of Beta distribution}
+performance data is in Table~\ref{tab:Performance of Beta distribution}
 
 \begin{table}
   \input{tab/rng_distribution_beta}%

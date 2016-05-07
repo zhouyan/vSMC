@@ -34,7 +34,7 @@ fails to allocate memory. In any other case, including zero input size, it
 shall return a reachable non-null pointer. The method \verb|aligned_free| shall
 behave similar to \verb|std::free|. It shall be able to handle a null pointer
 as its input. The library provides a few implementations, listed in
-table~\ref{tab:Aligned memory allocation}. In addition, a type alias
+Table~\ref{tab:Aligned memory allocation}. In addition, a type alias
 \verb|AlignedMemory| is defined to be one of the class listed in the table,
 depending on the availability of those classes, with preference in the same
 order as they are listed. The user can define the configuration macro
@@ -56,7 +56,7 @@ defined for convenience,
 \end{Verbatim}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{lXX}
+  \begin{tabularx}{\textwidth}{lLL}
     \toprule
     Class & Implementation & Availability \\
     \midrule
@@ -204,7 +204,7 @@ implementation of the simple particle filter example in section~\ref{sec:A
 OpenCL pointers.
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{XX}
+  \begin{tabularx}{\textwidth}{LL}
     \toprule
     Class & OpenCL pointer type \\
     \midrule

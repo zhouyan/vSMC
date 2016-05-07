@@ -2,8 +2,6 @@
 
 all :
 	cd prg; ./make.sh pf.pdf
-	cd tab; ./rng_distribution.pl
-	cd tab; ./rng_engine.pl
 	latexmk -silent -f manual.tex >/dev/null
 
 clean:
