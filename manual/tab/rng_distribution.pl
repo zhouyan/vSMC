@@ -4,12 +4,12 @@ use v5.16;
 
 do 'tab.pl';
 
-my @inverse = qw(Cauchy Exponential ExtremeValue Laplace Logistic Pareto
-Rayleigh UniformReal Weibull);
+my @inverse = qw(Arcsine Cauchy Exponential ExtremeValue Laplace Logistic
+Pareto Rayleigh UniformReal Weibull);
 
 my @normal = qw(Normal Lognormal Levy);
 
-my @nostd = qw(Logistic Pareto Rayleigh Levy);
+my @nostd = qw(Arcsine, Logistic Pareto Rayleigh Levy);
 
 my %distribution;
 my %cpB;

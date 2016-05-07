@@ -45,7 +45,12 @@
         option.add("N", "Number of samples in each run", &N, N);              \
         option.add("M", "Number of repetitions", &M, M);                      \
         option.process(argc, argv);                                           \
+        if (option.count("help"))                                             \
+            return 0;                                                         \
+                                                                              \
         rng_##prg(N, M);                                                      \
+                                                                              \
+        return 0;                                                             \
     }
 
 template <typename>

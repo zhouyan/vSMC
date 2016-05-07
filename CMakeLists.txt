@@ -61,36 +61,24 @@ OPTION(VSMC_ENABLE_LIBRARY "Enable building of library" ON)
 OPTION(VSMC_ENABLE_EXAMPLE "Enable building of example" ON)
 
 ##############################################################################
-# Configuration files
-##############################################################################
-
-FILE(READ ${PROJECT_SOURCE_DIR}/README.md README)
-FILE(READ ${PROJECT_SOURCE_DIR}/NEWS.md NEWS)
-SET(DOC_SOURCE  ${PROJECT_SOURCE_DIR}/doc)
-SET(DOC_INCLUDE ${PROJECT_SOURCE_DIR}/include)
-CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/Doxyfile.in
-    ${PROJECT_BINARY_DIR}/Doxyfile)
-CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/main.md.in
-    ${PROJECT_SOURCE_DIR}/doc/main.md)
-CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/news.md.in
-    ${PROJECT_SOURCE_DIR}/doc/news.md)
-
-##############################################################################
 # Documentations
 ##############################################################################
 
 INCLUDE(FindDoxygen)
-FILE(GLOB_RECURSE DOC_SOURCE_FILES      ${PROJECT_SOURCE_DIR}/doc/*.*)
-FILE(GLOB_RECURSE DOC_INCLUDE_FILES_C   ${PROJECT_SOURCE_DIR}/include/*.h)
-FILE(GLOB_RECURSE DOC_INCLUDE_FILES_CPP ${PROJECT_SOURCE_DIR}/include/*.hpp)
 IF(DOXYGEN_FOUND)
-    ADD_CUSTOM_COMMAND(
-        OUTPUT  ${PROJECT_BINARY_DIR}/doc
-        DEPENDS ${PROJECT_BINARY_DIR}/Doxyfile
-        ${DOC_SOURCE_FILES} ${DOC_INCLUDE_FILES_C} ${DOC_INCLUDE_FILES_CPP}
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-        COMMAND ${DOXYGEN_EXECUTABLE} ARGS Doxyfile)
-    ADD_CUSTOM_TARGET(docs DEPENDS ${PROJECT_BINARY_DIR}/doc)
+    FILE(READ ${PROJECT_SOURCE_DIR}/README.md README)
+    FILE(READ ${PROJECT_SOURCE_DIR}/NEWS.md NEWS)
+    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/Doxyfile.in
+        ${PROJECT_BINARY_DIR}/config/Doxyfile)
+    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/main.md.in
+        ${PROJECT_BINARY_DIR}/config/main.md)
+    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/news.md.in
+        ${PROJECT_BINARY_DIR}/config/news.md)
+    ADD_CUSTOM_TARGET(doxygen
+        DEPENDS ${PROJECT_BINARY_DIR}/config/Doxyfile
+        COMMAND ${DOXYGEN_EXECUTABLE} config/Doxyfile
+        COMMENT "Generating doxygen"
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 ENDIF(DOXYGEN_FOUND)
 
 ##############################################################################
@@ -167,5 +155,5 @@ IF (NOT VSMC_GOOD_COMPILER)
     MESSAGE(STATUS "known issues with compilers")
     MESSAGE (STATUS
         "C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
-MESSAGE(STATUS "=======================================================")
+    MESSAGE(STATUS "=======================================================")
 ENDIF (NOT VSMC_GOOD_COMPILER)
