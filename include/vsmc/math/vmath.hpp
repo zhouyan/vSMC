@@ -36,48 +36,10 @@
 #include <vsmc/math/constants.hpp>
 
 #if VSMC_USE_MKL_VML
-#include <mkl.h>
+#include <mkl_vml.h>
+#elif VSMC_USE_ACCELERATE
+#include <Accelerate/Accelerate.h>
 #endif
-
-#define VSMC_DEFINE_MATH_VMATH_1(func, name)                                  \
-    template <typename T>                                                     \
-    inline void name(std::size_t n, const T *a, T *y)                         \
-    {                                                                         \
-        for (std::size_t i = 0; i != n; ++i)                                  \
-            y[i] = func(a[i]);                                                \
-    }
-
-#define VSMC_DEFINE_MATH_VMATH_2(func, name)                                  \
-    template <typename T>                                                     \
-    inline void name(std::size_t n, const T *a, const T *b, T *y)             \
-    {                                                                         \
-        for (std::size_t i = 0; i != n; ++i)                                  \
-            y[i] = func(a[i], b[i]);                                          \
-    }
-
-#define VSMC_DEFINE_MATH_VMATH_B(op, name)                                    \
-    template <typename T>                                                     \
-    inline void name(std::size_t n, const T *a, const T *b, T *y)             \
-    {                                                                         \
-        for (std::size_t i = 0; i != n; ++i)                                  \
-            y[i] = a[i] op b[i];                                              \
-    }
-
-#define VSMC_DEFINE_MATH_VMATH_VS(op, name)                                   \
-    template <typename T>                                                     \
-    inline void name(std::size_t n, const T *a, T b, T *y)                    \
-    {                                                                         \
-        for (std::size_t i = 0; i != n; ++i)                                  \
-            y[i] = a[i] op b;                                                 \
-    }
-
-#define VSMC_DEFINE_MATH_VMATH_SV(op, name)                                   \
-    template <typename T>                                                     \
-    inline void name(std::size_t n, T a, const T *b, T *y)                    \
-    {                                                                         \
-        for (std::size_t i = 0; i != n; ++i)                                  \
-            y[i] = a op b[i];                                                 \
-    }
 
 #if VSMC_USE_MKL_VML
 
@@ -190,9 +152,143 @@ VSMC_DEFINE_MATH_VMATH_VML_1(CdfNormInv, cdfnorminv)
 VSMC_DEFINE_MATH_VMATH_VML_1(LGamma, lgamma)
 VSMC_DEFINE_MATH_VMATH_VML_1(TGamma, tgamm)
 
+VSMC_DEFINE_MATH_VMATH_VML_1(Floor, floor)
+VSMC_DEFINE_MATH_VMATH_VML_1(Ceil, ceil)
+VSMC_DEFINE_MATH_VMATH_VML_1(Trunc, trunc)
+VSMC_DEFINE_MATH_VMATH_VML_1(Round, round)
+inline void modf(std::size_t n, const float *a, float *y, float *z)
+{
+    internal::size_check<MKL_INT>(n, "modf");
+    ::vsModf(static_cast<MKL_INT>(n), a, y, z);
+}
+inline void modf(std::size_t n, const double *a, double *y, double *z)
+{
+    internal::size_check<MKL_INT>(n, "modf");
+    ::vdModf(static_cast<MKL_INT>(n), a, y, z);
+}
+
+} // namespace vsmc
+
+#elif VSMC_USE_ACCELERATE
+
+#define VSMC_DEFINE_MATH_VMATH_VFORCE_1(func, name)                           \
+    inline void name(std::size_t n, const float *a, float *y)                 \
+    {                                                                         \
+        internal::size_check<int>(n, #name);                                  \
+        int m = static_cast<int>(n);                                          \
+        ::vv##func##f(y, a, &m);                                              \
+    }                                                                         \
+    inline void name(std::size_t n, const double *a, double *y)               \
+    {                                                                         \
+        internal::size_check<int>(n, #name);                                  \
+        int m = static_cast<int>(n);                                          \
+        ::vv##func(y, a, &m);                                                 \
+    }
+
+#define VSMC_DEFINE_MATH_VMATH_VFORCE_2(func, name)                           \
+    inline void name(std::size_t n, const float *a, const float *b, float *y) \
+    {                                                                         \
+        internal::size_check<int>(n, #name);                                  \
+        int m = static_cast<int>(n);                                          \
+        ::vv##func##f(y, a, b, &m);                                           \
+    }                                                                         \
+    inline void name(                                                         \
+        std::size_t n, const double *a, const double *b, double *y)           \
+    {                                                                         \
+        internal::size_check<int>(n, #name);                                  \
+        int m = static_cast<int>(n);                                          \
+        ::vv##func(y, a, b, &m);                                              \
+    }
+
+namespace vsmc
+{
+
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(fabs, abs)
+
+VSMC_DEFINE_MATH_VMATH_VFORCE_2(div, div)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(sqrt, sqrt)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(cbrt, cbrt)
+VSMC_DEFINE_MATH_VMATH_VFORCE_2(pow, pow)
+
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(exp, exp)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(expm1, expm1)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(log, log)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(log10, log10)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(log1p, log1p)
+
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(cos, cos)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(sin, sin)
+inline void sincos(std::size_t n, const float *a, float *y, float *z)
+{
+    internal::size_check<int>(n, "sincos");
+    const int m = static_cast<int>(n);
+    ::vvsincosf(y, z, a, &m);
+}
+inline void sincos(std::size_t n, const double *a, double *y, double *z)
+{
+    internal::size_check<int>(n, "sincos");
+    const int m = static_cast<int>(n);
+    ::vvsincos(y, z, a, &m);
+}
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(tan, tan)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(acos, acos)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(asin, asin)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(atan, atan)
+VSMC_DEFINE_MATH_VMATH_VFORCE_2(atan2, atan2)
+
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(cosh, cosh)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(sinh, sinh)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(tanh, tanh)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(acosh, acosh)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(asinh, asinh)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(atanh, atanh)
+
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(floor, floor)
+VSMC_DEFINE_MATH_VMATH_VFORCE_1(ceil, ceil)
+
 } // namespace vsmc
 
 #endif // VSMC_USE_MKL_VML
+
+#define VSMC_DEFINE_MATH_VMATH_1(func, name)                                  \
+    template <typename T>                                                     \
+    inline void name(std::size_t n, const T *a, T *y)                         \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = func(a[i]);                                                \
+    }
+
+#define VSMC_DEFINE_MATH_VMATH_2(func, name)                                  \
+    template <typename T>                                                     \
+    inline void name(std::size_t n, const T *a, const T *b, T *y)             \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = func(a[i], b[i]);                                          \
+    }
+
+#define VSMC_DEFINE_MATH_VMATH_B(op, name)                                    \
+    template <typename T>                                                     \
+    inline void name(std::size_t n, const T *a, const T *b, T *y)             \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = a[i] op b[i];                                              \
+    }
+
+#define VSMC_DEFINE_MATH_VMATH_VS(op, name)                                   \
+    template <typename T>                                                     \
+    inline void name(std::size_t n, const T *a, T b, T *y)                    \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = a[i] op b;                                                 \
+    }
+
+#define VSMC_DEFINE_MATH_VMATH_SV(op, name)                                   \
+    template <typename T>                                                     \
+    inline void name(std::size_t n, T a, const T *b, T *y)                    \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = a op b[i];                                                 \
+    }
 
 namespace vsmc
 {
@@ -595,6 +691,27 @@ VSMC_DEFINE_MATH_VMATH_1(std::lgamma, lgamma)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \Gamma(a_i)\f$
 VSMC_DEFINE_MATH_VMATH_1(std::tgamma, tgamma)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \lfloor a_i \rfloor\f$
+VSMC_DEFINE_MATH_VMATH_1(std::floor, floor)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \lceil a_i \rceil\f$
+VSMC_DEFINE_MATH_VMATH_1(std::ceil, ceil)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = \mathrm{sgn}(a_i})\lfloor |a_i| \rfoor\f$
+VSMC_DEFINE_MATH_VMATH_1(std::trunc, trunc)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute rounding
+VSMC_DEFINE_MATH_VMATH_1(std::round, round)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute integeral and fraction parts
+template <typename T>
+inline void modf(std::size_t n, const T *a, T *y, T *z)
+{
+    for (std::size_t i = 0; i != n; ++i, ++a, ++y, ++z)
+        *z = std::modf(*a, y);
+}
 
 /// @}
 // vSpecial

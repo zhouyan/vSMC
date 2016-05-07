@@ -35,7 +35,8 @@
 #include <vsmc/internal/common.hpp>
 
 #if VSMC_HAS_MKL
-#include <mkl.h>
+#include <mkl_version.h>
+#include <mkl_vsl.h>
 #endif
 
 #define VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(flag, Name)                \
