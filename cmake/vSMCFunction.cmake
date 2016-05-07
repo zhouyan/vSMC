@@ -91,7 +91,7 @@ FUNCTION(VSMC_ADD_TEST basename testname)
     ADD_CUSTOM_TARGET(${basename}_${testname}-check
         DEPENDS ${basename}_${testname} ${basename}-files
         COMMAND ${basename}_${testname}
-        COMMENT "Running ${basename}_${testname}"
+        COMMENT "Checking ${basename}_${testname}"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
     ADD_DEPENDENCIES(${basename}-check ${basename}_${testname}-check)
 ENDFUNCTION(VSMC_ADD_TEST)
