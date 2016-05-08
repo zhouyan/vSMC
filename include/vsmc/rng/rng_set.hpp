@@ -35,7 +35,8 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/engine.hpp>
 #include <vsmc/rng/seed.hpp>
-#if VSMC_USE_TBB_TLS
+
+#if VSMC_HAS_TBB
 #include <tbb/combinable.h>
 #endif
 
@@ -112,7 +113,7 @@ class RNGSetVector
     Vector<rng_type> rng_;
 }; // class RNGSetVector
 
-#if VSMC_USE_TBB_TLS
+#if VSMC_HAS_TBB
 
 /// \brief Thread-local storage RNG set using tbb::combinable
 /// \ingroup RNG
@@ -146,7 +147,7 @@ class RNGSetTBB
     ::tbb::combinable<rng_type> rng_;
 }; // class RNGSetTBB
 
-#endif // VSMC_USE_TBB_TLS
+#endif // VSMC_HAS_TBB
 
 /// \brief Default RNG set
 /// \ingroup RNG
