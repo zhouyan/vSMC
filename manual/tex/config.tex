@@ -1,10 +1,9 @@
 \chapter{Configuration macros}
 \label{chap:Configuration macros}
 
-The library has a few configuration macros. All macros have a default value if
+The library has a few configuration macros. All macros have default values if
 left undefined, and can be overwritten by defining them with proper values
-before including any of the library headers. In this appendix, we detail all
-the configuration macros used by the library.
+before including any of the library headers.
 
 There are three types of configuration macros. The first type has a prefix
 \verb|VSMC_HAS_|. These macros specify a certain feature or third-party library
@@ -12,7 +11,8 @@ is available. The second type has a prefix \verb|VSMC_USE_|. These macros
 specify that a certain feature or third-party library can be used, if
 available. These two kinds of macros shall only be defined to integral values,
 with zero as false and all other values as true. The third type can be defined
-to arbitrary, and usually affects implementation choices made by the library.
+to arbitrary contents, and usually affect implementation choices made by the
+library.
 
 A concrete example of the relations among these three types of configuration
 macros is the memory allocation functions used by the library. The details is
@@ -20,29 +20,278 @@ in section~\ref{sec:Aligned memory allocation}. In short, they library has
 three implementations for aligned memory allocation. The preferred method is to
 use the \verb|scalable_aligned_malloc| from \tbb. It is defined through a class
 called \verb|AlignedMemoryTBB|. This class is only defined if and only if
-\verb|VSMC_HAS_TBB| is defined to a non-zero, in which case, the runtime
-library \verb|tbbmalloc| will need to be linked as well (\verb|-ltbbmalloc| on
-\unix-alike systems). However, if it is desirable to define this class such
-that the user can use it with \stl containers, but it is undesirable for the
-library itself to use it everywhere, then one can further define the macro
-\verb|VSMC_USE_TBB_MALLOC| to zero. In this case, the class is still defined,
-but it will not be used by the library. Instead the system will now prefer
-operating system dependent memory allocation functions such as
-\verb|posix_memalign|. Now, suppose this is still undesirable, and one want to
-use a memory allocation library not directly supported by the library. In this
-case, one can implement a aligned memory class (see section~\ref{sec:Aligned
-  memory allocation} for details), say \verb|AlignedMemoryUser|. And then define
-the macro \verb|VSMC_ALIGNED_MEOMRY_TYPE| to this class.
+\verb|VSMC_HAS_TBB| is true, in which case the runtime library \verb|tbbmalloc|
+will need to be linked as well (\verb|-ltbbmalloc| on \unix-alike systems).
+However, if it is desirable to define this class such that the user can use it
+with \stl containers, but it is undesirable for the library itself to use it
+everywhere, then one can further define the macro \verb|VSMC_USE_TBB_MALLOC| to
+zero. In this case, the class is still defined, but it will not be used by the
+library. Instead the system will now prefer operating system dependent memory
+allocation functions such as \verb|posix_memalign|. Now, suppose this is still
+undesirable, and one want to use a memory allocation function not directly
+supported by the library. In this case, one can implement a aligned memory
+class (see section~\ref{sec:Aligned memory allocation} for details), and then
+define the macro \verb|VSMC_ALIGNED_MEOMRY_TYPE| to this class. For example,
+\begin{Verbatim}
+  class AlignedMemoryUsr
+  {
+      public:
+      static void *aligned_malloc(std::size_t n, std::size_t alignment);
+      static void aligned_free(void *ptr);
+  };
 
-In summary, the \verb|VSMC_HAS_| macro affects what will be \emph{defined}
-by the library. The \verb|VSMC_USE_| macro affects what will be \emph{used}
-by the library. And other macros give direct control of the library's
-implementations. In most situations, it is sufficient to use the first two to
-configure the features of the library. The third kind is for more advanced
-users.
+  #define VSMC_ALIGNED_MEMORY_TYPE ::AlignedMemoryUsr
+  // Include vSMC headers
+\end{Verbatim}
 
-\section{System dependent macros}
-\label{sec:System dependent macros}
+In summary, the \verb|VSMC_HAS_| macros affect what will be \emph{defined} by
+the library. The \verb|VSMC_USE_| macros affect what will be \emph{used} by the
+library. And other macros give direct control of the library's implementations.
+In most situations, it is sufficient to use the first two to configure the
+features of the library. The third kind is for more advanced users. Below we
+details all configuration macros.
+
+\section{Platform characteristics}
+\label{sec:Platform characteristics}
 
 The following macros have default values that depend on the compiler, operating
-system and \cpu types.
+system or \cpu types. Their default values are therefore platform dependent.
+The library tries its best to determine the correct values. But in the case of
+errors, define these macros to override the default values.
+
+\paragraph{\texttt{VSMC\_HAS\_X86}} Determine if the \cpu is an x86 compatible.
+In few rare occasions the library will use features known to exist on x86
+\cpu{}s, for example the little-endian memory layout, etc.
+
+\paragraph{\texttt{VSMC\_HAS\_X86\_64}} Determine if the \cpu is x86-64
+compatible.
+
+\paragraph{\texttt{VSMC\_HAS\_POSIX}} Determine if the operating system is
+\posix compatible.
+
+\paragraph{\texttt{VSMC\_HAS\_AES\_NI}} Determine if the \aesni instructions
+are supported by the \cpu and the compiler. The \rng{}s based on these
+instructions in section~\ref{sub:AES-NI instructions based RNG} will are
+defined if this macro is true. One can include the following header directly to
+bypass this check,
+\begin{Verbatim}
+  #include <vsmc/rng/aes_ni.hpp>
+\end{Verbatim}
+
+\paragraph{\texttt{VSMC\_HAS\_RDRAND}} Determine if the \rdrand instructions
+are supported by the \cpu and the compiler. The \rng{}s based on these
+instructions in section~\ref{sec:Non-deterministic RNG} are only defined if
+this macro is true. One can include the following header directly to bypass
+this check,
+\begin{Verbatim}
+  #include <vsmc/rng/rdrand.hpp>
+\end{Verbatim}
+
+\paragraph{\texttt{VSMC\_HAS\_INT128}} Determine if the compiler support
+128-bits integer types.
+
+\paragraph{\texttt{VSMC\_INTE128}} The type of the 128-bits integer. Only have
+effects when \verb|VSMC_HAS_INT128| is true. The default is \verb|__int128|.
+
+\section{Third-party libraries}
+\label{sec:Third-party libraries}
+
+The following macros determine if certain third-party libraries are available.
+All macros with the prefix \verb|VSMC_HAS_| are define to \verb|0| by default.
+All macros with the prefix \verb|VSMC_USE_| are defined to \verb|1| if the
+corresponding \verb|VSMC_HAS_| macro is true. Otherwise it is defined to
+\verb|0|, unless stated otherwise.
+
+\paragraph{\texttt{VSMC\_HAS\_OMP}} Determine if OpenMP is supported.
+
+\paragraph{\texttt{VSMC\_USE\_OMP}} Allow the library to use OpenMP for
+parallelization. Currently this macro has no affect. The use of OpenMP for
+parallelization is explicitly through \verb|MoveOMP| etc.
+
+\paragraph{\texttt{VSMC\_HAS\_OPENCL}} Determine if OpenCL (version~1.2 or
+higher) is supported.
+
+\paragraph{\texttt{VSMC\_HAS\_HDF5}} Determine if the \hdf library is
+available. The functions in section~\ref{sec:Store objects in HDF5 format} are
+only defined if this macro is true. One can include the following header
+directly to bypass this check,
+\begin{Verbatim}
+  #include <vsmc/utility/hdf5.hpp>
+\end{Verbatim}
+
+\paragraph{\texttt{VSMC\_HAS\_TBB}} Determine if the \tbb library is available.
+The \verb|AlignedMemoryTBB| class in section~\ref{sec:Aligned memory
+  allocation} and the \verb|RNGSetTBB| class template in
+section~\ref{sec:Multiple RNG streams} are only defined if this macro is true.
+
+\paragraph{\texttt{VSMC\_USE\_TBB}} Allow the library to use the \tbb library
+for parallelization. Currently this macro has no affect. The use of \tbb for
+parallelization is explicitly through \verb|MoveTBB| etc.
+
+\paragraph{\texttt{VSMC\_USE\_TBB\_MALLOC}} Allow the library to use
+\verb|AlignedMemoryTBB| as the default memory allocation method.
+
+\paragraph{\texttt{VSMC\_USE\_TBB\_TLS}} Allow the library to use
+\verb|RNGSetTBB| as the default multiple \rng stream management method.
+
+\paragraph{\texttt{VSMC\_HAS\_MKL}} Determine if the \mkl library is available.
+The \rng{}s in section~\ref{sec:MKL RNG} are only defined if this macro is
+true. One can include the following header directly to bypass this check,
+\begin{Verbatim}
+  #include <vsmc/rng/mkl.hpp>
+\end{Verbatim}
+
+\paragraph{\texttt{VSMC\_USE\_MKL\_CBLAS}} Allow the library to use the
+\verb|mkl_cblas.h| header and assuming that corresponding runtime library will
+be linked for \blas support.
+
+\paragraph{\texttt{VSMC\_USE\_MKL\_VML}} Allow the library to accelerate the
+vector functions in section~\ref{sec:Vectorized operations} using the \vml
+component of \mkl.
+
+\paragraph{\texttt{VSMC\_USE\_MKL\_VSL}} Allow the library to use the \vsl
+component of \mkl.
+
+\paragraph{\texttt{VSMC\_USE\_ACCELERATE}} Allow the library to the Accelerate
+framework on Mac OS X for \blas support. The \verb|VSMC_USE_MKL_CBLAS| will
+take precedence over this macro. In addition, it also allows the library to use
+this framework to accelerate some vector functions in
+section~\ref{sec:Vectorized operations}. The \verb|VSMC_USE_MKL_VML| will take
+precedence over this macro for this purpose.
+
+\paragraph{\texttt{VSMC\_USE\_CBLAS}} Allow the library to the standard C
+interface of \blas. The default value is \verb|1| is either
+\verb|VSMC_USE_CBLAS| or \verb|VSMC_USE_ACCELERATE| is true. Otherwise the
+default value is zero. Manually define this macro to true if the \verb|cblas.h|
+header is available and a compatible runtime library is linked. When this macro
+is tested to be false, the library will declare the \blas Fortran routines in C
+itself (see below).
+
+\paragraph{\texttt{VSMC\_BLAS\_NAME} and
+  \texttt{VSMC\_BLAS\_NAME\_NO\_UNDERSCORE}} These two macros determine how
+shall the \blas Fortran routines be declared in C. The default behavior is to
+append an underscore to the function name. For example, \verb|dgemv| in Fortran
+becomes \verb|dgemv_| in C. If there should be no underscore, define the second
+macro. If the name mangling is more complicated, one can define the
+\verb|VSMC_BLAS_NAME| macro directly. For example,
+\begin{Verbatim}
+  #define VSMC_BLAS_NAME(x) _##x
+\end{Verbatim}
+These macros only have effects if \verb|VSMC_USE_CBLAS| is false.
+
+\paragraph{\texttt{VSMC\_BLAS\_INT}} The integer type of \blas routines. The
+default is \verb|MKL_INT| if \verb|VSMC_USE_CBLAS| and
+\verb|VSMC_USE_MKL_CBLAS| are both true. Otherwise it is \verb|int|. If the
+\blas interface use another integer type, such as the \ilp{}64 interface of
+some implementations on \lp{}64 platforms, then one should redefine this macro
+to the correct type.
+
+\section{RNG engines}
+\label{sec:RNG engines}
+
+Some configuration macros of counter-based \rng{}s are discussed in
+section~\ref{sec:Counter-based RNG}.
+
+\paragraph{\texttt{VSMC\_RNG\_TYPE}} The type of the alias \verb|RNG|. The
+default is \verb|ARS| if \verb|VSMC_HAS_AES_NI| is true. Otherwise, it is
+\verb|Threefry|.
+
+\paragraph{\texttt{VSMC\_RNG\_64\_TYPE}} The type of the alias \verb|RNG_64|.
+The default is \verb|ARS_64| if \verb|VSMC_HAS_AES_NI| is true. Otherwise, it
+is \verb|Threefry_64|.
+
+\paragraph{\texttt{VSMC\_RNG\_MINI\_TYPE}} The type of the alias
+\verb|RNGMini|.  The default is \verb|Philox2x32|.
+
+\paragraph{\texttt{VSMC\_RNG\_MINI\_64\_TYPE}} The type of the alias
+\verb|RNGMini_64|. The default is \verb|Philox2x32_64|.
+
+\paragraph{\texttt{VSMC\_RNG\_SET\_TYPE}} The type of the alias \verb|RNGSet|.
+The default is \verb|RNGSetTBB| if \verb|VSMC_USE_TBB_TLS| is true. Otherwise,
+it is \verb|RNGSetVector|. Note that, the two class templates have different
+default template argument. The class \verb|RNGSetVector<>| is the same as
+\verb|RNGSetVector<RNGMIni>| while the class \verb|RNGSetTBB<>| is the same as
+\verb|RNGSetTBB<RNG>|.
+
+\section{Memory allocation}
+\label{sec:Memory allocation}
+
+\paragraph{\texttt{VSMC\_ALIGNMENT}} The default alignment for scalar types,
+such as \verb|int|. More specifically, this affects types such that
+\verb|std::is_scalar<T>| true. The default is \verb|32|. This is sufficient for
+modern \simd operations. This will affect the memory allocated by
+\verb|Vector<T>| on the heap and \verb|Array<T>| on the stack. The value must
+be a power of two and positive.
+
+\paragraph{\texttt{VSMC\_ALIGNMENT\_MIN}} The minimum alignment for all types.
+The default is \verb|16|. The value must be a power of two and positive.
+
+\paragraph{\texttt{VSMC\_ALIGNED\_MEMORY\_TYPE}} The default type of the
+\verb|Memroy| template parameter of \verb|Allocator| (see
+section~\ref{sec:Aligned memory allocation}). The default is
+\verb|AlignedMemroyTBB| if \verb|VSMC_USE_TBB_MALLOC| is true. Otherwise it is
+\verb|AlignedMemorySYS| if \verb|VSMC_HAS_POSIX| is true or use the \msvc
+compiler. Otherwise, it is \verb|AlignedMemorySTD|. To use other memory
+allocation libraries, one usually does not need to define a new class. Most
+such libraries provides proxies to transparently replace system allocation
+functions such as \verb|posix_memalign| and \verb|_aligned_malloc| etc. And
+thus it is sufficient to define this macro to \verb|AlignedMemorySYS| and link
+to the proper libraries.
+
+\paragraph{\texttt{VSMC\_CONSTRUCT\_SCALAR}} Determine if scalar types shall be
+zero initialized upon allocation by \verb|Allocator|. The default value is
+\verb|0|. This departure from the behavior of \verb|std::allocator|, with which
+the memory is always value initialized. For example,
+\begin{Verbatim}
+  std::vector<int> v(n);
+\end{Verbatim}
+will initialize all values to zero. In contrast,
+\begin{Verbatim}
+  Vector<int> v(n);
+\end{Verbatim}
+will leave the memory uninitialized. To get zero initialized vectors, one can
+either define this macro to \verb|1|, or more efficiently,
+\begin{Verbatim}
+  Vector<int> v(n);
+  std::fill(v.begin(), v.end(), 0); // or
+  std::memset(v.data(), 0, sizeof(int) * v.size());
+\end{Verbatim}
+Most standard library implementations will pass the \verb|std::fill| call to
+\verb|std::memset|. It is strongly recommended that to leave this macro
+defined to zero. The \verb|std::vector|, with which \verb|Vector| is an alias
+to, calls the \verb|construct| member of \verb|Allocator| to initialize
+elements one by one, which is a huge waste of time. The library does not rely
+on zero initialization itself. Note that, this macro only affect
+\emph{default initialization of scalars}. For class types etc., and other
+constructor of \verb|std::vector|, such as
+\begin{Verbatim}
+  Vector<ClassType> c(n);
+  Vector<int> v(n, 2);
+\end{Verbatim}
+the behavior will be as expected. That is, the first will be default
+initialized and the second will be value initialized.
+
+\section{Error handling}
+\label{sec:Error handling}
+
+\paragraph{\texttt{VSMC\_NO\_RUNTIME\_ASSERT}} Determine if all runtime
+assertions shall be disabled. The default is \verb|1| if \verb|NDEBUG| is
+defined. Otherwise, it is \verb|0|. Runtime assertions are hard errors. The
+program will be terminated by \verb|std::exit| upon failure of assertions.
+These are usually errors that will cause undefined behaviors.
+
+\paragraph{\texttt{VSMC\_NO\_RUNTIME\_WARNING}} Determine if all runtime
+warnings shall be disabled. The default is \verb|1| if \verb|NDEBUG| is
+defined. Otherwise, it is \verb|0|. Runtime warnings are soft errors. The
+program will not be terminated and will continue. These errors do not introduce
+undefined behaviors, but indicate possible misuse of library features.
+
+\paragraph{\texttt{VSMC\_RUNTIME\_ASSERT\_AS\_EXCEPTION}} Determine if all
+runtime assertions shall be turned into exceptions. The exception type is
+\verb|RuntimeAssert|. The default value is \verb|0|. It has no affect is
+\verb|VSMC_NO_RUNTIME_ASSERT| is true.
+
+\paragraph{\texttt{VSMC\_RUNTIME\_WARNING\_AS\_EXCEPTION}} Determine if all
+runtime warnings shall be turned into exceptions. The exception type is
+\verb|RuntimeWarning|. The default value is \verb|0|. It has no affect is
+\verb|VSMC_NO_RUNTIME_WARNING| is true.
