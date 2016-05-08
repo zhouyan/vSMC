@@ -227,9 +227,6 @@ inline void rng_engine(std::size_t N, std::size_t M, int nwid, int swid,
 
 inline void rng_engine(std::size_t N, std::size_t M)
 {
-    N = std::max(N, static_cast<std::size_t>(10000));
-    M = std::max(M, static_cast<std::size_t>(10));
-
     const int nwid = 20;
     const int swid = 8;
     const int twid = 15;
