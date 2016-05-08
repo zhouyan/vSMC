@@ -1,0 +1,48 @@
+\chapter{Configuration macros}
+\label{chap:Configuration macros}
+
+The library has a few configuration macros. All macros have a default value if
+left undefined, and can be overwritten by defining them with proper values
+before including any of the library headers. In this appendix, we detail all
+the configuration macros used by the library.
+
+There are three types of configuration macros. The first type has a prefix
+\verb|VSMC_HAS_|. These macros specify a certain feature or third-party library
+is available. The second type has a prefix \verb|VSMC_USE_|. These macros
+specify that a certain feature or third-party library can be used, if
+available. These two kinds of macros shall only be defined to integral values,
+with zero as false and all other values as true. The third type can be defined
+to arbitrary, and usually affects implementation choices made by the library.
+
+A concrete example of the relations among these three types of configuration
+macros is the memory allocation functions used by the library. The details is
+in section~\ref{sec:Aligned memory allocation}. In short, they library has
+three implementations for aligned memory allocation. The preferred method is to
+use the \verb|scalable_aligned_malloc| from \tbb. It is defined through a class
+called \verb|AlignedMemoryTBB|. This class is only defined if and only if
+\verb|VSMC_HAS_TBB| is defined to a non-zero, in which case, the runtime
+library \verb|tbbmalloc| will need to be linked as well (\verb|-ltbbmalloc| on
+\unix-alike systems). However, if it is desirable to define this class such
+that the user can use it with \stl containers, but it is undesirable for the
+library itself to use it everywhere, then one can further define the macro
+\verb|VSMC_USE_TBB_MALLOC| to zero. In this case, the class is still defined,
+but it will not be used by the library. Instead the system will now prefer
+operating system dependent memory allocation functions such as
+\verb|posix_memalign|. Now, suppose this is still undesirable, and one want to
+use a memory allocation library not directly supported by the library. In this
+case, one can implement a aligned memory class (see section~\ref{sec:Aligned
+  memory allocation} for details), say \verb|AlignedMemoryUser|. And then define
+the macro \verb|VSMC_ALIGNED_MEOMRY_TYPE| to this class.
+
+In summary, the \verb|VSMC_HAS_| macro affects what will be \emph{defined}
+by the library. The \verb|VSMC_USE_| macro affects what will be \emph{used}
+by the library. And other macros give direct control of the library's
+implementations. In most situations, it is sufficient to use the first two to
+configure the features of the library. The third kind is for more advanced
+users.
+
+\section{System dependent macros}
+\label{sec:System dependent macros}
+
+The following macros have default values that depend on the compiler, operating
+system and \cpu types.

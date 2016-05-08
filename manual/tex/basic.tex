@@ -1,146 +1,31 @@
 \chapter{Basic usage}
 \label{chap:Basic usage}
 
-\section{Conventions}
-\label{sec:Conventions}
-
-All classes and functions that are accessible to users are within the name
-space \verb|vsmc|. Class names are in \verb|CamelCase| and function names and
-class members are in \verb|small_cases|. We will use ``function'' for referring
-to name space scope functions and ``method'' for class member functions. For
-brevity, we will omit the ``\verb|vsmc::|'' qualifier in the remaining of this
-document except in showing complete examples.
-
 \section{Getting and installing the library}
 \label{sec:Getting and installing the library}
 
 The library is hosted at
 GitHub\footnote{\url{https://github.com/zhouyan/vSMC}}. This is a header only
-\cpp template library. To install the library just move the contents of the
+\cpp template library. To install the library, just move the contents of the
 \verb|include| directory into a proper place, e.g., \verb|/usr/local/include|
-on Unix-alike systems. This library requires working \cppoo and \blas
+on \unix-alike systems. This library requires working \cppoo and \blas
 implementations. Intel Threading Building
 Blocks\footnote{\url{https://www.threadingbuildingblocks.org}} (\tbb), Intel
 Math Kernel Library\footnote{\url{https://software.intel.com/en-us/intel-mkl}}
 (\mkl) and \hdf\footnote{\url{http://www.hdfgroup.org}} are optional
 third-party libraries. One need to define the configuration macros
 \verb|VSMC_HAS_TBB|, \verb|VSMC_HAS_MKL| and \verb|VSMC_HAS_HDF5|,
-respectively, to nonzero values before including any \vsmc headers to make
+respectively, to non-zero values before including any \vsmc headers to make
 their existence known to the library.
 
-\section{Configuration macros}
-\label{sec:Configuration macros}
+\section{Conventions}
+\label{sec:Conventions}
 
-The library has a few configuration macros. All macros have a default value if
-left undefined and can be overwritten by defining them with proper values
-before including any of the library's headers. There are some additional macros
-for \rng related functionalities. They will be discussed in
-chapter~\ref{chap:Random number generating}.
-
-There are three types of configuration macros. The first type has a prefix
-\verb|VSMC_HAS_|. These macros specify a certain feature or third-party library
-is available. These are listed in Table~\ref{tab:Configuration macros for
-feature availability}. The second type has a prefix \verb|VSMC_USE_|. These
-macros specify that a certain feature or third-party library can be used, if
-available. These are listed in Table~\ref{tab:Configuration macros for feature
-usability}. For example, if \verb|VSMC_HAS_MKL| is defined to a non-zero value,
-but it is desirable not to use \mkl's vector math functions, then one can
-define \verb|VSMC_USE_MKL_VML| to zero to prevent the library to use this
-individual component. The third type changes the behavior of the library, for
-example by setting default value of some template parameter or the choosing
-among different implementations of a certain feature. They are listed in
-Table~\ref{tab:Configuration macros for library behavior}.
-
-\begin{table}
-  \begin{tabularx}{\textwidth}{llL}
-    \toprule
-    Macro & Default & Description \\
-    \midrule
-    \verb|VSMC_HAS_INT128| & Platform dependent
-    & Support for 128-bits integers \\
-    \verb|VSMC_HAS_SSE2| & Platform dependent
-    & Support for \sse{}2 intrinsic functions \\
-    \verb|VSMC_HAS_AVX2| & Platform dependent
-    & Support for \avx{}2 intrinsic functions \\
-    \verb|VSMC_HAS_AES_NI| & Platform dependent
-    & Support for \aesni intrinsic functions \\
-    \verb|VSMC_HAS_RDRAND| & Platform dependent
-    & Support for \rdrand intrinsic functions \\
-    \verb|VSMC_HAS_X86| & Platform dependent
-    & Support for x86 platform \\
-    \verb|VSMC_HAS_X86_64| & Platform dependent
-    & Support for x86-64 platform \\
-    \verb|VSMC_HAS_POSIX|  & Platform dependent
-    & Support for \posix platform \\
-    \verb|VSMC_HAS_OMP| & Platform dependent
-    & Support for OpenMP~2.5 or higher \\
-    \verb|VSMC_HAS_OPENCL| & \verb|0|
-    & Support for OpenCL~1.2 or higher \\
-    \verb|VSMC_HAS_TBB| & \verb|0|
-    & Support for \tbb~4.0 or higher \\
-    \verb|VSMC_HAS_TBB_MALLOC| & \verb|VSMC_HAS_TBB|
-    & Support for \tbb memory allocation. Note that, this will require linking
-    to the \verb|libtbbmalloc| runtime library in addition to the \verb|libtbb|
-    main library. \\
-    \verb|VSMC_HAS_HDF5| & \verb|0| &
-    Support for \hdf~1.8.6 or higher \\
-    \verb|VSMC_HAS_MKL| & \verb|0|
-    & Support for \mkl~11.2 or higher \\
-    \bottomrule
-  \end{tabularx}
-  \caption{Configuration macros for feature availability}
-  \label{tab:Configuration macros for feature availability}
-\end{table}
-
-\begin{table}
-  \begin{tabularx}{\textwidth}{llL}
-    \toprule
-    Macro & Default & Description \\
-    \midrule
-    \verb|VSMC_USE_OMP| & \verb|VSMC_HAS_OMP|
-    & Use OpenMP parallelization outside the \smp module \\
-    \verb|VSMC_USE_TBB| & \verb|VSMC_HAS_TBB|
-    & Use \tbb parallelization outside the \smp module \\
-    \verb|VSMC_USE_TBB_TLS| & \verb|VSMC_HAS_TBB|
-    & Use \tbb thread-local storage classes (\tls) \\
-    \verb|VSMC_USE_MKL_CBLAS| & \verb|VSMC_HAS_MKL|
-    & Use \verb|mkl_cblas.h| instead of \verb|cblas.h| \\
-    \verb|VSMC_USE_MKL_VML| & \verb|VSMC_HAS_MKL|
-    & Use \mkl vector mathematical functions (\vml) \\
-    \verb|VSMC_USE_MKL_VSL| & \verb|VSMC_HAS_MKL|
-    & Use \mkl statistical functions (\vsl) \\
-    \verb|VSMC_USE_ACCELERATE| & Platform dependent
-    & Use Mac OS X Accelerate framework for \blas and vector math operations.
-    The same functionality from \mkl (\verb|VSMC_USE_MKL_CBLAS| and
-    \verb|VSMC_USE_MKL_VML|) will take precedence over this macro. \\
-    \verb|VSMC_USE_CBLAS| & Platform dependent
-    & Should the standard C interface to \blas be used. \\
-    \bottomrule
-  \end{tabularx}
-  \caption{Configuration macros for feature usability}
-  \label{tab:Configuration macros for feature usability}
-\end{table}
-
-\begin{table}
-  \begin{tabularx}{\textwidth}{llL}
-    \toprule
-    Macro & Default & Description \\
-    \midrule
-    \verb|VSMC_INT128| & Platform dependent
-    & The 128-bit integer type \\
-    \verb|VSMC_ALIGNMENT| & \verb|32|
-    & Default alignment for scalar types \\
-    \verb|VSMC_ALIGNMENT_MIN| & \verb|16|
-    & Minimum alignment for all types \\
-    \verb|VSMC_ALIGNED_MEMORY_TYPE| & Platform dependent
-    & The type of \verb|AlignedMemory| \\
-    \verb|VSMC_CONSTRUCT_SCALAR| & \verb|0|
-    & Should \verb|Allocator::construct| zero out scalar types \\
-    \bottomrule
-  \end{tabularx}
-  \caption{Configuration macros for library behavior}
-  \label{tab:Configuration macros for library behavior}
-\end{table}
+All classes and functions that are accessible to users are within the name
+space \verb|vsmc|. Class an enumerator names are in \verb|CamelCases| and
+function names and class members (types, data and methods) are in
+\verb|small_cases|. For brevity, we will omit the ``\verb|vsmc::|'' qualifier
+in the remaining of this manual.
 
 \section{Concepts}
 \label{sec:Concepts}
@@ -775,7 +660,7 @@ The \verb|print(pf[1:5,])| statement shows the first five lines of the output,
   5 1000         1        0 382.8820 -1.47299 3.49230
 \end{Verbatim}
 The column \verb|Size| shows the sample size at each iteration. The column
-\verb|Resampled| shows nonzero values if resampling were performed and zero
+\verb|Resampled| shows non-zero values if resampling were performed and zero
 otherwise. For each moves and \mcmc steps, an acceptance count will be
 recorded. In this particular example, it is irrelevant. Next the column
 \verb|ESS| shows the value of \ess \emph{before} resampling. The last two
