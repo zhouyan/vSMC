@@ -34,27 +34,6 @@
 
 #define VSMC_INTEL_VERSION __INTEL_COMPILER
 
-#ifdef __x86_64__
-#ifndef VSMC_HAS_INT128
-#define VSMC_HAS_INT128 1
-#endif
-#ifndef VSMC_INT128
-#define VSMC_INT128 __int128
-#endif
-#endif
-
-#ifdef __SSE2__
-#ifndef VSMC_HAS_SSE2
-#define VSMC_HAS_SSE2 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef VSMC_HAS_AVX2
-#define VSMC_HAS_AVX2 1
-#endif
-#endif
-
 #ifdef __AVX__
 #ifndef VSMC_HAS_AES_NI
 #define VSMC_HAS_AES_NI 1
@@ -64,6 +43,15 @@
 #ifdef __AVX2__
 #ifndef VSMC_HAS_RDRAND
 #define VSMC_HAS_RDRAND 1
+#endif
+#endif
+
+#ifdef __x86_64__
+#ifndef VSMC_HAS_INT128
+#define VSMC_HAS_INT128 1
+#endif
+#ifndef VSMC_INT128
+#define VSMC_INT128 __int128
 #endif
 #endif
 

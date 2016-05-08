@@ -45,6 +45,7 @@
 #include "rand_uniform_int.cpp"
 #include "rand_uniform_int_64.cpp"
 
+#include "rand_arcsine.cpp"
 #include "rand_beta.cpp"
 #include "rand_cauchy.cpp"
 #include "rand_chi_squared.cpp"

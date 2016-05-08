@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/internal/compiler.h
+// vSMC/lib/src/rng/rand_arcsine.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,78 +29,57 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_INTERNAL_COMPILER_H
-#define VSMC_INTERNAL_COMPILER_H
+#include "libvsmcrng.hpp"
 
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif
+extern "C" {
 
-#if defined(__OPENCL_VERSION__)
-#define VSMC_OPENCL
-#include <vsmc/internal/compiler/opencl.h>
-#elif defined(__INTEL_COMPILER)
-#define VSMC_INTEL
-#include <vsmc/internal/compiler/intel.h>
-#elif defined(__clang__)
-#define VSMC_CLANG
-#include <vsmc/internal/compiler/clang.h>
-#elif defined(__GNUC__)
-#define VSMC_GCC
-#include <vsmc/internal/compiler/gcc.h>
-#elif defined(_MSC_VER)
-#define VSMC_MSVC
-#include <vsmc/internal/compiler/msvc.h>
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
 #endif
 
-#ifndef VSMC_OPENCL
-#ifdef __cplusplus
-#include <cmath>
-#include <cstddef>
-#include <cstdint>
-#include <cstdlib>
-#else
-#include <math.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
-#endif
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
 #endif
 
-#ifndef UINT64_C
-#error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    inline void vsmc_rand_arcsine_##name(                                     \
+        vsmc_rng rng, size_t n, double *r, double alpha, double beta)         \
+    {                                                                         \
+        ::vsmc::arcsine_distribution(                                         \
+            *reinterpret_cast<RNGType *>(rng.ptr), n, r, alpha, beta);        \
+    }
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+using vsmc_rand_arcsine_type = void (*)(
+    vsmc_rng, size_t, double *, double, double);
+
+static vsmc_rand_arcsine_type vsmc_rand_arcsine_dispatch[] = {
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
 #endif
 
-#ifndef VSMC_HAS_X86
-#if defined(i386) || defined(__i386) || defined(__i386__) ||                  \
-    defined(_M_IX86) || defined(_X86_) || defined(__x86_64) ||                \
-    defined(__x86_64__) || defined(__amd64) || defined(__amd64__) ||          \
-    defined(_M_AMD64) || defined(_M_X64)
-#define VSMC_HAS_X86 1
-#else
-#define VSMC_HAS_X86 0
-#endif
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
 #endif
 
-#ifndef VSMC_HAS_X86_64
-#if defined(__x86_64) || defined(__x86_64__) || defined(__amd64) ||           \
-    defined(__amd64__) || defined(_M_AMD64) || defined(_M_X64)
-#define VSMC_HAS_X86_64 1
-#else
-#define VSMC_HAS_X86_64 0
-#endif
-#endif
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rand_arcsine_##name,
+#define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
 
-#ifndef VSMC_HAS_AES_NI
-#define VSMC_HAS_AES_NI 0
-#endif
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
 
-#ifndef VSMC_HAS_RDRAND
-#define VSMC_HAS_RDRAND 0
-#endif
+#include <vsmc/rng/internal/rng_define_macro.hpp>
 
-#ifndef VSMC_HAS_INT128
-#define VSMC_HAS_INT128 0
-#endif
+    nullptr}; // vsmc_rand_arcsine_dispatch
 
-#endif // VSMC_INTERNAL_COMPILER_HPP
+void vsmc_rand_arcsine(
+    vsmc_rng rng, size_t n, double *r, double alpha, double beta)
+{
+    vsmc_rand_arcsine_dispatch[static_cast<std::size_t>(rng.type)](
+        rng, n, r, alpha, beta);
+}
+
+} // extern "C"

@@ -34,16 +34,4 @@
 
 #define VSMC_MSVC_VERSION _MSC_VER
 
-#ifdef __SSE2__
-#ifndef VSMC_HAS_SSE2
-#define VSMC_HAS_SSE2 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef VSMC_HAS_AVX2
-#define VSMC_HAS_AVX2 1
-#endif
-#endif
-
 #endif // VSMC_INTERNAL_COMPILER_MSVC_H

@@ -189,6 +189,10 @@ void vsmc_rand_uniform_int(vsmc_rng rng, size_t n, int *r, int a, int b);
 void vsmc_rand_uniform_int_64(
     vsmc_rng rng, size_t n, long long *r, long long a, long long b);
 
+/// \brief `vsmc::arcsine_distribution<double>`
+void vsmc_rand_arcsine(
+    vsmc_rng rng, size_t n, double *r, double alpha, double beta);
+
 /// \brief `vsmc::beta_distribution<double>`
 void vsmc_rand_beta(
     vsmc_rng rng, size_t n, double *r, double alpha, double beta);

@@ -139,13 +139,9 @@ inline void aligned_memory_test(
     aligned_memory_test<T, Alignment, vsmc::AlignedMemorySYS>(
         n, m, tname, "AlignedMemorySYS");
 #endif
-#if VSMC_HAS_TBB_MALLOC
+#if VSMC_HAS_TBB
     aligned_memory_test<T, Alignment, vsmc::AlignedMemoryTBB>(
         n, m, tname, "AlignedMemoryTBB");
-#endif
-#if VSMC_HAS_MKL
-    aligned_memory_test<T, Alignment, vsmc::AlignedMemoryMKL>(
-        n, m, tname, "AlignedMemoryMKL");
 #endif
 }
 
