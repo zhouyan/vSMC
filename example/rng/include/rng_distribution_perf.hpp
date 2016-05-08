@@ -151,8 +151,6 @@ template <typename vSMCDistType>
 inline void rng_distribution_test_perf(
     std::size_t N, std::size_t M, int nwid, int twid)
 {
-    using result_type = typename vSMCDistType::result_type;
-
     DistTrait<vSMCDistType> trait;
     auto params = trait.params();
 
