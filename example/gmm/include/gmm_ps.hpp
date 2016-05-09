@@ -34,7 +34,7 @@
 
 #include "gmm.hpp"
 
-template <typename SMP>
+template <typename Backend>
 inline void gmm_ps_run(
     std::size_t N, std::size_t n, std::size_t c, std::size_t power, int twid)
 {
@@ -47,12 +47,12 @@ inline void gmm_ps_run(
     vsmc::Seed::instance().set(101);
     vsmc::Sampler<GMM> sampler(N, vsmc::Stratified, 0.5);
     sampler.particle().value().comp_num(c);
-    sampler.init(GMMInit<SMP>());
+    sampler.init(GMMInit<Backend>());
     sampler.move(GMMMoveSMC(alpha_setter), false);
-    sampler.mcmc(GMMMoveMu<SMP>(), false);
-    sampler.mcmc(GMMMoveLambda<SMP>(), true);
-    sampler.mcmc(GMMMoveWeight<SMP>(), true);
-    sampler.monitor("path_integrand", 1, GMMPathIntegrand<SMP>());
+    sampler.mcmc(GMMMoveMu<Backend>(), false);
+    sampler.mcmc(GMMMoveLambda<Backend>(), true);
+    sampler.mcmc(GMMMoveWeight<Backend>(), true);
+    sampler.monitor("path_integrand", 1, GMMPathIntegrand<Backend>());
     sampler.monitor("path_grid", 1, GMMPathGrid(), true);
     sampler.initialize();
 
@@ -71,7 +71,7 @@ inline void gmm_ps_run(
             (ps_grid.record(0, iter) - ps_grid.record(0, iter - 1));
     }
 
-    std::cout << std::setw(twid) << std::left << gmm_smp_name<SMP>();
+    std::cout << std::setw(twid) << std::left << gmm_backend_name<Backend>();
     std::cout << std::setw(twid) << std::right << std::fixed << ps;
     std::cout << std::setw(twid) << std::right << std::fixed << time;
     std::cout << std::endl;
@@ -97,7 +97,7 @@ inline void gmm_ps(
     const std::size_t lwid = twid * 3;
 
     std::cout << std::string(lwid, '=') << std::endl;
-    std::cout << std::setw(twid) << std::left << "SMPBackend";
+    std::cout << std::setw(twid) << std::left << "Backend";
     std::cout << std::setw(twid) << std::right << "Path sampling";
     std::cout << std::setw(twid) << std::right << "Time (s)";
     std::cout << std::endl;

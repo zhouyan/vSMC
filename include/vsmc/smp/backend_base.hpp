@@ -39,6 +39,18 @@
 #pragma clang diagnostic ignored "-Wweak-vtables"
 #endif
 
+/// \brief Default SMP backend
+/// \ingroup Config
+#ifndef VSMC_SMP_BACKEND
+#if VSMC_HAS_OMP
+#define VSMC_SMP_BACKEND ::vsmc::BackendOMP
+#elif VSMC_HAS_TBB
+#define VSMC_SMP_BACKEND ::vsmc::BackendTBB
+#else
+#define VSMC_SMP_BACKEND ::vsmc::BackendSTD
+#endif
+#endif
+
 #define VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL(Name)                            \
     Name##Base() = default;                                                   \
     Name##Base(const Name##Base<T, Derived> &) = default;                     \
@@ -58,15 +70,31 @@
 
 #define VSMC_DEFINE_SMP_BACKEND_SPECIAL(Impl, Name)                           \
     Name##SMP() = default;                                                    \
-    Name##SMP(const Name##SMP<Backend##Impl, T, Derived> &) = default;        \
-    Name##SMP<Backend##Impl, T, Derived> &operator=(                          \
-        Name##SMP<Backend##Impl, T, Derived> &) = default;                    \
-    Name##SMP(Name##SMP<Backend##Impl, T, Derived> &&) = default;             \
-    Name##SMP<Backend##Impl, T, Derived> &operator=(                          \
-        Name##SMP<Backend##Impl, T, Derived> &&) = default;
+    Name##SMP(const Name##SMP<T, Derived, Backend##Impl> &) = default;        \
+    Name##SMP<T, Derived, Backend##Impl> &operator=(                          \
+        Name##SMP<T, Derived, Backend##Impl> &) = default;                    \
+    Name##SMP(Name##SMP<T, Derived, Backend##Impl> &&) = default;             \
+    Name##SMP<T, Derived, Backend##Impl> &operator=(                          \
+        Name##SMP<T, Derived, Backend##Impl> &&) = default;
 
 namespace vsmc
 {
+
+/// \brief SMP implementation ID for sequential
+/// \ingroup SEQ
+class BackendSEQ;
+
+/// \brief SMP implementation ID for the standard library
+/// \ingroup STD
+class BackendSTD;
+
+/// \brief SMP implementation ID for OpenMP
+/// \ingroup OMP
+class BackendOMP;
+
+/// \brief SMP implementation ID for Intel Threading Building Blocks
+/// \ingroup TBB
+class BackendTBB;
 
 /// \brief Template type parameter that cause the base class to use dynamic
 /// dispatch
@@ -75,17 +103,17 @@ class Virtual;
 
 /// \brief Sampler<T>::init_type
 /// \ingroup SMP
-template <typename Backend, typename T, typename = Virtual>
+template <typename T, typename = Virtual, typename = VSMC_SMP_BACKEND>
 class InitializeSMP;
 
 /// \brief Sampler<T>::move_type
 /// \ingroup SMP
-template <typename Backend, typename T, typename = Virtual>
+template <typename T, typename = Virtual, typename = VSMC_SMP_BACKEND>
 class MoveSMP;
 
 /// \brief Monitor<T>::eval_type
 /// \ingroup SMP
-template <typename Backend, typename T, typename = Virtual>
+template <typename T, typename = Virtual, typename = VSMC_SMP_BACKEND>
 class MonitorEvalSMP;
 
 /// \brief Initialize base dispatch class

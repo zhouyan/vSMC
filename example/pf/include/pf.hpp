@@ -35,23 +35,23 @@
 #include <vsmc/vsmc.hpp>
 
 template <typename>
-std::string pf_smp_name();
+std::string pf_backend_name();
 
 template <>
-std::string pf_smp_name<vsmc::BackendSEQ>()
+std::string pf_backend_name<vsmc::BackendSEQ>()
 {
     return "BackendSEQ";
 }
 
 template <>
-std::string pf_smp_name<vsmc::BackendSTD>()
+std::string pf_backend_name<vsmc::BackendSTD>()
 {
     return "BackendSTD";
 }
 
 #if VSMC_HAS_OMP
 template <>
-std::string pf_smp_name<vsmc::BackendOMP>()
+std::string pf_backend_name<vsmc::BackendOMP>()
 {
     return "BackendOMP";
 }
@@ -59,78 +59,78 @@ std::string pf_smp_name<vsmc::BackendOMP>()
 
 #if VSMC_HAS_TBB
 template <>
-std::string pf_smp_name<vsmc::BackendTBB>()
+std::string pf_backend_name<vsmc::BackendTBB>()
 {
     return "BackendTBB";
 }
 #endif
 
 template <vsmc::ResampleScheme>
-std::string pf_res_name();
+std::string pf_scheme_name();
 
 template <>
-std::string pf_res_name<vsmc::Multinomial>()
+std::string pf_scheme_name<vsmc::Multinomial>()
 {
     return "Multinomial";
 }
 
 template <>
-std::string pf_res_name<vsmc::Residual>()
+std::string pf_scheme_name<vsmc::Residual>()
 {
     return "Residual";
 }
 
 template <>
-std::string pf_res_name<vsmc::ResidualStratified>()
+std::string pf_scheme_name<vsmc::ResidualStratified>()
 {
     return "ResidualStratified";
 }
 
 template <>
-std::string pf_res_name<vsmc::ResidualSystematic>()
+std::string pf_scheme_name<vsmc::ResidualSystematic>()
 {
     return "ResidualSystematic";
 }
 
 template <>
-std::string pf_res_name<vsmc::Stratified>()
+std::string pf_scheme_name<vsmc::Stratified>()
 {
     return "Stratified";
 }
 
 template <>
-std::string pf_res_name<vsmc::Systematic>()
+std::string pf_scheme_name<vsmc::Systematic>()
 {
     return "Systematic";
 }
 
 template <vsmc::MatrixLayout>
-std::string pf_rc_name();
+std::string pf_layout_name();
 
 template <>
-std::string pf_rc_name<vsmc::RowMajor>()
+std::string pf_layout_name<vsmc::RowMajor>()
 {
     return "RowMajor";
 }
 
 template <>
-std::string pf_rc_name<vsmc::ColMajor>()
+std::string pf_layout_name<vsmc::ColMajor>()
 {
     return "ColMajor";
 }
 
 template <typename>
-std::string pf_rs_name();
+std::string pf_rng_set_name();
 
 template <>
-std::string pf_rs_name<vsmc::RNGSetVector<>>()
+std::string pf_rng_set_name<vsmc::RNGSetVector<>>()
 {
     return "RNGSetVector";
 }
 
 #if VSMC_HAS_TBB
 template <>
-std::string pf_rs_name<vsmc::RNGSetTBB<>>()
+std::string pf_rng_set_name<vsmc::RNGSetTBB<>>()
 {
     return "RNGSetTBB";
 }

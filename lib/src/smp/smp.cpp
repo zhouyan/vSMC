@@ -38,7 +38,7 @@ namespace vsmc
 
 template <typename Backend>
 class InitializeSMPC
-    : public InitializeSMP<Backend, StateMatrixC, InitializeSMPC<Backend>>
+    : public InitializeSMP<StateMatrixC, InitializeSMPC<Backend>, Backend>
 {
     public:
     InitializeSMPC(const vsmc_sampler_init_smp_type &work) : work_(work) {}
@@ -85,7 +85,7 @@ class InitializeSMPC
 }; // class InitializeSMPC
 
 template <typename Backend>
-class MoveSMPC : public MoveSMP<Backend, StateMatrixC, MoveSMPC<Backend>>
+class MoveSMPC : public MoveSMP<StateMatrixC, MoveSMPC<Backend>, Backend>
 {
     public:
     MoveSMPC(const vsmc_sampler_move_smp_type &work) : work_(work) {}
@@ -124,7 +124,7 @@ class MoveSMPC : public MoveSMP<Backend, StateMatrixC, MoveSMPC<Backend>>
 
 template <typename Backend>
 class MonitorEvalSMPC
-    : public MonitorEvalSMP<Backend, StateMatrixC, MonitorEvalSMPC<Backend>>
+    : public MonitorEvalSMP<StateMatrixC, MonitorEvalSMPC<Backend>, Backend>
 {
     public:
     MonitorEvalSMPC(const vsmc_monitor_eval_smp_type &work) : work_(work) {}

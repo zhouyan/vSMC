@@ -105,9 +105,9 @@ class PFCV : public PFCVBase<Layout>
     vsmc::Vector<double> obs_y_;
 }; // class PFCV
 
-template <typename SMP, vsmc::MatrixLayout Layout, typename RNGSetType>
-class PFCVInit : public vsmc::InitializeSMP<SMP, PFCV<Layout, RNGSetType>,
-                     PFCVInit<SMP, Layout, RNGSetType>>
+template <typename Backend, vsmc::MatrixLayout Layout, typename RNGSetType>
+class PFCVInit : public vsmc::InitializeSMP<PFCV<Layout, RNGSetType>,
+                     PFCVInit<Backend, Layout, RNGSetType>, Backend>
 {
     public:
     void eval_pre(vsmc::Particle<PFCV<Layout, RNGSetType>> &particle)
@@ -142,9 +142,9 @@ class PFCVInit : public vsmc::InitializeSMP<SMP, PFCV<Layout, RNGSetType>,
     vsmc::Vector<double> w_;
 }; // PFCVInit
 
-template <typename SMP, vsmc::MatrixLayout Layout, typename RNGSetType>
-class PFCVMove : public vsmc::MoveSMP<SMP, PFCV<Layout, RNGSetType>,
-                     PFCVMove<SMP, Layout, RNGSetType>>
+template <typename Backend, vsmc::MatrixLayout Layout, typename RNGSetType>
+class PFCVMove : public vsmc::MoveSMP<PFCV<Layout, RNGSetType>,
+                     PFCVMove<Backend, Layout, RNGSetType>, Backend>
 {
     public:
     void eval_pre(
@@ -182,10 +182,10 @@ class PFCVMove : public vsmc::MoveSMP<SMP, PFCV<Layout, RNGSetType>,
     vsmc::Vector<double> w_;
 }; // class PFCVMove
 
-template <typename SMP, typename RNGSetType>
-class PFCVMove<SMP, vsmc::ColMajor, RNGSetType>
-    : public vsmc::MoveSMP<SMP, PFCV<vsmc::ColMajor, RNGSetType>,
-          PFCVMove<SMP, vsmc::ColMajor, RNGSetType>>
+template <typename Backend, typename RNGSetType>
+class PFCVMove<Backend, vsmc::ColMajor, RNGSetType>
+    : public vsmc::MoveSMP<PFCV<vsmc::ColMajor, RNGSetType>,
+          PFCVMove<Backend, vsmc::ColMajor, RNGSetType>, Backend>
 {
     public:
 #if VSMC_HAS_TBB
@@ -193,7 +193,7 @@ class PFCVMove<SMP, vsmc::ColMajor, RNGSetType>
         vsmc::Particle<PFCV<vsmc::ColMajor, RNGSetType>> &particle)
     {
         return run_dispatch(
-            iter, particle, std::is_same<SMP, vsmc::BackendTBB>());
+            iter, particle, std::is_same<Backend, vsmc::BackendTBB>());
     }
 #endif
 
@@ -275,16 +275,16 @@ class PFCVMove<SMP, vsmc::ColMajor, RNGSetType>
         vsmc::Particle<PFCV<vsmc::ColMajor, RNGSetType>> &particle,
         std::false_type)
     {
-        return vsmc::MoveSMP<SMP, PFCV<vsmc::ColMajor, RNGSetType>,
-            PFCVMove<SMP, vsmc::ColMajor, RNGSetType>>::operator()(iter,
-            particle);
+        return vsmc::MoveSMP<PFCV<vsmc::ColMajor, RNGSetType>,
+            PFCVMove<Backend, vsmc::ColMajor, RNGSetType>,
+            Backend>::operator()(iter, particle);
     }
 #endif
 }; // class PFCVMove
 
-template <typename SMP, vsmc::MatrixLayout Layout, typename RNGSetType>
-class PFCVEval : public vsmc::MonitorEvalSMP<SMP, PFCV<Layout, RNGSetType>,
-                     PFCVEval<SMP, Layout, RNGSetType>>
+template <typename Backend, vsmc::MatrixLayout Layout, typename RNGSetType>
+class PFCVEval : public vsmc::MonitorEvalSMP<PFCV<Layout, RNGSetType>,
+                     PFCVEval<Backend, Layout, RNGSetType>, Backend>
 {
     public:
     void eval_sp(std::size_t, std::size_t,
@@ -295,24 +295,24 @@ class PFCVEval : public vsmc::MonitorEvalSMP<SMP, PFCV<Layout, RNGSetType>,
     }
 }; // class PFCVEval
 
-template <typename SMP, vsmc::ResampleScheme Scheme, vsmc::MatrixLayout Layout,
-    typename RNGSetType>
+template <typename Backend, vsmc::ResampleScheme Scheme,
+    vsmc::MatrixLayout Layout, typename RNGSetType>
 inline void pf_cv_run(std::size_t N, int nwid, int twid)
 {
     vsmc::Seed::instance().set(101);
     vsmc::Sampler<PFCV<Layout, RNGSetType>> sampler(N, Scheme, 0.5);
-    sampler.init(PFCVInit<SMP, Layout, RNGSetType>());
-    sampler.move(PFCVMove<SMP, Layout, RNGSetType>(), false);
-    sampler.monitor("pos", 2, PFCVEval<SMP, Layout, RNGSetType>());
+    sampler.init(PFCVInit<Backend, Layout, RNGSetType>());
+    sampler.move(PFCVMove<Backend, Layout, RNGSetType>(), false);
+    sampler.monitor("pos", 2, PFCVEval<Backend, Layout, RNGSetType>());
     sampler.monitor("pos").name(0) = "pos.x";
     sampler.monitor("pos").name(1) = "pos.y";
     sampler.initialize();
 
     const std::size_t n = sampler.particle().value().n();
-    const std::string smp(pf_smp_name<SMP>());
-    const std::string res(pf_res_name<Scheme>());
-    const std::string rc(pf_rc_name<Layout>());
-    const std::string rs(pf_rs_name<RNGSetType>());
+    const std::string smp(pf_backend_name<Backend>());
+    const std::string res(pf_scheme_name<Scheme>());
+    const std::string rc(pf_layout_name<Layout>());
+    const std::string rs(pf_rng_set_name<RNGSetType>());
 
     std::string basename = "pf_cv." + smp + "." + res + "." + rc + "." + rs;
 
@@ -375,31 +375,32 @@ inline void pf_cv_run(std::size_t N, int nwid, int twid)
     std::cout << std::endl;
 }
 
-template <typename SMP, vsmc::ResampleScheme Scheme, vsmc::MatrixLayout Layout>
+template <typename Backend, vsmc::ResampleScheme Scheme,
+    vsmc::MatrixLayout Layout>
 inline void pf_cv_run(std::size_t N, int nwid, int twid)
 {
-    pf_cv_run<SMP, Scheme, Layout, vsmc::RNGSetVector<>>(N, nwid, twid);
+    pf_cv_run<Backend, Scheme, Layout, vsmc::RNGSetVector<>>(N, nwid, twid);
 #if VSMC_HAS_TBB
-    pf_cv_run<SMP, Scheme, Layout, vsmc::RNGSetTBB<>>(N, nwid, twid);
+    pf_cv_run<Backend, Scheme, Layout, vsmc::RNGSetTBB<>>(N, nwid, twid);
 #endif
 }
 
-template <typename SMP, vsmc::ResampleScheme Scheme>
+template <typename Backend, vsmc::ResampleScheme Scheme>
 inline void pf_cv_run(std::size_t N, int nwid, int twid)
 {
-    pf_cv_run<SMP, Scheme, vsmc::RowMajor>(N, nwid, twid);
-    pf_cv_run<SMP, Scheme, vsmc::ColMajor>(N, nwid, twid);
+    pf_cv_run<Backend, Scheme, vsmc::RowMajor>(N, nwid, twid);
+    pf_cv_run<Backend, Scheme, vsmc::ColMajor>(N, nwid, twid);
 }
 
-template <typename SMP>
+template <typename Backend>
 inline void pf_cv_run(std::size_t N, int nwid, int twid)
 {
-    pf_cv_run<SMP, vsmc::Multinomial>(N, nwid, twid);
-    pf_cv_run<SMP, vsmc::Residual>(N, nwid, twid);
-    pf_cv_run<SMP, vsmc::ResidualStratified>(N, nwid, twid);
-    pf_cv_run<SMP, vsmc::ResidualSystematic>(N, nwid, twid);
-    pf_cv_run<SMP, vsmc::Stratified>(N, nwid, twid);
-    pf_cv_run<SMP, vsmc::Systematic>(N, nwid, twid);
+    pf_cv_run<Backend, vsmc::Multinomial>(N, nwid, twid);
+    pf_cv_run<Backend, vsmc::Residual>(N, nwid, twid);
+    pf_cv_run<Backend, vsmc::ResidualStratified>(N, nwid, twid);
+    pf_cv_run<Backend, vsmc::ResidualSystematic>(N, nwid, twid);
+    pf_cv_run<Backend, vsmc::Stratified>(N, nwid, twid);
+    pf_cv_run<Backend, vsmc::Systematic>(N, nwid, twid);
 }
 
 inline void pf_cv_run(std::size_t N, int nwid, int twid)

@@ -35,23 +35,23 @@
 #include <vsmc/vsmc.hpp>
 
 template <typename>
-std::string gmm_smp_name();
+std::string gmm_backend_name();
 
 template <>
-std::string gmm_smp_name<vsmc::BackendSEQ>()
+std::string gmm_backend_name<vsmc::BackendSEQ>()
 {
     return "BackendSEQ";
 }
 
 template <>
-std::string gmm_smp_name<vsmc::BackendSTD>()
+std::string gmm_backend_name<vsmc::BackendSTD>()
 {
     return "BackendSTD";
 }
 
 #if VSMC_HAS_OMP
 template <>
-std::string gmm_smp_name<vsmc::BackendOMP>()
+std::string gmm_backend_name<vsmc::BackendOMP>()
 {
     return "BackendOMP";
 }
@@ -59,7 +59,7 @@ std::string gmm_smp_name<vsmc::BackendOMP>()
 
 #if VSMC_HAS_TBB
 template <>
-std::string gmm_smp_name<vsmc::BackendTBB>()
+std::string gmm_backend_name<vsmc::BackendTBB>()
 {
     return "BackendTBB";
 }
@@ -359,8 +359,8 @@ class GMM : public GMMBase
     vsmc::Vector<double> obs_;
 }; // class GMM
 
-template <typename SMP>
-class GMMInit : public vsmc::InitializeSMP<SMP, GMM, GMMInit<SMP>>
+template <typename Backend>
+class GMMInit : public vsmc::InitializeSMP<GMM, GMMInit<Backend>, Backend>
 {
     public:
     void eval_pre(vsmc::Particle<GMM> &particle)
@@ -431,8 +431,8 @@ class GMMMoveSMC
     vsmc::Vector<double> w_;
 }; // class GMMMoveSMC
 
-template <typename SMP>
-class GMMMoveMu : public vsmc::MoveSMP<SMP, GMM, GMMMoveMu<SMP>>
+template <typename Backend>
+class GMMMoveMu : public vsmc::MoveSMP<GMM, GMMMoveMu<Backend>, Backend>
 {
     public:
     std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
@@ -455,8 +455,9 @@ class GMMMoveMu : public vsmc::MoveSMP<SMP, GMM, GMMMoveMu<SMP>>
     }
 }; // class GMMMoveMu
 
-template <typename SMP>
-class GMMMoveLambda : public vsmc::MoveSMP<SMP, GMM, GMMMoveLambda<SMP>>
+template <typename Backend>
+class GMMMoveLambda
+    : public vsmc::MoveSMP<GMM, GMMMoveLambda<Backend>, Backend>
 {
     public:
     std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
@@ -479,8 +480,9 @@ class GMMMoveLambda : public vsmc::MoveSMP<SMP, GMM, GMMMoveLambda<SMP>>
     }
 }; // class GMMMoveLambda
 
-template <typename SMP>
-class GMMMoveWeight : public vsmc::MoveSMP<SMP, GMM, GMMMoveWeight<SMP>>
+template <typename Backend>
+class GMMMoveWeight
+    : public vsmc::MoveSMP<GMM, GMMMoveWeight<Backend>, Backend>
 {
     public:
     std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
@@ -512,9 +514,9 @@ class GMMMoveWeight : public vsmc::MoveSMP<SMP, GMM, GMMMoveWeight<SMP>>
     }
 }; // class GMMMoveWeight
 
-template <typename SMP>
+template <typename Backend>
 class GMMPathIntegrand
-    : public vsmc::MonitorEvalSMP<SMP, GMM, GMMPathIntegrand<SMP>>
+    : public vsmc::MonitorEvalSMP<GMM, GMMPathIntegrand<Backend>, Backend>
 {
     public:
     void eval_sp(

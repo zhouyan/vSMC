@@ -65,14 +65,10 @@ inline void backend_std_range(
 
 } // namespace internal
 
-/// \brief SMP implementation ID for the standard library
-/// \ingroup STD
-class BackendSTD;
-
 /// \brief Sampler<T>::init_type subtype using the standard library
 /// \ingroup STD
 template <typename T, typename Derived>
-class InitializeSMP<BackendSTD, T, Derived> : public InitializeBase<T, Derived>
+class InitializeSMP<T, Derived, BackendSTD> : public InitializeBase<T, Derived>
 {
     public:
     std::size_t operator()(Particle<T> &particle, void *param)
@@ -108,7 +104,7 @@ class InitializeSMP<BackendSTD, T, Derived> : public InitializeBase<T, Derived>
 /// \brief Sampler<T>::move_type subtype using the standard library
 /// \ingroup STD
 template <typename T, typename Derived>
-class MoveSMP<BackendSTD, T, Derived> : public MoveBase<T, Derived>
+class MoveSMP<T, Derived, BackendSTD> : public MoveBase<T, Derived>
 {
     public:
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
@@ -143,7 +139,7 @@ class MoveSMP<BackendSTD, T, Derived> : public MoveBase<T, Derived>
 /// \brief Monitor<T>::eval_type subtype using the standard library
 /// \ingroup STD
 template <typename T, typename Derived>
-class MonitorEvalSMP<BackendSTD, T, Derived>
+class MonitorEvalSMP<T, Derived, BackendSTD>
     : public MonitorEvalBase<T, Derived>
 {
     public:
@@ -178,17 +174,17 @@ class MonitorEvalSMP<BackendSTD, T, Derived>
 /// \brief Sampler<T>::init_type subtype using the standard library
 /// \ingroup STD
 template <typename T, typename Derived>
-using InitializeSTD = InitializeSMP<BackendSTD, T, Derived>;
+using InitializeSTD = InitializeSMP<T, Derived, BackendSTD>;
 
 /// \brief Sampler<T>::move_type subtype using the standard library
 /// \ingroup STD
 template <typename T, typename Derived>
-using MoveSTD = MoveSMP<BackendSTD, T, Derived>;
+using MoveSTD = MoveSMP<T, Derived, BackendSTD>;
 
 /// \brief Monitor<T>::eval_type subtype using the standard library
 /// \ingroup STD
 template <typename T, typename Derived>
-using MonitorEvalSTD = MonitorEvalSMP<BackendSTD, T, Derived>;
+using MonitorEvalSTD = MonitorEvalSMP<T, Derived, BackendSTD>;
 
 } // namespace vsmc
 
