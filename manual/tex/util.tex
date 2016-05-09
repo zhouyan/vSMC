@@ -4,7 +4,7 @@
 The library provides some utilities for writing Monte Carlo simulation
 programs. For some of them, such as command line option processing, there are
 more advanced, dedicated libraries out there. The library only provides some
-basic functionality that is sufficient for most simple cases.
+basic functionality that is sufficient for simple cases.
 
 \section{Aligned memory allocation}
 \label{sec:Aligned memory allocation}
@@ -33,19 +33,29 @@ with the additional alignment requirement. It shall return a null pointer if it
 fails to allocate memory. In any other case, including zero input size, it
 shall return a reachable non-null pointer. The method \verb|aligned_free| shall
 behave similar to \verb|std::free|. It shall be able to handle a null pointer
-as its input. The library provides a few implementations, listed in
-Table~\ref{tab:Aligned memory allocation}. In addition, a type alias
-\verb|AlignedMemory| is defined to be one of the class listed in the table,
-depending on the availability of those classes, with preference in the same
-order as they are listed. The user can define the configuration macro
-\verb|VSMC_ALIGNED_MEMORY_TYPE| to override the choice made by the library.
+as its input. The library provides three implementations, discussed below. The
+default argument \verb|AlignedMemory| is an alias to one of them by default. It
+can be changed by defining the macro \verb|VSMC_ALIGNED_MEMORY_TYPE|.
+
+\paragraph{\texttt{AlignedMemoryTBB}} This class uses
+\verb|scalable_aligned_malloc| and \verb|scalable_aligned_free| from the \tbb
+library. This is the default method if \verb|VSMC_USE_TBB_MALLOC| is true.
+
+\paragraph{\texttt{AlignedMemorySYS}} This class uses \verb|posix_memalign| and
+\verb|free| on \posix platforms. It uses \verb|_aligned_malloc| and
+\verb|_aligned_free| if the compiler is \msvc. Otherwise, this class is not
+defined. If this class is define, it is the default method if
+\verb|VSMC_USE_TBB_MALLOC| is false.
+
+\paragraph{\texttt{AlignedMemorySTD}} This class uses only \verb|std::malloc|
+and \verb|std::free|. It is the last resort method the library will use.
 
 The default alignment depends on the type \verb|T|. If it is a scalar type
 (\verb|std::is_scalar<T>|), then the alignment is \verb|VSMC_ALIGNMENT|, whose
 default is 32. This alignment is sufficient for modern \simd operations, such
-as \avx{}2. For other types, the alignment is the maximum of \verb|alignof(T)|
-and \verb|VSMC_ALIGNMENT_MIN|, whose default is 16. Two container types are
-defined for convenience,
+as \avx. For other types, the alignment is the maximum of \verb|alignof(T)| and
+\verb|VSMC_ALIGNMENT_MIN|, whose default is 16. Two container types are defined
+for convenience,
 \begin{Verbatim}
   template <typename T>
   using Vector = std::vector<T, Allocator<T>>;
@@ -54,35 +64,15 @@ defined for convenience,
       std::size_t Alignment = AlignmentTrait<T>::value>
   class alignas(Alignment) Array;
 \end{Verbatim}
-
-\begin{table}
-  \begin{tabularx}{\textwidth}{lLL}
-    \toprule
-    Class & Implementation & Availability \\
-    \midrule
-    \verb|AlignedMemoryTBB|
-    & \tbb memory allocation functions
-    & \verb|VSMC_HAS_TBB_MALLOC|  \\
-    \verb|AlignedMemorySYS|
-    & Operating system libraries
-    & \verb|VSMC_HAS_POSIX|, or using \msvc \\
-    \verb|AlignedMemoryMKL|
-    & \mkl memory allocation functions
-    & \verb|VSMC_HAS_MKL| \\
-    \verb|AlignedMemorySTD|
-    & Standard library
-    & Always available \\
-    \bottomrule
-  \end{tabularx}
-  \caption{Aligned memory allocation}
-  \label{tab:Aligned memory allocation}
-\end{table}
+The first can be used as a drop-in replacement of \verb|std::vector<T>| since
+it is merely a type alias with a different default allocator. The second can is
+derived from \verb|std::array<T, N>| and thus can be a drop-in replacement in
+most situations.
 
 \section{Sample covariance}
 \label{sec:Sample covariance}
 
-The library provides some basic functionality to estimate sample covariance
-through the following class template,
+The library provides a class template to estimate sample covariance,
 \begin{Verbatim}
   template <typename RealType>
   class Covariance;
@@ -128,9 +118,9 @@ The last three parameters specify the storage scheme of the covariance matrix.
 See any reference of \blas or \lapack for explanation of the scheme. Below is
 an example of the class in use,
 \begin{Verbatim}
-  using T = StateMatrix<RowMajor, p, double>;
-  Sampler<T> sampler(n);
-  // Iterate the sampler
+  using T = StateMatrix<RowMajor, Dynamic, double>;
+  Sampler<T> sampler(n, p);
+  // Configure and iterate the sampler
   double mean[p];
   double cov[p * (p + 1) / 2];
   Covariance eval;
@@ -145,11 +135,11 @@ generate multivariate Normal proposals,
   double chol[p * (p + 1) / 2];
   double y[p];
   LAPACKE_dpptrf(LAPACK_ROW_MAJOR, 'L', p, chol);
-  NormalMVDistribution<double, p> normal_mv(nullptr, chol); // zero mean
+  NormalMVDistribution<double, p> normal_mv(mean, chol);
   normal_mv(rng, y);
 \end{Verbatim}
 
-\section{Store objects in \protect\hdf format}
+\section{Store objects in HDF5 format}
 \label{sec:Store objects in HDF5 format}
 
 If the \hdf library is available (\verb|VSMC_HAS_HDF5|), it is possible to
@@ -157,10 +147,10 @@ store \verb|Sampler<T>| objects, etc., in the \hdf format. For example,
 \begin{Verbatim}
   hdf5store(sampler, "pf.h5", "sampler", false);
 \end{Verbatim}
-creates a \hdf file named \verb|pf.h5| with the sampler stored as a list in the
-group \verb|sampler|. If the last argument is \verb|true|, the data is inserted
-to an existing file. Otherwise a new file is created. In R it can be processed
-as the following,
+creates an \hdf file named \verb|pf.h5| with the sampler stored as a list in
+the group \verb|sampler|. If the last argument is \verb|true|, the data is
+inserted to an existing file. Otherwise a new file is created. In R it can be
+processed as the following,
 \begin{Verbatim}
   library(rhdf5)
   pf <- as.data.frame(h5read("pf.h5", "sampler"))
@@ -168,12 +158,18 @@ as the following,
 This creates a \verb|data.frame| similar to that shown in
 section~\ref{sub:Implementations}. The \verb|hdf5store| function is overloaded
 for \verb|StateMatrix|, \verb|Sampler<T>| and \verb|Monitor<T>|. It is also
-overloaded for \verb|Particle<T>| if an overload for \verb|T| is available.
-Such an overload is automatically available if \verb|T| is a derived class of
-\verb|StateMatrix|. However, it may not be the most suitable one. Other types
-of objects can also be stored, see the reference manual for details.
+overloaded for \verb|Particle<T>| if an overload for \verb|T| is defined. The
+all follow the format as above. In addition, the following creates a new empty
+\hdf file,
+\begin{Verbatim}
+  hdf5store(filename);
+\end{Verbatim}
+while the following create a new group named \verb|dataname|,
+\begin{Verbatim}
+  hdf5store(filename, dataname, append);
+\end{Verbatim}
 
-\section{\protect\raii classes for OpenCL pointers}
+\section{RAII classes for OpenCL pointers}
 \label{sec:RAII classes for OpenCL pointers}
 
 The library provides a few classes to manager OpenCL pointers. It provides
@@ -197,11 +193,11 @@ In the above program, each class type object manages an OpenCL C type, such as
 \verb|cl_platform|. The resources will be released when the object is
 destroyed. Note that, the copy constructor and assignment operator perform
 shallow copy. This is particularly important for \verb|CLMemory| type objects.
-In appendix~\appref{app:sub:Parallelized implementation using OpenCL} an OpenCL
-implementation of the simple particle filter example in section~\ref{sec:A
-  simple particle filter} is shown. Table~\ref{tab:RAII classes for OpenCL
-  pointers} lists the classes defined by the library and their corresponding
-OpenCL pointers.
+In appendix~\appref{app:sub:Parallelized implementation using OpenCL}, an
+OpenCL implementation of the simple particle filter example in
+section~\ref{sec:A simple particle filter} is shown. Table~\ref{tab:RAII
+  classes for OpenCL pointers} lists the classes defined by the library and
+their corresponding OpenCL C pointer types.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{LL}
@@ -228,14 +224,14 @@ OpenCL pointers.
 The library provides some basic support for processing command line options.
 Here we show a minimal example. The complete program is shown in
 appendix~\appref{app:sec:Process command line program options}. First, we
-allocate define to store values of options,
+define variables to store values of options,
 \begin{Verbatim}
   int n;
   std::string str;
   std::vector<double> vec;
 \end{Verbatim}
 All types that support standard library \io stream operations are supported. In
-addition, for any type \verb|T| that supports such options,
+addition, for any type \verb|T| that supports such operations,
 \verb|std::vector<T, Alloc>|, is also supported. Then,
 \begin{Verbatim}
   ProgramOptionMap option_map;
@@ -269,7 +265,7 @@ The results of the option processing is displayed below,
 To summarize these output, the same option can be specified multiple times. If
 it is a scalar option, the last one is used (\verb|--str|, \verb|--n|). The
 value of a string option can be grouped by quotes. For a vector option
-(\verb|--vec|), all values are gather together and inserted into the vector.
+(\verb|--vec|), all values are gathered together and inserted into the vector.
 
 \section{Display program progress}
 \label{sec:Display program progress}
@@ -282,9 +278,7 @@ appendix~\appref{app:sec:Display program progress}.
   Progress progress;
   progress.start(n * n);
   for (std::size_t i = 0; i != n; ++i) {
-      std::stringstream ss;
-      ss << "i = " << i;
-      progress.message(ss.str());
+      progress.message("i = " + std::to_string(i));
       for (std::size_t j = 0; j != n; ++j) {
           // Do some computation
           progress.increment();
@@ -296,16 +290,12 @@ When invoked, the program output something similar the following,
 \begin{Verbatim}
   [  4%][00:07][  49019/1000000][i = 49]
 \end{Verbatim}
-The method \verb|progress.start(n * n)| starts the printing of the progress.
-The argument specifies how many iterations there will be before it is stopped.
-The method \verb|progress.message(ss.str())| direct the program to print a
-message. This is optional. Each time after we finish $n$ iterations (there are
-$n^3$ total iterations of the inner-most loop), we increment the progress count
-by calling \verb|progress.increment()|. And after everything is finished, the
-method \verb|progress.stop()| is called. The \verb|increment| method has an
-optional argument, which specifies how many steps has been finished. The
-default is one. For example, we can call \verb|progress.start(n * n * n)| and
-\verb|progress.increment(n)| instead.
+The method \verb|start| starts the printing of the progress. The argument
+specifies how many iterations there will be before it is stopped. The method
+\verb|message| direct the program to print a message. This is optional. Each
+time after we finish $n$ iterations (there are $n^3$ total iterations of the
+inner-most loop), we increment the progress count by calling \verb|increment|.
+And after everything is finished, the method \verb|stop| is called.
 
 \section{Stop watch}
 \label{sec:Stop watch}
@@ -328,5 +318,5 @@ physical stop watch. Here is a simple example
 \end{Verbatim}
 The above example demonstrate that timing can be accumulated between loop
 iterations, function calls, etc. It shall be noted that, the timing is only
-accurate if the computation between \verb|watch.start()| and
-\verb|watch.stop()| is non-trivial.
+accurate if the computation between \verb|start| and \verb|stop| is
+non-trivial.

@@ -1,10 +1,9 @@
 \documentclass[
-12pt,
+14pt,
 fontset=Arno,
-lines=36,
-chars=80,
+lines=32,
+chars=65,
 bib,
-mint,
 hyper,
 altcolor,
 showoverfull,
@@ -16,9 +15,6 @@ toclevel=2
 \date{Release v2.3.0}
 
 \addbibresource{manual.bib}
-
-\NewMinted{c}
-\NewMinted{cpp}
 
 \UseAbbr{aes}
 \UseAbbr{ais}
@@ -91,8 +87,6 @@ toclevel=2
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
 \newcolumntype{R}{>{\raggedleft\arraybackslash}X}
 
-% \includeonly{tex/math}
-
 \begin{document}
 
 \frontmatter
@@ -103,14 +97,13 @@ toclevel=2
 \include{tex/basic}
 \include{tex/advanced}
 \include{tex/math}
-\include{tex/resample}
 \include{tex/rng}
-\include{tex/util}
+\include{tex/resample}
 \include{tex/bib}
 
 \appendix
 \include{tex/config}
+\include{tex/util}
 \include{tex/capi}
-\include{tex/prg}
 
 \end{document}

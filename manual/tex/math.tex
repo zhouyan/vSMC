@@ -1,5 +1,5 @@
-\chapter{Mathematical operations}
-\label{chap:Mathemtical operations}
+\chapter{Elementary mathematical functions}
+\label{chap:Elementary mathemtical functions}
 
 \section{Constants}
 \label{sec:Constants}
@@ -17,18 +17,18 @@ performance difference from hard-coding the constants in the program, while the
 readability is improved. All defined constants are listed in
 Table~\ref{tab:Mathematical constants}.
 
-\section{Vectorized operations}
-\label{sec:Vectorized operations}
+\section{Vectorized functions}
+\label{sec:Vectorized functions}
 
-The library provides a set of functions for vectorized mathematical operations.
-For example,
+The library provides a set of vectorized elementary mathematical functions.
+For example, to perform additions of two vectors,
 \begin{Verbatim}
   std::size_t n = 1000;
   Vector<double> a(n), b(n), y(n);
   // Fill vectors a and b
   add(n, a.data(), b.data(), y.data());
 \end{Verbatim}
-performs addition for vectors. It is equivalent to
+This is equivalent to
 \begin{Verbatim}
   for (std::size_t i = 0; i != n; ++i)
       y[i] = a[i] + b[i];
@@ -36,14 +36,14 @@ performs addition for vectors. It is equivalent to
 The functions defined are listed in Tables~\ref{tab:Arithmetic functions}
 to~\ref{tab:Rounding functions}. For each function, the first parameter is
 always the length of the vector, and the last is a pointer to the output vector
-(except \verb|sincos| and \verb|modf| which have two output parameters). For
-all functions, the output is always a vector. If there are more than one input
-parameters, then some of them, but not all, can be scalars. For example, for
-the function call \verb|fma(n, a, b, c, y)| in Table~\ref{tab:Arithmetic
+(except for \verb|sincos| and \verb|modf|, which have two output parameters).
+For all functions, the output is always a vector. If there are more than one
+input parameters, then some of them, but not all, can be scalars. For example,
+for the function call \verb|fma(n, a, b, c, y)| in Table~\ref{tab:Arithmetic
   functions}, the input parameters are \verb|a|, \verb|b|, and \verb|c|. Some
 of them, not all, can be scalars instead of pointers to vectors. The output
-parameter \verb|y| has to be a pointer to a vector. Therefore, there are $2^3 -
-1$ versions of this function for each type of the value. Note that, mixed
+parameter \verb|y| has to be a pointer to a vector. Therefore, there are seven
+versions of this function for each type of the value. Note that, mixed
 precision is not allowed. For example,
 \begin{Verbatim}
   Vector<double> a(n);
@@ -51,19 +51,17 @@ precision is not allowed. For example,
   Vector<double> y(n);
   fma(n, a.data(), b.data(), 2, y.data());
 \end{Verbatim}
-will results in compile-time error because the third argument is of type
-\verb|int| while the others are of \verb|double| precision. The correct call
-shall be,
+will cause compile-time error because the third argument is of type \verb|int|
+while the others are of \verb|double| precision. The correct call shall be,
 \begin{Verbatim}
   fma(n, a.data(), b.data(), 2.0, y.data());
 \end{Verbatim}
-
-Without any third-party libraries, these functions does not provide performance
+Without any third-party libraries, these functions do not provide performance
 gain compared to the simple loop. When \mkl or Apple Accelerate framework is
 present, some functions can have substantial performance improvement when all
-input arguments are vectors. Vectorized random number generating
-introduced later (section~\ref{sec:Vectorized random number generating})
-performance heavily depends on these functions.
+input arguments are vectors. The performance of vectorized random number
+generating introduced later in section~\ref{sec:Vectorized random number
+  generating} heavily depends on these functions.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{LLLL}
