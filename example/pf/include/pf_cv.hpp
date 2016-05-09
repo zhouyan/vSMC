@@ -300,7 +300,8 @@ template <typename Backend, vsmc::ResampleScheme Scheme,
 inline void pf_cv_run(std::size_t N, int nwid, int twid)
 {
     vsmc::Seed::instance().set(101);
-    vsmc::Sampler<PFCV<Layout, RNGSetType>> sampler(N, Scheme, 0.5);
+    vsmc::Sampler<PFCV<Layout, RNGSetType>> sampler(N);
+    sampler.resample_method(Scheme, 0.5);
     sampler.init(PFCVInit<Backend, Layout, RNGSetType>());
     sampler.move(PFCVMove<Backend, Layout, RNGSetType>(), false);
     sampler.monitor("pos", 2, PFCVEval<Backend, Layout, RNGSetType>());

@@ -36,10 +36,7 @@ extern "C" {
 
 vsmc_covariance vsmc_covariance_new(void)
 {
-    auto ptr = new ::vsmc::Covariance<double>();
-    vsmc_covariance covariance = {ptr};
-
-    return covariance;
+    return {new ::vsmc::Covariance<double>()};
 }
 
 void vsmc_covariance_delete(vsmc_covariance *covariance_ptr)

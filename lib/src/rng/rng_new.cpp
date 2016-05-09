@@ -44,10 +44,8 @@ extern "C" {
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline vsmc_rng vsmc_rng_new_##name(unsigned seed)                        \
     {                                                                         \
-        auto ptr = new RNGType(static_cast<RNGType::result_type>(seed));      \
-        vsmc_rng rng = {ptr, vSMC##Name};                                     \
-                                                                              \
-        return rng;                                                           \
+        return {new RNGType(static_cast<RNGType::result_type>(seed)),         \
+            vSMC##Name};                                                      \
     }
 
 #include <vsmc/rng/internal/rng_define_macro_alias.hpp>

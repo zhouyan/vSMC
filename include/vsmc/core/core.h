@@ -285,8 +285,7 @@ void vsmc_monitor_turn_off(vsmc_monitor monitor);
 /// @{
 
 /// \brief `vsmc::Sampler::Sampler`
-vsmc_sampler vsmc_sampler_new(
-    size_t n, size_t dim, vSMCResampleScheme scheme, double threshold);
+vsmc_sampler vsmc_sampler_new(size_t n, size_t dim);
 
 /// \brief `vsmc::Sampler::~Sampler`
 void vsmc_sampler_delete(vsmc_sampler *sampler_ptr);
@@ -315,13 +314,13 @@ size_t vsmc_sampler_status_size(vsmc_sampler sampler);
 /// \brief `vsmc::Sampler::resample`
 void vsmc_sampler_resample(vsmc_sampler sampler);
 
-/// \brief `vsmc::Sampler::resample_scheme`
+/// \brief `vsmc::Sampler::resample_method`
 void vsmc_sampler_resample_scheme(
-    vsmc_sampler sampler, vSMCResampleScheme scheme);
+    vsmc_sampler sampler, vSMCResampleScheme scheme, double threshold);
 
 /// \brief `vsmc::Sampler::resample_method`
 void vsmc_sampler_resample_move(
-    vsmc_sampler sampler, vsmc_sampler_move_type res_move);
+    vsmc_sampler sampler, vsmc_sampler_move_type res_move, double threshold);
 
 /// \brief `vsmc::Sampler::threshold`
 double vsmc_sampler_get_threshold(vsmc_sampler sampler);

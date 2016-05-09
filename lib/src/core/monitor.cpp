@@ -51,11 +51,8 @@ extern "C" {
 vsmc_monitor vsmc_monitor_new(size_t dim, vsmc_monitor_eval_type eval,
     int record_only, vSMCMonitorStage stage)
 {
-    auto ptr = new ::vsmc::MonitorC(dim, ::vsmc::cast(eval), record_only != 0,
-        static_cast<::vsmc::MonitorStage>(stage));
-    vsmc_monitor monitor = {ptr};
-
-    return monitor;
+    return {new ::vsmc::MonitorC(dim, ::vsmc::cast(eval), record_only != 0,
+        static_cast<::vsmc::MonitorStage>(stage))};
 }
 
 void vsmc_monitor_delete(vsmc_monitor *monitor_ptr)

@@ -66,87 +66,18 @@ class Sampler
     using resample_type = std::function<void(std::size_t, std::size_t,
         typename Particle<T>::rng_type &, const double *, size_type *)>;
 
-    /// \brief Construct a Sampler without selection of resampling method
-    explicit Sampler(size_type N)
-        : particle_(N)
+    /// \brief Construct a Sampler
+    ///
+    /// \details
+    /// All arguments are passed to the constructor of Particle
+    template <typename... Args>
+    explicit Sampler(Args &&... args)
+        : particle_(std::forward<Args>(args)...)
         , init_by_iter_(false)
         , resample_threshold_(resample_threshold_never())
         , iter_num_(0)
     {
         resample_method(Multinomial);
-    }
-
-    /// \brief Construct a Sampler with a built-in resampling scheme
-    ///
-    /// \details
-    /// By default, resampling will be performed at every iteration.
-    Sampler(size_type N, ResampleScheme scheme)
-        : particle_(N)
-        , init_by_iter_(false)
-        , resample_threshold_(resample_threshold_always())
-        , iter_num_(0)
-    {
-        resample_method(scheme);
-    }
-
-    /// \brief Construct a Sampler with a user defined resampling algorithm
-    ///
-    /// \details
-    /// By default, resampling will be performed at every iteration.
-    Sampler(size_type N, const resample_type &res_alg)
-        : particle_(N)
-        , init_by_iter_(false)
-        , resample_threshold_(resample_threshold_always())
-        , iter_num_(0)
-    {
-        resample_method(res_alg);
-    }
-
-    /// \brief Construct a Sampler with a user defined resampling move
-    ///
-    /// \details
-    /// By default, resampling will be performed at every iteration.
-    Sampler(size_type N, const move_type &res_move)
-        : particle_(N)
-        , init_by_iter_(false)
-        , resample_threshold_(resample_threshold_always())
-        , iter_num_(0)
-    {
-        resample_method(res_move);
-    }
-
-    /// \brief Construct a Sampler with a built-in resampling scheme and a
-    /// threshold for resampling
-    Sampler(size_type N, ResampleScheme scheme, double resample_threshold)
-        : particle_(N)
-        , init_by_iter_(false)
-        , resample_threshold_(resample_threshold)
-        , iter_num_(0)
-    {
-        resample_method(scheme);
-    }
-
-    /// \brief Construct a Sampler with a user defined resampling algorithm and
-    /// a threshold for resampling
-    Sampler(
-        size_type N, const resample_type &res_alg, double resample_threshold)
-        : particle_(N)
-        , init_by_iter_(false)
-        , resample_threshold_(resample_threshold)
-        , iter_num_(0)
-    {
-        resample_method(res_alg);
-    }
-
-    /// \brief Construct a Sampler with a user defined resampling move and a
-    /// threshold for resampling
-    Sampler(size_type N, const move_type &res_move, double resample_threshold)
-        : particle_(N)
-        , init_by_iter_(false)
-        , resample_threshold_(resample_threshold)
-        , iter_num_(0)
-    {
-        resample_method(res_move);
     }
 
     /// \brief Clone the sampler system except the RNG engines
@@ -252,7 +183,8 @@ class Sampler
 
     /// \brief Set resampling method by a built-in ResampleScheme scheme
     /// name
-    Sampler<T> &resample_method(ResampleScheme scheme)
+    Sampler<T> &resample_method(
+        ResampleScheme scheme, double threshold = resample_threshold_always())
     {
         switch (scheme) {
             case Multinomial:
@@ -274,22 +206,27 @@ class Sampler
                 resample_move_ = ResampleMove<T>(ResampleResidualSystematic());
                 break;
         }
+        resample_threshold(threshold);
 
         return *this;
     }
 
     /// \brief Set resampling method by a `resample_type` object
-    Sampler<T> &resample_method(const resample_type &res_alg)
+    Sampler<T> &resample_method(const resample_type &res_alg,
+        double threshold = resample_threshold_always())
     {
         resample_move_ = ResampleMove<T>(res_alg);
+        resample_threshold(threshold);
 
         return *this;
     }
 
     /// \brief Set resampling method by a `move_type` object
-    Sampler<T> &resample_method(const move_type &res_move)
+    Sampler<T> &resample_method(const move_type &res_move,
+        double threshold = resample_threshold_always())
     {
         resample_move_ = res_move;
+        resample_threshold(threshold);
 
         return *this;
     }

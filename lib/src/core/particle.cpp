@@ -36,11 +36,7 @@ extern "C" {
 
 vsmc_particle vsmc_particle_new(size_t n, size_t dim)
 {
-    auto ptr = new ::vsmc::ParticleC(n);
-    ptr->value().resize_dim(dim);
-    vsmc_particle particle = {ptr};
-
-    return particle;
+    return {new ::vsmc::ParticleC(n, dim)};
 }
 
 void vsmc_particle_delete(vsmc_particle *particle_ptr)

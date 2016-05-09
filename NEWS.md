@@ -1,6 +1,12 @@
 # Changes in v2.3.0
 
 ## Important changes
+* `Sampler` constructor has been rewritten. It no longer accept arguments about
+  resampling method and threshold. Instead, it is now a variadic template and
+  pass all of its arguments to `Particle`. The later will take the first
+  argument, if it there is one, as the number of particles, and pass the rest
+  to value type `T`. Use the new `resample_method` method of `Sampler` to
+  configure the behavior of resampling.
 * `AlignedAllocator` is renamed to `Allocator`. The old type alias `Allocator`
   is removed. The default alignment is defined by `AlignmentTrait<T>`, which is
   `VSMC_ALIGNMENT` for scalar types and `max(alignof(T), VSMC_ALIGNMENT_MIN)`
@@ -8,17 +14,16 @@
 * New configuration macro `VSMC_CONSTRUCT_SCALAR`. If it is zero (the default),
   then `Allocator` will not zero initialize scalar values when `construct` is
   called without additional arguments.
-* The HDFIO module has been rewritten. Now there are only two main functions,
+* The HDF5 module has been rewritten. Now there are only two main functions,
   `hdf5load` and `hdf5store`. The data types are detected based on iterator
   types.
 
 ## New features
 
 * New C++ OpenCL RAII classes
-* `Sampler` gains new methods, `accept_size`, `read_accept_history`,
-  `read_accept_history_list`, and `read_accept_history_matrix`.
-* New functions `pack_s`, `pack_i`, `pack_m`, `unpack_s`, `unpack_i`, and
-  `unpack_m`, for pack and unpack vectors into/from contiguous storage
+* `Sampler` `accept_history` etc., are renamed to `status_history` etc.
+* `Sampler` gains new methods, `status_size`, `read_status_history`, and
+  `read_status_history_matrix`.
 * `StateMatrix` gain `resize(N, dim)` method. Resizing a `StateMatrix` object
   preserve original values in the following sense. Let N and M be the original
   and new sizes, let K and L be the original and new dimensions. Then
@@ -32,6 +37,12 @@
 * `Particle` can now be resized by various methods
 * One can now use resampling algorithms as a `Sampler::move_type` object
   through `ResampleMove`
+* New distribution `ArcsineDistribution`
+* New generic `MoveSMP` etc., base classes. `MoveTBB<T, Derived` etc., are now
+  alias to `MoveSMP<T, Derived, BackendTBB>` etc.
+* New vectorized rounding functions
+* New RNG type alias, `RNG_64`, `RNGMini` and `RNGMini_64`. And new naming
+  scheme, which is more consistent with the others, for AES-NI based RNGs.
 
 ## Changed behaviors
 

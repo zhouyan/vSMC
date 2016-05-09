@@ -35,13 +35,7 @@
 
 extern "C" {
 
-vsmc_weight vsmc_weight_new(size_t n)
-{
-    auto ptr = new ::vsmc::Weight(n);
-    vsmc_weight weight = {ptr};
-
-    return weight;
-}
+vsmc_weight vsmc_weight_new(size_t n) { return {new ::vsmc::Weight(n)}; }
 
 void vsmc_weight_delete(vsmc_weight *weight_ptr)
 {

@@ -91,9 +91,15 @@ class Particle
     using sp_type = SingleParticle<T>;
     using range_type = ParticleRange<T>;
 
-    explicit Particle(size_type N = 0)
+    Particle() : size_(0), value_(0), weight_(0), rng_set_(0)
+    {
+        Seed::instance()(rng_);
+    }
+
+    template <typename... Args>
+    explicit Particle(size_type N, Args &&... args)
         : size_(N)
-        , value_(N)
+        , value_(N, std::forward<Args>(args)...)
         , weight_(static_cast<SizeType<weight_type>>(N))
         , rng_set_(static_cast<SizeType<rng_set_type>>(N))
     {

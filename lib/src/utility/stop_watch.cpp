@@ -32,13 +32,7 @@
 #include <vsmc/utility/stop_watch.hpp>
 #include <vsmc/utility/utility.h>
 
-vsmc_stop_watch vsmc_stop_watch_new(void)
-{
-    auto ptr = new ::vsmc::StopWatch();
-    vsmc_stop_watch stop_watch = {ptr};
-
-    return stop_watch;
-}
+vsmc_stop_watch vsmc_stop_watch_new(void) { return {new ::vsmc::StopWatch()}; }
 
 void vsmc_stop_watch_delete(vsmc_stop_watch *stop_watch_ptr)
 {

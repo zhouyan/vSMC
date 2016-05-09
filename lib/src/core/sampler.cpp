@@ -55,15 +55,9 @@ inline SamplerC::move_type cast(vsmc_sampler_move_type fptr)
 
 extern "C" {
 
-vsmc_sampler vsmc_sampler_new(
-    size_t n, size_t dim, vSMCResampleScheme scheme, double threshold)
+vsmc_sampler vsmc_sampler_new(size_t n, size_t dim)
 {
-    auto ptr = new ::vsmc::SamplerC(
-        n, static_cast<::vsmc::ResampleScheme>(scheme), threshold);
-    ptr->particle().value().resize_dim(dim);
-    vsmc_sampler sampler = {ptr};
-
-    return sampler;
+    return {new ::vsmc::SamplerC(n, dim)};
 }
 
 void vsmc_sampler_delete(vsmc_sampler *sampler_ptr)
@@ -79,7 +73,7 @@ void vsmc_sampler_assign(vsmc_sampler sampler, vsmc_sampler other)
 
 vsmc_sampler vsmc_sampler_clone(vsmc_sampler sampler, int new_rng)
 {
-    vsmc_sampler clone = vsmc_sampler_new(0, 0, vSMCMultinomial, 0);
+    vsmc_sampler clone = vsmc_sampler_new(0, 0);
     ::vsmc::cast(clone) = ::vsmc::cast(sampler).clone(new_rng != 0);
 
     return clone;
@@ -116,16 +110,16 @@ void vsmc_sampler_resample(vsmc_sampler sampler)
 }
 
 void vsmc_sampler_resample_scheme(
-    vsmc_sampler sampler, vSMCResampleScheme scheme)
+    vsmc_sampler sampler, vSMCResampleScheme scheme, double threshold)
 {
     ::vsmc::cast(sampler).resample_method(
-        static_cast<::vsmc::ResampleScheme>(scheme));
+        static_cast<::vsmc::ResampleScheme>(scheme), threshold);
 }
 
 void vsmc_sampler_resample_move(
-    vsmc_sampler sampler, vsmc_sampler_move_type res_move)
+    vsmc_sampler sampler, vsmc_sampler_move_type res_move, double threshold)
 {
-    ::vsmc::cast(sampler).resample_method(::vsmc::cast(res_move));
+    ::vsmc::cast(sampler).resample_method(::vsmc::cast(res_move), threshold);
 }
 
 double vsmc_sampler_get_threshold(vsmc_sampler sampler)

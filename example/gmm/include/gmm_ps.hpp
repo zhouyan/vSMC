@@ -45,7 +45,8 @@ inline void gmm_ps_run(
         alpha_setter = GMMAlphaPrior(n, power);
 
     vsmc::Seed::instance().set(101);
-    vsmc::Sampler<GMM> sampler(N, vsmc::Stratified, 0.5);
+    vsmc::Sampler<GMM> sampler(N);
+    sampler.resample_method(vsmc::Stratified, 0.5);
     sampler.particle().value().comp_num(c);
     sampler.init(GMMInit<Backend>());
     sampler.move(GMMMoveSMC(alpha_setter), false);

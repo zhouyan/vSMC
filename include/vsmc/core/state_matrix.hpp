@@ -87,7 +87,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     public:
     using size_type = std::size_t;
     using state_type = T;
-    using state_pack_type = Vector<T>;
+    using pack_type = Vector<T>;
 
     template <typename S>
     class single_particle_type : public SingleParticleBase<S>
@@ -137,7 +137,14 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     }
 
     protected:
-    explicit StateMatrixBase(size_type N = 0) : size_(N), data_(N * Dim) {}
+    explicit StateMatrixBase(size_type N) : size_(N), data_(N * Dim) {}
+
+    StateMatrixBase(size_type N, std::size_t dim) : size_(N)
+    {
+        static_assert(Dim == Dynamic, "**StateMatrix::StateMatrix** USED WITH "
+                                      "AN OBJECT WITH FIXED DIMENSION");
+        resize_data(N, dim);
+    }
 
     StateMatrixBase(const StateMatrixBase<Layout, Dim, T> &) = default;
 
@@ -204,9 +211,13 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     using state_matrix_base_type = StateMatrixBase<RowMajor, Dim, T>;
     using size_type = typename state_matrix_base_type::size_type;
     using state_type = typename state_matrix_base_type::state_type;
-    using state_pack_type = typename state_matrix_base_type::state_pack_type;
+    using pack_type = typename state_matrix_base_type::pack_type;
 
     explicit StateMatrix(size_type N = 0) : state_matrix_base_type(N) {}
+
+    StateMatrix(size_type N, std::size_t dim) : state_matrix_base_type(N, dim)
+    {
+    }
 
     void resize(size_type N) { resize_both(N, this->dim()); }
 
@@ -305,15 +316,15 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
             Dim == Dynamic || 8 < Dim > ());
     }
 
-    state_pack_type state_pack(size_type id) const
+    pack_type state_pack(size_type id) const
     {
-        state_pack_type pack(this->dim());
+        pack_type pack(this->dim());
         std::copy(row_data(id), row_data(id) + this->dim(), pack.data());
 
         return pack;
     }
 
-    void state_unpack(size_type id, const state_pack_type &pack)
+    void state_unpack(size_type id, const pack_type &pack)
     {
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
             pack.size(), this->dim());
@@ -322,7 +333,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         std::copy(ptr, ptr + this->dim(), row_data(id));
     }
 
-    void state_unpack(size_type id, state_pack_type &&pack)
+    void state_unpack(size_type id, pack_type &&pack)
     {
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
             pack.size(), this->dim());
@@ -387,9 +398,13 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     using state_matrix_base_type = StateMatrixBase<ColMajor, Dim, T>;
     using size_type = typename state_matrix_base_type::size_type;
     using state_type = typename state_matrix_base_type::state_type;
-    using state_pack_type = typename state_matrix_base_type::state_pack_type;
+    using pack_type = typename state_matrix_base_type::pack_type;
 
     explicit StateMatrix(size_type N = 0) : state_matrix_base_type(N) {}
+
+    StateMatrix(size_type N, std::size_t dim) : state_matrix_base_type(N, dim)
+    {
+    }
 
     void resize(size_type N) { resize_both(N, this->dim()); }
 
@@ -475,7 +490,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
             }
         } else {
             StateMatrix<ColMajor, Dim, T> tmp;
-            tmp.resize_data(n, this->dim());
+            tmp.resize_data(N, this->dim());
             for (std::size_t d = 0; d != this->dim(); ++d) {
                 idx = index;
                 for (size_type dst = 0; dst != n; ++dst, ++idx)
@@ -496,16 +511,16 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
             Dim == Dynamic || 8 < Dim > ());
     }
 
-    state_pack_type state_pack(size_type id) const
+    pack_type state_pack(size_type id) const
     {
-        state_pack_type pack(this->dim());
+        pack_type pack(this->dim());
         for (std::size_t d = 0; d != this->dim(); ++d)
             pack[d] = state(id, d);
 
         return pack;
     }
 
-    void state_unpack(size_type id, const state_pack_type &pack)
+    void state_unpack(size_type id, const pack_type &pack)
     {
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
             pack.size(), this->dim());
@@ -514,7 +529,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
             state(id, d) = pack[d];
     }
 
-    void state_unpack(size_type id, state_pack_type &&pack)
+    void state_unpack(size_type id, pack_type &&pack)
     {
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
             pack.size(), this->dim());

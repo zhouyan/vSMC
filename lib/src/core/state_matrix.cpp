@@ -36,11 +36,7 @@ extern "C" {
 
 vsmc_state_matrix vsmc_state_matrix_new(size_t n, size_t dim)
 {
-    auto ptr = new ::vsmc::StateMatrixC(n);
-    ptr->resize_dim(dim);
-    vsmc_state_matrix state_matrix = {ptr};
-
-    return state_matrix;
+    return {new ::vsmc::StateMatrixC(n, dim)};
 }
 
 void vsmc_state_matrix_delete(vsmc_state_matrix *state_matrix_ptr)
