@@ -87,6 +87,7 @@ VSMC_ADD_HEADER_TEST(vsmc/rng/internal/common TRUE)
 
 VSMC_ADD_HEADER_TEST(vsmc/rng/distribution TRUE)
 VSMC_ADD_HEADER_TEST(vsmc/rng/uniform_bits_distribution  TRUE)
+VSMC_ADD_HEADER_TEST(vsmc/rng/arcsine_distribution       TRUE)
 VSMC_ADD_HEADER_TEST(vsmc/rng/beta_distribution          TRUE)
 VSMC_ADD_HEADER_TEST(vsmc/rng/cauchy_distribution        TRUE)
 VSMC_ADD_HEADER_TEST(vsmc/rng/chi_squared_distribution   TRUE)
