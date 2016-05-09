@@ -128,14 +128,14 @@ For all the three above, the \rng is \verb|ARSx8| (section~\ref{sub:AES-NI
   rand(rng_mkl, rnorm_vsmc, n, r.data());
 \end{Verbatim}
 In this case, not only the \rng itself is faster, the distribution might also
-use \mkl routines. The four cases are labeled ``\std/Boost'', ``\vsmc'',
+use \mkl routines. The four cases are labeled ``\std'', ``\vsmc'',
 ``\verb|rand|'' and ``\mkl'', respectively.
 
-\section{Counter-based RNG}
+\section{Counter-based \protect\rng}
 \label{sec:Counter-based RNG}
 
 The standard library provides a set of \rng engines (performance data in
-Table~\ref{tab:Performance of standard library RNG}). Unfortunately, none of
+Table~\appref{tab:Performance of standard library RNG}). Unfortunately, none of
 them are suitable for parallel computing without considerable efforts. To
 illustrate the problem, consider the situation where there are two threads that
 need to generate random numbers. And thus two \rng engine instances need to be
@@ -180,12 +180,6 @@ This not only requires managing the \rng{}s explicitly, but also knowing the
 number of threads at compile-time, which prevents it to be used in any
 applications using dynamic parallelization. And similar to the first solution,
 it cannot be used when threads are created implicitly.
-
-\begin{table}
-  \input{tab/rng_engine_std}%
-  \caption{Performance of standard library \protect\rng}
-  \label{tab:Performance of standard library RNG}
-\end{table}
 
 The development by \textcite{Salmon:2011um} made high performance parallel \rng
 much more accessible. The \rng{}s introduced in the paper use bijection $f_k$,
@@ -401,37 +395,14 @@ supported. Aliases for block sizes 1, 2, 4 and 8 are defined for all four
 algorithms, as well as both 32- and 64-bits output versions. These aliases are
 listed in Table~\ref{tab:Counter-based RNG}. The performance of these engines
 depends on a few factors, such as \cpu types, compilers, operating systems,
-etc. See Tables~\ref{tab:Performance of AES128Engine} to~\ref{tab:Performance
-  of ARSEngine} for performance data. In any case, the performance is good
-enough even for the most demanding applications. The library does not attempt
-to optimize the algorithm for any particular platform. In realistic
-applications, the performance of \rng is unlikely to become a bottle neck. Note
-that, the best performance is obtained with the vectorized \verb|rand| function
-(see section~\ref{sec:Vectorized random number generating}).
-
-\begin{table}
-  \input{tab/rng_engine_aes128}%
-  \caption{Performance of \protect\texttt{AES128Engine}}
-  \label{tab:Performance of AES128Engine}
-\end{table}
-
-\begin{table}
-  \input{tab/rng_engine_aes192}%
-  \caption{Performance of \protect\texttt{AES192Engine}}
-  \label{tab:Performance of AES192Engine}
-\end{table}
-
-\begin{table}
-  \input{tab/rng_engine_aes256}%
-  \caption{Performance of \protect\texttt{AES256Engine}}
-  \label{tab:Performance of AES256Engine}
-\end{table}
-
-\begin{table}
-  \input{tab/rng_engine_ars}%
-  \caption{Performance of \protect\texttt{ARSEngine}}
-  \label{tab:Performance of ARSEngine}
-\end{table}
+etc. See Tables~\appref{tab:Performance of AES128Engine}
+to~\appref{tab:Performance of ARSEngine} for performance data. In any case, the
+performance is good enough even for the most demanding applications. The
+library does not attempt to optimize the algorithm for any particular platform.
+In realistic applications, the performance of \rng is unlikely to become a
+bottle neck. Note that, the best performance is obtained with the vectorized
+\verb|rand| function (see section~\ref{sec:Vectorized random number
+  generating}).
 
 \subsection{Philox}
 \label{sub:Philox}
@@ -480,13 +451,7 @@ values larger than four, or \verb|T| being unsigned integer type with bits
 other than 32 or 64, one needs to provide a suitable trait class,
 \verb|Constant|. It is similar to that of \verb|ARSEngine|. See the reference
 manual of \verb|PhiloxConstants| for an example of how to define it. The
-performance data is in Table~\ref{tab:Performance of PhiloxEngine}.
-
-\begin{table}
-  \input{tab/rng_engine_philox}%
-  \caption{Performance of \protect\texttt{PhiloxEngine}}
-  \label{tab:Performance of PhiloxEngine}
-\end{table}
+performance data is in Table~\appref{tab:Performance of PhiloxEngine}.
 
 \subsection{Threefry}
 \label{sub:Threefry}
@@ -541,13 +506,7 @@ convenience,
 \end{Verbatim}
 Type aliases for 32- and 64-bits \verb|ResultType| are also defined, as listed
 in Table~\ref{tab:Counter-based RNG}. The performance data is in
-Table~\ref{tab:Performance of ThreefryEngine}.
-
-\begin{table}
-  \input{tab/rng_engine_threefry}%
-  \caption{Performance of \protect\texttt{ThreefryEngine}}
-  \label{tab:Performance of ThreefryEngine}
-\end{table}
+Table~\appref{tab:Performance of ThreefryEngine}.
 
 \subsection{\texttt{RNG} and \texttt{RNGMini}}
 \label{sub:RNG and RNGMini}
@@ -574,7 +533,7 @@ Table~\ref{tab:Default RNG}. The user can define the configuration macro
   \label{tab:Default RNG}
 \end{table}
 
-\subsection{Seeding counter-based RNG}
+\subsection{Seeding counter-based \protect\rng}
 \label{sub:Seeding counter-based RNG}
 
 The singleton class template \verb|SeedGenerator| can be used to generate
@@ -627,7 +586,7 @@ Note that, the seeds generated are not random at all. For any deterministic
 seeds does not always lead to independent streams. This seed generator is only
 suitable for counter-based \rng{}s.
 
-\section{Non-deterministic RNG}
+\section{Non-deterministic \protect\rng}
 \label{sec:Non-deterministic RNG}
 
 If the \rdrand instructions are supported, the library also implements three
@@ -639,15 +598,9 @@ configuration macro \verb|VSMC_RNG_RDRAND_NTRIAL_MAX|. A value of zero, the
 default, means the number of trials is unlimited. If it is a positive number,
 and if after the specified number of trials no random integer is return by the
 \rdrand instruction, zero is returned. The performance data is in
-Table~\ref{tab:Performance of non-deterministic RNG}.
+Table~\appref{tab:Performance of non-deterministic RNG}.
 
-\begin{table}
-  \input{tab/rng_engine_rdrand}%
-  \caption{Performance of non-deterministic \protect\rng}
-  \label{tab:Performance of non-deterministic RNG}
-\end{table}
-
-\section{MKL RNG}
+\section{\protect\mkl{} \protect\rng}
 \label{sec:MKL RNG}
 
 The \mkl library provides some high performance \rng{}s. The library implements
@@ -657,7 +610,7 @@ the best when they are used to generate vectors of random numbers. These
 wrappers use a buffer to store such vectors. And thus they have much larger
 state space than usual \rng{}s. Each \rng engines output by default 32-bits
 integers. Similar to the counter-based \rng{}s, 64-bits variants are also
-defined. The performance data is in Table~\ref{tab:Performance of MKL RNG}.
+defined. The performance data is in Table~\appref{tab:Performance of MKL RNG}.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{LL}
@@ -677,13 +630,7 @@ defined. The performance data is in Table~\ref{tab:Performance of MKL RNG}.
   \label{tab:MKL RNG}
 \end{table}
 
-\begin{table}
-  \input{tab/rng_engine_mkl}%
-  \caption{Performance of \protect\mkl{} \protect\rng}
-  \label{tab:Performance of MKL RNG}
-\end{table}
-
-\section{Multiple RNG streams}
+\section{Multiple \protect\rng streams}
 \label{sec:Multiple RNG streams}
 
 Earlier in section~\ref{sub:Particle} we introduced that \verb|particle.rng(i)|
@@ -971,11 +918,11 @@ earlier.
 
 Table~\ref{tab:Distributions using the inverse method} lists all the
 distributions implemented with the inverse method. The performance data of
-these distributions is in Table~\ref{tab:Performance of distributions using the
-  inverse method}. Note that, in this and other tables in the remaining of this
-section, we shortened the class name for brevity. For example, in the table the
-Cauchy distribution is listed as \verb|Cauchy| while the full declaration of
-the class template is,
+these distributions is in Table~\appref{tab:Performance of distributions using
+  the inverse method}. Note that, in this and other tables in the remaining of
+this section, we shortened the class name for brevity. For example, in the
+table the Cauchy distribution is listed as \verb|Cauchy| while the full
+declaration of the class template is,
 \begin{Verbatim}
   template <typename RealType>
   class CauchyDistribution;
@@ -1011,12 +958,6 @@ the class template is,
   \label{tab:Distributions using the inverse method}
 \end{table}
 
-\begin{table}
-  \input{tab/rng_distribution_inverse}%
-  \caption{Performance of distributions using the inverse method}
-  \label{tab:Performance of distributions using the inverse method}
-\end{table}
-
 \subsection{Normal and related distribution}
 \label{sub:Normal and related distribuiton}
 
@@ -1042,14 +983,8 @@ and the Levy distribution, $X = a + b / Z^2$,
   template <typename RealType>
   class LevyDistribution;
 \end{Verbatim}
-The performance data of these distributions is in Table~\ref{tab:Performance of
-  Normal and related distributions}.
-
-\begin{table}
-  \input{tab/rng_distribution_normal}%
-  \caption{Performance of Normal and related distributions}
-  \label{tab:Performance of Normal and related distributions}
-\end{table}
+The performance data of these distributions is in Table~\appref{tab:Performance
+  of Normal and related distributions}.
 
 \paragraph{Multivariate Normal distribution}
 
@@ -1109,32 +1044,9 @@ three related distributions,
 \end{Verbatim}
 They implement the $\chi^2$-distribution, the Fisher's $F$-distribution, and
 the Student's $t$-distribution, respectively. The performance data of these
-distributions, for different parameters are in Tables~\ref{tab:Performance of
-  Gamma distribution} to~\ref{tab:Performance of Student's t-distribution}.
-
-\begin{table}
-  \input{tab/rng_distribution_gamma}%
-  \caption{Performance of Gamma distribution}
-  \label{tab:Performance of Gamma distribution}
-\end{table}
-
-\begin{table}
-  \input{tab/rng_distribution_chisquared}%
-  \caption{Performance of $\chi^2$ distribution}
-  \label{tab:Performance of chi-squared distribution}
-\end{table}
-
-\begin{table}
-  \input{tab/rng_distribution_fisherf}%
-  \caption{Performance of Fisher's $F$-distribution}
-  \label{tab:Performance of Fisher's F-distribution}
-\end{table}
-
-\begin{table}
-  \input{tab/rng_distribution_studentt}%
-  \caption{Performance of Student's $t$-distribution}
-  \label{tab:Performance of Student's t-distribution}
-\end{table}
+distributions, for different parameters are in Tables~\appref{tab:Performance
+  of Gamma distribution} to~\appref{tab:Performance of Student's
+  t-distribution}.
 
 \subsection{Beta distribution}
 \label{sub:Beta distribution}
@@ -1158,10 +1070,4 @@ $\alpha < 1$, $\beta < 1$ and $D \le 0$, then Jöhnk's method
 switching algorithms in \textcite{Atkinson:1979es} is used. Note that, there is
 no vectorized implementation at the moment for the switching algorithms. In
 other cases, the vectorized generating shall provide considerable speedup. The
-performance data is in Table~\ref{tab:Performance of Beta distribution}
-
-\begin{table}
-  \input{tab/rng_distribution_beta}%
-  \caption{Performance of Beta distribution}
-  \label{tab:Performance of Beta distribution}
-\end{table}
+performance data is in Table~\appref{tab:Performance of Beta distribution}

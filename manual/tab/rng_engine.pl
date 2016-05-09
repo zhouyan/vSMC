@@ -64,8 +64,8 @@ sub table
         foreach (@lines) {
             my @record = split;
             $rng[$index] = '\verb|' . $record[0] . '|';
-            $cpB1[$index] .= &format_cpB($record[1]);
-            $cpB2[$index] .= &format_cpB($record[2]);
+            $cpB1[$index] .= &format($record[1]);
+            $cpB2[$index] .= &format($record[2]);
             if ($wid < length($rng[-1])) {
                 $wid = length($rng[-1]);
             }
@@ -75,7 +75,7 @@ sub table
 
     my $table;
     $table .= '\tbfigures' . "\n";
-    $table .= '\begin{tabularx}{\textwidth}{p{2in}RRRRRR}' . "\n";
+    $table .= '\begin{tabularx}{\textwidth}{p{1.8in}RRRRRR}' . "\n";
     $table .= ' ' x 2 . '\toprule' . "\n";
     $table .= ' ' x 2;
     $table .= '& \multicolumn{3}{c}{Loop} ';

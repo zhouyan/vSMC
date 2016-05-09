@@ -4,12 +4,8 @@ manual/prg/pf.pdf
 manual/prg/pf.rout
 manual/prg/pf_ocl
 manual/prg/pf_seq
-manual/prg/pf_seq_c
 manual/prg/pf_tbb
-manual/prg/pf_tbb_c
 manual/prg/program_option
 manual/prg/progress
-manual/prg/rng
-manual/prg/rng_c
 manual/tab/rng_distribution_*.tex
 manual/tab/rng_engine_*.tex

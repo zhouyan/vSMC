@@ -140,28 +140,21 @@ int main(int argc, char **argv)
     vsmc_sampler_move_smp_type pf_move = {
         pf_move_sp, pf_move_pre, pf_move_post};
     vsmc_monitor_eval_smp_type pf_eval = {pf_eval_sp, NULL, NULL};
+    vsmc_monitor pf_pos =
+        vsmc_monitor_new_smp(vSMCBackendTBB, 2, pf_eval, 0, vSMCMonitorMCMC);
 
-    vsmc_sampler sampler = vsmc_sampler_new(n, 4, vSMCMultinomial, 0.5);
-
+    vsmc_sampler sampler = vsmc_sampler_new(n, 4);
+    vsmc_sampler_resample_scheme(sampler, vSMCMultinomial, 0.5);
     vsmc_sampler_init_smp(vSMCBackendTBB, sampler, pf_init, 0);
     vsmc_sampler_move_smp(vSMCBackendTBB, sampler, pf_move, 0);
+    vsmc_sampler_set_monitor(sampler, "pos", pf_pos);
+    vsmc_monitor_delete(&pf_pos);
 
-    vsmc_monitor pos =
-        vsmc_monitor_new_smp(vSMCBackendTBB, 2, pf_eval, 0, vSMCMonitorMCMC);
-    vsmc_sampler_set_monitor(sampler, "pos", pos);
-    vsmc_monitor_delete(&pos);
-
-    vsmc_stop_watch watch = vsmc_stop_watch_new();
-    vsmc_stop_watch_start(watch);
     vsmc_sampler_initialize(sampler, (void *) "pf.data");
     vsmc_sampler_iterate(sampler, pf_obs_size - 1);
-    vsmc_stop_watch_stop(watch);
-    printf("Time (ms): %lg\n", vsmc_stop_watch_milliseconds(watch));
-    vsmc_stop_watch_delete(&watch);
-
     vsmc_sampler_print_f(sampler, "pf.out", '\t');
-
     vsmc_sampler_delete(&sampler);
+
     vsmc_free(pf_obs_x);
     vsmc_free(pf_obs_y);
     vsmc_free(pf_pos_x);

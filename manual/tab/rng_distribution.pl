@@ -12,7 +12,7 @@ my @normal = qw(Normal Lognormal Levy);
 my @nostd = qw(Arcsine, Logistic Pareto Rayleigh Levy);
 
 my %distribution;
-my %cpB;
+my %cpE;
 my $txt;
 open my $txtfile, '<', 'rng_distribution.txt';
 while (<$txtfile>) {
@@ -23,26 +23,26 @@ while (<$txtfile>) {
         $name =~ s/(.*)<double>(.*)/$1$2/;
         $name = '\verb|' . $name . "|\n";
         my $basename = $1;
-        my $cpB;
+        my $cpE;
         if ("@nostd" =~ /$basename/) {
             shift @record;
-            $cpB .= sprintf ' & %-4s', '--';
+            $cpE .= sprintf ' & %-4s', '--';
         } else {
-            $cpB .= &format_cpB(shift @record);
+            $cpE .= &format(shift @record);
         }
         foreach (@record[0..2]) {
-            $cpB .= &format_cpB($_)
+            $cpE .= &format($_)
         }
-        $cpB .= "\n";
+        $cpE .= "\n";
         if ("@inverse" =~ /$basename/) {
             $distribution{'inverse'} .= $name;
-            $cpB{'inverse'} .= $cpB;
+            $cpE{'inverse'} .= $cpE;
         } elsif ("@normal" =~ /$basename/) {
             $distribution{'normal'} .= $name;
-            $cpB{'normal'} .= $cpB;
+            $cpE{'normal'} .= $cpE;
         } else {
             $distribution{$basename} .= $name;
-            $cpB{$basename} .= $cpB;
+            $cpE{$basename} .= $cpE;
         }
     }
 }
@@ -51,7 +51,7 @@ print $txtfile $txt;
 
 while (my ($basename, $name) = each %distribution) {
     my @dist = split "\n", $distribution{$basename};
-    my @cpB = split "\n", $cpB{$basename};
+    my @cpE = split "\n", $cpE{$basename};
     my $wid = 0;
     foreach (@dist) {
         if ($wid < length($_)) {
@@ -61,17 +61,17 @@ while (my ($basename, $name) = each %distribution) {
 
     my $table;
     $table .= '\tbfigures' . "\n";
-    $table .= '\begin{tabularx}{\textwidth}{p{2in}RRRR}' . "\n";
+    $table .= '\begin{tabularx}{\textwidth}{p{1.8in}RRRR}' . "\n";
     $table .= ' ' x 2 . '\toprule' . "\n";
     $table .= ' ' x 2;
-    $table .= 'Distribution & \std/Boost & \vsmc & \verb|rand| & \mkl';
+    $table .= 'Distribution & \std & \vsmc & \verb|rand| & \mkl';
     $table .= " \\\\\n";
     $table .= ' ' x 2 . '\midrule' . "\n";
     my $index = 0;
     foreach (@dist) {
         $table .= ' ' x 2;
         $table .= sprintf "%-${wid}s", $dist[$index];
-        $table .= $cpB[$index];
+        $table .= $cpE[$index];
         $table .= " \\\\\n";
         $index++;
     }

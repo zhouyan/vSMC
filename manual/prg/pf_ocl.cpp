@@ -240,10 +240,11 @@ int main()
     std::cout << "Kernel move preferred work group size multiple: "
               << pwgsm_move << std::endl;
 
-    vsmc::Sampler<PFState> sampler(N, vsmc::Multinomial, 0.5);
+    vsmc::Sampler<PFState> sampler(N);
+    sampler.resample_method(vsmc::Multinomial, 0.5);
     sampler.particle().value().initialize(context, command_queue, kernel_copy);
     sampler.init(PFInit(command_queue, kernel_init));
-    sampler.move(PFMove(command_queue, kernel_move), false);
+    sampler.move(PFMove(command_queue, kernel_move));
     sampler.monitor("pos", 2, PFEval());
 
     vsmc::StopWatch watch;

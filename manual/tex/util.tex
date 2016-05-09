@@ -139,7 +139,7 @@ generate multivariate Normal proposals,
   normal_mv(rng, y);
 \end{Verbatim}
 
-\section{Store objects in HDF5 format}
+\section{Store objects in \protect\hdf5 format}
 \label{sec:Store objects in HDF5 format}
 
 If the \hdf library is available (\verb|VSMC_HAS_HDF5|), it is possible to
@@ -169,7 +169,7 @@ while the following create a new group named \verb|dataname|,
   hdf5store(filename, dataname, append);
 \end{Verbatim}
 
-\section{RAII classes for OpenCL pointers}
+\section{\protect\raii classes for OpenCL pointers}
 \label{sec:RAII classes for OpenCL pointers}
 
 The library provides a few classes to manager OpenCL pointers. It provides
@@ -272,8 +272,7 @@ value of a string option can be grouped by quotes. For a vector option
 
 Sometime it is desirable to see how much progress of a program has been made.
 The library provides a \verb|Progress| class for this purpose. Here we show a
-minimal example. The complete program is shown in
-appendix~\appref{app:sec:Display program progress}.
+minimal example.
 \begin{Verbatim}
   Progress progress;
   progress.start(n * n);
