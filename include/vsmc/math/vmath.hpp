@@ -435,8 +435,7 @@ inline void fma(std::size_t n, T a, T b, const T *c, T *y)
     add(n, a * b, c, y);
 }
 
-/// @}
-// vArithmetic
+/// @} vArithmetic
 
 /// \defgroup vPower Power root functions
 /// \ingroup vMath
@@ -541,8 +540,7 @@ inline void pow(std::size_t n, const T *a, T b, T *y)
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt{a_i^2 + b_i^2}\f$
 VSMC_DEFINE_MATH_VMATH_2(std::hypot, hypot)
 
-/// @}
-// vPower
+/// @} vPower
 
 /// \defgroup vExponential Exponential and logarithm functions
 /// \ingroup vMath
@@ -584,8 +582,7 @@ VSMC_DEFINE_MATH_VMATH_1(std::log10, log10)
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \log(a_i + 1)\f$
 VSMC_DEFINE_MATH_VMATH_1(std::log1p, log1p)
 
-/// @}
-// vExponential
+/// @} vExponential
 
 /// \defgroup vTrigonometric Trigonometric functions
 /// \ingroup vMath
@@ -629,8 +626,7 @@ VSMC_DEFINE_MATH_VMATH_1(std::atan, atan)
 /// signs to determine the quadrant
 VSMC_DEFINE_MATH_VMATH_2(std::atan2, atan2)
 
-/// @}
-// vTrigonometric
+/// @} vTrigonometric
 
 /// \defgroup vHyperbolic Hyperbolic functions
 /// \ingroup vMath
@@ -654,8 +650,7 @@ VSMC_DEFINE_MATH_VMATH_1(std::asinh, asinh)
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{arc}\tanh(a_i)\f$
 VSMC_DEFINE_MATH_VMATH_1(std::atanh, atanh)
 
-/// @}
-// vHyperbolic
+/// @} vHyperbolic
 
 /// \defgroup vSpecial Special functions
 /// \ingroup vMath
@@ -699,7 +694,7 @@ VSMC_DEFINE_MATH_VMATH_1(std::floor, floor)
 VSMC_DEFINE_MATH_VMATH_1(std::ceil, ceil)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = \mathrm{sgn}(a_i})\lfloor |a_i| \rfoor\f$
+/// \f$y_i = \mathrm{sgn}(a_i)\lfloor|a_i|\rfoor\f$
 VSMC_DEFINE_MATH_VMATH_1(std::trunc, trunc)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute rounding
@@ -713,104 +708,7 @@ inline void modf(std::size_t n, const T *a, T *y, T *z)
         *z = std::modf(*a, y);
 }
 
-/// @}
-// vSpecial
-
-/// \defgroup vPackUnpack Pack and unpack vectors
-/// \brief Pack and unpack vectors into/from contiguous storage
-/// \ingroup vMath
-/// @{
-
-/// \brief Pack vector `src` into vector `dst`, which has a stride `1`, such
-/// that `dst[i] = src[i * stride]`.
-template <typename RandomIter, typename IntType, typename OutputIter>
-inline void pack_s(
-    std::size_t n, RandomIter src, IntType stride, OutputIter dst)
-{
-    if (stride == 1)
-        std::copy_n(src, n, dst);
-    for (std::size_t i = 0; i != n; ++i, src += stride, ++dst) {
-        *dst =
-            static_cast<typename std::iterator_traits<OutputIter>::value_type>(
-                *src);
-    }
-}
-
-/// \brief Pack vector `src` into vector `dst`, which has a stride `1`, such
-/// that `dst[i] = src[index[i]]`.
-template <typename RandomIter, typename InputIter, typename OutputIter>
-inline void pack_i(
-    std::size_t n, RandomIter src, InputIter index, OutputIter dst)
-{
-    for (std::size_t i = 0; i != n; ++i, ++index, ++dst) {
-        *dst =
-            static_cast<typename std::iterator_traits<OutputIter>::value_type>(
-                src[static_cast<typename std::iterator_traits<
-                    RandomIter>::difference_type>(*index)]);
-    }
-}
-
-/// \brief Pack vector `src` into vector `dst`, which has a stride `1`, such
-/// that only `src[i]` with `mask[i]` being `true` (when converted to `bool`)
-/// are copied.
-template <typename InputIterSrc, typename InputIterMask, typename OutputIter>
-inline void pack_m(
-    std::size_t n, InputIterSrc src, InputIterMask mask, OutputIter dst)
-{
-    for (std::size_t i = 0; i != n; ++i, ++src, ++mask) {
-        if (*mask) {
-            *dst++ = static_cast<
-                typename std::iterator_traits<OutputIter>::value_type>(*src);
-        }
-    }
-}
-
-/// \brief Unpack a vector `src`, which has a stride `1`, into a vector `dst`,
-/// such that `dst[i * stride] = src[i]`.
-template <typename InputIter, typename IntType, typename RandomIter>
-inline void unpack_s(
-    std::size_t n, InputIter src, IntType stride, RandomIter dst)
-{
-    if (stride == 1)
-        std::copy_n(src, n, dst);
-    for (std::size_t i = 0; i != n; ++i, ++src, dst += stride) {
-        *dst =
-            static_cast<typename std::iterator_traits<RandomIter>::value_type>(
-                *src);
-    }
-}
-
-/// \brief Unpack a vector `src`, which has a stride `1`, into a vector `dst`,
-/// such that `dst[index[i]] = src[i]`.
-template <typename InputIterSrc, typename InputIterIndex, typename RandomIter>
-inline void unpack_i(
-    std::size_t n, InputIterSrc src, InputIterIndex index, RandomIter dst)
-{
-    for (std::size_t i = 0; i != n; ++i, ++src, ++index) {
-        dst[static_cast<typename std::iterator_traits<
-            RandomIter>::difference_type>(*index)] =
-            static_cast<typename std::iterator_traits<RandomIter>::value_type>(
-                *src);
-    }
-}
-
-/// \brief Unpack a vector `src`, which has a stride `1`, into a vector `dst`,
-/// such that only `dst[i]` with `mask[i]` being `true` (when converted to
-/// `bool`) is modified.
-template <typename InputIterSrc, typename InputIterMask, typename OutputIter>
-inline void unpack_m(
-    std::size_t n, InputIterSrc src, InputIterMask mask, OutputIter dst)
-{
-    for (std::size_t i = 0; i != n; ++i, ++mask, ++dst) {
-        if (*mask) {
-            *dst = static_cast<
-                typename std::iterator_traits<OutputIter>::value_type>(*src++);
-        }
-    }
-}
-
-/// @}
-// vPackUnpack
+/// @} vSpecial
 
 } // namespace vsmc
 

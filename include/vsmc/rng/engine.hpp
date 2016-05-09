@@ -53,6 +53,17 @@
 #endif
 #endif
 
+/// \brief Default `RNGMini` type
+/// \ingroup Config
+#ifndef VSMC_RNG_MINI_TYPE
+#define VSMC_RNG_MINI_TYPE ::vsmc::Philox2x32
+#endif
+
+/// \brief Default `RNG_64` type
+#ifndef VSMC_RNG_MINI_64_TYPE
+#define VSMC_RNG_MINI_64_TYPE ::vsmc::Philox2x32_64
+#endif
+
 #include <vsmc/rng/philox.hpp>
 #include <vsmc/rng/threefry.hpp>
 
@@ -81,11 +92,11 @@ using RNG_64 = VSMC_RNG_64_TYPE;
 
 /// \brief The 32-bits RNG with smallest state
 /// \ingroup RNG
-using RNGMini = Philox2x32;
+using RNGMini = VSMC_RNG_MINI_TYPE;
 
 /// \brief The 64-bits RNG with smallest state
 /// \ingroup RNG
-using RNGMini_64 = Philox2x32_64;
+using RNGMini_64 = VSMC_RNG_MINI_64_TYPE;
 
 } // namespace vsmc
 

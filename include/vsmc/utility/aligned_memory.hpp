@@ -40,22 +40,14 @@
 #include <malloc.h>
 #endif
 
-#if VSMC_HAS_TBB_MALLOC
+#if VSMC_HAS_TBB
 #include <tbb/scalable_allocator.h>
-#endif
-
-#if VSMC_HAS_MKL
-#include <mkl_service.h>
 #endif
 
 /// \brief The default alignment for scalar type
 /// \ingroup Config
 #ifndef VSMC_ALIGNMENT
-#if VSMC_HAS_X86_64
 #define VSMC_ALIGNMENT 32
-#else
-#define VSMC_ALIGNMENT 16
-#endif
 #endif
 
 /// \brief The minimum alignment for any type
@@ -72,12 +64,10 @@
 /// \brief Default AlignedMemory type
 /// \ingroup Config
 #ifndef VSMC_ALIGNED_MEMORY_TYPE
-#if VSMC_HAS_TBB_MALLOC
+#if VSMC_USE_TBB_MALLOC
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryTBB
 #elif VSMC_HAS_POSIX || defined(VSMC_MSVC)
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemorySYS
-#elif VSMC_HAS_MKL
-#define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemoryMKL
 #else
 #define VSMC_ALIGNED_MEMORY_TYPE ::vsmc::AlignedMemorySTD
 #endif
@@ -256,7 +246,7 @@ class AlignedMemorySYS
 
 #endif // VSMC_HAS_POSIX
 
-#if VSMC_HAS_TBB_MALLOC
+#if VSMC_HAS_TBB
 
 /// \brief Aligned memory using Intel TBB `scalable_aligned_malloc` and
 /// `scalable_aligned_free`.
@@ -276,28 +266,7 @@ class AlignedMemoryTBB
     }
 }; // class AlignedMemoryTBB
 
-#endif // VSMC_HAS_TBB_MALLOC
-
-#if VSMC_HAS_MKL
-
-/// \brief Aligned memory using Intel MKL `mkl_malloc` and `mkl_free`
-/// \ingroup AlignedMemory
-class AlignedMemoryMKL
-{
-    public:
-    static void *aligned_malloc(std::size_t n, std::size_t alignment) noexcept
-    {
-        return mkl_malloc(n > 0 ? n : 1, static_cast<int>(alignment));
-    }
-
-    static void aligned_free(void *ptr) noexcept
-    {
-        if (ptr != nullptr)
-            mkl_free(ptr);
-    }
-}; // class AlignedMemoryMKL
-
-#endif // VSMC_HAS_MKL
+#endif // VSMC_HAS_TBB
 
 /// \brief Default AlignedMemory type
 /// \ingroup AlignedMemory

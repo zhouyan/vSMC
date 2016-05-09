@@ -1,30 +1,6 @@
 \chapter{Mathematical operations}
 \label{chap:Mathemtical operations}
 
-\section{Using the BLAS library}
-\label{sec:Using the BLAS library}
-
-The library requires a working \blas implementation. Internally, the library
-use the standard C interface, such as \verb|cblas_dgemv|. Though this interface
-has been standardized for years, it is not universally available. If the
-\verb|cblas.h| header is not available or the runtime library does not have the
-required functions defined, then one should define the configuration macro
-\verb|VSMC_HAS_CBLAS| to zero. By default, this macro is defined to one if
-either \verb|VSMC_USE_MKL_CBLAS| or \verb|VSMC_USE_ACCELERATE| (see
-Table~\ref{tab:Configuration macros for feature usability}) are non-zero. The
-user can also manually define this macro to zero if it is undesirable to
-include the C interface header.
-
-When the C interface is not available, the library declares the standard
-Fortran subroutines in C itself, such as \verb|dgemv_|. If there should be no
-underscore appending the function name, then one can define the macro
-\verb|VSMC_BLAS_NAME_NO_UNDERSCORE|. Alternatively, one can define the macro
-\verb|VSMC_BLAS_NAME| directly. For example, if the name C function name has
-an underscore in front of the Fortran subroutine name,
-\begin{Verbatim}
-  #define VSMC_BLAS_NAME(x) _##x##_
-\end{Verbatim}
-
 \section{Constants}
 \label{sec:Constants}
 
@@ -40,6 +16,54 @@ The compiler will evaluate these values at compile-time and thus there is no
 performance difference from hard-coding the constants in the program, while the
 readability is improved. All defined constants are listed in
 Table~\ref{tab:Mathematical constants}.
+
+\section{Vectorized operations}
+\label{sec:Vectorized operations}
+
+The library provides a set of functions for vectorized mathematical operations.
+For example,
+\begin{Verbatim}
+  std::size_t n = 1000;
+  Vector<double> a(n), b(n), y(n);
+  // Fill vectors a and b
+  add(n, a.data(), b.data(), y.data());
+\end{Verbatim}
+performs addition for vectors. It is equivalent to
+\begin{Verbatim}
+  for (std::size_t i = 0; i != n; ++i)
+      y[i] = a[i] + b[i];
+\end{Verbatim}
+The functions defined are listed in Tables~\ref{tab:Arithmetic functions}
+to~\ref{tab:Rounding functions}. For each function, the first parameter is
+always the length of the vector, and the last is a pointer to the output vector
+(except \verb|sincos| and \verb|modf| which have two output parameters). For
+all functions, the output is always a vector. If there are more than one input
+parameters, then some of them, but not all, can be scalars. For example, for
+the function call \verb|fma(n, a, b, c, y)| in Table~\ref{tab:Arithmetic
+  functions}, the input parameters are \verb|a|, \verb|b|, and \verb|c|. Some
+of them, not all, can be scalars instead of pointers to vectors. The output
+parameter \verb|y| has to be a pointer to a vector. Therefore, there are $2^3 -
+1$ versions of this function for each type of the value. Note that, mixed
+precision is not allowed. For example,
+\begin{Verbatim}
+  Vector<double> a(n);
+  Vector<double> b(n);
+  Vector<double> y(n);
+  fma(n, a.data(), b.data(), 2, y.data());
+\end{Verbatim}
+will results in compile-time error because the third argument is of type
+\verb|int| while the others are of \verb|double| precision. The correct call
+shall be,
+\begin{Verbatim}
+  fma(n, a.data(), b.data(), 2.0, y.data());
+\end{Verbatim}
+
+Without any third-party libraries, these functions does not provide performance
+gain compared to the simple loop. When \mkl or Apple Accelerate framework is
+present, some functions can have substantial performance improvement when all
+input arguments are vectors. Vectorized random number generating
+introduced later (section~\ref{sec:Vectorized random number generating})
+performance heavily depends on these functions.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{LLLL}
@@ -103,54 +127,6 @@ Table~\ref{tab:Mathematical constants}.
   \caption{Mathematical constants}
   \label{tab:Mathematical constants}
 \end{table}
-
-\section{Vectorized operations}
-\label{sec:Vectorized operations}
-
-The library provides a set of functions for vectorized mathematical operations.
-For example,
-\begin{Verbatim}
-  std::size_t n = 1000;
-  Vector<double> a(n), b(n), y(n);
-  // Fill vectors a and b
-  add(n, a.data(), b.data(), y.data());
-\end{Verbatim}
-performs addition for vectors. It is equivalent to
-\begin{Verbatim}
-  for (std::size_t i = 0; i != n; ++i)
-      y[i] = a[i] + b[i];
-\end{Verbatim}
-The functions defined are listed in Table~\ref{tab:Arithmetic functions}
-to~\ref{tab:Special functions}. For each function, the first parameter is
-always the length of the vector, and the last is a pointer to the output vector
-(except \verb|sincos| which has two output parameters). For all functions, the
-output is always a vector. If there are more than one input parameters, then
-some of them, but not all, can be scalars. For example, for the function call
-\verb|fma(n, a, b, c, y)| in Table~\ref{tab:Arithmetic functions}, the input
-parameters are \verb|a|, \verb|b|, and \verb|c|. Some of them, not all, can be
-scalars instead of pointers to vectors. The output parameter \verb|y| has to be
-a pointer to a vector. Therefore, there are $2^3 - 1$ versions of this function
-for each type of the value. Note that, mixed precision is not allowed. For
-example,
-\begin{Verbatim}
-  Vector<double> a(n);
-  Vector<double> b(n);
-  Vector<double> y(n);
-  fma(n, a.data(), b.data(), 2, y.data());
-\end{Verbatim}
-will results in compile-time error because the third argument is of type
-\verb|int| while the others are of \verb|double| precision. The correct call
-shall be,
-\begin{Verbatim}
-  fma(n, a.data(), b.data(), 2.0, y.data());
-\end{Verbatim}
-
-Without any third-party libraries, these functions does not provide performance
-gain compared to the simple loop. When \mkl or Apple Accelerate framework is
-present, some functions can have substantial performance improvement when all
-input arguments are vectors. Vectorized random number generating
-introduced later (section~\ref{sec:Vectorized random number generating})
-performance heavily depends on these functions.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{LL}
@@ -262,62 +238,22 @@ performance heavily depends on these functions.
   \label{tab:Special functions}
 \end{table}
 
-\section{Pack and unpack vectors}
-\label{sec:Pack and unpack vectors}
+\begin{table}
+  \begin{tabularx}{\textwidth}{LL}
+    \toprule
+    Function & Operation \\
+    \midrule
+    \verb|floor(n, a, y)| & $y_i = \Floor{a_i}$                        \\ 
+    \verb|ceil(n, a, y)|  & $y_i = \Ceil{a_i}$                         \\ 
+    \verb|trunc(n, a, y)| & $y_i = \mathrm{sgn}(a_i)\Floor{\Abs{a_i}}$ \\ 
+    \verb|round(n, a, y)| & $y_i = \text{ nearest integer of }a_i$     \\ 
+    \verb|modf(n, a, y, z)| &
+    $y_i = \mathrm{sign}(a_i)\Floor{\Abs{a_i}}$,
+    $z_i = \mathrm{sign}(a_i)\Abs{a_i - y_i}$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Rounding functions}
+  \label{tab:Rounding functions}
+\end{table}
 
-The vectorized operations in the last section only operates on contiguous
-vectors. The library provides three functions to pack general vector into such
-storage,
-\begin{Verbatim}
-  // dst[i] = src[i * stride], i = 1 to n
-  template <typename RandomIter, typename IntType, typename OutputIter>
-  inline void pack_s(
-      std::size_t n, RandomIter src, IntType stride, OutputIter dst);
-
-  // dst[i] = src[index[i]], i = 1 to n
-  template <typename RandomIter, typename InputIter, typename OutputIter>
-  inline void pack_i(
-      std::size_t n, RandomIter src, InputIter index, OutputIter dst);
-
-  // Pack all src[i] with mask[i] is true, i = 1 to n
-  template <typename InputIterSrc, typename InputIterMask, typename OutputIter>
-  inline void pack_m(
-      std::size_t n, InputIterSrc src, InputIterMask mask, OutputIter dst);
-\end{Verbatim}
-There are also three corresponding unpack functions,
-\begin{Verbatim}
-  // dst[i * stride] = src[i], i = 1 to n
-  template <typename InputIter, typename IntType, typename RandomIter>
-  inline void unpack_s(
-      std::size_t n, InputIter src, IntType stride, RandomIter dst);
-
-  // dst[index[i]] = src[i], i = 1 to n
-  template <typename InputIterSrc, typename InputIterIndex, typename RandomIter>
-  inline void unpack_i(
-      std::size_t n, InputIterSrc src, InputIterIndex index, RandomIter dst);
-
-  // dst[j] = src[i], where mask[j] is the i-th element of mask such that
-  // mask[j] is true, i = 1 to n
-  template <typename InputIterSrc, typename InputIterMask, typename OutputIter>
-  inline void unpack_m(
-      std::size_t n, InputIterSrc src, InputIterMask mask, OutputIter dst);
-\end{Verbatim}
-These functions guarantee that the three assertions in the following program
-will never fail,
-\begin{Verbatim}
-  pack_s(n, src, stride, tmp);
-  unpack_s(n, tmp, stride, dst);
-  for (std::size_t i = 0; i != n; ++i)
-      assert(src[i * stride] == dst[i * stride]);
-
-  pack_i(n, src, index, tmp);
-  unpack_i(n, tmp, index, dst);
-  for (std::size_t i = 0; i != n; ++i)
-      assert(src[index[i]] == dst[index[i]]);
-
-  pack_m(n, src, mask, tmp);
-  unpack_m(n, tmp, mask, src);
-  for (std::size_t i = 0; i != n; ++i)
-      if (mask[i])
-          assert(src[i] == dst[i]);
-\end{Verbatim}
+\clearpage

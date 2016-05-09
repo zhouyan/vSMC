@@ -1,32 +1,31 @@
 \chapter{Basic usage}
 \label{chap:Basic usage}
 
-\section{Conventions}
-\label{sec:Conventions}
-
-All classes and functions that are accessible to users are within the name
-space \verb|vsmc|. Class names are in \verb|CamelCase| and function names and
-class members are in \verb|small_cases|. We will use ``function'' for referring
-to name space scope functions and ``method'' for class member functions. For
-brevity, we will omit the ``\verb|vsmc::|'' qualifier in the remaining of this
-document except in showing complete examples.
-
 \section{Getting and installing the library}
 \label{sec:Getting and installing the library}
 
 The library is hosted at
 GitHub\footnote{\url{https://github.com/zhouyan/vSMC}}. This is a header only
-\cpp template library. To install the library just move the contents of the
+\cpp template library. To install the library, just move the contents of the
 \verb|include| directory into a proper place, e.g., \verb|/usr/local/include|
-on Unix-alike systems. This library requires working \cppoo and \blas
+on \unix-alike systems. This library requires working \cppoo and \blas
 implementations. Intel Threading Building
 Blocks\footnote{\url{https://www.threadingbuildingblocks.org}} (\tbb), Intel
 Math Kernel Library\footnote{\url{https://software.intel.com/en-us/intel-mkl}}
 (\mkl) and \hdf\footnote{\url{http://www.hdfgroup.org}} are optional
 third-party libraries. One need to define the configuration macros
 \verb|VSMC_HAS_TBB|, \verb|VSMC_HAS_MKL| and \verb|VSMC_HAS_HDF5|,
-respectively, to nonzero values before including any \vsmc headers to make
+respectively, to non-zero values before including any \vsmc headers to make
 their existence known to the library.
+
+\section{Conventions}
+\label{sec:Conventions}
+
+All classes and functions that are accessible to users are within the name
+space \verb|vsmc|. Class an enumerator names are in \verb|CamelCases| and
+function names and class members (types, data and methods) are in
+\verb|small_cases|. For brevity, we will omit the ``\verb|vsmc::|'' qualifier
+in the remaining of this manual.
 
 \section{Concepts}
 \label{sec:Concepts}
@@ -661,7 +660,7 @@ The \verb|print(pf[1:5,])| statement shows the first five lines of the output,
   5 1000         1        0 382.8820 -1.47299 3.49230
 \end{Verbatim}
 The column \verb|Size| shows the sample size at each iteration. The column
-\verb|Resampled| shows nonzero values if resampling were performed and zero
+\verb|Resampled| shows non-zero values if resampling were performed and zero
 otherwise. For each moves and \mcmc steps, an acceptance count will be
 recorded. In this particular example, it is irrelevant. Next the column
 \verb|ESS| shows the value of \ess \emph{before} resampling. The last two

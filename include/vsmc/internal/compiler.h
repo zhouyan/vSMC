@@ -36,26 +36,6 @@
 #define __STDC_CONSTANT_MACROS
 #endif
 
-#ifndef __has_attribute
-#define __has_attribute(x) 0
-#endif
-
-#ifndef __has_builtin
-#define __has_builtin(x) 0
-#endif
-
-#ifndef __has_cpp_attribute
-#define __has_cpp_attribute(x) 0
-#endif
-
-#ifndef __has_extension
-#define __has_extension(x) 0
-#endif
-
-#ifndef __has_feature
-#define __has_feature(x) 0
-#endif
-
 #if defined(__OPENCL_VERSION__)
 #define VSMC_OPENCL
 #include <vsmc/internal/compiler/opencl.h>
@@ -111,18 +91,6 @@
 #endif
 #endif
 
-#ifndef VSMC_HAS_INT128
-#define VSMC_HAS_INT128 0
-#endif
-
-#ifndef VSMC_HAS_SSE2
-#define VSMC_HAS_SSE2 0
-#endif
-
-#ifndef VSMC_HAS_AVX2
-#define VSMC_HAS_AVX2 0
-#endif
-
 #ifndef VSMC_HAS_AES_NI
 #define VSMC_HAS_AES_NI 0
 #endif
@@ -131,10 +99,8 @@
 #define VSMC_HAS_RDRAND 0
 #endif
 
-#ifndef VSMC_HAS_OMP
-#ifdef _OPENMP
-#define VSMC_HAS_OMP 1
-#endif
+#ifndef VSMC_HAS_INT128
+#define VSMC_HAS_INT128 0
 #endif
 
 #endif // VSMC_INTERNAL_COMPILER_HPP

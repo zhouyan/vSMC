@@ -44,6 +44,7 @@ ENDIF(MKL_FOUND)
 
 IF(Boost_FOUND)
     VSMC_ADD_TEST(rng distribution)
+    VSMC_ADD_TEST(rng distribution_perf)
 ENDIF(Boost_FOUND)
 
 VSMC_ADD_FILE(rng rng_engine_kat_Philox2x32.txt)

@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/cmake/FindAVX2.cpp
+// vSMC/lib/src/rng/rand_arcsine.cpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,17 +29,57 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <immintrin.h>
-#include <iostream>
+#include "libvsmcrng.hpp"
 
-int main()
+extern "C" {
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    inline void vsmc_rand_arcsine_##name(                                     \
+        vsmc_rng rng, size_t n, double *r, double alpha, double beta)         \
+    {                                                                         \
+        ::vsmc::arcsine_distribution(                                         \
+            *reinterpret_cast<RNGType *>(rng.ptr), n, r, alpha, beta);        \
+    }
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+using vsmc_rand_arcsine_type = void (*)(
+    vsmc_rng, size_t, double *, double, double);
+
+static vsmc_rand_arcsine_type vsmc_rand_arcsine_dispatch[] = {
+
+#ifdef VSMC_RNG_DEFINE_MACRO
+#undef VSMC_RNG_DEFINE_MACRO
+#endif
+
+#ifdef VSMC_RNG_DEFINE_MACRO_NA
+#undef VSMC_RNG_DEFINE_MACRO_NA
+#endif
+
+#define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name) vsmc_rand_arcsine_##name,
+#define VSMC_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
+
+#include <vsmc/rng/internal/rng_define_macro_alias.hpp>
+
+#include <vsmc/rng/internal/rng_define_macro.hpp>
+
+    nullptr}; // vsmc_rand_arcsine_dispatch
+
+void vsmc_rand_arcsine(
+    vsmc_rng rng, size_t n, double *r, double alpha, double beta)
 {
-    __m256i m1 = _mm256_set1_epi32(1);
-    __m256i m2 = _mm256_set1_epi32(2);
-    __m256i m = _mm256_add_epi32(m1, m2);
-    char a[32];
-    _mm256_storeu_si256(reinterpret_cast<__m256i *>(a), m);
-    std::cout << a[0] << std::endl;
-
-    return 0;
+    vsmc_rand_arcsine_dispatch[static_cast<std::size_t>(rng.type)](
+        rng, n, r, alpha, beta);
 }
+
+} // extern "C"

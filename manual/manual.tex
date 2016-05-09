@@ -34,8 +34,10 @@ toclevel=2
 \UseAbbr{gcc}
 \UseAbbr{gnu}
 \UseAbbr{gpu}
+\UseAbbr{ilp}
 \UseAbbr{lapack}
 \UseAbbr{llvm}
+\UseAbbr{lp}
 \UseAbbr{mcmc}
 \UseAbbr{mkl}
 \UseAbbr{msvc}
@@ -51,8 +53,10 @@ toclevel=2
 \UseAbbr{smp}
 \UseAbbr{sse}
 \UseAbbr{std}
+\UseAbbr{stl}
 \UseAbbr{tbb}
 \UseAbbr{tls}
+\UseAbbr{unix}
 \UseAbbr{vml}
 \UseAbbr{vsl}
 
@@ -87,6 +91,8 @@ toclevel=2
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
 \newcolumntype{R}{>{\raggedleft\arraybackslash}X}
 
+% \includeonly{tex/math}
+
 \begin{document}
 
 \frontmatter
@@ -96,7 +102,6 @@ toclevel=2
 \include{tex/intro}
 \include{tex/basic}
 \include{tex/advanced}
-\include{tex/config}
 \include{tex/math}
 \include{tex/resample}
 \include{tex/rng}
@@ -104,6 +109,7 @@ toclevel=2
 \include{tex/bib}
 
 \appendix
+\include{tex/config}
 \include{tex/capi}
 \include{tex/prg}
 

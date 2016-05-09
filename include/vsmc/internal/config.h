@@ -32,7 +32,11 @@
 #ifndef VSMC_INTERNAL_CONFIG_H
 #define VSMC_INTERNAL_CONFIG_H
 
+// Compiler dependent macros
+
 #include <vsmc/internal/compiler.h>
+
+// Assertion macros
 
 #ifndef VSMC_NO_RUNTIME_ASSERT
 #ifndef NDEBUG
@@ -62,7 +66,7 @@
 #define VSMC_RUNTIME_WARNING_AS_EXCEPTION 0
 #endif
 
-// POSIX
+// OS dependent macros
 
 #ifndef VSMC_OPENCL
 #if defined(__APPLE__) || defined(__MACOSX)
@@ -70,6 +74,9 @@
 #if __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_5
 #ifndef VSMC_HAS_POSIX
 #define VSMC_HAS_POSIX 1
+#endif
+#ifndef VSMC_USE_ACCELERATE
+#define VSMC_USE_ACCELERATE 1
 #endif
 #endif
 #else // __APPLE__
@@ -90,40 +97,42 @@
 #define VSMC_HAS_POSIX 0
 #endif
 
-// Parallelization features
+// Optional libraries
 
 #ifndef VSMC_HAS_OMP
+#ifdef _OPENMP
+#define VSMC_HAS_OMP 1
+#else
 #define VSMC_HAS_OMP 0
 #endif
-
-#ifndef VSMC_HAS_OPENCL
-#define VSMC_HAS_OPENCL 0
-#endif
-
-#ifndef VSMC_HAS_TBB
-#define VSMC_HAS_TBB 0
-#endif
-
-#ifndef VSMC_HAS_TBB_MALLOC
-#define VSMC_HAS_TBB_MALLOC VSMC_HAS_TBB
 #endif
 
 #ifndef VSMC_USE_OMP
 #define VSMC_USE_OMP VSMC_HAS_OMP
 #endif
 
+#ifndef VSMC_HAS_OPENCL
+#define VSMC_HAS_OPENCL 0
+#endif
+
+#ifndef VSMC_HAS_HDF5
+#define VSMC_HAS_HDF5 0
+#endif
+
+#ifndef VSMC_HAS_TBB
+#define VSMC_HAS_TBB 0
+#endif
+
 #ifndef VSMC_USE_TBB
 #define VSMC_USE_TBB VSMC_HAS_TBB
 #endif
 
-#ifndef VSMC_USE_TBB_TLS
-#define VSMC_USE_TBB_TLS VSMC_HAS_TBB
+#ifndef VSMC_USE_TBB_MALLOC
+#define VSMC_USE_TBB_MALLOC VSMC_HAS_TBB
 #endif
 
-// Optional libraries
-
-#ifndef VSMC_HAS_HDF5
-#define VSMC_HAS_HDF5 0
+#ifndef VSMC_USE_TBB_TLS
+#define VSMC_USE_TBB_TLS VSMC_HAS_TBB
 #endif
 
 #ifndef VSMC_HAS_MKL
@@ -132,10 +141,6 @@
 
 #ifndef VSMC_USE_MKL_CBLAS
 #define VSMC_USE_MKL_CBLAS VSMC_HAS_MKL
-#endif
-
-#ifndef VSMC_USE_MKL_LAPACKE
-#define VSMC_USE_MKL_LAPACKE VSMC_HAS_MKL
 #endif
 
 #ifndef VSMC_USE_MKL_VML
@@ -147,15 +152,15 @@
 #endif
 
 #ifndef VSMC_USE_ACCELERATE
-#if defined(__APPLE__) || defined(__MACOSX)
-#define VSMC_USE_ACCELERATE 1
-#else
 #define VSMC_USE_ACCELERATE 0
-#endif
 #endif
 
 #ifndef VSMC_USE_CBLAS
-#define VSMC_USE_CBLAS (VSMC_USE_MKL_CBLAS || VSMC_USE_ACCELERATE)
+#if VSMC_USE_MKL_CBLAS || VSMC_USE_ACCELERATE
+#define VSMC_USE_CBLAS 1
+#else
+#define VSMC_USE_CBLAS 0
+#endif
 #endif
 
 #endif // VSMC_INTERNAL_CONFIG_H
