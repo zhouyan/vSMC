@@ -45,7 +45,10 @@ class PFState : public PFStateBase
     class single_particle_type : public PFStateSPBase<S>
     {
         public:
-        using PFStateSPBase<S>::single_particle_type;
+        single_particle_type(std::size_t id, vsmc::Particle<S> *pptr)
+            : PFStateSPBase<S>(id, pptr)
+        {
+        }
 
         double &pos_x() { return this->state(0); }
         double &pos_y() { return this->state(1); }

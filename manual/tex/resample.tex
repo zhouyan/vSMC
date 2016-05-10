@@ -102,12 +102,12 @@ which will generate $N$ random numbers within $[0, 1]$ such, say
 $\{U_i\}_{i=1}^N$, such that $U_1 \le U_2 \le \dots \le U_N$.
 
 An obvious method is to generate the random numbers first and then sort them.
-However, no sorting algorithm has cost $O(M)$, while it is possible to generate
-such an ordered sequence with cost $O(M)$ by using order statistics. The
-library defines three such sequences. The first is equivalent to sorted i.i.d.\
-random numbers. The second and the third are stratified and systematic,
-respectively. The builtin resampling algorithms are implemented using these
-sequences. For example,
+However, no sorting algorithm has cost $\calO(M)$, while it is possible to
+generate such an ordered sequence with cost $\calO(M)$ by using order
+statistics. The library defines three such sequences. The first is equivalent
+to sorted i.i.d.\ random numbers. The second and the third are stratified and
+systematic, respectively. The builtin resampling algorithms are implemented
+using these sequences. For example,
 \begin{Verbatim}
   using ResampleMultinomial = ResampleAlgorithm<U01SequenceSorted, false>;
   using ResampleResidual = ResampleAlgorithm<U01SequenceSorted, true>;
@@ -115,7 +115,7 @@ sequences. For example,
 If the user is able to define a new ordered random sequence, either through
 sorting or otherwise, then using the \verb|ResampleAlgorithm| template, a new
 resampling algorithm can easily be implemented. Note that, the algorithm
-implemented by this class template always has a cost $O(N + M)$, unless the
+implemented by this class template always has a cost $\calO(N + M)$, unless the
 random sequence has a greater cost.
 
 \section{Algorithms with increasing dimensions}
@@ -123,7 +123,7 @@ random sequence has a greater cost.
 
 In general an \sis algorithm operates on increasing dimensions. Assume that the
 storage cost of a single particle at the marginal ($X_t^{(i)}$) is of order
-$O(1)$. At each iterations $t$, the path $X_{0:t-1}^{(i)}$ is extended to
+$\calO(1)$. At each iterations $t$, the path $X_{0:t-1}^{(i)}$ is extended to
 $X_{0:t}^{(i)}$. The resampling algorithms operate on the space
 $\prod_{k=0}^tE_k$. When the proposal $q_t(\cdot|X_{0:t-1}^{(i)}) =
 q_t(\cdot|X_{t-1}^{(i)})$ and only the marginal $\eta_t(X_t)$ is of interest,
@@ -163,9 +163,9 @@ such that
 $q(\cdot|X_{0:t}^{(i)}) = q(\cdot|\varphi(X_{0:t-1}^{(i)}))$ and
 $W_t(X_{0:t}^{(i)}) = W_t(\phi(X_{0:t}^{(i)}))$. In this case, only the values
 of $\varphi_t(X_{0:t}^{(i)})$ and $\phi_t(X_{0:t}^{(i)})$ need to be resampled
-at every iteration. If they have storage costs at the order of $O(1)$, then the
-total cost of resampling will still be $O(tN)$. See \textcite{stpf} for some
-examples of such algorithms.
+at every iteration. If they have storage costs at the order of $\calO(1)$, then
+the total cost of resampling will still be $O(tN)$. See \textcite{stpf} for
+some examples of such algorithms.
 
 The library provides the following class template for implementing such an
 algorithm.
