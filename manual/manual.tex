@@ -1,4 +1,4 @@
-\documentclass[fontsize=13pt,lines=32,chars=79,bib,showoverfull]{mreport}
+\documentclass[fontsize=13pt,lines=32,chars=79,bib,showoverfull]{mbook}
 
 \title{vSMC -- Scalable Monte Carlo}
 \author{Yan Zhou}
@@ -13,17 +13,17 @@
 
 \mainmatter
 \include{tex/intro}
-\include{tex/basic}
-\include{tex/advanced}
+\include{tex/core}
+\include{tex/smp}
 \include{tex/math}
 \include{tex/rng}
 \include{tex/resample}
+\include{tex/utility}
 \include{tex/bib}
 
 \appendix
 \include{tex/config}
-\include{tex/util}
-\include{tex/perf}
 \include{tex/capi}
+\include{tex/perf}
 
 \end{document}
