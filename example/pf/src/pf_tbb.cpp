@@ -134,7 +134,7 @@ class PFInit : public vsmc::InitializeTBB<PFState, PFInit>
 class PFMove : public vsmc::MoveTBB<PFState, PFMove>
 {
     public:
-    void eval_pre(std::size_t t, vsmc::Particle<PFState> &particle)
+    void eval_pre(std::size_t, vsmc::Particle<PFState> &particle)
     {
         weight_.resize(particle.size());
     }
@@ -152,7 +152,7 @@ class PFMove : public vsmc::MoveTBB<PFState, PFMove>
         return 0;
     }
 
-    void eval_post(std::size_t t, vsmc::Particle<PFState> &particle)
+    void eval_post(std::size_t, vsmc::Particle<PFState> &particle)
     {
         particle.weight().add_log(weight_.data());
     }
@@ -164,8 +164,8 @@ class PFMove : public vsmc::MoveTBB<PFState, PFMove>
 class PFEval : public vsmc::MonitorEvalTBB<PFState, PFEval>
 {
     public:
-    void eval_sp(std::size_t t, std::size_t dim,
-        vsmc::SingleParticle<PFState> sp, double *r)
+    void eval_sp(
+        std::size_t, std::size_t, vsmc::SingleParticle<PFState> sp, double *r)
     {
         r[0] = sp.pos_x();
         r[1] = sp.pos_y();

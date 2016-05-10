@@ -136,7 +136,7 @@ class PFMove
         return 0;
     }
 
-    void eval_pre(std::size_t t, vsmc::Particle<PFState> &particle)
+    void eval_pre(std::size_t, vsmc::Particle<PFState> &particle)
     {
         auto &rng = particle.rng();
         const std::size_t size = particle.size();
@@ -164,7 +164,7 @@ class PFMove
         return 0;
     }
 
-    void eval_post(std::size_t t, vsmc::Particle<PFState> &particle)
+    void eval_post(std::size_t, vsmc::Particle<PFState> &particle)
     {
         particle.weight().add_log(weight_.data());
     }
@@ -189,16 +189,16 @@ class PFEval
         eval_post(t, particle);
     }
 
-    void eval_pre(std::size_t t, vsmc::Particle<PFState> &particle) {}
+    void eval_pre(std::size_t, vsmc::Particle<PFState> &) {}
 
-    void eval_sp(std::size_t t, std::size_t dim,
-        vsmc::SingleParticle<PFState> sp, double *r)
+    void eval_sp(
+        std::size_t, std::size_t, vsmc::SingleParticle<PFState> sp, double *r)
     {
         r[0] = sp.state(PosX);
         r[1] = sp.state(PosY);
     }
 
-    void eval_post(std::size_t t, vsmc::Particle<PFState> &particle) {}
+    void eval_post(std::size_t, vsmc::Particle<PFState> &) {}
 };
 
 int main(int argc, char **argv)
