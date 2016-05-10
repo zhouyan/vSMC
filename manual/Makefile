@@ -1,10 +1,15 @@
-.PHONY : all clean
+.PHONY : all tab fig clean
 
 all :
-	cd prg; ./make.sh pf.pdf
-	cd tab; ./rng_distribution.pl
-	cd tab; ./rng_engine.pl
 	latexmk -silent -f manual.tex >/dev/null
+
+tab :
+	cd tab; ./rng_engine.pl
+	cd tab; ./rng_distribution.pl
+
+fig :
+	cd prg; ./make.sh pf.pdf
+	cp prg/pf.pdf fig/pf.pdf
 
 clean:
 	cd prg; ./make.sh clean
