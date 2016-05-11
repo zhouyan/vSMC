@@ -48,7 +48,7 @@ class InitializeSMPC
         if (work_.eval_sp == nullptr)
             return 0;
 
-        vsmc_single_particle sp_c = {&sp.state(0), sp.id()};
+        vsmc_single_particle sp_c = {&sp(0), sp.id()};
 
         return work_.eval_sp(sp_c);
     }
@@ -95,7 +95,7 @@ class MoveSMPC : public MoveSMP<StateMatrixC, MoveSMPC<Backend>, Backend>
         if (work_.eval_sp == nullptr)
             return 0;
 
-        vsmc_single_particle sp_c = {&sp.state(0), sp.id()};
+        vsmc_single_particle sp_c = {&sp(0), sp.id()};
 
         return work_.eval_sp(iter, sp_c);
     }
@@ -134,7 +134,7 @@ class MonitorEvalSMPC
         if (work_.eval_sp == nullptr)
             return;
 
-        vsmc_single_particle sp_c = {&sp.state(0), sp.id()};
+        vsmc_single_particle sp_c = {&sp(0), sp.id()};
 
         work_.eval_sp(iter, dim, sp_c, r);
     }

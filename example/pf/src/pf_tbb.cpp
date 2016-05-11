@@ -50,10 +50,10 @@ class PFState : public PFStateBase
         {
         }
 
-        double &pos_x() { return this->state(0); }
-        double &pos_y() { return this->state(1); }
-        double &vel_x() { return this->state(2); }
-        double &vel_y() { return this->state(3); }
+        double &pos_x() { return this->operator()(0); }
+        double &pos_y() { return this->operator()(1); }
+        double &vel_x() { return this->operator()(2); }
+        double &vel_y() { return this->operator()(3); }
 
         double log_likelihood(std::size_t t)
         {
@@ -68,12 +68,12 @@ class PFState : public PFStateBase
         private:
         double obs_x(std::size_t t)
         {
-            return this->particle().value().obs_x_[t];
+            return this->particle().state().obs_x_[t];
         }
 
         double obs_y(std::size_t t)
         {
-            return this->particle().value().obs_y_[t];
+            return this->particle().state().obs_y_[t];
         }
     };
 
@@ -104,7 +104,7 @@ class PFInit : public vsmc::InitializeTBB<PFState, PFInit>
     public:
     void eval_param(vsmc::Particle<PFState> &particle, void *param)
     {
-        particle.value().read_data(static_cast<const char *>(param));
+        particle.state().read_data(static_cast<const char *>(param));
     }
 
     void eval_pre(vsmc::Particle<PFState> &particle)
@@ -188,7 +188,7 @@ int main(int argc, char **argv)
     vsmc::StopWatch watch;
     watch.start();
     sampler.initialize(const_cast<char *>("pf.data"));
-    sampler.iterate(sampler.particle().value().data_size() - 1);
+    sampler.iterate(sampler.particle().state().data_size() - 1);
     watch.stop();
     std::cout << "Time (ms): " << watch.milliseconds() << std::endl;
 

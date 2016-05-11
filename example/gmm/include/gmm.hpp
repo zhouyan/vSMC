@@ -283,7 +283,7 @@ class GMM : public GMMBase
     {
         comp_num_ = num;
         for (std::size_t i = 0; i != this->size(); ++i)
-            this->state(i, 0).comp_num(num);
+            this->operator()(i, 0).comp_num(num);
     }
 
     double update_log_prior(GMMState &state) const
@@ -365,15 +365,15 @@ class GMMInit : public vsmc::InitializeSMP<GMM, GMMInit<Backend>, Backend>
     public:
     void eval_pre(vsmc::Particle<GMM> &particle)
     {
-        particle.value().initialize();
-        particle.value().alpha(0);
+        particle.state().initialize();
+        particle.state().alpha(0);
         particle.weight().set_equal();
     }
 
     std::size_t eval_sp(vsmc::SingleParticle<GMM> sp)
     {
-        const GMM &gmm = sp.particle().value();
-        GMMState &state = sp.state(0);
+        const GMM &gmm = sp.particle().state();
+        GMMState &state = sp(0);
 
         std::normal_distribution<double> rmu(gmm.mu0(), gmm.sd0());
         std::gamma_distribution<double> rlambda(gmm.shape0(), gmm.scale0());
@@ -411,16 +411,16 @@ class GMMMoveSMC
     {
         alpha_setter_(iter, particle);
 
-        double alpha = particle.value().alpha();
+        double alpha = particle.state().alpha();
         alpha = alpha < 0.02 ? 0.02 : alpha;
-        particle.value().mu_sd(0.15 / alpha);
-        particle.value().lambda_sd((1 + std::sqrt(1 / alpha)) * 0.15);
-        particle.value().weight_sd((1 + std::sqrt(1 / alpha)) * 0.2);
+        particle.state().mu_sd(0.15 / alpha);
+        particle.state().lambda_sd((1 + std::sqrt(1 / alpha)) * 0.15);
+        particle.state().weight_sd((1 + std::sqrt(1 / alpha)) * 0.2);
 
         w_.resize(particle.size());
-        double coeff = particle.value().alpha_inc();
+        double coeff = particle.state().alpha_inc();
         for (std::size_t i = 0; i != particle.size(); ++i)
-            w_[i] = coeff * particle.value().state(i, 0).log_likelihood();
+            w_[i] = coeff * particle.state()(i, 0).log_likelihood();
         particle.weight().add_log(w_.data());
 
         return 0;
@@ -437,8 +437,8 @@ class GMMMoveMu : public vsmc::MoveSMP<GMM, GMMMoveMu<Backend>, Backend>
     public:
     std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
     {
-        const GMM &gmm = sp.particle().value();
-        GMMState &state = sp.state(0);
+        const GMM &gmm = sp.particle().state();
+        GMMState &state = sp(0);
 
         std::normal_distribution<double> rmu(0, gmm.mu_sd());
         std::uniform_real_distribution<double> runif(0, 1);
@@ -462,8 +462,8 @@ class GMMMoveLambda
     public:
     std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
     {
-        const GMM &gmm = sp.particle().value();
-        GMMState &state = sp.state(0);
+        const GMM &gmm = sp.particle().state();
+        GMMState &state = sp(0);
 
         std::lognormal_distribution<double> rlambda(0, gmm.lambda_sd());
         std::uniform_real_distribution<double> runif(0, 1);
@@ -487,8 +487,8 @@ class GMMMoveWeight
     public:
     std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
     {
-        const GMM &gmm = sp.particle().value();
-        GMMState &state = sp.state(0);
+        const GMM &gmm = sp.particle().state();
+        GMMState &state = sp(0);
 
         std::normal_distribution<double> rweight(0, gmm.weight_sd());
         std::uniform_real_distribution<double> runif(0, 1);
@@ -522,7 +522,7 @@ class GMMPathIntegrand
     void eval_sp(
         std::size_t, std::size_t, vsmc::SingleParticle<GMM> sp, double *res)
     {
-        *res = sp.state(0).log_likelihood();
+        *res = sp(0).log_likelihood();
     }
 }; // class GMMPathIntegrand
 
@@ -532,7 +532,7 @@ class GMMPathGrid
     void operator()(
         std::size_t, std::size_t, vsmc::Particle<GMM> &particle, double *res)
     {
-        *res = particle.value().alpha();
+        *res = particle.state().alpha();
     }
 }; // class GMMPathGrid
 
@@ -543,7 +543,7 @@ class GMMAlphaLinear
 
     void operator()(std::size_t iter, vsmc::Particle<GMM> &particle) const
     {
-        particle.value().alpha(static_cast<double>(iter) / iter_num_);
+        particle.state().alpha(static_cast<double>(iter) / iter_num_);
     }
 
     private:
@@ -564,7 +564,7 @@ class GMMAlphaPrior
         double alpha = 1;
         for (std::size_t p = 0; p != power_; ++p)
             alpha *= base;
-        particle.value().alpha(alpha);
+        particle.state().alpha(alpha);
     }
 
     private:

@@ -51,15 +51,15 @@ inline ResampleState<Layout> resample_index_fixed(
         const auto &val = value[d];
         const auto &idx = index[d];
         for (std::size_t i = 0; i != N; ++i)
-            state.state(i, d) = val[i];
+            state(i, d) = val[i];
         if (Layout == vsmc::RowMajor)
             for (std::size_t i = 0; i != N; ++i)
                 for (std::size_t j = 0; j != d + 1; ++j)
-                    state.state(i, j) = state.state(idx[i], j);
+                    state(i, j) = state(idx[i], j);
         if (Layout == vsmc::ColMajor)
             for (std::size_t j = 0; j != d + 1; ++j)
                 for (std::size_t i = 0; i != N; ++i)
-                    state.state(i, j) = state.state(idx[i], j);
+                    state(i, j) = state(idx[i], j);
     }
     watch.stop();
     std::cout << std::setw(60) << std::left << "Time (ms) using direct copy"
@@ -87,16 +87,16 @@ inline ResampleState<Layout> resample_index_rands(
         const auto &idx = index[d];
         state.resize_dim(d + 1);
         for (std::size_t i = 0; i != size[d]; ++i)
-            state.state(i, d) = val[i];
+            state(i, d) = val[i];
         tmp.resize(size[d + 1], d + 1);
         if (Layout == vsmc::RowMajor)
             for (std::size_t i = 0; i != size[d + 1]; ++i)
                 for (std::size_t j = 0; j != d + 1; ++j)
-                    tmp.state(i, j) = state.state(idx[i], j);
+                    tmp(i, j) = state(idx[i], j);
         if (Layout == vsmc::ColMajor)
             for (std::size_t j = 0; j != d + 1; ++j)
                 for (std::size_t i = 0; i != size[d + 1]; ++i)
-                    tmp.state(i, j) = state.state(idx[i], j);
+                    tmp(i, j) = state(idx[i], j);
         state = std::move(tmp);
     }
     watch.stop();
@@ -129,7 +129,7 @@ inline ResampleState<Layout> resample_index_trace(
     for (std::size_t j = 0; j != dim; ++j) {
         auto val = value[j].data();
         for (std::size_t i = 0; i != N; ++i)
-            state.state(i, j) = val[idxmat.state(i, j)];
+            state(i, j) = val[idxmat(i, j)];
     }
     watch.stop();
     std::cout << std::setw(60) << std::left << "Time (ms) using index trace"
@@ -152,7 +152,7 @@ inline bool resample_index_check(
     const std::size_t dim = state1.dim();
     for (std::size_t i = 0; i != N; ++i)
         for (std::size_t j = 0; j != dim; ++j)
-            if (state1.state(i, j) != state2.state(i, j))
+            if (state1(i, j) != state2(i, j))
                 return false;
 
     return true;

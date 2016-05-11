@@ -57,10 +57,10 @@ class PFCV : public PFCVBase<Layout>
         {
         }
 
-        double &pos_x() { return this->state(0); }
-        double &pos_y() { return this->state(1); }
-        double &vel_x() { return this->state(2); }
-        double &vel_y() { return this->state(3); }
+        double &pos_x() { return this->operator()(0); }
+        double &pos_y() { return this->operator()(1); }
+        double &vel_x() { return this->operator()(2); }
+        double &vel_y() { return this->operator()(3); }
 
         double log_likelihood(std::size_t iter)
         {
@@ -68,9 +68,9 @@ class PFCV : public PFCVBase<Layout>
             const double nu = 10;
 
             double llh_x =
-                scale * (pos_x() - this->particle().value().obs_x(iter));
+                scale * (pos_x() - this->particle().state().obs_x(iter));
             double llh_y =
-                scale * (pos_y() - this->particle().value().obs_y(iter));
+                scale * (pos_y() - this->particle().state().obs_y(iter));
 
             llh_x = std::log(1 + llh_x * llh_x / nu);
             llh_y = std::log(1 + llh_y * llh_y / nu);
@@ -112,7 +112,7 @@ class PFCVInit : public vsmc::InitializeSMP<PFCV<Layout, RNGSetType>,
     public:
     void eval_pre(vsmc::Particle<PFCV<Layout, RNGSetType>> &particle)
     {
-        particle.value().initialize();
+        particle.state().initialize();
         w_.resize(particle.size());
     }
 
@@ -214,13 +214,13 @@ class PFCVMove<Backend, vsmc::ColMajor, RNGSetType>
         vsmc::NormalDistribution<double> normal_vel(0, sd_vel);
 
         double *const pos_x =
-            range.particle().value().col_data(0) + range.begin();
+            range.particle().state().col_data(0) + range.begin();
         double *const pos_y =
-            range.particle().value().col_data(1) + range.begin();
+            range.particle().state().col_data(1) + range.begin();
         double *const vel_x =
-            range.particle().value().col_data(2) + range.begin();
+            range.particle().state().col_data(2) + range.begin();
         double *const vel_y =
-            range.particle().value().col_data(3) + range.begin();
+            range.particle().state().col_data(3) + range.begin();
         double *const w = w_.data() + range.begin();
         double *const v = v_.data() + range.begin();
 
@@ -239,8 +239,8 @@ class PFCVMove<Backend, vsmc::ColMajor, RNGSetType>
 
         const double scale = 10;
         const double nu = 10;
-        vsmc::sub(n, pos_x, range.particle().value().obs_x(iter), w);
-        vsmc::sub(n, pos_y, range.particle().value().obs_y(iter), v);
+        vsmc::sub(n, pos_x, range.particle().state().obs_x(iter), w);
+        vsmc::sub(n, pos_y, range.particle().state().obs_y(iter), v);
         vsmc::mul(n, scale, w, w);
         vsmc::mul(n, scale, v, v);
         vsmc::sqr(n, w, w);
@@ -309,7 +309,7 @@ inline void pf_cv_run(std::size_t N, int nwid, int twid)
     sampler.monitor("pos").name(1) = "pos.y";
     sampler.initialize();
 
-    const std::size_t n = sampler.particle().value().n();
+    const std::size_t n = sampler.particle().state().n();
     const std::string smp(pf_backend_name<Backend>());
     const std::string res(pf_scheme_name<Scheme>());
     const std::string rc(pf_layout_name<Layout>());

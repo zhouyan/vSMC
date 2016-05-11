@@ -192,8 +192,8 @@ void vsmc_particle_resize_by_uniform(vsmc_particle particle, size_t n);
 void vsmc_particle_resize_by_ragne(
     vsmc_particle particle, size_t n, size_t first, size_t last);
 
-/// \brief `vsmc:Particle::value`
-vsmc_state_matrix vsmc_particle_value(vsmc_particle particle);
+/// \brief `vsmc:Particle::state`
+vsmc_state_matrix vsmc_particle_state(vsmc_particle particle);
 
 /// \brief `vsmc:Particle::weight`
 vsmc_weight vsmc_particle_weight(vsmc_particle particle);

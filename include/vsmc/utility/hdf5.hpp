@@ -562,7 +562,7 @@ inline void hdf5store(const Particle<T> &particle, const std::string &filename,
     const std::string &dataname, bool append)
 {
     hdf5store(filename, dataname, append);
-    hdf5store(particle.value(), filename, dataname + "/Value", true);
+    hdf5store(particle.state(), filename, dataname + "/State", true);
     hdf5store(static_cast<std::size_t>(particle.weight().size()),
         particle.weight().data(), filename, dataname + "/Weight", true);
 }

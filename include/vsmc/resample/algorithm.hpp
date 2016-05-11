@@ -141,7 +141,7 @@ class ResampleMove
         Vector<size_type> idx(N);
         eval_(N, N, particle.rng(), particle.weight().data(), rep.data());
         resample_trans_rep_index(N, N, rep.data(), idx.data());
-        particle.value().copy(N, idx.data());
+        particle.state().copy(N, idx.data());
         particle.weight().set_equal();
 
         std::size_t R = 0;

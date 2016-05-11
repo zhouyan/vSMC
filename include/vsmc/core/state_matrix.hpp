@@ -86,7 +86,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
 {
     public:
     using size_type = std::size_t;
-    using state_type = T;
+    using value_type = T;
     using pack_type = Vector<T>;
 
     template <typename S>
@@ -99,11 +99,11 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         {
         }
 
-        std::size_t dim() const { return this->particle().value().dim(); }
+        std::size_t dim() const { return this->particle().state().dim(); }
 
-        state_type &state(std::size_t pos) const
+        value_type &operator()(std::size_t pos) const
         {
-            return this->particle().value().state(
+            return this->particle().state()(
                 static_cast<size_type>(this->id()), pos);
         }
     }; // class single_particle_type
@@ -125,9 +125,9 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
 
     void shrink_to_fit() { data_.shrink_to_fit(); }
 
-    state_type *data() { return data_.data(); }
+    value_type *data() { return data_.data(); }
 
-    const state_type *data() const { return data_.data(); }
+    const value_type *data() const { return data_.data(); }
 
     void swap(StateMatrixBase<Layout, Dim, T> &other) noexcept
     {
@@ -210,7 +210,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     public:
     using state_matrix_base_type = StateMatrixBase<RowMajor, Dim, T>;
     using size_type = typename state_matrix_base_type::size_type;
-    using state_type = typename state_matrix_base_type::state_type;
+    using value_type = typename state_matrix_base_type::value_type;
     using pack_type = typename state_matrix_base_type::pack_type;
 
     explicit StateMatrix(size_type N = 0) : state_matrix_base_type(N) {}
@@ -235,12 +235,12 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         resize_both(this->size(), dim);
     }
 
-    T &state(size_type id, std::size_t pos)
+    T &operator()(size_type id, std::size_t pos)
     {
         return this->data()[id * this->dim() + pos];
     }
 
-    const T &state(size_type id, std::size_t pos) const
+    const T &operator()(size_type id, std::size_t pos) const
     {
         return this->data()[id * this->dim() + pos];
     }
@@ -249,7 +249,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     OutputIter read_state(std::size_t pos, OutputIter first) const
     {
         for (size_type i = 0; i != this->size(); ++i, ++first)
-            *first = state(i, pos);
+            *first = operator()(i, pos);
 
         return first;
     }
@@ -263,17 +263,17 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         if (layout == ColMajor)
             for (std::size_t d = 0; d != this->dim(); ++d)
                 for (size_type i = 0; i != this->size(); ++i, ++first)
-                    *first = state(i, d);
+                    *first = operator()(i, d);
 
         return first;
     }
 
-    state_type *row_data(size_type id)
+    value_type *row_data(size_type id)
     {
         return this->data() + id * this->dim();
     }
 
-    const state_type *row_data(size_type id) const
+    const value_type *row_data(size_type id) const
     {
         return this->data() + id * this->dim();
     }
@@ -329,7 +329,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
             pack.size(), this->dim());
 
-        const state_type *ptr = pack.data();
+        const value_type *ptr = pack.data();
         std::copy(ptr, ptr + this->dim(), row_data(id));
     }
 
@@ -338,7 +338,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
             pack.size(), this->dim());
 
-        const state_type *ptr = pack.data();
+        const value_type *ptr = pack.data();
         std::move(ptr, ptr + this->dim(), row_data(id));
     }
 
@@ -375,13 +375,13 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     }
 
     template <std::size_t D>
-    void copy_particle_pos(const state_type *, state_type *, std::false_type)
+    void copy_particle_pos(const value_type *, value_type *, std::false_type)
     {
     }
 
     template <std::size_t D>
     void copy_particle_pos(
-        const state_type *src, state_type *dst, std::true_type)
+        const value_type *src, value_type *dst, std::true_type)
     {
         dst[D] = src[D];
         copy_particle_pos<D + 1>(
@@ -397,7 +397,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     public:
     using state_matrix_base_type = StateMatrixBase<ColMajor, Dim, T>;
     using size_type = typename state_matrix_base_type::size_type;
-    using state_type = typename state_matrix_base_type::state_type;
+    using value_type = typename state_matrix_base_type::value_type;
     using pack_type = typename state_matrix_base_type::pack_type;
 
     explicit StateMatrix(size_type N = 0) : state_matrix_base_type(N) {}
@@ -422,12 +422,12 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         resize_both(this->size(), dim);
     }
 
-    T &state(size_type id, std::size_t pos)
+    T &operator()(size_type id, std::size_t pos)
     {
         return this->data()[pos * this->size() + id];
     }
 
-    const T &state(size_type id, std::size_t pos) const
+    const T &operator()(size_type id, std::size_t pos) const
     {
         return this->data()[pos * this->size() + id];
     }
@@ -444,7 +444,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         if (layout == RowMajor)
             for (size_type i = 0; i != this->size(); ++i)
                 for (std::size_t d = 0; d != this->size(); ++d, ++first)
-                    *first = state(i, d);
+                    *first = operator()(i, d);
 
         if (layout == ColMajor)
             first = std::copy_n(this->data(), this->data_size(), first);
@@ -452,12 +452,12 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         return first;
     }
 
-    state_type *col_data(std::size_t pos)
+    value_type *col_data(std::size_t pos)
     {
         return this->data() + pos * this->size();
     }
 
-    const state_type *col_data(std::size_t pos) const
+    const value_type *col_data(std::size_t pos) const
     {
         return this->data() + pos * this->size();
     }
@@ -485,8 +485,10 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         if (n == this->size()) {
             for (std::size_t d = 0; d != this->dim(); ++d) {
                 idx = index;
-                for (size_type dst = 0; dst != n; ++dst, ++idx)
-                    state(dst, d) = state(static_cast<size_type>(*idx), d);
+                for (size_type dst = 0; dst != n; ++dst, ++idx) {
+                    operator()(dst, d) = operator()(
+                        static_cast<size_type>(*idx), d);
+                }
             }
         } else {
             StateMatrix<ColMajor, Dim, T> tmp;
@@ -494,7 +496,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
             for (std::size_t d = 0; d != this->dim(); ++d) {
                 idx = index;
                 for (size_type dst = 0; dst != n; ++dst, ++idx)
-                    tmp.state(dst, d) = state(static_cast<size_type>(*idx), d);
+                    tmp(dst, d) = operator()(static_cast<size_type>(*idx), d);
             }
             *this = std::move(tmp);
         }
@@ -515,7 +517,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     {
         pack_type pack(this->dim());
         for (std::size_t d = 0; d != this->dim(); ++d)
-            pack[d] = state(id, d);
+            pack[d] = operator()(id, d);
 
         return pack;
     }
@@ -526,7 +528,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
             pack.size(), this->dim());
 
         for (std::size_t d = 0; d != this->dim(); ++d)
-            state(id, d) = pack[d];
+            operator()(id, d) = pack[d];
     }
 
     void state_unpack(size_type id, pack_type &&pack)
@@ -535,7 +537,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
             pack.size(), this->dim());
 
         for (std::size_t d = 0; d != this->dim(); ++d)
-            state(id, d) = std::move(pack[d]);
+            operator()(id, d) = std::move(pack[d]);
     }
 
     private:
@@ -562,7 +564,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     void copy_particle_dispatch(size_type src, size_type dst, std::true_type)
     {
         for (std::size_t d = 0; d != this->dim(); ++d)
-            state(dst, d) = state(src, d);
+            operator()(dst, d) = operator()(src, d);
     }
 
     void copy_particle_dispatch(size_type src, size_type dst, std::false_type)
@@ -572,13 +574,13 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     }
 
     template <std::size_t D>
-    void copy_particle_pos(const state_type *, state_type *, std::false_type)
+    void copy_particle_pos(const value_type *, value_type *, std::false_type)
     {
     }
 
     template <std::size_t D>
     void copy_particle_pos(
-        const state_type *src, state_type *dst, std::true_type)
+        const value_type *src, value_type *dst, std::true_type)
     {
         dst[D * this->size()] = src[D * this->size()];
         copy_particle_pos<D + 1>(

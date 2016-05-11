@@ -81,13 +81,13 @@ void vsmc_state_matrix_shrink_to_fit(vsmc_state_matrix state_matrix)
 double vsmc_state_matrix_get(
     vsmc_state_matrix state_matrix, size_t id, size_t pos)
 {
-    return ::vsmc::cast(state_matrix).state(id, pos);
+    return ::vsmc::cast(state_matrix)(id, pos);
 }
 
 void vsmc_state_matrix_set(
     vsmc_state_matrix state_matrix, size_t id, size_t pos, double state)
 {
-    ::vsmc::cast(state_matrix).state(id, pos) = state;
+    ::vsmc::cast(state_matrix)(id, pos) = state;
 }
 
 double *vsmc_state_matrix_data(vsmc_state_matrix state_matrix)

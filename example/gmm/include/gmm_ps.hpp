@@ -47,7 +47,7 @@ inline void gmm_ps_run(
     vsmc::Seed::instance().set(101);
     vsmc::Sampler<GMM> sampler(N);
     sampler.resample_method(vsmc::Stratified, 0.5);
-    sampler.particle().value().comp_num(c);
+    sampler.particle().state().comp_num(c);
     sampler.init(GMMInit<Backend>());
     sampler.move(GMMMoveSMC(alpha_setter), false);
     sampler.mcmc(GMMMoveMu<Backend>(), false);

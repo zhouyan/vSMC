@@ -84,14 +84,14 @@ class Particle
 {
     public:
     using size_type = SizeType<T>;
-    using value_type = T;
+    using state_type = T;
     using weight_type = WeightType<T>;
     using rng_set_type = RNGSetType<T>;
     using rng_type = typename rng_set_type::rng_type;
     using sp_type = SingleParticle<T>;
     using range_type = ParticleRange<T>;
 
-    Particle() : size_(0), value_(0), weight_(0), rng_set_(0)
+    Particle() : size_(0), state_(0), weight_(0), rng_set_(0)
     {
         Seed::instance()(rng_);
     }
@@ -99,7 +99,7 @@ class Particle
     template <typename... Args>
     explicit Particle(size_type N, Args &&... args)
         : size_(N)
-        , value_(N, std::forward<Args>(args)...)
+        , state_(N, std::forward<Args>(args)...)
         , weight_(static_cast<SizeType<weight_type>>(N))
         , rng_set_(static_cast<SizeType<rng_set_type>>(N))
     {
@@ -130,7 +130,7 @@ class Particle
     {
         if (this != &other) {
             size_ = other.size_;
-            value_ = other.value_;
+            state_ = other.state_;
             weight_ = other.weight_;
 
             if (!retain_rng) {
@@ -146,7 +146,7 @@ class Particle
     {
         if (this != &other) {
             size_ = other.size_;
-            value_ = std::move(other.value_);
+            state_ = std::move(other.state_);
             weight_ = std::move(other.weight_);
 
             if (!retain_rng) {
@@ -269,11 +269,11 @@ class Particle
         resize(N, idx.data());
     }
 
-    /// \brief Read and write access to the value collection object
-    value_type &value() { return value_; }
+    /// \brief Read and write access to the state collection object
+    state_type &state() { return state_; }
 
-    /// \brief Read only access to the value collection object
-    const value_type &value() const { return value_; }
+    /// \brief Read only access to the state collection object
+    const state_type &state() const { return state_; }
 
     /// \brief Read and write access to the weight collection object
     weight_type &weight() { return weight_; }
@@ -327,7 +327,7 @@ class Particle
     static constexpr std::size_t M_ = internal::BufferSize<size_type>::value;
 
     size_type size_;
-    value_type value_;
+    state_type state_;
     weight_type weight_;
     rng_set_type rng_set_;
     rng_type rng_;
@@ -335,7 +335,7 @@ class Particle
     void resize(size_type N, const size_type *idx)
     {
         size_ = N;
-        value_.copy(N, idx);
+        state_.copy(N, idx);
         weight_.resize(static_cast<SizeType<weight_type>>(N));
         rng_set_.resize(static_cast<SizeType<rng_set_type>>(N));
     }

@@ -45,8 +45,8 @@ class PFState : public PFStateBase
 
     double log_likelihood(std::size_t t, size_type i) const
     {
-        double llh_x = 10 * (this->state(i, PosX) - obs_x_[t]);
-        double llh_y = 10 * (this->state(i, PosY) - obs_y_[t]);
+        double llh_x = 10 * (this->operator()(i, PosX) - obs_x_[t]);
+        double llh_y = 10 * (this->operator()(i, PosY) - obs_y_[t]);
         llh_x = std::log(1 + llh_x * llh_x / 10);
         llh_y = std::log(1 + llh_y * llh_y / 10);
 
@@ -92,7 +92,7 @@ class PFInit
 
     void eval_param(vsmc::Particle<PFState> &particle, void *param)
     {
-        particle.value().read_data(static_cast<const char *>(param));
+        particle.state().read_data(static_cast<const char *>(param));
     }
 
     void eval_pre(vsmc::Particle<PFState> &particle)
@@ -104,11 +104,11 @@ class PFInit
     {
         vsmc::NormalDistribution<double> norm_pos(0, 2);
         vsmc::NormalDistribution<double> norm_vel(0, 1);
-        sp.state(PosX) = norm_pos(sp.rng());
-        sp.state(PosY) = norm_pos(sp.rng());
-        sp.state(VelX) = norm_vel(sp.rng());
-        sp.state(VelY) = norm_vel(sp.rng());
-        weight_[sp.id()] = sp.particle().value().log_likelihood(0, sp.id());
+        sp(PosX) = norm_pos(sp.rng());
+        sp(PosY) = norm_pos(sp.rng());
+        sp(VelX) = norm_vel(sp.rng());
+        sp(VelY) = norm_vel(sp.rng());
+        weight_[sp.id()] = sp.particle().state().log_likelihood(0, sp.id());
 
         return 0;
     }
@@ -155,11 +155,11 @@ class PFMove
 
     std::size_t eval_sp(std::size_t t, vsmc::SingleParticle<PFState> sp)
     {
-        sp.state(PosX) += pos_x_[sp.id()] + 0.1 * sp.state(VelX);
-        sp.state(PosY) += pos_y_[sp.id()] + 0.1 * sp.state(VelY);
-        sp.state(VelX) += vel_x_[sp.id()];
-        sp.state(VelY) += vel_y_[sp.id()];
-        weight_[sp.id()] = sp.particle().value().log_likelihood(t, sp.id());
+        sp(PosX) += pos_x_[sp.id()] + 0.1 * sp(VelX);
+        sp(PosY) += pos_y_[sp.id()] + 0.1 * sp(VelY);
+        sp(VelX) += vel_x_[sp.id()];
+        sp(VelY) += vel_y_[sp.id()];
+        weight_[sp.id()] = sp.particle().state().log_likelihood(t, sp.id());
 
         return 0;
     }
@@ -194,8 +194,8 @@ class PFEval
     void eval_sp(
         std::size_t, std::size_t, vsmc::SingleParticle<PFState> sp, double *r)
     {
-        r[0] = sp.state(PosX);
-        r[1] = sp.state(PosY);
+        r[0] = sp(PosX);
+        r[1] = sp(PosY);
     }
 
     void eval_post(std::size_t, vsmc::Particle<PFState> &) {}
@@ -214,7 +214,7 @@ int main(int argc, char **argv)
     vsmc::StopWatch watch;
     watch.start();
     sampler.initialize(const_cast<char *>("pf.data"));
-    sampler.iterate(sampler.particle().value().data_size() - 1);
+    sampler.iterate(sampler.particle().state().data_size() - 1);
     watch.stop();
     std::cout << "Time (ms): " << watch.milliseconds() << std::endl;
 

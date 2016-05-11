@@ -116,34 +116,25 @@ void vsmc_particle_resize_by_ragne(
     ::vsmc::cast(particle).resize_by_range(n, first, last);
 }
 
-vsmc_state_matrix vsmc_particle_value(vsmc_particle particle)
+vsmc_state_matrix vsmc_particle_state(vsmc_particle particle)
 {
-    vsmc_state_matrix value = {&::vsmc::cast(particle).value()};
-
-    return value;
+    return {&::vsmc::cast(particle).state()};
 }
 
 vsmc_weight vsmc_particle_weight(vsmc_particle particle)
 {
-    vsmc_weight weight = {&::vsmc::cast(particle).weight()};
-
-    return weight;
+    return {&::vsmc::cast(particle).weight()};
 }
 
 vsmc_rng vsmc_particle_rng(vsmc_particle particle, size_t id)
 {
-    vsmc_rng rng = {&::vsmc::cast(particle).rng(id),
+    return {&::vsmc::cast(particle).rng(id),
         ::vsmc::rng_type<::vsmc::ParticleC::rng_type>()};
-
-    return rng;
 }
 
 vsmc_single_particle vsmc_particle_sp(vsmc_particle particle, size_t id)
 {
-    vsmc_single_particle sp = {
-        ::vsmc::cast(particle).value().row_data(id), id};
-
-    return sp;
+    return {::vsmc::cast(particle).state().row_data(id), id};
 }
 
 } // extern "C"
