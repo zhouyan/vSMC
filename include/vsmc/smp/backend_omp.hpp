@@ -55,42 +55,11 @@ inline void backend_omp_range(IntType N, IntType &begin, IntType &end)
 
 } // namespace vsmc::internal
 
-/// \brief Sampler<T>::init_type subtype using OpenMP
+/// \brief Sampler<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-class InitializeSMP<T, Derived, BackendOMP> : public InitializeBase<T, Derived>
-{
-    public:
-    std::size_t operator()(Particle<T> &particle, void *param)
-    {
-        using size_type = typename Particle<T>::size_type;
-
-        this->eval_param(particle, param);
-        this->eval_pre(particle);
-        std::size_t accept = 0;
-        Particle<T> *pptr = &particle;
-#pragma omp parallel default(none) shared(accept) firstprivate(pptr)
-        {
-            size_type begin = 0;
-            size_type end = 0;
-            internal::backend_omp_range(pptr->size(), begin, end);
-            std::size_t acc = this->eval_range(pptr->range(begin, end));
-#pragma omp atomic
-            accept += acc;
-        }
-        this->eval_post(particle);
-
-        return accept;
-    }
-
-    protected:
-    VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, Initialize)
-}; // class InitializeSMP
-
-/// \brief Sampler<T>::move_type subtype using OpenMP
-/// \ingroup OMP
-template <typename T, typename Derived>
-class MoveSMP<T, Derived, BackendOMP> : public MoveBase<T, Derived>
+class SamplerEvalSMP<T, Derived, BackendOMP>
+    : public SamplerEvalBase<T, Derived>
 {
     public:
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
@@ -115,8 +84,8 @@ class MoveSMP<T, Derived, BackendOMP> : public MoveBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, Move)
-}; // class MoveSMP
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, SamplerEval)
+}; // class SamplerEvalSMP
 
 /// \brief Monitor<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
@@ -147,15 +116,10 @@ class MonitorEvalSMP<T, Derived, BackendOMP>
     VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, MonitorEval)
 }; // class MonitorEvalSMP
 
-/// \brief Sampler<T>::init_type subtype using OpenMP
+/// \brief Sampler<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-using InitializeOMP = InitializeSMP<T, Derived, BackendOMP>;
-
-/// \brief Sampler<T>::move_type subtype using OpenMP
-/// \ingroup OMP
-template <typename T, typename Derived>
-using MoveOMP = MoveSMP<T, Derived, BackendOMP>;
+using SamplerEvalOMP = SamplerEvalSMP<T, Derived, BackendOMP>;
 
 /// \brief Monitor<T>::eval_type subtype using OpenMP
 /// \ingroup OMP

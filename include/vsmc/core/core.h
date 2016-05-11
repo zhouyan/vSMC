@@ -169,7 +169,7 @@ void vsmc_particle_delete(vsmc_particle *particle_ptr);
 void vsmc_particle_assign(vsmc_particle particle, vsmc_particle other);
 
 /// \brief `vsmc::Particle::clone`
-vsmc_particle vsmc_particle_clone(vsmc_particle particle, int new_rng);
+vsmc_particle vsmc_particle_clone(vsmc_particle particle);
 
 /// \brief `vsmc::Particle::size`
 size_t vsmc_particle_size(vsmc_particle particle);
@@ -252,25 +252,16 @@ void vsmc_monitor_read_record(vsmc_monitor monitor, size_t id, double *first);
 void vsmc_monitor_read_record_matrix(
     vsmc_monitor monitor, vSMCMatrixLayout layout, double *first);
 
-/// \brief `vsmc::Monitor::set_eval`
-void vsmc_monitor_set_eval(
-    vsmc_monitor monitor, vsmc_monitor_eval_type new_eval);
-
 /// \brief `vsmc::Monitor::eval`
-void vsmc_monitor_eval(vsmc_monitor monitor, size_t iter,
+void vsmc_monitor_eval(vsmc_monitor monitor, vsmc_monitor_eval_type new_eval,
+    int record_only, vSMCMonitorStage stage);
+
+/// \brief `vsmc::Monitor::operator()`
+void vsmc_monitor_compute(vsmc_monitor monitor, size_t iter,
     vsmc_particle particle, vSMCMonitorStage stage);
 
 /// \brief `vsmc::Monitor::clear`
 void vsmc_monitor_clear(vsmc_monitor monitor);
-
-/// \brief `vsmc::Monitor::recording`
-int vsmc_monitor_recording(vsmc_monitor monitor);
-
-/// \brief `vsmc::Monitor::turn_on`
-void vsmc_monitor_turn_on(vsmc_monitor monitor);
-
-/// \brief `vsmc::Monitor::turn_off`
-void vsmc_monitor_turn_off(vsmc_monitor monitor);
 
 /// @} C_API_Core_Monitor
 
@@ -287,7 +278,7 @@ void vsmc_sampler_delete(vsmc_sampler *sampler_ptr);
 void vsmc_sampler_assign(vsmc_sampler sampler, vsmc_sampler other);
 
 /// \brief `vsmc::Sampler::clone`
-vsmc_sampler vsmc_sampler_clone(vsmc_sampler sampler, int new_rng);
+vsmc_sampler vsmc_sampler_clone(vsmc_sampler sampler);
 
 /// \brief `vsmc::Sampler::size`
 size_t vsmc_sampler_size(vsmc_sampler sampler);
@@ -301,16 +292,17 @@ size_t vsmc_sampler_iter_size(vsmc_sampler sampler);
 /// \brief `vsmc::Sampler::iter_num`
 size_t vsmc_sampler_iter_num(vsmc_sampler sampler);
 
-/// \brief `vsmc::Sampler::resample`
-void vsmc_sampler_resample(vsmc_sampler sampler);
+/// \brief `vsmc::Sampler::eval`
+void vsmc_sampler_eval(vsmc_sampler sampler, vsmc_sampler_eval_type new_eval,
+    vSMCSamplerStage stage, int append);
 
 /// \brief `vsmc::Sampler::resample_method`
 void vsmc_sampler_resample_scheme(
     vsmc_sampler sampler, vSMCResampleScheme scheme, double threshold);
 
 /// \brief `vsmc::Sampler::resample_method`
-void vsmc_sampler_resample_move(
-    vsmc_sampler sampler, vsmc_sampler_move_type res_move, double threshold);
+void vsmc_sampler_resample_eval(
+    vsmc_sampler sampler, vsmc_sampler_eval_type res_move, double threshold);
 
 /// \brief `vsmc::Sampler::threshold`
 double vsmc_sampler_get_threshold(vsmc_sampler sampler);
@@ -323,6 +315,28 @@ double vsmc_sampler_resample_threshold_never(void);
 
 /// \brief `vsmc::Sampler::threshold_always`
 double vsmc_sampler_resample_threshold_always(void);
+
+/// \brief `vsmc::Sampler::monitor`
+void vsmc_sampler_set_monitor(
+    vsmc_sampler sampler, const char *name, vsmc_monitor mon);
+
+/// \brief `vsmc::Sampler::monitor`
+vsmc_monitor vsmc_sampler_get_monitor(vsmc_sampler sampler, const char *name);
+
+/// \brief `vsmc::Sampler::monitor_clear`
+int vsmc_sampler_monitor_clear(vsmc_sampler sampler, const char *name);
+
+/// \brief `vsmc::Sampler::monitor_clear`
+void vsmc_sampler_monitor_clear_all(vsmc_sampler sampler);
+
+/// \brief `vsmc::Sampler::initialize`
+void vsmc_sampler_initialize(vsmc_sampler sampler);
+
+/// \brief `vsmc::Sampler::iterate`
+void vsmc_sampler_iterate(vsmc_sampler sampler, size_t num);
+
+/// \brief `vsmc::Sampler::particle`
+vsmc_particle vsmc_sampler_particle(vsmc_sampler sampler);
 
 /// \brief `vsmc::Sampler::size_history`
 size_t vsmc_sampler_size_history(vsmc_sampler sampler, size_t iter);
@@ -345,71 +359,6 @@ void vsmc_sampler_read_resampled_history(vsmc_sampler sampler, int *first);
 /// \brief `vsmc::Sampler::status_history`
 size_t vsmc_sampler_status_history(
     vsmc_sampler sampler, size_t iter, size_t id);
-
-/// \brief `vsmc::Sampler::particle`
-vsmc_particle vsmc_sampler_particle(vsmc_sampler sampler);
-
-/// \brief `vsmc::Sampler::init_by_iter`
-void vsmc_sampler_init_by_iter(
-    vsmc_sampler sampler, int initialize_by_iterate);
-
-/// \brief `vsmc::Sampler::init_queue_clear`
-void vsmc_sampler_init_queue_clear(vsmc_sampler sampler);
-
-/// \brief `vsmc::Sampler::init_queue_empty`
-int vsmc_sampler_init_queue_empty(vsmc_sampler sampler);
-
-/// \brief `vsmc::Sampler::init_queue_size`
-size_t vsmc_sampler_init_queue_size(vsmc_sampler sampler);
-
-/// \brief `vsmc::Sampler::init`
-void vsmc_sampler_init(
-    vsmc_sampler sampler, vsmc_sampler_init_type new_init, int append);
-
-/// \brief `vsmc::Sampler::move_queue_clear`
-void vsmc_sampler_move_queue_clear(vsmc_sampler sampler);
-
-/// \brief `vsmc::Sampler::move_queue_empty`
-int vsmc_sampler_move_queue_empty(vsmc_sampler sampler);
-
-/// \brief `vsmc::Sampler::move_queue_size`
-size_t vsmc_sampler_move_queue_size(vsmc_sampler sampler);
-
-/// \brief `vsmc::Sampler::move`
-void vsmc_sampler_move(
-    vsmc_sampler sampler, vsmc_sampler_move_type new_move, int append);
-
-/// \brief `vsmc::Sampler::mcmc_queue_clear`
-void vsmc_sampler_mcmc_queue_clear(vsmc_sampler sampler);
-
-/// \brief `vsmc::Sampler::mcmc_queue_empty`
-int vsmc_sampler_mcmc_queue_empty(vsmc_sampler sampler);
-
-/// \brief `vsmc::Sampler::mcmc_queue_size`
-size_t vsmc_sampler_mcmc_queue_size(vsmc_sampler sampler);
-
-/// \brief `vsmc::Sampler::mcmc`
-void vsmc_sampler_mcmc(
-    vsmc_sampler sampler, vsmc_sampler_move_type new_mcmc, int append);
-
-/// \brief `vsmc::Sampler::initialize`
-void vsmc_sampler_initialize(vsmc_sampler sampler, void *param);
-
-/// \brief `vsmc::Sampler::iterate`
-void vsmc_sampler_iterate(vsmc_sampler sampler, size_t num);
-
-/// \brief `vsmc::Sampler::monitor`
-void vsmc_sampler_set_monitor(
-    vsmc_sampler sampler, const char *name, vsmc_monitor mon);
-
-/// \brief `vsmc::Sampler::monitor`
-vsmc_monitor vsmc_sampler_get_monitor(vsmc_sampler sampler, const char *name);
-
-/// \brief `vsmc::Sampler::clear_monitor`
-int vsmc_sampler_clear_monitor(vsmc_sampler sampler, const char *name);
-
-/// \brief `vsmc::Sampler::clear_monitor`
-void vsmc_sampler_clear_monitor_all(vsmc_sampler sampler);
 
 /// \brief `vsmc::Sampler::print`
 size_t vsmc_sampler_print(vsmc_sampler sampler, char *buf, char sepchar);

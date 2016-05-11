@@ -106,56 +106,14 @@ class Particle
         Seed::instance()(rng_);
     }
 
-    /// \brief Clone the particle system except the RNG engines
-    ///
-    /// \param new_rng If true, the new particle system has new-seeded RNG.
-    /// Otherwise false, it is exactly the same as the current.
-    Particle<T> clone(bool new_rng) const
+    /// \brief Clone the Particle except the RNG engines
+    Particle<T> clone() const
     {
         Particle<T> particle(*this);
-        if (new_rng) {
-            particle.rng_set_.seed();
-            Seed::instance()(particle.rng_);
-        }
+        particle.rng_set_.seed();
+        Seed::instance()(particle.rng_);
 
         return particle;
-    }
-
-    /// \brief Clone another particle system except the RNG engines
-    ///
-    /// \param other The particle system to be cloned
-    /// \param retain_rng If true, retain the current system's RNG. Otherwise,
-    /// it is exactly the same as the new one.
-    Particle<T> &clone(const Particle<T> &other, bool retain_rng)
-    {
-        if (this != &other) {
-            size_ = other.size_;
-            state_ = other.state_;
-            weight_ = other.weight_;
-
-            if (!retain_rng) {
-                rng_set_ = other.rng_set_;
-                rng_ = other.rng_;
-            }
-        }
-
-        return *this;
-    }
-
-    Particle<T> &clone(Particle<T> &&other, bool retain_rng)
-    {
-        if (this != &other) {
-            size_ = other.size_;
-            state_ = std::move(other.state_);
-            weight_ = std::move(other.weight_);
-
-            if (!retain_rng) {
-                rng_set_ = other.rng_set_;
-                rng_ = other.rng_;
-            }
-        }
-
-        return *this;
     }
 
     /// \brief Number of particles

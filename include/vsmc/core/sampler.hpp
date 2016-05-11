@@ -44,13 +44,54 @@
     VSMC_RUNTIME_ASSERT(                                                      \
         (func), "**Sampler::" #caller "** INVALID " #name " OBJECT")
 
-#define VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER                        \
-    VSMC_RUNTIME_WARNING((init_queue_.empty() || !init_by_iter_),             \
-        "**Sampler::initialize** INIT QUEUE IS NOT EMPTY BUT INITILIALIZED "  \
-        "BY ITERATING")
-
 namespace vsmc
 {
+
+/// \brief Sampler evaluaiton stages
+/// \ingroup Core
+enum SamplerStage {
+    SamplerInit = 1 << 0, ///< Evaluation at initialization before resampling
+    SamplerMove = 1 << 1, ///< Evaluation at iteration before resampling
+    SamplerMCMC = 1 << 2  ///< Evaluation at after resampling
+};                        // enum SamplerStage
+
+inline constexpr SamplerStage operator&(SamplerStage s1, SamplerStage s2)
+{
+    return static_cast<SamplerStage>(
+        static_cast<int>(s1) & static_cast<int>(s2));
+}
+
+inline constexpr SamplerStage operator|(SamplerStage s1, SamplerStage s2)
+{
+    return static_cast<SamplerStage>(
+        static_cast<int>(s1) | static_cast<int>(s2));
+}
+
+inline constexpr SamplerStage operator^(SamplerStage s1, SamplerStage s2)
+{
+    return static_cast<SamplerStage>(
+        static_cast<int>(s1) ^ static_cast<int>(s2));
+}
+
+inline constexpr SamplerStage operator~(SamplerStage s)
+{
+    return static_cast<SamplerStage>(~static_cast<int>(s));
+}
+
+inline SamplerStage &operator&=(SamplerStage &s1, SamplerStage s2)
+{
+    return s1 = s1 & s2;
+}
+
+inline SamplerStage &operator|=(SamplerStage &s1, SamplerStage s2)
+{
+    return s1 = s1 | s2;
+}
+
+inline SamplerStage &operator^=(SamplerStage &s1, SamplerStage s2)
+{
+    return s1 = s1 ^ s2;
+}
 
 /// \brief SMC Sampler
 /// \ingroup Core
@@ -59,11 +100,7 @@ class Sampler
 {
     public:
     using size_type = typename Particle<T>::size_type;
-    using init_type = std::function<std::size_t(Particle<T> &, void *)>;
-    using move_type = std::function<std::size_t(std::size_t, Particle<T> &)>;
-    using monitor_map_type = std::map<std::string, Monitor<T>>;
-    using resample_type = std::function<void(std::size_t, std::size_t,
-        typename Particle<T>::rng_type &, const double *, size_type *)>;
+    using eval_type = std::function<std::size_t(std::size_t, Particle<T> &)>;
 
     /// \brief Construct a Sampler
     ///
@@ -72,73 +109,19 @@ class Sampler
     template <typename... Args>
     explicit Sampler(Args &&... args)
         : particle_(std::forward<Args>(args)...)
-        , init_by_iter_(false)
-        , resample_threshold_(resample_threshold_never())
         , iter_num_(0)
+        , resample_threshold_(resample_threshold_never())
     {
-        resample_method(Multinomial);
     }
 
-    /// \brief Clone the sampler system except the RNG engines
-    ///
-    /// \param new_rng If true, the new particle system has new-seeded RNG.
-    /// Otherwise false, it is exactly the same as the current.
-    Sampler<T> clone(bool new_rng) const
+    /// \brief Clone the Sampler except the RNG engines
+    Sampler<T> clone() const
     {
         Sampler<T> sampler(*this);
-        if (new_rng) {
-            sampler.particle().rng_set().seed();
-            Seed::instance()(sampler.particle().rng());
-        }
+        sampler.particle().rng_set().seed();
+        Seed::instance()(sampler.particle().rng());
 
         return sampler;
-    }
-
-    /// \brief Clone another sampler system except the RNG engines
-    ///
-    /// \param other The particle system to be cloned
-    /// \param retain_rng If true, retain the current system's RNG. Otherwise,
-    /// it is exactly the same as the new one.
-    Sampler<T> &clone(const Sampler<T> &other, bool retain_rng)
-    {
-        if (this != &other) {
-            particle_.clone(other.particle_, retain_rng);
-            init_by_iter_ = other.init_by_iter_;
-            init_queue_ = other.init_queue_;
-            move_queue_ = other.move_queue_;
-            mcmc_queue_ = other.mcmc_queue_;
-            resample_move_ = other.resample_move_;
-            resample_threshold_ = other.resample_threshold_;
-            iter_num_ = other.iter_num_;
-            size_history_ = other.size_history_;
-            ess_history_ = other.ess_history_;
-            resampled_history_ = other.resampled_history_;
-            status_history_ = other.status_history_;
-            status_ = other.status_;
-        }
-
-        return *this;
-    }
-
-    Sampler<T> &clone(Sampler<T> &&other, bool retain_rng)
-    {
-        if (this != &other) {
-            particle_.clone(std::move(other.particle_), retain_rng);
-            init_by_iter_ = other.init_by_iter_;
-            init_queue_ = std::move(other.init_queue_);
-            move_queue_ = std::move(other.move_queue_);
-            mcmc_queue_ = std::move(other.mcmc_queue_);
-            resample_move_ = std::move(other.resample_move_);
-            resample_threshold_ = other.resample_threshold_;
-            iter_num_ = other.iter_num_;
-            size_history_ = std::move(other.size_history_);
-            ess_history_ = std::move(other.ess_history_);
-            resampled_history_ = std::move(other.resampled_history_);
-            status_history_ = std::move(other.status_history_);
-            status_ = std::move(other.status_);
-        }
-
-        return *this;
     }
 
     /// \brief Number of particles
@@ -147,9 +130,11 @@ class Sampler
     /// \brief Reserve space for a specified number of iterations
     void reserve(std::size_t num)
     {
+        num += iter_num_;
         size_history_.reserve(num);
         ess_history_.reserve(num);
         resampled_history_.reserve(num);
+        status_history_.reserve(num);
         for (auto &m : monitor_)
             m.second.reserve(num);
     }
@@ -160,10 +145,13 @@ class Sampler
     /// \brief Current iteration number (initialization count as zero)
     std::size_t iter_num() const { return iter_num_; }
 
-    /// \brief Force resample
-    Sampler<T> &resample()
+    /// \brief Add a new evaluation object
+    Sampler<T> &eval(
+        const eval_type &new_eval, SamplerStage stage, bool append = true)
     {
-        do_resample(resample_threshold_always());
+        if (!append)
+            eval_.clear();
+        eval_.push_back(std::make_pair(new_eval, stage));
 
         return *this;
     }
@@ -175,22 +163,22 @@ class Sampler
     {
         switch (scheme) {
             case Multinomial:
-                resample_move_ = ResampleMove<T>(ResampleMultinomial());
+                resample_eval_ = ResampleEval<T>(ResampleMultinomial());
                 break;
             case Residual:
-                resample_move_ = ResampleMove<T>(ResampleResidual());
+                resample_eval_ = ResampleEval<T>(ResampleResidual());
                 break;
             case Stratified:
-                resample_move_ = ResampleMove<T>(ResampleStratified());
+                resample_eval_ = ResampleEval<T>(ResampleStratified());
                 break;
             case Systematic:
-                resample_move_ = ResampleMove<T>(ResampleSystematic());
+                resample_eval_ = ResampleEval<T>(ResampleSystematic());
                 break;
             case ResidualStratified:
-                resample_move_ = ResampleMove<T>(ResampleResidualStratified());
+                resample_eval_ = ResampleEval<T>(ResampleResidualStratified());
                 break;
             case ResidualSystematic:
-                resample_move_ = ResampleMove<T>(ResampleResidualSystematic());
+                resample_eval_ = ResampleEval<T>(ResampleResidualSystematic());
                 break;
         }
         resample_threshold(threshold);
@@ -198,21 +186,11 @@ class Sampler
         return *this;
     }
 
-    /// \brief Set resampling method by a `resample_type` object
-    Sampler<T> &resample_method(const resample_type &res_alg,
+    /// \brief Set resampling method by a `eval_type` object
+    Sampler<T> &resample_method(const eval_type &res_eval,
         double threshold = resample_threshold_always())
     {
-        resample_move_ = ResampleMove<T>(res_alg);
-        resample_threshold(threshold);
-
-        return *this;
-    }
-
-    /// \brief Set resampling method by a `move_type` object
-    Sampler<T> &resample_method(const move_type &res_move,
-        double threshold = resample_threshold_always())
-    {
-        resample_move_ = res_move;
+        resample_eval_ = res_eval;
         resample_threshold(threshold);
 
         return *this;
@@ -241,6 +219,78 @@ class Sampler
     {
         return std::numeric_limits<double>::infinity();
     }
+
+    /// \brief Add a monitor
+    ///
+    /// \param name The name of the monitor
+    /// \param mon The new monitor to be added
+    Sampler<T> &monitor(const std::string &name, const Monitor<T> &mon)
+    {
+        monitor_.insert(std::make_pair(name, mon));
+
+        return *this;
+    }
+
+    /// \brief Read and write access to a named monitor
+    Monitor<T> &monitor(const std::string &name)
+    {
+        typename monitor_map_type::iterator iter = monitor_.find(name);
+
+        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, monitor_, monitor);
+
+        return iter->second;
+    }
+
+    /// \brief Read only access to a named monitor
+    const Monitor<T> &monitor(const std::string &name) const
+    {
+        typename monitor_map_type::const_iterator citer = monitor_.find(name);
+
+        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(
+            citer, monitor_, monitor);
+
+        return citer->second;
+    }
+
+    /// \brief Erase a named monitor
+    bool monitor_clear(const std::string &name)
+    {
+        return monitor_.erase(name) ==
+            static_cast<typename monitor_map_type::size_type>(1);
+    }
+
+    /// \brief Erase all monitors
+    Sampler<T> &monitor_clear()
+    {
+        monitor_.clear();
+
+        return *this;
+    }
+
+    /// \brief Initialization
+    Sampler<T> &initialize()
+    {
+        do_initialize();
+
+        return *this;
+    }
+
+    /// \brief Iteration
+    Sampler<T> &iterate(std::size_t num = 1)
+    {
+        if (num > 1)
+            reserve(num);
+        for (std::size_t i = 0; i != num; ++i)
+            do_iterate();
+
+        return *this;
+    }
+
+    /// \brief Read and write access to the Particle<T> object
+    Particle<T> &particle() { return particle_; }
+
+    /// \brief Read only access to the Particle<T> object
+    const Particle<T> &particle() const { return particle_; }
 
     /// \brief Get sampler size of a given iteration (initialization count as
     /// iteration zero)
@@ -287,264 +337,6 @@ class Sampler
         return status_history_[iter][id];
     }
 
-    /// \brief Read and write access to the Particle<T> object
-    Particle<T> &particle() { return particle_; }
-
-    /// \brief Read only access to the Particle<T> object
-    const Particle<T> &particle() const { return particle_; }
-
-    /// \brief Set if initialization should use the move and mcmc queue
-    ///
-    /// \details
-    /// If set to `false`, then the initialization step use the initialization
-    /// object if it is not empty. Otherwise, it perform the same steps as the
-    /// iteration step.
-    Sampler<T> &init_by_iter(bool initialize_by_iterate)
-    {
-        init_by_iter_ = initialize_by_iterate;
-
-        return *this;
-    }
-
-    /// \brief Clear the init queue
-    Sampler<T> &init_queue_clear()
-    {
-        init_queue_.clear();
-
-        return *this;
-    }
-
-    /// \brief Check if init queue is empty
-    bool init_queue_empty() const { return init_queue_.empty(); }
-
-    /// \brief Check the size of the init queue
-    std::size_t init_queue_size() const { return init_queue_.size(); }
-
-    /// \brief Add a new init
-    Sampler<T> &init(const init_type &new_init, bool append = true)
-    {
-        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_init, init, INIT);
-
-        if (!append)
-            init_queue_.clear();
-        init_queue_.push_back(new_init);
-
-        return *this;
-    }
-
-    /// \brief Add a sequence of new inits
-    template <typename InputIter>
-    Sampler<T> &init(InputIter first, InputIter last, bool append = true)
-    {
-        if (!append)
-            init_queue_.clear();
-        while (first != last) {
-            VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(*first, init, INIT);
-            init_queue_.push_back(*first);
-            ++first;
-        }
-
-        return *this;
-    }
-
-    /// \brief Clear the move queue
-    Sampler<T> &move_queue_clear()
-    {
-        move_queue_.clear();
-        return *this;
-    }
-
-    /// \brief Check if move queue is empty
-    bool move_queue_empty() const { return move_queue_.empty(); }
-
-    /// \brief Check the size of the move queue
-    std::size_t move_queue_size() const { return move_queue_.size(); }
-
-    /// \brief Add a new move
-    Sampler<T> &move(const move_type &new_move, bool append = true)
-    {
-        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_move, move, MOVE);
-
-        if (!append)
-            move_queue_.clear();
-        move_queue_.push_back(new_move);
-
-        return *this;
-    }
-
-    /// \brief Add a sequence of new moves
-    template <typename InputIter>
-    Sampler<T> &move(InputIter first, InputIter last, bool append = true)
-    {
-        if (!append)
-            move_queue_.clear();
-        while (first != last) {
-            VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(*first, move, MOVE);
-            move_queue_.push_back(*first);
-            ++first;
-        }
-
-        return *this;
-    }
-
-    /// \brief Clear the mcmc queue
-    Sampler<T> &mcmc_queue_clear()
-    {
-        mcmc_queue_.clear();
-
-        return *this;
-    }
-
-    /// \brief Check if mcmc queue is empty
-    bool mcmc_queue_empty() const { return mcmc_queue_.empty(); }
-
-    /// \brief Check the size of the mcmc queue
-    std::size_t mcmc_queue_size() const { return mcmc_queue_.size(); }
-
-    /// \brief Add a new mcmc
-    Sampler<T> &mcmc(const move_type &new_mcmc, bool append = true)
-    {
-        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(new_mcmc, mcmc, MCMC);
-
-        if (!append)
-            mcmc_queue_.clear();
-        mcmc_queue_.push_back(new_mcmc);
-
-        return *this;
-    }
-
-    /// \brief Add a sequence of new mcmcs
-    template <typename InputIter>
-    Sampler<T> &mcmc(InputIter first, InputIter last, bool append = true)
-    {
-        if (!append)
-            mcmc_queue_.clear();
-        while (first != last) {
-            VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(*first, mcmc, MCMC);
-            mcmc_queue_.push_back(*first);
-            ++first;
-        }
-
-        return *this;
-    }
-
-    /// \brief Initialization
-    ///
-    /// \param param Additional parameters passed to the initialization object
-    /// of type init_type
-    ///
-    /// All histories (ESS, resampled, move status, Monitor) are clared
-    /// before callling the initialization object. Monitors evaluation objects
-    /// are untouched.
-    Sampler<T> &initialize(void *param = nullptr)
-    {
-        VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER;
-
-        do_reset();
-        status_.clear();
-        if (init_by_iter_)
-            do_iterate();
-        else
-            do_initialize(param);
-        status_history_.push_back(status_);
-
-        return *this;
-    }
-
-    /// \brief Iteration
-    ///
-    /// \details
-    /// Moves performed first. Then ESS/N is compared to the threshold and
-    /// possible resampling is performed. Then mcmcs are performed. Then
-    /// monitors are computed
-    Sampler<T> &iterate(std::size_t num = 1)
-    {
-        status_.clear();
-        if (num > 1)
-            reserve(iter_size() + num);
-        for (std::size_t i = 0; i != num; ++i) {
-            ++iter_num_;
-            do_iterate();
-        }
-        status_history_.push_back(status_);
-
-        return *this;
-    }
-
-    /// \brief Add a monitor
-    ///
-    /// \param name The name of the monitor
-    /// \param mon The new monitor to be added
-    Sampler<T> &monitor(const std::string &name, const Monitor<T> &mon)
-    {
-        monitor_.insert(std::make_pair(name, mon));
-
-        return *this;
-    }
-
-    /// \brief Add a monitor with an evaluation object
-    ///
-    /// \param name The name of the Monitor
-    /// \param dim The dimension of the Monitor, i.e., the number of variables
-    /// \param eval The evaluation object of type Monitor::eval_type
-    /// \param record_only The Monitor only records results
-    /// \param stage The stage of the Monitor
-    ///
-    /// \sa Monitor
-    Sampler<T> &monitor(const std::string &name, std::size_t dim,
-        const typename Monitor<T>::eval_type &eval, bool record_only = false,
-        MonitorStage stage = MonitorMCMC)
-    {
-        monitor_.insert(typename monitor_map_type::value_type(
-            name, Monitor<T>(dim, eval, record_only, stage)));
-
-        return *this;
-    }
-
-    /// \brief Read and write access to a named monitor
-    Monitor<T> &monitor(const std::string &name)
-    {
-        typename monitor_map_type::iterator iter = monitor_.find(name);
-
-        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, monitor_, monitor);
-
-        return iter->second;
-    }
-
-    /// \brief Read only access to a named monitor
-    const Monitor<T> &monitor(const std::string &name) const
-    {
-        typename monitor_map_type::const_iterator citer = monitor_.find(name);
-
-        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(
-            citer, monitor_, monitor);
-
-        return citer->second;
-    }
-
-    /// \brief Read and write access to all monitors to the monitor_map_type
-    /// object
-    monitor_map_type &monitor() { return monitor_; }
-
-    /// \brief Read only access to all monitors to the the monitor_map_type
-    /// object
-    const monitor_map_type &monitor() const { return monitor_; }
-
-    /// \brief Erase a named monitor
-    bool clear_monitor(const std::string &name)
-    {
-        return monitor_.erase(name) ==
-            static_cast<typename monitor_map_type::size_type>(1);
-    }
-
-    /// \brief Erase all monitors
-    Sampler<T> &clear_monitor()
-    {
-        monitor_.clear();
-
-        return *this;
-    }
-
     /// \brief Summary of sampler history
     std::map<std::string, Vector<double>> summary() const
     {
@@ -568,7 +360,7 @@ class Sampler
                 ssize = status_history_[i].size();
         for (std::size_t j = 0; j != ssize; ++j) {
             for (std::size_t i = 0; i != iter_size(); ++i) {
-                data[i] = status_history_[i].size() > j + 1 ?
+                data[i] = status_history_[i].size() > j ?
                     status_history_[i][j] :
                     missing_data;
             }
@@ -624,43 +416,48 @@ class Sampler
     }
 
     private:
-    Particle<T> particle_;
+    using monitor_map_type = std::map<std::string, Monitor<T>>;
 
-    bool init_by_iter_;
-    Vector<init_type> init_queue_;
-    Vector<move_type> move_queue_;
-    Vector<move_type> mcmc_queue_;
-    move_type resample_move_;
+    Particle<T> particle_;
+    std::size_t iter_num_;
+
+    Vector<std::pair<eval_type, SamplerStage>> eval_;
+    eval_type resample_eval_;
     double resample_threshold_;
 
-    std::size_t iter_num_;
     Vector<size_type> size_history_;
     Vector<double> ess_history_;
     Vector<bool> resampled_history_;
-    Vector<std::size_t> status_;
     Vector<Vector<std::size_t>> status_history_;
+    Vector<std::size_t> status_;
     monitor_map_type monitor_;
 
     void do_reset()
     {
+        iter_num_ = 0;
+        particle_.weight().set_equal();
+        for (auto &m : monitor_)
+            m.second.clear();
+
         size_history_.clear();
         ess_history_.clear();
         resampled_history_.clear();
         status_history_.clear();
-        for (auto &m : monitor_)
-            m.second.clear();
-        iter_num_ = 0;
-        particle_.weight().set_equal();
+        status_.clear();
     }
 
-    void do_initialize(void *param)
+    void do_initialize()
     {
-        do_init(param);
+        do_reset();
+        status_.clear();
+        do_init();
         do_common();
     }
 
     void do_iterate()
     {
+        ++iter_num_;
+        status_.clear();
         do_move();
         do_common();
     }
@@ -672,24 +469,28 @@ class Sampler
         do_monitor(MonitorResample);
         do_mcmc();
         do_monitor(MonitorMCMC);
+        status_history_.push_back(std::move(status_));
     }
 
-    void do_init(void *param)
+    void do_init()
     {
-        for (auto &m : init_queue_)
-            status_.push_back(m(particle_, param));
+        for (auto &e : eval_)
+            if ((e.second & SamplerInit) != 0)
+                status_.push_back(e.first(iter_num_, particle_));
     }
 
     void do_move()
     {
-        for (auto &m : move_queue_)
-            status_.push_back(m(iter_num_, particle_));
+        for (auto &e : eval_)
+            if ((e.second & SamplerMove) != 0)
+                status_.push_back(e.first(iter_num_, particle_));
     }
 
     void do_mcmc()
     {
-        for (auto &m : mcmc_queue_)
-            status_.push_back(m(iter_num_, particle_));
+        for (auto &e : eval_)
+            if ((e.second & SamplerMCMC) != 0)
+                status_.push_back(e.first(iter_num_, particle_));
     }
 
     void do_resample(double threshold)
@@ -699,7 +500,7 @@ class Sampler
 
         if (ess_history_.back() < size() * threshold) {
             resampled_history_.push_back(true);
-            resample_move_(iter_num_, particle_);
+            resample_eval_(iter_num_, particle_);
         } else {
             resampled_history_.push_back(false);
         }
@@ -709,7 +510,7 @@ class Sampler
     {
         for (auto &m : monitor_)
             if (!m.second.empty())
-                m.second.eval(iter_num_, particle_, stage);
+                m.second(iter_num_, particle_, stage);
     }
 }; // class Sampler
 

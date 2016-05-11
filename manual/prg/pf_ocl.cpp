@@ -70,14 +70,11 @@ class PFState : public PFStateBase
             dev_data_, CL_TRUE, 0, sizeof(cl_pf_sp) * size(), data());
     }
 
-    void read_data(const char *param)
+    void read_data()
     {
-        if (param == nullptr)
-            return;
-
         vsmc::Vector<cl_float> obs_x(n);
         vsmc::Vector<cl_float> obs_y(n);
-        std::ifstream data(param);
+        std::ifstream data("pf.data");
         for (std::size_t i = 0; i != n; ++i)
             data >> obs_x[i] >> obs_y[i];
         data.close();
@@ -114,23 +111,23 @@ class PFInit
     {
     }
 
-    std::size_t operator()(vsmc::Particle<PFState> &particle, void *param)
+    std::size_t operator()(std::size_t, vsmc::Particle<PFState> &particle)
     {
-        particle.value().read_data(static_cast<const char *>(param));
+        particle.state().read_data();
 
         kernel_.set_arg(0, static_cast<cl_int>(particle.size()));
-        kernel_.set_arg(1, particle.value().dev_data());
-        kernel_.set_arg(2, particle.value().dev_rng_set());
-        kernel_.set_arg(3, particle.value().dev_weight());
-        kernel_.set_arg(4, particle.value().dev_obs_x());
-        kernel_.set_arg(5, particle.value().dev_obs_y());
+        kernel_.set_arg(1, particle.state().dev_data());
+        kernel_.set_arg(2, particle.state().dev_rng_set());
+        kernel_.set_arg(3, particle.state().dev_weight());
+        kernel_.set_arg(4, particle.state().dev_obs_x());
+        kernel_.set_arg(5, particle.state().dev_obs_y());
 
         command_queue_.enqueue_nd_range_kernel(kernel_, 1, vsmc::CLNDRange(),
             vsmc::CLNDRange(G), vsmc::CLNDRange(L));
         command_queue_.finish();
 
         weight_.resize(particle.size());
-        command_queue_.enqueue_read_buffer(particle.value().dev_weight(),
+        command_queue_.enqueue_read_buffer(particle.state().dev_weight(),
             CL_TRUE, 0, sizeof(cl_float) * particle.size(), weight_.data());
         particle.weight().set_log(weight_.data());
 
@@ -156,18 +153,18 @@ class PFMove
     {
         kernel_.set_arg(0, static_cast<cl_int>(t));
         kernel_.set_arg(1, static_cast<cl_int>(particle.size()));
-        kernel_.set_arg(2, particle.value().dev_data());
-        kernel_.set_arg(3, particle.value().dev_rng_set());
-        kernel_.set_arg(4, particle.value().dev_weight());
-        kernel_.set_arg(5, particle.value().dev_obs_x());
-        kernel_.set_arg(6, particle.value().dev_obs_y());
+        kernel_.set_arg(2, particle.state().dev_data());
+        kernel_.set_arg(3, particle.state().dev_rng_set());
+        kernel_.set_arg(4, particle.state().dev_weight());
+        kernel_.set_arg(5, particle.state().dev_obs_x());
+        kernel_.set_arg(6, particle.state().dev_obs_y());
 
         command_queue_.enqueue_nd_range_kernel(kernel_, 1, vsmc::CLNDRange(),
             vsmc::CLNDRange(G), vsmc::CLNDRange(L));
         command_queue_.finish();
 
         weight_.resize(particle.size());
-        command_queue_.enqueue_read_buffer(particle.value().dev_weight(),
+        command_queue_.enqueue_read_buffer(particle.state().dev_weight(),
             CL_TRUE, 0, sizeof(cl_float) * particle.size(), weight_.data());
         particle.weight().add_log(weight_.data());
 
@@ -185,14 +182,14 @@ class PFEval : public vsmc::MonitorEvalTBB<PFState, PFEval>
     public:
     void eval_pre(std::size_t t, vsmc::Particle<PFState> &particle)
     {
-        particle.value().copy_to_host();
+        particle.state().copy_to_host();
     }
 
     void eval_sp(std::size_t t, std::size_t dim,
         vsmc::SingleParticle<PFState> sp, double *r)
     {
-        r[0] = sp.state(0).pos_x;
-        r[1] = sp.state(0).pos_y;
+        r[0] = sp(0).pos_x;
+        r[1] = sp(0).pos_y;
     }
 };
 
@@ -242,14 +239,14 @@ int main()
 
     vsmc::Sampler<PFState> sampler(N);
     sampler.resample_method(vsmc::Multinomial, 0.5);
-    sampler.particle().value().initialize(context, command_queue, kernel_copy);
-    sampler.init(PFInit(command_queue, kernel_init));
-    sampler.move(PFMove(command_queue, kernel_move));
-    sampler.monitor("pos", 2, PFEval());
+    sampler.particle().state().initialize(context, command_queue, kernel_copy);
+    sampler.eval(PFInit(command_queue, kernel_init), vsmc::SamplerInit);
+    sampler.eval(PFMove(command_queue, kernel_move), vsmc::SamplerMove);
+    sampler.monitor("pos", vsmc::Monitor<PFState>(2, PFEval()));
 
     vsmc::StopWatch watch;
     watch.start();
-    sampler.initialize(const_cast<char *>("pf.data")).iterate(n - 1);
+    sampler.initialize().iterate(n - 1);
     watch.stop();
     std::cout << "Time (ms): " << watch.milliseconds() << std::endl;
 

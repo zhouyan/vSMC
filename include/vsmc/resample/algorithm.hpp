@@ -38,7 +38,7 @@
 
 #define VSMC_RUNTIME_ASSERT_RESAMPLE_ALGORITHM_EVAL                           \
     VSMC_RUNTIME_ASSERT(                                                      \
-        eval_, "**ResampleMove::operator()** INVALID ALGORITHM OBJECT")
+        eval_, "**ResampleEval::operator()** INVALID ALGORITHM OBJECT")
 
 namespace vsmc
 {
@@ -101,9 +101,9 @@ class ResampleAlgorithm
     }
 }; // class ResampleAlgorithm
 
-/// \brief Resample algorithm acting as a Sampler move
+/// \brief Sampler<T>::eval_type subtype
 template <typename T>
-class ResampleMove
+class ResampleEval
 {
     public:
     using eval_type = std::function<void(std::size_t, std::size_t,
@@ -114,7 +114,7 @@ class ResampleMove
     ///
     /// \param eval A resampling algorithm evaluation object, see interface of
     /// ResampleAlgorithm
-    explicit ResampleMove(const eval_type &eval) : eval_(eval) {}
+    explicit ResampleEval(const eval_type &eval) : eval_(eval) {}
 
     static constexpr double always()
     {
@@ -154,7 +154,7 @@ class ResampleMove
 
     private:
     eval_type eval_;
-}; // class ResampleMove
+}; // class ResampleEval
 
 /// \brief Multinomial resampling
 /// \ingroup Resample

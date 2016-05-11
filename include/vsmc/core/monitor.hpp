@@ -69,7 +69,6 @@ class Monitor
         MonitorStage stage = MonitorMCMC)
         : dim_(dim)
         , eval_(eval)
-        , recording_(true)
         , record_only_(record_only)
         , stage_(stage)
         , name_(dim)
@@ -228,16 +227,20 @@ class Monitor
     }
 
     /// \brief Set a new evaluation object of type eval_type
-    void set_eval(const eval_type &new_eval) { eval_ = new_eval; }
+    void eval(const eval_type &new_eval, bool record_only = false,
+        MonitorStage stage = MonitorMCMC)
+    {
+        eval_ = new_eval;
+        record_only_ = record_only;
+        stage_ = stage;
+    }
 
     /// \brief Perform the evaluation for a given iteration and a Particle<T>
     /// object.
-    void eval(std::size_t iter, Particle<T> &particle, MonitorStage stage)
+    void operator()(
+        std::size_t iter, Particle<T> &particle, MonitorStage stage)
     {
         internal::size_check<VSMC_BLAS_INT>(particle.size(), "Monitor::eval");
-
-        if (!recording_)
-            return;
 
         if (stage != stage_)
             return;
@@ -269,19 +272,9 @@ class Monitor
         record_.clear();
     }
 
-    /// \brief Whether the Monitor is actively recording results
-    bool recording() const { return recording_; }
-
-    /// \brief Turn on the recording
-    void turn_on() { recording_ = true; }
-
-    /// \brief Turn off the recording
-    void turn_off() { recording_ = false; }
-
     private:
     std::size_t dim_;
     eval_type eval_;
-    bool recording_;
     bool record_only_;
     MonitorStage stage_;
     Vector<std::string> name_;

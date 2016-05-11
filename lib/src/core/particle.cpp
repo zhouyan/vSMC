@@ -50,10 +50,10 @@ void vsmc_particle_assign(vsmc_particle particle, vsmc_particle other)
     ::vsmc::cast(particle) = ::vsmc::cast(other);
 }
 
-vsmc_particle vsmc_particle_clone(vsmc_particle particle, int new_rng)
+vsmc_particle vsmc_particle_clone(vsmc_particle particle)
 {
     vsmc_particle clone = vsmc_particle_new(0, 0);
-    ::vsmc::cast(clone) = ::vsmc::cast(particle).clone(new_rng != 0);
+    ::vsmc::cast(clone) = ::vsmc::cast(particle).clone();
 
     return clone;
 }

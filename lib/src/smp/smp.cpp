@@ -37,58 +37,11 @@ namespace vsmc
 {
 
 template <typename Backend>
-class InitializeSMPC
-    : public InitializeSMP<StateMatrixC, InitializeSMPC<Backend>, Backend>
+class SamplerEvalSMPC
+    : public SamplerEvalSMP<StateMatrixC, SamplerEvalSMPC<Backend>, Backend>
 {
     public:
-    InitializeSMPC(const vsmc_sampler_init_smp_type &work) : work_(work) {}
-
-    std::size_t eval_sp(SingleParticleC sp)
-    {
-        if (work_.eval_sp == nullptr)
-            return 0;
-
-        vsmc_single_particle sp_c = {&sp(0), sp.id()};
-
-        return work_.eval_sp(sp_c);
-    }
-
-    void eval_param(ParticleC &particle, void *param)
-    {
-        if (work_.eval_param == nullptr)
-            return;
-
-        vsmc_particle particle_c = {&particle};
-        work_.eval_param(particle_c, param);
-    }
-
-    void eval_pre(ParticleC &particle)
-    {
-        if (work_.eval_pre == nullptr)
-            return;
-
-        vsmc_particle particle_c = {&particle};
-        work_.eval_pre(particle_c);
-    }
-
-    void eval_post(ParticleC &particle)
-    {
-        if (work_.eval_post == nullptr)
-            return;
-
-        vsmc_particle particle_c = {&particle};
-        work_.eval_post(particle_c);
-    }
-
-    private:
-    vsmc_sampler_init_smp_type work_;
-}; // class InitializeSMPC
-
-template <typename Backend>
-class MoveSMPC : public MoveSMP<StateMatrixC, MoveSMPC<Backend>, Backend>
-{
-    public:
-    MoveSMPC(const vsmc_sampler_move_smp_type &work) : work_(work) {}
+    SamplerEvalSMPC(const vsmc_sampler_eval_smp_type &work) : work_(work) {}
 
     std::size_t eval_sp(std::size_t iter, SingleParticleC sp)
     {
@@ -119,8 +72,8 @@ class MoveSMPC : public MoveSMP<StateMatrixC, MoveSMPC<Backend>, Backend>
     }
 
     private:
-    vsmc_sampler_move_smp_type work_;
-}; // class MoveSMPC
+    vsmc_sampler_eval_smp_type work_;
+}; // class SamplerEvalSMPC
 
 template <typename Backend>
 class MonitorEvalSMPC
@@ -164,26 +117,13 @@ class MonitorEvalSMPC
 } // namespace vsmc
 
 #define VSMC_DEFINE_LIB_SMP(Name, name)                                       \
-    inline void vsmc_sampler_init_##name(vsmc_sampler sampler,                \
-        vsmc_sampler_init_smp_type new_init, int append)                      \
+    inline void vsmc_sampler_eval_##name(vsmc_sampler sampler,                \
+        vsmc_sampler_eval_smp_type new_eval, vSMCSamplerStage stage,          \
+        int append)                                                           \
     {                                                                         \
-        ::vsmc::cast(sampler).init(                                           \
-            ::vsmc::InitializeSMPC<::vsmc::Backend##Name>(new_init),          \
-            append != 0);                                                     \
-    }                                                                         \
-                                                                              \
-    inline void vsmc_sampler_move_##name(vsmc_sampler sampler,                \
-        vsmc_sampler_move_smp_type new_move, int append)                      \
-    {                                                                         \
-        ::vsmc::cast(sampler).move(                                           \
-            ::vsmc::MoveSMPC<::vsmc::Backend##Name>(new_move), append != 0);  \
-    }                                                                         \
-                                                                              \
-    inline void vsmc_sampler_mcmc_##name(vsmc_sampler sampler,                \
-        vsmc_sampler_move_smp_type new_mcmc, int append)                      \
-    {                                                                         \
-        ::vsmc::cast(sampler).mcmc(                                           \
-            ::vsmc::MoveSMPC<::vsmc::Backend##Name>(new_mcmc), append != 0);  \
+        ::vsmc::cast(sampler).eval(                                           \
+            ::vsmc::SamplerEvalSMPC<::vsmc::Backend##Name>(new_eval),         \
+            static_cast<::vsmc::SamplerStage>(stage), append != 0);           \
     }                                                                         \
                                                                               \
     inline vsmc_monitor vsmc_monitor_new_##name(size_t dim,                   \
@@ -235,76 +175,28 @@ int vsmc_backend_smp_check(vSMCBackendSMP backend)
     return vsmc_backend_smp_table[static_cast<std::size_t>(backend)];
 }
 
-using vsmc_sampler_init_smp_dispatch_type = void (*)(
-    vsmc_sampler, vsmc_sampler_init_smp_type, int);
+using vsmc_sampler_eval_smp_dispatch_type = void (*)(
+    vsmc_sampler, vsmc_sampler_eval_smp_type, vSMCSamplerStage, int);
 
-static vsmc_sampler_init_smp_dispatch_type vsmc_sampler_init_smp_dispatch[] = {
-    vsmc_sampler_init_seq, vsmc_sampler_init_std,
+static vsmc_sampler_eval_smp_dispatch_type vsmc_sampler_eval_smp_dispatch[] = {
+    vsmc_sampler_eval_seq, vsmc_sampler_eval_std,
 #if VSMC_HAS_OMP
-    vsmc_sampler_init_omp,
+    vsmc_sampler_eval_omp,
 #else
     nullptr,
 #endif
 #if VSMC_HAS_TBB
-    vsmc_sampler_init_tbb,
+    vsmc_sampler_eval_tbb,
 #else
     nullptr,
 #endif
-    nullptr}; // vsmc_sampler_init_smp_dispatch
+    nullptr}; // vsmc_sampler_eval_smp_dispatch
 
-void vsmc_sampler_init_smp(vSMCBackendSMP backend, vsmc_sampler sampler,
-    vsmc_sampler_init_smp_type new_init, int append)
+void vsmc_sampler_eval_smp(vSMCBackendSMP backend, vsmc_sampler sampler,
+    vsmc_sampler_eval_smp_type new_eval, vSMCSamplerStage stage, int append)
 {
-    vsmc_sampler_init_smp_dispatch[static_cast<std::size_t>(backend)](
-        sampler, new_init, append);
-}
-
-using vsmc_sampler_move_smp_dispatch_type = void (*)(
-    vsmc_sampler, vsmc_sampler_move_smp_type, int);
-
-static vsmc_sampler_move_smp_dispatch_type vsmc_sampler_move_smp_dispatch[] = {
-    vsmc_sampler_move_seq, vsmc_sampler_move_std,
-#if VSMC_HAS_OMP
-    vsmc_sampler_move_omp,
-#else
-    nullptr,
-#endif
-#if VSMC_HAS_TBB
-    vsmc_sampler_move_tbb,
-#else
-    nullptr,
-#endif
-    nullptr}; // vsmc_sampler_move_smp_dispatch
-
-void vsmc_sampler_move_smp(vSMCBackendSMP backend, vsmc_sampler sampler,
-    vsmc_sampler_move_smp_type new_move, int append)
-{
-    vsmc_sampler_move_smp_dispatch[static_cast<std::size_t>(backend)](
-        sampler, new_move, append);
-}
-
-using vsmc_sampler_mcmc_smp_dispatch_type = void (*)(
-    vsmc_sampler, vsmc_sampler_move_smp_type, int);
-
-static vsmc_sampler_mcmc_smp_dispatch_type vsmc_sampler_mcmc_smp_dispatch[] = {
-    vsmc_sampler_mcmc_seq, vsmc_sampler_mcmc_std,
-#if VSMC_HAS_OMP
-    vsmc_sampler_mcmc_omp,
-#else
-    nullptr,
-#endif
-#if VSMC_HAS_TBB
-    vsmc_sampler_mcmc_tbb,
-#else
-    nullptr,
-#endif
-    nullptr}; // vsmc_sampler_mcmc_smp_dispatch
-
-void vsmc_sampler_mcmc_smp(vSMCBackendSMP backend, vsmc_sampler sampler,
-    vsmc_sampler_move_smp_type new_mcmc, int append)
-{
-    vsmc_sampler_mcmc_smp_dispatch[static_cast<std::size_t>(backend)](
-        sampler, new_mcmc, append);
+    vsmc_sampler_eval_smp_dispatch[static_cast<std::size_t>(backend)](
+        sampler, new_eval, stage, append);
 }
 
 using vsmc_monitor_new_smp_dispatch_type = vsmc_monitor (*)(

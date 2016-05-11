@@ -64,6 +64,13 @@ typedef enum {
     vSMCMonitorMCMC      ///< vsmc::MonitorMCMC
 } vSMCMonitorStage;
 
+/// \brief vsmc::SamplerStage
+typedef enum {
+    vSMCSamplerInit = 1 << 0, ///< vsmc::SamplerInit
+    vSMCSamplerMove = 1 << 1, ///< vsmc::SamplerMove
+    vSMCSamplerMCMC = 1 << 2  ///< vsmc::SamplerMCMC
+} vSMCSamplerStage;
+
 /// \brief RNG types
 typedef enum {
     vSMCRNG,    ///< vsmc::RNG
@@ -208,30 +215,19 @@ typedef struct {
     void *ptr;
 } vsmc_stop_watch;
 
-/// \brief vsmc::Sampler::init_type
-typedef size_t (*vsmc_sampler_init_type)(vsmc_particle, void *);
-
-/// \brief vsmc::Sampler::move_type
-typedef size_t (*vsmc_sampler_move_type)(size_t, vsmc_particle);
+/// \brief vsmc::Sampler::eval_type
+typedef size_t (*vsmc_sampler_eval_type)(size_t, vsmc_particle);
 
 /// \brief vsmc::Monitor::eval_type
 typedef void (*vsmc_monitor_eval_type)(
     size_t, size_t, vsmc_particle, double *);
 
-/// \brief vsmc::InitializeSMP
-typedef struct {
-    size_t (*eval_sp)(vsmc_single_particle);
-    void (*eval_param)(vsmc_particle, void *);
-    void (*eval_pre)(vsmc_particle);
-    void (*eval_post)(vsmc_particle);
-} vsmc_sampler_init_smp_type;
-
-/// \brief vsmc::MoveSMP
+/// \brief vsmc::SamplerEvalSMP
 typedef struct {
     size_t (*eval_sp)(size_t, vsmc_single_particle);
     void (*eval_pre)(size_t, vsmc_particle);
     void (*eval_post)(size_t, vsmc_particle);
-} vsmc_sampler_move_smp_type;
+} vsmc_sampler_eval_smp_type;
 
 /// \brief vsmc::MonitorEvalSMP
 typedef struct {

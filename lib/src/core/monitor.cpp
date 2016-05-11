@@ -138,37 +138,23 @@ void vsmc_monitor_read_record_matrix(
         static_cast<::vsmc::MatrixLayout>(layout), first);
 }
 
-void vsmc_monitor_set_eval(
-    vsmc_monitor monitor, vsmc_monitor_eval_type new_eval)
+void vsmc_monitor_eval(vsmc_monitor monitor, vsmc_monitor_eval_type new_eval,
+    int record_only, vSMCMonitorStage stage)
 {
-    ::vsmc::cast(monitor).set_eval(::vsmc::cast(new_eval));
+    ::vsmc::cast(monitor).eval(::vsmc::cast(new_eval), record_only != 0,
+        static_cast<::vsmc::MonitorStage>(stage));
 }
 
-void vsmc_monitor_eval(vsmc_monitor monitor, size_t iter,
+void vsmc_monitor_compute(vsmc_monitor monitor, size_t iter,
     vsmc_particle particle, vSMCMonitorStage stage)
 {
-    ::vsmc::cast(monitor).eval(iter, ::vsmc::cast(particle),
+    ::vsmc::cast(monitor)(iter, ::vsmc::cast(particle),
         static_cast<::vsmc::MonitorStage>(stage));
 }
 
 void vsmc_monitor_clear(vsmc_monitor monitor)
 {
     ::vsmc::cast(monitor).clear();
-}
-
-int vsmc_monitor_recording(vsmc_monitor monitor)
-{
-    return ::vsmc::cast(monitor).recording();
-}
-
-void vsmc_monitor_turn_on(vsmc_monitor monitor)
-{
-    ::vsmc::cast(monitor).turn_on();
-}
-
-void vsmc_monitor_turn_off(vsmc_monitor monitor)
-{
-    ::vsmc::cast(monitor).turn_off();
 }
 
 } // extern "C"

@@ -48,13 +48,14 @@ inline void gmm_ps_run(
     vsmc::Sampler<GMM> sampler(N);
     sampler.resample_method(vsmc::Stratified, 0.5);
     sampler.particle().state().comp_num(c);
-    sampler.init(GMMInit<Backend>());
-    sampler.move(GMMMoveSMC(alpha_setter), false);
-    sampler.mcmc(GMMMoveMu<Backend>(), false);
-    sampler.mcmc(GMMMoveLambda<Backend>(), true);
-    sampler.mcmc(GMMMoveWeight<Backend>(), true);
-    sampler.monitor("path_integrand", 1, GMMPathIntegrand<Backend>());
-    sampler.monitor("path_grid", 1, GMMPathGrid(), true);
+    sampler.eval(GMMInit<Backend>(), vsmc::SamplerInit);
+    sampler.eval(GMMMoveSMC(alpha_setter), vsmc::SamplerMove);
+    sampler.eval(GMMMoveMu<Backend>(), vsmc::SamplerMCMC);
+    sampler.eval(GMMMoveLambda<Backend>(), vsmc::SamplerMCMC);
+    sampler.eval(GMMMoveWeight<Backend>(), vsmc::SamplerMCMC);
+    sampler.monitor(
+        "path_integrand", vsmc::Monitor<GMM>(1, GMMPathIntegrand<Backend>()));
+    sampler.monitor("path_grid", vsmc::Monitor<GMM>(1, GMMPathGrid(), true));
     sampler.initialize();
 
     vsmc::StopWatch watch;

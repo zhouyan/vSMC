@@ -34,11 +34,6 @@ PROJECT(vSMCExample-pf CXX)
 VSMC_ADD_EXAMPLE(pf)
 
 VSMC_ADD_TEST(pf cv)
-VSMC_ADD_TEST(pf seq)
-
-IF(TBB_FOUND)
-    VSMC_ADD_TEST(pf tbb)
-ENDIF(TBB_FOUND)
 
 VSMC_ADD_FILE(pf pf_cv.R)
 VSMC_ADD_FILE(pf pf_cv.data)

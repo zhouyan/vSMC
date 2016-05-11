@@ -101,227 +101,20 @@ class BackendTBB;
 /// \ingroup SMP
 class Virtual;
 
-/// \brief Sampler<T>::init_type
+/// \brief Sampler<T>::eval_type
 /// \ingroup SMP
 template <typename T, typename = Virtual, typename = VSMC_SMP_BACKEND>
-class InitializeSMP;
-
-/// \brief Sampler<T>::move_type
-/// \ingroup SMP
-template <typename T, typename = Virtual, typename = VSMC_SMP_BACKEND>
-class MoveSMP;
+class SamplerEvalSMP;
 
 /// \brief Monitor<T>::eval_type
 /// \ingroup SMP
 template <typename T, typename = Virtual, typename = VSMC_SMP_BACKEND>
 class MonitorEvalSMP;
 
-/// \brief Initialize base dispatch class
+/// \brief Sampler evaluation base dispatch class
 /// \ingroup SMP
 template <typename T, typename Derived>
-class InitializeBase
-{
-    public:
-    std::size_t eval_sp(SingleParticle<T> sp)
-    {
-        return eval_sp_dispatch(sp, &Derived::eval_sp);
-    }
-
-    std::size_t eval_range(ParticleRange<T> range)
-    {
-        return eval_range_dispatch(range, &Derived::eval_range);
-    }
-
-    void eval_param(Particle<T> &particle, void *param)
-    {
-        eval_param_dispatch(particle, param, &Derived::eval_param);
-    }
-
-    void eval_pre(Particle<T> &particle)
-    {
-        eval_pre_dispatch(particle, &Derived::eval_pre);
-    }
-
-    void eval_post(Particle<T> &particle)
-    {
-        eval_post_dispatch(particle, &Derived::eval_post);
-    }
-
-    protected:
-    VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL(Initialize)
-
-    private:
-    // non-static non-const
-
-    template <typename D>
-    std::size_t eval_sp_dispatch(
-        SingleParticle<T> sp, std::size_t (D::*)(SingleParticle<T>))
-    {
-        return static_cast<Derived *>(this)->eval_sp(sp);
-    }
-
-    template <typename D>
-    std::size_t eval_range_dispatch(
-        ParticleRange<T> range, std::size_t (D::*)(ParticleRange<T>))
-    {
-        return static_cast<Derived *>(this)->eval_range(range);
-    }
-
-    template <typename D>
-    void eval_param_dispatch(
-        Particle<T> &particle, void *param, void (D::*)(Particle<T> &, void *))
-    {
-        static_cast<Derived *>(this)->eval_param(particle, param);
-    }
-
-    template <typename D>
-    void eval_pre_dispatch(Particle<T> &particle, void (D::*)(Particle<T> &))
-    {
-        static_cast<Derived *>(this)->eval_pre(particle);
-    }
-
-    template <typename D>
-    void eval_post_dispatch(Particle<T> &particle, void (D::*)(Particle<T> &))
-    {
-        static_cast<Derived *>(this)->eval_post(particle);
-    }
-
-    // non-static const
-
-    template <typename D>
-    std::size_t eval_sp_dispatch(
-        SingleParticle<T> sp, std::size_t (D::*)(SingleParticle<T>) const)
-    {
-        return static_cast<Derived *>(this)->eval_sp(sp);
-    }
-
-    template <typename D>
-    std::size_t eval_range_dispatch(
-        ParticleRange<T> range, std::size_t (D::*)(ParticleRange<T>) const)
-    {
-        return static_cast<Derived *>(this)->eval_range(range);
-    }
-
-    template <typename D>
-    void eval_param_dispatch(Particle<T> &particle, void *param,
-        void (D::*)(Particle<T> &, void *) const)
-    {
-        static_cast<Derived *>(this)->eval_param(particle, param);
-    }
-
-    template <typename D>
-    void eval_pre_dispatch(
-        Particle<T> &particle, void (D::*)(Particle<T> &) const)
-    {
-        static_cast<Derived *>(this)->eval_pre(particle);
-    }
-
-    template <typename D>
-    void eval_post_dispatch(
-        Particle<T> &particle, void (D::*)(Particle<T> &) const)
-    {
-        static_cast<Derived *>(this)->eval_post(particle);
-    }
-
-    // static
-
-    std::size_t eval_sp_dispatch(
-        SingleParticle<T> sp, std::size_t (*)(SingleParticle<T>))
-    {
-        return Derived::eval_sp(sp);
-    }
-
-    std::size_t eval_range_dispatch(
-        ParticleRange<T> range, std::size_t (*)(ParticleRange<T>))
-    {
-        return Derived::eval_range(range);
-    }
-
-    void eval_param_dispatch(
-        Particle<T> &particle, void *param, void (*)(Particle<T> &, void *))
-    {
-        Derived::eval_param(particle, param);
-    }
-
-    void eval_pre_dispatch(Particle<T> &particle, void (*)(Particle<T> &))
-    {
-        Derived::eval_pre(particle);
-    }
-
-    void eval_post_dispatch(Particle<T> &particle, void (*)(Particle<T> &))
-    {
-        Derived::eval_post(particle);
-    }
-
-    // base
-
-    std::size_t eval_sp_dispatch(
-        SingleParticle<T>, std::size_t (InitializeBase::*)(SingleParticle<T>))
-    {
-        return 0;
-    }
-
-    std::size_t eval_range_dispatch(ParticleRange<T> range,
-        std::size_t (InitializeBase::*)(ParticleRange<T>))
-    {
-        using size_type = typename Particle<T>::size_type;
-
-        std::size_t accept = 0;
-        for (size_type i = range.begin(); i != range.end(); ++i)
-            accept += eval_sp(range.particle().sp(i));
-
-        return accept;
-    }
-
-    void eval_param_dispatch(
-        Particle<T> &, void *, void (InitializeBase::*)(Particle<T> &, void *))
-    {
-    }
-
-    void eval_pre_dispatch(
-        Particle<T> &, void (InitializeBase::*)(Particle<T> &))
-    {
-    }
-
-    void eval_post_dispatch(
-        Particle<T> &, void (InitializeBase::*)(Particle<T> &))
-    {
-    }
-}; // class InitializeBase
-
-/// \brief Initilaize base dispatch class
-/// \ingroup SMP
-template <typename T>
-class InitializeBase<T, Virtual>
-{
-    public:
-    virtual std::size_t eval_sp(SingleParticle<T>) { return 0; }
-
-    virtual std::size_t eval_range(ParticleRange<T> range)
-    {
-        using size_type = typename Particle<T>::size_type;
-
-        std::size_t accept = 0;
-        for (size_type i = range.begin(); i != range.end(); ++i)
-            accept += eval_sp(range.particle().sp(i));
-
-        return accept;
-    }
-
-    virtual void eval_param(Particle<T> &, void *) {}
-
-    virtual void eval_pre(Particle<T> &) {}
-
-    virtual void eval_post(Particle<T> &) {}
-
-    protected:
-    VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(Initialize)
-}; // class InitializeBase<T, Virtual>
-
-/// \brief Move base dispatch class
-/// \ingroup SMP
-template <typename T, typename Derived>
-class MoveBase
+class SamplerEvalBase
 {
     public:
     std::size_t eval_sp(std::size_t iter, SingleParticle<T> sp)
@@ -345,7 +138,7 @@ class MoveBase
     }
 
     protected:
-    VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL(Move)
+    VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL(SamplerEval)
 
     private:
     // non-static non-const
@@ -437,13 +230,13 @@ class MoveBase
     // base
 
     std::size_t eval_sp_dispatch(std::size_t, SingleParticle<T>,
-        std::size_t (MoveBase::*)(std::size_t, SingleParticle<T>))
+        std::size_t (SamplerEvalBase::*)(std::size_t, SingleParticle<T>))
     {
         return 0;
     }
 
     std::size_t eval_range_dispatch(std::size_t iter, ParticleRange<T> range,
-        std::size_t (MoveBase::*)(std::size_t, ParticleRange<T>))
+        std::size_t (SamplerEvalBase::*)(std::size_t, ParticleRange<T>))
     {
         using size_type = typename Particle<T>::size_type;
 
@@ -455,20 +248,20 @@ class MoveBase
     }
 
     void eval_pre_dispatch(std::size_t, Particle<T> &,
-        void (MoveBase::*)(std::size_t, Particle<T> &))
+        void (SamplerEvalBase::*)(std::size_t, Particle<T> &))
     {
     }
 
     void eval_post_dispatch(std::size_t, Particle<T> &,
-        void (MoveBase::*)(std::size_t, Particle<T> &))
+        void (SamplerEvalBase::*)(std::size_t, Particle<T> &))
     {
     }
-}; // class MoveBase
+}; // class SamplerEvalBase
 
-/// \brief Move base dispatch class
+/// \brief Mampler evaluation base dispatch class
 /// \ingroup SMP
 template <typename T>
-class MoveBase<T, Virtual>
+class SamplerEvalBase<T, Virtual>
 {
     public:
     virtual std::size_t eval_sp(std::size_t, SingleParticle<T>) { return 0; }
@@ -489,8 +282,8 @@ class MoveBase<T, Virtual>
     virtual void eval_post(std::size_t, Particle<T> &) {}
 
     protected:
-    VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(Move)
-}; // class MoveBase<T, Virtual>
+    VSMC_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(SamplerEval)
+}; // class SamplerEvalBase<T, Virtual>
 
 /// \brief Monitor evalution base dispatch class
 /// \ingroup SMP

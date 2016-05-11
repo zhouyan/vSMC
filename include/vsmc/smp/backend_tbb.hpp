@@ -53,77 +53,11 @@ inline ::tbb::blocked_range<IntType> backend_tbb_range(
 
 } // namespace internal
 
-/// \brief Sampler<T>::init_type subtype using Intel Threading Building Blocks
+/// \brief Sampler<T>::eval_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
 template <typename T, typename Derived>
-class InitializeSMP<T, Derived, BackendTBB> : public InitializeBase<T, Derived>
-{
-    public:
-    std::size_t operator()(Particle<T> &particle, void *param)
-    {
-        return run(particle, param);
-    }
-
-    protected:
-    VSMC_DEFINE_SMP_BACKEND_SPECIAL(TBB, Initialize)
-
-    class work_type
-    {
-        public:
-        using size_type = typename Particle<T>::size_type;
-
-        work_type(
-            InitializeSMP<T, Derived, BackendTBB> *wptr, Particle<T> *pptr)
-            : wptr_(wptr), pptr_(pptr), accept_(0)
-        {
-        }
-
-        work_type(const work_type &other, ::tbb::split)
-            : wptr_(other.wptr_), pptr_(other.pptr_), accept_(0)
-        {
-        }
-
-        void operator()(const ::tbb::blocked_range<size_type> &range)
-        {
-            accept_ +=
-                wptr_->eval_range(pptr_->range(range.begin(), range.end()));
-        }
-
-        void join(const work_type &other) { accept_ += other.accept_; }
-
-        std::size_t accept() const { return accept_; }
-
-        private:
-        InitializeSMP<T, Derived, BackendTBB> *const wptr_;
-        Particle<T> *const pptr_;
-        std::size_t accept_;
-    }; // class work_type
-
-    template <typename... Args>
-    std::size_t run(Particle<T> &particle, void *param, std::size_t grainsize,
-        Args &&... args)
-    {
-        this->eval_param(particle, param);
-        this->eval_pre(particle);
-        work_type work(this, &particle);
-        ::tbb::parallel_reduce(
-            internal::backend_tbb_range(particle.size(), grainsize), work,
-            std::forward<Args>(args)...);
-        this->eval_post(particle);
-
-        return work.accept();
-    }
-
-    std::size_t run(Particle<T> &particle, void *param)
-    {
-        return run(particle, param, 1);
-    }
-}; // class InitializeSMP
-
-/// \brief Sampler<T>::move_type subtype using Intel Threading Building Blocks
-/// \ingroup TBB
-template <typename T, typename Derived>
-class MoveSMP<T, Derived, BackendTBB> : public MoveBase<T, Derived>
+class SamplerEvalSMP<T, Derived, BackendTBB>
+    : public SamplerEvalBase<T, Derived>
 {
     public:
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
@@ -132,15 +66,15 @@ class MoveSMP<T, Derived, BackendTBB> : public MoveBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_BACKEND_SPECIAL(TBB, Move)
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(TBB, SamplerEval)
 
     class work_type
     {
         public:
         using size_type = typename Particle<T>::size_type;
 
-        work_type(MoveSMP<T, Derived, BackendTBB> *wptr, std::size_t iter,
-            Particle<T> *pptr)
+        work_type(SamplerEvalSMP<T, Derived, BackendTBB> *wptr,
+            std::size_t iter, Particle<T> *pptr)
             : wptr_(wptr), iter_(iter), pptr_(pptr), accept_(0)
         {
         }
@@ -164,7 +98,7 @@ class MoveSMP<T, Derived, BackendTBB> : public MoveBase<T, Derived>
         std::size_t accept() const { return accept_; }
 
         private:
-        MoveSMP<T, Derived, BackendTBB> *const wptr_;
+        SamplerEvalSMP<T, Derived, BackendTBB> *const wptr_;
         const std::size_t iter_;
         Particle<T> *const pptr_;
         std::size_t accept_;
@@ -188,7 +122,7 @@ class MoveSMP<T, Derived, BackendTBB> : public MoveBase<T, Derived>
     {
         return run(iter, particle, 0);
     }
-}; // class MoveSMP
+}; // class SamplerEvalSMP
 
 /// \brief Monitor<T>::eval_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
@@ -251,15 +185,10 @@ class MonitorEvalSMP<T, Derived, BackendTBB>
     }
 }; // class MonitorEvalSMP
 
-/// \brief Sampler<T>::init_type subtype using Intel Threading Building Blocks
+/// \brief Sampler<T>::eval_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB
 template <typename T, typename Derived>
-using InitializeTBB = InitializeSMP<T, Derived, BackendTBB>;
-
-/// \brief Sampler<T>::move_type subtype using Intel Threading Building Blocks
-/// \ingroup TBB
-template <typename T, typename Derived>
-using MoveTBB = MoveSMP<T, Derived, BackendTBB>;
+using SamplerEvalTBB = SamplerEvalSMP<T, Derived, BackendTBB>;
 
 /// \brief Monitor<T>::eval_type subtype using Intel Threading Building Blocks
 /// \ingroup TBB

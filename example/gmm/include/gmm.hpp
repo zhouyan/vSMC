@@ -360,17 +360,17 @@ class GMM : public GMMBase
 }; // class GMM
 
 template <typename Backend>
-class GMMInit : public vsmc::InitializeSMP<GMM, GMMInit<Backend>, Backend>
+class GMMInit : public vsmc::SamplerEvalSMP<GMM, GMMInit<Backend>, Backend>
 {
     public:
-    void eval_pre(vsmc::Particle<GMM> &particle)
+    void eval_pre(std::size_t, vsmc::Particle<GMM> &particle)
     {
         particle.state().initialize();
         particle.state().alpha(0);
         particle.weight().set_equal();
     }
 
-    std::size_t eval_sp(vsmc::SingleParticle<GMM> sp)
+    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
     {
         const GMM &gmm = sp.particle().state();
         GMMState &state = sp(0);
@@ -432,7 +432,7 @@ class GMMMoveSMC
 }; // class GMMMoveSMC
 
 template <typename Backend>
-class GMMMoveMu : public vsmc::MoveSMP<GMM, GMMMoveMu<Backend>, Backend>
+class GMMMoveMu : public vsmc::SamplerEvalSMP<GMM, GMMMoveMu<Backend>, Backend>
 {
     public:
     std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
@@ -457,7 +457,7 @@ class GMMMoveMu : public vsmc::MoveSMP<GMM, GMMMoveMu<Backend>, Backend>
 
 template <typename Backend>
 class GMMMoveLambda
-    : public vsmc::MoveSMP<GMM, GMMMoveLambda<Backend>, Backend>
+    : public vsmc::SamplerEvalSMP<GMM, GMMMoveLambda<Backend>, Backend>
 {
     public:
     std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
@@ -482,7 +482,7 @@ class GMMMoveLambda
 
 template <typename Backend>
 class GMMMoveWeight
-    : public vsmc::MoveSMP<GMM, GMMMoveWeight<Backend>, Backend>
+    : public vsmc::SamplerEvalSMP<GMM, GMMMoveWeight<Backend>, Backend>
 {
     public:
     std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)

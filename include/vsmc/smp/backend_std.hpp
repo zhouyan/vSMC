@@ -65,46 +65,11 @@ inline void backend_std_range(
 
 } // namespace internal
 
-/// \brief Sampler<T>::init_type subtype using the standard library
+/// \brief Sampler<T>::eval_type subtype using the standard library
 /// \ingroup STD
 template <typename T, typename Derived>
-class InitializeSMP<T, Derived, BackendSTD> : public InitializeBase<T, Derived>
-{
-    public:
-    std::size_t operator()(Particle<T> &particle, void *param)
-    {
-        using size_type = typename Particle<T>::size_type;
-
-        this->eval_param(particle, param);
-        this->eval_pre(particle);
-        vsmc::Vector<size_type> begin;
-        vsmc::Vector<size_type> end;
-        internal::backend_std_range(particle.size(), begin, end);
-        vsmc::Vector<std::future<std::size_t>> task_group;
-        for (std::size_t i = 0; i != begin.size(); ++i) {
-            const size_type b = begin[i];
-            const size_type e = end[i];
-            task_group.push_back(
-                std::async(std::launch::async, [this, &particle, b, e]() {
-                    return this->eval_range(particle.range(b, e));
-                }));
-        }
-        std::size_t accept = 0;
-        for (auto &task : task_group)
-            accept += task.get();
-        this->eval_post(particle);
-
-        return accept;
-    }
-
-    protected:
-    VSMC_DEFINE_SMP_BACKEND_SPECIAL(STD, Initialize)
-}; // class InitializeSMP
-
-/// \brief Sampler<T>::move_type subtype using the standard library
-/// \ingroup STD
-template <typename T, typename Derived>
-class MoveSMP<T, Derived, BackendSTD> : public MoveBase<T, Derived>
+class SamplerEvalSMP<T, Derived, BackendSTD>
+    : public SamplerEvalBase<T, Derived>
 {
     public:
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
@@ -133,8 +98,8 @@ class MoveSMP<T, Derived, BackendSTD> : public MoveBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_BACKEND_SPECIAL(STD, Move)
-}; // class MoveSMP
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(STD, SamplerEval)
+}; // class SamplerEvalSMP
 
 /// \brief Monitor<T>::eval_type subtype using the standard library
 /// \ingroup STD
@@ -171,15 +136,10 @@ class MonitorEvalSMP<T, Derived, BackendSTD>
     VSMC_DEFINE_SMP_BACKEND_SPECIAL(STD, MonitorEval)
 }; // class MonitorEvalSMP
 
-/// \brief Sampler<T>::init_type subtype using the standard library
+/// \brief Sampler<T>::eval_type subtype using the standard library
 /// \ingroup STD
 template <typename T, typename Derived>
-using InitializeSTD = InitializeSMP<T, Derived, BackendSTD>;
-
-/// \brief Sampler<T>::move_type subtype using the standard library
-/// \ingroup STD
-template <typename T, typename Derived>
-using MoveSTD = MoveSMP<T, Derived, BackendSTD>;
+using SamplerEvalSTD = SamplerEvalSMP<T, Derived, BackendSTD>;
 
 /// \brief Monitor<T>::eval_type subtype using the standard library
 /// \ingroup STD

@@ -1,12 +1,15 @@
 \chapter{Introduction}
 \label{chap:Introduction}
 
-In this chapter, we introduce the kinds of Monte Carlo algorithms readily
-supported by the library and introduce the terminologies used through out this
-document.
+In this chapter, we introduce the basic structure of Monte Carlo algorithms
+that can be implemented with this library. At a high level, almost all
+algorithms can be described as the following, from an implementation
+perspective. Let $\{E_t\}_{t\ge0}$ be a sequence of state spaces, and
+$\{X_t^i\}_{i=1}^{N_t} \in E_t^{N_t}$. A Monte Carlo algorithm iteratively
+applies some kernel $M_t:\prod_{k=0}^{t-1}E_k^{N_k}\to\prod_{k=0}^tE_k^{N_k}$,
+that draws $\{X_k^{1:N_k}\}_{k=1}^t$ given $\{X_k^{1:N_k}\}_{k=0}^{t-1}$
+according to some probability law.
 
-\section{Resampling}
-
-\section{Markov chain Monte Carlo}
-
-\section{Sequential Monte Carlo}
+At first this may seem a very strange way to describe Monte Carlo algorithms.
+But later it will become clear that, we can implement many always by just
+defining proper kernels $M_t$.

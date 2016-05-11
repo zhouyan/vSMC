@@ -48,17 +48,9 @@ int vsmc_backend_smp_max();
 /// \brief Check if a given SMP backend is defined within the library
 int vsmc_backend_smp_check(vSMCBackendSMP backend);
 
-/// \brief `vsmc::Sampler::init` with `vsmc::InitializeSMP` as input
-void vsmc_sampler_init_smp(vSMCBackendSMP backend, vsmc_sampler sampler,
-    vsmc_sampler_init_smp_type new_init, int append);
-
-/// \brief `vsmc::Sampler::move` with `vsmc::MoveSMP` as input
-void vsmc_sampler_move_smp(vSMCBackendSMP backend, vsmc_sampler sampler,
-    vsmc_sampler_move_smp_type new_move, int append);
-
-/// \brief `vsmc::Sampler::mcmc` with `vsmc::MoveSMP` as input
-void vsmc_sampler_mcmc_smp(vSMCBackendSMP backend, vsmc_sampler sampler,
-    vsmc_sampler_move_smp_type new_mcmc, int append);
+/// \brief `vsmc::Sampler::eval` with `vsmc::SamplerEvalSMP` as input
+void vsmc_sampler_eval_smp(vSMCBackendSMP backend, vsmc_sampler sampler,
+    vsmc_sampler_eval_smp_type new_eval, vSMCSamplerStage, int append);
 
 /// \brief `vsmc::Monitor` with `vsmc::MonitorEvalSMP` as input
 vsmc_monitor vsmc_monitor_new_smp(vSMCBackendSMP backend, size_t dim,

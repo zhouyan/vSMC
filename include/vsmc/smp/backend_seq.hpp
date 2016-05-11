@@ -37,30 +37,11 @@
 namespace vsmc
 {
 
-/// \brief Sampler<T>::init_type subtype
+/// \brief Sampler<T>::eval_type subtype
 /// \ingroup SEQ
 template <typename T, typename Derived>
-class InitializeSMP<T, Derived, BackendSEQ> : public InitializeBase<T, Derived>
-{
-    public:
-    std::size_t operator()(Particle<T> &particle, void *param)
-    {
-        this->eval_param(particle, param);
-        this->eval_pre(particle);
-        std::size_t accept = this->eval_range(particle.range());
-        this->eval_post(particle);
-
-        return accept;
-    }
-
-    protected:
-    VSMC_DEFINE_SMP_BACKEND_SPECIAL(SEQ, Initialize)
-}; // class InitializeSMP
-
-/// \brief Sampler<T>::move_type subtype
-/// \ingroup SEQ
-template <typename T, typename Derived>
-class MoveSMP<T, Derived, BackendSEQ> : public MoveBase<T, Derived>
+class SamplerEvalSMP<T, Derived, BackendSEQ>
+    : public SamplerEvalBase<T, Derived>
 {
     public:
     std::size_t operator()(std::size_t iter, Particle<T> &particle)
@@ -73,8 +54,8 @@ class MoveSMP<T, Derived, BackendSEQ> : public MoveBase<T, Derived>
     }
 
     protected:
-    VSMC_DEFINE_SMP_BACKEND_SPECIAL(SEQ, Move)
-}; // class MoveSMP
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(SEQ, SamplerEval)
+}; // class SamplerEvalSMP
 
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup SEQ
@@ -95,15 +76,10 @@ class MonitorEvalSMP<T, Derived, BackendSEQ>
     VSMC_DEFINE_SMP_BACKEND_SPECIAL(SEQ, MonitorEval)
 }; // class MonitorEvalSMP
 
-/// \brief Sampler<T>::init_type subtype
+/// \brief Sampler<T>::eval_type subtype
 /// \ingroup SEQ
 template <typename T, typename Derived>
-using InitializeSEQ = InitializeSMP<T, Derived, BackendSEQ>;
-
-/// \brief Sampler<T>::move_type subtype
-/// \ingroup SEQ
-template <typename T, typename Derived>
-using MoveSEQ = MoveSMP<T, Derived, BackendSEQ>;
+using SamplerEvalSEQ = SamplerEvalSMP<T, Derived, BackendSEQ>;
 
 /// \brief Monitor<T>::eval_type subtype
 /// \ingroup SEQ
