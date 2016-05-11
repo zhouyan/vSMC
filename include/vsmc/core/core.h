@@ -147,11 +147,11 @@ void vsmc_state_matrix_read_state_matrix(
     vsmc_state_matrix state_matrix, vSMCMatrixLayout layout, double *first);
 
 /// \brief `vsmc::StateMatrix::copy`
-void vsmc_state_matrix_copy(
+void vsmc_state_matrix_select(
     vsmc_state_matrix state_matrix, size_t n, const size_t *index);
 
-/// \brief `vsmc::StateMatrix::copy_particle`
-void vsmc_state_matrix_copy_particle(
+/// \brief `vsmc::StateMatrix::duplicate`
+void vsmc_state_matrix_duplicate(
     vsmc_state_matrix state_matrix, size_t src, size_t dst);
 
 /// @} C_API_Core_StateMatrix
@@ -178,19 +178,12 @@ size_t vsmc_particle_size(vsmc_particle particle);
 void vsmc_particle_resize_by_index(
     vsmc_particle particle, size_t n, const size_t *index);
 
-/// \brief `vsmc::Particle::resize_by_mask`
-void vsmc_particle_resize_by_mask(vsmc_particle particle, size_t n, int *mask);
-
 /// \brief `vsmc::Particle::resize_by_resample`
 void vsmc_particle_resize_by_resample(
     vsmc_particle particle, size_t n, vSMCResampleScheme scheme);
 
 /// \brief `vsmc::Particle::resize_by_uniform`
 void vsmc_particle_resize_by_uniform(vsmc_particle particle, size_t n);
-
-/// \brief `vsmc::Particle::resize_by_range`
-void vsmc_particle_resize_by_ragne(
-    vsmc_particle particle, size_t n, size_t first, size_t last);
 
 /// \brief `vsmc:Particle::state`
 vsmc_state_matrix vsmc_particle_state(vsmc_particle particle);
@@ -308,9 +301,6 @@ size_t vsmc_sampler_iter_size(vsmc_sampler sampler);
 /// \brief `vsmc::Sampler::iter_num`
 size_t vsmc_sampler_iter_num(vsmc_sampler sampler);
 
-/// \brief `vsmc::Sampler::status_size`
-size_t vsmc_sampler_status_size(vsmc_sampler sampler);
-
 /// \brief `vsmc::Sampler::resample`
 void vsmc_sampler_resample(vsmc_sampler sampler);
 
@@ -354,14 +344,7 @@ void vsmc_sampler_read_resampled_history(vsmc_sampler sampler, int *first);
 
 /// \brief `vsmc::Sampler::status_history`
 size_t vsmc_sampler_status_history(
-    vsmc_sampler sampler, size_t id, size_t iter);
-
-/// \brief `vsmc::Sampler::read_status_history`
-void vsmc_sampler_read_status_history(vsmc_sampler, size_t id, size_t *first);
-
-/// \brief `vsmc::Sampler::read_status_history_matrix`
-void vsmc_sampler_read_status_history_matrix(
-    vsmc_sampler sampler, vSMCMatrixLayout layout, size_t *first);
+    vsmc_sampler sampler, size_t iter, size_t id);
 
 /// \brief `vsmc::Sampler::particle`
 vsmc_particle vsmc_sampler_particle(vsmc_sampler sampler);

@@ -113,16 +113,16 @@ void vsmc_state_matrix_read_state_matrix(
         .read_state_matrix(static_cast<::vsmc::MatrixLayout>(layout), first);
 }
 
-void vsmc_state_matrix_copy(
+void vsmc_state_matrix_select(
     vsmc_state_matrix state_matrix, size_t n, const size_t *index)
 {
-    ::vsmc::cast(state_matrix).copy(n, index);
+    ::vsmc::cast(state_matrix).select(n, index);
 }
 
-void vsmc_state_matrix_copy_particle(
+void vsmc_state_matrix_duplicate(
     vsmc_state_matrix state_matrix, size_t src, size_t dst)
 {
-    ::vsmc::cast(state_matrix).copy_particle(src, dst);
+    ::vsmc::cast(state_matrix).duplicate(src, dst);
 }
 
 } // extern "C"

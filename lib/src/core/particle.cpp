@@ -69,11 +69,6 @@ void vsmc_particle_resize_by_index(
     ::vsmc::cast(particle).resize_by_index(n, index);
 }
 
-void vsmc_particle_resize_by_mask(vsmc_particle particle, size_t n, int *mask)
-{
-    ::vsmc::cast(particle).resize_by_mask(n, mask);
-}
-
 void vsmc_particle_resize_by_resample(
     vsmc_particle particle, size_t n, vSMCResampleScheme scheme)
 {
@@ -108,12 +103,6 @@ void vsmc_particle_resize_by_resample(
 void vsmc_particle_resize_by_uniform(vsmc_particle particle, size_t n)
 {
     ::vsmc::cast(particle).resize_by_uniform(n);
-}
-
-void vsmc_particle_resize_by_ragne(
-    vsmc_particle particle, size_t n, size_t first, size_t last)
-{
-    ::vsmc::cast(particle).resize_by_range(n, first, last);
 }
 
 vsmc_state_matrix vsmc_particle_state(vsmc_particle particle)

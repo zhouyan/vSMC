@@ -289,30 +289,30 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     /// \f$a_i = i\f$ for all \f$r_i > 0\f$. This condition is always satisfied
     /// if `index` comes from `resamle_trans_rep_index`.
     template <typename IntType, typename InputIter>
-    InputIter copy(IntType N, InputIter index)
+    void select(IntType N, InputIter index)
     {
         size_type n = static_cast<size_type>(N);
         if (this->size() == 0 || internal::is_nullptr(index)) {
             this->resize(n);
-            return index;
+            return;
         }
 
         if (n > this->size())
             this->resize(n);
         for (size_type dst = 0; dst != n; ++dst, ++index)
-            copy_particle(static_cast<size_type>(*index), dst);
+            duplicate(static_cast<size_type>(*index), dst);
         if (n < this->size())
             this->resize(n);
 
-        return index;
+        return;
     }
 
-    void copy_particle(size_type src, size_type dst)
+    void duplicate(size_type src, size_type dst)
     {
         if (src == dst)
             return;
 
-        copy_particle_dispatch(src, dst, std::integral_constant < bool,
+        duplicate_dispatch(src, dst, std::integral_constant < bool,
             Dim == Dynamic || 8 < Dim > ());
     }
 
@@ -363,28 +363,27 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         *this = std::move(tmp);
     }
 
-    void copy_particle_dispatch(size_type src, size_type dst, std::true_type)
+    void duplicate_dispatch(size_type src, size_type dst, std::true_type)
     {
         std::copy(row_data(src), row_data(src) + this->dim(), row_data(dst));
     }
 
-    void copy_particle_dispatch(size_type src, size_type dst, std::false_type)
+    void duplicate_dispatch(size_type src, size_type dst, std::false_type)
     {
-        copy_particle_pos<0>(row_data(src), row_data(dst),
+        duplicate_pos<0>(row_data(src), row_data(dst),
             std::integral_constant<bool, 0 < Dim>());
     }
 
     template <std::size_t D>
-    void copy_particle_pos(const value_type *, value_type *, std::false_type)
+    void duplicate_pos(const value_type *, value_type *, std::false_type)
     {
     }
 
     template <std::size_t D>
-    void copy_particle_pos(
-        const value_type *src, value_type *dst, std::true_type)
+    void duplicate_pos(const value_type *src, value_type *dst, std::true_type)
     {
         dst[D] = src[D];
-        copy_particle_pos<D + 1>(
+        duplicate_pos<D + 1>(
             src, dst, std::integral_constant<bool, D + 1 < Dim>());
     }
 }; // class StateMatrix
@@ -473,12 +472,12 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     /// \f$a_i = i\f$ for all \f$r_i > 0\f$. This condition is always satisfied
     /// if `index` comes from `resamle_trans_rep_index`.
     template <typename InputIter>
-    InputIter copy(size_type N, InputIter index)
+    void select(size_type N, InputIter index)
     {
         size_type n = static_cast<size_type>(N);
         if (this->size() == 0 || internal::is_nullptr(index)) {
             this->resize(N);
-            return index;
+            return;
         }
 
         InputIter idx = index;
@@ -501,15 +500,15 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
             *this = std::move(tmp);
         }
 
-        return idx;
+        return;
     }
 
-    void copy_particle(size_type src, size_type dst)
+    void duplicate(size_type src, size_type dst)
     {
         if (src == dst)
             return;
 
-        copy_particle_dispatch(src, dst, std::integral_constant < bool,
+        duplicate_dispatch(src, dst, std::integral_constant < bool,
             Dim == Dynamic || 8 < Dim > ());
     }
 
@@ -561,29 +560,28 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         *this = std::move(tmp);
     }
 
-    void copy_particle_dispatch(size_type src, size_type dst, std::true_type)
+    void duplicate_dispatch(size_type src, size_type dst, std::true_type)
     {
         for (std::size_t d = 0; d != this->dim(); ++d)
             operator()(dst, d) = operator()(src, d);
     }
 
-    void copy_particle_dispatch(size_type src, size_type dst, std::false_type)
+    void duplicate_dispatch(size_type src, size_type dst, std::false_type)
     {
-        copy_particle_pos<0>(this->data() + src, this->data() + dst,
+        duplicate_pos<0>(this->data() + src, this->data() + dst,
             std::integral_constant<bool, 0 < Dim>());
     }
 
     template <std::size_t D>
-    void copy_particle_pos(const value_type *, value_type *, std::false_type)
+    void duplicate_pos(const value_type *, value_type *, std::false_type)
     {
     }
 
     template <std::size_t D>
-    void copy_particle_pos(
-        const value_type *src, value_type *dst, std::true_type)
+    void duplicate_pos(const value_type *src, value_type *dst, std::true_type)
     {
         dst[D * this->size()] = src[D * this->size()];
-        copy_particle_pos<D + 1>(
+        duplicate_pos<D + 1>(
             src, dst, std::integral_constant<bool, D + 1 < Dim>());
     }
 }; // class StateMatrix

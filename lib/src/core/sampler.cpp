@@ -99,11 +99,6 @@ size_t vsmc_sampler_iter_num(vsmc_sampler sampler)
     return ::vsmc::cast(sampler).iter_num();
 }
 
-size_t vsmc_sampler_status_size(vsmc_sampler sampler)
-{
-    return ::vsmc::cast(sampler).status_size();
-}
-
 void vsmc_sampler_resample(vsmc_sampler sampler)
 {
     ::vsmc::cast(sampler).resample();
@@ -173,22 +168,9 @@ void vsmc_sampler_read_resampled_history(vsmc_sampler sampler, int *first)
 }
 
 size_t vsmc_sampler_status_history(
-    vsmc_sampler sampler, size_t id, size_t iter)
+    vsmc_sampler sampler, size_t iter, size_t id)
 {
-    return ::vsmc::cast(sampler).status_history(id, iter);
-}
-
-void vsmc_sampler_read_status_history(
-    vsmc_sampler sampler, size_t id, size_t *first)
-{
-    ::vsmc::cast(sampler).read_status_history(id, first);
-}
-
-void vsmc_sampler_read_status_history_matrix(
-    vsmc_sampler sampler, vSMCMatrixLayout layout, size_t *first)
-{
-    ::vsmc::cast(sampler).read_status_history_matrix(
-        static_cast<::vsmc::MatrixLayout>(layout), first);
+    return ::vsmc::cast(sampler).status_history(iter, id);
 }
 
 vsmc_particle vsmc_sampler_particle(vsmc_sampler sampler)

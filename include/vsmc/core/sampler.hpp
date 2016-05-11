@@ -59,7 +59,6 @@ class Sampler
 {
     public:
     using size_type = typename Particle<T>::size_type;
-    using value_type = T;
     using init_type = std::function<std::size_t(Particle<T> &, void *)>;
     using move_type = std::function<std::size_t(std::size_t, Particle<T> &)>;
     using monitor_map_type = std::map<std::string, Monitor<T>>;
@@ -115,6 +114,7 @@ class Sampler
             ess_history_ = other.ess_history_;
             resampled_history_ = other.resampled_history_;
             status_history_ = other.status_history_;
+            status_ = other.status_;
         }
 
         return *this;
@@ -135,6 +135,7 @@ class Sampler
             ess_history_ = std::move(other.ess_history_);
             resampled_history_ = std::move(other.resampled_history_);
             status_history_ = std::move(other.status_history_);
+            status_ = std::move(other.status_);
         }
 
         return *this;
@@ -149,11 +150,6 @@ class Sampler
         size_history_.reserve(num);
         ess_history_.reserve(num);
         resampled_history_.reserve(num);
-
-        do_status();
-        for (auto &s : status_history_)
-            s.reserve(num);
-
         for (auto &m : monitor_)
             m.second.reserve(num);
     }
@@ -163,15 +159,6 @@ class Sampler
 
     /// \brief Current iteration number (initialization count as zero)
     std::size_t iter_num() const { return iter_num_; }
-
-    /// \brief Move status history
-    ///
-    /// \details
-    /// At each iterations, including the initialization step, let `M` be the
-    /// size of the move/init queue plus the size of the mcmc queue. The value
-    /// return by this method is the maximum of `M` for all iterations already
-    /// performed.
-    std::size_t status_size() const { return status_history_.size(); }
 
     /// \brief Force resample
     Sampler<T> &resample()
@@ -295,44 +282,9 @@ class Sampler
     }
 
     /// \brief Get the status of a given move id and the iteration
-    std::size_t status_history(std::size_t id, std::size_t iter) const
+    std::size_t status_history(std::size_t iter, std::size_t id) const
     {
-        return status_history_[id][iter];
-    }
-
-    /// \brief Read status history for a given move id through an
-    /// output it ertor
-    template <typename OutputIter>
-    OutputIter read_status_history(std::size_t id, OutputIter first) const
-    {
-        return std::copy(
-            status_history_[id].begin(), status_history_[id].end(), first);
-    }
-
-    /// \brief Read the record history of all moves as a matrix through an
-    /// output iterator
-    template <typename OutputIter>
-    OutputIter read_status_history_matrix(
-        MatrixLayout layout, OutputIter first) const
-    {
-        if (layout == RowMajor) {
-            for (std::size_t iter = 0; iter != iter_size(); ++iter) {
-                for (std::size_t id = 0; id != status_size(); ++id, ++first) {
-                    *first = static_cast<
-                        typename std::iterator_traits<OutputIter>::value_type>(
-                        status_history(id, iter));
-                }
-            }
-        }
-
-        if (layout == ColMajor) {
-            for (std::size_t id = 0; id != status_size(); ++id) {
-                first = std::copy(status_history_[id].begin(),
-                    status_history_[id].end(), first);
-            }
-        }
-
-        return first;
+        return status_history_[iter][id];
     }
 
     /// \brief Read and write access to the Particle<T> object
@@ -489,12 +441,12 @@ class Sampler
         VSMC_RUNTIME_WARNING_CORE_SAMPLER_INIT_BY_ITER;
 
         do_reset();
-        do_status();
+        status_.clear();
         if (init_by_iter_)
             do_iterate();
         else
             do_initialize(param);
-        do_status();
+        status_history_.push_back(status_);
 
         return *this;
     }
@@ -507,14 +459,14 @@ class Sampler
     /// monitors are computed
     Sampler<T> &iterate(std::size_t num = 1)
     {
-        do_status();
+        status_.clear();
         if (num > 1)
             reserve(iter_size() + num);
         for (std::size_t i = 0; i != num; ++i) {
             ++iter_num_;
             do_iterate();
         }
-        do_status();
+        status_history_.push_back(status_);
 
         return *this;
     }
@@ -596,6 +548,8 @@ class Sampler
     /// \brief Summary of sampler history
     std::map<std::string, Vector<double>> summary() const
     {
+        const double missing_data = std::numeric_limits<double>::quiet_NaN();
+
         std::map<std::string, Vector<double>> df;
         Vector<double> data(iter_size());
 
@@ -606,15 +560,21 @@ class Sampler
             data.begin());
         df["Resampled"] = data;
 
-        for (std::size_t i = 0; i != status_size(); ++i) {
-            std::copy(status_history_[i].begin(), status_history_[i].end(),
-                data.begin());
-            df["Status." + std::to_string(i)] = data;
-        }
-
         df["ESS"] = ess_history_;
 
-        const double missing_data = std::numeric_limits<double>::quiet_NaN();
+        std::size_t ssize = 0;
+        for (std::size_t i = 0; i != iter_size(); ++i)
+            if (ssize < status_history_[i].size())
+                ssize = status_history_[i].size();
+        for (std::size_t j = 0; j != ssize; ++j) {
+            for (std::size_t i = 0; i != iter_size(); ++i) {
+                data[i] = status_history_[i].size() > j + 1 ?
+                    status_history_[i][j] :
+                    missing_data;
+            }
+            df["Status." + std::to_string(j)] = data;
+        }
+
         for (const auto &m : monitor_) {
             if (m.second.iter_size() > 0) {
                 for (std::size_t d = 0; d != m.second.dim(); ++d) {
@@ -677,26 +637,9 @@ class Sampler
     Vector<size_type> size_history_;
     Vector<double> ess_history_;
     Vector<bool> resampled_history_;
+    Vector<std::size_t> status_;
     Vector<Vector<std::size_t>> status_history_;
     monitor_map_type monitor_;
-
-    void do_status()
-    {
-        if (status_history_.empty())
-            status_history_.push_back(Vector<std::size_t>());
-        std::size_t size =
-            mcmc_queue_.size() +
-            ((iter_num_ == 0 && !init_by_iter_) ?
-                    std::max(static_cast<std::size_t>(1), move_queue_.size()) :
-                    move_queue_.size());
-        if (status_size() < size) {
-            std::size_t diff = size - status_size();
-            for (std::size_t d = 0; d != diff; ++d)
-                status_history_.push_back(Vector<std::size_t>());
-        }
-        for (std::size_t i = 0; i != status_size(); ++i)
-            status_history_[i].resize(iter_size());
-    }
 
     void do_reset()
     {
@@ -710,41 +653,43 @@ class Sampler
         particle_.weight().set_equal();
     }
 
-    void do_initialize(void *param) { do_common(do_init(0, param)); }
+    void do_initialize(void *param)
+    {
+        do_init(param);
+        do_common();
+    }
 
-    void do_iterate() { do_common(do_move(0)); }
+    void do_iterate()
+    {
+        do_move();
+        do_common();
+    }
 
-    void do_common(std::size_t ia)
+    void do_common()
     {
         do_monitor(MonitorMove);
         do_resample(resample_threshold_);
         do_monitor(MonitorResample);
-        do_mcmc(ia);
+        do_mcmc();
         do_monitor(MonitorMCMC);
     }
 
-    std::size_t do_init(std::size_t ia, void *param)
+    void do_init(void *param)
     {
         for (auto &m : init_queue_)
-            status_history_[ia++].push_back(m(particle_, param));
-
-        return ia;
+            status_.push_back(m(particle_, param));
     }
 
-    std::size_t do_move(std::size_t ia)
+    void do_move()
     {
         for (auto &m : move_queue_)
-            status_history_[ia++].push_back(m(iter_num_, particle_));
-
-        return ia;
+            status_.push_back(m(iter_num_, particle_));
     }
 
-    std::size_t do_mcmc(std::size_t ia)
+    void do_mcmc()
     {
         for (auto &m : mcmc_queue_)
-            status_history_[ia++].push_back(m(iter_num_, particle_));
-
-        return ia;
+            status_.push_back(m(iter_num_, particle_));
     }
 
     void do_resample(double threshold)

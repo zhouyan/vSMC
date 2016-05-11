@@ -45,7 +45,7 @@ class Weight
     public:
     using size_type = std::size_t;
 
-    explicit Weight(size_type N = 0) : ess_(0), data_(N) {}
+    explicit Weight(size_type N = 0) : ess_(0), data_(N) { set_equal(); }
 
     /// \brief Size of this Weight object
     size_type size() const { return data_.size(); }

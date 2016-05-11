@@ -62,7 +62,6 @@ template <typename T>
 class Monitor
 {
     public:
-    using value_type = T;
     using eval_type =
         std::function<void(std::size_t, std::size_t, Particle<T> &, double *)>;
 

@@ -1,8 +1,9 @@
 # Changes in v2.3.0
 
 ## Important changes
-* `StateMatrix` member `state` is replaced by `operator()`. `Particle` member
-  `value` is renamed `state`.
+* `StateMatrix` member `state` is replaced by `operator()`, `copy` renamed to
+  `select` and `copy_particle` renamed to `duplicate`.
+* `Particle` member `value` is renamed `state`.
 * `Sampler` constructor has been rewritten. It no longer accept arguments about
   resampling method and threshold. Instead, it is now a variadic template and
   pass all of its arguments to `Particle`. The later will take the first

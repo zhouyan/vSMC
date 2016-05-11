@@ -172,29 +172,6 @@ class Particle
             N, index, std::is_convertible<InputIter, const size_type *>());
     }
 
-    /// \brief Resize by selecting according to user supplied mask vector
-    ///
-    /// \param N The new sample size
-    /// \param mask A mask vector of length at least `size()`. Each element,
-    ///
-    /// \details
-    /// when converted to `bool`, if `true`, the corresponding particle is
-    /// preserved. The vector of preserved particles is copied repeatedly until
-    /// there are enough particles to fill the new system.
-    template <typename InputIter>
-    void resize_by_mask(size_type N, InputIter mask)
-    {
-        Vector<size_type> idx(static_cast<std::size_t>(N));
-        Vector<size_type> mask_index(static_cast<std::size_t>(size_));
-        std::size_t M = 0;
-        for (size_type i = 0; i != size_; ++i, ++mask)
-            if (*mask)
-                mask_index[M++] = i;
-        resize_copy_index(
-            static_cast<std::size_t>(N), M, mask_index.data(), idx.data());
-        resize(N, idx.data());
-    }
-
     /// \brief Resize by resampling
     ///
     /// \param N The new sample size
@@ -227,46 +204,6 @@ class Particle
     {
         weight_.set_equal();
         resize_by_resample(N, ResampleMultinomial());
-    }
-
-    /// \brief Equivalent to `resize_by_range(N, 0, size());
-    void resize_by_range(size_type N) { resize_by_range(N, 0, size_); }
-
-    /// \brief Equivalent to `resize_by_range(N, first, size());
-    void resize_by_range(size_type N, size_type first)
-    {
-        resize_by_range(N, first, size_);
-    }
-
-    /// \brief Resize by selecting a range of particles
-    ///
-    /// \param N The new sample size
-    /// \param first The index of the first particle to be preserved
-    /// \param last The index past the last particle to be preserved
-    ///
-    /// \details
-    /// This is the most destructive resizing method. The particles in the
-    /// range [first, last) are copied repeatedly until there are enough
-    /// particles to fill the new system.
-    void resize_by_range(size_type N, size_type first, size_type last)
-    {
-        VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RESIZE_BY_RANGE;
-
-        if (N == size_ && first == 0)
-            return;
-
-        Vector<size_type> idx(static_cast<std::size_t>(N));
-        size_type M = last - first;
-        if (M >= N) {
-            for (size_type i = 0; i != N; ++i, ++first)
-                idx[static_cast<std::size_t>(i)] = first;
-        } else {
-            for (size_type i = 0; i != M; ++i, ++first)
-                idx[static_cast<std::size_t>(i)] = first;
-            resize_copy_index(static_cast<std::size_t>(N - M),
-                static_cast<std::size_t>(M), idx.data(), idx.data() + M);
-        }
-        resize(N, idx.data());
     }
 
     /// \brief Read and write access to the state collection object
@@ -335,7 +272,7 @@ class Particle
     void resize(size_type N, const size_type *idx)
     {
         size_ = N;
-        state_.copy(N, idx);
+        state_.select(N, idx);
         weight_.resize(static_cast<SizeType<weight_type>>(N));
         rng_set_.resize(static_cast<SizeType<rng_set_type>>(N));
     }
