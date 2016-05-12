@@ -56,10 +56,12 @@ inline void backend_std_range(
 
     const IntType m = N / np;
     const IntType r = N % np;
+    IntType b = 0;
     for (IntType id = 0; id != np; ++id) {
         const IntType n = m + (id < r ? 1 : 0);
-        begin.push_back(id < r ? n * id : (n + 1) * r + n * (id - r));
-        end.push_back(begin.back() + n);
+        begin.push_back(b);
+        end.push_back(b + n);
+        b += n;
     }
 }
 
