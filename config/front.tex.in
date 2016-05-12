@@ -1,7 +1,7 @@
-\title{vSMC}
+\title{@PROJECT_NAME@}
 \subtitle{Scalable Monte Carlo}
 \author{Yan Zhou}
-\date{version 3.0.0}
+\date{version @PROJECT_VERSION@}
 
 \maketitle
 \tableofcontents

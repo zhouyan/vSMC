@@ -71,7 +71,7 @@ void vsmc_weight_read_weight(vsmc_weight weight, double *first, int stride);
 /// \brief `vsmc::Weight::data`
 const double *vsmc_weight_data(vsmc_weight weight);
 
-/// \brief `vsmc::Weight::equal`
+/// \brief `vsmc::Weight::set_equal`
 void vsmc_weight_set_equal(vsmc_weight weight);
 
 /// \brief `vsmc::Weight::set`
@@ -83,7 +83,7 @@ void vsmc_weight_mul(vsmc_weight weight, const double *first, int stride);
 /// \brief `vsmc::Weight::set_log`
 void vsmc_weight_set_log(vsmc_weight weight, const double *first, int stride);
 
-/// \brief `vsmc::Weight::log`
+/// \brief `vsmc::Weight::add_log`
 void vsmc_weight_add_log(vsmc_weight weight, const double *first, int stride);
 
 /// \brief `vsmc::Weight::draw`
@@ -185,10 +185,10 @@ void vsmc_particle_resize_by_resample(
 /// \brief `vsmc::Particle::resize_by_uniform`
 void vsmc_particle_resize_by_uniform(vsmc_particle particle, size_t n);
 
-/// \brief `vsmc:Particle::state`
+/// \brief `vsmc::Particle::state`
 vsmc_state_matrix vsmc_particle_state(vsmc_particle particle);
 
-/// \brief `vsmc:Particle::weight`
+/// \brief `vsmc::Particle::weight`
 vsmc_weight vsmc_particle_weight(vsmc_particle particle);
 
 /// \brief `vsmc::Particle::rng`
@@ -230,10 +230,10 @@ void vsmc_monitor_reserve(vsmc_monitor monitor, size_t num);
 /// \brief `vsmc::Monitor::empty`
 int vsmc_monitor_empty(vsmc_monitor monitor);
 
-/// \brief `vsmc::Monitor::set_name`
+/// \brief `vsmc::Monitor::name`
 void vsmc_monitor_set_name(vsmc_monitor monitor, size_t id, const char *name);
 
-/// \brief `vsmc::Monitor::get_name`
+/// \brief `vsmc::Monitor::name`
 size_t vsmc_monitor_get_name(vsmc_monitor monitor, size_t id, char *name);
 
 /// \brief `vsmc::Monitor::index`
@@ -304,16 +304,16 @@ void vsmc_sampler_resample_scheme(
 void vsmc_sampler_resample_eval(
     vsmc_sampler sampler, vsmc_sampler_eval_type res_move, double threshold);
 
-/// \brief `vsmc::Sampler::threshold`
+/// \brief `vsmc::Sampler::resample_threshold`
 double vsmc_sampler_get_threshold(vsmc_sampler sampler);
 
-/// \brief `vsmc::Sampler::threshold`
+/// \brief `vsmc::Sampler::resample_threshold`
 void vsmc_sampler_set_threshold(vsmc_sampler sampler, double threshold);
 
-/// \brief `vsmc::Sampler::threshold_never`
+/// \brief `vsmc::Sampler::resample_threshold_never`
 double vsmc_sampler_resample_threshold_never(void);
 
-/// \brief `vsmc::Sampler::threshold_always`
+/// \brief `vsmc::Sampler::resample_threshold_always`
 double vsmc_sampler_resample_threshold_always(void);
 
 /// \brief `vsmc::Sampler::monitor`
