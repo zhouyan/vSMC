@@ -63,7 +63,7 @@ inline std::size_t resample_trans_residual(std::size_t N, std::size_t M,
     OutputIterI integ_i = integ;
     const resid_type coeff = static_cast<resid_type>(M);
     for (std::size_t i = 0; i != N; ++i, ++weight, ++resid_i, ++integ_i) {
-        resid_type w = coeff * static_cast<resid_type>(*weight);
+        const resid_type w = coeff * static_cast<resid_type>(*weight);
         resid_type integral;
         *resid_i = std::modf(w, &integral);
         *integ_i = static_cast<integ_type>(integral);

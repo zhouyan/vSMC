@@ -312,7 +312,7 @@ inline void pf_cv_run(std::size_t N, int nwid, int twid)
 #endif
 
     vsmc::StopWatch watch;
-    for (std::size_t i = 1; i <= n; ++i) {
+    for (std::size_t i = 1; i < n; ++i) {
         watch.start();
         sampler.iterate();
         watch.stop();
