@@ -53,22 +53,26 @@ template <typename T>
 class SingleParticleBase
 {
     public:
-    SingleParticleBase(typename Particle<T>::size_type id, Particle<T> *pptr)
+    using particle_type = Particle<T>;
+    using size_type = typename particle_type::size_type;
+    using rng_type = typename particle_type::rng_type;
+
+    SingleParticleBase(size_type id, particle_type *pptr)
         : pptr_(pptr), id_(id)
     {
     }
 
-    Particle<T> &particle() const { return *pptr_; }
+    particle_type &particle() const { return *pptr_; }
 
-    Particle<T> *particle_ptr() const { return pptr_; }
+    particle_type *particle_ptr() const { return pptr_; }
 
-    typename Particle<T>::size_type id() const { return id_; }
+    size_type id() const { return id_; }
 
-    typename Particle<T>::rng_type &rng() const { return pptr_->rng(id_); }
+    rng_type &rng() const { return pptr_->rng(id_); }
 
     private:
-    Particle<T> *pptr_;
-    typename Particle<T>::size_type id_;
+    particle_type *pptr_;
+    size_type id_;
 }; // class SingleParticleBase
 
 /// \brief SingleParticle base class trait
@@ -90,10 +94,11 @@ VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
 /// class single_particle_type
 /// {
 ///     public:
-///     using size_type = IntType;
-///     single_particle_type(size_type id, Particle<S> *pptr);
+///     single_particle_type(
+///         typename Particle<T>::size_type id, Particle<S> *pptr);
 ///     size_type id() const;
 ///     Particle<S> &particle() const;
+///     Particle<S> *patricle_ptr() const;
 /// }; // class single_particle_type
 /// ~~~
 /// Usually you can safely derive `single_particle_type<S>` from
@@ -102,13 +107,17 @@ template <typename T>
 class SingleParticle : public SingleParticleBaseType<T>
 {
     public:
-    SingleParticle(typename Particle<T>::size_type id, Particle<T> *pptr)
+    using particle_type = Particle<T>;
+    using size_type = typename particle_type::size_type;
+    using rng_type = typename particle_type::rng_type;
+
+    SingleParticle(size_type id, particle_type *pptr)
         : SingleParticleBaseType<T>(id, pptr)
     {
     }
 
     template <typename IntType>
-    SingleParticle operator[](IntType n)
+    SingleParticle<T> operator[](IntType n)
     {
         return SingleParticle<T>(static_cast<typename Particle<T>::size_type>(
                                      static_cast<std::ptrdiff_t>(this->id()) +

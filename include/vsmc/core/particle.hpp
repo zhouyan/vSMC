@@ -230,13 +230,16 @@ class Particle
     sp_type sp(size_type id) { return SingleParticle<T>(id, this); }
 
     /// \brief Get a ParticleRange<T> object
-    range_type range(size_type first, size_type last)
+    range_type range(size_type first, size_type last, size_type grainsize = 1)
     {
-        return ParticleRange<T>(first, last, this);
+        return ParticleRange<T>(first, last, this, grainsize);
     }
 
-    /// \brief Get a ParticleRange<T> object with `begin == 0`, `end == size()`
-    range_type range() { return ParticleRange<T>(0, size(), this); }
+    /// \brief Get a ParticleRange<T> object, `first == 0`, `last == size()`
+    range_type range(size_type grainsize = 1)
+    {
+        return ParticleRange<T>(0, size(), this, grainsize);
+    }
 
     /// \brief Get a SingleParticle<T> object for the first particle
     sp_type begin() { return sp(0); }
