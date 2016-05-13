@@ -34,7 +34,7 @@ suppressPackageStartupMessages(library(rhdf5))
 
 theme_set(theme_bw())
 
-smp <- c("OMP", "SEQ", "TBB")
+smp <- paste0("Backend", c("SEQ", "STD", "OMP", "TBB"))
 exe <- paste("pf_cv", smp, sep = ".")
 res <- c(
     "Multinomial",
@@ -104,8 +104,8 @@ pf_cv_est <- function() {
             pos.y <- numeric()
             for (i in 0:(length(particle) - 1)) {
                 name <- paste0("Iter.", i)
+                s <- particle[[name]]$State
                 w <- particle[[name]]$Weight
-                s <- particle[[name]]$Value
                 if (dim(s)[1] > dim(s)[2]) {
                     pos.x <- c(pos.x, sum(w * s[,1]))
                     pos.y <- c(pos.y, sum(w * s[,2]))

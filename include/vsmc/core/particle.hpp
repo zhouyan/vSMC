@@ -39,10 +39,10 @@
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
 
-#define VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RESIZE_BY_RANGE                     \
+#define VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RESIZE_BY_RANGE(n, b, e, g)         \
     VSMC_RUNTIME_ASSERT(                                                      \
-        (!internal::is_negative(first) && first < last && last <= size_),     \
-        "**Particle::resize_by_range** INDICES OUT OF RANGE")
+        (!internal::is_negative(b) && b < e && e <= n && g > 0),              \
+        "**ParticleRange::ParticleRange** INVALID ARGUMENTS")
 
 namespace vsmc
 {
@@ -53,28 +53,54 @@ template <typename T>
 class ParticleRange
 {
     public:
-    ParticleRange(typename Particle<T>::size_type begin,
-        typename Particle<T>::size_type end, Particle<T> *pptr)
-        : pptr_(pptr), begin_(begin), end_(end)
+    using particle_type = Particle<T>;
+    using size_type = typename particle_type::size_type;
+    using sp_type = typename particle_type::sp_type;
+
+    ParticleRange(size_type first, size_type last, particle_type *pptr,
+        size_type grainsize = 1)
+        : pptr_(pptr), first_(first), last_(last), grainsize_(grainsize)
     {
+        VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RESIZE_BY_RANGE(
+            pptr_->size(), first_, last_, grainsize_);
     }
 
-    Particle<T> &particle() const { return *pptr_; }
+    template <typename SplitType>
+    ParticleRange(ParticleRange<T> &other, SplitType)
+        : pptr_(other.pptr_)
+        , first_((other.first_ + other.last_) / 2)
+        , last_(other.last_)
+        , grainsize_(other.grainsize_)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RESIZE_BY_RANGE(
+            pptr_->size(), first_, last_, grainsize_);
 
-    Particle<T> *particle_ptr() const { return pptr_; }
+        other.last_ = first_;
+    }
 
-    typename Particle<T>::size_type size() const { return end_ - begin_; }
+    particle_type &particle() const { return *pptr_; }
 
-    typename Particle<T>::size_type begin() const { return begin_; }
+    particle_type *particle_ptr() const { return pptr_; }
 
-    typename Particle<T>::size_type end() const { return end_; }
+    size_type size() const { return last_ - first_; }
 
-    typename Particle<T>::rng_type &rng() const { return pptr_->rng(begin_); }
+    size_type first() const { return first_; }
+
+    size_type last() const { return last_; }
+
+    sp_type begin() const { return pptr_->sp(first_); }
+
+    sp_type end() const { return pptr_->sp(last_); }
+
+    bool empty() const { return first_ == last_; }
+
+    bool is_divisible() const { return size() > grainsize_; }
 
     private:
-    Particle<T> *pptr_;
-    typename Particle<T>::size_type begin_;
-    typename Particle<T>::size_type end_;
+    particle_type *pptr_;
+    size_type first_;
+    size_type last_;
+    size_type grainsize_;
 }; // class ParticleRange
 
 /// \brief Particle class representing the whole particle set
@@ -204,9 +230,9 @@ class Particle
     sp_type sp(size_type id) { return SingleParticle<T>(id, this); }
 
     /// \brief Get a ParticleRange<T> object
-    range_type range(size_type begin, size_type end)
+    range_type range(size_type first, size_type last)
     {
-        return ParticleRange<T>(begin, end, this);
+        return ParticleRange<T>(first, last, this);
     }
 
     /// \brief Get a ParticleRange<T> object with `begin == 0`, `end == size()`

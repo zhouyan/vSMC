@@ -42,15 +42,15 @@ namespace internal
 {
 
 template <typename IntType>
-inline void backend_omp_range(IntType N, IntType &begin, IntType &end)
+inline void backend_omp_range(IntType N, IntType &first, IntType &last)
 {
     const IntType np = static_cast<IntType>(::omp_get_num_threads());
     const IntType id = static_cast<IntType>(::omp_get_thread_num());
     const IntType m = N / np;
     const IntType r = N % np;
     const IntType n = m + (id < r ? 1 : 0);
-    begin = id < r ? n * id : (n + 1) * r + n * (id - r);
-    end = begin + n;
+    first = id < r ? n * id : (n + 1) * r + n * (id - r);
+    last = first + n;
 }
 
 } // namespace vsmc::internal
@@ -71,10 +71,10 @@ class SamplerEvalSMP<T, Derived, BackendOMP>
         Particle<T> *pptr = &particle;
 #pragma omp parallel default(none) shared(accept) firstprivate(pptr, iter)
         {
-            size_type begin = 0;
-            size_type end = 0;
-            internal::backend_omp_range(pptr->size(), begin, end);
-            std::size_t acc = this->eval_range(iter, pptr->range(begin, end));
+            size_type first = 0;
+            size_type last = 0;
+            internal::backend_omp_range(pptr->size(), first, last);
+            std::size_t acc = this->eval_range(iter, pptr->range(first, last));
 #pragma omp atomic
             accept += acc;
         }
@@ -103,11 +103,11 @@ class MonitorEvalSMP<T, Derived, BackendOMP>
         Particle<T> *pptr = &particle;
 #pragma omp parallel default(none) firstprivate(pptr, iter, dim, r)
         {
-            size_type begin = 0;
-            size_type end = 0;
-            internal::backend_omp_range(pptr->size(), begin, end);
-            this->eval_range(iter, dim, pptr->range(begin, end),
-                r + static_cast<std::size_t>(begin) * dim);
+            size_type first = 0;
+            size_type last = 0;
+            internal::backend_omp_range(pptr->size(), first, last);
+            this->eval_range(iter, dim, pptr->range(first, last),
+                r + static_cast<std::size_t>(first) * dim);
         }
         this->eval_post(iter, particle);
     }

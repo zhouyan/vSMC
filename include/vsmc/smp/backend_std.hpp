@@ -42,15 +42,15 @@ namespace internal
 
 template <typename IntType>
 inline void backend_std_range(
-    IntType N, vsmc::Vector<IntType> &begin, vsmc::Vector<IntType> &end)
+    IntType N, vsmc::Vector<IntType> &first, vsmc::Vector<IntType> &last)
 {
-    begin.clear();
-    end.clear();
+    first.clear();
+    last.clear();
     const IntType np = std::max(static_cast<IntType>(1),
         static_cast<IntType>(std::thread::hardware_concurrency()));
     if (np == 1) {
-        begin.push_back(0);
-        end.push_back(N);
+        first.push_back(0);
+        last.push_back(N);
         return;
     }
 
@@ -59,8 +59,8 @@ inline void backend_std_range(
     IntType b = 0;
     for (IntType id = 0; id != np; ++id) {
         const IntType n = m + (id < r ? 1 : 0);
-        begin.push_back(b);
-        end.push_back(b + n);
+        first.push_back(b);
+        last.push_back(b + n);
         b += n;
     }
 }
@@ -79,13 +79,13 @@ class SamplerEvalSMP<T, Derived, BackendSTD>
         using size_type = typename Particle<T>::size_type;
 
         this->eval_pre(iter, particle);
-        vsmc::Vector<size_type> begin;
-        vsmc::Vector<size_type> end;
-        internal::backend_std_range(particle.size(), begin, end);
+        vsmc::Vector<size_type> first;
+        vsmc::Vector<size_type> last;
+        internal::backend_std_range(particle.size(), first, last);
         vsmc::Vector<std::future<std::size_t>> task_group;
-        for (std::size_t i = 0; i != begin.size(); ++i) {
-            const size_type b = begin[i];
-            const size_type e = end[i];
+        for (std::size_t i = 0; i != first.size(); ++i) {
+            const size_type b = first[i];
+            const size_type e = last[i];
             task_group.push_back(std::async(
                 std::launch::async, [this, iter, &particle, b, e]() {
                     return this->eval_range(iter, particle.range(b, e));
@@ -116,13 +116,13 @@ class MonitorEvalSMP<T, Derived, BackendSTD>
         using size_type = typename Particle<T>::size_type;
 
         this->eval_pre(iter, particle);
-        vsmc::Vector<size_type> begin;
-        vsmc::Vector<size_type> end;
-        internal::backend_std_range(particle.size(), begin, end);
+        vsmc::Vector<size_type> first;
+        vsmc::Vector<size_type> last;
+        internal::backend_std_range(particle.size(), first, last);
         vsmc::Vector<std::future<void>> task_group;
-        for (std::size_t i = 0; i != begin.size(); ++i) {
-            const size_type b = begin[i];
-            const size_type e = end[i];
+        for (std::size_t i = 0; i != first.size(); ++i) {
+            const size_type b = first[i];
+            const size_type e = last[i];
             task_group.push_back(std::async(
                 std::launch::async, [this, iter, dim, &particle, r, b, e]() {
                     this->eval_range(iter, dim, particle.range(b, e),

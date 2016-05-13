@@ -182,7 +182,7 @@ class PFCVMove<Backend, vsmc::ColMajor, RNGSetType>
         v_.resize(particle.size());
     }
 
-    std::size_t eval_range(std::size_t, vsmc::ParticleRange<T> range)
+    std::size_t eval_range(std::size_t, const vsmc::ParticleRange<T> &range)
     {
         const double sd_pos = std::sqrt(0.02);
         const double sd_vel = std::sqrt(0.001);
@@ -191,18 +191,18 @@ class PFCVMove<Backend, vsmc::ColMajor, RNGSetType>
         vsmc::NormalDistribution<double> normal_vel(0, sd_vel);
 
         double *const pos_x =
-            range.particle().state().col_data(0) + range.begin();
+            range.particle().state().col_data(0) + range.first();
         double *const pos_y =
-            range.particle().state().col_data(1) + range.begin();
+            range.particle().state().col_data(1) + range.first();
         double *const vel_x =
-            range.particle().state().col_data(2) + range.begin();
+            range.particle().state().col_data(2) + range.first();
         double *const vel_y =
-            range.particle().state().col_data(3) + range.begin();
-        double *const w = w_.data() + range.begin();
-        double *const v = v_.data() + range.begin();
+            range.particle().state().col_data(3) + range.first();
+        double *const w = w_.data() + range.first();
+        double *const v = v_.data() + range.first();
 
         const std::size_t n = range.size();
-        auto &rng = range.rng();
+        auto &rng = range.begin().rng();
         normal_pos(rng, n, w);
         normal_pos(rng, n, v);
         vsmc::add(n, w, pos_x, pos_x);
