@@ -57,10 +57,10 @@ class PFCV : public PFCVBase<Layout>
         {
         }
 
-        double &pos_x() { return this->operator()(0); }
-        double &pos_y() { return this->operator()(1); }
-        double &vel_x() { return this->operator()(2); }
-        double &vel_y() { return this->operator()(3); }
+        double &pos_x() { return this->at(0); }
+        double &pos_y() { return this->at(1); }
+        double &vel_x() { return this->at(2); }
+        double &vel_y() { return this->at(3); }
 
         double log_likelihood(std::size_t iter)
         {
