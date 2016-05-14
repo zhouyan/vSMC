@@ -68,11 +68,10 @@ class NormalMVDistribution
         using result_type = RealType;
         using distribution_type = NormalMVDistribution<RealType, Dim>;
 
-        explicit param_type(const result_type *mean = nullptr,
-            const result_type *chol = nullptr)
-            : rnorm_(0, 1)
-            , null_mean_(mean == nullptr)
-            , null_chol_(chol == nullptr)
+        param_type(const result_type *mean, const result_type *chol)
+            : normal_(0, 1)
+            , is_null_mean_(mean == nullptr)
+            , is_null_chol_(chol == nullptr)
         {
             static_assert(Dim != Dynamic, "**NormalMVDistribution::param_type*"
                                           "* OBJECT DECLARED WITH DYNAMIC "
@@ -80,13 +79,13 @@ class NormalMVDistribution
             init(mean, chol);
         }
 
-        explicit param_type(std::size_t dim, const result_type *mean = nullptr,
-            const result_type *chol = nullptr)
-            : rnorm_(0, 1)
+        param_type(
+            std::size_t dim, const result_type *mean, const result_type *chol)
+            : normal_(0, 1)
             , mean_(dim)
             , chol_(dim * (dim + 1) / 2)
-            , null_mean_(mean == nullptr)
-            , null_chol_(chol == nullptr)
+            , is_null_mean_(mean == nullptr)
+            , is_null_chol_(chol == nullptr)
         {
             static_assert(Dim == Dynamic, "**NormalMVDistribution::param_type*"
                                           "* OBJECT DECLARED WITH FIXED "
@@ -109,9 +108,9 @@ class NormalMVDistribution
                 return false;
             if (param1.chol_ != param2.chol_)
                 return false;
-            if (param1.null_mean_ != param2.null_mean_)
+            if (param1.is_null_mean_ != param2.is_null_mean_)
                 return false;
-            if (param1.null_chol_ != param2.null_chol_)
+            if (param1.is_null_chol_ != param2.is_null_chol_)
                 return false;
             return true;
         }
@@ -130,11 +129,10 @@ class NormalMVDistribution
                 return os;
 
             os << param.norm_ << ' ';
-            os << param.dim() << ' ';
             os << param.mean_ << ' ';
             os << param.chol_ << ' ';
-            os << param.null_mean_ << ' ';
-            os << param.null_chol_;
+            os << param.is_null_mean_ << ' ';
+            os << param.is_null_chol_;
 
             return os;
         }
@@ -146,34 +144,24 @@ class NormalMVDistribution
             if (!is)
                 return is;
 
-            NormalDistribution<RealType> rnorm;
+            NormalDistribution<RealType> normal;
+            internal::StaticVector<result_type, Dim> mean;
+            internal::StaticVector<result_type, Dim *(Dim + 1) / 2> chol;
+            bool is_null_mean;
+            bool is_null_chol;
 
-            is >> std::ws >> rnorm;
-            if (!is)
-                return is;
-
-            std::size_t dim = 0;
-            is >> std::ws >> dim;
-            if (!is)
-                return is;
-
-            internal::StaticVector<result_type, Dim> mean(dim);
-            internal::StaticVector<result_type, Dim *(Dim + 1) / 2> chol(
-                dim * (dim + 1) / 2);
-            bool null_mean;
-            bool null_chol;
-
+            is >> std::ws >> normal;
             is >> std::ws >> mean;
             is >> std::ws >> chol;
-            is >> std::ws >> null_mean;
-            is >> std::ws >> null_chol;
+            is >> std::ws >> is_null_mean;
+            is >> std::ws >> is_null_chol;
 
             if (is) {
-                param.rnorm_ = std::move(rnorm);
-                std::move(mean.begin(), mean.end(), param.mean_.begin());
-                std::move(chol.begin(), chol.end(), param.chol_.begin());
-                param.null_mean_ = null_mean;
-                param.null_chol_ = null_chol;
+                param.normal_ = std::move(normal);
+                param.mean_ = std::move(mean);
+                param.chol_ = std::move(chol);
+                param.is_null_mean_ = is_null_mean;
+                param.is_null_chol_ = is_null_chol;
             } else {
                 is.setstate(std::ios_base::failbit);
             }
@@ -182,11 +170,11 @@ class NormalMVDistribution
         }
 
         private:
-        NormalDistribution<RealType> rnorm_;
+        NormalDistribution<RealType> normal_;
         internal::StaticVector<result_type, Dim> mean_;
         internal::StaticVector<result_type, Dim *(Dim + 1) / 2> chol_;
-        bool null_mean_;
-        bool null_chol_;
+        bool is_null_mean_;
+        bool is_null_chol_;
 
         friend distribution_type;
 
@@ -215,8 +203,7 @@ class NormalMVDistribution
     /// \param chol The lower triangular elements of the Cholesky decomposition
     /// of the covaraince matrix, packed row by row. If it is a nullpointer,
     /// then the covariance is the identicy matrix \f$I\f$
-    explicit NormalMVDistribution(
-        const result_type *mean = nullptr, const result_type *chol = nullptr)
+    NormalMVDistribution(const result_type *mean, const result_type *chol)
         : param_(mean, chol)
     {
         internal::size_check<VSMC_BLAS_INT>(
@@ -225,12 +212,27 @@ class NormalMVDistribution
     }
 
     /// \brief Only usable when `Dim == Dynamic`
-    explicit NormalMVDistribution(std::size_t dim,
-        const result_type *mean = nullptr, const result_type *chol = nullptr)
+    NormalMVDistribution(
+        std::size_t dim, const result_type *mean, const result_type *chol)
         : param_(dim, mean, chol)
     {
         internal::size_check<VSMC_BLAS_INT>(
             dim, "NormalMVDistribution::NormalMVDistribution");
+        reset();
+    }
+
+    explicit NormalMVDistribution(const param_type &param) : param_(param)
+    {
+        internal::size_check<VSMC_BLAS_INT>(
+            param.dim_, "NormalMVDistribution::NormalMVDistribution");
+        reset();
+    }
+
+    explicit NormalMVDistribution(param_type &&param)
+        : param_(std::move(param))
+    {
+        internal::size_check<VSMC_BLAS_INT>(
+            param.dim_, "NormalMVDistribution::NormalMVDistribution");
         reset();
     }
 
@@ -244,7 +246,7 @@ class NormalMVDistribution
         std::fill_n(x, dim(), std::numeric_limits<result_type>::max());
     }
 
-    void reset() { param_.rnorm_.reset(); }
+    void reset() { param_.normal_.reset(); }
 
     std::size_t dim() const { return param_.dim(); }
 
@@ -252,7 +254,7 @@ class NormalMVDistribution
 
     const result_type *chol() const { return param_.chol(); }
 
-    param_type param() const { return param_; }
+    const param_type &param() const { return param_; }
 
     void param(const param_type &param)
     {
@@ -289,8 +291,8 @@ class NormalMVDistribution
         RNGType &rng, std::size_t n, result_type *r, const param_type &param)
     {
         normal_mv_distribution(rng, n, r, param.dim(),
-            (param.null_mean_ ? param.mean() : nullptr),
-            (param.null_chol_ ? param.chol() : nullptr));
+            (param.is_null_mean_ ? param.mean() : nullptr),
+            (param.is_null_chol_ ? param.chol() : nullptr));
     }
 
     friend bool operator==(
@@ -340,10 +342,10 @@ class NormalMVDistribution
     template <typename RNGType>
     void generate(RNGType &rng, result_type *r, const param_type &param)
     {
-        param_.rnorm_(rng, param.dim(), r);
-        if (!param.null_chol_)
+        param_.normal_(rng, param.dim(), r);
+        if (!param.is_null_chol_)
             mulchol(r, param);
-        if (!param.null_mean_)
+        if (!param.is_null_mean_)
             add(param.dim(), param.mean(), r, r);
     }
 
@@ -398,7 +400,8 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     internal::size_check<VSMC_BLAS_INT>(n, "normal_mv_distribution");
     internal::size_check<VSMC_BLAS_INT>(dim, "normal_mv_distribution");
 
-    normal_distribution(rng, n * dim, r, 0.0, 1.0);
+    normal_distribution(
+        rng, n * dim, r, static_cast<RealType>(0), static_cast<RealType>(1));
     if (chol != nullptr) {
         Vector<RealType> cholf(dim * dim);
         for (std::size_t i = 0; i != dim; ++i)
@@ -411,11 +414,12 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
             add(dim, mean, r, r);
 }
 
-template <typename RealType, typename RNGType>
+template <typename RealType, std::size_t Dim, typename RNGType>
 inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
-    const typename NormalMVDistribution<RealType>::param_type &param)
+    const typename NormalMVDistribution<RealType, Dim>::param_type &param)
 {
-    normal_mv_distribution(rng, n, r, param.dim(), param.mean(), param.chol());
+    NormalMVDistribution<RealType, Dim> dist(param);
+    dist(rng, n, r);
 }
 
 template <typename RealType, std::size_t Dim, typename RNGType>

@@ -438,7 +438,8 @@
     using distribution_type = Name##Distribution<T>;                          \
                                                                               \
     Name##Distribution() = default;                                           \
-    explicit Name##Distribution(const param_type &) {}
+    explicit Name##Distribution(const param_type &) { reset(); }              \
+    explicit Name##Distribution(param_type &&) { reset(); }
 
 #define VSMC_DEFINE_RNG_DISTRIBUTION_CONSTRUCTOR_1(Name, p1, v1)              \
     public:                                                                   \
@@ -451,6 +452,12 @@
     }                                                                         \
                                                                               \
     explicit Name##Distribution(const param_type &param) : param_(param)      \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    explicit Name##Distribution(param_type &&param)                           \
+        : param_(std::move(param))                                            \
     {                                                                         \
         reset();                                                              \
     }                                                                         \
@@ -469,6 +476,12 @@
     }                                                                         \
                                                                               \
     explicit Name##Distribution(const param_type &param) : param_(param)      \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    explicit Name##Distribution(param_type &&param)                           \
+        : param_(std::move(param))                                            \
     {                                                                         \
         reset();                                                              \
     }                                                                         \
@@ -494,6 +507,12 @@
         reset();                                                              \
     }                                                                         \
                                                                               \
+    explicit Name##Distribution(param_type &&param)                           \
+        : param_(std::move(param))                                            \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
     result_type p1() const { return param_.p1(); }                            \
     result_type p2() const { return param_.p2(); }                            \
     result_type p3() const { return param_.p3(); }
@@ -512,6 +531,12 @@
     }                                                                         \
                                                                               \
     explicit Name##Distribution(const param_type &param) : param_(param)      \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    explicit Name##Distribution(param_type &&param)                           \
+        : param_(std::move(param))                                            \
     {                                                                         \
         reset();                                                              \
     }                                                                         \
