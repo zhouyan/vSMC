@@ -363,17 +363,10 @@ template <typename Backend>
 class GMMInit : public vsmc::SamplerEvalSMP<GMM, GMMInit<Backend>, Backend>
 {
     public:
-    void eval_pre(std::size_t, vsmc::Particle<GMM> &particle)
+    std::size_t eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
     {
-        particle.state().initialize();
-        particle.state().alpha(0);
-        particle.weight().set_equal();
-    }
-
-    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
-    {
-        const GMM &gmm = sp.particle().state();
-        GMMState &state = sp(0);
+        const GMM &gmm = idx.particle().state();
+        GMMState &state = idx(0);
 
         std::normal_distribution<double> rmu(gmm.mu0(), gmm.sd0());
         std::gamma_distribution<double> rlambda(gmm.shape0(), gmm.scale0());
@@ -381,9 +374,9 @@ class GMMInit : public vsmc::SamplerEvalSMP<GMM, GMMInit<Backend>, Backend>
 
         double sum = 0;
         for (std::size_t i = 0; i != state.comp_num(); ++i) {
-            state.mu(i) = rmu(sp.rng());
-            state.lambda(i) = rlambda(sp.rng());
-            state.weight(i) = rweight(sp.rng());
+            state.mu(i) = rmu(idx.rng());
+            state.lambda(i) = rlambda(idx.rng());
+            state.weight(i) = rweight(idx.rng());
             sum += state.weight(i);
         }
         for (std::size_t i = 0; i != state.comp_num(); ++i)
@@ -393,6 +386,13 @@ class GMMInit : public vsmc::SamplerEvalSMP<GMM, GMMInit<Backend>, Backend>
         gmm.update_log_likelihood(state);
 
         return 0;
+    }
+
+    void eval_pre(std::size_t, vsmc::Particle<GMM> &particle)
+    {
+        particle.state().initialize();
+        particle.state().alpha(0);
+        particle.weight().set_equal();
     }
 }; // class GMMInit
 
@@ -435,10 +435,10 @@ template <typename Backend>
 class GMMMoveMu : public vsmc::SamplerEvalSMP<GMM, GMMMoveMu<Backend>, Backend>
 {
     public:
-    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
+    std::size_t eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
     {
-        const GMM &gmm = sp.particle().state();
-        GMMState &state = sp(0);
+        const GMM &gmm = idx.particle().state();
+        GMMState &state = idx(0);
 
         std::normal_distribution<double> rmu(0, gmm.mu_sd());
         std::uniform_real_distribution<double> runif(0, 1);
@@ -446,10 +446,10 @@ class GMMMoveMu : public vsmc::SamplerEvalSMP<GMM, GMMMoveMu<Backend>, Backend>
         double p = state.log_prior() + gmm.alpha() * state.log_likelihood();
         state.save_old();
         for (std::size_t i = 0; i != state.comp_num(); ++i)
-            state.mu(i) += rmu(sp.rng());
+            state.mu(i) += rmu(idx.rng());
         p = gmm.update_log_prior(state) +
             gmm.alpha() * gmm.update_log_likelihood(state) - p;
-        double u = std::log(runif(sp.rng()));
+        double u = std::log(runif(idx.rng()));
 
         return state.mh_reject_mu(p, u);
     }
@@ -460,10 +460,10 @@ class GMMMoveLambda
     : public vsmc::SamplerEvalSMP<GMM, GMMMoveLambda<Backend>, Backend>
 {
     public:
-    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
+    std::size_t eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
     {
-        const GMM &gmm = sp.particle().state();
-        GMMState &state = sp(0);
+        const GMM &gmm = idx.particle().state();
+        GMMState &state = idx(0);
 
         std::lognormal_distribution<double> rlambda(0, gmm.lambda_sd());
         std::uniform_real_distribution<double> runif(0, 1);
@@ -471,10 +471,10 @@ class GMMMoveLambda
         double p = state.log_prior() + gmm.alpha() * state.log_likelihood();
         state.save_old();
         for (std::size_t i = 0; i != state.comp_num(); ++i)
-            state.lambda(i) *= rlambda(sp.rng());
+            state.lambda(i) *= rlambda(idx.rng());
         p = state.log_lambda_diff() + gmm.update_log_prior(state) +
             gmm.alpha() * gmm.update_log_likelihood(state) - p;
-        double u = std::log(runif(sp.rng()));
+        double u = std::log(runif(idx.rng()));
 
         return state.mh_reject_lambda(p, u);
     }
@@ -485,10 +485,10 @@ class GMMMoveWeight
     : public vsmc::SamplerEvalSMP<GMM, GMMMoveWeight<Backend>, Backend>
 {
     public:
-    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<GMM> sp)
+    std::size_t eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
     {
-        const GMM &gmm = sp.particle().state();
-        GMMState &state = sp(0);
+        const GMM &gmm = idx.particle().state();
+        GMMState &state = idx(0);
 
         std::normal_distribution<double> rweight(0, gmm.weight_sd());
         std::uniform_real_distribution<double> runif(0, 1);
@@ -499,7 +499,7 @@ class GMMMoveWeight
         for (std::size_t i = 0; i != state.comp_num() - 1; ++i) {
             state.weight(i) =
                 std::log(state.weight(i) / state.weight(state.comp_num() - 1));
-            state.weight(i) += rweight(sp.rng());
+            state.weight(i) += rweight(idx.rng());
             state.weight(i) = std::exp(state.weight(i));
             sum += state.weight(i);
         }
@@ -508,7 +508,7 @@ class GMMMoveWeight
             state.weight(i) /= sum;
         p = state.logit_weight_diff() + gmm.update_log_prior(state) +
             gmm.alpha() * gmm.update_log_likelihood(state) - p;
-        double u = std::log(runif(sp.rng()));
+        double u = std::log(runif(idx.rng()));
 
         return state.mh_reject_weight(p, u);
     }
@@ -519,10 +519,10 @@ class GMMPathIntegrand
     : public vsmc::MonitorEvalSMP<GMM, GMMPathIntegrand<Backend>, Backend>
 {
     public:
-    void eval_sp(
-        std::size_t, std::size_t, vsmc::SingleParticle<GMM> sp, double *res)
+    void eval(
+        std::size_t, std::size_t, vsmc::ParticleIndex<GMM> idx, double *res)
     {
-        *res = sp(0).log_likelihood();
+        *res = idx(0).log_likelihood();
     }
 }; // class GMMPathIntegrand
 

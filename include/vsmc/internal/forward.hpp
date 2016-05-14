@@ -38,28 +38,28 @@
 namespace vsmc
 {
 
-template <typename>
-class Sampler;
+template <MatrixLayout, std::size_t, typename>
+class StateMatrix;
+
+class Weight;
 
 template <typename>
-class Particle;
+class ParticleIndex;
 
 template <typename>
-class Monitor;
+class ParticleIndexBase;
 
 template <typename>
 class ParticleRange;
 
 template <typename>
-class SingleParticle;
+class Particle;
 
 template <typename>
-class SingleParticleBase;
+class Sampler;
 
-class Weight;
-
-template <MatrixLayout, std::size_t, typename>
-class StateMatrix;
+template <typename>
+class Monitor;
 
 } // namesapce vsmc
 

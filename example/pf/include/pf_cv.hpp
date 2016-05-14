@@ -46,14 +46,14 @@ class PFCV : public PFCVBase<Layout>
     using base = PFCVBase<Layout>;
 
     template <typename T>
-    using base_sp = typename base::template single_particle_type<T>;
+    using base_idx = typename base::template particle_index_type<T>;
 
     template <typename T>
-    class single_particle_type : public base_sp<T>
+    class particle_index_type : public base_idx<T>
     {
         public:
-        single_particle_type(std::size_t id, vsmc::Particle<T> *pptr)
-            : base_sp<T>(id, pptr)
+        particle_index_type(std::size_t id, vsmc::Particle<T> *pptr)
+            : base_idx<T>(id, pptr)
         {
         }
 
@@ -77,7 +77,7 @@ class PFCV : public PFCVBase<Layout>
 
             return -0.5 * (nu + 1) * (llh_x + llh_y);
         }
-    }; // class single_particle_type
+    }; // class particle_index_type
 
     PFCV(std::size_t N) : PFCVBase<Layout>(N) {}
 
@@ -117,18 +117,18 @@ class PFCVInit : public vsmc::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
         particle.state().initialize();
     }
 
-    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<T> sp)
+    std::size_t eval(std::size_t, vsmc::ParticleIndex<T> idx)
     {
         const double sd_pos0 = 2;
         const double sd_vel0 = 1;
         vsmc::NormalDistribution<double> normal_pos(0, sd_pos0);
         vsmc::NormalDistribution<double> normal_vel(0, sd_vel0);
 
-        auto &rng = sp.rng();
-        sp.pos_x() = normal_pos(rng);
-        sp.pos_y() = normal_pos(rng);
-        sp.vel_x() = normal_vel(rng);
-        sp.vel_y() = normal_vel(rng);
+        auto &rng = idx.rng();
+        idx.pos_x() = normal_pos(rng);
+        idx.pos_y() = normal_pos(rng);
+        idx.vel_x() = normal_vel(rng);
+        idx.vel_y() = normal_vel(rng);
 
         return 0;
     }
@@ -141,7 +141,7 @@ class PFCVMove : public vsmc::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
     public:
     using T = PFCV<Layout, RNGSetType>;
 
-    std::size_t eval_sp(std::size_t, vsmc::SingleParticle<T> sp)
+    std::size_t eval(std::size_t, vsmc::ParticleIndex<T> idx)
     {
         const double sd_pos = std::sqrt(0.02);
         const double sd_vel = std::sqrt(0.001);
@@ -149,11 +149,11 @@ class PFCVMove : public vsmc::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
         vsmc::NormalDistribution<double> normal_pos(0, sd_pos);
         vsmc::NormalDistribution<double> normal_vel(0, sd_vel);
 
-        auto &rng = sp.rng();
-        sp.pos_x() += normal_pos(rng) + delta * sp.vel_x();
-        sp.pos_y() += normal_pos(rng) + delta * sp.vel_y();
-        sp.vel_x() += normal_vel(rng);
-        sp.vel_y() += normal_vel(rng);
+        auto &rng = idx.rng();
+        idx.pos_x() += normal_pos(rng) + delta * idx.vel_x();
+        idx.pos_y() += normal_pos(rng) + delta * idx.vel_y();
+        idx.vel_x() += normal_vel(rng);
+        idx.vel_y() += normal_vel(rng);
 
         return 0;
     }
@@ -250,9 +250,9 @@ class PFCVWeight : public vsmc::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
         w_.resize(particle.size());
     }
 
-    std::size_t eval_sp(std::size_t iter, vsmc::SingleParticle<T> sp)
+    std::size_t eval(std::size_t iter, vsmc::ParticleIndex<T> idx)
     {
-        w_[sp.id()] = sp.log_likelihood(iter);
+        w_[idx.id()] = idx.log_likelihood(iter);
 
         return 0;
     }
@@ -271,11 +271,11 @@ class PFCVEval : public vsmc::MonitorEvalSMP<PFCV<Layout, RNGSetType>,
                      PFCVEval<Backend, Layout, RNGSetType>, Backend>
 {
     public:
-    void eval_sp(std::size_t, std::size_t,
-        vsmc::SingleParticle<PFCV<Layout, RNGSetType>> sp, double *res)
+    void eval(std::size_t, std::size_t,
+        vsmc::ParticleIndex<PFCV<Layout, RNGSetType>> idx, double *res)
     {
-        res[0] = sp.pos_x();
-        res[1] = sp.pos_y();
+        res[0] = idx.pos_x();
+        res[1] = idx.pos_y();
     }
 }; // class PFCVEval
 

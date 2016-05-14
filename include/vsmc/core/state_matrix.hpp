@@ -33,7 +33,6 @@
 #define VSMC_CORE_STATE_MATRIX_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/core/single_particle.hpp>
 
 #define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(psize, dim)         \
     VSMC_RUNTIME_ASSERT((psize >= dim),                                       \
@@ -90,12 +89,12 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     using pack_type = Vector<T>;
 
     template <typename S>
-    class single_particle_type : public SingleParticleBase<S>
+    class particle_index_type : public ParticleIndexBase<S>
     {
         public:
-        single_particle_type(
+        particle_index_type(
             typename Particle<S>::size_type id, Particle<S> *pptr)
-            : SingleParticleBase<S>(id, pptr)
+            : ParticleIndexBase<S>(id, pptr)
         {
         }
 
@@ -106,7 +105,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
             return this->particle().state()(
                 static_cast<size_type>(this->id()), pos);
         }
-    }; // class single_particle_type
+    }; // class particle_index_type
 
     /// \brief The numbrer of particles
     size_type size() const { return size_; }

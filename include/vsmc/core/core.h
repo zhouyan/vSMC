@@ -194,9 +194,6 @@ vsmc_weight vsmc_particle_weight(vsmc_particle particle);
 /// \brief `vsmc::Particle::rng`
 vsmc_rng vsmc_particle_rng(vsmc_particle particle, size_t id);
 
-/// \brief `vsmc::Particle::sp`
-vsmc_single_particle vsmc_particle_sp(vsmc_particle particle, size_t id);
-
 /// @} C_API_Core_Particle
 
 /// \addtogroup C_API_Core_Monitor

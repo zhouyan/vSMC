@@ -117,9 +117,9 @@ template <typename T, typename Derived>
 class SamplerEvalBase
 {
     public:
-    std::size_t eval_sp(std::size_t iter, SingleParticle<T> sp)
+    std::size_t eval(std::size_t iter, ParticleIndex<T> idx)
     {
-        return eval_sp_dispatch(iter, sp, &Derived::eval_sp);
+        return eval_dispatch(iter, idx, &Derived::eval);
     }
 
     std::size_t eval_range(std::size_t iter, const ParticleRange<T> &range)
@@ -144,10 +144,10 @@ class SamplerEvalBase
     // non-static non-const
 
     template <typename D>
-    std::size_t eval_sp_dispatch(std::size_t iter, SingleParticle<T> sp,
-        std::size_t (D::*)(std::size_t, SingleParticle<T>))
+    std::size_t eval_dispatch(std::size_t iter, ParticleIndex<T> idx,
+        std::size_t (D::*)(std::size_t, ParticleIndex<T>))
     {
-        return static_cast<Derived *>(this)->eval_sp(iter, sp);
+        return static_cast<Derived *>(this)->eval(iter, idx);
     }
 
     template <typename D>
@@ -175,10 +175,10 @@ class SamplerEvalBase
     // non-static const
 
     template <typename D>
-    std::size_t eval_sp_dispatch(std::size_t iter, SingleParticle<T> sp,
-        std::size_t (D::*)(std::size_t, SingleParticle<T>) const)
+    std::size_t eval_dispatch(std::size_t iter, ParticleIndex<T> idx,
+        std::size_t (D::*)(std::size_t, ParticleIndex<T>) const)
     {
-        return static_cast<Derived *>(this)->eval_sp(iter, sp);
+        return static_cast<Derived *>(this)->eval(iter, idx);
     }
 
     template <typename D>
@@ -205,10 +205,10 @@ class SamplerEvalBase
 
     // static
 
-    std::size_t eval_sp_dispatch(std::size_t iter, SingleParticle<T> sp,
-        std::size_t (*)(std::size_t, SingleParticle<T>))
+    std::size_t eval_dispatch(std::size_t iter, ParticleIndex<T> idx,
+        std::size_t (*)(std::size_t, ParticleIndex<T>))
     {
-        return Derived::eval_sp(iter, sp);
+        return Derived::eval(iter, idx);
     }
 
     std::size_t eval_range_dispatch(std::size_t iter,
@@ -232,8 +232,8 @@ class SamplerEvalBase
 
     // base
 
-    std::size_t eval_sp_dispatch(std::size_t, SingleParticle<T>,
-        std::size_t (SamplerEvalBase::*)(std::size_t, SingleParticle<T>))
+    std::size_t eval_dispatch(std::size_t, ParticleIndex<T>,
+        std::size_t (SamplerEvalBase::*)(std::size_t, ParticleIndex<T>))
     {
         return 0;
     }
@@ -244,8 +244,8 @@ class SamplerEvalBase
                                         std::size_t, const ParticleRange<T> &))
     {
         std::size_t accept = 0;
-        for (auto sp : range)
-            accept += eval_sp(iter, sp);
+        for (auto idx : range)
+            accept += eval(iter, idx);
 
         return accept;
     }
@@ -267,14 +267,14 @@ template <typename T>
 class SamplerEvalBase<T, Virtual>
 {
     public:
-    virtual std::size_t eval_sp(std::size_t, SingleParticle<T>) { return 0; }
+    virtual std::size_t eval(std::size_t, ParticleIndex<T>) { return 0; }
 
     virtual std::size_t eval_range(
         std::size_t iter, const ParticleRange<T> &range)
     {
         std::size_t accept = 0;
-        for (auto sp : range)
-            accept += eval_sp(iter, sp);
+        for (auto idx : range)
+            accept += eval(iter, idx);
 
         return accept;
     }
@@ -293,10 +293,10 @@ template <typename T, typename Derived>
 class MonitorEvalBase
 {
     public:
-    void eval_sp(
-        std::size_t iter, std::size_t dim, SingleParticle<T> sp, double *r)
+    void eval(
+        std::size_t iter, std::size_t dim, ParticleIndex<T> idx, double *r)
     {
-        eval_sp_dispatch(iter, dim, sp, r, &Derived::eval_sp);
+        eval_dispatch(iter, dim, idx, r, &Derived::eval);
     }
 
     void eval_range(std::size_t iter, std::size_t dim,
@@ -322,11 +322,11 @@ class MonitorEvalBase
     // non-static non-const
 
     template <typename D>
-    void eval_sp_dispatch(std::size_t iter, std::size_t dim,
-        SingleParticle<T> sp, double *r,
-        void (D::*)(std::size_t, std::size_t, SingleParticle<T>, double *))
+    void eval_dispatch(std::size_t iter, std::size_t dim, ParticleIndex<T> idx,
+        double *r,
+        void (D::*)(std::size_t, std::size_t, ParticleIndex<T>, double *))
     {
-        static_cast<Derived *>(this)->eval_sp(iter, dim, sp, r);
+        static_cast<Derived *>(this)->eval(iter, dim, idx, r);
     }
 
     template <typename D>
@@ -355,12 +355,11 @@ class MonitorEvalBase
     // non-static const
 
     template <typename D>
-    void eval_sp_dispatch(std::size_t iter, std::size_t dim,
-        SingleParticle<T> sp, double *r,
-        void (D::*)(std::size_t, std::size_t, SingleParticle<T>, double *)
-            const)
+    void eval_dispatch(std::size_t iter, std::size_t dim, ParticleIndex<T> idx,
+        double *r, void (D::*)(std::size_t, std::size_t, ParticleIndex<T>,
+                           double *) const)
     {
-        static_cast<Derived *>(this)->eval_sp(iter, dim, sp, r);
+        static_cast<Derived *>(this)->eval(iter, dim, idx, r);
     }
 
     template <typename D>
@@ -388,11 +387,11 @@ class MonitorEvalBase
 
     // static
 
-    void eval_sp_dispatch(std::size_t iter, std::size_t dim,
-        SingleParticle<T> sp, double *r,
-        void (*)(std::size_t, std::size_t, SingleParticle<T>, double *))
+    void eval_dispatch(std::size_t iter, std::size_t dim, ParticleIndex<T> idx,
+        double *r,
+        void (*)(std::size_t, std::size_t, ParticleIndex<T>, double *))
     {
-        Derived::eval_sp(iter, dim, sp, r);
+        Derived::eval(iter, dim, idx, r);
     }
 
     void eval_range_dispatch(std::size_t iter, std::size_t dim,
@@ -416,9 +415,9 @@ class MonitorEvalBase
 
     // base
 
-    void eval_sp_dispatch(std::size_t, std::size_t, SingleParticle<T>,
-        double *, void (MonitorEvalBase::*)(std::size_t, std::size_t,
-                              SingleParticle<T>, double *))
+    void eval_dispatch(std::size_t, std::size_t, ParticleIndex<T>, double *,
+        void (MonitorEvalBase::*)(std::size_t, std::size_t, ParticleIndex<T>,
+                           double *))
     {
     }
 
@@ -427,8 +426,8 @@ class MonitorEvalBase
         void (MonitorEvalBase::*)(std::size_t, std::size_t,
                                  const ParticleRange<T> &, double *))
     {
-        for (auto sp : range) {
-            eval_sp(iter, dim, sp, r);
+        for (auto idx : range) {
+            eval(iter, dim, idx, r);
             r += dim;
         }
     }
@@ -450,15 +449,13 @@ template <typename T>
 class MonitorEvalBase<T, Virtual>
 {
     public:
-    virtual void eval_sp(std::size_t, std::size_t, SingleParticle<T>, double *)
-    {
-    }
+    virtual void eval(std::size_t, std::size_t, ParticleIndex<T>, double *) {}
 
     virtual void eval_range(std::size_t iter, std::size_t dim,
         const ParticleRange<T> &range, double *r)
     {
-        for (auto sp : range) {
-            eval_sp(iter, dim, sp, r);
+        for (auto idx : range) {
+            eval(iter, dim, idx, r);
             r += dim;
         }
     }

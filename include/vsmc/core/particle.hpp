@@ -33,19 +33,254 @@
 #define VSMC_CORE_PARTICLE_HPP
 
 #include <vsmc/internal/common.hpp>
-#include <vsmc/core/single_particle.hpp>
 #include <vsmc/core/weight.hpp>
 #include <vsmc/resample/algorithm.hpp>
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
 
-#define VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RESIZE_BY_RANGE(n, b, e, g)         \
+#define VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2)           \
+    VSMC_RUNTIME_ASSERT((idx1.particle_ptr() == idx2.particle_ptr()),         \
+        "COMPARE TWO ParticleIndex OBJECTS THAT BELONG TO TWO PARTICLE "      \
+        "SYSTEMS");
+
+#define VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_DIFFERENCE(idx1, idx2)        \
+    VSMC_RUNTIME_ASSERT((idx1.particle_ptr() == idx2.particle_ptr()),         \
+        "SUBSTRACT TWO ParticleIndex OBJECTS THAT BELONG TO TWO PARTICLE "    \
+        "SYSTEMS");
+
+#define VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RANGE(n, b, e, g)                   \
     VSMC_RUNTIME_ASSERT(                                                      \
         (!internal::is_negative(b) && b < e && e <= n && g > 0),              \
         "**ParticleRange::ParticleRange** INVALID ARGUMENTS")
 
 namespace vsmc
 {
+
+/// \brief A thin wrapper over a complete Particle
+/// \ingroup Core
+template <typename T>
+class ParticleIndexBase
+{
+    public:
+    using particle_type = Particle<T>;
+    using size_type = typename particle_type::size_type;
+    using rng_type = typename particle_type::rng_type;
+
+    ParticleIndexBase(size_type id, particle_type *pptr) : pptr_(pptr), id_(id)
+    {
+    }
+
+    particle_type &particle() const { return *pptr_; }
+
+    particle_type *particle_ptr() const { return pptr_; }
+
+    size_type id() const { return id_; }
+
+    rng_type &rng() const { return pptr_->rng(id_); }
+
+    private:
+    particle_type *pptr_;
+    size_type id_;
+}; // class ParticleIndexBase
+
+/// \brief ParticleIndex base class trait
+/// \ingroup Traits
+VSMC_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
+    ParticleIndexBaseType, particle_index_type, ParticleIndexBase)
+
+/// \brief A thin wrapper over a complete Particle
+/// \ingroup Core
+///
+/// \details
+/// This is the basic ParticleIndex available for any type of Particle. To
+/// extend it for type `T`. One can either specialize
+/// vsmc::ParticleIndexBaseTypeTrait<T> or define a class template named
+/// `particle_index_type` within `T` with the following minimum requirement.
+/// ~~~{.cpp}
+/// template <typename S> // S: StateType, such as StateMatrix<Dim, T>
+/// class particle_index_type
+/// {
+///     public:
+///     particle_index_type(
+///         typename Particle<T>::size_type id, Particle<S> *pptr);
+///     size_type id() const;
+///     Particle<S> &particle() const;
+///     Particle<S> *patricle_ptr() const;
+/// };
+/// ~~~
+/// Usually you can safely derive `particle_index_type<S>` from
+/// ParticleIndexBase<S> and add methods specific to `S`.
+template <typename T>
+class ParticleIndex : public ParticleIndexBaseType<T>
+{
+    public:
+    using particle_type = Particle<T>;
+    using size_type = typename particle_type::size_type;
+    using rng_type = typename particle_type::rng_type;
+
+    ParticleIndex(size_type id, particle_type *pptr)
+        : ParticleIndexBaseType<T>(id, pptr)
+    {
+    }
+
+    template <typename IntType>
+    ParticleIndex<T> operator[](IntType n)
+    {
+        return ParticleIndex<T>(static_cast<typename Particle<T>::size_type>(
+                                    static_cast<std::ptrdiff_t>(this->id()) +
+                                    static_cast<std::ptrdiff_t>(n)),
+            this->particle_ptr());
+    }
+
+    ParticleIndex<T> &operator*() { return *this; }
+
+    const ParticleIndex<T> &operator*() const { return *this; }
+
+    ParticleIndex<T> *operator->() { return this; }
+
+    const ParticleIndex<T> *operator->() const { return this; }
+}; // class ParticleIndex
+
+template <typename T>
+inline bool operator==(
+    const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
+{
+    VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2);
+
+    return idx1.id() == idx2.id();
+}
+
+template <typename T>
+inline bool operator!=(
+    const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
+{
+    VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2);
+
+    return idx1.id() != idx2.id();
+}
+
+template <typename T>
+inline bool operator<(
+    const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
+{
+    VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2);
+
+    return idx1.id() < idx2.id();
+}
+
+template <typename T>
+inline bool operator>(
+    const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
+{
+    VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2);
+
+    return idx1.id() > idx2.id();
+}
+
+template <typename T>
+inline bool operator<=(
+    const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
+{
+    VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2);
+
+    return idx1.id() <= idx2.id();
+}
+
+template <typename T>
+inline bool operator>=(
+    const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
+{
+    VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2);
+
+    return idx1.id() >= idx2.id();
+}
+
+template <typename T>
+inline ParticleIndex<T> &operator++(ParticleIndex<T> &idx)
+{
+    idx = ParticleIndex<T>(idx.id() + 1, idx.particle_ptr());
+
+    return idx;
+}
+
+template <typename T>
+inline ParticleIndex<T> operator++(ParticleIndex<T> &idx, int)
+{
+    ParticleIndex<T> idx_tmp(idx);
+    idx = ParticleIndex<T>(idx.id() + 1, idx.particle_ptr());
+
+    return idx_tmp;
+}
+
+template <typename T>
+inline ParticleIndex<T> &operator--(ParticleIndex<T> &idx)
+{
+    idx = ParticleIndex<T>(idx.id() - 1, idx.particle_ptr());
+
+    return idx;
+}
+
+template <typename T>
+inline ParticleIndex<T> operator--(ParticleIndex<T> &idx, int)
+{
+    ParticleIndex<T> idx_tmp(idx);
+    idx = ParticleIndex<T>(idx.id() - 1, idx.particle_ptr());
+
+    return idx_tmp;
+}
+
+template <typename T, typename IntType>
+inline ParticleIndex<T> operator+(const ParticleIndex<T> &idx, IntType n)
+{
+    return ParticleIndex<T>(static_cast<typename Particle<T>::size_type>(
+                                static_cast<std::ptrdiff_t>(idx.id()) +
+                                static_cast<std::ptrdiff_t>(n)),
+        idx.particle_ptr());
+}
+
+template <typename T, typename IntType>
+inline ParticleIndex<T> operator+(IntType n, const ParticleIndex<T> &idx)
+{
+    return ParticleIndex<T>(static_cast<typename Particle<T>::size_type>(
+                                static_cast<std::ptrdiff_t>(idx.id()) +
+                                static_cast<std::ptrdiff_t>(n)),
+        idx.particle_ptr());
+}
+
+template <typename T, typename IntType>
+inline ParticleIndex<T> operator-(const ParticleIndex<T> &idx, IntType n)
+{
+    return ParticleIndex<T>(static_cast<typename Particle<T>::size_type>(
+                                static_cast<std::ptrdiff_t>(idx.id()) -
+                                static_cast<std::ptrdiff_t>(n)),
+        idx.particle_ptr());
+}
+
+template <typename T, typename IntType>
+inline ParticleIndex<T> &operator+=(ParticleIndex<T> &idx, IntType n)
+{
+    idx = idx + n;
+
+    return idx;
+}
+
+template <typename T, typename IntType>
+inline ParticleIndex<T> &operator-=(ParticleIndex<T> &idx, IntType n)
+{
+    idx = idx - n;
+
+    return idx;
+}
+
+template <typename T>
+inline std::ptrdiff_t operator-(
+    const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
+{
+    VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2);
+
+    return static_cast<std::ptrdiff_t>(idx1.id()) -
+        static_cast<std::ptrdiff_t>(idx2.id());
+}
 
 /// \brief A subset of particles
 /// \ingroup Core
@@ -55,13 +290,12 @@ class ParticleRange
     public:
     using particle_type = Particle<T>;
     using size_type = typename particle_type::size_type;
-    using sp_type = typename particle_type::sp_type;
 
     ParticleRange(size_type first, size_type last, particle_type *pptr,
         size_type grainsize = 1)
         : pptr_(pptr), first_(first), last_(last), grainsize_(grainsize)
     {
-        VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RESIZE_BY_RANGE(
+        VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RANGE(
             pptr_->size(), first_, last_, grainsize_);
     }
 
@@ -72,7 +306,7 @@ class ParticleRange
         , last_(other.last_)
         , grainsize_(other.grainsize_)
     {
-        VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RESIZE_BY_RANGE(
+        VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RANGE(
             pptr_->size(), first_, last_, grainsize_);
 
         other.last_ = first_;
@@ -88,9 +322,9 @@ class ParticleRange
 
     size_type last() const { return last_; }
 
-    sp_type begin() const { return pptr_->sp(first_); }
+    ParticleIndex<T> begin() const { return pptr_->index(first_); }
 
-    sp_type end() const { return pptr_->sp(last_); }
+    ParticleIndex<T> end() const { return pptr_->index(last_); }
 
     bool empty() const { return first_ == last_; }
 
@@ -114,8 +348,6 @@ class Particle
     using weight_type = WeightType<T>;
     using rng_set_type = RNGSetType<T>;
     using rng_type = typename rng_set_type::rng_type;
-    using sp_type = SingleParticle<T>;
-    using range_type = ParticleRange<T>;
 
     Particle() : size_(0), state_(0), weight_(0), rng_set_(0)
     {
@@ -226,26 +458,27 @@ class Particle
     /// \brief Get the (sequential) RNG used stream for resampling
     const rng_type &rng() const { return rng_; }
 
-    /// \brief Get a SingleParticle<T> object
-    sp_type sp(size_type id) { return SingleParticle<T>(id, this); }
+    /// \brief Get a ParticleIndex<T> object
+    ParticleIndex<T> index(size_type id) { return ParticleIndex<T>(id, this); }
 
-    /// \brief Get a ParticleRange<T> object
-    range_type range(size_type first, size_type last, size_type grainsize = 1)
+    /// \brief Get a ParticleIndex<T> object for the first particle
+    ParticleIndex<T> begin() { return index(0); }
+
+    /// \brief Get a ParticleIndex<T> object for one pass the last particle
+    ParticleIndex<T> end() { return index(size_); }
+
+    /// \brief Get a ParticleRange<T> object of a given range
+    ParticleRange<T> range(
+        size_type first, size_type last, size_type grainsize = 1)
     {
         return ParticleRange<T>(first, last, this, grainsize);
     }
 
-    /// \brief Get a ParticleRange<T> object, `first == 0`, `last == size()`
-    range_type range(size_type grainsize = 1)
+    /// \brief Get a ParticleRange<T> object of all particles
+    ParticleRange<T> range(size_type grainsize = 1)
     {
         return ParticleRange<T>(0, size(), this, grainsize);
     }
-
-    /// \brief Get a SingleParticle<T> object for the first particle
-    sp_type begin() { return sp(0); }
-
-    /// \brief Get a SingleParticle<T> object for the first particle
-    sp_type end() { return sp(size_); }
 
     private:
     static constexpr std::size_t M_ = internal::BufferSize<size_type>::value;

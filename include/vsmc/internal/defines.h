@@ -188,7 +188,7 @@ typedef struct {
 typedef struct {
     double *state;
     size_t id;
-} vsmc_single_particle;
+} vsmc_particle_index;
 
 /// \brief `vsmc::Particle`
 typedef struct {
@@ -224,14 +224,14 @@ typedef void (*vsmc_monitor_eval_type)(
 
 /// \brief `vsmc::SamplerEvalSMP`
 typedef struct {
-    size_t (*eval_sp)(size_t, vsmc_single_particle);
+    size_t (*eval)(size_t, vsmc_particle_index);
     void (*eval_pre)(size_t, vsmc_particle);
     void (*eval_post)(size_t, vsmc_particle);
 } vsmc_sampler_eval_smp_type;
 
 /// \brief `vsmc::MonitorEvalSMP`
 typedef struct {
-    void (*eval_sp)(size_t, size_t, vsmc_single_particle, double *);
+    void (*eval)(size_t, size_t, vsmc_particle_index, double *);
     void (*eval_pre)(size_t, vsmc_particle);
     void (*eval_post)(size_t, vsmc_particle);
 } vsmc_monitor_eval_smp_type;

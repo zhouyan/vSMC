@@ -44,7 +44,7 @@ using StateMatrixC = StateMatrix<RowMajor, Dynamic, double>;
 
 using ParticleC = Particle<StateMatrixC>;
 
-using SingleParticleC = SingleParticle<StateMatrixC>;
+using ParticleIndexC = ParticleIndex<StateMatrixC>;
 
 using SamplerC = Sampler<StateMatrixC>;
 

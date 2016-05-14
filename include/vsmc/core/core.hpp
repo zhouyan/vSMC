@@ -36,7 +36,6 @@
 #include <vsmc/core/monitor.hpp>
 #include <vsmc/core/particle.hpp>
 #include <vsmc/core/sampler.hpp>
-#include <vsmc/core/single_particle.hpp>
 #include <vsmc/core/state_matrix.hpp>
 #include <vsmc/core/weight.hpp>
 
