@@ -38,6 +38,9 @@
     VSMC_RUNTIME_ASSERT((psize >= dim),                                       \
         "**StateMatrix::state_unpack** INPUT PACK SIZE TOO SMALL")
 
+#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_INDEX(flag)                     \
+    VSMC_RUNTIME_ASSERT(flag, "**StateMatrix** INDEX OUT OF RANGE");
+
 namespace vsmc
 {
 
@@ -104,6 +107,14 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         {
             return this->particle().state()(
                 static_cast<size_type>(this->id()), pos);
+        }
+
+        value_type &at(std::size_t pos) const
+        {
+            VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_INDEX(
+                (!internal::is_negative(pos) && pos < this->dim()));
+
+            return operator()(pos);
         }
     }; // class particle_index_type
 
@@ -244,6 +255,24 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         return this->data()[id * this->dim() + pos];
     }
 
+    T &at(size_type id, std::size_t pos)
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_INDEX(
+            (!internal::is_negative(id) && id < this->size() &&
+                !internal::is_negative(pos) && pos < this->dim()));
+
+        return operator()(id, pos);
+    }
+
+    const T &at(size_type id, std::size_t pos) const
+    {
+        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_INDEX(
+            (!internal::is_negative(id) && id < this->size() &&
+                !internal::is_negative(pos) && pos < this->dim()));
+
+        return operator()(id, pos);
+    }
+
     template <typename OutputIter>
     OutputIter read_state(std::size_t pos, OutputIter first) const
     {
@@ -284,9 +313,9 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     ///
     /// \details
     /// Let \f$a_i\f$ denote the value of `index[i]`, and
-    /// \f$r_i = \sum_{j=1}^N \mathbb{I}_{a_j = i}\f$. Then it is required that
-    /// \f$a_i = i\f$ for all \f$r_i > 0\f$. This condition is always satisfied
-    /// if `index` comes from `resamle_trans_rep_index`.
+    /// \f$r_i = \sum_{j=1}^N \mathbb{I}_{\{i\}}(a_j)\f$. Then it is required
+    /// that \f$a_i = i\f$ for all \f$r_i > 0\f$. This condition is always
+    /// satisfied if `index` comes from `resamle_trans_rep_index`.
     template <typename IntType, typename InputIter>
     void select(IntType N, InputIter index)
     {
