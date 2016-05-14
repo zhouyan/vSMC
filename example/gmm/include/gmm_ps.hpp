@@ -56,8 +56,8 @@ inline void gmm_ps_run(
     sampler.monitor(
         "path_integrand", vsmc::Monitor<GMM>(1, GMMPathIntegrand<Backend>()));
     sampler.monitor("path_grid", vsmc::Monitor<GMM>(1, GMMPathGrid(), true));
-    sampler.initialize();
 
+    sampler.initialize();
     vsmc::StopWatch watch;
     watch.start();
     sampler.iterate(n);

@@ -34,5 +34,6 @@ PROJECT(vSMCExample-gmm CXX)
 VSMC_ADD_EXAMPLE(gmm)
 
 VSMC_ADD_TEST(gmm ps)
+VSMC_ADD_TEST(gmm smp)
 
 VSMC_ADD_FILE(gmm gmm.data)

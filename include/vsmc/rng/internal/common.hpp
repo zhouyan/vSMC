@@ -1074,18 +1074,6 @@ inline void rand(RNGType &rng, const DistributionType &distribution,
 template <typename, typename>
 class CounterEngine;
 
-template <typename = double, std::size_t = Dynamic>
-class RandomWalk;
-
-template <typename = double, std::size_t = Dynamic, std::size_t = Dynamic>
-class RandomWalkG;
-
-template <typename = double>
-class NormalProposal;
-
-template <typename = double, std::size_t = Dynamic>
-class NormalMVProposal;
-
 template <typename = double>
 class BetaDistribution;
 
@@ -1094,6 +1082,9 @@ class CauchyDistribution;
 
 template <typename = double>
 class ChiSquaredDistribution;
+
+template <typename = double, std::size_t = Dynamic>
+class DirichletDistribution;
 
 template <typename = int>
 class DiscreteDistribution;

@@ -44,6 +44,13 @@
 /// \defgroup Core Core
 /// \brief Constructing samplers with operations on the whole particle set
 
+/// \defgroup Algorithm Algorithm
+/// \brief Monte Calro algorithms
+
+/// \defgroup RandomWalk Random walk
+/// \ingroup Algorithm
+/// \brief Random walk Metropolis-Hastings algorithm
+
 /// \defgroup Resample Resampling algorithms
 /// \brief Resampling algorithm functor classes
 
@@ -99,10 +106,6 @@
 /// \defgroup Threefry Threefry
 /// \ingroup RNG
 /// \brief Random number generating using Random123 Threefry RNG
-
-/// \defgroup RandomWalk Random walk
-/// \ingroup RNG
-/// \brief Random walk MCMC kernels
 
 /// \defgroup RDRAND Intel DRNG
 /// \ingroup RNG
@@ -163,6 +166,7 @@
 /// \brief Time measurement
 
 #include <vsmc/internal/config.h>
+#include <vsmc/algorithm/algorithm.hpp>
 #include <vsmc/core/core.hpp>
 #include <vsmc/math/math.hpp>
 #include <vsmc/resample/resample.hpp>

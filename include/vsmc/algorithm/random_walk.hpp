@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/rng/random_walk.hpp
+// vSMC/include/vsmc/algorithm/random_walk.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,24 +29,28 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_RNG_RANDOM_WALK_HPP
-#define VSMC_RNG_RANDOM_WALK_HPP
+#ifndef VSMC_ALGORITHM_RANDOM_WALK_HPP
+#define VSMC_ALGORITHM_RANDOM_WALK_HPP
 
-#include <vsmc/rng/internal/common.hpp>
+#include <vsmc/internal/common.hpp>
 #include <vsmc/rng/normal_distribution.hpp>
 #include <vsmc/rng/normal_mv_distribution.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_RANDOM_WALK_PROPOSAL_PARAM(flag, Name)        \
+#define VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_PROPOSAL_PARAM(flag, Name)  \
     VSMC_RUNTIME_ASSERT(                                                      \
         (flag), "**" #Name "Proposal** CONSTRUCTED WITH INVALID PARAMETERS")
+
+#define VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_NORMAL_MV_LOGIT_DIM(dim)    \
+    VSMC_RUNTIME_ASSERT((dim > 1), "**NormalMVLogitProposal** CONSTRUCTED "   \
+                                   "WITH DIMENSION LESS THAN 2")
 
 namespace vsmc
 {
 
 /// \brief Random walk MCMC update
 /// \ingroup RandomWalk
-template <typename RealType, std::size_t Dim>
+template <typename RealType = double, std::size_t Dim = Dynamic>
 class RandomWalk
 {
     public:
@@ -192,7 +196,8 @@ class RandomWalk
 
 /// \brief Random walk MCMC update with test function
 /// \ingroup RandomWalk
-template <typename RealType, std::size_t DimX, std::size_t DimG>
+template <typename RealType = double, std::size_t DimX = Dynamic,
+    std::size_t DimG = Dynamic>
 class RandomWalkG
 {
     public:
@@ -415,7 +420,7 @@ inline RealType normal_proposal_qab(
 
 /// \brief Normal random walk proposal
 /// \ingroup RandomWalk
-template <typename RealType>
+template <typename RealType = double>
 class NormalProposal
 {
     public:
@@ -426,15 +431,13 @@ class NormalProposal
     /// \param stddev The standard deviation (scale) of the proposal
     /// \param a The lower bound of the support of the target distribution
     /// \param b The upper bound of the support of the target distribution
-    explicit NormalProposal(result_type stddev = 1,
-        result_type a = -std::numeric_limits<result_type>::infinity(),
-        result_type b = std::numeric_limits<result_type>::infinity())
-        : rnorm_(0, stddev), a_(a), b_(b), flag_(0)
+    NormalProposal(result_type stddev, result_type a, result_type b)
+        : normal_(static_cast<result_type>(0), stddev), a_(a), b_(b), flag_(0)
     {
         unsigned lower = std::isfinite(a) ? 1 : 0;
         unsigned upper = std::isfinite(b) ? 1 : 0;
         flag_ = (lower << 1) + upper;
-        VSMC_RUNTIME_ASSERT_RNG_RANDOM_WALK_PROPOSAL_PARAM(
+        VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_PROPOSAL_PARAM(
             internal::normal_proposal_check_param(a, b), Normal);
     }
 
@@ -446,7 +449,7 @@ class NormalProposal
     result_type operator()(
         RNGType &rng, std::size_t, const result_type *x, result_type *y)
     {
-        result_type z = rnorm_(rng);
+        result_type z = normal_(rng);
         switch (flag_) {
             case 0: return internal::normal_proposal_q(*x, *y, z);
             case 1: return internal::normal_proposal_qb(*x, *y, z, b_);
@@ -457,7 +460,7 @@ class NormalProposal
     }
 
     private:
-    NormalDistribution<RealType> rnorm_;
+    NormalDistribution<RealType> normal_;
     result_type a_;
     result_type b_;
     unsigned flag_;
@@ -465,46 +468,233 @@ class NormalProposal
 
 /// \brief Multivariate Normal random walk proposal
 /// \ingroup RandomWalk
-template <typename RealType, std::size_t Dim>
+template <typename RealType = double, std::size_t Dim = Dynamic>
 class NormalMVProposal
 {
     public:
     using result_type = RealType;
 
     /// \brief Only usable when `Dim != Dynamic`
-    ///
-    /// \param chol The lower triangular elements of the Cholesky decomposition
-    /// of the covaraince matrix, packed row by row. If it is a nullpointer,
-    /// then the covariance is the identicy matrix \f$I\f$
-    /// \param a The lower bound of the support of the target distribuiton. It
-    /// is assumed that the support is \f$\prod_{p=1}^d E_p \subset
-    /// \mathbb{R}^d\f$ where \f$E_p \subset \mathbb{R}\f$.
-    /// \param b The upper bound of the support of the target distribution.
-    ///
-    /// \details
-    /// If the geometry of the support is more complex than above, then one may
-    /// find a superset of the support that takes the required form, and reject
-    /// proposals that lay outside the support manually.
-    explicit NormalMVProposal(const result_type *chol = nullptr,
-        const result_type *a = nullptr, const result_type *b = nullptr)
-        : rnorm_(nullptr, chol)
+    NormalMVProposal(result_type chol, result_type a, result_type b)
+        : normal_mv_(static_cast<result_type>(0), chol)
     {
         static_assert(Dim != Dynamic,
             "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
-        init(Dim, a, b);
+        init_a(a);
+        init_b(b);
+        init_flag();
     }
 
-    explicit NormalMVProposal(std::size_t dim,
-        const result_type *chol = nullptr, const result_type *a = nullptr,
-        const result_type *b = nullptr)
-        : rnorm_(dim, nullptr, chol), a_(dim), b_(dim), z_(dim), flag_(dim)
+    /// \brief Only usable when `Dim != Dynamic`
+    NormalMVProposal(result_type chol, result_type a, const result_type *b)
+        : normal_mv_(static_cast<result_type>(0), chol)
+    {
+        static_assert(Dim != Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+        init_a(a);
+        init_b(b);
+        init_flag();
+    }
+
+    /// \brief Only usable when `Dim != Dynamic`
+    NormalMVProposal(result_type chol, const result_type *a, result_type b)
+        : normal_mv_(static_cast<result_type>(0), chol)
+    {
+        static_assert(Dim != Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+        init_a(a);
+        init_b(b);
+        init_flag();
+    }
+
+    /// \brief Only usable when `Dim != Dynamic`
+    NormalMVProposal(
+        result_type chol, const result_type *a, const result_type *b)
+        : normal_mv_(static_cast<result_type>(0), chol)
+    {
+        static_assert(Dim != Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+        init_a(a);
+        init_b(b);
+        init_flag();
+    }
+
+    /// \brief Only usable when `Dim != Dynamic`
+    NormalMVProposal(const result_type *chol, result_type a, result_type b)
+        : normal_mv_(static_cast<result_type>(0), chol)
+    {
+        static_assert(Dim != Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+        init_a(a);
+        init_b(b);
+        init_flag();
+    }
+
+    /// \brief Only usable when `Dim != Dynamic`
+    NormalMVProposal(
+        const result_type *chol, result_type a, const result_type *b)
+        : normal_mv_(static_cast<result_type>(0), chol)
+    {
+        static_assert(Dim != Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+        init_a(a);
+        init_b(b);
+        init_flag();
+    }
+
+    /// \brief Only usable when `Dim != Dynamic`
+    NormalMVProposal(
+        const result_type *chol, const result_type *a, result_type b)
+        : normal_mv_(static_cast<result_type>(0), chol)
+    {
+        static_assert(Dim != Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+        init_a(a);
+        init_b(b);
+        init_flag();
+    }
+
+    /// \brief Only usable when `Dim != Dynamic`
+    NormalMVProposal(
+        const result_type *chol, const result_type *a, const result_type *b)
+        : normal_mv_(static_cast<result_type>(0), chol)
+    {
+        static_assert(Dim != Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+        init_a(a);
+        init_b(b);
+        init_flag();
+    }
+
+    /// \brief Only usable when `Dim == Dynamic`
+    NormalMVProposal(
+        std::size_t dim, result_type chol, result_type a, result_type b)
+        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        , a_(dim)
+        , b_(dim)
+        , z_(dim)
+        , flag_(dim)
     {
         static_assert(Dim == Dynamic,
             "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
-        init(dim, a, b);
+        init_a(a);
+        init_b(b);
+        init_flag();
     }
 
-    std::size_t dim() const { return rnorm_.dim(); }
+    /// \brief Only usable when `Dim == Dynamic`
+    NormalMVProposal(
+        std::size_t dim, result_type chol, result_type a, const result_type *b)
+        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        , a_(dim)
+        , b_(dim)
+        , z_(dim)
+        , flag_(dim)
+    {
+        static_assert(Dim == Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+        init_a(a);
+        init_b(b);
+        init_flag();
+    }
+
+    /// \brief Only usable when `Dim == Dynamic`
+    NormalMVProposal(
+        std::size_t dim, result_type chol, const result_type *a, result_type b)
+        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        , a_(dim)
+        , b_(dim)
+        , z_(dim)
+        , flag_(dim)
+    {
+        static_assert(Dim == Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+        init_a(a);
+        init_b(b);
+        init_flag();
+    }
+
+    /// \brief Only usable when `Dim == Dynamic`
+    NormalMVProposal(std::size_t dim, result_type chol, const result_type *a,
+        const result_type *b)
+        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        , a_(dim)
+        , b_(dim)
+        , z_(dim)
+        , flag_(dim)
+    {
+        static_assert(Dim == Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+        init_a(a);
+        init_b(b);
+        init_flag();
+    }
+
+    /// \brief Only usable when `Dim == Dynamic`
+    NormalMVProposal(
+        std::size_t dim, const result_type *chol, result_type a, result_type b)
+        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        , a_(dim)
+        , b_(dim)
+        , z_(dim)
+        , flag_(dim)
+    {
+        static_assert(Dim == Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+        init_a(a);
+        init_b(b);
+        init_flag();
+    }
+
+    /// \brief Only usable when `Dim == Dynamic`
+    NormalMVProposal(std::size_t dim, const result_type *chol, result_type a,
+        const result_type *b)
+        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        , a_(dim)
+        , b_(dim)
+        , z_(dim)
+        , flag_(dim)
+    {
+        static_assert(Dim == Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+        init_a(a);
+        init_b(b);
+        init_flag();
+    }
+
+    /// \brief Only usable when `Dim == Dynamic`
+    NormalMVProposal(std::size_t dim, const result_type *chol,
+        const result_type *a, result_type b)
+        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        , a_(dim)
+        , b_(dim)
+        , z_(dim)
+        , flag_(dim)
+    {
+        static_assert(Dim == Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+        init_a(a);
+        init_b(b);
+        init_flag();
+    }
+
+    /// \brief Only usable when `Dim == Dynamic`
+    NormalMVProposal(std::size_t dim, const result_type *chol,
+        const result_type *a, const result_type *b)
+        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        , a_(dim)
+        , b_(dim)
+        , z_(dim)
+        , flag_(dim)
+    {
+        static_assert(Dim == Dynamic,
+            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+        init_a(a);
+        init_b(b);
+        init_flag();
+    }
+
+    std::size_t dim() const { return normal_mv_.dim(); }
     const result_type *a() const { return a_.data(); }
     const result_type *b() const { return b_.data(); }
 
@@ -512,7 +702,7 @@ class NormalMVProposal
     result_type operator()(
         RNGType &rng, std::size_t, const result_type *x, result_type *y)
     {
-        rnorm_(rng, z_.data());
+        normal_mv_(rng, z_.data());
         result_type q = 0;
         for (std::size_t i = 0; i != dim(); ++i) {
             switch (flag_[i]) {
@@ -539,41 +729,128 @@ class NormalMVProposal
     }
 
     private:
-    NormalMVDistribution<RealType, Dim> rnorm_;
+    NormalMVDistribution<RealType, Dim> normal_mv_;
     internal::StaticVector<RealType, Dim> a_;
     internal::StaticVector<RealType, Dim> b_;
     internal::StaticVector<RealType, Dim> z_;
     internal::StaticVector<unsigned, Dim> flag_;
 
-    void init(std::size_t dim, const result_type *a, const result_type *b)
+    void init_a(result_type a) { std::fill(a_.begin(), a_.end(), a); }
+
+    void init_a(const result_type *a)
     {
-        if (a == nullptr) {
-            std::fill(a_.begin(), a_.end(),
-                -std::numeric_limits<result_type>::infinity());
-        } else {
-            std::copy_n(a, dim, a_.begin());
-        }
+        std::copy_n(a, a_.size(), a_.begin());
+    }
 
-        if (b == nullptr) {
-            std::fill(b_.begin(), b_.end(),
-                std::numeric_limits<result_type>::infinity());
-        } else {
-            std::copy_n(b, dim, b_.begin());
-        }
+    void init_b(result_type b) { std::fill(b_.begin(), b_.end(), b); }
 
-        for (std::size_t i = 0; i != dim; ++i) {
+    void init_b(const result_type *b)
+    {
+        std::copy_n(b, b_.size(), b_.begin());
+    }
+
+    void init_flag()
+    {
+
+        for (std::size_t i = 0; i != dim(); ++i) {
             unsigned lower = std::isfinite(a_[i]) ? 1 : 0;
             unsigned upper = std::isfinite(b_[i]) ? 1 : 0;
             flag_[i] = (lower << 1) + upper;
         }
 
-        VSMC_RUNTIME_ASSERT_RNG_RANDOM_WALK_PROPOSAL_PARAM(
+        VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_PROPOSAL_PARAM(
             internal::normal_mv_proposal_check_param(
-                dim, a_.data(), b_.data()),
+                dim(), a_.data(), b_.data()),
             NormalMV);
     }
 }; // class NormalMVProposal
 
+/// \brief Multivariate Normal random walk proposal on logit scale
+/// \ingroup RandomWalk
+template <typename RealType = double, std::size_t Dim = Dynamic>
+class NormalMVLogitProposal
+{
+    public:
+    using result_type = RealType;
+
+    /// \brief Only usable when `Dim > 1`
+    NormalMVLogitProposal(result_type chol)
+        : normal_mv_(static_cast<result_type>(0), chol)
+    {
+        static_assert(Dim > 1, "**NormalMVLogitProposal** OBJECT DECLARED "
+                               "WITH DIMENSION LESS THAN 2");
+    }
+
+    /// \brief Only usable when `Dim > 1`
+    NormalMVLogitProposal(const result_type *chol)
+        : normal_mv_(static_cast<result_type>(0), chol)
+    {
+        static_assert(Dim > 1, "**NormalMVLogitProposal** OBJECT DECLARED "
+                               "WITH DIMENSION LESS THAN 2");
+    }
+
+    /// \brief Only usable when `Dim == Dynamic`
+    NormalMVLogitProposal(std::size_t dim, result_type chol)
+        : normal_mv_(dim, static_cast<result_type>(0), chol), z_(dim)
+    {
+        static_assert(Dim == Dynamic,
+            "**NormalMVLogitProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+        VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_NORMAL_MV_LOGIT_DIM(dim);
+    }
+
+    /// \brief Only usable when `Dim == Dynamic`
+    NormalMVLogitProposal(std::size_t dim, const result_type *chol)
+        : normal_mv_(dim, static_cast<result_type>(0), chol), z_(dim)
+    {
+        static_assert(Dim == Dynamic,
+            "**NormalMVLogitProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+        VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_NORMAL_MV_LOGIT_DIM(dim);
+    }
+
+    std::size_t dim() const { return normal_mv_.dim(); }
+
+    template <typename RNGType>
+    result_type operator()(
+        RNGType &rng, std::size_t, const result_type *x, result_type *y)
+    {
+        const std::size_t d = dim();
+        normal_mv_(rng, z_.data());
+        exp(d - 1, z_.data(), z_.data());
+
+        result_type s = 1;
+        const result_type w = x[d - 1];
+        for (std::size_t i = 0; i != d - 1; ++i) {
+            y[i] = z_[i] * x[i] / w;
+            s += y[i];
+        }
+        y[d - 1] = 1;
+        mul(d, 1 / s, y, y);
+
+        return q(y) - q(x);
+    }
+
+    private:
+    NormalMVDistribution<RealType, Dim> normal_mv_;
+    internal::StaticVector<RealType, Dim> z_;
+
+    result_type q(const result_type *x)
+    {
+        const std::size_t d = dim();
+
+        result_type slw = 1;
+        result_type sllw = 0;
+        const result_type w = x[d - 1];
+        for (std::size_t i = 0; i != d - 1; ++i) {
+            double v = x[i] / w;
+            slw += v;
+            sllw += std::log(v);
+        }
+        sllw -= d * std::log(slw);
+
+        return sllw;
+    }
+}; // class NormalMVLogitProposal
+
 } // namespace vsmc
 
-#endif // VSMC_RNG_RANDOM_WALK_HPP
+#endif // VSMC_ALGORITHM_RANDOM_WALK_HPP

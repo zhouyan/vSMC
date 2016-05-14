@@ -37,6 +37,7 @@
 #include <vsmc/rng/beta_distribution.hpp>
 #include <vsmc/rng/cauchy_distribution.hpp>
 #include <vsmc/rng/chi_squared_distribution.hpp>
+#include <vsmc/rng/dirichlet_distribution.hpp>
 #include <vsmc/rng/discrete_distribution.hpp>
 #include <vsmc/rng/exponential_distribution.hpp>
 #include <vsmc/rng/extreme_value_distribution.hpp>

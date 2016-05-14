@@ -53,6 +53,9 @@ VSMC_ADD_EXAMPLE(vsmc)
 
 VSMC_ADD_HEADER_TEST(vsmc/vsmc TRUE)
 
+VSMC_ADD_HEADER_TEST(vsmc/algorithm/algorithm TRUE)
+VSMC_ADD_HEADER_TEST(vsmc/algorithm/random_walk TRUE)
+
 VSMC_ADD_HEADER_TEST(vsmc/core/core TRUE)
 VSMC_ADD_HEADER_TEST(vsmc/core/monitor      TRUE)
 VSMC_ADD_HEADER_TEST(vsmc/core/particle     TRUE)
@@ -77,7 +80,6 @@ VSMC_ADD_HEADER_TEST(vsmc/resample/index     TRUE)
 VSMC_ADD_HEADER_TEST(vsmc/resample/transform TRUE)
 
 VSMC_ADD_HEADER_TEST(vsmc/rng/rng TRUE "MKL")
-VSMC_ADD_HEADER_TEST(vsmc/rng/random_walk     TRUE)
 VSMC_ADD_HEADER_TEST(vsmc/rng/rng_set         TRUE)
 VSMC_ADD_HEADER_TEST(vsmc/rng/seed            TRUE)
 VSMC_ADD_HEADER_TEST(vsmc/rng/u01             TRUE)

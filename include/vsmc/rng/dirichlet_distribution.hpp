@@ -60,7 +60,7 @@ class DirichletDistribution
             static_assert(Dim != Dynamic, "**DirichletDistribution::param_"
                                           "type** OBJECT DECLARED WITH "
                                           "DYNAMIC DIMENSION");
-            init(alpha);
+            init_alpha(alpha);
         }
 
         explicit param_type(const result_type *alpha) : is_scalar_(false)
@@ -68,7 +68,7 @@ class DirichletDistribution
             static_assert(Dim != Dynamic, "**DirichletDistribution::param_"
                                           "type** OBJECT DECLARED WITH "
                                           "DYNAMIC DIMENSION");
-            init(alpha);
+            init_alpha(alpha);
         }
 
         explicit param_type(std::size_t dim, result_type alpha)
@@ -77,7 +77,7 @@ class DirichletDistribution
             static_assert(Dim == Dynamic, "**DirichletDistribution::param_"
                                           "type** OBJECT DELCARED WITH FIXED "
                                           "DIMENSION");
-            init(alpha);
+            init_alpha(alpha);
         }
 
         explicit param_type(std::size_t dim, const result_type *alpha)
@@ -86,7 +86,7 @@ class DirichletDistribution
             static_assert(Dim == Dynamic, "**DirichletDistribution::param_"
                                           "type** OBJECT DELCARED WITH FIXED "
                                           "DIMENSION");
-            init(alpha);
+            init_alpha(alpha);
         }
 
         std::size_t dim() const { return alpha_.size(); }
@@ -151,32 +151,32 @@ class DirichletDistribution
 
         friend distribution_type;
 
-        void init(double alpha)
+        void init_alpha(result_type alpha)
         {
             std::fill(alpha_.begin(), alpha_.end(), alpha);
         }
 
-        void init(const double *alpha)
+        void init_alpha(const result_type *alpha)
         {
             std::copy_n(alpha, alpha_.size(), alpha_.begin());
         }
     }; // class param_type
 
-    /// \brief Only usable when `Dim > 0`
-    explicit DirichletDistribution(double alpha) : param_(alpha) {}
+    /// \brief Only usable when `Dim != Dynamic`
+    explicit DirichletDistribution(result_type alpha) : param_(alpha) {}
 
-    /// \brief Only usable when `Dim > 0`
-    explicit DirichletDistribution(const double *alpha) : param_(alpha) {}
+    /// \brief Only usable when `Dim != Dynamic`
+    explicit DirichletDistribution(const result_type *alpha) : param_(alpha) {}
 
     /// \brief Only usable when `Dim == Dynamic`
-    explicit DirichletDistribution(std::size_t dim, double alpha)
+    explicit DirichletDistribution(std::size_t dim, result_type alpha)
         : param_(dim, alpha)
     {
         reset();
     }
 
     /// \brief Only usable when `Dim == Dynamic`
-    DirichletDistribution(std::size_t dim, const double *alpha)
+    DirichletDistribution(std::size_t dim, const result_type *alpha)
         : param_(dim, alpha)
     {
         reset();
