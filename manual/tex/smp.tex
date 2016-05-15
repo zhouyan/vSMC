@@ -1,2 +1,436 @@
 \chapter{Symmetric multiprocessing}
 \label{chap:Symmetric multiprocessing}
+
+Many Monte Carlo algorithms admit straight forward parallelism. In this
+chapter, we introduce how to use the library to parallelize a Monte Carlo
+algorithm implementations on shared memory symmetric multiprocessing (\smp)
+platforms.
+
+\section{Decomposition of evaluation objects}
+\label{sec:Decomposition of evaluation objects}
+
+Recall that, in section~\ref{sec:Sampler} we introduced the concepts of sampler
+evaluation objects. The primary method of iterating a sampler is through
+one or more evaluation objects that is convertible to the following type,
+\begin{Verbatim}
+  using eval_type = std::function<void(std::size_t, Particle<T> &)>;
+\end{Verbatim}
+In some situations, part of the evaluation process can be parallelized. For
+example, consider the weight step in the simple particle filter in
+section~\ref{sec:Example (Core concepts)}. Recall the simple \verb|PFWeight|
+function in section~\ref{sub:Implementation (PF)},
+\begin{Verbatim}
+  inline void PFWeight(std::size_t iter, Particle<PF> &particle)
+  {
+      Vector<double> weight(particle.size());
+      for (auto idx : particle)
+          weight[idx.id()] = idx.log_likelihood(iter);
+      particle.weight().add_log(weight.data());
+  }
+\end{Verbatim}
+The loop inside the function can be parallelized, since the assignment is
+independent of each other. However, the statements before and after the loop
+cannot be parallelized. Therefore, we can decompose it into three simple
+functions. Below, we re-implement \verb|PFWeight| as a class that is
+convertible to \verb|eval_type|.
+\begin{Verbatim}
+  class PFWeight
+  {
+      public:
+      void operator()(std::size_t iter, Particle<PF> &particle)
+      {
+          eval_first(iter, particle);
+          for (auto idx : particle)
+              eval_each(idx);
+          eval_last(iter, particle);
+      }
+
+      void eval_first(std::size_t, Particle<PF> &particle)
+      {
+          weight_.resize(particle.size());
+      }
+
+      void eval_each(std::size_t iter, ParticleIndex<PF> idx)
+      {
+          weight_[idx.id()] = idx.log_likelihood(iter);
+      }
+
+      void eval_last(std::size_t, Particle<PF> &particle)
+      {
+          particle.weight().add_log(weight_.data());
+      }
+
+      private:
+      Vector<double> weight_;
+  }; // class PFWeight
+\end{Verbatim}
+Of course, such an implementation provides no benefits compared to the
+original. In fact it is rather cumbersome. However, the library provides a
+simple mechanism to convert any operators implemented this way to a
+parallelized one. For example,
+\begin{Verbatim}
+  class PFWeightSMP : public SamplerEvalSMP<PF>
+  {
+      public:
+      void eval_first(std::size_t, Particle<PF> &particle)
+      {
+          weight_.resize(particle.size());
+      }
+
+      void eval_each(std::size_t iter, ParticleIndex<PF> idx)
+      {
+          weight_[idx.id()] = idx.log_likelihood(iter);
+      }
+
+      void eval_last(std::size_t, Particle<PF> &particle)
+      {
+          particle.weight().add_log(weight_.data());
+      }
+
+      private:
+      Vector<double> weight_;
+  }; // class PFWeight
+\end{Verbatim}
+This new implementation differs from the one earlier in two places. First, it
+is now a derived class of \verb|SamplerEvalSMP<PF>|. Second, the interface
+operator, which makes the class type convertible to \verb|eval_type| of
+\verb|Sampler| is removed. Now, the loop inside that operator in earlier
+implementations will be parallelized. Still, for this simple function, the
+performance benefits through parallelization is minimal. However, in less
+trivial situations, \verb|eval_each| may be substantially more complicated. And
+the extra effort to decompose the implementation into these three functions
+will be minimal and there can be considerable performance advantage.
+
+\subsection{The \texttt{SamplerEvalSMP} class}
+\label{sub:The SamplerEvalSMP class}
+
+We have already seen the \verb|SamplerEvalSMP| class template. The full
+declaration of the template is as below,
+\begin{Verbatim}
+  template <typename T, typename = Virtual, typename = BackendSMP>
+  class SamplerEvalSMP;
+\end{Verbatim}
+The first template parameter is the same as that of \verb|Sampler|. The second
+specifies the polymorphism method. The default is to use virtual functions. We
+will introduce another method later in section~\ref{sec:Static polymorphism}.
+The last one selects the parallel programming models, or ``backends''. The
+default is platform dependent and will be detailed in
+section~\ref{sec:Programming models}. In this section, we will discuss the
+default behavior.
+
+The class template has one public method.
+\begin{Verbatim}
+  void operator()(std::size_t iter, Particle<T> &particle);
+\end{Verbatim}
+This makes instances of its derived classes convertible to \verb|eval_type| of
+\verb|Sampler|. Its constructors and other special members are protected. And
+thus it cannot be used on its own. It also has three other protected members,
+\begin{Verbatim}
+    virtual void eval_first(std::size_t, Particle<T> &);
+    virtual void eval_each(std::size_t, ParticleIndex<T>);
+    virtual void eval_last(std::size_t, Particle<T> &);
+\end{Verbatim}
+The default implementation of each is to do nothing. They are not pure virtual
+functions, and thus their implementation in the derived class is optional. The
+public operator is implemented as if it is the same as we saw earlier in the
+\verb|PFWeight| class. How the loop is parallelized is implementation detail.
+The only requirement is that the derived class implementation of
+\verb|eval_each| has to be thread-safe.
+
+A full treatment of thread-safety is beyond the scope of this manual. Here are
+rule of thumbs. In the standard library, this library and others designed with
+thread-safety in mind, one can usually assume the following,
+\begin{itemize}
+  \item Namespace scope functions are thread-safe.
+  \item Constant member functions are thread-safe.
+  \item Non-constant member functions are \emph{potentially not} thread-safe.
+\end{itemize}
+Note that, constant member function is often a sufficient, but not necessary
+condition for thread-safety. For example, the \verb|eval_each| method itself is
+a non-constant member function, but it is required to be thread-safe.
+
+Here is one example of a problematic implementation of \verb|eval_each|,
+\begin{Verbatim}
+  using T = StateMatrix<RowMajor, 1, double>;
+
+  class Eval : SamplerEvalSMP<T>
+  {
+      public:
+      void eval_each(std::size_t iter, ParticleIndex<T> idx)
+      {
+          idx(0) = normal_(rng_);
+      }
+
+      private:
+      std::mt19937 rng_;
+      std::normal_distribution<double> normal_;
+  };
+\end{Verbatim}
+The methods \verb|operator()| of \rng engines and the distribution generators
+are generally non-constant members. And therefore they are potentially not
+thread-safe. In fact, in the above example, they are indeed so. And when
+parallelized the behavior is undefined. The correct way is to construct the
+distribution object within \verb|eval_each| and use the \rng engines in the
+particle system,
+\begin{Verbatim}
+  class Eval : SamplerEvalSMP<T>
+  {
+      public:
+      void eval_each(std::size_t iter, ParticleIndex<T> idx)
+      {
+          std::normal_distribution<double> normal_;
+          idx(0) = normal_(idx.rng());
+      }
+  };
+\end{Verbatim}
+
+\subsection{The \texttt{MonitorEvalSMP} class}
+\label{sub:he MonitorEvalSMP class}
+
+A function or class that is convertible to \verb|eval_type| of \verb|Monitor|
+can also be parallelized. This is done through the following class template,
+\begin{Verbatim}
+  template <typename T, typename = Virtual, typename = BackendSMP>
+  class MonitorEvalSMP;
+\end{Verbatim}
+This is similar to \verb|SamplerEvalSMP| except for the \verb|eval_each|
+method, which has the following signature,
+\begin{Verbatim}
+  virtual void eval_each(
+      std::size_t iter, std::size_t dim, ParticleIndex<T> idx, double *r);
+\end{Verbatim}
+Now the output parameter \verb|r| no longer points an $N$ by $d$ matrix.
+Instead it points to a $d$-vector specific for each particle. For example,
+recall the \verb|PFEstimate| function in section~\ref{sub:Implementation (PF)}.
+\begin{Verbatim}
+  inline void PFEstimate(
+      std::size_t, std::size_t, Particle<PF> &particle, double *r)
+  {
+      for (auto idx : particle) {
+          *r++ = idx.pos_x();
+          *r++ = idx.pos_y();
+      }
+  }
+\end{Verbatim}
+This can be parallelized as the following,
+\begin{Verbatim}
+  class PFEstimate : public MonitorEvalSMP<PF>
+  {
+      public:
+      void eval_each(
+          std::size_t, std::size_t, ParticleIndex<PF> idx, double *r)
+      {
+          *r++ = idx.pos_x();
+          *r++ = idx.pos_y();
+      }
+  }; // class PFEstimate
+\end{Verbatim}
+Optionally, the derived class can also have \verb|eval_first| and
+\verb|eval_last| methods, similar to that of \verb|SamplerEvalSMP|.
+
+\section{Static polymorphism}
+\label{sec:Static polymorphism}
+
+Calling virtual functions has a small cost at runtime. There are situations
+where there is a large number of particles, and thus parallelization is
+beneficial, but the computation of \verb|eval_each| is light weighted and the
+cost of virtual function calls becomes significant. In this case, one can
+specify the second template parameter of \verb|SamplerEvalSMP| and
+\verb|MonitorEvalSMP| to force the compiler to statically dispatch calls of
+\verb|eval_each|. For example,
+\begin{Verbatim}
+  class Eval : SamplerEvalSMP<T, Derived>;
+\end{Verbatim}
+The class \verb|Derived| is where the base class \emph{start} looking for
+methods \verb|eval_each|, etc. It does not have to implement these methods
+itself. For example,
+\begin{Verbatim}
+  template <typename Derived>
+  class Eval : public SamplerEvalSMP<T, Derived>
+  {
+      public:
+      void eval_first(std::size_t iter, Particle<T> &particle);
+  };
+
+  class Eval1 : public Eval<Eval1>
+  {
+      public:
+      void eval_each(std::size_t iter, ParticleIndex<T> idx);
+  };
+
+  class Eval2 : public Eval<Eval2>
+  {
+      public:
+      void eval_each(std::size_t iter, ParticleIndex<T> idx);
+  };
+\end{Verbatim}
+Here, \verb|Eval| is a direct derived class of \verb|SamplerEvalSMP|, and it
+implements the \verb|eval_first| method. This method is inherited by
+\verb|Eval1| and \verb|Eval2|, which implement the \verb|eval_each| method. The
+base class \verb|SamlerEvalSMP| will start looking for \verb|eval_first| in
+\verb|Eval1| and \verb|Eval2|. But it will find it in \verb|Eval|. It will
+find \verb|eval_each| in those two classes. And it will find \verb|eval_last|
+in itself.\footnote{This is not actually true. It will find unimplemented
+  methods in its base class. However this is an implementation detail.}
+
+The implementations of methods \verb|eval_each| etc., can be either constant,
+non-constant, or static. This type of use is call \emph{Curiously Recurring
+  Template Pattern} (\crtp\footnote{%
+  \url{https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern}}).
+The key point is that, the template parameter \verb|Derived| tells
+\verb|SamlerEvalSMP| where should it start looking for \verb|eval_each|, etc.
+And it will cast itself to \verb|Derived| if it finds non-static member
+functions. It will call the methods directly if it finds static member
+functions. The class template \verb|SamplerEvalSMP| has \emph{non-virtual}
+default implementations of these methods.
+
+\section{Programming models}
+\label{sec:Programming models}
+
+The third template parameter of \verb|SamplerEvalSMP| and \verb|MonitorEvalSMP|
+specifies the programming model to use for parallelization. Possible types are
+\begin{Verbatim}
+  class BackendSEQ; // Sequential implementation
+  class BackendSTD; // Parallelization using the standard library
+  class BackendOMP; // Parallelization using OpenMP
+  class BackendTBB; // Parallelization using Intel TBB
+\end{Verbatim}
+It is also possible to implement new backends by partial specialization of
+\verb|SamplerEvalSMP| and \verb|MonitorEvalSMP|. However, this is a too
+technical topic to be included in this manual.
+
+Each partial specialization of \verb|SamplerEvalSMP| for the types above has a
+protected method,
+\begin{Verbatim}
+  template <typename... Args>
+  void run(std::size_t iter, Particle<T> &particle, std::size_t grainsize,
+      Args &&... args);
+\end{Verbatim}
+which is called by the public operator method. One may use this function to
+gain finer control of the parallelization. The behavior and allowable arguments
+depend on the specific programming model. At the time of writing, this only has
+effects on the \tbb backend. For others, these arguments are ignored.
+
+In the case of \tbb, one can control the task division through the grain size.
+For example,
+\begin{Verbatim}
+  class Eval : SamplerEvalSMP<T, Eval, BackendTBB>
+  {
+      public:
+      void operator()(std::size_t iter, Particle<T> &particle)
+      {
+          run(iter, particle, G);
+      }
+
+      void eval_each(std::size_t, ParticleIndex<T> idx);
+  };
+\end{Verbatim}
+The argument $G$ passed to \verb|run| above controls the threading such that,
+each thread will process at least $G / 2$ particles. See the documents of \tbb
+for more information of grain size. The additional arguments \verb|args| are
+passed directly as the optional arguments of \verb|tbb::parallel_for|, the
+partitioner and the task group context. See documents of \tbb for more details.
+
+\section{Vectorization}
+\label{sec:Vectorization}
+
+It is often more efficient to process a vector as a whole instead of through a
+loop. For example, considering the task of initializing states from a Gamma
+distribution,
+\begin{Verbatim}
+  using T = StateMatrix<ColMajor, 1, double>;
+
+  class Eval
+  {
+      public:
+      void operator()(std::size_t iter, Particle<T> &particle)
+      {
+          std::gamma_distribution<double> gamma(2, 1);
+          auto &rng = particle.rng();
+          for (auto idx : particle)
+              idx(0) = gamma(rng);
+      }
+  };
+\end{Verbatim}
+Later in section~\ref{sec:Vectorized random number generating} we will show
+that the library provides vectorized random numbers generating. For example,
+the above can be written as,
+\begin{Verbatim}
+  class Eval
+  {
+      public:
+      void operator()(std::size_t iter, Particle<T> &particle)
+      {
+          GammaDistribution<double> gamma(2, 1);
+          auto &rng = particle.rng();
+          auto n = particle.size();
+          auto r = particle.state().col_data(0);
+          rand(rng, gamma, n, r);
+      }
+  };
+\end{Verbatim}
+which is about four to five times faster than the loop earlier. This is called
+\emph{vectorization}. However, if the sample size is large, we would also like
+to parallelize the loop. It is not possible to combine vectorization and
+parallelization through the \verb|eval_each| method we have seen. In this
+situation, instead of implementing \verb|eval_each|, one can implement an
+\verb|eval_range| method. For example,
+\begin{Verbatim}
+  class Eval : public SamplerEvalSMP<T>
+  {
+      public:
+      void eval_range(std::size_t iter, const ParticleRang<T> &range)
+      {
+          GammaDistribution<double> gamma(2, 1);
+          auto &rng = range.begin().rng();
+          auto n = range.size();
+          auto r = range.particle().state().col_data(0) + range.first();
+          rand(rng, gamma, n, r);
+      }
+  };
+\end{Verbatim}
+The class \verb|ParticleRange| is an abstraction of a subset of a particle
+system. It has the following methods,
+\begin{Verbatim}
+  range.particle();     // A reference to the particle system it belongs to
+  range.particle_ptr(); // A pointer to the particle system it belongs to
+  range.first(); // The index of the first particle within the range
+  range.last();  // The index of one pass the last particle within the range
+  range.begin(); // An ParticleIndex<T> object for the first particle
+  range.end();   // An ParticleIndex<T> object for one pass the last particle
+\end{Verbatim}
+It can also be iterated, similar to \verb|Particle|. For example,
+\begin{Verbatim}
+  for (auto idx : range)
+      /* process ParticleIndex<T> object idx */;
+\end{Verbatim}
+If such a method is defined, the particle system will first be partitioned into
+multiple disjoint ranges. And each thread will process one of more of such
+ranges. The \verb|eval_range| method has to be thread-safe. If both
+\verb|eval_range| and \verb|eval_each| are defined, the later is ignored.
+
+\subsection{Using \texttt{eval\_range} with \tbb}
+
+When using the \tbb backend, special care need to be taken when using the
+\verb|eval_range| implementation. The purpose of using \verb|eval_range|
+instead of \verb|eval_each| is to process vectors as a whole. For optimal
+performance, the vectors cannot be too short. Otherwise, the performance will
+only be worse than using a loop. Therefore it is important to control the grain
+size. Therefore, it is recommended that if one does want to use
+\verb|eval_range|, then one should also redefine the interface operator. For
+example,
+\begin{Verbatim}
+  class Eval : public SamplerEvalSMP<T>
+  {
+      public:
+      void operator()(std::size_t iter, Particle<T> &particle)
+      {
+          run(iter, particle, G);
+      }
+
+      void eval_range(std::size_t iter, const ParticleRang<T> &range);
+  };
+\end{Verbatim}
+where $G$ is the grain size. Even though the grain size has no effect for
+backends other than \tbb at the moment, it is planned to provide similar
+functionality as \tbb for other backends in the near future.

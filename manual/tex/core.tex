@@ -462,7 +462,7 @@ example,
   Sampler<T> sampler(N, d);
 \end{Verbatim}
 Any callable objects that is convertible to the following can be used as
-operations on the particle system.
+operations on the particle system,
 \begin{Verbatim}
   using eval_type = std::function<void(std::size_t, Particle<T> &)>;
 \end{Verbatim}
@@ -470,7 +470,12 @@ For example,
 \begin{Verbatim}
   void eval(std::size_t iter, Particle<T> &particle);
 \end{Verbatim}
-Such a function can be attached to the sampler by the \verb|eval| method,
+Conceptually, such a function implement an operator $M(\{X^i,W^i\}_{i=1}^N)$
+such that a new particle system $\{\hat{X}^i,\hat{W}^i\}_{i=1}^{\hat{N}}$ is
+produced given the original. If it often possible to decompose the operator $M$
+into multiple simpler ones. And thus a sampler can have a sequence of
+evaluation objects attached to it. Each of these evaluation objects can be
+attached to the sampler by the \verb|eval| method,
 \begin{Verbatim}
   Sampler<T> &eval(
       const eval_type &new_eval, SamplerStage stage, bool append = true);
@@ -718,22 +723,21 @@ filter algorithm is shown in Algorithm~\ref{alg:pf}.
     \STATE \emph{Initialization}
     \STATE\STATESKIP Set $t\leftarrow0$.
     \STATE\STATESKIP Sample
-    $\xpos^{(0,i)},\ypos^{(0,i)}\sim\calN(0,4)$ and
-    $\xvel^{(0,i)},\yvel^{(0,i)}\sim\calN(0,1)$.
-    \STATE\STATESKIP Weight $W_0^{(i)} \propto \exp\{\ell(X_0^{(i)}|Y_0)\}$
+    $\xpos^{0,i},\ypos^{0,i}\sim\calN(0,4)$ and
+    $\xvel^{0,i},\yvel^{0,i}\sim\calN(0,1)$.
+    \STATE\STATESKIP Weight $W_0^i \propto \exp\{\ell(X_0^i|Y_0)\}$
     where $\ell$ is the log-likelihood function.
 
     \STATE \emph{Iteration}
     \STATE\STATESKIP Set $t\leftarrow t + 1$.
     \STATE\STATESKIP Sample
     \begin{align*}
-      \xpos^{(t,i)}&\sim\calN(\xpos^{(t-1,i)} + \Delta\xvel^{(t-1,i)}, 0.02) &
-      \xvel^{(t,i)}&\sim\calN(\xvel^{(t-1,i)}, 0.001) \\
-      \ypos^{(t,i)}&\sim\calN(\ypos^{(t-1,i)} + \Delta\yvel^{(t-1,i)}, 0.02) &
-      \yvel^{(t,i)}&\sim\calN(\yvel^{(t-1,i)}, 0.001)
+      \xpos^{t,i}&\sim\calN(\xpos^{t-1,i} + \Delta\xvel^{t-1,i}, 0.02) &
+      \xvel^{t,i}&\sim\calN(\xvel^{t-1,i}, 0.001) \\
+      \ypos^{t,i}&\sim\calN(\ypos^{t-1,i} + \Delta\yvel^{t-1,i}, 0.02) &
+      \yvel^{t,i}&\sim\calN(\yvel^{t-1,i}, 0.001)
     \end{align*}
-    \STATE\STATESKIP Weight $W_t^{(i)} \propto
-    W_{t-1}^{(i)}\exp\{\ell(X_t^{(i)}|Y_t)\}$.
+    \STATE\STATESKIP Weight $W_t^i \propto W_{t-1}^i\exp\{\ell(X_t^i|Y_t)\}$.
 
     \STATE \emph{Repeat the \emph{Iteration} step until all data are processed}.
     \vskip1ex\hrule
@@ -742,8 +746,8 @@ filter algorithm is shown in Algorithm~\ref{alg:pf}.
   \label{alg:pf}
 \end{algorithm}
 
-\subsection{Implementations}
-\label{sub:Implementations}
+\subsection{Implementation}
+\label{sub:Implementation (PF)}
 
 We will work through a complete implementation using a top-down approach.
 First, we show the \verb|main| function.
@@ -918,8 +922,8 @@ will be computed with the \verb|log_likelihood| method of
   inline void PFWeight(std::size_t iter, Particle<PF> &particle)
   {
       Vector<double> weight(particle.size());
-      std::transform(particle.begin(), particle.end(), weight.begin(),
-          [iter](ParticleIndex<PF> idx) { return idx.log_likelihood(iter); });
+      for (auto idx : particle)
+          weight[idx.id()] = idx.log_likelihood(iter);
       particle.weight().add_log(weight.data());
   }
 \end{Verbatim}
@@ -930,9 +934,8 @@ And thus the function above is correct for both initialization and iterations.
 
 \subsubsection{The \texttt{PFEstimate} function}
 
-Last, we would like to record the value of $\varphi_t(X_t^{(i)}) =
-(\xpos^{(t,i)},\ypos^{(t,i)})^{\transpose}$. This is done by defining the
-function,
+Last, we would like to record the value of $\varphi_t(X_t^i) =
+(\xpos^{t,i},\ypos^{t,i})^{\transpose}$. This is done by defining the function,
 \begin{Verbatim}
   inline void PFEstimate(
       std::size_t, std::size_t, Particle<PF> &particle, double *r)
