@@ -43,14 +43,13 @@ class SamplerEvalSMPC
     public:
     SamplerEvalSMPC(const vsmc_sampler_eval_smp_type &work) : work_(work) {}
 
-    std::size_t eval(std::size_t iter, ParticleIndexC idx)
+    void eval(std::size_t iter, ParticleIndexC idx)
     {
         if (work_.eval == nullptr)
-            return 0;
+            return;
 
         vsmc_particle_index idx_c = {&idx(0), idx.id()};
-
-        return work_.eval(iter, idx_c);
+        work_.eval(iter, idx_c);
     }
 
     void eval_pre(std::size_t iter, ParticleC &particle)

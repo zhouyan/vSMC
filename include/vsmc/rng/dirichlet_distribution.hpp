@@ -292,18 +292,18 @@ class DirichletDistribution
     template <typename RNGType>
     void generate(RNGType &rng, result_type *r, const param_type &param)
     {
-        const std::size_t n = param.dim();
+        const std::size_t d = param.dim();
         if (param.is_scalar_) {
             GammaDistribution<result_type> gamma(param.alpha()[0]);
-            gamma(rng, n, r);
+            gamma(rng, d, r);
         } else {
-            for (std::size_t i = 0; i != n; ++i) {
+            for (std::size_t i = 0; i != d; ++i) {
                 GammaDistribution<result_type> gamma(param.alpha()[i]);
                 r[i] = gamma(rng);
             }
         }
-        result_type s = std::accumulate(r, r + n, static_cast<result_type>(0));
-        mul(n, 1 / s, r, r);
+        result_type s = std::accumulate(r, r + d, static_cast<result_type>(0));
+        mul(d, 1 / s, r, r);
     }
 }; // class DirichletDistribution
 

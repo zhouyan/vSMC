@@ -68,9 +68,9 @@ class PFCV : public PFCVBase<Layout>
             const double nu = 10;
 
             double llh_x =
-                scale * (pos_x() - this->particle().state().obs_x(iter));
+                scale * (pos_x() - this->particle().state().obs_x_[iter]);
             double llh_y =
-                scale * (pos_y() - this->particle().state().obs_y(iter));
+                scale * (pos_y() - this->particle().state().obs_y_[iter]);
 
             llh_x = std::log(1 + llh_x * llh_x / nu);
             llh_y = std::log(1 + llh_y * llh_y / nu);
@@ -79,17 +79,8 @@ class PFCV : public PFCVBase<Layout>
         }
     }; // class particle_index_type
 
-    PFCV(std::size_t N) : PFCVBase<Layout>(N) {}
-
-    std::size_t n() const { return obs_x_.size(); }
-
-    double obs_x(std::size_t iter) { return obs_x_[iter]; }
-    double obs_y(std::size_t iter) { return obs_y_[iter]; }
-
-    void initialize()
+    PFCV(std::size_t N) : PFCVBase<Layout>(N)
     {
-        obs_x_.clear();
-        obs_y_.clear();
         double x = 0;
         double y = 0;
         std::ifstream data("pf_cv.data");
@@ -99,6 +90,8 @@ class PFCV : public PFCVBase<Layout>
         }
         data.close();
     }
+
+    std::size_t n() const { return obs_x_.size(); }
 
     private:
     vsmc::Vector<double> obs_x_;
@@ -112,12 +105,7 @@ class PFCVInit : public vsmc::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
     public:
     using T = PFCV<Layout, RNGSetType>;
 
-    void eval_pre(std::size_t, vsmc::Particle<T> &particle)
-    {
-        particle.state().initialize();
-    }
-
-    std::size_t eval(std::size_t, vsmc::ParticleIndex<T> idx)
+    void eval(std::size_t, vsmc::ParticleIndex<T> idx)
     {
         const double sd_pos0 = 2;
         const double sd_vel0 = 1;
@@ -129,8 +117,6 @@ class PFCVInit : public vsmc::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
         idx.pos_y() = normal_pos(rng);
         idx.vel_x() = normal_vel(rng);
         idx.vel_y() = normal_vel(rng);
-
-        return 0;
     }
 }; // PFCVInit
 
@@ -141,7 +127,7 @@ class PFCVMove : public vsmc::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
     public:
     using T = PFCV<Layout, RNGSetType>;
 
-    std::size_t eval(std::size_t, vsmc::ParticleIndex<T> idx)
+    void eval(std::size_t, vsmc::ParticleIndex<T> idx)
     {
         const double sd_pos = std::sqrt(0.02);
         const double sd_vel = std::sqrt(0.001);
@@ -154,8 +140,6 @@ class PFCVMove : public vsmc::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
         idx.pos_y() += normal_pos(rng) + delta * idx.vel_y();
         idx.vel_x() += normal_vel(rng);
         idx.vel_y() += normal_vel(rng);
-
-        return 0;
     }
 }; // class PFCVMove
 
@@ -167,22 +151,12 @@ class PFCVMove<Backend, vsmc::ColMajor, RNGSetType>
     public:
     using T = PFCV<vsmc::ColMajor, RNGSetType>;
 
-#if VSMC_HAS_TBB
-    std::size_t operator()(std::size_t iter,
-        vsmc::Particle<PFCV<vsmc::ColMajor, RNGSetType>> &particle)
+    void operator()(std::size_t iter, vsmc::Particle<T> &particle)
     {
-        return run_dispatch(
-            iter, particle, std::is_same<Backend, vsmc::BackendTBB>());
-    }
-#endif
-
-    void eval_pre(std::size_t, vsmc::Particle<T> &particle)
-    {
-        w_.resize(particle.size());
-        v_.resize(particle.size());
+        this->run(iter, particle, 512);
     }
 
-    std::size_t eval_range(std::size_t, const vsmc::ParticleRange<T> &range)
+    void eval_range(std::size_t, const vsmc::ParticleRange<T> &range)
     {
         const double sd_pos = std::sqrt(0.02);
         const double sd_vel = std::sqrt(0.001);
@@ -213,29 +187,17 @@ class PFCVMove<Backend, vsmc::ColMajor, RNGSetType>
         normal_vel(rng, n, v);
         vsmc::add(n, w, vel_x, vel_x);
         vsmc::add(n, v, vel_y, vel_y);
+    }
 
-        return 0;
+    void eval_pre(std::size_t, vsmc::Particle<T> &particle)
+    {
+        w_.resize(particle.size());
+        v_.resize(particle.size());
     }
 
     private:
     vsmc::Vector<double> w_;
     vsmc::Vector<double> v_;
-
-#if VSMC_HAS_TBB
-    std::size_t run_dispatch(
-        std::size_t iter, vsmc::Particle<T> &particle, std::true_type)
-    {
-        return this->run(iter, particle, 512);
-    }
-
-    std::size_t run_dispatch(
-        std::size_t iter, vsmc::Particle<T> &particle, std::false_type)
-    {
-        return vsmc::SamplerEvalSMP<T,
-            PFCVMove<Backend, vsmc::ColMajor, RNGSetType>,
-            Backend>::operator()(iter, particle);
-    }
-#endif
 }; // class PFCVMove
 
 template <typename Backend, vsmc::MatrixLayout Layout, typename RNGSetType>
@@ -245,21 +207,19 @@ class PFCVWeight : public vsmc::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
     public:
     using T = PFCV<Layout, RNGSetType>;
 
-    void eval_pre(std::size_t, vsmc::Particle<T> &particle)
-    {
-        w_.resize(particle.size());
-    }
-
-    std::size_t eval(std::size_t iter, vsmc::ParticleIndex<T> idx)
+    void eval(std::size_t iter, vsmc::ParticleIndex<T> idx)
     {
         w_[idx.id()] = idx.log_likelihood(iter);
-
-        return 0;
     }
 
     void eval_post(std::size_t, vsmc::Particle<T> &particle)
     {
         particle.weight().add_log(w_.data());
+    }
+
+    void eval_pre(std::size_t, vsmc::Particle<T> &particle)
+    {
+        w_.resize(particle.size());
     }
 
     private:
@@ -271,8 +231,10 @@ class PFCVEval : public vsmc::MonitorEvalSMP<PFCV<Layout, RNGSetType>,
                      PFCVEval<Backend, Layout, RNGSetType>, Backend>
 {
     public:
-    void eval(std::size_t, std::size_t,
-        vsmc::ParticleIndex<PFCV<Layout, RNGSetType>> idx, double *res)
+    using T = PFCV<Layout, RNGSetType>;
+
+    void eval(
+        std::size_t, std::size_t, vsmc::ParticleIndex<T> idx, double *res)
     {
         res[0] = idx.pos_x();
         res[1] = idx.pos_y();
@@ -283,15 +245,17 @@ template <typename Backend, vsmc::ResampleScheme Scheme,
     vsmc::MatrixLayout Layout, typename RNGSetType>
 inline void pf_cv_run(std::size_t N, int nwid, int twid)
 {
+    using T = PFCV<Layout, RNGSetType>;
+
     vsmc::Seed::instance().set(101);
-    vsmc::Sampler<PFCV<Layout, RNGSetType>> sampler(N);
+    vsmc::Sampler<T> sampler(N);
     sampler.resample_method(Scheme, 0.5);
     sampler.eval(PFCVInit<Backend, Layout, RNGSetType>(), vsmc::SamplerInit);
     sampler.eval(PFCVMove<Backend, Layout, RNGSetType>(), vsmc::SamplerMove);
     sampler.eval(PFCVWeight<Backend, Layout, RNGSetType>(),
         vsmc::SamplerInit | vsmc::SamplerMove);
-    sampler.monitor("pos", vsmc::Monitor<PFCV<Layout, RNGSetType>>(
-                               2, PFCVEval<Backend, Layout, RNGSetType>()));
+    sampler.monitor(
+        "pos", vsmc::Monitor<T>(2, PFCVEval<Backend, Layout, RNGSetType>()));
     sampler.monitor("pos").name(0) = "pos.x";
     sampler.monitor("pos").name(1) = "pos.y";
     sampler.initialize();

@@ -100,7 +100,7 @@ class Sampler
 {
     public:
     using size_type = typename Particle<T>::size_type;
-    using eval_type = std::function<std::size_t(std::size_t, Particle<T> &)>;
+    using eval_type = std::function<void(std::size_t, Particle<T> &)>;
 
     /// \brief Construct a Sampler
     ///
@@ -134,7 +134,6 @@ class Sampler
         size_history_.reserve(num);
         ess_history_.reserve(num);
         resampled_history_.reserve(num);
-        status_history_.reserve(num);
         for (auto &m : monitor_)
             m.second.reserve(num);
     }
@@ -331,12 +330,6 @@ class Sampler
             resampled_history_.begin(), resampled_history_.end(), first);
     }
 
-    /// \brief Get the status of a given move id and the iteration
-    std::size_t status_history(std::size_t iter, std::size_t id) const
-    {
-        return status_history_[iter][id];
-    }
-
     /// \brief Summary of sampler history
     std::map<std::string, Vector<double>> summary() const
     {
@@ -353,19 +346,6 @@ class Sampler
         df["Resampled"] = data;
 
         df["ESS"] = ess_history_;
-
-        std::size_t ssize = 0;
-        for (std::size_t i = 0; i != iter_size(); ++i)
-            if (ssize < status_history_[i].size())
-                ssize = status_history_[i].size();
-        for (std::size_t j = 0; j != ssize; ++j) {
-            for (std::size_t i = 0; i != iter_size(); ++i) {
-                data[i] = status_history_[i].size() > j ?
-                    status_history_[i][j] :
-                    missing_data;
-            }
-            df["Status." + std::to_string(j)] = data;
-        }
 
         for (const auto &m : monitor_) {
             if (m.second.iter_size() > 0) {
@@ -428,8 +408,6 @@ class Sampler
     Vector<size_type> size_history_;
     Vector<double> ess_history_;
     Vector<bool> resampled_history_;
-    Vector<Vector<std::size_t>> status_history_;
-    Vector<std::size_t> status_;
     monitor_map_type monitor_;
 
     void do_reset()
@@ -442,14 +420,11 @@ class Sampler
         size_history_.clear();
         ess_history_.clear();
         resampled_history_.clear();
-        status_history_.clear();
-        status_.clear();
     }
 
     void do_initialize()
     {
         do_reset();
-        status_.clear();
         do_init();
         do_common();
     }
@@ -457,7 +432,6 @@ class Sampler
     void do_iterate()
     {
         ++iter_num_;
-        status_.clear();
         do_move();
         do_common();
     }
@@ -469,28 +443,27 @@ class Sampler
         do_monitor(MonitorResample);
         do_mcmc();
         do_monitor(MonitorMCMC);
-        status_history_.push_back(std::move(status_));
     }
 
     void do_init()
     {
         for (auto &e : eval_)
             if ((e.second & SamplerInit) != 0)
-                status_.push_back(e.first(iter_num_, particle_));
+                e.first(iter_num_, particle_);
     }
 
     void do_move()
     {
         for (auto &e : eval_)
             if ((e.second & SamplerMove) != 0)
-                status_.push_back(e.first(iter_num_, particle_));
+                e.first(iter_num_, particle_);
     }
 
     void do_mcmc()
     {
         for (auto &e : eval_)
             if ((e.second & SamplerMCMC) != 0)
-                status_.push_back(e.first(iter_num_, particle_));
+                e.first(iter_num_, particle_);
     }
 
     void do_resample(double threshold)

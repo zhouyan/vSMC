@@ -201,12 +201,6 @@ void vsmc_sampler_read_resampled_history(vsmc_sampler sampler, int *first)
     ::vsmc::cast(sampler).read_resampled_history(first);
 }
 
-size_t vsmc_sampler_status_history(
-    vsmc_sampler sampler, size_t iter, size_t id)
-{
-    return ::vsmc::cast(sampler).status_history(iter, id);
-}
-
 size_t vsmc_sampler_print(vsmc_sampler sampler, char *buf, char sepchar)
 {
     std::stringstream ss;

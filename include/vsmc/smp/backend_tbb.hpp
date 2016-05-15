@@ -59,15 +59,6 @@ template <typename T, typename Derived>
 class SamplerEvalSMP<T, Derived, BackendTBB>
     : public SamplerEvalBase<T, Derived>
 {
-    public:
-    std::size_t operator()(std::size_t iter, Particle<T> &particle)
-    {
-        return run(iter, particle);
-    }
-
-    protected:
-    VSMC_DEFINE_SMP_BACKEND_SPECIAL(TBB, SamplerEval)
-
     class work_type
     {
         public:
@@ -75,52 +66,44 @@ class SamplerEvalSMP<T, Derived, BackendTBB>
 
         work_type(SamplerEvalSMP<T, Derived, BackendTBB> *wptr,
             std::size_t iter, Particle<T> *pptr)
-            : wptr_(wptr), iter_(iter), pptr_(pptr), accept_(0)
+            : wptr_(wptr), iter_(iter), pptr_(pptr)
         {
         }
 
-        work_type(const work_type &other, ::tbb::split)
-            : wptr_(other.wptr_)
-            , iter_(other.iter_)
-            , pptr_(other.pptr_)
-            , accept_(0)
+        void operator()(const ::tbb::blocked_range<size_type> &range) const
         {
+            wptr_->eval_range(iter_, pptr_->range(range.begin(), range.end()));
         }
-
-        void operator()(const ::tbb::blocked_range<size_type> &range)
-        {
-            accept_ += wptr_->eval_range(
-                iter_, pptr_->range(range.begin(), range.end()));
-        }
-
-        void join(const work_type &other) { accept_ += other.accept_; }
-
-        std::size_t accept() const { return accept_; }
 
         private:
         SamplerEvalSMP<T, Derived, BackendTBB> *const wptr_;
         const std::size_t iter_;
         Particle<T> *const pptr_;
-        std::size_t accept_;
     }; // class work_type
 
-    template <typename... Args>
-    std::size_t run(std::size_t iter, Particle<T> &particle,
-        std::size_t grainsize, Args &&... args)
+    public:
+    void operator()(std::size_t iter, Particle<T> &particle)
     {
-        this->eval_pre(iter, particle);
-        work_type work(this, iter, &particle);
-        ::tbb::parallel_reduce(
-            internal::backend_tbb_range(particle.size(), grainsize), work,
-            std::forward<Args>(args)...);
-        this->eval_post(iter, particle);
-
-        return work.accept();
+        run(iter, particle);
     }
 
-    std::size_t run(std::size_t iter, Particle<T> &particle)
+    protected:
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(TBB, SamplerEval)
+
+    void run(std::size_t iter, Particle<T> &particle)
     {
-        return run(iter, particle, 0);
+        run(iter, particle, 1);
+    }
+
+    template <typename... Args>
+    void run(std::size_t iter, Particle<T> &particle, std::size_t grainsize,
+        Args &&... args)
+    {
+        this->eval_pre(iter, particle);
+        ::tbb::parallel_for(
+            internal::backend_tbb_range(particle.size(), grainsize),
+            work_type(this, iter, &particle), std::forward<Args>(args)...);
+        this->eval_post(iter, particle);
     }
 }; // class SamplerEvalSMP
 
@@ -130,16 +113,6 @@ template <typename T, typename Derived>
 class MonitorEvalSMP<T, Derived, BackendTBB>
     : public MonitorEvalBase<T, Derived>
 {
-    public:
-    void operator()(
-        std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
-    {
-        run(iter, dim, particle, r);
-    }
-
-    protected:
-    VSMC_DEFINE_SMP_BACKEND_SPECIAL(TBB, MonitorEval)
-
     class work_type
     {
         public:
@@ -166,22 +139,32 @@ class MonitorEvalSMP<T, Derived, BackendTBB>
         double *const r_;
     }; // class work_type
 
-    template <typename... Args>
-    void run(std::size_t iter, std::size_t dim, Particle<T> &particle,
-        double *r, std::size_t grainsize, Args &&... args)
+    public:
+    void operator()(
+        std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
     {
-        this->eval_pre(iter, particle);
-        work_type work(this, iter, dim, &particle, r);
-        ::tbb::parallel_for(
-            internal::backend_tbb_range(particle.size(), grainsize), work,
-            std::forward<Args>(args)...);
-        this->eval_post(iter, particle);
+        run(iter, dim, particle, r);
     }
+
+    protected:
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(TBB, MonitorEval)
 
     void run(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
     {
         run(iter, dim, particle, r, 1);
+    }
+
+    template <typename... Args>
+    void run(std::size_t iter, std::size_t dim, Particle<T> &particle,
+        double *r, std::size_t grainsize, Args &&... args)
+    {
+        this->eval_pre(iter, particle);
+        ::tbb::parallel_for(
+            internal::backend_tbb_range(particle.size(), grainsize),
+            work_type(this, iter, dim, &particle, r),
+            std::forward<Args>(args)...);
+        this->eval_post(iter, particle);
     }
 }; // class MonitorEvalSMP
 

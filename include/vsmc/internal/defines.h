@@ -216,7 +216,7 @@ typedef struct {
 } vsmc_stop_watch;
 
 /// \brief `vsmc::Sampler::eval_type`
-typedef size_t (*vsmc_sampler_eval_type)(size_t, vsmc_particle);
+typedef void (*vsmc_sampler_eval_type)(size_t, vsmc_particle);
 
 /// \brief `vsmc::Monitor::eval_type`
 typedef void (*vsmc_monitor_eval_type)(
@@ -224,7 +224,7 @@ typedef void (*vsmc_monitor_eval_type)(
 
 /// \brief `vsmc::SamplerEvalSMP`
 typedef struct {
-    size_t (*eval)(size_t, vsmc_particle_index);
+    void (*eval)(size_t, vsmc_particle_index);
     void (*eval_pre)(size_t, vsmc_particle);
     void (*eval_post)(size_t, vsmc_particle);
 } vsmc_sampler_eval_smp_type;

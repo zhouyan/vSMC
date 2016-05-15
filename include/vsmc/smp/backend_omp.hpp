@@ -62,29 +62,35 @@ class SamplerEvalSMP<T, Derived, BackendOMP>
     : public SamplerEvalBase<T, Derived>
 {
     public:
-    std::size_t operator()(std::size_t iter, Particle<T> &particle)
+    void operator()(std::size_t iter, Particle<T> &particle)
     {
-        using size_type = typename Particle<T>::size_type;
-
-        this->eval_pre(iter, particle);
-        std::size_t accept = 0;
-        Particle<T> *pptr = &particle;
-#pragma omp parallel default(none) shared(accept) firstprivate(pptr, iter)
-        {
-            size_type first = 0;
-            size_type last = 0;
-            internal::backend_omp_range(pptr->size(), first, last);
-            std::size_t acc = this->eval_range(iter, pptr->range(first, last));
-#pragma omp atomic
-            accept += acc;
-        }
-        this->eval_post(iter, particle);
-
-        return accept;
+        run(iter, particle);
     }
 
     protected:
     VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, SamplerEval)
+
+    void run(std::size_t iter, Particle<T> &particle)
+    {
+        run(iter, particle, 1);
+    }
+
+    template <typename... Args>
+    void run(std::size_t iter, Particle<T> &particle, std::size_t, Args &&...)
+    {
+        using size_type = typename Particle<T>::size_type;
+
+        this->eval_pre(iter, particle);
+        Particle<T> *pptr = &particle;
+#pragma omp parallel default(none) firstprivate(pptr, iter)
+        {
+            size_type first = 0;
+            size_type last = 0;
+            internal::backend_omp_range(pptr->size(), first, last);
+            this->eval_range(iter, pptr->range(first, last));
+        }
+        this->eval_post(iter, particle);
+    }
 }; // class SamplerEvalSMP
 
 /// \brief Monitor<T>::eval_type subtype using OpenMP
@@ -96,6 +102,22 @@ class MonitorEvalSMP<T, Derived, BackendOMP>
     public:
     void operator()(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
+    {
+        run(iter, dim, particle, r);
+    }
+
+    protected:
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, MonitorEval)
+
+    void run(
+        std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
+    {
+        run(iter, dim, particle, r, 1);
+    }
+
+    template <typename... Args>
+    void run(std::size_t iter, std::size_t dim, Particle<T> &particle,
+        double *r, std::size_t, Args &&...)
     {
         using size_type = typename Particle<T>::size_type;
 
@@ -111,9 +133,6 @@ class MonitorEvalSMP<T, Derived, BackendOMP>
         }
         this->eval_post(iter, particle);
     }
-
-    protected:
-    VSMC_DEFINE_SMP_BACKEND_SPECIAL(OMP, MonitorEval)
 }; // class MonitorEvalSMP
 
 /// \brief Sampler<T>::eval_type subtype using OpenMP

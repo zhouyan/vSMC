@@ -353,10 +353,6 @@ int vsmc_sampler_resampled_history(vsmc_sampler sampler, size_t iter);
 /// \brief `vsmc::Sampler::read_resampled_history`
 void vsmc_sampler_read_resampled_history(vsmc_sampler sampler, int *first);
 
-/// \brief `vsmc::Sampler::status_history`
-size_t vsmc_sampler_status_history(
-    vsmc_sampler sampler, size_t iter, size_t id);
-
 /// \brief `vsmc::Sampler::print`
 size_t vsmc_sampler_print(vsmc_sampler sampler, char *buf, char sepchar);
 

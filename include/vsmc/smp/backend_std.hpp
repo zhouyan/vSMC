@@ -74,7 +74,21 @@ class SamplerEvalSMP<T, Derived, BackendSTD>
     : public SamplerEvalBase<T, Derived>
 {
     public:
-    std::size_t operator()(std::size_t iter, Particle<T> &particle)
+    void operator()(std::size_t iter, Particle<T> &particle)
+    {
+        run(iter, particle);
+    }
+
+    protected:
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(STD, SamplerEval)
+
+    void run(std::size_t iter, Particle<T> &particle)
+    {
+        run(iter, particle, 1);
+    }
+
+    template <typename... Args>
+    void run(std::size_t iter, Particle<T> &particle, std::size_t, Args &&...)
     {
         using size_type = typename Particle<T>::size_type;
 
@@ -82,25 +96,19 @@ class SamplerEvalSMP<T, Derived, BackendSTD>
         vsmc::Vector<size_type> first;
         vsmc::Vector<size_type> last;
         internal::backend_std_range(particle.size(), first, last);
-        vsmc::Vector<std::future<std::size_t>> task_group;
+        vsmc::Vector<std::future<void>> task_group;
         for (std::size_t i = 0; i != first.size(); ++i) {
             const size_type b = first[i];
             const size_type e = last[i];
             task_group.push_back(std::async(
                 std::launch::async, [this, iter, &particle, b, e]() {
-                    return this->eval_range(iter, particle.range(b, e));
+                    this->eval_range(iter, particle.range(b, e));
                 }));
         }
-        std::size_t accept = 0;
         for (auto &task : task_group)
-            accept += task.get();
+            task.wait();
         this->eval_post(iter, particle);
-
-        return accept;
     }
-
-    protected:
-    VSMC_DEFINE_SMP_BACKEND_SPECIAL(STD, SamplerEval)
 }; // class SamplerEvalSMP
 
 /// \brief Monitor<T>::eval_type subtype using the standard library
@@ -112,6 +120,22 @@ class MonitorEvalSMP<T, Derived, BackendSTD>
     public:
     void operator()(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
+    {
+        run(iter, dim, particle, r);
+    }
+
+    protected:
+    VSMC_DEFINE_SMP_BACKEND_SPECIAL(STD, MonitorEval)
+
+    void run(
+        std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
+    {
+        run(iter, dim, particle, r, 1);
+    }
+
+    template <typename... Args>
+    void run(std::size_t iter, std::size_t dim, Particle<T> &particle,
+        double *r, std::size_t, Args &&...)
     {
         using size_type = typename Particle<T>::size_type;
 
@@ -133,9 +157,6 @@ class MonitorEvalSMP<T, Derived, BackendSTD>
             task.wait();
         this->eval_post(iter, particle);
     }
-
-    protected:
-    VSMC_DEFINE_SMP_BACKEND_SPECIAL(STD, MonitorEval)
 }; // class MonitorEvalSMP
 
 /// \brief Sampler<T>::eval_type subtype using the standard library

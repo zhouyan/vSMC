@@ -95,7 +95,6 @@ class GMM : public GMMBase
 
         Vector<double> log_lambda(c_);
         log(c_, lambda, log_lambda.data());
-        mul(c_, 0.5, log_lambda.data(), log_lambda.data());
 
         auto ll = -0.5 * n * const_ln_pi_2<double>();
         for (std::size_t k = 0; k != n; ++k) {
@@ -111,12 +110,6 @@ class GMM : public GMMBase
         return ll;
     }
 
-    void initialize()
-    {
-        alpha_ = 0;
-        alpha_inc_ = 0;
-    }
-
     std::size_t c() const { return c_; }
 
     double alpha() const { return alpha_; }
@@ -127,6 +120,11 @@ class GMM : public GMMBase
     {
         alpha_inc_ = a - alpha_;
         alpha_ = a;
+
+        auto scale = std::max(0.02, a);
+        sd_mu_ = 0.15 / scale;
+        sd_lambda_ = (1 + std::sqrt(1 / scale)) * 0.15;
+        sd_omega_ = (1 + std::sqrt(1 / scale)) * 0.2;
     }
 
     double mu0() const { return mu0_; }
@@ -137,10 +135,6 @@ class GMM : public GMMBase
     double sd_mu() const { return sd_mu_; }
     double sd_lambda() const { return sd_lambda_; }
     double sd_omega() const { return sd_omega_; }
-
-    double &sd_mu() { return sd_mu_; }
-    double &sd_lambda() { return sd_lambda_; }
-    double &sd_omega() { return sd_omega_; }
 
     private:
     std::size_t c_;
@@ -156,19 +150,29 @@ class GMM : public GMMBase
     Vector<double> obs_;
 }; // class GMM
 
-class GMMInit : public SamplerEvalSMP<GMM, GMMInit>
+template <typename Derived>
+class GMMEvalSMP : public SamplerEvalSMP<GMM, Derived>
 {
     public:
-    std::size_t eval_range(std::size_t, const ParticleRange<GMM> &range)
+    void operator()(std::size_t iter, Particle<GMM> &particle)
+    {
+        this->run(iter, particle, 64);
+    }
+}; // class GMMEvalSMP
+
+class GMMInit : public GMMEvalSMP<GMMInit>
+{
+    public:
+    void eval_range(std::size_t, const ParticleRange<GMM> &range)
     {
         auto c = range.particle().state().c();
         auto &rng = range.begin().rng();
 
-        NormalDistribution<double> rmu(
+        NormalDistribution<> rmu(
             range.particle().state().mu0(), range.particle().state().sd0());
-        GammaDistribution<double> rlambda(range.particle().state().shape0(),
+        GammaDistribution<> rlambda(range.particle().state().shape0(),
             range.particle().state().scale0());
-        DirichletDistribution<double> romega(c, 1);
+        DirichletDistribution<> romega(c, 1);
 
         for (auto idx : range) {
             rmu(rng, c, idx.mu());
@@ -179,13 +183,11 @@ class GMMInit : public SamplerEvalSMP<GMM, GMMInit>
             idx.log_likelihood() = idx.particle().state().log_likelihood(
                 idx.mu(), idx.lambda(), idx.omega());
         }
-
-        return 0;
     }
 
     void eval_pre(std::size_t, Particle<GMM> &particle)
     {
-        particle.state().initialize();
+        particle.state().alpha(0);
     }
 }; // class GMMInit
 
@@ -199,10 +201,6 @@ class GMMMove
         auto alpha = iter / T_;
         alpha = std::min(1.0, alpha * alpha);
         particle.state().alpha(alpha);
-        auto scale = alpha < 0.02 ? 0.02 : alpha;
-        particle.state().sd_mu() = 0.15 / scale;
-        particle.state().sd_lambda() = (1 + std::sqrt(1 / scale)) * 0.15;
-        particle.state().sd_omega() = (1 + std::sqrt(1 / scale)) * 0.2;
 
         w_.resize(particle.size());
         std::transform(particle.begin(), particle.end(), w_.begin(),
@@ -218,102 +216,99 @@ class GMMMove
     Vector<double> w_;
 }; // class GMMMove
 
-class GMMMu : public SamplerEvalSMP<GMM, GMMMu>
+class GMMMu : public GMMEvalSMP<GMMMu>
 {
     public:
-    std::size_t eval_range(std::size_t, const ParticleRange<GMM> &range)
+    void eval_range(std::size_t, const ParticleRange<GMM> &range)
     {
         auto alpha = range.particle().state().alpha();
         auto c = range.particle().state().c();
         auto &rng = range.begin().rng();
 
-        NormalMVProposal<double> proposal(c, range.particle().state().sd_mu(),
+        NormalMVProposal<> proposal(c, range.particle().state().sd_mu(),
             -std::numeric_limits<double>::infinity(),
             std::numeric_limits<double>::infinity());
-        RandomWalk<double> random_walk(c);
+        RandomWalk<> random_walk(c);
 
-        std::size_t accept = 0;
         for (auto idx : range) {
-            auto ltx = idx.log_prior() + alpha * idx.log_likelihood();
-            accept += random_walk(rng, idx.mu(), &ltx,
-                [idx, alpha](std::size_t, const double *x) {
-                    auto lp =
-                        idx.particle().state().log_prior(x, idx.lambda());
-                    auto ll = idx.particle().state().log_likelihood(
+            auto lp = idx.log_prior();
+            auto ll = idx.log_likelihood();
+            auto lt = lp + alpha * ll;
+            auto acc = random_walk(rng, idx.mu(), &lt,
+                [idx, alpha, &lp, &ll](std::size_t, const double *x) {
+                    lp = idx.particle().state().log_prior(x, idx.lambda());
+                    ll = idx.particle().state().log_likelihood(
                         x, idx.lambda(), idx.omega());
                     return lp + alpha * ll;
                 },
                 proposal);
-            idx.log_prior() =
-                idx.particle().state().log_prior(idx.mu(), idx.lambda());
-            idx.log_likelihood() = (ltx - idx.log_prior()) / alpha;
+            if (acc != 0) {
+                idx.log_prior() = lp;
+                idx.log_likelihood() = ll;
+            }
         }
-
-        return accept;
     }
 }; // class GMMMu
 
-class GMMLambda : public SamplerEvalSMP<GMM, GMMLambda>
+class GMMLambda : public GMMEvalSMP<GMMLambda>
 {
     public:
-    std::size_t eval_range(std::size_t, const ParticleRange<GMM> &range)
+    void eval_range(std::size_t, const ParticleRange<GMM> &range)
     {
         auto alpha = range.particle().state().alpha();
         auto c = range.particle().state().c();
         auto &rng = range.begin().rng();
 
-        NormalMVProposal<double> proposal(c,
-            range.particle().state().sd_lambda(), 0.0,
-            std::numeric_limits<double>::infinity());
-        RandomWalk<double> random_walk(c);
+        NormalMVProposal<> proposal(c, range.particle().state().sd_lambda(),
+            0.0, std::numeric_limits<double>::infinity());
+        RandomWalk<> random_walk(c);
 
-        std::size_t accept = 0;
         for (auto idx : range) {
-            auto ltx = idx.log_prior() + alpha * idx.log_likelihood();
-            accept += random_walk(rng, idx.lambda(), &ltx,
-                [idx, alpha](std::size_t, const double *x) {
-                    double lp = idx.particle().state().log_prior(idx.mu(), x);
-                    double ll = idx.particle().state().log_likelihood(
+            auto lp = idx.log_prior();
+            auto ll = idx.log_likelihood();
+            auto lt = lp + alpha * ll;
+            auto acc = random_walk(rng, idx.lambda(), &lt,
+                [idx, alpha, &lp, &ll](std::size_t, const double *x) {
+                    lp = idx.particle().state().log_prior(idx.mu(), x);
+                    ll = idx.particle().state().log_likelihood(
                         idx.mu(), x, idx.omega());
                     return lp + alpha * ll;
                 },
                 proposal);
-            idx.log_prior() =
-                idx.particle().state().log_prior(idx.mu(), idx.lambda());
-            idx.log_likelihood() = ltx - idx.log_prior();
+            if (acc != 0) {
+                idx.log_prior() = lp;
+                idx.log_likelihood() = ll;
+            }
         }
-
-        return accept;
     }
 }; // class GMMLambda
 
-class GMMOmega : public SamplerEvalSMP<GMM, GMMOmega>
+class GMMOmega : public GMMEvalSMP<GMMOmega>
 {
     public:
-    std::size_t eval_range(std::size_t, const ParticleRange<GMM> &range)
+    void eval_range(std::size_t, const ParticleRange<GMM> &range)
     {
         auto alpha = range.particle().state().alpha();
         auto c = range.particle().state().c();
         auto &rng = range.begin().rng();
 
-        NormalMVLogitProposal<double> proposal(
+        NormalMVLogitProposal<> proposal(
             c, range.particle().state().sd_omega());
-        RandomWalk<double> random_walk(c);
+        RandomWalk<> random_walk(c);
 
-        std::size_t accept = 0;
         for (auto idx : range) {
-            auto ltx = alpha * idx.log_likelihood();
-            random_walk(rng, idx.omega(), &ltx,
-                [idx, alpha](std::size_t, const double *x) {
-                    return alpha *
-                        idx.particle().state().log_likelihood(
-                            idx.mu(), idx.lambda(), x);
+            auto ll = idx.log_likelihood();
+            auto lt = alpha * ll;
+            auto acc = random_walk(rng, idx.omega(), &lt,
+                [idx, alpha, &ll](std::size_t, const double *x) {
+                    ll = idx.particle().state().log_likelihood(
+                        idx.mu(), idx.lambda(), x);
+                    return alpha * ll;
                 },
                 proposal);
-            idx.log_likelihood() = ltx / alpha;
+            if (acc != 0)
+                idx.log_likelihood() = ll;
         }
-
-        return accept;
     }
 }; // class GMMOmega
 
@@ -321,6 +316,7 @@ inline void GMMNC(std::size_t, std::size_t, Particle<GMM> &particle, double *r)
 {
     std::transform(particle.begin(), particle.end(), r,
         [](ParticleIndex<GMM> idx) { return idx.log_likelihood(); });
+    mul(particle.size(), particle.state().alpha_inc(), r, r);
 }
 
 int main()
@@ -330,13 +326,13 @@ int main()
     const double T = 100;
 
     Sampler<GMM> sampler(N, c);
-    sampler.resample_method(Stratified, 0.5);
-    sampler.eval(GMMInit(), SamplerInit);
-    sampler.eval(GMMMove(T), SamplerMove);
-    sampler.eval(GMMMu(), SamplerMCMC);
-    sampler.eval(GMMLambda(), SamplerMCMC);
-    sampler.eval(GMMOmega(), SamplerMCMC);
-    sampler.monitor("nc", Monitor<GMM>(1, GMMNC));
+    sampler.resample_method(Stratified, 0.5)
+        .eval(GMMInit(), SamplerInit)
+        .eval(GMMMove(T), SamplerMove)
+        .eval(GMMMu(), SamplerMCMC)
+        .eval(GMMLambda(), SamplerMCMC)
+        .eval(GMMOmega(), SamplerMCMC)
+        .monitor("nc", Monitor<GMM>(1, GMMNC));
     auto &nc = sampler.monitor("nc");
 
     sampler.initialize();
@@ -345,13 +341,11 @@ int main()
     double z = 0;
     while (sampler.particle().state().alpha() < 1) {
         sampler.iterate();
-        z += sampler.particle().state().alpha() * nc.record(0);
+        z += nc.record(0);
     }
     watch.stop();
-    std::cout << "log(Normalizing constant): " << std::fixed << z << std::endl;
-    std::cout << "Time: " << std::fixed << watch.seconds() << std::endl;
-
-    hdf5store(sampler.particle(), "gmm.h5", "Particle", false);
+    std::cout << "log(Normalizing constant): " << z << std::endl;
+    std::cout << "Time: " << watch.seconds() << std::endl;
 
     return 0;
 }

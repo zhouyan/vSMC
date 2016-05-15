@@ -44,17 +44,26 @@ class SamplerEvalSMP<T, Derived, BackendSEQ>
     : public SamplerEvalBase<T, Derived>
 {
     public:
-    std::size_t operator()(std::size_t iter, Particle<T> &particle)
+    void operator()(std::size_t iter, Particle<T> &particle)
     {
-        this->eval_pre(iter, particle);
-        std::size_t accept = this->eval_range(iter, particle.range());
-        this->eval_post(iter, particle);
-
-        return accept;
+        run(iter, particle);
     }
 
     protected:
     VSMC_DEFINE_SMP_BACKEND_SPECIAL(SEQ, SamplerEval)
+
+    void run(std::size_t iter, Particle<T> &particle)
+    {
+        run(iter, particle, 1);
+    }
+
+    template <typename... Args>
+    void run(std::size_t iter, Particle<T> &particle, std::size_t, Args &&...)
+    {
+        this->eval_pre(iter, particle);
+        this->eval_range(iter, particle.range());
+        this->eval_post(iter, particle);
+    }
 }; // class SamplerEvalSMP
 
 /// \brief Monitor<T>::eval_type subtype
@@ -67,13 +76,26 @@ class MonitorEvalSMP<T, Derived, BackendSEQ>
     void operator()(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
     {
-        this->eval_pre(iter, particle);
-        this->eval_range(iter, dim, particle.range(), r);
-        this->eval_post(iter, particle);
+        run(iter, dim, particle, r);
     }
 
     protected:
     VSMC_DEFINE_SMP_BACKEND_SPECIAL(SEQ, MonitorEval)
+
+    void run(
+        std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
+    {
+        run(iter, dim, particle, r, 1);
+    }
+
+    template <typename... Args>
+    void run(std::size_t iter, std::size_t dim, Particle<T> &particle,
+        double *r, std::size_t, Args &&...)
+    {
+        this->eval_pre(iter, particle);
+        this->eval_range(iter, dim, particle.range(), r);
+        this->eval_post(iter, particle);
+    }
 }; // class MonitorEvalSMP
 
 /// \brief Sampler<T>::eval_type subtype

@@ -363,7 +363,7 @@ template <typename Backend>
 class GMMInit : public vsmc::SamplerEvalSMP<GMM, GMMInit<Backend>, Backend>
 {
     public:
-    std::size_t eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
+    void eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
     {
         const GMM &gmm = idx.particle().state();
         GMMState &state = idx(0);
@@ -384,8 +384,6 @@ class GMMInit : public vsmc::SamplerEvalSMP<GMM, GMMInit<Backend>, Backend>
 
         gmm.update_log_prior(state);
         gmm.update_log_likelihood(state);
-
-        return 0;
     }
 
     void eval_pre(std::size_t, vsmc::Particle<GMM> &particle)
@@ -435,7 +433,7 @@ template <typename Backend>
 class GMMMoveMu : public vsmc::SamplerEvalSMP<GMM, GMMMoveMu<Backend>, Backend>
 {
     public:
-    std::size_t eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
+    void eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
     {
         const GMM &gmm = idx.particle().state();
         GMMState &state = idx(0);
@@ -451,7 +449,7 @@ class GMMMoveMu : public vsmc::SamplerEvalSMP<GMM, GMMMoveMu<Backend>, Backend>
             gmm.alpha() * gmm.update_log_likelihood(state) - p;
         double u = std::log(runif(idx.rng()));
 
-        return state.mh_reject_mu(p, u);
+        state.mh_reject_mu(p, u);
     }
 }; // class GMMMoveMu
 
@@ -460,7 +458,7 @@ class GMMMoveLambda
     : public vsmc::SamplerEvalSMP<GMM, GMMMoveLambda<Backend>, Backend>
 {
     public:
-    std::size_t eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
+    void eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
     {
         const GMM &gmm = idx.particle().state();
         GMMState &state = idx(0);
@@ -476,7 +474,7 @@ class GMMMoveLambda
             gmm.alpha() * gmm.update_log_likelihood(state) - p;
         double u = std::log(runif(idx.rng()));
 
-        return state.mh_reject_lambda(p, u);
+        state.mh_reject_lambda(p, u);
     }
 }; // class GMMMoveLambda
 
@@ -485,7 +483,7 @@ class GMMMoveWeight
     : public vsmc::SamplerEvalSMP<GMM, GMMMoveWeight<Backend>, Backend>
 {
     public:
-    std::size_t eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
+    void eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
     {
         const GMM &gmm = idx.particle().state();
         GMMState &state = idx(0);
@@ -510,7 +508,7 @@ class GMMMoveWeight
             gmm.alpha() * gmm.update_log_likelihood(state) - p;
         double u = std::log(runif(idx.rng()));
 
-        return state.mh_reject_weight(p, u);
+        state.mh_reject_weight(p, u);
     }
 }; // class GMMMoveWeight
 

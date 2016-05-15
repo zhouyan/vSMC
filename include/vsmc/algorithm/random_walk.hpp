@@ -815,16 +815,11 @@ class NormalMVLogitProposal
     {
         const std::size_t d = dim();
         normal_mv_(rng, z_.data());
-        exp(d - 1, z_.data(), z_.data());
-
-        result_type s = 1;
-        const result_type w = x[d - 1];
-        for (std::size_t i = 0; i != d - 1; ++i) {
-            y[i] = z_[i] * x[i] / w;
-            s += y[i];
-        }
+        exp(d - 1, z_.data(), y);
+        mul(d - 1, x, y, y);
+        mul(d - 1, 1 / x[d - 1], y, y);
         y[d - 1] = 1;
-        mul(d, 1 / s, y, y);
+        mul(d, 1 / std::accumulate(y, y + d, 0.0), y, y);
 
         return q(y) - q(x);
     }

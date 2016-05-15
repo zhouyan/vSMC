@@ -90,7 +90,7 @@ class PF : public PFBase
     Vector<double> obs_y_;
 }; // class PF
 
-inline std::size_t PFInit(std::size_t, Particle<PF> &particle)
+inline void PFInit(std::size_t, Particle<PF> &particle)
 {
     std::normal_distribution<double> rpos(0, 2);
     std::normal_distribution<double> rvel(0, 1);
@@ -102,11 +102,9 @@ inline std::size_t PFInit(std::size_t, Particle<PF> &particle)
         idx.vel_x() = rvel(rng);
         idx.vel_y() = rvel(rng);
     }
-
-    return 0;
 }
 
-inline std::size_t PFMove(std::size_t, Particle<PF> &particle)
+inline void PFMove(std::size_t, Particle<PF> &particle)
 {
     std::normal_distribution<double> rpos(0, std::sqrt(0.02));
     std::normal_distribution<double> rvel(0, std::sqrt(0.001));
@@ -119,18 +117,14 @@ inline std::size_t PFMove(std::size_t, Particle<PF> &particle)
         idx.vel_x() += rvel(rng);
         idx.vel_y() += rvel(rng);
     }
-
-    return 0;
 }
 
-inline std::size_t PFWeight(std::size_t iter, Particle<PF> &particle)
+inline void PFWeight(std::size_t iter, Particle<PF> &particle)
 {
     Vector<double> weight(particle.size());
     std::transform(particle.begin(), particle.end(), weight.begin(),
         [iter](ParticleIndex<PF> idx) { return idx.log_likelihood(iter); });
     particle.weight().add_log(weight.data());
-
-    return 0;
 }
 
 inline void PFEstimate(
