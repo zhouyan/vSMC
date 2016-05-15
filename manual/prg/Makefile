@@ -43,6 +43,7 @@ progress : progress.cpp
 	$(CXX) $(CXXFLAGS) -o progress progress.cpp $(LDFLAGS)
 
 clean:
+	rm -f gmm
 	rm -f pf_seq pf_tbb pf_ocl pf.out pf.rout pf.pdf
 	rm -f program_option
 	rm -f progress

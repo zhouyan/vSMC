@@ -43,31 +43,31 @@ class SamplerEvalSMPC
     public:
     SamplerEvalSMPC(const vsmc_sampler_eval_smp_type &work) : work_(work) {}
 
-    void eval(std::size_t iter, ParticleIndexC idx)
+    void eval_each(std::size_t iter, ParticleIndexC idx)
     {
-        if (work_.eval == nullptr)
+        if (work_.eval_each == nullptr)
             return;
 
         vsmc_particle_index idx_c = {&idx(0), idx.id()};
-        work_.eval(iter, idx_c);
+        work_.eval_each(iter, idx_c);
     }
 
-    void eval_pre(std::size_t iter, ParticleC &particle)
+    void eval_first(std::size_t iter, ParticleC &particle)
     {
-        if (work_.eval_pre == nullptr)
+        if (work_.eval_first == nullptr)
             return;
 
         vsmc_particle particle_c = {&particle};
-        work_.eval_pre(iter, particle_c);
+        work_.eval_first(iter, particle_c);
     }
 
-    void eval_post(std::size_t iter, ParticleC &particle)
+    void eval_last(std::size_t iter, ParticleC &particle)
     {
-        if (work_.eval_post == nullptr)
+        if (work_.eval_last == nullptr)
             return;
 
         vsmc_particle particle_c = {&particle};
-        work_.eval_post(iter, particle_c);
+        work_.eval_last(iter, particle_c);
     }
 
     private:
@@ -81,32 +81,32 @@ class MonitorEvalSMPC
     public:
     MonitorEvalSMPC(const vsmc_monitor_eval_smp_type &work) : work_(work) {}
 
-    void eval(std::size_t iter, size_t dim, ParticleIndexC idx, double *r)
+    void eval_each(std::size_t iter, size_t dim, ParticleIndexC idx, double *r)
     {
-        if (work_.eval == nullptr)
+        if (work_.eval_each == nullptr)
             return;
 
         vsmc_particle_index idx_c = {&idx(0), idx.id()};
 
-        work_.eval(iter, dim, idx_c, r);
+        work_.eval_each(iter, dim, idx_c, r);
     }
 
-    void eval_pre(std::size_t iter, ParticleC &particle)
+    void eval_first(std::size_t iter, ParticleC &particle)
     {
-        if (work_.eval_pre == nullptr)
+        if (work_.eval_first == nullptr)
             return;
 
         vsmc_particle particle_c = {&particle};
-        work_.eval_pre(iter, particle_c);
+        work_.eval_first(iter, particle_c);
     }
 
-    void eval_post(std::size_t iter, ParticleC &particle)
+    void eval_last(std::size_t iter, ParticleC &particle)
     {
-        if (work_.eval_post == nullptr)
+        if (work_.eval_last == nullptr)
             return;
 
         vsmc_particle particle_c = {&particle};
-        work_.eval_post(iter, particle_c);
+        work_.eval_last(iter, particle_c);
     }
 
     private:
@@ -117,11 +117,10 @@ class MonitorEvalSMPC
 
 #define VSMC_DEFINE_LIB_SMP(Name, name)                                       \
     inline void vsmc_sampler_eval_##name(vsmc_sampler sampler,                \
-        vsmc_sampler_eval_smp_type new_eval, vSMCSamplerStage stage,          \
-        int append)                                                           \
+        vsmc_sampler_eval_smp_type eval, vSMCSamplerStage stage, int append)  \
     {                                                                         \
         ::vsmc::cast(sampler).eval(                                           \
-            ::vsmc::SamplerEvalSMPC<::vsmc::Backend##Name>(new_eval),         \
+            ::vsmc::SamplerEvalSMPC<::vsmc::Backend##Name>(eval),             \
             static_cast<::vsmc::SamplerStage>(stage), append != 0);           \
     }                                                                         \
                                                                               \
@@ -192,10 +191,10 @@ static vsmc_sampler_eval_smp_dispatch_type vsmc_sampler_eval_smp_dispatch[] = {
     nullptr}; // vsmc_sampler_eval_smp_dispatch
 
 void vsmc_sampler_eval_smp(vSMCBackendSMP backend, vsmc_sampler sampler,
-    vsmc_sampler_eval_smp_type new_eval, vSMCSamplerStage stage, int append)
+    vsmc_sampler_eval_smp_type eval, vSMCSamplerStage stage, int append)
 {
     vsmc_sampler_eval_smp_dispatch[static_cast<std::size_t>(backend)](
-        sampler, new_eval, stage, append);
+        sampler, eval, stage, append);
 }
 
 using vsmc_monitor_new_smp_dispatch_type = vsmc_monitor (*)(

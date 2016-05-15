@@ -60,9 +60,9 @@ class SamplerEvalSMP<T, Derived, BackendSEQ>
     template <typename... Args>
     void run(std::size_t iter, Particle<T> &particle, std::size_t, Args &&...)
     {
-        this->eval_pre(iter, particle);
+        this->eval_first(iter, particle);
         this->eval_range(iter, particle.range());
-        this->eval_post(iter, particle);
+        this->eval_last(iter, particle);
     }
 }; // class SamplerEvalSMP
 
@@ -92,9 +92,9 @@ class MonitorEvalSMP<T, Derived, BackendSEQ>
     void run(std::size_t iter, std::size_t dim, Particle<T> &particle,
         double *r, std::size_t, Args &&...)
     {
-        this->eval_pre(iter, particle);
+        this->eval_first(iter, particle);
         this->eval_range(iter, dim, particle.range(), r);
-        this->eval_post(iter, particle);
+        this->eval_last(iter, particle);
     }
 }; // class MonitorEvalSMP
 

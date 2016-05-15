@@ -99,11 +99,11 @@ class SamplerEvalSMP<T, Derived, BackendTBB>
     void run(std::size_t iter, Particle<T> &particle, std::size_t grainsize,
         Args &&... args)
     {
-        this->eval_pre(iter, particle);
+        this->eval_first(iter, particle);
         ::tbb::parallel_for(
             internal::backend_tbb_range(particle.size(), grainsize),
             work_type(this, iter, &particle), std::forward<Args>(args)...);
-        this->eval_post(iter, particle);
+        this->eval_last(iter, particle);
     }
 }; // class SamplerEvalSMP
 
@@ -159,12 +159,12 @@ class MonitorEvalSMP<T, Derived, BackendTBB>
     void run(std::size_t iter, std::size_t dim, Particle<T> &particle,
         double *r, std::size_t grainsize, Args &&... args)
     {
-        this->eval_pre(iter, particle);
+        this->eval_first(iter, particle);
         ::tbb::parallel_for(
             internal::backend_tbb_range(particle.size(), grainsize),
             work_type(this, iter, dim, &particle, r),
             std::forward<Args>(args)...);
-        this->eval_post(iter, particle);
+        this->eval_last(iter, particle);
     }
 }; // class MonitorEvalSMP
 

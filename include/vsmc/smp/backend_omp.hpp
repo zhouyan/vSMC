@@ -80,7 +80,7 @@ class SamplerEvalSMP<T, Derived, BackendOMP>
     {
         using size_type = typename Particle<T>::size_type;
 
-        this->eval_pre(iter, particle);
+        this->eval_first(iter, particle);
         Particle<T> *pptr = &particle;
 #pragma omp parallel default(none) firstprivate(pptr, iter)
         {
@@ -89,7 +89,7 @@ class SamplerEvalSMP<T, Derived, BackendOMP>
             internal::backend_omp_range(pptr->size(), first, last);
             this->eval_range(iter, pptr->range(first, last));
         }
-        this->eval_post(iter, particle);
+        this->eval_last(iter, particle);
     }
 }; // class SamplerEvalSMP
 
@@ -121,7 +121,7 @@ class MonitorEvalSMP<T, Derived, BackendOMP>
     {
         using size_type = typename Particle<T>::size_type;
 
-        this->eval_pre(iter, particle);
+        this->eval_first(iter, particle);
         Particle<T> *pptr = &particle;
 #pragma omp parallel default(none) firstprivate(pptr, iter, dim, r)
         {
@@ -131,7 +131,7 @@ class MonitorEvalSMP<T, Derived, BackendOMP>
             this->eval_range(iter, dim, pptr->range(first, last),
                 r + static_cast<std::size_t>(first) * dim);
         }
-        this->eval_post(iter, particle);
+        this->eval_last(iter, particle);
     }
 }; // class MonitorEvalSMP
 

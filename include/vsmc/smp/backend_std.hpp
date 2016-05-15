@@ -92,7 +92,7 @@ class SamplerEvalSMP<T, Derived, BackendSTD>
     {
         using size_type = typename Particle<T>::size_type;
 
-        this->eval_pre(iter, particle);
+        this->eval_first(iter, particle);
         vsmc::Vector<size_type> first;
         vsmc::Vector<size_type> last;
         internal::backend_std_range(particle.size(), first, last);
@@ -107,7 +107,7 @@ class SamplerEvalSMP<T, Derived, BackendSTD>
         }
         for (auto &task : task_group)
             task.wait();
-        this->eval_post(iter, particle);
+        this->eval_last(iter, particle);
     }
 }; // class SamplerEvalSMP
 
@@ -139,7 +139,7 @@ class MonitorEvalSMP<T, Derived, BackendSTD>
     {
         using size_type = typename Particle<T>::size_type;
 
-        this->eval_pre(iter, particle);
+        this->eval_first(iter, particle);
         vsmc::Vector<size_type> first;
         vsmc::Vector<size_type> last;
         internal::backend_std_range(particle.size(), first, last);
@@ -155,7 +155,7 @@ class MonitorEvalSMP<T, Derived, BackendSTD>
         }
         for (auto &task : task_group)
             task.wait();
-        this->eval_post(iter, particle);
+        this->eval_last(iter, particle);
     }
 }; // class MonitorEvalSMP
 

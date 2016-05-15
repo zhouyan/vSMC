@@ -199,7 +199,7 @@ class GMMInit : public GMMEvalSMP<GMMInit>
         }
     }
 
-    void eval_pre(std::size_t, Particle<GMM> &particle)
+    void eval_first(std::size_t, Particle<GMM> &particle)
     {
         particle.state().phi(0);
     }

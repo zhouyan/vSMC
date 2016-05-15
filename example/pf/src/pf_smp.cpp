@@ -93,7 +93,7 @@ class PF : public PFBase
 class PFInit : public SamplerEvalSMP<PF, PFInit>
 {
     public:
-    void eval(std::size_t, ParticleIndex<PF> idx)
+    void eval_each(std::size_t, ParticleIndex<PF> idx)
     {
         std::normal_distribution<double> rpos(0, 2);
         std::normal_distribution<double> rvel(0, 1);
@@ -109,7 +109,7 @@ class PFInit : public SamplerEvalSMP<PF, PFInit>
 class PFMove : public SamplerEvalSMP<PF, PFMove>
 {
     public:
-    void eval(std::size_t, ParticleIndex<PF> idx)
+    void eval_each(std::size_t, ParticleIndex<PF> idx)
     {
         std::normal_distribution<double> rpos(0, std::sqrt(0.02));
         std::normal_distribution<double> rvel(0, std::sqrt(0.001));
@@ -126,17 +126,17 @@ class PFMove : public SamplerEvalSMP<PF, PFMove>
 class PFWeight : public SamplerEvalSMP<PF, PFWeight>
 {
     public:
-    void eval(std::size_t iter, ParticleIndex<PF> idx)
+    void eval_each(std::size_t iter, ParticleIndex<PF> idx)
     {
         weight_[idx.id()] = idx.log_likelihood(iter);
     }
 
-    void eval_pre(std::size_t, Particle<PF> &particle)
+    void eval_first(std::size_t, Particle<PF> &particle)
     {
         weight_.resize(particle.size());
     }
 
-    void eval_post(std::size_t, Particle<PF> &particle)
+    void eval_last(std::size_t, Particle<PF> &particle)
     {
         particle.weight().add_log(weight_.data());
     }
@@ -148,7 +148,7 @@ class PFWeight : public SamplerEvalSMP<PF, PFWeight>
 class PFEstimate : public MonitorEvalSMP<PF, PFEstimate>
 {
     public:
-    void eval(std::size_t, std::size_t, ParticleIndex<PF> idx, double *r)
+    void eval_each(std::size_t, std::size_t, ParticleIndex<PF> idx, double *r)
     {
         *r++ = idx.pos_x();
         *r++ = idx.pos_y();

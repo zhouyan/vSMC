@@ -224,16 +224,16 @@ typedef void (*vsmc_monitor_eval_type)(
 
 /// \brief `vsmc::SamplerEvalSMP`
 typedef struct {
-    void (*eval)(size_t, vsmc_particle_index);
-    void (*eval_pre)(size_t, vsmc_particle);
-    void (*eval_post)(size_t, vsmc_particle);
+    void (*eval_each)(size_t, vsmc_particle_index);
+    void (*eval_first)(size_t, vsmc_particle);
+    void (*eval_last)(size_t, vsmc_particle);
 } vsmc_sampler_eval_smp_type;
 
 /// \brief `vsmc::MonitorEvalSMP`
 typedef struct {
-    void (*eval)(size_t, size_t, vsmc_particle_index, double *);
-    void (*eval_pre)(size_t, vsmc_particle);
-    void (*eval_post)(size_t, vsmc_particle);
+    void (*eval_each)(size_t, size_t, vsmc_particle_index, double *);
+    void (*eval_first)(size_t, vsmc_particle);
+    void (*eval_last)(size_t, vsmc_particle);
 } vsmc_monitor_eval_smp_type;
 
 /// @} C_API_Definitions

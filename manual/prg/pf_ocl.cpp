@@ -180,12 +180,12 @@ class PFMove
 class PFEval : public vsmc::MonitorEvalTBB<PFState, PFEval>
 {
     public:
-    void eval_pre(std::size_t t, vsmc::Particle<PFState> &particle)
+    void eval_first(std::size_t t, vsmc::Particle<PFState> &particle)
     {
         particle.state().copy_to_host();
     }
 
-    void eval_sp(std::size_t t, std::size_t dim,
+    void eval_each(std::size_t t, std::size_t dim,
         vsmc::SingleParticle<PFState> sp, double *r)
     {
         r[0] = sp(0).pos_x;

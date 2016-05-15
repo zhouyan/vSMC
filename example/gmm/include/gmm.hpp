@@ -363,7 +363,7 @@ template <typename Backend>
 class GMMInit : public vsmc::SamplerEvalSMP<GMM, GMMInit<Backend>, Backend>
 {
     public:
-    void eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
+    void eval_each(std::size_t, vsmc::ParticleIndex<GMM> idx)
     {
         const GMM &gmm = idx.particle().state();
         GMMState &state = idx(0);
@@ -386,7 +386,7 @@ class GMMInit : public vsmc::SamplerEvalSMP<GMM, GMMInit<Backend>, Backend>
         gmm.update_log_likelihood(state);
     }
 
-    void eval_pre(std::size_t, vsmc::Particle<GMM> &particle)
+    void eval_first(std::size_t, vsmc::Particle<GMM> &particle)
     {
         particle.state().initialize();
         particle.state().alpha(0);
@@ -433,7 +433,7 @@ template <typename Backend>
 class GMMMoveMu : public vsmc::SamplerEvalSMP<GMM, GMMMoveMu<Backend>, Backend>
 {
     public:
-    void eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
+    void eval_each(std::size_t, vsmc::ParticleIndex<GMM> idx)
     {
         const GMM &gmm = idx.particle().state();
         GMMState &state = idx(0);
@@ -458,7 +458,7 @@ class GMMMoveLambda
     : public vsmc::SamplerEvalSMP<GMM, GMMMoveLambda<Backend>, Backend>
 {
     public:
-    void eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
+    void eval_each(std::size_t, vsmc::ParticleIndex<GMM> idx)
     {
         const GMM &gmm = idx.particle().state();
         GMMState &state = idx(0);
@@ -483,7 +483,7 @@ class GMMMoveWeight
     : public vsmc::SamplerEvalSMP<GMM, GMMMoveWeight<Backend>, Backend>
 {
     public:
-    void eval(std::size_t, vsmc::ParticleIndex<GMM> idx)
+    void eval_each(std::size_t, vsmc::ParticleIndex<GMM> idx)
     {
         const GMM &gmm = idx.particle().state();
         GMMState &state = idx(0);
@@ -517,7 +517,7 @@ class GMMPathIntegrand
     : public vsmc::MonitorEvalSMP<GMM, GMMPathIntegrand<Backend>, Backend>
 {
     public:
-    void eval(
+    void eval_each(
         std::size_t, std::size_t, vsmc::ParticleIndex<GMM> idx, double *res)
     {
         *res = idx(0).log_likelihood();

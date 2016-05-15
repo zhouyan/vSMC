@@ -105,7 +105,7 @@ class PFCVInit : public vsmc::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
     public:
     using T = PFCV<Layout, RNGSetType>;
 
-    void eval(std::size_t, vsmc::ParticleIndex<T> idx)
+    void eval_each(std::size_t, vsmc::ParticleIndex<T> idx)
     {
         const double sd_pos0 = 2;
         const double sd_vel0 = 1;
@@ -127,7 +127,7 @@ class PFCVMove : public vsmc::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
     public:
     using T = PFCV<Layout, RNGSetType>;
 
-    void eval(std::size_t, vsmc::ParticleIndex<T> idx)
+    void eval_each(std::size_t, vsmc::ParticleIndex<T> idx)
     {
         const double sd_pos = std::sqrt(0.02);
         const double sd_vel = std::sqrt(0.001);
@@ -189,7 +189,7 @@ class PFCVMove<Backend, vsmc::ColMajor, RNGSetType>
         vsmc::add(n, v, vel_y, vel_y);
     }
 
-    void eval_pre(std::size_t, vsmc::Particle<T> &particle)
+    void eval_first(std::size_t, vsmc::Particle<T> &particle)
     {
         w_.resize(particle.size());
         v_.resize(particle.size());
@@ -207,19 +207,19 @@ class PFCVWeight : public vsmc::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
     public:
     using T = PFCV<Layout, RNGSetType>;
 
-    void eval(std::size_t iter, vsmc::ParticleIndex<T> idx)
+    void eval_each(std::size_t iter, vsmc::ParticleIndex<T> idx)
     {
         w_[idx.id()] = idx.log_likelihood(iter);
     }
 
-    void eval_post(std::size_t, vsmc::Particle<T> &particle)
-    {
-        particle.weight().add_log(w_.data());
-    }
-
-    void eval_pre(std::size_t, vsmc::Particle<T> &particle)
+    void eval_first(std::size_t, vsmc::Particle<T> &particle)
     {
         w_.resize(particle.size());
+    }
+
+    void eval_last(std::size_t, vsmc::Particle<T> &particle)
+    {
+        particle.weight().add_log(w_.data());
     }
 
     private:
@@ -233,7 +233,7 @@ class PFCVEval : public vsmc::MonitorEvalSMP<PFCV<Layout, RNGSetType>,
     public:
     using T = PFCV<Layout, RNGSetType>;
 
-    void eval(
+    void eval_each(
         std::size_t, std::size_t, vsmc::ParticleIndex<T> idx, double *res)
     {
         res[0] = idx.pos_x();

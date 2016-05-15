@@ -663,9 +663,9 @@ than \verb|RNGSetVector| while maintains better thread-safety. The performance
 impact of using \tls is minimal unless the computation at the calling site is
 trivial. For example,
 \begin{Verbatim}
-  std::size_t eval_pre(SingleParticle<T> sp)
+  void eval_each(std::size_t, ParticleIndex<T> idx)
   {
-      auto &rng = sp.rng();
+      auto &rng = idx.rng();
       // using rng to initialize state
       // do some computation, likely far more costly than TLS
   }
