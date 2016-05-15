@@ -1,13 +1,13 @@
 .PHONY : all clean libvsmc
 
 CC := clang
-CFLAGS := $(CFLAGS) -std=c11 -O3 -DNDEBUG
+CFLAGS := $(CFLAGS) -O3 -DNDEBUG
 CFLAGS := $(CFLAGS) -I ../../include
 CFLAGS := $(CFLAGS) -L ../../build/clang-Release/lib
 CFLAGS := $(CFLAGS) -Wl,-rpath -Wl,../../build/clang-Release/lib
 
 CXX := clang++
-CXXFLAGS := $(CXXFLAGS) -std=c++11 -O3 -DNDEBUG
+CXXFLAGS := $(CXXFLAGS) -std=c++14 -O3 -DNDEBUG
 CXXFLAGS := $(CXXFLAGS) -I ../../include
 CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_MKL
 CXXFLAGS := $(CXXFLAGS) -DVSMC_HAS_TBB
@@ -18,6 +18,9 @@ all : pf_seq pf_tbb pf_ocl program_option progress
 
 libvsmc :
 	ninja -C ../../build/clang-Release libvsmc_shared
+
+gmm : gmm.cpp
+	$(CXX) $(CXXFLAGS) -o gmm gmm.cpp $(LDFLAGS)
 
 pf.pdf : pf_tbb pf.R
 	./pf_tbb

@@ -160,10 +160,12 @@ int main()
     const std::size_t N = 1000;
 
     Sampler<PF> sampler(N);
-    sampler.eval(PFInit(), SamplerInit);
-    sampler.eval(PFMove(), SamplerMove);
-    sampler.eval(PFWeight(), SamplerInit | SamplerMove);
-    sampler.monitor("pos", Monitor<PF>(2, PFEstimate()));
+
+    sampler.resample_method(Stratified, 0.5)
+        .eval(PFInit(), SamplerInit)
+        .eval(PFMove(), SamplerMove)
+        .eval(PFWeight(), SamplerInit | SamplerMove)
+        .monitor("pos", Monitor<PF>(2, PFEstimate()));
 
     sampler.initialize().iterate(sampler.particle().state().n() - 1);
 

@@ -668,12 +668,6 @@ columns show the importance sampling estimates of the positions recorded by the
 monitor named \verb|"pos"|. A graphical representation of the output is shown
 in figure~\ref{fig:pf}.
 
-\begin{figure}
-  \includegraphics{fig/pf}
-  \caption{A simple particle filter}
-  \label{fig:pf}
-\end{figure}
-
 Before diving into the details of the implementation of \verb|PFState|, etc.,
 we will first define a few constants and types. The state space is of dimension
 $4$. And it is natural to use a \verb|StateMatrix| as the base class of

@@ -41,6 +41,7 @@ operations can be done on \verb|state|,
   state.reserve(N);      // Reserve space for a new sample size
   state.shrink_to_fit(); // Release memory no longer needed
   state(i, j);           // The element at row i, column j
+  state.at(i, j);        // Same as above but with assertions
 \end{Verbatim}
 If the template parameter \verb|Dim| is equal to zero, then it is assumed that
 the dimension is dynamic and may change later. In this case, there are
@@ -671,19 +672,20 @@ of iterations.
 \section{Example}
 \label{sec:Example (Core concepts)}
 
-\subsection{Model and algorithm}
-\label{sub:Model and algorithm}
-
 This is an example used in \textcite{Johansen:2009wd}. Through this example, we
 will show how to implement a simple particle filter. It shall walk one through
 the basic features of the library introduced above.
 
+\subsection{Model and algorithm}
+\label{sub:Model and algorithm}
+
 The state space model, known as the almost constant velocity model in the
 tracking literature, provides a simple scenario. The state vector $X_t$
 contains the position and velocity of an object moving in a plane. That is,
-$X_t = (\xpos^t, \ypos^t, \xvel^t, \yvel^t)^T$. Imperfect observations $Y_t =
-(\xobs^t, \yobs^t)^{\transpose}$ of the positions are possible at each time
-instance. The state and observation equations are linear with additive noises,
+$X_t = (\xpos^t, \ypos^t, \xvel^t, \yvel^t)^{\transpose}$. Imperfect
+observations $Y_t = (\xobs^t, \yobs^t)^{\transpose}$ of the positions are
+possible at each time instance. The state and observation equations are linear
+with additive noises,
 \begin{align*}
   X_t &= AX_{t-1} + V_t \\
   Y_t &= BX_t + \alpha W_t
@@ -708,7 +710,7 @@ respectively. The observation noise, $W_t$ comprises independent, identically
 distributed $t$-distributed random variables with degree of freedom $\nu = 10$.
 The prior at time $0$ corresponds to an axis-aligned Gaussian with variance $4$
 for the position coordinates and $1$ for the velocity coordinates. The particle
-filter algorithm is shown in algorithm~\ref{alg:pf}.
+filter algorithm is shown in Algorithm~\ref{alg:pf}.
 
 \begin{algorithm}[t]
   \begin{algorithmic}
@@ -718,8 +720,8 @@ filter algorithm is shown in algorithm~\ref{alg:pf}.
     \STATE\STATESKIP Sample
     $\xpos^{(0,i)},\ypos^{(0,i)}\sim\calN(0,4)$ and
     $\xvel^{(0,i)},\yvel^{(0,i)}\sim\calN(0,1)$.
-    \STATE\STATESKIP Weight $W_0^{(i)} \propto \exp{\ell(X_0^{(i)}|Y_0)}$ where
-    $\ell$ is the log-likelihood function.
+    \STATE\STATESKIP Weight $W_0^{(i)} \propto \exp\{\ell(X_0^{(i)}|Y_0)\}$
+    where $\ell$ is the log-likelihood function.
 
     \STATE \emph{Iteration}
     \STATE\STATESKIP Set $t\leftarrow t + 1$.
@@ -731,14 +733,246 @@ filter algorithm is shown in algorithm~\ref{alg:pf}.
       \yvel^{(t,i)}&\sim\calN(\yvel^{(t-1,i)}, 0.001)
     \end{align*}
     \STATE\STATESKIP Weight $W_t^{(i)} \propto
-    W_{t-1}^{(i)}\exp{\ell(X_t^{(i)}|Y_t)}$.
+    W_{t-1}^{(i)}\exp\{\ell(X_t^{(i)}|Y_t)\}$.
 
     \STATE \emph{Repeat the \emph{Iteration} step until all data are processed}.
     \vskip1ex\hrule
   \end{algorithmic}
-  \caption{Particle filter algorithm for the almost constant velocity model.}
+  \caption{Particle filter algorithm for the almost constant velocity model}
   \label{alg:pf}
 \end{algorithm}
 
 \subsection{Implementations}
 \label{sub:Implementations}
+
+We will work through a complete implementation using a top-down approach.
+First, we show the \verb|main| function.
+\begin{Verbatim}
+  int main()
+  {
+      const std::size_t N = 1000;
+
+      Sampler<PF> sampler(N);
+
+      sampler.resample_method(Stratified, 0.5)
+          .eval(PFInit, SamplerInit)
+          .eval(PFMove, SamplerMove)
+          .eval(PFWeight, SamplerInit | SamplerMove)
+          .monitor("pos", Monitor<PF>(2, PFEstimate));
+
+      sampler.initialize().iterate(sampler.particle().state().n() - 1);
+
+      std::ofstream out("pf.out");
+      out << sampler;
+      out.close();
+
+      return 0;
+  }
+\end{Verbatim}
+In a real application, the sample size $N$ is likely to be determined by some
+user input. For brevity, we simply used a constant here. Within the \verb|main|
+function, a \verb|Sampler| object is first constructed with the specified
+number of particles. Then we configure the sampler. First, it will use
+stratified resampling when $\ess < N / 2$. The sampling step within the
+\emph{Initialization} and \emph{Iteration} in Algorithm~\ref{alg:pf} will be
+implemented by two functions, \verb|PFInit| and \verb|PFMove|, respectively.
+The weighting is done through the function \verb|PFWeight|. And the estimate
+will be monitored through the function \verb|PFEstimate|. These are attached to
+the sampler through the \verb|eval| and \verb|monitor| methods as shown above.
+After configuring the sampler, we initialize it and iterate $n - 1$ times,
+where $n$ is the total number of observations, including at time $t = 0$. In
+the end, we write a summary of the sampler into the file \verb|pf.out|. This
+\verb|main| function is a simple translation of the algorithm described
+earlier. Now we show the details of the implementation each function used.
+
+\subsubsection{The \texttt{PF} class}
+
+First all of, we need a class to represent the state space, which is $\Real^4$.
+A sensible base class is thus,
+\begin{Verbatim}
+  using PFBase = StateMatrix<RowMajor, 4, double>;
+\end{Verbatim}
+The class \verb|PF| is declared as below,
+\begin{Verbatim}
+  class PF : public PFBase
+  {
+      public:
+      template <typename T>
+      class particle_index_type;
+
+      PF(std::size_t N);
+      std::size_t n() const { return obs_x_.size(); };
+
+      private:
+      Vector<double> obs_x_;
+      Vector<double> obs_y_;
+  };
+\end{Verbatim}
+The constructor will initialize the observations,
+\begin{Verbatim}
+  PF(std::size_t N) : PFBase(N)
+  {
+      double x = 0;
+      double y = 0;
+      std::ifstream data("pf_cv.data");
+      while (data >> x >> y) {
+          obs_x_.push_back(x);
+          obs_y_.push_back(y);
+      }
+      data.close();
+  }
+\end{Verbatim}
+Again, in a real application, the data is unlikely to be initialized in this
+way. The method \verb|n| simply return the size of \verb|obs_x_|. Last, we
+would like to extend the \verb|ParticleIndex<PF>| class, by defining the member
+class template \verb|particle_index_type|,
+\begin{Verbatim}
+  template <typename T>
+  using PFIndexBase = PFBase::particle_index_type<T>;
+
+  template <typename T>
+  class particle_index_type : public PFIndexBase<T>
+  {
+      public:
+      particle_index_type(std::size_t i, Particle<T> *pptr)
+          : PFIndexBase<T>(i, pptr)
+      {
+      }
+
+      double &pos_x() { return this->at(0); }
+      double &pos_y() { return this->at(1); }
+      double &vel_x() { return this->at(2); }
+      double &vel_y() { return this->at(3); }
+
+      double log_likelihood(std::size_t iter);
+  }; // class particle_index_type
+\end{Verbatim}
+First of all, we don't want to later refer to the states $\xpos$, etc., by
+integer index values in the reset of the program, which is error prone even for
+this simple example. Second, we would like to compute the log-likelihood of any
+given particle. This is implemented through the \verb|log_likelihood| method,
+which is a simple translation of the mathematical formulation,
+\begin{Verbatim}
+  double log_likelihood(std::size_t iter)
+  {
+      const double x = this->particle().state().obs_x_[iter];
+      const double y = this->particle().state().obs_y_[iter];
+      const double scale = 10;
+      const double nu = 10;
+
+      double llh_x = scale * (pos_x() - x);
+      double llh_y = scale * (pos_y() - y);
+      llh_x = std::log(1 + llh_x * llh_x / nu);
+      llh_y = std::log(1 + llh_y * llh_y / nu);
+
+      return -0.5 * (nu + 1) * (llh_x + llh_y);
+  }
+\end{Verbatim}
+
+\subsubsection{The \texttt{PFInit} and \texttt{PFMove} functions}
+
+The function that sample the state values from the prior is as the following,
+\begin{Verbatim}
+  inline void PFInit(std::size_t, Particle<PF> &particle)
+  {
+      std::normal_distribution<double> rpos(0, 2);
+      std::normal_distribution<double> rvel(0, 1);
+      auto &rng = particle.rng();
+
+      for (auto idx : particle) {
+          idx.pos_x() = rpos(rng);
+          idx.pos_y() = rpos(rng);
+          idx.vel_x() = rvel(rng);
+          idx.vel_y() = rvel(rng);
+      }
+  }
+\end{Verbatim}
+We construct two Normal distribution objects using for the position and
+velocity components of the states. And initialize each particle with them. The
+function to sample new states in each iteration later is similar,
+\begin{Verbatim}
+  inline void PFMove(std::size_t, Particle<PF> &particle)
+  {
+      std::normal_distribution<double> rpos(0, std::sqrt(0.02));
+      std::normal_distribution<double> rvel(0, std::sqrt(0.001));
+      auto &rng = particle.rng();
+      const double delta = 0.1;
+
+      for (auto idx : particle) {
+          idx.pos_x() += rpos(rng) + delta * idx.vel_x();
+          idx.pos_y() += rpos(rng) + delta * idx.vel_y();
+          idx.vel_x() += rvel(rng);
+          idx.vel_y() += rvel(rng);
+      }
+  }
+\end{Verbatim}
+Both of these two functions are really simple translations of the mathematical
+formulation of the algorithm.
+
+\subsubsection{The \texttt{PFWeight} function}
+
+In each iteration, we will weight the particles using its log-likelihood. This
+will be computed with the \verb|log_likelihood| method of
+\verb|particle_index_type| defined earlier,
+\begin{Verbatim}
+  inline void PFWeight(std::size_t iter, Particle<PF> &particle)
+  {
+      Vector<double> weight(particle.size());
+      std::transform(particle.begin(), particle.end(), weight.begin(),
+          [iter](ParticleIndex<PF> idx) { return idx.log_likelihood(iter); });
+      particle.weight().add_log(weight.data());
+  }
+\end{Verbatim}
+The last step in the function above add the logarithm of the incremental
+weights to the particle system. Note that, each time the \verb|initialize|
+method of \verb|Sampler| is called, the weights will be set to be equal first.
+And thus the function above is correct for both initialization and iterations.
+
+\subsubsection{The \texttt{PFEstimate} function}
+
+Last, we would like to record the value of $\varphi_t(X_t^{(i)}) =
+(\xpos^{(t,i)},\ypos^{(t,i)})^{\transpose}$. This is done by defining the
+function,
+\begin{Verbatim}
+  inline void PFEstimate(
+      std::size_t, std::size_t, Particle<PF> &particle, double *r)
+  {
+      for (auto idx : particle) {
+          *r++ = idx.pos_x();
+          *r++ = idx.pos_y();
+      }
+  }
+\end{Verbatim}
+The out parameter \verb|r| points to an $N$ by $d$ row major matrix, $d = 2$.
+
+\subsubsection{Summary}
+
+As we see above, the implementation of all the functions attached to the
+sampler object is straightforward. In fact, half of the program is within the
+definition of the \verb|PF| class. This is in fact a common pattern of programs
+using this library. The class that represent the state space also contains
+methods and data that is specific to the model.
+
+The first few lines of the output of the program, written by
+\begin{Verbatim}
+  std::ofstream out("pf.out");
+  out << sampler;
+  out.close();
+\end{Verbatim}
+is shown below
+\begin{Verbatim}
+  ESS   Resampled       Size    pos.0   pos.1
+  2.13795       1       1000    -1.29499        3.11821
+  357.471       1       1000    -1.22486        3.18716
+  152.535       1       1000    -1.31156        2.99123
+\end{Verbatim}
+One can read this text file into a statistical program, for exmaple
+R\footnote{\url{http://r-project.org}}, to produce Figure~\ref{fig:pf}. More
+advanced methods for saving summaries and histories of a sampler is given in
+section~\ref{sec:Store objects in HDF5 format}, using the \hdf format.
+
+\begin{figure}
+  \includegraphics{fig/pf}
+  \caption{Estimates and observations of the almost constant velocity model}
+  \label{fig:pf}
+\end{figure}
