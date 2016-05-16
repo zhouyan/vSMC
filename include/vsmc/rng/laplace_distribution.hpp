@@ -35,10 +35,6 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_LAPLACE_DISTRIBUTION_PARAM_CHECK(b)           \
-    VSMC_RUNTIME_ASSERT((b > 0), "**LaplaceDistribution** CONSTRUCTED "       \
-                                 "WITH INVALID SCALE PARAMETER VALUE")
-
 namespace vsmc
 {
 

@@ -54,8 +54,8 @@ inline std::size_t resample_trans_residual(std::size_t N, std::size_t M,
     using integ_type = typename std::iterator_traits<OutputIterI>::value_type;
 
     static_assert(std::is_floating_point<resid_type>::value,
-        "**resample_trans_residual** OUTPUT resid IS NOT OF FLOATING POINT "
-        "TYPES");
+        "**resample_trans_residual** used resid other than floating point "
+        "types");
 
     resid_type sum_resid = 0;
     integ_type sum_integ = 0;

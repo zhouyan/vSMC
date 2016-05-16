@@ -407,8 +407,8 @@ inline void gamma_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType alpha, RealType beta)
 {
     static_assert(std::is_floating_point<RealType>::value,
-        "**gamma_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
-        "TYPES");
+        "**gamma_distribution** used with RealType other than floating point "
+        "types");
 
     const std::size_t k = internal::BufferSize<RealType>::value;
     const internal::GammaDistributionConstant<RealType> constant(alpha);

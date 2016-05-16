@@ -582,8 +582,8 @@ inline void beta_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType alpha, RealType beta)
 {
     static_assert(std::is_floating_point<RealType>::value,
-        "**beta_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
-        "TYPES");
+        "**beta_distribution** used with RealType other than floating point "
+        "types");
 
     const std::size_t k = internal::BufferSize<RealType>::value;
     const internal::BetaDistributionConstant<RealType> constant(alpha, beta);

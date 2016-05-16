@@ -35,16 +35,6 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/counter.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(div, rem)               \
-    VSMC_RUNTIME_ASSERT((div > rem),                                          \
-        "**SeedGenerator::modulo** "                                          \
-        "REMAINDER IS NOT SMALLER THAN THE DIVISOR")
-
-#define VSMC_RUNTIME_ASSERT_RNG_SEED_MAX(max)                                 \
-    VSMC_RUNTIME_ASSERT((max > 1),                                            \
-        "**SeedGenerator::modulo** "                                          \
-        "THE MAXIMUM OF THE INTERNAL SEED IS NO LARGER THAN 1")
-
 /// \brief Default result type of Seed
 /// \ingroup Config
 #ifndef VSMC_SEED_RESULT_TYPE
@@ -130,13 +120,17 @@ class SeedGenerator
     /// \brief Set the divisor and the remainder
     void modulo(result_type divisor, result_type remainder)
     {
-        VSMC_RUNTIME_ASSERT_RNG_SEED_GENERATOR_MODULO(divisor, remainder);
+        runtime_assert(divisor > remainder, "**SeedGenerator::modulo** the "
+                                            "remainder is not smaller than "
+                                            "the divisor");
+
+        result_type maxs = std::numeric_limits<result_type>::max() / divisor;
+        runtime_assert(maxs > 1, "**SeedGenerator::modulo** the maximum of "
+                                 "the internal seed will be no larger than 1");
 
         divisor_ = divisor;
         remainder_ = remainder;
         max_ = std::numeric_limits<result_type>::max() / divisor;
-
-        VSMC_RUNTIME_ASSERT_RNG_SEED_MAX(max_);
 
         set(seed_);
     }

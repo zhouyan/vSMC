@@ -34,17 +34,6 @@
 
 #include <vsmc/internal/common.hpp>
 
-#define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(func)                             \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (id < dim()), "**Monitor::" #func "** INVALID ID NUMBER ARGUMENT")
-
-#define VSMC_RUNTIME_ASSERT_CORE_MONITOR_ITER(func)                           \
-    VSMC_RUNTIME_ASSERT((iter < iter_size()),                                 \
-        "**Monitor::" #func "** INVALID ITERATION NUMBER ARGUMENT")
-
-#define VSMC_RUNTIME_ASSERT_CORE_MONITOR_EVAL                                 \
-    VSMC_RUNTIME_ASSERT(eval_, "**Monitor::eval** INVALID EVALUATION OBJECT")
-
 namespace vsmc
 {
 
@@ -107,7 +96,7 @@ class Monitor
     /// summary table.
     std::string &name(std::size_t id)
     {
-        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(name);
+        runtime_assert(id < dim(), "**Monitor::name** index out of range");
 
         return name_[id];
     }
@@ -115,7 +104,7 @@ class Monitor
     /// \brief Read only access to the names of variables
     const std::string &name(std::size_t id) const
     {
-        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(name);
+        runtime_assert(id < dim(), "**Monitor::name** index out of range");
 
         return name_[id];
     }
@@ -123,10 +112,10 @@ class Monitor
     /// \brief Get the latest iteration index of the sampler
     std::size_t index() const
     {
-        std::size_t iter = iter_size() > 0 ? iter_size() - 1 : iter_size();
-        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ITER(index);
+        runtime_assert(
+            iter_size() > 0, "**Monitor::index** no iteration recorded");
 
-        return index_[iter];
+        return index_[iter_size() - 1];
     }
 
     /// \brief Get the iteration index of the sampler of a given Monitor
@@ -140,7 +129,8 @@ class Monitor
     /// `turnoff()`, then iter(iter) shall just be `iter`.
     std::size_t index(std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ITER(index);
+        runtime_assert(iter < iter_size(),
+            "**Monitor::index** iteration number out of range");
 
         return index_[iter];
     }
@@ -156,19 +146,20 @@ class Monitor
     /// variable
     double record(std::size_t id) const
     {
-        std::size_t iter = iter_size() > 0 ? iter_size() - 1 : iter_size();
-        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(record);
-        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ITER(record);
+        runtime_assert(id < dim(), "**Monitor::record** index out of range");
+        runtime_assert(
+            iter_size() > 0, "**Monitor::record** no iteration reocorded");
 
-        return record_[iter * dim_ + id];
+        return record_[(iter_size() - 1) * dim_ + id];
     }
 
     /// \brief Get the Monte Carlo integration record of a given variable and
     /// the Monitor iteration
     double record(std::size_t id, std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(record);
-        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ITER(record);
+        runtime_assert(id < dim(), "**Monitor::record** index out of range");
+        runtime_assert(iter < iter_size(),
+            "**Monitor::record** iteration number out of range");
 
         return record_[iter * dim_ + id];
     }
@@ -178,7 +169,8 @@ class Monitor
     template <typename OutputIter>
     OutputIter read_record(std::size_t id, OutputIter first) const
     {
-        VSMC_RUNTIME_ASSERT_CORE_MONITOR_ID(record);
+        runtime_assert(
+            id < dim(), "**Monitor::read_record** index out of range");
 
         const std::size_t N = iter_size();
         const double *riter = record_.data() + id;
@@ -245,7 +237,8 @@ class Monitor
         if (stage != stage_)
             return;
 
-        VSMC_RUNTIME_ASSERT_CORE_MONITOR_EVAL;
+        runtime_assert(static_cast<bool>(eval_),
+            "**Monitor::operator()** invalid evaluation object");
 
         result_.resize(dim_);
         if (record_only_) {

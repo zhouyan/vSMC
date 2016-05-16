@@ -39,10 +39,6 @@
 #define VSMC_RNG_RDRAND_NTRIAL_MAX 0
 #endif
 
-#define VSMC_RUNTIME_WARNING_RNG_RDRAND_ENGINE_NTRIAL(ntrial, NTrialMax)      \
-    VSMC_RUNTIME_WARNING((ntrial < NTrialMax),                                \
-        "**RDRAND::generate** MAXIMUM NUMBER OF TRIALS EXCEEDED")
-
 namespace vsmc
 {
 
@@ -98,14 +94,14 @@ template <typename ResultType,
 class RDRANDEngine
 {
     static_assert(std::is_unsigned<ResultType>::value,
-        "**RDRANDEngine** USED WITH ResultType OTHER THAN UNSIGNED INTEGER "
-        "TYPES");
+        "**RDRANDEngine** used with ResultType other than unsigned integer "
+        "types");
 
     static_assert(std::numeric_limits<ResultType>::digits == 16 ||
             std::numeric_limits<ResultType>::digits == 32 ||
             std::numeric_limits<ResultType>::digits == 64,
-        "**RDRANDEngine** USED WITH ResultType OF SIZE OTHER THAN 16, 32 OR "
-        "64 BITS");
+        "**RDRANDEngine** used with ResultType of size other than 16, 32 or "
+        "64 bits");
 
     public:
     using result_type = ResultType;
@@ -185,7 +181,8 @@ class RDRANDEngine
             if (success || ntrial > NTrialMax)
                 break;
         }
-        VSMC_RUNTIME_WARNING_RNG_RDRAND_ENGINE_NTRIAL(ntrial, NTrialMax);
+        runtime_assert(ntrial < NTrialMax,
+            "**RDRAND::generator** maximum number of trials exceeded", true);
 
         return r;
     }

@@ -45,49 +45,6 @@
 #pragma clang diagnostic ignored "-Wweak-vtables"
 #endif
 
-#if VSMC_NO_RUNTIME_ASSERT
-#define VSMC_RUNTIME_ASSERT(cond, msg)
-#else // VSMC_NO_RUNTIME_ASSERT
-#if VSMC_RUNTIME_ASSERT_AS_EXCEPTION
-#define VSMC_RUNTIME_ASSERT(cond, msg)                                        \
-    {                                                                         \
-        if (!(cond)) {                                                        \
-            throw ::vsmc::RuntimeAssert(msg);                                 \
-        };                                                                    \
-    }
-#else // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
-#define VSMC_RUNTIME_ASSERT(cond, msg)                                        \
-    {                                                                         \
-        if (!(cond)) {                                                        \
-            std::fprintf(stderr, "vSMC runtime assertion failed:%s\n", msg);  \
-            std::fflush(stderr);                                              \
-        };                                                                    \
-        assert(cond);                                                         \
-    }
-#endif // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
-#endif // VSMC_NO_RUNTIME_ASSERT
-
-#if VSMC_NO_RUNTIME_WARNING
-#define VSMC_RUNTIME_WARNING(cond, msg)
-#else // VSMC_NO_RUNTIME_WARNING
-#if VSMC_RUNTIME_WARNING_AS_EXCEPTION
-#define VSMC_RUNTIME_WARNING(cond, msg)                                       \
-    {                                                                         \
-        if (!(cond)) {                                                        \
-            throw ::vsmc::RuntimeWarning(msg);                                \
-        };                                                                    \
-    }
-#else // VSMC_RUNTIME_WARNING_AS_EXCEPTION
-#define VSMC_RUNTIME_WARNING(cond, msg)                                       \
-    {                                                                         \
-        if (!(cond)) {                                                        \
-            std::fprintf(stderr, "vSMC runtime warning:%s\n", msg);           \
-            std::fflush(stderr);                                              \
-        };                                                                    \
-    }
-#endif // VSMC_RUNTIME_WARNING_AS_EXCEPTION
-#endif // VSMC_NO_RUNTIME_WARNING
-
 namespace vsmc
 {
 
@@ -99,15 +56,31 @@ class RuntimeAssert : public std::runtime_error
     explicit RuntimeAssert(const std::string &msg) : std::runtime_error(msg) {}
 }; // class RuntimeAssert
 
-class RuntimeWarning : public std::runtime_error
+#if VSMC_NO_RUNTIME_ASSERT
+inline void runtime_assert(bool, const char *, bool) {}
+#else // VSMC_NO_RUNTIME_ASSERT
+inline void runtime_assert(bool cond, const char *msg, bool soft = false)
 {
-    public:
-    explicit RuntimeWarning(const char *msg) : std::runtime_error(msg) {}
-
-    explicit RuntimeWarning(const std::string &msg) : std::runtime_error(msg)
-    {
+#if VSMC_RUNTIME_ASSERT_AS_EXCEPTION
+    if (!cond) {
+        throw ::vsmc::RuntimeAssert(msg);
     }
-}; // class RuntimeWarning
+#else  // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
+    if (!cond) {
+        std::fprintf(stderr, "vSMC runtime assertion failed:%s\n", msg);
+        std::fflush(stderr);
+    }
+    if (!soft)
+        assert(cond);
+#endif // VSMC_RUNTIME_ASSERT_AS_EXCEPTION
+}
+#endif // VSMC_NO_RUNTIME_ASSERT
+
+inline void runtime_assert(
+    bool cond, const std::string &msg, bool soft = false)
+{
+    runtime_assert(cond, msg.c_str(), soft);
+}
 
 namespace internal
 {
@@ -128,7 +101,7 @@ inline void size_check(SizeType n, const char *f)
     msg += f;
     msg += "** INPUT SIZE TOO BIG";
 
-    VSMC_RUNTIME_ASSERT((static_cast<std::uintmax_t>(n) <= nmax), msg.c_str());
+    runtime_assert((static_cast<std::uintmax_t>(n) <= nmax), msg.c_str());
 }
 #endif // VSMC_NO_RUNTIME_ASSERT
 

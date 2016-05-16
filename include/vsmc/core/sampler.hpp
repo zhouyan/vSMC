@@ -36,14 +36,6 @@
 #include <vsmc/core/monitor.hpp>
 #include <vsmc/core/particle.hpp>
 
-#define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, map, func)        \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (iter != map.end()), "**Sampler::" #func "** INVALID MONITOR NAME")
-
-#define VSMC_RUNTIME_ASSERT_CORE_SAMPLER_FUNCTOR(func, caller, name)          \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (func), "**Sampler::" #caller "** INVALID " #name " OBJECT")
-
 namespace vsmc
 {
 
@@ -252,7 +244,8 @@ class Sampler
     {
         typename monitor_map_type::iterator iter = monitor_.find(name);
 
-        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(iter, monitor_, monitor);
+        runtime_assert(iter != monitor_.end(),
+            "**Sampler::monitor** monitor name not found");
 
         return iter->second;
     }
@@ -262,8 +255,8 @@ class Sampler
     {
         typename monitor_map_type::const_iterator citer = monitor_.find(name);
 
-        VSMC_RUNTIME_ASSERT_CORE_SAMPLER_MONITOR_NAME(
-            citer, monitor_, monitor);
+        runtime_assert(citer != monitor_.end(),
+            "**Sampler::monitor** monitor name not found");
 
         return citer->second;
     }
@@ -441,23 +434,35 @@ class Sampler
 
     void do_init()
     {
-        for (auto &e : eval_)
-            if ((e.second & SamplerInit) != 0)
+        for (auto &e : eval_) {
+            if ((e.second & SamplerInit) != 0) {
+                runtime_assert(static_cast<bool>(e.first),
+                    "**Sampler** invalid evaluation object");
                 e.first(iter_num_, particle_);
+            }
+        }
     }
 
     void do_move()
     {
-        for (auto &e : eval_)
-            if ((e.second & SamplerMove) != 0)
+        for (auto &e : eval_) {
+            if ((e.second & SamplerMove) != 0) {
+                runtime_assert(static_cast<bool>(e.first),
+                    "**Sampler** invalid evaluation object");
                 e.first(iter_num_, particle_);
+            }
+        }
     }
 
     void do_mcmc()
     {
-        for (auto &e : eval_)
-            if ((e.second & SamplerMCMC) != 0)
+        for (auto &e : eval_) {
+            if ((e.second & SamplerMCMC) != 0) {
+                runtime_assert(static_cast<bool>(e.first),
+                    "**Sampler** invalid evaluation object");
                 e.first(iter_num_, particle_);
+            }
+        }
     }
 
     void do_resample(double threshold)

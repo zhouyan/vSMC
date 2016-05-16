@@ -36,10 +36,6 @@
 #include <vsmc/resample/transform.hpp>
 #include <vsmc/rng/u01_sequence.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RESAMPLE_ALGORITHM_EVAL                           \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        eval_, "**ResampleEval::operator()** INVALID ALGORITHM OBJECT")
-
 namespace vsmc
 {
 
@@ -122,7 +118,8 @@ class ResampleEval
     /// \brief Returns how many particles having non-zero replication number
     std::size_t operator()(std::size_t, Particle<T> &particle) const
     {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_ALGORITHM_EVAL;
+        runtime_assert(static_cast<bool>(eval_),
+            "**ResampleEval::operator()** invalid evaluation object");
 
         using size_type = typename Particle<T>::size_type;
 

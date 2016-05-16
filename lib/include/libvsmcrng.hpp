@@ -35,10 +35,6 @@
 #include <vsmc/rng/rng.h>
 #include <vsmc/rng/rng.hpp>
 
-#define VSMC_RUNTIME_ASSERT_LIB_RNG_TYPE(rng1, rng2, func)                    \
-    VSMC_RUNTIME_ASSERT((rng1.type == rng2.type),                             \
-        "**vsmc_rng_" #func "CALLED WITH TWO RNG OF DIFFERENT TYPES")
-
 #define VSMC_DEFINE_LIB_RNG_DIST(RNGType)                                     \
     RNGType &rng_cpp = *reinterpret_cast<RNGType *>(rng.ptr);                 \
     for (size_t i = 0; i != n; ++i)                                           \

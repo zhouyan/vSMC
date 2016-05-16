@@ -48,8 +48,8 @@ class DirichletDistribution
     class param_type
     {
         static_assert(std::is_floating_point<RealType>::value,
-            "**DirichletDistribution::param_type** USED WITH RealType OTHER "
-            "THAN FLOATING POINT TYPES");
+            "**DirichletDistribution::param_type** used with RealType other "
+            "than floating point types");
 
         public:
         using result_type = RealType;
@@ -58,16 +58,16 @@ class DirichletDistribution
         explicit param_type(result_type alpha) : is_scalar_(true)
         {
             static_assert(Dim != Dynamic, "**DirichletDistribution::param_"
-                                          "type** OBJECT DECLARED WITH "
-                                          "DYNAMIC DIMENSION");
+                                          "type** object declared with "
+                                          "dynamic dimension");
             init_alpha(alpha);
         }
 
         explicit param_type(const result_type *alpha) : is_scalar_(false)
         {
             static_assert(Dim != Dynamic, "**DirichletDistribution::param_"
-                                          "type** OBJECT DECLARED WITH "
-                                          "DYNAMIC DIMENSION");
+                                          "type** object declared with "
+                                          "dynamic dimension");
             init_alpha(alpha);
         }
 
@@ -75,8 +75,8 @@ class DirichletDistribution
             : alpha_(dim), is_scalar_(false)
         {
             static_assert(Dim == Dynamic, "**DirichletDistribution::param_"
-                                          "type** OBJECT DELCARED WITH FIXED "
-                                          "DIMENSION");
+                                          "type** object delcared with fixed "
+                                          "dimension");
             init_alpha(alpha);
         }
 
@@ -84,8 +84,8 @@ class DirichletDistribution
             : alpha_(dim), is_scalar_(false)
         {
             static_assert(Dim == Dynamic, "**DirichletDistribution::param_"
-                                          "type** OBJECT DELCARED WITH FIXED "
-                                          "DIMENSION");
+                                          "type** object delcared with fixed "
+                                          "dimension");
             init_alpha(alpha);
         }
 
@@ -339,8 +339,8 @@ inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, const RealType *alpha)
 {
     static_assert(std::is_floating_point<RealType>::value,
-        "**dirichlet_distribution** USED WITH RealType OTHER THAN FLOATING "
-        "POINT TYPES");
+        "**dirichlet_distribution** used with RealType other than floating "
+        "point types");
 
     if (n * dim == 0)
         return;

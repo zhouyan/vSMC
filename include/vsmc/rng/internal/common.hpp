@@ -39,17 +39,13 @@
 #include <mkl_vsl.h>
 #endif
 
-#define VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(flag, Name)                \
-    VSMC_RUNTIME_ASSERT((flag),                                               \
-        "**" #Name "Distribution** CONSTRUCTED WITH INVALID PARAMETERS")
-
 #define VSMC_DEFINE_RNG_DISTRIBUTION_PARAM_TYPE_0(Name, T, t, Type)           \
     public:                                                                   \
     class param_type                                                          \
     {                                                                         \
         static_assert(std::is_##t<T>::value,                                  \
-            "**" #Name "Distribution::param_type** USED WITH " #T             \
-            " OTHER THAN " #Type " INTEGER TYPES");                           \
+            "**" #Name "Distribution::param_type** used with " #T             \
+            " other than " #Type " integer types");                           \
                                                                               \
         public:                                                               \
         using result_type = T;                                                \
@@ -88,8 +84,8 @@
     class param_type                                                          \
     {                                                                         \
         static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #Name "Distribution::param_type** USED WITH RealType OTHER " \
-            "THAN FLOATING POINT TYPES");                                     \
+            "**" #Name "Distribution::param_type** used with RealType other " \
+            "than floating point types");                                     \
                                                                               \
         public:                                                               \
         using result_type = RealType;                                         \
@@ -97,8 +93,10 @@
                                                                               \
         explicit param_type(result_type p1 = v1) : p1##_(p1)                  \
         {                                                                     \
-            VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(                       \
-                internal::name##_distribution_check_param(p1), Name);         \
+            ::vsmc::runtime_assert(                                           \
+                internal::name##_distribution_check_param(p1),                \
+                "**" #Name                                                    \
+                "Distribution** constructed with invalid arguments");         \
         }                                                                     \
                                                                               \
         result_type p1() const { return p1##_; }                              \
@@ -161,8 +159,8 @@
     class param_type                                                          \
     {                                                                         \
         static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #Name "Distribution::param_type** USED WITH RealType OTHER " \
-            "THAN FLOATING POINT TYPES");                                     \
+            "**" #Name "Distribution::param_type** used with RealType other " \
+            "than floating point types");                                     \
                                                                               \
         public:                                                               \
         using result_type = RealType;                                         \
@@ -171,8 +169,10 @@
         explicit param_type(result_type p1 = v1, result_type p2 = v2)         \
             : p1##_(p1), p2##_(p2)                                            \
         {                                                                     \
-            VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(                       \
-                internal::name##_distribution_check_param(p1, p2), Name);     \
+            ::vsmc::runtime_assert(                                           \
+                internal::name##_distribution_check_param(p1, p2),            \
+                "**" #Name                                                    \
+                "Distribution** constructed with invalid arguments");         \
         }                                                                     \
                                                                               \
         result_type p1() const { return p1##_; }                              \
@@ -244,8 +244,8 @@
     class param_type                                                          \
     {                                                                         \
         static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #Name "Distribution::param_type** USED WITH RealType OTHER " \
-            "THAN FLOATING POINT TYPES");                                     \
+            "**" #Name "Distribution::param_type** used with RealType other " \
+            "than floating point types");                                     \
                                                                               \
         public:                                                               \
         using result_type = RealType;                                         \
@@ -255,8 +255,10 @@
             result_type p1 = v1, result_type p2 = v2, result_type p3 = v3)    \
             : p1##_(p1), p2##_(p2), p3##_(p3)                                 \
         {                                                                     \
-            VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(                       \
-                internal::name##_distribution_check_param(p1, p2, p3), Name); \
+            ::vsmc::runtime_assert(                                           \
+                internal::name##_distribution_check_param(p1, p2, p3),        \
+                "**" #Name                                                    \
+                "Distribution** constructed with invalid arguments");         \
         }                                                                     \
                                                                               \
         result_type p1() const { return p1##_; }                              \
@@ -336,8 +338,8 @@
     class param_type                                                          \
     {                                                                         \
         static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #Name "Distribution::param_type** USED WITH RealType OTHER " \
-            "THAN FLOATING POINT TYPES");                                     \
+            "**" #Name "Distribution::param_type** used with RealType other " \
+            "than floating point types");                                     \
                                                                               \
         public:                                                               \
         using result_type = RealType;                                         \
@@ -347,9 +349,10 @@
             result_type p3 = v3, result_type p4 = v4)                         \
             : p1##_(p1), p2##_(p2), p3##_(p3), p4##_(p4)                      \
         {                                                                     \
-            VSMC_RUNTIME_ASSERT_RNG_DISTRIBUTION_PARAM(                       \
+            ::vsmc::runtime_assert(                                           \
                 internal::name##_distribution_check_param(p1, p2, p3, p4),    \
-                Name);                                                        \
+                "**" #Name                                                    \
+                "Distribution** constructed with invalid arguments");         \
         }                                                                     \
                                                                               \
         result_type p1() const { return p1##_; }                              \
@@ -856,8 +859,8 @@
     inline void name##_distribution(RNGType &rng, std::size_t n, RealType *r) \
     {                                                                         \
         static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #name "_distribution** USED WITH RealType OTHER THAN "       \
-            "FLOATING POINT TYPES");                                          \
+            "**" #name "_distribution** used with RealType other than "       \
+            "floating point types");                                          \
                                                                               \
         const std::size_t K = internal::BufferSize<RealType>::value;          \
         const std::size_t M = n / K;                                          \
@@ -873,8 +876,8 @@
         RNGType &rng, std::size_t N, RealType *r, RealType p1)                \
     {                                                                         \
         static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #name "_distribution** USED WITH RealType OTHER THAN "       \
-            "FLOATING POINT TYPES");                                          \
+            "**" #name "_distribution** used with RealType other than "       \
+            "floating point types");                                          \
                                                                               \
         const std::size_t K = internal::BufferSize<RealType>::value;          \
         const std::size_t M = N / K;                                          \
@@ -890,8 +893,8 @@
         RNGType &rng, std::size_t N, RealType *r, RealType p1, RealType p2)   \
     {                                                                         \
         static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #name "_distribution** USED WITH RealType OTHER THAN "       \
-            "FLOATING POINT TYPES");                                          \
+            "**" #name "_distribution** used with RealType other than "       \
+            "floating point types");                                          \
                                                                               \
         const std::size_t K = internal::BufferSize<RealType>::value;          \
         const std::size_t M = N / K;                                          \
@@ -907,8 +910,8 @@
         RealType p1, RealType p2, RealType p3)                                \
     {                                                                         \
         static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #name "_distribution** USED WITH RealType OTHER THAN "       \
-            "FLOATING POINT TYPES");                                          \
+            "**" #name "_distribution** used with RealType other than "       \
+            "floating point types");                                          \
                                                                               \
         const std::size_t K = internal::BufferSize<RealType>::value;          \
         const std::size_t M = N / K;                                          \
@@ -924,8 +927,8 @@
         RealType p1, RealType p2, RealType p3, RealType p4)                   \
     {                                                                         \
         static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #name "_distribution** USED WITH RealType OTHER THAN "       \
-            "FLOATING POINT TYPES");                                          \
+            "**" #name "_distribution** used with RealType other than "       \
+            "floating point types");                                          \
                                                                               \
         const std::size_t K = internal::BufferSize<RealType>::value;          \
         const std::size_t M = N / K;                                          \

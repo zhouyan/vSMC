@@ -130,8 +130,8 @@ inline void normal_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType mean, RealType stddev)
 {
     static_assert(std::is_floating_point<RealType>::value,
-        "**normal_distribution** USED WITH RealType OTHER THAN FLOATING POINT "
-        "TYPES");
+        "**normal_distribution** used with RealType other than floating point "
+        "types");
 
     const std::size_t k = internal::BufferSize<RealType>::value;
     const std::size_t m = n / k;

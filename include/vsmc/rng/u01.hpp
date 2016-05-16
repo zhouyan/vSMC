@@ -213,11 +213,12 @@ template <typename UIntType, typename RealType, typename Lower, typename Upper>
 inline RealType u01(UIntType u) noexcept
 {
     static_assert(std::is_unsigned<UIntType>::value,
-        "**u01** USED WITH UIntType OTHER THAN UNSIGNED INTEGER "
-        "TYPES");
+        "**u01** used with UIntType other than unsigned integer "
+        "types");
+
     static_assert(std::is_floating_point<RealType>::value,
-        "**u01** USED WITH RealType OTHER THAN FLOATING POINT "
-        "TYPES");
+        "**u01** used with RealType other than floating point "
+        "types");
 
     return internal::U01Impl<UIntType, RealType, Lower, Upper>::eval(u);
 }
@@ -228,11 +229,12 @@ template <typename UIntType, typename RealType, typename Lower, typename Upper>
 inline void u01(std::size_t n, const UIntType *u, RealType *r) noexcept
 {
     static_assert(std::is_unsigned<UIntType>::value,
-        "**u01** USED WITH UIntType OTHER THAN UNSIGNED INTEGER "
-        "TYPES");
+        "**u01** used with UIntType other than unsigned integer "
+        "types");
+
     static_assert(std::is_floating_point<RealType>::value,
-        "**u01** USED WITH RealType OTHER THAN FLOATING POINT "
-        "TYPES");
+        "**u01** used with RealType other than floating point "
+        "types");
 
     internal::U01Impl<UIntType, RealType, Lower, Upper>::eval(n, u, r);
 }

@@ -86,10 +86,10 @@ template <typename KeySeqType, std::size_t Rounds, std::size_t Blocks>
 class AESNIGenerator
 {
     static_assert(
-        Rounds != 0, "**AESNIGenerator** USED WITH ROUNDS EQUAL TO ZERO");
+        Rounds != 0, "**AESNIGenerator** used with rounds equal to zero");
 
     static_assert(
-        Blocks != 0, "**AESNIGenerator** USED WITH Blocks EQUAL TO ZERO");
+        Blocks != 0, "**AESNIGenerator** used with blocks equal to zero");
 
     public:
     using ctr_type = std::array<std::uint64_t, 2>;

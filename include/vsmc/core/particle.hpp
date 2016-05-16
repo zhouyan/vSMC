@@ -38,21 +38,6 @@
 #include <vsmc/rng/rng_set.hpp>
 #include <vsmc/rng/seed.hpp>
 
-#define VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2)           \
-    VSMC_RUNTIME_ASSERT((idx1.particle_ptr() == idx2.particle_ptr()),         \
-        "COMPARE TWO ParticleIndex OBJECTS THAT BELONG TO TWO PARTICLE "      \
-        "SYSTEMS");
-
-#define VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_DIFFERENCE(idx1, idx2)        \
-    VSMC_RUNTIME_ASSERT((idx1.particle_ptr() == idx2.particle_ptr()),         \
-        "SUBSTRACT TWO ParticleIndex OBJECTS THAT BELONG TO TWO PARTICLE "    \
-        "SYSTEMS");
-
-#define VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RANGE(n, b, e, g)                   \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (!internal::is_negative(b) && b < e && e <= n && g > 0),              \
-        "**ParticleRange::ParticleRange** INVALID ARGUMENTS")
-
 namespace vsmc
 {
 
@@ -145,7 +130,9 @@ template <typename T>
 inline bool operator==(
     const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
 {
-    VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2);
+    runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
+        "Compare two ParticleIndex objects from two different particle "
+        "systems");
 
     return idx1.id() == idx2.id();
 }
@@ -154,8 +141,6 @@ template <typename T>
 inline bool operator!=(
     const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
 {
-    VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2);
-
     return idx1.id() != idx2.id();
 }
 
@@ -163,7 +148,9 @@ template <typename T>
 inline bool operator<(
     const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
 {
-    VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2);
+    runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
+        "Compare two ParticleIndex objects from two different particle "
+        "systems");
 
     return idx1.id() < idx2.id();
 }
@@ -172,7 +159,9 @@ template <typename T>
 inline bool operator>(
     const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
 {
-    VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2);
+    runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
+        "Compare two ParticleIndex objects from two different particle "
+        "systems");
 
     return idx1.id() > idx2.id();
 }
@@ -181,7 +170,9 @@ template <typename T>
 inline bool operator<=(
     const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
 {
-    VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2);
+    runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
+        "Compare two ParticleIndex objects from two different particle "
+        "systems");
 
     return idx1.id() <= idx2.id();
 }
@@ -190,7 +181,9 @@ template <typename T>
 inline bool operator>=(
     const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
 {
-    VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2);
+    runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
+        "Compare two ParticleIndex objects from two different particle "
+        "systems");
 
     return idx1.id() >= idx2.id();
 }
@@ -276,7 +269,9 @@ template <typename T>
 inline std::ptrdiff_t operator-(
     const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
 {
-    VSMC_RUNTIME_ASSERT_CORE_PARTICLE_INDEX_COMPARE(idx1, idx2);
+    runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
+        "Substract two ParticleIndex objects from two different particle "
+        "systems");
 
     return static_cast<std::ptrdiff_t>(idx1.id()) -
         static_cast<std::ptrdiff_t>(idx2.id());
@@ -295,8 +290,9 @@ class ParticleRange
         size_type grainsize = 1)
         : pptr_(pptr), first_(first), last_(last), grainsize_(grainsize)
     {
-        VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RANGE(
-            pptr_->size(), first_, last_, grainsize_);
+        runtime_assert(!internal::is_negative(first) && first < last &&
+                last <= pptr->size() && grainsize > 0,
+            "**ParticleRange** constructed with invalid arguments");
     }
 
     template <typename SplitType>
@@ -306,9 +302,6 @@ class ParticleRange
         , last_(other.last_)
         , grainsize_(other.grainsize_)
     {
-        VSMC_RUNTIME_ASSERT_CORE_PARTICLE_RANGE(
-            pptr_->size(), first_, last_, grainsize_);
-
         other.last_ = first_;
     }
 

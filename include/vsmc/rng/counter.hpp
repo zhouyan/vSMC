@@ -187,11 +187,11 @@ template <typename ResultType, typename Generator>
 class CounterEngine
 {
     static_assert(std::is_unsigned<ResultType>::value,
-        "**CounterEngine** USED WITH ResultType OTHER THAN UNSIGNED INTGER "
-        "TYPES");
+        "**CounterEngine** used with ResultType other than unsigned intger "
+        "types");
 
     static_assert(Generator::size() % sizeof(ResultType) == 0,
-        "**CounterEngine** USED WITH Generator::size() NOT DIVISIBLE BY "
+        "**CounterEngine** used with Generator::size() not divisible by "
         "sizeof(ResultType)");
 
     public:

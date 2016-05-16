@@ -35,14 +35,6 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/uniform_real_distribution.hpp>
 
-#define VSMC_RUNTIME_WARNING_RNG_MKL_OFFSET                                   \
-    VSMC_RUNTIME_WARNING((offset < MaxOffset),                                \
-        "**MKLEngine** EXCESS MAXIMUM NUMBER OF INDEPDENT RNG STREAMS")
-
-#define VSMC_RUNTIME_ASSERT_RNG_MKL_DISCARD                                   \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (nskip >= 0), "**MKLEngine::discard** INPUT IS NEGATIVE")
-
 namespace vsmc
 {
 
@@ -70,7 +62,7 @@ inline int mkl_error_check(int status, const char *cpp, const char *c)
     msg += "; Error code: ";
     msg += std::to_string(status);
 
-    VSMC_RUNTIME_ASSERT((status == VSL_ERROR_OK), msg.c_str());
+    runtime_assert((status == VSL_ERROR_OK), msg.c_str());
 
     return status;
 }
@@ -719,12 +711,7 @@ template <MKL_INT BRNG, MKL_INT MaxOffset = MKLMaxOffset<BRNG>::value>
 class MKLOffset
 {
     public:
-    static MKL_INT eval(MKL_INT offset)
-    {
-        VSMC_RUNTIME_WARNING_RNG_MKL_OFFSET;
-
-        return BRNG + offset % MaxOffset;
-    }
+    static MKL_INT eval(MKL_INT offset) { return BRNG + offset % MaxOffset; }
 }; // class MKLOffset
 
 template <MKL_INT BRNG>
@@ -791,7 +778,7 @@ template <MKL_INT BRNG, int Bits>
 class MKLEngine
 {
     static_assert(Bits == 32 || Bits == 64,
-        "**MKLEngine** USED WITH Bits OTHER THAN 32, OR 64");
+        "**MKLEngine** used with bits other than 32, or 64");
 
     public:
     using result_type = internal::MKLResultType<Bits>;
@@ -810,7 +797,7 @@ class MKLEngine
     MKLEngine(MKL_INT offset, result_type s) : index_(M_)
     {
         static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
-            "**MKLEngine** DOES NOT SUPPORT OFFSETING");
+            "**MKLEngine** does not support offseting");
 
         seed(offset, s);
     }
@@ -822,7 +809,7 @@ class MKLEngine
         : index_(M_)
     {
         static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
-            "**MKLEngine** DOES NOT SUPPORT OFFSETING");
+            "**MKLEngine** does not support offseting");
 
         seed(offset, seq);
     }
@@ -850,7 +837,7 @@ class MKLEngine
     void seed(MKL_INT offset, result_type s)
     {
         static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
-            "**MKLEngine** DOES NOT SUPPORT OFFSETING");
+            "**MKLEngine** does not support offseting");
 
         s %= static_cast<result_type>(std::numeric_limits<MKL_UINT>::max());
         MKL_INT brng = internal::MKLOffset<BRNG>::eval(offset);
@@ -864,7 +851,7 @@ class MKLEngine
             internal::is_seed_seq<SeedSeq, MKL_UINT>::value>::type * = nullptr)
     {
         static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
-            "**MKLEngine** DOES NOT SUPPORT OFFSETING");
+            "**MKLEngine** does not support offseting");
 
         MKL_INT brng = internal::MKLOffset<BRNG>::eval(offset);
         Vector<unsigned> params;
@@ -922,9 +909,8 @@ class MKLEngine
 
     void discard(long long nskip)
     {
-        VSMC_RUNTIME_ASSERT_RNG_MKL_DISCARD;
 
-        if (nskip == 0)
+        if (nskip <= 0)
             return;
 
         const long long remain = static_cast<long long>(M_ - index_);

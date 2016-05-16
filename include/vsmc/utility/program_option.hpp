@@ -39,11 +39,6 @@
 #pragma clang diagnostic ignored "-Wweak-vtables"
 #endif
 
-#define VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, func)         \
-    VSMC_RUNTIME_ASSERT((ptr != nullptr),                                     \
-        "**ProgramOption::" #func                                             \
-        "** ATTEMPT TO SET OPTION WITH A NULL POINTER")
-
 namespace vsmc
 {
 
@@ -352,7 +347,8 @@ class ProgramOptionMap
     ProgramOptionMap &add(
         const std::string &name, const std::string &desc, T *ptr)
     {
-        VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
+        runtime_assert(ptr != nullptr,
+            "**ProgramOptionMap::add** pointer for option value is null");
 
         return add_option(
             name, std::make_shared<ProgramOptionScalar<T>>(desc, ptr));
@@ -363,7 +359,8 @@ class ProgramOptionMap
     ProgramOptionMap &add(
         const std::string &name, const std::string &desc, T *ptr, V val)
     {
-        VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
+        runtime_assert(ptr != nullptr,
+            "**ProgramOptionMap::add** pointer for option value is null");
 
         return add_option(
             name, std::make_shared<ProgramOptionScalar<T>>(desc, ptr, val));
@@ -374,7 +371,8 @@ class ProgramOptionMap
     ProgramOptionMap &add(const std::string &name, const std::string &desc,
         std::vector<T, Alloc> *ptr)
     {
-        VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
+        runtime_assert(ptr != nullptr,
+            "**ProgramOptionMap::add** pointer for option value is null");
 
         return add_option(
             name, std::make_shared<ProgramOptionVector<T, Alloc>>(desc, ptr));
@@ -385,7 +383,8 @@ class ProgramOptionMap
     ProgramOptionMap &add(const std::string &name, const std::string &desc,
         std::vector<T, Alloc> *ptr, V val)
     {
-        VSMC_RUNTIME_ASSERT_UTILITY_PROGRAM_OPTION_NULLPTR(ptr, add);
+        runtime_assert(ptr != nullptr,
+            "**ProgramOptionMap::add** pointer for option value is null");
 
         return add_option(name,
             std::make_shared<ProgramOptionVector<T, Alloc>>(desc, ptr, val));

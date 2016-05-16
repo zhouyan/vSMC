@@ -34,10 +34,6 @@
 
 #include <vsmc/internal/common.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(iter, iter_back, func)        \
-    VSMC_RUNTIME_ASSERT((iter <= iter_back && iter_back < iter_size()),       \
-        "**ResampleIndex::" #func "** ITERATION NUMBERS OUT OF RANGE")
-
 namespace vsmc
 {
 
@@ -57,16 +53,16 @@ class ResampleIndex
     /// \brief The sample size of the last iteration
     std::size_t size() const
     {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(0, 0, size);
-
+        if (index_.size() == 0)
+            return 0;
         return index_.back().size();
     }
 
     /// \brief The sample size of a given iteration
     std::size_t size(std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(iter, iter, size);
-
+        if (iter >= index_.size())
+            return 0;
         return index_[iter].size();
     }
 
@@ -99,36 +95,6 @@ class ResampleIndex
         std::copy_n(first, N, index_[iter_size_ - 1].begin());
     }
 
-    /// \brief Insert at last iteration an identity resampling index
-    void insert(std::size_t N)
-    {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(0, 0, insert);
-
-        resize_identity(N);
-        index_[iter_size_ - 1].resize(N);
-        std::copy_n(identity_.begin(), N, index_[iter_size_ - 1].begin());
-    }
-
-    /// \brief Insert at last iteration an identity resampling index
-    template <typename InputIter>
-    void insert(std::size_t N, InputIter first)
-    {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(0, 0, insert);
-
-        index_[iter_size_ - 1].resize(N);
-        std::copy_n(first, N, index_[iter_size_ - 1].begin());
-    }
-
-    /// \brief Insert at a given iteration a resampling index
-    template <typename InputIter>
-    void insert(std::size_t N, std::size_t iter, InputIter first)
-    {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(iter, iter, insert);
-
-        index_[iter].resize(N);
-        std::copy_n(first, N, index_[iter].begin());
-    }
-
     index_type index(std::size_t id) const
     {
         return index(id, iter_size_ - 1, 0);
@@ -143,7 +109,8 @@ class ResampleIndex
     index_type index(
         std::size_t id, std::size_t iter_back, std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(iter, iter_back, insert);
+        runtime_assert(iter <= iter_back && iter_back < iter_size(),
+            "**ResampleIndex::index** iteration numbers out of range");
 
         index_type idx = index_.back()[id];
         while (iter_back > iter) {
@@ -161,7 +128,9 @@ class ResampleIndex
 
     std::size_t index_matrix_nrow(std::size_t iter_back) const
     {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(iter_back, iter_back, insert);
+        runtime_assert(iter_back < iter_size(), "**ResampleIndex::index_"
+                                                "matrix_nrow** iteration "
+                                                "numbers out of range");
 
         return index_[iter_back].size();
     }
@@ -179,7 +148,9 @@ class ResampleIndex
     std::size_t index_matrix_ncol(
         std::size_t iter_back, std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(iter, iter_back, insert);
+        runtime_assert(iter <= iter_back && iter_back < iter_size(),
+            "**ResampleIndex::index_matrix_ncol** iteration numbers out of "
+            "range");
 
         return iter_back - iter + 1;
     }
@@ -199,7 +170,8 @@ class ResampleIndex
     Vector<index_type> index_matrix(
         MatrixLayout layout, std::size_t iter_back, std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(iter, iter_back, insert);
+        runtime_assert(iter <= iter_back && iter_back < iter_size(),
+            "**ResampleIndex::index_matrix** iteration numbers out of range");
 
         Vector<index_type> idxmat(
             index_matrix_nrow(iter_back) * index_matrix_ncol(iter_back, iter));
@@ -234,7 +206,9 @@ class ResampleIndex
     RandomIter read_index_matrix(MatrixLayout layout, RandomIter first,
         std::size_t iter_back, std::size_t iter) const
     {
-        VSMC_RUNTIME_ASSERT_RESAMPLE_INDEX_ITER(iter, iter_back, insert);
+        runtime_assert(iter <= iter_back && iter_back < iter_size(),
+            "**ResampleIndex::read_index_matrix** iteration numbers out of "
+            "range");
 
         using difference_type =
             typename std::iterator_traits<RandomIter>::difference_type;

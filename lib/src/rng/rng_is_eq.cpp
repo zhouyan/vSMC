@@ -44,7 +44,8 @@ extern "C" {
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline int vsmc_rng_is_eq_##name(vsmc_rng rng1, vsmc_rng rng2)            \
     {                                                                         \
-        VSMC_RUNTIME_ASSERT_LIB_RNG_TYPE(rng1, rng2, vsmc_rng_is_eq);         \
+        ::vsmc::runtime_assert(rng1.type == rng2.type,                        \
+            "**vsmc_rng_is_eq** called with two RNGs of different types");    \
                                                                               \
         return static_cast<int>(*reinterpret_cast<RNGType *>(rng1.ptr) ==     \
             *reinterpret_cast<RNGType *>(rng2.ptr));                          \

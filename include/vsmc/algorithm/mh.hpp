@@ -37,14 +37,6 @@
 #include <vsmc/rng/normal_mv_distribution.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_ALGORITHM_MH_PROPOSAL_PARAM(flag, Name)           \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (flag), "**" #Name "Proposal** CONSTRUCTED WITH INVALID PARAMETERS")
-
-#define VSMC_RUNTIME_ASSERT_ALGORITHM_MH_NORMAL_MV_LOGIT_DIM(dim)             \
-    VSMC_RUNTIME_ASSERT((dim > 1), "**NormalMVLogitProposal** CONSTRUCTED "   \
-                                   "WITH DIMENSION LESS THAN 2")
-
 namespace vsmc
 {
 
@@ -60,14 +52,14 @@ class MH
     MH()
     {
         static_assert(
-            Dim != Dynamic, "**MH** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+            Dim != Dynamic, "**MH** object declared with dynamic dimension");
     }
 
     /// \brief Only usable when `Dim == Dynamic`
     MH(std::size_t dim) : x_(dim), y_(dim)
     {
         static_assert(
-            Dim == Dynamic, "**MH** OBJECT DECLARED WITH FIXED DIMENSION");
+            Dim == Dynamic, "**MH** object declared with fixed dimension");
     }
 
     std::size_t dim() const { return x_.size(); }
@@ -236,11 +228,12 @@ class NormalProposal
     NormalProposal(result_type stddev, result_type a, result_type b)
         : normal_(const_zero<result_type>(), stddev), a_(a), b_(b), flag_(0)
     {
+        runtime_assert(internal::normal_proposal_check_param(a, b),
+            "**NormalProposal** constructed with invalid arguments");
+
         unsigned lower = std::isfinite(a) ? 1 : 0;
         unsigned upper = std::isfinite(b) ? 1 : 0;
         flag_ = (lower << 1) + upper;
-        VSMC_RUNTIME_ASSERT_ALGORITHM_MH_PROPOSAL_PARAM(
-            internal::normal_proposal_check_param(a, b), Normal);
     }
 
     std::size_t dim() const { return 1; }
@@ -279,7 +272,7 @@ class NormalMVProposal
         : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+            "**NormalMVProposal** object declared with dynamic dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -290,7 +283,7 @@ class NormalMVProposal
         : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+            "**NormalMVProposal** object declared with dynamic dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -301,7 +294,7 @@ class NormalMVProposal
         : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+            "**NormalMVProposal** object declared with dynamic dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -313,7 +306,7 @@ class NormalMVProposal
         : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+            "**NormalMVProposal** object declared with dynamic dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -324,7 +317,7 @@ class NormalMVProposal
         : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+            "**NormalMVProposal** object declared with dynamic dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -336,7 +329,7 @@ class NormalMVProposal
         : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+            "**NormalMVProposal** object declared with dynamic dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -348,7 +341,7 @@ class NormalMVProposal
         : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+            "**NormalMVProposal** object declared with dynamic dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -360,7 +353,7 @@ class NormalMVProposal
         : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+            "**NormalMVProposal** object declared with dynamic dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -376,7 +369,7 @@ class NormalMVProposal
         , flag_(dim)
     {
         static_assert(Dim == Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+            "**NormalMVProposal** object declared with fixed dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -392,7 +385,7 @@ class NormalMVProposal
         , flag_(dim)
     {
         static_assert(Dim == Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+            "**NormalMVProposal** object declared with fixed dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -408,7 +401,7 @@ class NormalMVProposal
         , flag_(dim)
     {
         static_assert(Dim == Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+            "**NormalMVProposal** object declared with fixed dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -424,7 +417,7 @@ class NormalMVProposal
         , flag_(dim)
     {
         static_assert(Dim == Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+            "**NormalMVProposal** object declared with fixed dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -440,7 +433,7 @@ class NormalMVProposal
         , flag_(dim)
     {
         static_assert(Dim == Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+            "**NormalMVProposal** object declared with fixed dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -456,7 +449,7 @@ class NormalMVProposal
         , flag_(dim)
     {
         static_assert(Dim == Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+            "**NormalMVProposal** object declared with fixed dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -472,7 +465,7 @@ class NormalMVProposal
         , flag_(dim)
     {
         static_assert(Dim == Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+            "**NormalMVProposal** object declared with fixed dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -488,7 +481,7 @@ class NormalMVProposal
         , flag_(dim)
     {
         static_assert(Dim == Dynamic,
-            "**NormalMVProposal** OBJECT DECLARED WITH FIXED DIMENSION");
+            "**NormalMVProposal** object declared with fixed dimension");
         init_a(a);
         init_b(b);
         init_flag();
@@ -542,17 +535,15 @@ class NormalMVProposal
 
     void init_flag()
     {
+        runtime_assert(internal::normal_mv_proposal_check_param(
+                           dim(), a_.data(), b_.data()),
+            "**NormalMVProposal** constructed with invalid arguments");
 
         for (std::size_t i = 0; i != dim(); ++i) {
             unsigned lower = std::isfinite(a_[i]) ? 1 : 0;
             unsigned upper = std::isfinite(b_[i]) ? 1 : 0;
             flag_[i] = (lower << 1) + upper;
         }
-
-        VSMC_RUNTIME_ASSERT_ALGORITHM_MH_PROPOSAL_PARAM(
-            internal::normal_mv_proposal_check_param(
-                dim(), a_.data(), b_.data()),
-            NormalMV);
     }
 }; // class NormalMVProposal
 
@@ -568,16 +559,16 @@ class NormalMVLogitProposal
     NormalMVLogitProposal(result_type chol)
         : normal_mv_(const_zero<result_type>(), chol)
     {
-        static_assert(Dim > 1, "**NormalMVLogitProposal** OBJECT DECLARED "
-                               "WITH DIMENSION LESS THAN 2");
+        static_assert(Dim > 1, "**NormalMVLogitProposal** object declared "
+                               "with dimension less than 2");
     }
 
     /// \brief Only usable when `Dim > 1`
     NormalMVLogitProposal(const result_type *chol)
         : normal_mv_(const_zero<result_type>(), chol)
     {
-        static_assert(Dim > 1, "**NormalMVLogitProposal** OBJECT DECLARED "
-                               "WITH DIMENSION LESS THAN 2");
+        static_assert(Dim > 1, "**NormalMVLogitProposal** object declared "
+                               "with dimension less than 2");
     }
 
     /// \brief Only usable when `Dim == Dynamic`
@@ -585,8 +576,10 @@ class NormalMVLogitProposal
         : normal_mv_(dim, const_zero<result_type>(), chol), z_(dim)
     {
         static_assert(Dim == Dynamic,
-            "**NormalMVLogitProposal** OBJECT DECLARED WITH FIXED DIMENSION");
-        VSMC_RUNTIME_ASSERT_ALGORITHM_MH_NORMAL_MV_LOGIT_DIM(dim);
+            "**NormalMVLogitProposal** object declared with fixed dimension");
+
+        runtime_assert(dim > 1, "**NormalMVLogitProposal** constructed with "
+                                "dimension less than 2");
     }
 
     /// \brief Only usable when `Dim == Dynamic`
@@ -594,8 +587,10 @@ class NormalMVLogitProposal
         : normal_mv_(dim, const_zero<result_type>(), chol), z_(dim)
     {
         static_assert(Dim == Dynamic,
-            "**NormalMVLogitProposal** OBJECT DECLARED WITH FIXED DIMENSION");
-        VSMC_RUNTIME_ASSERT_ALGORITHM_MH_NORMAL_MV_LOGIT_DIM(dim);
+            "**NormalMVLogitProposal** object declared with fixed dimension");
+
+        runtime_assert(dim > 1, "**NormalMVLogitProposal** constructed with "
+                                "dimension less than 2");
     }
 
     std::size_t dim() const { return normal_mv_.dim(); }

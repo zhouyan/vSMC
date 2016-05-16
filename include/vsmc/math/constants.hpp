@@ -66,7 +66,7 @@ template <typename T>
 inline constexpr T const_inf() noexcept
 {
     static_assert(std::is_floating_point<T>::value,
-        "**const_inf** USED WITH T OTHER THAN FLOATING POINT TYPES");
+        "**const_inf** used with T other than floating point types");
 
     return std::numeric_limits<T>::infinity();
 }
@@ -77,7 +77,7 @@ template <typename T>
 inline constexpr T const_nan() noexcept
 {
     static_assert(std::is_floating_point<T>::value,
-        "**const_nan** USED WITH T OTHER THAN FLOATING POINT TYPES");
+        "**const_nan** used with T other than floating point types");
 
     return std::numeric_limits<T>::quiet_NaN();
 }

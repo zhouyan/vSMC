@@ -56,8 +56,8 @@ class NormalMVDistribution
     class param_type
     {
         static_assert(internal::is_one_of<RealType, float, double>::value,
-            "**NormalMVDistributon::param_type** USED WITH RealType OTHER "
-            "THAN float OR double");
+            "**NormalMVDistributon::param_type** used with RealType other "
+            "than float or double");
 
         public:
         using result_type = RealType;
@@ -67,8 +67,8 @@ class NormalMVDistribution
             : is_scalar_mean_(true), is_scalar_chol_(true)
         {
             static_assert(Dim != Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* OBJECT DECLARED WITH DYNAMIC "
-                                          "DIMENSION");
+                                          "* object declared with dynamic "
+                                          "dimension");
             init_mean(mean);
             init_chol(chol);
         }
@@ -77,8 +77,8 @@ class NormalMVDistribution
             : is_scalar_mean_(true), is_scalar_chol_(false)
         {
             static_assert(Dim != Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* OBJECT DECLARED WITH DYNAMIC "
-                                          "DIMENSION");
+                                          "* object declared with dynamic "
+                                          "dimension");
             init_mean(mean);
             init_chol(chol);
         }
@@ -87,8 +87,8 @@ class NormalMVDistribution
             : is_scalar_mean_(false), is_scalar_chol_(true)
         {
             static_assert(Dim != Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* OBJECT DECLARED WITH DYNAMIC "
-                                          "DIMENSION");
+                                          "* object declared with dynamic "
+                                          "dimension");
             init_mean(mean);
             init_chol(chol);
         }
@@ -97,8 +97,8 @@ class NormalMVDistribution
             : is_scalar_mean_(false), is_scalar_chol_(false)
         {
             static_assert(Dim != Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* OBJECT DECLARED WITH DYNAMIC "
-                                          "DIMENSION");
+                                          "* object declared with dynamic "
+                                          "dimension");
             init_mean(mean);
             init_chol(chol);
         }
@@ -110,8 +110,8 @@ class NormalMVDistribution
             , is_scalar_chol_(true)
         {
             static_assert(Dim == Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* OBJECT DECLARED WITH FIXED "
-                                          "DIMENSION");
+                                          "* object declared with fixed "
+                                          "dimension");
             init_mean(mean);
             init_chol(chol);
         }
@@ -123,8 +123,8 @@ class NormalMVDistribution
             , is_scalar_chol_(false)
         {
             static_assert(Dim == Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* OBJECT DECLARED WITH FIXED "
-                                          "DIMENSION");
+                                          "* object declared with fixed "
+                                          "dimension");
             init_mean(mean);
             init_chol(chol);
         }
@@ -136,8 +136,8 @@ class NormalMVDistribution
             , is_scalar_chol_(false)
         {
             static_assert(Dim == Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* OBJECT DECLARED WITH FIXED "
-                                          "DIMENSION");
+                                          "* object declared with fixed "
+                                          "dimension");
             init_mean(mean);
             init_chol(chol);
         }
@@ -150,8 +150,8 @@ class NormalMVDistribution
             , is_scalar_chol_(false)
         {
             static_assert(Dim == Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* OBJECT DECLARED WITH FIXED "
-                                          "DIMENSION");
+                                          "* object declared with fixed "
+                                          "dimension");
             init_mean(mean);
             init_chol(chol);
         }
@@ -530,7 +530,7 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, RealType mean, RealType chol)
 {
     static_assert(internal::is_one_of<RealType, float, double>::value,
-        "**normal_mv_distribution** USED WITH RealType OTHER THAN float OR "
+        "**normal_mv_distribution** used with RealType other than float or "
         "double");
 
     internal::size_check<VSMC_BLAS_INT>(n, "normal_mv_distribution");
@@ -546,7 +546,7 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, RealType mean, const RealType *chol)
 {
     static_assert(internal::is_one_of<RealType, float, double>::value,
-        "**normal_mv_distribution** USED WITH RealType OTHER THAN float OR "
+        "**normal_mv_distribution** used with RealType other than float or "
         "double");
 
     internal::size_check<VSMC_BLAS_INT>(n, "normal_mv_distribution");
@@ -570,7 +570,7 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, const RealType *mean, RealType chol)
 {
     static_assert(internal::is_one_of<RealType, float, double>::value,
-        "**normal_mv_distribution** USED WITH RealType OTHER THAN float OR "
+        "**normal_mv_distribution** used with RealType other than float or "
         "double");
 
     internal::size_check<VSMC_BLAS_INT>(n, "normal_mv_distribution");
@@ -588,7 +588,7 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, const RealType *mean, const RealType *chol)
 {
     static_assert(internal::is_one_of<RealType, float, double>::value,
-        "**normal_mv_distribution** USED WITH RealType OTHER THAN float OR "
+        "**normal_mv_distribution** used with RealType other than float or "
         "double");
 
     internal::size_check<VSMC_BLAS_INT>(n, "normal_mv_distribution");

@@ -35,10 +35,6 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(flag)          \
-    VSMC_RUNTIME_ASSERT(                                                      \
-        (flag), "**DiscreteDistribution** WEIGHTS ARE NOT NON-NEGATIVE")
-
 namespace vsmc
 {
 
@@ -145,12 +141,10 @@ class DiscreteDistribution
                 return;
 
             double sum = 0;
-#ifndef NDEBUG
             bool flag = is_positive(probability_, sum);
-            VSMC_RUNTIME_ASSERT_RNG_DISCRETE_DISTRIBUTION_POSITIVE(flag);
-#else
-            is_positive(probability_, sum);
-#endif
+            runtime_assert(flag,
+                "**DiscreteDistribution** constructed with negative weights");
+
             mul(probability_.size(), 1 / sum, probability_.data(),
                 probability_.data());
         }

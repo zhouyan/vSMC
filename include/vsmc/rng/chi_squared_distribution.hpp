@@ -84,8 +84,8 @@ inline void chi_squared_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType df)
 {
     static_assert(std::is_floating_point<RealType>::value,
-        "**chi_squared_distribution** USED WITH RealType OTHER THAN FLOATING "
-        "POINT TYPES");
+        "**chi_squared_distribution** used with RealType other than floating "
+        "point types");
 
     gamma_distribution(rng, n, r, df / 2, static_cast<RealType>(2));
 }

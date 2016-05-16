@@ -454,13 +454,13 @@ template <typename T, std::size_t K = VSMC_RNG_THREEFRY_VECTOR_LENGTH,
 class ThreefryGenerator
 {
     static_assert(std::is_unsigned<T>::value,
-        "**ThreefryGenerator** USED WITH T OTHER THAN UNSIGNED INTEGER TYPES");
+        "**ThreefryGenerator** used with T other than unsigned integer types");
 
     static_assert(K != 0 && K % 2 == 0,
-        "**ThreefryGenerator** USED WITH K OTHER THAN MULTIPLES OF 2");
+        "**ThreefryGenerator** used with K other than multiples of 2");
 
     static_assert(
-        Rounds != 0, "**ThreefryGenerator** USED WITH ROUNDS EQUAL TO ZERO");
+        Rounds != 0, "**ThreefryGenerator** used with rounds equal to zero");
 
     public:
     using ctr_type = std::array<T, K>;

@@ -35,10 +35,6 @@
 #include <vsmc/rng/internal/common.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_RNG_U01_SEQUENCE(Method)                          \
-    VSMC_RUNTIME_ASSERT((n < N_ && (n == n_ || n == n_ + 1 || n_ == N_)),     \
-        "**U01Sequence" #Method "::operator[]** INVALID INDEX")
-
 namespace vsmc
 {
 
@@ -121,8 +117,8 @@ template <typename RealType>
 inline void u01_trans_sorted(std::size_t N, const RealType *u01, RealType *r)
 {
     static_assert(std::is_floating_point<RealType>::value,
-        "**u01_trans_sorted** USED WITH RealType OTHER THAN FLOATING POINT "
-        "TYPES");
+        "**u01_trans_sorted** used with RealType other than floating point "
+        "types");
 
     if (N == 0)
         return;
@@ -151,8 +147,8 @@ inline void u01_trans_stratified(
     std::size_t N, const RealType *u01, RealType *r)
 {
     static_assert(std::is_floating_point<RealType>::value,
-        "**u01_trans_stratified** USED WITH RealType OTHER THAN FLOATING "
-        "POINT TYPES");
+        "**u01_trans_stratified** used with RealType other than floating "
+        "point types");
 
     if (N == 0)
         return;
@@ -174,8 +170,8 @@ inline void u01_trans_systematic(
     std::size_t N, const RealType *u01, RealType *r)
 {
     static_assert(std::is_floating_point<RealType>::value,
-        "**u01_trans_systematic** USED WITH RealType OTHER THAN FLOATING "
-        "POINT TYPES");
+        "**u01_trans_systematic** used with RealType other than floating "
+        "point types");
 
     if (N == 0)
         return;
@@ -196,8 +192,8 @@ template <typename RealType, typename RNGType>
 inline void u01_rand_sorted(RNGType &rng, std::size_t N, RealType *r)
 {
     static_assert(std::is_floating_point<RealType>::value,
-        "**u01_rand_sorted** USED WITH RealType OTHER THAN FLOATING POINT "
-        "TYPES");
+        "**u01_rand_sorted** used with RealType other than floating point "
+        "types");
 
     if (N == 0)
         return;
@@ -223,8 +219,8 @@ template <typename RealType, typename RNGType>
 inline void u01_rand_stratified(RNGType &rng, std::size_t N, RealType *r)
 {
     static_assert(std::is_floating_point<RealType>::value,
-        "**u01_rand_stratified** USED WITH RealType OTHER THAN FLOATING POINT "
-        "TYPES");
+        "**u01_rand_stratified** used with RealType other than floating point "
+        "types");
 
     const std::size_t k = internal::BufferSize<RealType>::value;
     const std::size_t m = N / k;
@@ -241,8 +237,8 @@ template <typename RealType, typename RNGType>
 inline void u01_rand_systematic(RNGType &rng, std::size_t N, RealType *r)
 {
     static_assert(std::is_floating_point<RealType>::value,
-        "**u01_rand_systematic** USED WITH RealType OTHER THAN FLOATING POINT "
-        "TYPES");
+        "**u01_rand_systematic** used with RealType other than floating point "
+        "types");
 
     U01Distribution<RealType> ru01;
     RealType u01 = ru01(rng);

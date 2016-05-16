@@ -402,13 +402,13 @@ template <typename T, std::size_t K = VSMC_RNG_PHILOX_VECTOR_LENGTH,
 class PhiloxGenerator
 {
     static_assert(std::is_unsigned<T>::value,
-        "**PhiloxGenerator** USED WITH T OTHER THAN UNSIGNED INTEGER TYPES");
+        "**PhiloxGenerator** used with T other than unsigned integer types");
 
     static_assert(K != 0 && K % 2 == 0,
-        "**PhiloxGenerator** USED WITH K OTHER THAN MULTIPLES OF 2");
+        "**PhiloxGenerator** used with K other than multiples of 2");
 
     static_assert(
-        Rounds != 0, "**PhiloxGenerator** USED WITH ROUNDS EQUAL TO ZERO");
+        Rounds != 0, "**PhiloxGenerator** used with rounds equal to zero");
 
     public:
     using ctr_type = std::array<T, K>;

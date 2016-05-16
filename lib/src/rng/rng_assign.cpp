@@ -44,7 +44,8 @@ extern "C" {
 #define VSMC_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline void vsmc_rng_assign_##name(vsmc_rng rng, vsmc_rng other)          \
     {                                                                         \
-        VSMC_RUNTIME_ASSERT_LIB_RNG_TYPE(rng, other, vsmc_rng_assign);        \
+        ::vsmc::runtime_assert(rng.type == other.type,                        \
+            "**vsmc_rng_assign** called with two RNGs of different types");   \
                                                                               \
         *reinterpret_cast<RNGType *>(rng.ptr) =                               \
             *reinterpret_cast<RNGType *>(other.ptr);                          \

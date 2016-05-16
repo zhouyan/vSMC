@@ -34,13 +34,6 @@
 
 #include <vsmc/internal/common.hpp>
 
-#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(psize, dim)         \
-    VSMC_RUNTIME_ASSERT((psize >= dim),                                       \
-        "**StateMatrix::state_unpack** INPUT PACK SIZE TOO SMALL")
-
-#define VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_INDEX(flag)                     \
-    VSMC_RUNTIME_ASSERT(flag, "**StateMatrix** INDEX OUT OF RANGE");
-
 namespace vsmc
 {
 
@@ -111,8 +104,8 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
 
         value_type &at(std::size_t pos) const
         {
-            VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_INDEX(
-                (!internal::is_negative(pos) && pos < this->dim()));
+            runtime_assert(
+                pos < this->dim(), "**StateMatrix::at** index out of range");
 
             return operator()(pos);
         }
@@ -151,8 +144,9 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
 
     StateMatrixBase(size_type N, std::size_t dim) : size_(N)
     {
-        static_assert(Dim == Dynamic, "**StateMatrix::StateMatrix** USED WITH "
-                                      "AN OBJECT WITH FIXED DIMENSION");
+        static_assert(Dim == Dynamic, "**StateMatrix::StateMatrix** used with "
+                                      "an object with fixed dimension");
+
         resize_data(N, dim);
     }
 
@@ -233,15 +227,17 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     void resize(size_type N, std::size_t dim)
     {
-        static_assert(Dim == Dynamic, "**StateMatrix::resize** USED WITH AN "
-                                      "OBJECT WITH FIXED DIMENSION");
+        static_assert(Dim == Dynamic, "**StateMatrix::resize** used with an "
+                                      "object with fixed dimension");
+
         resize_both(N, dim);
     }
 
     void resize_dim(std::size_t dim)
     {
-        static_assert(Dim == Dynamic, "**StateMatrix::resize_dim** USED WITH "
-                                      "AN OBJECT WITH FIXED DIMENSION");
+        static_assert(Dim == Dynamic, "**StateMatrix::resize_dim** used with "
+                                      "an object with fixed dimension");
+
         resize_both(this->size(), dim);
     }
 
@@ -257,18 +253,18 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     T &at(size_type id, std::size_t pos)
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_INDEX(
-            (!internal::is_negative(id) && id < this->size() &&
-                !internal::is_negative(pos) && pos < this->dim()));
+        runtime_assert(!internal::is_negative(id) && id < this->size() &&
+                pos < this->dim(),
+            "**StateMatrix::at** index out of range");
 
         return operator()(id, pos);
     }
 
     const T &at(size_type id, std::size_t pos) const
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_INDEX(
-            (!internal::is_negative(id) && id < this->size() &&
-                !internal::is_negative(pos) && pos < this->dim()));
+        runtime_assert(!internal::is_negative(id) && id < this->size() &&
+                pos < this->dim(),
+            "**StateMatrix::at** index out of range");
 
         return operator()(id, pos);
     }
@@ -354,8 +350,8 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     void state_unpack(size_type id, const pack_type &pack)
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
-            pack.size(), this->dim());
+        runtime_assert(pack.size() >= this->dim(),
+            "**StateMatrix::unpack** pack size is too small");
 
         const value_type *ptr = pack.data();
         std::copy(ptr, ptr + this->dim(), row_data(id));
@@ -363,8 +359,8 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     void state_unpack(size_type id, pack_type &&pack)
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
-            pack.size(), this->dim());
+        runtime_assert(pack.size() >= this->dim(),
+            "**StateMatrix::unpack** pack size is too small");
 
         const value_type *ptr = pack.data();
         std::move(ptr, ptr + this->dim(), row_data(id));
@@ -437,15 +433,17 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     void resize(size_type N, std::size_t dim)
     {
-        static_assert(Dim == Dynamic, "**StateMatrix::resize** USED WITH AN "
-                                      "OBJECT WITH FIXED DIMENSION");
+        static_assert(Dim == Dynamic, "**StateMatrix::resize** used with an "
+                                      "object with fixed dimension");
+
         resize_both(N, dim);
     }
 
     void resize_dim(std::size_t dim)
     {
-        static_assert(Dim == Dynamic, "**StateMatrix::resize_dim** USED WITH "
-                                      "AN OBJECT WITH FIXED DIMENSION");
+        static_assert(Dim == Dynamic, "**StateMatrix::resize_dim** used with "
+                                      "an object with fixed dimension");
+
         resize_both(this->size(), dim);
     }
 
@@ -551,8 +549,8 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     void state_unpack(size_type id, const pack_type &pack)
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
-            pack.size(), this->dim());
+        runtime_assert(pack.size() >= this->dim(),
+            "**StateMatrix::unpack** pack size is too small");
 
         for (std::size_t d = 0; d != this->dim(); ++d)
             operator()(id, d) = pack[d];
@@ -560,8 +558,8 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     void state_unpack(size_type id, pack_type &&pack)
     {
-        VSMC_RUNTIME_ASSERT_CORE_STATE_MATRIX_UNPACK_SIZE(
-            pack.size(), this->dim());
+        runtime_assert(pack.size() >= this->dim(),
+            "**StateMatrix::unpack** pack size is too small");
 
         for (std::size_t d = 0; d != this->dim(); ++d)
             operator()(id, d) = std::move(pack[d]);
