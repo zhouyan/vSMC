@@ -91,6 +91,21 @@ size_t vsmc_sampler_iter_num(vsmc_sampler sampler)
     return ::vsmc::cast(sampler).iter_num();
 }
 
+void vsmc_sampler_reset(vsmc_sampler sampler)
+{
+    ::vsmc::cast(sampler).reset();
+}
+
+void vsmc_sampler_clear(vsmc_sampler sampler)
+{
+    ::vsmc::cast(sampler).clear();
+}
+
+void vsmc_sampler_eval_clear(vsmc_sampler sampler)
+{
+    ::vsmc::cast(sampler).eval_clear();
+}
+
 void vsmc_sampler_eval(vsmc_sampler sampler, vsmc_sampler_eval_type new_eval,
     vSMCSamplerStage stage, int append)
 {
@@ -144,9 +159,9 @@ vsmc_monitor vsmc_sampler_get_monitor(vsmc_sampler sampler, const char *name)
     return monitor;
 }
 
-int vsmc_sampler_monitor_clear(vsmc_sampler sampler, const char *name)
+void vsmc_sampler_monitor_clear(vsmc_sampler sampler, const char *name)
 {
-    return ::vsmc::cast(sampler).monitor_clear(name);
+    ::vsmc::cast(sampler).monitor_clear(name);
 }
 
 void vsmc_sampler_monitor_clear_all(vsmc_sampler sampler)

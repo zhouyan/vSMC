@@ -61,10 +61,10 @@ static inline void pf_free()
     vsmc_free(pf_inc_w);
 }
 
-static inline double pf_log_likelihood(size_t t, vsmc_single_particle sp)
+static inline double pf_log_likelihood(size_t t, vsmc_particle_index idx)
 {
-    double llh_x = 10 * (sp.state[PosX] - pf_obs_x[t]);
-    double llh_y = 10 * (sp.state[PosY] - pf_obs_y[t]);
+    double llh_x = 10 * (idx.state[PosX] - pf_obs_x[t]);
+    double llh_y = 10 * (idx.state[PosY] - pf_obs_y[t]);
     llh_x = log(1 + llh_x * llh_x / 10);
     llh_y = log(1 + llh_y * llh_y / 10);
 

@@ -248,8 +248,7 @@ class GMMMu : public GMMEvalSMP<GMMMu>
             auto lp = idx.log_prior();
             auto ll = idx.log_likelihood();
             auto lt = lp + phi * ll;
-            auto pi = [this, idx, phi, &lp, &ll](
-                std::size_t, const double *x) {
+            auto pi = [this, idx, phi, &lp, &ll](const double *x) {
                 lp = model_.log_prior(x, idx.lambda(), idx.omega());
                 ll = model_.log_likelihood(x, idx.lambda(), idx.omega());
                 return lp + phi * ll;
@@ -284,8 +283,7 @@ class GMMLambda : public GMMEvalSMP<GMMLambda>
             auto lp = idx.log_prior();
             auto ll = idx.log_likelihood();
             auto lt = lp + phi * ll;
-            auto pi = [this, idx, phi, &lp, &ll](
-                std::size_t, const double *x) {
+            auto pi = [this, idx, phi, &lp, &ll](const double *x) {
                 lp = model_.log_prior(idx.mu(), x, idx.omega());
                 ll = model_.log_likelihood(idx.mu(), x, idx.omega());
                 return lp + phi * ll;
@@ -319,8 +317,7 @@ class GMMOmega : public GMMEvalSMP<GMMOmega>
             auto lp = idx.log_prior();
             auto ll = idx.log_likelihood();
             auto lt = lp + phi * ll;
-            auto pi = [this, idx, phi, &lp, &ll](
-                std::size_t, const double *x) {
+            auto pi = [this, idx, phi, &lp, &ll](const double *x) {
                 lp = model_.log_prior(idx.mu(), idx.lambda(), x);
                 ll = model_.log_likelihood(idx.mu(), idx.lambda(), x);
                 return lp + phi * ll;

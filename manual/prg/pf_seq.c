@@ -1,43 +1,38 @@
 #include "pf.h"
 
-static inline size_t pf_init(size_t t, vsmc_particle particle)
+static inline void pf_init(size_t t, vsmc_particle particle)
 {
     pf_normal(particle, 2, 1);
     const size_t n = vsmc_particle_size(particle);
     for (size_t i = 0; i < n; ++i) {
-        const vsmc_single_particle sp = vsmc_particle_sp(particle, i);
-        sp.state[PosX] = pf_pos_x[i];
-        sp.state[PosY] = pf_pos_y[i];
-        sp.state[VelX] = pf_vel_x[i];
-        sp.state[VelY] = pf_vel_y[i];
+        const vsmc_particle_index idx = vsmc_particle_get_index(particle, i);
+        idx.state[PosX] = pf_pos_x[i];
+        idx.state[PosY] = pf_pos_y[i];
+        idx.state[VelX] = pf_vel_x[i];
+        idx.state[VelY] = pf_vel_y[i];
     }
-
-    return 0;
 }
 
-static inline size_t pf_move(size_t t, vsmc_particle particle)
+static inline void pf_move(size_t t, vsmc_particle particle)
 {
     pf_normal(particle, sqrt(0.02), sqrt(0.001));
     const size_t n = vsmc_particle_size(particle);
     for (size_t i = 0; i < n; ++i) {
-        vsmc_single_particle sp = vsmc_particle_sp(particle, i);
-        sp.state[PosX] += pf_pos_x[i] + 0.1 * sp.state[VelX];
-        sp.state[PosY] += pf_pos_y[i] + 0.1 * sp.state[VelY];
-        sp.state[VelX] += pf_vel_x[i];
-        sp.state[VelY] += pf_vel_y[i];
+        vsmc_particle_index idx = vsmc_particle_get_index(particle, i);
+        idx.state[PosX] += pf_pos_x[i] + 0.1 * idx.state[VelX];
+        idx.state[PosY] += pf_pos_y[i] + 0.1 * idx.state[VelY];
+        idx.state[VelX] += pf_vel_x[i];
+        idx.state[VelY] += pf_vel_y[i];
     }
-
-    return 0;
 }
 
-static inline size_t pf_weight(size_t t, vsmc_particle particle)
+static inline void pf_weight(size_t t, vsmc_particle particle)
 {
     const size_t n = vsmc_particle_size(particle);
     for (size_t i = 0; i < n; ++i)
-        pf_inc_w[i] = pf_log_likelihood(t, vsmc_particle_sp(particle, i));
+        pf_inc_w[i] =
+            pf_log_likelihood(t, vsmc_particle_get_index(particle, i));
     vsmc_weight_add_log(vsmc_particle_weight(particle), pf_inc_w, 1);
-
-    return 0;
 }
 
 static inline void pf_eval(
@@ -45,9 +40,9 @@ static inline void pf_eval(
 {
     const size_t n = vsmc_particle_size(particle);
     for (size_t i = 0; i < n; ++i) {
-        vsmc_single_particle sp = vsmc_particle_sp(particle, i);
-        *r++ = sp.state[PosX];
-        *r++ = sp.state[PosY];
+        vsmc_particle_index idx = vsmc_particle_get_index(particle, i);
+        *r++ = idx.state[PosX];
+        *r++ = idx.state[PosY];
     }
 }
 
@@ -60,7 +55,7 @@ int main(int argc, char **argv)
     pf_malloc(n);
 
     vsmc_sampler sampler = vsmc_sampler_new(n, 4);
-    vsmc_sampler_resample_scheme(sampler, vSMCMultinomial, 0.5);
+    vsmc_sampler_resample_scheme(sampler, vSMCStratified, 0.5);
     vsmc_sampler_eval(sampler, pf_init, vSMCSamplerInit, 1);
     vsmc_sampler_eval(sampler, pf_move, vSMCSamplerMove, 1);
     vsmc_sampler_eval(

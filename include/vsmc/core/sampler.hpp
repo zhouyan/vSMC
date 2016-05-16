@@ -144,6 +144,29 @@ class Sampler
     /// \brief Current iteration number (initialization count as zero)
     std::size_t iter_num() const { return iter_num_; }
 
+    /// \brief Reset a sampler
+    void reset()
+    {
+        clear();
+        eval_clear();
+    }
+
+    /// \brief Clear all history
+    void clear()
+    {
+        iter_num_ = 0;
+        particle_.weight().set_equal();
+        for (auto &m : monitor_)
+            m.second.clear();
+
+        size_history_.clear();
+        ess_history_.clear();
+        resampled_history_.clear();
+    }
+
+    /// \brief Clear the evaluation sequence
+    void eval_clear() { eval_.clear(); }
+
     /// \brief Add a new evaluation object
     Sampler<T> &eval(
         const eval_type &new_eval, SamplerStage stage, bool append = true)
@@ -252,19 +275,10 @@ class Sampler
     }
 
     /// \brief Erase a named monitor
-    bool monitor_clear(const std::string &name)
-    {
-        return monitor_.erase(name) ==
-            static_cast<typename monitor_map_type::size_type>(1);
-    }
+    void monitor_clear(const std::string &name) { monitor_.erase(name); }
 
     /// \brief Erase all monitors
-    Sampler<T> &monitor_clear()
-    {
-        monitor_.clear();
-
-        return *this;
-    }
+    void monitor_clear() { monitor_.clear(); }
 
     /// \brief Initialization
     Sampler<T> &initialize()
@@ -410,21 +424,9 @@ class Sampler
     Vector<bool> resampled_history_;
     monitor_map_type monitor_;
 
-    void do_reset()
-    {
-        iter_num_ = 0;
-        particle_.weight().set_equal();
-        for (auto &m : monitor_)
-            m.second.clear();
-
-        size_history_.clear();
-        ess_history_.clear();
-        resampled_history_.clear();
-    }
-
     void do_initialize()
     {
-        do_reset();
+        clear();
         do_init();
         do_common();
     }

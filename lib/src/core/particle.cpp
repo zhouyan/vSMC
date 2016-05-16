@@ -121,4 +121,9 @@ vsmc_rng vsmc_particle_rng(vsmc_particle particle, size_t id)
         ::vsmc::rng_type<::vsmc::ParticleC::rng_type>()};
 }
 
+vsmc_particle_index vsmc_particle_get_index(vsmc_particle particle, size_t id)
+{
+    return {::vsmc::cast(particle).state().row_data(id), id};
+}
+
 } // extern "C"

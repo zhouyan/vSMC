@@ -194,6 +194,9 @@ vsmc_weight vsmc_particle_weight(vsmc_particle particle);
 /// \brief `vsmc::Particle::rng`
 vsmc_rng vsmc_particle_rng(vsmc_particle particle, size_t id);
 
+/// \brief `vsmc::Particle::index`
+vsmc_particle_index vsmc_particle_get_index(vsmc_particle particle, size_t id);
+
 /// @} C_API_Core_Particle
 
 /// \addtogroup C_API_Core_Monitor
@@ -289,6 +292,15 @@ size_t vsmc_sampler_iter_size(vsmc_sampler sampler);
 /// \brief `vsmc::Sampler::iter_num`
 size_t vsmc_sampler_iter_num(vsmc_sampler sampler);
 
+/// \brief `vsmc::Sampler::reset`
+void vsmc_sampler_reset(vsmc_sampler sampler);
+
+/// \brief `vsmc::Sampler::clear`
+void vsmc_sampler_clear(vsmc_sampler sampler);
+
+/// \brief `vsmc::Sampler::eval_clear`
+void vsmc_sampler_eval_clear(vsmc_sampler sampler);
+
 /// \brief `vsmc::Sampler::eval`
 void vsmc_sampler_eval(vsmc_sampler sampler, vsmc_sampler_eval_type new_eval,
     vSMCSamplerStage stage, int append);
@@ -321,7 +333,7 @@ void vsmc_sampler_set_monitor(
 vsmc_monitor vsmc_sampler_get_monitor(vsmc_sampler sampler, const char *name);
 
 /// \brief `vsmc::Sampler::monitor_clear`
-int vsmc_sampler_monitor_clear(vsmc_sampler sampler, const char *name);
+void vsmc_sampler_monitor_clear(vsmc_sampler sampler, const char *name);
 
 /// \brief `vsmc::Sampler::monitor_clear`
 void vsmc_sampler_monitor_clear_all(vsmc_sampler sampler);

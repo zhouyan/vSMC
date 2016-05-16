@@ -1,3 +1,0 @@
-OPENCL_LIBRARY := -framework OpenCL
-
-include Makefile
