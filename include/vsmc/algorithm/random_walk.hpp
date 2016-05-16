@@ -50,11 +50,11 @@ namespace vsmc
 
 /// \brief Random walk MCMC update
 /// \ingroup RandomWalk
-template <typename RealType = double, std::size_t Dim = Dynamic>
+template <typename ResultType = double, std::size_t Dim = Dynamic>
 class RandomWalk
 {
     public:
-    using result_type = RealType;
+    using result_type = ResultType;
 
     /// \brief Only usable when `Dim != Dynamic`
     RandomWalk()
@@ -84,14 +84,14 @@ class RandomWalk
     /// \f$\log\gamma(x)\f$ between updates if it is expensive to calculate.
     /// \param log_target The log-target fucntion
     /// ~~~{.cpp}
-    /// result_type log_target(std::size_t dim_x, const result_type *x );
+    /// double log_target(std::size_t dim_x, const result_type *x );
     /// ~~~
     /// It accepts the lengths of the state vector and a pointer to the storage
     /// of the state value. It return the value of log-target function
     /// \f$\log\gamma(x)\f$.
     /// \param proposal The proposal function. It takes the form,
     /// ~~~{.cpp}
-    /// result_type proposal(RNGType &rng, std::size_t dim,
+    /// double proposal(RNGType &rng, std::size_t dim,
     ///     const result_type *x, result_type *y);
     /// ~~~
     /// After the call, the function return the proposed value in `y` and
@@ -99,15 +99,15 @@ class RandomWalk
     ///
     /// \return Acceptance count
     template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(RNGType &rng, result_type *x, result_type *ltx,
+    std::size_t operator()(RNGType &rng, result_type *x, double *ltx,
         LogTargetType &&log_target, ProposalType &&proposal)
     {
-        U01Distribution<result_type> u01;
-        result_type q = proposal(rng, dim(), x, y_.data());
-        result_type s = ltx == nullptr ? log_target(dim(), x) : *ltx;
-        result_type t = log_target(dim(), y_.data());
-        result_type p = t - s + q;
-        result_type u = std::log(u01(rng));
+        U01Distribution<double> u01;
+        double s = ltx == nullptr ? log_target(dim(), x) : *ltx;
+        double q = proposal(rng, dim(), x, y_.data());
+        double t = log_target(dim(), y_.data());
+        double p = t - s + q;
+        double u = std::log(u01(rng));
 
         if (u < p) {
             std::copy(y_.begin(), y_.end(), x);
@@ -118,248 +118,39 @@ class RandomWalk
         return 0;
     }
 
-    /// \brief One-step random walk update of a block of elements within a
-    /// vector state
-    ///
-    /// \details
-    /// With this operator, it is assumed that the length of input/output state
-    /// vector `x` is of length `m` instead of `dim_x()`. A sub-vector of
-    /// length `dim_x()`, starting at index `idx` will be updated. The
-    /// log-target function will be called with `m` as its first argument and a
-    /// length `m` vector will be passed as its second argument as well.
-    template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(RNGType &rng, std::size_t m, std::size_t idx,
-        result_type *x, result_type *ltx, LogTargetType &&log_target,
-        ProposalType &&proposal)
-    {
-        U01Distribution<result_type> u01;
-        std::copy_n(x + idx, dim(), x_.begin());
-        result_type q = proposal(rng, dim(), x_.data(), y_.data());
-        result_type s = ltx == nullptr ? log_target(m, x) : *ltx;
-        std::copy(y_.begin(), y_.end(), x + idx);
-        result_type t = log_target(m, x);
-        result_type p = t - s + q;
-        result_type u = std::log(u01(rng));
-
-        if (u < p) {
-            if (ltx != nullptr)
-                *ltx = t;
-            return 1;
-        }
-        std::copy(x_.begin(), x_.end(), x + idx);
-
-        return 0;
-    }
-
     /// \brief Multi-step random walk update
     template <typename RNGType, typename LogTargetType, typename ProposalType>
     std::size_t operator()(std::size_t n, RNGType &rng, result_type *x,
-        result_type *ltx, LogTargetType &&log_target, ProposalType &&proposal)
+        double *ltx, LogTargetType &&log_target, ProposalType &&proposal)
     {
-        std::size_t acc = 0;
-        result_type s = ltx == nullptr ? log_target(dim(), x) : *ltx;
+        std::copy_n(x, dim(), x_.data());
+        U01Distribution<double> u01;
+        std::size_t accept = 0;
+        double s = ltx == nullptr ? log_target(dim(), x) : *ltx;
         for (std::size_t i = 0; i != n; ++i) {
-            acc += operator()(rng, x, &s,
-                std::forward<LogTargetType>(log_target),
-                std::forward<ProposalType>(proposal));
+            double q = proposal(rng, dim(), x_.data(), y_.data());
+            double t = log_target(dim(), y_.data());
+            double p = t - s + q;
+            double u = std::log(u01(rng));
+            if (u < p) {
+                ++accept;
+                s = t;
+                x_.swap(y_);
+            }
         }
-        if (ltx != nullptr)
-            *ltx = s;
-
-        return acc;
-    }
-
-    /// \brief Multi-step random walk update of a block of element within a
-    /// vector state
-    template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(std::size_t n, RNGType &rng, std::size_t m,
-        std::size_t idx, result_type *x, result_type *ltx,
-        LogTargetType &&log_target, ProposalType &&proposal)
-    {
-        std::size_t acc = 0;
-        result_type s = ltx == nullptr ? log_target(m, x) : *ltx;
-        for (std::size_t i = 0; i != n; ++i) {
-            acc += operator()(rng, m, idx, x, &s,
-                std::forward<LogTargetType>(log_target),
-                std::forward<ProposalType>(proposal));
+        if (accept != 0) {
+            std::copy(x_.begin(), x_.end(), x);
+            if (ltx != nullptr)
+                *ltx = s;
         }
-        if (ltx != nullptr)
-            *ltx = s;
 
-        return acc;
+        return accept;
     }
 
     private:
-    internal::StaticVector<RealType, Dim> x_;
-    internal::StaticVector<RealType, Dim> y_;
+    internal::StaticVector<ResultType, Dim> x_;
+    internal::StaticVector<ResultType, Dim> y_;
 }; // class RandomWalk
-
-/// \brief Random walk MCMC update with test function
-/// \ingroup RandomWalk
-template <typename RealType = double, std::size_t DimX = Dynamic,
-    std::size_t DimG = Dynamic>
-class RandomWalkG
-{
-    public:
-    using result_type = RealType;
-
-    /// \brief Only usable when `DimX != Dynamic` and `DimG != Dynamic`
-    RandomWalkG()
-    {
-        static_assert(DimX != Dynamic && DimG != Dynamic,
-            "**RandomWalk** OBJECT DECLARED WITH DYNAMIC DIMENSION");
-    }
-
-    /// \brief Only usable when `DimX == Dynamic` and `DimG == Dynamic`
-    RandomWalkG(std::size_t dim_x, std::size_t dim_g)
-        : x_(dim_x), y_(dim_x), g_(dim_g)
-    {
-        static_assert(DimX == Dynamic && DimG == Dynamic,
-            "**RandomWalk** OBJECT DECLARED WITH FIXED DIMENSION");
-    }
-
-    std::size_t dim_x() const { return x_.size(); }
-    std::size_t dim_g() const { return g_.size(); }
-
-    /// \brief One-step random walk update
-    ///
-    /// \param rng RNG engine
-    /// \param x The current state value. It will be updated to the new value
-    /// after the MCMC move.
-    /// \param ltx If it is a non-null pointer, then it points to the value of
-    /// the \f$\log\gamma(x)\f$. It will be updated to the new value if the
-    /// MCMC move is accepted and left unchanged otherwise. If it is a null
-    /// pointer, then it is ignored. Use this pointer to save
-    /// \f$\log\gamma(x)\f$ between updates if it is expensive to calculate.
-    /// \param g If it is a non-null pointer, then it is used to save the value
-    /// of the test function \f$g(x)\f$ if the MCMC move is accepted and left
-    /// unchanged otherwise. If it is a null pointer, then it is ignored.
-    /// \param log_target The log-target fucntion
-    /// ~~~{.cpp}
-    /// result_type log_target(std::size_t dim_x, std::size_t dim_g,
-    ///     const result_type *x, result_type *g);
-    /// ~~~
-    /// It accepts the lengths of the state vector and test function value
-    /// vector, and pointers to the storage of the state value and test
-    /// function value. It return the value of log-target function
-    /// \f$\log\gamma(x)\f$. Note that this fucntion shall be able to handle
-    /// its argument `g` as a null pointer.
-    /// \param proposal The proposal function. It takes the form,
-    /// ~~~{.cpp}
-    /// result_type proposal(RNGType &rng, std::size_t dim,
-    ///     const result_type *x, result_type *y);
-    /// ~~~
-    /// After the call, the function return the proposed value in `y` and
-    /// return the value \f$\log(q(y, x) / q(x, y))\f$.
-    ///
-    /// \return Acceptance count
-    template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(RNGType &rng, result_type *x, result_type *ltx,
-        result_type *g, LogTargetType &&log_target, ProposalType &&proposal)
-    {
-        U01Distribution<result_type> u01;
-        result_type q = proposal(rng, dim_x(), x, y_.data());
-        result_type s =
-            ltx == nullptr ? log_target(dim_x(), dim_g(), x, nullptr) : *ltx;
-        result_type t = log_target(
-            dim_x(), dim_g(), y_.data(), (g == nullptr ? nullptr : g_.data()));
-        result_type p = t - s + q;
-        result_type u = std::log(u01(rng));
-
-        if (u < p) {
-            std::copy(y_.begin(), y_.end(), x);
-            if (ltx != nullptr)
-                *ltx = t;
-            if (g != nullptr)
-                std::copy(g_.begin(), g_.end(), g);
-            return 1;
-        }
-        return 0;
-    }
-
-    /// \brief One-step random walk update of a block of elements within a
-    /// vector state
-    ///
-    /// \details
-    /// With this operator, it is assumed that the length of input/output state
-    /// vector `x` is of length `m` instead of `dim_x()`. A sub-vector of
-    /// length `dim_x()`, starting at index `idx` will be updated. The
-    /// log-target function will be called with `m` as its first argument and a
-    /// length `m` vector will be passed as its third argument as well.
-    template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(RNGType &rng, std::size_t m, std::size_t idx,
-        result_type *x, result_type *ltx, result_type *g,
-        LogTargetType &&log_target, ProposalType &&proposal)
-    {
-        U01Distribution<result_type> u01;
-        std::copy_n(x + idx, dim_x(), x_.begin());
-        result_type q = proposal(rng, dim_x(), x_.data(), y_.data());
-        result_type s =
-            ltx == nullptr ? log_target(m, dim_g(), x, nullptr) : *ltx;
-        std::copy(y_.begin(), y_.end(), x + idx);
-        result_type t =
-            log_target(m, dim_g(), x, (g == nullptr ? nullptr : g_.data()));
-        result_type p = t - s + q;
-        result_type u = std::log(u01(rng));
-
-        if (u < p) {
-            if (ltx != nullptr)
-                *ltx = t;
-            if (g != nullptr)
-                std::copy(g_.begin(), g_.end(), g);
-            return 1;
-        }
-        std::copy(x_.begin(), x_.end(), x + idx);
-
-        return 0;
-    }
-
-    /// \brief Multi-step random walk update
-    template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(std::size_t n, RNGType &rng, result_type *x,
-        result_type *ltx, result_type *g, LogTargetType &&log_target,
-        ProposalType &&proposal)
-    {
-        std::size_t acc = 0;
-        result_type s =
-            ltx == nullptr ? log_target(dim_x(), dim_g(), x, nullptr) : *ltx;
-        for (std::size_t i = 0; i != n; ++i) {
-            acc += operator()(rng, x, &s, g,
-                std::forward<LogTargetType>(log_target),
-                std::forward<ProposalType>(proposal));
-        }
-        if (ltx != nullptr)
-            *ltx = s;
-
-        return acc;
-    }
-
-    /// \brief Multi-step random walk update of a block of element within a
-    /// vector state
-    template <typename RNGType, typename LogTargetType, typename ProposalType>
-    std::size_t operator()(std::size_t n, RNGType &rng, std::size_t m,
-        std::size_t idx, result_type *x, result_type *ltx, result_type *g,
-        LogTargetType &&log_target, ProposalType &&proposal)
-    {
-        std::size_t acc = 0;
-        result_type s =
-            ltx == nullptr ? log_target(m, dim_g(), x, nullptr) : *ltx;
-        for (std::size_t i = 0; i != n; ++i) {
-            acc += operator()(rng, m, idx, x, &s, g,
-                std::forward<LogTargetType>(log_target),
-                std::forward<ProposalType>(proposal));
-        }
-        if (ltx != nullptr)
-            *ltx = s;
-
-        return acc;
-    }
-
-    private:
-    internal::StaticVector<RealType, DimX> x_;
-    internal::StaticVector<RealType, DimX> y_;
-    internal::StaticVector<RealType, DimG> g_;
-}; // class RandomWalkG
 
 namespace internal
 {
@@ -381,7 +172,7 @@ inline bool normal_mv_proposal_check_param(
 }
 
 template <typename RealType>
-inline RealType normal_proposal_q(RealType x, RealType &y, RealType z)
+inline double normal_proposal_q(RealType x, RealType &y, RealType z)
 {
     y = x + z;
 
@@ -389,31 +180,32 @@ inline RealType normal_proposal_q(RealType x, RealType &y, RealType z)
 }
 
 template <typename RealType>
-inline RealType normal_proposal_qa(
+inline double normal_proposal_qa(
     RealType x, RealType &y, RealType z, RealType a)
 {
     y = a + (x - a) * std::exp(z);
 
-    return z;
+    return static_cast<double>(z);
 }
 
 template <typename RealType>
-inline RealType normal_proposal_qb(
+inline double normal_proposal_qb(
     RealType x, RealType &y, RealType z, RealType b)
 {
     y = b - (b - x) * std::exp(z);
 
-    return z;
+    return static_cast<double>(z);
 }
 
 template <typename RealType>
-inline RealType normal_proposal_qab(
+inline double normal_proposal_qab(
     RealType x, RealType &y, RealType z, RealType a, RealType b)
 {
     RealType r = std::exp(z) * (x - a) / (b - x);
     y = (a + b * r) / (1 + r);
 
-    return std::log((y - a) / (x - a) * (b - y) / (b - x));
+    return std::log(
+        static_cast<double>(((y - a) / (x - a)) * ((b - y) / (b - x))));
 }
 
 } // namespace vsmc::internal
@@ -441,12 +233,9 @@ class NormalProposal
             internal::normal_proposal_check_param(a, b), Normal);
     }
 
-    result_type a() const { return a_; }
-    result_type b() const { return b_; }
-
     /// \brief Propose new value `y` and return \f$\log(q(y, x) / q(x, y))\f$.
     template <typename RNGType>
-    result_type operator()(
+    double operator()(
         RNGType &rng, std::size_t, const result_type *x, result_type *y)
     {
         result_type z = normal_(rng);
@@ -694,17 +483,13 @@ class NormalMVProposal
         init_flag();
     }
 
-    std::size_t dim() const { return normal_mv_.dim(); }
-    const result_type *a() const { return a_.data(); }
-    const result_type *b() const { return b_.data(); }
-
     template <typename RNGType>
     result_type operator()(
         RNGType &rng, std::size_t, const result_type *x, result_type *y)
     {
         normal_mv_(rng, z_.data());
         result_type q = 0;
-        for (std::size_t i = 0; i != dim(); ++i) {
+        for (std::size_t i = 0; i != z_.size(); ++i) {
             switch (flag_[i]) {
                 case 0:
                     q += internal::normal_proposal_q(x[i], y[i], z_[i]);
@@ -752,7 +537,7 @@ class NormalMVProposal
     void init_flag()
     {
 
-        for (std::size_t i = 0; i != dim(); ++i) {
+        for (std::size_t i = 0; i != flag_.size(); ++i) {
             unsigned lower = std::isfinite(a_[i]) ? 1 : 0;
             unsigned upper = std::isfinite(b_[i]) ? 1 : 0;
             flag_[i] = (lower << 1) + upper;
@@ -760,7 +545,7 @@ class NormalMVProposal
 
         VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_PROPOSAL_PARAM(
             internal::normal_mv_proposal_check_param(
-                dim(), a_.data(), b_.data()),
+                flag_.size(), a_.data(), b_.data()),
             NormalMV);
     }
 }; // class NormalMVProposal
@@ -807,10 +592,8 @@ class NormalMVLogitProposal
         VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_NORMAL_MV_LOGIT_DIM(dim);
     }
 
-    std::size_t dim() const { return normal_mv_.dim(); }
-
     template <typename RNGType>
-    result_type operator()(
+    double operator()(
         RNGType &rng, std::size_t, const result_type *x, result_type *y)
     {
         const std::size_t d = dim();
@@ -821,7 +604,7 @@ class NormalMVLogitProposal
         y[d - 1] = 1;
         mul(d, 1 / std::accumulate(y, y + d, 0.0), y, y);
 
-        return q(y) - q(x);
+        return static_cast<double>(q(y) - q(x));
     }
 
     private:
