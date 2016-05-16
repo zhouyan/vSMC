@@ -33,6 +33,6 @@
 #define VSMC_ALGORITHM_ALGORITHM_HPP
 
 #include <vsmc/internal/config.h>
-#include <vsmc/algorithm/random_walk.hpp>
+#include <vsmc/algorithm/mh.hpp>
 
 #endif // VSMC_ALGORITHM_ALGORITHM_HPP

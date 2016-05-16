@@ -54,7 +54,7 @@ VSMC_ADD_EXAMPLE(vsmc)
 VSMC_ADD_HEADER_TEST(vsmc/vsmc TRUE)
 
 VSMC_ADD_HEADER_TEST(vsmc/algorithm/algorithm TRUE)
-VSMC_ADD_HEADER_TEST(vsmc/algorithm/random_walk TRUE)
+VSMC_ADD_HEADER_TEST(vsmc/algorithm/mh TRUE)
 
 VSMC_ADD_HEADER_TEST(vsmc/core/core TRUE)
 VSMC_ADD_HEADER_TEST(vsmc/core/monitor      TRUE)

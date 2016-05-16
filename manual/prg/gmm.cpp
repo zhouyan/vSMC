@@ -57,7 +57,7 @@ class GMMModel
         return NormalMVLogitProposal<double>(r_, sd);
     }
 
-    auto random_walk() const { return RandomWalk<double>(r_); }
+    auto mh() const { return MH<double>(r_); }
 
     double log_prior(
         const double *mu, const double *lambda, const double *omega) const
@@ -240,7 +240,7 @@ class GMMMu : public GMMEvalSMP<GMMMu>
         auto scale = std::max(0.02, phi);
         auto sd = 0.15 / scale;
         auto proposal = model_.proposal_mu(sd);
-        auto random_walk = model_.random_walk();
+        auto mh = model_.mh();
         auto &rng = range.begin().rng();
         for (auto idx : range) {
             auto lp = idx.log_prior();
@@ -251,7 +251,7 @@ class GMMMu : public GMMEvalSMP<GMMMu>
                 ll = model_.log_likelihood(x, idx.lambda(), idx.omega());
                 return lp + phi * ll;
             };
-            auto acc = random_walk(rng, idx.mu(), &lt, pi, proposal);
+            auto acc = mh(rng, idx.mu(), &lt, pi, proposal);
             if (acc != 0) {
                 idx.log_prior() = lp;
                 idx.log_likelihood() = ll;
@@ -275,7 +275,7 @@ class GMMLambda : public GMMEvalSMP<GMMLambda>
         auto scale = std::max(0.02, phi);
         auto sd = 0.15 * (1 + std::sqrt(1 / scale));
         auto proposal = model_.proposal_lambda(sd);
-        auto random_walk = model_.random_walk();
+        auto mh = model_.mh();
         auto &rng = range.begin().rng();
         for (auto idx : range) {
             auto lp = idx.log_prior();
@@ -286,7 +286,7 @@ class GMMLambda : public GMMEvalSMP<GMMLambda>
                 ll = model_.log_likelihood(idx.mu(), x, idx.omega());
                 return lp + phi * ll;
             };
-            auto acc = random_walk(rng, idx.lambda(), &lt, pi, proposal);
+            auto acc = mh(rng, idx.lambda(), &lt, pi, proposal);
             if (acc != 0) {
                 idx.log_prior() = lp;
                 idx.log_likelihood() = ll;
@@ -309,7 +309,7 @@ class GMMOmega : public GMMEvalSMP<GMMOmega>
         auto scale = std::max(0.02, phi);
         auto sd = 0.2 * (1 + std::sqrt(1 / scale));
         auto proposal = model_.proposal_omega(sd);
-        auto random_walk = model_.random_walk();
+        auto mh = model_.mh();
         auto &rng = range.begin().rng();
         for (auto idx : range) {
             auto lp = idx.log_prior();
@@ -320,7 +320,7 @@ class GMMOmega : public GMMEvalSMP<GMMOmega>
                 ll = model_.log_likelihood(idx.mu(), idx.lambda(), x);
                 return lp + phi * ll;
             };
-            auto acc = random_walk(rng, idx.omega(), &lt, pi, proposal);
+            auto acc = mh(rng, idx.omega(), &lt, pi, proposal);
             if (acc != 0) {
                 idx.log_prior() = lp;
                 idx.log_likelihood() = ll;

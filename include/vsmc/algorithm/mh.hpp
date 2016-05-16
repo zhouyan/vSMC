@@ -1,5 +1,5 @@
 //============================================================================
-// vSMC/include/vsmc/algorithm/random_walk.hpp
+// vSMC/include/vsmc/algorithm/mh.hpp
 //----------------------------------------------------------------------------
 //                         vSMC: Scalable Monte Carlo
 //----------------------------------------------------------------------------
@@ -29,59 +29,59 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef VSMC_ALGORITHM_RANDOM_WALK_HPP
-#define VSMC_ALGORITHM_RANDOM_WALK_HPP
+#ifndef VSMC_ALGORITHM_MH_HPP
+#define VSMC_ALGORITHM_MH_HPP
 
 #include <vsmc/internal/common.hpp>
 #include <vsmc/rng/normal_distribution.hpp>
 #include <vsmc/rng/normal_mv_distribution.hpp>
 #include <vsmc/rng/u01_distribution.hpp>
 
-#define VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_PROPOSAL_PARAM(flag, Name)  \
+#define VSMC_RUNTIME_ASSERT_ALGORITHM_MH_PROPOSAL_PARAM(flag, Name)           \
     VSMC_RUNTIME_ASSERT(                                                      \
         (flag), "**" #Name "Proposal** CONSTRUCTED WITH INVALID PARAMETERS")
 
-#define VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_NORMAL_MV_LOGIT_DIM(dim)    \
+#define VSMC_RUNTIME_ASSERT_ALGORITHM_MH_NORMAL_MV_LOGIT_DIM(dim)             \
     VSMC_RUNTIME_ASSERT((dim > 1), "**NormalMVLogitProposal** CONSTRUCTED "   \
                                    "WITH DIMENSION LESS THAN 2")
 
 namespace vsmc
 {
 
-/// \brief Random walk MCMC update
-/// \ingroup RandomWalk
+/// \brief Metropolis-Hastings MCMC update
+/// \ingroup MH
 template <typename ResultType = double, std::size_t Dim = Dynamic>
-class RandomWalk
+class MH
 {
     public:
     using result_type = ResultType;
 
     /// \brief Only usable when `Dim != Dynamic`
-    RandomWalk()
+    MH()
     {
-        static_assert(Dim != Dynamic,
-            "**RandomWalk** OBJECT DECLARED WITH DYNAMIC DIMENSION");
+        static_assert(
+            Dim != Dynamic, "**MH** OBJECT DECLARED WITH DYNAMIC DIMENSION");
     }
 
     /// \brief Only usable when `Dim == Dynamic`
-    RandomWalk(std::size_t dim) : x_(dim), y_(dim)
+    MH(std::size_t dim) : x_(dim), y_(dim)
     {
-        static_assert(Dim == Dynamic,
-            "**RandomWalk** OBJECT DECLARED WITH FIXED DIMENSION");
+        static_assert(
+            Dim == Dynamic, "**MH** OBJECT DECLARED WITH FIXED DIMENSION");
     }
 
     std::size_t dim() const { return x_.size(); }
 
-    /// \brief One-step random walk update
+    /// \brief One-step Metropolis-Hastings update
     ///
     /// \param rng RNG engine
     /// \param x The current state value. It will be updated to the new value
-    /// after the random walk move if it is accepted, and left unchanged
-    /// otherwise.
+    /// after the Metropolis-Hastings move if it is accepted, and left
+    /// unchanged otherwise.
     /// \param ltx If it is a non-null pointer, then it points to the value of
     /// the \f$\log\gamma(x)\f$. It will be updated to the new value if the
-    /// random walk move is accepted, and left unchanged otherwise. If it is a
-    /// null pointer, then it is ignored. Use this pointer to save
+    /// Metropolis-Hastings move is accepted, and left unchanged otherwise. If
+    /// it is a null pointer, then it is ignored. Use this pointer to save
     /// \f$\log\gamma(x)\f$ between updates if it is expensive to calculate.
     /// \param log_target The log-target fucntion
     /// ~~~{.cpp}
@@ -120,7 +120,7 @@ class RandomWalk
         return 0;
     }
 
-    /// \brief Multi-step random walk update
+    /// \brief Multi-step Metropolis-Hastings update
     template <typename RNGType, typename LogTarget, typename Proposal>
     std::size_t operator()(std::size_t n, RNGType &rng, result_type *x,
         double *ltx, LogTarget &&log_target, Proposal &&proposal)
@@ -161,7 +161,7 @@ class RandomWalk
     private:
     internal::StaticVector<ResultType, Dim> x_;
     internal::StaticVector<ResultType, Dim> y_;
-}; // class RandomWalk
+}; // class MH
 
 namespace internal
 {
@@ -220,15 +220,15 @@ inline RealType normal_proposal_qab(
 
 } // namespace vsmc::internal
 
-/// \brief Normal random walk proposal
-/// \ingroup RandomWalk
+/// \brief Normal proposal
+/// \ingroup MH
 template <typename RealType = double>
 class NormalProposal
 {
     public:
     using result_type = RealType;
 
-    /// \brief Construct a Normal random walk proposal
+    /// \brief Construct a Normal proposal
     ///
     /// \param stddev The standard deviation (scale) of the proposal
     /// \param a The lower bound of the support of the target distribution
@@ -239,7 +239,7 @@ class NormalProposal
         unsigned lower = std::isfinite(a) ? 1 : 0;
         unsigned upper = std::isfinite(b) ? 1 : 0;
         flag_ = (lower << 1) + upper;
-        VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_PROPOSAL_PARAM(
+        VSMC_RUNTIME_ASSERT_ALGORITHM_MH_PROPOSAL_PARAM(
             internal::normal_proposal_check_param(a, b), Normal);
     }
 
@@ -266,8 +266,8 @@ class NormalProposal
     unsigned flag_;
 }; // class NormalProposal
 
-/// \brief Multivariate Normal random walk proposal
-/// \ingroup RandomWalk
+/// \brief Multivariate Normal proposal
+/// \ingroup MH
 template <typename RealType = double, std::size_t Dim = Dynamic>
 class NormalMVProposal
 {
@@ -549,15 +549,15 @@ class NormalMVProposal
             flag_[i] = (lower << 1) + upper;
         }
 
-        VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_PROPOSAL_PARAM(
+        VSMC_RUNTIME_ASSERT_ALGORITHM_MH_PROPOSAL_PARAM(
             internal::normal_mv_proposal_check_param(
                 dim(), a_.data(), b_.data()),
             NormalMV);
     }
 }; // class NormalMVProposal
 
-/// \brief Multivariate Normal random walk proposal on logit scale
-/// \ingroup RandomWalk
+/// \brief Multivariate Normal proposal on logit scale
+/// \ingroup MH
 template <typename RealType = double, std::size_t Dim = Dynamic>
 class NormalMVLogitProposal
 {
@@ -586,7 +586,7 @@ class NormalMVLogitProposal
     {
         static_assert(Dim == Dynamic,
             "**NormalMVLogitProposal** OBJECT DECLARED WITH FIXED DIMENSION");
-        VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_NORMAL_MV_LOGIT_DIM(dim);
+        VSMC_RUNTIME_ASSERT_ALGORITHM_MH_NORMAL_MV_LOGIT_DIM(dim);
     }
 
     /// \brief Only usable when `Dim == Dynamic`
@@ -595,7 +595,7 @@ class NormalMVLogitProposal
     {
         static_assert(Dim == Dynamic,
             "**NormalMVLogitProposal** OBJECT DECLARED WITH FIXED DIMENSION");
-        VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_NORMAL_MV_LOGIT_DIM(dim);
+        VSMC_RUNTIME_ASSERT_ALGORITHM_MH_NORMAL_MV_LOGIT_DIM(dim);
     }
 
     std::size_t dim() const { return normal_mv_.dim(); }
@@ -636,4 +636,4 @@ class NormalMVLogitProposal
 
 } // namespace vsmc
 
-#endif // VSMC_ALGORITHM_RANDOM_WALK_HPP
+#endif // VSMC_ALGORITHM_MH_HPP
