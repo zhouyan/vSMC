@@ -193,11 +193,11 @@ In the above program, each class type object manages an OpenCL C type, such as
 \verb|cl_platform|. The resources will be released when the object is
 destroyed. Note that, the copy constructor and assignment operator perform
 shallow copy. This is particularly important for \verb|CLMemory| type objects.
-In appendix~\appref{app:sub:Parallelized implementation using OpenCL}, an
-OpenCL implementation of the simple particle filter example in
-section~\ref{sec:A simple particle filter} is shown. Table~\ref{tab:RAII
-  classes for OpenCL pointers} lists the classes defined by the library and
-their corresponding OpenCL C pointer types.
+In Appendix~\appref{sub:Parallelized implementation using OpenCL}, an OpenCL
+implementation of the simple particle filter example in section~\ref{sec:A
+  simple particle filter} is shown. Table~\ref{tab:RAII classes for OpenCL
+  pointers} lists the classes defined by the library and their corresponding
+OpenCL C pointer types.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{LL}
@@ -223,8 +223,8 @@ their corresponding OpenCL C pointer types.
 
 The library provides some basic support for processing command line options.
 Here we show a minimal example. The complete program is shown in
-appendix~\appref{app:sec:Process command line program options}. First, we
-define variables to store values of options,
+Appendix~\appref{sec:Process command line program options}. First, we define
+variables to store values of options,
 \begin{Verbatim}
   int n;
   std::string str;

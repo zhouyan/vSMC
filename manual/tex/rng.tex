@@ -5,11 +5,11 @@ The library has a comprehensive \rng system to facilitate implementation of
 Monte Carlo algorithms. Similar to the standard library header \verb|<random>|,
 there are mainly two parts of this system. The first is a set of \rng{} engines
 that generate random integers. The other is a set of distribution generators.
-The former are documented in sections~\ref{sec:Counter-based RNG}
-to~\ref{sec:MKL RNG}, and the later in section~\ref{sec:Distributions}. Apart
+The former are documented in Sections~\ref{sec:Counter-based RNG}
+to~\ref{sec:MKL RNG}, and the later in Section~\ref{sec:Distributions}. Apart
 from these, the library also provides facilities for vectorized random number
-generating (section~\ref{sec:Vectorized random number generating}) and using
-multiple \rng{}s in parallel programs (section~\ref{sec:Multiple RNG streams}).
+generating (Section~\ref{sec:Vectorized random number generating}) and using
+multiple \rng{}s in parallel programs (Section~\ref{sec:Multiple RNG streams}).
 
 \section{Vectorized random number generating}
 \label{sec:Vectorized random number generating}
@@ -71,14 +71,14 @@ otherwise, it is the \llvm clang compiler. The operating system is Mac OS X
 (version~11.1). Depending on the \cpu, the compiler, and the operating system,
 performance may vary considerably. The library does not attempt to optimize for
 any particular platform. However, given accelerated vectorized mathematical
-functions (seed section~\ref{sec:Vectorized functions}), for any given
+functions (seed Section~\ref{sec:Vectorized functions}), for any given
 platform, the relative performance advantage to alternatives, such as the
 standard library, is usually substantial.
 
 For \rng engines, we measure the performance of generating random bits instead
 of the raw output from the engines. All internal usages of \rng{}s in the
 library first transfer the raw output to unsigned integers uniform on the set
-$\{0,\dots,2^W-1\}$, $W\in\{32,64\}$ (see section~\ref{sub:Uniform bits
+$\{0,\dots,2^W-1\}$, $W\in\{32,64\}$ (see Section~\ref{sub:Uniform bits
   distribution}). Direct use of the raw output from \rng engines is rare in
 applications.
 
@@ -120,9 +120,9 @@ The third is the vectorized performance,
 \begin{Verbatim}
   rand(rng, rnorm_vsmc, n, r.data());
 \end{Verbatim}
-For all the three above, the \rng is \verb|ARSx8| (section~\ref{sub:AES-NI
+For all the three above, the \rng is \verb|ARSx8| (Section~\ref{sub:AES-NI
   instructions based RNG}). The last is when \rng is \verb|MKL_SFMT19937|
-(section~\ref{sec:MKL RNG}),
+(Section~\ref{sec:MKL RNG}),
 \begin{Verbatim}
   MKL_SFMT19937 rng_mkl;
   rand(rng_mkl, rnorm_vsmc, n, r.data());
@@ -401,7 +401,7 @@ performance is good enough even for the most demanding applications. The
 library does not attempt to optimize the algorithm for any particular platform.
 In realistic applications, the performance of \rng is unlikely to become a
 bottle neck. Note that, the best performance is obtained with the vectorized
-\verb|rand| function (see section~\ref{sec:Vectorized random number
+\verb|rand| function (see Section~\ref{sec:Vectorized random number
   generating}).
 
 \subsection{Philox}
@@ -633,7 +633,7 @@ defined. The performance data is in Table~\appref{tab:Performance of MKL RNG}.
 \section{Multiple \protect\rng streams}
 \label{sec:Multiple RNG streams}
 
-Earlier in section~\ref{sub:Particle} we introduced that \verb|particle.rng(i)|
+Earlier in Section~\ref{sub:Particle} we introduced that \verb|particle.rng(i)|
 returns an independent \rng instance. This is actually done through a class
 template called \verb|RNGSet|. Three of them are implemented in the library.
 They all have the same interface,
@@ -727,7 +727,7 @@ are the same as those in the standard library, with \verb|CamelCase| names. For
 example, \verb|NormalDistribuiton| can be used as a drop-in replacement of
 \verb|std::normal_distribuiton|. This includes all of the continuous
 distributions defined in the standard library. As stated in
-section~\ref{sec:Vectorized random number generating}, all the distributions
+Section~\ref{sec:Vectorized random number generating}, all the distributions
 defined in the library support vectorized random number generating. In the
 following sections we introduce each distributions included in the library.
 
@@ -1010,7 +1010,7 @@ $d(d + 1)/2$-vector, where $d$ is the dimension. The vector is the lower
 triangular elements of the Cholesky decomposition of the covariance matrix,
 packed row by row. Libraries such as \lapack has routines to compute such a
 matrix. Alternatively, one can use the covariance functionalities in the
-library. See section~\ref{sec:Sample covariance}, which also provides a
+library. See Section~\ref{sec:Sample covariance}, which also provides a
 concrete example of using the multivariate Normal distribution.
 
 \subsection{Gamma and related distribution}

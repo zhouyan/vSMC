@@ -217,7 +217,7 @@ returns a reference to an \rng engine, specific to the $i$\ith particle. For $i
 \end{Verbatim}
 are called from two different threads, then \verb|rng1| and \verb|rng2| will be
 instances of two independent \rng engines. The details are in
-section~\ref{sec:Multiple RNG streams}. The \verb|Particle| class also contains
+Section~\ref{sec:Multiple RNG streams}. The \verb|Particle| class also contains
 an \rng engine independent of any particles,
 \begin{Verbatim}
   auto &rng = particle.rng();
@@ -387,7 +387,7 @@ if such a member class template exists. Otherwise, it derives from
 \verb|ParticleIndexBase<T>|, which only has methods as described earlier for
 any type \verb|T|. Therefore, it is possible to give \verb|ParticleIndex<T>|
 methods that are more convenient for a particular problem. We will see examples
-later in section~\ref{sec:Example (Core concepts)}.
+later in Section~\ref{sec:Example (Core concepts)}.
 
 The \verb|ParticleIndex| type can also be used like an random access iterator.
 For example,
@@ -403,7 +403,7 @@ For example,
 Other comparison operators such as \verb|!=|, \verb|<|, etc., are also
 defined. Note that, comparing or subtracting two indices from two different
 particles systems is meaningless. This will result in runtime errors unless
-debugging is disabled (see section~\appref{sec:Error handling}). The increment
+debugging is disabled (see Section~\appref{sec:Error handling}). The increment
 and decrement operators follow usual \cpp prefix and postfix semantics.
 However, it is important to note that, \verb|ParticleIndex| \emph{is not} an
 iterator even though it shares many common methods. Recall that,
@@ -495,7 +495,7 @@ by the following method,
       ResampleScheme scheme, double threshold = resample_threshold_always());
 \end{Verbatim}
 which uses a builtin resampling scheme of the library (see
-section~\ref{sec:Builtin algorithms}). Or alternatively,
+Section~\ref{sec:Builtin algorithms}). Or alternatively,
 \begin{Verbatim}
   Sampler<T> &resample_method(const eval_type &res_eval,
       double threshold = resample_threshold_always());
@@ -972,7 +972,7 @@ is shown below
 One can read this text file into a statistical program, for exmaple
 R\footnote{\url{http://r-project.org}}, to produce Figure~\ref{fig:pf}. More
 advanced methods for saving summaries and histories of a sampler is given in
-section~\ref{sec:Store objects in HDF5 format}, using the \hdf format.
+Section~\ref{sec:Store objects in HDF5 format}, using the \hdf format.
 
 \begin{figure}
   \includegraphics{fig/pf}

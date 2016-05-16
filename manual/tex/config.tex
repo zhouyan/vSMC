@@ -16,7 +16,7 @@ library.
 
 A concrete example of the relations among these three types of configuration
 macros is the memory allocation functions used by the library. The details is
-in section~\ref{sec:Aligned memory allocation}. In short, they library has
+in Section~\ref{sec:Aligned memory allocation}. In short, they library has
 three implementations for aligned memory allocation. The preferred method is to
 use the \verb|scalable_aligned_malloc| from \tbb. It is defined through a class
 called \verb|AlignedMemoryTBB|. This class is only defined if and only if
@@ -30,7 +30,7 @@ library. Instead the system will now prefer operating system dependent memory
 allocation functions such as \verb|posix_memalign|. Now, suppose this is still
 undesirable, and one want to use a memory allocation function not directly
 supported by the library. In this case, one can implement a aligned memory
-class (see section~\ref{sec:Aligned memory allocation} for details), and then
+class (see Section~\ref{sec:Aligned memory allocation} for details), and then
 define the macro \verb|VSMC_ALIGNED_MEOMRY_TYPE| to this class. For example,
 \begin{Verbatim}
   class AlignedMemoryUsr
@@ -71,7 +71,7 @@ compatible.
 
 \paragraph{\texttt{VSMC\_HAS\_AES\_NI}} Determine if the \aesni instructions
 are supported by the \cpu and the compiler. The \rng{}s based on these
-instructions in section~\ref{sub:AES-NI instructions based RNG} will are
+instructions in Section~\ref{sub:AES-NI instructions based RNG} will are
 defined if this macro is true. One can include the following header directly to
 bypass this check,
 \begin{Verbatim}
@@ -80,7 +80,7 @@ bypass this check,
 
 \paragraph{\texttt{VSMC\_HAS\_RDRAND}} Determine if the \rdrand instructions
 are supported by the \cpu and the compiler. The \rng{}s based on these
-instructions in section~\ref{sec:Non-deterministic RNG} are only defined if
+instructions in Section~\ref{sec:Non-deterministic RNG} are only defined if
 this macro is true. One can include the following header directly to bypass
 this check,
 \begin{Verbatim}
@@ -112,7 +112,7 @@ parallelization is explicitly through \verb|MoveOMP| etc.
 higher) is supported.
 
 \paragraph{\texttt{VSMC\_HAS\_HDF5}} Determine if the \hdf library is
-available. The functions in section~\ref{sec:Store objects in HDF5 format} are
+available. The functions in Section~\ref{sec:Store objects in HDF5 format} are
 only defined if this macro is true. One can include the following header
 directly to bypass this check,
 \begin{Verbatim}
@@ -120,9 +120,9 @@ directly to bypass this check,
 \end{Verbatim}
 
 \paragraph{\texttt{VSMC\_HAS\_TBB}} Determine if the \tbb library is available.
-The \verb|AlignedMemoryTBB| class in section~\ref{sec:Aligned memory
+The \verb|AlignedMemoryTBB| class in Section~\ref{sec:Aligned memory
   allocation} and the \verb|RNGSetTBB| class template in
-section~\ref{sec:Multiple RNG streams} are only defined if this macro is true.
+Section~\ref{sec:Multiple RNG streams} are only defined if this macro is true.
 
 \paragraph{\texttt{VSMC\_USE\_TBB}} Allow the library to use the \tbb library
 for parallelization. Currently this macro has no affect. The use of \tbb for
@@ -135,7 +135,7 @@ parallelization is explicitly through \verb|MoveTBB| etc.
 \verb|RNGSetTBB| as the default multiple \rng stream management method.
 
 \paragraph{\texttt{VSMC\_HAS\_MKL}} Determine if the \mkl library is available.
-The \rng{}s in section~\ref{sec:MKL RNG} are only defined if this macro is
+The \rng{}s in Section~\ref{sec:MKL RNG} are only defined if this macro is
 true. One can include the following header directly to bypass this check,
 \begin{Verbatim}
   #include <vsmc/rng/mkl.hpp>
@@ -146,7 +146,7 @@ true. One can include the following header directly to bypass this check,
 be linked for \blas support.
 
 \paragraph{\texttt{VSMC\_USE\_MKL\_VML}} Allow the library to accelerate the
-vector functions in section~\ref{sec:Vectorized operations} using the \vml
+vector functions in Section~\ref{sec:Vectorized operations} using the \vml
 component of \mkl.
 
 \paragraph{\texttt{VSMC\_USE\_MKL\_VSL}} Allow the library to use the \vsl
@@ -156,7 +156,7 @@ component of \mkl.
 framework on Mac OS X for \blas support. The \verb|VSMC_USE_MKL_CBLAS| will
 take precedence over this macro. In addition, it also allows the library to use
 this framework to accelerate some vector functions in
-section~\ref{sec:Vectorized operations}. The \verb|VSMC_USE_MKL_VML| will take
+Section~\ref{sec:Vectorized operations}. The \verb|VSMC_USE_MKL_VML| will take
 precedence over this macro for this purpose.
 
 \paragraph{\texttt{VSMC\_USE\_CBLAS}} Allow the library to the standard C
@@ -190,7 +190,7 @@ to the correct type.
 \label{sec:RNG engines}
 
 Some configuration macros of counter-based \rng{}s are discussed in
-section~\ref{sec:Counter-based RNG}.
+Section~\ref{sec:Counter-based RNG}.
 
 \paragraph{\texttt{VSMC\_RNG\_TYPE}} The type of the alias \verb|RNG|. The
 default is \verb|ARS| if \verb|VSMC_HAS_AES_NI| is true. Otherwise, it is
@@ -228,7 +228,7 @@ The default is \verb|16|. The value must be a power of two and positive.
 
 \paragraph{\texttt{VSMC\_ALIGNED\_MEMORY\_TYPE}} The default type of the
 \verb|Memroy| template parameter of \verb|Allocator| (see
-section~\ref{sec:Aligned memory allocation}). The default is
+Section~\ref{sec:Aligned memory allocation}). The default is
 \verb|AlignedMemroyTBB| if \verb|VSMC_USE_TBB_MALLOC| is true. Otherwise it is
 \verb|AlignedMemorySYS| if \verb|VSMC_HAS_POSIX| is true or use the \msvc
 compiler. Otherwise, it is \verb|AlignedMemorySTD|. To use other memory

@@ -5,7 +5,7 @@
 \label{sec:Builtin algorithms}
 
 The library supports resampling in a more general way than the algorithm
-described in chapter~\ref{chap:Sequential Monte Carlo}. Recall that, given a
+described in Chapter~\ref{chap:Sequential Monte Carlo}. Recall that, given a
 particle system $\{W^{(i)},X^{(i)}\}_{i=1}^N$, a new system $\{\bar{W}^{(i)},
 \bar{X}^{(i)}\}_{i=1}^M$ is generated. Regardless of other statistical
 properties, in practice, such an algorithm can be decomposed into three steps.
@@ -18,7 +18,7 @@ set $\bar{X}^{(i)} = X^{(a_i)}$.
 The first step determines the statistical properties of the resampling
 algorithm. The library defines all algorithms discussed in
 \textcite{Douc:2005wa}. Samplers can be constructed with builtin schemes as
-seen in section~\ref{sub:Implementations}. In addition, samplers can also be
+seen in Section~\ref{sub:Implementations}. In addition, samplers can also be
 constructed with user defined resampling operations. A user defined resampling
 algorithm can be any type that is convertible to
 \verb|Sampler<T>::resample_type|,
