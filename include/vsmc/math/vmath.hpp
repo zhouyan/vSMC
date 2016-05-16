@@ -446,7 +446,7 @@ template <typename T>
 inline void inv(std::size_t n, const T *a, T *y)
 {
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = static_cast<T>(1) / a[i];
+        y[i] = const_one<T>() / a[i];
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i / b_i\f$
@@ -672,11 +672,11 @@ inline void cdfnorm(std::size_t n, const T *a, T *y)
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        mul(k, static_cast<T>(1) / const_sqrt_2<T>(), a, y);
+        mul(k, const_one<T>() / const_sqrt_2<T>(), a, y);
         erf(k, y, y);
         fma(k, static_cast<T>(0.5), static_cast<T>(0.5), y, y);
     }
-    mul(l, static_cast<T>(1) / const_sqrt_2<T>(), a, y);
+    mul(l, const_one<T>() / const_sqrt_2<T>(), a, y);
     erf(l, y, y);
     fma(l, static_cast<T>(0.5), static_cast<T>(0.5), y, y);
 }

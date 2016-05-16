@@ -43,15 +43,13 @@ class GMMModel
 
     auto proposal_mu(double sd) const
     {
-        return NormalMVProposal<double>(r_, sd,
-            -std::numeric_limits<double>::infinity(),
-            std::numeric_limits<double>::infinity());
+        return NormalMVProposal<double>(
+            r_, sd, -const_inf<double>(), const_inf<double>());
     }
 
     auto proposal_lambda(double sd) const
     {
-        return NormalMVProposal<double>(
-            r_, sd, 0.0, std::numeric_limits<double>::infinity());
+        return NormalMVProposal<double>(r_, sd, 0.0, const_inf<double>());
     }
 
     auto proposal_omega(double sd) const

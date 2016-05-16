@@ -101,7 +101,7 @@ inline OutputIter resample_trans_u01_rep(std::size_t N, std::size_t M,
         return replication;
     }
 
-    OutputIter rep = std::fill_n(replication, N, static_cast<rep_type>(0));
+    OutputIter rep = std::fill_n(replication, N, const_zero<rep_type>());
     if (M == 0)
         return rep;
 

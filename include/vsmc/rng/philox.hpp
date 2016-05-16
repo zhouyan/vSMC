@@ -184,7 +184,7 @@ class PhiloxHiLo<T, 64>
 #else // VSMC_HAS_INT128
 
         const T a = multiplier::value;
-        const T lomask = (static_cast<T>(1) << 32) - 1;
+        const T lomask = (const_one<T>() << 32) - 1;
         const T ahi = a >> 32;
         const T alo = a & lomask;
         const T bhi = b >> 32;

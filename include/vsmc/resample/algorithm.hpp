@@ -116,18 +116,8 @@ class ResampleEval
     /// ResampleAlgorithm
     explicit ResampleEval(const eval_type &eval) : eval_(eval) {}
 
-    static constexpr double always()
-    {
-        return std::numeric_limits<double>::infinity();
-    }
-
-    static constexpr double never()
-    {
-        return -std::numeric_limits<double>::infinity();
-    }
-
     /// \brief Set a new evaluation object of type eval_type
-    void set_eval(const eval_type &new_eval) { eval_ = new_eval; }
+    void eval(const eval_type &new_eval) { eval_ = new_eval; }
 
     /// \brief Returns how many particles having non-zero replication number
     std::size_t operator()(std::size_t, Particle<T> &particle) const

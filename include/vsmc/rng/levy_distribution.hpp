@@ -85,7 +85,7 @@ inline void levy_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     normal_distribution(
-        rng, n, r, static_cast<RealType>(0), static_cast<RealType>(1));
+        rng, n, r, const_zero<RealType>(), const_one<RealType>());
     sqr(n, r, r);
     inv(n, r, r);
     fma(n, r, b, a, r);

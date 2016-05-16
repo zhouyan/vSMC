@@ -46,7 +46,7 @@ inline void backend_std_range(
 {
     first.clear();
     last.clear();
-    const IntType np = std::max(static_cast<IntType>(1),
+    const IntType np = std::max(const_one<IntType>(),
         static_cast<IntType>(std::thread::hardware_concurrency()));
     if (np == 1) {
         first.push_back(0);

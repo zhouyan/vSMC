@@ -87,7 +87,7 @@ inline void logistic_distribution_impl(
 {
     Array<RealType, K> s;
     u01_oo_distribution(rng, n, r);
-    sub(n, static_cast<RealType>(1), r, s.data());
+    sub(n, const_one<RealType>(), r, s.data());
     div(n, r, s.data(), r);
     log(n, r, r);
     fma(n, r, b, a, r);

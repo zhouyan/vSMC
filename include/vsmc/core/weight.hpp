@@ -231,7 +231,7 @@ class Weight
         using value_type =
             typename std::iterator_traits<InputIter>::value_type;
 
-        value_type v = -std::numeric_limits<value_type>::infinity();
+        value_type v = -const_inf<value_type>();
         for (std::size_t i = 0; i != n; ++i, ++first)
             if (v < *first)
                 v = *first;
@@ -292,7 +292,7 @@ class WeightNull
 
     void shrink_to_fit() {}
 
-    double ess() const { return std::numeric_limits<double>::quiet_NaN(); }
+    double ess() const { return const_nan<double>(); }
 
     const double *data() const { return nullptr; }
 

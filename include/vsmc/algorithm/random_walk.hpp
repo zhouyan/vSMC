@@ -234,7 +234,7 @@ class NormalProposal
     /// \param a The lower bound of the support of the target distribution
     /// \param b The upper bound of the support of the target distribution
     NormalProposal(result_type stddev, result_type a, result_type b)
-        : normal_(static_cast<result_type>(0), stddev), a_(a), b_(b), flag_(0)
+        : normal_(const_zero<result_type>(), stddev), a_(a), b_(b), flag_(0)
     {
         unsigned lower = std::isfinite(a) ? 1 : 0;
         unsigned upper = std::isfinite(b) ? 1 : 0;
@@ -276,7 +276,7 @@ class NormalMVProposal
 
     /// \brief Only usable when `Dim != Dynamic`
     NormalMVProposal(result_type chol, result_type a, result_type b)
-        : normal_mv_(static_cast<result_type>(0), chol)
+        : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
             "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
@@ -287,7 +287,7 @@ class NormalMVProposal
 
     /// \brief Only usable when `Dim != Dynamic`
     NormalMVProposal(result_type chol, result_type a, const result_type *b)
-        : normal_mv_(static_cast<result_type>(0), chol)
+        : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
             "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
@@ -298,7 +298,7 @@ class NormalMVProposal
 
     /// \brief Only usable when `Dim != Dynamic`
     NormalMVProposal(result_type chol, const result_type *a, result_type b)
-        : normal_mv_(static_cast<result_type>(0), chol)
+        : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
             "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
@@ -310,7 +310,7 @@ class NormalMVProposal
     /// \brief Only usable when `Dim != Dynamic`
     NormalMVProposal(
         result_type chol, const result_type *a, const result_type *b)
-        : normal_mv_(static_cast<result_type>(0), chol)
+        : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
             "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
@@ -321,7 +321,7 @@ class NormalMVProposal
 
     /// \brief Only usable when `Dim != Dynamic`
     NormalMVProposal(const result_type *chol, result_type a, result_type b)
-        : normal_mv_(static_cast<result_type>(0), chol)
+        : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
             "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
@@ -333,7 +333,7 @@ class NormalMVProposal
     /// \brief Only usable when `Dim != Dynamic`
     NormalMVProposal(
         const result_type *chol, result_type a, const result_type *b)
-        : normal_mv_(static_cast<result_type>(0), chol)
+        : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
             "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
@@ -345,7 +345,7 @@ class NormalMVProposal
     /// \brief Only usable when `Dim != Dynamic`
     NormalMVProposal(
         const result_type *chol, const result_type *a, result_type b)
-        : normal_mv_(static_cast<result_type>(0), chol)
+        : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
             "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
@@ -357,7 +357,7 @@ class NormalMVProposal
     /// \brief Only usable when `Dim != Dynamic`
     NormalMVProposal(
         const result_type *chol, const result_type *a, const result_type *b)
-        : normal_mv_(static_cast<result_type>(0), chol)
+        : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim != Dynamic,
             "**NormalMVProposal** OBJECT DECLARED WITH DYNAMIC DIMENSION");
@@ -369,7 +369,7 @@ class NormalMVProposal
     /// \brief Only usable when `Dim == Dynamic`
     NormalMVProposal(
         std::size_t dim, result_type chol, result_type a, result_type b)
-        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        : normal_mv_(dim, const_zero<result_type>(), chol)
         , a_(dim)
         , b_(dim)
         , z_(dim)
@@ -385,7 +385,7 @@ class NormalMVProposal
     /// \brief Only usable when `Dim == Dynamic`
     NormalMVProposal(
         std::size_t dim, result_type chol, result_type a, const result_type *b)
-        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        : normal_mv_(dim, const_zero<result_type>(), chol)
         , a_(dim)
         , b_(dim)
         , z_(dim)
@@ -401,7 +401,7 @@ class NormalMVProposal
     /// \brief Only usable when `Dim == Dynamic`
     NormalMVProposal(
         std::size_t dim, result_type chol, const result_type *a, result_type b)
-        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        : normal_mv_(dim, const_zero<result_type>(), chol)
         , a_(dim)
         , b_(dim)
         , z_(dim)
@@ -417,7 +417,7 @@ class NormalMVProposal
     /// \brief Only usable when `Dim == Dynamic`
     NormalMVProposal(std::size_t dim, result_type chol, const result_type *a,
         const result_type *b)
-        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        : normal_mv_(dim, const_zero<result_type>(), chol)
         , a_(dim)
         , b_(dim)
         , z_(dim)
@@ -433,7 +433,7 @@ class NormalMVProposal
     /// \brief Only usable when `Dim == Dynamic`
     NormalMVProposal(
         std::size_t dim, const result_type *chol, result_type a, result_type b)
-        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        : normal_mv_(dim, const_zero<result_type>(), chol)
         , a_(dim)
         , b_(dim)
         , z_(dim)
@@ -449,7 +449,7 @@ class NormalMVProposal
     /// \brief Only usable when `Dim == Dynamic`
     NormalMVProposal(std::size_t dim, const result_type *chol, result_type a,
         const result_type *b)
-        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        : normal_mv_(dim, const_zero<result_type>(), chol)
         , a_(dim)
         , b_(dim)
         , z_(dim)
@@ -465,7 +465,7 @@ class NormalMVProposal
     /// \brief Only usable when `Dim == Dynamic`
     NormalMVProposal(std::size_t dim, const result_type *chol,
         const result_type *a, result_type b)
-        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        : normal_mv_(dim, const_zero<result_type>(), chol)
         , a_(dim)
         , b_(dim)
         , z_(dim)
@@ -481,7 +481,7 @@ class NormalMVProposal
     /// \brief Only usable when `Dim == Dynamic`
     NormalMVProposal(std::size_t dim, const result_type *chol,
         const result_type *a, const result_type *b)
-        : normal_mv_(dim, static_cast<result_type>(0), chol)
+        : normal_mv_(dim, const_zero<result_type>(), chol)
         , a_(dim)
         , b_(dim)
         , z_(dim)
@@ -566,7 +566,7 @@ class NormalMVLogitProposal
 
     /// \brief Only usable when `Dim > 1`
     NormalMVLogitProposal(result_type chol)
-        : normal_mv_(static_cast<result_type>(0), chol)
+        : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim > 1, "**NormalMVLogitProposal** OBJECT DECLARED "
                                "WITH DIMENSION LESS THAN 2");
@@ -574,7 +574,7 @@ class NormalMVLogitProposal
 
     /// \brief Only usable when `Dim > 1`
     NormalMVLogitProposal(const result_type *chol)
-        : normal_mv_(static_cast<result_type>(0), chol)
+        : normal_mv_(const_zero<result_type>(), chol)
     {
         static_assert(Dim > 1, "**NormalMVLogitProposal** OBJECT DECLARED "
                                "WITH DIMENSION LESS THAN 2");
@@ -582,7 +582,7 @@ class NormalMVLogitProposal
 
     /// \brief Only usable when `Dim == Dynamic`
     NormalMVLogitProposal(std::size_t dim, result_type chol)
-        : normal_mv_(dim, static_cast<result_type>(0), chol), z_(dim)
+        : normal_mv_(dim, const_zero<result_type>(), chol), z_(dim)
     {
         static_assert(Dim == Dynamic,
             "**NormalMVLogitProposal** OBJECT DECLARED WITH FIXED DIMENSION");
@@ -591,7 +591,7 @@ class NormalMVLogitProposal
 
     /// \brief Only usable when `Dim == Dynamic`
     NormalMVLogitProposal(std::size_t dim, const result_type *chol)
-        : normal_mv_(dim, static_cast<result_type>(0), chol), z_(dim)
+        : normal_mv_(dim, const_zero<result_type>(), chol), z_(dim)
     {
         static_assert(Dim == Dynamic,
             "**NormalMVLogitProposal** OBJECT DECLARED WITH FIXED DIMENSION");

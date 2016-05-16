@@ -32,6 +32,9 @@
 #ifndef VSMC_MATH_CONSTANTS_HPP
 #define VSMC_MATH_CONSTANTS_HPP
 
+#include <limits>
+#include <type_traits>
+
 #define VSMC_DEFINE_MATH_CONSTANTS(name, val)                                 \
     template <typename T>                                                     \
     inline constexpr T const_##name() noexcept                                \
@@ -56,6 +59,44 @@
 
 namespace vsmc
 {
+
+/// \brief Infinity
+/// \ingroup Constants
+template <typename T>
+inline constexpr T const_inf() noexcept
+{
+    static_assert(std::is_floating_point<T>::value,
+        "**const_inf** USED WITH T OTHER THAN FLOATING POINT TYPES");
+
+    return std::numeric_limits<T>::infinity();
+}
+
+/// \brief Quiet NaN
+/// \ingroup Constants
+template <typename T>
+inline constexpr T const_nan() noexcept
+{
+    static_assert(std::is_floating_point<T>::value,
+        "**const_nan** USED WITH T OTHER THAN FLOATING POINT TYPES");
+
+    return std::numeric_limits<T>::quiet_NaN();
+}
+
+/// \brief Zero
+/// \ingroup Constants
+template <typename T>
+inline constexpr T const_zero() noexcept
+{
+    return 0;
+}
+
+/// \brief One
+/// \ingroup Constants
+template <typename T>
+inline constexpr T const_one() noexcept
+{
+    return 1;
+}
 
 /// \brief \f$\pi\f$
 /// \ingroup Constants

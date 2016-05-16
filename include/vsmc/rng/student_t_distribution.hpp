@@ -78,7 +78,7 @@ class StudentTDistribution
     result_type generate(RNGType &rng, const param_type &param)
     {
         result_type z = normal_(rng);
-        result_type u = std::numeric_limits<result_type>::infinity();
+        result_type u = const_inf<result_type>();
         if (internal::is_equal(param.n(), param_.n())) {
             while (!std::isfinite(u))
                 u = n() / chi_squared_(rng);
@@ -104,7 +104,7 @@ inline void student_t_distribution_impl(
     mul(n, 1 / df, r, r);
     sqrt(n, r, r);
     normal_distribution(
-        rng, n, s.data(), static_cast<RealType>(0), static_cast<RealType>(1));
+        rng, n, s.data(), const_zero<RealType>(), const_one<RealType>());
     div(n, s.data(), r, r);
 
     StudentTDistribution<RealType> dist(df);

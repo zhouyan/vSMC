@@ -243,7 +243,7 @@ class DiscreteDistribution
 
         if (!normalized) {
             value_type mulw =
-                1 / std::accumulate(first, last, static_cast<value_type>(0));
+                1 / std::accumulate(first, last, const_zero<value_type>());
             value_type accw = 0;
             result_type index = 0;
             while (first != last) {

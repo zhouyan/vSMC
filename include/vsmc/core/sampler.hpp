@@ -230,17 +230,11 @@ class Sampler
 
     /// \brief Special value of resampling threshold that indicate no
     /// resampling will be ever performed
-    static double resample_threshold_never()
-    {
-        return -std::numeric_limits<double>::infinity();
-    }
+    static double resample_threshold_never() { return -const_inf<double>(); }
 
     /// \brief Special value of resampling threshold that indicate no
     /// resampling will always be performed
-    static double resample_threshold_always()
-    {
-        return std::numeric_limits<double>::infinity();
-    }
+    static double resample_threshold_always() { return const_inf<double>(); }
 
     /// \brief Add a monitor
     ///
@@ -347,8 +341,6 @@ class Sampler
     /// \brief Summary of sampler history
     std::map<std::string, Vector<double>> summary() const
     {
-        const double missing_data = std::numeric_limits<double>::quiet_NaN();
-
         std::map<std::string, Vector<double>> df;
         Vector<double> data(iter_size());
 
@@ -370,7 +362,7 @@ class Sampler
                             i == m.second.index(miter)) {
                             data[i] = m.second.record(d, miter++);
                         } else {
-                            data[i] = missing_data;
+                            data[i] = const_nan<double>();
                         }
                     }
                     if (m.second.name(d).empty())

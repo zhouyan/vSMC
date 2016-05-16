@@ -431,7 +431,7 @@ inline std::size_t beta_distribution_impl_1x(RNGType &rng, std::size_t n,
     log(n, r, r);
     mul(n, constant.b, r, r);
     exp(n, r, r);
-    sub(n, static_cast<RealType>(1), r, r);
+    sub(n, const_one<RealType>(), r, r);
 
     return n;
 }
@@ -466,7 +466,7 @@ inline std::size_t beta_distribution_impl_c(RNGType &rng, std::size_t n,
     RealType *const x = s.data() + n * 3;
     RealType *const y = s.data() + n * 4;
     u01_oo_distribution(rng, n * 2, s.data());
-    sub(n, static_cast<RealType>(1), u1, v);
+    sub(n, const_one<RealType>(), u1, v);
     div(n, u1, v, v);
     log(n, v, v);
     mul(n, b, v, v);

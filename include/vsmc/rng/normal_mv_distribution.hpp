@@ -553,7 +553,7 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     internal::size_check<VSMC_BLAS_INT>(dim, "normal_mv_distribution");
 
     normal_distribution(
-        rng, n * dim, r, static_cast<RealType>(0), static_cast<RealType>(1));
+        rng, n * dim, r, const_zero<RealType>(), const_one<RealType>());
     Vector<RealType> cholf(dim * dim);
     for (std::size_t i = 0; i != dim; ++i)
         for (std::size_t j = 0; j <= i; ++j)
@@ -576,7 +576,7 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     internal::size_check<VSMC_BLAS_INT>(n, "normal_mv_distribution");
     internal::size_check<VSMC_BLAS_INT>(dim, "normal_mv_distribution");
 
-    normal_distribution(rng, n * dim, r, static_cast<RealType>(0), chol);
+    normal_distribution(rng, n * dim, r, const_zero<RealType>(), chol);
     for (std::size_t i = 0; i != n; ++i, r += dim)
         add(dim, mean, r, r);
 }
@@ -595,7 +595,7 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     internal::size_check<VSMC_BLAS_INT>(dim, "normal_mv_distribution");
 
     normal_distribution(
-        rng, n * dim, r, static_cast<RealType>(0), static_cast<RealType>(1));
+        rng, n * dim, r, const_zero<RealType>(), const_one<RealType>());
     Vector<RealType> cholf(dim * dim);
     for (std::size_t i = 0; i != dim; ++i)
         for (std::size_t j = 0; j <= i; ++j)

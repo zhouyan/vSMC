@@ -61,7 +61,7 @@ inline void u01_trans_sorted_impl(std::size_t n0, std::size_t n,
         s[j] = lmax;
     }
     exp(n - n0, s.data(), s.data());
-    sub(n - n0, static_cast<RealType>(1), s.data(), r);
+    sub(n - n0, const_one<RealType>(), s.data(), r);
 }
 
 template <std::size_t K, typename RealType, typename RNGType>

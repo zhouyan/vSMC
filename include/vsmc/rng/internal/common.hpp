@@ -1032,7 +1032,7 @@ class RNGTraits
     static constexpr typename RNGType::result_type R_ = RNGType::min() == 0 &&
             RNGType::max() == std::numeric_limits<result_type>::max() ?
         0 :
-        RNGType::max() - RNGType::min() + static_cast<result_type>(1);
+        RNGType::max() - RNGType::min() + const_one<result_type>();
 
     public:
     /// \brief If the random integers are uniform on the set

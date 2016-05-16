@@ -86,7 +86,7 @@ class GammaDistributionConstant
                 c = 1 / alpha;
                 break;
             case GammaDistributionAlgorithmN:
-                d = alpha - static_cast<RealType>(1) / 3;
+                d = alpha - const_one<RealType>() / 3;
                 c = 1 / (3 * std::sqrt(d));
                 break;
             case GammaDistributionAlgorithmE: break;
@@ -332,8 +332,8 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
 
     u01_oo_distribution(rng, n, u);
     normal_distribution(
-        rng, n, w, static_cast<RealType>(0), static_cast<RealType>(1));
-    fma(n, c, w, static_cast<RealType>(1), v);
+        rng, n, w, const_zero<RealType>(), const_one<RealType>());
+    fma(n, c, w, const_one<RealType>(), v);
     NormalDistribution<RealType> rnorm(0, 1);
     for (std::size_t i = 0; i != n; ++i) {
         if (v[i] <= 0) {
@@ -347,7 +347,7 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
     mul(n, v, e, v);
     sqr(n, w, e);
     sqr(n, e, e);
-    fma(n, -static_cast<RealType>(0.0331), e, static_cast<RealType>(1), e);
+    fma(n, -static_cast<RealType>(0.0331), e, const_one<RealType>(), e);
     mul(n, d * beta, v, x);
 
     std::size_t m = 0;

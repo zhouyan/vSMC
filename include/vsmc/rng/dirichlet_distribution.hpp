@@ -302,7 +302,7 @@ class DirichletDistribution
                 r[i] = gamma(rng);
             }
         }
-        result_type s = std::accumulate(r, r + d, static_cast<result_type>(0));
+        result_type s = std::accumulate(r, r + d, const_zero<result_type>());
         mul(d, 1 / s, r, r);
     }
 }; // class DirichletDistribution
@@ -315,7 +315,7 @@ inline void dirichlet_distribution_avg(
     std::size_t n, std::size_t dim, RealType *r)
 {
     for (std::size_t i = 0; i != n; ++i, r += dim) {
-        RealType s = std::accumulate(r, r + dim, static_cast<RealType>(0));
+        RealType s = std::accumulate(r, r + dim, const_zero<RealType>());
         mul(dim, 1 / s, r, r);
     }
 }
@@ -328,7 +328,7 @@ template <typename RealType, typename RNGType>
 inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, const RealType alpha)
 {
-    gamma_distribution(rng, n * dim, r, alpha, static_cast<RealType>(1));
+    gamma_distribution(rng, n * dim, r, alpha, const_one<RealType>());
     internal::dirichlet_distribution_avg(n, dim, r);
 }
 
@@ -347,8 +347,7 @@ inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
 
     Vector<RealType> s(n);
     for (std::size_t i = 0; i != dim; ++i) {
-        gamma_distribution(
-            rng, n, s.data(), alpha[i], static_cast<RealType>(1));
+        gamma_distribution(rng, n, s.data(), alpha[i], const_one<RealType>());
         RealType *t = r + i;
         for (std::size_t j = 0; j != n; ++j, t += dim)
             *t = s[i];

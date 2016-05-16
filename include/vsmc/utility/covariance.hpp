@@ -87,7 +87,7 @@ class Covariance
 
         result_type sw = w == nullptr ?
             static_cast<result_type>(n) :
-            std::accumulate(w, w + n, static_cast<result_type>(0));
+            std::accumulate(w, w + n, const_zero<result_type>());
         mean_.resize(p);
         if (w == nullptr) {
             if (layout == RowMajor) {
@@ -96,8 +96,8 @@ class Covariance
                     add(p, x + i * p, mean_.data(), mean_.data());
             } else {
                 for (std::size_t i = 0; i != p; ++i) {
-                    mean_[i] = std::accumulate(x + i * n, x + (i + 1) * n,
-                        static_cast<result_type>(0));
+                    mean_[i] = std::accumulate(
+                        x + i * n, x + (i + 1) * n, const_zero<result_type>());
                 }
             }
         } else {
