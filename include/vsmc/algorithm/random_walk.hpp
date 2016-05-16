@@ -483,13 +483,15 @@ class NormalMVProposal
         init_flag();
     }
 
+    std::size_t dim() const { return normal_mv_.dim(); }
+
     template <typename RNGType>
     result_type operator()(
         RNGType &rng, std::size_t, const result_type *x, result_type *y)
     {
         normal_mv_(rng, z_.data());
         result_type q = 0;
-        for (std::size_t i = 0; i != z_.size(); ++i) {
+        for (std::size_t i = 0; i != dim(); ++i) {
             switch (flag_[i]) {
                 case 0:
                     q += internal::normal_proposal_q(x[i], y[i], z_[i]);
@@ -522,22 +524,16 @@ class NormalMVProposal
 
     void init_a(result_type a) { std::fill(a_.begin(), a_.end(), a); }
 
-    void init_a(const result_type *a)
-    {
-        std::copy_n(a, a_.size(), a_.begin());
-    }
+    void init_a(const result_type *a) { std::copy_n(a, dim(), a_.begin()); }
 
     void init_b(result_type b) { std::fill(b_.begin(), b_.end(), b); }
 
-    void init_b(const result_type *b)
-    {
-        std::copy_n(b, b_.size(), b_.begin());
-    }
+    void init_b(const result_type *b) { std::copy_n(b, dim(), b_.begin()); }
 
     void init_flag()
     {
 
-        for (std::size_t i = 0; i != flag_.size(); ++i) {
+        for (std::size_t i = 0; i != dim(); ++i) {
             unsigned lower = std::isfinite(a_[i]) ? 1 : 0;
             unsigned upper = std::isfinite(b_[i]) ? 1 : 0;
             flag_[i] = (lower << 1) + upper;
@@ -545,7 +541,7 @@ class NormalMVProposal
 
         VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_PROPOSAL_PARAM(
             internal::normal_mv_proposal_check_param(
-                flag_.size(), a_.data(), b_.data()),
+                dim(), a_.data(), b_.data()),
             NormalMV);
     }
 }; // class NormalMVProposal
@@ -592,6 +588,8 @@ class NormalMVLogitProposal
         VSMC_RUNTIME_ASSERT_ALGORITHM_RANDOM_WALK_NORMAL_MV_LOGIT_DIM(dim);
     }
 
+    std::size_t dim() const { return normal_mv_.dim(); }
+
     template <typename RNGType>
     double operator()(
         RNGType &rng, std::size_t, const result_type *x, result_type *y)
@@ -604,17 +602,15 @@ class NormalMVLogitProposal
         y[d - 1] = 1;
         mul(d, 1 / std::accumulate(y, y + d, 0.0), y, y);
 
-        return static_cast<double>(q(y) - q(x));
+        return static_cast<double>(q(d, y) - q(d, x));
     }
 
     private:
     NormalMVDistribution<RealType, Dim> normal_mv_;
     internal::StaticVector<RealType, Dim> z_;
 
-    result_type q(const result_type *x)
+    result_type q(std::size_t d, const result_type *x)
     {
-        const std::size_t d = dim();
-
         result_type slw = 1;
         result_type sllw = 0;
         const result_type w = x[d - 1];
