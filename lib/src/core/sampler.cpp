@@ -107,10 +107,10 @@ void vsmc_sampler_eval_clear(vsmc_sampler sampler)
 }
 
 void vsmc_sampler_eval(vsmc_sampler sampler, vsmc_sampler_eval_type new_eval,
-    vSMCSamplerStage stage, int append)
+    vSMCSamplerStage stage)
 {
-    ::vsmc::cast(sampler).eval(::vsmc::cast(new_eval),
-        static_cast<::vsmc::SamplerStage>(stage), append != 0);
+    ::vsmc::cast(sampler).eval(
+        ::vsmc::cast(new_eval), static_cast<::vsmc::SamplerStage>(stage));
 }
 
 void vsmc_sampler_resample_scheme(

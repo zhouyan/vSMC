@@ -474,22 +474,25 @@ Conceptually, such a function implement an operator $M(\{X^i,W^i\}_{i=1}^N)$
 such that a new particle system $\{\hat{X}^i,\hat{W}^i\}_{i=1}^{\hat{N}}$ is
 produced given the original. If it often possible to decompose the operator $M$
 into multiple simpler ones. And thus a sampler can have a sequence of
-evaluation objects attached to it. Each of these evaluation objects can be
-attached to the sampler by the \verb|eval| method,
+evaluation objects. Each of these evaluation objects can be added to the
+sampler by the \verb|eval| method,
 \begin{Verbatim}
-  Sampler<T> &eval(
-      const eval_type &new_eval, SamplerStage stage, bool append = true);
+  Sampler<T> &eval(const eval_type &new_eval, SamplerStage stage);
 \end{Verbatim}
 For example,
 \begin{Verbatim}
   sampler.eval(eval, SamplerInit | SamplerMove, true);
 \end{Verbatim}
 The first argument is the evaluation object. The sampler maintains a sequence
-of evaluation steps. If the third argument is true, then the new evaluation
-object will be appended to the existing sequence. Otherwise, the sequence will
-be cleared first. The second argument will be explained shortly. The sampler
-can also have an optional resampling step. This can be attached to the sampler
-by the following method,
+of evaluation steps. The new evaluation object will be appended to the existing
+sequence. Note that, the order at which these objects being evaluated is the
+same as the one they are added to the sampler. One can clear the sequence by
+\begin{Verbatim}
+  sampler.eval_clear();
+\end{Verbatim}
+The second argument will be explained shortly. The sampler can also have an
+optional resampling step. This can be added to the sampler by the following
+method,
 \begin{Verbatim}
   Sampler<T> &resample_method(
       ResampleScheme scheme, double threshold = resample_threshold_always());
@@ -543,11 +546,10 @@ perform the resampling. The builtin algorithms will use the \verb|select|
 method of the state type \verb|T| to perform the selection after generating the
 index vector. In all other three types of stages, all objects in the sequence
 of evaluations objects set by the \verb|eval| method of \verb|Sampler| is
-checked. Recall that, each evaluation object is attached to the sampler by a
-call to the following method,
+checked. Recall that, each evaluation object is added to the sampler by a call
+to the following method,
 \begin{Verbatim}
-  Sampler<T> &eval(
-      const eval_type &new_eval, SamplerStage stage, bool append = true);
+  Sampler<T> &eval(const eval_type &new_eval, SamplerStage stage);
 \end{Verbatim}
 At each stage, the value of the second parameter will be check. For example,
 at the \verb|SamplerInit| stage, this object will be called if and only if the
@@ -645,16 +647,24 @@ the calculation of $\varphi_t$ be carried out. Possible values are,
     iteration.
 \end{description}
 
-A monitor can be attached to a sampler. For example,
+A monitor can be added to a sampler. For example,
 \begin{Verbatim}
   Monitor<T> mon(d, eval, false, MonitorMCMC);
   sampler.monitor("name", mon);
 \end{Verbatim}
-Later, this monitor can be retrieved by,
+If a monitor with the same name already exists, then the old one will be
+removed, and the new one will be appended to the end of the monitoring
+sequence. Note that, the order at which the monitors being evaluated is the
+same as the one they are added to the sampler. This ordering is of importance
+if a monitor alternate the particle system in any way, which is allowed even
+though unusual.
+
+A new monitor with the same does not take the place of the old one. Monitors
+can be retrieved by,
 \begin{Verbatim}
   const auto &mon = sampler.monitor("name");
 \end{Verbatim}
-One can also detach the monitor from the sampler by,
+One can also remove the monitor from the sampler by,
 \begin{Verbatim}
   sampler.monitor_clear("name");
 \end{Verbatim}
@@ -668,8 +678,8 @@ these values using the following methods,
   mon.record(i, j); // The value of the i-th component of the result
                     // at the j-th evaluation
 \end{Verbatim}
-Note that, the monitor does not have to be attached to a sampler before it
-starting initialization. It can also be detached before the sampler finishing
+Note that, the monitor does not have to be added to a sampler before it
+starting initialization. It can also be removed before the sampler finishing
 all iterations. Therefore, the iteration numbers of a monitor being evaluated
 are not necessarily the sequence $0,1,\dots,n$, where $n$ is the total number
 of iterations.
@@ -781,7 +791,7 @@ stratified resampling when $\ess < N / 2$. The sampling step within the
 \emph{Initialization} and \emph{Iteration} in Algorithm~\ref{alg:pf} will be
 implemented by two functions, \verb|PFInit| and \verb|PFMove|, respectively.
 The weighting is done through the function \verb|PFWeight|. And the estimate
-will be monitored through the function \verb|PFEstimate|. These are attached to
+will be monitored through the function \verb|PFEstimate|. These are added to
 the sampler through the \verb|eval| and \verb|monitor| methods as shown above.
 After configuring the sampler, we initialize it and iterate $n - 1$ times,
 where $n$ is the total number of observations, including at time $t = 0$. In
@@ -950,8 +960,8 @@ The out parameter \verb|r| points to an $N$ by $d$ row major matrix, $d = 2$.
 
 \subsubsection{Summary}
 
-As we see above, the implementation of all the functions attached to the
-sampler object is straightforward. In fact, half of the program is within the
+As we see above, the implementation of all the functions added to the sampler
+object is straightforward. In fact, half of the program is within the
 definition of the \verb|PF| class. This is in fact a common pattern of programs
 using this library. The class that represent the state space also contains
 methods and data that is specific to the model.

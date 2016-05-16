@@ -156,20 +156,6 @@ class Sampler
         resampled_history_.clear();
     }
 
-    /// \brief Clear the evaluation sequence
-    void eval_clear() { eval_.clear(); }
-
-    /// \brief Add a new evaluation object
-    Sampler<T> &eval(
-        const eval_type &new_eval, SamplerStage stage, bool append = true)
-    {
-        if (!append)
-            eval_.clear();
-        eval_.push_back(std::make_pair(new_eval, stage));
-
-        return *this;
-    }
-
     /// \brief Set resampling method by a built-in ResampleScheme scheme
     /// name
     Sampler<T> &resample_method(
@@ -228,43 +214,62 @@ class Sampler
     /// resampling will always be performed
     static double resample_threshold_always() { return const_inf<double>(); }
 
-    /// \brief Add a monitor
-    ///
-    /// \param name The name of the monitor
-    /// \param mon The new monitor to be added
-    Sampler<T> &monitor(const std::string &name, const Monitor<T> &mon)
+    /// \brief Add a new evaluation object
+    Sampler<T> &eval(const eval_type &new_eval, SamplerStage stage)
     {
-        monitor_.insert(std::make_pair(name, mon));
+        eval_.push_back(std::make_pair(stage, new_eval));
 
         return *this;
     }
 
-    /// \brief Read and write access to a named monitor
+    /// \brief Clear the evaluation sequence
+    void eval_clear() { eval_.clear(); }
+
+    /// \brief Attach a new monitor
+    ///
+    /// The monitor is attached to
+    Sampler<T> &monitor(const std::string &name, const Monitor<T> &mon)
+    {
+        monitor_clear(name);
+        monitor_.push_back(std::make_pair(name, mon));
+
+        return *this;
+    }
+
+    /// \brief Read and write access to a Monitor
     Monitor<T> &monitor(const std::string &name)
     {
-        typename monitor_map_type::iterator iter = monitor_.find(name);
+        auto miter = std::find_if(monitor_.begin(), monitor_.end(),
+            [&name](const std::pair<std::string, Monitor<T>> &m) {
+                return m.first == name;
+            });
 
-        runtime_assert(iter != monitor_.end(),
-            "**Sampler::monitor** monitor name not found");
-
-        return iter->second;
+        return miter->second;
     }
 
-    /// \brief Read only access to a named monitor
+    /// \brief Read only access to a Monitor
     const Monitor<T> &monitor(const std::string &name) const
     {
-        typename monitor_map_type::const_iterator citer = monitor_.find(name);
+        auto miter = std::find_if(monitor_.begin(), monitor_.end(),
+            [&name](const std::pair<std::string, Monitor<T>> &m) {
+                return m.first == name;
+            });
 
-        runtime_assert(citer != monitor_.end(),
-            "**Sampler::monitor** monitor name not found");
-
-        return citer->second;
+        return miter->second;
     }
 
-    /// \brief Erase a named monitor
-    void monitor_clear(const std::string &name) { monitor_.erase(name); }
+    /// \brief Clear a named monitor sequence
+    void monitor_clear(const std::string &name)
+    {
+        auto miter = std::find_if(monitor_.begin(), monitor_.end(),
+            [&name](const std::pair<std::string, Monitor<T>> &m) {
+                return m.first == name;
+            });
+        if (miter != monitor_.end())
+            monitor_.erase(miter);
+    }
 
-    /// \brief Erase all monitors
+    /// \brief Clear the monitor sequence
     void monitor_clear() { monitor_.clear(); }
 
     /// \brief Initialization
@@ -395,19 +400,17 @@ class Sampler
     }
 
     private:
-    using monitor_map_type = std::map<std::string, Monitor<T>>;
-
     Particle<T> particle_;
     std::size_t iter_num_;
 
-    Vector<std::pair<eval_type, SamplerStage>> eval_;
-    eval_type resample_eval_;
     double resample_threshold_;
+    eval_type resample_eval_;
+    Vector<std::pair<SamplerStage, eval_type>> eval_;
+    Vector<std::pair<std::string, Monitor<T>>> monitor_;
 
     Vector<size_type> size_history_;
     Vector<double> ess_history_;
     Vector<bool> resampled_history_;
-    monitor_map_type monitor_;
 
     void do_initialize()
     {
@@ -435,10 +438,10 @@ class Sampler
     void do_init()
     {
         for (auto &e : eval_) {
-            if ((e.second & SamplerInit) != 0) {
-                runtime_assert(static_cast<bool>(e.first),
+            if ((e.first & SamplerInit) != 0) {
+                runtime_assert(static_cast<bool>(e.second),
                     "**Sampler** invalid evaluation object");
-                e.first(iter_num_, particle_);
+                e.second(iter_num_, particle_);
             }
         }
     }
@@ -446,10 +449,10 @@ class Sampler
     void do_move()
     {
         for (auto &e : eval_) {
-            if ((e.second & SamplerMove) != 0) {
-                runtime_assert(static_cast<bool>(e.first),
+            if ((e.first & SamplerMove) != 0) {
+                runtime_assert(static_cast<bool>(e.second),
                     "**Sampler** invalid evaluation object");
-                e.first(iter_num_, particle_);
+                e.second(iter_num_, particle_);
             }
         }
     }
@@ -457,10 +460,10 @@ class Sampler
     void do_mcmc()
     {
         for (auto &e : eval_) {
-            if ((e.second & SamplerMCMC) != 0) {
-                runtime_assert(static_cast<bool>(e.first),
+            if ((e.first & SamplerMCMC) != 0) {
+                runtime_assert(static_cast<bool>(e.second),
                     "**Sampler** invalid evaluation object");
-                e.first(iter_num_, particle_);
+                e.second(iter_num_, particle_);
             }
         }
     }

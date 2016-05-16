@@ -303,7 +303,7 @@ void vsmc_sampler_eval_clear(vsmc_sampler sampler);
 
 /// \brief `vsmc::Sampler::eval`
 void vsmc_sampler_eval(vsmc_sampler sampler, vsmc_sampler_eval_type new_eval,
-    vSMCSamplerStage stage, int append);
+    vSMCSamplerStage stage);
 
 /// \brief `vsmc::Sampler::resample_method`
 void vsmc_sampler_resample_scheme(

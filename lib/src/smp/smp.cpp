@@ -117,11 +117,11 @@ class MonitorEvalSMPC
 
 #define VSMC_DEFINE_LIB_SMP(Name, name)                                       \
     inline void vsmc_sampler_eval_##name(vsmc_sampler sampler,                \
-        vsmc_sampler_eval_smp_type eval, vSMCSamplerStage stage, int append)  \
+        vsmc_sampler_eval_smp_type eval, vSMCSamplerStage stage)              \
     {                                                                         \
         ::vsmc::cast(sampler).eval(                                           \
             ::vsmc::SamplerEvalSMPC<::vsmc::Backend##Name>(eval),             \
-            static_cast<::vsmc::SamplerStage>(stage), append != 0);           \
+            static_cast<::vsmc::SamplerStage>(stage));                        \
     }                                                                         \
                                                                               \
     inline vsmc_monitor vsmc_monitor_new_##name(size_t dim,                   \
@@ -174,7 +174,7 @@ int vsmc_backend_smp_check(vSMCBackendSMP backend)
 }
 
 using vsmc_sampler_eval_smp_dispatch_type = void (*)(
-    vsmc_sampler, vsmc_sampler_eval_smp_type, vSMCSamplerStage, int);
+    vsmc_sampler, vsmc_sampler_eval_smp_type, vSMCSamplerStage);
 
 static vsmc_sampler_eval_smp_dispatch_type vsmc_sampler_eval_smp_dispatch[] = {
     vsmc_sampler_eval_seq, vsmc_sampler_eval_std,
@@ -191,10 +191,10 @@ static vsmc_sampler_eval_smp_dispatch_type vsmc_sampler_eval_smp_dispatch[] = {
     nullptr}; // vsmc_sampler_eval_smp_dispatch
 
 void vsmc_sampler_eval_smp(vSMCBackendSMP backend, vsmc_sampler sampler,
-    vsmc_sampler_eval_smp_type eval, vSMCSamplerStage stage, int append)
+    vsmc_sampler_eval_smp_type eval, vSMCSamplerStage stage)
 {
     vsmc_sampler_eval_smp_dispatch[static_cast<std::size_t>(backend)](
-        sampler, eval, stage, append);
+        sampler, eval, stage);
 }
 
 using vsmc_monitor_new_smp_dispatch_type = vsmc_monitor (*)(

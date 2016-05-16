@@ -50,7 +50,7 @@ int vsmc_backend_smp_check(vSMCBackendSMP backend);
 
 /// \brief `vsmc::Sampler::eval` with `vsmc::SamplerEvalSMP` as input
 void vsmc_sampler_eval_smp(vSMCBackendSMP backend, vsmc_sampler sampler,
-    vsmc_sampler_eval_smp_type eval, vSMCSamplerStage, int append);
+    vsmc_sampler_eval_smp_type eval, vSMCSamplerStage);
 
 /// \brief `vsmc::Monitor` with `vsmc::MonitorEvalSMP` as input
 vsmc_monitor vsmc_monitor_new_smp(vSMCBackendSMP backend, size_t dim,
