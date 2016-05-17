@@ -1,3 +1,7 @@
+# THIS PROJECT HAS BEEN ABANDONED
+
+After some development in the `develop` branch, the interface has changed enough for me to finnaly make the decicion to give it a clean slate. The new project is called MCKL, which at the moment is almost identical to the `develop` branch of vSMC. It can be found at https://github.com/zhouyan/MCKL
+
 # Introduction
 
 The vSMC library provides a framework for implementing SMC algorithms. It has a
